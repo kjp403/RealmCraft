@@ -693,10 +693,18 @@ grow_vertical = 2
 
 [node name="GameLogo" type="TextureRect" parent="AlreadyConnectedPanel" unique_id=1494808797]
 custom_minimum_size = Vector2(500, 120)
-layout_mode = 0
-offset_right = 1254.0
-offset_bottom = 1254.0
-offset_transform_enabled = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -220.0
+offset_right = 250.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("7_sg1qr")
 expand_mode = 1
 stretch_mode = 5
