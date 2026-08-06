@@ -14,12 +14,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="Ekonia"
+config/name="RealmCraft"
 config/version="0.28.0"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
-config/features=PackedStringArray("4.6", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/show_image=false
 config/icon="res://assets/project_icon/ekonia_e_logo.png"
 
@@ -33,7 +33,6 @@ ClientState="*res://source/client/autoload/client_state.gd"
 Client="*res://source/client/autoload/client.tscn"
 Toaster="*res://source/client/autoload/toaster.gd"
 Announcer="*res://source/client/autoload/announcer.gd"
-MCPRuntime="*uid://bmdn775mlknqs"
 Transition="*res://source/client/autoload/transition.gd"
 LootFeed="*res://source/client/autoload/loot_feed.gd"
 
@@ -54,7 +53,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/tinymmo/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/tinymmo/plugin.cfg")
 
 [file_customization]
 

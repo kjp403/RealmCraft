@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://5wv1gfwppcnf"]
 
 [ext_resource type="Script" uid="uid://ch86ljq7iwgv8" path="res://source/client/gateway/gateway.gd" id="2_74q4y"]
+[ext_resource type="Texture2D" uid="uid://bi8hsu6rwyey1" path="res://source/client/gateway/RealmCraft_logo_cropped_transparent.png" id="3_sg1qr"]
 [ext_resource type="Texture2D" uid="uid://cl572rmxiaw1m" path="res://assets/sprites/ui/backgrounds/fairy_forest.png" id="4_uvr2v"]
 [ext_resource type="FontFile" uid="uid://cehc3gujked8x" path="res://assets/fonts/Cinzel/static/Cinzel-Bold.ttf" id="5_opc3y"]
 [ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="6_g2eid"]
 [ext_resource type="FontFile" uid="uid://cr1d4ugttxggp" path="res://assets/fonts/Atkinson_Hyperlegible/AtkinsonHyperlegible-Bold.ttf" id="6_tnybn"]
 [ext_resource type="Texture2D" uid="uid://cp0ddo3nvmx2u" path="res://assets/sprites/ui/gateway/icon_more.png" id="7_4oa66"]
 [ext_resource type="PackedScene" uid="uid://dgpsxb4qq1hex" path="res://source/client/ui/menus/settings/settings_menu.tscn" id="7_g2eid"]
+[ext_resource type="Texture2D" uid="uid://d08i1tgsc10al" path="res://source/client/gateway/RealmCraft logo.png" id="7_sg1qr"]
 [ext_resource type="Script" uid="uid://q5rsjtg6nsto" path="res://source/client/gateway/popup_panel.gd" id="9_4rdug"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q35d6"]
@@ -66,6 +68,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 2.0
+offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.129558, 0.129559, 0.129558, 0.35)
@@ -97,7 +101,15 @@ texture = SubResource("GradientTexture2D_rk5g7")
 layout_mode = 2
 theme_override_constants/separation = 16
 
+[node name="GameLogo" type="TextureRect" parent="MainPanel/VBoxContainer" unique_id=914272249]
+custom_minimum_size = Vector2(700, 180)
+layout_mode = 2
+texture = ExtResource("3_sg1qr")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Label" type="Label" parent="MainPanel/VBoxContainer" unique_id=2087592224]
+visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("5_opc3y")
 theme_override_font_sizes/font_size = 34
@@ -679,7 +691,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="GameLogo" type="TextureRect" parent="AlreadyConnectedPanel" unique_id=1494808797]
+custom_minimum_size = Vector2(500, 120)
+layout_mode = 0
+offset_right = 1254.0
+offset_bottom = 1254.0
+offset_transform_enabled = true
+texture = ExtResource("7_sg1qr")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="GameTitleLabel" type="Label" parent="AlreadyConnectedPanel" unique_id=112352109]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -694,7 +717,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("5_opc3y")
 theme_override_font_sizes/font_size = 24
-text = "Ekonia Online"
+text = "REALM CRAFT"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="AlreadyConnectedPanel" unique_id=651861677]
