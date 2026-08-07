@@ -70,6 +70,23 @@ func start_world_server() -> void:
 	add_child(net_report_timer)
 
 
+## Snapshot a connected player's live location into lb_stats so it persists via
+## stats_json (no schema change) and login can resume them where they left off.
+func _stamp_location(peer_id: int, player: PlayerResource) -> void:
+	if player == null or instance_manager == null:
+		return
+	var inst: ServerInstance = instance_manager.find_instance_for_peer(peer_id)
+	if inst == null:
+		return
+	player.current_instance = inst.instance_resource.instance_name
+	var node: Player = inst.get_player(peer_id)
+	if node != null:
+		player.last_position = node.global_position
+	player.lb_stats["last_instance"] = player.current_instance
+	player.lb_stats["last_x"] = player.last_position.x
+	player.lb_stats["last_y"] = player.last_position.y
+
+
 func _on_periodic_save() -> void:
 	# Refresh last-seen for everyone online so a crash only loses at most one
 	# save interval of it (the authoritative stamp is on disconnect).
@@ -78,6 +95,7 @@ func _on_periodic_save() -> void:
 		var p: PlayerResource = connected_players[pid]
 		if p != null:
 			p.lb_stats["last_seen_ms"] = now_unix_ms
+			_stamp_location(pid, p)
 	var saved: int = database.save_all_connected(connected_players)
 	# The backup (checkpoint + full-file copy) only runs every Nth save — see
 	# BACKUP_EVERY_N_SAVES. Shutdown / master-triggered saves back up separately.
@@ -145,6 +163,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	# Last-seen stamp (unix ms). Rides lb_stats/stats_json like played_seconds —
 	# no schema change; profile.get buckets it into coarse "last seen" text.
 	player.lb_stats["last_seen_ms"] = int(Time.get_unix_time_from_system() * 1000.0)
+
+	# Persist where they logged out so next login resumes here (see _stamp_location
+	# and InstanceManagerServer._on_peer_connected). Runs before the instance despawn.
+	_stamp_location(peer_id, player)
 
 	database.save_player(player)
 

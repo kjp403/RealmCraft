@@ -106,6 +106,29 @@ func _on_peer_connected(peer_id: int) -> void:
 	# out — no lock, no forced tutorial). Every later login → the tavern (guild house) hub.
 	var played_seconds: int = int(player_resource.lb_stats.get("played_seconds", 0))
 	var is_first_login: bool = player_resource.level <= 1 and player_resource.experience <= 0 and played_seconds <= 0
+
+	# Returning players resume where they logged out. last_instance/last_x/last_y are
+	# persisted into lb_stats on save (rides stats_json — no schema change). Only
+	# restore to an authored, known instance; skip the jail cell (jailed players were
+	# already routed above) and first-time logins (they start in the cell).
+	if not is_first_login:
+		var saved_name: String = str(player_resource.lb_stats.get("last_instance", ""))
+		if saved_name != "" and saved_name != JAIL_INSTANCE_NAME and instance_collection.has(saved_name):
+			var saved_res: InstanceResource = instance_collection.get(saved_name)
+			var saved_inst: ServerInstance = (
+				charge_instance(saved_res)
+				if saved_res.charged_instances.is_empty()
+				else saved_res.get_instance(0)
+			)
+			if saved_inst != null:
+				var saved_position := Vector2(
+					float(player_resource.lb_stats.get("last_x", 0.0)),
+					float(player_resource.lb_stats.get("last_y", 0.0))
+				)
+				charge_new_instance.rpc_id(peer_id, saved_res.map_path, saved_inst.name)
+				saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
+				return
+
 	var target_name: String = JAIL_INSTANCE_NAME if is_first_login else TAVERN_INSTANCE_NAME
 	var target_res: InstanceResource = instance_collection.get(target_name, null)
 	if target_res != null:

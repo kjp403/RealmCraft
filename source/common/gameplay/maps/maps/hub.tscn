@@ -569,7 +569,7 @@ warper_id = 27
 target_id = 27
 
 [node name="WoodlandPortal" parent="Warpers" unique_id=686472752 instance=ExtResource("29_2sqao")]
-position = Vector2(856, -112)
+position = Vector2(8, -336)
 portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
 destination_label = "Goblin Woodland"
 target_instance = ExtResource("12_sgxfe")
