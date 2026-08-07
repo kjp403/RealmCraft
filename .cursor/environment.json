@@ -5,15 +5,15 @@
   "terminals": [
     {
       "name": "master-server",
-      "command": "godot --headless --path . --mode=master-server"
+      "command": "bash ./.cursor/run-server.sh master-server"
     },
     {
       "name": "gateway-server",
-      "command": "bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8064) 2>/dev/null; do sleep 1; done; exec godot --headless --path . --mode=gateway-server'"
+      "command": "bash ./.cursor/run-server.sh gateway-server 8064"
     },
     {
       "name": "world-server",
-      "command": "bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8062) 2>/dev/null; do sleep 1; done; exec godot --headless --path . --mode=world-server'"
+      "command": "bash ./.cursor/run-server.sh world-server 8062"
     }
   ]
 }
