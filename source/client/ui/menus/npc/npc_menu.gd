@@ -1,31 +1,26 @@
 extends Control
-## NPC dialogue — Undertale / Zelda-style. The NPC name + text sit in a fixed box
-## pinned to the bottom-left; the options are a vertical, touch-friendly list on
-## the right (kept OUT of the box so it never resizes/jitters). "Talk" options play
-## their lore lines inline with a typewriter reveal — click to skip to the full
-## line, click again to advance. Routing options hand off to their menus.
-##
-## Text is a RichTextLabel with bbcode, so lines can use [color], [wave], [shake]…
-## No backdrop: real-time MMO, the world stays visible + playable; only the box +
-## buttons eat clicks.
-##
-## open() arg: {
-##   "name", "greeting",
-##   "entries": [ {label, icon, menu, arg}  (routes out)
-##              | {label, icon, lines}      (plays inline) ],
-## }
+## Responsive compact NPC dialogue card.
+## NPCs with up to three choices use one column. NPCs with more choices use
+## two columns so the card stays compact and clear of the bottom-right HUD dock.
 
-## Reveal speed for the typewriter (visible characters per second).
 const TYPE_CPS: float = 45.0
-## Uniform touch-target height for the option buttons.
-const BUTTON_HEIGHT: float = 46.0
+const CARD_WIDTH: float = 500.0
+const SCREEN_MARGIN: float = 16.0
+const BOTTOM_MARGIN: float = 64.0
+const MIN_CARD_HEIGHT: float = 142.0
+const MAX_CARD_HEIGHT: float = 340.0
+const BUTTON_HEIGHT: float = 30.0
+const OPTION_SEPARATION: int = 5
+const MULTI_COLUMN_THRESHOLD: int = 3
+const MULTI_COLUMN_COUNT: int = 2
 
-var _data: Dictionary
+var _data: Dictionary = {}
 var _lines: Array = []
 var _line_index: int = 0
 var _typing: bool = false
+var _option_rows: int = 1
 
-var _box: PanelContainer
+var _card: PanelContainer
 var _name_label: Label
 var _text: RichTextLabel
 var _options: VBoxContainer
@@ -34,167 +29,286 @@ var _type_tween: Tween
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# Let clicks outside the box/buttons reach the world (movement etc.).
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	resized.connect(_place_card)
 
 
 func open(arg: Variant) -> void:
 	_data = arg if arg is Dictionary else {}
+	_cancel_typewriter()
+
 	for child: Node in get_children():
+		remove_child(child)
 		child.queue_free()
+
 	_build()
 	_show_options()
 
 
 func _build() -> void:
-	# Text box: bottom, spanning the left side (room for options on the right).
-	var box: PanelContainer = PanelContainer.new()
-	box.anchor_left = 0.0
-	box.anchor_right = 1.0
-	box.anchor_top = 1.0
-	box.anchor_bottom = 1.0
-	box.offset_left = 40
-	box.offset_right = -300
-	box.offset_top = -132
-	box.offset_bottom = -28
-	box.grow_vertical = Control.GROW_DIRECTION_BEGIN # taller text grows the box UP; bottom stays put
-	add_child(box)
-	_box = box
+	_card = PanelContainer.new()
+	_card.anchor_left = 0.5
+	_card.anchor_right = 0.5
+	_card.anchor_top = 1.0
+	_card.anchor_bottom = 1.0
+	_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_card)
 
-	var pad: MarginContainer = MarginContainer.new()
-	pad.add_theme_constant_override(&"margin_left", 18)
-	pad.add_theme_constant_override(&"margin_right", 18)
-	pad.add_theme_constant_override(&"margin_top", 12)
-	pad.add_theme_constant_override(&"margin_bottom", 12)
-	box.add_child(pad)
+	var padding := MarginContainer.new()
+	padding.add_theme_constant_override(&"margin_left", 12)
+	padding.add_theme_constant_override(&"margin_right", 12)
+	padding.add_theme_constant_override(&"margin_top", 10)
+	padding.add_theme_constant_override(&"margin_bottom", 10)
+	_card.add_child(padding)
 
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override(&"separation", 6)
-	pad.add_child(vbox)
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override(&"separation", 6)
+	padding.add_child(column)
 
 	_name_label = Label.new()
 	_name_label.text = str(_data.get("name", ""))
-	_name_label.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.6))
-	_name_label.add_theme_font_size_override(&"font_size", 16)
-	vbox.add_child(_name_label)
+	_name_label.add_theme_color_override(
+		&"font_color",
+		Color(1.0, 0.88, 0.55)
+	)
+	_name_label.add_theme_font_size_override(&"font_size", 15)
+	column.add_child(_name_label)
 
 	_text = RichTextLabel.new()
 	_text.bbcode_enabled = true
 	_text.scroll_active = false
-	_text.fit_content = true # report the full text height so the box can grow to fit it
+	_text.fit_content = true
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(_text)
+	_text.custom_minimum_size = Vector2(0.0, 40.0)
+	_text.add_theme_font_size_override(&"normal_font_size", 13)
+	column.add_child(_text)
 
-	# Options: right side, vertical, big touch targets, bottom-aligned.
+	column.add_child(HSeparator.new())
+
 	_options = VBoxContainer.new()
-	_options.anchor_left = 1.0
-	_options.anchor_right = 1.0
-	_options.anchor_top = 1.0
-	_options.anchor_bottom = 1.0
-	_options.offset_left = -272
-	_options.offset_right = -28
-	_options.offset_top = -320
-	_options.offset_bottom = -28
-	_options.alignment = BoxContainer.ALIGNMENT_END
-	_options.add_theme_constant_override(&"separation", 8)
-	add_child(_options)
+	_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_options.add_theme_constant_override(
+		&"separation",
+		OPTION_SEPARATION
+	)
+	column.add_child(_options)
+
+	_place_card()
 
 
-# --- Options mode -----------------------------------------------------------
+func _place_card() -> void:
+	if _card == null:
+		return
+
+	var available_width: float = maxf(
+		280.0,
+		size.x - SCREEN_MARGIN * 2.0
+	)
+	var width: float = minf(CARD_WIDTH, available_width)
+
+	_card.offset_left = -width * 0.5
+	_card.offset_right = width * 0.5
+	_card.offset_bottom = -BOTTOM_MARGIN
+
+	_fit_card.call_deferred()
+
+
+func _fit_card() -> void:
+	if _card == null or _text == null or _options == null:
+		return
+
+	var text_height: float = clampf(
+		_text.get_content_height(),
+		40.0,
+		140.0
+	)
+	var options_height: float = (
+		float(_option_rows) * BUTTON_HEIGHT
+	)
+
+	if _option_rows > 1:
+		options_height += float(
+			_option_rows - 1
+		) * float(OPTION_SEPARATION)
+
+	# Padding + name + dialogue + separator + response rows.
+	var needed_height: float = (
+		20.0
+		+ 22.0
+		+ 6.0
+		+ text_height
+		+ 13.0
+		+ options_height
+	)
+	var available_height: float = maxf(
+		MIN_CARD_HEIGHT,
+		size.y - BOTTOM_MARGIN - SCREEN_MARGIN
+	)
+	var height: float = clampf(
+		needed_height,
+		MIN_CARD_HEIGHT,
+		minf(MAX_CARD_HEIGHT, available_height)
+	)
+
+	_card.offset_top = _card.offset_bottom - height
+
 
 func _show_options() -> void:
 	_set_text(str(_data.get("greeting", "...")))
 	_clear_options()
-	for entry: Dictionary in _data.get("entries", []):
-		_options.add_child(_option_button(entry))
-	var bye: Button = Button.new()
-	bye.text = "Good-bye"
-	bye.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
-	bye.pressed.connect(hide)
-	_options.add_child(bye)
+
+	var entries: Array = _data.get("entries", [])
+	var column_count: int = (
+		MULTI_COLUMN_COUNT
+		if entries.size() > MULTI_COLUMN_THRESHOLD
+		else 1
+	)
+
+	if not entries.is_empty():
+		var choices := GridContainer.new()
+		choices.columns = column_count
+		choices.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		choices.add_theme_constant_override(
+			&"h_separation",
+			OPTION_SEPARATION
+		)
+		choices.add_theme_constant_override(
+			&"v_separation",
+			OPTION_SEPARATION
+		)
+		_options.add_child(choices)
+
+		for entry: Dictionary in entries:
+			choices.add_child(_option_button(entry))
+
+	var goodbye := _make_button("Goodbye")
+	goodbye.pressed.connect(_close_dialogue)
+	_options.add_child(goodbye)
+
+	var choice_rows: int = ceili(
+		float(entries.size()) / float(column_count)
+	)
+	_option_rows = choice_rows + 1
+	_fit_card.call_deferred()
 
 
 func _option_button(entry: Dictionary) -> Button:
-	var button: Button = Button.new()
 	var icon: String = str(entry.get("icon", ""))
 	var label: String = str(entry.get("label", "?"))
-	button.text = ("%s  %s" % [icon, label]) if not icon.is_empty() else label
-	button.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
+	var display_text: String = (
+		"%s  %s" % [icon, label]
+		if not icon.is_empty()
+		else label
+	)
+	var button := _make_button(display_text)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.tooltip_text = label
 	button.pressed.connect(_on_entry.bind(entry))
+	return button
+
+
+func _make_button(label: String) -> Button:
+	var button := Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(0.0, BUTTON_HEIGHT)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.focus_mode = Control.FOCUS_NONE
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	button.add_theme_font_size_override(&"font_size", 12)
 	return button
 
 
 func _on_entry(entry: Dictionary) -> void:
 	if entry.has("lines"):
-		_lines = entry["lines"]
+		_lines = entry["lines"] if entry["lines"] is Array else []
 		_line_index = 0
 		_show_line()
 	elif entry.has("menu"):
-		hide()
-		ClientState.open_menu_requested.emit(entry["menu"], entry["arg"])
+		_close_dialogue()
+		ClientState.open_menu_requested.emit(
+			entry["menu"],
+			entry.get("arg", null)
+		)
 
-
-# --- Line-reading mode ------------------------------------------------------
 
 func _show_line() -> void:
 	if _line_index >= _lines.size():
-		_show_options() # finished talking → back to the options
+		_show_options()
 		return
+
 	_set_text(str(_lines[_line_index]))
 	_clear_options()
-	var cont: Button = Button.new()
-	cont.text = "Continue" if _line_index < _lines.size() - 1 else "Back"
-	cont.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
-	cont.pressed.connect(_on_continue)
-	_options.add_child(cont)
+
+	var label: String = (
+		"Continue"
+		if _line_index < _lines.size() - 1
+		else "Back"
+	)
+	var continue_button := _make_button(label)
+	continue_button.pressed.connect(_on_continue)
+	_options.add_child(continue_button)
+	_option_rows = 1
+	_fit_card.call_deferred()
 
 
-## First click finishes the typewriter; the next advances (classic Undertale).
 func _on_continue() -> void:
 	if _typing:
 		_finish_typing()
 		return
+
 	_line_index += 1
 	_show_line()
 
 
-# --- Typewriter -------------------------------------------------------------
-
 func _set_text(bbcode: String) -> void:
 	_text.text = bbcode
-	_fit_box.call_deferred() # grow the box to the new text once it's laid out at its width
 	_text.visible_ratio = 0.0
 	_typing = true
-	if _type_tween != null and _type_tween.is_valid():
-		_type_tween.kill()
-	var chars: int = maxi(1, _text.get_total_character_count())
+	_cancel_typewriter(false)
+
+	var characters: int = maxi(
+		1,
+		_text.get_total_character_count()
+	)
 	_type_tween = create_tween()
-	_type_tween.tween_property(_text, ^"visible_ratio", 1.0, chars / TYPE_CPS)
-	# Just clear the flag on natural completion — don't kill the tween from inside
-	# its own callback. The skip path (_finish_typing) does the killing.
-	_type_tween.tween_callback(func() -> void: _typing = false)
+	_type_tween.tween_property(
+		_text,
+		^"visible_ratio",
+		1.0,
+		float(characters) / TYPE_CPS
+	)
+	_type_tween.tween_callback(_on_typewriter_finished)
+	_fit_card.call_deferred()
 
 
-func _finish_typing() -> void:
-	if _type_tween != null and _type_tween.is_valid():
-		_type_tween.kill()
-	_text.visible_ratio = 1.0
+func _on_typewriter_finished() -> void:
 	_typing = false
 
 
+func _finish_typing() -> void:
+	_cancel_typewriter()
+	_text.visible_ratio = 1.0
+
+
+func _cancel_typewriter(clear_typing: bool = true) -> void:
+	if _type_tween != null and _type_tween.is_valid():
+		_type_tween.kill()
+	_type_tween = null
+
+	if clear_typing:
+		_typing = false
+
+
 func _clear_options() -> void:
+	if _options == null:
+		return
+
 	for child: Node in _options.get_children():
 		_options.remove_child(child)
 		child.queue_free()
 
 
-## Grow the text box upward to fit the current text. The bottom edge stays pinned (the box is
-## already at the screen bottom); only the top moves up. Deferred from _set_text so the
-## RichTextLabel has laid out at its wrapped width before we read its content height.
-func _fit_box() -> void:
-	if _box == null or _text == null:
-		return
-	var content_h: float = _text.get_content_height()
-	# name label (~22) + vbox separation (6) + text + box padding (12 top + 12 bottom).
-	var needed: float = 22.0 + 6.0 + content_h + 24.0
-	_box.offset_top = _box.offset_bottom - maxf(needed, 104.0)
+func _close_dialogue() -> void:
+	_cancel_typewriter()
+	hide()

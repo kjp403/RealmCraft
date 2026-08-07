@@ -38,22 +38,45 @@ const ACTION_LIST_CHARACTERS := "list_characters"
 const ACTION_ENTER_WORLD := "enter_world"
 const ACTION_DISCONNECT := "disconnect"
 
+const ALPHA_CLIENT_CONFIG_FILENAME: String = "realmcraft_client.cfg"
+
+static var _cached_base_url: String = ""
+
 
 static func base_url() -> String:
+	# A command-line override is useful for local diagnostics and automated tests.
+	# Keep it ahead of build features so a release client can be redirected without
+	# recompiling it.
+	var command_line_url: String = str(CmdlineUtils.get_parsed_args().get("api", "")).strip_edges()
+	if not command_line_url.is_empty():
+		return command_line_url
+
+	# Private-alpha builds read their gateway from a small file beside the EXE.
+	# Test hosts can therefore change their Tailscale IP without distributing a
+	# new binary. Do not silently fall through to the legacy production service.
+	if OS.has_feature("realmcraft_alpha"):
+		if not _cached_base_url.is_empty():
+			return _cached_base_url
+		var config_path: String = OS.get_executable_path().get_base_dir().path_join(
+			ALPHA_CLIENT_CONFIG_FILENAME
+		)
+		var config_file := ConfigFile.new()
+		var error: Error = config_file.load(config_path)
+		if error == OK:
+			var configured_url: String = str(
+				config_file.get_value("network", "gateway_url", "")
+			).strip_edges().rstrip("/")
+			if configured_url.begins_with("http://") or configured_url.begins_with("https://"):
+				_cached_base_url = configured_url
+				return _cached_base_url
+		push_error(
+			"RealmCraft Alpha requires [network] gateway_url in %s (http:// or https://)." % config_path
+		)
+		return "http://127.0.0.1:8088"
+
 	if OS.has_feature("ekonia") or OS.has_feature("release"):
 		return "https://ws.ekoniaonline.com"
 	return "http://127.0.0.1:8088"
-
-	# var command_line_arg: String = CmdlineUtils.get_parsed_args().get("api", "")
-	# if command_line_arg:
-	# 	return command_line_arg
-	#
-	# # Check if has default in ProjectSettings
-	# # (set different values for debug/release export presets)).
-	# var value: String = ProjectSettings.get_setting("network/api/base_url", "")
-	# if not value.is_empty():
-	# 	return value
-	# return "http://127.0.0.1:8088"
 
 
 static func get_endpoint(path: String) -> String:

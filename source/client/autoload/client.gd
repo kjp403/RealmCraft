@@ -52,8 +52,9 @@ func connect_to_server(
 	_port: int,
 	_authentication_token: String
 ) -> void:
-	print("connecting to: ", _address, "  (port: ", _port, " ignored if URL)  token=", _authentication_token)
-	print(_address, _port, _authentication_token)
+	# Authentication tokens are bearer credentials. Never include one in a client
+	# log or console capture.
+	print("Connecting to world: ", _address, " (port: ", _port, " ignored if URL)")
 	authentication_token = _authentication_token
 	create(Role.CLIENT, _address, _port)
 

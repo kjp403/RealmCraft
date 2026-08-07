@@ -1,4 +1,12 @@
 extends DataRequestHandler
+const PUBLIC_EQUIPMENT_SLOTS: Array[StringName] = [
+	&"helmet",
+	&"relic",
+	&"weapon",
+	&"torso",
+	&"ring",
+	&"boot",
+]
 
 func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictionary) -> Dictionary:
 	var ws: WorldServer = instance.world_server
@@ -20,94 +28,104 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	var is_self: bool = target_id == from_player.player_id
 
 	# Step 1 get minimal profile row from DB (works for online and offline)
-	var row: Dictionary = ws.database.store.get_player_profile_row(target_id)
-	if row.is_empty():
+	var profile_row: Dictionary = ws.database.store.get_player_profile_row(target_id)
+	if profile_row.is_empty():
 		return {"error": 1, "ok": false, "name": "Unknown"}
 
 	#Step 2: if online, overlay some fields from memory (optional)
 	var target_peer_id: int = ws.player_id_to_peer_id.get(target_id, 0)
 	var target_player: PlayerResource = ws.connected_players.get(target_peer_id) if target_peer_id != 0 else null
-	# Gold is a currency item: balance = amount held in inventory (RAM if online, else DB json).
-	var money: int = Inventory.count(
-		JSON.parse_string(str(row.get("inventory_json", "{}"))) as Dictionary,
-		Economy.gold_id()
-	)
 	# Resolve the leaderboard counters: live dict in RAM for online, parsed from
 	# stats_json on disk for offline. Defaults to empty so missing keys read as 0.
 	var lb: Dictionary = {}
 	if target_player != null:
 		# Keep DB row as base, but override fields that might be more upto date in RAM
-		row["display_name"] = target_player.display_name
-		row["account_name"] = target_player.account_name
-		row["skin_id"] = target_player.skin_id
-		row["level"] = target_player.level
-		money = Inventory.count(target_player.inventory, Economy.gold_id())
-		row["profile_status"] = target_player.profile_status
-		row["profile_animation"] = target_player.profile_animation
-		row["active_guild_id"] = target_player.active_guild_id
-		row["display_title"] = target_player.display_title
+		profile_row["display_name"] = target_player.display_name
+		profile_row["account_name"] = target_player.account_name
+		profile_row["skin_id"] = target_player.skin_id
+		profile_row["level"] = target_player.level
+		profile_row["profile_status"] = target_player.profile_status
+		profile_row["profile_animation"] = target_player.profile_animation
+		profile_row["active_guild_id"] = target_player.active_guild_id
+		profile_row["display_title"] = target_player.display_title
 		lb = target_player.lb_stats
 	else:
-		var lb_parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
+		var lb_parsed: Variant = JSON.parse_string(str(profile_row.get("stats_json", "{}")))
 		if lb_parsed is Dictionary:
 			lb = lb_parsed
 
-	# Step 3 build final response once
-	var guild_id: int = int(row.get("active_guild_id", 0))
-	var guild_name: String = ws.database.store.get_guild_name(guild_id)if guild_id > 0 else ""
+	var public_equipment: Dictionary = _public_equipment_for(
+		target_player,
+		profile_row
+	)
+	var public_skills: Dictionary = _public_skills_for(
+		target_player,
+		profile_row
+	)
+
+	# Step 3: build final response once.
+	var guild_id: int = int(profile_row.get("active_guild_id", 0))
+	var guild_name: String = (
+		ws.database.store.get_guild_name(guild_id)
+		if guild_id > 0
+		else ""
+	)
 
 	# Account name is the public "main" handle (like a Discord username); the
 	# character display name is just a nickname and may not be unique. The
 	# permanent player_id is shown only to staff (moderator and up).
-	var mod_priority: int = int(instance.global_role_definitions.get("moderator", {}).get("priority", 1))
-	var staff_view: bool = CommandPermissions.effective_priority(from_player, instance) >= mod_priority
+	var mod_priority: int = int(
+		instance.global_role_definitions.get(
+			"moderator",
+			{}
+		).get("priority", 1)
+	)
+	var staff_view: bool = (
+		CommandPermissions.effective_priority(from_player, instance)
+		>= mod_priority
+	)
 
 	var profile: Dictionary = {
-		"name": str(row.get("display_name", "Unknown")),
-		"title": str(row.get("display_title", "")),
-		"account_name": str(row.get("account_name", "")),
-		"skin_id": int(row.get("skin_id", 1)),
+		"name": str(profile_row.get("display_name", "Unknown")),
+		"title": str(profile_row.get("display_title", "")),
+		"account_name": str(profile_row.get("account_name", "")),
+		"skin_id": int(profile_row.get("skin_id", 1)),
+		"equipment": public_equipment,
+		"skills": public_skills,
 		"stats": {
-			"money": money,
-			"character_class": "???",
-			"level": int(row.get("level", 1)),
-			# Live played-time for the target. Banked seconds in lb_stats + the
-			# current session's elapsed (so an online player's hours count up
-			# while you watch).
+			"level": int(profile_row.get("level", 1)),
 			"hours": _hours_for(target_player, lb),
-			# Leaderboard counters surfaced on the public profile. Defaults to 0
-			# when the key has never been written for this player.
 			"pve_kills": int(lb.get("pve_kills_total", 0)),
-			"pvp_kills": int(lb.get("pvp_kills_total", 0)),
-			"arena_wins": int(lb.get("arena_wins", 0)),
-			"arena_losses": int(lb.get("arena_losses", 0)),
-			# Coarse presence only ("Online now" / "Less than a week ago") —
-			# deliberately never an exact timestamp, so nobody can be stalked
-			# through their play schedule. Empty when unknown (pre-feature rows).
 			"last_seen": _last_seen_text(target_player, lb),
 		},
-		"animation": str(row.get("profile_animation", "idle")),
-		"description": str(row.get("profile_status", "")),
+		"animation": str(profile_row.get("profile_animation", "idle")),
+		"description": str(profile_row.get("profile_status", "")),
 		"self": is_self,
 		"id": target_id,
 		"staff_view": staff_view,
 		"friend": (not is_self) and from_player.friends.has(target_id),
-		# Whether the viewer has the target blocked — the profile panel uses
-		# this to flip the "Block" item to "Unblock" without an extra fetch.
-		"blocked": (not is_self) and BlockList.is_blocked(from_player.player_id, target_id),
+		"blocked": (
+			(not is_self)
+			and BlockList.is_blocked(from_player.player_id, target_id)
+		),
 	}
 
 	if not guild_name.is_empty():
 		profile["guild_name"] = guild_name
 
-	#Step 4: can_guild_invite (uses inviter's active guild)
-	profile["can_guild_invite"] = _can_invite(ws, from_player, target_id, is_self)
+	# Step 4: can_guild_invite (uses inviter's active guild).
+	profile["can_guild_invite"] = _can_invite(
+		ws,
+		from_player,
+		target_id,
+		is_self
+	)
 
 	# Public trophy strip — the up-to-3 titles the target pinned to their
 	# profile. Shipped to everyone so any viewer sees the same picks.
 	profile["displayed_trophies"] = (
 		Array(target_player.displayed_trophies) if target_player != null
-		else _parse_trophies(row)
+		else _parse_trophies(profile_row)
 	)
 
 	# Self-view extras: full title list + animation list so the edit form can
@@ -123,8 +141,8 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 
 
 ## Parse displayed_trophies out of an offline player's titles_json row.
-static func _parse_trophies(row: Dictionary) -> Array:
-	var titles_v: Variant = JSON.parse_string(str(row.get("titles_json", "{}")))
+static func _parse_trophies(profile_row: Dictionary) -> Array:
+	var titles_v: Variant = JSON.parse_string(str(profile_row.get("titles_json", "{}")))
 	if titles_v is Dictionary:
 		var trophies_v: Variant = (titles_v as Dictionary).get("trophies", [])
 		if trophies_v is Array:
@@ -160,8 +178,69 @@ func _hours_for(target_player: PlayerResource, lb: Dictionary) -> int:
 	var banked: int = int(lb.get("played_seconds", 0))
 	var live: int = 0
 	if target_player != null and target_player.session_start_ms > 0:
-		live = (Time.get_ticks_msec() - target_player.session_start_ms) / 1000
-	return (banked + live) / 3600
+		live = int((Time.get_ticks_msec() - target_player.session_start_ms) / 1000.0)
+	return int(float(banked + live) / 3600.0)
+
+
+static func _public_equipment_for(
+	target_player: PlayerResource,
+	profile_row: Dictionary
+) -> Dictionary:
+	var source: Dictionary = {}
+
+	if target_player != null:
+		source = target_player.equipment
+	else:
+		var parsed: Variant = JSON.parse_string(
+			str(profile_row.get("equipment_json", "{}"))
+		)
+		if parsed is Dictionary:
+			source = parsed
+
+	var public_equipment: Dictionary = {}
+
+	for slot_key: StringName in PUBLIC_EQUIPMENT_SLOTS:
+		var item_id: int = int(
+			source.get(
+				slot_key,
+				source.get(String(slot_key), 0)
+			)
+		)
+
+		if item_id > 0:
+			public_equipment[String(slot_key)] = item_id
+
+	return public_equipment
+
+
+static func _public_skills_for(
+	target_player: PlayerResource,
+	profile_row: Dictionary
+) -> Dictionary:
+	var source: Dictionary = {}
+
+	if target_player != null:
+		source = target_player.skills
+	else:
+		var parsed: Variant = JSON.parse_string(
+			str(profile_row.get("skills_json", "{}"))
+		)
+		if parsed is Dictionary:
+			source = parsed
+
+	var public_skills: Dictionary = {}
+
+	for raw_skill_name: Variant in source:
+		var entry_value: Variant = source[raw_skill_name]
+		if not entry_value is Dictionary:
+			continue
+
+		var entry: Dictionary = entry_value
+		public_skills[String(raw_skill_name)] = {
+			"level": maxi(1, int(entry.get("level", 1))),
+		}
+
+	return public_skills
 
 
 func _can_invite(ws: WorldServer, from_player: PlayerResource, target_id: int, is_self: bool) -> bool:

@@ -22,7 +22,9 @@ const BRANCH_SUBTITLES: Dictionary[StringName, String] = {
 	&"resolve": "Defense & Durability",
 	&"inspiration": "Support & Mobility",
 }
-const TILE_SIZE: Vector2 = Vector2(54, 54)
+const TILE_SIZE: Vector2 = Vector2(44, 44)
+const MODAL_MAX_SIZE := Vector2(800.0, 500.0)
+const MODAL_MIN_MARGIN := 16
 
 const COLOR_OWNED: Color = Color(0.5, 0.85, 0.55)
 const COLOR_LEARN: Color = Color(0.96, 0.74, 0.16)
@@ -35,35 +37,88 @@ var _selected_node: String = ""
 
 var _points_label: Label
 var _picker_overlay: Control
+var _modal_margin: MarginContainer
 
 
 func _ready() -> void:
-	build_shell("Mastery", null, true)
-	# Full-screen takeover: make the shell backdrop opaque so the menu we opened
-	# FROM (the character window) doesn't bleed through the translucent panels.
-	var backdrop: ColorRect = get_child(0) as ColorRect
-	if backdrop != null:
-		backdrop.color = Color(0.05, 0.06, 0.09, 0.98)
+	build_shell("Mastery", null, false)
+
+	backdrop.color = Color(0.025, 0.03, 0.05, 0.82)
+
+	_modal_margin = get_child(1) as MarginContainer
+	resized.connect(_place_modal)
+
 	visibility_changed.connect(_on_visibility_changed)
-	close_requested.connect(_close_slot_picker)
-	# The shell's right-side button reads "Close"; here it's a Back to the hub.
+	close_requested.connect(_on_back_requested)
+
 	var back_button: Button = header_right.get_child(0) as Button
 	if back_button != null:
 		back_button.text = "Back"
-	# Points readout in the header centre.
+		back_button.custom_minimum_size = Vector2(58, 28)
+		back_button.add_theme_font_size_override(&"font_size", 11)
+
 	_points_label = Label.new()
-	_points_label.add_theme_color_override(&"font_color", COLOR_LEARN)
-	_points_label.add_theme_font_size_override(&"font_size", 14)
+	_points_label.add_theme_color_override(
+		&"font_color",
+		COLOR_LEARN
+	)
+	_points_label.add_theme_font_size_override(&"font_size", 12)
 	_points_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header_center.add_child(_points_label)
-	# Reset sits left of Back.
-	var reset: Button = Button.new()
-	reset.text = "Reset points"
-	reset.custom_minimum_size = Vector2(0, 34)
+
+	var reset := Button.new()
+	reset.text = "Reset"
+	reset.custom_minimum_size = Vector2(62, 28)
 	reset.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	reset.add_theme_font_size_override(&"font_size", 11)
+	reset.tooltip_text = "Refund all points in this Mastery."
 	reset.pressed.connect(_on_respec_pressed)
 	header_right.add_child(reset)
 	header_right.move_child(reset, 0)
+
+	call_deferred(&"_place_modal")
+
+
+func _place_modal() -> void:
+	if _modal_margin == null:
+		return
+
+	var horizontal_margin: int = maxi(
+		MODAL_MIN_MARGIN,
+		int((size.x - MODAL_MAX_SIZE.x) * 0.5)
+	)
+	var vertical_margin: int = maxi(
+		MODAL_MIN_MARGIN,
+		int((size.y - MODAL_MAX_SIZE.y) * 0.5)
+	)
+
+	_modal_margin.add_theme_constant_override(
+		&"margin_left",
+		horizontal_margin
+	)
+	_modal_margin.add_theme_constant_override(
+		&"margin_right",
+		horizontal_margin
+	)
+	_modal_margin.add_theme_constant_override(
+		&"margin_top",
+		vertical_margin
+	)
+	_modal_margin.add_theme_constant_override(
+		&"margin_bottom",
+		vertical_margin
+	)
+func _on_back_requested() -> void:
+	_close_slot_picker()
+
+	var compact_mastery := get_tree().root.find_child(
+		"CompactMasteryHost",
+		true,
+		false
+	) as Control
+
+	if compact_mastery != null:
+		compact_mastery.call_deferred(&"show")
 
 
 ## Entry point from HUD.display_menu(&"mastery_tree", category). [param category]
@@ -382,7 +437,7 @@ func _make_detail_panel(tree: MasteryTreeResource, info: Dictionary) -> Control:
 	# Fixed height so the layout never jumps when a description wraps to a 2nd/3rd
 	# line (1 line ≈ 85, 2 ≈ 105, 3 ≈ 125). Reserve the 3-line height; shorter
 	# descriptions just leave whitespace below. Keep descriptions to ≤3 lines.
-	panel.custom_minimum_size.y = 126
+	panel.custom_minimum_size.y = 104
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(0.09, 0.10, 0.13, 0.92)
 	box.set_corner_radius_all(8)
@@ -470,7 +525,8 @@ func _make_action_button(node: MasteryNode, _tree: MasteryTreeResource, info: Di
 	var prereq_owned: bool = String(node.upgrades).is_empty() or owned_set.has(String(node.upgrades))
 
 	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(140, 42)
+	button.custom_minimum_size = Vector2(112, 34)
+	button.add_theme_font_size_override(&"font_size", 10)
 	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 	if not owned:

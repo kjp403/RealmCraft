@@ -330,6 +330,10 @@ func spawn_player(player_id: int) -> void:
 			var click_area: ClickableArea = new_player.get_node_or_null(^"ProfileClickArea") as ClickableArea
 			if click_area != null:
 				click_area.clicked.connect(_on_player_clicked.bind(player_id))
+				if player_id != multiplayer.get_unique_id():
+					click_area.right_clicked.connect(
+						_on_player_right_clicked.bind(player_id)
+					)
 
 	var sync: StateSynchronizer = new_player.state_synchronizer
 	synchronizer_manager.add_entity(player_id, sync)
@@ -343,6 +347,13 @@ func _on_player_clicked(peer_id: int) -> void:
 	var lp: LocalPlayer = ClientState.local_player
 	if lp != null and is_instance_valid(lp) and not lp.is_armed():
 		ClientState.player_profile_by_peer_requested.emit(peer_id)
+
+
+func _on_player_right_clicked(peer_id: int) -> void:
+	if peer_id == multiplayer.get_unique_id():
+		return
+	if players_by_peer_id.has(peer_id):
+		ClientState.player_context_requested.emit(peer_id)
 
 
 func _on_combat_hit(payload: Dictionary) -> void:

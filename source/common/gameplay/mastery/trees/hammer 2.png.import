@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ceoj5ip1pcrjh"
-path="res://.godot/imported/RealmCraft.png-6780c82771133fd5fbdc33e8fe3ac587.ctex"
+uid="uid://cesic4lr5kx52"
+path="res://.godot/imported/hammer 2.png-720026da3ccb16d7f1039843876d1b93.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://source/client/gateway/RealmCraft.png"
-dest_files=["res://.godot/imported/RealmCraft.png-6780c82771133fd5fbdc33e8fe3ac587.ctex"]
+source_file="res://source/common/gameplay/mastery/trees/hammer 2.png"
+dest_files=["res://.godot/imported/hammer 2.png-720026da3ccb16d7f1039843876d1b93.ctex"]
 
 [params]
 

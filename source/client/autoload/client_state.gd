@@ -9,6 +9,9 @@ signal player_profile_requested(id: int)
 ## click) — the client doesn't carry the persistent player_id, so the server resolves
 ## it (see profile.get.gd).
 signal player_profile_by_peer_requested(peer_id: int)
+## A remote player's world hitbox was right-clicked. The HUD owns presentation
+## and turns this into Examine / Follow / Trade actions.
+signal player_context_requested(peer_id: int)
 signal open_menu_requested(menu: StringName, arg: Variant)
 signal dm_requested(id: int)
 ## Emitted on the client after a successful gather (mining, ...). Carries the
@@ -26,10 +29,9 @@ signal quest_progressed(quest_id: int)
 ## quest; the choice is session-local, deliberately not persisted anywhere.
 var tracked_quest_id: int = -1
 
-## The trade table whose panel is open (0 = closed). Independent of being seated: you can
-## open a table's panel to view/join it, and closing the panel does NOT leave your seat.
-signal viewed_trade_changed(table_id: int)
-var viewed_trade_table: int
+## The private trade session whose panel is open (0 = closed).
+signal viewed_trade_changed(trade_id: int)
+var viewed_trade_id: int
 ## Emitted whenever the active input type changes. [br]
 ## [b]Example[/b]: switching from keyboard to gamepad.
 signal input_changed(input_type: InputComponent.InputType)
@@ -169,6 +171,15 @@ func _ready() -> void:
 	)
 
 	settings.load_file()
+	# Control-layout migration: LMB is now movement/interact and Space is the
+	# primary attack. Only migrate the former shipped default; any other custom
+	# attack binding remains untouched.
+	if settings.get_value(&"mouse_keyboard", &"player_shoot") == "mouse:1":
+		settings.set_value(
+			&"mouse_keyboard",
+			&"player_shoot",
+			"physical:Space"
+		)
 	settings.setting_changed.connect(_on_setting_changed)
 	language = settings.data.get(&"general", {}).get(&"language", "en_US")
 	# Saved keybinds must hold from boot (gateway, menus) — not only once the
@@ -359,10 +370,10 @@ func remove_blocked(id: int) -> void:
 	blocked_ids_changed.emit()
 
 
-## Open/close the trade panel for a table (0 = close). Does not join or leave a seat.
-func set_viewed_trade(table_id: int) -> void:
-	viewed_trade_table = table_id
-	viewed_trade_changed.emit(table_id)
+## Open/close the private trade panel (0 = close).
+func set_viewed_trade(trade_id: int) -> void:
+	viewed_trade_id = trade_id
+	viewed_trade_changed.emit(trade_id)
 
 
 func _on_setting_changed(section: StringName, property: StringName, new_value: Variant) -> void:

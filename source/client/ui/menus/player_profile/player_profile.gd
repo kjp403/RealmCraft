@@ -8,6 +8,31 @@ const MORE_ITEM_EDIT: int = 0
 const MORE_ITEM_REPORT: int = 1
 const MORE_ITEM_BLOCK: int = 2
 const MORE_ITEM_SHOW_GUILD: int = 3
+const PROFILE_MAX_SIZE := Vector2(720.0, 440.0)
+const PROFILE_MIN_MARGIN := 16
+
+enum ProfileTab {
+	OVERVIEW,
+	EQUIPMENT,
+	SKILLS,
+}
+
+const EQUIPMENT_SLOT_ORDER: Array[StringName] = [
+	&"helmet",
+	&"relic",
+	&"weapon",
+	&"torso",
+	&"ring",
+	&"boot",
+]
+const EQUIPMENT_SLOT_NAMES: Dictionary = {
+	&"helmet": "Head",
+	&"relic": "Relic",
+	&"weapon": "Weapon",
+	&"torso": "Body",
+	&"ring": "Ring",
+	&"boot": "Boots",
+}
 
 # Stat-value colors so the eye can read kinds at a glance — gold = wealth,
 # cyan = progression (level/hours), red = combat record.
@@ -49,12 +74,225 @@ var _trophies_counter: Label
 ## CheckBox-per-title built per open. Used to enforce the max-3 cap and to
 ## collect the selected set on save.
 var _trophy_checkboxes: Array[CheckBox]
+var _profile_margin: MarginContainer
+var _overview_left: Control
+var _overview_right: Control
+var _equipment_left: MarginContainer
+var _equipment_right: MarginContainer
+var _skills_left: MarginContainer
+var _skills_right: MarginContainer
+var _equipment_left_list: VBoxContainer
+var _equipment_right_list: VBoxContainer
+var _skills_left_list: VBoxContainer
+var _skills_right_list: VBoxContainer
+var _tab_buttons: Array[Button] = []
 
 
 func _ready() -> void:
 	more_button.pressed.connect(_show_more_popup)
 	more_popup.id_pressed.connect(_on_more_item_pressed)
-	DragScroll.enable(description_scroll) # touch/mouse drag-to-scroll the details column
+	DragScroll.enable(description_scroll)
+
+	_configure_profile_layout()
+	_build_profile_tabs()
+	resized.connect(_place_profile_card)
+	call_deferred(&"_place_profile_card")
+
+
+func _configure_profile_layout() -> void:
+	var background: ColorRect = $Background
+	background.color = Color(0.025, 0.03, 0.05, 0.76)
+
+	_profile_margin = $CenterContainer as MarginContainer
+
+	var card: PanelContainer = $CenterContainer/Card
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(0.045, 0.045, 0.065, 0.98)
+	card_style.border_color = Color(0.52, 0.34, 0.20, 0.95)
+
+	card_style.border_width_left = 1
+	card_style.border_width_top = 1
+	card_style.border_width_right = 1
+	card_style.border_width_bottom = 1
+
+	card_style.corner_radius_top_left = 6
+	card_style.corner_radius_top_right = 6
+	card_style.corner_radius_bottom_left = 6
+	card_style.corner_radius_bottom_right = 6
+
+	card_style.shadow_color = Color(0.0, 0.0, 0.0, 0.55)
+	card_style.shadow_size = 8
+
+	card.add_theme_stylebox_override(&"panel", card_style)
+
+	var card_margin: MarginContainer = (
+		$CenterContainer/Card/CardMargin
+	)
+	card_margin.add_theme_constant_override(&"margin_left", 12)
+	card_margin.add_theme_constant_override(&"margin_top", 10)
+	card_margin.add_theme_constant_override(&"margin_right", 12)
+	card_margin.add_theme_constant_override(&"margin_bottom", 10)
+
+	var body: HBoxContainer = (
+		$CenterContainer/Card/CardMargin/VBox/Body
+	)
+	body.add_theme_constant_override(&"separation", 10)
+
+	var stats_margin: MarginContainer = (
+		$CenterContainer/Card/CardMargin/VBox/Body/LeftPanel/StatsMargin
+	)
+	stats_margin.add_theme_constant_override(&"margin_left", 10)
+	stats_margin.add_theme_constant_override(&"margin_top", 10)
+	stats_margin.add_theme_constant_override(&"margin_right", 10)
+	stats_margin.add_theme_constant_override(&"margin_bottom", 10)
+
+	var right_margin: MarginContainer = (
+		$CenterContainer/Card/CardMargin/VBox/Body/RightPanel/RightMargin
+	)
+	right_margin.add_theme_constant_override(&"margin_left", 10)
+	right_margin.add_theme_constant_override(&"margin_top", 10)
+	right_margin.add_theme_constant_override(&"margin_right", 10)
+	right_margin.add_theme_constant_override(&"margin_bottom", 10)
+
+	player_character.scale = Vector2(3.0, 3.0)
+
+	invite_guild_button.custom_minimum_size = Vector2(82, 30)
+	friend_button.custom_minimum_size = Vector2(82, 30)
+	message_button.custom_minimum_size = Vector2(82, 30)
+	more_button.custom_minimum_size = Vector2(34, 30)
+
+	invite_guild_button.add_theme_font_size_override(&"font_size", 10)
+	friend_button.add_theme_font_size_override(&"font_size", 10)
+	message_button.add_theme_font_size_override(&"font_size", 10)
+	more_button.add_theme_font_size_override(&"font_size", 10)
+
+	var action_bar: HBoxContainer = (
+		$CenterContainer/Card/CardMargin/VBox/ActionBar
+	)
+	var close_button: Button = $CloseButton
+
+	if close_button.get_parent() != action_bar:
+		close_button.reparent(action_bar)
+
+	close_button.custom_minimum_size = Vector2(54, 30)
+	close_button.add_theme_font_size_override(&"font_size", 10)
+
+
+func _build_profile_tabs() -> void:
+	var body: HBoxContainer = (
+		$CenterContainer/Card/CardMargin/VBox/Body
+	)
+	var main_box: VBoxContainer = body.get_parent() as VBoxContainer
+	var left_panel: PanelContainer = body.get_node("LeftPanel")
+	var right_panel: PanelContainer = body.get_node("RightPanel")
+
+	_overview_left = left_panel.get_node("StatsMargin") as Control
+	_overview_right = right_panel.get_node("RightMargin") as Control
+
+	var tab_bar := HBoxContainer.new()
+	tab_bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	tab_bar.add_theme_constant_override(&"separation", 6)
+	main_box.add_child(tab_bar)
+	main_box.move_child(tab_bar, 0)
+
+	_tab_buttons.append(
+		_make_tab_button("Overview", ProfileTab.OVERVIEW, tab_bar)
+	)
+	_tab_buttons.append(
+		_make_tab_button("Equipment", ProfileTab.EQUIPMENT, tab_bar)
+	)
+	_tab_buttons.append(
+		_make_tab_button("Skills", ProfileTab.SKILLS, tab_bar)
+	)
+
+	_equipment_left = _make_switching_view(left_panel)
+	_equipment_right = _make_switching_view(right_panel)
+	_skills_left = _make_switching_view(left_panel)
+	_skills_right = _make_switching_view(right_panel)
+
+	_equipment_left_list = _make_view_list(_equipment_left)
+	_equipment_right_list = _make_view_list(_equipment_right)
+	_skills_left_list = _make_view_list(_skills_left)
+	_skills_right_list = _make_view_list(_skills_right)
+
+	_select_profile_tab(ProfileTab.OVERVIEW)
+
+
+func _make_tab_button(
+	label_text: String,
+	tab: ProfileTab,
+	parent: HBoxContainer
+) -> Button:
+	var button := Button.new()
+	button.text = label_text
+	button.toggle_mode = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.custom_minimum_size = Vector2(104.0, 28.0)
+	button.add_theme_font_size_override(&"font_size", 11)
+	button.pressed.connect(_select_profile_tab.bind(tab))
+	parent.add_child(button)
+	return button
+
+
+func _make_switching_view(parent: PanelContainer) -> MarginContainer:
+	var view := MarginContainer.new()
+	view.add_theme_constant_override(&"margin_left", 10)
+	view.add_theme_constant_override(&"margin_top", 10)
+	view.add_theme_constant_override(&"margin_right", 10)
+	view.add_theme_constant_override(&"margin_bottom", 10)
+	parent.add_child(view)
+	view.hide()
+	return view
+
+
+func _make_view_list(view: MarginContainer) -> VBoxContainer:
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override(&"separation", 6)
+	view.add_child(list)
+	return list
+
+
+func _select_profile_tab(tab: ProfileTab) -> void:
+	_overview_left.visible = tab == ProfileTab.OVERVIEW
+	_overview_right.visible = tab == ProfileTab.OVERVIEW
+	_equipment_left.visible = tab == ProfileTab.EQUIPMENT
+	_equipment_right.visible = tab == ProfileTab.EQUIPMENT
+	_skills_left.visible = tab == ProfileTab.SKILLS
+	_skills_right.visible = tab == ProfileTab.SKILLS
+
+	for index: int in _tab_buttons.size():
+		_tab_buttons[index].set_pressed_no_signal(index == int(tab))
+
+
+func _place_profile_card() -> void:
+	if _profile_margin == null:
+		return
+
+	var horizontal_margin: int = maxi(
+		PROFILE_MIN_MARGIN,
+		int((size.x - PROFILE_MAX_SIZE.x) * 0.5)
+	)
+	var vertical_margin: int = maxi(
+		PROFILE_MIN_MARGIN,
+		int((size.y - PROFILE_MAX_SIZE.y) * 0.5)
+	)
+
+	_profile_margin.add_theme_constant_override(
+		&"margin_left",
+		horizontal_margin
+	)
+	_profile_margin.add_theme_constant_override(
+		&"margin_right",
+		horizontal_margin
+	)
+	_profile_margin.add_theme_constant_override(
+		&"margin_top",
+		vertical_margin
+	)
+	_profile_margin.add_theme_constant_override(
+		&"margin_bottom",
+		vertical_margin
+	)
 
 
 func open_player_profile(player_id: int) -> void:
@@ -119,7 +357,10 @@ func apply_profile(profile: Dictionary) -> void:
 
 	_render_stats(profile.get("stats", {}))
 	_render_title_strip(profile)
+	_render_public_equipment(profile.get("equipment", {}))
+	_render_public_skills(profile.get("skills", {}))
 	_render_action_bar(profile, is_self)
+	_select_profile_tab(ProfileTab.OVERVIEW)
 
 	if profile.get("id", 0):
 		cache[profile.get("id")] = profile
@@ -140,43 +381,40 @@ func apply_profile(profile: Dictionary) -> void:
 # ---------------------------------------------------------------------------
 
 func _render_stats(stats: Dictionary) -> void:
-	for child in stats_list.get_children():
+	for child: Node in stats_list.get_children():
 		child.queue_free()
 
-	# Coarse presence, first row: "Online now" pops cyan, offline buckets stay
-	# dim. Hidden entirely when the server has no stamp yet (pre-feature rows).
 	var last_seen: String = str(stats.get("last_seen", ""))
 	if not last_seen.is_empty():
 		var online: bool = last_seen == "Online now"
 		stats_list.add_child(_stat_row(
-			"Last seen", last_seen,
+			"Status",
+			last_seen,
 			COLOR_VALUE_PROGRESS if online else COLOR_DIM
 		))
 
-	# Hours: only show once the player has banked at least one full hour.
-	# Below an hour just reads as "0h" which feels like a bug.
-	var hours: int = int(stats.get("hours", 0))
-	if hours > 0:
-		stats_list.add_child(_stat_row("Hours", "%dh" % hours, COLOR_VALUE_NEUTRAL))
-
-	# Level with a (MAX) badge at cap so capped players advertise it.
 	var level: int = int(stats.get("level", 1))
-	var level_text: String = "%d (MAX)" % level if level >= 20 else str(level)
-	stats_list.add_child(_stat_row("Level", level_text, COLOR_VALUE_PROGRESS))
+	var level_text: String = (
+		"%d (MAX)" % level if level >= 20 else str(level)
+	)
+	stats_list.add_child(_stat_row(
+		"Combat level",
+		level_text,
+		COLOR_VALUE_PROGRESS
+	))
 
-	stats_list.add_child(_stat_row("Gold", str(stats.get("money", 0)), COLOR_VALUE_GOLD))
+	var hours: int = int(stats.get("hours", 0))
+	stats_list.add_child(_stat_row(
+		"Hours played",
+		"%dh" % hours,
+		COLOR_VALUE_NEUTRAL
+	))
 
-	# PvE / PvP / Arena rendered as separate rows for clarity per design call.
-	# Combat stats share the red palette so they read as a single category.
-	stats_list.add_child(_stat_row("PvE kills", str(stats.get("pve_kills", 0)), COLOR_VALUE_COMBAT))
-	stats_list.add_child(_stat_row("PvP kills", str(stats.get("pvp_kills", 0)), COLOR_VALUE_COMBAT))
-	var wins: int = int(stats.get("arena_wins", 0))
-	var losses: int = int(stats.get("arena_losses", 0))
-	stats_list.add_child(_stat_row("Arena", "%d W / %d L" % [wins, losses], COLOR_VALUE_COMBAT))
-
-
-## Two-column "Label: Value" row. Label is left-aligned, value right-aligned
-## with a category-specific accent color so the eye groups kinds.
+	stats_list.add_child(_stat_row(
+		"Monsters defeated",
+		str(stats.get("pve_kills", 0)),
+		COLOR_VALUE_COMBAT
+	))
 func _stat_row(label_text: String, value_text: String, value_color: Color) -> HBoxContainer:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 8)
@@ -193,6 +431,154 @@ func _stat_row(label_text: String, value_text: String, value_color: Color) -> HB
 	row.add_child(value)
 
 	return row
+
+
+func _render_public_equipment(equipment: Dictionary) -> void:
+	_clear_children(_equipment_left_list)
+	_clear_children(_equipment_right_list)
+
+	for index: int in EQUIPMENT_SLOT_ORDER.size():
+		var slot_key: StringName = EQUIPMENT_SLOT_ORDER[index]
+		var target_list: VBoxContainer = (
+			_equipment_left_list if index < 3
+			else _equipment_right_list
+		)
+		var item_id: int = int(
+			equipment.get(
+				String(slot_key),
+				equipment.get(slot_key, 0)
+			)
+		)
+		target_list.add_child(
+			_make_public_equipment_slot(slot_key, item_id)
+		)
+
+
+func _make_public_equipment_slot(
+	slot_key: StringName,
+	item_id: int
+) -> Control:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(0.0, 66.0)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override(&"margin_left", 7)
+	margin.add_theme_constant_override(&"margin_top", 6)
+	margin.add_theme_constant_override(&"margin_right", 7)
+	margin.add_theme_constant_override(&"margin_bottom", 6)
+	panel.add_child(margin)
+
+	var row_box := HBoxContainer.new()
+	row_box.add_theme_constant_override(&"separation", 7)
+	margin.add_child(row_box)
+
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(38.0, 38.0)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	row_box.add_child(icon)
+
+	var text_box := VBoxContainer.new()
+	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	row_box.add_child(text_box)
+
+	var slot_name := Label.new()
+	slot_name.text = str(EQUIPMENT_SLOT_NAMES.get(slot_key, slot_key))
+	slot_name.add_theme_font_size_override(&"font_size", 10)
+	slot_name.self_modulate = COLOR_DIM
+	text_box.add_child(slot_name)
+
+	var item_name := Label.new()
+	item_name.add_theme_font_size_override(&"font_size", 11)
+	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	text_box.add_child(item_name)
+
+	var item: Item = null
+	if item_id > 0:
+		item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+
+	if item != null:
+		icon.texture = item.item_icon
+		item_name.text = str(item.item_name)
+		panel.tooltip_text = str(item.item_name)
+	else:
+		item_name.text = "Empty"
+		item_name.self_modulate = Color(0.5, 0.5, 0.55)
+		icon.modulate = Color(1.0, 1.0, 1.0, 0.2)
+
+	return panel
+
+
+func _render_public_skills(skills: Dictionary) -> void:
+	_clear_children(_skills_left_list)
+	_clear_children(_skills_right_list)
+
+	var entries: Array[Dictionary] = []
+	for raw_skill_name: Variant in skills:
+		var value: Variant = skills[raw_skill_name]
+		if not value is Dictionary:
+			continue
+		entries.append({
+			"name": String(raw_skill_name),
+			"level": maxi(1, int((value as Dictionary).get("level", 1))),
+		})
+
+	entries.sort_custom(_skill_entry_before)
+
+	if entries.is_empty():
+		var empty := Label.new()
+		empty.text = "No profession progress yet."
+		empty.self_modulate = COLOR_DIM
+		_skills_left_list.add_child(empty)
+		return
+
+	var split_index: int = int(ceil(float(entries.size()) / 2.0))
+	for index: int in entries.size():
+		var target_list: VBoxContainer = (
+			_skills_left_list if index < split_index
+			else _skills_right_list
+		)
+		target_list.add_child(_make_public_skill_row(entries[index]))
+
+
+func _skill_entry_before(a: Dictionary, b: Dictionary) -> bool:
+	return String(a["name"]) < String(b["name"])
+
+
+func _make_public_skill_row(entry: Dictionary) -> Control:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(0.0, 38.0)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override(&"margin_left", 8)
+	margin.add_theme_constant_override(&"margin_right", 8)
+	panel.add_child(margin)
+
+	var row_box := HBoxContainer.new()
+	row_box.add_theme_constant_override(&"separation", 6)
+	margin.add_child(row_box)
+
+	var skill_name := Label.new()
+	skill_name.text = String(entry["name"]).capitalize()
+	skill_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	skill_name.add_theme_font_size_override(&"font_size", 11)
+	row_box.add_child(skill_name)
+
+	var level := Label.new()
+	level.text = "Lv %d" % int(entry["level"])
+	level.add_theme_font_size_override(&"font_size", 11)
+	level.self_modulate = COLOR_VALUE_PROGRESS
+	row_box.add_child(level)
+
+	return panel
+
+
+func _clear_children(parent: Node) -> void:
+	for child: Node in parent.get_children():
+		parent.remove_child(child)
+		child.queue_free()
 
 
 # ---------------------------------------------------------------------------

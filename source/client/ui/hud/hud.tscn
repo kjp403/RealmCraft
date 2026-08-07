@@ -15,8 +15,23 @@
 [ext_resource type="Texture2D" uid="uid://bkp7uawftw7ll" path="res://assets/sprites/ui/menu_icons_shadow/32px/three_dots_vertical.png" id="12_menuicon"]
 [ext_resource type="Texture2D" uid="uid://dliywarss4qeo" path="res://assets/sprites/ui/menu_icons_shadow/32px/exclamation_mark.png" id="13_notificon"]
 [ext_resource type="Texture2D" uid="uid://b30enhdjqcbft" path="res://assets/sprites/ui/menu_icons_shadow/32px/message.png" id="14_chaticon"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu_icons_shadow/32px/house.png" id="15_recallicon"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu_icons_shadow/32px/character.png" id="16_actionsicon"]
+[ext_resource type="Texture2D" uid="uid://ynwqebkmwic2" path="res://assets/sprites/ui/menu_icons_shadow/32px/house.png" id="15_recallicon"]
+[ext_resource type="Texture2D" uid="uid://cvhtiqtsoemqu" path="res://assets/sprites/ui/menu_icons_shadow/32px/character.png" id="16_actionsicon"]
+[ext_resource type="Texture2D" uid="uid://itym6yc2umhu" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Inventory.png" id="18_0nxvx"]
+[ext_resource type="Script" uid="uid://duu47co5eyo28" path="res://source/client/ui/compact_menus/compact_menu_host.gd" id="19_ft5kn"]
+[ext_resource type="Texture2D" uid="uid://dbnwfedjt85gv" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Settings.png" id="19_gfcab"]
+[ext_resource type="Texture2D" uid="uid://d0kknj2iwoh7d" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Skills.png" id="20_ft5kn"]
+[ext_resource type="Texture2D" uid="uid://qpqs36jrqq0i" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Mastery.png" id="21_kfwow"]
+[ext_resource type="Texture2D" uid="uid://bue1pve5tb8x3" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Quests.png" id="22_gou6k"]
+[ext_resource type="Texture2D" uid="uid://bmoes06pru4hf" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Friends.png" id="23_ki2qh"]
+[ext_resource type="Texture2D" uid="uid://l0qcolmhap2l" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Equipment.png" id="24_xti04"]
+[ext_resource type="PackedScene" uid="uid://dhai0yww7fk23" path="res://source/client/ui/compact_menus/compact_menu_host.tscn" id="25_gfcab"]
+[ext_resource type="PackedScene" uid="uid://b5jrvtnut25vw" path="res://source/client/ui/compact_menus/compact_equipment_host.tscn" id="27_kfwow"]
+[ext_resource type="PackedScene" uid="uid://dwinfa5ww2353" path="res://source/client/ui/compact_menus/compact_skills_host.tscn" id="28_gou6k"]
+[ext_resource type="PackedScene" uid="uid://c24nhpogo3f67" path="res://source/client/ui/compact_menus/compact_mastery_host.tscn" id="29_ki2qh"]
+[ext_resource type="PackedScene" uid="uid://cohrbemcbnijv" path="res://source/client/ui/compact_menus/compact_quests_host.tscn" id="30_xti04"]
+[ext_resource type="PackedScene" uid="uid://cpwrfj2pewvc3" path="res://source/client/ui/compact_menus/compact_friends_host.tscn" id="31_2pq2e"]
+[ext_resource type="PackedScene" path="res://source/client/ui/compact_menus/compact_settings_host.tscn" id="32_settings"]
 
 [node name="HUD" type="Control" unique_id=1687231756]
 layout_mode = 3
@@ -219,6 +234,7 @@ icon_alignment = 1
 metadata/_edit_lock_ = true
 
 [node name="MenuButton" type="Button" parent="MenuButtons/ButtonRail" unique_id=948283629]
+visible = false
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 0
@@ -357,7 +373,157 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("9_trade")
 
+[node name="CompactMenuHost" parent="." unique_id=1675211017 instance=ExtResource("25_gfcab")]
+z_index = 5
+layout_mode = 1
+offset_top = -352.0
+script = ExtResource("19_ft5kn")
+
+[node name="BottomMenuDock" type="HBoxContainer" parent="." unique_id=164839858]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -262.0
+offset_top = -46.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 2
+
+[node name="InventoryDockButton" type="Button" parent="BottomMenuDock" unique_id=156619410]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Inventory"
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("18_0nxvx")
+icon_alignment = 1
+
+[node name="EquipmentDockButton" type="Button" parent="BottomMenuDock" unique_id=1538015955]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("19_gfcab")
+
+[node name="SkillsDockButton" type="Button" parent="BottomMenuDock" unique_id=1957067760]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("20_ft5kn")
+
+[node name="MasteryDockButton" type="Button" parent="BottomMenuDock" unique_id=2110754032]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("21_kfwow")
+
+[node name="QuestsDockButton" type="Button" parent="BottomMenuDock" unique_id=240203550]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("22_gou6k")
+
+[node name="FriendsDockButton" type="Button" parent="BottomMenuDock" unique_id=286181143]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("23_ki2qh")
+
+[node name="SettingsDockButton" type="Button" parent="BottomMenuDock" unique_id=195172667]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("24_xti04")
+
+[node name="CompactEquipmentHost" parent="." unique_id=916821349 instance=ExtResource("27_kfwow")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 270.0
+offset_bottom = 370.0
+
+[node name="CompactSkillsHost" parent="." unique_id=580795554 instance=ExtResource("28_gou6k")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 270.0
+offset_bottom = 370.0
+
+[node name="CompactMasteryHost" parent="." unique_id=1475389267 instance=ExtResource("29_ki2qh")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 270.0
+offset_bottom = 370.0
+
+[node name="CompactQuestsHost" parent="." unique_id=1699807180 instance=ExtResource("30_xti04")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 270.0
+offset_bottom = 370.0
+
+[node name="CompactFriendsHost" parent="." unique_id=1084196581 instance=ExtResource("31_2pq2e")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 270.0
+offset_bottom = 370.0
+
+[node name="CompactSettingsHost" parent="." unique_id=1020881892 instance=ExtResource("32_settings")]
+z_index = 5
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 180.0
+offset_bottom = 262.0
+
 [connection signal="pressed" from="MenuButtons/ButtonRail/MenuButton" to="." method="_on_overlay_menu_button_pressed"]
 [connection signal="pressed" from="MenuButtons/ButtonRail/NotificationButton" to="." method="_on_notification_button_pressed"]
 [connection signal="pressed" from="NotificationPopup/PanelContainer/VBoxContainer/HBoxContainer/CancelButton" to="NotificationPopup" method="_on_cancel_button_pressed"]
 [connection signal="pressed" from="NotificationPopup/PanelContainer/VBoxContainer/HBoxContainer/ConfirmButton" to="NotificationPopup" method="_on_confirm_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/InventoryDockButton" to="." method="_on_inventory_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/EquipmentDockButton" to="." method="_on_equipment_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/SkillsDockButton" to="." method="_on_skills_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/MasteryDockButton" to="." method="_on_mastery_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/QuestsDockButton" to="." method="_on_quests_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/FriendsDockButton" to="." method="_on_friends_dock_button_pressed"]
+[connection signal="pressed" from="BottomMenuDock/SettingsDockButton" to="." method="_on_settings_dock_button_pressed"]

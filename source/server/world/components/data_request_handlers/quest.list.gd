@@ -29,9 +29,18 @@ func data_request_handler(
 		# VISIT objectives BEFORE building the view so the player sees the
 		# just-advanced count in the same response. Also push quest.update so
 		# the HUD tracker refreshes immediately (same pattern as kill/craft).
-		var visit_updates: Array = QuestService.on_visit(resource, giver_key, peer_id, instance)
+		var visit_updates: Array = QuestService.on_visit(
+			resource,
+			giver_key,
+			peer_id,
+			instance
+		)
 		if not visit_updates.is_empty():
-			WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": visit_updates})
+			WorldServer.curr.data_push.rpc_id(
+				peer_id,
+				&"quest.update",
+				{"messages": visit_updates}
+			)
 		var giver: Object = instance.instance_map.get_quest_giver(giver_key)
 		if giver:
 			giver_name = str(giver.get(&"giver_name"))
@@ -39,10 +48,8 @@ func data_request_handler(
 				if quest:
 					var qid: int = int(quest.get_meta(&"id", 0))
 					# Prereq-locked quests are INCLUDED and render locked with
-					# their unlock conditions (owner call after playtest
-					# 2026-07-04 — hidden chain quests popped invisibly and
-					# players could miss that a follow-up existed). Accepting
-					# stays hard-gated server-side in quest.accept.
+					# their unlock conditions. Accepting stays hard-gated
+					# server-side in quest.accept.
 					resources_by_id[qid] = quest
 					quest_ids.append(qid)
 			# Pending turn-ins: active quests whose turn_in_giver_id points at
@@ -52,7 +59,9 @@ func data_request_handler(
 					continue
 				if resource.quest_state(active_quest_id) != &"active":
 					continue
-				var quest: QuestResource = QuestResource.load_quest(active_quest_id)
+				var quest: QuestResource = QuestResource.load_quest(
+					active_quest_id
+				)
 				if quest and quest.turn_in_giver_key() == giver_key:
 					resources_by_id[active_quest_id] = quest
 					quest_ids.append(active_quest_id)
@@ -61,70 +70,112 @@ func data_request_handler(
 
 	var out: Array = []
 	for quest_id: int in quest_ids:
-		out.append(_quest_view(resource, int(quest_id), resources_by_id.get(quest_id), inventory))
+		out.append(
+			_quest_view(
+				resource,
+				int(quest_id),
+				resources_by_id.get(quest_id),
+				inventory
+			)
+		)
 
 	# Toast any quest that just became turn-in-able via a passive COLLECT fill
 	# (inventory changes fire no advance event). Latches so it only toasts once.
 	QuestService.notify_passive_ready(resource, peer_id)
-	return {"giver": String(giver_key), "giver_name": giver_name, "quests": out}
+	return {
+		"giver": String(giver_key),
+		"giver_name": giver_name,
+		"quests": out,
+	}
 
 
-func _quest_view(resource: PlayerResource, quest_id: int, quest_ref: QuestResource, inventory: Dictionary) -> Dictionary:
+func _quest_view(
+	resource: PlayerResource,
+	quest_id: int,
+	quest_ref: QuestResource,
+	inventory: Dictionary
+) -> Dictionary:
 	# Prefer the direct reference (from the giver) over the registry lookup —
 	# avoids "?" names when the content index is stale.
-	var quest: QuestResource = quest_ref if quest_ref != null else QuestResource.load_quest(quest_id)
+	var quest: QuestResource = (
+		quest_ref
+		if quest_ref != null
+		else QuestResource.load_quest(quest_id)
+	)
 	if quest == null:
 		return {"id": quest_id, "name": "?", "objectives": []}
 
-	# A turned-in quest is locked done — for COLLECT, don't recompute the count from
-	# live inventory (items were consumed at turn-in), which would otherwise read e.g.
-	# "8/10" after the player spends the leftover stack. Show every objective met.
+	# A turned-in quest is locked done — for COLLECT, don't recompute the count
+	# from live inventory after its items have been consumed.
 	var turned_in: bool = resource.quest_state(quest_id) == &"turned_in"
 
 	var objectives: Array = []
 	for i: int in quest.objectives.size():
 		var objective: QuestObjective = quest.objectives[i]
-		# A null slot means the objective resource failed to load (usually a broken
-		# ext_resource path after a file move). Skip + warn instead of crashing the
-		# whole list — the warning names the quest so the data is findable.
 		if objective == null:
-			ServerLog.warn("quest.list: quest %d ('%s') objective %d is null (broken resource ref?) — skipped" % [quest_id, quest.quest_name, i])
+			ServerLog.warn(
+				(
+					"quest.list: quest %d ('%s') objective %d is null "
+					+ "(broken resource ref?) — skipped"
+				) % [quest_id, quest.quest_name, i]
+			)
 			continue
+
+		var count: int = (
+			objective.required_amount
+			if turned_in
+			else QuestService.objective_count(
+				resource,
+				quest_id,
+				i,
+				objective,
+				inventory
+			)
+		)
+		var visit_target_key: String = ""
+		var visit_target_name: String = ""
+		if (
+			objective.type == QuestObjective.Type.VISIT
+			and objective.target_giver != null
+		):
+			visit_target_key = String(objective.target_giver.giver_key())
+			visit_target_name = objective.target_giver_name
+			if visit_target_name.is_empty():
+				visit_target_name = objective.target_giver.npc_name
+
 		objectives.append({
 			"desc": objective.describe(),
-			"count": objective.required_amount if turned_in else QuestService.objective_count(resource, quest_id, i, objective, inventory),
+			"count": count,
 			"required": objective.required_amount,
-			# VISIT objectives are single-fire; the "(0/1)" counter reads clumsily,
-			# so the client hides it on non-countable (VISIT) rows.
+			# VISIT objectives are single-fire; the client hides (0/1).
 			"countable": objective.type != QuestObjective.Type.VISIT,
+			# A stable content key, not a coordinate. The client resolves the
+			# matching NPC in whichever map is currently active.
+			"target_giver": visit_target_key,
+			"target_name": visit_target_name,
 		})
 
 	return {
 		"id": quest_id,
 		"name": quest.quest_name,
 		"description": quest.description,
-		"state": String(resource.quest_state(quest_id)), # "" / "active" / "turned_in"
-		"complete": turned_in or QuestService.is_complete(resource, quest_id, inventory),
+		"state": String(resource.quest_state(quest_id)),
+		"complete": (
+			turned_in
+			or QuestService.is_complete(resource, quest_id, inventory)
+		),
 		"objectives": objectives,
 		"reward_xp": quest.reward_xp,
 		"reward_gold": quest.reward_gold,
-		# Level-gate info so the client can swap the Accept button for a
-		# "Requires level N" label on quests the player isn't ready for.
 		"min_level": quest.min_level,
 		"meets_level": resource.level >= quest.min_level,
-		# 0 = ALL objectives required, 1 = ANY single objective is enough. Lets
-		# the client tweak the objective list label ("Speak with any of these…").
 		"completion": int(quest.completion),
-		# Prerequisite lock info: true once accepted/turned in (a chain can't
-		# retroactively lock a quest you hold), else the live gate check.
-		"meets_prereq": resource.quest_state(quest_id) != &"" or quest.prerequisites_met(resource),
-		# Names of the still-unturned-in prerequisite quests, for the locked-row
-		# condition line. Empty when met (or already accepted).
+		"meets_prereq": (
+			resource.quest_state(quest_id) != &""
+			or quest.prerequisites_met(resource)
+		),
 		"prereq_names": _unmet_prereq_names(resource, quest),
-		# 0 = ALL prereqs required, 1 = ANY one is enough ("one of several paths").
 		"prereq_mode": int(quest.requires_mode),
-		# Item rewards as [{name, amount}] so the client reward line can show
-		# gear/material grants, not just XP/gold.
 		"reward_items": _reward_item_views(quest),
 	}
 
@@ -133,13 +184,18 @@ func _reward_item_views(quest: QuestResource) -> Array:
 	var out: Array = []
 	for reward: QuestReward in quest.reward_items:
 		if reward and reward.item:
-			out.append({"name": str(reward.item.item_name), "amount": reward.amount})
+			out.append({
+				"name": str(reward.item.item_name),
+				"amount": reward.amount,
+			})
 	return out
 
 
-## Quest-name list of the prerequisites [param resource] hasn't turned in yet.
-## Empty for anything already accepted — the lock only applies pre-accept.
-func _unmet_prereq_names(resource: PlayerResource, quest: QuestResource) -> Array:
+## Quest-name list of prerequisites the player hasn't turned in yet.
+func _unmet_prereq_names(
+	resource: PlayerResource,
+	quest: QuestResource
+) -> Array:
 	if resource.quest_state(int(quest.get_meta(&"id", 0))) != &"":
 		return []
 	var names: Array = []
@@ -147,6 +203,9 @@ func _unmet_prereq_names(resource: PlayerResource, quest: QuestResource) -> Arra
 		if prereq == null:
 			continue
 		var prereq_id: int = int(prereq.get_meta(&"id", 0))
-		if prereq_id <= 0 or resource.quest_state(prereq_id) != &"turned_in":
+		if (
+			prereq_id <= 0
+			or resource.quest_state(prereq_id) != &"turned_in"
+		):
 			names.append(str(prereq.quest_name))
 	return names

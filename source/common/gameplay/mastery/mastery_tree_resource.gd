@@ -8,6 +8,7 @@ extends Resource
 
 @export var category: StringName
 @export var display_name: String
+@export var category_icon: Texture2D
 @export var nodes: Array[MasteryNode]
 
 

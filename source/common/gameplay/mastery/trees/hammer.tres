@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="MasteryTreeResource" format=3 uid="uid://d2gneg5bc2u4f"]
 
+[ext_resource type="Texture2D" uid="uid://cesic4lr5kx52" path="res://source/common/gameplay/mastery/trees/hammer 2.png" id="1_fn7e0"]
 [ext_resource type="Script" uid="uid://cx1btl22f4mft" path="res://source/common/gameplay/mastery/mastery_tree_resource.gd" id="1_tree"]
 [ext_resource type="Script" uid="uid://dmdvxcrsmfmo2" path="res://source/common/gameplay/mastery/mastery_node.gd" id="2_node"]
 [ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="3_mod"]
@@ -208,5 +209,6 @@ upgrades = &"hammer_aura_3"
 [resource]
 script = ExtResource("1_tree")
 category = &"hammer"
-display_name = "Hammer"
+display_name = "Heavy Weapons"
+category_icon = ExtResource("1_fn7e0")
 nodes = Array[ExtResource("2_node")]([SubResource("Node_crush"), SubResource("Node_shock"), SubResource("Node_quake"), SubResource("Node_cataclysm"), SubResource("Node_exe1"), SubResource("Node_exe2"), SubResource("Node_exe3"), SubResource("Node_bulwark"), SubResource("Node_juggernaut"), SubResource("Node_ls1"), SubResource("Node_ls2"), SubResource("Node_ls3"), SubResource("Node_momentum"), SubResource("Node_aura1"), SubResource("Node_aura2"), SubResource("Node_aura3"), SubResource("Node_aura4")])

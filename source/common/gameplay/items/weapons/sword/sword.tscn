@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bogvbnwhxp5ej" path="res://assets/sprites/items/weapons/wood/wood.png" id="6_w7nnk"]
 
 [node name="Sword" unique_id=924782394 instance=ExtResource("1_6bj2e")]
+position = Vector2(-8, 0)
 script = ExtResource("2_gih3n")
 abilities = Array[ExtResource("5_ability")]([ExtResource("4_swing")])
 animation_libraries = Dictionary[StringName, AnimationLibrary]({
@@ -16,3 +17,4 @@ animation_libraries = Dictionary[StringName, AnimationLibrary]({
 
 [node name="WeaponSprite" parent="." index="0" unique_id=2118713155]
 texture = ExtResource("6_w7nnk")
+scale = Vector2(0.65, 0.65)

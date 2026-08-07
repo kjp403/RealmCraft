@@ -52,7 +52,19 @@ func _ready() -> void:
 		&"/v1/handshake",
 		handle_handshake
 	)
-	server.listen(8088, "127.0.0.1")
+	# The manager connection remains loopback-only in its own section, while the
+	# public HTTP listener can be bound to a private VPN address for closed tests.
+	var config_path: String = CmdlineUtils.get_parsed_args().get(
+		"config", "res://data/config/gateway_config.cfg"
+	)
+	var configuration: Dictionary = ConfigFileUtils.load_section("gateway-server", config_path)
+	if configuration.has("error"):
+		push_error("Gateway HTTP listener could not load %s." % config_path)
+		return
+	server.listen(
+		int(configuration.get("port", 8088)),
+		str(configuration.get("bind_address", "127.0.0.1"))
+	)
 	
 	gateway_manager_client.response_received.connect(
 		_on_gateway_manager_client_response_received

@@ -6,7 +6,10 @@ func data_request_handler(
 	instance: ServerInstance,
 	args: Dictionary
 ) -> Dictionary:
-	var table: TradeTable = instance.instance_map.get_trade_table(int(args.get("table", 0)))
-	if table == null:
+	if not RateLimiter.check(peer_id, &"trade.state", 12, 5_000):
 		return {}
-	return TradeService.build_state(table)
+	return TradeService.state_for(
+		peer_id,
+		instance,
+		int(args.get("trade", 0))
+	)

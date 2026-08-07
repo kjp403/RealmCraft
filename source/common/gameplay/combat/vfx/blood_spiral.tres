@@ -1,6 +1,6 @@
-[gd_resource type="SpriteFrames" load_steps=7 format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://brjlokg6jtvj5"]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/vfx/blood_mage/blood_spiral.png" id="1_tex"]
+[ext_resource type="Texture2D" uid="uid://fug71iwve57l" path="res://assets/sprites/vfx/blood_mage/blood_spiral.png" id="1_tex"]
 
 [sub_resource type="AtlasTexture" id="f0"]
 atlas = ExtResource("1_tex")
@@ -40,7 +40,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("f4")
 }],
-"loop": false,
+"loop": 0,
 "name": &"default",
 "speed": 14.0
 }]

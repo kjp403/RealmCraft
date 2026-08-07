@@ -13,21 +13,21 @@
 
 [sub_resource type="Resource" id="Resource_iej2c"]
 script = ExtResource("7_31n01")
-lines = Array[String](["..."])
-label_override = "What happened to you ?"
+lines = Array[String](["You are in the Charter Intake, beneath the city's old keep.", "A patrol found you unconscious beyond the city walls and brought you here because you had no Charter papers.", "These cells are old, but you are not being sentenced. The Charter Clerk must register you before you can enter the city."])
+label_override = "Where am I, and how did I get here?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Resource_ruchx"]
 script = ExtResource("7_31n01")
-lines = Array[String](["Seriously ? Asking me that ?", "Well go out of there and talk to the Hall Keeper next to the door."])
-label_override = "Where can I get money ?"
+lines = Array[String](["Much of the Realm remains dangerous. Goblins, bandits, beasts, and things from the Hollow control the lands beyond the walls.", "The Charter calls its recruits Heroes. Heroes protect settlements, explore dangerous regions, gather resources, craft supplies, and fight the Realm's enemies.", "You are not locked to one class, combat style, or profession. Every Hero can train every discipline.", "Speak with the Charter Clerk across the room. He will register you and explain what happens next."])
+label_override = "What is the Heroes' Program?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Resource_j8n1e"]
 script = ExtResource("8_26gsj")
 npc_name = "Arya"
 skin = ExtResource("9_rj7ca")
-greeting = "I swear I didn't do anything..."
+greeting = "Easy... you're awake. Don't panic. I came through the Charter Intake the same way you did."
 interactions = Array[ExtResource("6_ruchx")]([SubResource("Resource_iej2c"), SubResource("Resource_ruchx")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
 

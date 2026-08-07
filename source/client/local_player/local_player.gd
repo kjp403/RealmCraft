@@ -17,6 +17,11 @@ const CAMERA_LIMIT_MAX: int = 10000000
 ## ever sees. Dirty-marking still happens every physics frame — the dirty map
 ## coalesces — only the actual send is gated (docs/netcode_smoothness.md, Phase 2).
 const NET_SEND_INTERVAL_S: float = 1.0 / 20.0
+const CLICK_NAVIGATION_SCRIPT: Script = preload(
+	"res://source/client/local_player/click_navigation.gd"
+)
+const FOLLOW_REPATH_MS: int = 300
+const FOLLOW_STOP_DISTANCE: float = 28.0
 
 
 ## Fallback move speed until the synced MOVE_SPEED stat arrives. Actual movement
@@ -47,6 +52,9 @@ var fid_pivot: int
 var _net_send_accum: float = 0.0
 
 var synchronizer_manager: StateSynchronizerManagerClient
+var _click_navigation: ClickNavigation
+var _follow_peer_id: int = 0
+var _follow_repath_at_ms: int = 0
 
 @onready var camera_2d: Camera2D = $Camera2D
 @onready var controller: InputComponent = $InputComponent
@@ -54,6 +62,9 @@ var synchronizer_manager: StateSynchronizerManagerClient
 
 func _ready() -> void:
 	ClientState.local_player = self
+	_click_navigation = CLICK_NAVIGATION_SCRIPT.new()
+	add_child(_click_navigation)
+	_click_navigation.setup(self)
 	ClientState.local_player_ready.emit(self)
 	
 	super._ready()
@@ -385,11 +396,19 @@ func process_movement() -> void:
 
 func process_input() -> void:
 	if _dead or _has_gui_focus() or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
+		_click_navigation.cancel()
 		input_direction = Vector2.ZERO
 		action_input = false
 		return
 
-	input_direction = controller.get_move_direction()
+	var manual_direction: Vector2 = controller.get_move_direction()
+	if manual_direction != Vector2.ZERO:
+		_follow_peer_id = 0
+		_click_navigation.cancel()
+		input_direction = manual_direction
+	else:
+		_update_follow_navigation()
+		input_direction = _click_navigation.movement_direction()
 	look_direction = controller.get_look_direction()
 	action_input = controller.is_attack_pressed()
 
@@ -488,8 +507,80 @@ func set_camera_zoom(zoom: Vector2) -> void:
 	camera_2d.zoom = zoom
 
 
+## Starts collision-aware click movement. Called by both the world click input
+## and the minimap. WASD cancels the route in [method process_input].
+func set_click_move_target(world_target: Vector2) -> void:
+	if _dead or ClientState.menu_open or _has_gui_focus():
+		return
+	_follow_peer_id = 0
+	_click_navigation.request_move(world_target)
+
+
+## Follow a remote player using the same collision-aware pathing as click movement.
+## Any manual movement/click destination or instance change cancels the follow.
+func follow_peer(peer_id: int) -> bool:
+	if peer_id <= 0 or InstanceClient.current == null:
+		return false
+	var target: Player = InstanceClient.current.players_by_peer_id.get(peer_id, null)
+	if target == null or target == self:
+		return false
+	_follow_peer_id = peer_id
+	_follow_repath_at_ms = 0
+	_update_follow_navigation()
+	return true
+
+
+func _update_follow_navigation() -> void:
+	if _follow_peer_id <= 0 or InstanceClient.current == null:
+		return
+	var target: Player = InstanceClient.current.players_by_peer_id.get(
+		_follow_peer_id,
+		null
+	)
+	if target == null or not is_instance_valid(target):
+		_follow_peer_id = 0
+		_click_navigation.cancel()
+		return
+	if global_position.distance_to(target.global_position) <= FOLLOW_STOP_DISTANCE:
+		_click_navigation.cancel()
+		return
+	var now: int = Time.get_ticks_msec()
+	if now < _follow_repath_at_ms:
+		return
+	_follow_repath_at_ms = now + FOLLOW_REPATH_MS
+	_click_navigation.request_move(target.global_position)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is not InputEventMouseButton:
+		return
+	var mouse_event := event as InputEventMouseButton
+	if (
+		mouse_event.button_index != MOUSE_BUTTON_LEFT
+		or not mouse_event.pressed
+	):
+		return
+	if (
+		_dead
+		or ClientState.menu_open
+		or _has_gui_focus()
+		or ClientState.world_interactables_hovered > 0
+	):
+		return
+	var hovered: Control = get_viewport().gui_get_hovered_control()
+	if hovered != null and hovered.mouse_filter == Control.MOUSE_FILTER_STOP:
+		return
+	set_click_move_target(get_global_mouse_position())
+	get_viewport().set_input_as_handled()
+
+
 func _on_instance_changed_camera_limits(instance: InstanceClient) -> void:
+	_follow_peer_id = 0
 	_apply_camera_limits(instance.instance_map if instance != null else null)
+	if _click_navigation != null:
+		_click_navigation.rebuild_for_map(
+			instance.instance_map if instance != null else null
+		)
 
 
 ## Clamp the camera to [param map]'s per-edge limits. Each edge defaults to ±CAMERA_LIMIT

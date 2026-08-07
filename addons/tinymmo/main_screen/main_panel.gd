@@ -163,6 +163,11 @@ func generate_content_index(
 		if not resource:
 			continue
 
+		# Only actual Item resources belong in the item registry.
+		if content_name == "items" and resource is not Item:
+			print_plugin("Skipping '%s' — resource is not an Item." % resource_path)
+			continue
+
 		warn_quest_prereq_cycles(resource, resource_path)
 
 		var slug: StringName = resource_path.get_file().get_basename()

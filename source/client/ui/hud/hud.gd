@@ -3,6 +3,12 @@ extends Control
 
 const CHAT_ICON: Texture2D = preload("res://assets/sprites/ui/menu_icons_shadow/32px/message.png")
 const CHAT_ICON_UNREAD: Texture2D = preload("res://assets/sprites/ui/menu_icons_shadow/32px/message_exclamation.png")
+const NAVIGATION_MINIMAP_SCRIPT: Script = preload(
+	"res://source/client/ui/hud/navigation_minimap.gd"
+)
+const PLAYER_CONTEXT_MENU_SCRIPT: Script = preload(
+	"res://source/client/ui/hud/player_context_menu.gd"
+)
 
 @export var sub_menu: Control
 
@@ -10,6 +16,7 @@ var notifications: Array[Dictionary]
 var menus: Dictionary[StringName, Control]
 var _xp_tween: Tween
 var _chat_icon: TextureRect
+var _navigation_minimap: Control
 ## Bumped on every player.died push so an in-flight respawn countdown can detect that a newer
 ## death event superseded it and bail (the newest invocation owns the death overlay).
 var _death_gen: int = 0
@@ -46,6 +53,20 @@ const MENU_FADE_S: float = 0.10
 
 
 func _ready() -> void:
+	_navigation_minimap = NAVIGATION_MINIMAP_SCRIPT.new()
+	add_child(_navigation_minimap)
+	add_child(PLAYER_CONTEXT_MENU_SCRIPT.new())
+	# The minimap owns the upper-right navigation lane. Keep the existing
+	# tracker directly below it so the two surfaces read as one system.
+	quest_tracker.anchor_left = 1.0
+	quest_tracker.anchor_top = 0.0
+	quest_tracker.anchor_right = 1.0
+	quest_tracker.anchor_bottom = 0.0
+	quest_tracker.offset_left = -240.0
+	quest_tracker.offset_top = 182.0
+	quest_tracker.offset_right = -16.0
+	quest_tracker.offset_bottom = 210.0
+
 	notification_button.visible = false
 	notification_button.disabled = true
 	# Adopt the buttons' editor-assigned .tscn icons as crisp mounted glyphs (integer-scaled to fit,
@@ -496,3 +517,50 @@ func _animate_menu_open(menu: Control) -> void:
 	UISound.reveal()
 	menu.modulate.a = 0.0
 	create_tween().tween_property(menu, ^"modulate:a", 1.0, MENU_FADE_S)
+
+
+func _toggle_compact_panel(selected_panel: Control) -> void:
+	var should_open: bool = not selected_panel.visible
+
+	var compact_panels: Array[Control] = [
+		$CompactMenuHost,
+		$CompactEquipmentHost,
+		$CompactSkillsHost,
+		$CompactMasteryHost,
+		$CompactQuestsHost,
+		$CompactFriendsHost,
+		$CompactSettingsHost,
+	]
+
+	for panel: Control in compact_panels:
+		panel.hide()
+
+	selected_panel.visible = should_open
+
+
+func _on_inventory_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactMenuHost)
+
+
+func _on_equipment_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactEquipmentHost)
+
+
+func _on_skills_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactSkillsHost)
+
+
+func _on_mastery_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactMasteryHost)
+
+
+func _on_quests_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactQuestsHost)
+
+
+func _on_friends_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactFriendsHost)
+
+
+func _on_settings_dock_button_pressed() -> void:
+	_toggle_compact_panel($CompactSettingsHost)

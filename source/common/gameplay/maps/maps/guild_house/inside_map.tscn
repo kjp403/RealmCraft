@@ -11,21 +11,13 @@
 [ext_resource type="Resource" uid="uid://cx1parqqaupb5" path="res://source/common/gameplay/characters/npc/npcs/hall_keeper.tres" id="9_aldlr"]
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="9_fjcme"]
 [ext_resource type="Resource" uid="uid://dhdjy3c4ufju0" path="res://source/common/gameplay/characters/npc/npcs/starter_merchant.tres" id="9_lkcla"]
-[ext_resource type="Resource" uid="uid://dy11163ahw7sn" path="res://source/common/gameplay/characters/npc/npcs/dev_all_merchant.tres" id="10_3dhf7"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="10_subvk"]
 [ext_resource type="Resource" uid="uid://b7ty7yxpd32u2" path="res://source/common/gameplay/characters/npc/npcs/dungeon_keeper.tres" id="11_aldlr"]
 [ext_resource type="SpriteFrames" uid="uid://dlopdt61exewy" path="res://source/common/gameplay/characters/sprite_frames/scholar_researcher.tres" id="16_aldlr"]
 [ext_resource type="Script" uid="uid://du561hesf7lyn" path="res://source/common/gameplay/characters/npc/interactions/name_change_interaction.gd" id="17_8uqpf"]
-[ext_resource type="SpriteFrames" uid="uid://bfer1b8yk1buk" path="res://source/common/gameplay/characters/sprite_frames/royal_archer.tres" id="17_c2wc5"]
 [ext_resource type="Script" uid="uid://beeyftaqtiwe3" path="res://source/common/gameplay/characters/npc/interactions/attribute_reset_interaction.gd" id="17_j3473"]
-[ext_resource type="PackedScene" uid="uid://otv230rdmir2" path="res://source/common/gameplay/sparring/duel_master.tscn" id="18_egdmy"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="19_kqnsa"]
-[ext_resource type="Script" uid="uid://c1nyyoow8f4tw" path="res://source/common/gameplay/sparring/spar_team.gd" id="19_wfdll"]
-[ext_resource type="Script" uid="uid://cmw2wguvs4l0k" path="res://source/common/gameplay/sparring/spar_banner.gd" id="20_0vpir"]
-[ext_resource type="Script" uid="uid://c8u5wuyqcyq7f" path="res://source/common/gameplay/sparring/normalized_spar_mode.gd" id="22_7whis"]
 [ext_resource type="Script" uid="uid://bfh4whbd72q65" path="res://source/common/gameplay/characters/npc/interactions/wardrobe_interaction.gd" id="24_8uqpf"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/leaderboard/champion_statue.tscn" id="26_7whis"]
-[ext_resource type="Script" uid="uid://b2j8gyjph35qx" path="res://source/common/gameplay/trade/trade_table.gd" id="30_0sb5n"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5v2ol"]
 size = Vector2(80, 50)
@@ -48,22 +40,6 @@ npc_name = "Horizon"
 skin = ExtResource("16_aldlr")
 interactions = Array[ExtResource("9_fjcme")]([SubResource("Resource_1whb7"), SubResource("Resource_whj3q"), SubResource("Resource_7whis")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
-
-[sub_resource type="Resource" id="Resource_g5t2t"]
-script = ExtResource("19_kqnsa")
-npc_name = "Duel Master"
-skin = ExtResource("17_c2wc5")
-metadata/_custom_type_script = "uid://ddps5vwhnf048"
-
-[sub_resource type="Resource" id="Resource_0vpir"]
-script = ExtResource("22_7whis")
-metadata/_custom_type_script = "uid://c8u5wuyqcyq7f"
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_fjcme"]
-size = Vector2(350, 280)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_j3473"]
-size = Vector2(48, 41.740356)
 
 [node name="GuildHouseInside" type="Node2D" unique_id=108008123]
 y_sort_enabled = true
@@ -119,10 +95,6 @@ position = Vector2(10, -23)
 tile_map_data = PackedByteArray("AAD/////AwAMAAoAAAA=")
 tile_set = ExtResource("3_cwf2m")
 
-[node name="HorizonAll" parent="." unique_id=1922057613 instance=ExtResource("10_subvk")]
-position = Vector2(-256, -408)
-npc_resource = ExtResource("10_3dhf7")
-
 [node name="VillageElder" parent="." unique_id=455324457 instance=ExtResource("10_subvk")]
 position = Vector2(184, -248)
 collision_mask = 6
@@ -142,219 +114,3 @@ npc_resource = ExtResource("11_aldlr")
 position = Vector2(-312, -184)
 collision_mask = 6
 npc_resource = SubResource("Resource_luj30")
-
-[node name="NPC" parent="." unique_id=1505421392 instance=ExtResource("10_subvk")]
-position = Vector2(-215, -565)
-npc_resource = SubResource("Resource_g5t2t")
-
-[node name="NPC2" parent="." unique_id=2114824117 instance=ExtResource("10_subvk")]
-position = Vector2(138, -568)
-npc_resource = SubResource("Resource_g5t2t")
-
-[node name="DuelMaster" parent="." unique_id=601088349 node_paths=PackedStringArray("fight_zone") instance=ExtResource("18_egdmy")]
-position = Vector2(-215, -575)
-master_id = 1
-fight_zone = NodePath("Area2D")
-game_mode = SubResource("Resource_0vpir")
-
-[node name="Area2D" type="Area2D" parent="DuelMaster" unique_id=1660179517]
-position = Vector2(1, -133)
-scale = Vector2(1, 0.71999514)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DuelMaster/Area2D" unique_id=19142993]
-scale = Vector2(0.7062999, 0.77713996)
-shape = SubResource("RectangleShape2D_fjcme")
-
-[node name="SparTeam" type="Node2D" parent="DuelMaster" unique_id=1333064097]
-position = Vector2(0, 1)
-script = ExtResource("19_wfdll")
-metadata/_custom_type_script = "uid://c1nyyoow8f4tw"
-
-[node name="Marker2D" type="Marker2D" parent="DuelMaster/SparTeam" unique_id=1028553782]
-position = Vector2(-77, -120)
-
-[node name="SparTeam2" type="Node2D" parent="DuelMaster" unique_id=981813334]
-position = Vector2(1, 1)
-script = ExtResource("19_wfdll")
-metadata/_custom_type_script = "uid://c1nyyoow8f4tw"
-
-[node name="Marker2D" type="Marker2D" parent="DuelMaster/SparTeam2" unique_id=25025406]
-position = Vector2(82, -117)
-
-[node name="RichTextLabel" type="RichTextLabel" parent="DuelMaster" unique_id=1799319407]
-offset_left = -64.0
-offset_top = -64.0
-offset_right = 56.0
-offset_bottom = -24.0
-bbcode_enabled = true
-script = ExtResource("20_0vpir")
-master_id = 1
-metadata/_custom_type_script = "uid://cmw2wguvs4l0k"
-
-[node name="DuelMaster2" parent="." unique_id=1303478002 node_paths=PackedStringArray("fight_zone") instance=ExtResource("18_egdmy")]
-position = Vector2(137, -574)
-master_id = 2
-master_name = "Duel Arena 2vs2"
-fight_zone = NodePath("Area2D")
-
-[node name="Area2D" type="Area2D" parent="DuelMaster2" unique_id=104452380]
-position = Vector2(10.999996, -144)
-scale = Vector2(1.433524, 0.85779786)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DuelMaster2/Area2D" unique_id=604824907]
-scale = Vector2(0.7062999, 0.77713996)
-shape = SubResource("RectangleShape2D_fjcme")
-
-[node name="SparTeam" type="Node2D" parent="DuelMaster2" unique_id=4479123]
-position = Vector2(0, -2)
-script = ExtResource("19_wfdll")
-metadata/_custom_type_script = "uid://c1nyyoow8f4tw"
-
-[node name="Marker2D" type="Marker2D" parent="DuelMaster2/SparTeam" unique_id=1257816642]
-position = Vector2(-83, -87)
-
-[node name="Marker2D2" type="Marker2D" parent="DuelMaster2/SparTeam" unique_id=1258674069]
-position = Vector2(-86, -186)
-
-[node name="SparTeam2" type="Node2D" parent="DuelMaster2" unique_id=940277329]
-script = ExtResource("19_wfdll")
-metadata/_custom_type_script = "uid://c1nyyoow8f4tw"
-
-[node name="Marker2D" type="Marker2D" parent="DuelMaster2/SparTeam2" unique_id=573464177]
-position = Vector2(100, -85)
-
-[node name="Marker2D2" type="Marker2D" parent="DuelMaster2/SparTeam2" unique_id=600700449]
-position = Vector2(102, -186)
-
-[node name="RichTextLabel" type="RichTextLabel" parent="DuelMaster2" unique_id=517693899]
-offset_left = -64.0
-offset_top = -64.0
-offset_right = 56.0
-offset_bottom = -24.0
-bbcode_enabled = true
-script = ExtResource("20_0vpir")
-master_id = 1
-metadata/_custom_type_script = "uid://cmw2wguvs4l0k"
-
-[node name="ChampionStatue" parent="." unique_id=609075953 instance=ExtResource("26_7whis")]
-position = Vector2(273, -410)
-category = "pve"
-rank = 1
-
-[node name="ChampionStatue5" parent="." unique_id=785691182 instance=ExtResource("26_7whis")]
-position = Vector2(233, -418)
-category = "pve"
-rank = 2
-
-[node name="ChampionStatue4" parent="." unique_id=1200026101 instance=ExtResource("26_7whis")]
-position = Vector2(313, -418)
-category = "pve"
-rank = 3
-
-[node name="ChampionStatue2" parent="." unique_id=1133065155 instance=ExtResource("26_7whis")]
-position = Vector2(119, -411)
-category = "level"
-rank = 1
-
-[node name="ChampionStatue6" parent="." unique_id=910175863 instance=ExtResource("26_7whis")]
-position = Vector2(159, -419)
-category = "level"
-rank = 3
-
-[node name="ChampionStatue7" parent="." unique_id=224040274 instance=ExtResource("26_7whis")]
-position = Vector2(79, -419)
-category = "level"
-rank = 2
-
-[node name="ChampionStatue3" parent="." unique_id=327434570 instance=ExtResource("26_7whis")]
-position = Vector2(-34, -415)
-category = "pvp"
-rank = 1
-
-[node name="ChampionStatue8" parent="." unique_id=495987836 instance=ExtResource("26_7whis")]
-position = Vector2(6, -423)
-category = "pvp"
-rank = 3
-
-[node name="ChampionStatue9" parent="." unique_id=2005138464 instance=ExtResource("26_7whis")]
-position = Vector2(-74, -423)
-category = "pvp"
-rank = 2
-
-[node name="TradeTable" type="Area2D" parent="." unique_id=1067648088]
-position = Vector2(-152, -122)
-script = ExtResource("30_0sb5n")
-table_id = 1
-join_cost = 5
-metadata/_custom_type_script = "uid://b2j8gyjph35qx"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TradeTable" unique_id=1451348247]
-position = Vector2(-0.7891998, 2.930725)
-shape = SubResource("RectangleShape2D_j3473")
-
-[node name="Label" type="Label" parent="TradeTable" unique_id=444578383]
-z_index = 5
-offset_left = -23.0
-offset_top = -13.0
-offset_right = 22.0
-offset_bottom = 10.0
-text = "Trade"
-
-[node name="TradeTable2" type="Area2D" parent="." unique_id=230510553]
-position = Vector2(-152, -43)
-script = ExtResource("30_0sb5n")
-table_id = 1
-join_cost = 5
-metadata/_custom_type_script = "uid://b2j8gyjph35qx"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TradeTable2" unique_id=1378901131]
-position = Vector2(-0.7891998, 2.930725)
-shape = SubResource("RectangleShape2D_j3473")
-
-[node name="Label" type="Label" parent="TradeTable2" unique_id=1509147869]
-z_index = 5
-offset_left = -23.0
-offset_top = -13.0
-offset_right = 22.0
-offset_bottom = 10.0
-text = "Trade"
-
-[node name="TradeTable3" type="Area2D" parent="." unique_id=1453115447]
-position = Vector2(-295, -43)
-script = ExtResource("30_0sb5n")
-table_id = 1
-join_cost = 5
-metadata/_custom_type_script = "uid://b2j8gyjph35qx"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TradeTable3" unique_id=1729306506]
-position = Vector2(-0.7891998, 2.930725)
-shape = SubResource("RectangleShape2D_j3473")
-
-[node name="Label" type="Label" parent="TradeTable3" unique_id=285344465]
-z_index = 5
-offset_left = -23.0
-offset_top = -13.0
-offset_right = 22.0
-offset_bottom = 10.0
-text = "Trade"
-
-[node name="TradeTable4" type="Area2D" parent="." unique_id=472722146]
-position = Vector2(-296, -122)
-script = ExtResource("30_0sb5n")
-table_id = 1
-join_cost = 5
-metadata/_custom_type_script = "uid://b2j8gyjph35qx"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TradeTable4" unique_id=2125094549]
-position = Vector2(-0.7891998, 2.930725)
-shape = SubResource("RectangleShape2D_j3473")
-
-[node name="Label" type="Label" parent="TradeTable4" unique_id=1093003536]
-z_index = 5
-offset_left = -23.0
-offset_top = -13.0
-offset_right = 22.0
-offset_bottom = 10.0
-text = "Trade"

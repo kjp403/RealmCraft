@@ -1,0 +1,387 @@
+extends PanelContainer
+
+const PANEL_SIZE := Vector2(180.0, 262.0)
+const RIGHT_MARGIN := 12.0
+const BOTTOM_CLEARANCE := 52.0
+
+const GRID_COLUMNS := 4
+const GRID_ROWS := 5
+const SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
+const SLOT_SIZE := Vector2(36.0, 36.0)
+
+const ACTION_PRIMARY := 0
+
+@onready var header: HBoxContainer = $MarginContainer/MainColumn/Header
+@onready var close_button: Button = $MarginContainer/MainColumn/Header/CloseButton
+@onready var content_margin: MarginContainer = $MarginContainer/MainColumn/Content
+@onready var inventory_grid: GridContainer = $MarginContainer/MainColumn/Content/InventoryScroll/InventoryGrid
+
+var gold_label: Label
+var context_menu: PopupMenu
+var context_entry: Dictionary = {}
+var primary_action_in_progress: bool = false
+
+
+func _ready() -> void:
+	set_anchors_preset(Control.PRESET_TOP_LEFT)
+	custom_minimum_size = PANEL_SIZE
+	size = PANEL_SIZE
+
+	inventory_grid.columns = GRID_COLUMNS
+	inventory_grid.add_theme_constant_override(&"h_separation", 4)
+	inventory_grid.add_theme_constant_override(&"v_separation", 4)
+
+	content_margin.add_theme_constant_override(&"margin_left", 10)
+
+	_build_currency_pouch()
+	_build_context_menu()
+	_build_empty_grid()
+
+	close_button.pressed.connect(hide)
+	visibility_changed.connect(_on_visibility_changed)
+	ClientState.local_player_ready.connect(_on_local_player_ready)
+
+	var hud := get_parent() as Control
+	if hud != null:
+		hud.resized.connect(_place_panel)
+
+	call_deferred(&"_place_panel")
+	_connect_equipment_signal()
+	hide()
+
+
+func _place_panel() -> void:
+	var hud := get_parent() as Control
+	if hud == null:
+		return
+
+	size = PANEL_SIZE
+	position = Vector2(
+		hud.size.x - PANEL_SIZE.x - RIGHT_MARGIN,
+		hud.size.y - PANEL_SIZE.y - BOTTOM_CLEARANCE
+	)
+
+
+func _build_currency_pouch() -> void:
+	var pouch := HBoxContainer.new()
+	pouch.tooltip_text = "Currency pouch"
+	pouch.add_theme_constant_override(&"separation", 2)
+
+	var gold_item: Item = ContentRegistryHub.load_by_id(
+		&"items",
+		Economy.gold_id()
+	) as Item
+
+	var gold_icon := TextureRect.new()
+	gold_icon.custom_minimum_size = Vector2(14.0, 14.0)
+	gold_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	gold_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if gold_item != null:
+		gold_icon.texture = gold_item.item_icon
+
+	gold_label = Label.new()
+	gold_label.text = "0"
+	gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	gold_label.add_theme_font_size_override(&"font_size", 11)
+	gold_label.add_theme_color_override(
+		&"font_color",
+		Color(1.0, 0.85, 0.45)
+	)
+	gold_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	pouch.add_child(gold_icon)
+	pouch.add_child(gold_label)
+
+	header.add_child(pouch)
+
+	# Move the pouch immediately before the X button.
+	header.move_child(pouch, close_button.get_index())
+
+
+func _build_context_menu() -> void:
+	context_menu = PopupMenu.new()
+	context_menu.id_pressed.connect(_on_context_action)
+	add_child(context_menu)
+
+
+func _build_empty_grid() -> void:
+	for child: Node in inventory_grid.get_children():
+		inventory_grid.remove_child(child)
+		child.queue_free()
+
+	for _index: int in range(SLOT_COUNT):
+		var slot := Button.new()
+
+		# Both minimum and maximum are fixed so item textures cannot resize rows.
+		slot.custom_minimum_size = SLOT_SIZE
+		slot.custom_maximum_size = SLOT_SIZE
+		slot.clip_contents = true
+		slot.expand_icon = true
+		slot.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		slot.focus_mode = Control.FOCUS_NONE
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_theme_constant_override(&"icon_max_width", 24)
+
+		inventory_grid.add_child(slot)
+
+
+func _on_visibility_changed() -> void:
+	if visible:
+		_connect_equipment_signal()
+		_refresh_inventory()
+
+
+func _on_local_player_ready(_local_player: LocalPlayer) -> void:
+	_connect_equipment_signal()
+
+	if visible:
+		_refresh_inventory()
+
+
+func _connect_equipment_signal() -> void:
+	var local_player: Player = ClientState.local_player
+	if local_player == null:
+		return
+
+	var changed_signal: Signal = (
+		local_player.equipment_component.equipment_changed
+	)
+	if not changed_signal.is_connected(_on_equipment_changed):
+		changed_signal.connect(_on_equipment_changed)
+
+
+func _on_equipment_changed(
+	_slot_key: StringName,
+	_item_id: int
+) -> void:
+	# Weapon equip completes after its draw delay, not when item.equip replies.
+	if visible:
+		_refresh_inventory()
+
+
+func _refresh_inventory() -> void:
+	if InstanceClient.current == null:
+		return
+
+	var result: Array = await Client.request_data_await(
+		&"inventory.get",
+		{},
+		InstanceClient.current.name
+	)
+
+	if result.size() < 2 or result[1] != OK:
+		return
+
+	var inventory: Dictionary = result[0]
+	var entries: Array[Dictionary] = []
+
+	gold_label.text = str(
+		Inventory.count(inventory, Economy.gold_id())
+	)
+
+	for slot_uid: Variant in inventory:
+		var data: Dictionary = inventory[slot_uid]
+		var item: Item = ContentRegistryHub.load_by_id(
+			&"items",
+			int(data.get("id", 0))
+		) as Item
+
+		# Currency is displayed in the pouch instead of consuming a slot.
+		if item == null or item.is_currency:
+			continue
+
+		entries.append({
+			"uid": int(slot_uid),
+			"data": data,
+			"item": item,
+		})
+
+	entries.sort_custom(_entry_before)
+	entries.sort_custom(_entry_before)
+	_build_empty_grid()
+	_display_entries(entries)
+
+func _entry_before(a: Dictionary, b: Dictionary) -> bool:
+	return int(a["uid"]) < int(b["uid"])
+
+
+func _display_entries(entries: Array[Dictionary]) -> void:
+	var slots: Array[Node] = inventory_grid.get_children()
+
+	for index: int in range(slots.size()):
+		var slot := slots[index] as Button
+
+		slot.icon = null
+		slot.tooltip_text = ""
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		for child: Node in slot.get_children():
+			slot.remove_child(child)
+			child.queue_free()
+
+		if index >= entries.size():
+			continue
+
+		var entry: Dictionary = entries[index]
+		var data: Dictionary = entry["data"]
+		var item: Item = entry["item"]
+
+		slot.icon = item.item_icon
+		slot.tooltip_text = String(item.item_name)
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
+
+		slot.gui_input.connect(
+			_on_slot_gui_input.bind(entry, slot),
+		)
+
+		var amount: int = int(data.get("a", 1))
+		if amount > 1:
+			var quantity := Label.new()
+			quantity.text = str(amount)
+			quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			quantity.add_theme_font_size_override(&"font_size", 10)
+			quantity.add_theme_color_override(&"font_color", Color.WHITE)
+			quantity.add_theme_color_override(
+				&"font_outline_color",
+				Color(0.0, 0.0, 0.0, 0.9)
+			)
+			quantity.add_theme_constant_override(&"outline_size", 3)
+
+			# Add it first, then anchor it relative to its actual slot.
+			slot.add_child(quantity)
+			quantity.set_anchors_and_offsets_preset(
+				Control.PRESET_BOTTOM_RIGHT
+			)
+			quantity.offset_left -= 2
+			quantity.offset_right -= 2
+			quantity.offset_top -= 2
+			quantity.offset_bottom -= 2
+
+
+func _on_slot_gui_input(
+	event: InputEvent,
+	entry: Dictionary,
+	slot: Button
+) -> void:
+	if not event is InputEventMouseButton:
+		return
+
+	var mouse_event := event as InputEventMouseButton
+
+	if not mouse_event.pressed:
+		return
+
+	if mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+		slot.accept_event()
+		_open_context_menu(entry)
+		return
+
+	if (
+		mouse_event.button_index == MOUSE_BUTTON_LEFT
+		and mouse_event.double_click
+	):
+		slot.accept_event()
+		_perform_primary_action(entry)
+
+
+func _open_context_menu(entry: Dictionary) -> void:
+	context_entry = entry
+	context_menu.clear()
+
+	var item: Item = entry["item"]
+	var action_text := "Hold"
+
+	if item is ConsumableItem:
+		action_text = "Use"
+	elif item is GearItem:
+		action_text = "Equip"
+
+	context_menu.add_item(action_text, ACTION_PRIMARY)
+	context_menu.position = Vector2i(
+		get_viewport().get_mouse_position()
+	)
+	context_menu.popup()
+
+
+func _on_context_action(action_id: int) -> void:
+	if action_id == ACTION_PRIMARY and not context_entry.is_empty():
+		_perform_primary_action(context_entry)
+
+
+func _perform_primary_action(entry: Dictionary) -> void:
+	if primary_action_in_progress or InstanceClient.current == null:
+		return
+
+	var item: Item = entry["item"]
+	var item_id: int = int(item.get_meta(&"id", 0))
+
+	if item_id <= 0:
+		return
+
+	var request_name: StringName = &"item.equip"
+
+	if item is ConsumableItem:
+		request_name = &"item.consume"
+
+	primary_action_in_progress = true
+	var result: Array = await Client.request_data_await(
+		request_name,
+		{"id": item_id},
+		InstanceClient.current.name
+	)
+	primary_action_in_progress = false
+
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("The item could not be used.")
+		return
+
+	var payload: Dictionary = (
+		result[0] if result[0] is Dictionary else {}
+	)
+
+	match str(payload.get("reason", "")):
+		"dead":
+			Toaster.toast("You cannot use items while dead.")
+			return
+		"missing":
+			Toaster.toast("That item is no longer in your inventory.")
+			_refresh_inventory()
+			return
+		"not_consumable":
+			Toaster.toast("That item cannot be consumed.")
+			return
+		"no_effect":
+			Toaster.toast("You do not currently need that potion.")
+			return
+		"cooldown":
+			Toaster.toast("That potion is still on cooldown.")
+			return
+		"in_combat":
+			Toaster.toast("You cannot do that while in combat.")
+			return
+		"level":
+			Toaster.toast(
+				"Requires level %d." % int(payload.get("level", 0))
+			)
+			return
+		"gear_level":
+			Toaster.toast(
+				"Restricted to level %d gear." % int(
+					payload.get("level", 0)
+				)
+			)
+			return
+		"cant_equip":
+			Toaster.toast("You cannot equip that item.")
+			return
+
+	if not bool(payload.get("ok", false)):
+		Toaster.toast("The item could not be used.")
+		return
+
+	if item is ConsumableItem:
+		Toaster.toast("Potion consumed.")
+
+	_refresh_inventory()

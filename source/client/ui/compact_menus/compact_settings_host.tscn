@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://source/client/ui/compact_menus/compact_settings_host.gd" id="1_settings"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings"]
+bg_color = Color(0.09019608, 0.078431375, 0.12156863, 0.9490196)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6039216, 0.44313726, 0.21960784, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.5019608)
+shadow_size = 4
+
+[node name="CompactSettingsHost" type="PanelContainer"]
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -192.0
+offset_top = -314.0
+offset_right = -12.0
+offset_bottom = -52.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_settings")
+script = ExtResource("1_settings")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="MainColumn" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainColumn"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainColumn/Header"]
+z_index = 5
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.9098039, 0.78039217, 0.47843137, 1)
+text = "Settings"
+vertical_alignment = 1
+
+[node name="HeaderSpacer" type="Control" parent="MarginContainer/MainColumn/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="MarginContainer/MainColumn/Header"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+text = "x"
+
+[node name="HeaderSeparator" type="HSeparator" parent="MarginContainer/MainColumn"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Content" type="MarginContainer" parent="MarginContainer/MainColumn"]
+layout_mode = 2
+size_flags_vertical = 3

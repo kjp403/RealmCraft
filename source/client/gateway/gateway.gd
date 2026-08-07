@@ -1262,8 +1262,9 @@ func _apply_skin(index: int) -> void:
 		_skin_name_label.text = PlayerSkins.display_name(skin_id)
 
 
-# Ideally we must not save credentials locally even if crypted,
-# saving a temporary token given by the server is the way. 
+# Local editor convenience only. Exported clients must never persist the account
+# password: LOCAL_PASS is compiled into the binary and is therefore not a real
+# secret. Production auto-login needs a server-issued, revocable refresh token.
 func try_auto_login() -> bool:
 	# Load the saved session FIRST. A first-time player (no token) goes straight
 	# to the main menu — no spinner, no boot delay, nothing to wait on.
@@ -1302,6 +1303,8 @@ func try_auto_login() -> bool:
 # Can be changed / randomized each build
 const LOCAL_PASS: String = "LOCAL_PASSWORD"
 func save_refresh_token(token: String, file_path: String) -> void:
+	if not OS.has_feature("editor"):
+		return
 	var file: FileAccess = FileAccess.open_encrypted_with_pass(file_path, FileAccess.WRITE, LOCAL_PASS)
 	if file:
 		file.store_string(token)
@@ -1311,6 +1314,11 @@ func save_refresh_token(token: String, file_path: String) -> void:
 
 
 func load_refresh_token(file_path: String) -> String:
+	if not OS.has_feature("editor"):
+		# Remove any credential file left by an older exported build.
+		if FileAccess.file_exists(file_path):
+			DirAccess.remove_absolute(file_path)
+		return ""
 	if not FileAccess.file_exists(file_path):
 		return ""
 	var file: FileAccess = FileAccess.open_encrypted_with_pass(file_path, FileAccess.READ, LOCAL_PASS)

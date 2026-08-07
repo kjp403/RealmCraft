@@ -310,6 +310,7 @@ func _propagate_spawn(new_player_id: int) -> void:
 
 @rpc("authority", "call_remote", "reliable", 0)
 func despawn_player(peer_id: int, delete: bool = false) -> void:
+	TradeService.on_peer_left(self, peer_id)
 	connected_peers.remove_at(connected_peers.find(peer_id))
 	
 	synchronizer_manager.remove_entity(peer_id)

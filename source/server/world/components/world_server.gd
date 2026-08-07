@@ -167,7 +167,8 @@ func _on_peer_authentication_failed(peer_id: int) -> void:
 func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 	# Cast as String if not returns empty String
 	var auth_token: String = bytes_to_var(data) as String
-	print("Peer: %d is trying to connect with data: \"%s\"." % [peer_id, auth_token])
+	# The token is a one-time bearer credential. Log the peer, never the secret.
+	print("Peer: %d supplied world authentication data." % peer_id)
 	if is_valid_authentication_token(auth_token):
 		multiplayer.complete_auth(peer_id)
 		connected_players[peer_id] = token_list[auth_token]

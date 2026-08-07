@@ -1,6 +1,7 @@
 class_name ClickableArea
 extends Area2D
-## A reusable world-space CLICK TARGET: emits [signal clicked] on a left-click or tap.
+## A reusable world-space CLICK TARGET: emits [signal clicked] on a left-click or tap,
+## and [signal right_clicked] for desktop context actions.
 ## It carries NO policy — each user decides what the click MEANS (talk, inspect, loot,
 ## open) by connecting [signal clicked]. So players, NPCs, signs, lootables, doors all
 ## share one detection path instead of re-implementing the input-event boilerplate.
@@ -12,6 +13,7 @@ extends Area2D
 
 ## Emitted once per left-click / tap that lands on this area.
 signal clicked
+signal right_clicked
 
 
 func _ready() -> void:
@@ -23,3 +25,7 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 	if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed) \
 			or (event is InputEventScreenTouch and event.pressed):
 		clicked.emit()
+	elif event is InputEventMouseButton \
+			and event.button_index == MOUSE_BUTTON_RIGHT \
+			and event.pressed:
+		right_clicked.emit()

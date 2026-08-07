@@ -9,16 +9,16 @@ func _init(_db: SQLite) -> void:
 	db = _db
 
 
-func begin() -> void:
-	db.query("BEGIN;")
+func begin() -> bool:
+	return db.query("BEGIN;")
 
 
-func commit() -> void:
-	db.query("COMMIT;")
+func commit() -> bool:
+	return db.query("COMMIT;")
 
 
-func rollback() -> void:
-	db.query("ROLLBACK;")
+func rollback() -> bool:
+	return db.query("ROLLBACK;")
 
 
 #region Players
@@ -31,7 +31,7 @@ func get_player(player_id: int) -> PlayerResource:
 	return _row_to_player(row)
 
 
-func save_player(player: PlayerResource) -> void:
+func save_player(player: PlayerResource) -> bool:
 	var attributes_json: String = JSON.stringify(player.attributes)
 	var inventory_json: String = JSON.stringify(player.inventory)
 	var equipment_json: String = JSON.stringify(player.equipment)
@@ -62,7 +62,7 @@ func save_player(player: PlayerResource) -> void:
 
 	var joined_guild_ids_json: String = JSON.stringify(player.joined_guild_ids)
 
-	db.query_with_bindings(
+	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
@@ -200,7 +200,9 @@ func save_flag_state(flag_id: int, owner_guild_id: int, last_capture_ms: int) ->
 
 func get_player_profile_row(player_id: int) -> Dictionary:
 	db.query_with_bindings(
-		"SELECT player_id, account_name, display_name, skin_id, level, inventory_json, profile_status, profile_animation, active_guild_id, titles_json, stats_json "
+		"SELECT player_id, account_name, display_name, skin_id, level, "
+		+ "profile_status, profile_animation, active_guild_id, "
+		+ "equipment_json, skills_json, titles_json, stats_json "
 		+ "FROM players WHERE player_id=?;",
 		[player_id]
 	)
@@ -208,12 +210,16 @@ func get_player_profile_row(player_id: int) -> Dictionary:
 	if db.query_result.is_empty():
 		return {}
 
-	# Flatten the title display field for the profile handler so it doesn't have
-	# to parse JSON. Other fields stay in their raw form.
 	var row: Dictionary = db.query_result[0]
-	var titles_v: Variant = JSON.parse_string(str(row.get("titles_json", "{}")))
+	var titles_v: Variant = JSON.parse_string(
+		str(row.get("titles_json", "{}"))
+	)
+
 	if titles_v is Dictionary:
-		row["display_title"] = str((titles_v as Dictionary).get("display", ""))
+		row["display_title"] = str(
+			(titles_v as Dictionary).get("display", "")
+		)
+
 	return row
 
 

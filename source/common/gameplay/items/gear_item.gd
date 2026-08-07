@@ -11,6 +11,9 @@ const _SLOT_ORDER: Dictionary = {
 
 ## Main Stats (Base stats)
 @export var base_modifiers: Array[StatModifier]
+func _init() -> void:
+	# Equipment must occupy individual inventory slots.
+	stack_limit = 1
 
 
 func inventory_tab() -> InventoryTab:

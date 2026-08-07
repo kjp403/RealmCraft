@@ -43,7 +43,7 @@ const GROUPS: Array[Array] = [
 	[&"quest", "Quest"],
 	[&"items", "Items"],
 ]
-const GRID_COLUMNS: int = 6
+const GRID_COLUMNS: int = 4
 const SECTION_HEADER_COLOR: Color = Color(0.56, 0.72, 0.85)
 const EQUIPPED_BADGE_COLOR: Color = Color(1.0, 0.9, 0.55)
 ## Gear slot keys that hold REAL equipment (moved out of the bag on equip).

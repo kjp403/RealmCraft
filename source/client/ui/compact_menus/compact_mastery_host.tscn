@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://c24nhpogo3f67"]
+
+[ext_resource type="Script" uid="uid://crqrfhdb18u11" path="res://source/client/ui/compact_menus/compact_mastery_host.gd" id="1_osl5n"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4nh52"]
+bg_color = Color(0.09019608, 0.078431375, 0.12156863, 0.9490196)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6039216, 0.44313726, 0.21960784, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.5019608)
+shadow_size = 4
+
+[node name="CompactMasteryHost" type="PanelContainer" unique_id=1675211017]
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -282.0
+offset_top = -382.0
+offset_right = -12.0
+offset_bottom = -12.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_4nh52")
+script = ExtResource("1_osl5n")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1015868304]
+layout_mode = 2
+
+[node name="MainColumn" type="VBoxContainer" parent="MarginContainer" unique_id=939670202]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainColumn" unique_id=1933356872]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Inventory"
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainColumn/Header" unique_id=49661164]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.9098039, 0.78039217, 0.47843137, 1)
+text = "Mastery"
+vertical_alignment = 1
+
+[node name="HeaderSpacer" type="Control" parent="MarginContainer/MainColumn/Header" unique_id=1976843933]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="MarginContainer/MainColumn/Header" unique_id=441775262]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+text = "x"
+
+[node name="HeaderSeparator" type="HSeparator" parent="MarginContainer/MainColumn" unique_id=1009138577]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Content" type="MarginContainer" parent="MarginContainer/MainColumn" unique_id=1197832346]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InventoryScroll" type="ScrollContainer" parent="MarginContainer/MainColumn/Content" unique_id=858209481]
+layout_mode = 2
+
+[node name="InventoryGrid" type="GridContainer" parent="MarginContainer/MainColumn/Content/InventoryScroll" unique_id=603341389]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+columns = 4

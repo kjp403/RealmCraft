@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d08i1tgsc10al"
-path="res://.godot/imported/RealmCraft logo.png-765e27589ed5acf8922aad441e2b153d.ctex"
+uid="uid://qpqs36jrqq0i"
+path="res://.godot/imported/Mastery.png-01e2583b7c28b76c84c256a21c3d70fa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://source/client/gateway/RealmCraft logo.png"
-dest_files=["res://.godot/imported/RealmCraft logo.png-765e27589ed5acf8922aad441e2b153d.ctex"]
+source_file="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Mastery.png"
+dest_files=["res://.godot/imported/Mastery.png-01e2583b7c28b76c84c256a21c3d70fa.ctex"]
 
 [params]
 
