@@ -4,8 +4,8 @@ extends PanelContainer
 ## SubViewport, follows the local player, shows the tracked VISIT target, and
 ## converts minimap clicks back into world coordinates for click-to-move.
 
-const PANEL_SIZE: Vector2 = Vector2(224.0, 160.0)
-const VIEW_SIZE: Vector2i = Vector2i(212, 126)
+const PANEL_SIZE: Vector2 = Vector2(150.0, 112.0)
+const VIEW_SIZE: Vector2i = Vector2i(140, 82)
 const MAP_ZOOM: float = 0.22
 const EDGE_PADDING: float = 9.0
 const VISIT_PREFIX: String = "Speak with "
@@ -30,10 +30,10 @@ var _refresh_retry: float = 0.0
 func _ready() -> void:
 	name = "NavigationMinimap"
 	set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	offset_left = -240.0
-	offset_top = 12.0
-	offset_right = -16.0
-	offset_bottom = 172.0
+	offset_left = -158.0
+	offset_top = 8.0
+	offset_right = -8.0
+	offset_bottom = 120.0
 	custom_minimum_size = PANEL_SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	z_index = 80
