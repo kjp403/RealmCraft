@@ -313,6 +313,11 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/pick_swing/wooden_sickle_swing.tres",
 &"slug": &"wooden_sickle_swing"
 }, {
+&"hash": "7e5dc2a1d39e5f300ddebeca058115761e670f61874833ee0bcba32bc4e560fd",
+&"id": 65,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/pick_swing/wooden_axe_swing.tres",
+&"slug": &"wooden_axe_swing"
+}, {
 &"hash": "e49670ae838d9241d939a5405c05e1dbab20e6a4c3b903ed4c341bc48dacce8e",
 &"id": 61,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye.tres",
