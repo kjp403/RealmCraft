@@ -102,6 +102,8 @@ func _ready() -> void:
 	_show_connecting()
 	menu_stack.append(main_panel)
 	back_button.hide()
+	# Guest login disabled — hide the "Play as Guest" button.
+	$MainPanel/VBoxContainer/VBoxContainer/GuestButton.hide()
 
 	prepare_character_creation_menu()
 
@@ -882,9 +884,7 @@ func add_world_card(world_info: Dictionary, world_id: int) -> Button:
 	text_label.append_text(
 		"\n[i][font_size=12]\"%s\"[/font_size][/i]\n" % tr(world_info.get("motd", ""))
 	)
-	text_label.append_text(
-		"\n[font_size=13][b]%s[/b][/font_size]\n" % "PvP" if world_info.get("pvp", true) else "No PvP"
-	)
+	# World PvP status intentionally not shown on the card.
 
 	button.add_child(text_label)
 
