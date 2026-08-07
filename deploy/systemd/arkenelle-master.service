@@ -1,0 +1,15 @@
+[Unit]
+Description=Arkenelle Master Server (orchestrator + admin dashboard)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arkenelle
+WorkingDirectory=/opt/arkenelle
+ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=master-server
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
