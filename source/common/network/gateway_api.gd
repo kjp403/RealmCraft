@@ -74,8 +74,8 @@ static func base_url() -> String:
 		)
 		return "http://127.0.0.1:8088"
 
-	if OS.has_feature("ekonia") or OS.has_feature("release"):
-		return "https://ws.ekoniaonline.com"
+	if OS.has_feature("arkenelle") or OS.has_feature("release"):
+		return "https://api.arkenelle.com"
 	return "http://127.0.0.1:8088"
 
 
