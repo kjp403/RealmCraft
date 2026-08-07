@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3 uid="uid://coaktree001xx"]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="2_log"]
+[ext_resource type="Texture2D" uid="uid://bqpcnh5waadxj" path="res://assets/sprites/environment/green_woods/trees.png" id="3_trees"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oak"]
+atlas = ExtResource("3_trees")
+region = Rect2(0, 0, 48, 96)
+
+[resource]
+script = ExtResource("1_script")
+ore = ExtResource("2_log")
+yield_amount = 1
+job_xp = Dictionary[StringName, int]({
+&"woodcutting": 12
+})
+required_tool = &"axe"
+extraction_hp = 4
+max_charges = 3
+charge_regen_seconds = 18.0
+depleted_recharge_seconds = 90.0
+player_cooldown_seconds = 5.0
+texture = SubResource("AtlasTexture_oak")

@@ -408,6 +408,11 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/metals/copper_ore.tres",
 &"slug": &"copper_ore"
 }, {
+&"hash": "a060fd13f1986b0c0dd73757305f0e874aa124774e8d771292fb837d4eea63a4",
+&"id": 173,
+&"path": "res://source/common/gameplay/items/materials/wood/oak_log.tres",
+&"slug": &"oak_log"
+}, {
 &"hash": "bac21725fd399664892f252a9757de6226a3a0c3cf2e1bc3bfd9fe11615f8d01",
 &"id": 105,
 &"path": "res://source/common/gameplay/items/materials/metals/gold_bar.tres",
@@ -612,6 +617,11 @@ entries = Array[Dictionary]([{
 &"id": 66,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle.tres",
 &"slug": &"sickle"
+}, {
+&"hash": "d21e570f629f9952b49b1aa1f50d6945695ed5e862864844733b66067cf471c0",
+&"id": 172,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe.tres",
+&"slug": &"axe"
 }, {
 &"hash": "f24f017aa9c28d608f978c20c0cd0a8738bb7ce8a8b795d9d521ccd384edb9b3",
 &"id": 90,
