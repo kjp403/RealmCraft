@@ -105,7 +105,7 @@ visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("5_opc3y")
 theme_override_font_sizes/font_size = 34
-text = "Ekonia Online"
+text = "Arkenelle"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=281198905]

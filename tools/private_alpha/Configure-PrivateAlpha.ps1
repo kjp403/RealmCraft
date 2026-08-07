@@ -28,7 +28,7 @@ New-Item -ItemType Directory -Force -Path $ClientDirectory | Out-Null
 
 $gatewayConfigPath = Join-Path $serverConfigDirectory "gateway_config.cfg"
 $worldConfigPath = Join-Path $serverConfigDirectory "world_config.cfg"
-$clientConfigPath = Join-Path $ClientDirectory "realmcraft_client.cfg"
+$clientConfigPath = Join-Path $ClientDirectory "arkenelle_client.cfg"
 $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
 
 $gatewayConfig = @"
@@ -51,8 +51,8 @@ bind_address="$TailscaleIPv4"
 certificate_path="res://data/config/tls/certificate.crt"
 key_path="res://data/config/tls/key.key"
 database_path="."
-motd="WELCOME_REALMCRAFT_ALPHA"
-name="RealmCraft Alpha"
+motd="WELCOME_ARKENELLE_ALPHA"
+name="Arkenelle Alpha"
 max_players=25
 hardcore=false
 bonus_xp=0.0
@@ -75,7 +75,7 @@ gateway_url="http://${TailscaleIPv4}:8088"
 [System.IO.File]::WriteAllText($worldConfigPath, $worldConfig, $utf8WithoutBom)
 [System.IO.File]::WriteAllText($clientConfigPath, $clientConfig, $utf8WithoutBom)
 
-Write-Host "RealmCraft private-alpha configuration created for $TailscaleIPv4."
+Write-Host "Arkenelle private-alpha configuration created for $TailscaleIPv4."
 Write-Host "Gateway: $gatewayConfigPath"
 Write-Host "World:   $worldConfigPath"
 Write-Host "Client:  $clientConfigPath"

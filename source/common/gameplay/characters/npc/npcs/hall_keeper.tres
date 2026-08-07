@@ -47,6 +47,6 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("7_npc")
 npc_name = "Hall Keeper"
 skin = ExtResource("6_skin")
-greeting = "Registration complete? Good. Before you leave this hall, remember one thing: RealmCraft does not lock you into a class, weapon, or profession. Every Hero may train every path. I can explain the systems, then give you your first assignment."
+greeting = "Registration complete? Good. Before you leave this hall, remember one thing: Arkenelle does not lock you into a class, weapon, or profession. Every Hero may train every path. I can explain the systems, then give you your first assignment."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_welcome"), SubResource("Dialogue_progression"), SubResource("Dialogue_combat"), SubResource("Dialogue_professions"), SubResource("Dialogue_first_steps"), SubResource("Dialogue_keeper")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

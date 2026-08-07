@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs one RealmCraft dedicated server for the Cloud Agent `terminals`.
+# Runs one Arkenelle dedicated server for the Cloud Agent `terminals`.
 #
 # Usage: run-server.sh <mode> [wait_port]
 #   mode      = master-server | gateway-server | world-server

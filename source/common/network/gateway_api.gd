@@ -38,7 +38,7 @@ const ACTION_LIST_CHARACTERS := "list_characters"
 const ACTION_ENTER_WORLD := "enter_world"
 const ACTION_DISCONNECT := "disconnect"
 
-const ALPHA_CLIENT_CONFIG_FILENAME: String = "realmcraft_client.cfg"
+const ALPHA_CLIENT_CONFIG_FILENAME: String = "arkenelle_client.cfg"
 
 static var _cached_base_url: String = ""
 
@@ -54,7 +54,7 @@ static func base_url() -> String:
 	# Private-alpha builds read their gateway from a small file beside the EXE.
 	# Test hosts can therefore change their Tailscale IP without distributing a
 	# new binary. Do not silently fall through to the legacy production service.
-	if OS.has_feature("realmcraft_alpha"):
+	if OS.has_feature("arkenelle_alpha"):
 		if not _cached_base_url.is_empty():
 			return _cached_base_url
 		var config_path: String = OS.get_executable_path().get_base_dir().path_join(
@@ -70,7 +70,7 @@ static func base_url() -> String:
 				_cached_base_url = configured_url
 				return _cached_base_url
 		push_error(
-			"RealmCraft Alpha requires [network] gateway_url in %s (http:// or https://)." % config_path
+			"Arkenelle Alpha requires [network] gateway_url in %s (http:// or https://)." % config_path
 		)
 		return "http://127.0.0.1:8088"
 
