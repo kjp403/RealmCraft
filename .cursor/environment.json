@@ -1,0 +1,19 @@
+{
+  "name": "RealmCraft (Godot 4.7 MMO)",
+  "user": "ubuntu",
+  "install": "bash ./.cursor/install.sh",
+  "terminals": [
+    {
+      "name": "master-server",
+      "command": "godot --headless --path . --mode=master-server"
+    },
+    {
+      "name": "gateway-server",
+      "command": "bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8064) 2>/dev/null; do sleep 1; done; exec godot --headless --path . --mode=gateway-server'"
+    },
+    {
+      "name": "world-server",
+      "command": "bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8062) 2>/dev/null; do sleep 1; done; exec godot --headless --path . --mode=world-server'"
+    }
+  ]
+}
