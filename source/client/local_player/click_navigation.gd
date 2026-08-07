@@ -77,7 +77,7 @@ func is_ready() -> bool:
 
 
 func _build_grid(generation: int, map: Map) -> void:
-	# RealmCraft removes the persistent LocalPlayer from the old map before the
+	# Arkenelle removes the persistent LocalPlayer from the old map before the
 	# destination server spawns it into the new map. During that short window
 	# Node.get_tree() is null, so wait through the process-wide SceneTree instead.
 	var scene_tree := Engine.get_main_loop() as SceneTree

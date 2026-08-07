@@ -1,5 +1,5 @@
 {
-  "name": "RealmCraft (Godot 4.7 MMO)",
+  "name": "Arkenelle (Godot 4.7 MMO)",
   "user": "ubuntu",
   "install": "bash ./.cursor/install.sh",
   "terminals": [

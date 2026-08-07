@@ -1,4 +1,4 @@
-# RealmCraft private alpha
+# Arkenelle private alpha
 
 This setup exposes only the player-facing gateway and world sockets through a
 Tailscale machine share. It is intended for a small, controlled commercial
@@ -31,7 +31,7 @@ Then run:
 ```
 
 This creates ignored, machine-local server configuration under
-`data/local/private_alpha` and places `realmcraft_client.cfg` beside the exported
+`data/local/private_alpha` and places `arkenelle_client.cfg` beside the exported
 Windows client. The address can change without rebuilding the EXE.
 
 Run the gateway with:
@@ -55,8 +55,8 @@ From an elevated PowerShell window on the host, allow only Tailscale's IPv4
 range to the two player-facing TCP ports:
 
 ```powershell
-New-NetFirewallRule -DisplayName "RealmCraft Alpha Gateway (Tailscale)" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8088 -RemoteAddress 100.64.0.0/10 -Profile Any
-New-NetFirewallRule -DisplayName "RealmCraft Alpha World (Tailscale)" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8087 -RemoteAddress 100.64.0.0/10 -Profile Any
+New-NetFirewallRule -DisplayName "Arkenelle Alpha Gateway (Tailscale)" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8088 -RemoteAddress 100.64.0.0/10 -Profile Any
+New-NetFirewallRule -DisplayName "Arkenelle Alpha World (Tailscale)" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8087 -RemoteAddress 100.64.0.0/10 -Profile Any
 ```
 
 Do not add inbound rules for ports 8062 or 8064.
@@ -64,7 +64,7 @@ Do not add inbound rules for ports 8062 or 8064.
 ## Distribution
 
 Each tester receives the complete client folder, including
-`RealmCraft-Alpha.exe` and `realmcraft_client.cfg`. Because the alpha binary is
+`Arkenelle-Alpha.exe` and `arkenelle_client.cfg`. Because the alpha binary is
 not yet code-signed, Windows may identify it as an unknown publisher. Provide a
 SHA-256 checksum with every build; do not instruct testers to disable Defender
 or SmartScreen globally.

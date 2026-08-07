@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cloud Agent install step for RealmCraft (Godot 4 MMO).
+# Cloud Agent install step for Arkenelle (Godot 4 MMO).
 #
 # 1. Provisions the Godot 4.7 editor binary (matches project.godot's "4.7"
 #    config/features tag). The editor's --headless mode runs the game's
@@ -61,4 +61,4 @@ if ! "$GODOT" --headless --path . --import; then
 		echo "WARN: import still non-zero; servers will import on first boot." >&2
 fi
 
-echo "RealmCraft install complete."
+echo "Arkenelle install complete."

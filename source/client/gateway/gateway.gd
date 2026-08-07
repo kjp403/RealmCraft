@@ -51,7 +51,7 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
-const LINK_WEBSITE: String = "https://ekoniaonline.com"
+const LINK_WEBSITE: String = "https://arkenelle.com"
 const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
@@ -64,7 +64,7 @@ const SFX_REVEAL: String = "res://assets/audio/sfx/ui/ui_reveal.wav"
 const MUSIC_GATEWAY: String = "res://assets/audio/music/angevin.ogg"
 
 # Release-stage tag shown after the build number in the ConnectionInfo line
-# ("Connected · Ekonia 0.2.0 - Alpha"). The version itself comes live from
+# ("Connected · Arkenelle 0.2.0 - Alpha"). The version itself comes live from
 # project.godot via GatewayAPI.game_version(), so it never drifts from the build.
 const BUILD_STAGE: String = "Alpha"
 
@@ -848,13 +848,13 @@ func fill_connection_info(_account_name: String, _account_id: int) -> void:
 
 
 ## The bottom-left status line, two rows: "<Connected/Offline> · <account / not logged
-## in>" then "Ekonia <version> <stage>". Built in one place so the build version is
+## in>" then "Arkenelle <version> <stage>". Built in one place so the build version is
 ## ALWAYS shown — logged in or not. Version is live from project.godot (never drifts
 ## from the handshake gate); the account-ID (old dev-only debug) is intentionally gone.
 func _refresh_connection_info() -> void:
 	var status: String = tr("STATUS_ONLINE") if _server_online else tr("STATUS_OFFLINE")
 	var who: String = account_name if not account_name.is_empty() else tr("NOT_LOGGED_IN")
-	var game: String = str(ProjectSettings.get_setting("application/config/name", "Ekonia"))
+	var game: String = str(ProjectSettings.get_setting("application/config/name", "Arkenelle"))
 	$ConnectionInfo.text = "%s · %s\n%s %s %s" % [
 		status, who, game, GatewayAPI.game_version(), BUILD_STAGE
 	]
