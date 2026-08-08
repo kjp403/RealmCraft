@@ -52,10 +52,12 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
 const LINK_WEBSITE: String = Distribution.WEBSITE_URL
-## Browser fallback page. Prefer [constant LINK_ITCH_APP] for updates.
+## Browser marketing page only — never use this for the Update button.
 const LINK_DOWNLOAD: String = Distribution.ITCH_URL
-## Opens Arkenelle inside the itch.io desktop app so Update stays in-app.
+## Opens Arkenelle's page inside the itch.io desktop app.
 const LINK_ITCH_APP: String = Distribution.ITCH_APP_URL
+## Queues Install/Update in the itch.io app (in-game Update button target).
+const LINK_ITCH_UPDATE: String = Distribution.ITCH_INSTALL_URL
 const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
@@ -268,17 +270,23 @@ func _wire_button_audio(button: Button, is_back: bool = false) -> void:
 
 
 ## Hard block for an outdated client: nothing's playable on a mismatched build, so
-## loop a non-dismissable "please update". Prefer opening the itch.io *app* so
-## Update stays in-app; fall back to the public itch page if the app isn't installed.
+## loop a non-dismissable "please update". Opens the itch.io *app* Install/Update
+## deep link only — never the public browser Download page (that forces a full
+## reinstall and breaks auto-update).
 func _block_outdated(detail: String) -> void:
 	var message: String = detail if not detail.is_empty() else tr("ERR_OUTDATED")
 	while true:
 		await popup_panel.confirm_message(message, &"UPDATE_TITLE", &"UPDATE")
+		_open_itch_update()
+
+
+## Ask the itch.io desktop app to install/update Arkenelle in-place.
+func _open_itch_update() -> void:
+	var err: Error = OS.shell_open(LINK_ITCH_UPDATE)
+	if err != OK:
+		# App protocol handler missing — open the in-app game page as a softer fallback.
+		# Still avoid LINK_DOWNLOAD (browser Download).
 		OS.shell_open(LINK_ITCH_APP)
-		# Tiny delay then also surface the public page as a browser fallback for
-		# players who only sideloaded a zip (no itch app handler registered).
-		await get_tree().create_timer(0.4).timeout
-		OS.shell_open(LINK_DOWNLOAD)
 
 
 ## Reveal the main menu (no saved session): show it, focus the first action, then
