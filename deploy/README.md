@@ -23,15 +23,19 @@ Repo page → **Settings** → **Secrets and variables** → **Actions** → **N
 |-------------|--------|
 | `VPS_HOST` | `144.217.91.100` |
 | `VPS_USER` | `ubuntu` |
-| `VPS_SSH_KEY` | Full contents of your private key file (usually `C:\Users\YOU\.ssh\arkenelle_ovh`) — include the `-----BEGIN … KEY-----` lines |
+| `VPS_SSH_KEY` | Full contents of your **private** key file (usually `C:\Users\YOU\.ssh\arkenelle_ovh`) |
 
-To copy the key on Windows PowerShell:
+**Important:** use the file **without** `.pub` on the end.  
+Private key text starts with `-----BEGIN OPENSSH PRIVATE KEY-----` (or `BEGIN RSA PRIVATE KEY`).  
+A `.pub` file starts with `ssh-ed25519` / `ssh-rsa` — that will **fail**.
+
+Copy on Windows PowerShell (keeps line breaks):
 
 ```powershell
-Get-Content $env:USERPROFILE\.ssh\arkenelle_ovh | Set-Clipboard
+Get-Content $env:USERPROFILE\.ssh\arkenelle_ovh -Raw | Set-Clipboard
 ```
 
-Then paste into the `VPS_SSH_KEY` secret box.
+Then edit the `VPS_SSH_KEY` secret → paste → save.
 
 ### 2. Merge the auto-deploy PR / push to `main`
 
