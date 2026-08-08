@@ -37,4 +37,7 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "Item '%s' has no registry id." % token
 
 	Inventory.add_item(target.resource.inventory, item_id, amount)
+	ChatCommand.notify_inventory_changed(
+		target.peer_id, item_id, amount, str(item.item_name)
+	)
 	return "Gave %d x %s (id %d) to %s." % [amount, str(item.item_name), item_id, target.label()]

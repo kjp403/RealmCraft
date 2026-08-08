@@ -4,7 +4,7 @@ extends ChatCommand
 
 func _init() -> void:
 	command_name = "gold"
-	command_priority = 100 # senior_admin
+	command_priority = 2 # admin+ (same as /give — live pouch refresh for testing)
 	command_usage = "/gold <self|@account|#id> <amount>"
 
 
@@ -23,7 +23,9 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "Amount must be positive."
 
 	var res: PlayerResource = target.resource
-	Inventory.add_item(res.inventory, Economy.gold_id(), amount)
+	var gold_id: int = Economy.gold_id()
+	Inventory.add_item(res.inventory, gold_id, amount)
+	ChatCommand.notify_inventory_changed(target.peer_id, gold_id, amount, "gold")
 	return "Gave %d gold to %s. New balance: %d." % [
-		amount, target.label(), Inventory.count(res.inventory, Economy.gold_id())
+		amount, target.label(), Inventory.count(res.inventory, gold_id)
 	]
