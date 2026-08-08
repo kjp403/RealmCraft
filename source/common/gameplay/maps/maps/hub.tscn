@@ -45,8 +45,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/bandit_hideout.tres" id="46_l3yo4"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="47_mine"]
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="48_copper"]
-[ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="49_coal"]
-[ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="50_oak"]
+[ext_resource type="Resource" uid="uid://ctinvein001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres" id="49_tin"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_aris3"]
 size = Vector2(40, 32)
@@ -610,57 +609,42 @@ target_id = 21
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=1888000001]
 
-[node name="OakTree1" parent="MineableNodes" unique_id=1888000002 instance=ExtResource("47_mine")]
+[node name="CopperVein1" parent="MineableNodes" unique_id=1888000002 instance=ExtResource("47_mine")]
 y_sort_enabled = true
-position = Vector2(-216, 288)
-data = ExtResource("50_oak")
+position = Vector2(-280, 280)
+data = ExtResource("48_copper")
 
-[node name="OakTree2" parent="MineableNodes" unique_id=1888000003 instance=ExtResource("47_mine")]
-y_sort_enabled = true
-position = Vector2(48, 272)
-data = ExtResource("50_oak")
-
-[node name="OakTree3" parent="MineableNodes" unique_id=1888000004 instance=ExtResource("47_mine")]
-y_sort_enabled = true
-position = Vector2(200, 336)
-data = ExtResource("50_oak")
-
-[node name="OakTree4" parent="MineableNodes" unique_id=1888000005 instance=ExtResource("47_mine")]
-y_sort_enabled = true
-position = Vector2(-128, 464)
-data = ExtResource("50_oak")
-
-[node name="OakTree5" parent="MineableNodes" unique_id=1888000006 instance=ExtResource("47_mine")]
-y_sort_enabled = true
-position = Vector2(112, 512)
-data = ExtResource("50_oak")
-
-[node name="OakTree6" parent="MineableNodes" unique_id=1888000007 instance=ExtResource("47_mine")]
-y_sort_enabled = true
-position = Vector2(-40, 376)
-data = ExtResource("50_oak")
-
-[node name="CopperOre1" parent="MineableNodes" unique_id=1888000008 instance=ExtResource("47_mine")]
+[node name="CopperVein2" parent="MineableNodes" unique_id=1888000003 instance=ExtResource("47_mine")]
 y_sort_enabled = true
 position = Vector2(-280, 360)
 data = ExtResource("48_copper")
 
-[node name="CopperOre2" parent="MineableNodes" unique_id=1888000009 instance=ExtResource("47_mine")]
+[node name="CopperVein3" parent="MineableNodes" unique_id=1888000004 instance=ExtResource("47_mine")]
 y_sort_enabled = true
-position = Vector2(232, 424)
+position = Vector2(-280, 440)
 data = ExtResource("48_copper")
 
-[node name="CopperOre3" parent="MineableNodes" unique_id=1888000010 instance=ExtResource("47_mine")]
+[node name="CopperVein4" parent="MineableNodes" unique_id=1888000005 instance=ExtResource("47_mine")]
 y_sort_enabled = true
-position = Vector2(0, 560)
+position = Vector2(-280, 520)
 data = ExtResource("48_copper")
 
-[node name="CoalOre1" parent="MineableNodes" unique_id=1888000011 instance=ExtResource("47_mine")]
+[node name="TinVein1" parent="MineableNodes" unique_id=1888000006 instance=ExtResource("47_mine")]
 y_sort_enabled = true
-position = Vector2(152, 304)
-data = ExtResource("49_coal")
+position = Vector2(248, 280)
+data = ExtResource("49_tin")
 
-[node name="CoalOre2" parent="MineableNodes" unique_id=1888000012 instance=ExtResource("47_mine")]
+[node name="TinVein2" parent="MineableNodes" unique_id=1888000007 instance=ExtResource("47_mine")]
 y_sort_enabled = true
-position = Vector2(-240, 496)
-data = ExtResource("49_coal")
+position = Vector2(248, 360)
+data = ExtResource("49_tin")
+
+[node name="TinVein3" parent="MineableNodes" unique_id=1888000008 instance=ExtResource("47_mine")]
+y_sort_enabled = true
+position = Vector2(248, 440)
+data = ExtResource("49_tin")
+
+[node name="TinVein4" parent="MineableNodes" unique_id=1888000009 instance=ExtResource("47_mine")]
+y_sort_enabled = true
+position = Vector2(248, 520)
+data = ExtResource("49_tin")
