@@ -15,13 +15,13 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.1"
+config/version="0.28.2"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/show_image=false
-config/icon="res://assets/project_icon/ekonia_e_logo.png"
+config/icon="res://assets/project_icon/arkenelle_icon.png"
 
 [audio]
 
