@@ -14,6 +14,8 @@ extends Interactable
 func _ready() -> void:
 	if station != null:
 		menu_name = &"crafting"
+		# Set before Interactable._ready so the hover NameLabel can be built.
+		hover_name = station.station_name
 		# Self-register with the owning map, keyed by node name (what the client
 		# sends and craft.item resolves).
 		var map: Map = Map.of(self)

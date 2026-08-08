@@ -47,6 +47,10 @@
 [ext_resource type="Resource" uid="uid://ctinvein001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres" id="49_tin"]
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="51_coal"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="50_tree"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="52_desert"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="53_fforge"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/the_hollow.tres" id="54_hollow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="55_sewers"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6ao3"]
 atlas = ExtResource("27_xjjg4")
@@ -446,7 +450,7 @@ color = Color(0.25, 1, 0.25, 0.16)
 polygon = PackedVector2Array(152, 56, 824, 56, 824, 520, 152, 520)
 
 [node name="AnvilStation" parent="." unique_id=325384635 instance=ExtResource("25_og50n")]
-position = Vector2(-320, 176)
+position = Vector2(-400, 120)
 station = ExtResource("26_anjaa")
 metadata/_edit_group_ = true
 
@@ -454,7 +458,7 @@ metadata/_edit_group_ = true
 sprite_frames = SubResource("SpriteFrames_e6m2f")
 
 [node name="FurnaceStation" parent="." unique_id=1099708083 instance=ExtResource("25_og50n")]
-position = Vector2(-400, 176)
+position = Vector2(-528, 120)
 station = ExtResource("28_sgxfe")
 metadata/_edit_group_ = true
 
@@ -463,7 +467,7 @@ sprite_frames = SubResource("SpriteFrames_660kg")
 frame_progress = 0.763101
 
 [node name="WorkBenchStation" parent="." unique_id=923273387 instance=ExtResource("25_og50n")]
-position = Vector2(-536, -216)
+position = Vector2(-536, -40)
 station = ExtResource("30_2opns")
 metadata/_edit_group_ = true
 
@@ -503,6 +507,10 @@ npc_resource = SubResource("Resource_jubm3")
 position = Vector2(-592, -88)
 npc_resource = SubResource("Resource_p483h")
 
+[node name="BankerYard" parent="NPCs" unique_id=1048618123 instance=ExtResource("16_da30u")]
+position = Vector2(-528, 16)
+npc_resource = ExtResource("14_banker")
+
 [node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
 position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")
@@ -538,10 +546,10 @@ target_id = 22
 [node name="TheHollowPortal" parent="Warpers" unique_id=2072488891 instance=ExtResource("29_2sqao")]
 position = Vector2(992, 80)
 portal_color = Color(0.11549731, 0.1297065, 0.12632617, 1)
-destination_label = "The Hollow (test → DimWood)"
-target_instance = ExtResource("30_og50n")
+destination_label = "The Hollow"
+target_instance = ExtResource("54_hollow")
 warper_id = 27
-target_id = 0
+target_id = 27
 
 [node name="WoodlandPortal" parent="Warpers" unique_id=686472752 instance=ExtResource("29_2sqao")]
 position = Vector2(8, -336)
@@ -554,26 +562,26 @@ target_id = 23
 [node name="DesertPortal" parent="Warpers" unique_id=151131626 instance=ExtResource("29_2sqao")]
 position = Vector2(992, -48)
 portal_color = Color(0.5308139, 0.42815638, 0, 1)
-destination_label = "Desert (test → Woodland)"
-target_instance = ExtResource("12_sgxfe")
+destination_label = "Desert"
+target_instance = ExtResource("52_desert")
 warper_id = 25
-target_id = 0
+target_id = 25
 
-[node name="DesertPortal2" parent="Warpers" unique_id=1638213698 instance=ExtResource("29_2sqao")]
+[node name="SewersPortal" parent="Warpers" unique_id=1638213698 instance=ExtResource("29_2sqao")]
 position = Vector2(856, 80)
 portal_color = Color(0, 0.526729, 0.27035004, 1)
-destination_label = "The Sewers (test → Fungus Cave)"
-target_instance = ExtResource("24_2sqao")
+destination_label = "The Sewers"
+target_instance = ExtResource("55_sewers")
 warper_id = 28
-target_id = 0
+target_id = 28
 
 [node name="FireForgePortal" parent="Warpers" unique_id=121112763 instance=ExtResource("29_2sqao")]
 position = Vector2(992, 16)
 portal_color = Color(0.7412448, 0.25372657, 0, 1)
-destination_label = "Fire Forge (test → Bandit Hideout)"
-target_instance = ExtResource("46_l3yo4")
+destination_label = "Fire Forge"
+target_instance = ExtResource("53_fforge")
 warper_id = 26
-target_id = 0
+target_id = 26
 
 [node name="CavePortal" parent="Warpers" unique_id=396714839 instance=ExtResource("29_2sqao")]
 position = Vector2(856, -48)

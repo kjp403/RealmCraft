@@ -1,3 +1,4 @@
+class_name GroundItem
 extends Area2D
 ## A bag stack discarded onto the map. Click / tap to pick it up — does NOT
 ## auto-loot on walkover (that looped drop→pickup and bloated the loot feed).
@@ -7,6 +8,7 @@ extends Area2D
 ## Client clicks use [ClickableArea] (same path as gather nodes / NPCs) so hover
 ## suppresses click-move and combat, then [PickupController] walks into range
 ## before requesting [code]item.pickup[/code].
+## Area-loot (F / player_interact) is handled by item.pickup_area.
 
 
 ## Seconds before an unclaimed drop despawns (anti-litter).
