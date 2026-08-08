@@ -66,6 +66,7 @@ func _ready() -> void:
 	close_button.pressed.connect(_on_close_pressed)
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
+	Client.subscribe(&"skills.get", _on_skills_received)
 
 	var hud := get_parent() as Control
 	if hud != null:

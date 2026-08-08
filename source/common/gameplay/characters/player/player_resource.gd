@@ -41,6 +41,9 @@ const HEALTH_PER_LEVEL: float = 5.0
 @export var skin_id: int = 1 # Default skin
 
 @export var inventory: Dictionary
+## Personal bank vault (same slot format as inventory). Unlimited capacity —
+## stored separately so bag UI stay compact while long-term storage grows.
+@export var bank: Dictionary
 ## Equipped gear: gear-slot key (&"weapon", &"torso", ...) -> item_id. Equipped items
 ## live here, NOT in inventory (they're moved out on equip, back on unequip).
 @export var equipment: Dictionary

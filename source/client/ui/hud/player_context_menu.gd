@@ -92,10 +92,15 @@ func _on_trade_invite(payload: Dictionary) -> void:
 	_invite_id = int(payload.get("invite", 0))
 	if _invite_id <= 0:
 		return
+	# Chat LineEdit steals Enter / focus — release it so Accept is unambiguous.
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
 	_invite_dialog.dialog_text = "%s wants to trade with you." % str(
 		payload.get("from_name", "Another player")
 	)
 	_invite_dialog.popup_centered(Vector2i(380, 150))
+	_invite_dialog.grab_focus()
 
 
 func _respond_to_invite(accepted: bool) -> void:
@@ -103,6 +108,9 @@ func _respond_to_invite(accepted: bool) -> void:
 		return
 	var invite_id: int = _invite_id
 	_invite_id = 0
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
 	var result: Array = await Client.request_data_await(
 		&"trade.respond",
 		{"invite": invite_id, "accepted": accepted},
@@ -114,6 +122,13 @@ func _respond_to_invite(accepted: bool) -> void:
 	var payload: Dictionary = result[0]
 	if not bool(payload.get("ok", false)) and accepted:
 		Toaster.toast("That trade request is no longer available.")
+		return
+	# Open immediately from the respond reply so the accepter never depends on
+	# a separate trade.open push landing while chat/HUD is reshuffling.
+	if accepted and bool(payload.get("ok", false)):
+		var trade_id: int = int(payload.get("trade", 0))
+		if trade_id > 0:
+			ClientState.set_viewed_trade(trade_id)
 
 
 func _on_trade_open(payload: Dictionary) -> void:

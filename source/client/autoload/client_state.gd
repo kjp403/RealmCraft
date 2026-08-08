@@ -267,14 +267,20 @@ var _last_depleted_toast_ms: int
 func _on_item_picked_up(data: Dictionary) -> void:
 	if data.is_empty():
 		return
-	# Ground-drop pickups are "quiet": refresh the bag, but do NOT inflate the
-	# left-side LootFeed (drop→pickup loops were showing Copper Ore ×50 while
-	# the bag still held 10). Combat/mining loot keeps using LootFeed.add_item.
+	var item_id: int = int(data.get("id", 0))
+	var amount: int = int(data.get("amount", 0))
+	var item_name: String = str(data.get("name", "item"))
+	# Ground-drop / admin-grant pickups are "quiet": refresh the bag, but do NOT
+	# inflate the left-side LootFeed (drop→pickup loops were showing Copper Ore
+	# ×50 while the bag still held 10). Combat/mining loot keeps using LootFeed.
 	if not bool(data.get("quiet", false)):
-		var item_id: int = int(data.get("id", 0))
-		var amount: int = int(data.get("amount", 0))
 		if item_id > 0 and amount > 0:
-			LootFeed.add_item(item_id, amount, str(data.get("name", "item")))
+			LootFeed.add_item(item_id, amount, item_name)
+	elif item_id > 0 and amount > 0:
+		# Quiet grants still need a readable confirmation — otherwise /give can
+		# succeed server-side while the player thinks nothing arrived.
+		Toaster.toast("Received %s ×%d" % [item_name, amount] if amount > 1 \
+			else "Received %s" % item_name)
 	inventory_changed.emit(data)
 
 

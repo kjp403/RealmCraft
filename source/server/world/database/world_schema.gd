@@ -39,6 +39,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 10:
 		_migration_v10(db)
 		_set_schema_version(db, 10)
+	if version < 11:
+		_migration_v11(db)
+		_set_schema_version(db, 11)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -246,6 +249,13 @@ static func _migration_v10(db: SQLite) -> void:
 		"CREATE UNIQUE INDEX IF NOT EXISTS idx_players_display_name "
 		+ "ON players(display_name COLLATE NOCASE);"
 	)
+
+
+## v11: personal item bank (unlimited vault). Same JSON shape as inventory_json;
+## ADD COLUMN — no DB wipe.
+static func _migration_v11(db: SQLite) -> void:
+	if not _column_exists(db, "players", "bank_json"):
+		db.query("ALTER TABLE players ADD COLUMN bank_json TEXT NOT NULL DEFAULT '{}';")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

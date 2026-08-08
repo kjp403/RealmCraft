@@ -34,6 +34,7 @@ func get_player(player_id: int) -> PlayerResource:
 func save_player(player: PlayerResource) -> bool:
 	var attributes_json: String = JSON.stringify(player.attributes)
 	var inventory_json: String = JSON.stringify(player.inventory)
+	var bank_json: String = JSON.stringify(player.bank)
 	var equipment_json: String = JSON.stringify(player.equipment)
 	var skills_json: String = JSON.stringify(player.skills)
 	var mastery_json: String = JSON.stringify({
@@ -66,9 +67,9 @@ func save_player(player: PlayerResource) -> bool:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, "
+		+ "attributes_json, inventory_json, bank_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -83,6 +84,7 @@ func save_player(player: PlayerResource) -> bool:
 
 			attributes_json,
 			inventory_json,
+			bank_json,
 			equipment_json,
 			skills_json,
 			mastery_json,
@@ -151,6 +153,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	# hammer, 6-8g), which seeds build identity and teaches the economy. 25g
 	# covers a weapon + a potion or a cheap armor piece.
 	player.inventory = {}
+	player.bank = {}
 	Inventory.add_item(player.inventory, 1, 1) # health_potion
 	Inventory.add_item(player.inventory, Economy.gold_id(), 25)
 	# Starting attribute points so a new character has something to spend.
@@ -264,6 +267,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 
 	player.attributes.assign(JSON.parse_string(str(row.get("attributes_json", "{}"))) as Dictionary)
 	player.inventory = Inventory.normalize(JSON.parse_string(str(row.get("inventory_json", "{}"))) as Dictionary)
+	player.bank = Inventory.normalize(JSON.parse_string(str(row.get("bank_json", "{}"))) as Dictionary)
 	# Equipment: { slot_key (StringName) -> item_id (int) }; JSON gives string keys/float values.
 	var equipment_raw: Dictionary = JSON.parse_string(str(row.get("equipment_json", "{}"))) as Dictionary
 	player.equipment = {}

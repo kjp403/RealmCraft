@@ -231,10 +231,14 @@ func _refresh() -> void:
 		if item != null:
 			PixelIcon.set_art(_slot_pixels[slot_key], item.item_icon)
 			_slot_buttons[slot_key].modulate = Color.WHITE
+			_slot_buttons[slot_key].tooltip_text = ItemTooltip.hover_text(item)
 		else:
 			var slot_res: ItemSlot = _slots[slot_key]
 			PixelIcon.set_art(_slot_pixels[slot_key], slot_res.icon if slot_res else null)
 			_slot_buttons[slot_key].modulate = EMPTY_SLOT_DIM
+			_slot_buttons[slot_key].tooltip_text = (
+				slot_res.display_name if slot_res else String(slot_key)
+			)
 
 	_render_totals(values)
 	if _selected_slot.is_empty():

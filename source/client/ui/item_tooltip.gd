@@ -30,6 +30,28 @@ const DELTA_UP_COLOR: String = "82c785"
 const DELTA_DOWN_COLOR: String = "d98080"
 
 
+## Plain-text hover tooltip for bag / equipment tiles (Godot `tooltip_text`
+## does not render BBCode). Includes name, auto stats, and a short flavor line.
+static func hover_text(item: Item) -> String:
+	if item == null:
+		return ""
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append(str(item.item_name))
+	for entry: Dictionary in item.stat_lines():
+		var text: String = str(entry.get("text", "")).strip_edges()
+		if not text.is_empty():
+			lines.append(text)
+	var flavor: String = item.description.strip_edges()
+	if not flavor.is_empty():
+		# Keep hover short — first sentence / ~120 chars.
+		var cut: int = flavor.find(".")
+		var snippet: String = flavor.substr(0, cut + 1) if cut >= 0 and cut < 120 else flavor
+		if snippet.length() > 120:
+			snippet = snippet.substr(0, 117) + "…"
+		lines.append(snippet)
+	return "\n".join(lines)
+
+
 ## Builds the tooltip body. Pass [param compare_with] (the equipped
 ## counterpart) to append green/red per-stat deltas — stats only the equipped
 ## item has are listed as a red loss line. Null keeps the plain rendering, so
