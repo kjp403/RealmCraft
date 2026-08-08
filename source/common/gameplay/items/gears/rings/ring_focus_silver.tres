@@ -20,7 +20,9 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_2cm48")
 slot = ExtResource("4_c2pit")
-required_level = 10
+required_level = 0
+required_mastery_categories = Array[StringName]([&"any"])
+required_mastery_level = 10
 base_modifiers = Array[ExtResource("1_j6m1g")]([SubResource("Resource_2cm48"), SubResource("Resource_c2pit")])
 item_name = &"Silver Focus Ring"
 item_icon = ExtResource("2_c2pit")

@@ -6,9 +6,8 @@ extends DataRequestHandler
 ## authority, no NPC gatekeeper — EXCEPT mid-spar/duel, where swapping
 ## abilities would dodge the fight you signed up for.
 ##
-## No capacity check here on purpose: a too-heavy pick is stored but inert
-## (MasteryService.effective_special_ids skips it) until the player wields a
-## weapon that can channel it. Storing intent beats erroring on it.
+## No weapon-capacity budget: owned picks always channel when the matching
+## weapon type is held. Storing intent beats erroring on it.
 
 const MAX_PICKS: int = 2
 

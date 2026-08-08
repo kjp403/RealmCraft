@@ -560,7 +560,7 @@ func _make_action_button(node: MasteryNode, _tree: MasteryTreeResource, info: Di
 		var key: String = SLOT_KEYS[slot_index] if slot_index < SLOT_KEYS.size() else str(slot_index + 1)
 		button.text = "Unequip  (%s)" % key
 	else:
-		button.text = "Equip  (heavy)" if _too_heavy_for_wielded(node) else "Equip"
+		button.text = "Equip"
 	button.pressed.connect(_on_equip_pressed.bind(String(node.id), equipped))
 	return button
 
@@ -598,10 +598,7 @@ func _open_slot_picker(node_id: String) -> void:
 		if not occ_id.is_empty():
 			occupant = "%s (Power %d)" % [_node_display_name(occ_id), _node_power(occ_id)]
 		entries.append("Slot %d (%s)  ·  %s" % [i + 1, SLOT_KEYS[i], occupant])
-	var title: String = "Place %s (Power %d) on which slot?" % [_node_display_name(node_id), _node_power(node_id)]
-	var cap: int = _wielded_capacity()
-	if cap >= 0:
-		title += "\nWeapon capacity: %d. A T1 ability is free; T2/T3/T4 cost 1/2/3 to slot." % cap
+	var title: String = "Place %s on which slot?" % _node_display_name(node_id)
 	_picker_overlay = SlotPickerOverlay.open(
 		self, title, entries,
 		func(slot: int) -> void: _send_loadout_with(node_id, slot)
@@ -629,11 +626,6 @@ func _send_loadout_with(node_id: String, slot: int) -> void:
 		picks[slot] = node_id
 	while not picks.is_empty() and str(picks[picks.size() - 1]).is_empty():
 		picks.pop_back()
-	var cap: int = _wielded_capacity()
-	if cap >= 0 and slot >= 0:
-		var used: int = _loadout_power_used(picks, MasteryService.tree_for(StringName(_category)))
-		if used > cap:
-			Toaster.toast("Over capacity (%d / %d used). T1 abilities are free; a higher-tier weapon channels heavier upgrades." % [used, cap])
 	Client.request_data(
 		&"mastery.loadout",
 		_on_loadout_result,
@@ -779,12 +771,6 @@ func _loadout_power_used(picks: Array, tree: MasteryTreeResource) -> int:
 	return total
 
 
-## True when the LOCAL player's wielded weapon is this category but can't channel
-## the node's weight — a UI hint only; the server re-checks anyway.
-func _too_heavy_for_wielded(node: MasteryNode) -> bool:
-	if ClientState.local_player == null:
-		return false
-	var weapon_item: WeaponItem = ClientState.local_player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
-	if weapon_item == null or String(weapon_item.category) != _category:
-		return false
-	return MasteryService.ability_weight(node) > weapon_item.capacity
+## Capacity budgets are retired — owned abilities always channel on a matching weapon.
+func _too_heavy_for_wielded(_node: MasteryNode) -> bool:
+	return false

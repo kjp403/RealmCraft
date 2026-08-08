@@ -344,9 +344,26 @@ const MASTERY_LEVEL_CAP: int = 50
 ## Returns the {"level", "xp", "spent"} entry for a weapon category, creating
 ## it at level 1 (= 1 spendable point) if missing.
 func get_mastery(category: StringName) -> Dictionary:
-	if not masteries.has(category):
-		masteries[category] = {"level": 1, "xp": 0, "spent": {}}
-	return masteries[category]
+	var key := StringName(String(category))
+	if not masteries.has(key):
+		# JSON / mixed String vs StringName keys can leave a sibling entry —
+		# adopt it under the canonical StringName key before creating a stub.
+		for existing: Variant in masteries.keys():
+			if String(existing) == String(key):
+				var adopted: Dictionary = masteries[existing]
+				masteries.erase(existing)
+				masteries[key] = adopted
+				return adopted
+		masteries[key] = {"level": 1, "xp": 0, "spent": {}}
+	return masteries[key]
+
+
+## Read-only mastery level for gates (0 = never practiced). Does not create entries.
+func mastery_level_of(category: StringName) -> int:
+	for existing: Variant in masteries.keys():
+		if String(existing) == String(category):
+			return int((masteries[existing] as Dictionary).get("level", 1))
+	return 0
 
 
 func mastery_xp_to_next(mastery_level: int) -> int:

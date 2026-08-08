@@ -14,7 +14,9 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_t7116")
 slot = ExtResource("4_jnguy")
-required_level = 15
+required_level = 0
+required_mastery_categories = Array[StringName]([&"any"])
+required_mastery_level = 15
 base_modifiers = Array[ExtResource("1_6abd4")]([SubResource("Resource_t7116")])
 item_name = &"Gold Guard Ring"
 item_icon = ExtResource("2_jnguy")

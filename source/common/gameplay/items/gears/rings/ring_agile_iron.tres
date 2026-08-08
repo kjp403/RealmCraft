@@ -14,7 +14,9 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_stohu")
 slot = ExtResource("4_6tyai")
-required_level = 5
+required_level = 0
+required_mastery_categories = Array[StringName]([&"any"])
+required_mastery_level = 5
 base_modifiers = Array[ExtResource("1_df0pt")]([SubResource("Resource_tw1yf")])
 item_name = &"Iron Agile Ring"
 item_icon = ExtResource("2_6tyai")

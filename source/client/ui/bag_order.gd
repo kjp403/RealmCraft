@@ -11,6 +11,37 @@ const PROPERTY: StringName = &"bag_order"
 const EMPTY: int = -1
 
 
+## Visible drag ghost for bag rearrange. Tall atlas weapon icons shrink badly
+## in a tiny box — use a generous square + nearest filtering so the art reads.
+static func make_drag_preview(texture: Texture2D, box: Vector2 = Vector2(48, 48)) -> Control:
+	var host := Control.new()
+	host.custom_minimum_size = box
+	host.size = box
+	var panel := Panel.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.09, 0.12, 0.92)
+	style.set_border_width_all(1)
+	style.border_color = Color(0.75, 0.78, 0.88, 0.85)
+	style.set_corner_radius_all(6)
+	panel.add_theme_stylebox_override(&"panel", style)
+	host.add_child(panel)
+	var icon := TextureRect.new()
+	icon.texture = texture
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	icon.offset_left = 4
+	icon.offset_top = 4
+	icon.offset_right = -4
+	icon.offset_bottom = -4
+	host.add_child(icon)
+	return host
+
+
 static func load_order() -> Array:
 	var raw: Variant = ClientState.settings.get_value(SECTION, PROPERTY)
 	if raw is Array:

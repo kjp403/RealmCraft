@@ -66,7 +66,7 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	var node: MasteryNode = tree.get_node_by_id(node_id)
 	if node == null:
 		return {"ok": false, "reason": "unknown_node"}
-	if not resource.masteries.has(category):
+	if resource.mastery_level_of(category) <= 0 and not _has_mastery_entry(resource, category):
 		return {"ok": false, "reason": "no_mastery"}
 	var entry: Dictionary = resource.get_mastery(category)
 	var spent: Dictionary = entry["spent"]
@@ -86,19 +86,26 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 ## Wipes a category's spent points AND its loadout pick. Free during alpha so
 ## testers experiment — pricing comes later if it matters.
 static func reset(resource: PlayerResource, category: StringName) -> Dictionary:
-	if not resource.masteries.has(category):
+	if not _has_mastery_entry(resource, category):
 		return {"ok": false, "reason": "no_mastery"}
-	(resource.masteries[category]["spent"] as Dictionary).clear()
+	var entry: Dictionary = resource.get_mastery(category)
+	(entry["spent"] as Dictionary).clear()
 	resource.ability_loadout.erase(String(category))
 	return {"ok": true}
 
 
+static func _has_mastery_entry(resource: PlayerResource, category: StringName) -> bool:
+	for existing: Variant in resource.masteries.keys():
+		if String(existing) == String(category):
+			return true
+	return false
+
+
 ## The "abilities" registry ids to mount in the weapon's special slots, ONE
 ## ENTRY PER LOADOUT SLOT POSITION (0 = that slot is empty), so a pick keeps
-## the input key the player placed it on. The capacity gate is a WEIGHT
-## BUDGET spent in slot order: a pick that doesn't fit the remaining budget,
-## isn't owned, or isn't an ability resolves to 0 (stored but inert until a
-## weapon that can channel it).
+## the input key the player placed it on. Owned ability picks always channel
+## while the matching weapon type is held — mastery level is the only gate
+## (weapon "capacity" is display flavor, not an equip budget).
 static func effective_special_ids(resource: PlayerResource, weapon_item: WeaponItem) -> Array[int]:
 	var out: Array[int] = []
 	if resource == null or weapon_item == null or weapon_item.category.is_empty():
@@ -107,9 +114,12 @@ static func effective_special_ids(resource: PlayerResource, weapon_item: WeaponI
 	if tree == null:
 		return out
 	var picks: Array = resource.ability_loadout.get(String(weapon_item.category), [])
-	var entry: Dictionary = resource.masteries.get(weapon_item.category, {})
+	var entry: Dictionary = {}
+	for existing: Variant in resource.masteries.keys():
+		if String(existing) == String(weapon_item.category):
+			entry = resource.masteries[existing]
+			break
 	var spent: Dictionary = entry.get("spent", {})
-	var budget: int = weapon_item.capacity
 	var used_chains: Dictionary = {} # chain root id -> true (never mount a chain twice)
 	for pick in picks:
 		var resolved: int = 0
@@ -117,27 +127,20 @@ static func effective_special_ids(resource: PlayerResource, weapon_item: WeaponI
 		if not node_id.is_empty() and spent.has(node_id):
 			var node: MasteryNode = tree.get_node_by_id(StringName(node_id))
 			if node != null and node.ability != null:
-				# Fire the EXACT tier the player slotted (no auto-bump to highest):
-				# channeling a lighter tier to free weapon power for another ability
-				# is a valid build. One tier per chain; over-budget picks stay inert.
+				# Fire the EXACT tier the player slotted (no auto-bump to highest).
+				# One tier per chain so Q/E never double-mount the same move.
 				var root: String = String(_chain_root_id(tree, node))
-				var weight: int = ability_weight(node)
-				if weight <= budget and not used_chains.has(root):
+				if not used_chains.has(root):
 					var ability_id: int = int(node.ability.get_meta(&"id", 0))
 					if ability_id > 0:
 						resolved = ability_id
-						budget -= weight
 						used_chains[root] = true
 		out.append(resolved)
 	return out
 
 
-## EQUIP weight of an ability node = tier - 1. A T1 (weight 0) is FREE to slot, so
-## you can ALWAYS fill both special slots — capacity is the UPGRADE budget you
-## spread across them (T2/T3/T4 cost 1/2/3), not a cost for having abilities at
-## all. This keeps early loadouts from feeling empty and lets a capstone (T4) still
-## carry a minor second ability. Point cost to LEARN stays = tier (spent_cost).
-## See docs/progression.md.
+## Historical equip-weight helper (tier - 1). Kept for UI labels that still
+## describe relative ability power; it no longer gates loadouts.
 static func ability_weight(node: MasteryNode) -> int:
 	return maxi(0, node.tier - 1)
 

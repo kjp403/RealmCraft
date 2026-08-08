@@ -8,12 +8,10 @@ extends SparGameMode
 ## on a DuelMaster, done).
 ##
 ## What it does NOT normalize (on purpose, alpha scope): mastery kits — a
-## higher-level fighter keeps more unlocked abilities, though the bracket-legal
-## weapon's capacity drags the usable ability weight down with it. Equal
-## stats, your kit.
+## higher-level fighter keeps more unlocked abilities. Equal stats, your kit.
 
 ## Fighters are synced to this level; equipped gear must have
-## required_level <= this to queue (enforced by SparringService).
+## required_level / required_mastery_level <= this to queue (SparringService).
 @export var sync_level: int = 10
 
 
@@ -32,8 +30,13 @@ func gear_over_bracket(player_resource: PlayerResource) -> bool:
 		var item: Item = ContentRegistryHub.load_by_id(&"items", int(player_resource.equipment[slot_key])) as Item
 		if item == null:
 			continue
-		# required_level lives on the gear/weapon subclasses, not the Item base.
-		var req: Variant = item.get("required_level")
-		if req != null and int(req) > sync_level:
+		# Character-level and mastery-tier gates both count as bracket tiers.
+		var req_level: Variant = item.get("required_level")
+		var req_mastery: Variant = item.get("required_mastery_level")
+		var tier: int = maxi(
+			int(req_level) if req_level != null else 0,
+			int(req_mastery) if req_mastery != null else 0
+		)
+		if tier > sync_level:
 			return true
 	return false

@@ -303,12 +303,7 @@ func _bag_get_drag_data(
 	entry: Dictionary,
 	slot: Control
 ) -> Variant:
-	var preview := TextureRect.new()
-	preview.texture = (entry["item"] as Item).item_icon
-	preview.custom_minimum_size = Vector2(32, 32)
-	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	slot.set_drag_preview(preview)
+	slot.set_drag_preview(BagOrder.make_drag_preview((entry["item"] as Item).item_icon, Vector2(48, 48)))
 	return {"bag_uid": int(entry["uid"])}
 
 

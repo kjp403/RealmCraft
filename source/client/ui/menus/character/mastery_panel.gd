@@ -195,23 +195,18 @@ func _rebuild_summary() -> void:
 	_summary.add_child(loadout_label)
 	_summary.add_child(_make_loadout_strip(info))
 
-	# Power line — what the loadout demands vs the wielded weapon's capacity.
+	# Channel hint — owned loadout abilities fire while the matching weapon is held.
 	var cap: int = _wielded_capacity()
-	var used: int = _loadout_power_used(info.get("loadout", []), tree)
-	if cap >= 0 or used > 0:
-		var power: Label = Label.new()
-		power.add_theme_font_size_override(&"font_size", 12)
-		power.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		if cap < 0:
-			power.text = "Loadout power: %d  (equip a %s to channel it)" % [used, display.to_lower()]
-			power.add_theme_color_override(&"font_color", Color(0.7, 0.72, 0.78))
-		elif used > cap:
-			power.text = "Weapon power: %d / %d. Over capacity, the heaviest ability won't channel." % [used, cap]
-			power.add_theme_color_override(&"font_color", Color(1.0, 0.55, 0.4))
-		else:
-			power.text = "Weapon power: %d / %d used" % [used, cap]
-			power.add_theme_color_override(&"font_color", Color(0.7, 0.85, 1.0))
-		_summary.add_child(power)
+	var power: Label = Label.new()
+	power.add_theme_font_size_override(&"font_size", 12)
+	power.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if cap < 0:
+		power.text = "Equip a %s to channel this loadout." % display.to_lower()
+		power.add_theme_color_override(&"font_color", Color(0.7, 0.72, 0.78))
+	else:
+		power.text = "Owned abilities channel while this weapon is held."
+		power.add_theme_color_override(&"font_color", Color(0.7, 0.85, 1.0))
+	_summary.add_child(power)
 
 	# Spacer + Open-tree button pinned bottom-right.
 	var spacer: Control = Control.new()

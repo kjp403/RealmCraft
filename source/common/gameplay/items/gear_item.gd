@@ -90,15 +90,21 @@ func can_equip(player: Player) -> bool:
 ## True when mastery gate is empty or the player has the required level in one
 ## of the listed categories (&"any" = highest mastery across all trees).
 func meets_mastery_requirement(res: PlayerResource) -> bool:
+	if res == null:
+		return false
 	if required_mastery_level <= 0 or required_mastery_categories.is_empty():
 		return true
 	if required_mastery_categories.has(&"any"):
 		var best: int = 0
+		# Prefer practiced entries on the player; also scan known trees so a
+		# /mastery-set category that matches a tree is counted.
+		for existing: Variant in res.masteries.keys():
+			best = maxi(best, res.mastery_level_of(StringName(str(existing))))
 		for category: StringName in MasteryService.trees():
-			best = maxi(best, int(res.get_mastery(category).get("level", 1)))
+			best = maxi(best, res.mastery_level_of(category))
 		return best >= required_mastery_level
 	for category: StringName in required_mastery_categories:
-		if int(res.get_mastery(category).get("level", 1)) >= required_mastery_level:
+		if res.mastery_level_of(category) >= required_mastery_level:
 			return true
 	return false
 

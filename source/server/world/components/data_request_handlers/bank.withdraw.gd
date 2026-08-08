@@ -1,5 +1,6 @@
 extends DataRequestHandler
 ## Move a bank stack (or part of it) back into the bag. No storage cap.
+## Currency stacks that somehow landed in the vault are purged back to the pouch.
 
 
 func data_request_handler(
@@ -23,6 +24,19 @@ func data_request_handler(
 	var have: int = int(slot.get("a", 0))
 	if item_id <= 0 or have <= 0:
 		return {"ok": false, "reason": "missing"}
+
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item != null and item.is_currency:
+		var purged: int = Inventory.remove_from_slot(bank, slot_uid, have)
+		if purged > 0:
+			Inventory.add_item(player.player_resource.inventory, item_id, purged)
+			instance.world_server.database.save_player(player.player_resource)
+		return {
+			"ok": false,
+			"reason": "currency",
+			"inventory": player.player_resource.inventory,
+			"bank": player.player_resource.bank,
+		}
 
 	var amount: int = int(args.get("amount", have))
 	if amount <= 0:
