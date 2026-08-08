@@ -78,6 +78,9 @@ static func _reward(player: Player, npc: HostileNpc, reserved_peer: int = 0) -> 
 	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
 	if weapon_item != null and not weapon_item.category.is_empty():
 		mastery = resource.add_mastery_xp(weapon_item.category, npc.xp_reward)
+		# Level-up intrinsic bonuses (AD/AP/armor/…) need a refresh to apply.
+		if bool(mastery.get("leveled_up", false)) or bool(mastery.get("started", false)):
+			MasteryService.refresh(player)
 
 	var peer_id: int = int(resource.current_peer_id)
 	if peer_id > 0:

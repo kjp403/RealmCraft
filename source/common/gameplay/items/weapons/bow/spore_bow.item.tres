@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponItem" format=3 uid="uid://dowcv48c5suhy"]
 
 [ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
-[ext_resource type="Texture2D" uid="uid://d0226i8o2vv53" path="res://assets/sprites/items/weapons/rustic/rustic.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://c6613ovlcm1qr" path="res://assets/sprites/items/weapons/spore/spore.png" id="2_tex"]
 [ext_resource type="PackedScene" uid="uid://e6kqwoh5tlxp" path="res://source/common/gameplay/items/weapons/bow/wooden_bow.tscn" id="3_scene"]
 [ext_resource type="Script" uid="uid://5hk0gl5ng64h" path="res://source/common/gameplay/items/weapon_item.gd" id="4_item"]
 [ext_resource type="Resource" uid="uid://qav4p12rsbn3" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="5_slot"]
@@ -18,7 +18,7 @@ value = -7.0
 
 [sub_resource type="AtlasTexture" id="Atlas_icon"]
 atlas = ExtResource("2_tex")
-region = Rect2(80, 128, 16, 32)
+region = Rect2(80, 48, 16, 32)
 
 [resource]
 script = ExtResource("4_item")

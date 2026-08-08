@@ -18,7 +18,7 @@ func _ready() -> void:
 
 
 func _open_for_npc(npc: HostileNpc) -> void:
-	if npc == null or not is_instance_valid(npc) or npc.is_dead:
+	if npc == null or not is_instance_valid(npc) or _is_dead(npc):
 		return
 	_target = npc
 	_menu.clear()
@@ -34,9 +34,20 @@ func _open_for_npc(npc: HostileNpc) -> void:
 func _on_action(action_id: int) -> void:
 	if action_id != ACTION_ATTACK:
 		return
-	if _target == null or not is_instance_valid(_target) or _target.is_dead:
+	if _target == null or not is_instance_valid(_target) or _is_dead(_target):
 		return
 	var local_player: LocalPlayer = ClientState.local_player
 	if local_player == null:
 		return
 	local_player.start_hostile_attack(_target)
+
+
+func _is_dead(npc: HostileNpc) -> bool:
+	if npc.is_dead:
+		return true
+	if npc.enemy_state == HostileNpc.EnemyState.DEAD \
+			or npc.enemy_state == HostileNpc.EnemyState.REVIVING:
+		return true
+	if npc.stats_component != null and npc.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+		return true
+	return false

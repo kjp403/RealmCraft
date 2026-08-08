@@ -416,7 +416,11 @@ func process_movement() -> void:
 
 
 func process_input() -> void:
-	if _dead or _has_gui_focus() or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
+	# Movement lock (drink root / hammer slam root) freezes WASD but must NOT
+	# cancel Right-click → Attack — otherwise heavy weapons / drink roots abort
+	# the auto-attack loop after a single hit.
+	var rooted: bool = Time.get_ticks_msec() < _movement_lock_until_ms
+	if _dead or _has_gui_focus() or ClientState.menu_open:
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
@@ -425,6 +429,20 @@ func process_input() -> void:
 		if _combat_target_controller != null:
 			_combat_target_controller.cancel()
 		input_direction = Vector2.ZERO
+		action_input = false
+		return
+	if rooted:
+		_click_navigation.cancel()
+		if _harvest_controller != null:
+			_harvest_controller.cancel()
+		if _pickup_controller != null:
+			_pickup_controller.cancel()
+		input_direction = Vector2.ZERO
+		# Keep Attack looping while briefly rooted; look + fire still run below.
+		if _combat_target_controller != null and _combat_target_controller.tick():
+			action_input = false
+			return
+		look_direction = controller.get_look_direction()
 		action_input = false
 		return
 

@@ -70,6 +70,9 @@ func data_request_handler(
 		if previous_id > 0:
 			Inventory.add_item(inventory, previous_id, 1)
 		player.player_resource.equipment[slot_key] = item_id
+		# Armor / rings / relics equip instantly — must return success here or the
+		# fall-through "cant_equip" below toasts failure while the piece is already on.
+		return {"ok": true}
 	elif item is MaterialItem:
 		# Resources are bag-only — Drop from the inventory menu, never Hold.
 		return {"ok": false, "reason": "cant_equip"}

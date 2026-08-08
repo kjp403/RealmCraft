@@ -33,5 +33,6 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource(
 item_name = &"Enchanted Robe"
 item_icon = ExtResource("2_icon")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
+can_trade = true
 metadata/slug = &"enchanted_robe"
 metadata/id = 14

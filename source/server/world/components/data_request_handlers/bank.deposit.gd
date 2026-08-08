@@ -1,5 +1,6 @@
 extends DataRequestHandler
 ## Move a bag stack (or part of it) into the personal bank. No storage cap.
+## Currency (gold) is rejected — it stays in the currency pouch.
 
 
 func data_request_handler(
@@ -23,6 +24,10 @@ func data_request_handler(
 	var have: int = int(slot.get("a", 0))
 	if item_id <= 0 or have <= 0:
 		return {"ok": false, "reason": "missing"}
+
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item != null and item.is_currency:
+		return {"ok": false, "reason": "currency"}
 
 	var amount: int = int(args.get("amount", have))
 	if amount <= 0:

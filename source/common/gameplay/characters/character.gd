@@ -197,11 +197,16 @@ func _on_stat_changed(stat_name: StringName, value: float) -> void:
 
 
 ## Remaining life points drawn on the over-head bar (e.g. "42").
+## Uses the synced health snapshot, not the tweening ProgressBar value — otherwise
+## the last fractional HP (or a mid-tween bar) ceils to "1" and sticks on corpses.
 func _refresh_hp_label() -> void:
 	if hp_label == null:
 		return
-	var current: int = maxi(0, int(ceil(progress_bar.value)))
-	hp_label.text = str(current) if current > 0 else ""
+	var hp: float = _last_health_seen if _last_health_seen >= 0.0 else progress_bar.value
+	if hp <= 0.0:
+		hp_label.text = ""
+		return
+	hp_label.text = str(maxi(1, int(round(hp))))
 
 
 ## Combat juice: brief red tint on the sprite + a spatial hit SFX. Called
@@ -225,9 +230,13 @@ func _play_hit_feedback() -> void:
 
 
 ## Glide the over-head bar to [param value] instead of snapping.
+## Death (0 HP) snaps immediately so the bar/label never linger at "1".
 func _set_bar_value(value: float) -> void:
 	if _bar_value_tween != null and _bar_value_tween.is_valid():
 		_bar_value_tween.kill()
+	if value <= 0.0:
+		progress_bar.value = 0.0
+		return
 	_bar_value_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_bar_value_tween.tween_property(progress_bar, ^"value", value, HEALTH_BAR_FILL_S)
 

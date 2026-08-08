@@ -79,6 +79,7 @@ func _spawn_click_area() -> void:
 	area.add_child(collision)
 	add_child(area)
 	area.clicked.connect(_on_clicked) # ClickableArea does the left-click/tap detection
+	area.right_clicked.connect(_on_right_clicked)
 	# Mirror the GUI combat-gate into the world: while the cursor is over this talkable
 	# NPC, suppress the player's attack so a click TALKS instead of also shooting. Undone
 	# on free (tree_exiting) so the shared counter can't leak and stick combat off.
@@ -126,6 +127,15 @@ func _on_clicked() -> void:
 		Toaster.toast("Too far from %s." % who)
 
 
+func _on_right_clicked() -> void:
+	if not _player_in_range():
+		var who: String = display_name if not display_name.is_empty() else "them"
+		Toaster.toast("Too far from %s." % who)
+		return
+	_face_local_player()
+	ClientState.npc_context_requested.emit(self)
+
+
 ## True when the local player is close enough to interact. Clicks from too far are
 ## silently ignored, so you have to walk up to the NPC (this also underpins the
 ## "rooted while talking" model). Null-safe before the local player exists.
@@ -143,6 +153,11 @@ func _face_local_player() -> void:
 	if lp == null or not is_instance_valid(lp) or animated_sprite == null:
 		return
 	animated_sprite.flip_h = lp.global_position.x < global_position.x
+
+
+## Public entry for HUD context menus (Talk) and left-click.
+func open_interactions() -> void:
+	_open_interactions()
 
 
 func _open_interactions() -> void:
