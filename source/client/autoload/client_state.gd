@@ -14,6 +14,8 @@ signal player_profile_by_peer_requested(peer_id: int)
 signal player_context_requested(peer_id: int)
 ## Right-click a hostile → HUD opens Attack menu for that NPC.
 signal hostile_context_requested(npc: HostileNpc)
+## Right-click a friendly NPC → HUD opens Talk / Bank (etc.) context actions.
+signal npc_context_requested(npc: NPC)
 signal open_menu_requested(menu: StringName, arg: Variant)
 signal dm_requested(id: int)
 ## Emitted on the client after a successful gather (mining, ...). Carries the

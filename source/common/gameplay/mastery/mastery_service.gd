@@ -205,9 +205,46 @@ static func refresh(player: Player) -> void:
 			for modifier: StatModifier in node.passive_modifiers:
 				player.stats_component.modify_stat(modifier.stat_name, modifier.value)
 				resource.applied_mastery_passives.append({"stat": modifier.stat_name, "value": modifier.value})
+		# Intrinsic level bonuses while that mastery weapon is held — practicing a
+		# tree is rewarding even before spending points (see _level_bonus_package).
+		if is_held:
+			var level: int = int((resource.masteries[category] as Dictionary).get("level", 1))
+			for bonus: Dictionary in _level_bonus_package(category, level):
+				var stat: StringName = bonus["stat"]
+				var value: float = float(bonus["value"])
+				if is_zero_approx(value):
+					continue
+				player.stats_component.modify_stat(stat, value)
+				resource.applied_mastery_passives.append({"stat": stat, "value": value})
 
 	_carry_current_to_max(player, Stat.HEALTH, Stat.HEALTH_MAX, old_hp_max)
 	_carry_current_to_max(player, Stat.MANA, Stat.MANA_MAX, old_mana_max)
+
+
+## Per-level (above 1) offensive + defensive package while the matching weapon
+## is equipped. Tuned so mastery 15 ≈ a soft mid-tier armor bump and mastery 25
+## is a real specialization reward — not a substitute for gear or tree nodes.
+static func _level_bonus_package(category: StringName, level: int) -> Array[Dictionary]:
+	var ranks: int = maxi(0, mini(level, PlayerResource.MASTERY_LEVEL_CAP) - 1)
+	if ranks <= 0:
+		return []
+	var out: Array[Dictionary] = []
+	match category:
+		&"sword", &"hammer":
+			out.append({"stat": Stat.AD, "value": ranks * 0.45})
+			out.append({"stat": Stat.ARMOR, "value": ranks * 0.3})
+			out.append({"stat": Stat.HEALTH_MAX, "value": ranks * 1.2})
+		&"bow":
+			out.append({"stat": Stat.AD, "value": ranks * 0.45})
+			out.append({"stat": Stat.MOVE_SPEED, "value": ranks * 0.25})
+			out.append({"stat": Stat.ARMOR, "value": ranks * 0.2})
+		&"wand", &"book":
+			out.append({"stat": Stat.AP, "value": ranks * 0.45})
+			out.append({"stat": Stat.MR, "value": ranks * 0.3})
+			out.append({"stat": Stat.MANA_MAX, "value": ranks * 1.5})
+		_:
+			pass
+	return out
 
 
 ## When a max stat changed (a +/- max-health passive equipped/removed), shift

@@ -12,5 +12,6 @@ item_name = &"Health Potion"
 item_icon = ExtResource("3_35wr3")
 description = "A reliable brew, standard issue for the watch."
 metadata/_custom_type_script = "uid://bprsise4rcsak"
+can_trade = true
 metadata/slug = &"health_potion"
 metadata/id = 1

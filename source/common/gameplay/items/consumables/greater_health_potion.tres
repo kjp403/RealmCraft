@@ -11,5 +11,6 @@ heal_amount = 80
 item_name = &"Greater Health Potion"
 item_icon = ExtResource("1_3l1dt")
 description = "A potent brew for a tougher fight."
+can_trade = true
 metadata/slug = &"greater_health_potion"
 metadata/id = 67

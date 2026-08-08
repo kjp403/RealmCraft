@@ -9,5 +9,6 @@ mana_amount = 200
 item_name = &"Greater Mana Potion"
 item_icon = ExtResource("1_icon")
 description = "A deep blue draught for prolonged casting."
+can_trade = true
 metadata/slug = &"greater_mana_potion"
 metadata/id = 205

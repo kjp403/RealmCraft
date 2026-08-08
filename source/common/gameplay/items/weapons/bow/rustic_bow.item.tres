@@ -20,7 +20,7 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ibcoj"]
 atlas = ExtResource("2_0xwrd")
-region = Rect2(80, 128, 16, 32)
+region = Rect2(80, 48, 16, 32)
 
 [resource]
 script = ExtResource("4_yrgi7")

@@ -12,6 +12,9 @@ const PLAYER_CONTEXT_MENU_SCRIPT: Script = preload(
 const HOSTILE_CONTEXT_MENU_SCRIPT: Script = preload(
 	"res://source/client/ui/hud/hostile_context_menu.gd"
 )
+const NPC_CONTEXT_MENU_SCRIPT: Script = preload(
+	"res://source/client/ui/hud/npc_context_menu.gd"
+)
 
 @export var sub_menu: Control
 
@@ -60,6 +63,7 @@ func _ready() -> void:
 	add_child(_navigation_minimap)
 	add_child(PLAYER_CONTEXT_MENU_SCRIPT.new())
 	add_child(HOSTILE_CONTEXT_MENU_SCRIPT.new())
+	add_child(NPC_CONTEXT_MENU_SCRIPT.new())
 	# The minimap owns the upper-right navigation lane. Keep the existing
 	# tracker directly below it so the two surfaces read as one system.
 	quest_tracker.anchor_left = 1.0

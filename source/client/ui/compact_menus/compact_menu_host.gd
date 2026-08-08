@@ -301,14 +301,9 @@ func _bag_get_drag_data_empty(_at_position: Vector2) -> Variant:
 func _bag_get_drag_data(
 	_at_position: Vector2,
 	entry: Dictionary,
-	slot: Control
+	_slot: Control
 ) -> Variant:
-	var preview := TextureRect.new()
-	preview.texture = (entry["item"] as Item).item_icon
-	preview.custom_minimum_size = Vector2(32, 32)
-	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	slot.set_drag_preview(preview)
+	# No drag ghost — rearrange is position-only; the floating icon was noisy.
 	return {"bag_uid": int(entry["uid"])}
 
 
