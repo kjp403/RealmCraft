@@ -149,12 +149,12 @@ func _boot_handshake() -> bool:
 	while true:
 		_show_connecting()
 		var response: Dictionary = await _request_handshake()
-		# Editor "Run Multiple Instances": gateway/master may still be booting, so ride
-		# out pure connection / not-ready errors. Exported clients skip this.
+		# Ride out brief gateway/master restarts (deploy) and editor multi-instance boot races.
 		var attempts: int = 0
-		while OS.has_feature("editor") and GatewayError.is_connection_error(response) and attempts < 20:
+		var max_attempts: int = 40 if OS.has_feature("editor") else 12
+		while GatewayError.is_connection_error(response) and attempts < max_attempts:
 			attempts += 1
-			await get_tree().create_timer(0.25).timeout
+			await get_tree().create_timer(0.5).timeout
 			response = await _request_handshake()
 
 		if response.get("ok") == true:
@@ -167,8 +167,28 @@ func _boot_handshake() -> bool:
 			_block_outdated(str(response.get("msg", "")))
 			return false
 		# Gateway / master unreachable → message + Retry; the press loops us around.
-		await popup_panel.confirm_message(tr("ERR_CANT_REACH"), &"CANT_REACH_TITLE", &"RETRY")
+		# Include diagnostics so a stuck player (or bug report) shows URL/version/error.
+		var detail: String = "%s\n\n%s" % [tr("ERR_CANT_REACH"), _handshake_failure_detail(response)]
+		await popup_panel.confirm_message(detail, &"CANT_REACH_TITLE", &"RETRY")
 	return false  # unreachable — the loop only exits via the returns above
+
+
+func _handshake_failure_detail(response: Dictionary) -> String:
+	var url: String = GatewayAPI.handshake()
+	var ver: String = GatewayAPI.game_version()
+	var err: Variant = response.get("error", "?")
+	var code: Variant = response.get("code", "")
+	var msg: String = str(response.get("msg", ""))
+	var parts: PackedStringArray = [
+		"API: %s" % url,
+		"Client: v%s" % ver,
+		"Error: %s" % str(err),
+	]
+	if code != null and str(code) != "":
+		parts.append("Code: %s" % str(code))
+	if not msg.is_empty():
+		parts.append(msg)
+	return "\n".join(parts)
 
 
 func _request_handshake() -> Dictionary:
