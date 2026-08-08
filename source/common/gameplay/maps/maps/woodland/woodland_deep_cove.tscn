@@ -62,14 +62,14 @@ texture = ExtResource("10_dock")
 [node name="FishingBoat" type="Sprite2D" parent="."]
 z_index = 2
 centered = false
-position = Vector2(372, 176)
+position = Vector2(388, 180)
 texture = ExtResource("12_boat")
 
 [node name="BoatLabel" type="Label" parent="."]
-offset_left = 364
-offset_top = 156
-offset_right = 444
-offset_bottom = 172
+offset_left = 380
+offset_top = 160
+offset_right = 460
+offset_bottom = 176
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 3
@@ -78,7 +78,7 @@ text = "Beach"
 horizontal_alignment = 1
 
 [node name="BoatToBeach" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(368, 208)
+position = Vector2(376, 212)
 target = NodePath("../../WoodlandBeach/BoatToDeepCove")
 
 [node name="CollisionShape2D" parent="BoatToBeach" index="0"]
