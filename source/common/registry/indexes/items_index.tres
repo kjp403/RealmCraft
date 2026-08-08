@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1786204421
-next_id = 250
+next_id = 253
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -938,10 +938,25 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/weapons/tools/axe.tres",
 &"slug": &"axe"
 }, {
-&"hash": "5e333f98498dcdccfb9dbc5b3b5783b1f80778a716478d89d182c242832eb96c",
+&"hash": "d8838092d424ee19560b2c49fc29b1ea8778b14d5e898a3363455475f9bc06c0",
 &"id": 179,
 &"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod.tres",
 &"slug": &"fishing_rod"
+}, {
+&"hash": "b7066cc37bf321690e86ef7f71c1f065a33b2ec51595a3ad43ef161c0c45b51f",
+&"id": 250,
+&"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod_lv10.tres",
+&"slug": &"fishing_rod_lv10"
+}, {
+&"hash": "2c88ec0ca42e88775c39e3d093e92bf125e0d40bea9d8dcdbdcbb8a056eb00e7",
+&"id": 251,
+&"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod_lv20.tres",
+&"slug": &"fishing_rod_lv20"
+}, {
+&"hash": "46ce1006a2bff471e78d43fc078c979c7e426c8cb7c9d3532685bf9eb0bf7507",
+&"id": 252,
+&"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod_lv30.tres",
+&"slug": &"fishing_rod_lv30"
 }, {
 &"hash": "3729fc73c172be2b715a7de56f891337ba81ace13c30510917b5ce078523e793",
 &"id": 52,

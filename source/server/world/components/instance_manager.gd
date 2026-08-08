@@ -310,6 +310,40 @@ func find_instance_for_peer(peer_id: int) -> ServerInstance:
 	return null
 
 
+## Boss-arena / authored death eject: if the peer's current instance has
+## [member InstanceResource.death_return_instance], switch them there (Castle
+## Garden for The Hollow). Returns true when a cross-instance return was scheduled.
+func send_player_death_return(peer_id: int) -> bool:
+	var current_inst: ServerInstance = find_instance_for_peer(peer_id)
+	if current_inst == null or current_inst.instance_resource == null:
+		return false
+	var dest_ref: InstanceResource = current_inst.instance_resource.death_return_instance
+	if dest_ref == null:
+		return false
+	# Prefer the collection entry so we use the live charged_instances list.
+	var dest: InstanceResource = instance_collection.get(
+		String(dest_ref.instance_name), dest_ref
+	) as InstanceResource
+	if dest == null:
+		dest = dest_ref
+	var player: Player = current_inst.get_player(peer_id)
+	if player == null:
+		return false
+	var warper_id: int = current_inst.instance_resource.death_return_warper_id
+	# Already on the destination map — snap to its home spawn instead of no-op.
+	if current_inst.instance_resource.instance_name == dest.instance_name:
+		teleport_peer_to(peer_id, current_inst, current_inst.instance_map.get_spawn_position(warper_id))
+		return true
+	if dest.charged_instances.is_empty():
+		queue_charge_instance(
+			dest,
+			player_switch_instance.bind(warper_id, player, current_inst)
+		)
+	else:
+		player_switch_instance(dest.get_instance(), warper_id, player, current_inst)
+	return true
+
+
 ## Move an online player straight to the jail instance. Mirrors the warper
 ## handler: synchronous switch if jail is already charged, else queue until
 ## the instance is ready. Silently no-ops if the jail map isn't authored yet.

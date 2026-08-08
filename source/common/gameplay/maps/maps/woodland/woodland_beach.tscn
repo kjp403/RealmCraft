@@ -1,9 +1,6 @@
 [gd_scene format=3 uid="uid://cf9f162e5c50c5"]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_beach_ground.png" id="1_ground"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar2.png" id="2_bar"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/fishshop2.png" id="3_shop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar1.png" id="4_bar2"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
 [ext_resource type="Resource" uid="uid://c7bc2b3bd11a32" path="res://source/common/gameplay/crafting/resources/cooking_station.tres" id="7_cook"]
@@ -14,7 +11,6 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_red.png" id="p0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_blue.png" id="p1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/chair_red.png" id="p2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/palm.png" id="p6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
 [ext_resource type="Resource" uid="uid://cda7f206562b2b" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_shrimp.tres" id="h0"]
 [ext_resource type="Resource" uid="uid://ca1a2c6ce3fae3" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_herring.tres" id="h1"]
@@ -32,42 +28,12 @@ ground_size = Vector2(832, 512)
 shoreline = PackedVector2Array(0, 316, 16, 316, 32, 329, 48, 316, 64, 313, 80, 297, 96, 300, 112, 284, 128, 252, 144, 268, 160, 252, 176, 220, 192, 236, 208, 204, 224, 217, 240, 220, 256, 201, 272, 201, 288, 204, 304, 172, 320, 172, 336, 188, 352, 169, 368, 156, 384, 169, 400, 169, 416, 156, 432, 169, 448, 156, 464, 156, 480, 156, 496, 169, 512, 169, 528, 169, 544, 185, 560, 185, 576, 201, 592, 201, 608, 217, 624, 233, 640, 249, 656, 236, 672, 265, 688, 265, 704, 281, 720, 281, 736, 268, 752, 284, 768, 316, 784, 345, 800, 345, 816, 345, 831, 345)
 dock_walk = Rect2(388, 140, 56, 140)
 boat_pad = Rect2(408, 200, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(140, 100, 60, 28), Rect2(290, 84, 60, 24), Rect2(470, 105, 60, 28), Rect2(62, 82, 16, 12), Rect2(672, 102, 16, 12), Rect2(228, 162, 24, 14), Rect2(212, 182, 24, 16), Rect2(124, 134, 12, 12), Rect2(554, 139, 12, 12), Rect2(234, 133, 32, 20)])
+solid_footprints = Array[Rect2]([Rect2(228, 162, 24, 14), Rect2(212, 182, 24, 16), Rect2(124, 134, 12, 12), Rect2(554, 139, 12, 12), Rect2(234, 133, 32, 20)])
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
 centered = false
 texture = ExtResource("1_ground")
-
-[node name="BeachBar" type="Sprite2D" parent="."]
-z_index = 2
-position = Vector2(170, 120)
-texture = ExtResource("2_bar")
-offset = Vector2(0, -40)
-
-[node name="FishShop" type="Sprite2D" parent="."]
-z_index = 2
-position = Vector2(320, 100)
-texture = ExtResource("3_shop")
-offset = Vector2(0, -32)
-
-[node name="BeachHut" type="Sprite2D" parent="."]
-z_index = 2
-position = Vector2(500, 125)
-texture = ExtResource("4_bar2")
-offset = Vector2(0, -40)
-
-[node name="Palm1" type="Sprite2D" parent="."]
-z_index = 3
-position = Vector2(70, 90)
-texture = ExtResource("p6")
-offset = Vector2(0, -24)
-
-[node name="Palm2" type="Sprite2D" parent="."]
-z_index = 3
-position = Vector2(680, 110)
-texture = ExtResource("p6")
-offset = Vector2(0, -24)
 
 [node name="Umbrella1" type="Sprite2D" parent="."]
 position = Vector2(240, 170)

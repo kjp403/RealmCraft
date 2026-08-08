@@ -31,8 +31,8 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_gear")
 required_level = 0
-required_mastery_categories = Array[StringName]([&"bow"])
-required_mastery_level = 15
+required_mastery_categories = Array[StringName]([])
+required_mastery_level = 0
 slot = ExtResource("4_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3")])
 item_name = &"Phantom Sandals"

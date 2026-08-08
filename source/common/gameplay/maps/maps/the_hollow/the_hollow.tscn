@@ -1,13 +1,11 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
+[ext_resource type="Script" path="res://source/common/gameplay/maps/maps/the_hollow/the_hollow.gd" id="1_map"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="2_rp"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="3_warper"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="4_portal"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="5_hub"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/backgrounds/fairy_forest.png" id="5_bg"]
-[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="6_hostile"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres" id="7_golem"]
 
 [node name="the_hollow" type="Node2D"]
 script = ExtResource("1_map")
@@ -62,17 +60,9 @@ autowrap_mode = 3
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 script = ExtResource("2_rp")
-id_to_node = {
-0: NodePath("MechaStoneGolem")
-}
-node_to_id = {
-NodePath("MechaStoneGolem"): 0
-}
+id_to_node = {}
+node_to_id = {}
 metadata/_custom_type_script = "uid://wq8klpndipnu"
-
-[node name="MechaStoneGolem" parent="ReplicatedPropsContainer" instance=ExtResource("6_hostile")]
-position = Vector2(464, 240)
-enemy_data = ExtResource("7_golem")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("3_warper")]
 position = Vector2(480, 396)

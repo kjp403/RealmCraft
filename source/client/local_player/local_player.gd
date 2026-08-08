@@ -173,15 +173,19 @@ func refresh_nameplate_color() -> void:
 
 
 ## Lock control while dead, then teleport ourselves to the spawn point (the server owns
-## HP + the dead flag; position is ours to set).
+## HP + the dead flag; position is ours to set). Boss-arena deaths set return_home —
+## the server switches instance after the delay, so skip the local snap.
 func _on_player_died(data: Dictionary) -> void:
 	_dead = true
 	_respawn_position = data.get("spawn", global_position)
+	var return_home: bool = bool(data.get("return_home", false))
 	await get_tree().create_timer(float(data.get("respawn_in", 3.0))).timeout
 	if not is_instance_valid(self):
 		return
-	global_position = _respawn_position
 	_dead = false
+	if return_home:
+		return
+	global_position = _respawn_position
 
 
 ## Server-driven teleport for the start/end of a sparring match. Pushes carry
