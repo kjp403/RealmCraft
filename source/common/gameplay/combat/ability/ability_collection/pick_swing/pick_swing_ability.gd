@@ -16,7 +16,7 @@ extends AbilityResource
 ## up for higher tiers. Combined with node.extraction_hp this sets the
 ## "swings per ore yield" feel.
 @export var extraction_damage: int = 1
-@export var spawn_offset: float = 0.0
+@export var spawn_offset: float = 18.0
 ## The tool this swing counts as. Veins want &"pickaxe", herbs want &"sickle".
 ## Forwarded to the PickArc so MineableNode.required_tool can gate the gather.
 @export var tool_type: StringName = &"pickaxe"

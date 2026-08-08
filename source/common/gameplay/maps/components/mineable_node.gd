@@ -27,6 +27,7 @@ extends Area2D
 
 # --- Cached refs ------------------------------------------------------------
 @onready var _sprite: Sprite2D = $Sprite2D
+@onready var _name_label: Label = $NameLabel
 @onready var _bar: ProgressBar = $VisualState/ProgressBar
 @onready var _charge_label: Label = $VisualState/ChargeLabel
 @onready var _visual_state: Control = $VisualState
@@ -64,6 +65,7 @@ func _ready() -> void:
 	# Apply visuals on every peer (server included; harmless and keeps the
 	# editor's preview honest).
 	_apply_sprite()
+	_apply_name_label()
 	_visual_state.visible = false
 	# Lift the progress bar + charge label above map decorations (plants, rocks)
 	# that otherwise render on top of this node's world-space Control.
@@ -362,3 +364,13 @@ func _apply_sprite() -> void:
 	# Works whether `data.texture` is a plain Texture2D or an AtlasTexture —
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
+
+
+func _apply_name_label() -> void:
+	if _name_label == null:
+		return
+	if data == null or data.ore == null:
+		_name_label.visible = false
+		return
+	_name_label.visible = true
+	_name_label.text = String(data.ore.item_name)

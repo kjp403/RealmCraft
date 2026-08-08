@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://ctinoremat001"]
+
+[ext_resource type="Texture2D" uid="uid://c4a7ea4a56bff" path="res://assets/sprites/items/icons/ore_tin.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Tin Ore"
+item_icon = ExtResource("1_icon")
+description = "Soft silvery ore. Pair it with copper when you are ready to learn bronze work."
+metadata/slug = &"tin_ore"
+metadata/id = 174

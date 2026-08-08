@@ -407,6 +407,11 @@ entries = Array[Dictionary]([{
 &"id": 51,
 &"path": "res://source/common/gameplay/items/materials/metals/copper_ore.tres",
 &"slug": &"copper_ore"
+, {
+&"hash": "2df1c1886cad980c9df0e0ee769a897dc29b571bb45d606287dd71184c5195db",
+&"id": 174,
+&"path": "res://source/common/gameplay/items/materials/metals/tin_ore.tres",
+&"slug": &"tin_ore"
 }, {
 &"hash": "a060fd13f1986b0c0dd73757305f0e874aa124774e8d771292fb837d4eea63a4",
 &"id": 173,

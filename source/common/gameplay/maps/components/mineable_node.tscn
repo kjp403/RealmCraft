@@ -8,7 +8,7 @@ atlas = ExtResource("2_7dauq")
 region = Rect2(0, 16, 32, 48)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_default"]
-size = Vector2(32, 32)
+size = Vector2(40, 40)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_bar_bg"]
 bg_color = Color(0.06, 0.05, 0.02, 0.85)
@@ -22,22 +22,42 @@ border_color = Color(0, 0, 0, 0.7)
 bg_color = Color(0.98, 0.78, 0.12, 1)
 
 [node name="MineableNode" type="Area2D" unique_id=1129547794]
+monitoring = true
+monitorable = true
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1101883737]
+position = Vector2(0, -16)
 texture = SubResource("AtlasTexture_g4qfl")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=638739511]
+position = Vector2(0, -8)
 shape = SubResource("RectangleShape2D_default")
+
+[node name="NameLabel" type="Label" parent="." unique_id=1888000100]
+z_index = 50
+offset_left = -56.0
+offset_top = -56.0
+offset_right = 56.0
+offset_bottom = -36.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.75, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 12
+text = "Ore"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="VisualState" type="Control" parent="." unique_id=1934028571]
 visible = false
+z_index = 100
 layout_mode = 3
 anchors_preset = 0
 offset_left = -32.0
-offset_top = -54.0
+offset_top = -72.0
 offset_right = 32.0
-offset_bottom = -28.0
+offset_bottom = -46.0
 mouse_filter = 2
 
 [node name="ProgressBar" type="ProgressBar" parent="VisualState" unique_id=1505719423]
