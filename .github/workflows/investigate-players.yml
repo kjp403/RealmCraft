@@ -156,6 +156,36 @@ jobs:
             echo "######## GODOT.LOG FULL NAME HITS ########"
             sudo grep -i -n -E 'Nesato|qqqqq' /opt/arkenelle/.local/share/slayhorizon/logs/godot.log | tail -100 || true
 
+            
+            echo "######## PLAYER ID 9 + ALL ROWS FROM NEWEST BACKUP ########"
+            NEWEST="$(sudo ls -1t /opt/arkenelle/.local/share/slayhorizon/db_backups/classic_*.db 2>/dev/null | head -1 || true)"
+            echo "NEWEST=$NEWEST"
+            if [ -n "$NEWEST" ]; then
+              sudo sqlite3 -header -column "$NEWEST" "SELECT player_id, account_name, display_name, level, experience, server_roles_json FROM players ORDER BY player_id;"
+              echo
+              sudo sqlite3 "$NEWEST" "SELECT * FROM players WHERE player_id=9 OR display_name LIKE '%Nesato%' COLLATE NOCASE OR account_name LIKE '%qqqqq%' COLLATE NOCASE;"
+              echo
+              echo "-- raw dump player 9 json fields --"
+              sudo sqlite3 -line "$NEWEST" "SELECT player_id, account_name, display_name, level, experience, available_attributes_points, skin_id, server_roles_json, attributes_json, inventory_json, bank_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, stats_json, titles_json FROM players WHERE player_id=9 OR display_name LIKE '%Nesato%' COLLATE NOCASE OR account_name LIKE '%qqqqq%' COLLATE NOCASE;"
+            fi
+            echo "######## RAW BAN/JAIL/MUTE FILE CONTENTS ########"
+            for f in \
+              /opt/arkenelle/.local/share/slayhorizon/server_bans.cfg \
+              /opt/arkenelle/.local/share/slayhorizon/server_jail.cfg \
+              /opt/arkenelle/.local/share/slayhorizon/server_mutes.cfg \
+              /opt/arkenelle/.local/share/slayhorizon/server_admins.cfg \
+              /opt/arkenelle/user://server_bans.cfg
+            do
+              if sudo test -f "$f"; then
+                echo "FILE $f"
+                sudo cat "$f"
+              fi
+            done
+            sudo find /opt/arkenelle/.local/share/slayhorizon -maxdepth 2 -type f -name '*.cfg' -o -name '*.tres' 2>/dev/null | while read -r f; do
+              echo "FILE $f"
+              sudo sed -n '1,200p' "$f"
+            done
+
             echo "=== END ==="
             } 2>&1 | tee "$OUT"
             wc -l "$OUT"
