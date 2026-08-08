@@ -46,8 +46,11 @@ func _ready() -> void:
 
 
 ## Keyboard 1/2/3. _unhandled_input on purpose: keys consumed by the GUI
-## (typing numbers in chat) never reach here.
+## (typing numbers in chat) never reach here. Ignore key-repeat echoes so
+## holding a rebound hotkey (e.g. Space) can't fire the slot every OS repeat.
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_echo():
+		return
 	for i: int in SLOT_ACTIONS.size():
 		if event.is_action_pressed(SLOT_ACTIONS[i]):
 			_trigger_slot(i)

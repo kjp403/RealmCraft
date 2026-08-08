@@ -2,11 +2,11 @@ class_name BossController
 extends Node
 ## The BRAIN of a dungeon boss. The boss itself stays a plain HostileNpc (the BODY:
 ## moves, basic-attacks, takes damage, dies); this node watches the body's HP and
-## orchestrates the fight on top — phase transition, a telegraphed slam, and an
-## enrage that summons adds + speeds the body up. Every move is composed from
-## primitives that ALREADY exist (AttackTelegraph via the body's rp_lunge_telegraph,
-## container.spawn_dynamic for summons, plain stat tweaks), so none of it bloats
-## HostileNpc.
+## orchestrates the fight on top — phase transition, a telegraphed slam, optional
+## laser / arm-cannon pressure, and an enrage that summons adds + speeds the body up.
+## Every move is composed from primitives that ALREADY exist (AttackTelegraph via the
+## body's rp_lunge_telegraph, CastTelegraph via rp_cast_telegraph, container.spawn_dynamic
+## for summons, plain Projectile for arm shots), so none of it bloats HostileNpc.
 ##
 ## RoomNode attaches one to a boss marker's mob on spawn. Server-only: it frees
 ## itself anywhere else (and since it's added AFTER the dynamic spawn, clients never
@@ -16,6 +16,8 @@ extends Node
 ## Extra seconds the body stays planted AFTER a slam lands — sells the weight and
 ## stops the boss snapping straight back into a chase.
 const SLAM_RECOVER_S: float = 0.25
+const LASER_RECOVER_S: float = 0.2
+const ARM_RECOVER_S: float = 0.15
 
 ## Enrage when the body drops to this fraction of max HP.
 var enrage_at_health_fraction: float = 0.5
@@ -26,6 +28,19 @@ var slam_damage: float = 45.0
 ## Seconds between slams — phase 1, then the faster enraged cadence.
 var slam_interval_s: float = 6.0
 var enraged_slam_interval_s: float = 3.5
+## Optional laser corridor (0 range = off). Forces a SIDESTEP dodge.
+var laser_range: float = 0.0
+var laser_width: float = 28.0
+var laser_windup_s: float = 1.15
+var laser_damage: float = 55.0
+var laser_interval_s: float = 8.0
+var enraged_laser_interval_s: float = 5.0
+## Optional arm-cannon bolt (0 interval = off). A slow projectile to weave through.
+var arm_shot_interval_s: float = 0.0
+var arm_shot_damage: float = 40.0
+var arm_shot_speed: float = 220.0
+var arm_shot_lifetime_s: float = 1.4
+var enraged_arm_shot_interval_s: float = 0.0
 ## Adds summoned the moment the boss enrages.
 var add_enemy_slug: StringName = &"rat_base"
 var add_count: int = 2
@@ -39,6 +54,11 @@ var boss: HostileNpc
 var _enraged: bool = false
 var _casting: bool = false
 var _next_slam_ms: int = 0
+var _next_laser_ms: int = 0
+var _next_arm_ms: int = 0
+## Round-robin so slam / laser / arm don't all fire the same frame when cooldowns
+## line up — keeps the dodge pressure readable.
+var _next_move: int = 0
 
 
 func _ready() -> void:
@@ -46,7 +66,10 @@ func _ready() -> void:
 		queue_free()
 		return
 	_load_config()
-	_next_slam_ms = Time.get_ticks_msec() + int(slam_interval_s * 1000.0)
+	var now: int = Time.get_ticks_msec()
+	_next_slam_ms = now + int(slam_interval_s * 1000.0)
+	_next_laser_ms = now + int(maxi(1, int(laser_interval_s * 500.0)))
+	_next_arm_ms = now + int(maxi(1, int(arm_shot_interval_s * 700.0)))
 	# Boss-event music is driven by the boss's own lifecycle — automatic for EVERY boss
 	# (world + dungeon both attach this brain): the combat track on spawn, the victory
 	# sting on death. An admin abort (boss removed WITHOUT dying) is cued as "end" by
@@ -82,6 +105,20 @@ func _load_config() -> void:
 	slam_damage = d.slam_damage
 	slam_interval_s = d.slam_interval_s
 	enraged_slam_interval_s = d.enraged_slam_interval_s
+	laser_range = d.laser_range
+	laser_width = d.laser_width
+	laser_windup_s = d.laser_windup_s
+	laser_damage = d.laser_damage
+	laser_interval_s = d.laser_interval_s
+	enraged_laser_interval_s = d.enraged_laser_interval_s
+	arm_shot_interval_s = d.arm_shot_interval_s
+	arm_shot_damage = d.arm_shot_damage
+	arm_shot_speed = d.arm_shot_speed
+	arm_shot_lifetime_s = d.arm_shot_lifetime_s
+	enraged_arm_shot_interval_s = (
+		d.enraged_arm_shot_interval_s if d.enraged_arm_shot_interval_s > 0.0
+		else d.arm_shot_interval_s * 0.65
+	)
 	add_enemy_slug = d.add_enemy_slug
 	add_count = d.add_count
 	add_spread_px = d.add_spread_px
@@ -93,9 +130,30 @@ func _physics_process(_delta: float) -> void:
 		return
 	if not _enraged and _health_fraction() <= enrage_at_health_fraction:
 		_enrage()
-	# Only slam while someone is actually engaging — no flailing at an empty room.
-	if not _casting and boss.targeted_player != null and Time.get_ticks_msec() >= _next_slam_ms:
-		_slam()
+	# Only cast while someone is actually engaging — no flailing at an empty room.
+	if _casting or boss.targeted_player == null:
+		return
+	var now: int = Time.get_ticks_msec()
+	# Prefer the next move in rotation when several are ready — forces a mix of
+	# slam (step out), laser (sidestep), and arm bolts (weave) instead of slam spam.
+	for _i: int in 3:
+		var move: int = (_next_move + _i) % 3
+		match move:
+			0:
+				if now >= _next_slam_ms:
+					_next_move = (move + 1) % 3
+					_slam()
+					return
+			1:
+				if laser_range > 0.0 and now >= _next_laser_ms:
+					_next_move = (move + 1) % 3
+					_laser()
+					return
+			2:
+				if arm_shot_interval_s > 0.0 and now >= _next_arm_ms:
+					_next_move = (move + 1) % 3
+					_arm_shot()
+					return
 
 
 func _health_fraction() -> float:
@@ -114,6 +172,7 @@ func _slam() -> void:
 	# Commit the body: hold position through the wind-up + a short recovery so it
 	# doesn't stroll out of its own danger ring while the slam resolves.
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((slam_windup_s + SLAM_RECOVER_S) * 1000.0)
+	boss.replicate_visual(&"rp_play_skin_anim", [&"special"])
 	# Filling telegraph (clock-wedge countdown) — players read WHEN it lands.
 	boss.replicate_visual(&"rp_cast_telegraph", [center, slam_radius, slam_windup_s])
 	await get_tree().create_timer(slam_windup_s).timeout
@@ -134,12 +193,79 @@ func _slam() -> void:
 	_casting = false
 
 
+## Locked-aim laser corridor: telegraph a strip toward the target, then blast
+## anyone still on the line. Sidestep is the only clean dodge (backing up stays
+## inside the corridor — same lesson as LungeBehavior).
+func _laser() -> void:
+	_casting = true
+	var target: Player = boss.targeted_player
+	if target == null or not is_instance_valid(target):
+		_casting = false
+		return
+	var origin: Vector2 = boss.global_position
+	var dir: Vector2 = origin.direction_to(target.global_position)
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	var end: Vector2 = origin + dir * laser_range
+	boss.action_root_until_ms = Time.get_ticks_msec() + int((laser_windup_s + LASER_RECOVER_S) * 1000.0)
+	boss.replicate_visual(&"rp_play_skin_anim", [&"special"])
+	boss.replicate_visual(&"rp_lunge_telegraph", [end, laser_width, laser_windup_s + 0.15])
+	await get_tree().create_timer(laser_windup_s).timeout
+	if not is_instance_valid(boss) or boss.is_dead:
+		_casting = false
+		return
+	boss.replicate_visual(&"rp_laser_beam", [origin, end, 0.4])
+	var instance: Node = _instance()
+	if instance != null:
+		for peer_id: int in instance.players_by_peer_id:
+			var player: Player = instance.players_by_peer_id[peer_id]
+			if player == null or player.is_dead:
+				continue
+			if _dist_to_segment(player.global_position, origin, end) <= laser_width:
+				player.take_damage(laser_damage, boss)
+	var interval: float = enraged_laser_interval_s if _enraged else laser_interval_s
+	_next_laser_ms = Time.get_ticks_msec() + int(interval * 1000.0)
+	_casting = false
+
+
+## Slow arm-cannon bolt aimed at the current target — weave sideways to dodge.
+func _arm_shot() -> void:
+	_casting = true
+	var target: Player = boss.targeted_player
+	if target == null or not is_instance_valid(target):
+		_casting = false
+		return
+	var dir: Vector2 = boss.global_position.direction_to(target.global_position)
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	boss.action_root_until_ms = Time.get_ticks_msec() + int(ARM_RECOVER_S * 1000.0)
+	boss.replicate_visual(&"rp_play_skin_anim", [&"attack"])
+	boss.fire_arm_projectile(dir, arm_shot_speed, arm_shot_lifetime_s, arm_shot_damage)
+	var interval: float = enraged_arm_shot_interval_s if _enraged else arm_shot_interval_s
+	_next_arm_ms = Time.get_ticks_msec() + int(interval * 1000.0)
+	_casting = false
+
+
+## Distance from [param point] to the closest point on segment [param a]→[param b].
+func _dist_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
+	var ab: Vector2 = b - a
+	var len_sq: float = ab.length_squared()
+	if len_sq <= 0.0001:
+		return point.distance_to(a)
+	var t: float = clampf((point - a).dot(ab) / len_sq, 0.0, 1.0)
+	return point.distance_to(a + ab * t)
+
+
 ## Phase 2: speed the body up, summon adds, and pull the next slam in so the shift
 ## reads as a real escalation.
 func _enrage() -> void:
 	_enraged = true
 	boss.move_speed = int(boss.move_speed * enrage_speed_mult)
 	_next_slam_ms = Time.get_ticks_msec() + int(enraged_slam_interval_s * 1000.0)
+	if laser_range > 0.0:
+		_next_laser_ms = Time.get_ticks_msec() + int(enraged_laser_interval_s * 1000.0)
+	if arm_shot_interval_s > 0.0:
+		_next_arm_ms = Time.get_ticks_msec() + int(enraged_arm_shot_interval_s * 1000.0)
 	_announce_enrage()
 	_summon_adds.call_deferred() # spawn_dynamic toggles collision — defer out of the physics step
 

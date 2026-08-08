@@ -114,3 +114,27 @@ extends Resource
 @export var add_spread_px: float = 48.0
 ## Move-speed multiplier applied to the body on enrage (it chases harder).
 @export var enrage_speed_mult: float = 1.3
+## Telegraphed laser corridor (px reach / half-width). 0 range = disabled —
+## used by Mecha-stone Golem to force lateral dodges between slams.
+@export var laser_range: float = 0.0
+@export var laser_width: float = 28.0
+@export var laser_windup_s: float = 1.15
+@export var laser_damage: float = 55.0
+@export var laser_interval_s: float = 8.0
+@export var enraged_laser_interval_s: float = 5.0
+## Arm-cannon projectile. 0 interval = disabled.
+@export var arm_shot_interval_s: float = 0.0
+@export var arm_shot_damage: float = 40.0
+@export var arm_shot_speed: float = 220.0
+@export var arm_shot_lifetime_s: float = 1.4
+@export var enraged_arm_shot_interval_s: float = 0.0
+## DPS-ranked ornate chest grants (bag LootChestItems: blue/red/pink). When
+## ornate_chest_top_max > 0, RewardService sorts contributors by damage and
+## awards: top → [top_min, top_max], 2nd → [second_min, second_max], everyone
+## else → 1 chest at consolation_chance (e.g. 0.25). Each chest is rolled
+## independently among the three ornate tiers. 0 top_max = disabled.
+@export var ornate_chest_top_min: int = 0
+@export var ornate_chest_top_max: int = 0
+@export var ornate_chest_second_min: int = 0
+@export var ornate_chest_second_max: int = 0
+@export_range(0.0, 1.0, 0.01) var ornate_chest_consolation_chance: float = 0.0

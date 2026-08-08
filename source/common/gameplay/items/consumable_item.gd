@@ -12,11 +12,12 @@ extends Item
 @export var buff_stat: StringName = &""
 @export var buff_amount: float = 0.0
 @export var buff_duration_s: float = 0.0
-## Drink cooldown in ms, SHARED across every item with the same cooldown_category, so
-## you can't chain-chug a heal then a mana potion. Recommended 5000-7000 for a real
-## gate. Persists across re-equip (banked on Character.ability_cooldowns, like a weapon
-## ability's cooldown); resets on logout.
-@export var shared_cooldown_ms: int = 6000
+## Drink cooldown in ms, SHARED across every item with the same cooldown_category —
+## so you can't spam the same family from a hotkey / held drink. Health and mana
+## potions use separate categories (3s each) so a heal and a mana sip can both
+## land, but neither can be held-down spam. Persists across re-equip (banked on
+## Character.ability_cooldowns, like a weapon ability); resets on logout.
+@export var shared_cooldown_ms: int = 3000
 ## Items sharing this category share ONE drink cooldown. Give a type its own category
 ## (e.g. &"mana_potion") to make it cool down independently of other potions.
 @export var cooldown_category: StringName = &"potion"

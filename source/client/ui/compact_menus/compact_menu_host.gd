@@ -355,6 +355,18 @@ func _on_slot_gui_input(
 		_open_context_menu(entry)
 		return
 
+	# Shift+Left: instant armor swap (helmet/torso/boots/ring/relic) — boss-fight
+	# fluent gear changes without opening the context menu or double-clicking.
+	# Weapons stay on double-click / Equip (they still need the draw cast).
+	if (
+		mouse_event.button_index == MOUSE_BUTTON_LEFT
+		and mouse_event.shift_pressed
+		and _is_armor_gear(entry["item"] as Item)
+	):
+		slot.accept_event()
+		_perform_primary_action(entry)
+		return
+
 	if (
 		mouse_event.button_index == MOUSE_BUTTON_LEFT
 		and mouse_event.double_click
@@ -490,6 +502,14 @@ func _perform_drop(entry: Dictionary) -> void:
 
 	Toaster.toast("Dropped %s." % str(payload.get("name", item.item_name)))
 	_refresh_inventory()
+
+
+## True for bag armor / jewelry (not weapons). Used by Shift+click equip.
+func _is_armor_gear(item: Item) -> bool:
+	if item == null or not (item is GearItem):
+		return false
+	var gear: GearItem = item as GearItem
+	return gear.slot != null and gear.slot.key != &"weapon"
 
 
 func _perform_primary_action(entry: Dictionary) -> void:
