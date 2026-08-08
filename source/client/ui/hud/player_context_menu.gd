@@ -95,26 +95,45 @@ func _ask_mod_action(action_id: int) -> void:
 		Toaster.toast("Can't moderate that player yet (missing id).")
 		return
 	_pending_mod_action = action_id
+	var ok_label: String = "Confirm"
 	match action_id:
 		ACTION_KICK:
-			_mod_dialog.title = "Kick player"
-			_mod_dialog.dialog_text = "Kick %s (#%d) from the world?" % [_target_name, _target_player_id]
+			_mod_dialog.title = "Confirm kick"
+			_mod_dialog.dialog_text = (
+				"Kick %s (#%d) from the world?\n\nThey can reconnect unless you also ban them."
+				% [_target_name, _target_player_id]
+			)
+			ok_label = "Kick"
 		ACTION_BAN:
-			_mod_dialog.title = "Ban account"
+			_mod_dialog.title = "Confirm account ban"
 			_mod_dialog.dialog_text = (
-				"Permanently ban %s's account (#%d)?\nThey will be blocked even while offline."
+				"Permanently ban %s's account (#%d)?\n\n"
+				+ "This blocks them even while offline. This cannot be undone from here."
 				% [_target_name, _target_player_id]
 			)
+			ok_label = "Ban account"
 		ACTION_IP_BAN:
-			_mod_dialog.title = "IP ban"
+			_mod_dialog.title = "Confirm IP ban"
 			_mod_dialog.dialog_text = (
-				"Permanently IP-ban %s (#%d)?\nTheir current IP will be blocked from joining."
+				"Permanently IP-ban %s (#%d)?\n\n"
+				+ "Their current IP will be blocked from joining. This cannot be undone from here."
 				% [_target_name, _target_player_id]
 			)
+			ok_label = "IP ban"
 		_:
 			_pending_mod_action = -1
 			return
-	_mod_dialog.popup_centered(Vector2i(420, 160))
+	_mod_dialog.ok_button_text = ok_label
+	_mod_dialog.cancel_button_text = "Cancel"
+	# Chat LineEdit steals Enter — release it, then focus Cancel so a stray
+	# Enter/Space after the right-click menu does NOT confirm the ban/kick.
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
+	_mod_dialog.popup_centered(Vector2i(440, 180))
+	var cancel_btn: Button = _mod_dialog.get_cancel_button()
+	if cancel_btn != null:
+		cancel_btn.grab_focus()
 
 
 func _confirm_mod_action() -> void:
