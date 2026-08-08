@@ -13,12 +13,18 @@ extends Area2D
 const LIFETIME_S: float = 300.0
 ## Max distance (world px) from the player to allow a click-pickup (server).
 const PICKUP_RANGE: float = 96.0
+## Kill loot is reserved to its owner for this long (then free-for-all).
+const EXCLUSIVE_S: float = 60.0
 ## Client click target size — larger than the old 14px physics circle so drops
 ## are easy to hit.
 const CLICK_SIZE: Vector2 = Vector2(36, 36)
 
 @export var item_id: int = 0
 @export var amount: int = 1
+## Peer that earned this pile (0 = unowned / free for all).
+@export var owner_peer_id: int = 0
+## Server clock (msec) until which only [member owner_peer_id] may pick up.
+@export var exclusive_until_ms: int = 0
 
 var collected: bool = false
 
@@ -110,6 +116,13 @@ func try_pickup(player: Player) -> Dictionary:
 		return {"ok": false, "reason": "missing"}
 	if player.global_position.distance_to(global_position) > PICKUP_RANGE:
 		return {"ok": false, "reason": "too_far"}
+	var picker: int = int(player.player_resource.current_peer_id)
+	if (
+		owner_peer_id > 0
+		and picker != owner_peer_id
+		and Time.get_ticks_msec() < exclusive_until_ms
+	):
+		return {"ok": false, "reason": "reserved"}
 
 	collected = true
 	Inventory.add_item(player.player_resource.inventory, item_id, amount)

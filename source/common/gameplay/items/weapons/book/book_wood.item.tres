@@ -33,6 +33,7 @@ region = Rect2(48, 0, 16, 16)
 [resource]
 script = ExtResource("4_item")
 category = &"book"
+capacity = 1
 right_hand_scene = ExtResource("3_book")
 slot = ExtResource("5_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ap"), SubResource("Mod_mana_max"), SubResource("Mod_mana_regen"), SubResource("Mod_haste")])

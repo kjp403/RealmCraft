@@ -186,6 +186,13 @@ func _ready() -> void:
 			&"player_shoot",
 			"physical:Space"
 		)
+	# Special slot 1 was RMB; HUD labels it Q — migrate the old default so Q works.
+	if settings.get_value(&"mouse_keyboard", &"player_special") == "mouse:2":
+		settings.set_value(
+			&"mouse_keyboard",
+			&"player_special",
+			"physical:Q"
+		)
 	settings.setting_changed.connect(_on_setting_changed)
 	language = settings.data.get(&"general", {}).get(&"language", "en_US")
 	# Saved keybinds must hold from boot (gateway, menus) — not only once the
