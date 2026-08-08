@@ -55,9 +55,9 @@ z_index = 100
 layout_mode = 3
 anchors_preset = 0
 offset_left = -32.0
-offset_top = -72.0
+offset_top = -52.0
 offset_right = 32.0
-offset_bottom = -46.0
+offset_bottom = -26.0
 mouse_filter = 2
 
 [node name="ProgressBar" type="ProgressBar" parent="VisualState" unique_id=1505719423]
