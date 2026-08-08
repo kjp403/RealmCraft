@@ -18,6 +18,10 @@ const BACKUP_EVERY_N_SAVES: int = 6  # 6 × 5 min = 30 min
 var _periodic_save_count: int = 0
 
 var token_list: Dictionary[String, PlayerResource]
+## Gateway-provided client IP for each pending auth token (Caddy X-Real-IP).
+var token_client_ips: Dictionary[String, String]
+## {peer_id: client_ip} for currently connected peers.
+var peer_client_ips: Dictionary[int, String]
 
 ## {peer_id: PlayerResource}
 var connected_players: Dictionary[int, PlayerResource]
@@ -29,9 +33,11 @@ static var curr: WorldServer
 
 func start_world_server() -> void:
 	world_manager.token_received.connect(
-		func(auth_token: String, _username: String, character_id: int):
+		func(auth_token: String, _username: String, character_id: int, client_ip: String = ""):
 			var player: PlayerResource = database.get_player_resource(character_id)
 			token_list[auth_token] = player
+			if not client_ip.is_empty():
+				token_client_ips[auth_token] = client_ip
 	)
 
 	var configuration: Dictionary = ConfigFileUtils.load_section(
@@ -175,6 +181,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 	player.current_peer_id = 0
 	connected_players.erase(peer_id)
+	peer_client_ips.erase(peer_id)
 
 
 func _on_peer_authenticating(peer_id: int) -> void:
@@ -193,9 +200,16 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 	print("Peer: %d supplied world authentication data." % peer_id)
 	if is_valid_authentication_token(auth_token):
 		var pending: PlayerResource = token_list[auth_token]
+		var client_ip: String = _resolve_client_ip(peer_id, str(token_client_ips.get(auth_token, "")))
+		token_client_ips.erase(auth_token)
 		# Account bans block world entry entirely (character switch can't dodge).
 		if pending != null and BanList.is_banned(pending.account_name):
 			print("Peer: %d rejected — account banned (%s)." % [peer_id, pending.account_name])
+			token_list.erase(auth_token)
+			peer.disconnect_peer(peer_id)
+			return
+		if IpBanList.is_banned(client_ip):
+			print("Peer: %d rejected — IP banned (%s)." % [peer_id, client_ip])
 			token_list.erase(auth_token)
 			peer.disconnect_peer(peer_id)
 			return
@@ -206,6 +220,10 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		# disconnect. Reset on every fresh login.
 		connected_players[peer_id].session_start_ms = Time.get_ticks_msec()
 		player_id_to_peer_id[connected_players[peer_id].player_id] = peer_id
+		if not client_ip.is_empty():
+			peer_client_ips[peer_id] = client_ip
+			if pending != null:
+				IpBanList.remember_account_ip(pending.account_name, client_ip)
 		# Hydrate the per-player block-list cache so chat filtering is a
 		# dictionary lookup, not a JSON parse per message.
 		BlockList.set_for(connected_players[peer_id].player_id, connected_players[peer_id].blocked_ids)
@@ -225,6 +243,43 @@ func is_valid_authentication_token(auth_token: String) -> bool:
 	if token_list.has(auth_token):
 		return true
 	return false
+
+
+## Best-known client IP for a connected peer (gateway X-Real-IP preferred).
+func get_peer_client_ip(peer_id: int) -> String:
+	return str(peer_client_ips.get(peer_id, ""))
+
+
+## Disconnect every connected peer whose recorded client IP matches [param ip].
+## Returns how many peers were kicked.
+func disconnect_peers_with_ip(ip: String, notice: String = "") -> int:
+	var needle: String = IpBanList.normalize_ip(ip)
+	if needle.is_empty():
+		return 0
+	var kicked: int = 0
+	for pid: int in peer_client_ips.keys():
+		if IpBanList.normalize_ip(str(peer_client_ips[pid])) != needle:
+			continue
+		var player: PlayerResource = connected_players.get(pid)
+		if player != null and not notice.is_empty() and chat_service != null:
+			chat_service.push_system_to_player(null, player.player_id, notice)
+		peer.disconnect_peer.call_deferred(pid)
+		kicked += 1
+	return kicked
+
+
+## Prefer the gateway-provided IP when the WebSocket peer address is loopback
+## (normal behind Caddy). Falls back to the socket address otherwise.
+func _resolve_client_ip(peer_id: int, token_ip: String) -> String:
+	var socket_ip: String = ""
+	if peer is WebSocketMultiplayerPeer:
+		socket_ip = (peer as WebSocketMultiplayerPeer).get_peer_address(peer_id)
+	if IpBanList.is_usable_ip(token_ip):
+		return IpBanList.normalize_ip(token_ip)
+	if IpBanList.is_usable_ip(socket_ip):
+		return IpBanList.normalize_ip(socket_ip)
+	var fallback: String = token_ip if not token_ip.is_empty() else socket_ip
+	return IpBanList.normalize_ip(fallback)
 
 
 @export var instance_manager: InstanceManagerServer

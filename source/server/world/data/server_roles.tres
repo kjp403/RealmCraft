@@ -17,6 +17,10 @@ roles = Dictionary[String, Dictionary]({
 "commands": [],
 "priority": 1
 },
+"owner": {
+"commands": [],
+"priority": 1000
+},
 "senior_admin": {
 "commands": [],
 "priority": 100

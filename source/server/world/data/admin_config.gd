@@ -6,10 +6,10 @@ class_name AdminConfig
 ## Looks for "user://server_admins.cfg" first (editable next to a deployed build), then the
 ## bundled "res://data/config/server_admins.cfg". Format (role names come from ServerRoles):
 ##   [admins]
-##   MyAccount="senior_admin"
+##   MyAccount="owner"
 ##
 ## SECURITY: guest* account names are never honored — they previously matched auto-created
-## guest logins and granted free senior_admin.
+## guest logins and granted free senior_admin. owner / senior_admin belong only here.
 
 const USER_PATH: String = "user://server_admins.cfg"
 const RES_PATH: String = "res://data/config/server_admins.cfg"

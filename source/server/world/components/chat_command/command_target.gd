@@ -102,8 +102,22 @@ static func resolve(token: String, caller_peer_id: int, instance: ServerInstance
 		r.display_name = str(row.get("display_name", ""))
 		return r
 
-	# A bare word that isn't a number is ambiguous under the @-for-account rule.
-	r.error = "Unknown target '%s'. Use self, @account or #id." % clean
+	# Bare display name (e.g. Nesato) — resolve online first, else via DB so
+	# offline /ban and /ipban work without forcing staff to look up #ids.
+	var online_peer: int = _online_peer_for_display_name(clean, ws)
+	if online_peer != 0:
+		_fill_online(r, online_peer, ws.connected_players.get(online_peer))
+		return r
+	var by_name: Dictionary = ws.database.store.get_player_row_by_display_name(clean)
+	if not by_name.is_empty():
+		r.ok = true
+		r.online = false
+		r.player_id = int(by_name.get("player_id", 0))
+		r.account_name = str(by_name.get("account_name", ""))
+		r.display_name = str(by_name.get("display_name", clean))
+		return r
+
+	r.error = "Unknown target '%s'. Use self, @account, #id, or an exact character name." % clean
 	return r
 
 
@@ -130,5 +144,14 @@ static func _online_peer_for_account(account: String, ws: WorldServer) -> int:
 	for peer_id: int in ws.connected_players:
 		var p: PlayerResource = ws.connected_players[peer_id]
 		if p != null and p.account_name.to_lower() == account:
+			return peer_id
+	return 0
+
+
+static func _online_peer_for_display_name(display_name: String, ws: WorldServer) -> int:
+	var needle: String = display_name.to_lower()
+	for peer_id: int in ws.connected_players:
+		var p: PlayerResource = ws.connected_players[peer_id]
+		if p != null and p.display_name.to_lower() == needle:
 			return peer_id
 	return 0

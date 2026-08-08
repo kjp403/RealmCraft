@@ -1,7 +1,7 @@
 extends ChatCommand
 ## Grant a server role to an online player and persist it to the DB. Use this for
-## staff (moderator/admin). The owner should grant themselves senior_admin via the
-## admin config file, not here.
+## staff (moderator/admin). owner / senior_admin are config-file only
+## (server_admins.cfg) — never via /grant.
 
 
 func _init() -> void:
@@ -19,10 +19,9 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "Unknown role '%s'. Known roles: %s" % [
 			role, ", ".join(server_instance.global_role_definitions.keys())
 		]
-	# senior_admin is config-file only — never persist it via /grant (closes the
-	# selfadmin → /grant @alt senior_admin replication path).
-	if role == "senior_admin":
-		return "senior_admin can only be granted via server_admins.cfg, not /grant."
+	# owner / senior_admin are config-file only — never persist via /grant.
+	if role in ["owner", "senior_admin"]:
+		return "%s can only be granted via server_admins.cfg, not /grant." % role
 
 	var target: CommandTarget.Result = CommandTarget.resolve(args[1], peer_id, server_instance)
 	if not target.ok:

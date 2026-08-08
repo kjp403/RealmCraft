@@ -19,7 +19,7 @@ func start_database(world_info: Dictionary) -> void:
 
 
 ## One-shot wipe of every DB staff role after the /selfadmin breach, then on
-## every live boot strip any senior_admin that somehow got persisted again.
+## every live boot strip any owner/senior_admin that somehow got persisted again.
 ## Marker lives under user:// so it survives git deploys.
 func _live_security_scrub_roles() -> void:
 	const MARKER: String = "user://.security_roles_scrub_v1"
@@ -37,11 +37,12 @@ func _live_security_scrub_roles() -> void:
 		if marker != null:
 			marker.store_string("scrubbed at unix %d\n" % int(Time.get_unix_time_from_system()))
 			marker.close()
-	var stripped: int = store.strip_persisted_role("senior_admin")
-	if stripped > 0:
-		push_warning(
-			"LIVE security: stripped persisted senior_admin from %d character(s)." % stripped
-		)
+	for role_name: String in ["owner", "senior_admin"]:
+		var stripped: int = store.strip_persisted_role(role_name)
+		if stripped > 0:
+			push_warning(
+				"LIVE security: stripped persisted %s from %d character(s)." % [role_name, stripped]
+			)
 
 
 func configure_database(world_info: Dictionary) -> void:

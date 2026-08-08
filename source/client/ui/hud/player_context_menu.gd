@@ -6,13 +6,19 @@ extends Node
 const ACTION_EXAMINE: int = 0
 const ACTION_FOLLOW: int = 1
 const ACTION_TRADE: int = 2
+const ACTION_KICK: int = 3
+const ACTION_BAN: int = 4
+const ACTION_IP_BAN: int = 5
 const TARGET_HEADING_ID: int = 100
 
 var _menu: PopupMenu
 var _invite_dialog: ConfirmationDialog
+var _mod_dialog: ConfirmationDialog
 var _target_peer_id: int = 0
 var _target_name: String = ""
+var _target_player_id: int = 0
 var _invite_id: int = 0
+var _pending_mod_action: int = -1
 
 
 func _ready() -> void:
@@ -28,6 +34,14 @@ func _ready() -> void:
 	_invite_dialog.canceled.connect(_respond_to_invite.bind(false))
 	add_child(_invite_dialog)
 
+	_mod_dialog = ConfirmationDialog.new()
+	_mod_dialog.title = "Confirm"
+	_mod_dialog.ok_button_text = "Confirm"
+	_mod_dialog.cancel_button_text = "Cancel"
+	_mod_dialog.confirmed.connect(_confirm_mod_action)
+	_mod_dialog.canceled.connect(func() -> void: _pending_mod_action = -1)
+	add_child(_mod_dialog)
+
 	ClientState.player_context_requested.connect(_open_for_peer)
 	Client.subscribe(&"trade.invite", _on_trade_invite)
 	Client.subscribe(&"trade.open", _on_trade_open)
@@ -42,6 +56,7 @@ func _open_for_peer(peer_id: int) -> void:
 		return
 	_target_peer_id = peer_id
 	_target_name = str(target.display_name)
+	_target_player_id = int(target.player_id)
 	_menu.clear()
 	_menu.add_item(_target_name, TARGET_HEADING_ID)
 	_menu.set_item_disabled(0, true)
@@ -49,6 +64,15 @@ func _open_for_peer(peer_id: int) -> void:
 	_menu.add_item("Examine", ACTION_EXAMINE)
 	_menu.add_item("Follow", ACTION_FOLLOW)
 	_menu.add_item("Trade", ACTION_TRADE)
+	# Admin+ only (synced staff_role; owner/senior_admin are mapped to "admin").
+	# Menu is shown even on other staff — owners need to right-click-ban a rogue
+	# senior_admin. Server enforces rank (admin cannot punish admin+).
+	var me: Player = ClientState.local_player
+	if me != null and me.staff_role == "admin":
+		_menu.add_separator()
+		_menu.add_item("Kick", ACTION_KICK)
+		_menu.add_item("Ban", ACTION_BAN)
+		_menu.add_item("IP Ban", ACTION_IP_BAN)
 	_menu.position = Vector2i(get_viewport().get_mouse_position())
 	_menu.popup()
 
@@ -63,6 +87,83 @@ func _on_action(action_id: int) -> void:
 				Toaster.toast("Following %s. Move manually to stop." % _target_name)
 		ACTION_TRADE:
 			_request_trade()
+		ACTION_KICK, ACTION_BAN, ACTION_IP_BAN:
+			_ask_mod_action(action_id)
+
+
+func _ask_mod_action(action_id: int) -> void:
+	if _target_player_id <= 0:
+		Toaster.toast("Can't moderate that player yet (missing id).")
+		return
+	_pending_mod_action = action_id
+	var ok_label: String = "Confirm"
+	match action_id:
+		ACTION_KICK:
+			_mod_dialog.title = "Confirm kick"
+			_mod_dialog.dialog_text = (
+				"Kick %s (#%d) from the world?\n\nThey can reconnect unless you also ban them."
+				% [_target_name, _target_player_id]
+			)
+			ok_label = "Kick"
+		ACTION_BAN:
+			_mod_dialog.title = "Confirm account ban"
+			_mod_dialog.dialog_text = (
+				"Permanently ban %s's account (#%d)?\n\n"
+				+ "This blocks them even while offline. This cannot be undone from here."
+			) % [_target_name, _target_player_id]
+			ok_label = "Ban account"
+		ACTION_IP_BAN:
+			_mod_dialog.title = "Confirm IP ban"
+			_mod_dialog.dialog_text = (
+				"Permanently IP-ban %s (#%d)?\n\n"
+				+ "Their current IP will be blocked from joining. This cannot be undone from here."
+			) % [_target_name, _target_player_id]
+			ok_label = "IP ban"
+		_:
+			_pending_mod_action = -1
+			return
+	_mod_dialog.ok_button_text = ok_label
+	_mod_dialog.cancel_button_text = "Cancel"
+	# Chat LineEdit steals Enter — release it, then focus Cancel so a stray
+	# Enter/Space after the right-click menu does NOT confirm the ban/kick.
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
+	_mod_dialog.popup_centered(Vector2i(440, 180))
+	var cancel_btn: Button = _mod_dialog.get_cancel_button()
+	if cancel_btn != null:
+		cancel_btn.grab_focus()
+
+
+func _confirm_mod_action() -> void:
+	var action_id: int = _pending_mod_action
+	_pending_mod_action = -1
+	if action_id < 0 or _target_player_id <= 0 or InstanceClient.current == null:
+		return
+	var cmd: String = ""
+	match action_id:
+		ACTION_KICK:
+			cmd = "kick"
+		ACTION_BAN:
+			cmd = "ban"
+		ACTION_IP_BAN:
+			cmd = "ipban"
+		_:
+			return
+	var target_token: String = "#%d" % _target_player_id
+	Client.request_data(
+		&"chat.command.exec",
+		Callable(),
+		{"cmd": cmd, "params": PackedStringArray([cmd, target_token])},
+		InstanceClient.current.name
+	)
+	match action_id:
+		ACTION_KICK:
+			Toaster.toast("Kick requested for %s." % _target_name)
+		ACTION_BAN:
+			Toaster.toast("Ban requested for %s." % _target_name)
+		ACTION_IP_BAN:
+			Toaster.toast("IP ban requested for %s." % _target_name)
 
 
 func _request_trade() -> void:
