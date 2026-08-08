@@ -178,7 +178,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/world_boss.tres",
 &"slug": &"world_boss"
 }, {
-&"hash": "mecha_stone_golem_v1",
+&"hash": "mecha_stone_golem_v2",
 &"id": 40,
 &"path": "res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres",
 &"slug": &"mecha_stone_golem"

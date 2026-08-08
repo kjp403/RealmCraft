@@ -1,0 +1,45 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://d3kvmqiomg5v8" path="res://assets/sprites/characters/mecha_stone_golem/laser_sheet.png" id="1_laser"]
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_0"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 0, 300, 300)
+[sub_resource type="AtlasTexture" id="Atlas_laser_1"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 300, 300, 300)
+[sub_resource type="AtlasTexture" id="Atlas_laser_2"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 600, 300, 300)
+[sub_resource type="AtlasTexture" id="Atlas_laser_3"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 900, 300, 300)
+[sub_resource type="AtlasTexture" id="Atlas_laser_4"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 1200, 300, 300)
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_4")
+}],
+"loop": false,
+"name": &"default",
+"speed": 12.0
+}]

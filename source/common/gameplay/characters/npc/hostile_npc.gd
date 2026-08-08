@@ -230,6 +230,20 @@ func _apply_enemy_data() -> void:
 			(progress_bar.offset_bottom - progress_bar.offset_top) * 0.5
 		)
 		progress_bar.scale = Vector2.ONE * enemy_data.visual_scale
+		# Keep the nameplate stacked above the lifted bar (DisplayNameLabel parks
+		# near y=0 by default — under a tall boss sprite it disappears into the art).
+		if display_name_label != null:
+			display_name_label.position.y -= lift
+	# Bosses keep a permanent over-head HP bar with remaining points — players need
+	# the read for a long fight. Regular trash still auto-hides on idle. Widen the
+	# bar so 4-digit remaining HP (e.g. 7500) isn't clipped by the 32px default.
+	if enemy_data.is_boss:
+		health_bar_auto_hide = false
+		if progress_bar != null:
+			progress_bar.offset_left = -28.0
+			progress_bar.offset_right = 28.0
+			if hp_label != null:
+				hp_label.add_theme_font_size_override(&"font_size", 9)
 
 var container: ReplicatedPropsContainer
 var enemy_state: EnemyState = EnemyState.IDLE:
@@ -284,6 +298,22 @@ func _ready() -> void:
 			stats_component.stats.stat_changed.connect(_debug_client_stat_changed)
 		_apply_ally_bar_tint()
 		refresh_nameplate_color()
+		# Drive SpriteFrames via the shared AnimationTree (idle/run/death method
+		# tracks). Friendly NPCs already flip this on; hostiles previously left
+		# the tree inactive / never kicked the first travel, so skins sat on
+		# frame 0 with no playback — most obvious on large bosses like the golem.
+		if animation_tree != null:
+			animation_tree.active = true
+		if animated_sprite != null and animated_sprite.sprite_frames != null \
+				and animated_sprite.sprite_frames.has_animation(&"idle"):
+			animated_sprite.play(&"idle")
+		if locomotion_state_machine != null:
+			locomotion_state_machine.travel(&"locomotion_idle")
+		# Boss HP bar stays up from spawn (health_bar_auto_hide cleared in
+		# _apply_enemy_data) — Character._ready may have hidden it already.
+		if enemy_data != null and enemy_data.is_boss and progress_bar != null:
+			progress_bar.show()
+			progress_bar.modulate.a = 1.0
 		# Re-evaluate if the local player's guild changes (so a guard that spawned
 		# before you tagged in updates without a relog).
 		if is_instance_valid(ClientState):
@@ -384,9 +414,13 @@ func _physics_process(_delta: float) -> void:
 
 	# Rooted for a telegraphed cast — or STUNNED (Pinning Arrow): hold position and do
 	# nothing. DEAD still processes so death isn't deferred behind the wind-up.
+	# Still sync + animate: a boss cast can last >1s and players keep hitting it —
+	# skipping sync here froze the over-head HP bar (and idle/run) for the whole wind-up.
 	if enemy_state != EnemyState.DEAD and (
 			Time.get_ticks_msec() < action_root_until_ms or is_stunned()):
 		velocity = Vector2.ZERO
+		_process_animations()
+		_process_synchronization()
 		return
 
 	match enemy_state:
@@ -624,6 +658,102 @@ func rp_slam_impact(center: Vector2, radius: float) -> void:
 	impact.top_level = true
 	add_child(impact)
 	impact.global_position = center
+
+
+## Client-visual: play a one-shot SpriteFrames clip (attack / special) on this
+## mob's skin. Pauses the AnimationTree so the locomotion method-tracks don't
+## stomp the action mid-play, then resumes idle/run from the synced anim enum.
+func rp_play_skin_anim(anim_name: StringName) -> void:
+	if multiplayer.is_server() or animated_sprite == null:
+		return
+	var frames: SpriteFrames = animated_sprite.sprite_frames
+	if frames == null or not frames.has_animation(anim_name):
+		return
+	if animation_tree != null:
+		animation_tree.active = false
+	animated_sprite.play(anim_name)
+	if not animated_sprite.animation_finished.is_connected(_on_skin_action_finished):
+		animated_sprite.animation_finished.connect(_on_skin_action_finished, CONNECT_ONE_SHOT)
+
+
+func _on_skin_action_finished() -> void:
+	if animation_tree != null:
+		animation_tree.active = true
+	# Re-kick locomotion from the current synced anim (IDLE/RUN/DEATH).
+	_set_anim(anim)
+
+
+## Client-visual: a short laser blast along a world corridor (Mecha Golem). The
+## server already applied damage; this is the beam VFX on top of the telegraph.
+func rp_laser_beam(from: Vector2, to: Vector2, duration: float) -> void:
+	if multiplayer.is_server():
+		return
+	var laser_frames: SpriteFrames = load(
+		"res://source/common/gameplay/combat/vfx/mecha_laser.tres"
+	) as SpriteFrames
+	if laser_frames == null:
+		return
+	var mid: Vector2 = (from + to) * 0.5
+	var beam_len: float = from.distance_to(to)
+	var sc: float = maxf(0.35, beam_len / 300.0)
+	var fx: SpriteEffect = SpriteEffect.spawn(self, laser_frames, {
+		"scale": Vector2(sc, sc * 0.55),
+		"z_index": 2,
+		"speed_scale": 1.25,
+		"duration": maxf(0.2, duration),
+	})
+	if fx == null:
+		return
+	fx.top_level = true
+	fx.global_position = mid
+	fx.rotation = (to - from).angle()
+
+
+## Client-visual: a thrown arm-cannon bolt the player must sidestep. Cosmetic —
+## the server's Projectile owns the hit.
+func rp_arm_projectile(direction: Vector2, speed: float, lifetime: float) -> void:
+	if multiplayer.is_server():
+		return
+	_spawn_arm_bolt(direction, speed, lifetime, 0.0, false)
+
+
+## Server: fire a damaging arm bolt and echo the cosmetic flight to clients.
+func fire_arm_projectile(direction: Vector2, speed: float, lifetime: float, damage: float) -> void:
+	if not multiplayer.is_server():
+		return
+	_spawn_arm_bolt(direction, speed, lifetime, damage, true)
+	replicate_visual(&"rp_arm_projectile", [direction, speed, lifetime])
+
+
+## Shared arm-bolt factory (server damage + client cosmetic). [param deal_damage]
+## true only on the authoritative peer.
+func _spawn_arm_bolt(
+		direction: Vector2,
+		speed: float,
+		lifetime: float,
+		damage: float,
+		deal_damage: bool
+	) -> void:
+	var bolt: Projectile = preload(
+		"res://source/common/gameplay/items/weapons/wand/bolt.tscn"
+	).instantiate() as Projectile
+	bolt.direction = direction.normalized()
+	bolt.speed = speed
+	bolt.lifetime = lifetime
+	bolt.damage = damage if deal_damage else 0.0
+	bolt.damage_type = CombatHit.DAMAGE_PHYSICAL
+	bolt.source = self
+	bolt.top_level = true
+	var sprite: Sprite2D = bolt.get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null:
+		var tex: Texture2D = load(
+			"res://assets/sprites/characters/mecha_stone_golem/arm_projectile.png"
+		) as Texture2D
+		if tex != null:
+			sprite.texture = tex
+			sprite.scale = Vector2(0.22, 0.22)
+	add_child(bolt)
+	bolt.global_position = global_position + direction.normalized() * 28.0
 
 
 func _process_animations() -> void:
