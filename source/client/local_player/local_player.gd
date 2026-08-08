@@ -20,6 +20,9 @@ const NET_SEND_INTERVAL_S: float = 1.0 / 20.0
 const CLICK_NAVIGATION_SCRIPT: Script = preload(
 	"res://source/client/local_player/click_navigation.gd"
 )
+const HARVEST_CONTROLLER_SCRIPT: Script = preload(
+	"res://source/client/local_player/harvest_controller.gd"
+)
 const FOLLOW_REPATH_MS: int = 300
 const FOLLOW_STOP_DISTANCE: float = 28.0
 
@@ -53,6 +56,7 @@ var _net_send_accum: float = 0.0
 
 var synchronizer_manager: StateSynchronizerManagerClient
 var _click_navigation: ClickNavigation
+var _harvest_controller: HarvestController
 var _follow_peer_id: int = 0
 var _follow_repath_at_ms: int = 0
 
@@ -65,6 +69,9 @@ func _ready() -> void:
 	_click_navigation = CLICK_NAVIGATION_SCRIPT.new()
 	add_child(_click_navigation)
 	_click_navigation.setup(self)
+	_harvest_controller = HARVEST_CONTROLLER_SCRIPT.new()
+	add_child(_harvest_controller)
+	_harvest_controller.setup(self)
 	ClientState.local_player_ready.emit(self)
 	
 	super._ready()
@@ -397,6 +404,8 @@ func process_movement() -> void:
 func process_input() -> void:
 	if _dead or _has_gui_focus() or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
 		_click_navigation.cancel()
+		if _harvest_controller != null:
+			_harvest_controller.cancel()
 		input_direction = Vector2.ZERO
 		action_input = false
 		return
@@ -405,6 +414,8 @@ func process_input() -> void:
 	if manual_direction != Vector2.ZERO:
 		_follow_peer_id = 0
 		_click_navigation.cancel()
+		if _harvest_controller != null:
+			_harvest_controller.cancel()
 		input_direction = manual_direction
 	else:
 		_update_follow_navigation()
@@ -448,6 +459,12 @@ func process_input() -> void:
 					or Input.is_action_just_pressed(&"player_special_2")):
 				_cancel_channel()
 			action_input = false
+			return
+
+	# Click-to-gather overrides hold-to-attack while a vein is locked.
+	if _harvest_controller != null and _harvest_controller.is_active():
+		if _harvest_controller.tick():
+			equipment_component.process_input(self)
 			return
 
 	equipment_component.process_input(self)
@@ -513,7 +530,26 @@ func set_click_move_target(world_target: Vector2) -> void:
 	if _dead or ClientState.menu_open or _has_gui_focus():
 		return
 	_follow_peer_id = 0
+	if _harvest_controller != null:
+		_harvest_controller.cancel()
 	_click_navigation.request_move(world_target)
+
+
+## Begin commercial-style auto-gather on [param node] (walk in, swing until
+## depleted, wait for regen, repeat). Cancel with WASD or a ground click.
+func start_auto_gather(node: MineableNode) -> void:
+	if _harvest_controller == null:
+		return
+	_harvest_controller.start(node)
+
+
+func is_auto_gathering() -> bool:
+	return _harvest_controller != null and _harvest_controller.is_active()
+
+
+func notify_gather_result(data: Dictionary) -> void:
+	if _harvest_controller != null:
+		_harvest_controller.on_gather_result(data)
 
 
 ## Follow a remote player using the same collision-aware pathing as click movement.
@@ -576,6 +612,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_instance_changed_camera_limits(instance: InstanceClient) -> void:
 	_follow_peer_id = 0
+	if _harvest_controller != null:
+		_harvest_controller.cancel()
 	_apply_camera_limits(instance.instance_map if instance != null else null)
 	if _click_navigation != null:
 		_click_navigation.rebuild_for_map(

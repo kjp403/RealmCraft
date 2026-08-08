@@ -613,7 +613,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres",
 &"slug": &"sword_sunsteel.item"
 }, {
-&"hash": "21457e4cff41aaff6174700bcacfbbd624c86c6cf4edf3aa352b24e495018215",
+&"hash": "3729fc73c172be2b715a7de56f891337ba81ace13c30510917b5ce078523e793",
 &"id": 52,
 &"path": "res://source/common/gameplay/items/weapons/tools/pickaxe.tres",
 &"slug": &"pickaxe"
