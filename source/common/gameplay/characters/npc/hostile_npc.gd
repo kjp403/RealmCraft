@@ -326,6 +326,20 @@ func _ready() -> void:
 	# is placed correctly on clients immediately instead of sitting at the container origin until
 	# its first physics frame. Without this, a spawn VFX fired right after spawn lands at (0,0).
 	_process_synchronization()
+	# Deferred so dungeon/world-boss spawners can attach first; map-placed bosses
+	# still get a brain if none was provided.
+	call_deferred(&"_ensure_boss_brain")
+
+
+func _ensure_boss_brain() -> void:
+	if not multiplayer.is_server() or enemy_data == null or not enemy_data.is_boss:
+		return
+	if get_node_or_null("BossController") != null:
+		return
+	var brain: BossController = BossController.new()
+	brain.name = "BossController"
+	brain.boss = self
+	add_child(brain)
 
 
 func _on_local_guild_changed(_new_id: int) -> void:

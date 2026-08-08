@@ -6,7 +6,7 @@
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
 version = 1784473722
-next_id = 40
+next_id = 41
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -177,6 +177,11 @@ entries = Array[Dictionary]([{
 &"id": 15,
 &"path": "res://source/common/gameplay/characters/npc/types/world_boss.tres",
 &"slug": &"world_boss"
+}, {
+&"hash": "mecha_stone_golem_v1",
+&"id": 40,
+&"path": "res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres",
+&"slug": &"mecha_stone_golem"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

@@ -95,7 +95,7 @@ func _trigger_slot(index: int) -> void:
 func _on_item_action_result(result: Dictionary) -> void:
 	match str(result.get("reason", "")):
 		"in_combat":
-			Toaster.toast("Can't change gear in combat (weapons only).")
+			Toaster.toast("You cannot do that while in combat.")
 		"cooldown":
 			Toaster.toast("That's still on cooldown.")
 		"no_effect":

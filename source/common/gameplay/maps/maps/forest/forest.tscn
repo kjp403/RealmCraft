@@ -49,7 +49,10 @@ aoi_test_point = Vector2(900, 0)
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_7mrv4")
 weather = Array[ExtResource("3_vs2bv")]([ExtResource("3_pyxru"), ExtResource("5_4tbu3"), ExtResource("6_o3pwt")])
+camera_limit_left = 400
+camera_limit_top = 350
 camera_limit_right = 2720
+camera_limit_bottom = 2500
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="World_tiles" type="Node2D" parent="." unique_id=471749141]
@@ -269,13 +272,17 @@ position = Vector2(2520, 1784)
 [node name="RespawnPoint" parent="." unique_id=1414716116 instance=ExtResource("5_3a2x5")]
 position = Vector2(2457.2495, 1784.071)
 
+[node name="DimWoodEntrance" parent="." unique_id=1414716117 instance=ExtResource("5_3a2x5")]
+position = Vector2(2457.2495, 1784.071)
+warper_id = 29
+
 [node name="Portal" parent="." unique_id=375786523 instance=ExtResource("27_ndacl")]
 position = Vector2(2626.2527, 1884.6681)
 portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
 destination_label = "Castle Garden"
 target_instance = ExtResource("6_1fctu")
 warper_id = 20
-target_id = 20
+target_id = 21
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=400947523]
 

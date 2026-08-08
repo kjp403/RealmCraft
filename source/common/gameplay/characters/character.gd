@@ -296,8 +296,7 @@ var is_dead: bool = false
 ## The character that dealt the most recent damage (for kill attribution).
 var last_attacker: Character
 
-## How long a hit (dealt OR taken) keeps a combatant "in combat". Gear swaps
-## are locked while in combat so you can't re-spec mid-fight.
+## How long a hit (dealt OR taken) keeps a combatant "in combat" (UI status).
 const COMBAT_LINGER_MS: int = 5000
 ## Server-side runtime: ticks_msec until which this character counts as in
 ## combat. Set on every hit for both attacker and victim.
@@ -426,11 +425,21 @@ func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 	var maybe_instance: Node = maybe_map.get_parent()
 	if maybe_instance == null:
 		return
+	var payload: Dictionary = {
+		"amount": int(round(mitigated_amount)),
+		"position": global_position,
+	}
+	# Auto-retaliate: tell the victim client which hostile hit them.
+	if self is Player and last_attacker != null and is_instance_valid(last_attacker):
+		var victim: Player = self as Player
+		if victim.player_resource != null:
+			payload["victim_peer"] = int(victim.player_resource.player_id)
+		if last_attacker is HostileNpc:
+			var mob: HostileNpc = last_attacker as HostileNpc
+			if mob.container != null:
+				payload["attacker_prop_id"] = mob.container.child_id_of_node(mob)
 	WorldServer.curr.propagate_rpc(
-		WorldServer.curr.data_push.bind(&"combat.hit", {
-			"amount": int(round(mitigated_amount)),
-			"position": global_position,
-		}),
+		WorldServer.curr.data_push.bind(&"combat.hit", payload),
 		maybe_instance.name
 	)
 
