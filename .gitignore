@@ -35,5 +35,8 @@ addons/godot-sqlite/bin/*
 /data/config/discord_webhook.cfg
 source/server/master/account_collection.tres
 /addons/godot_mcp
-# Raw purchased asset dumps (curated copies live under assets/sprites/)
-assets/_import/
+# Raw purchased asset dumps (curated copies live under assets/sprites/).
+# Keep assets/_import/.gdignore tracked so Godot never imports staging dumps.
+assets/_import/**
+!assets/_import/
+!assets/_import/.gdignore
