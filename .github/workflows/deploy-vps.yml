@@ -36,6 +36,16 @@ jobs:
             echo "See deploy/README.md (Auto-deploy section)."
             exit 1
           fi
+          # Catch the common mistake: pasted .pub / wrong file / mangled key.
+          # Do not print the secret — only check shape.
+          if ! printf '%s' "$VPS_SSH_KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
+            echo "::error::VPS_SSH_KEY does not look like a private key."
+            echo "It must start with -----BEGIN OPENSSH PRIVATE KEY----- (or BEGIN RSA PRIVATE KEY)."
+            echo "Do NOT use the .pub file. Re-copy with:"
+            echo "  Get-Content \$env:USERPROFILE\\.ssh\\arkenelle_ovh -Raw | Set-Clipboard"
+            exit 1
+          fi
+          echo "Secrets present and VPS_SSH_KEY looks like a private key."
 
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.2
@@ -45,18 +55,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           command_timeout: 15m
-          script_stop: true
-          # Inline bootstrap so the FIRST run works even before update.sh exists
-          # on the VPS. After pull, prefer the repo script.
+          request_pty: true
           script: |
             set -euo pipefail
             cd /opt/arkenelle
-            if [ -f deploy/update.sh ]; then
-              sudo bash deploy/update.sh
-            else
-              sudo -u arkenelle git fetch --prune origin main
-              sudo -u arkenelle git merge --ff-only origin/main
-              sudo -u arkenelle godot --headless --path /opt/arkenelle --import
-              sudo systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
-              systemctl --no-pager --lines=0 status arkenelle-master arkenelle-gateway arkenelle-world || true
-            fi
+            sudo bash deploy/update.sh
