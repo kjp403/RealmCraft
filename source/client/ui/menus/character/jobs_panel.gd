@@ -139,57 +139,120 @@ func _create_skill_tile(
 	skill_name: String,
 	info: Dictionary
 ) -> Control:
-	var tile := PanelContainer.new()
-	tile.custom_minimum_size = Vector2(76, 76)
-	tile.tooltip_text = String(
+	var level: int = int(info.get("level", 1))
+	var xp: int = int(info.get("xp", 0))
+	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
+	var display: String = str(
 		info.get("display_name", skill_name.capitalize())
 	)
-	tile.add_theme_stylebox_override(
-		&"panel",
-		_make_tile_style()
-	)
+	var remaining: int = maxi(0, xp_to_next - xp)
+
+	var tile := Button.new()
+	tile.custom_minimum_size = Vector2(76, 88)
+	tile.focus_mode = Control.FOCUS_NONE
+	tile.clip_contents = true
+	tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next\nClick for sources" % [
+		display, level, xp, xp_to_next, remaining
+	]
+	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
+	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
+	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
+	tile.add_theme_stylebox_override(&"pressed", _make_tile_style())
 
 	var stack := VBoxContainer.new()
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_theme_constant_override(&"separation", 1)
+	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	stack.offset_left = 4
+	stack.offset_top = 4
+	stack.offset_right = -4
+	stack.offset_bottom = -4
 	tile.add_child(stack)
 
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(46, 46)
+	icon.custom_minimum_size = Vector2(40, 40)
 	icon.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.texture = _get_skill_icon(skill_name)
 	stack.add_child(icon)
 
-	# Use the first letter when a skill does not have an icon yet.
 	if icon.texture == null:
 		var fallback := Label.new()
 		fallback.text = skill_name.left(1).to_upper()
 		fallback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fallback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		fallback.add_theme_font_size_override(&"font_size", 24)
+		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fallback.add_theme_font_size_override(&"font_size", 22)
 		fallback.add_theme_color_override(
 			&"font_color",
 			Color(0.82, 0.72, 0.52)
 		)
 		icon.add_child(fallback)
-		fallback.set_anchors_and_offsets_preset(
-			Control.PRESET_FULL_RECT
-		)
+		fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	var level := Label.new()
-	level.text = str(int(info.get("level", 1)))
-	level.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	level.add_theme_font_size_override(&"font_size", 16)
-	level.add_theme_color_override(
+	var level_row := HBoxContainer.new()
+	level_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(level_row)
+
+	var level_label := Label.new()
+	level_label.text = "Lv %d" % level
+	level_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	level_label.add_theme_font_size_override(&"font_size", 11)
+	level_label.add_theme_color_override(
 		&"font_color",
-		Color(0.93, 0.93, 0.96)
+		Color(1.0, 0.88, 0.55)
 	)
-	stack.add_child(level)
+	level_row.add_child(level_label)
+
+	var bar := ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = xp_to_next
+	bar.value = xp
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 8)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(bar)
 
 	return tile
+
+
+func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
+	var display: String = str(info.get("display_name", skill_name.capitalize()))
+	var level: int = int(info.get("level", 1))
+	var xp: int = int(info.get("xp", 0))
+	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
+	var lines: PackedStringArray = [
+		"%s — Lv %d" % [display, level],
+		"%d / %d XP (%d to next level)" % [xp, xp_to_next, maxi(0, xp_to_next - xp)],
+		"",
+	]
+	var jp: JobPerks = JobRegistry.perks_for(StringName(skill_name))
+	if jp != null and not jp.source_items.is_empty():
+		lines.append("Can gather:")
+		for i: int in jp.source_items.size():
+			var item: Item = jp.source_items[i]
+			if item == null:
+				continue
+			var req: int = jp.source_levels[i] if i < jp.source_levels.size() else 0
+			var gate: String = "any level" if req <= 0 else ("Lv %d" % req)
+			var lock: String = "" if req <= level else " (locked)"
+			lines.append("• %s — %s%s" % [String(item.item_name), gate, lock])
+	elif jp != null and not jp.recipe_items.is_empty():
+		lines.append("Can craft:")
+		for i: int in jp.recipe_items.size():
+			var item: Item = jp.recipe_items[i]
+			if item == null:
+				continue
+			var req: int = jp.recipe_levels[i] if i < jp.recipe_levels.size() else 0
+			var gate: String = "any level" if req <= 0 else ("Lv %d" % req)
+			lines.append("• %s — %s" % [String(item.item_name), gate])
+	else:
+		lines.append("No source list authored for this skill yet.")
+	Toaster.toast("\n".join(lines), 4.0)
 
 
 func _create_locked_tile() -> Control:

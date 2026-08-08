@@ -40,6 +40,9 @@ func _ready() -> void:
 	close_button.pressed.connect(hide)
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.local_player_ready.connect(_on_local_player_ready)
+	# Mining / gathering awards go to the server bag; refresh while the dock is open
+	# so ore counts climb without close→reopen (fullscreen inventory already does this).
+	ClientState.gather_succeeded.connect(_on_gather_succeeded)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -130,6 +133,11 @@ func _build_empty_grid() -> void:
 func _on_visibility_changed() -> void:
 	if visible:
 		_connect_equipment_signal()
+		_refresh_inventory()
+
+
+func _on_gather_succeeded(_result: Dictionary) -> void:
+	if visible:
 		_refresh_inventory()
 
 
