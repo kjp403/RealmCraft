@@ -765,7 +765,7 @@ enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="HubPortal" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
-position = Vector2(984, 1448)
+position = Vector2(984, 1320)
 portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
 destination_label = "Castle Garden"
 target_instance = ExtResource("28_hub")
@@ -773,7 +773,7 @@ warper_id = 23
 target_id = 23
 
 [node name="RespawnPoint" parent="." unique_id=1537871885 instance=ExtResource("5_jiw8u")]
-position = Vector2(920, 1400)
+position = Vector2(920, 1280)
 
 [node name="TeleporterEntry" parent="." unique_id=1508016588 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
 position = Vector2(1656, 128)
@@ -828,7 +828,7 @@ position = Vector2(2760, 680)
 data = ExtResource("28_svn3l")
 
 [node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
-position = Vector2(900, 1200)
+position = Vector2(900, 1520)
 
 [node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
-position = Vector2(1900, 1220)
+position = Vector2(1900, 1540)
