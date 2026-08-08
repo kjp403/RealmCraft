@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://ac0936bb83a74"]
+
+[ext_resource type="Texture2D" uid="uid://cjkfdttfk3lnw" path="res://assets/sprites/items/icons/Icon307.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://bprsise4rcsak" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+mana_amount = 40
+item_name = &"Minor Mana Potion"
+item_icon = ExtResource("1_icon")
+description = "A sip of blue. Enough to cast again."
+metadata/slug = &"minor_mana_potion"
+metadata/id = 204

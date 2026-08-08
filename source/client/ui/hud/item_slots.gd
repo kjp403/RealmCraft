@@ -92,6 +92,15 @@ func _on_item_action_result(result: Dictionary) -> void:
 			Toaster.toast("You do not currently need that potion.")
 		"level":
 			Toaster.toast("Requires level %d to equip." % int(result.get("level", 0)))
+		"mastery":
+			var cats: PackedStringArray = PackedStringArray()
+			for entry: Variant in result.get("categories", []):
+				cats.append(str(entry).capitalize())
+			var level: int = int(result.get("level", 0))
+			if cats.is_empty() or (cats.size() == 1 and cats[0].to_lower() == "any"):
+				Toaster.toast("Requires any mastery level %d." % level)
+			else:
+				Toaster.toast("Requires %s mastery %d." % [" / ".join(cats), level])
 		"gear_level":
 			Toaster.toast("Fair arena: level %d gear only." % int(result.get("level", 0)))
 		"cant_equip":

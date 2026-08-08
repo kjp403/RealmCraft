@@ -711,6 +711,9 @@ func _surface_item_rejection(result: Array) -> bool:
 		"level":
 			Toaster.toast("Requires level %d to equip." % int(payload.get("level", 0)))
 			return true
+		"mastery":
+			Toaster.toast(_mastery_equip_toast(payload))
+			return true
 		"cant_equip":
 			Toaster.toast("You can't equip that.")
 			return true
@@ -752,3 +755,13 @@ func _on_equipment_changed(_slot_key: StringName, _item_id: int) -> void:
 	# weapon (synthetic equipped tile + its not-yet-removed bag entry).
 	if visible:
 		fill_inventory()
+
+
+func _mastery_equip_toast(payload: Dictionary) -> String:
+	var level: int = int(payload.get("level", 0))
+	var cats: PackedStringArray = PackedStringArray()
+	for entry: Variant in payload.get("categories", []):
+		cats.append(str(entry).capitalize())
+	if cats.is_empty() or (cats.size() == 1 and cats[0].to_lower() == "any"):
+		return "Requires any mastery level %d." % level
+	return "Requires %s mastery %d." % [" / ".join(cats), level]

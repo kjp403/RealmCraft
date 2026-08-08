@@ -514,6 +514,9 @@ func _perform_primary_action(entry: Dictionary) -> void:
 				"Requires level %d." % int(payload.get("level", 0))
 			)
 			return
+		"mastery":
+			Toaster.toast(_mastery_equip_toast(payload))
+			return
 		"gear_level":
 			Toaster.toast(
 				"Restricted to level %d gear." % int(
@@ -533,3 +536,13 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		Toaster.toast("Potion consumed.")
 
 	_refresh_inventory()
+
+
+func _mastery_equip_toast(payload: Dictionary) -> String:
+	var level: int = int(payload.get("level", 0))
+	var cats: PackedStringArray = PackedStringArray()
+	for entry: Variant in payload.get("categories", []):
+		cats.append(str(entry).capitalize())
+	if cats.is_empty() or (cats.size() == 1 and cats[0].to_lower() == "any"):
+		return "Requires any mastery level %d." % level
+	return "Requires %s mastery %d." % [" / ".join(cats), level]

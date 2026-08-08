@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786166423
-next_id = 204
+version = 1786193763
+next_id = 206
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -27,6 +27,16 @@ entries = Array[Dictionary]([{
 &"id": 75,
 &"path": "res://source/common/gameplay/items/consumables/mana_potion.tres",
 &"slug": &"mana_potion"
+}, {
+&"hash": "4306e3d2c0a919f8c12e133b5dacbdc2cb8b1676e8a7a84c846b2cd43638764b",
+&"id": 205,
+&"path": "res://source/common/gameplay/items/consumables/greater_mana_potion.tres",
+&"slug": &"greater_mana_potion"
+}, {
+&"hash": "c23b363f3765e5963c3bc26baa7b0fab47d77ea9bb7003a89570de65a5dcee56",
+&"id": 204,
+&"path": "res://source/common/gameplay/items/consumables/minor_mana_potion.tres",
+&"slug": &"minor_mana_potion"
 }, {
 &"hash": "988547a323082e99821e1293591e00b30bae8d6b6bf1f5580977a8bc4e850ae9",
 &"id": 68,

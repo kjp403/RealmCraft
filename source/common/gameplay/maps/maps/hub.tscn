@@ -503,7 +503,7 @@ position = Vector2(-592, -88)
 npc_resource = SubResource("Resource_p483h")
 
 [node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
-position = Vector2(232, -120)
+position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")
 
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]

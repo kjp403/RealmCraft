@@ -5,7 +5,9 @@
 [ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="3_hhhqo"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="4_ph35l"]
 [ext_resource type="Resource" uid="uid://cd4yooe27ja23" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="5_7hhe3"]
-[ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="6_1d18i"]
+[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="6_mana"]
+[ext_resource type="Resource" uid="uid://dfbcb377cc5d4" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="7_gmana"]
+[ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="8_1d18i"]
 
 [sub_resource type="Resource" id="Resource_a2v62"]
 script = ExtResource("3_hhhqo")
@@ -21,11 +23,25 @@ price = 20
 currency_item = ExtResource("2_277it")
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
+[sub_resource type="Resource" id="Resource_mana"]
+script = ExtResource("3_hhhqo")
+item = ExtResource("6_mana")
+price = 10
+currency_item = ExtResource("2_277it")
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
+[sub_resource type="Resource" id="Resource_gmana"]
+script = ExtResource("3_hhhqo")
+item = ExtResource("7_gmana")
+price = 20
+currency_item = ExtResource("2_277it")
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
 [resource]
-script = ExtResource("6_1d18i")
+script = ExtResource("8_1d18i")
 shop_name = "Lost Soul Shop"
 currency_item = ExtResource("2_277it")
-entries = Array[ExtResource("3_hhhqo")]([SubResource("Resource_a2v62"), SubResource("Resource_atp0p")])
+entries = Array[ExtResource("3_hhhqo")]([SubResource("Resource_a2v62"), SubResource("Resource_atp0p"), SubResource("Resource_mana"), SubResource("Resource_gmana")])
 metadata/_custom_type_script = "uid://bsed5oxrf1q15"
 metadata/slug = &"lost_soul_shop"
 metadata/id = 8

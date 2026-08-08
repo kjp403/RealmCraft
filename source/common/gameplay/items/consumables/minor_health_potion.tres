@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_script")
+shared_cooldown_ms = 0
+cooldown_category = &"health_potion"
 heal_amount = 20
 item_name = &"Minor Health Potion"
 item_icon = ExtResource("1_p8ujo")

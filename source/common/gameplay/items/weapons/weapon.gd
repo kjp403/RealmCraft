@@ -236,6 +236,9 @@ func perform_action(action_index: int, direction: Vector2, released: bool = fals
 func _consume_mana(ability: AbilityResource) -> void:
 	if ability.mana_cost <= 0 or character == null or not GameMode.is_world_server():
 		return
+	# Only players pay mana — NPC auto-attacks skip the cost (see Ability.can_use).
+	if character is not Player:
+		return
 	var mana: float = character.stats_component.get_stat(Stat.MANA)
 	character.stats_component.set_stat(Stat.MANA, maxf(0.0, mana - ability.mana_cost))
 

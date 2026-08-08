@@ -100,7 +100,9 @@ func auto_use(entity: Entity, direction: Vector2) -> void:
 func can_use(user: Entity = null) -> bool:
 	if (Time.get_ticks_msec() / 1000.0) - last_action_time < effective_cooldown(user):
 		return false
-	if mana_cost > 0 and user is Character:
+	# Players spend mana; HostileNPCs (and other non-Player casters) do not —
+	# their damage is tuned via EnemyTypeResource.attack_damage → AP/AD.
+	if mana_cost > 0 and user is Player:
 		if (user as Character).stats_component.get_stat(Stat.MANA) < mana_cost:
 			return false
 	return true
