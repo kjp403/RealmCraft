@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_script")
+shared_cooldown_ms = 3000
+cooldown_category = &"mana_potion"
 mana_amount = 40
 item_name = &"Minor Mana Potion"
 item_icon = ExtResource("1_icon")
