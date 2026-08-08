@@ -35,7 +35,7 @@ price = 6
 [sub_resource type="Resource" id="Entry_potion"]
 script = ExtResource("1_entry")
 item = ExtResource("8_potion")
-price = 4
+price = 10
 
 [resource]
 script = ExtResource("3_shop")
