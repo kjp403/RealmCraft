@@ -9,6 +9,7 @@
 [ext_resource type="Resource" uid="uid://f0urxop3y64l" path="res://source/common/gameplay/items/weapons/sword/sword.item.tres" id="10_kyjwk"]
 [ext_resource type="Resource" uid="uid://cg2jsfh0cr5gy" path="res://source/common/gameplay/items/weapons/book/book_wood.item.tres" id="20_bookw"]
 [ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="21_mpot"]
+[ext_resource type="Resource" uid="uid://ac0936bb83a74" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="22_mmana"]
 
 [sub_resource type="Resource" id="Buyback_0"]
 script = ExtResource("1_ca6k6")
@@ -65,17 +66,22 @@ item = ExtResource("20_bookw")
 price = 12
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
-
 [sub_resource type="Resource" id="Resource_mpot"]
 script = ExtResource("1_dqht8")
 item = ExtResource("21_mpot")
 price = 10
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
+[sub_resource type="Resource" id="Resource_mmana"]
+script = ExtResource("1_dqht8")
+item = ExtResource("22_mmana")
+price = 10
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
 [resource]
 script = ExtResource("9_y1msh")
 shop_name = "Starter Shop"
-entries = Array[ExtResource("1_dqht8")]([SubResource("Resource_lhqif"), SubResource("Resource_kyjwk"), SubResource("Resource_6r5rp"), SubResource("Resource_o7ypm"), SubResource("Resource_bookw"), SubResource("Resource_mpot")])
+entries = Array[ExtResource("1_dqht8")]([SubResource("Resource_lhqif"), SubResource("Resource_kyjwk"), SubResource("Resource_6r5rp"), SubResource("Resource_o7ypm"), SubResource("Resource_bookw"), SubResource("Resource_mpot"), SubResource("Resource_mmana")])
 accepted_trades = Array[ExtResource("1_ca6k6")]([SubResource("Buyback_0"), SubResource("Buyback_1"), SubResource("Buyback_2"), SubResource("Buyback_3"), SubResource("Buyback_4")])
 metadata/_custom_type_script = "uid://bsed5oxrf1q15"
 metadata/slug = &"start_shop"

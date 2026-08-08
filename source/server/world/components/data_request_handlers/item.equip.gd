@@ -26,10 +26,18 @@ func data_request_handler(
 		return {}
 
 	# Gear that exists but can't be equipped: tell the player WHY instead of a
-	# silent no-op (a too-high required_level is the usual culprit).
+	# silent no-op (mastery / character level are the usual culprits).
 	if item is GearItem and not item.can_equip(player):
-		if player.player_resource.level < item.required_level:
-			return {"ok": false, "reason": "level", "level": item.required_level}
+		var gear: GearItem = item as GearItem
+		if not gear.meets_mastery_requirement(player.player_resource):
+			return {
+				"ok": false,
+				"reason": "mastery",
+				"level": gear.required_mastery_level,
+				"categories": _mastery_category_names(gear),
+			}
+		if player.player_resource.level < gear.required_level:
+			return {"ok": false, "reason": "level", "level": gear.required_level}
 		return {"ok": false, "reason": "cant_equip"}
 
 	# Normalized spar bracket: while level-synced, gear ABOVE the bracket can't
@@ -73,3 +81,10 @@ func data_request_handler(
 		player.begin_hand_draw(item_id)
 		return {"ok": true}
 	return {"ok": false, "reason": "cant_equip"}
+
+
+func _mastery_category_names(gear: GearItem) -> PackedStringArray:
+	var names: PackedStringArray = PackedStringArray()
+	for category: StringName in gear.required_mastery_categories:
+		names.append(String(category))
+	return names

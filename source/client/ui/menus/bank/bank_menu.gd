@@ -19,6 +19,11 @@ var _bank_count: Label
 
 func _ready() -> void:
 	build_shell("Bank", null, true)
+	# Match Secure Trade: fullscreen MenuShell defaults to a 50% dim + empty card,
+	# which left the vault unreadable over bright outdoor scenes.
+	if backdrop != null:
+		backdrop.color = Color(0.04, 0.05, 0.08, 0.82)
+	_apply_solid_bank_card()
 	_build_body()
 	visibility_changed.connect(func() -> void:
 		if visible:
@@ -28,6 +33,28 @@ func _ready() -> void:
 
 func open(_arg: Variant = null) -> void:
 	_refresh()
+
+
+func _apply_solid_bank_card() -> void:
+	var node: Node = content
+	var card: PanelContainer = null
+	while node != null:
+		if node is PanelContainer:
+			card = node as PanelContainer
+			break
+		node = node.get_parent()
+	if card == null:
+		return
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.1, 0.14, 0.96)
+	style.set_corner_radius_all(10)
+	style.set_border_width_all(1)
+	style.border_color = Color(0.28, 0.3, 0.38, 0.9)
+	style.content_margin_left = 4
+	style.content_margin_right = 4
+	style.content_margin_top = 2
+	style.content_margin_bottom = 4
+	card.add_theme_stylebox_override(&"panel", style)
 
 
 func _build_body() -> void:

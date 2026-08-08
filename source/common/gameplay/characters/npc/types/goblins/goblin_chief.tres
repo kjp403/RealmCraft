@@ -12,6 +12,15 @@
 [ext_resource type="Resource" uid="uid://gq7qvwoyrijf" path="res://source/common/gameplay/items/weapons/bow/bone_bow.item.tres" id="7_ylanq"]
 [ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="8_tvh5y"]
 [ext_resource type="SpriteFrames" uid="uid://b3kb4pkejph4" path="res://source/common/gameplay/characters/sprite_frames/goblin.tres" id="9_61lu3"]
+[ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+
+[sub_resource type="Resource" id="Lunge_chief"]
+script = ExtResource("91_lunge")
+lunge_range = 160.0
+lunge_radius = 26.0
+lunge_windup_s = 0.65
+lunge_speed_multiplier = 5.5
+lunge_cooldown = 5.0
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("1_4uukv")
@@ -59,7 +68,8 @@ visual_scale = 1.4
 is_boss = true
 max_health = 350.0
 attack_damage = 5.0
-move_speed = 65
+behaviors = Array[ExtResource("1_101c6")]([SubResource("Lunge_chief")])
+move_speed = 95
 distance_to_attack = 22
 leashes = false
 detection_radius = 90

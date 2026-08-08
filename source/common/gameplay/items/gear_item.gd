@@ -6,8 +6,15 @@ const _SLOT_ORDER: Dictionary = {
 	&"weapon": 0, &"helmet": 1, &"torso": 2, &"boot": 3, &"ring": 4, &"relic": 5,
 }
 
-@export var slot: ItemSlot
+## Character-level gate (mostly legacy). Armor sets use mastery instead.
 @export_range(0, 99, 1.0, "suffix:lvl") var required_level: int = 0
+## Mastery tree(s) that unlock this piece. Empty = no mastery gate.
+## Multiple entries = any-of (e.g. wand OR book for cloth). Use &"any" for
+## universal endgame sets (Ancient) that accept any trained mastery.
+@export var required_mastery_categories: Array[StringName] = []
+@export_range(0, 99, 1.0, "suffix:mstr") var required_mastery_level: int = 0
+
+@export var slot: ItemSlot
 
 ## Main Stats (Base stats)
 @export var base_modifiers: Array[StatModifier]
@@ -35,7 +42,7 @@ func group_key() -> StringName:
 
 func sort_key() -> Array:
 	var slot_rank: int = _SLOT_ORDER.get(slot.key if slot else &"", 9)
-	return [slot_rank, required_level, String(item_name)]
+	return [slot_rank, required_mastery_level, required_level, String(item_name)]
 
 
 func stat_lines() -> Array[Dictionary]:
@@ -44,9 +51,23 @@ func stat_lines() -> Array[Dictionary]:
 		if modifier == null or is_zero_approx(modifier.value):
 			continue
 		lines.append({"text": _format_modifier(modifier), "stat": StringName(modifier.stat_name)})
-	if required_level > 0:
+	if required_mastery_level > 0 and not required_mastery_categories.is_empty():
+		lines.append({
+			"text": "Requires %s mastery %d" % [_mastery_label(), required_mastery_level],
+			"kind": &"level",
+		})
+	elif required_level > 0:
 		lines.append({"text": "Requires level %d" % required_level, "kind": &"level"})
 	return lines
+
+
+func _mastery_label() -> String:
+	if required_mastery_categories.has(&"any"):
+		return "any"
+	var names: PackedStringArray = PackedStringArray()
+	for category: StringName in required_mastery_categories:
+		names.append(String(category).capitalize())
+	return " / ".join(names)
 
 
 ## "+5 Attack Damage" / "-3 Armor". Integer when whole, else one decimal.
@@ -57,8 +78,28 @@ static func _format_modifier(modifier: StatModifier) -> String:
 
 
 func can_equip(player: Player) -> bool:
-	if player.player_resource:
-		return slot.is_unlocked_for(player.player_resource) and player.player_resource.level >= required_level
+	if player == null or player.player_resource == null or slot == null:
+		return false
+	if not slot.is_unlocked_for(player.player_resource):
+		return false
+	if player.player_resource.level < required_level:
+		return false
+	return meets_mastery_requirement(player.player_resource)
+
+
+## True when mastery gate is empty or the player has the required level in one
+## of the listed categories (&"any" = highest mastery across all trees).
+func meets_mastery_requirement(res: PlayerResource) -> bool:
+	if required_mastery_level <= 0 or required_mastery_categories.is_empty():
+		return true
+	if required_mastery_categories.has(&"any"):
+		var best: int = 0
+		for category: StringName in MasteryService.trees():
+			best = maxi(best, int(res.get_mastery(category).get("level", 1)))
+		return best >= required_mastery_level
+	for category: StringName in required_mastery_categories:
+		if int(res.get_mastery(category).get("level", 1)) >= required_mastery_level:
+			return true
 	return false
 
 

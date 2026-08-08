@@ -5,22 +5,31 @@
 [ext_resource type="Script" uid="uid://dnmtdktay2df6" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
 [ext_resource type="Resource" uid="uid://dnbj6tmyghec4" path="res://source/common/gameplay/items/item_slot/slots/helmet.tres" id="4_slot"]
 
-[sub_resource type="Resource" id="Mod_armor"]
+[sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
 value = 1.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
-[sub_resource type="Resource" id="Mod_speed"]
+[sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "move_speed"
+value = 2.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_2"]
+script = ExtResource("1_mod")
+stat_name = "ad"
 value = 1.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_armor"), SubResource("Mod_speed")])
+required_level = 0
+required_mastery_categories = Array[StringName]([&"bow"])
+required_mastery_level = 1
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Leather Cap"
 item_icon = ExtResource("2_icon")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"

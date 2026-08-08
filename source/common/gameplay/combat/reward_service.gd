@@ -23,7 +23,12 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 		return
 	if npc.xp_reward <= 0 and (npc.loot == null or npc.loot.is_empty()):
 		return # nothing to give (a shadow mob) — don't even resolve players
-	var frac: float = BOSS_MIN_DAMAGE_FRACTION if npc.is_boss else MIN_DAMAGE_FRACTION
+	# is_boss lives on EnemyTypeResource — HostileNPC never copied it, so bare
+	# npc.is_boss crashed distribute() and wiped XP/loot for every kill.
+	var is_boss: bool = (
+		npc.enemy_data != null and bool(npc.enemy_data.is_boss)
+	)
+	var frac: float = BOSS_MIN_DAMAGE_FRACTION if is_boss else MIN_DAMAGE_FRACTION
 	var threshold: float = npc.stats_component.get_stat(Stat.HEALTH_MAX) * frac
 	var killer_peer: int = -1
 	if killer is Player and (killer as Player).player_resource != null:
