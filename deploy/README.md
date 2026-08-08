@@ -55,6 +55,20 @@ Watch deploys: GitHub → **Actions** → **Deploy VPS**.
 
 ---
 
+## Client auto-updates (itch.io)
+
+Server deploys do **not** update player EXEs. For Windows/Linux/Web installs that
+update themselves, use the itch.io pipeline:
+
+→ **[release-clients.md](./release-clients.md)** (create itch project, `BUTLER_API_KEY`, tag `v*`)
+
+Players install once with the [itch.io app](https://itch.io/app) from
+https://kjp403.itch.io/arkenelle. Later tagged releases push via butler and the
+app updates them. Only bump `project.godot` `config/version` when you ship a
+client build.
+
+---
+
 ## Prerequisites (already done)
 - DNS: `api` and `play` A records → your VPS IP.
 - VPS reachable over SSH with your key.

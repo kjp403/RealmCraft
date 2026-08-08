@@ -1,17 +1,16 @@
 name: Build slim export templates
 
-# Compiles size-stripped Godot export templates for Web / Windows / Linux /
-# Android and uploads them as downloadable artifacts. SLOW (~20-40 min) and
-# expensive, so it runs on demand only — trigger it once now, then again only
-# when you bump the Godot version. The fast per-release export workflow reuses
-# these artifacts.
+# OPTIONAL size-stripped Godot export templates. The main release workflow
+# (release.yml) uses official Godot 4.7.1 templates so client publishes work
+# without this job. Re-enable slim templates later if download size matters:
+# bump GODOT_REF to match release.yml, run this workflow, then point release.yml
+# back at the artifacts.
 on:
   workflow_dispatch:
 
 env:
-  # MUST match your editor version exactly (see deploy-server.sh / Godot's About
-  # dialog). The template ABI is version-locked to the editor that exports with it.
-  GODOT_REF: "4.6.3-stable"
+  # MUST match your editor / release.yml GODOT_REF exactly when used.
+  GODOT_REF: "4.7.1-stable"
 
 jobs:
   build:

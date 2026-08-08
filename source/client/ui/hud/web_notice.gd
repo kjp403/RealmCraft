@@ -7,8 +7,8 @@ extends Control
 
 
 ## Where "Get the full version" sends the player. Opened in a new browser tab on web via
-## OS.shell_open. TODO: point this at your itch.io download page if you'd rather link there.
-const DOWNLOAD_URL: String = "https://arkenelle.com"
+## OS.shell_open. Prefer the itch page so desktop installs can auto-update via itch.app.
+const DOWNLOAD_URL: String = Distribution.ITCH_URL
 
 const NOTICE_TEXT: String = """You're playing the browser version, which runs lighter for compatibility. Some effects like weather are turned off and the performance is capped.
 
