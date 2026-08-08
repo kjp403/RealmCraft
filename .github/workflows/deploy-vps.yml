@@ -60,9 +60,11 @@ jobs:
           request_pty: true
           script: |
             set -euo pipefail
-            # Pull first so brand-new files (like deploy/update.sh) exist on the VPS
-            # before we try to execute them. Then run the full update script.
+            # Sync the VPS tree to origin/main before running update.sh.
+            # Godot --import on prior deploys often dirties *.import files, which
+            # would block a plain merge/ff-only pull.
             cd /opt/arkenelle
             sudo -u arkenelle git fetch --prune origin main
-            sudo -u arkenelle git merge --ff-only origin/main
+            sudo -u arkenelle git reset --hard origin/main
+            sudo -u arkenelle git clean -fd
             sudo bash /opt/arkenelle/deploy/update.sh

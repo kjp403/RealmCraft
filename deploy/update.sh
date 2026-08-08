@@ -21,14 +21,11 @@ fi
 echo "==> Fetching origin/${BRANCH}"
 sudo -u "$APP_USER" git -C "$APP_DIR" fetch --prune origin "$BRANCH"
 
-echo "==> Fast-forward to origin/${BRANCH}"
-# ff-only keeps any accidental local VPS edits from being silently wiped.
-if ! sudo -u "$APP_USER" git -C "$APP_DIR" merge --ff-only "origin/${BRANCH}"; then
-	echo "ERROR: VPS repo cannot fast-forward. Someone changed files on the server." >&2
-	echo "Fix with (careful — discards local VPS edits):" >&2
-	echo "  sudo -u $APP_USER git -C $APP_DIR reset --hard origin/${BRANCH}" >&2
-	exit 1
-fi
+echo "==> Resetting to origin/${BRANCH}"
+# Deploy machine must match the branch exactly. Prior `godot --import` runs
+# rewrite *.import files on disk; reset --hard clears those so pulls never stall.
+sudo -u "$APP_USER" git -C "$APP_DIR" reset --hard "origin/${BRANCH}"
+sudo -u "$APP_USER" git -C "$APP_DIR" clean -fd
 
 echo "==> Importing Godot assets"
 sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import
