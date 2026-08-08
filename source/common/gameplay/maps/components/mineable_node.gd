@@ -55,6 +55,13 @@ var _disp_max: int
 ## Predicted ticks_msec of the next charge gain (or full snap-refill at 0).
 var _next_regen_ms: int
 
+const MARKER_SCENE: PackedScene = preload(
+	"res://source/common/gameplay/maps/components/interactable_marker.tscn"
+)
+
+## Client-only: true while the cursor is over this node's click-area.
+var _interactable_hovered: bool = false
+
 
 func _ready() -> void:
 	collision_layer = PhysicsLayers.HARVESTABLE # pick/sickle arcs target this to gather
@@ -71,12 +78,19 @@ func _ready() -> void:
 	# that otherwise render on top of this node's world-space Control.
 	_visual_state.z_index = 100
 
+	# Harvest hitbox itself is never the click target — a separate ClickableArea
+	# handles LMB on the client so we don't fight Area2D physics layers.
+	input_pickable = false
+
 	if multiplayer.is_server():
 		_charges = data.max_charges
 		_last_regen_ms = Time.get_ticks_msec()
-	# Input is swing-driven now — the pickaxe's hitbox drives extraction, so
-	# this Area2D never needs pickable input on either side.
-	input_pickable = false
+		set_process(false)
+		return
+
+	# --- Client only past here ---
+	_spawn_click_area()
+	_spawn_marker()
 	# Charge prediction only runs once a client receives state and arms it.
 	set_process(false)
 
@@ -374,3 +388,52 @@ func _apply_name_label() -> void:
 		return
 	_name_label.visible = true
 	_name_label.text = String(data.ore.item_name)
+
+
+## Client charge count used by [HarvestController] while waiting on regen.
+## [code]-1[/code] = unknown yet (treat as available until a gather result arrives).
+func client_charges_left() -> int:
+	return _disp_charges
+
+
+func _spawn_click_area() -> void:
+	var area: ClickableArea = ClickableArea.new()
+	var collision: CollisionShape2D = CollisionShape2D.new()
+	var rect: RectangleShape2D = RectangleShape2D.new()
+	var size: Vector2 = Vector2(40, 48)
+	if data != null and data.texture != null:
+		size = data.texture.get_size()
+	rect.size = size
+	collision.shape = rect
+	collision.position = _sprite.position if _sprite != null else Vector2(0, -16)
+	area.add_child(collision)
+	add_child(area)
+	area.clicked.connect(_on_clicked)
+	area.mouse_entered.connect(_set_interactable_hover.bind(true))
+	area.mouse_exited.connect(_set_interactable_hover.bind(false))
+	area.tree_exiting.connect(_set_interactable_hover.bind(false))
+
+
+func _spawn_marker() -> void:
+	var marker: InteractableMarker = MARKER_SCENE.instantiate()
+	marker.kind = InteractableMarker.Kind.GATHER
+	var top_y: float = -40.0
+	if _sprite != null and _sprite.texture != null:
+		top_y = _sprite.position.y - _sprite.texture.get_size().y * 0.5
+	marker.position = Vector2(0, top_y - 10.0)
+	add_child(marker)
+
+
+func _set_interactable_hover(on: bool) -> void:
+	if not GameMode.is_client() or on == _interactable_hovered:
+		return
+	_interactable_hovered = on
+	ClientState.world_interactables_hovered += 1 if on else -1
+
+
+func _on_clicked() -> void:
+	if not GameMode.is_client():
+		return
+	if ClientState.local_player == null:
+		return
+	ClientState.local_player.start_auto_gather(self)

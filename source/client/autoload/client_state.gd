@@ -253,6 +253,10 @@ func _on_gather_result(data: Dictionary) -> void:
 	# players need to see live state on the same node.
 	_apply_node_visual_state(data)
 
+	# Keep the click-to-gather loop in sync (stop on wrong tool, wait on deplete).
+	if local_player != null:
+		local_player.notify_gather_result(data)
+
 	if not data.get("ok", false):
 		match str(data.get("reason", "")):
 			"no_tool":
@@ -264,10 +268,15 @@ func _on_gather_result(data: Dictionary) -> void:
 			"level":
 				Toaster.toast("Requires Mining Lv %d." % int(data.get("required_level", 0)))
 			"depleted":
-				var now_ms: int = Time.get_ticks_msec()
-				if now_ms - _last_depleted_toast_ms > 4000:
-					_last_depleted_toast_ms = now_ms
-					Toaster.toast("This vein is depleted. Come back later.")
+				# Auto-gather waits silently for regen; only toast when the player
+				# was swinging manually.
+				if local_player != null and local_player.is_auto_gathering():
+					pass
+				else:
+					var now_ms: int = Time.get_ticks_msec()
+					if now_ms - _last_depleted_toast_ms > 4000:
+						_last_depleted_toast_ms = now_ms
+						Toaster.toast("This vein is depleted. Come back later.")
 			# "cooldown" stays silent — players will spam swings during it.
 		return
 
