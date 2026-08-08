@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_item"]
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Texture2D" uid="uid://c3ms2rt4ssmpr" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Woodcutting.png" id="icon_tex"]
 [ext_resource type="Resource" uid="uid://clogmat000001" path="res://source/common/gameplay/items/materials/wood/logs.tres" id="3_logs"]
 [ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="4_oak"]
 [ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="5_willow"]
@@ -10,6 +11,7 @@
 
 [resource]
 script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
 job_slug = &"woodcutting"
 display_name = "Woodcutting"
 category = &"gathering"

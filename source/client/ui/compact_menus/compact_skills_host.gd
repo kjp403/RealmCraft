@@ -1,12 +1,23 @@
 extends PanelContainer
-## Dock Skills panel: job icons with XP bars. Click a skill (e.g. Mining) to see
-## level progress and what sources / recipes unlock at which level.
+## Dock Skills panel — OSRS-style cells for the 7 live skills only.
+## Click a skill for gather/craft sources and XP detail.
 
-const PANEL_SIZE := Vector2(220.0, 300.0)
+const PANEL_SIZE := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
-const GRID_COLUMNS := 3
-const TILE_SIZE := Vector2(60.0, 64.0)
+const GRID_COLUMNS := 2
+const TILE_SIZE := Vector2(112.0, 52.0)
+
+## Live skills only (slug keys match JobRegistry / save data).
+const SKILL_ORDER: Array[String] = [
+	"mining",
+	"smithing",
+	"fishing",
+	"cooking",
+	"outfitting",
+	"woodcutting",
+	"harvesting",
+]
 
 @onready var title_label: Label = (
 	$MarginContainer/MainColumn/Header/TitleLabel
@@ -25,6 +36,7 @@ var _skills: Dictionary = {}
 var _skills_grid: GridContainer
 var _grid_root: Control
 var _detail_root: VBoxContainer
+var _total_level_bar: Label
 var _selected_slug: String = ""
 var _back_button: Button
 
@@ -34,13 +46,16 @@ func _ready() -> void:
 	custom_minimum_size = PANEL_SIZE
 	size = PANEL_SIZE
 
-	content.add_theme_constant_override(&"margin_left", 6)
-	content.add_theme_constant_override(&"margin_right", 6)
+	content.add_theme_constant_override(&"margin_left", 4)
+	content.add_theme_constant_override(&"margin_right", 4)
+	content.add_theme_constant_override(&"margin_top", 2)
+	content.add_theme_constant_override(&"margin_bottom", 4)
 
 	header_spacer.hide()
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.text = "Skills"
+	title_label.add_theme_color_override(&"font_color", Color(0.98, 0.92, 0.35))
 
 	for child: Node in content.get_children():
 		content.remove_child(child)
@@ -61,14 +76,16 @@ func _ready() -> void:
 
 
 func _build_layout() -> void:
-	_grid_root = Control.new()
+	_grid_root = VBoxContainer.new()
 	_grid_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_grid_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_grid_root.add_theme_constant_override(&"separation", 4)
 	_grid_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	content.add_child(_grid_root)
 
 	var scroll := ScrollContainer.new()
-	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_grid_root.add_child(scroll)
 
@@ -79,9 +96,21 @@ func _build_layout() -> void:
 
 	_skills_grid = GridContainer.new()
 	_skills_grid.columns = GRID_COLUMNS
-	_skills_grid.add_theme_constant_override(&"h_separation", 5)
-	_skills_grid.add_theme_constant_override(&"v_separation", 5)
+	_skills_grid.add_theme_constant_override(&"h_separation", 4)
+	_skills_grid.add_theme_constant_override(&"v_separation", 4)
 	grid_center.add_child(_skills_grid)
+
+	_total_level_bar = Label.new()
+	_total_level_bar.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_total_level_bar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_total_level_bar.custom_minimum_size = Vector2(0, 22)
+	_total_level_bar.add_theme_font_size_override(&"font_size", 12)
+	_total_level_bar.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	_total_level_bar.text = "Total level: —"
+	var total_panel := PanelContainer.new()
+	total_panel.add_theme_stylebox_override(&"panel", _make_total_bar_style())
+	total_panel.add_child(_total_level_bar)
+	_grid_root.add_child(total_panel)
 
 	_detail_root = VBoxContainer.new()
 	_detail_root.visible = false
@@ -127,9 +156,7 @@ func _refresh() -> void:
 
 func _on_skills_received(data: Dictionary) -> void:
 	_skills = data.get("skills", {})
-	var total_level: int = 0
-	for skill_name: Variant in _skills:
-		total_level += int((_skills[skill_name] as Dictionary).get("level", 1))
+	var total_level: int = _total_unlocked_level()
 	if _detail_root.visible and _selected_slug != "":
 		title_label.text = str(
 			(_skills.get(_selected_slug, {}) as Dictionary).get(
@@ -138,19 +165,25 @@ func _on_skills_received(data: Dictionary) -> void:
 		)
 		_rebuild_detail()
 	else:
-		title_label.text = "Skills · %d" % total_level
+		title_label.text = "Skills"
 		_build_skills_grid()
+		_total_level_bar.text = "Total level: %d" % total_level
+
+
+func _total_unlocked_level() -> int:
+	var total_level: int = 0
+	for skill_name: Variant in _skills:
+		total_level += int((_skills[skill_name] as Dictionary).get("level", 1))
+	return total_level
 
 
 func _show_grid() -> void:
 	_selected_slug = ""
 	_detail_root.visible = false
 	_grid_root.visible = true
-	var total_level: int = 0
-	for skill_name: Variant in _skills:
-		total_level += int((_skills[skill_name] as Dictionary).get("level", 1))
-	title_label.text = "Skills · %d" % total_level
+	title_label.text = "Skills"
 	_build_skills_grid()
+	_total_level_bar.text = "Total level: %d" % _total_unlocked_level()
 
 
 func _show_detail(slug: String) -> void:
@@ -165,28 +198,17 @@ func _build_skills_grid() -> void:
 		_skills_grid.remove_child(child)
 		child.queue_free()
 
-	var entries: Array[Dictionary] = []
-	for skill_name: Variant in _skills:
-		entries.append({
-			"slug": String(skill_name),
-			"info": _skills[skill_name],
-		})
-	entries.sort_custom(_sort_skills)
-
-	for entry: Dictionary in entries:
-		_skills_grid.add_child(
-			_create_skill_tile(String(entry["slug"]), entry["info"])
-		)
-
-
-func _sort_skills(a: Dictionary, b: Dictionary) -> bool:
-	var a_info: Dictionary = a["info"]
-	var b_info: Dictionary = b["info"]
-	var a_category_order: int = 0 if str(a_info.get("category", "")) == "gathering" else 1
-	var b_category_order: int = 0 if str(b_info.get("category", "")) == "gathering" else 1
-	if a_category_order != b_category_order:
-		return a_category_order < b_category_order
-	return int(a_info.get("order", 0)) < int(b_info.get("order", 0))
+	for slug: String in SKILL_ORDER:
+		if _skills.has(slug):
+			_skills_grid.add_child(_create_skill_tile(slug, _skills[slug]))
+		else:
+			var info: Dictionary = {
+				"display_name": JobRegistry.display_name(StringName(slug)),
+				"level": 1,
+				"xp": 0,
+				"xp_to_next": 1,
+			}
+			_skills_grid.add_child(_create_skill_tile(slug, info))
 
 
 func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
@@ -203,6 +225,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	tile.size = TILE_SIZE
 	tile.clip_contents = true
 	tile.focus_mode = Control.FOCUS_NONE
+	tile.flat = true
 	if at_cap:
 		tile.tooltip_text = "%s\nLv %d — Max level\nClick for details" % [display, level]
 	else:
@@ -218,51 +241,68 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	icon.texture = _get_skill_icon(skill_name)
-	icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	icon.offset_left = 10
-	icon.offset_top = 4
-	icon.offset_right = -10
-	icon.offset_bottom = -22
+	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	icon.offset_left = 2
+	icon.offset_top = 2
+	icon.offset_right = 50
+	icon.offset_bottom = -2
 	tile.add_child(icon)
 
 	if icon.texture == null:
 		var fallback := Label.new()
-		fallback.text = skill_name.left(1).to_upper()
+		fallback.text = display.left(1).to_upper()
 		fallback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fallback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.add_theme_font_size_override(&"font_size", 20)
+		fallback.add_theme_font_size_override(&"font_size", 14)
 		fallback.add_theme_color_override(&"font_color", Color(0.82, 0.72, 0.52))
 		fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		icon.add_child(fallback)
 
-	var level_label := Label.new()
-	level_label.text = str(level)
-	level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	level_label.add_theme_font_size_override(&"font_size", 10)
-	level_label.add_theme_color_override(&"font_color", Color(1.0, 0.88, 0.55))
-	level_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	level_label.offset_left = -18
-	level_label.offset_top = 2
-	level_label.offset_right = -3
-	level_label.offset_bottom = 14
-	tile.add_child(level_label)
+	# OSRS-style diagonal current / base levels (yellow).
+	var cur := Label.new()
+	cur.text = str(level)
+	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cur.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cur.add_theme_font_size_override(&"font_size", 12)
+	cur.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	cur.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
+	cur.add_theme_constant_override(&"shadow_offset_x", 1)
+	cur.add_theme_constant_override(&"shadow_offset_y", 1)
+	cur.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	cur.offset_left = -40
+	cur.offset_top = 2
+	cur.offset_right = -10
+	cur.offset_bottom = 18
+	tile.add_child(cur)
 
-	var bar := ProgressBar.new()
-	bar.min_value = 0
-	bar.max_value = xp_to_next
-	bar.value = xp_to_next if at_cap else xp
-	bar.show_percentage = false
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_left = 4
-	bar.offset_top = -10
-	bar.offset_right = -4
-	bar.offset_bottom = -3
-	bar.add_theme_stylebox_override(&"background", _make_bar_bg())
-	bar.add_theme_stylebox_override(&"fill", _make_bar_fill())
-	tile.add_child(bar)
+	var base := Label.new()
+	base.text = str(level)
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	base.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	base.add_theme_font_size_override(&"font_size", 12)
+	base.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	base.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
+	base.add_theme_constant_override(&"shadow_offset_x", 1)
+	base.add_theme_constant_override(&"shadow_offset_y", 1)
+	base.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	base.offset_left = -32
+	base.offset_top = -18
+	base.offset_right = -4
+	base.offset_bottom = -2
+	tile.add_child(base)
+
+	var slash := Label.new()
+	slash.text = "/"
+	slash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slash.add_theme_font_size_override(&"font_size", 11)
+	slash.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	slash.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	slash.offset_left = -28
+	slash.offset_top = -8
+	slash.offset_right = -16
+	slash.offset_bottom = 8
+	tile.add_child(slash)
 
 	return tile
 
@@ -292,12 +332,25 @@ func _rebuild_detail() -> void:
 	_back_button.pressed.connect(_show_grid)
 	_detail_root.add_child(_back_button)
 
+	var header_row := HBoxContainer.new()
+	header_row.add_theme_constant_override(&"separation", 8)
+	_detail_root.add_child(header_row)
+
+	var detail_icon := TextureRect.new()
+	detail_icon.custom_minimum_size = Vector2(32, 32)
+	detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	detail_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	detail_icon.texture = _get_skill_icon(_selected_slug)
+	header_row.add_child(detail_icon)
+
 	var header := Label.new()
-	header.text = "Lv %d" % level
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.text = "Lv %d / %d" % [level, level]
+	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_theme_font_size_override(&"font_size", 16)
-	header.add_theme_color_override(&"font_color", Color(1.0, 0.92, 0.7))
-	_detail_root.add_child(header)
+	header.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	header_row.add_child(header)
 
 	var bar := ProgressBar.new()
 	bar.min_value = 0
@@ -405,6 +458,8 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	var job := JobRegistry.perks_for(StringName(skill_name))
 	if job == null:
 		return null
+	if job.icon != null:
+		return job.icon
 	if not job.source_items.is_empty() and job.source_items[0] != null:
 		return job.source_items[0].item_icon
 	if not job.recipe_items.is_empty() and job.recipe_items[0] != null:
@@ -413,26 +468,39 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 
 
 func _apply_tile_styles(tile: Button) -> void:
-	tile.add_theme_stylebox_override(
-		&"normal",
-		_make_tile_style(Color(0.035, 0.03, 0.055, 0.82), Color(0.42, 0.28, 0.18, 0.85))
-	)
-	tile.add_theme_stylebox_override(
-		&"hover",
-		_make_tile_style(Color(0.10, 0.075, 0.08, 0.92), Color(0.86, 0.57, 0.25, 1.0))
-	)
-	tile.add_theme_stylebox_override(
-		&"pressed",
-		_make_tile_style(Color(0.16, 0.11, 0.07, 0.96), Color(1.0, 0.72, 0.30, 1.0))
-	)
+	var normal := _make_cell_style()
+	var hover := _make_cell_style()
+	hover.border_color = Color(0.92, 0.82, 0.28, 1.0)
+	hover.bg_color = Color(0.20, 0.18, 0.14, 0.98)
+	var pressed := _make_cell_style()
+	pressed.border_color = Color(1.0, 0.92, 0.35, 1.0)
+	tile.add_theme_stylebox_override(&"normal", normal)
+	tile.add_theme_stylebox_override(&"hover", hover)
+	tile.add_theme_stylebox_override(&"pressed", pressed)
+	tile.add_theme_stylebox_override(&"focus", normal)
 
 
-func _make_tile_style(background_color: Color, border_color: Color) -> StyleBoxFlat:
+func _make_cell_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = background_color
-	style.border_color = border_color
+	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
+	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
+	style.set_corner_radius_all(2)
+	style.content_margin_left = 2
+	style.content_margin_right = 2
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
+	return style
+
+
+func _make_total_bar_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.02, 0.02, 0.02, 0.95)
+	style.border_color = Color(0.42, 0.38, 0.32, 1.0)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(1)
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
 	return style
 
 

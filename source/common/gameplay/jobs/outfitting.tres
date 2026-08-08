@@ -1,14 +1,16 @@
 [gd_resource type="Resource" script_class="JobPerks" format=3 uid="uid://byow6smgh482j"]
 
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Texture2D" uid="uid://csk8c1a0a6a6c" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Crafting.png" id="icon_tex"]
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_u1igm"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/cloth/cloth_hood.tres" id="2_hood"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/leather_jacket.tres" id="3_jacket"]
 
 [resource]
 script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
 job_slug = &"outfitting"
-display_name = "Outfitting"
+display_name = "Crafting"
 category = &"crafting"
 sort_order = 1
 perks = Array[Dictionary]([{
@@ -32,4 +34,4 @@ perks = Array[Dictionary]([{
 }])
 recipe_items = Array[ExtResource("1_u1igm")]([ExtResource("2_hood"), ExtResource("3_jacket")])
 recipe_levels = Array[int]([0, 0])
-describe_lines = Array[String](["Outfitting XP +{xp}%", "Material refund: {refund}%", "Extra item: {extra_item}%"])
+describe_lines = Array[String](["Crafting XP +{xp}%", "Material refund: {refund}%", "Extra item: {extra_item}%"])

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_item"]
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Texture2D" uid="uid://cskfb3437ad75" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Fishing.png" id="icon_tex"]
 [ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="f0"]
 [ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="f1"]
 [ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="f3"]
@@ -13,6 +14,7 @@
 
 [resource]
 script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
 job_slug = &"fishing"
 display_name = "Fishing"
 category = &"gathering"

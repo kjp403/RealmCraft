@@ -3,17 +3,17 @@
 [ext_resource type="Script" uid="uid://c2pcfsdbtbx4a" path="res://source/client/ui/compact_menus/compact_skills_host.gd" id="1_cmegb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4nh52"]
-bg_color = Color(0.09019608, 0.078431375, 0.12156863, 0.9490196)
+bg_color = Color(0.18431373, 0.17254902, 0.15686275, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.6039216, 0.44313726, 0.21960784, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-shadow_color = Color(0, 0, 0, 0.5019608)
+border_color = Color(0.45490196, 0.41568628, 0.34117648, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0, 0, 0, 0.55)
 shadow_size = 4
 
 [node name="CompactSkillsHost" type="PanelContainer" unique_id=1675211017]
@@ -22,10 +22,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -282.0
-offset_top = -382.0
+offset_left = -248.0
+offset_top = -344.0
 offset_right = -12.0
-offset_bottom = -12.0
+offset_bottom = -52.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_4nh52")
 script = ExtResource("1_cmegb")
 
@@ -44,7 +44,7 @@ theme_override_constants/separation = 4
 [node name="TitleLabel" type="Label" parent="MarginContainer/MainColumn/Header" unique_id=49661164]
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_colors/font_color = Color(0.9098039, 0.78039217, 0.47843137, 1)
+theme_override_colors/font_color = Color(0.98, 0.92, 0.35, 1)
 text = "Skills"
 vertical_alignment = 1
 
