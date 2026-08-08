@@ -196,18 +196,56 @@ jobs:
           chmod +x butler
           ./butler -V
 
+      - name: Prepare portable itch builds
+        run: |
+          set -euo pipefail
+          # Portable folders (exe + .pck, not one giant embedded exe) patch cleanly
+          # in the itch app. Single-file Godot builds force full re-downloads and
+          # often make "Update" fall back to a browser Download button.
+          VERSION=$(grep -E '^config/version=' project.godot | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "USERVERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Game version: ${VERSION}"
+          if [ -f exports/windows/Arkenelle.exe ]; then
+            test -f exports/windows/Arkenelle.pck
+            printf '%s\n' \
+              '[[actions]]' \
+              'name = "play"' \
+              'path = "Arkenelle.exe"' \
+              'platform = "windows"' \
+              > exports/windows/.itch.toml
+            ls -lah exports/windows
+          fi
+          if [ -f exports/linux/Arkenelle.x86_64 ]; then
+            if [ ! -f exports/linux/Arkenelle.x86_64.pck ] && [ ! -f exports/linux/Arkenelle.pck ]; then
+              echo "::warning::Linux .pck missing — export may still be embedded."
+            fi
+            printf '%s\n' \
+              '[[actions]]' \
+              'name = "play"' \
+              'path = "Arkenelle.x86_64"' \
+              'platform = "linux"' \
+              > exports/linux/.itch.toml
+          fi
+
       - name: Push clients to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
           set -euo pipefail
           want() { [ "$PLATFORMS" = "all" ] || [ "$PLATFORMS" = "$1" ]; }
-          if want windows; then ./butler push exports/windows "${ITCH_GAME}:windows"; fi
-          if want linux;   then ./butler push exports/linux   "${ITCH_GAME}:linux"; fi
-          if want web;     then ./butler push exports/web     "${ITCH_GAME}:web"; fi
+          # --userversion lets the itch app show 0.28.x and pick the right patch.
+          if want windows; then
+            ./butler push exports/windows "${ITCH_GAME}:windows" --userversion "${USERVERSION}"
+          fi
+          if want linux; then
+            ./butler push exports/linux "${ITCH_GAME}:linux" --userversion "${USERVERSION}"
+          fi
+          if want web; then
+            ./butler push exports/web "${ITCH_GAME}:web" --userversion "${USERVERSION}"
+          fi
           if want android && [ -f exports/android/Arkenelle.apk ]; then
             # Push only the .apk, NOT the whole dir — Godot also drops an
             # Arkenelle.apk.idsig that sideloaders don't need.
-            ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android"
+            ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android" --userversion "${USERVERSION}"
           fi
           ./butler status "${ITCH_GAME}"
