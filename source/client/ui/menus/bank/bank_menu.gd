@@ -116,7 +116,7 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Left-click stacks over 2 to deposit. Qty 1–2: set amount, then Deposit. Or Deposit All."
+		"Left-click a bag stack to deposit it all. Or Deposit All."
 		if is_bag
 		else "Click a stack, set amount, Withdraw."
 	)
