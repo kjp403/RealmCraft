@@ -1162,9 +1162,10 @@ func _add_password_toggle(into: Node, fields: Array[LineEdit]) -> void:
 	into.add_child(toggle)
 
 
-## A throwaway display name (character names aren't unique — Discord-style), for
-## the "Random" dice next to the name field. Letters only, 2–3 syllables, so it
-## always passes username validation.
+## A throwaway display name for the "Random" dice next to the name field.
+## Letters only, 2–3 syllables, so it always passes username validation.
+## Character names are unique world-wide — if the dice lands on a taken name,
+## create will refuse and the player can roll again.
 func _random_character_name() -> String:
 	var syllables: PackedStringArray = [
 		"ar", "en", "th", "or", "el", "an", "ka", "ri", "mo", "lu", "ne", "sa",

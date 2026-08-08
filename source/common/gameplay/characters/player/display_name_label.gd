@@ -6,6 +6,11 @@ extends Label
 const RANK_ICON_ADMIN := preload("res://assets/sprites/ui/ranks/admin.png")
 const RANK_ICON_MODERATOR := preload("res://assets/sprites/ui/ranks/moderator.png")
 const BADGE_PX := 14.0
+## Gap between badge right edge and the first letter of the name (label space).
+const BADGE_GAP := 3.0
+## Optical lift so the 14px icon sits on the glyph mid-line (font_size 32).
+const BADGE_Y_NUDGE := -2.0
+
 
 var _badge: TextureRect
 
@@ -13,6 +18,10 @@ var _badge: TextureRect
 func _ready() -> void:
 	if multiplayer.is_server():
 		return
+	# Shrink-wrap to glyphs — the scene placeholder rect is wide and center-
+	# aligned, which parked the badge far left of the actual letters.
+	horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	var parent_node: Node = get_parent()
 	if parent_node.has_signal(&"display_name_changed"):
 		parent_node.display_name_changed.connect(_on_display_name_changed)
@@ -23,6 +32,7 @@ func _ready() -> void:
 	# Seed text if the sync already landed before this label was ready.
 	if parent_node.get("display_name") != null:
 		text = str(parent_node.get("display_name"))
+	_recenter()
 
 
 func _notification(what: int) -> void:
@@ -68,9 +78,18 @@ func _apply_badge(role: String) -> void:
 
 
 func _recenter() -> void:
-	# Label is scaled 0.2 on the Character scene — keep the name centred, and
-	# park the badge just left of the text in label-local space.
-	var scaled_w: float = size.x * scale.x
-	position.x = -scaled_w / 2.0
+	# Label is scaled 0.2 on the Character scene. Shrink-wrap to the glyphs,
+	# park the badge snug left of the first letter, then center the whole
+	# [badge|name] group under the character.
+	reset_size()
+	var left_extent: float = 0.0
 	if _badge != null and is_instance_valid(_badge):
-		_badge.position = Vector2(-BADGE_PX - 4.0, (size.y - BADGE_PX) * 0.5)
+		left_extent = BADGE_PX + BADGE_GAP
+		_badge.position = Vector2(
+			-(BADGE_PX + BADGE_GAP),
+			(size.y - BADGE_PX) * 0.5 + BADGE_Y_NUDGE
+		)
+	# group_left = position.x - left_extent * scale.x
+	# group_right = position.x + size.x * scale.x
+	# center at 0 → position.x = -(size.x - left_extent) * scale.x / 2
+	position.x = -(size.x - left_extent) * scale.x * 0.5

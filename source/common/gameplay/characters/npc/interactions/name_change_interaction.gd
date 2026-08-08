@@ -1,17 +1,13 @@
 class_name NameChangeInteraction
 extends NPCInteraction
-## NPC capability: rename the character for a gold fee. Opens the name-change
-## dialog; the rename itself is the server-authoritative name.change handler,
-## which reads COST here so the displayed price and the charged price can't drift.
+## Character renames are disabled. Kept as a class so old scene resources that
+## still reference this script don't break; menu_entry is empty so the option
+## never appears.
 
-## Gold fee for a rename. Single source of truth — the server handler reads it too.
+## Historical gold fee (unused — renames are off). Kept so any leftover dialog
+## code that reads COST still resolves.
 const COST: int = 20
 
 
 func menu_entry(_npc: Node) -> Dictionary:
-	return {
-		"label": _label_or("Change name"),
-		"icon": _icon_or(""),
-		"menu": &"name_change",
-		"arg": COST,
-	}
+	return {}

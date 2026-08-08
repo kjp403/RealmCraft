@@ -149,6 +149,9 @@ func _on_confirm() -> void:
 		hide()
 		return
 	match str(data.get("reason", "")):
+		"disabled":
+			Toaster.toast("Name changes are no longer available.")
+			hide()
 		"gold":
 			_set_hint("Not enough gold (%d g needed)." % _cost, true)
 		"same":

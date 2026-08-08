@@ -253,8 +253,13 @@ func player_character_creation_result(gateway_id: int, peer_id: int, username: S
 			}
 		)
 	else:
-		gateway_manager.player_character_creation_result.rpc_id(
-			gateway_id, peer_id, result_code
+		# result_code 0 = create refused (today: display name already taken).
+		# Reply through the normal gateway_response channel — the old
+		# player_character_creation_result RPC is not implemented on the gateway.
+		gateway_manager.gateway_response.rpc_id(
+			gateway_id,
+			peer_id,
+			{"error": "This name is already taken."}
 		)
 
 

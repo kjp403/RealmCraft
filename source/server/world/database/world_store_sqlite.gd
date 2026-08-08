@@ -105,7 +105,31 @@ func save_player(player: PlayerResource) -> bool:
 	)
 
 
+## True when another character already uses this display name (case-insensitive).
+## Pass exclude_player_id when renaming so a player can keep their own name.
+func is_display_name_taken(display_name: String, exclude_player_id: int = 0) -> bool:
+	if display_name.is_empty():
+		return false
+	if exclude_player_id > 0:
+		db.query_with_bindings(
+			"SELECT 1 FROM players WHERE display_name = ? COLLATE NOCASE AND player_id != ? LIMIT 1;",
+			[display_name, exclude_player_id]
+		)
+	else:
+		db.query_with_bindings(
+			"SELECT 1 FROM players WHERE display_name = ? COLLATE NOCASE LIMIT 1;",
+			[display_name]
+		)
+	return not db.query_result.is_empty()
+
+
 func create_player_character(account_name: String, character_data: Dictionary) -> int:
+	var display_name: String = str(character_data.get("name", "Player")).strip_edges()
+	# Character names are unique world-wide (case-insensitive). Return 0 so the
+	# master/gateway can surface "name taken" instead of creating a duplicate.
+	if is_display_name_taken(display_name):
+		return 0
+
 	db.query_with_bindings("INSERT OR IGNORE INTO accounts(account_name) VALUES(?);", [account_name])
 
 	db.query("SELECT COALESCE(MAX(player_id), 0) AS max_id FROM players;")
@@ -116,7 +140,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	player.init(
 		next_id,
 		account_name,
-		str(character_data.get("name", "Player")),
+		display_name,
 		int(character_data.get("skin", 1))
 	)
 	# The chosen creation skin is owned from the start, so it's equippable in the wardrobe.

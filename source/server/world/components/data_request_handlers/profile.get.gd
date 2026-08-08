@@ -71,9 +71,9 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		else ""
 	)
 
-	# Account name is the public "main" handle (like a Discord username); the
-	# character display name is just a nickname and may not be unique. The
-	# permanent player_id is shown only to staff (moderator and up).
+	# Account name is the public login handle (@name); the character display
+	# name is the in-world nameplate and is unique world-wide. The permanent
+	# player_id is shown only to staff (moderator and up).
 	var mod_priority: int = int(
 		instance.global_role_definitions.get(
 			"moderator",
