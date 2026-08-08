@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://cf7feaf3b28ffd"]
+
+[ext_resource type="Texture2D" uid="uid://koph0nkujcra" path="res://assets/sprites/environment/chests/wood_gold_small.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"wood_gold_small"
+item_name = &"Wood Chest (Gold, Small)"
+item_icon = ExtResource("1_icon")
+description = "A small gold-trimmed wood chest. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"wood_gold_small"
+metadata/id = 245

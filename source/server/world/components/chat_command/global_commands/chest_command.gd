@@ -1,5 +1,7 @@
 extends ChatCommand
-## Spawn a loot chest at your feet for QA / boss-drop tuning.
+## Spawn a world loot chest at your feet for QA / boss-drop tuning.
+## For a tradeable bag chest use /give instead (same slug), e.g.
+## /give self gold_pink_large
 ## Examples: /chest wood_silver_small   |   /chest gold_pink_large
 
 
