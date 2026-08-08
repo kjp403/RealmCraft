@@ -364,6 +364,7 @@ func _on_slot_gui_input(
 		var item: Item = entry["item"]
 		if (
 			item is ConsumableItem
+			or item is LootChestItem
 			or item is GearItem
 			or item.holdable
 		):
@@ -377,14 +378,21 @@ func _open_context_menu(entry: Dictionary) -> void:
 
 	var item: Item = entry["item"]
 
-	if item is ConsumableItem:
+	if item is LootChestItem:
+		context_menu.add_item("Open", ACTION_PRIMARY)
+	elif item is ConsumableItem:
 		context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is GearItem:
 		context_menu.add_item("Equip", ACTION_PRIMARY)
 	elif item.holdable:
 		context_menu.add_item("Hold", ACTION_PRIMARY)
 
-	if item is ConsumableItem or item is GearItem or item.holdable:
+	if (
+		item is ConsumableItem
+		or item is LootChestItem
+		or item is GearItem
+		or item.holdable
+	):
 		context_menu.add_item("Bind to 1-2-3", ACTION_HOTKEY)
 
 	if item.can_drop():
@@ -495,12 +503,19 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		return
 
 	# Materials and other non-holdables are Drop-only — never send item.equip.
-	if not (item is ConsumableItem or item is GearItem or item.holdable):
+	if not (
+		item is ConsumableItem
+		or item is LootChestItem
+		or item is GearItem
+		or item.holdable
+	):
 		return
 
 	var request_name: StringName = &"item.equip"
 
-	if item is ConsumableItem:
+	if item is LootChestItem:
+		request_name = &"chest.open_item"
+	elif item is ConsumableItem:
 		request_name = &"item.consume"
 
 	primary_action_in_progress = true
@@ -564,6 +579,7 @@ func _perform_primary_action(entry: Dictionary) -> void:
 
 	if item is ConsumableItem:
 		Toaster.toast("Potion consumed.")
+	# LootChestItem loot toast rides the chest.opened push.
 
 	_refresh_inventory()
 

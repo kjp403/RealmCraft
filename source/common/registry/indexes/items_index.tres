@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1786204421
-next_id = 243
+next_id = 250
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -992,6 +992,41 @@ entries = Array[Dictionary]([{
 &"id": 171,
 &"path": "res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres",
 &"slug": &"wand_sunsteel.item"
+}, {
+&"hash": "2bec09ec6e51eb395e78455a3911a23463dfbe0957acfccd4dab3ba8bfb188c7",
+&"id": 243,
+&"path": "res://source/common/gameplay/items/chests/wood_silver_small.tres",
+&"slug": &"wood_silver_small"
+}, {
+&"hash": "04317023d57f5eb8d9386944011df75dce2744b03a8878de4c1fec1894fa114e",
+&"id": 244,
+&"path": "res://source/common/gameplay/items/chests/wood_silver_medium.tres",
+&"slug": &"wood_silver_medium"
+}, {
+&"hash": "fbbe1687e2579166a0c8c1b7839bde881d394e9097eaa095253ef378be7a7de5",
+&"id": 245,
+&"path": "res://source/common/gameplay/items/chests/wood_gold_small.tres",
+&"slug": &"wood_gold_small"
+}, {
+&"hash": "714166864b97e017eaa60457defc298a297073527033764712f11144b910ad31",
+&"id": 246,
+&"path": "res://source/common/gameplay/items/chests/wood_gold_medium.tres",
+&"slug": &"wood_gold_medium"
+}, {
+&"hash": "31a4069fd05a6c118cf5d3ef0df53889cbc18f22e0cbfbfccf779a8c077c03af",
+&"id": 247,
+&"path": "res://source/common/gameplay/items/chests/gold_blue_large.tres",
+&"slug": &"gold_blue_large"
+}, {
+&"hash": "ccc457915c05103e92fa5c724817a339e3728cc695d644d37a5d1cf6449a3ef7",
+&"id": 248,
+&"path": "res://source/common/gameplay/items/chests/gold_red_large.tres",
+&"slug": &"gold_red_large"
+}, {
+&"hash": "31e827a0bf7602941865584b4dd7b17c65a9c4cdba805724829739447199cc21",
+&"id": 249,
+&"path": "res://source/common/gameplay/items/chests/gold_pink_large.tres",
+&"slug": &"gold_pink_large"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

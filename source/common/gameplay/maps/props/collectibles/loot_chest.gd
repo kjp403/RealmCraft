@@ -126,28 +126,9 @@ func try_open(player: Player) -> Dictionary:
 		return {"ok": false, "reason": "reserved"}
 
 	opened = true
-	var resource: PlayerResource = player.player_resource
-	var gold: int = 0
-	if chest.gold_max > 0:
-		gold = randi_range(chest.gold_min, chest.gold_max)
-		if gold > 0 and Economy.gold_id() > 0:
-			Inventory.add_item(resource.inventory, Economy.gold_id(), gold)
-
-	var items: Array = []
-	for drop: LootDrop in chest.loot:
-		if drop == null or drop.item == null:
-			continue
-		if randf() <= drop.chance:
-			_grant_drop(resource, drop, items)
-
-	# T1/T2 (and any table): never open to gold-only — guarantee ≥1 resource stack.
-	if items.is_empty():
-		var candidates: Array[LootDrop] = []
-		for drop: LootDrop in chest.loot:
-			if drop != null and drop.item != null and int(drop.item.get_meta(&"id", 0)) > 0:
-				candidates.append(drop)
-		if not candidates.is_empty():
-			_grant_drop(resource, candidates[randi() % candidates.size()], items)
+	var payout: Dictionary = chest.roll_and_grant(player)
+	var gold: int = int(payout.get("gold", 0))
+	var items: Array = payout.get("items", []) as Array
 
 	var peer: int = opener
 	if peer > 0 and WorldServer.curr != null:
@@ -164,21 +145,6 @@ func try_open(player: Player) -> Dictionary:
 		"gold": gold,
 		"items": items,
 	}
-
-
-func _grant_drop(resource: PlayerResource, drop: LootDrop, items: Array) -> void:
-	var amount: int = randi_range(drop.min_amount, drop.max_amount)
-	if amount <= 0:
-		return
-	var item_id: int = int(drop.item.get_meta(&"id", 0))
-	if item_id <= 0:
-		return
-	Inventory.add_item(resource.inventory, item_id, amount)
-	items.append({
-		"id": item_id,
-		"amount": amount,
-		"name": str(drop.item.item_name),
-	})
 
 
 func _expire() -> void:

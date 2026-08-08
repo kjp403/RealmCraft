@@ -569,8 +569,8 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 	if _selected_item is GearItem:
 		action_button.text = "Equip"
 		action_button.disabled = false
-	elif _selected_item is ConsumableItem:
-		action_button.text = "Use"
+	elif _selected_item is ConsumableItem or _selected_item is LootChestItem:
+		action_button.text = "Open" if _selected_item is LootChestItem else "Use"
 		action_button.disabled = false
 	elif _selected_item.holdable:
 		action_button.text = "Hold"
@@ -585,6 +585,7 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 	hotkey_button.disabled = not (
 		_selected_item is GearItem
 		or _selected_item is ConsumableItem
+		or _selected_item is LootChestItem
 		or _selected_item.holdable
 	)
 	pin_button.disabled = false
@@ -632,6 +633,15 @@ func _on_action_button_pressed() -> void:
 			fill_inventory()
 		return
 	if _selected_item == null or _selected_item_id <= 0:
+		return
+	if _selected_item is LootChestItem:
+		var open_result: Array = await Client.request_data_await(
+			&"chest.open_item",
+			{"id": _selected_item_id},
+			InstanceClient.current.name
+		)
+		if not _surface_item_rejection(open_result):
+			fill_inventory()
 		return
 	if _selected_item is ConsumableItem:
 		var consume_result: Array = await Client.request_data_await(

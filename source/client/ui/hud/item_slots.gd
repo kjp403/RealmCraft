@@ -70,6 +70,17 @@ func _trigger_slot(index: int) -> void:
 			InstanceClient.current.name
 		)
 		return
+	# Loot chests open from the bag (same payout as a world chest).
+	if item is LootChestItem:
+		Client.request_data(
+			&"chest.open_item",
+			func(result: Dictionary) -> void:
+				_on_item_action_result(result)
+				_after_slot_used(result, index),
+			{"id": int(item.get_meta(&"id", 0))},
+			InstanceClient.current.name
+		)
+		return
 	# Toggle: tapping the slot of whatever you're HOLDING puts it away.
 	if _is_equipped(item):
 		var slot_key: StringName = (item as GearItem).slot.key if item is GearItem else &"weapon"
@@ -132,7 +143,7 @@ func _is_equipped(item: Item) -> bool:
 ## (Gear bindings persist forever; the item just bounces bag <-> body.)
 func _after_slot_used(_response: Dictionary, index: int) -> void:
 	var item: Item = item_shortcuts[index] if index < item_shortcuts.size() else null
-	if item == null or not item is ConsumableItem:
+	if item == null or not (item is ConsumableItem or item is LootChestItem):
 		return
 	var item_id: int = int(item.get_meta(&"id", 0))
 	Client.request_data(
@@ -189,7 +200,12 @@ func _quickslot_can_drop(_at_position: Vector2, data: Variant, _index: int) -> b
 	var item: Item = _item_from_drag(data)
 	if item == null:
 		return false
-	return item is ConsumableItem or item is GearItem or item.holdable
+	return (
+		item is ConsumableItem
+		or item is LootChestItem
+		or item is GearItem
+		or item.holdable
+	)
 
 
 func _quickslot_drop(_at_position: Vector2, data: Variant, index: int) -> void:
