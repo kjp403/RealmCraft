@@ -60,12 +60,12 @@ Watch deploys: GitHub → **Actions** → **Deploy VPS**.
 Server deploys do **not** update player EXEs. For Windows/Linux/Web installs that
 update themselves, use the itch.io pipeline:
 
-→ **[release-clients.md](./release-clients.md)** (create itch project, `BUTLER_API_KEY`, tag `v*`)
+→ **[release-clients.md](./release-clients.md)** (butler channel, portable exe+pck, `BUTLER_API_KEY`)
 
-Players install once with the [itch.io app](https://itch.io/app) from
-https://kjp403.itch.io/arkenelle. Later tagged releases push via butler and the
-app updates them. Only bump `project.godot` `config/version` when you ship a
-client build.
+Players must **Install** with the [itch.io app](https://itch.io/app) (not the
+browser **Download** button). Releases push a portable folder so the app can
+patch in-place. Delete any manual Uploads on the itch edit page — they make
+Update open a browser download instead.
 
 ---
 

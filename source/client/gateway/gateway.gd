@@ -52,8 +52,10 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
 const LINK_WEBSITE: String = Distribution.WEBSITE_URL
-## Client downloads + itch.app auto-updates (outdated-build dialog opens this).
+## Browser fallback page. Prefer [constant LINK_ITCH_APP] for updates.
 const LINK_DOWNLOAD: String = Distribution.ITCH_URL
+## Opens Arkenelle inside the itch.io desktop app so Update stays in-app.
+const LINK_ITCH_APP: String = Distribution.ITCH_APP_URL
 const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
@@ -266,12 +268,16 @@ func _wire_button_audio(button: Button, is_back: bool = false) -> void:
 
 
 ## Hard block for an outdated client: nothing's playable on a mismatched build, so
-## loop a non-dismissable "please update" (each press opens the itch download page —
-## players on the itch.app get the update there automatically).
+## loop a non-dismissable "please update". Prefer opening the itch.io *app* so
+## Update stays in-app; fall back to the public itch page if the app isn't installed.
 func _block_outdated(detail: String) -> void:
 	var message: String = detail if not detail.is_empty() else tr("ERR_OUTDATED")
 	while true:
 		await popup_panel.confirm_message(message, &"UPDATE_TITLE", &"UPDATE")
+		OS.shell_open(LINK_ITCH_APP)
+		# Tiny delay then also surface the public page as a browser fallback for
+		# players who only sideloaded a zip (no itch app handler registered).
+		await get_tree().create_timer(0.4).timeout
 		OS.shell_open(LINK_DOWNLOAD)
 
 

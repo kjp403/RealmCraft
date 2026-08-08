@@ -1,6 +1,6 @@
 # Release Windows/Linux/Web clients (itch.io auto-update)
 
-Players should install **once** with the [itch.io app](https://itch.io/app). After that, tagging a release here pushes a new build and the app updates them — no manual re-download for every change.
+Players should install **once** with the [itch.io app](https://itch.io/app). After that, each Release workflow push updates them **inside the app** — no browser re-download.
 
 Server-only hotfixes still go through **Deploy VPS** on `main` and do **not** need a client release (and should **not** bump `application/config/version`).
 
@@ -12,47 +12,58 @@ Server-only hotfixes still go through **Deploy VPS** on `main` and do **not** ne
 
 1. Open https://itch.io/game/new while logged in as **kjp403**
 2. **Title:** `Arkenelle`
-3. **Project URL:** `arkenelle`  
-   Final page must be: **https://kjp403.itch.io/arkenelle**
-4. Classification: **Games** · Kind: **Downloadable** (you can also enable HTML later for web)
-5. Visibility can start as **Draft** until the first butler push lands
+3. **Project URL:** `arkenelle` → **https://kjp403.itch.io/arkenelle**
+4. Classification: **Games** · Kind: **Downloadable**
+5. Visibility: **Public**
 6. Save
 
 ### 2. Add the butler API key to GitHub
 
-1. Create a key: https://itch.io/user/settings/api-keys  
-   (label it e.g. `arkenelle-github-actions`)
-2. Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-3. Name: `BUTLER_API_KEY`  
-   Value: paste the key
+1. Create a key: https://itch.io/user/settings/api-keys
+2. Repo → **Settings** → **Secrets and variables** → **Actions**
+3. Secret name: `BUTLER_API_KEY`
 
-### 3. Tell testers how to install
+### 3. Clean the itch Uploads page (important)
 
-> Install the [itch.io app](https://itch.io/app), open https://kjp403.itch.io/arkenelle, click **Install**.  
-> Later updates appear in the itch app — you don’t need a new zip each time.
+Manual “Upload files” on the itch edit page fights the butler channel and makes
+**Update** open a browser Download instead of patching in the app.
+
+1. Open https://kjp403.itch.io/arkenelle/edit
+2. Go to **Uploads** / **Builds**
+3. **Delete** any hand-uploaded `Arkenelle.exe` / zip that you added in the browser
+4. Leave only the butler channel builds (after CI runs you’ll see channel `windows`)
+
+### 4. Tell testers how to install (exact words)
+
+> 1. Install the [itch.io app](https://itch.io/app)  
+> 2. Open https://kjp403.itch.io/arkenelle **inside the itch app**  
+> 3. Click **Install** (green / “Install with the itch.io app”)  
+> 4. Do **not** use the red **Download** button in a normal browser  
+> 5. Always launch from itch **Library**
 
 ---
 
 ## How to ship a client update
 
-Only when players need new **client** content (UI, maps they load locally, icons, click/menu fixes, etc.):
+1. Bump `application/config/version` in `project.godot` when the client must change
+2. Merge to `main` (VPS deploys matching server version)
+3. GitHub → **Actions** → **Release clients to itch.io** → **Run workflow**  
+   (or `git tag vX.Y.Z && git push origin vX.Y.Z`)
+4. Wait for green — butler pushes a **portable folder** (`Arkenelle.exe` + `Arkenelle.pck`) with `--userversion`
+5. Players: itch app → Library → Arkenelle → **Update** (stays in the app)
 
-1. Bump `application/config/version` in `project.godot` (e.g. `0.28.0` → `0.28.1`)
-2. Merge that to `main` (VPS deploys the matching server version)
-3. Tag and push:
+---
 
-```bash
-git checkout main
-git pull origin main
-git tag v0.28.1
-git push origin v0.28.1
-```
+## If Update still opens a browser
 
-4. Watch **Actions → Release clients to itch.io** until green
-5. Confirm https://kjp403.itch.io/arkenelle shows the new Windows build  
-6. itch.app users get the update automatically; outdated EXEs are blocked at login and pointed at the itch page
+That install was created from a **browser Download**, not an itch **Install**. Fix once:
 
-Manual run (no tag): **Actions → Release clients to itch.io → Run workflow**.
+1. itch app → Library → Arkenelle → **Uninstall** / Manage → Forget
+2. Open the game page **inside the itch app**
+3. Click **Install** again
+4. From then on, Update patches in-app
+
+Also confirm you deleted manual Uploads (step 3 above) and the latest CI push shows channel `windows` with your version (e.g. `0.28.4`).
 
 ---
 
@@ -60,10 +71,10 @@ Manual run (no tag): **Actions → Release clients to itch.io → Run workflow**
 
 | Change | Client release? |
 |--------|-----------------|
-| Pure `source/server/**` logic / DB / config | No — Deploy VPS only; leave version alone |
-| `source/client/**`, shared maps/items/shops players must see, UI | Yes — bump version + tag |
+| Pure `source/server/**` logic / DB / config | No — Deploy VPS only |
+| `source/client/**`, shared maps/items/UI players must see | Yes — bump version + Release workflow |
 
-The gateway uses an **exact** version match (`source/server/gateway/http_server.gd`). Bumping the version without publishing a matching itch build will lock everyone out until they update.
+The gateway uses an **exact** version match. Bumping the version without publishing a matching itch build locks everyone out until they update.
 
 ---
 
