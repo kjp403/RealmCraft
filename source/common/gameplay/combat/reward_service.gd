@@ -14,6 +14,9 @@ const MIN_DAMAGE_FRACTION: float = 0.1
 const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
 ## Ground piles stay reserved to their earner for this long (anti-ninja).
 const LOOT_EXCLUSIVE_MS: int = 60_000
+## Ornate bag-chest item IDs (blue / red / pink). Ranked boss grants pick one
+## at random per chest so each earner gets their own mix.
+const ORNATE_CHEST_IDS: Array[int] = [247, 248, 249]
 
 
 ## [param contributors] = peer_id -> total damage dealt this life (HostileNpc
@@ -21,7 +24,8 @@ const LOOT_EXCLUSIVE_MS: int = 60_000
 static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Character) -> void:
 	if not GameMode.is_world_server():
 		return
-	if npc.xp_reward <= 0 and (npc.loot == null or npc.loot.is_empty()):
+	if npc.xp_reward <= 0 and (npc.loot == null or npc.loot.is_empty()) \
+			and not _has_ranked_ornate_chests(npc):
 		return # nothing to give (a shadow mob) — don't even resolve players
 	# is_boss lives on EnemyTypeResource — HostileNPC never copied it, so bare
 	# npc.is_boss crashed distribute() and wiped XP/loot for every kill.
@@ -33,20 +37,78 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 	var killer_peer: int = -1
 	if killer is Player and (killer as Player).player_resource != null:
 		killer_peer = int((killer as Player).player_resource.current_peer_id)
-	var rewarded: Dictionary[int, bool] = {}
+
+	# Build the eligible set, then sort by damage so DPS-ranked chest grants
+	# (Mecha Golem ornate chests) know #1 / #2 / everyone else.
+	var ranked: Array[Dictionary] = []
+	var seen: Dictionary[int, bool] = {}
 	for peer_id: int in contributors:
 		if peer_id != killer_peer and float(contributors[peer_id]) < threshold:
 			continue
+		ranked.append({
+			"peer": peer_id,
+			"dmg": float(contributors[peer_id]),
+		})
+		seen[peer_id] = true
+	if killer_peer > 0 and not seen.has(killer_peer):
+		ranked.append({
+			"peer": killer_peer,
+			"dmg": float(contributors.get(killer_peer, 0.0)),
+		})
+	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["dmg"]) > float(b["dmg"])
+	)
+
+	for rank: int in ranked.size():
+		var peer_id: int = int(ranked[rank]["peer"])
 		var player: Player = _resolve_player(peer_id)
 		if player != null:
 			# Each contributor gets their own loot roll, reserved to THEM for 60s
-			# so nearby players can't ninja-loot (top damager included).
-			_reward(player, npc, peer_id)
-		rewarded[peer_id] = true
-	if killer_peer > 0 and not rewarded.has(killer_peer):
-		var kp: Player = _resolve_player(killer_peer)
-		if kp != null:
-			_reward(kp, npc, killer_peer)
+			# so nearby players can't ninja-loot (top damager included). Ranked
+			# ornate chests (if authored) append on top of the table roll.
+			_reward(player, npc, peer_id, _roll_ranked_ornate_chests(rank, npc))
+
+
+static func _has_ranked_ornate_chests(npc: HostileNpc) -> bool:
+	return npc.enemy_data != null and npc.enemy_data.ornate_chest_top_max > 0
+
+
+## Rank 0 = top DPS, 1 = second, else consolation roll. Returns loot entries
+## ready to merge into the participant's personal pile.
+static func _roll_ranked_ornate_chests(rank: int, npc: HostileNpc) -> Array:
+	var d: EnemyTypeResource = npc.enemy_data
+	if d == null or d.ornate_chest_top_max <= 0:
+		return []
+	var count: int = 0
+	match rank:
+		0:
+			count = randi_range(
+				maxi(0, d.ornate_chest_top_min),
+				maxi(0, d.ornate_chest_top_max)
+			)
+		1:
+			count = randi_range(
+				maxi(0, d.ornate_chest_second_min),
+				maxi(0, d.ornate_chest_second_max)
+			)
+		_:
+			if d.ornate_chest_consolation_chance > 0.0 \
+					and randf() <= d.ornate_chest_consolation_chance:
+				count = 1
+	if count <= 0:
+		return []
+	var out: Array = []
+	for _i: int in count:
+		var chest_id: int = ORNATE_CHEST_IDS[randi() % ORNATE_CHEST_IDS.size()]
+		var chest_item: Item = ContentRegistryHub.load_by_id(&"items", chest_id) as Item
+		if chest_item == null:
+			continue
+		out.append({
+			"id": chest_id,
+			"amount": 1,
+			"name": str(chest_item.item_name),
+		})
+	return out
 
 
 ## The live Player for a peer (null if they logged off / left), via its current
@@ -62,7 +124,14 @@ static func _resolve_player(peer_id: int) -> Player:
 
 ## All of one participant's reward, and the combat.reward push to their client.
 ## [param reserved_peer] owns the ground piles for [constant LOOT_EXCLUSIVE_MS].
-static func _reward(player: Player, npc: HostileNpc, reserved_peer: int = 0) -> void:
+## [param bonus_loot] is extra personal loot (ranked ornate chests) merged in
+## before the ground spawn — still reserved to this peer.
+static func _reward(
+	player: Player,
+	npc: HostileNpc,
+	reserved_peer: int = 0,
+	bonus_loot: Array = []
+) -> void:
 	var resource: PlayerResource = player.player_resource
 	if resource == null:
 		return
@@ -70,7 +139,11 @@ static func _reward(player: Player, npc: HostileNpc, reserved_peer: int = 0) -> 
 	var level_before: int = resource.level
 	var progress: Dictionary = resource.add_experience(npc.xp_reward)
 	var loot_gained: Array = _roll_loot(npc)
-	# Drops land on the ground for click-pickup — not auto-bagged.
+	for entry: Variant in bonus_loot:
+		if entry is Dictionary:
+			loot_gained.append(entry)
+	# Drops land on the ground for click-pickup — not auto-bagged. Each peer's
+	# piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
 	_spawn_ground_loot(player, npc, loot_gained, reserved_peer)
 
 	# Weapon mastery: practicing a category = killing with it. Same xp number.
@@ -125,7 +198,7 @@ static func _roll_loot(npc: HostileNpc) -> Array:
 
 
 ## Scatter rolled loot as clickable GroundItems around the corpse. Piles are
-## reserved to [param reserved_peer] (top damage) for 60s, then free-for-all.
+## reserved to [param reserved_peer] (that participant) for 60s, then free-for-all.
 static func _spawn_ground_loot(
 	player: Player,
 	npc: HostileNpc,
