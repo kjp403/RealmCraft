@@ -76,7 +76,7 @@ func tick() -> bool:
 		cancel()
 		return false
 	if not _player.is_armed():
-		Toaster.toast("Equip a weapon to attack.")
+		Toaster.toast("Can't attack right now.")
 		cancel()
 		return false
 
