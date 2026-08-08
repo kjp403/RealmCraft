@@ -65,9 +65,10 @@ func _open_for_peer(peer_id: int) -> void:
 	_menu.add_item("Follow", ACTION_FOLLOW)
 	_menu.add_item("Trade", ACTION_TRADE)
 	# Admin+ only (synced staff_role; senior_admin is mapped to "admin" on the wire).
-	# Server re-checks CommandPermissions — this is UI gating only.
+	# Hide Kick/Ban/IP Ban on other admin+ targets — server also rejects these.
+	# (senior_admin can still /ban a rogue admin via chat; client can't tell ranks apart.)
 	var me: Player = ClientState.local_player
-	if me != null and me.staff_role == "admin":
+	if me != null and me.staff_role == "admin" and target.staff_role != "admin":
 		_menu.add_separator()
 		_menu.add_item("Kick", ACTION_KICK)
 		_menu.add_item("Ban", ACTION_BAN)
@@ -109,16 +110,14 @@ func _ask_mod_action(action_id: int) -> void:
 			_mod_dialog.dialog_text = (
 				"Permanently ban %s's account (#%d)?\n\n"
 				+ "This blocks them even while offline. This cannot be undone from here."
-				% [_target_name, _target_player_id]
-			)
+			) % [_target_name, _target_player_id]
 			ok_label = "Ban account"
 		ACTION_IP_BAN:
 			_mod_dialog.title = "Confirm IP ban"
 			_mod_dialog.dialog_text = (
 				"Permanently IP-ban %s (#%d)?\n\n"
 				+ "Their current IP will be blocked from joining. This cannot be undone from here."
-				% [_target_name, _target_player_id]
-			)
+			) % [_target_name, _target_player_id]
 			ok_label = "IP ban"
 		_:
 			_pending_mod_action = -1

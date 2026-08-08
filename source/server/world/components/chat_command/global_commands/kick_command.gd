@@ -20,8 +20,15 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	if target.peer_id == peer_id:
 		return "You can't kick yourself."
 
-	var reason: String = " ".join(args.slice(2)) if args.size() > 2 else ""
 	var ws: WorldServer = server_instance.world_server
+	var admin: PlayerResource = ws.connected_players.get(peer_id)
+	var staff_block: String = CommandPermissions.staff_moderation_block_reason(
+		admin, target, server_instance
+	)
+	if not staff_block.is_empty():
+		return staff_block
+
+	var reason: String = " ".join(args.slice(2)) if args.size() > 2 else ""
 	if not reason.is_empty():
 		ws.chat_service.push_system_to_player(
 			server_instance,

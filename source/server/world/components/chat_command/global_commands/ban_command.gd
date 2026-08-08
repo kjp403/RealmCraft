@@ -26,6 +26,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "You can't ban yourself."
 	if target.peer_id == peer_id and target.peer_id != 0:
 		return "You can't ban yourself."
+	var staff_block: String = CommandPermissions.staff_moderation_block_reason(
+		admin, target, server_instance
+	)
+	if not staff_block.is_empty():
+		return staff_block
 
 	var args_offset: int = 2
 	var duration_ms: int = 0

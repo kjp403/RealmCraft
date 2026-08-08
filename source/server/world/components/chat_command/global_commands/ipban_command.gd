@@ -43,6 +43,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		if admin != null and not target.account_name.is_empty() \
 				and target.account_name.to_lower() == admin.account_name.to_lower():
 			return "You can't IP-ban yourself."
+		var staff_block: String = CommandPermissions.staff_moderation_block_reason(
+			admin, target, server_instance
+		)
+		if not staff_block.is_empty():
+			return staff_block
 		if target.online:
 			ip = ws.get_peer_client_ip(target.peer_id)
 			kick_peer_id = target.peer_id

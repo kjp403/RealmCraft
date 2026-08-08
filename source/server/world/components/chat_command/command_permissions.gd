@@ -67,6 +67,75 @@ static func can_run(command: ChatCommand, player: PlayerResource, instance: Serv
 	return command.command_priority <= effective_priority(player, instance)
 
 
+## Admin priority floor — anyone at or above this is protected staff.
+const STAFF_PROTECT_PRIORITY: int = 2 # admin
+
+
+## If [param issuer] may not kick/ban/ipban [param target], return a player-facing
+## error. Empty string means the action is allowed.
+## Hierarchy: you may only punish targets with a *strictly lower* effective
+## priority than yours — so admin cannot punish admin/senior_admin, and
+## senior_admin cannot punish another senior_admin. Owners can still punish
+## regular admins.
+static func staff_moderation_block_reason(
+	issuer: PlayerResource,
+	target: CommandTarget.Result,
+	instance: ServerInstance
+) -> String:
+	if issuer == null or target == null or not target.ok or instance == null:
+		return ""
+	var issuer_p: int = effective_priority(issuer, instance)
+	var target_p: int = effective_priority_for_target(target, instance)
+	if target_p < STAFF_PROTECT_PRIORITY:
+		return ""
+	if issuer_p > target_p:
+		return ""
+	if target_p >= 100:
+		return "You can't moderate a senior admin."
+	return "You can't moderate another admin (or higher)."
+
+
+## Effective priority for an online or offline CommandTarget (AdminConfig + DB roles).
+static func effective_priority_for_target(
+	target: CommandTarget.Result,
+	instance: ServerInstance
+) -> int:
+	if target == null or not target.ok:
+		return 0
+	if target.online and target.resource != null:
+		return effective_priority(target.resource, instance)
+
+	var best: int = 0
+	var config_role: String = AdminConfig.role_for(target.account_name)
+	if not config_role.is_empty():
+		best = maxi(best, _role_priority(instance, config_role))
+
+	var ws: WorldServer = instance.world_server
+	if ws == null or ws.database == null or ws.database.store == null:
+		return best
+
+	if target.player_id > 0:
+		best = maxi(best, _priority_from_roles_dict(
+			ws.database.store.get_player_roles(target.player_id),
+			instance
+		))
+	elif not target.account_name.is_empty():
+		best = maxi(best, ws.database.store.get_account_max_role_priority(
+			target.account_name,
+			instance.global_role_definitions
+		))
+	return best
+
+
+static func _priority_from_roles_dict(roles: Dictionary, instance: ServerInstance) -> int:
+	var best: int = 0
+	for role: String in roles:
+		if _db_role_blocked(role):
+			continue
+		best = maxi(best, _role_priority(instance, role))
+	return best
+
+
 static func _db_role_blocked(role: String) -> bool:
 	# On live servers, DB-held senior_admin is ignored. Owner bootstrap is
 	# AdminConfig-only. Local/dev keeps DB senior_admin for testing.

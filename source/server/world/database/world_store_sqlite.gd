@@ -278,6 +278,43 @@ func save_flag_state(flag_id: int, owner_guild_id: int, last_capture_ms: int) ->
 	)
 
 
+## Persisted server_roles for one character (empty dict if none / missing).
+func get_player_roles(player_id: int) -> Dictionary:
+	if player_id <= 0:
+		return {}
+	db.query_with_bindings(
+		"SELECT server_roles_json FROM players WHERE player_id=? LIMIT 1;",
+		[player_id]
+	)
+	if db.query_result.is_empty():
+		return {}
+	var roles_v: Variant = JSON.parse_string(str(db.query_result[0].get("server_roles_json", "{}")))
+	return roles_v if roles_v is Dictionary else {}
+
+
+## Highest role priority among every character on an account (DB only — callers
+## still merge AdminConfig). Used for offline staff-protection checks.
+func get_account_max_role_priority(account_name: String, role_definitions: Dictionary) -> int:
+	if account_name.is_empty():
+		return 0
+	db.query_with_bindings(
+		"SELECT server_roles_json FROM players WHERE account_name=? COLLATE NOCASE;",
+		[account_name]
+	)
+	var best: int = 0
+	for row: Dictionary in db.query_result:
+		var roles_v: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
+		if not (roles_v is Dictionary):
+			continue
+		for role: String in roles_v as Dictionary:
+			# Mirror CommandPermissions live rule: ignore DB senior_admin in LIVE.
+			if role == "senior_admin" and ServerEnvironment.is_live():
+				continue
+			var role_data: Dictionary = role_definitions.get(role, {})
+			best = maxi(best, int(role_data.get("priority", 0)))
+	return best
+
+
 ## Lookup a character by exact display name (case-insensitive). Used so staff can
 ## `/ban Nesato` while the account is offline without first running /chars.
 func get_player_row_by_display_name(display_name: String) -> Dictionary:
