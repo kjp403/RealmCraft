@@ -79,6 +79,10 @@ extends Resource
 ## anything it sees before the leash kicks in. ~150 default.
 @export var detection_radius: int = 150
 @export var chase_on_area: bool = false
+## When true, this archetype never joins pack assist — hitting one does not
+## pull nearby allies via was_attacked, and it won't help neighbors either.
+## Use for early trash (goblins) so you can fight one at a time.
+@export var is_lone: bool = false
 
 @export_group("Rewards")
 @export var xp_reward: int = 25

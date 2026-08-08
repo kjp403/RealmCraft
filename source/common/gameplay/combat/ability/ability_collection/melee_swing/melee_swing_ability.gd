@@ -31,6 +31,10 @@ extends AbilityResource
 @export var slow_amount: float = 0.0
 @export var slow_duration_s: float = 0.0
 
+## Cap how many combatants one swing can damage (0 = unlimited AoE). Basics
+## set this to 1 so a swing doesn't cleave / pull a whole pack at once.
+@export var max_targets: int = 0
+
 ## Overrides the arc scene's hitbox radius (0 = keep the scene default). Lets a
 ## "devastating" T3 swing actually hit a bigger area than the basic swing while
 ## reusing the same arc scene — pair it with a matching [member impact_reach].
@@ -98,6 +102,7 @@ func _fire_arc(user: Entity, direction: Vector2) -> void:
 	arc.source = user if user is Character else null
 	arc.slow_amount = slow_amount
 	arc.slow_duration_s = slow_duration_s
+	arc.max_targets = max_targets
 	# Optional bigger hitbox for heavy swings — duplicate the shape so we resize
 	# THIS arc only, never the shared CircleShape2D sub-resource.
 	if arc_radius > 0.0:

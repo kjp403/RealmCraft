@@ -34,6 +34,7 @@ distance_to_attack = 18
 max_distance_from_spawn = 250
 detection_radius = 60
 chase_on_area = false
+is_lone = true
 xp_reward = 12
 respawn_delay = 12.0
 loot = Array[ExtResource("1_edovy")]([SubResource("Drop_cloth")])

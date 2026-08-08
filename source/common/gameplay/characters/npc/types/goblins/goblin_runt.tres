@@ -26,6 +26,7 @@ distance_to_attack = 18
 max_distance_from_spawn = 250
 detection_radius = 50
 chase_on_area = false
+is_lone = true
 xp_reward = 8
 respawn_delay = 8.0
 loot = Array[ExtResource("1_t2je2")]([SubResource("Drop_cloth")])

@@ -145,6 +145,8 @@ var max_distance_from_spawn: int = 300
 var detection_radius: int = 150
 ## Start chasing as soon as a player steps inside detection_area.
 var chase_on_area: bool = false
+## Opt out of pack assist (driven by enemy_data.is_lone). See EnemyTypeResource.
+var is_lone: bool = false
 ## Composable server-side behaviors (docs/hostile_npc_refactor.md P1): built
 ## in _apply_enemy_data from enemy_data.behaviors + legacy-field synthesis.
 ## Behaviors are SHARED resources — their per-mob runtime scratch lives in
@@ -188,6 +190,7 @@ func _apply_enemy_data() -> void:
 		max_distance_from_spawn = NO_LEASH_DISTANCE
 	detection_radius = enemy_data.detection_radius
 	chase_on_area = enemy_data.chase_on_area
+	is_lone = enemy_data.is_lone
 	# Composable behaviors (docs/hostile_npc_refactor.md). The legacy flat
 	# lunge fields are gone — every archetype authors behaviors directly.
 	behaviors = []
@@ -388,9 +391,11 @@ func _physics_process(_delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	# Ally-pack assist: when another HostileNpc enters detection range,
 	# subscribe to their was_attacked signal so we aggro the attacker
-	# alongside them. Mob types that should be lone wolves can set
-	# is_lone=true on their EnemyTypeResource to opt out.
+	# alongside them. Lone archetypes (is_lone) neither call for help nor
+	# answer — so early trash like goblins can be fought one at a time.
 	if body is HostileNpc and body != self:
+		if is_lone or (body as HostileNpc).is_lone:
+			return
 		if not (body as HostileNpc).was_attacked.is_connected(_on_ally_attacked):
 			(body as HostileNpc).was_attacked.connect(_on_ally_attacked)
 		return

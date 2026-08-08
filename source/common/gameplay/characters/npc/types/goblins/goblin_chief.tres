@@ -57,6 +57,7 @@ distance_to_attack = 22
 leashes = false
 detection_radius = 90
 chase_on_area = false
+is_lone = true
 xp_reward = 120
 respawns = false
 loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow")])
