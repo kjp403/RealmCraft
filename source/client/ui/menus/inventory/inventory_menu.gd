@@ -707,7 +707,7 @@ func _surface_item_rejection(result: Array) -> bool:
 		return false
 	match str(payload.get("reason", "")):
 		"in_combat":
-			Toaster.toast("Can't change gear in combat (weapons only).")
+			Toaster.toast("You cannot do that while in combat.")
 			return true
 		"cooldown":
 			Toaster.toast("That's still on cooldown.")

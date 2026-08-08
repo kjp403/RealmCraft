@@ -38,7 +38,7 @@ const STAT_LABELS: Dictionary = {
 ## learn what each icon means, LoL-style. Buffs/debuffs without a bespoke line
 ## fall back to a generated one.
 const DESCRIPTIONS: Dictionary = {
-	&"combat": "In Combat. Armor is locked (weapons still swap freely).",
+	&"combat": "In Combat.",
 	&"burn": "Burning. Taking fire damage every second.",
 	&"poison": "Poisoned. Taking damage every second.",
 	&"slow": "Slowed. Reduced movement speed.",

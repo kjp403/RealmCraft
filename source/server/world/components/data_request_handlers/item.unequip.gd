@@ -20,11 +20,6 @@ func data_request_handler(
 	if item_id <= 0:
 		return {"ok": false}
 
-	# Same combat lock as equipping — armor/rings stay put mid-fight, but the
-	# weapon slot is exempt (weapon swapping is core combat).
-	if player.is_in_combat() and slot != &"weapon":
-		return {"ok": false, "reason": "in_combat"}
-
 	# Unequipping the tome must end Battle Form — staying titan-sized without the
 	# book equipped was an exploit (form outlived the mastery bar that cast it).
 	if slot == &"weapon":

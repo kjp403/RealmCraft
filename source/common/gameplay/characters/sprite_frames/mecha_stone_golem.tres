@@ -1,0 +1,147 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://bmechastoneg0lem"]
+
+[ext_resource type="Texture2D" uid="uid://ciinxju4m0dge" path="res://assets/sprites/characters/mecha_stone_golem/death.png" id="1_death"]
+[ext_resource type="Texture2D" uid="uid://oh6f8no2vis1" path="res://assets/sprites/characters/mecha_stone_golem/idle.png" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://dgtjbx6w3dst0" path="res://assets/sprites/characters/mecha_stone_golem/run.png" id="3_run"]
+
+[sub_resource type="AtlasTexture" id="Atlas_death_0"]
+atlas = ExtResource("1_death")
+region = Rect2(0, 0, 50, 64)
+[sub_resource type="AtlasTexture" id="Atlas_death_1"]
+atlas = ExtResource("1_death")
+region = Rect2(50, 0, 50, 64)
+[sub_resource type="AtlasTexture" id="Atlas_death_2"]
+atlas = ExtResource("1_death")
+region = Rect2(100, 0, 50, 64)
+[sub_resource type="AtlasTexture" id="Atlas_death_3"]
+atlas = ExtResource("1_death")
+region = Rect2(150, 0, 50, 64)
+[sub_resource type="AtlasTexture" id="Atlas_idle_0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 65, 64)
+[sub_resource type="AtlasTexture" id="Atlas_idle_1"]
+atlas = ExtResource("2_idle")
+region = Rect2(65, 0, 65, 64)
+[sub_resource type="AtlasTexture" id="Atlas_idle_2"]
+atlas = ExtResource("2_idle")
+region = Rect2(130, 0, 65, 64)
+[sub_resource type="AtlasTexture" id="Atlas_idle_3"]
+atlas = ExtResource("2_idle")
+region = Rect2(195, 0, 65, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_0"]
+atlas = ExtResource("3_run")
+region = Rect2(0, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_1"]
+atlas = ExtResource("3_run")
+region = Rect2(61, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_2"]
+atlas = ExtResource("3_run")
+region = Rect2(122, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_3"]
+atlas = ExtResource("3_run")
+region = Rect2(183, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_4"]
+atlas = ExtResource("3_run")
+region = Rect2(244, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_5"]
+atlas = ExtResource("3_run")
+region = Rect2(305, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_6"]
+atlas = ExtResource("3_run")
+region = Rect2(366, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_7"]
+atlas = ExtResource("3_run")
+region = Rect2(427, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_8"]
+atlas = ExtResource("3_run")
+region = Rect2(488, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_run_9"]
+atlas = ExtResource("3_run")
+region = Rect2(549, 0, 61, 64)
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_death_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_death_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_death_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_death_3")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_idle_3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_7")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_8")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_run_9")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}]
+metadata/slug = &"mecha_stone_golem"

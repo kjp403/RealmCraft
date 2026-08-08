@@ -7,13 +7,14 @@ extends MenuShell
 const VIEW_SIZE: Vector2i = Vector2i(720, 420)
 ## Fallback zoom when a map has unbounded camera limits (follow-player).
 const FALLBACK_ZOOM: float = 0.28
-## Keep a little padding so map edges aren't flush with the frame.
-const FIT_PADDING: float = 0.92
+## Letterbox padding so map edges aren't flush with the frame.
+const FIT_PADDING: float = 0.88
 
 
 var _sub_viewport: SubViewport
 var _map_camera: Camera2D
 var _map_texture: TextureRect
+var _map_host: Control
 var _area_label: Label
 var _legend: VBoxContainer
 var _player_marker: Label
@@ -21,6 +22,7 @@ var _player_marker: Label
 var _map_zoom: float = FALLBACK_ZOOM
 var _camera_center: Vector2 = Vector2.ZERO
 var _resolved_map: Node = null
+var _view_size: Vector2 = Vector2(VIEW_SIZE)
 
 
 func _ready() -> void:
@@ -35,6 +37,7 @@ func open(_arg: Variant = null) -> void:
 	_refresh_legend()
 	_attach_world()
 	set_process(true)
+	call_deferred(&"_sync_viewport_size")
 
 
 func _on_visibility_changed() -> void:
@@ -42,6 +45,7 @@ func _on_visibility_changed() -> void:
 	if visible:
 		_attach_world()
 		_refresh_legend()
+		call_deferred(&"_sync_viewport_size")
 
 
 func _process(_delta: float) -> void:
@@ -58,6 +62,7 @@ func _process(_delta: float) -> void:
 	if current_map != _resolved_map:
 		_resolved_map = current_map
 		_fit_camera_to_map(current_map)
+	_sync_viewport_size()
 	_map_camera.global_position = _camera_center
 	_update_player_marker(player)
 
@@ -96,12 +101,13 @@ func _build_body() -> void:
 	map_frame.add_theme_stylebox_override(&"panel", _frame_style())
 	map_column.add_child(map_frame)
 
-	var map_host := Control.new()
-	map_host.custom_minimum_size = Vector2(VIEW_SIZE)
-	map_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	map_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	map_host.clip_contents = true
-	map_frame.add_child(map_host)
+	_map_host = Control.new()
+	_map_host.custom_minimum_size = Vector2(VIEW_SIZE)
+	_map_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_map_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_map_host.clip_contents = true
+	_map_host.resized.connect(_sync_viewport_size)
+	map_frame.add_child(_map_host)
 
 	_sub_viewport = SubViewport.new()
 	_sub_viewport.name = "WorldMapViewport"
@@ -120,12 +126,13 @@ func _build_body() -> void:
 	_map_texture = TextureRect.new()
 	_map_texture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_map_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_map_texture.stretch_mode = TextureRect.STRETCH_SCALE
+	# Keep aspect so a taller/wider host does not stretch-crop the map.
+	_map_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_map_texture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_map_texture.mouse_filter = Control.MOUSE_FILTER_STOP
 	_map_texture.texture = _sub_viewport.get_texture()
 	_map_texture.gui_input.connect(_on_map_gui_input)
-	map_host.add_child(_map_texture)
+	_map_host.add_child(_map_texture)
 
 	_player_marker = Label.new()
 	_player_marker.text = "◆"
@@ -134,7 +141,7 @@ func _build_body() -> void:
 	_player_marker.add_theme_color_override(&"font_color", Color(0.35, 0.95, 1.0))
 	_player_marker.add_theme_color_override(&"font_outline_color", Color(0.05, 0.06, 0.1, 0.9))
 	_player_marker.add_theme_constant_override(&"outline_size", 4)
-	map_host.add_child(_player_marker)
+	_map_host.add_child(_player_marker)
 
 	var legend_panel := PanelContainer.new()
 	legend_panel.custom_minimum_size = Vector2(220, 0)
@@ -171,6 +178,22 @@ func _build_body() -> void:
 	DragScroll.enable(scroll)
 
 
+func _sync_viewport_size() -> void:
+	if _sub_viewport == null or _map_host == null:
+		return
+	var host_size: Vector2 = _map_host.size
+	if host_size.x < 64.0 or host_size.y < 64.0:
+		host_size = Vector2(VIEW_SIZE)
+	var new_size := Vector2i(
+		maxi(64, int(round(host_size.x))),
+		maxi(64, int(round(host_size.y))),
+	)
+	if _sub_viewport.size != new_size:
+		_sub_viewport.size = new_size
+		_view_size = Vector2(new_size)
+		_fit_camera_to_map(_resolved_map)
+
+
 func _attach_world() -> void:
 	if _sub_viewport == null or not is_inside_tree():
 		return
@@ -190,8 +213,7 @@ func _attach_world() -> void:
 
 
 ## Fit the SubViewport camera so the current map's authored camera limits fill
-## the black frame and stay centered. Unbounded maps fall back to a tighter
-## follow-player zoom (old 0.09 left hub as a tiny island in void).
+## the frame without cropping. Unbounded maps fall back to follow-player zoom.
 func _fit_camera_to_map(map: Node) -> void:
 	var player: LocalPlayer = ClientState.local_player
 	var player_pos: Vector2 = (
@@ -199,6 +221,8 @@ func _fit_camera_to_map(map: Node) -> void:
 	)
 	_map_zoom = FALLBACK_ZOOM
 	_camera_center = player_pos
+	var view_w: float = maxf(_view_size.x, float(VIEW_SIZE.x))
+	var view_h: float = maxf(_view_size.y, float(VIEW_SIZE.y))
 	if map is Map:
 		var m: Map = map
 		var has_bounds: bool = (
@@ -212,19 +236,17 @@ func _fit_camera_to_map(map: Node) -> void:
 		if has_bounds:
 			var map_w: float = float(m.camera_limit_right - m.camera_limit_left)
 			var map_h: float = float(m.camera_limit_bottom - m.camera_limit_top)
-			var zoom_x: float = float(VIEW_SIZE.x) / map_w
-			var zoom_y: float = float(VIEW_SIZE.y) / map_h
+			var zoom_x: float = view_w / map_w
+			var zoom_y: float = view_h / map_h
+			# min = whole map visible (letterboxed). No camera limits on the
+			# map camera — limits were clamping the zoomed-out view and
+			# cropping bottom/top content in the M map.
 			_map_zoom = minf(zoom_x, zoom_y) * FIT_PADDING
 			_camera_center = Vector2(
 				float(m.camera_limit_left + m.camera_limit_right) * 0.5,
 				float(m.camera_limit_top + m.camera_limit_bottom) * 0.5,
 			)
-			if _map_camera != null:
-				_map_camera.limit_left = m.camera_limit_left
-				_map_camera.limit_top = m.camera_limit_top
-				_map_camera.limit_right = m.camera_limit_right
-				_map_camera.limit_bottom = m.camera_limit_bottom
-		elif _map_camera != null:
+		if _map_camera != null:
 			_map_camera.limit_left = -10000000
 			_map_camera.limit_top = -10000000
 			_map_camera.limit_right = 10000000
@@ -289,13 +311,18 @@ func _on_map_gui_input(event: InputEvent) -> void:
 	var player: LocalPlayer = ClientState.local_player
 	if not is_instance_valid(player):
 		return
-	var view_size: Vector2 = (
-		_map_texture.size if _map_texture != null and _map_texture.size.x > 0.0
-		else Vector2(VIEW_SIZE)
-	)
+	# Project through the letterboxed texture rect into viewport pixels, then world.
+	var tex_size: Vector2 = _view_size
+	var draw_size: Vector2 = _map_texture.size if _map_texture != null else tex_size
+	if draw_size.x <= 0.0 or draw_size.y <= 0.0:
+		draw_size = tex_size
+	var scale: float = minf(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
+	var drawn := tex_size * scale
+	var origin := (draw_size - drawn) * 0.5
+	var in_tex: Vector2 = (local_pos - origin) / scale
 	var world_position: Vector2 = (
 		_camera_center
-		+ (local_pos - view_size * 0.5) / _map_zoom
+		+ (in_tex - tex_size * 0.5) / _map_zoom
 	)
 	player.set_click_move_target(world_position)
 	if _map_texture != null:
@@ -305,14 +332,16 @@ func _on_map_gui_input(event: InputEvent) -> void:
 func _update_player_marker(player: LocalPlayer) -> void:
 	if _player_marker == null or _map_texture == null:
 		return
-	var view_size: Vector2 = (
-		_map_texture.size if _map_texture.size.x > 0.0 else Vector2(VIEW_SIZE)
-	)
-	var screen_pos: Vector2 = (
-		view_size * 0.5
+	var tex_size: Vector2 = _view_size
+	var draw_size: Vector2 = _map_texture.size if _map_texture.size.x > 0.0 else tex_size
+	var scale: float = minf(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
+	var drawn := tex_size * scale
+	var origin := (draw_size - drawn) * 0.5
+	var screen_in_tex: Vector2 = (
+		tex_size * 0.5
 		+ (player.global_position - _camera_center) * _map_zoom
 	)
-	_player_marker.position = screen_pos - Vector2(8, 12)
+	_player_marker.position = origin + screen_in_tex * scale - Vector2(8, 12)
 
 
 func _frame_style() -> StyleBoxFlat:

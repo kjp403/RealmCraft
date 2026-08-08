@@ -396,7 +396,7 @@ music = ExtResource("2_xjjg4")
 camera_limit_left = -640
 camera_limit_top = -384
 camera_limit_right = 1088
-camera_limit_bottom = 640
+camera_limit_bottom = 700
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Tiles" type="Node2D" parent="." unique_id=756390445]
@@ -450,7 +450,7 @@ color = Color(0.25, 1, 0.25, 0.16)
 polygon = PackedVector2Array(152, 56, 824, 56, 824, 520, 152, 520)
 
 [node name="AnvilStation" parent="." unique_id=325384635 instance=ExtResource("25_og50n")]
-position = Vector2(-400, 120)
+position = Vector2(-384, 104)
 station = ExtResource("26_anjaa")
 metadata/_edit_group_ = true
 
@@ -458,7 +458,7 @@ metadata/_edit_group_ = true
 sprite_frames = SubResource("SpriteFrames_e6m2f")
 
 [node name="FurnaceStation" parent="." unique_id=1099708083 instance=ExtResource("25_og50n")]
-position = Vector2(-528, 120)
+position = Vector2(-464, 40)
 station = ExtResource("28_sgxfe")
 metadata/_edit_group_ = true
 
@@ -467,7 +467,7 @@ sprite_frames = SubResource("SpriteFrames_660kg")
 frame_progress = 0.763101
 
 [node name="WorkBenchStation" parent="." unique_id=923273387 instance=ExtResource("25_og50n")]
-position = Vector2(-536, -40)
+position = Vector2(-592, -168)
 station = ExtResource("30_2opns")
 metadata/_edit_group_ = true
 
@@ -508,7 +508,7 @@ position = Vector2(-592, -88)
 npc_resource = SubResource("Resource_p483h")
 
 [node name="BankerYard" parent="NPCs" unique_id=1048618123 instance=ExtResource("16_da30u")]
-position = Vector2(-528, 16)
+position = Vector2(-392, 40)
 npc_resource = ExtResource("14_banker")
 
 [node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
@@ -533,7 +533,7 @@ portal_color = Color(0, 0.33908218, 0.29476115, 1)
 destination_label = "DimWood (Dark Forest)"
 target_instance = ExtResource("30_og50n")
 warper_id = 20
-target_id = 20
+target_id = 29
 
 [node name="BanditHideoutPortal" parent="Warpers" unique_id=706210769 instance=ExtResource("29_2sqao")]
 position = Vector2(856, 16)

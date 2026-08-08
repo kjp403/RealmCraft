@@ -415,7 +415,7 @@ func _on_unequip_pressed() -> void:
 	)
 
 	if str(payload.get("reason", "")) == "in_combat":
-		Toaster.toast("Armor cannot be changed during combat.")
+		Toaster.toast("You cannot do that while in combat.")
 		_render_selected_slot()
 		return
 
