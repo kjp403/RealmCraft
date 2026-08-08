@@ -275,24 +275,30 @@ func _on_combat_reward(data: Dictionary) -> void:
 				lines.append("Dropped %s" % loot_name)
 		else:
 			LootFeed.add_item(loot_id, loot_amount, loot_name)
-	# Character level-up = the ceremony lane: a center-screen banner (the in-world
-	# flare + camera kick ride the level.up broadcast, not this push). Mastery
-	# stays a corner card — frequent enough that a banner would wear thin.
+	# Character level-up ceremony (fireworks + jingle + banner) rides the
+	# level.up broadcast in InstanceClient — avoid a second banner/sfx here.
+	# Attribute points still get a quiet corner line so the gain isn't lost.
 	if int(data.get("levels_gained", 0)) > 0:
-		Announcer.announce(
-			"Level %d" % int(data.get("level", 1)),
-			"+%d attribute points" % int(data.get("points_gained", 0)),
-			{"sfx": UISound.LEVELUP}
-		)
+		var pts: int = int(data.get("points_gained", 0))
+		if pts > 0:
+			Toaster.toast("+%d attribute points" % pts)
 	var big: PackedStringArray = PackedStringArray()
 	var mastery: Dictionary = data.get("mastery", {})
 	if bool(mastery.get("started", false)):
 		big.append("%s Mastery begun! +1 mastery point (Character > Mastery)" % str(mastery.get("category", "")).capitalize())
 	elif bool(mastery.get("leveled_up", false)):
-		big.append("%s Mastery Lv %d! +1 mastery point" % [
-			str(mastery.get("category", "")).capitalize(),
-			int(mastery.get("level", 1)),
-		])
+		# Mastery level-ups get the same fireworks / jingle ceremony.
+		if local_player != null:
+			LevelUpFx.celebrate(
+				local_player,
+				"%s Mastery" % str(mastery.get("category", "")).capitalize(),
+				int(mastery.get("level", 1)),
+			)
+		else:
+			big.append("%s Mastery Lv %d! +1 mastery point" % [
+				str(mastery.get("category", "")).capitalize(),
+				int(mastery.get("level", 1)),
+			])
 	if not big.is_empty():
 		Toaster.toast_group("Mastery", big)
 
@@ -420,14 +426,24 @@ func _on_gather_result(data: Dictionary) -> void:
 	if grants_v is Array:
 		for grant: Dictionary in grants_v:
 			lines.append("+%d %s XP" % [int(grant.get("xp", 0)), str(grant.get("job", "")).capitalize()])
-	# Level-up / perk = one-off → its own card; the yield body coalesces per ore.
-	var big: PackedStringArray = PackedStringArray()
+	# Profession level-up: fireworks + jingle + "Your Mining level has achieved N".
+	# Check every grant so multi-job nodes (e.g. herb + medicine) each celebrate.
+	var leveled_jobs: Dictionary = {}
 	if data.get("leveled_up", false):
-		big.append("%s — Level %d!" % [job_slug.capitalize(), int(data.get("level", 1))])
+		leveled_jobs[job_slug] = int(data.get("level", 1))
+	if grants_v is Array:
+		for grant: Dictionary in grants_v:
+			var prog: Dictionary = grant.get("progress", {})
+			if bool(prog.get("leveled_up", false)):
+				leveled_jobs[str(grant.get("job", ""))] = int(prog.get("level", 1))
+	if local_player != null:
+		for job_key: Variant in leveled_jobs.keys():
+			var slug: String = str(job_key)
+			if slug.is_empty():
+				continue
+			LevelUpFx.celebrate_skill(local_player, StringName(slug), int(leveled_jobs[job_key]))
 	if int(data.get("perk_points_gained", 0)) > 0:
-		big.append("Perk point available. Spend in Character → Jobs.")
-	if not big.is_empty():
-		Toaster.toast_group("Level Up!", big)
+		Toaster.toast("Perk point available. Spend in Character → Jobs.")
 
 	Toaster.toast_feed("gather:" + str(data.get("ore_name", "ore")), title, lines)
 
