@@ -1211,40 +1211,39 @@ func request_enter_world() -> Dictionary:
 
 
 func prepare_character_creation_menu() -> void:
-	_skin_ids = PlayerSkins.ids()
+	# New heroes always start as Knight. Horizon in the Guild House sells other looks.
+	var starter_id: int = PlayerSkins.starter_skin_id()
+	_skin_ids = [starter_id]
+	_skin_index = 0
+	selected_skin_id = starter_id
 	_skin_preview = $CharacterCreation/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/CenterContainer/Control/AnimatedSprite2D
-	_skin_preview.play(&"run")
+	var frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", starter_id) as SpriteFrames
+	if _skin_preview != null and frames != null:
+		_skin_preview.sprite_frames = frames
+		_skin_preview.play(&"run")
 
-	# Replace the tiny-icon grid with a Prev / name / Next cycler. The big centre
-	# preview is the visual, so the chosen character shows LARGE instead of as 8
-	# small icons.
+	# Replace the old Prev/Next picker with a locked Knight label + hint.
 	var grid: GridContainer = $CharacterCreation/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer/VBoxContainer
 	for child: Node in grid.get_children():
 		child.queue_free()
-	grid.columns = 3
-
-	var prev: Button = Button.new()
-	prev.text = "<"
-	prev.custom_minimum_size = Vector2(44.0, 44.0)
-	prev.add_theme_font_size_override(&"font_size", 22)
-	prev.pressed.connect(_cycle_skin.bind(-1))
+	grid.columns = 1
 
 	_skin_name_label = Label.new()
 	_skin_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_skin_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_skin_name_label.custom_minimum_size = Vector2(110.0, 44.0)
-
-	var next: Button = Button.new()
-	next.text = ">"
-	next.custom_minimum_size = Vector2(44.0, 44.0)
-	next.add_theme_font_size_override(&"font_size", 22)
-	next.pressed.connect(_cycle_skin.bind(1))
-
-	grid.add_child(prev)
+	_skin_name_label.custom_minimum_size = Vector2(180.0, 28.0)
+	_skin_name_label.add_theme_font_size_override(&"font_size", 18)
+	_skin_name_label.text = PlayerSkins.display_name(starter_id)
 	grid.add_child(_skin_name_label)
-	grid.add_child(next)
 
-	_apply_skin(0)  # show the first skin in the preview
+	var hint: Label = Label.new()
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.custom_minimum_size = Vector2(220.0, 0.0)
+	hint.add_theme_font_size_override(&"font_size", 12)
+	hint.add_theme_color_override(&"font_color", Color(0.7, 0.72, 0.78))
+	hint.text = "Starter look: Knight. Buy more skins from Horizon in the Guild House."
+	grid.add_child(hint)
 
 	# Enable the (scene-hidden) "Random" dice next to the name field.
 	var name_edit: LineEdit = $CharacterCreation/VBoxContainer/VBoxContainer/HBoxContainer2/LineEdit
@@ -1256,28 +1255,22 @@ func prepare_character_creation_menu() -> void:
 	)
 
 
-## Cycle the starter skin by +1 / -1 (wraps around the roster).
-func _cycle_skin(delta: int) -> void:
-	if _skin_ids.is_empty():
-		return
-	_apply_skin(wrapi(_skin_index + delta, 0, _skin_ids.size()))
+## Kept for any leftover callers; creation no longer cycles skins.
+func _cycle_skin(_delta: int) -> void:
+	pass
 
 
-## Apply a skin by index — set selected_skin_id, update the preview + name label.
-func _apply_skin(index: int) -> void:
-	if index < 0 or index >= _skin_ids.size():
-		return
-	var skin_id: int = _skin_ids[index]
-	var frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", skin_id) as SpriteFrames
-	if not frames:
-		return
-	_skin_index = index
-	selected_skin_id = skin_id
-	if _skin_preview:
+## Kept for any leftover callers; creation locks to the Knight starter.
+func _apply_skin(_index: int) -> void:
+	var starter_id: int = PlayerSkins.starter_skin_id()
+	_skin_index = 0
+	selected_skin_id = starter_id
+	var frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", starter_id) as SpriteFrames
+	if _skin_preview != null and frames != null:
 		_skin_preview.sprite_frames = frames
 		_skin_preview.play(&"run")
-	if _skin_name_label:
-		_skin_name_label.text = PlayerSkins.display_name(skin_id)
+	if _skin_name_label != null:
+		_skin_name_label.text = PlayerSkins.display_name(starter_id)
 
 
 # Local editor convenience only. Exported clients must never persist the account

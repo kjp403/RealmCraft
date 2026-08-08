@@ -1,13 +1,13 @@
 extends MenuShell
 ## Skin wardrobe — a big animated preview with prev/next arrows to browse every player skin,
 ## an idle/run/death animation toggle, and a single action button that Buys a locked skin
-## (50g, which auto-equips it) or Equips an owned one. Equipping swaps the local player's
-## sprite instantly (the server syncs :skin_id to everyone else). Opened from an NPC
-## (WardrobeInteraction → open_menu_requested(&"wardrobe")); ownership refreshes on show.
+## (Horizon gold price from PlayerSkins.price, which auto-equips it) or Equips an owned one.
+## Equipping swaps the local player's sprite instantly (the server syncs :skin_id to everyone
+## else). Opened from Horizon (WardrobeInteraction → open_menu_requested(&"wardrobe"));
+## ownership refreshes on show.
 
 const PREVIEW_BOX: float = 200.0
 const PREVIEW_SCALE: float = 3.0
-const SKIN_COST: int = 50
 const ANIMS: Array[StringName] = [&"idle", &"run", &"death"]
 
 var _skins: Array[int] = []
@@ -228,11 +228,19 @@ func _update_action() -> void:
 		_action_button.text = "Equip"
 		_action_button.disabled = false
 		_status_label.text = "Owned."
-	else:
-		_action_button.text = "Buy — %d gold" % SKIN_COST
-		var can_afford: bool = _gold >= SKIN_COST
+	elif PlayerSkins.is_for_sale(skin_id):
+		var cost: int = PlayerSkins.price(skin_id)
+		_action_button.text = "Buy — %d gold" % cost
+		var can_afford: bool = _gold >= cost
 		_action_button.disabled = not can_afford
-		_status_label.text = "Locked." if can_afford else "Not enough gold (%d needed)." % SKIN_COST
+		_status_label.text = (
+			"Locked — Horizon sells this look." if can_afford
+			else "Not enough gold (%d needed)." % cost
+		)
+	else:
+		_action_button.text = "Unavailable"
+		_action_button.disabled = true
+		_status_label.text = "Not for sale."
 
 
 func _on_action_pressed() -> void:
@@ -275,10 +283,15 @@ func _equipped_id() -> int:
 func _buy_error(reason: String) -> String:
 	match reason:
 		"no_gold":
-			return "Not enough gold (%d needed)." % SKIN_COST
+			var cost: int = 0
+			if _idx >= 0 and _idx < _skins.size():
+				cost = PlayerSkins.price(_skins[_idx])
+			return "Not enough gold (%d needed)." % cost
 		"owned":
 			return "You already own this."
 		"invalid":
 			return "That skin isn't available."
+		"not_for_sale":
+			return "Horizon doesn't sell that look."
 		_:
 			return "Couldn't buy that skin."

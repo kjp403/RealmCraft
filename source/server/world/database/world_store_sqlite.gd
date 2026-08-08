@@ -139,14 +139,16 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	var next_id: int = max_id + 1
 
 	var player: PlayerResource = PlayerResource.new()
+	# Starter look is always Knight — cosmetics are bought from Horizon later.
+	# Ignore any client-supplied skin id so creation can't unlock paid skins for free.
+	var starter_skin: int = PlayerSkins.starter_skin_id()
 	player.init(
 		next_id,
 		account_name,
 		display_name,
-		int(character_data.get("skin", 1))
+		starter_skin
 	)
-	# The chosen creation skin is owned from the start, so it's equippable in the wardrobe.
-	player.owned_skins = PackedInt64Array([player.skin_id])
+	player.owned_skins = PackedInt64Array([starter_skin])
 
 	# Starting kit: ONE potion + gold, no weapon — a fresh character's first
 	# decision is choosing a weapon at the starter shop (sword / bow / wand /
