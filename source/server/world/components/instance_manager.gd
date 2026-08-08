@@ -56,6 +56,11 @@ func setup_global_commands_and_roles() -> void:
 	var commands := ServerInstance.global_chat_commands
 	for file_path: String in files:
 		var command = load(file_path).new()
+		# Permanently refuse the removed /selfadmin bootstrap — never re-register
+		# even if a stale file somehow lands on a host.
+		if str(command.command_name) == "selfadmin":
+			push_warning("Refusing to register removed command: /selfadmin")
+			continue
 		commands.set(command.command_name, command)
 
 	var roles := ServerInstance.global_role_definitions
