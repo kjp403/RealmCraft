@@ -36,8 +36,11 @@ func data_request_handler(
 	var inventory: Dictionary = player.player_resource.inventory
 	var currency_id: int = int(entry.get("currency_id", 0))
 	var total: int = int(entry.get("price", 0)) * amount
-	# Pay with the currency item (gold by default).
-	if currency_id <= 0 or not Inventory.remove_amount_by_id(inventory, currency_id, total):
+	# Pay with the currency item (gold by default). currency_id 0 means the items
+	# registry failed to resolve gold — surface that separately from a real shortfall.
+	if currency_id <= 0:
+		return {"ok": false, "reason": "no_currency"}
+	if not Inventory.remove_amount_by_id(inventory, currency_id, total):
 		return {"ok": false, "reason": "cant_afford"}
 
 	# Add one at a time so stackable items merge and non-stackable get separate slots.

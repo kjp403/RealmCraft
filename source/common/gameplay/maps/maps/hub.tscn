@@ -4,8 +4,6 @@
 [ext_resource type="TileSet" uid="uid://c5xmsv8ol2sya" path="res://source/common/gameplay/maps/tilesets/castle.tres" id="2_ooayc"]
 [ext_resource type="AudioStream" uid="uid://cm5502pmvcc5j" path="res://assets/audio/music/market.ogg" id="2_xjjg4"]
 [ext_resource type="PackedScene" uid="uid://bihlmci6oa6b8" path="res://source/common/gameplay/maps/maps/guild_house/outside_building.tscn" id="3_0cu5u"]
-[ext_resource type="Script" uid="uid://bydt2tg3ki33r" path="res://source/common/gameplay/basing/territory_flag.gd" id="4_pywca"]
-[ext_resource type="Texture2D" uid="uid://b8lt6fh1ogotd" path="res://assets/sprites/environment/building/Exterior/Garden.png" id="5_vf1no"]
 [ext_resource type="Script" uid="uid://ddtm11pnrdkyo" path="res://source/common/gameplay/maps/zone_patch_2d.gd" id="6_vf1no"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="7_aris3"]
 [ext_resource type="Resource" uid="uid://c0xqjh15bmdkm" path="res://source/common/gameplay/maps/instance/instance_collection/building/guild_house.tres" id="8_m02lb"]
@@ -46,9 +44,6 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="47_mine"]
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="48_copper"]
 [ext_resource type="Resource" uid="uid://ctinvein001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres" id="49_tin"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_aris3"]
-size = Vector2(40, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6ao3"]
 atlas = ExtResource("27_xjjg4")
@@ -434,38 +429,6 @@ metadata/_custom_type_script = "uid://wq8klpndipnu"
 
 [node name="Guild_house" parent="." unique_id=327021183 instance=ExtResource("3_0cu5u")]
 position = Vector2(-424, -152)
-
-[node name="TerritoryFlag" type="StaticBody2D" parent="." unique_id=1392353516 node_paths=PackedStringArray("banner", "health_bar", "grace_label")]
-position = Vector2(-8, 336)
-script = ExtResource("4_pywca")
-flag_id = 4
-territory_name = "Castle Garden"
-banner = NodePath("Banner")
-health_bar = NodePath("HealthBar")
-grace_label = NodePath("Label")
-metadata/_custom_type_script = "uid://bydt2tg3ki33r"
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TerritoryFlag" unique_id=697874088]
-position = Vector2(2.852417, 19.610718)
-shape = SubResource("RectangleShape2D_aris3")
-
-[node name="Banner" type="Sprite2D" parent="TerritoryFlag" unique_id=1224599872]
-texture = ExtResource("5_vf1no")
-region_enabled = true
-region_rect = Rect2(440, 336, 40, 72)
-
-[node name="HealthBar" type="ProgressBar" parent="TerritoryFlag" unique_id=1579135147]
-offset_left = -33.147583
-offset_top = 43.610718
-offset_right = 38.852417
-offset_bottom = 68.61072
-
-[node name="Label" type="Label" parent="TerritoryFlag" unique_id=1017719438]
-offset_left = -41.90564
-offset_top = 7.2435303
-offset_right = 43.397217
-offset_bottom = 28.24353
 
 [node name="ZonePatch2D" type="Node2D" parent="." unique_id=1513613879]
 script = ExtResource("6_vf1no")

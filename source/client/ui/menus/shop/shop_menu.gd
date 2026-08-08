@@ -440,6 +440,7 @@ func _buy() -> void:
 		match str(result[0].get("reason", "")):
 			"no_shop": Toaster.toast("This merchant isn't available right now.")
 			"not_sold_here": Toaster.toast("This item isn't sold here.")
+			"no_currency": Toaster.toast("Shop currency is unavailable. Try again after a server update.")
 			"cant_afford": Toaster.toast("Not enough funds.")
 			_: Toaster.toast("Purchase failed.")
 		_refresh_buy_action()
