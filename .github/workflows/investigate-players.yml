@@ -2,6 +2,8 @@ name: Investigate Players
 
 # One-shot VPS lookup for account/character intel. Does NOT restart services.
 on:
+  push:
+    branches: [cursor/investigate-players-6dc0]
   workflow_dispatch:
     inputs:
       accounts:
@@ -26,7 +28,7 @@ jobs:
           request_pty: true
           script: |
             set -euo pipefail
-            ACCOUNTS='${{ inputs.accounts }}'
+            ACCOUNTS='${{ github.event.inputs.accounts || 'Nesato,qqqqq' }}'
             OUT=/tmp/arkenelle-player-lookup.txt
             : > "$OUT"
             {
