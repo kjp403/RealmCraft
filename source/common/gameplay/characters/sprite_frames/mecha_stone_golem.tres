@@ -3,6 +3,9 @@
 [ext_resource type="Texture2D" uid="uid://ciinxju4m0dge" path="res://assets/sprites/characters/mecha_stone_golem/death.png" id="1_death"]
 [ext_resource type="Texture2D" uid="uid://oh6f8no2vis1" path="res://assets/sprites/characters/mecha_stone_golem/idle.png" id="2_idle"]
 [ext_resource type="Texture2D" uid="uid://dgtjbx6w3dst0" path="res://assets/sprites/characters/mecha_stone_golem/run.png" id="3_run"]
+[ext_resource type="Texture2D" uid="uid://c3xnr3lh22ie3" path="res://assets/sprites/characters/mecha_stone_golem/attack.png" id="4_attack"]
+[ext_resource type="Texture2D" uid="uid://fpsgrpod0ml3" path="res://assets/sprites/characters/mecha_stone_golem/special.png" id="5_special"]
+[ext_resource type="Texture2D" uid="uid://bqxvgknxtsjb0" path="res://assets/sprites/characters/mecha_stone_golem/walk.png" id="6_walk"]
 
 [sub_resource type="AtlasTexture" id="Atlas_death_0"]
 atlas = ExtResource("1_death")
@@ -58,6 +61,78 @@ region = Rect2(488, 0, 61, 64)
 [sub_resource type="AtlasTexture" id="Atlas_run_9"]
 atlas = ExtResource("3_run")
 region = Rect2(549, 0, 61, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_0"]
+atlas = ExtResource("4_attack")
+region = Rect2(0, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_1"]
+atlas = ExtResource("4_attack")
+region = Rect2(97, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_2"]
+atlas = ExtResource("4_attack")
+region = Rect2(194, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_3"]
+atlas = ExtResource("4_attack")
+region = Rect2(291, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_4"]
+atlas = ExtResource("4_attack")
+region = Rect2(388, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_5"]
+atlas = ExtResource("4_attack")
+region = Rect2(485, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_6"]
+atlas = ExtResource("4_attack")
+region = Rect2(582, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_7"]
+atlas = ExtResource("4_attack")
+region = Rect2(679, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_attack_8"]
+atlas = ExtResource("4_attack")
+region = Rect2(776, 0, 97, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_0"]
+atlas = ExtResource("5_special")
+region = Rect2(0, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_1"]
+atlas = ExtResource("5_special")
+region = Rect2(67, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_2"]
+atlas = ExtResource("5_special")
+region = Rect2(134, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_3"]
+atlas = ExtResource("5_special")
+region = Rect2(201, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_4"]
+atlas = ExtResource("5_special")
+region = Rect2(268, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_5"]
+atlas = ExtResource("5_special")
+region = Rect2(335, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_special_6"]
+atlas = ExtResource("5_special")
+region = Rect2(402, 0, 67, 64)
+[sub_resource type="AtlasTexture" id="Atlas_walk_0"]
+atlas = ExtResource("6_walk")
+region = Rect2(0, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_1"]
+atlas = ExtResource("6_walk")
+region = Rect2(133, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_2"]
+atlas = ExtResource("6_walk")
+region = Rect2(266, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_3"]
+atlas = ExtResource("6_walk")
+region = Rect2(399, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_4"]
+atlas = ExtResource("6_walk")
+region = Rect2(532, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_5"]
+atlas = ExtResource("6_walk")
+region = Rect2(665, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_6"]
+atlas = ExtResource("6_walk")
+region = Rect2(798, 0, 133, 128)
+[sub_resource type="AtlasTexture" id="Atlas_walk_7"]
+atlas = ExtResource("6_walk")
+region = Rect2(931, 0, 133, 128)
 [resource]
 animations = [{
 "frames": [{
@@ -79,7 +154,8 @@ animations = [{
 "loop": false,
 "name": &"death",
 "speed": 5.0
-}, {
+},
+{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("Atlas_idle_0")
@@ -99,7 +175,8 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 5.0
-}, {
+},
+{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("Atlas_run_0")
@@ -142,6 +219,117 @@ animations = [{
 }],
 "loop": true,
 "name": &"run",
+"speed": 8.0
+},
+{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_7")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_attack_8")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 10.0
+},
+{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_special_6")
+}],
+"loop": false,
+"name": &"special",
+"speed": 8.0
+},
+{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_5")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_6")
+},
+{
+"duration": 1.0,
+"texture": SubResource("Atlas_walk_7")
+}],
+"loop": true,
+"name": &"walk",
 "speed": 8.0
 }]
 metadata/slug = &"mecha_stone_golem"

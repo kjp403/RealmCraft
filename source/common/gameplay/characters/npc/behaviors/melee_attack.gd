@@ -14,6 +14,9 @@ extends MobAttack
 func _fire(npc) -> bool:
 	var strike_radius: float = radius if radius > 0.0 else float(npc.distance_to_attack)
 	npc.replicate_visual(&"rp_attack", [strike_radius])
+	# Play a skin "attack" clip when authored (Mecha Golem, etc.); no-op for
+	# skins that only ship idle/run/death.
+	npc.replicate_visual(&"rp_play_skin_anim", [&"attack"])
 	var damage: float = npc.stats_component.get_stat(Stat.AD)
 	for candidate: Player in npc._strike_candidates():
 		if npc._is_target_valid(candidate) and npc._is_hostile_to(candidate) \
