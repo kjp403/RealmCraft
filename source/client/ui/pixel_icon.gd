@@ -54,6 +54,13 @@ static func _fit(host: Control, icon: TextureRect) -> void:
 	if art.x <= 0.0 or art.y <= 0.0:
 		return
 	var box: float = minf(host.size.x, host.size.y)
-	var factor: float = maxf(1.0, floorf(box / maxf(art.x, art.y)))
+	if box <= 0.0:
+		return
+	var art_max: float = maxf(art.x, art.y)
+	# Integer upscale when the host is larger (crisp pixel art). Downscale when the
+	# art is larger than the host — 64×64 pack icons must fit loot-feed / compact slots.
+	var factor: float = box / art_max
+	if factor >= 1.0:
+		factor = maxf(1.0, floorf(factor))
 	icon.size = art * factor
 	icon.global_position = (host.global_position + (host.size - icon.size) * 0.5).round()

@@ -1,0 +1,30 @@
+{
+  "pack": "64x64 resource icons (purchased)",
+  "source_staging": "assets/_import/64x64_pack/ (gitignored)",
+  "applied": {
+    "ore_copper.png": "ore_01.png",
+    "ore_tin.png": "ore_03.png",
+    "ore_iron.png": "ore_04.png",
+    "ore_coal.png": "ore_14.png",
+    "ore_gold.png": "ore_06.png",
+    "ore_silver.png": "ore_05.png",
+    "bar_copper.png": "ingot_01.png",
+    "bar_iron.png": "ingot_03.png",
+    "bar_gold.png": "ingot_08.png",
+    "bar_silver.png": "ingot_11.png",
+    "oak_log.png": "log_01.png",
+    "mat_cloth_forest.png": "cloth_10.png",
+    "mat_hide_forest.png": "hide_14.png",
+    "mat_leather_forest.png": "leather_10.png",
+    "mat_cloth_bandit.png": "cloth_06.png",
+    "mat_cloth_cave.png": "cloth_07.png",
+    "mat_cloth_sewer.png": "cloth_02.png",
+    "mat_hide_bandit.png": "hide_04.png",
+    "mat_hide_cave.png": "hide_10.png",
+    "mat_hide_sewer.png": "hide_15.png",
+    "mat_leather_bandit.png": "leather_02.png",
+    "mat_leather_cave.png": "leather_05.png",
+    "mat_leather_sewer.png": "leather_15.png"
+  },
+  "notes": "World vein/rock props are separate from inventory icons; pack does not replace mineable node sprites."
+}
