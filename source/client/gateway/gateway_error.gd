@@ -58,5 +58,6 @@ static func is_connection_error(response: Dictionary) -> bool:
 	if code is String:
 		return code == "connection_failed" or code == "request_error"
 	if code is int or code is float:
+		# ERR_TIMEOUT is also returned as "gateway not ready" while master is linking.
 		return int(code) == Error.ERR_TIMEOUT
 	return false
