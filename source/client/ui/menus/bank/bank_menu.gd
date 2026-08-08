@@ -18,6 +18,7 @@ var _bag_count: Label
 var _bank_count: Label
 var _amount_spin: SpinBox
 var _transfer_button: Button
+var _deposit_all_button: Button
 var _selection_label: Label
 
 var _selected_uid: int = -1
@@ -94,6 +95,7 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	col.add_theme_constant_override(&"separation", 8)
 
 	var header := HBoxContainer.new()
+	header.add_theme_constant_override(&"separation", 8)
 	col.add_child(header)
 	var label := Label.new()
 	label.text = title
@@ -104,9 +106,20 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	var count := Label.new()
 	count.add_theme_color_override(&"font_color", MUTED)
 	header.add_child(count)
+	if is_bag:
+		_deposit_all_button = Button.new()
+		_deposit_all_button.text = "Deposit All"
+		_deposit_all_button.focus_mode = Control.FOCUS_NONE
+		_deposit_all_button.tooltip_text = "Move every bag item into the vault (gold stays in your pouch)."
+		_deposit_all_button.pressed.connect(_on_deposit_all_pressed)
+		header.add_child(_deposit_all_button)
 
 	var hint := Label.new()
-	hint.text = "Click a stack, set amount, Transfer." if is_bag else "Click a stack, set amount, Transfer."
+	hint.text = (
+		"Click a stack, set amount, Deposit — or Deposit All."
+		if is_bag
+		else "Click a stack, set amount, Withdraw."
+	)
 	hint.add_theme_color_override(&"font_color", MUTED)
 	hint.add_theme_font_size_override(&"font_size", 12)
 	col.add_child(hint)
@@ -197,8 +210,11 @@ func _refresh() -> void:
 func _rebuild_grids() -> void:
 	_fill_grid(_bag_grid, _inventory, true)
 	_fill_grid(_bank_grid, _bank, false)
-	_bag_count.text = "%d stacks" % _count_stacks(_inventory)
+	var bag_stacks: int = _count_stacks(_inventory)
+	_bag_count.text = "%d stacks" % bag_stacks
 	_bank_count.text = "%d stacks · no limit" % _count_stacks(_bank)
+	if _deposit_all_button != null:
+		_deposit_all_button.disabled = _busy or bag_stacks <= 0
 
 
 func _count_stacks(store: Dictionary) -> int:
@@ -315,6 +331,8 @@ func _on_transfer_pressed() -> void:
 	if amount <= 0:
 		return
 	_busy = true
+	if _deposit_all_button != null:
+		_deposit_all_button.disabled = true
 	var type: StringName = &"bank.deposit" if _selected_from_bag else &"bank.withdraw"
 	var result: Array = await Client.request_data_await(
 		type,
@@ -326,6 +344,7 @@ func _on_transfer_pressed() -> void:
 		return
 	if result.size() < 2 or result[1] != OK or not (result[0] is Dictionary):
 		Toaster.toast("That transfer failed.")
+		_rebuild_grids()
 		return
 	var payload: Dictionary = result[0]
 	if not bool(payload.get("ok", false)):
@@ -334,9 +353,51 @@ func _on_transfer_pressed() -> void:
 				Toaster.toast("Gold stays in your currency pouch.")
 			_:
 				Toaster.toast("That transfer failed.")
+		_rebuild_grids()
 		return
 	_inventory = payload.get("inventory", {}) as Dictionary
 	_bank = payload.get("bank", {}) as Dictionary
+	_clear_selection()
+	_rebuild_grids()
+	ClientState.inventory_changed.emit({"quiet": true})
+
+
+func _on_deposit_all_pressed() -> void:
+	if _busy or InstanceClient.current == null:
+		return
+	if _count_stacks(_inventory) <= 0:
+		Toaster.toast("Your bag has nothing to deposit.")
+		return
+	_busy = true
+	if _deposit_all_button != null:
+		_deposit_all_button.disabled = true
+	var result: Array = await Client.request_data_await(
+		&"bank.deposit_all",
+		{},
+		InstanceClient.current.name
+	)
+	_busy = false
+	if not is_instance_valid(self) or not visible:
+		return
+	if result.size() < 2 or result[1] != OK or not (result[0] is Dictionary):
+		Toaster.toast("Deposit All failed.")
+		_rebuild_grids()
+		return
+	var payload: Dictionary = result[0]
+	if not bool(payload.get("ok", false)):
+		Toaster.toast("Deposit All failed.")
+		_rebuild_grids()
+		return
+	_inventory = payload.get("inventory", {}) as Dictionary
+	_bank = payload.get("bank", {}) as Dictionary
+	var stacks: int = int(payload.get("stacks", 0))
+	if stacks <= 0:
+		Toaster.toast("Your bag has nothing to deposit.")
+	else:
+		Toaster.toast("Deposited %d stack%s into the vault." % [
+			stacks,
+			"" if stacks == 1 else "s",
+		])
 	_clear_selection()
 	_rebuild_grids()
 	ClientState.inventory_changed.emit({"quiet": true})
