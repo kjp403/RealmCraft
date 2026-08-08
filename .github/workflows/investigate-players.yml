@@ -71,13 +71,19 @@ jobs:
               DB="$(sudo find /opt/arkenelle -path '*/app_userdata/*/db/classic.db' 2>/dev/null | head -1 || true)"
             fi
             if [ -z "$DB" ]; then
-              echo "WARNING: no user:// classic.db found; listing godot dirs:"
-              sudo ls -la /opt/arkenelle/.local/share/godot/app_userdata/ 2>/dev/null || true
-              sudo find /opt/arkenelle -iname '*userdata*' -o -iname 'classic.db' 2>/dev/null | head -50 || true
-              # Last resort: copy while world is running is risky; still try repo path for completeness
-              DB=/opt/arkenelle/source/server/world/data/classic.db
-              echo "FALLBACK_DB=$DB (likely seed, not live)"
+              echo "WARNING: no live db/classic.db — using newest db_backups snapshot"
+              DB="$(sudo ls -1t /opt/arkenelle/.local/share/slayhorizon/db_backups/classic_*.db 2>/dev/null | head -1 || true)"
+              echo "BACKUP_DB=$DB"
             fi
+            if [ -z "$DB" ]; then
+              DB=/opt/arkenelle/source/server/world/data/classic.db
+              echo "FALLBACK_SEED_DB=$DB"
+            fi
+            echo "Also querying ALL backups for Nesato/qqqqq:"
+            for b in $(sudo ls -1t /opt/arkenelle/.local/share/slayhorizon/db_backups/classic_*.db 2>/dev/null | head -5); do
+              echo "-- backup $b players=$(sudo sqlite3 "$b" 'select count(*) from players;' 2>/dev/null || echo '?') --"
+              sudo sqlite3 -header -column "$b" "SELECT player_id, account_name, display_name, level, experience, server_roles_json FROM players WHERE account_name LIKE '%Nesato%' COLLATE NOCASE OR display_name LIKE '%Nesato%' COLLATE NOCASE OR account_name LIKE '%qqqqq%' COLLATE NOCASE OR display_name LIKE '%qqqqq%' COLLATE NOCASE;" 2>/dev/null || true
+            done
             echo "DB=$DB"
             sudo ls -la "$DB" || true
             echo
@@ -141,6 +147,15 @@ jobs:
               done
             done
             echo
+            
+            echo "######## FULL SERVER LOG HITS (server_*.log) ########"
+            sudo find /opt/arkenelle/.local/share/slayhorizon/logs -name 'server_*.log' 2>/dev/null | while read -r log; do
+              echo "LOG $log"
+              sudo grep -i -n -E 'Nesato|qqqqq|selfadmin|senior_admin|/grant|/give|/gold|/ban' "$log" | tail -200 || true
+            done
+            echo "######## GODOT.LOG FULL NAME HITS ########"
+            sudo grep -i -n -E 'Nesato|qqqqq' /opt/arkenelle/.local/share/slayhorizon/logs/godot.log | tail -100 || true
+
             echo "=== END ==="
             } 2>&1 | tee "$OUT"
             wc -l "$OUT"
