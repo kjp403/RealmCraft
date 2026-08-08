@@ -7,8 +7,9 @@ extends ColorRect
 ##
 ## Generic on purpose — used by the inventory hotkey assigner; the mastery
 ## panel's ability picker is the same pattern and can migrate here later.
-## Parent it to a full-rect, non-container Control (a menu's scene root) so
-## it covers the menu and dies with it.
+##
+## Always mounts as a top-level fullscreen Control so a docked host (compact
+## bag is only ~180px wide) cannot clip the 280px slot buttons off-screen.
 
 
 ## [param entries] one label per slot button ("Slot 1 (1) — Health Potion").
@@ -17,6 +18,9 @@ static func open(host: Control, title_text: String, entries: PackedStringArray, 
 	var overlay: SlotPickerOverlay = SlotPickerOverlay.new()
 	overlay.color = Color(0.0, 0.0, 0.0, 0.5)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Draw in viewport space so a narrow docked host (compact bag) can't clip us.
+	overlay.top_level = true
+	overlay.z_index = 128
 	overlay.gui_input.connect(func(event: InputEvent) -> void:
 		var clicked: bool = (
 			(event is InputEventMouseButton and event.pressed)
@@ -49,6 +53,8 @@ static func open(host: Control, title_text: String, entries: PackedStringArray, 
 
 	var title: Label = Label.new()
 	title.text = title_text
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.custom_minimum_size = Vector2(280, 0)
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.75))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)

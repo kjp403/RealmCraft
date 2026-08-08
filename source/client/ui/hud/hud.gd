@@ -315,6 +315,13 @@ func _on_menu_requested(menu_name: StringName, arg: Variant) -> void:
 	display_menu(menu_name, arg)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	# World map (M): toggle open/closed even while menus freeze LocalPlayer input.
+	if event.is_action_pressed(&"player_map"):
+		display_menu(&"world_map", null)
+		get_viewport().set_input_as_handled()
+
+
 func open_player_profile(player_id: int) -> void:
 	display_menu(&"player_profile")
 	menus[&"player_profile"].open_player_profile(player_id)
@@ -393,6 +400,10 @@ func display_menu(menu_name: StringName, arg: Variant = null) -> void:
 		new_menu.visibility_changed.connect(_on_submenu_visiblity_changed.bind(new_menu))
 		sub_menu.add_child(new_menu)
 		menus[menu_name] = new_menu
+	# M / Map toggles closed when already open (same shortcut re-press).
+	if menu_name == &"world_map" and menus[menu_name].visible:
+		menus[menu_name].hide()
+		return
 	# Fullscreen shells (inventory, profile, shop, …) each dim the whole viewport.
 	# Only one may be visible: stacking lets a later-opened menu cover another's Close
 	# button with no Escape escape hatch on every panel. NPC→shop already closes the
@@ -406,7 +417,7 @@ func display_menu(menu_name: StringName, arg: Variant = null) -> void:
 	menus[menu_name].show()
 	menus[menu_name].move_to_front()
 	_animate_menu_open(menus[menu_name])
-	if arg != null and menus[menu_name].has_method(&"open"):
+	if menus[menu_name].has_method(&"open") and (arg != null or menu_name == &"world_map"):
 		menus[menu_name].open(arg)
 
 

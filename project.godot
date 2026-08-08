@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.34"
+config/version="0.28.35"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
@@ -175,6 +175,11 @@ player_quickslot_3={
 player_recall={
 "deadzone": 0.5,
 "events": Array[InputEvent]([Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":66,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+])
+}
+player_map={
+"deadzone": 0.5,
+"events": Array[InputEvent]([Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":77,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ])
 }
 menu_tab_prev={

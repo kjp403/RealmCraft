@@ -5,9 +5,10 @@ class_name ZoneDiscovery
 ## name-lookup scans, so a resource parked elsewhere still warps via direct ref
 ## but won't banner. No code edit per biome.
 ##
-## EVERY entry into an opted-in map shows the zone text (it's the only surface
-## with the biome name + level band today — no world map yet; owner call
-## 2026-07-19). The true FIRST visit on this install gets the full ceremony
+## EVERY entry into an opted-in map shows the zone text (biome name + level
+## band). The world map (M / Menu → Map) shows a live area view + region list;
+## this banner remains the arrival ceremony. The true FIRST visit on this
+## install gets the full ceremony
 ## (sound + long dwell); repeats are a quieter, shorter echo so portal-hopping
 ## never gets noisy. First-visit persistence is a local ConfigFile by owner
 ## decision (2026-07-19): zero server/DB work, and a reinstall re-showing the

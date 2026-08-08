@@ -18,6 +18,11 @@ var character: Character
 ## button, so the release sends even if the server's "began" hasn't echoed back.
 var _held: Dictionary[int, bool] = {}
 
+## Ground-aim (Meteor / Rain): slot currently holding for cursor placement, or -1.
+var _ground_aim_slot: int = -1
+## Live aim ghost under the cursor while a ground-aimed special is held.
+var _ground_aim_marker: Node2D = null
+
 ## Ability count the SCENE shipped (after _ready's duplication) — mastery
 ## loadout abilities are appended after this index, so remounting can strip
 ## them without touching scene defaults (the bow/hammer pattern until their
@@ -209,12 +214,21 @@ func can_use_weapon(action_index: int, released: bool = false) -> bool:
 	return abilities[action_index].can_use(character)
 
 
-func perform_action(action_index: int, direction: Vector2, released: bool = false) -> void:
+func perform_action(
+	action_index: int,
+	direction: Vector2,
+	released: bool = false,
+	ground_target: Variant = null
+) -> void:
 	if action_index < 0 or action_index >= abilities.size():
 		return
 	var ability: AbilityResource = abilities[action_index]
 	if ability == null:
 		return # empty loadout slot (null hole)
+	# Optional cursor-placed world point for ground-aimed mastery specials.
+	if ground_target is Vector2:
+		ability.aim_point = ground_target
+		ability.has_aim_point = true
 	# Cooldown + mana stamp on the COMPLETING phase: press for single-phase
 	# abilities, release for charge abilities. mark_used here (not only in
 	# try_perform_action) so the server action.perform path respects cooldowns.
@@ -271,6 +285,7 @@ func process_input(local_player: LocalPlayer) -> void:
 	# Single-phase: tap to fire (predictive local mark_used keeps the channel
 	# quiet while held). Two-phase: press sends the charge, release sends the
 	# fire — _held bridges the round-trip so a fast tap still releases.
+	# Ground-aimed: hold shows a cursor ghost; release casts at that point.
 	if abilities.is_empty():
 		return
 	var controller: InputComponent = local_player.controller
@@ -279,6 +294,8 @@ func process_input(local_player: LocalPlayer) -> void:
 		_handle_slot_input(1, controller.is_special_just_pressed(), controller.is_special_just_released(), local_player)
 	if abilities.size() > 2:
 		_handle_slot_input(2, controller.is_special2_just_pressed(), controller.is_special2_just_released(), local_player)
+	if _ground_aim_slot >= 0:
+		_update_ground_aim(local_player)
 
 
 ## Fire ability [param slot] directly from a touch ability-bar tap. Mirrors the
@@ -315,6 +332,16 @@ func _handle_slot_input(slot: int, just_pressed: bool, just_released: bool, loca
 	var ability: AbilityResource = abilities[slot]
 	if ability == null:
 		return # empty loadout slot (null hole)
+
+	# Hold-to-aim ground specials: press shows the ghost; release casts at cursor.
+	# Must not fall through into the instant single-phase press path.
+	if ability.ground_aimed and not ability.has_release:
+		if just_pressed and ability.can_use(character):
+			_start_ground_aim(slot, ability, local_player)
+		elif just_released and _ground_aim_slot == slot and _held.get(slot, false):
+			_finish_ground_aim(local_player)
+		return
+
 	if just_pressed and ability.can_use(character):
 		if ability.has_release:
 			_held[slot] = true
@@ -345,8 +372,133 @@ func _handle_slot_input(slot: int, just_pressed: bool, just_released: bool, loca
 		_send_action(slot, true, local_player)
 
 
-func _send_action(slot: int, released: bool, local_player: LocalPlayer) -> void:
+func _start_ground_aim(slot: int, ability: AbilityResource, local_player: LocalPlayer) -> void:
+	# Cancel any prior aim (switching Q↔E mid-hold).
+	if _ground_aim_slot >= 0 and _ground_aim_slot != slot:
+		_held[_ground_aim_slot] = false
+		_clear_ground_aim()
+	_ground_aim_slot = slot
+	_held[slot] = true
+	_ensure_ground_aim_marker(ability)
+	_update_ground_aim(local_player)
+
+
+func _finish_ground_aim(local_player: LocalPlayer) -> void:
+	var slot: int = _ground_aim_slot
+	if slot < 0 or slot >= abilities.size():
+		_clear_ground_aim()
+		return
+	var ability: AbilityResource = abilities[slot]
+	_held[slot] = false
+	if ability == null or not ability.can_use(character):
+		_clear_ground_aim()
+		return
+	var target: Vector2 = _clamped_ground_aim(local_player, ability)
+	var aim_dir: Vector2 = (target - character.global_position)
+	if aim_dir != Vector2.ZERO:
+		local_player.look_direction = aim_dir.normalized()
+	ability.aim_point = target
+	ability.has_aim_point = true
+	_stamp_cooldown(ability) # predictive — server cooldown stays authoritative
+	ability.predict_use(character, local_player.look_direction)
+	_send_action(slot, false, local_player, target)
+	_clear_ground_aim()
+
+
+func _update_ground_aim(local_player: LocalPlayer) -> void:
+	if _ground_aim_slot < 0 or _ground_aim_slot >= abilities.size():
+		return
+	var ability: AbilityResource = abilities[_ground_aim_slot]
+	if ability == null:
+		_clear_ground_aim()
+		return
+	# Bail if the key was lost without a release event (focus steal, menu open).
+	if not _held.get(_ground_aim_slot, false):
+		_clear_ground_aim()
+		return
+	var target: Vector2 = _clamped_ground_aim(local_player, ability)
+	var aim_dir: Vector2 = target - character.global_position
+	if aim_dir != Vector2.ZERO:
+		local_player.look_direction = aim_dir.normalized()
+	if is_instance_valid(_ground_aim_marker):
+		_ground_aim_marker.global_position = target
+		if _ground_aim_marker.has_method(&"set_radius"):
+			_ground_aim_marker.call(&"set_radius", _ground_aim_blast_radius(ability))
+
+
+func _clamped_ground_aim(local_player: LocalPlayer, ability: AbilityResource) -> Vector2:
+	var origin: Vector2 = character.global_position
+	var max_range: float = ability.get_ground_aim_range()
+	# Mouse when available; stick look falls back to fixed-range ahead of aim.
+	var raw: Vector2
+	if local_player.get_viewport() != null:
+		raw = local_player.get_global_mouse_position()
+	else:
+		var dir: Vector2 = local_player.look_direction
+		if dir == Vector2.ZERO:
+			dir = Vector2.RIGHT
+		raw = origin + dir.normalized() * max_range
+	var offset: Vector2 = raw - origin
+	if offset.length() > max_range:
+		return origin + offset.normalized() * max_range
+	return raw
+
+
+func _ground_aim_blast_radius(ability: AbilityResource) -> float:
+	if ability is MeteorAbility:
+		return (ability as MeteorAbility).blast_radius
+	return 48.0
+
+
+func _ensure_ground_aim_marker(ability: AbilityResource) -> void:
+	if is_instance_valid(_ground_aim_marker):
+		return
+	var map: Node = character.get_parent() if character != null else null
+	if map == null:
+		return
+	var marker := _GroundAimGhost.new()
+	marker.radius = _ground_aim_blast_radius(ability)
+	map.add_child(marker)
+	_ground_aim_marker = marker
+
+
+func _clear_ground_aim() -> void:
+	_ground_aim_slot = -1
+	if is_instance_valid(_ground_aim_marker):
+		_ground_aim_marker.queue_free()
+	_ground_aim_marker = null
+
+
+func _send_action(
+	slot: int,
+	released: bool,
+	local_player: LocalPlayer,
+	ground_target: Variant = null
+) -> void:
 	var args: Dictionary = {"d": local_player.look_direction, "i": slot}
 	if released:
 		args["r"] = true
+	if ground_target is Vector2:
+		args["t"] = ground_target
 	Client.request_data(&"action.perform", Callable(), args, InstanceClient.current.name)
+
+
+## Soft aim ring shown while holding a ground-aimed special (Meteor / Rain).
+class _GroundAimGhost extends Node2D:
+	var radius: float = 48.0
+
+	func _ready() -> void:
+		z_index = -1
+		queue_redraw()
+
+	func set_radius(value: float) -> void:
+		radius = value
+		queue_redraw()
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		draw_circle(Vector2.ZERO, radius, Color(1.0, 0.85, 0.3, 0.16))
+		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 48, Color(1.0, 0.88, 0.35, 0.85), 2.0, true)
+		draw_circle(Vector2.ZERO, 3.0, Color(1.0, 0.95, 0.55, 0.95))
