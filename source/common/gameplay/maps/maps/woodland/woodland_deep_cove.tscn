@@ -15,7 +15,7 @@
 [ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h3"]
 
 [sub_resource type="RectangleShape2D" id="BoatShape"]
-size = Vector2(72, 56)
+size = Vector2(64, 64)
 
 [node name="WoodlandDeepCove" type="Node2D"]
 y_sort_enabled = true
@@ -55,19 +55,21 @@ offset = Vector2(0, -8)
 
 [node name="Dock" type="Sprite2D" parent="."]
 z_index = 1
-position = Vector2(352, 180)
+centered = false
+position = Vector2(336, 120)
 texture = ExtResource("10_dock")
 
 [node name="FishingBoat" type="Sprite2D" parent="."]
 z_index = 2
-position = Vector2(404, 228)
+centered = false
+position = Vector2(372, 176)
 texture = ExtResource("12_boat")
 
 [node name="BoatLabel" type="Label" parent="."]
-offset_left = 368
-offset_top = 186
-offset_right = 448
-offset_bottom = 202
+offset_left = 364
+offset_top = 156
+offset_right = 444
+offset_bottom = 172
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 3
@@ -76,7 +78,7 @@ text = "Beach"
 horizontal_alignment = 1
 
 [node name="BoatToBeach" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(384, 232)
+position = Vector2(368, 208)
 target = NodePath("../../WoodlandBeach/BoatToDeepCove")
 
 [node name="CollisionShape2D" parent="BoatToBeach" index="0"]
