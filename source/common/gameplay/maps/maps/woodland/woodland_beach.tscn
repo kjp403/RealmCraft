@@ -16,120 +16,157 @@
 [ext_resource type="Resource" uid="uid://c9af9405ce45a6" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_crab.tres" id="h5"]
 [ext_resource type="Resource" uid="uid://c77e507ca6a840" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_parrot.tres" id="h6"]
 [ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h7"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_a.png" id="d0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_b.png" id="d1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_c.png" id="d2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_d.png" id="d3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_0.png" id="s0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_1.png" id="s1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_2.png" id="s2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_3.png" id="s3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_red.png" id="p0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_blue.png" id="p1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/chair_red.png" id="p2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/chair_blue.png" id="p3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/towel_orange.png" id="p4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/palm.png" id="p6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/dock.png" id="p7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/dock2.png" id="p8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/flower_pink.png" id="p9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/flower_orange.png" id="p10"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_teal.png" id="p11"]
 
 [node name="WoodlandBeach" type="Node2D"]
 y_sort_enabled = true
 
 [node name="Ground" type="Sprite2D" parent="."]
-z_index = -2
+z_index = -5
 texture = ExtResource("1_ground")
 centered = false
 position = Vector2(0, 0)
 
 [node name="BeachBar" type="Sprite2D" parent="."]
-z_index = 1
-position = Vector2(140, 120)
+z_index = 2
+position = Vector2(160, 130)
 texture = ExtResource("2_bar")
 offset = Vector2(0, -40)
 
 [node name="FishShop" type="Sprite2D" parent="."]
-z_index = 1
-position = Vector2(280, 100)
+z_index = 2
+position = Vector2(300, 110)
 texture = ExtResource("3_shop")
 offset = Vector2(0, -32)
 
 [node name="BeachHut" type="Sprite2D" parent="."]
-z_index = 1
-position = Vector2(420, 128)
+z_index = 2
+position = Vector2(460, 135)
 texture = ExtResource("4_bar2")
 offset = Vector2(0, -40)
 
-[node name="DecoA" type="Sprite2D" parent="."]
-position = Vector2(80, 160)
-texture = ExtResource("d0")
+[node name="Palm1" type="Sprite2D" parent="."]
+z_index = 3
+position = Vector2(80, 100)
+texture = ExtResource("p6")
+offset = Vector2(0, -24)
 
-[node name="DecoB" type="Sprite2D" parent="."]
-position = Vector2(340, 168)
-texture = ExtResource("d1")
+[node name="Palm2" type="Sprite2D" parent="."]
+z_index = 3
+position = Vector2(600, 120)
+texture = ExtResource("p6")
+offset = Vector2(0, -24)
 
-[node name="DecoC" type="Sprite2D" parent="."]
-position = Vector2(200, 180)
-texture = ExtResource("d2")
+[node name="Umbrella1" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(220, 180)
+texture = ExtResource("p0")
+offset = Vector2(0, -16)
 
-[node name="DecoD" type="Sprite2D" parent="."]
-position = Vector2(500, 150)
-texture = ExtResource("d3")
+[node name="Umbrella2" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(380, 190)
+texture = ExtResource("p1")
+offset = Vector2(0, -16)
+
+[node name="Umbrella3" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(540, 175)
+texture = ExtResource("p11")
+offset = Vector2(0, -16)
+
+[node name="Chair1" type="Sprite2D" parent="."]
+position = Vector2(200, 200)
+texture = ExtResource("p2")
+
+[node name="Chair2" type="Sprite2D" parent="."]
+position = Vector2(250, 205)
+texture = ExtResource("p3")
+
+[node name="Towel1" type="Sprite2D" parent="."]
+position = Vector2(360, 210)
+texture = ExtResource("p4")
+
+[node name="Torch1" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(120, 150)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="Torch2" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(520, 145)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="Flower1" type="Sprite2D" parent="."]
+position = Vector2(100, 160)
+texture = ExtResource("p9")
+
+[node name="Flower2" type="Sprite2D" parent="."]
+position = Vector2(580, 155)
+texture = ExtResource("p10")
+
+[node name="Dock" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(320, 250)
+texture = ExtResource("p7")
+offset = Vector2(0, 0)
+
+[node name="Dock2" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(320, 314)
+texture = ExtResource("p8")
 
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
-position = Vector2(200, 150)
+position = Vector2(230, 155)
 station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 position = Vector2(0, -16)
 texture = ExtResource("8_cookart")
 
-
-[node name="FishShadows" type="Node2D" parent="."]
-z_index = -1
-
-[node name="S0" type="Sprite2D" parent="FishShadows"]
-position = Vector2(80, 280)
-texture = ExtResource("s0")
-modulate = Color(1, 1, 1, 0.7)
-
-[node name="S1" type="Sprite2D" parent="FishShadows"]
-position = Vector2(200, 300)
-texture = ExtResource("s1")
-modulate = Color(1, 1, 1, 0.65)
-
-[node name="S2" type="Sprite2D" parent="FishShadows"]
-position = Vector2(360, 288)
-texture = ExtResource("s2")
-modulate = Color(1, 1, 1, 0.7)
-
-[node name="S3" type="Sprite2D" parent="FishShadows"]
-position = Vector2(480, 304)
-texture = ExtResource("s3")
-modulate = Color(1, 1, 1, 0.6)
-
 [node name="MineableNodes" type="Node2D" parent="."]
 
 [node name="ShrimpHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(48, 248)
+position = Vector2(64, 252)
 data = ExtResource("h0")
 
 [node name="HerringHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(112, 256)
+position = Vector2(128, 260)
 data = ExtResource("h1")
 
 [node name="TroutHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(176, 248)
+position = Vector2(192, 252)
 data = ExtResource("h2")
 
 [node name="TunaHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(240, 260)
+position = Vector2(256, 268)
 data = ExtResource("h3")
 
 [node name="LionfishHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(304, 252)
+position = Vector2(336, 256)
 data = ExtResource("h4")
 
 [node name="CrabHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(368, 256)
+position = Vector2(400, 264)
 data = ExtResource("h5")
 
 [node name="ParrotHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(432, 248)
+position = Vector2(480, 252)
 data = ExtResource("h6")
 
 [node name="AnglerHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(496, 260)
+position = Vector2(560, 268)
 data = ExtResource("h7")
