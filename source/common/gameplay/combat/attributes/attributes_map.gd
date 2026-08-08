@@ -47,8 +47,9 @@ const DEFENSE: Dictionary[StringName, float] = {
 
 const INTELLIGENCE: Dictionary[StringName, float] = {
 	# Mirrors STRENGHT: the main driver of MAGIC damage growth. Weapons grant the
-	# base AP (wand +18), INT scales it — 60 pts ≈ +36 AP (×3 a fresh caster).
-	# Also scales heal bolts (heal = AP × ratio), so INT is the support stat too.
+	# base AP (wood wand +15 ≈ sword DPS at wand_bolt 1.5s vs sword_swing 0.6s),
+	# INT scales it — 60 pts ≈ +36 AP (×3 a fresh caster). Also scales heal bolts
+	# (heal = AP × ratio), so INT is the support stat too.
 	Stat.AP: 0.6,
 }
 
