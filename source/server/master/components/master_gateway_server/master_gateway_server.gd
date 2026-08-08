@@ -79,6 +79,7 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request[GatewayAPI.KEY_ACCOUNT_USERNAME],
 				request[GatewayAPI.KEY_WORLD_ID],
 				request[GatewayAPI.KEY_CHAR_ID],
+				str(request.get("__ip__", "")),
 			)
 
 
@@ -184,7 +185,14 @@ func request_player_characters(gateway_id: int, request_id: int, username: Strin
 		gateway_response.rpc_id(gateway_id, request_id, {"error": GatewayAPI.ERR_BAD_CREDENTIALS, "msg": "account not found or world."})
 
 
-func request_enter_world(gateway_id: int, request_id: int, username: String, world_id: int, character_id: int) -> void:
+func request_enter_world(
+	gateway_id: int,
+	request_id: int,
+	username: String,
+	world_id: int,
+	character_id: int,
+	client_ip: String = ""
+) -> void:
 	var account: AccountResource = authentication_manager.account_collection.collection.get(username)
 
 	if not world_manager.connected_worlds.has(world_id):
@@ -201,5 +209,6 @@ func request_enter_world(gateway_id: int, request_id: int, username: String, wor
 		gateway_id,
 		request_id,
 		username,
-		character_id
+		character_id,
+		client_ip
 	)

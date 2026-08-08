@@ -1,11 +1,12 @@
 extends ChatCommand
-## Ban an account from joining the world. Disconnects them if online.
+## Ban an account from joining the world. Works online or offline.
+## Disconnects them if they are currently connected.
 
 
 func _init() -> void:
 	command_name = "ban"
 	command_priority = 2 # admin+
-	command_usage = "/ban <self|@account|#id> [duration] [reason]   (duration e.g. 30s, 10m, 2h, 1d; omit for permanent)"
+	command_usage = "/ban <self|@account|#id|Name> [duration] [reason]   (duration e.g. 30s, 10m, 2h, 1d; omit for permanent)"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
@@ -17,7 +18,13 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return target.error
 	if target.account_name.is_empty():
 		return "Couldn't resolve an account for that target."
-	if target.peer_id == peer_id:
+
+	var ws: WorldServer = server_instance.world_server
+	var admin: PlayerResource = ws.connected_players.get(peer_id)
+	var admin_id: int = admin.player_id if admin else 0
+	if admin != null and target.account_name.to_lower() == admin.account_name.to_lower():
+		return "You can't ban yourself."
+	if target.peer_id == peer_id and target.peer_id != 0:
 		return "You can't ban yourself."
 
 	var args_offset: int = 2
@@ -30,10 +37,6 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 			duration_label = args[2]
 	var reason: String = " ".join(args.slice(args_offset)) if args.size() > args_offset else ""
 
-	var ws: WorldServer = server_instance.world_server
-	var admin: PlayerResource = ws.connected_players.get(peer_id)
-	var admin_id: int = admin.player_id if admin else 0
-
 	BanList.ban(target.account_name, reason, admin_id, duration_ms)
 
 	if target.online:
@@ -42,5 +45,6 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 			notice += "\nReason: " + reason
 		ws.chat_service.push_system_to_player(server_instance, target.player_id, notice)
 		ws.peer.disconnect_peer.call_deferred(target.peer_id)
+		return "Banned %s for %s." % [target.label(), duration_label]
 
-	return "Banned %s for %s." % [target.label(), duration_label]
+	return "Banned %s for %s (offline — blocked on next login)." % [target.label(), duration_label]

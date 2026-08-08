@@ -278,6 +278,21 @@ func save_flag_state(flag_id: int, owner_guild_id: int, last_capture_ms: int) ->
 	)
 
 
+## Lookup a character by exact display name (case-insensitive). Used so staff can
+## `/ban Nesato` while the account is offline without first running /chars.
+func get_player_row_by_display_name(display_name: String) -> Dictionary:
+	if display_name.is_empty():
+		return {}
+	db.query_with_bindings(
+		"SELECT player_id, account_name, display_name FROM players "
+		+ "WHERE display_name = ? COLLATE NOCASE LIMIT 1;",
+		[display_name]
+	)
+	if db.query_result.is_empty():
+		return {}
+	return db.query_result[0]
+
+
 func get_player_profile_row(player_id: int) -> Dictionary:
 	db.query_with_bindings(
 		"SELECT player_id, account_name, display_name, skin_id, level, "

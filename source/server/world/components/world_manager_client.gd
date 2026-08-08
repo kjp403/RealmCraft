@@ -2,7 +2,7 @@ class_name WorldManagerClient
 extends BaseMultiplayerEndpoint
 
 
-signal token_received(auth_token: String, username: String, character_id: int)
+signal token_received(auth_token: String, username: String, character_id: int, client_ip: String)
 
 @export var database: WorldDatabase
 @export var world_server: WorldServer
@@ -349,8 +349,8 @@ func fetch_server_info(_info: Dictionary) -> void:
 
 
 @rpc("authority")
-func fetch_token(auth_token: String, username: String, character_id: int) -> void:
-	token_received.emit(auth_token, username, character_id)
+func fetch_token(auth_token: String, username: String, character_id: int, client_ip: String = "") -> void:
+	token_received.emit(auth_token, username, character_id, client_ip)
 
 
 @rpc("any_peer")
@@ -398,7 +398,8 @@ func request_login(
 	gateway_id: int,
 	peer_id: int,
 	username: String,
-	character_id: int
+	character_id: int,
+	client_ip: String = ""
 ) -> void:
 	var player: PlayerResource = database.get_player_resource(character_id)
 	if player == null:
@@ -413,6 +414,7 @@ func request_login(
 		peer_id,
 		username,
 		character_id,
+		client_ip,
 	)
 
 
@@ -422,6 +424,7 @@ func result_login(
 	_gateway_id: int,
 	_peer_id: int,
 	_username: String,
-	_character_id: int
+	_character_id: int,
+	_client_ip: String = ""
 ) -> void:
 	pass

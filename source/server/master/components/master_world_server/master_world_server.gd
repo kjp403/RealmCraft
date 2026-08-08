@@ -209,7 +209,7 @@ func tell_world_to_revoke_role(world_id: int, player_id: int, role: String) -> b
 
 
 @rpc("authority")
-func fetch_token(_auth_token: String, _username: String, _character_id: int) -> void:
+func fetch_token(_auth_token: String, _username: String, _character_id: int, _client_ip: String = "") -> void:
 	pass
 
 
@@ -241,7 +241,7 @@ func player_character_creation_result(gateway_id: int, peer_id: int, username: S
 		# release build. (Was gated on "debug", which masked this on the debug server.)
 		authentication_manager.save_account_collection()
 		var auth_token: String = authentication_manager.generate_random_token()
-		fetch_token.rpc_id(world_id, auth_token, username, result_code)
+		fetch_token.rpc_id(world_id, auth_token, username, result_code, "")
 		
 		gateway_manager.gateway_response.rpc_id(
 			gateway_id,
@@ -269,12 +269,12 @@ func request_player_characters(_gateway_id: int, _peer_id: int, _username: Strin
 
 
 @rpc("any_peer")
-func request_login(_gateway_id: int, _peer_id: int, _username: String, _character_id: int) -> void:
+func request_login(_gateway_id: int, _peer_id: int, _username: String, _character_id: int, _client_ip: String = "") -> void:
 	pass
 
 
 @rpc("any_peer")
-func result_login(result_code: int, gateway_id: int, peer_id: int, username: String, character_id: int) -> void:
+func result_login(result_code: int, gateway_id: int, peer_id: int, username: String, character_id: int, client_ip: String = "") -> void:
 	var world_id: int = multiplayer_api.get_remote_sender_id()
 	if result_code == OK:
 		# Mark the account connected so login_request refuses a second login;
@@ -283,7 +283,7 @@ func result_login(result_code: int, gateway_id: int, peer_id: int, username: Str
 		if account != null:
 			account.peer_id = peer_id
 		var auth_token: String = authentication_manager.generate_random_token()
-		fetch_token.rpc_id(world_id, auth_token, username, character_id)
+		fetch_token.rpc_id(world_id, auth_token, username, character_id, client_ip)
 		await get_tree().create_timer(0.5).timeout
 		gateway_manager.gateway_response.rpc_id(
 			gateway_id,

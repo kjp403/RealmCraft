@@ -5,7 +5,7 @@ extends ChatCommand
 func _init() -> void:
 	command_name = "unban"
 	command_priority = 2 # admin+
-	command_usage = "/unban <@account|#id>"
+	command_usage = "/unban <@account|#id|Name>"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
