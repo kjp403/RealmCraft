@@ -37,6 +37,10 @@ var _them_gold: Label
 var _them_ready: Label
 var _picker_overlay: Control
 var _picker_grid: GridContainer
+var _amount_overlay: Control
+var _amount_title: Label
+var _amount_spin: SpinBox
+var _amount_item_id: int = 0
 var _countdown_label: Label
 var _accept_button: Button
 var _cancel_button: Button
@@ -55,6 +59,7 @@ func _ready() -> void:
 	_apply_solid_trade_card()
 	_build_body()
 	_build_picker_overlay()
+	_build_amount_overlay()
 	close_requested.connect(_on_leave)
 	hide()
 	ClientState.viewed_trade_changed.connect(_on_viewed_changed)
@@ -213,6 +218,10 @@ func _build_picker_overlay() -> void:
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.5))
 	header.add_child(title)
 	header.add_child(_make_action("Done", _close_picker))
+	var hint := Label.new()
+	hint.text = "Left-click: +1 · Right-click: choose amount"
+	hint.add_theme_color_override(&"font_color", MUTED_COLOR)
+	box.add_child(hint)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(366, 252)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -220,6 +229,72 @@ func _build_picker_overlay() -> void:
 	_picker_grid = GridContainer.new()
 	_picker_grid.columns = 5
 	scroll.add_child(_picker_grid)
+
+
+func _build_amount_overlay() -> void:
+	_amount_overlay = Control.new()
+	_amount_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_amount_overlay.visible = false
+	_amount_overlay.z_index = 20
+	add_child(_amount_overlay)
+
+	var dim := ColorRect.new()
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.04, 0.05, 0.08, 0.7)
+	dim.gui_input.connect(func(event: InputEvent) -> void:
+		if (event is InputEventMouseButton and event.pressed) \
+				or (event is InputEventScreenTouch and event.pressed):
+			_close_amount_prompt())
+	_amount_overlay.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_amount_overlay.add_child(center)
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(320, 0)
+	center.add_child(card)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 14)
+	card.add_child(pad)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 10)
+	pad.add_child(box)
+
+	_amount_title = Label.new()
+	_amount_title.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.5))
+	_amount_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_amount_title)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 8)
+	box.add_child(row)
+	var amount_label := Label.new()
+	amount_label.text = "Amount"
+	amount_label.add_theme_color_override(&"font_color", MUTED_COLOR)
+	row.add_child(amount_label)
+	_amount_spin = SpinBox.new()
+	_amount_spin.min_value = 0
+	_amount_spin.max_value = 1
+	_amount_spin.value = 1
+	_amount_spin.rounded = true
+	_amount_spin.custom_minimum_size = Vector2(120, 0)
+	_amount_spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_amount_spin)
+	var max_btn := Button.new()
+	max_btn.text = "Max"
+	max_btn.focus_mode = Control.FOCUS_NONE
+	max_btn.pressed.connect(func() -> void:
+		_amount_spin.value = _amount_spin.max_value)
+	row.add_child(max_btn)
+
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override(&"separation", 8)
+	actions.alignment = BoxContainer.ALIGNMENT_END
+	box.add_child(actions)
+	actions.add_child(_make_action("Cancel", _close_amount_prompt))
+	actions.add_child(_make_action("Offer", _confirm_offer_amount))
 
 
 func _on_viewed_changed(trade_id: int) -> void:
@@ -409,10 +484,14 @@ func _make_slot(item_id: int, amount: int, mine: bool) -> Button:
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null:
 		PixelIcon.mount(slot, item.item_icon)
-		slot.tooltip_text = ItemTooltip.hover_text(item)
+		var tip: String = ItemTooltip.hover_text(item)
+		if mine and not _locked:
+			tip += "\nLeft-click: −1 · Right-click: set amount"
+		slot.tooltip_text = tip
 	slot.add_child(_count_badge(amount))
 	if mine and not _locked:
 		slot.pressed.connect(_remove_from_offer.bind(item_id))
+		slot.gui_input.connect(_on_offer_slot_gui_input.bind(item_id))
 	else:
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return slot
@@ -465,6 +544,79 @@ func _remove_from_offer(item_id: int) -> void:
 	else:
 		_my_items.erase(item_id)
 	_send_offer()
+
+
+## Set offered amount for [param item_id] (0 removes it). Clamped to owned count.
+func _set_offer_amount(item_id: int, amount: int) -> void:
+	if _locked:
+		return
+	var owned: int = int(_owned.get(item_id, 0))
+	amount = clampi(amount, 0, owned)
+	if amount <= 0:
+		_my_items.erase(item_id)
+		_send_offer()
+		return
+	if not _my_items.has(item_id) and _my_items.size() >= SLOTS:
+		Toaster.toast("Your offer is full (%d item types maximum)." % SLOTS)
+		return
+	_my_items[item_id] = amount
+	_send_offer()
+
+
+func _on_picker_slot_gui_input(event: InputEvent, item_id: int) -> void:
+	if _locked:
+		return
+	if event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_RIGHT:
+		get_viewport().set_input_as_handled()
+		_prompt_offer_amount(item_id)
+
+
+func _on_offer_slot_gui_input(event: InputEvent, item_id: int) -> void:
+	if _locked:
+		return
+	if event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_RIGHT:
+		get_viewport().set_input_as_handled()
+		_prompt_offer_amount(item_id)
+
+
+func _prompt_offer_amount(item_id: int) -> void:
+	if _locked or _amount_overlay == null:
+		return
+	var owned: int = int(_owned.get(item_id, 0))
+	if owned <= 0:
+		return
+	_amount_item_id = item_id
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	var name: String = str(item.item_name) if item != null else "item"
+	var current: int = int(_my_items.get(item_id, 0))
+	_amount_title.text = "Offer %s\n(have %d · currently offering %d)" % [
+		name, owned, current,
+	]
+	_amount_spin.min_value = 0
+	_amount_spin.max_value = owned
+	_amount_spin.value = owned if current <= 0 else current
+	_amount_overlay.visible = true
+	_amount_spin.get_line_edit().grab_focus()
+	_amount_spin.get_line_edit().select_all()
+
+
+func _confirm_offer_amount() -> void:
+	if _amount_item_id <= 0:
+		_close_amount_prompt()
+		return
+	_amount_spin.get_line_edit().release_focus()
+	_set_offer_amount(_amount_item_id, int(_amount_spin.value))
+	_close_amount_prompt()
+
+
+func _close_amount_prompt() -> void:
+	_amount_item_id = 0
+	if _amount_overlay != null:
+		_amount_overlay.visible = false
+		if _amount_spin != null:
+			_amount_spin.get_line_edit().release_focus()
 
 
 func _send_offer() -> void:
@@ -520,6 +672,7 @@ func _toggle_picker() -> void:
 
 func _close_picker() -> void:
 	_picker_open = false
+	_close_amount_prompt()
 	if _picker_overlay != null:
 		_picker_overlay.visible = false
 
@@ -539,12 +692,13 @@ func _rebuild_picker() -> void:
 		button.focus_mode = Control.FOCUS_NONE
 		if item != null:
 			PixelIcon.mount(button, item.item_icon)
-			button.tooltip_text = "%s (have %d)" % [
+			button.tooltip_text = "%s (have %d)\nLeft-click: +1 · Right-click: choose amount" % [
 				str(item.item_name),
 				int(_owned[item_id]),
 			]
 			button.add_child(_count_badge(int(_owned[item_id])))
 		button.pressed.connect(_add_to_offer.bind(item_id))
+		button.gui_input.connect(_on_picker_slot_gui_input.bind(item_id))
 		_picker_grid.add_child(button)
 	if not any:
 		var empty := Label.new()
