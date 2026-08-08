@@ -41,11 +41,9 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	return total
 
 
-## Mastery points granted per level. 2 → a level-10 cap yields a 20-point budget:
-## enough to specialize into one branch's flagship chain plus a splash (tree
-## content totals ~30, a single branch ~11-16). The tree is NO LONGER sized so
-## you can own everything at cap — you choose. Tune this one number to retune the
-## whole budget. See docs/mastery.md.
+## Mastery points granted per level. 2 → a level-50 cap yields a 100-point budget
+## (trees still total ~30, so early levels specialize and later levels finish
+## the tree). Tune this one number to retune the whole budget.
 const POINTS_PER_LEVEL: int = 2
 
 ## Level 1 already grants a full POINTS_PER_LEVEL so the first tier-1 pick is
