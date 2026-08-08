@@ -8,6 +8,15 @@
 [ext_resource type="Resource" uid="uid://c8mlycu302745" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="20_bowr"]
 [ext_resource type="Resource" uid="uid://blxysmttimic7" path="res://source/common/gameplay/items/weapons/wand/wand_bandit.item.tres" id="21_wandr"]
 [ext_resource type="Resource" uid="uid://b5u0jyyxqonrh" path="res://source/common/gameplay/items/weapons/book/book_rustic.item.tres" id="22_bookr"]
+[ext_resource type="Resource" uid="uid://2gsl864x53vil" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="30_br_helm"]
+[ext_resource type="Resource" uid="uid://220bc63rtaob7" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="31_br_chest"]
+[ext_resource type="Resource" uid="uid://2q7ip57npoho8" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="32_br_boots"]
+[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="33_fe_helm"]
+[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="34_fe_chest"]
+[ext_resource type="Resource" uid="uid://gjk4hvjre3ox" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="35_fe_boots"]
+[ext_resource type="Resource" uid="uid://3ih0n9l3vzb10" path="res://source/common/gameplay/items/gears/metal/steel_helmet.tres" id="36_st_helm"]
+[ext_resource type="Resource" uid="uid://2sqvuu6o9jrio" path="res://source/common/gameplay/items/gears/metal/steel_chest.tres" id="37_st_chest"]
+[ext_resource type="Resource" uid="uid://274t9kspo2nuo" path="res://source/common/gameplay/items/gears/metal/steel_boots.tres" id="38_st_boots"]
 
 [sub_resource type="Resource" id="Buyback_0"]
 script = ExtResource("1_yeyhk")
@@ -62,10 +71,55 @@ item = ExtResource("22_bookr")
 price = 60
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
+[sub_resource type="Resource" id="Entry_br_helm"]
+script = ExtResource("2_entry")
+item = ExtResource("30_br_helm")
+price = 20
+
+[sub_resource type="Resource" id="Entry_br_chest"]
+script = ExtResource("2_entry")
+item = ExtResource("31_br_chest")
+price = 35
+
+[sub_resource type="Resource" id="Entry_br_boots"]
+script = ExtResource("2_entry")
+item = ExtResource("32_br_boots")
+price = 10
+
+[sub_resource type="Resource" id="Entry_fe_helm"]
+script = ExtResource("2_entry")
+item = ExtResource("33_fe_helm")
+price = 30
+
+[sub_resource type="Resource" id="Entry_fe_chest"]
+script = ExtResource("2_entry")
+item = ExtResource("34_fe_chest")
+price = 45
+
+[sub_resource type="Resource" id="Entry_fe_boots"]
+script = ExtResource("2_entry")
+item = ExtResource("35_fe_boots")
+price = 20
+
+[sub_resource type="Resource" id="Entry_st_helm"]
+script = ExtResource("2_entry")
+item = ExtResource("36_st_helm")
+price = 50
+
+[sub_resource type="Resource" id="Entry_st_chest"]
+script = ExtResource("2_entry")
+item = ExtResource("37_st_chest")
+price = 100
+
+[sub_resource type="Resource" id="Entry_st_boots"]
+script = ExtResource("2_entry")
+item = ExtResource("38_st_boots")
+price = 35
+
 [resource]
 script = ExtResource("1_shop")
 shop_name = "Forge Smith"
-entries = Array[ExtResource("2_entry")]([SubResource("Entry_rustic_sword"), SubResource("Entry_rustic_maul"), SubResource("Resource_bowr"), SubResource("Resource_wandr"), SubResource("Resource_bookr")])
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_rustic_sword"), SubResource("Entry_rustic_maul"), SubResource("Resource_bowr"), SubResource("Resource_wandr"), SubResource("Resource_bookr"), SubResource("Entry_br_helm"), SubResource("Entry_br_chest"), SubResource("Entry_br_boots"), SubResource("Entry_fe_helm"), SubResource("Entry_fe_chest"), SubResource("Entry_fe_boots"), SubResource("Entry_st_helm"), SubResource("Entry_st_chest"), SubResource("Entry_st_boots")])
 accepted_trades = Array[ExtResource("1_yeyhk")]([SubResource("Buyback_0"), SubResource("Buyback_1"), SubResource("Buyback_2"), SubResource("Buyback_3"), SubResource("Buyback_4")])
 metadata/slug = &"rustic_shop"
 metadata/id = 7

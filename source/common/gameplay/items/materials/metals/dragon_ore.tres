@@ -11,6 +11,7 @@ description = "Heat-scarred ore with a crimson sheen. Used to craft Dragon gear.
 holdable = false
 can_trade = true
 vendor_value = 8
+stack_limit = 10
 tags = PackedStringArray()
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"dragon_ore"

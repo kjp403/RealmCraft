@@ -53,7 +53,7 @@ item = ExtResource("7_coal")
 script = ExtResource("1_recipe")
 output_item = ExtResource("12_steel_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_ore"), SubResource("I_st_coal")])
-required_level = 8
+required_level = 15
 xp_reward = 40
 
 [sub_resource type="Resource" id="I_ag_ore"]

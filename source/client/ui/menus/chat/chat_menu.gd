@@ -1180,8 +1180,42 @@ func _handle_local_mute_command(args: PackedStringArray) -> void:
 
 
 func _system_echo(text: String) -> void:
+	echo_system(text)
+
+
+## Local-only system line in the peek feed (and full System conversation).
+## Used for client-side game messages like skill level-ups.
+func echo_system(text: String) -> void:
+	if text.is_empty() or peek_feed_text_display == null:
+		return
 	peek_feed_text_display.append_text("[color=%s][SYS][/color] %s" % [TAG_COLOR_SYSTEM, text])
 	peek_feed_text_display.newline()
+	# Persist into the System conversation so it isn't peek-only ephemera.
+	var self_id: int = int(ClientState.player_id)
+	if self_id > 0:
+		var convo_id: String = ChatConstants.system_conversation_id(self_id)
+		_ensure_conversation_exists(convo_id)
+		var record: Dictionary = {
+			"id": ChatConstants.SYSTEM_SENDER_ID,
+			"name": "System",
+			"title": "",
+			"guild_name": "",
+			"staff_role": "",
+			"text": text,
+			"time_ms": int(Time.get_unix_time_from_system() * 1000.0),
+			"msg_id": 0,
+			"is_self": false,
+			"is_system": true,
+			"convo_id": convo_id,
+		}
+		(raw_messages_by_conversation[convo_id] as Array).append(record)
+		if full_feed.visible and (current_conversation_id == convo_id or current_conversation_id == ALL_CONVERSATION_ID):
+			_refresh_full_feed()
+	if not full_feed.visible:
+		_reset_peek_view()
+		peek_feed.show()
+		peek_feed_text_display.show()
+		_start_peek_fade()
 #endregion
 
 

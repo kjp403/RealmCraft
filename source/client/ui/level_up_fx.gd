@@ -5,12 +5,17 @@ class_name LevelUpFx
 
 
 const FIREWORKS_TEX: Texture2D = preload("res://assets/sprites/vfx/level_up/fireworks.png")
-const FRAME_W: int = 240
-const FRAME_H: int = 331
-const COLS: int = 6
-const FRAME_COUNT: int = 36
-## Seconds per frame (~1.8s total at 36 frames).
+## Cropped fireworks-only atlas (character / ground stripped from the source GIF).
+const FRAME_W: int = 195
+const FRAME_H: int = 170
+const COLS: int = 8
+const FRAME_COUNT: int = 40
+## Seconds per frame (~2.0s total at 40 frames).
 const FRAME_DURATION: float = 0.05
+## Center-screen banner dwell — long enough to read while gathering.
+const BANNER_DURATION: float = 8.0
+## Corner toast dwell (backup lane if the banner is missed).
+const TOAST_DURATION: float = 6.0
 
 static var _frames: SpriteFrames
 
@@ -23,9 +28,10 @@ static func celebrate(player: Player, skill_label: String, level: int) -> void:
 		return
 	var frames: SpriteFrames = _fireworks_frames()
 	if frames != null:
+		# Cropped sheet is already fireworks-only; sit the burst just above the head.
 		SpriteEffect.spawn(player, frames, {
-			"scale": Vector2(0.55, 0.55),
-			"offset": Vector2(0.0, -56.0),
+			"scale": Vector2(0.75, 0.75),
+			"offset": Vector2(0.0, -52.0),
 			"z_index": 8,
 			"speed_scale": 1.0,
 		})
@@ -34,7 +40,17 @@ static func celebrate(player: Player, skill_label: String, level: int) -> void:
 		if label.is_empty():
 			label = "skill"
 		var msg: String = "Your %s level has achieved %d" % [label, level]
-		Announcer.announce(msg, "", {"sfx": UISound.LEVELUP, "duration": 3.2})
+		# Cut any still-playing level-up jingle, then restart — rapid multi-levels
+		# must not stack the audio. Keyed banner replaces itself so the text
+		# refreshes to the newest skill/level instead of queuing.
+		UISound.play_levelup()
+		Announcer.announce(
+			"Level up!",
+			msg,
+			{"sfx": "", "sound": false, "duration": BANNER_DURATION, "key": "level_up"},
+		)
+		Toaster.toast(msg, TOAST_DURATION)
+		_echo_game_message(msg)
 		if player.has_method("shake_camera"):
 			(player as LocalPlayer).shake_camera(0.25)
 
@@ -47,8 +63,20 @@ static func celebrate_skill(player: Player, skill_slug: StringName, level: int) 
 	celebrate(player, label, level)
 
 
+static func _echo_game_message(text: String) -> void:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var found: Array[Node] = tree.root.find_children("*", "ChatMenu", true, false)
+	if found.is_empty():
+		return
+	var chat: ChatMenu = found[0] as ChatMenu
+	if chat != null:
+		chat.echo_system(text)
+
+
 static func _fireworks_frames() -> SpriteFrames:
-	if _frames != null:
+	if _frames != null and _frames.get_frame_count(&"default") == FRAME_COUNT:
 		return _frames
 	if FIREWORKS_TEX == null:
 		return null

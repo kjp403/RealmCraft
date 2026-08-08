@@ -78,7 +78,7 @@ item = ExtResource("63_coal")
 script = ExtResource("1_recipe")
 output_item = ExtResource("12_st_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_st_ore"), SubResource("I_sm_st_coal")])
-required_level = 8
+required_level = 15
 xp_reward = 40
 
 [sub_resource type="Resource" id="I_sm_ag"]
@@ -206,7 +206,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("26_st_helm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_helm")])
-required_level = 8
+required_level = 15
 xp_reward = 120
 
 [sub_resource type="Resource" id="I_st_chest"]
@@ -218,7 +218,7 @@ amount = 5
 script = ExtResource("1_recipe")
 output_item = ExtResource("27_st_chest")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_chest")])
-required_level = 8
+required_level = 15
 xp_reward = 200
 
 [sub_resource type="Resource" id="I_st_boots"]
@@ -230,7 +230,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("28_st_boots")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_boots")])
-required_level = 8
+required_level = 15
 xp_reward = 80
 
 [sub_resource type="Resource" id="I_st_arr"]
@@ -241,7 +241,7 @@ item = ExtResource("12_st_bar")
 script = ExtResource("1_recipe")
 output_item = ExtResource("32_st_arr")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_arr")])
-required_level = 8
+required_level = 15
 xp_reward = 40
 
 [sub_resource type="Resource" id="I_ag_neck"]

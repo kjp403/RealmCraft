@@ -269,7 +269,7 @@ scale = Vector2(3.559999, 1)
 warper_id = 21
 
 [node name="CastleGardenPortal" parent="." unique_id=375786523 instance=ExtResource("19_pvtw6")]
-position = Vector2(-96, -120)
+position = Vector2(0, -72)
 portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
 destination_label = "Castle Garden"
 target_instance = ExtResource("8_f6l70")
@@ -287,7 +287,7 @@ position = Vector2(139.9191, -1114.0907)
 data = ExtResource("24_iron")
 
 [node name="CoalVein" parent="MineableNodes" unique_id=806920154 instance=ExtResource("23_n7hu4")]
-position = Vector2(146.38373, -617.54645)
+position = Vector2(-96, -48)
 data = ExtResource("25_coal")
 
 [node name="IronVein2" parent="MineableNodes" unique_id=1129547795 instance=ExtResource("23_n7hu4")]
@@ -295,7 +295,19 @@ position = Vector2(-220, -900)
 data = ExtResource("24_iron")
 
 [node name="CoalVein2" parent="MineableNodes" unique_id=806920155 instance=ExtResource("23_n7hu4")]
-position = Vector2(80, -780)
+position = Vector2(96, -48)
+data = ExtResource("25_coal")
+
+[node name="CoalVein3" parent="MineableNodes" unique_id=806920156 instance=ExtResource("23_n7hu4")]
+position = Vector2(-48, -112)
+data = ExtResource("25_coal")
+
+[node name="CoalVein4" parent="MineableNodes" unique_id=806920157 instance=ExtResource("23_n7hu4")]
+position = Vector2(48, -112)
+data = ExtResource("25_coal")
+
+[node name="CoalVein5" parent="MineableNodes" unique_id=806920158 instance=ExtResource("23_n7hu4")]
+position = Vector2(0, -160)
 data = ExtResource("25_coal")
 
 [node name="Label" type="Label" parent="." unique_id=1332924517]

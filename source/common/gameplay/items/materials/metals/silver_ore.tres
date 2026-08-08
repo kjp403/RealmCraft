@@ -9,6 +9,7 @@ item_name = &"Silver Ore"
 item_icon = ExtResource("1_lkimo")
 description = "Raw silver, pale in the light. Smelts into silver bars."
 vendor_value = 8
+stack_limit = 10
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"silver_ore"
 metadata/id = 56

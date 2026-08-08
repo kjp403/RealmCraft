@@ -29,9 +29,19 @@ const HOVER_DB: float = -11.0
 const REVEAL_DB: float = -6.0
 
 
-static func play(path: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
+static func play(
+	path: String,
+	pitch: float = 1.0,
+	volume_db: float = 0.0,
+	replace_same: bool = false,
+) -> void:
 	if is_instance_valid(Client) and Client.audio_manager != null:
-		Client.audio_manager.play_ui_sound(path, pitch, volume_db)
+		Client.audio_manager.play_ui_sound(path, pitch, volume_db, replace_same)
+
+
+## Level-up jingle: cuts itself short if another level-up fires mid-play.
+static func play_levelup() -> void:
+	play(LEVELUP, 1.0, 0.0, true)
 
 
 static func click() -> void: play(CLICK, 1.0, CLICK_DB)

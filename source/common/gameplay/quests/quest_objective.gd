@@ -11,6 +11,8 @@ enum Type { KILL, COLLECT, CRAFT, VISIT }
 ## COLLECT (have N in the bag) / CRAFT (craft N) target item.
 @export var item: Item
 @export var required_amount: int = 1
+## Optional COLLECT/CRAFT display name (e.g. "Coal" instead of "Coal Ore").
+@export var label_override: String = ""
 ## VISIT only: the NPC to talk to (drag in its NPCResource). The objective advances
 ## when the player opens the quest menu at this NPC.
 @export var target_giver: NPCResource
@@ -40,10 +42,16 @@ func describe() -> String:
 			# "Bring", not "Collect": COLLECT items are consumed and handed to the
 			# giver on turn-in (see QuestService.apply_turn_in), so it's a delivery,
 			# not a gather. (Daily COLLECT is NOT consumed — it keeps "Collect".)
-			return "Bring %s" % (str(item.item_name) if item else "?")
+			return "Bring %s" % _item_label()
 		Type.CRAFT:
-			return "Craft %s" % (str(item.item_name) if item else "?")
+			return "Craft %s" % _item_label()
 		Type.VISIT:
 			var who: String = target_giver_name if not target_giver_name.is_empty() else "the indicated person"
 			return "Speak with %s" % who
 	return ""
+
+
+func _item_label() -> String:
+	if not label_override.is_empty():
+		return label_override
+	return str(item.item_name) if item else "?"

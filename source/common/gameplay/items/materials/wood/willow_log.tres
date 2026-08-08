@@ -9,5 +9,6 @@ item_name = &"Willow Log"
 item_icon = ExtResource("1_icon")
 description = "A soft willow log. Light and springy."
 vendor_value = 3
+stack_limit = 10
 metadata/slug = &"willow_log"
 metadata/id = 176

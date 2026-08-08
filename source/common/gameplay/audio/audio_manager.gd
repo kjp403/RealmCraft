@@ -21,6 +21,10 @@ const MUSIC_FADE_IN_FLOOR_DB: float = -30.0
 var _tweens: Dictionary[AudioStreamPlayer, Tween]
 var _cached_sounds: Dictionary[String, AudioStream]
 var _pending_music: PendingMusic
+## Polyphonic stream id of the last UI cue that requested replace-on-replay
+## (level-up jingles cut themselves short when another fires mid-play).
+var _replaceable_ui_stream_id: int = -1
+var _replaceable_ui_path: String = ""
 
 
 func _ready() -> void:
@@ -100,16 +104,35 @@ func stop_music(fade_out_duration: float = 1.0) -> void:
 
 ## Load and play sound from the given path.
 ## If the resource was previously loaded, it will be retrieved from cache.
-func play_ui_sound(sound_path: String, pitch: float = 1.0, volume_db: float = 0.0) -> bool:
-	return play_ui_sound_stream(_get_sound(sound_path), pitch, volume_db)
+## [param replace_same]: when true, cuts any still-playing cue from the same
+## path before starting this one (level-up jingles).
+func play_ui_sound(
+	sound_path: String,
+	pitch: float = 1.0,
+	volume_db: float = 0.0,
+	replace_same: bool = false,
+) -> bool:
+	return play_ui_sound_stream(_get_sound(sound_path), pitch, volume_db, sound_path if replace_same else "")
 
 
 ## Play sound using the given [AudioStream]. [volume_db] trims THIS cue under the bus volume
 ## (e.g. -6 for a softer click) without touching the player/settings volume.
-func play_ui_sound_stream(sound: AudioStream, pitch: float = 1.0, volume_db: float = 0.0) -> bool:
+## [param replace_path]: non-empty = stop the previous replaceable cue for this path first.
+func play_ui_sound_stream(
+	sound: AudioStream,
+	pitch: float = 1.0,
+	volume_db: float = 0.0,
+	replace_path: String = "",
+) -> bool:
 	if not sound: return false
 	var playback: AudioStreamPlaybackPolyphonic = ui_player.get_stream_playback()
-	playback.play_stream(sound, 0, volume_db, pitch)
+	if not replace_path.is_empty() and replace_path == _replaceable_ui_path and _replaceable_ui_stream_id >= 0:
+		playback.stop_stream(_replaceable_ui_stream_id)
+		_replaceable_ui_stream_id = -1
+	var stream_id: int = playback.play_stream(sound, 0, volume_db, pitch)
+	if not replace_path.is_empty():
+		_replaceable_ui_path = replace_path
+		_replaceable_ui_stream_id = stream_id
 	return true
 
 #endregion
