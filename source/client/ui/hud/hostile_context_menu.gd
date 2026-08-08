@@ -18,7 +18,7 @@ func _ready() -> void:
 
 
 func _open_for_npc(npc: HostileNpc) -> void:
-	if npc == null or not is_instance_valid(npc) or npc.is_dead:
+	if not CombatTargetController._npc_is_alive(npc):
 		return
 	_target = npc
 	_menu.clear()
@@ -34,7 +34,7 @@ func _open_for_npc(npc: HostileNpc) -> void:
 func _on_action(action_id: int) -> void:
 	if action_id != ACTION_ATTACK:
 		return
-	if _target == null or not is_instance_valid(_target) or _target.is_dead:
+	if not CombatTargetController._npc_is_alive(_target):
 		return
 	var local_player: LocalPlayer = ClientState.local_player
 	if local_player == null:
