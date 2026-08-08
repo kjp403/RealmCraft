@@ -55,10 +55,6 @@ var _disp_max: int
 ## Predicted ticks_msec of the next charge gain (or full snap-refill at 0).
 var _next_regen_ms: int
 
-const MARKER_SCENE: PackedScene = preload(
-	"res://source/common/gameplay/maps/components/interactable_marker.tscn"
-)
-
 ## Client-only: true while the cursor is over this node's click-area.
 var _interactable_hovered: bool = false
 
@@ -91,7 +87,6 @@ func _ready() -> void:
 
 	# --- Client only past here ---
 	_spawn_click_area()
-	_spawn_marker()
 	# Charge prediction only runs once a client receives state and arms it.
 	set_process(false)
 
@@ -486,16 +481,6 @@ func _spawn_click_area() -> void:
 	area.mouse_entered.connect(_set_interactable_hover.bind(true))
 	area.mouse_exited.connect(_set_interactable_hover.bind(false))
 	area.tree_exiting.connect(_set_interactable_hover.bind(false))
-
-
-func _spawn_marker() -> void:
-	var marker: InteractableMarker = MARKER_SCENE.instantiate()
-	marker.kind = InteractableMarker.Kind.GATHER
-	var top_y: float = -40.0
-	if _sprite != null and _sprite.texture != null:
-		top_y = _sprite.position.y - _sprite.texture.get_size().y * 0.5
-	marker.position = Vector2(0, top_y - 10.0)
-	add_child(marker)
 
 
 func _set_interactable_hover(on: bool) -> void:
