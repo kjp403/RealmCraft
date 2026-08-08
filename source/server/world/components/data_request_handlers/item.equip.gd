@@ -62,11 +62,14 @@ func data_request_handler(
 		if previous_id > 0:
 			Inventory.add_item(inventory, previous_id, 1)
 		player.player_resource.equipment[slot_key] = item_id
+	elif item is MaterialItem:
+		# Resources are bag-only — Drop from the inventory menu, never Hold.
+		return {"ok": false, "reason": "cant_equip"}
 	elif item.holdable:
-		# A consumable OR any other holdable item (material, trophy, ...) is a HAND ITEM:
+		# A consumable OR any other holdable item (trophy, ...) is a HAND ITEM:
 		# draw it in the SAME way. A consumable mounts a node with a "drink" action; a
 		# plain item just shows in hand with no ability. Either way it STAYS in the bag
 		# (referenced), so no removal here. A non-holdable item simply does nothing.
 		player.begin_hand_draw(item_id)
 		return {"ok": true}
-	return {}
+	return {"ok": false, "reason": "cant_equip"}
