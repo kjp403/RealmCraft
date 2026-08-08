@@ -10,7 +10,7 @@ const MENU_ENTRIES: Array = [
 	{"label": "Mail", "menu": "mail"},
 	{"label": "Guild", "menu": "guild"},
 	{"label": "Leaderboard", "menu": "leaderboard"},
-	{"label": "Map"},
+	{"label": "Map", "menu": "world_map"},
 	{"label": "Achievements"},
 	{"label": "Bestiary"},
 	{"label": "House"},

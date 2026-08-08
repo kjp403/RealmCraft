@@ -52,7 +52,22 @@ extends Resource
 ## leave it false and everything behaves as before.
 var has_release: bool = false
 
+## Hold-to-aim ground placement (Meteor / Rain of Arrows). Press starts an aim
+## ghost under the cursor; release casts at that world point (clamped to range).
+## Distinct from has_release (bow charge) — these fire a single use_ability on
+## release rather than a begin/release pair.
+var ground_aimed: bool = false
+## World aim point set by Weapon / action.perform before use_ability runs.
+var aim_point: Vector2 = Vector2.ZERO
+var has_aim_point: bool = false
+
 var last_action_time: float = -INF
+
+
+## Max cursor distance from the caster for ground-aimed abilities. Subclasses
+## with a cast_range (Meteor) override; default keeps a sensible clamp.
+func get_ground_aim_range() -> float:
+	return 140.0
 
 
 func use_ability(_entity: Entity, _direction: Vector2) -> void:

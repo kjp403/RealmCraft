@@ -39,17 +39,21 @@ func data_request_handler(
 	var action_direction: Vector2 = args.get("d", Vector2.ZERO)
 	# "r" marks the RELEASE phase of a two-phase (charge) ability.
 	var released: bool = bool(args.get("r", false))
+	# Optional cursor-placed world point for ground-aimed mastery specials (Meteor).
+	var ground_target: Variant = args.get("t", null)
 	if player.equipment_component.can_use(&"weapon", action_index, released):
 		var weapon_node: Weapon = player.equipment_component.mounted_nodes[&"weapon"] as Weapon
 		# Bake aim spread ONCE here (server RNG) so the sprayed direction rides the echo to
 		# every peer — the visual bolt then matches the one that actually dealt damage.
 		action_direction = weapon_node.aim_with_spread(action_index, action_direction)
-		weapon_node.perform_action(action_index, action_direction, released)
+		weapon_node.perform_action(action_index, action_direction, released, ground_target)
+		var echo: Dictionary = {
+			"i": action_index, "d": action_direction, "p": peer_id, "r": released
+		}
+		if ground_target is Vector2:
+			echo["t"] = ground_target
 		WorldServer.curr.propagate_rpc(
-			WorldServer.curr.data_push.bind(
-				&"action.perform",
-				{"i": action_index, "d": action_direction, "p": peer_id, "r": released}
-			),
+			WorldServer.curr.data_push.bind(&"action.perform", echo),
 			instance.name
 		)
 	return {}
