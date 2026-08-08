@@ -36,6 +36,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 9:
 		_migration_v9(db)
 		_set_schema_version(db, 9)
+	if version < 10:
+		_migration_v10(db)
+		_set_schema_version(db, 10)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -215,6 +218,50 @@ static func _migration_v8(db: SQLite) -> void:
 static func _migration_v9(db: SQLite) -> void:
 	if not _column_exists(db, "players", "wardstones_json"):
 		db.query("ALTER TABLE players ADD COLUMN wardstones_json TEXT NOT NULL DEFAULT '[]';")
+
+
+## v10: character display names are unique world-wide (case-insensitive). Existing
+## collisions keep the lowest player_id; later rows get a numeric suffix so the
+## UNIQUE index can be created safely on live DBs that already have dupes.
+static func _migration_v10(db: SQLite) -> void:
+	db.query("SELECT player_id, display_name FROM players ORDER BY player_id ASC;")
+	var rows: Array = db.query_result.duplicate(true)
+	var claimed: Dictionary = {}
+	for row: Dictionary in rows:
+		var pid: int = int(row.get("player_id", 0))
+		var name: String = str(row.get("display_name", ""))
+		var key: String = name.to_lower()
+		if pid <= 0 or name.is_empty():
+			continue
+		if not claimed.has(key):
+			claimed[key] = true
+			continue
+		var candidate: String = _unique_display_name_candidate(name, claimed)
+		claimed[candidate.to_lower()] = true
+		db.query_with_bindings(
+			"UPDATE players SET display_name=? WHERE player_id=?;",
+			[candidate, pid]
+		)
+	db.query(
+		"CREATE UNIQUE INDEX IF NOT EXISTS idx_players_display_name "
+		+ "ON players(display_name COLLATE NOCASE);"
+	)
+
+
+static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:
+	# Prefer base_2, base_3, … truncated to the username max length (20).
+	const MAX_LEN: int = 20
+	var n: int = 2
+	while n < 10000:
+		var suffix: String = "_%d" % n
+		var stem: String = base
+		if stem.length() + suffix.length() > MAX_LEN:
+			stem = stem.substr(0, maxi(1, MAX_LEN - suffix.length()))
+		var candidate: String = stem + suffix
+		if not claimed.has(candidate.to_lower()):
+			return candidate
+		n += 1
+	return "%s_%d" % [base.substr(0, maxi(1, MAX_LEN - 6)), randi() % 100000]
 
 
 static func _column_exists(db: SQLite, table: String, column: String) -> bool:

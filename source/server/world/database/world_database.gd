@@ -65,6 +65,10 @@ func create_player_character(username: String, character_data: Dictionary) -> in
 	return store.create_player_character(username, character_data)
 
 
+func is_display_name_taken(display_name: String, exclude_player_id: int = 0) -> bool:
+	return store.is_display_name_taken(display_name, exclude_player_id)
+
+
 func get_account_characters(account_name: String) -> Dictionary:
 	return store.get_account_characters(account_name)
 
