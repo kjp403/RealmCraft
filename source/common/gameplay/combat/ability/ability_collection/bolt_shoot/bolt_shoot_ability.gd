@@ -71,10 +71,11 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 		return
 	var bolt: Projectile = projectile_scene.instantiate()
 	bolt.top_level = true
+	var reach: float = BattleFormState.reach_multiplier(user as Character) if user is Character else 1.0
 	bolt.direction = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
 	bolt.speed = speed
 	if max_range > 0.0:
-		bolt.lifetime = max_range / maxf(1.0, speed)  # reach ≈ max_range px
+		bolt.lifetime = (max_range * reach) / maxf(1.0, speed)  # reach ≈ max_range px
 	bolt.source = user
 	bolt.damage = maxf(0.0, _wielder_ap(user) * ap_ratio)
 	bolt.damage_type = CombatHit.DAMAGE_MAGIC # mitigated by MR, not armor
@@ -84,7 +85,7 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	bolt.pierce_left = pierce_count
 	bolt.modulate = bolt_modulate
 	bolt.impact_vfx = impact_vfx
-	bolt.explode_radius = explode_radius
+	bolt.explode_radius = explode_radius * reach
 	bolt.explode_damage = maxf(0.0, _wielder_ap(user) * explode_ap_ratio)
 	bolt.global_position = _spawn_position(user)
 	user.add_child(bolt)

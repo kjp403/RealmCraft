@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_inter"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="2_shopint"]
+[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/cave_master_shop.tres" id="3_shop"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_diag"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="SpriteFrames" uid="uid://vb13tsyp74iv" path="res://source/common/gameplay/characters/sprite_frames/fungus_old.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Shop"]
+script = ExtResource("2_shopint")
+shop = ExtResource("3_shop")
+
+[sub_resource type="Resource" id="Talk"]
+script = ExtResource("4_diag")
+lines = Array[String](["Stock costs more down here — the spores eat through corks.", "I'll take spore weapons off your hands for five hundred gold apiece.", "Mind the Heart. It does not stay dead for long."])
+label_override = "Ask about the caves"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Cave Master"
+skin = ExtResource("6_skin")
+greeting = "Welcome to the dark, traveler. Potions are dearer here, but spore steel fetches a fair price."
+interactions = Array[ExtResource("1_inter")]([SubResource("Shop"), SubResource("Talk")])

@@ -25,6 +25,11 @@ func data_request_handler(
 	if player.is_in_combat() and slot != &"weapon":
 		return {"ok": false, "reason": "in_combat"}
 
+	# Unequipping the tome must end Battle Form — staying titan-sized without the
+	# book equipped was an exploit (form outlived the mastery bar that cast it).
+	if slot == &"weapon":
+		BattleFormState.cancel_on(player)
+
 	player.equipment_component.unequip(slot)
 	# Return it to the bag only if it was bag-OWNED (gear/weapon). Consumables and
 	# materials are REFERENCED while held — they never left the bag, so re-adding

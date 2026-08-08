@@ -197,10 +197,24 @@ static func _on_battleform(payload: Dictionary) -> void:
 				fade_fx.global_position = rune_pos
 
 	await player.get_tree().create_timer(maxf(0.0, float(payload.get("d", 8.0)) - windup)).timeout
-	if is_instance_valid(player):
-		player.scale = Vector2.ONE
-		if cam != null and is_instance_valid(cam):
-			cam.scale = Vector2.ONE
+	_reset_battleform_scale(player)
+
+
+## Early Battle Form end (tome unequip / swap) — snap scale back immediately.
+static func _on_battleform_end(payload: Dictionary) -> void:
+	if current == null:
+		return
+	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	_reset_battleform_scale(player)
+
+
+static func _reset_battleform_scale(player: Player) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	player.scale = Vector2.ONE
+	var cam: Node2D = player.get_node_or_null(^"Camera2D") as Node2D
+	if cam != null and is_instance_valid(cam):
+		cam.scale = Vector2.ONE
 
 
 ## Channel ended (completed, cancelled, caster died) — drop the aura.
@@ -277,6 +291,7 @@ func _ready() -> void:
 		Client.subscribe(&"channel.end", _on_channel_end)
 		Client.subscribe(&"guard.cast", _on_guard_cast)
 		Client.subscribe(&"battleform.start", _on_battleform)
+		Client.subscribe(&"battleform.end", _on_battleform_end)
 		Client.subscribe(&"dungeon.room", _on_dungeon_room)
 		Client.subscribe(&"dungeon.left", _on_dungeon_left)
 		Client.subscribe(&"level.up", _on_level_up)

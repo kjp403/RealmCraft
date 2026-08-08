@@ -6,7 +6,8 @@
 [resource]
 script = ExtResource("1_bf")
 bonus_hp = 280.0
-scale_factor = 1.8
+scale_factor = 1.45
+reach_mult = 1.85
 buff_duration_s = 14.0
 name = "Battle Form II"
 icon = ExtResource("1_pp5lj")

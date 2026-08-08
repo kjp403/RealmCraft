@@ -18,27 +18,14 @@
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="12_y53hc"]
 [ext_resource type="Resource" uid="uid://btnithna7holw" path="res://source/common/gameplay/characters/npc/types/fungus/spore_swarm.tres" id="13_n7hu4"]
 [ext_resource type="Resource" uid="uid://3ne3o1ls5mdj" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="14_dysl4"]
-[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="16_dxrxi"]
-[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="17_s14j1"]
 [ext_resource type="Script" uid="uid://cr2yg6sl43by8" path="res://source/common/gameplay/dungeon/dungeon_master.gd" id="17_vnkgl"]
 [ext_resource type="Script" uid="uid://i1qmy82mdrm8" path="res://source/common/gameplay/dungeon/dungeon_resource.gd" id="18_kouuu"]
-[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="18_wegif"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="19_pvtw6"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="23_n7hu4"]
 [ext_resource type="Resource" uid="uid://bd8w3ab76gouv" path="res://source/common/gameplay/characters/npc/npcs/forager_maela.tres" id="24_dxrxi"]
-[ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="24_dysl4"]
-
-[sub_resource type="Resource" id="Resource_le077"]
-script = ExtResource("17_s14j1")
-lines = Array[String](["In construction"])
-metadata/_custom_type_script = "uid://cb4eeew5u1da1"
-
-[sub_resource type="Resource" id="Resource_40wvd"]
-script = ExtResource("18_wegif")
-npc_name = "Cave Master"
-greeting = "In construction"
-interactions = Array[ExtResource("16_dxrxi")]([SubResource("Resource_le077")])
-metadata/_custom_type_script = "uid://ddps5vwhnf048"
+[ext_resource type="Resource" uid="uid://cutpirmfqwx8b" path="res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres" id="24_iron"]
+[ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="25_coal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/cave_master.tres" id="26_cavem"]
 
 [sub_resource type="Resource" id="Resource_pvtw6"]
 script = ExtResource("18_kouuu")
@@ -157,7 +144,10 @@ id_to_node = {
 5: NodePath("Puffcap2"),
 6: NodePath("Myconid"),
 7: NodePath("SporeSwarm"),
-8: NodePath("FungalHeart")
+8: NodePath("SporeSwarm2"),
+9: NodePath("SporeSwarm3"),
+10: NodePath("SporeSwarm4"),
+11: NodePath("FungalHeart")
 }
 node_to_id = {
 NodePath("Sporeling"): 0,
@@ -168,7 +158,10 @@ NodePath("Puffcap"): 4,
 NodePath("Puffcap2"): 5,
 NodePath("Myconid"): 6,
 NodePath("SporeSwarm"): 7,
-NodePath("FungalHeart"): 8
+NodePath("SporeSwarm2"): 8,
+NodePath("SporeSwarm3"): 9,
+NodePath("SporeSwarm4"): 10,
+NodePath("FungalHeart"): 11
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -220,6 +213,24 @@ debug_draw_ranges = false
 enemy_data = ExtResource("13_n7hu4")
 weapon = null
 
+[node name="SporeSwarm2" parent="ReplicatedPropsContainer" unique_id=54992207 instance=ExtResource("9_msvda")]
+position = Vector2(-180, -980)
+debug_draw_ranges = false
+enemy_data = ExtResource("13_n7hu4")
+weapon = null
+
+[node name="SporeSwarm3" parent="ReplicatedPropsContainer" unique_id=54992208 instance=ExtResource("9_msvda")]
+position = Vector2(200, -1020)
+debug_draw_ranges = false
+enemy_data = ExtResource("13_n7hu4")
+weapon = null
+
+[node name="SporeSwarm4" parent="ReplicatedPropsContainer" unique_id=54992209 instance=ExtResource("9_msvda")]
+position = Vector2(-360, -1080)
+debug_draw_ranges = false
+enemy_data = ExtResource("13_n7hu4")
+weapon = null
+
 [node name="FungalHeart" parent="ReplicatedPropsContainer" unique_id=225589282 instance=ExtResource("9_msvda")]
 position = Vector2(-292.74463, -1169.4962)
 debug_draw_ranges = false
@@ -236,7 +247,7 @@ target = NodePath("../BarTeleporter")
 
 [node name="ShopSeller" parent="." unique_id=1922057613 instance=ExtResource("12_y53hc")]
 position = Vector2(872, 88)
-npc_resource = SubResource("Resource_40wvd")
+npc_resource = ExtResource("26_cavem")
 
 [node name="QuestGiver" parent="." unique_id=1450054875 instance=ExtResource("12_y53hc")]
 position = Vector2(725, 74)
@@ -255,13 +266,14 @@ shape = SubResource("RectangleShape2D_kouuu")
 [node name="Entrance" parent="." unique_id=1414716116 instance=ExtResource("7_msvda")]
 position = Vector2(-1, -19)
 scale = Vector2(3.559999, 1)
+warper_id = 21
 
 [node name="CastleGardenPortal" parent="." unique_id=375786523 instance=ExtResource("19_pvtw6")]
 position = Vector2(-96, -120)
 portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
 destination_label = "Castle Garden"
 target_instance = ExtResource("8_f6l70")
-warper_id = 21
+warper_id = 20
 target_id = 21
 
 [node name="Maela" parent="." unique_id=1893723557 instance=ExtResource("12_y53hc")]
@@ -270,13 +282,21 @@ npc_resource = ExtResource("24_dxrxi")
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=202359622]
 
-[node name="CopperVein" parent="MineableNodes" unique_id=1129547794 instance=ExtResource("23_n7hu4")]
+[node name="IronVein" parent="MineableNodes" unique_id=1129547794 instance=ExtResource("23_n7hu4")]
 position = Vector2(139.9191, -1114.0907)
-data = ExtResource("24_dysl4")
+data = ExtResource("24_iron")
 
-[node name="CopperVein2" parent="MineableNodes" unique_id=806920154 instance=ExtResource("23_n7hu4")]
+[node name="CoalVein" parent="MineableNodes" unique_id=806920154 instance=ExtResource("23_n7hu4")]
 position = Vector2(146.38373, -617.54645)
-data = ExtResource("24_dysl4")
+data = ExtResource("25_coal")
+
+[node name="IronVein2" parent="MineableNodes" unique_id=1129547795 instance=ExtResource("23_n7hu4")]
+position = Vector2(-220, -900)
+data = ExtResource("24_iron")
+
+[node name="CoalVein2" parent="MineableNodes" unique_id=806920155 instance=ExtResource("23_n7hu4")]
+position = Vector2(80, -780)
+data = ExtResource("25_coal")
 
 [node name="Label" type="Label" parent="." unique_id=1332924517]
 offset_left = 472.0

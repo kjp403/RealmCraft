@@ -103,20 +103,30 @@ func _fire_arc(user: Entity, direction: Vector2) -> void:
 	arc.slow_amount = slow_amount
 	arc.slow_duration_s = slow_duration_s
 	arc.max_targets = max_targets
+	var reach: float = BattleFormState.reach_multiplier(user as Character) if user is Character else 1.0
+	var effective_radius: float = arc_radius * reach
+	var effective_offset: float = spawn_offset * reach
 	# Optional bigger hitbox for heavy swings — duplicate the shape so we resize
 	# THIS arc only, never the shared CircleShape2D sub-resource.
-	if arc_radius > 0.0:
+	if effective_radius > 0.0:
 		var shape_node: CollisionShape2D = arc.get_node_or_null(^"CollisionShape2D")
 		if shape_node != null and shape_node.shape is CircleShape2D:
 			var circle: CircleShape2D = shape_node.shape.duplicate()
-			circle.radius = arc_radius
+			circle.radius = effective_radius
+			shape_node.shape = circle
+	elif reach > 1.0:
+		# Battle Form: grow the scene-default circle so titan swings still connect.
+		var shape_node: CollisionShape2D = arc.get_node_or_null(^"CollisionShape2D")
+		if shape_node != null and shape_node.shape is CircleShape2D:
+			var circle: CircleShape2D = shape_node.shape.duplicate()
+			circle.radius = circle.radius * reach
 			shape_node.shape = circle
 	# A swing deals ad_ratio × the wielder's AD (base + Strength + gear), so both
 	# leveling and a better weapon raise every hit.
 	var ad: float = (user as Character).stats_component.get_stat(Stat.AD) if user is Character else 0.0
 	arc.damage = ad * ad_ratio
 	var dir_norm: Vector2 = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
-	arc.global_position = user.global_position + dir_norm * spawn_offset
+	arc.global_position = user.global_position + dir_norm * effective_offset
 	arc.rotation = dir_norm.angle()
 	user.get_parent().add_child(arc)
 
@@ -126,9 +136,10 @@ func _fire_arc(user: Entity, direction: Vector2) -> void:
 func _spawn_telegraph(user: Entity, direction: Vector2) -> void:
 	if user == null or user.get_parent() == null:
 		return
+	var reach: float = BattleFormState.reach_multiplier(user as Character) if user is Character else 1.0
 	var dir_norm: Vector2 = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
 	var tele: CastTelegraph = CastTelegraph.new()
-	tele.radius = arc_radius if arc_radius > 0.0 else 32.0
+	tele.radius = (arc_radius if arc_radius > 0.0 else 32.0) * reach
 	tele.duration = cast_time_s
 	user.get_parent().add_child(tele)
-	tele.global_position = user.global_position + dir_norm * spawn_offset
+	tele.global_position = user.global_position + dir_norm * (spawn_offset * reach)

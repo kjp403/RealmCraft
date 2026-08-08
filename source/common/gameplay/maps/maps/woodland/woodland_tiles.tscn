@@ -27,6 +27,7 @@
 [ext_resource type="Resource" uid="uid://dsvbif0isp6d5" path="res://source/common/gameplay/maps/components/mineable_nodes/flax.tres" id="27_lebv5"]
 [ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
+[ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="28_fungus"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
@@ -790,6 +791,14 @@ destination_label = "Castle Garden"
 target_instance = ExtResource("28_hub")
 warper_id = 23
 target_id = 23
+
+[node name="FungusCavePortal" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]
+position = Vector2(2648, 520)
+portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
+destination_label = "Fungus Cave"
+target_instance = ExtResource("28_fungus")
+warper_id = 24
+target_id = 21
 
 [node name="RespawnPoint" parent="." unique_id=1537871885 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
