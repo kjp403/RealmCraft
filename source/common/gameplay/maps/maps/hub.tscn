@@ -446,7 +446,7 @@ color = Color(0.25, 1, 0.25, 0.16)
 polygon = PackedVector2Array(152, 56, 824, 56, 824, 520, 152, 520)
 
 [node name="AnvilStation" parent="." unique_id=325384635 instance=ExtResource("25_og50n")]
-position = Vector2(-320, 176)
+position = Vector2(-400, 120)
 station = ExtResource("26_anjaa")
 metadata/_edit_group_ = true
 
@@ -454,7 +454,7 @@ metadata/_edit_group_ = true
 sprite_frames = SubResource("SpriteFrames_e6m2f")
 
 [node name="FurnaceStation" parent="." unique_id=1099708083 instance=ExtResource("25_og50n")]
-position = Vector2(-400, 176)
+position = Vector2(-528, 120)
 station = ExtResource("28_sgxfe")
 metadata/_edit_group_ = true
 
