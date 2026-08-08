@@ -24,68 +24,68 @@
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_5"]
 script = ExtResource("1_loot")
 item = ExtResource("item_5")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_6"]
 script = ExtResource("1_loot")
 item = ExtResource("item_6")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_7"]
 script = ExtResource("1_loot")
 item = ExtResource("item_7")
-min_amount = 25
-max_amount = 50
+min_amount = 9
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_8"]
 script = ExtResource("1_loot")
 item = ExtResource("item_8")
-min_amount = 25
-max_amount = 50
+min_amount = 9
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_9"]
 script = ExtResource("1_loot")
 item = ExtResource("item_9")
-min_amount = 75
-max_amount = 125
+min_amount = 26
+max_amount = 44
 
 [sub_resource type="Resource" id="Drop_10"]
 script = ExtResource("1_loot")
 item = ExtResource("item_10")
-min_amount = 50
-max_amount = 75
+min_amount = 18
+max_amount = 26
 
 [sub_resource type="Resource" id="Drop_11"]
 script = ExtResource("1_loot")
