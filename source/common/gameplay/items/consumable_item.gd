@@ -39,7 +39,7 @@ func group_key() -> StringName:
 func stat_lines() -> Array[Dictionary]:
 	var lines: Array[Dictionary] = []
 	if heal_amount > 0:
-		lines.append({"text": "Restores %d health" % heal_amount, "kind": &"heal"})
+		lines.append({"text": "Heals %d" % heal_amount, "kind": &"heal"})
 	if mana_amount > 0:
 		lines.append({"text": "Restores %d mana" % mana_amount, "kind": &"mana"})
 	if buff_stat != &"" and not is_zero_approx(buff_amount) and buff_duration_s > 0.0:

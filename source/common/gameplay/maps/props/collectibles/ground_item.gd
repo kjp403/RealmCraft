@@ -1,3 +1,4 @@
+class_name GroundItem
 extends Area2D
 ## A bag stack discarded onto the map. Click / tap to pick it up — does NOT
 ## auto-loot on walkover (that looped drop→pickup and bloated the loot feed).
@@ -13,6 +14,8 @@ extends Area2D
 const LIFETIME_S: float = 300.0
 ## Max distance (world px) from the player to allow a click-pickup (server).
 const PICKUP_RANGE: float = 96.0
+## Nearby gold piles within this range merge into one clickable stack.
+const GOLD_MERGE_RANGE: float = 64.0
 ## Client click target size — larger than the old 14px physics circle so drops
 ## are easy to hit.
 const CLICK_SIZE: Vector2 = Vector2(36, 36)
@@ -58,6 +61,29 @@ func _refresh_visual() -> void:
 	if amount_label != null:
 		amount_label.visible = amount > 1
 		amount_label.text = str(amount)
+
+
+## Server: fold [param extra] into this pile and sync the new amount to clients.
+func add_stack(extra: int) -> void:
+	if collected or extra <= 0:
+		return
+	amount += extra
+	_refresh_visual()
+	var init: Variant = get_meta(&"spawn_init", {})
+	if init is Dictionary:
+		(init as Dictionary)["amount"] = amount
+		set_meta(&"spawn_init", init)
+	var container: ReplicatedPropsContainer = get_meta(&"rp_container", null) as ReplicatedPropsContainer
+	if container == null:
+		container = get_parent() as ReplicatedPropsContainer
+	if container != null and multiplayer.is_server():
+		container.queue_op_by_node(self, "rp_set_amount", [amount])
+
+
+## Client-visual: amount changed because nearby gold merged into this pile.
+func rp_set_amount(new_amount: int) -> void:
+	amount = new_amount
+	_refresh_visual()
 
 
 func _spawn_click_area() -> void:

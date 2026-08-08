@@ -56,8 +56,8 @@ func _trigger_slot(index: int) -> void:
 	if item == null:
 		return
 	# Toggle: tapping the slot of whatever you're HOLDING puts it away (1 = sword on,
-	# 1 again = bare hands; a held potion toggles the same way). Otherwise equip it to
-	# hand. Every hand item — weapon, potion, material — rides the &"weapon" slot.
+	# 1 again = bare hands; a held potion toggles the same way). Consumables drink from
+	# the bag via item.consume so a hotkeyed potion never displaces your weapon.
 	if _is_equipped(item):
 		var slot_key: StringName = (item as GearItem).slot.key if item is GearItem else &"weapon"
 		Client.request_data(
@@ -67,8 +67,11 @@ func _trigger_slot(index: int) -> void:
 			InstanceClient.current.name
 		)
 		return
+	var request_name: StringName = &"item.equip"
+	if item is ConsumableItem:
+		request_name = &"item.consume"
 	Client.request_data(
-		&"item.equip",
+		request_name,
 		func(result: Dictionary) -> void:
 			_on_item_action_result(result)
 			_after_slot_used(result, index),
@@ -132,9 +135,11 @@ func _on_slot_assigned(index: Variant, item: Variant) -> void:
 	if item != null:
 		button.icon = (item as Item).item_icon
 		button.text = "" if button.icon != null else String((item as Item).item_name)
+		button.tooltip_text = ItemTooltip.hover_text(item as Item)
 	else:
 		button.icon = null
 		button.text = str(i + 1)
+		button.tooltip_text = ""
 	_persist()
 
 

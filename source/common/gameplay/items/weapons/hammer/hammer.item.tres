@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_ad_hammer"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 7.0
+value = 18.0
 
 [sub_resource type="Resource" id="Mod_ms_hammer"]
 script = ExtResource("1_mod")
@@ -28,7 +28,7 @@ slot = ExtResource("5_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ad_hammer"), SubResource("Mod_ms_hammer")])
 item_name = &"Wood Hammer"
 item_icon = SubResource("AtlasTexture_hammer")
-description = "Slow and heavy. Slams the ground and hits everything around you, best when you're surrounded."
+description = "Heavy two-hander. Slower than a wand, but each slam hits much harder up close."
 can_trade = true
 stack_limit = 1
 metadata/slug = &"hammer.item"
