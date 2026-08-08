@@ -59,6 +59,9 @@ const MAX_STEP_PX: float = 8.0
 ## Colliders already handled this flight (instance_id) — so a piercing shot hits each target once
 ## and a lingering overlap isn't re-resolved every frame.
 var _hit_ids: Dictionary[int, bool] = {}
+## Set on a non-pierce DAMAGED hit so the same physics step can't cleave a second
+## packed mob before queue_free() takes effect (is_instance_valid stays true until idle).
+var _spent: bool = false
 
 
 func _ready() -> void:
@@ -102,19 +105,26 @@ func _physics_process(delta: float) -> void:
 		position += step
 		for collider: Node2D in CombatHit.overlapping_bodies(self):
 			_handle_collision(collider)
-			if not is_instance_valid(self):
+			if _spent or not is_instance_valid(self):
 				return
 
 
 ## Resolve one collider once: skip self / already-handled, drain an Arcane Wall, otherwise run the
 ## subclass response and react to it (stop on a wall, pierce, or pass a non-target).
 func _handle_collision(node: Node2D) -> void:
+	if _spent:
+		return
 	if node == source:
 		return
-	var id: int = node.get_instance_id()
-	if _hit_ids.has(id):
+	# Deduplicate HurtBox + Character for the same combatant (different instance ids).
+	var resolve_id: int = node.get_instance_id()
+	if node is HurtBox and (node as HurtBox).character != null:
+		resolve_id = (node as HurtBox).character.get_instance_id()
+	elif node is Character:
+		resolve_id = node.get_instance_id()
+	if _hit_ids.has(resolve_id):
 		return
-	_hit_ids[id] = true # each collider handled once per flight
+	_hit_ids[resolve_id] = true
 
 	# Arcane Wall: a damage-pool shield. Eats up to its remaining HP; the OVERFLOW punches through
 	# (a big nuke is reduced, not fully negated). Deterministic across peers (same synced damage).
@@ -149,8 +159,10 @@ func _handle_collision(node: Node2D) -> void:
 					if stun_s > 0.0:
 						(victim as Character).apply_stun(stun_s)
 			if not piercing or pierce_left <= 0:
+				_spent = true
 				queue_free()
-			pierce_left -= 1
+			else:
+				pierce_left -= 1
 
 
 ## What this projectile DOES to [param node], returning how the base reacts: IGNORED = pass through,

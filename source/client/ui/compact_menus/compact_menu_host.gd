@@ -213,13 +213,12 @@ func _refresh_inventory() -> void:
 			"item": item,
 		})
 
-	entries.sort_custom(_entry_before)
-	entries.sort_custom(_entry_before)
+	var order: Array = BagOrder.sync_with_entries(entries)
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return BagOrder.index_of(order, int(a["uid"])) < BagOrder.index_of(order, int(b["uid"]))
+	)
 	_build_empty_grid()
 	_display_entries(entries)
-
-func _entry_before(a: Dictionary, b: Dictionary) -> bool:
-	return int(a["uid"]) < int(b["uid"])
 
 
 func _display_entries(entries: Array[Dictionary]) -> void:
@@ -231,7 +230,6 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 		slot.icon = null
 		slot.tooltip_text = ""
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
 		for child: Node in slot.get_children():
 			slot.remove_child(child)
 			child.queue_free()
@@ -249,6 +247,11 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 
 		slot.gui_input.connect(
 			_on_slot_gui_input.bind(entry, slot),
+		)
+		slot.set_drag_forwarding(
+			_bag_get_drag_data.bind(entry, slot),
+			_bag_can_drop_data,
+			_bag_drop_data.bind(entry),
 		)
 
 		var amount: int = int(data.get("a", 1))
@@ -273,6 +276,35 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 			quantity.offset_right -= 2
 			quantity.offset_top -= 2
 			quantity.offset_bottom -= 2
+
+
+func _bag_get_drag_data(
+	_at_position: Vector2,
+	entry: Dictionary,
+	slot: Control
+) -> Variant:
+	var preview := TextureRect.new()
+	preview.texture = (entry["item"] as Item).item_icon
+	preview.custom_minimum_size = Vector2(32, 32)
+	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	slot.set_drag_preview(preview)
+	return {"bag_uid": int(entry["uid"])}
+
+
+func _bag_can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return data is Dictionary and (data as Dictionary).has("bag_uid")
+
+
+func _bag_drop_data(_at_position: Vector2, data: Variant, target: Dictionary) -> void:
+	if data is not Dictionary:
+		return
+	var from_uid: int = int((data as Dictionary).get("bag_uid", -1))
+	var to_uid: int = int(target.get("uid", -1))
+	if from_uid < 0 or to_uid < 0 or from_uid == to_uid:
+		return
+	BagOrder.swap(BagOrder.load_order(), from_uid, to_uid)
+	_refresh_inventory()
 
 
 func _on_slot_gui_input(

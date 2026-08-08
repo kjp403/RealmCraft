@@ -8,5 +8,6 @@ script = ExtResource("2_mat")
 item_name = &"Yew Log"
 item_icon = ExtResource("1_icon")
 description = "A dense yew log. Slow-grown and prized."
+vendor_value = 8
 metadata/slug = &"yew_log"
 metadata/id = 178

@@ -290,6 +290,7 @@ func _ready() -> void:
 		# Mobs stream at 10 Hz (props channel), half the player broadcast rate — the
 		# interpolation delay needs 2 samples in flight, so double the default.
 		net_smooth_delay_ms = 200
+		_build_client_click_area()
 		set_physics_process(false)
 		return
 	
@@ -1065,6 +1066,28 @@ func _process_death() -> void:
 		printerr("[SRV NPC %s] _process_death respawn END: HP=%.1f is_dead=%s state=%d" % [
 			enemy_type, stats_component.get_stat(Stat.HEALTH), is_dead, enemy_state
 		])
+
+
+## Client-only right-click target for the Attack context menu.
+func _build_client_click_area() -> void:
+	if has_node(^"ClickArea"):
+		return
+	var area: ClickableArea = ClickableArea.new()
+	area.name = "ClickArea"
+	var collision: CollisionShape2D = CollisionShape2D.new()
+	var rect: RectangleShape2D = RectangleShape2D.new()
+	rect.size = Vector2(36, 48)
+	collision.shape = rect
+	collision.position = Vector2(0, -16)
+	area.add_child(collision)
+	add_child(area)
+	area.right_clicked.connect(_on_client_right_clicked)
+
+
+func _on_client_right_clicked() -> void:
+	if is_dead or not is_instance_valid(ClientState):
+		return
+	ClientState.hostile_context_requested.emit(self)
 
 
 ## If npc is engaged (chasing or attacking), stops and starts returning to

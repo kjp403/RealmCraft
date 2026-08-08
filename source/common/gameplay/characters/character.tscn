@@ -278,7 +278,7 @@ debug_color = Color(0.846048, 0.237298, 0.730831, 0.42)
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1823295515]
 offset_left = -16.0
-offset_top = -38.0
+offset_top = -40.0
 offset_right = 16.0
 offset_bottom = -34.0
 theme_override_styles/background = SubResource("StyleBoxFlat_cgfpq")
@@ -287,6 +287,22 @@ step = 0.5
 value = 50.0
 allow_greater = true
 show_percentage = false
+
+[node name="HpLabel" type="Label" parent="ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 8
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
 
 [node name="StateSynchronizer" type="Node" parent="." unique_id=550344404 node_paths=PackedStringArray("root_node")]
 script = ExtResource("5_eyotc")

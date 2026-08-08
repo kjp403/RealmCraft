@@ -63,6 +63,7 @@ func has_armed_shot() -> bool:
 ## Over-head HP bar + name label. Guaranteed present by the Character scene (every subclass
 ## inherits character.tscn), so subclasses use these directly — no has_node/cast dance.
 @onready var progress_bar: ProgressBar = $ProgressBar
+@onready var hp_label: Label = $ProgressBar/HpLabel
 @onready var display_name_label: Label = $DisplayNameLabel
 @onready var hand_offset: Node2D = $HandOffset
 @onready var hand_pivot: Node2D = $HandOffset/HandPivot
@@ -189,8 +190,18 @@ func _on_stat_changed(stat_name: StringName, value: float) -> void:
 			if health_bar_auto_hide:
 				_flash_health_bar()
 		_last_health_seen = value
+		_refresh_hp_label()
 	if stat_name == Stat.HEALTH_MAX:
 		progress_bar.max_value = value
+		_refresh_hp_label()
+
+
+## Remaining life points drawn on the over-head bar (e.g. "42").
+func _refresh_hp_label() -> void:
+	if hp_label == null:
+		return
+	var current: int = maxi(0, int(ceil(progress_bar.value)))
+	hp_label.text = str(current) if current > 0 else ""
 
 
 ## Combat juice: brief red tint on the sprite + a spatial hit SFX. Called

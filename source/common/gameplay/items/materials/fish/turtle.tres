@@ -8,5 +8,6 @@ script = ExtResource("2_mat")
 item_name = &"Turtle"
 item_icon = ExtResource("1_icon")
 description = "Rare shell-backed catch from deeper holes."
+vendor_value = 12
 metadata/slug = &"turtle"
 metadata/id = 189

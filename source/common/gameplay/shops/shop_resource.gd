@@ -15,10 +15,12 @@ extends Resource
 @export var entries: Array[ShopEntry]
 ## What this vendor TAKES from the player — barter bundles OR gold buy-backs
 ## ("give 1 Bone Sword, receive 4 gold" is just a trade whose payout is gold).
-## THE CURATED ECONOMY (docs/economy.md): there is no generic junk-selling; a
-## vendor buys exactly what's listed here, so every item's outlet is a
-## deliberate authoring decision.
+## Specialty rates; items listed here prefer this over flat [member Item.vendor_value].
 @export var accepted_trades: Array[ShopTrade]
+## When true, the Sell tab also lists any owned item with [member Item.vendor_value] > 0
+## (gatherable junk-sell). Specialty [member accepted_trades] still take priority for
+## matching item ids. Default on so general merchants accept materials.
+@export var buys_vendor_priced: bool = true
 
 
 ## Capabilities are DERIVED from the data (no parallel enum to contradict it —
@@ -31,7 +33,8 @@ func allows_buying() -> bool:
 ## Defensive against shops authored before the accepted_trades field existed
 ## (where it can deserialize as null).
 func has_trades() -> bool:
-	return accepted_trades != null and not accepted_trades.is_empty()
+	var has_specialty: bool = accepted_trades != null and not accepted_trades.is_empty()
+	return has_specialty or buys_vendor_priced
 
 
 ## { "price": int, "currency_id": int } for one item, or {} if not sold here.

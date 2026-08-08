@@ -12,6 +12,8 @@ signal player_profile_by_peer_requested(peer_id: int)
 ## A remote player's world hitbox was right-clicked. The HUD owns presentation
 ## and turns this into Examine / Follow / Trade actions.
 signal player_context_requested(peer_id: int)
+## Right-click a hostile → HUD opens Attack menu for that NPC.
+signal hostile_context_requested(npc: HostileNpc)
 signal open_menu_requested(menu: StringName, arg: Variant)
 signal dm_requested(id: int)
 ## Emitted on the client after a successful gather (mining, ...). Carries the
@@ -200,13 +202,21 @@ func _on_combat_reward(data: Dictionary) -> void:
 	var enemy_type: String = str(data.get("enemy_type", ""))
 	var title: String = "Defeated %s" % _readable_enemy_name(enemy_type) if not enemy_type.is_empty() else "Reward"
 
-	# Loot goes to the compact ICON feed (self-coalescing pills — see LootFeed),
-	# and +XP now reads on the XP BAR itself (hud floaty + pulse) — both moved
-	# off the kill card (docs/notifications.md toast-lane rework), so the card
-	# is just the "Defeated X ×N" headline.
+	# Loot: inventory kills use the compact ICON feed; ground drops just name
+	# what landed so players know to click-pick it up.
 	var lines: PackedStringArray = PackedStringArray()
+	var ground_loot: bool = bool(data.get("ground", false))
 	for entry: Dictionary in data.get("loot", []):
-		LootFeed.add_item(int(entry.get("id", 0)), int(entry.get("amount", 1)), str(entry.get("name", "item")))
+		var loot_id: int = int(entry.get("id", 0))
+		var loot_amount: int = int(entry.get("amount", 1))
+		var loot_name: String = str(entry.get("name", "item"))
+		if ground_loot:
+			if loot_amount > 1:
+				lines.append("Dropped %s ×%d" % [loot_name, loot_amount])
+			else:
+				lines.append("Dropped %s" % loot_name)
+		else:
+			LootFeed.add_item(loot_id, loot_amount, loot_name)
 	# Character level-up = the ceremony lane: a center-screen banner (the in-world
 	# flare + camera kick ride the level.up broadcast, not this push). Mastery
 	# stays a corner card — frequent enough that a banner would wear thin.

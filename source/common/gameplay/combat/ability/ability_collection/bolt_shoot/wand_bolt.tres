@@ -9,5 +9,6 @@ projectile_scene = ExtResource("2_bolt")
 speed = 330.0
 name = "Magic Bolt"
 cooldown = 1.5
+mana_cost = 2
 metadata/slug = &"wand_bolt"
 metadata/id = 1
