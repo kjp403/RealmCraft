@@ -375,7 +375,18 @@ func display_menu(menu_name: StringName, arg: Variant = null) -> void:
 		new_menu.visibility_changed.connect(_on_submenu_visiblity_changed.bind(new_menu))
 		sub_menu.add_child(new_menu)
 		menus[menu_name] = new_menu
+	# Fullscreen shells (inventory, profile, shop, …) each dim the whole viewport.
+	# Only one may be visible: stacking lets a later-opened menu cover another's Close
+	# button with no Escape escape hatch on every panel. NPC→shop already closes the
+	# dialogue first, so exclusive open keeps that handoff intact.
+	for other_name: StringName in menus.keys():
+		if other_name != menu_name and menus[other_name].visible:
+			menus[other_name].hide()
+	# Dock panels sit on the HUD (often above/beside the profile Close). Close them
+	# so a world-click profile can't get trapped under the inventory dock.
+	_hide_compact_panels()
 	menus[menu_name].show()
+	menus[menu_name].move_to_front()
 	_animate_menu_open(menus[menu_name])
 	if arg != null and menus[menu_name].has_method(&"open"):
 		menus[menu_name].open(arg)
@@ -519,10 +530,8 @@ func _animate_menu_open(menu: Control) -> void:
 	create_tween().tween_property(menu, ^"modulate:a", 1.0, MENU_FADE_S)
 
 
-func _toggle_compact_panel(selected_panel: Control) -> void:
-	var should_open: bool = not selected_panel.visible
-
-	var compact_panels: Array[Control] = [
+func _compact_panels() -> Array[Control]:
+	return [
 		$CompactMenuHost,
 		$CompactEquipmentHost,
 		$CompactSkillsHost,
@@ -532,10 +541,22 @@ func _toggle_compact_panel(selected_panel: Control) -> void:
 		$CompactSettingsHost,
 	]
 
-	for panel: Control in compact_panels:
+
+func _hide_compact_panels() -> void:
+	for panel: Control in _compact_panels():
 		panel.hide()
 
+
+func _toggle_compact_panel(selected_panel: Control) -> void:
+	var should_open: bool = not selected_panel.visible
+	_hide_compact_panels()
 	selected_panel.visible = should_open
+	# Opening a dock while a fullscreen submenu is up recreates the "can't reach
+	# Close" trap (dock covers the profile action bar). Prefer the dock: hide menus.
+	if should_open:
+		for menu: Control in menus.values():
+			if menu.visible:
+				menu.hide()
 
 
 func _on_inventory_dock_button_pressed() -> void:

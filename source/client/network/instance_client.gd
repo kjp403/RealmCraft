@@ -329,8 +329,13 @@ func spawn_player(player_id: int) -> void:
 			new_player.set_meta(&"profile_click_wired", true)
 			var click_area: ClickableArea = new_player.get_node_or_null(^"ProfileClickArea") as ClickableArea
 			if click_area != null:
-				click_area.clicked.connect(_on_player_clicked.bind(player_id))
-				if player_id != multiplayer.get_unique_id():
+				# Local avatar: no inspect click-box. Keeps NPC / node clicks from also
+				# landing on your own profile hitbox while you stand on top of them.
+				# Open your profile from the Menu button instead.
+				if player_id == multiplayer.get_unique_id():
+					click_area.input_pickable = false
+				else:
+					click_area.clicked.connect(_on_player_clicked.bind(player_id))
 					click_area.right_clicked.connect(
 						_on_player_right_clicked.bind(player_id)
 					)
@@ -343,7 +348,18 @@ func spawn_player(player_id: int) -> void:
 ## while the local player has no weapon out (holster-mode), so a click during a fight
 ## stays a shot. [param peer_id] is sent to the server, which resolves it to the
 ## persistent player_id (the client doesn't carry it).
+##
+## Own-character clicks never open profile here — use the Menu / Profile entry. Clicking
+## an NPC while standing on your hitbox would otherwise open BOTH the NPC dialogue and
+## your Character Profile, and stacked menus can cover each other's Close buttons.
+## Also suppressed while hovering a talkable world interactable or a blocking menu is up.
 func _on_player_clicked(peer_id: int) -> void:
+	if peer_id == multiplayer.get_unique_id():
+		return
+	if ClientState.world_interactables_hovered > 0:
+		return
+	if ClientState.menu_open:
+		return
 	var lp: LocalPlayer = ClientState.local_player
 	if lp != null and is_instance_valid(lp) and not lp.is_armed():
 		ClientState.player_profile_by_peer_requested.emit(peer_id)

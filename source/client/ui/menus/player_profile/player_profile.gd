@@ -99,6 +99,14 @@ func _ready() -> void:
 	call_deferred(&"_place_profile_card")
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_on_close_pressed()
+
+
 func _configure_profile_layout() -> void:
 	var background: ColorRect = $Background
 	background.color = Color(0.025, 0.03, 0.05, 0.76)
