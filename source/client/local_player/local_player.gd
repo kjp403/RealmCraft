@@ -276,6 +276,22 @@ func request_recall() -> void:
 	Client.request_data(&"recall.start", Callable(), {}, InstanceClient.current.name)
 
 
+## Area-loot (F): ask the server to pick up every reserved/free pile in range.
+func request_area_loot() -> void:
+	if InstanceClient.current == null:
+		return
+	Client.request_data(&"item.pickup_area", func(result: Dictionary) -> void:
+		var count: int = int(result.get("picked", 0))
+		if count <= 0:
+			return
+		var names: PackedStringArray = PackedStringArray(result.get("names", []))
+		if names.is_empty():
+			Toaster.toast("Looted %d pile%s." % [count, "s" if count != 1 else ""])
+		else:
+			Toaster.toast("Looted: %s" % ", ".join(names))
+	, {}, InstanceClient.current.name)
+
+
 ## Tell the server to stop our channel (it pushes channel.end back, which also
 ## clears the flag — calling this just unroots us a frame early, locally).
 func _cancel_channel() -> void:
@@ -477,6 +493,11 @@ func process_input() -> void:
 	# it. Not while already channeling (re-press is ignored; cancel by moving).
 	if Input.is_action_just_pressed(&"player_recall"):
 		request_recall()
+
+	# Area loot (F / player_interact): vacuum every pile reserved to us (or free)
+	# within pickup range.
+	if Input.is_action_just_pressed(&"player_interact"):
+		request_area_loot()
 
 	# Channeling: rooted (process_movement zeroes velocity). A move key CANCELS
 	# the channel and frees us from this frame on; otherwise suppress all actions

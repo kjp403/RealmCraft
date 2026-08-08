@@ -510,7 +510,8 @@ func _make_public_equipment_slot(
 	if item != null:
 		icon.texture = item.item_icon
 		item_name.text = str(item.item_name)
-		panel.tooltip_text = str(item.item_name)
+		# Full gear/weapon stats on hover (same text inventory uses).
+		panel.tooltip_text = ItemTooltip.hover_text(item)
 	else:
 		item_name.text = "Empty"
 		item_name.self_modulate = Color(0.5, 0.5, 0.55)

@@ -22,8 +22,13 @@ const BOW_CHARGE_FRAMES: Array[Rect2] = [
 var _charge_tween: Tween
 
 
-func perform_action(action_index: int, direction: Vector2, released: bool = false) -> void:
-	super.perform_action(action_index, direction, released)
+func perform_action(
+	action_index: int,
+	direction: Vector2,
+	released: bool = false,
+	ground_target: Variant = null
+) -> void:
+	super.perform_action(action_index, direction, released, ground_target)
 	if not GameMode.is_client():
 		return
 	if action_index < 0 or action_index >= abilities.size():

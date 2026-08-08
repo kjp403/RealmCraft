@@ -1,0 +1,66 @@
+[gd_resource type="Resource" script_class="ShopResource" format=3]
+
+[ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
+[ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
+[ext_resource type="Script" uid="uid://b1my10ee17j5b" path="res://source/common/gameplay/shops/shop_trade.gd" id="3_trade"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="10_mhp"]
+[ext_resource type="Resource" uid="uid://ac0936bb83a74" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="11_mmp"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="12_hp"]
+[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="13_mp"]
+[ext_resource type="Resource" uid="uid://f73fbhjwsu73" path="res://source/common/gameplay/items/weapons/sword/sword_spore.item.tres" id="20_sword"]
+[ext_resource type="Resource" uid="uid://dowcv48c5suhy" path="res://source/common/gameplay/items/weapons/bow/spore_bow.item.tres" id="21_bow"]
+[ext_resource type="Resource" uid="uid://jgkj3ooungr0" path="res://source/common/gameplay/items/weapons/hammer/hammer_spore.item.tres" id="22_hammer"]
+[ext_resource type="Resource" uid="uid://c118jtihx3ybm" path="res://source/common/gameplay/items/weapons/wand/wand_spore.item.tres" id="23_wand"]
+[ext_resource type="Resource" uid="uid://cikrefs0c7r42" path="res://source/common/gameplay/items/weapons/book/book_spore.item.tres" id="24_book"]
+
+[sub_resource type="Resource" id="Entry_mhp"]
+script = ExtResource("1_entry")
+item = ExtResource("10_mhp")
+price = 18
+
+[sub_resource type="Resource" id="Entry_mmp"]
+script = ExtResource("1_entry")
+item = ExtResource("11_mmp")
+price = 18
+
+[sub_resource type="Resource" id="Entry_hp"]
+script = ExtResource("1_entry")
+item = ExtResource("12_hp")
+price = 28
+
+[sub_resource type="Resource" id="Entry_mp"]
+script = ExtResource("1_entry")
+item = ExtResource("13_mp")
+price = 28
+
+[sub_resource type="Resource" id="Buy_sword"]
+script = ExtResource("3_trade")
+item = ExtResource("20_sword")
+payout = 500
+
+[sub_resource type="Resource" id="Buy_bow"]
+script = ExtResource("3_trade")
+item = ExtResource("21_bow")
+payout = 500
+
+[sub_resource type="Resource" id="Buy_hammer"]
+script = ExtResource("3_trade")
+item = ExtResource("22_hammer")
+payout = 500
+
+[sub_resource type="Resource" id="Buy_wand"]
+script = ExtResource("3_trade")
+item = ExtResource("23_wand")
+payout = 500
+
+[sub_resource type="Resource" id="Buy_book"]
+script = ExtResource("3_trade")
+item = ExtResource("24_book")
+payout = 500
+
+[resource]
+script = ExtResource("2_shop")
+shop_name = "Cave Master's Cache"
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_mhp"), SubResource("Entry_mmp"), SubResource("Entry_hp"), SubResource("Entry_mp")])
+accepted_trades = Array[ExtResource("3_trade")]([SubResource("Buy_sword"), SubResource("Buy_bow"), SubResource("Buy_hammer"), SubResource("Buy_wand"), SubResource("Buy_book")])
+metadata/slug = &"cave_master_shop"

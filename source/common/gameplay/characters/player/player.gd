@@ -265,6 +265,8 @@ func is_equip_casting() -> bool:
 func begin_hand_draw(item_id: int, duration_ms: int = WEAPON_DRAW_MS) -> void:
 	if not GameMode.is_world_server():
 		return
+	# Leaving the tome (swap / drink draw) ends Battle Form immediately.
+	BattleFormState.cancel_on(self)
 	_equip_cast_token += 1
 	var token: int = _equip_cast_token
 	_equip_cast_until_ms = Time.get_ticks_msec() + duration_ms
