@@ -15,7 +15,7 @@ The game servers bind to `127.0.0.1`, so only Caddy (ports 80/443) is public.
 After a **one-time** GitHub secrets setup, merging to `main` updates the live
 server automatically. No SSH, no PowerShell paste.
 
-### 1. Add three GitHub Actions secrets
+### 1. Add GitHub Actions secrets
 
 Repo page → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
@@ -24,6 +24,7 @@ Repo page → **Settings** → **Secrets and variables** → **Actions** → **N
 | `VPS_HOST` | `144.217.91.100` |
 | `VPS_USER` | `ubuntu` |
 | `VPS_SSH_KEY` | Full contents of your **private** key file (usually `C:\Users\YOU\.ssh\arkenelle_ovh`) |
+| `VPS_SSH_PASSPHRASE` | The password you typed when you created that SSH key (if it has none, leave this secret empty / omit it) |
 
 **Important:** use the file **without** `.pub` on the end.  
 Private key text starts with `-----BEGIN OPENSSH PRIVATE KEY-----` (or `BEGIN RSA PRIVATE KEY`).  
@@ -35,7 +36,8 @@ Copy on Windows PowerShell (keeps line breaks):
 Get-Content $env:USERPROFILE\.ssh\arkenelle_ovh -Raw | Set-Clipboard
 ```
 
-Then edit the `VPS_SSH_KEY` secret → paste → save.
+Then edit the `VPS_SSH_KEY` secret → paste → save.  
+If your key asks for a password when you SSH, also add `VPS_SSH_PASSPHRASE` with that same password.
 
 ### 2. Merge the auto-deploy PR / push to `main`
 
