@@ -584,7 +584,7 @@ warper_id = 26
 target_id = 26
 
 [node name="CavePortal" parent="Warpers" unique_id=396714839 instance=ExtResource("29_2sqao")]
-position = Vector2(856, -48)
+position = Vector2(792, -48)
 portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
 destination_label = "Fungus Cave"
 target_instance = ExtResource("24_2sqao")

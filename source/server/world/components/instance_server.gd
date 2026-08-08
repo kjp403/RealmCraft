@@ -57,9 +57,15 @@ func _ready() -> void:
 	status_tick.start()
 
 
+## peer_id → odd/even toggle so out-of-combat HP heals 1 every 2 seconds on the
+## 1 Hz status tick (see [method _on_status_tick]).
+var _hp_regen_tick: Dictionary = {}
+
+
 ## 1 Hz upkeep for every player in this instance. Mana regen reads the
 ## MANA_REGEN stat (base + Spirit + future gear/food), so "regens faster" is
-## an itemizable property, not a constant.
+## an itemizable property, not a constant. Out-of-combat HP regenerates
+## +1 every 2 seconds.
 func _on_status_tick() -> void:
 	for peer_id: int in players_by_peer_id:
 		var player: Player = players_by_peer_id[peer_id]
@@ -70,6 +76,7 @@ func _on_status_tick() -> void:
 		# Status HUD snapshot (buffs / DoTs / in-combat) — after the expiry pass
 		# so dropped buffs vanish from the strip the same second they end.
 		StatusService.sync(player)
+		_tick_player_hp_regen(peer_id, player)
 		var mana_max: float = player.stats_component.get_stat(Stat.MANA_MAX)
 		if mana_max <= 0.0:
 			continue
@@ -80,6 +87,25 @@ func _on_status_tick() -> void:
 		if regen <= 0.0:
 			continue
 		player.stats_component.set_stat(Stat.MANA, minf(mana_max, mana + regen))
+
+
+func _tick_player_hp_regen(peer_id: int, player: Player) -> void:
+	if player.is_in_combat():
+		_hp_regen_tick.erase(peer_id)
+		return
+	var health_max: float = player.stats_component.get_stat(Stat.HEALTH_MAX)
+	if health_max <= 0.0:
+		return
+	var health: float = player.stats_component.get_stat(Stat.HEALTH)
+	if health >= health_max:
+		_hp_regen_tick.erase(peer_id)
+		return
+	var phase: int = int(_hp_regen_tick.get(peer_id, 0)) + 1
+	_hp_regen_tick[peer_id] = phase
+	# Heal on every 2nd out-of-combat tick → 1 HP / 2 seconds.
+	if phase % 2 != 0:
+		return
+	player.stats_component.set_stat(Stat.HEALTH, minf(health_max, health + 1.0))
 
 
 func load_map(map_path: String) -> void:

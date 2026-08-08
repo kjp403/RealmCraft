@@ -3,10 +3,18 @@
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
 [ext_resource type="Texture2D" uid="uid://b57aqr6w0t2re" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Smithing.png" id="icon_tex"]
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_qh35w"]
-[ext_resource type="Resource" uid="uid://bvgijymuxvkai" path="res://source/common/gameplay/items/materials/metals/copper_bar.tres" id="2_ixckp"]
-[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="3_soni8"]
-[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="4_qjnhd"]
-[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="5_4tjbh"]
+[ext_resource type="Resource" uid="uid://25erkqwlk35t5" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="2_br_bar"]
+[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="3_fe_bar"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="4_st_bar"]
+[ext_resource type="Resource" uid="uid://2gsl864x53vil" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="5_br_helm"]
+[ext_resource type="Resource" uid="uid://220bc63rtaob7" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="6_br_chest"]
+[ext_resource type="Resource" uid="uid://2q7ip57npoho8" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="7_br_boots"]
+[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="8_fe_helm"]
+[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="9_fe_chest"]
+[ext_resource type="Resource" uid="uid://gjk4hvjre3ox" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="10_fe_boots"]
+[ext_resource type="Resource" uid="uid://3ih0n9l3vzb10" path="res://source/common/gameplay/items/gears/metal/steel_helmet.tres" id="11_st_helm"]
+[ext_resource type="Resource" uid="uid://2sqvuu6o9jrio" path="res://source/common/gameplay/items/gears/metal/steel_chest.tres" id="12_st_chest"]
+[ext_resource type="Resource" uid="uid://274t9kspo2nuo" path="res://source/common/gameplay/items/gears/metal/steel_boots.tres" id="13_st_boots"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -33,6 +41,6 @@ perks = Array[Dictionary]([{
 "name": "Steady Hand",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("1_qh35w")]([ExtResource("2_ixckp"), ExtResource("3_soni8"), ExtResource("4_qjnhd"), ExtResource("5_4tjbh")])
-recipe_levels = Array[int]([0, 0, 0, 0])
+recipe_items = Array[ExtResource("1_qh35w")]([ExtResource("2_br_bar"), ExtResource("5_br_helm"), ExtResource("6_br_chest"), ExtResource("7_br_boots"), ExtResource("3_fe_bar"), ExtResource("8_fe_helm"), ExtResource("9_fe_chest"), ExtResource("10_fe_boots"), ExtResource("4_st_bar"), ExtResource("11_st_helm"), ExtResource("12_st_chest"), ExtResource("13_st_boots")])
+recipe_levels = Array[int]([1, 1, 1, 1, 5, 5, 5, 5, 15, 15, 15, 15])
 describe_lines = Array[String](["Smithing XP +{xp}%", "Material refund: {refund}%", "Extra item: {extra_item}%"])

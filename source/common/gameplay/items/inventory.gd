@@ -42,6 +42,8 @@ static func set_pinned(inventory: Dictionary, slot_uid: int, pinned: bool) -> bo
 
 
 ## Add an item to the inventory, stacking when the item allows it.
+## Respects [member Item.stack_limit]: fill existing stacks up to the cap, then
+## open new slots for the remainder (ores/logs at 10 → up to 28×10 in a full bag).
 static func add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> void:
 	if item_id <= 0 or amount <= 0:
 		return
@@ -51,15 +53,38 @@ static func add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> vo
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	# Unknown items default to non-stackable (own slot) to stay safe.
 	var stackable: bool = item != null and item.is_stackable()
+	if not stackable:
+		for _i: int in amount:
+			inventory[next_uid(inventory)] = {"id": item_id, "a": 1}
+		return
 
-	if stackable:
+	# 0 = pseudo-infinite (legacy default); otherwise hard cap per slot.
+	var limit: int = 0 if item == null else int(item.stack_limit)
+	var remaining: int = amount
+	if limit > 0:
 		for slot_uid in inventory:
-			if int(inventory[slot_uid].get("id", 0)) == item_id:
-				inventory[slot_uid]["a"] = int(inventory[slot_uid].get("a", 0)) + amount
-				return
-		# TODO: respect stack_limit by splitting into multiple slots when needed.
+			if remaining <= 0:
+				break
+			if int(inventory[slot_uid].get("id", 0)) != item_id:
+				continue
+			var have: int = int(inventory[slot_uid].get("a", 0))
+			if have >= limit:
+				continue
+			var space: int = limit - have
+			var put: int = mini(space, remaining)
+			inventory[slot_uid]["a"] = have + put
+			remaining -= put
+		while remaining > 0:
+			var put: int = mini(limit, remaining)
+			inventory[next_uid(inventory)] = {"id": item_id, "a": put}
+			remaining -= put
+		return
 
-	inventory[next_uid(inventory)] = {"id": item_id, "a": amount}
+	for slot_uid in inventory:
+		if int(inventory[slot_uid].get("id", 0)) == item_id:
+			inventory[slot_uid]["a"] = int(inventory[slot_uid].get("a", 0)) + remaining
+			return
+	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining}
 
 
 ## Remove up to `amount` from a slot, erasing the slot when it empties.

@@ -20,6 +20,9 @@ const NET_SEND_INTERVAL_S: float = 1.0 / 20.0
 const CLICK_NAVIGATION_SCRIPT: Script = preload(
 	"res://source/client/local_player/click_navigation.gd"
 )
+const CLICK_MOVE_MARKER_SCRIPT: Script = preload(
+	"res://source/client/local_player/click_move_marker.gd"
+)
 const HARVEST_CONTROLLER_SCRIPT: Script = preload(
 	"res://source/client/local_player/harvest_controller.gd"
 )
@@ -64,6 +67,7 @@ var _net_send_accum: float = 0.0
 
 var synchronizer_manager: StateSynchronizerManagerClient
 var _click_navigation: ClickNavigation
+var _click_move_marker: ClickMoveMarker
 var _harvest_controller: HarvestController
 var _pickup_controller: PickupController
 var _combat_target_controller: CombatTargetController
@@ -82,6 +86,8 @@ func _ready() -> void:
 	_click_navigation = CLICK_NAVIGATION_SCRIPT.new()
 	add_child(_click_navigation)
 	_click_navigation.setup(self)
+	_click_move_marker = CLICK_MOVE_MARKER_SCRIPT.new()
+	add_child(_click_move_marker)
 	_harvest_controller = HARVEST_CONTROLLER_SCRIPT.new()
 	add_child(_harvest_controller)
 	_harvest_controller.setup(self)
@@ -649,6 +655,8 @@ func set_click_move_target(world_target: Vector2) -> void:
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
 	_click_navigation.request_move(world_target)
+	if _click_move_marker != null:
+		_click_move_marker.flash_at(world_target)
 
 
 ## Begin commercial-style auto-gather on [param node] (walk in, swing until

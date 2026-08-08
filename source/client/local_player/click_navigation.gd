@@ -7,7 +7,9 @@ const TRANSITION_FIX_VERSION: String = "2026-08-07-b"
 
 const CELL_SIZE: float = 16.0
 const COLLISION_MASK: int = 2
-const PLAYER_CLEARANCE: Vector2 = Vector2(14.0, 8.0)
+## Tight footprint so click/minimap routes hug walls and props instead of
+## fat-blocking corridors and getting the player stuck on object pads.
+const PLAYER_CLEARANCE: Vector2 = Vector2(8.0, 5.0)
 const PLAYER_SHAPE_OFFSET: Vector2 = Vector2(0.0, -3.0)
 const WAYPOINT_REACHED_DISTANCE: float = 7.0
 const SEARCH_RADIUS_CELLS: int = 10
@@ -118,7 +120,7 @@ func _build_grid(generation: int, map: Map) -> void:
 	grid.region = Rect2i(start_id, end_id - start_id)
 	grid.cell_size = Vector2.ONE * CELL_SIZE
 	grid.offset = Vector2.ONE * CELL_SIZE * 0.5
-	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_AT_LEAST_ONE_WALKABLE
 	grid.default_compute_heuristic = AStarGrid2D.HEURISTIC_OCTILE
 	grid.default_estimate_heuristic = AStarGrid2D.HEURISTIC_OCTILE
 	grid.update()

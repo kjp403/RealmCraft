@@ -40,10 +40,14 @@ static func celebrate(player: Player, skill_label: String, level: int) -> void:
 		if label.is_empty():
 			label = "skill"
 		var msg: String = "Your %s level has achieved %d" % [label, level]
+		# Cut any still-playing level-up jingle, then restart — rapid multi-levels
+		# must not stack the audio. Keyed banner replaces itself so the text
+		# refreshes to the newest skill/level instead of queuing.
+		UISound.play_levelup()
 		Announcer.announce(
 			"Level up!",
 			msg,
-			{"sfx": UISound.LEVELUP, "duration": BANNER_DURATION},
+			{"sfx": "", "sound": false, "duration": BANNER_DURATION, "key": "level_up"},
 		)
 		Toaster.toast(msg, TOAST_DURATION)
 		_echo_game_message(msg)
