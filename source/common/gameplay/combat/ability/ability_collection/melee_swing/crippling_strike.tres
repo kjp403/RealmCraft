@@ -9,6 +9,7 @@ ad_ratio = 1.1
 swing_animation = &"weapon/sword.swing"
 slow_amount = 30.0
 slow_duration_s = 2.0
+max_targets = 1
 name = "Crippling Strike"
 cooldown = 5.0
 mana_cost = 8

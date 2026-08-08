@@ -1,8 +1,8 @@
 class_name MeleeArc
 extends Area2D
-## Short-lived hitbox spawned (server-only) by melee weapons. Damages every valid
-## target it overlaps via CombatHit — same flag / PvP / sparring / friendly-fire
-## rules as the bow arrow, so combat stays consistent across weapons.
+## Short-lived hitbox spawned (server-only) by melee weapons. Damages overlapping
+## targets via CombatHit — same flag / PvP / sparring / friendly-fire rules as
+## the bow arrow, so combat stays consistent across weapons.
 ##
 ## The arc is a STATIC box at the swing position; it does NOT follow the player
 ## (a swing is a brief moment in front of you). The visible swing is the weapon's
@@ -12,6 +12,10 @@ extends Area2D
 ## shape query) on the first physics step, plus body_entered for anything that
 ## walks in during its life. The shape query is what lets a swing hit a STILL
 ## target (a territory flag, a motionless mob) that enter-events miss.
+##
+## [member max_targets] caps how many combatants a single swing can DAMAGE
+## (0 = unlimited AoE). Basics use 1 so a pack standing on top of each other
+## doesn't all get cleaved / pulled by one swing — closest target wins.
 
 ## A target at/below this fraction of max HP counts as "low" for the wielder's
 ## Executioner mastery passive (DAMAGE_VS_LOW_HP amp).
@@ -33,9 +37,13 @@ var damage_type: StringName = CombatHit.DAMAGE_PHYSICAL
 ## into air refunds nothing.
 var heal_per_hit: float = 0.0
 var mana_per_hit: float = 0.0
+## 0 = hit every valid overlap (AoE novas / slams / whirlwinds). 1 = single-target
+## basics. Only counts CombatHit.Result.DAMAGED landings toward the cap.
+var max_targets: int = 0
 
 var _hit_bodies: Array[Node] = []
 var _scanned: bool = false
+var _targets_damaged: int = 0
 
 
 func _ready() -> void:
@@ -59,11 +67,19 @@ func _physics_process(_delta: float) -> void:
 	if _scanned:
 		return
 	_scanned = true
-	for body: Node2D in CombatHit.overlapping_bodies(self):
+	var bodies: Array[Node2D] = CombatHit.overlapping_bodies(self)
+	# Prefer the closest combatant when capped — otherwise pack stacks feel random.
+	if max_targets > 0 and bodies.size() > 1:
+		bodies = _sorted_by_distance(bodies)
+	for body: Node2D in bodies:
 		_on_body_entered(body)
+		if max_targets > 0 and _targets_damaged >= max_targets:
+			break
 
 
 func _on_body_entered(body: Node2D) -> void:
+	if max_targets > 0 and _targets_damaged >= max_targets:
+		return
 	if body == source:
 		return
 	if _hit_bodies.has(body):
@@ -75,6 +91,7 @@ func _on_body_entered(body: Node2D) -> void:
 	var result: CombatHit.Result = CombatHit.try_damage(source if source is Character else null, body, dealt, damage_type)
 	if result != CombatHit.Result.DAMAGED:
 		return
+	_targets_damaged += 1
 	# Slow rides a LANDED hit on a Player only (the first negative status buff, via
 	# the same BuffService potions use).
 	if slow_amount > 0.0 and slow_duration_s > 0.0 and struck is Player:
@@ -87,6 +104,23 @@ func _on_body_entered(body: Node2D) -> void:
 		if mana_per_hit > 0.0:
 			var mmax: float = source.stats_component.get_stat(Stat.MANA_MAX)
 			source.stats_component.set_stat(Stat.MANA, minf(mmax, source.stats_component.get_stat(Stat.MANA) + mana_per_hit))
+
+
+## Closest-to-source first so a single-target swing picks the mob you're on,
+## not whichever collider the physics query happened to return first.
+func _sorted_by_distance(bodies: Array[Node2D]) -> Array[Node2D]:
+	var origin: Vector2 = source.global_position if is_instance_valid(source) else global_position
+	var scored: Array = []
+	for body: Node2D in bodies:
+		var node: Node2D = body
+		if body is HurtBox and (body as HurtBox).character is Node2D:
+			node = (body as HurtBox).character as Node2D
+		scored.append({"body": body, "d": origin.distance_squared_to(node.global_position)})
+	scored.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["d"] < b["d"])
+	var out: Array[Node2D] = []
+	for entry: Dictionary in scored:
+		out.append(entry["body"] as Node2D)
+	return out
 
 
 ## Executioner mastery passive: the wielder's DAMAGE_VS_LOW_HP stat (%) amplifies

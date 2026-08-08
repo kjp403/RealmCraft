@@ -15,7 +15,8 @@ const BASE_STATS: Dictionary[StringName, float] = {
 	# Low innate attack power on purpose: most of your damage comes from your
 	# weapon's AD + the Strength attribute, so leveling and gear both matter and
 	# a fresh level-1 is meant to feel weak. See AttributeMap / the weapon items.
-	Stat.AD: 10.0,
+	# (Was 10 — with a +4 wood sword that printed 14s on 0-armor goblins at L1.)
+	Stat.AD: 3.0,
 	Stat.ARMOR: 15.0,
 	Stat.MR: 15.0,
 	# Mana gates SPECIAL abilities only (mana_cost on the AbilityResource);
