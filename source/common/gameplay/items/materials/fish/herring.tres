@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_mat")
-item_name = &"Herring"
+item_name = &"Raw Herring"
 item_icon = ExtResource("1_icon")
 description = "A common silvery school fish."
 vendor_value = 2

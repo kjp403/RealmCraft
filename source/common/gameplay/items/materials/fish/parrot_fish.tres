@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_mat")
-item_name = &"Parrot Fish"
+item_name = &"Raw Parrot Fish"
 item_icon = ExtResource("1_icon")
 description = "Bright-beaked reef grazer."
 vendor_value = 7

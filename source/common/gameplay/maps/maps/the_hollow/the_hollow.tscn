@@ -60,8 +60,15 @@ text = "The Mecha-stone Golem stirs here. Levels 25+. Use the portal to return."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="ReplicatedPropsContainer" type="Node2D" parent="."]
+[node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 script = ExtResource("2_rp")
+id_to_node = {
+0: NodePath("MechaStoneGolem")
+}
+node_to_id = {
+NodePath("MechaStoneGolem"): 0
+}
+metadata/_custom_type_script = "uid://wq8klpndipnu"
 
 [node name="MechaStoneGolem" parent="ReplicatedPropsContainer" instance=ExtResource("6_hostile")]
 position = Vector2(464, 240)

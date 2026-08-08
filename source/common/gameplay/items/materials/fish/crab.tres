@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_mat")
-item_name = &"Crab"
+item_name = &"Raw Crab"
 item_icon = ExtResource("1_icon")
 description = "A scuttling shoreline crab."
 vendor_value = 5

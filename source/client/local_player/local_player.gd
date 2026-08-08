@@ -555,13 +555,26 @@ func process_input() -> void:
 		if _pickup_controller.tick():
 			return
 
-	# Right-click Attack: walk into range and keep swinging.
+	# Spacebar: lock onto a hostile (remembered fight target after WASD / click
+	# move, else nearest). Persists like Right-click → Attack until cancelled.
+	if (
+		_combat_target_controller != null
+		and controller.is_attack_just_pressed()
+		and is_armed()
+		and not _combat_target_controller.is_active()
+	):
+		var space_target: HostileNpc = _combat_target_controller.acquire_for_spacebar()
+		if space_target != null:
+			_begin_hostile_attack(space_target)
+
+	# Locked Attack: walk into range and keep swinging.
 	if _combat_target_controller != null and _combat_target_controller.is_active():
 		if _combat_target_controller.tick():
 			equipment_component.process_input(self)
 			return
 
 	equipment_component.process_input(self)
+	# Free-aim hold-fire only when no hostile lock is active.
 	if action_input and equipment_component.can_use(&"weapon", 0):
 		Client.request_data(&"action.perform", Callable(),
 		{"d": look_direction, "i": 0}, InstanceClient.current.name)
@@ -697,7 +710,11 @@ func try_auto_retaliate(attacker_prop_id: int) -> void:
 	var map: Map = InstanceClient.current.instance_map as Map
 	if map == null or map.replicated_props_container == null:
 		return
-	var node: Node = map.replicated_props_container.dynamic_nodes.get(attacker_prop_id, null)
+	# Static bosses (Mecha Golem) live in id_to_node; trash often uses dynamic_nodes.
+	var container: ReplicatedPropsContainer = map.replicated_props_container
+	var node: Node = container.id_to_node.get(attacker_prop_id, null)
+	if node == null:
+		node = container.dynamic_nodes.get(attacker_prop_id, null)
 	if node is HostileNpc:
 		var npc: HostileNpc = node as HostileNpc
 		if npc.is_dead:

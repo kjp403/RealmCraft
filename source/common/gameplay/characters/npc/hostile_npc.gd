@@ -214,9 +214,9 @@ func _apply_enemy_data() -> void:
 		# animated_sprite (from Character) is @onready — already assigned by the
 		# time _ready (and therefore this) runs.
 		animated_sprite.sprite_frames = enemy_data.skin
-	# Visual size (a boss reads bigger) — SPRITE only, never the node (a scaled
-	# node inflates collision so it can't reach melee range). Applied on both
-	# server + client since enemy_data resolves on both.
+	# Visual size (a boss reads bigger) — SPRITE only for the CharacterBody2D
+	# nav capsule (a scaled node can't close to melee range). HurtBox + click
+	# area DO grow with the sprite so player swings/projectiles can connect.
 	if enemy_data.visual_scale != 1.0:
 		animated_sprite.scale *= enemy_data.visual_scale
 		# A big sprite swallows the head-bar — lift it clear of the enlarged sprite
@@ -234,6 +234,7 @@ func _apply_enemy_data() -> void:
 		# near y=0 by default — under a tall boss sprite it disappears into the art).
 		if display_name_label != null:
 			display_name_label.position.y -= lift
+	_scale_hurtbox_to_sprite()
 	# Bosses keep a permanent over-head HP bar with remaining points — players need
 	# the read for a long fight. Regular trash still auto-hides on idle. Widen the
 	# bar so 4-digit remaining HP (e.g. 7500) isn't clipped by the 32px default.
@@ -1231,12 +1232,49 @@ func _build_client_click_area() -> void:
 	area.name = "ClickArea"
 	var collision: CollisionShape2D = CollisionShape2D.new()
 	var rect: RectangleShape2D = RectangleShape2D.new()
-	rect.size = Vector2(36, 48)
+	var volume: Vector2 = _combat_volume_size()
+	rect.size = volume
 	collision.shape = rect
-	collision.position = Vector2(0, -16)
+	collision.position = Vector2(0.0, -volume.y * 0.5)
 	area.add_child(collision)
 	add_child(area)
 	area.right_clicked.connect(_on_client_right_clicked)
+
+
+## Grow the shared HurtBox to match the (optionally enlarged) sprite. Nav body
+## stays tiny so the mob can still path into melee range.
+func _scale_hurtbox_to_sprite() -> void:
+	var shape_node: CollisionShape2D = get_node_or_null(^"HurtBox/CollisionShape2D") as CollisionShape2D
+	if shape_node == null:
+		return
+	var volume: Vector2 = _combat_volume_size()
+	var base: Vector2 = Vector2(16.0, 32.0)
+	# Skip no-op for normal-sized trash (keeps shared shape resource intact).
+	if volume.x <= base.x * 1.15 and volume.y <= base.y * 1.15:
+		return
+	var rect: RectangleShape2D = RectangleShape2D.new()
+	rect.size = volume
+	shape_node.shape = rect
+	shape_node.position = Vector2(0.0, -volume.y * 0.5)
+
+
+## Hit / click volume from idle frame × visual_scale (falls back to a padded
+## default so tiny skins don't shrink below the stock hurtbox).
+func _combat_volume_size() -> Vector2:
+	var vs: float = 1.0
+	if enemy_data != null:
+		vs = maxf(1.0, enemy_data.visual_scale)
+	var frame: Vector2 = Vector2(48.0, 64.0)
+	if animated_sprite != null and animated_sprite.sprite_frames != null:
+		var frames: SpriteFrames = animated_sprite.sprite_frames
+		var anim: StringName = &"idle" if frames.has_animation(&"idle") else animated_sprite.animation
+		if frames.has_animation(anim):
+			var tex: Texture2D = frames.get_frame_texture(anim, 0)
+			if tex != null:
+				frame = tex.get_size()
+	# Cover most of the drawn sprite — Mecha Golem (~65×64 @ 2.2×) → ~120×127.
+	var sized: Vector2 = Vector2(frame.x * vs * 0.85, frame.y * vs * 0.9)
+	return Vector2(maxf(36.0, sized.x), maxf(48.0, sized.y))
 
 
 func _on_client_right_clicked() -> void:

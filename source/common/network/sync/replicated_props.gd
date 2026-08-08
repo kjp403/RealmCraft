@@ -88,8 +88,17 @@ var _pending_by_cpid: Dictionary[int, Variant]
 # lazily — apply_pairs only runs on clients.
 var _smooth_position_fid: int = -1
 
+func _enter_tree() -> void:
+	# Packed-scene children are already parented when the container enters the
+	# tree, and HostileNPC._ready (child-first) reads child_id_of_node. Bake
+	# here so unbaked maps still get stable static IDs on server + client —
+	# without this, ops/pairs (attack anims, telegraphs, position) never resolve.
+	if id_to_node.is_empty():
+		_bake_static_map()
+
+
 func _ready() -> void:
-	if Engine.is_editor_hint() and id_to_node.is_empty():
+	if id_to_node.is_empty():
 		_bake_static_map()
 
 
@@ -99,7 +108,7 @@ func _notification(what: int) -> void:
 			_bake_static_map()
 
 
-## Bake (editor): all immediate children become "static props"
+## Bake: all immediate children become "static props" with stable IDs.
 func _bake_static_map() -> void:
 	id_to_node.clear()
 	node_to_id.clear()
