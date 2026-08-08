@@ -1,42 +1,22 @@
 extends PanelContainer
-## Dock Skills panel — OSRS-style skill grid (icon + current/base level).
-## Click an unlocked skill for gather/craft sources. Placeholder slots are future skills.
+## Dock Skills panel — OSRS-style cells for the 7 live skills only.
+## Click a skill for gather/craft sources and XP detail.
 
-const PANEL_SIZE := Vector2(248.0, 392.0)
+const PANEL_SIZE := Vector2(236.0, 292.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
-const GRID_COLUMNS := 3
-const TILE_SIZE := Vector2(72.0, 34.0)
-const PLACEHOLDER_ICON_DIR := (
-	"res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/placeholders/"
-)
+const GRID_COLUMNS := 2
+const TILE_SIZE := Vector2(108.0, 44.0)
 
-## Fixed OSRS-like layout (row-major, 3 columns). `slug` null = future placeholder.
-const SKILL_SLOTS: Array[Dictionary] = [
-	{"slug": "", "label": "Attack", "icon": "Attack.png"},
-	{"slug": "", "label": "Hitpoints", "icon": "Hitpoints.png"},
-	{"slug": "mining", "label": "Mining", "icon": ""},
-	{"slug": "", "label": "Strength", "icon": "Strength.png"},
-	{"slug": "", "label": "Agility", "icon": "Agility.png"},
-	{"slug": "smithing", "label": "Smithing", "icon": ""},
-	{"slug": "", "label": "Defence", "icon": "Defence.png"},
-	{"slug": "", "label": "Herblore", "icon": "Herblore.png"},
-	{"slug": "fishing", "label": "Fishing", "icon": ""},
-	{"slug": "", "label": "Ranged", "icon": "Ranged.png"},
-	{"slug": "", "label": "Thieving", "icon": "Thieving.png"},
-	{"slug": "cooking", "label": "Cooking", "icon": ""},
-	{"slug": "", "label": "Prayer", "icon": "Prayer.png"},
-	{"slug": "outfitting", "label": "Crafting", "icon": ""},
-	{"slug": "", "label": "Firemaking", "icon": "Firemaking.png"},
-	{"slug": "", "label": "Magic", "icon": "Magic.png"},
-	{"slug": "", "label": "Fletching", "icon": "Fletching.png"},
-	{"slug": "woodcutting", "label": "Woodcutting", "icon": ""},
-	{"slug": "", "label": "Runecraft", "icon": "Runecraft.png"},
-	{"slug": "", "label": "Slayer", "icon": "Slayer.png"},
-	{"slug": "harvesting", "label": "Farming", "icon": ""},
-	{"slug": "", "label": "Construction", "icon": "Construction.png"},
-	{"slug": "", "label": "Hunter", "icon": "Hunter.png"},
-	{"slug": "", "label": "Sailing", "icon": "Sailing.png"},
+## Live skills only (slug keys match JobRegistry / save data).
+const SKILL_ORDER: Array[String] = [
+	"mining",
+	"smithing",
+	"fishing",
+	"cooking",
+	"outfitting",
+	"woodcutting",
+	"harvesting",
 ]
 
 @onready var title_label: Label = (
@@ -59,7 +39,6 @@ var _detail_root: VBoxContainer
 var _total_level_bar: Label
 var _selected_slug: String = ""
 var _back_button: Button
-var _placeholder_icon_cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -117,8 +96,8 @@ func _build_layout() -> void:
 
 	_skills_grid = GridContainer.new()
 	_skills_grid.columns = GRID_COLUMNS
-	_skills_grid.add_theme_constant_override(&"h_separation", 3)
-	_skills_grid.add_theme_constant_override(&"v_separation", 3)
+	_skills_grid.add_theme_constant_override(&"h_separation", 4)
+	_skills_grid.add_theme_constant_override(&"v_separation", 4)
 	grid_center.add_child(_skills_grid)
 
 	_total_level_bar = Label.new()
@@ -219,26 +198,17 @@ func _build_skills_grid() -> void:
 		_skills_grid.remove_child(child)
 		child.queue_free()
 
-	for slot: Dictionary in SKILL_SLOTS:
-		var slug: String = str(slot.get("slug", ""))
-		if slug != "" and _skills.has(slug):
+	for slug: String in SKILL_ORDER:
+		if _skills.has(slug):
 			_skills_grid.add_child(_create_skill_tile(slug, _skills[slug]))
-		elif slug != "":
-			# Skill exists in registry but not yet on character payload — show as Lv 1.
+		else:
 			var info: Dictionary = {
-				"display_name": str(slot.get("label", slug.capitalize())),
+				"display_name": JobRegistry.display_name(StringName(slug)),
 				"level": 1,
 				"xp": 0,
 				"xp_to_next": 1,
 			}
 			_skills_grid.add_child(_create_skill_tile(slug, info))
-		else:
-			_skills_grid.add_child(
-				_create_placeholder_tile(
-					str(slot.get("label", "?")),
-					str(slot.get("icon", ""))
-				)
-			)
 
 
 func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
@@ -263,7 +233,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 			display, level, xp, xp_to_next, remaining
 		]
 	tile.pressed.connect(_show_detail.bind(skill_name))
-	_apply_tile_styles(tile, false)
+	_apply_tile_styles(tile)
 
 	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -272,10 +242,10 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	icon.texture = _get_skill_icon(skill_name)
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	icon.offset_left = 3
-	icon.offset_top = 3
-	icon.offset_right = 28
-	icon.offset_bottom = -3
+	icon.offset_left = 4
+	icon.offset_top = 2
+	icon.offset_right = 42
+	icon.offset_bottom = -2
 	tile.add_child(icon)
 
 	if icon.texture == null:
@@ -294,122 +264,45 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	cur.text = str(level)
 	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cur.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	cur.add_theme_font_size_override(&"font_size", 11)
+	cur.add_theme_font_size_override(&"font_size", 12)
 	cur.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	cur.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
 	cur.add_theme_constant_override(&"shadow_offset_x", 1)
 	cur.add_theme_constant_override(&"shadow_offset_y", 1)
 	cur.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	cur.offset_left = -30
-	cur.offset_top = 1
-	cur.offset_right = -6
-	cur.offset_bottom = 16
+	cur.offset_left = -40
+	cur.offset_top = 2
+	cur.offset_right = -10
+	cur.offset_bottom = 18
 	tile.add_child(cur)
 
 	var base := Label.new()
 	base.text = str(level)
 	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	base.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	base.add_theme_font_size_override(&"font_size", 11)
+	base.add_theme_font_size_override(&"font_size", 12)
 	base.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	base.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
 	base.add_theme_constant_override(&"shadow_offset_x", 1)
 	base.add_theme_constant_override(&"shadow_offset_y", 1)
 	base.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	base.offset_left = -24
-	base.offset_top = -16
-	base.offset_right = -3
-	base.offset_bottom = -1
+	base.offset_left = -32
+	base.offset_top = -18
+	base.offset_right = -4
+	base.offset_bottom = -2
 	tile.add_child(base)
 
 	var slash := Label.new()
 	slash.text = "/"
 	slash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slash.add_theme_font_size_override(&"font_size", 10)
+	slash.add_theme_font_size_override(&"font_size", 11)
 	slash.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	slash.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	slash.offset_left = -20
-	slash.offset_top = -7
-	slash.offset_right = -10
+	slash.offset_left = -28
+	slash.offset_top = -8
+	slash.offset_right = -16
 	slash.offset_bottom = 8
 	tile.add_child(slash)
-
-	return tile
-
-
-func _create_placeholder_tile(label: String, icon_file: String) -> Control:
-	var tile := PanelContainer.new()
-	tile.custom_minimum_size = TILE_SIZE
-	tile.tooltip_text = "%s\nComing soon" % label
-	tile.modulate = Color(0.55, 0.55, 0.55, 0.85)
-	tile.add_theme_stylebox_override(&"panel", _make_cell_style(true))
-
-	var root := Control.new()
-	root.custom_minimum_size = TILE_SIZE
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tile.add_child(root)
-
-	var icon := TextureRect.new()
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.texture = _get_placeholder_icon(icon_file)
-	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	icon.offset_left = 3
-	icon.offset_top = 3
-	icon.offset_right = 28
-	icon.offset_bottom = -3
-	root.add_child(icon)
-
-	if icon.texture == null:
-		var fallback := Label.new()
-		fallback.text = label.left(1)
-		fallback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		fallback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.add_theme_font_size_override(&"font_size", 12)
-		fallback.add_theme_color_override(&"font_color", Color(0.45, 0.45, 0.42))
-		fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		icon.add_child(fallback)
-
-	var cur := Label.new()
-	cur.text = "1"
-	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cur.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	cur.add_theme_font_size_override(&"font_size", 11)
-	cur.add_theme_color_override(&"font_color", Color(0.55, 0.55, 0.35))
-	cur.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	cur.offset_left = -30
-	cur.offset_top = 1
-	cur.offset_right = -6
-	cur.offset_bottom = 16
-	root.add_child(cur)
-
-	var base := Label.new()
-	base.text = "1"
-	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	base.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	base.add_theme_font_size_override(&"font_size", 11)
-	base.add_theme_color_override(&"font_color", Color(0.55, 0.55, 0.35))
-	base.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	base.offset_left = -24
-	base.offset_top = -16
-	base.offset_right = -3
-	base.offset_bottom = -1
-	root.add_child(base)
-
-	var slash := Label.new()
-	slash.text = "/"
-	slash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slash.add_theme_font_size_override(&"font_size", 10)
-	slash.add_theme_color_override(&"font_color", Color(0.55, 0.55, 0.35))
-	slash.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	slash.offset_left = -20
-	slash.offset_top = -7
-	slash.offset_right = -10
-	slash.offset_bottom = 8
-	root.add_child(slash)
 
 	return tile
 
@@ -574,25 +467,12 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	return null
 
 
-func _get_placeholder_icon(icon_file: String) -> Texture2D:
-	if icon_file.is_empty():
-		return null
-	if _placeholder_icon_cache.has(icon_file):
-		return _placeholder_icon_cache[icon_file]
-	var path := PLACEHOLDER_ICON_DIR + icon_file
-	var tex: Texture2D = null
-	if ResourceLoader.exists(path):
-		tex = load(path) as Texture2D
-	_placeholder_icon_cache[icon_file] = tex
-	return tex
-
-
-func _apply_tile_styles(tile: Button, locked: bool) -> void:
-	var normal := _make_cell_style(locked)
-	var hover := _make_cell_style(locked)
+func _apply_tile_styles(tile: Button) -> void:
+	var normal := _make_cell_style()
+	var hover := _make_cell_style()
 	hover.border_color = Color(0.92, 0.82, 0.28, 1.0)
 	hover.bg_color = Color(0.20, 0.18, 0.14, 0.98)
-	var pressed := _make_cell_style(locked)
+	var pressed := _make_cell_style()
 	pressed.border_color = Color(1.0, 0.92, 0.35, 1.0)
 	tile.add_theme_stylebox_override(&"normal", normal)
 	tile.add_theme_stylebox_override(&"hover", hover)
@@ -600,14 +480,10 @@ func _apply_tile_styles(tile: Button, locked: bool) -> void:
 	tile.add_theme_stylebox_override(&"focus", normal)
 
 
-func _make_cell_style(locked: bool) -> StyleBoxFlat:
+func _make_cell_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	if locked:
-		style.bg_color = Color(0.14, 0.13, 0.12, 0.95)
-		style.border_color = Color(0.32, 0.30, 0.27, 0.9)
-	else:
-		style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
-		style.border_color = Color(0.48, 0.44, 0.38, 1.0)
+	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
+	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(2)
 	style.content_margin_left = 2

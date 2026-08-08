@@ -1,19 +1,15 @@
 extends VBoxContainer
-## Character-menu skills grid (OSRS-style cells + future placeholders).
+## Character-menu skills grid — the 7 live skills in OSRS-style cells.
 ## Displays existing server-provided jobs without changing XP or progression.
 
 const _SkillsHostScript = preload(
 	"res://source/client/ui/compact_menus/compact_skills_host.gd"
 )
-const PLACEHOLDER_ICON_DIR := (
-	"res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/placeholders/"
-)
-const TILE_SIZE := Vector2(96.0, 40.0)
+const TILE_SIZE := Vector2(120.0, 40.0)
 
 @onready var skill_list: VBoxContainer = %SkillList
 
 var _skills: Dictionary = {}
-var _placeholder_icon_cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -62,7 +58,7 @@ func _build_skills_grid() -> void:
 	outer_row.add_child(spacer)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(340, 420)
+	panel.custom_minimum_size = Vector2(280, 280)
 	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	panel.add_theme_stylebox_override(&"panel", _make_panel_style())
 	outer_row.add_child(panel)
@@ -91,33 +87,25 @@ func _build_skills_grid() -> void:
 	content.add_child(title)
 
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 2
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	grid.add_theme_constant_override(&"h_separation", 4)
 	grid.add_theme_constant_override(&"v_separation", 4)
 	content.add_child(grid)
 
-	for slot: Dictionary in _SkillsHostScript.SKILL_SLOTS:
-		var slug: String = str(slot.get("slug", ""))
-		if slug != "" and _skills.has(slug):
+	for slug: String in _SkillsHostScript.SKILL_ORDER:
+		if _skills.has(slug):
 			grid.add_child(_create_skill_tile(slug, _skills[slug]))
-		elif slug != "":
+		else:
 			grid.add_child(
 				_create_skill_tile(
 					slug,
 					{
-						"display_name": str(slot.get("label", slug.capitalize())),
+						"display_name": JobRegistry.display_name(StringName(slug)),
 						"level": 1,
 						"xp": 0,
 						"xp_to_next": 1,
 					}
-				)
-			)
-		else:
-			grid.add_child(
-				_create_placeholder_tile(
-					str(slot.get("label", "?")),
-					str(slot.get("icon", ""))
 				)
 			)
 
@@ -153,9 +141,9 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 			display, level, xp, xp_to_next, remaining
 		]
 	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
-	tile.add_theme_stylebox_override(&"normal", _make_tile_style(false))
-	tile.add_theme_stylebox_override(&"hover", _make_tile_style(false))
-	tile.add_theme_stylebox_override(&"pressed", _make_tile_style(false))
+	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
+	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
+	tile.add_theme_stylebox_override(&"pressed", _make_tile_style())
 
 	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -166,40 +154,11 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	icon.offset_left = 4
 	icon.offset_top = 4
-	icon.offset_right = 34
+	icon.offset_right = 36
 	icon.offset_bottom = -4
 	tile.add_child(icon)
 
 	_add_level_labels(tile, level, Color(1.0, 1.0, 0.0))
-	return tile
-
-
-func _create_placeholder_tile(label: String, icon_file: String) -> Control:
-	var tile := PanelContainer.new()
-	tile.custom_minimum_size = TILE_SIZE
-	tile.tooltip_text = "%s\nComing soon" % label
-	tile.modulate = Color(0.55, 0.55, 0.55, 0.85)
-	tile.add_theme_stylebox_override(&"panel", _make_tile_style(true))
-
-	var root := Control.new()
-	root.custom_minimum_size = TILE_SIZE
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tile.add_child(root)
-
-	var icon := TextureRect.new()
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.texture = _get_placeholder_icon(icon_file)
-	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	icon.offset_left = 4
-	icon.offset_top = 4
-	icon.offset_right = 34
-	icon.offset_bottom = -4
-	root.add_child(icon)
-
-	_add_level_labels(root, 1, Color(0.55, 0.55, 0.35))
 	return tile
 
 
@@ -214,9 +173,9 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	cur.add_theme_constant_override(&"shadow_offset_x", 1)
 	cur.add_theme_constant_override(&"shadow_offset_y", 1)
 	cur.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	cur.offset_left = -36
+	cur.offset_left = -40
 	cur.offset_top = 2
-	cur.offset_right = -8
+	cur.offset_right = -10
 	cur.offset_bottom = 18
 	parent.add_child(cur)
 
@@ -230,7 +189,7 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	base.add_theme_constant_override(&"shadow_offset_x", 1)
 	base.add_theme_constant_override(&"shadow_offset_y", 1)
 	base.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	base.offset_left = -28
+	base.offset_left = -32
 	base.offset_top = -18
 	base.offset_right = -4
 	base.offset_bottom = -2
@@ -242,9 +201,9 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	slash.add_theme_font_size_override(&"font_size", 11)
 	slash.add_theme_color_override(&"font_color", color)
 	slash.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	slash.offset_left = -24
+	slash.offset_left = -28
 	slash.offset_top = -8
-	slash.offset_right = -12
+	slash.offset_right = -16
 	slash.offset_bottom = 8
 	parent.add_child(slash)
 
@@ -303,19 +262,6 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	return null
 
 
-func _get_placeholder_icon(icon_file: String) -> Texture2D:
-	if icon_file.is_empty():
-		return null
-	if _placeholder_icon_cache.has(icon_file):
-		return _placeholder_icon_cache[icon_file]
-	var path := PLACEHOLDER_ICON_DIR + icon_file
-	var tex: Texture2D = null
-	if ResourceLoader.exists(path):
-		tex = load(path) as Texture2D
-	_placeholder_icon_cache[icon_file] = tex
-	return tex
-
-
 func _make_panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.184, 0.173, 0.157, 0.97)
@@ -327,14 +273,10 @@ func _make_panel_style() -> StyleBoxFlat:
 	return style
 
 
-func _make_tile_style(locked: bool) -> StyleBoxFlat:
+func _make_tile_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	if locked:
-		style.bg_color = Color(0.14, 0.13, 0.12, 0.95)
-		style.border_color = Color(0.32, 0.30, 0.27, 0.9)
-	else:
-		style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
-		style.border_color = Color(0.48, 0.44, 0.38, 1.0)
+	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
+	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(2)
 	return style
