@@ -4,83 +4,82 @@
 [ext_resource type="Script" uid="uid://dou76lfuf6clf" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
 [ext_resource type="Script" uid="uid://cgkqi5dwtob32" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
 [ext_resource type="Resource" uid="uid://3vo07t5fjdwo" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="4_cop_ore"]
-[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="5_iron_ore"]
-[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="6_silver_ore"]
-[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="7_gold_ore"]
-[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="8_coal"]
-[ext_resource type="Resource" uid="uid://bvgijymuxvkai" path="res://source/common/gameplay/items/materials/metals/copper_bar.tres" id="9_cop_bar"]
-[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="10_iron_bar"]
-[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="11_silver_bar"]
-[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="12_gold_bar"]
+[ext_resource type="Resource" uid="uid://ctinoremat001" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="5_tin_ore"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="6_iron_ore"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="7_coal"]
+[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="8_silver_ore"]
+[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="9_gold_ore"]
+[ext_resource type="Resource" uid="uid://25erkqwlk35t5" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="10_bronze_bar"]
+[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="11_iron_bar"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="12_steel_bar"]
+[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="13_silver_bar"]
+[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="14_gold_bar"]
 
-[sub_resource type="Resource" id="I_cu_ore"]
+[sub_resource type="Resource" id="I_br_cu"]
 script = ExtResource("3_ingred")
 item = ExtResource("4_cop_ore")
-amount = 4
 
-[sub_resource type="Resource" id="I_cu_coal"]
+[sub_resource type="Resource" id="I_br_sn"]
 script = ExtResource("3_ingred")
-item = ExtResource("8_coal")
-amount = 2
+item = ExtResource("5_tin_ore")
 
-[sub_resource type="Resource" id="R_copper_bar"]
+[sub_resource type="Resource" id="R_bronze_bar"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("9_cop_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cu_ore"), SubResource("I_cu_coal")])
-xp_reward = 4
+output_item = ExtResource("10_bronze_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_cu"), SubResource("I_br_sn")])
+required_level = 1
+xp_reward = 20
 
 [sub_resource type="Resource" id="I_fe_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("5_iron_ore")
-amount = 4
-
-[sub_resource type="Resource" id="I_fe_coal"]
-script = ExtResource("3_ingred")
-item = ExtResource("8_coal")
-amount = 2
+item = ExtResource("6_iron_ore")
 
 [sub_resource type="Resource" id="R_iron_bar"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("10_iron_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_ore"), SubResource("I_fe_coal")])
-xp_reward = 8
+output_item = ExtResource("11_iron_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_ore")])
+required_level = 5
+xp_reward = 30
+
+[sub_resource type="Resource" id="I_st_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("6_iron_ore")
+
+[sub_resource type="Resource" id="I_st_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+
+[sub_resource type="Resource" id="R_steel_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("12_steel_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_ore"), SubResource("I_st_coal")])
+required_level = 8
+xp_reward = 40
 
 [sub_resource type="Resource" id="I_ag_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("6_silver_ore")
-amount = 4
-
-[sub_resource type="Resource" id="I_ag_coal"]
-script = ExtResource("3_ingred")
-item = ExtResource("8_coal")
-amount = 2
+item = ExtResource("8_silver_ore")
 
 [sub_resource type="Resource" id="R_silver_bar"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("11_silver_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_ore"), SubResource("I_ag_coal")])
-required_level = 3
-xp_reward = 12
+output_item = ExtResource("13_silver_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_ore")])
+required_level = 10
+xp_reward = 50
 
 [sub_resource type="Resource" id="I_au_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_gold_ore")
-amount = 4
-
-[sub_resource type="Resource" id="I_au_coal"]
-script = ExtResource("3_ingred")
-item = ExtResource("8_coal")
-amount = 2
+item = ExtResource("9_gold_ore")
 
 [sub_resource type="Resource" id="R_gold_bar"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("12_gold_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_ore"), SubResource("I_au_coal")])
-required_level = 4
-xp_reward = 16
+output_item = ExtResource("14_gold_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_ore")])
+required_level = 15
+xp_reward = 70
 
 [resource]
 script = ExtResource("2_station")
 station_name = "Furnace"
-craft_fee = 5
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_copper_bar"), SubResource("R_iron_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar")])
+craft_fee = 0
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_bronze_bar"), SubResource("R_iron_bar"), SubResource("R_steel_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar")])

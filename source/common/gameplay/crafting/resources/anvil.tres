@@ -3,38 +3,28 @@
 [ext_resource type="Script" uid="uid://btm2w18d3d327" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
 [ext_resource type="Script" uid="uid://dou76lfuf6clf" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
 [ext_resource type="Script" uid="uid://cgkqi5dwtob32" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
-[ext_resource type="Resource" uid="uid://bvgijymuxvkai" path="res://source/common/gameplay/items/materials/metals/copper_bar.tres" id="4_cu"]
-[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="5_fe"]
-[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="6_ag"]
-[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="7_au"]
-[ext_resource type="Resource" uid="uid://q4cf80ltq3o7" path="res://source/common/gameplay/items/gears/metal/copper_helmet.tres" id="10_cu_helm"]
-[ext_resource type="Resource" uid="uid://06eftjbn1jrb" path="res://source/common/gameplay/items/gears/metal/copper_chest.tres" id="11_cu_chest"]
-[ext_resource type="Resource" uid="uid://cdya57kta2v38" path="res://source/common/gameplay/items/gears/metal/copper_boots.tres" id="12_cu_boots"]
-[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="13_fe_helm"]
-[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="14_fe_chest"]
-[ext_resource type="Resource" uid="uid://gjk4hvjre3ox" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="15_fe_boots"]
-[ext_resource type="Resource" uid="uid://dva5dhreyo7oq" path="res://source/common/gameplay/items/gears/metal/silver_helmet.tres" id="16_ag_helm"]
-[ext_resource type="Resource" uid="uid://bx7r2woa6hcaq" path="res://source/common/gameplay/items/gears/metal/silver_chest.tres" id="17_ag_chest"]
-[ext_resource type="Resource" uid="uid://sw7lrve8r4xn" path="res://source/common/gameplay/items/gears/metal/silver_boots.tres" id="18_ag_boots"]
-[ext_resource type="Resource" uid="uid://cfyha2k3evcbd" path="res://source/common/gameplay/items/gears/metal/gold_helmet.tres" id="19_au_helm"]
-[ext_resource type="Resource" uid="uid://cb6byo2q8d4tw" path="res://source/common/gameplay/items/gears/metal/gold_chest.tres" id="20_au_chest"]
-[ext_resource type="Resource" uid="uid://c7y0m821gjf6s" path="res://source/common/gameplay/items/gears/rings/ring_vital_copper.tres" id="30_vit_cu"]
-[ext_resource type="Resource" uid="uid://bl77gx5cq03da" path="res://source/common/gameplay/items/gears/rings/ring_vital_iron.tres" id="31_vit_fe"]
-[ext_resource type="Resource" uid="uid://ck6cv62s6h7vq" path="res://source/common/gameplay/items/gears/rings/ring_vital_silver.tres" id="32_vit_ag"]
-[ext_resource type="Resource" uid="uid://dklvf1ocerpct" path="res://source/common/gameplay/items/gears/rings/ring_vital_gold.tres" id="33_vit_au"]
-[ext_resource type="Resource" uid="uid://q48c6nmayuqg" path="res://source/common/gameplay/items/gears/rings/ring_focus_copper.tres" id="34_foc_cu"]
-[ext_resource type="Resource" uid="uid://cedqcft2ex86n" path="res://source/common/gameplay/items/gears/rings/ring_focus_iron.tres" id="35_foc_fe"]
-[ext_resource type="Resource" uid="uid://dxdcgb62etvpi" path="res://source/common/gameplay/items/gears/rings/ring_focus_silver.tres" id="36_foc_ag"]
-[ext_resource type="Resource" uid="uid://cixc0iyg4fjwl" path="res://source/common/gameplay/items/gears/rings/ring_focus_gold.tres" id="37_foc_au"]
-[ext_resource type="Resource" uid="uid://dg5l3afqqf4kk" path="res://source/common/gameplay/items/gears/rings/ring_agile_copper.tres" id="38_agi_cu"]
-[ext_resource type="Resource" uid="uid://damsgq1j2pyyy" path="res://source/common/gameplay/items/gears/rings/ring_agile_iron.tres" id="39_agi_fe"]
-[ext_resource type="Resource" uid="uid://crli8f7qamv4y" path="res://source/common/gameplay/items/gears/rings/ring_agile_silver.tres" id="40_agi_ag"]
-[ext_resource type="Resource" uid="uid://bauigep73avj7" path="res://source/common/gameplay/items/gears/rings/ring_agile_gold.tres" id="41_agi_au"]
-[ext_resource type="Resource" uid="uid://cn2adklrwpt54" path="res://source/common/gameplay/items/gears/rings/ring_guard_copper.tres" id="42_gua_cu"]
-[ext_resource type="Resource" uid="uid://dpp7igwa0g5tq" path="res://source/common/gameplay/items/gears/rings/ring_guard_iron.tres" id="43_gua_fe"]
-[ext_resource type="Resource" uid="uid://dhip37ume8mm6" path="res://source/common/gameplay/items/gears/rings/ring_guard_silver.tres" id="44_gua_ag"]
-[ext_resource type="Resource" uid="uid://b01u4m663krn6" path="res://source/common/gameplay/items/gears/rings/ring_guard_gold.tres" id="45_gua_au"]
-[ext_resource type="Resource" uid="uid://dut1iwma7xwhi" path="res://source/common/gameplay/items/gears/metal/gold_boots.tres" id="46_au_boots"]
+[ext_resource type="Resource" uid="uid://25erkqwlk35t5" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="10_br_bar"]
+[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="11_fe_bar"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="12_st_bar"]
+[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="13_ag_bar"]
+[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="14_au_bar"]
+[ext_resource type="Resource" uid="uid://2gsl864x53vil" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="20_br_helm"]
+[ext_resource type="Resource" uid="uid://220bc63rtaob7" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="21_br_chest"]
+[ext_resource type="Resource" uid="uid://2q7ip57npoho8" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="22_br_boots"]
+[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="23_fe_helm"]
+[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="24_fe_chest"]
+[ext_resource type="Resource" uid="uid://gjk4hvjre3ox" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="25_fe_boots"]
+[ext_resource type="Resource" uid="uid://3ih0n9l3vzb10" path="res://source/common/gameplay/items/gears/metal/steel_helmet.tres" id="26_st_helm"]
+[ext_resource type="Resource" uid="uid://2sqvuu6o9jrio" path="res://source/common/gameplay/items/gears/metal/steel_chest.tres" id="27_st_chest"]
+[ext_resource type="Resource" uid="uid://274t9kspo2nuo" path="res://source/common/gameplay/items/gears/metal/steel_boots.tres" id="28_st_boots"]
+[ext_resource type="Resource" uid="uid://1lvvopw0erqjg" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_arr"]
+[ext_resource type="Resource" uid="uid://1iiaqnhrs3xsd" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_arr"]
+[ext_resource type="Resource" uid="uid://3f1wcpqzydqkt" path="res://source/common/gameplay/items/materials/metals/steel_arrowheads.tres" id="32_st_arr"]
+[ext_resource type="Resource" uid="uid://vg35b9ctogly" path="res://source/common/gameplay/items/gears/jewelry/silver_necklace.tres" id="40_ag_neck"]
+[ext_resource type="Resource" uid="uid://11c0mdf16j8or" path="res://source/common/gameplay/items/gears/jewelry/silver_ring.tres" id="41_ag_ring"]
+[ext_resource type="Resource" uid="uid://2134ru3aty4tm" path="res://source/common/gameplay/items/gears/jewelry/silver_amulet.tres" id="42_ag_amu"]
+[ext_resource type="Resource" uid="uid://1o2nfx71t7bhn" path="res://source/common/gameplay/items/gears/jewelry/gold_necklace.tres" id="43_au_neck"]
+[ext_resource type="Resource" uid="uid://2d48a9j7xbhbh" path="res://source/common/gameplay/items/gears/jewelry/gold_ring.tres" id="44_au_ring"]
 [ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="50_dr_ore"]
 [ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="51_dr_gem"]
 [ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="52_dr_cloth"]
@@ -42,376 +32,275 @@
 [ext_resource type="Resource" uid="uid://a61a08ff189d4" path="res://source/common/gameplay/items/gears/metal/dragon_chest.tres" id="54_dr_chest"]
 [ext_resource type="Resource" uid="uid://82d10bddb7344" path="res://source/common/gameplay/items/gears/metal/dragon_boots.tres" id="55_dr_boots"]
 
-[sub_resource type="Resource" id="I_cu2a"]
-script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
-amount = 2
+[ext_resource type="Resource" uid="uid://3vo07t5fjdwo" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="60_cop_ore"]
+[ext_resource type="Resource" uid="uid://ctinoremat001" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="61_tin_ore"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="62_iron_ore"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="63_coal"]
+[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="64_silver_ore"]
+[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="65_gold_ore"]
 
-[sub_resource type="Resource" id="R_cu_helm"]
+
+[sub_resource type="Resource" id="I_sm_br_cu"]
+script = ExtResource("3_ingred")
+item = ExtResource("60_cop_ore")
+
+[sub_resource type="Resource" id="I_sm_br_sn"]
+script = ExtResource("3_ingred")
+item = ExtResource("61_tin_ore")
+
+[sub_resource type="Resource" id="R_sm_bronze_bar"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("10_cu_helm")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cu2a")])
+output_item = ExtResource("10_br_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_br_cu"), SubResource("I_sm_br_sn")])
+required_level = 1
+xp_reward = 20
 
-[sub_resource type="Resource" id="I_cu3"]
+[sub_resource type="Resource" id="I_sm_fe"]
 script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
+item = ExtResource("62_iron_ore")
+
+[sub_resource type="Resource" id="R_sm_iron_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("11_fe_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_fe")])
+required_level = 5
+xp_reward = 30
+
+[sub_resource type="Resource" id="I_sm_st_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("62_iron_ore")
+
+[sub_resource type="Resource" id="I_sm_st_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("63_coal")
+
+[sub_resource type="Resource" id="R_sm_steel_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("12_st_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_st_ore"), SubResource("I_sm_st_coal")])
+required_level = 8
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_sm_ag"]
+script = ExtResource("3_ingred")
+item = ExtResource("64_silver_ore")
+
+[sub_resource type="Resource" id="R_sm_silver_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("13_ag_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_ag")])
+required_level = 10
+xp_reward = 50
+
+[sub_resource type="Resource" id="I_sm_au"]
+script = ExtResource("3_ingred")
+item = ExtResource("65_gold_ore")
+
+[sub_resource type="Resource" id="R_sm_gold_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("14_au_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sm_au")])
+required_level = 15
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_br_helm"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
 amount = 3
 
-[sub_resource type="Resource" id="R_cu_chest"]
+[sub_resource type="Resource" id="R_br_helm"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("11_cu_chest")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cu3")])
-xp_reward = 14
+output_item = ExtResource("20_br_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_helm")])
+required_level = 1
+xp_reward = 55
 
-[sub_resource type="Resource" id="I_cu2b"]
+[sub_resource type="Resource" id="I_br_chest"]
 script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
+item = ExtResource("10_br_bar")
+amount = 5
+
+[sub_resource type="Resource" id="R_br_chest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("21_br_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_chest")])
+required_level = 1
+xp_reward = 95
+
+[sub_resource type="Resource" id="I_br_boots"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
 amount = 2
 
-[sub_resource type="Resource" id="R_cu_boots"]
+[sub_resource type="Resource" id="R_br_boots"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("12_cu_boots")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cu2b")])
+output_item = ExtResource("22_br_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_boots")])
+required_level = 1
+xp_reward = 40
 
-[sub_resource type="Resource" id="I_fe3"]
+[sub_resource type="Resource" id="I_br_arr"]
 script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
+item = ExtResource("10_br_bar")
+
+[sub_resource type="Resource" id="R_br_arr"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("30_br_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_arr")])
+required_level = 1
+xp_reward = 20
+
+[sub_resource type="Resource" id="I_fe_helm"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
 amount = 3
 
 [sub_resource type="Resource" id="R_fe_helm"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("13_fe_helm")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe3")])
-required_level = 2
-xp_reward = 20
+output_item = ExtResource("23_fe_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_helm")])
+required_level = 5
+xp_reward = 90
 
-[sub_resource type="Resource" id="I_fe5"]
+[sub_resource type="Resource" id="I_fe_chest"]
 script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
+item = ExtResource("11_fe_bar")
 amount = 5
 
 [sub_resource type="Resource" id="R_fe_chest"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("14_fe_chest")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe5")])
-required_level = 2
-xp_reward = 28
+output_item = ExtResource("24_fe_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_chest")])
+required_level = 5
+xp_reward = 150
 
-[sub_resource type="Resource" id="I_fe2a"]
+[sub_resource type="Resource" id="I_fe_boots"]
 script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
+item = ExtResource("11_fe_bar")
 amount = 2
 
 [sub_resource type="Resource" id="R_fe_boots"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("15_fe_boots")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe2a")])
-required_level = 2
-xp_reward = 18
+output_item = ExtResource("25_fe_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_boots")])
+required_level = 5
+xp_reward = 60
 
-[sub_resource type="Resource" id="I_ag3"]
+[sub_resource type="Resource" id="I_fe_arr"]
 script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 3
+item = ExtResource("11_fe_bar")
 
-[sub_resource type="Resource" id="R_ag_helm"]
+[sub_resource type="Resource" id="R_fe_arr"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("16_ag_helm")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag3")])
-required_level = 3
+output_item = ExtResource("31_fe_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_arr")])
+required_level = 5
 xp_reward = 30
 
-[sub_resource type="Resource" id="I_ag5"]
+[sub_resource type="Resource" id="I_st_helm"]
 script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 5
-
-[sub_resource type="Resource" id="R_ag_chest"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("17_ag_chest")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag5")])
-required_level = 3
-xp_reward = 40
-
-[sub_resource type="Resource" id="I_ag2a"]
-script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 2
-
-[sub_resource type="Resource" id="R_ag_boots"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("18_ag_boots")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag2a")])
-required_level = 3
-xp_reward = 26
-
-[sub_resource type="Resource" id="I_au3"]
-script = ExtResource("3_ingred")
-item = ExtResource("7_au")
+item = ExtResource("12_st_bar")
 amount = 3
 
-[sub_resource type="Resource" id="R_au_helm"]
+[sub_resource type="Resource" id="R_st_helm"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("19_au_helm")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au3")])
-required_level = 4
-xp_reward = 44
+output_item = ExtResource("26_st_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_helm")])
+required_level = 8
+xp_reward = 120
 
-[sub_resource type="Resource" id="I_au5"]
+[sub_resource type="Resource" id="I_st_chest"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_au")
+item = ExtResource("12_st_bar")
 amount = 5
 
-[sub_resource type="Resource" id="R_au_chest"]
+[sub_resource type="Resource" id="R_st_chest"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("20_au_chest")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au5")])
-required_level = 4
-xp_reward = 55
+output_item = ExtResource("27_st_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_chest")])
+required_level = 8
+xp_reward = 200
 
-[sub_resource type="Resource" id="I_au2b"]
+[sub_resource type="Resource" id="I_st_boots"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_au")
+item = ExtResource("12_st_bar")
 amount = 2
 
-[sub_resource type="Resource" id="R_au_boots"]
+[sub_resource type="Resource" id="R_st_boots"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("46_au_boots")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au2b")])
-required_level = 4
+output_item = ExtResource("28_st_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_boots")])
+required_level = 8
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_st_arr"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+
+[sub_resource type="Resource" id="R_st_arr"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("32_st_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_arr")])
+required_level = 8
 xp_reward = 40
 
-[sub_resource type="Resource" id="I_r_cu_a"]
+[sub_resource type="Resource" id="I_ag_neck"]
 script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
-
-[sub_resource type="Resource" id="R_vit_cu"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("30_vit_cu")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_r_cu_a")])
-xp_reward = 6
-
-[sub_resource type="Resource" id="I_r_cu_b"]
-script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
-
-[sub_resource type="Resource" id="R_foc_cu"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("34_foc_cu")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_r_cu_b")])
-xp_reward = 6
-
-[sub_resource type="Resource" id="I_r_cu_c"]
-script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
-
-[sub_resource type="Resource" id="R_agi_cu"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("38_agi_cu")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_r_cu_c")])
-xp_reward = 6
-
-[sub_resource type="Resource" id="I_r_cu_d"]
-script = ExtResource("3_ingred")
-item = ExtResource("4_cu")
-
-[sub_resource type="Resource" id="R_gua_cu"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("42_gua_cu")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_r_cu_d")])
-xp_reward = 6
-
-[sub_resource type="Resource" id="I_up_vit_fe_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("30_vit_cu")
-
-[sub_resource type="Resource" id="I_up_vit_fe_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
+item = ExtResource("13_ag_bar")
 amount = 2
 
-[sub_resource type="Resource" id="R_vit_fe"]
+[sub_resource type="Resource" id="R_ag_neck"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("31_vit_fe")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_vit_fe_ring"), SubResource("I_up_vit_fe_bar")])
-required_level = 2
-xp_reward = 14
+output_item = ExtResource("40_ag_neck")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_neck")])
+required_level = 10
+xp_reward = 140
 
-[sub_resource type="Resource" id="I_up_foc_fe_ring"]
+[sub_resource type="Resource" id="I_ag_ring"]
 script = ExtResource("3_ingred")
-item = ExtResource("34_foc_cu")
+item = ExtResource("13_ag_bar")
 
-[sub_resource type="Resource" id="I_up_foc_fe_bar"]
+[sub_resource type="Resource" id="R_ag_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("41_ag_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_ring")])
+required_level = 10
+xp_reward = 90
+
+[sub_resource type="Resource" id="I_ag_amu"]
 script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
+item = ExtResource("13_ag_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_ag_amu"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("42_ag_amu")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_amu")])
+required_level = 10
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_au_neck"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
 amount = 2
 
-[sub_resource type="Resource" id="R_foc_fe"]
+[sub_resource type="Resource" id="R_au_neck"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("35_foc_fe")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_foc_fe_ring"), SubResource("I_up_foc_fe_bar")])
-required_level = 2
-xp_reward = 14
+output_item = ExtResource("43_au_neck")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_neck")])
+required_level = 15
+xp_reward = 220
 
-[sub_resource type="Resource" id="I_up_agi_fe_ring"]
+[sub_resource type="Resource" id="I_au_ring"]
 script = ExtResource("3_ingred")
-item = ExtResource("38_agi_cu")
+item = ExtResource("14_au_bar")
 
-[sub_resource type="Resource" id="I_up_agi_fe_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
-amount = 2
-
-[sub_resource type="Resource" id="R_agi_fe"]
+[sub_resource type="Resource" id="R_au_ring"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("39_agi_fe")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_agi_fe_ring"), SubResource("I_up_agi_fe_bar")])
-required_level = 2
-xp_reward = 14
-
-[sub_resource type="Resource" id="I_up_gua_fe_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("42_gua_cu")
-
-[sub_resource type="Resource" id="I_up_gua_fe_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("5_fe")
-amount = 2
-
-[sub_resource type="Resource" id="R_gua_fe"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("43_gua_fe")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_gua_fe_ring"), SubResource("I_up_gua_fe_bar")])
-required_level = 2
-xp_reward = 14
-
-[sub_resource type="Resource" id="I_up_vit_ag_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("31_vit_fe")
-
-[sub_resource type="Resource" id="I_up_vit_ag_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 2
-
-[sub_resource type="Resource" id="R_vit_ag"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("32_vit_ag")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_vit_ag_ring"), SubResource("I_up_vit_ag_bar")])
-required_level = 3
-xp_reward = 24
-
-[sub_resource type="Resource" id="I_up_foc_ag_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("35_foc_fe")
-
-[sub_resource type="Resource" id="I_up_foc_ag_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 2
-
-[sub_resource type="Resource" id="R_foc_ag"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("36_foc_ag")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_foc_ag_ring"), SubResource("I_up_foc_ag_bar")])
-required_level = 3
-xp_reward = 24
-
-[sub_resource type="Resource" id="I_up_agi_ag_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("39_agi_fe")
-
-[sub_resource type="Resource" id="I_up_agi_ag_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 2
-
-[sub_resource type="Resource" id="R_agi_ag"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("40_agi_ag")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_agi_ag_ring"), SubResource("I_up_agi_ag_bar")])
-required_level = 3
-xp_reward = 24
-
-[sub_resource type="Resource" id="I_up_gua_ag_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("43_gua_fe")
-
-[sub_resource type="Resource" id="I_up_gua_ag_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("6_ag")
-amount = 2
-
-[sub_resource type="Resource" id="R_gua_ag"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("44_gua_ag")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_gua_ag_ring"), SubResource("I_up_gua_ag_bar")])
-required_level = 3
-xp_reward = 24
-
-[sub_resource type="Resource" id="I_up_vit_au_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("32_vit_ag")
-
-[sub_resource type="Resource" id="I_up_vit_au_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("7_au")
-amount = 2
-
-[sub_resource type="Resource" id="R_vit_au"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("33_vit_au")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_vit_au_ring"), SubResource("I_up_vit_au_bar")])
-required_level = 4
-xp_reward = 36
-
-[sub_resource type="Resource" id="I_up_foc_au_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("36_foc_ag")
-
-[sub_resource type="Resource" id="I_up_foc_au_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("7_au")
-amount = 2
-
-[sub_resource type="Resource" id="R_foc_au"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("37_foc_au")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_foc_au_ring"), SubResource("I_up_foc_au_bar")])
-required_level = 4
-xp_reward = 36
-
-[sub_resource type="Resource" id="I_up_agi_au_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("40_agi_ag")
-
-[sub_resource type="Resource" id="I_up_agi_au_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("7_au")
-amount = 2
-
-[sub_resource type="Resource" id="R_agi_au"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("41_agi_au")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_agi_au_ring"), SubResource("I_up_agi_au_bar")])
-required_level = 4
-xp_reward = 36
-
-[sub_resource type="Resource" id="I_up_gua_au_ring"]
-script = ExtResource("3_ingred")
-item = ExtResource("44_gua_ag")
-
-[sub_resource type="Resource" id="I_up_gua_au_bar"]
-script = ExtResource("3_ingred")
-item = ExtResource("7_au")
-amount = 2
-
-[sub_resource type="Resource" id="R_gua_au"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("45_gua_au")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_gua_au_ring"), SubResource("I_up_gua_au_bar")])
-required_level = 4
-xp_reward = 36
+output_item = ExtResource("44_au_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_ring")])
+required_level = 15
+xp_reward = 180
 
 [sub_resource type="Resource" id="I_drh_ore"]
 script = ExtResource("3_ingred")
@@ -478,6 +367,6 @@ xp_reward = 130
 
 [resource]
 script = ExtResource("2_station")
-station_name = "Anvil"
-craft_fee = 5
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_cu_helm"), SubResource("R_cu_chest"), SubResource("R_cu_boots"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_ag_helm"), SubResource("R_ag_chest"), SubResource("R_ag_boots"), SubResource("R_au_helm"), SubResource("R_au_chest"), SubResource("R_au_boots"), SubResource("R_vit_cu"), SubResource("R_foc_cu"), SubResource("R_agi_cu"), SubResource("R_gua_cu"), SubResource("R_vit_fe"), SubResource("R_foc_fe"), SubResource("R_agi_fe"), SubResource("R_gua_fe"), SubResource("R_vit_ag"), SubResource("R_foc_ag"), SubResource("R_agi_ag"), SubResource("R_gua_ag"), SubResource("R_vit_au"), SubResource("R_foc_au"), SubResource("R_agi_au"), SubResource("R_gua_au"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])
+station_name = "Smithing Table"
+craft_fee = 0
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])

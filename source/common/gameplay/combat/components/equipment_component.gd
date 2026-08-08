@@ -34,6 +34,11 @@ var mounted_nodes: Dictionary[StringName, Node]
 ## pairs applied (baseline ordering isn't guaranteed) still picks them up.
 var _special_ability_ids: Array[int] = [0, 0]
 
+## Server-side ledger of gear modifiers currently applied to stats_component.
+## Blind +/- on GearItem.equip/unequip could desync when a clear was skipped or
+## LevelSync restored an old snapshot; the ledger makes strip/reapply idempotent.
+var _applied_gear_mods: Array[Dictionary] = []
+
 
 func _ready() -> void:
 	slots.slot_changed.connect(_on_slot_changed)
@@ -97,6 +102,7 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 	_clear_slot(slot)
 
 	if item_id == 0:
+		_clamp_vitals_to_max()
 		equipment_changed.emit(slot, 0)
 		return
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
@@ -105,6 +111,7 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 
 	equipped_items[slot] = item
 	item.equip(character)
+	_apply_gear_stats(slot, item)
 	if slot == &"weapon":
 		_apply_special_to_mounted()
 	equipment_changed.emit(slot,  item_id)
@@ -118,10 +125,70 @@ func _apply_special_to_mounted() -> void:
 
 func _clear_slot(slot: StringName) -> void:
 	var item: Item = equipped_items.get(slot, null)
-	
+
 	if item:
 		item.unequip(character)
 	equipped_items.erase(slot)
+	_remove_gear_stats(slot)
+
+
+## Apply GearItem base_modifiers for [param slot], tracking them in the ledger.
+## Safe to call after item.equip(); no-ops on clients and non-gear.
+func _apply_gear_stats(slot: StringName, item: Item) -> void:
+	if item == null or not (item is GearItem):
+		return
+	if character == null or character.multiplayer == null or not character.multiplayer.is_server():
+		return
+	var gear: GearItem = item as GearItem
+	for modifier: StatModifier in gear.base_modifiers:
+		if modifier == null or is_zero_approx(modifier.value):
+			continue
+		var stat: StringName = StringName(modifier.stat_name)
+		character.stats_component.modify_stat(stat, modifier.value)
+		_applied_gear_mods.append({
+			"slot": slot,
+			"stat": stat,
+			"value": float(modifier.value),
+		})
+
+
+## Strip every ledger entry for [param slot] (or all slots when empty).
+func _remove_gear_stats(slot: StringName = &"") -> void:
+	if character == null or character.multiplayer == null or not character.multiplayer.is_server():
+		_applied_gear_mods.clear()
+		return
+	for i: int in range(_applied_gear_mods.size() - 1, -1, -1):
+		var entry: Dictionary = _applied_gear_mods[i]
+		if slot != &"" and entry.get("slot", &"") != slot:
+			continue
+		character.stats_component.modify_stat(
+			StringName(entry["stat"]),
+			-float(entry["value"])
+		)
+		_applied_gear_mods.remove_at(i)
+
+
+## Rebuild gear bonuses from currently equipped items. Use after LevelSync.restore
+## or any path that rewrote live stats without going through slot_changed.
+func reapply_all_gear_stats() -> void:
+	_remove_gear_stats(&"")
+	for slot: StringName in equipped_items:
+		_apply_gear_stats(slot, equipped_items[slot])
+	_clamp_vitals_to_max()
+
+
+func _clamp_vitals_to_max() -> void:
+	if character == null or character.stats_component == null:
+		return
+	if character.multiplayer == null or not character.multiplayer.is_server():
+		return
+	var comps: StatsComponent = character.stats_component
+	var hmax: float = comps.get_stat(Stat.HEALTH_MAX)
+	var mmax: float = comps.get_stat(Stat.MANA_MAX)
+	if comps.get_stat(Stat.HEALTH) > hmax:
+		comps.set_stat(Stat.HEALTH, hmax)
+	if comps.get_stat(Stat.MANA) > mmax:
+		comps.set_stat(Stat.MANA, mmax)
 
 
 static func slot_path(slot: StringName) -> String:
@@ -139,11 +206,17 @@ class EquipmentSlots extends RefCounted:
 
 
 	func _set(property: StringName, value: Variant) -> bool:
-		if typeof(value) != TYPE_INT:
-			return false
+		# Wire / JSON paths sometimes deliver floats (0.0); coerce so unequip
+		# can't silently no-op and leave gear stats applied.
+		var item_id: int = 0
+		match typeof(value):
+			TYPE_INT:
+				item_id = value
+			TYPE_FLOAT:
+				item_id = int(value)
+			_:
+				return false
 
-		values[property] = value
-
-		slot_changed.emit(property, value)
-
+		values[property] = item_id
+		slot_changed.emit(property, item_id)
 		return true

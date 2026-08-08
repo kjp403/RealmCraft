@@ -1,11 +1,12 @@
 extends Control
-## HUD quick slots (keys 1 / 2 / 3): one-press access to anything usable from
-## the bag — weapons and tools EQUIP (with swap), consumables USE — all
-## through the same server-validated item.equip path, so a binding is pure
-## convenience: pressing a slot for an item you no longer own is a no-op.
+## HUD quick slots (keys 1 / 2 / 3): one-press access to bag items — weapons
+## and tools EQUIP (with swap), consumables USE via item.consume so a potion
+## never displaces the held weapon.
 ##
-## Assignment happens in the inventory's detail strip (Hotkey button →
-## SlotPickerOverlay). Bindings persist client-side per character.
+## Assignment:
+##  • Inventory / compact bag → Hotkey / Bind to 1-2-3
+##  • Drag an item from the bag onto a slot button
+## Bindings persist client-side per character.
 
 
 const SLOT_COUNT: int = 3
@@ -24,6 +25,9 @@ func _ready() -> void:
 	for i: int in slot_container.get_child_count():
 		var button: Button = slot_container.get_child(i) as Button
 		button.pressed.connect(_trigger_slot.bind(i))
+		button.set_meta(&"quick_slot_index", i)
+		# Accept inventory / bag drag-drops of potions and gear.
+		button.set_drag_forwarding(Callable(), _quickslot_can_drop.bind(i), _quickslot_drop.bind(i))
 		# Corner key hint that survives the icon replacing the button text.
 		var key_label: Label = Label.new()
 		key_label.text = str(i + 1)
@@ -55,9 +59,18 @@ func _trigger_slot(index: int) -> void:
 	var item: Item = item_shortcuts[index] if index < item_shortcuts.size() else null
 	if item == null:
 		return
-	# Toggle: tapping the slot of whatever you're HOLDING puts it away (1 = sword on,
-	# 1 again = bare hands; a held potion toggles the same way). Consumables drink from
-	# the bag via item.consume so a hotkeyed potion never displaces your weapon.
+	# Potions / food always drink from the bag — never toggle a held copy.
+	if item is ConsumableItem:
+		Client.request_data(
+			&"item.consume",
+			func(result: Dictionary) -> void:
+				_on_item_action_result(result)
+				_after_slot_used(result, index),
+			{"id": int(item.get_meta(&"id", 0))},
+			InstanceClient.current.name
+		)
+		return
+	# Toggle: tapping the slot of whatever you're HOLDING puts it away.
 	if _is_equipped(item):
 		var slot_key: StringName = (item as GearItem).slot.key if item is GearItem else &"weapon"
 		Client.request_data(
@@ -67,11 +80,8 @@ func _trigger_slot(index: int) -> void:
 			InstanceClient.current.name
 		)
 		return
-	var request_name: StringName = &"item.equip"
-	if item is ConsumableItem:
-		request_name = &"item.consume"
 	Client.request_data(
-		request_name,
+		&"item.equip",
 		func(result: Dictionary) -> void:
 			_on_item_action_result(result)
 			_after_slot_used(result, index),
@@ -173,3 +183,36 @@ func _persist() -> void:
 	if not ClientState.settings.data.has(SETTINGS_SECTION):
 		ClientState.settings.data[SETTINGS_SECTION] = {}
 	ClientState.settings.set_value(SETTINGS_SECTION, StringName(str(ClientState.player_id)), out)
+
+
+func _quickslot_can_drop(_at_position: Vector2, data: Variant, _index: int) -> bool:
+	var item: Item = _item_from_drag(data)
+	if item == null:
+		return false
+	return item is ConsumableItem or item is GearItem or item.holdable
+
+
+func _quickslot_drop(_at_position: Vector2, data: Variant, index: int) -> void:
+	var item: Item = _item_from_drag(data)
+	if item == null:
+		return
+	# Move existing binding of the same item off other slots first.
+	for i: int in SLOT_COUNT:
+		if (ClientState.quick_slots.get_key(i) as Item) == item:
+			ClientState.quick_slots.set_key(i, null)
+	ClientState.quick_slots.set_key(index, item)
+	Toaster.toast("Bound %s to key %d." % [item.item_name, index + 1])
+
+
+static func _item_from_drag(data: Variant) -> Item:
+	if data is Item:
+		return data as Item
+	if data is Dictionary:
+		var dict: Dictionary = data
+		var as_item: Variant = dict.get("item", null)
+		if as_item is Item:
+			return as_item as Item
+		var item_id: int = int(dict.get("id", dict.get("item_id", 0)))
+		if item_id > 0:
+			return ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	return null
