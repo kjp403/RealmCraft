@@ -2,17 +2,18 @@ class_name AuthenticationManager
 extends Node
 
 
+const LEGACY_ACCOUNT_COLLECTION: String = "res://source/server/master/account_collection.tres"
+const USER_ACCOUNT_COLLECTION: String = "user://master/account_collection.tres"
+
 var account_collection: AccountResourceCollection
-## Production path (writable). In an exported build res:// is read-only, so
-## ResourceSaver.save() against res:// silently fails and accounts can't
-## persist. Mirrors the world-db split: editor reads/writes res://, exports
-## live under user://. NO seed fallback — production starts blank by design,
-## dev/debug accounts never leak into the live environment.
+## Durable account store. Live/export → user://master/ (survives git deploys).
+## Local editor/dev without --env=live → res:// for convenience.
+## NEVER key this off OS.has_feature("editor") alone — the VPS uses the editor binary.
 var account_collection_path: String:
 	get:
-		if OS.has_feature("editor"):
-			return "res://source/server/master/account_collection.tres"
-		return "user://master/account_collection.tres"
+		if ServerEnvironment.use_user_data_paths():
+			return USER_ACCOUNT_COLLECTION
+		return LEGACY_ACCOUNT_COLLECTION
 var active_accounts: Dictionary[StringName, AccountResource]
 
 
@@ -28,16 +29,22 @@ func generate_random_token() -> String:
 
 
 func create_account(username: String, password: String, is_guest: bool) -> AccountResource:
+	# Guest login is permanently disabled — guestN names previously matched
+	# server_admins.cfg entries and granted free senior_admin.
+	if is_guest:
+		push_warning("Guest account creation is disabled.")
+		return null
 	# Account names are case-insensitive (like Discord) so "John" and "john"
 	# can't both exist. Normalize to lowercase before any lookup / storage.
-	if not is_guest:
-		username = username.strip_edges().to_lower()
-	if not is_guest and username_exists(username):
+	username = username.strip_edges().to_lower()
+	if username_exists(username):
+		return null
+	# Refuse guest* usernames even via normal registration — they used to be
+	# auto-admin via a bad server_admins.cfg entry.
+	if username.begins_with("guest") and username.substr(5).is_valid_int():
+		push_warning("Refusing reserved guest* account name: %s" % username)
 		return null
 	var account_id: int = account_collection.get_new_account_id()
-	if is_guest:
-		username = "guest%d" % account_id
-		password = generate_random_token()
 	# Store only a salted, key-stretched hash — never the plaintext password.
 	var new_account: AccountResource = AccountResource.new()
 	new_account.init(account_id, username, PasswordHasher.hash_password(password))
@@ -49,6 +56,8 @@ func create_account(username: String, password: String, is_guest: bool) -> Accou
 
 
 func load_account_collection() -> void:
+	if ServerEnvironment.use_user_data_paths():
+		ServerEnvironment.migrate_file_if_needed(USER_ACCOUNT_COLLECTION, LEGACY_ACCOUNT_COLLECTION)
 	if ResourceLoader.exists(account_collection_path):
 		account_collection = ResourceLoader.load(account_collection_path)
 	else:
@@ -56,8 +65,7 @@ func load_account_collection() -> void:
 
 
 func save_account_collection() -> void:
-	# Ensure user://master/ exists before the first save in an export build.
-	if not OS.has_feature("editor"):
+	if ServerEnvironment.use_user_data_paths():
 		DirAccess.make_dir_recursive_absolute("user://master")
 	ResourceSaver.save(account_collection, account_collection_path)
 

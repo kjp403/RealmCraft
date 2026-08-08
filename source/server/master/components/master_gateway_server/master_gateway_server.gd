@@ -45,10 +45,11 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				)
 			)
 		"guest":
+			# Guest creation is permanently disabled (see AuthenticationManager).
 			gateway_response.rpc_id(
 				gateway_id,
 				request_id,
-				create_account_request("", "", true)
+				{"error": GatewayAPI.ERR_GUEST_DISABLED, "msg": "Guest login disabled."}
 			)
 		"create_account":
 			gateway_response.rpc_id(

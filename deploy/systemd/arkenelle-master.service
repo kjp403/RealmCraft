@@ -7,7 +7,9 @@ Wants=network-online.target
 Type=simple
 User=arkenelle
 WorkingDirectory=/opt/arkenelle
-ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=master-server
+# --env=live is REQUIRED: the VPS uses the Godot editor binary, so without this
+# flag OS.has_feature("editor") is true and data/admin gates take the unsafe path.
+ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=master-server --env=live
 Restart=always
 RestartSec=3
 

@@ -14,21 +14,50 @@ func start_database(world_info: Dictionary) -> void:
 	WorldSchema.ensure_schema(db)
 	store = WorldStoreSqlite.new(db)
 	mail_store = MailStore.new(db)
+	if ServerEnvironment.is_live():
+		_live_security_scrub_roles()
+
+
+## One-shot wipe of every DB staff role after the /selfadmin breach, then on
+## every live boot strip any senior_admin that somehow got persisted again.
+## Marker lives under user:// so it survives git deploys.
+func _live_security_scrub_roles() -> void:
+	const MARKER: String = "user://.security_roles_scrub_v1"
+	if not FileAccess.file_exists(MARKER):
+		var cleared: int = store.clear_all_persisted_roles()
+		if cleared > 0:
+			push_warning(
+				(
+					"LIVE security: one-shot cleared persisted server_roles on %d character(s). "
+					+ "Owner admin is via server_admins.cfg; re-/grant staff as needed."
+				)
+				% cleared
+			)
+		var marker: FileAccess = FileAccess.open(MARKER, FileAccess.WRITE)
+		if marker != null:
+			marker.store_string("scrubbed at unix %d\n" % int(Time.get_unix_time_from_system()))
+			marker.close()
+	var stripped: int = store.strip_persisted_role("senior_admin")
+	if stripped > 0:
+		push_warning(
+			"LIVE security: stripped persisted senior_admin from %d character(s)." % stripped
+		)
 
 
 func configure_database(world_info: Dictionary) -> void:
 	var file_name: String = (str(world_info["name"]) + ".db").to_lower()
-
-	# Reminder: writing to res:// is fine in editor, NOT in exports.
-	if OS.has_feature("editor"):
-		database_path = "res://source/server/world/data/" + file_name
-	else:
+	var legacy_res_path: String = "res://source/server/world/data/" + file_name
+	# NEVER key this off OS.has_feature("editor") — the VPS runs the editor
+	# binary, so that feature is true in production. Use ServerEnvironment.
+	if ServerEnvironment.use_user_data_paths():
 		database_path = "user://db/" + file_name
+		ServerEnvironment.migrate_sqlite_if_needed(database_path, legacy_res_path)
+	else:
+		database_path = legacy_res_path
 
 
 func open_database() -> void:
-	# Ensure directory exists for user://
-	if not OS.has_feature("editor"):
+	if ServerEnvironment.use_user_data_paths():
 		DirAccess.make_dir_recursive_absolute("user://db")
 
 	db = SQLite.new()

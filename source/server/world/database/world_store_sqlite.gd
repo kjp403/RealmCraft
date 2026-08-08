@@ -206,6 +206,57 @@ func get_role_holders() -> Array:
 	return out
 
 
+## Wipe every persisted staff role. Used once on LIVE after privilege breaches so
+## only AdminConfig (and intentional re-/grants) can elevate anyone. Returns the
+## number of player rows that previously held roles.
+func clear_all_persisted_roles() -> int:
+	var holders: Array = get_role_holders()
+	if holders.is_empty():
+		return 0
+	db.query(
+		"UPDATE players SET server_roles_json='{}' "
+		+ "WHERE server_roles_json IS NOT NULL AND server_roles_json NOT IN ('{}', '');"
+	)
+	for row: Dictionary in holders:
+		print(
+			"Cleared persisted roles for #%d %s (@%s): %s"
+			% [
+				int(row.get("player_id", 0)),
+				str(row.get("name", "")),
+				str(row.get("account", "")),
+				str(row.get("roles", {})),
+			]
+		)
+	return holders.size()
+
+
+## Remove one role key from every player that holds it. Returns rows changed.
+func strip_persisted_role(role: String) -> int:
+	var holders: Array = get_role_holders()
+	var changed: int = 0
+	for row: Dictionary in holders:
+		var roles: Variant = row.get("roles", {})
+		if not (roles is Dictionary) or not (roles as Dictionary).has(role):
+			continue
+		var next_roles: Dictionary = (roles as Dictionary).duplicate()
+		next_roles.erase(role)
+		db.query_with_bindings(
+			"UPDATE players SET server_roles_json=? WHERE player_id=?;",
+			[JSON.stringify(next_roles), int(row.get("player_id", 0))]
+		)
+		changed += 1
+		print(
+			"Stripped role '%s' from #%d %s (@%s)"
+			% [
+				role,
+				int(row.get("player_id", 0)),
+				str(row.get("name", "")),
+				str(row.get("account", "")),
+			]
+		)
+	return changed
+
+
 ## Returns the persisted ownership of a flag, or {} if no row exists (flag never
 ## captured — treat as unowned, full HP, no grace period).
 func get_flag_state(flag_id: int) -> Dictionary:

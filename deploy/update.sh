@@ -30,6 +30,10 @@ sudo -u "$APP_USER" git -C "$APP_DIR" clean -fd
 echo "==> Importing Godot assets"
 sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import
 
+echo "==> Refreshing systemd units (keeps --env=live and other ExecStart flags current)"
+install -m 0644 "$APP_DIR"/deploy/systemd/arkenelle-*.service /etc/systemd/system/
+systemctl daemon-reload
+
 echo "==> Restarting game services"
 systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
 

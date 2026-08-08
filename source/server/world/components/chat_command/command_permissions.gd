@@ -6,6 +6,10 @@ class_name CommandPermissions
 ##   - the role granted live via the admin config file (AdminConfig), if any.
 ## A command runs when its command_priority is <= that effective priority
 ## (command_priority <= 0 means "anyone").
+##
+## LIVE hardening: senior_admin can NEVER come from the DB — only from
+## AdminConfig. That closes the old /selfadmin → autosave → permanent
+## senior_admin persistence path even if a stale role row somehow remains.
 
 
 ## The highest role priority this player effectively has.
@@ -15,6 +19,8 @@ static func effective_priority(player: PlayerResource, instance: ServerInstance)
 
 	var best: int = 0
 	for role: String in player.server_roles:
+		if _db_role_blocked(role):
+			continue
 		best = maxi(best, _role_priority(instance, role))
 
 	# Live, non-persisted grant from the owner's admin config file.
@@ -33,6 +39,8 @@ static func effective_role_slug(player: PlayerResource, instance: ServerInstance
 	var best_priority: int = 0
 	var best_role: String = ""
 	for role: String in player.server_roles:
+		if _db_role_blocked(role):
+			continue
 		var p: int = _role_priority(instance, role)
 		if p > best_priority:
 			best_priority = p
@@ -57,6 +65,14 @@ static func can_run(command: ChatCommand, player: PlayerResource, instance: Serv
 	if command.command_priority <= 0:
 		return true
 	return command.command_priority <= effective_priority(player, instance)
+
+
+static func _db_role_blocked(role: String) -> bool:
+	# On live servers, DB-held senior_admin is ignored. Owner bootstrap is
+	# AdminConfig-only. Local/dev keeps DB senior_admin for testing.
+	if role == "senior_admin" and ServerEnvironment.is_live():
+		return true
+	return false
 
 
 static func _role_priority(instance: ServerInstance, role: String) -> int:

@@ -7,6 +7,9 @@ class_name AdminConfig
 ## bundled "res://data/config/server_admins.cfg". Format (role names come from ServerRoles):
 ##   [admins]
 ##   MyAccount="senior_admin"
+##
+## SECURITY: guest* account names are never honored — they previously matched auto-created
+## guest logins and granted free senior_admin.
 
 const USER_PATH: String = "user://server_admins.cfg"
 const RES_PATH: String = "res://data/config/server_admins.cfg"
@@ -37,6 +40,14 @@ static func reload() -> void:
 	_loaded = false
 
 
+static func _is_forbidden_account(account: String) -> bool:
+	var key: String = account.to_lower()
+	# guest1, guest2, … — auto-created guest usernames.
+	if key.begins_with("guest") and key.substr(5).is_valid_int():
+		return true
+	return false
+
+
 static func _load() -> void:
 	_loaded = true
 	var config: ConfigFile = ConfigFile.new()
@@ -44,4 +55,13 @@ static func _load() -> void:
 	if config.load(path) != OK or not config.has_section("admins"):
 		return
 	for account: String in config.get_section_keys("admins"):
-		_roles[account.to_lower()] = str(config.get_value("admins", account, ""))
+		if _is_forbidden_account(account):
+			push_warning(
+				"AdminConfig: ignoring forbidden guest* admin entry '%s' in %s"
+				% [account, path]
+			)
+			continue
+		var role: String = str(config.get_value("admins", account, "")).strip_edges()
+		if role.is_empty():
+			continue
+		_roles[account.to_lower()] = role
