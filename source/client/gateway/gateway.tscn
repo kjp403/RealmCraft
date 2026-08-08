@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://5wv1gfwppcnf"]
 
 [ext_resource type="Script" uid="uid://ch86ljq7iwgv8" path="res://source/client/gateway/gateway.gd" id="2_74q4y"]
-[ext_resource type="Texture2D" uid="uid://bi8hsu6rwyey1" path="res://source/client/gateway/RealmCraft_logo_cropped_transparent.png" id="3_sg1qr"]
+[ext_resource type="Texture2D" uid="uid://bi8hsu6rwyey1" path="res://source/client/gateway/Arkenelle_logo_cropped_transparent.png" id="3_sg1qr"]
 [ext_resource type="Texture2D" uid="uid://cl572rmxiaw1m" path="res://assets/sprites/ui/backgrounds/fairy_forest.png" id="4_uvr2v"]
 [ext_resource type="FontFile" uid="uid://cehc3gujked8x" path="res://assets/fonts/Cinzel/static/Cinzel-Bold.ttf" id="5_opc3y"]
 [ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="6_g2eid"]
