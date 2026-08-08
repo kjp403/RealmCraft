@@ -405,6 +405,8 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	var job := JobRegistry.perks_for(StringName(skill_name))
 	if job == null:
 		return null
+	if job.icon != null:
+		return job.icon
 	if not job.source_items.is_empty() and job.source_items[0] != null:
 		return job.source_items[0].item_icon
 	if not job.recipe_items.is_empty() and job.recipe_items[0] != null:

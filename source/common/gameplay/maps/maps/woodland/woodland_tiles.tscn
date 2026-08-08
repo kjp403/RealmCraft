@@ -30,6 +30,12 @@
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
+[ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="31_ntree"]
+[ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="32_otree"]
+[ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="33_wtree"]
+[ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
+[ext_resource type="Resource" uid="uid://csilvervein001" path="res://source/common/gameplay/maps/components/mineable_nodes/silver_vein.tres" id="35_silver"]
+[ext_resource type="Resource" uid="uid://cgoldvein00001" path="res://source/common/gameplay/maps/components/mineable_nodes/gold_vein.tres" id="36_gold"]
 
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
@@ -553,7 +559,7 @@ tile_set = SubResource("tileset")
 
 [node name="Trees" type="TileMapLayer" parent="." unique_id=2136582253]
 y_sort_enabled = true
-tile_map_data = PackedByteArray("AAAFAA0ABgAHAAAAAAAFACcAAwAGAAAAAAAFADgAAwACAAQAAAAFAD8ABQAAAAAAAAAFAEcABQAAAAgAAAAGAC8AAwAFAAYAAAAGAE8AAwAEAAMAAAAGAFYAAwAEAAIAAAAIAC0ABQAAAAgAAAAJACAAAwAAAAIAAAAJAE8AAwAAAAcAAAAKADsAAwAGAAAAAAALABsAAwACAAQAAAALADcAAwACAAQAAAAQAEUABAADAAYAAAAQAEwABgAHAAAAAAAVABwABQAAAAAAAAAVACoAAwAEAAYAAAAYAFcAAwACAAQAAAAZAEcAAwABAAIAAAAcAE0ABQAAAAAAAAAdACAAAwAFAAYAAAAdACcABgAHAAoAAAAdAEMAAwAFAAIAAAAfADQABQAUAAQAAAAfAEcABAADAAAAAAAgABgAAwAFAAIAAAAgABwAAwACAAQAAAAjABsABAAAAAYAAAAnAD4ABQAFAAgAAAAnAEsAAwAGAAQAAAAoAEYAAwAFAAIAAAAsAAoAAwAGAAQAAAAtACkABAADAAAAAAAwAA0AAwAAAAcAAAAwACgAAwAGAAQAAAAxAA8AAwAGAAQAAAAyACAAAwAEAAIAAAAyAEsABAAAAAAAAAAzAAsAAwABAAIAAAA0ACkAAwACAAQAAAA2ACEAAwAEAAcAAAA2AEoAAwAEAAYAAAA5AAkABAAAAAAAAABBAEIABQAUAAwAAABEADgAAwABAAYAAABEADwABgAHAAAAAABGAAkAAwACAAAAAABIAAwAAwACAAQAAABKAAwAAwAGAAQAAABKACEAAwABAAIAAABLABAAAwAFAAYAAABLACUAAwACAAAAAABMAE4AAwAGAAQAAABMAFQAAwACAAAAAABNAAsAAwABAAIAAABNAA8AAwAFAAYAAABNACAAAwACAAQAAABNAEcAAwAGAAAAAABQAD0AAwACAAAAAABQAFcAAwAFAAYAAABRAB4AAwACAAQAAABSADYABAAAAAYAAABSADwAAwABAAIAAABUAAkAAwAFAAIAAABYADUAAwAGAAAAAABcADIAAwAGAAQAAABcAEoABAAAAAAAAABfAAoAAwACAAQAAABgACMAAwACAAAAAABjACYABgAJABQAAABjAC4ABAADAAAAAABjADkAAwAEAAYAAABmADAAAwACAAQAAABnAAkAAwABAAYAAABnAFgAAwABAAYAAABoAD4AAwACAAQAAABpACkAAwABAAIAAABpADgAAwAFAAYAAABqACkAAwAGAAAAAABrAC4AAwACAAQAAABsABQAAwAEAAcAAABtACcAAwAAAAMAAABtAEEAAwACAAAAAABuABoABgAAAAAAAABuADMAAwAGAAAAAABuAFcAAwAFAAYAAABvABMAAwACAAQAAABvACYAAwABAAYAAABvADkAAwACAAQAAABvAFcAAwAGAAQAAABwACgAAwACAAAAAABxAAkAAwAEAAYAAABxAEQAAwABAAYAAAByACsABAAAAAYAAAB4ACIAAwAFAAYAAAB5AA0AAwAGAAAAAAB5ACUABQAFAAgAAAB5AFgAAwAAAAcAAAB8AEMAAwACAAAAAAB+AAoAAwAAAAIAAAB+AC8AAwAAAAMAAAB+ADkAAwABAAYAAAB/ADkAAwAFAAYAAAB/AEQAAwAGAAAAAACAAEkAAwAFAAYAAACAAE4AAwAGAAQAAAA=")
+tile_map_data = PackedByteArray()
 tile_set = SubResource("tileset")
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." unique_id=487766068 node_paths=PackedStringArray("id_to_node", "node_to_id")]
@@ -826,6 +832,356 @@ data = ExtResource("28_svn3l")
 [node name="SecretHerbNode" parent="MineableNodes" unique_id=548743243 instance=ExtResource("7_jiw8u")]
 position = Vector2(2760, 680)
 data = ExtResource("28_svn3l")
+
+[node name="Tree1" parent="MineableNodes" unique_id=1900000101 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(712, 168)
+data = ExtResource("31_ntree")
+
+[node name="Tree2" parent="MineableNodes" unique_id=1900000102 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(824, 184)
+data = ExtResource("31_ntree")
+
+[node name="Tree3" parent="MineableNodes" unique_id=1900000103 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1240, 248)
+data = ExtResource("31_ntree")
+
+[node name="Tree4" parent="MineableNodes" unique_id=1900000104 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1784, 312)
+data = ExtResource("31_ntree")
+
+[node name="Tree5" parent="MineableNodes" unique_id=1900000105 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(520, 392)
+data = ExtResource("31_ntree")
+
+[node name="Tree6" parent="MineableNodes" unique_id=1900000106 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(184, 440)
+data = ExtResource("31_ntree")
+
+[node name="Tree7" parent="MineableNodes" unique_id=1900000107 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1304, 488)
+data = ExtResource("31_ntree")
+
+[node name="Tree8" parent="MineableNodes" unique_id=1900000108 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(472, 520)
+data = ExtResource("31_ntree")
+
+[node name="Tree9" parent="MineableNodes" unique_id=1900000109 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(808, 520)
+data = ExtResource("31_ntree")
+
+[node name="Tree10" parent="MineableNodes" unique_id=1900000110 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1928, 552)
+data = ExtResource("31_ntree")
+
+[node name="Tree11" parent="MineableNodes" unique_id=1900000111 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1544, 568)
+data = ExtResource("31_ntree")
+
+[node name="Tree12" parent="MineableNodes" unique_id=1900000112 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1208, 600)
+data = ExtResource("31_ntree")
+
+[node name="Tree13" parent="MineableNodes" unique_id=1900000113 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1784, 616)
+data = ExtResource("31_ntree")
+
+[node name="Tree14" parent="MineableNodes" unique_id=1900000114 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(88, 632)
+data = ExtResource("31_ntree")
+
+[node name="Tree15" parent="MineableNodes" unique_id=1900000115 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(776, 648)
+data = ExtResource("31_ntree")
+
+[node name="Tree16" parent="MineableNodes" unique_id=1900000116 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1688, 664)
+data = ExtResource("31_ntree")
+
+[node name="Tree17" parent="MineableNodes" unique_id=1900000117 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(344, 680)
+data = ExtResource("31_ntree")
+
+[node name="Tree18" parent="MineableNodes" unique_id=1900000118 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(104, 760)
+data = ExtResource("31_ntree")
+
+[node name="Tree19" parent="MineableNodes" unique_id=1900000119 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1640, 776)
+data = ExtResource("31_ntree")
+
+[node name="Tree20" parent="MineableNodes" unique_id=1900000120 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1480, 808)
+data = ExtResource("31_ntree")
+
+[node name="Tree21" parent="MineableNodes" unique_id=1900000121 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1768, 824)
+data = ExtResource("31_ntree")
+
+[node name="Tree22" parent="MineableNodes" unique_id=1900000122 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(184, 888)
+data = ExtResource("31_ntree")
+
+[node name="Tree23" parent="MineableNodes" unique_id=1900000123 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(88, 904)
+data = ExtResource("31_ntree")
+
+[node name="Tree24" parent="MineableNodes" unique_id=1900000124 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1096, 904)
+data = ExtResource("31_ntree")
+
+[node name="Tree25" parent="MineableNodes" unique_id=1900000125 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1688, 904)
+data = ExtResource("31_ntree")
+
+[node name="Tree26" parent="MineableNodes" unique_id=1900000126 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1592, 920)
+data = ExtResource("31_ntree")
+
+[node name="Tree27" parent="MineableNodes" unique_id=1900000127 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1784, 920)
+data = ExtResource("31_ntree")
+
+[node name="Tree28" parent="MineableNodes" unique_id=1900000128 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1320, 968)
+data = ExtResource("31_ntree")
+
+[node name="Tree29" parent="MineableNodes" unique_id=1900000129 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1672, 1000)
+data = ExtResource("31_ntree")
+
+[node name="Tree30" parent="MineableNodes" unique_id=1900000130 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(472, 1080)
+data = ExtResource("31_ntree")
+
+[node name="Tree31" parent="MineableNodes" unique_id=1900000131 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1992, 1080)
+data = ExtResource("31_ntree")
+
+[node name="Tree32" parent="MineableNodes" unique_id=1900000132 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1816, 1096)
+data = ExtResource("31_ntree")
+
+[node name="Tree33" parent="MineableNodes" unique_id=1900000133 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(648, 1128)
+data = ExtResource("31_ntree")
+
+[node name="Tree34" parent="MineableNodes" unique_id=1900000134 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1240, 1144)
+data = ExtResource("31_ntree")
+
+[node name="Tree35" parent="MineableNodes" unique_id=1900000135 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(872, 1192)
+data = ExtResource("31_ntree")
+
+[node name="Tree36" parent="MineableNodes" unique_id=1900000136 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1224, 1256)
+data = ExtResource("31_ntree")
+
+[node name="Tree37" parent="MineableNodes" unique_id=1900000137 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(104, 1272)
+data = ExtResource("31_ntree")
+
+[node name="Tree38" parent="MineableNodes" unique_id=1900000138 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(392, 1400)
+data = ExtResource("31_ntree")
+
+[node name="Tree39" parent="MineableNodes" unique_id=1900000139 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1288, 1400)
+data = ExtResource("31_ntree")
+
+[node name="Tree40" parent="MineableNodes" unique_id=1900000140 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1768, 1400)
+data = ExtResource("31_ntree")
+
+[node name="Tree41" parent="MineableNodes" unique_id=1900000141 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1656, 1416)
+data = ExtResource("31_ntree")
+
+[node name="OakTree1" parent="MineableNodes" unique_id=1900000142 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(920, 152)
+data = ExtResource("32_otree")
+
+[node name="OakTree2" parent="MineableNodes" unique_id=1900000143 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(568, 440)
+data = ExtResource("32_otree")
+
+[node name="OakTree3" parent="MineableNodes" unique_id=1900000144 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(728, 664)
+data = ExtResource("32_otree")
+
+[node name="OakTree4" parent="MineableNodes" unique_id=1900000145 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1832, 696)
+data = ExtResource("32_otree")
+
+[node name="OakTree5" parent="MineableNodes" unique_id=1900000146 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1592, 744)
+data = ExtResource("32_otree")
+
+[node name="OakTree6" parent="MineableNodes" unique_id=1900000147 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1320, 872)
+data = ExtResource("32_otree")
+
+[node name="OakTree7" parent="MineableNodes" unique_id=1900000148 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(264, 1112)
+data = ExtResource("32_otree")
+
+[node name="OakTree8" parent="MineableNodes" unique_id=1900000149 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(504, 1144)
+data = ExtResource("32_otree")
+
+[node name="OakTree9" parent="MineableNodes" unique_id=1900000150 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1480, 1192)
+data = ExtResource("32_otree")
+
+[node name="OakTree10" parent="MineableNodes" unique_id=1900000151 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(808, 1208)
+data = ExtResource("32_otree")
+
+[node name="WillowTree1" parent="MineableNodes" unique_id=1900000152 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(344, 456)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree2" parent="MineableNodes" unique_id=1900000153 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1944, 600)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree3" parent="MineableNodes" unique_id=1900000154 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(136, 728)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree4" parent="MineableNodes" unique_id=1900000155 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(504, 840)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree5" parent="MineableNodes" unique_id=1900000156 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(632, 1000)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree6" parent="MineableNodes" unique_id=1900000157 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(88, 1016)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree7" parent="MineableNodes" unique_id=1900000158 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1048, 1064)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree8" parent="MineableNodes" unique_id=1900000159 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(88, 1144)
+data = ExtResource("33_wtree")
+
+[node name="WillowTree9" parent="MineableNodes" unique_id=1900000160 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(456, 1240)
+data = ExtResource("33_wtree")
+
+[node name="MapleTree1" parent="MineableNodes" unique_id=1900000161 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(88, 216)
+data = ExtResource("34_mtree")
+
+[node name="MapleTree2" parent="MineableNodes" unique_id=1900000162 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1768, 424)
+data = ExtResource("34_mtree")
+
+[node name="MapleTree3" parent="MineableNodes" unique_id=1900000163 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1592, 616)
+data = ExtResource("34_mtree")
+
+[node name="MapleTree4" parent="MineableNodes" unique_id=1900000164 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(472, 632)
+data = ExtResource("34_mtree")
+
+[node name="MapleTree5" parent="MineableNodes" unique_id=1900000165 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1096, 968)
+data = ExtResource("34_mtree")
+
+[node name="MapleTree6" parent="MineableNodes" unique_id=1900000166 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(264, 1224)
+data = ExtResource("34_mtree")
+
+[node name="SilverVein1" parent="MineableNodes" unique_id=1900000167 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(400, 480)
+data = ExtResource("35_silver")
+
+[node name="SilverVein2" parent="MineableNodes" unique_id=1900000168 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1560, 520)
+data = ExtResource("35_silver")
+
+[node name="GoldVein1" parent="MineableNodes" unique_id=1900000169 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1880, 640)
+data = ExtResource("36_gold")
+
+[node name="GoldVein2" parent="MineableNodes" unique_id=1900000170 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(240, 720)
+data = ExtResource("36_gold")
 
 [node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
 position = Vector2(900, 1520)

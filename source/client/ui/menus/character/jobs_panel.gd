@@ -291,6 +291,9 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	if job == null:
 		return null
 
+	if job.icon != null:
+		return job.icon
+
 	if not job.source_items.is_empty():
 		var source_item: Item = job.source_items[0]
 		if source_item != null:

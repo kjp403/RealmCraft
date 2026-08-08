@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi8hsu6rwyey1"
-path="res://.godot/imported/Arkenelle_logo_cropped_transparent.png-87d05bef214f32102cbb05f6c3a21a06.ctex"
+uid="uid://csk3ca6257488"
+path="res://.godot/imported/Cooking.png-c6611738a457bdf73813313cb8f0513f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://source/client/gateway/Arkenelle_logo_cropped_transparent.png"
-dest_files=["res://.godot/imported/Arkenelle_logo_cropped_transparent.png-87d05bef214f32102cbb05f6c3a21a06.ctex"]
+source_file="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Cooking.png"
+dest_files=["res://.godot/imported/Cooking.png-c6611738a457bdf73813313cb8f0513f.ctex"]
 
 [params]
 

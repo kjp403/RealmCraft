@@ -315,7 +315,7 @@ func _on_gather_result(data: Dictionary) -> void:
 	var job_slug: String = str(data.get("job", "mining"))
 	var title: String = "Caught" if job_slug == "fishing" else (
 		"Chopped" if job_slug == "woodcutting" else (
-			"Harvested" if job_slug == "harvesting" else "Mined"
+			"Farmed" if job_slug == "harvesting" else "Mined"
 		)
 	)
 

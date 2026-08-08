@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi8hsu6rwyey1"
-path="res://.godot/imported/Arkenelle_logo_cropped_transparent.png-87d05bef214f32102cbb05f6c3a21a06.ctex"
+uid="uid://cskfb3437ad75"
+path="res://.godot/imported/Fishing.png-ff53a9a9bbe1f4febe06ad23a085ed2e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://source/client/gateway/Arkenelle_logo_cropped_transparent.png"
-dest_files=["res://.godot/imported/Arkenelle_logo_cropped_transparent.png-87d05bef214f32102cbb05f6c3a21a06.ctex"]
+source_file="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Fishing.png"
+dest_files=["res://.godot/imported/Fishing.png-ff53a9a9bbe1f4febe06ad23a085ed2e.ctex"]
 
 [params]
 

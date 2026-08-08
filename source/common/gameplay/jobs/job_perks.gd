@@ -25,6 +25,9 @@ extends Resource
 
 @export var job_slug: StringName
 @export var display_name: String
+## Optional dedicated skill icon (OSRS-style). When set, Skills UI prefers
+## this over falling back to the first gather/recipe item icon.
+@export var icon: Texture2D
 ## &"gathering" or &"crafting" — drives Jobs-panel grouping.
 @export var category: StringName
 ## Sort order WITHIN the category (lower = higher in the list). Lets us
