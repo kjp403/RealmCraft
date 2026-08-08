@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="JobPerks" format=3 uid="uid://byow6smgh482j"]
 
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
-[ext_resource type="Texture2D" uid="uid://cskcraft001" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Crafting.png" id="icon_tex"]
+[ext_resource type="Texture2D" uid="uid://csk8c1a0a6a6c" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Crafting.png" id="icon_tex"]
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_u1igm"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/cloth/cloth_hood.tres" id="2_hood"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/leather_jacket.tres" id="3_jacket"]

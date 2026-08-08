@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_8yfjc"]
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
-[ext_resource type="Texture2D" uid="uid://cskfarm0001" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Farming.png" id="icon_tex"]
+[ext_resource type="Texture2D" uid="uid://csk236a261024" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Farming.png" id="icon_tex"]
 [ext_resource type="Resource" uid="uid://d2dopgtbgmdii" path="res://source/common/gameplay/items/materials/herbs/healing_herb.tres" id="3_00t3y"]
 
 [resource]

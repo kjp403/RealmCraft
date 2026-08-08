@@ -1,10 +1,19 @@
 extends VBoxContainer
-## Compact skills grid.
+## Character-menu skills grid (OSRS-style cells + future placeholders).
 ## Displays existing server-provided jobs without changing XP or progression.
+
+const _SkillsHostScript = preload(
+	"res://source/client/ui/compact_menus/compact_skills_host.gd"
+)
+const PLACEHOLDER_ICON_DIR := (
+	"res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/placeholders/"
+)
+const TILE_SIZE := Vector2(96.0, 40.0)
 
 @onready var skill_list: VBoxContainer = %SkillList
 
 var _skills: Dictionary = {}
+var _placeholder_icon_cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -48,26 +57,25 @@ func _build_skills_grid() -> void:
 	outer_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	skill_list.add_child(outer_row)
 
-	# This spacer pushes the compact panel toward the right side.
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	outer_row.add_child(spacer)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(360, 410)
+	panel.custom_minimum_size = Vector2(340, 420)
 	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	panel.add_theme_stylebox_override(&"panel", _make_panel_style())
 	outer_row.add_child(panel)
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override(&"margin_left", 14)
-	margin.add_theme_constant_override(&"margin_top", 12)
-	margin.add_theme_constant_override(&"margin_right", 14)
-	margin.add_theme_constant_override(&"margin_bottom", 14)
+	margin.add_theme_constant_override(&"margin_left", 10)
+	margin.add_theme_constant_override(&"margin_top", 10)
+	margin.add_theme_constant_override(&"margin_right", 10)
+	margin.add_theme_constant_override(&"margin_bottom", 10)
 	panel.add_child(margin)
 
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override(&"separation", 10)
+	content.add_theme_constant_override(&"separation", 8)
 	margin.add_child(content)
 
 	var total_level := 0
@@ -76,83 +84,68 @@ func _build_skills_grid() -> void:
 		total_level += int(info.get("level", 1))
 
 	var title := Label.new()
-	title.text = "Skills — Total Lv %d" % total_level
+	title.text = "Skills"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override(&"font_size", 18)
-	title.add_theme_color_override(
-		&"font_color",
-		Color(0.96, 0.82, 0.55)
-	)
+	title.add_theme_font_size_override(&"font_size", 16)
+	title.add_theme_color_override(&"font_color", Color(0.98, 0.92, 0.35))
 	content.add_child(title)
 
-	content.add_child(HSeparator.new())
-
 	var grid := GridContainer.new()
-	grid.columns = 4
+	grid.columns = 3
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	grid.add_theme_constant_override(&"h_separation", 7)
-	grid.add_theme_constant_override(&"v_separation", 7)
+	grid.add_theme_constant_override(&"h_separation", 4)
+	grid.add_theme_constant_override(&"v_separation", 4)
 	content.add_child(grid)
 
-	var entries: Array = []
-
-	for skill_name in _skills:
-		entries.append({
-			"slug": String(skill_name),
-			"info": _skills[skill_name]
-		})
-
-	entries.sort_custom(_sort_skills)
-
-	for entry in entries:
-		grid.add_child(
-			_create_skill_tile(
-				entry["slug"],
-				entry["info"]
+	for slot: Dictionary in _SkillsHostScript.SKILL_SLOTS:
+		var slug: String = str(slot.get("slug", ""))
+		if slug != "" and _skills.has(slug):
+			grid.add_child(_create_skill_tile(slug, _skills[slug]))
+		elif slug != "":
+			grid.add_child(
+				_create_skill_tile(
+					slug,
+					{
+						"display_name": str(slot.get("label", slug.capitalize())),
+						"level": 1,
+						"xp": 0,
+						"xp_to_next": 1,
+					}
+				)
 			)
-		)
+		else:
+			grid.add_child(
+				_create_placeholder_tile(
+					str(slot.get("label", "?")),
+					str(slot.get("icon", ""))
+				)
+			)
 
-	# Add locked-looking empty spaces until the grid contains 16 tiles.
-	while grid.get_child_count() < 16:
-		grid.add_child(_create_locked_tile())
-
-
-func _sort_skills(a: Dictionary, b: Dictionary) -> bool:
-	var a_info: Dictionary = a["info"]
-	var b_info: Dictionary = b["info"]
-
-	var a_category := String(a_info.get("category", ""))
-	var b_category := String(b_info.get("category", ""))
-
-	var a_category_order := 0 if a_category == "gathering" else 1
-	var b_category_order := 0 if b_category == "gathering" else 1
-
-	if a_category_order != b_category_order:
-		return a_category_order < b_category_order
-
-	return int(a_info.get("order", 0)) < int(
-		b_info.get("order", 0)
-	)
+	var total_panel := PanelContainer.new()
+	total_panel.add_theme_stylebox_override(&"panel", _make_total_bar_style())
+	var total_label := Label.new()
+	total_label.text = "Total level: %d" % total_level
+	total_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	total_label.add_theme_font_size_override(&"font_size", 13)
+	total_label.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
+	total_panel.add_child(total_label)
+	content.add_child(total_panel)
 
 
-func _create_skill_tile(
-	skill_name: String,
-	info: Dictionary
-) -> Control:
+func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))
 	var raw_next: int = int(info.get("xp_to_next", 1))
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
-	var display: String = str(
-		info.get("display_name", skill_name.capitalize())
-	)
+	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 
 	var tile := Button.new()
-	tile.custom_minimum_size = Vector2(76, 88)
+	tile.custom_minimum_size = TILE_SIZE
 	tile.focus_mode = Control.FOCUS_NONE
 	tile.clip_contents = true
+	tile.flat = true
 	if at_cap:
 		tile.tooltip_text = "%s\nLv %d — Max level\nClick for sources" % [display, level]
 	else:
@@ -160,69 +153,100 @@ func _create_skill_tile(
 			display, level, xp, xp_to_next, remaining
 		]
 	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
-	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
-	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
-	tile.add_theme_stylebox_override(&"pressed", _make_tile_style())
-
-	var stack := VBoxContainer.new()
-	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.add_theme_constant_override(&"separation", 1)
-	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	stack.offset_left = 4
-	stack.offset_top = 4
-	stack.offset_right = -4
-	stack.offset_bottom = -4
-	tile.add_child(stack)
+	tile.add_theme_stylebox_override(&"normal", _make_tile_style(false))
+	tile.add_theme_stylebox_override(&"hover", _make_tile_style(false))
+	tile.add_theme_stylebox_override(&"pressed", _make_tile_style(false))
 
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(40, 40)
-	icon.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.texture = _get_skill_icon(skill_name)
-	stack.add_child(icon)
+	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	icon.offset_left = 4
+	icon.offset_top = 4
+	icon.offset_right = 34
+	icon.offset_bottom = -4
+	tile.add_child(icon)
 
-	if icon.texture == null:
-		var fallback := Label.new()
-		fallback.text = skill_name.left(1).to_upper()
-		fallback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		fallback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.add_theme_font_size_override(&"font_size", 22)
-		fallback.add_theme_color_override(
-			&"font_color",
-			Color(0.82, 0.72, 0.52)
-		)
-		icon.add_child(fallback)
-		fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var level_row := HBoxContainer.new()
-	level_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.add_child(level_row)
-
-	var level_label := Label.new()
-	level_label.text = "Lv %d" % level
-	level_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	level_label.add_theme_font_size_override(&"font_size", 11)
-	level_label.add_theme_color_override(
-		&"font_color",
-		Color(1.0, 0.88, 0.55)
-	)
-	level_row.add_child(level_label)
-
-	var bar := ProgressBar.new()
-	bar.min_value = 0
-	bar.max_value = xp_to_next
-	bar.value = xp_to_next if at_cap else xp
-	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(0, 8)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.add_child(bar)
-
+	_add_level_labels(tile, level, Color(1.0, 1.0, 0.0))
 	return tile
+
+
+func _create_placeholder_tile(label: String, icon_file: String) -> Control:
+	var tile := PanelContainer.new()
+	tile.custom_minimum_size = TILE_SIZE
+	tile.tooltip_text = "%s\nComing soon" % label
+	tile.modulate = Color(0.55, 0.55, 0.55, 0.85)
+	tile.add_theme_stylebox_override(&"panel", _make_tile_style(true))
+
+	var root := Control.new()
+	root.custom_minimum_size = TILE_SIZE
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tile.add_child(root)
+
+	var icon := TextureRect.new()
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.texture = _get_placeholder_icon(icon_file)
+	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	icon.offset_left = 4
+	icon.offset_top = 4
+	icon.offset_right = 34
+	icon.offset_bottom = -4
+	root.add_child(icon)
+
+	_add_level_labels(root, 1, Color(0.55, 0.55, 0.35))
+	return tile
+
+
+func _add_level_labels(parent: Control, level: int, color: Color) -> void:
+	var cur := Label.new()
+	cur.text = str(level)
+	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cur.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cur.add_theme_font_size_override(&"font_size", 12)
+	cur.add_theme_color_override(&"font_color", color)
+	cur.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
+	cur.add_theme_constant_override(&"shadow_offset_x", 1)
+	cur.add_theme_constant_override(&"shadow_offset_y", 1)
+	cur.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	cur.offset_left = -36
+	cur.offset_top = 2
+	cur.offset_right = -8
+	cur.offset_bottom = 18
+	parent.add_child(cur)
+
+	var base := Label.new()
+	base.text = str(level)
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	base.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	base.add_theme_font_size_override(&"font_size", 12)
+	base.add_theme_color_override(&"font_color", color)
+	base.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 1))
+	base.add_theme_constant_override(&"shadow_offset_x", 1)
+	base.add_theme_constant_override(&"shadow_offset_y", 1)
+	base.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	base.offset_left = -28
+	base.offset_top = -18
+	base.offset_right = -4
+	base.offset_bottom = -2
+	parent.add_child(base)
+
+	var slash := Label.new()
+	slash.text = "/"
+	slash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slash.add_theme_font_size_override(&"font_size", 11)
+	slash.add_theme_color_override(&"font_color", color)
+	slash.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	slash.offset_left = -24
+	slash.offset_top = -8
+	slash.offset_right = -12
+	slash.offset_bottom = 8
+	parent.add_child(slash)
 
 
 func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
@@ -262,72 +286,66 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 	Toaster.toast_group("%s — Lv %d" % [display, level], lines, 4.5)
 
 
-func _create_locked_tile() -> Control:
-	var tile := PanelContainer.new()
-	tile.custom_minimum_size = Vector2(76, 76)
-	tile.modulate = Color(1.0, 1.0, 1.0, 0.48)
-	tile.add_theme_stylebox_override(
-		&"panel",
-		_make_tile_style()
-	)
-
-	var lock := Label.new()
-	lock.text = "LOCK"
-	lock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lock.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lock.add_theme_font_size_override(&"font_size", 11)
-	lock.add_theme_color_override(
-		&"font_color",
-		Color(0.55, 0.52, 0.46)
-	)
-	tile.add_child(lock)
-
-	return tile
-
-
 func _get_skill_icon(skill_name: String) -> Texture2D:
 	var job := JobRegistry.perks_for(StringName(skill_name))
-
 	if job == null:
 		return null
-
 	if job.icon != null:
 		return job.icon
-
 	if not job.source_items.is_empty():
 		var source_item: Item = job.source_items[0]
 		if source_item != null:
 			return source_item.item_icon
-
 	if not job.recipe_items.is_empty():
 		var recipe_item: Item = job.recipe_items[0]
 		if recipe_item != null:
 			return recipe_item.item_icon
-
 	return null
+
+
+func _get_placeholder_icon(icon_file: String) -> Texture2D:
+	if icon_file.is_empty():
+		return null
+	if _placeholder_icon_cache.has(icon_file):
+		return _placeholder_icon_cache[icon_file]
+	var path := PLACEHOLDER_ICON_DIR + icon_file
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_placeholder_icon_cache[icon_file] = tex
+	return tex
 
 
 func _make_panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.055, 0.055, 0.075, 0.97)
-	style.border_color = Color(0.50, 0.38, 0.23)
-	style.set_border_width_all(3)
-	style.corner_radius_top_left = 2
-	style.corner_radius_top_right = 2
-	style.corner_radius_bottom_left = 2
-	style.corner_radius_bottom_right = 2
+	style.bg_color = Color(0.184, 0.173, 0.157, 0.97)
+	style.border_color = Color(0.455, 0.416, 0.341)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(2)
 	style.shadow_color = Color(0, 0, 0, 0.55)
 	style.shadow_size = 5
 	return style
 
 
-func _make_tile_style() -> StyleBoxFlat:
+func _make_tile_style(locked: bool) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.045, 0.045, 0.065, 1.0)
-	style.border_color = Color(0.17, 0.16, 0.19)
-	style.set_border_width_all(2)
-	style.corner_radius_top_left = 1
-	style.corner_radius_top_right = 1
-	style.corner_radius_bottom_left = 1
-	style.corner_radius_bottom_right = 1
+	if locked:
+		style.bg_color = Color(0.14, 0.13, 0.12, 0.95)
+		style.border_color = Color(0.32, 0.30, 0.27, 0.9)
+	else:
+		style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
+		style.border_color = Color(0.48, 0.44, 0.38, 1.0)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(2)
+	return style
+
+
+func _make_total_bar_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.02, 0.02, 0.02, 0.95)
+	style.border_color = Color(0.42, 0.38, 0.32, 1.0)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(1)
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
 	return style
