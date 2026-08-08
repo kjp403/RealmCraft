@@ -2,11 +2,11 @@ extends PanelContainer
 ## Dock Skills panel — OSRS-style cells for the 7 live skills only.
 ## Click a skill for gather/craft sources and XP detail.
 
-const PANEL_SIZE := Vector2(236.0, 292.0)
+const PANEL_SIZE := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const GRID_COLUMNS := 2
-const TILE_SIZE := Vector2(108.0, 44.0)
+const TILE_SIZE := Vector2(112.0, 52.0)
 
 ## Live skills only (slug keys match JobRegistry / save data).
 const SKILL_ORDER: Array[String] = [
@@ -242,9 +242,9 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	icon.texture = _get_skill_icon(skill_name)
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	icon.offset_left = 4
+	icon.offset_left = 2
 	icon.offset_top = 2
-	icon.offset_right = 42
+	icon.offset_right = 50
 	icon.offset_bottom = -2
 	tile.add_child(icon)
 
