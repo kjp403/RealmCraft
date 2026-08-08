@@ -21,8 +21,15 @@ func data_request_handler(
 		var tree: MasteryTreeResource = MasteryService.trees()[category]
 		# No entry = never killed with this weapon: level 0, nothing spendable.
 		# The entry is born from practice (add_mastery_xp), not from this menu.
-		var practiced: bool = resource.masteries.has(category)
-		var entry: Dictionary = resource.masteries.get(category, {})
+		var practiced: bool = resource.mastery_level_of(category) > 0 or resource.masteries.has(category)
+		# Normalize via get_mastery only when practiced so we don't spawn stubs
+		# for every tree on every mastery.get poll.
+		var entry: Dictionary = {}
+		for existing: Variant in resource.masteries.keys():
+			if String(existing) == String(category):
+				entry = resource.masteries[existing]
+				practiced = true
+				break
 		var level: int = int(entry.get("level", 0))
 		out[String(category)] = {
 			"level": level,

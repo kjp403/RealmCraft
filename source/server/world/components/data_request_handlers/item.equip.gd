@@ -45,9 +45,12 @@ func data_request_handler(
 	# join — they stay swappable mid-fight, so the join gate alone can't hold
 	# the bracket (a level 38 drawing a fire sword mid-match, real playtest).
 	var spar_mode: SparGameMode = SparringService.active_mode_for_peer(peer_id)
-	if spar_mode is NormalizedSparMode and item is GearItem \
-			and (item as GearItem).required_level > (spar_mode as NormalizedSparMode).sync_level:
-		return {"ok": false, "reason": "gear_level", "level": (spar_mode as NormalizedSparMode).sync_level}
+	if spar_mode is NormalizedSparMode and item is GearItem:
+		var gear: GearItem = item as GearItem
+		var sync_level: int = (spar_mode as NormalizedSparMode).sync_level
+		var gear_tier: int = maxi(gear.required_level, gear.required_mastery_level)
+		if gear_tier > sync_level:
+			return {"ok": false, "reason": "gear_level", "level": sync_level}
 
 	if item is GearItem:
 		# Combat lock — but WEAPONS stay swappable mid-fight (sword for melee,

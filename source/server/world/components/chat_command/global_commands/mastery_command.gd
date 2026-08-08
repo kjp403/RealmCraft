@@ -93,6 +93,8 @@ func _set_mastery_level(res: PlayerResource, category: StringName, level: int) -
 	var entry: Dictionary = res.get_mastery(category)
 	entry["level"] = level
 	entry["xp"] = 0
+	# Keep the canonical StringName key so equip gates and mastery.get agree.
+	res.masteries[StringName(String(category))] = entry
 	var tree: MasteryTreeResource = MasteryService.tree_for(category)
 	if tree != null:
 		var budget: int = level * MasteryService.POINTS_PER_LEVEL

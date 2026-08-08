@@ -453,17 +453,20 @@ func _passes_tab_value(tab: int) -> bool:
 func _entry_less_than(a: Dictionary, b: Dictionary) -> bool:
 	if a.equipped != b.equipped:
 		return a.equipped # equipped tiles lead their section
-	# The pinned section mixes groups, whose sort arrays aren't comparable
-	# across groups — rank by group first, sort arrays only within one.
+	# Rank by group first, then player drag order (so rearrange sticks), and
+	# only then intrinsic sort_key as a tie-breaker — never auto-resort.
 	var rank_a: int = _group_rank(a.group)
 	var rank_b: int = _group_rank(b.group)
 	if rank_a != rank_b:
 		return rank_a < rank_b
+	var order: Array = BagOrder.load_order()
+	var ia: int = BagOrder.index_of(order, int(a.uid))
+	var ib: int = BagOrder.index_of(order, int(b.uid))
+	if ia != ib:
+		return ia < ib
 	if a.sort != b.sort:
 		return a.sort < b.sort
-	# Honor drag-arranged bag order (shared with the compact dock).
-	var order: Array = BagOrder.load_order()
-	return BagOrder.index_of(order, int(a.uid)) < BagOrder.index_of(order, int(b.uid))
+	return int(a.uid) < int(b.uid)
 
 
 func _group_rank(key: StringName) -> int:
@@ -520,12 +523,7 @@ func _make_bag_button(entry: Dictionary) -> Button:
 	if int(entry.uid) >= 0:
 		button.set_drag_forwarding(
 			func(_at: Vector2) -> Variant:
-				var preview := TextureRect.new()
-				preview.texture = (entry.item as Item).item_icon
-				preview.custom_minimum_size = Vector2(40, 40)
-				preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-				preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-				button.set_drag_preview(preview)
+				button.set_drag_preview(BagOrder.make_drag_preview((entry.item as Item).item_icon, Vector2(56, 56)))
 				return {"bag_uid": int(entry.uid)},
 			func(_at: Vector2, data: Variant) -> bool:
 				return data is Dictionary and (data as Dictionary).has("bag_uid"),

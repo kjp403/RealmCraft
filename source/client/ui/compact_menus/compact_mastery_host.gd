@@ -452,20 +452,10 @@ func _render_selected_category() -> void:
 	_e_name.text = _loadout_name(loadout, 1, tree)
 
 	var capacity: int = _wielded_capacity()
-	var power_used: int = _loadout_power_used(loadout, tree)
-
 	if capacity < 0:
 		_power_label.text = "Equip this weapon type to use its abilities."
-	elif power_used > capacity:
-		_power_label.text = "Power %d/%d · Over capacity" % [
-			power_used,
-			capacity,
-		]
 	else:
-		_power_label.text = "Weapon power %d/%d" % [
-			power_used,
-			capacity,
-		]
+		_power_label.text = "Abilities channel while this weapon is held."
 
 	_manage_button.disabled = false
 
