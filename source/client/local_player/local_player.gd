@@ -158,6 +158,12 @@ func _ready() -> void:
 ## see the cycle note there.)
 func _apply_team_bar_color() -> void:
 	set_health_bar_fill(BAR_COLOR_SELF)
+	refresh_nameplate_color()
+
+
+## Self nameplate is light cyan (not friend-green / player-white).
+func refresh_nameplate_color() -> void:
+	set_nameplate_color(NAME_COLOR_SELF)
 
 
 ## Lock control while dead, then teleport ourselves to the spawn point (the server owns
@@ -416,7 +422,10 @@ func process_movement() -> void:
 
 
 func process_input() -> void:
-	if _dead or _has_gui_focus() or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms:
+	# Movement lock (drink / hammer slam root) freezes WASD but must NOT cancel
+	# Right-click → Attack — otherwise heavy weapons abort after one hit.
+	var rooted: bool = Time.get_ticks_msec() < _movement_lock_until_ms
+	if _dead or _has_gui_focus() or ClientState.menu_open:
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
@@ -425,6 +434,19 @@ func process_input() -> void:
 		if _combat_target_controller != null:
 			_combat_target_controller.cancel()
 		input_direction = Vector2.ZERO
+		action_input = false
+		return
+	if rooted:
+		_click_navigation.cancel()
+		if _harvest_controller != null:
+			_harvest_controller.cancel()
+		if _pickup_controller != null:
+			_pickup_controller.cancel()
+		input_direction = Vector2.ZERO
+		if _combat_target_controller != null and _combat_target_controller.tick():
+			action_input = false
+			return
+		look_direction = controller.get_look_direction()
 		action_input = false
 		return
 

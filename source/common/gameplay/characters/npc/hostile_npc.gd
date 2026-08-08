@@ -283,6 +283,7 @@ func _ready() -> void:
 		if DEBUG_NPC:
 			stats_component.stats.stat_changed.connect(_debug_client_stat_changed)
 		_apply_ally_bar_tint()
+		refresh_nameplate_color()
 		# Re-evaluate if the local player's guild changes (so a guard that spawned
 		# before you tagged in updates without a relog).
 		if is_instance_valid(ClientState):
@@ -342,6 +343,16 @@ func _apply_ally_bar_tint() -> void:
 	if is_ally:
 		health_bar_auto_hide = false # ally guards stay visible (not damage-gated)
 		progress_bar.show()
+
+
+## Hostiles stay white until Right-click → Attack paints them red.
+func refresh_nameplate_color() -> void:
+	if multiplayer.is_server() or display_name_label == null:
+		return
+	if get_instance_id() == Character.combat_target_instance_id:
+		set_nameplate_color(NAME_COLOR_TARGET)
+	else:
+		set_nameplate_color(NAME_COLOR_PLAYER)
 
 
 ## Server-set: while this timestamp is in the future the body holds position — a

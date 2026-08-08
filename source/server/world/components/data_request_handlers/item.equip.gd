@@ -70,6 +70,10 @@ func data_request_handler(
 		if previous_id > 0:
 			Inventory.add_item(inventory, previous_id, 1)
 		player.player_resource.equipment[slot_key] = item_id
+		# Non-weapon gear equips instantly — must return success here. Without
+		# this, fall-through returns cant_equip and the client toasts failure
+		# while the piece is already worn (Enchanted/Phantom/Gold/etc.).
+		return {"ok": true}
 	elif item is MaterialItem:
 		# Resources are bag-only — Drop from the inventory menu, never Hold.
 		return {"ok": false, "reason": "cant_equip"}

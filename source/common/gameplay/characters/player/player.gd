@@ -11,6 +11,11 @@ signal staff_role_changed(role: String)
 var active_guild_id: int = 0:
 	set = _set_active_guild_id
 
+## Persistent account id (not peer id). Synced so clients can paint friend-green
+## nameplates without relying on display-name string matching.
+var player_id: int = 0:
+	set = _set_player_id
+
 ## Staff badge slug synced to all clients: "" | "moderator" | "admin".
 ## Drives the nameplate icon + chat rank glyph.
 var staff_role: String = "":
@@ -177,6 +182,11 @@ func _set_active_guild_id(value: int) -> void:
 	_apply_team_bar_color()
 
 
+func _set_player_id(value: int) -> void:
+	player_id = value
+	refresh_nameplate_color()
+
+
 func _set_staff_role(value: String) -> void:
 	staff_role = value
 	if not multiplayer.is_server():
@@ -197,16 +207,30 @@ func _apply_team_bar_color() -> void:
 	var peer: int = name.to_int()
 	if Character.spar_opponent_peers.has(peer):
 		set_health_bar_fill(BAR_COLOR_HOSTILE)
+		refresh_nameplate_color()
 		return
 	if Character.spar_ally_peers.has(peer):
 		set_health_bar_fill(BAR_COLOR_ALLY)
+		refresh_nameplate_color()
 		return
 	# Co-op groupmates read as allies regardless of guild (dungeon context).
 	if Character.group_peers.has(peer):
 		set_health_bar_fill(BAR_COLOR_ALLY)
+		refresh_nameplate_color()
 		return
 	var same_guild: bool = active_guild_id > 0 and active_guild_id == Character.local_viewer_guild_id
 	set_health_bar_fill(BAR_COLOR_ALLY if same_guild else BAR_COLOR_HOSTILE)
+	refresh_nameplate_color()
+
+
+## Other players: white. Friends: green. LocalPlayer overrides to cyan.
+func refresh_nameplate_color() -> void:
+	if multiplayer.is_server() or display_name_label == null:
+		return
+	if player_id > 0 and Character.local_friend_ids.has(player_id):
+		set_nameplate_color(NAME_COLOR_FRIEND)
+	else:
+		set_nameplate_color(NAME_COLOR_PLAYER)
 
 
 func is_pvp() -> bool:

@@ -82,6 +82,8 @@ func _refresh() -> void:
 
 func fill_friend_list(payload: Dictionary) -> void:
 	_clear_list()
+	# Keep world nameplates in sync whenever the friends UI refreshes.
+	ClientState.set_friend_ids_from_list(payload)
 
 	if payload.is_empty():
 		_empty_hint("No friends yet. Search above to find players.")
