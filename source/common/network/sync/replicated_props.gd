@@ -22,9 +22,11 @@ const STATIC_MAX: int = 32767
 ## spawnable. load() (not preload) avoids a class cycle with the scene's script.
 const SCENE_HOSTILE_NPC: int = 0
 const SCENE_GROUND_ITEM: int = 1
+const SCENE_LOOT_CHEST: int = 2
 const DYNAMIC_SCENE_PATHS: Dictionary = {
 	SCENE_HOSTILE_NPC: "res://source/common/gameplay/characters/npc/hostile_npc.tscn",
 	SCENE_GROUND_ITEM: "res://source/common/gameplay/maps/props/collectibles/ground_item.tscn",
+	SCENE_LOOT_CHEST: "res://source/common/gameplay/maps/props/collectibles/loot_chest.tscn",
 }
 
 

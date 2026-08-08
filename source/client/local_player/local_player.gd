@@ -646,13 +646,18 @@ func start_auto_gather(node: MineableNode) -> void:
 	_harvest_controller.start(node)
 
 
-## Walk to a ground drop and pick it up. Cancel with WASD or a ground click.
-func start_auto_pickup(item: Node2D, prop_id: int) -> void:
+## Walk to a ground drop / loot chest and interact. Cancel with WASD or a ground click.
+## [param request] defaults to [code]item.pickup[/code]; chests use [code]chest.open[/code].
+func start_auto_pickup(
+	item: Node2D,
+	prop_id: int,
+	request: StringName = &"item.pickup"
+) -> void:
 	if _pickup_controller == null:
 		return
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
-	_pickup_controller.start(item, prop_id)
+	_pickup_controller.start(item, prop_id, request)
 
 
 ## Right-click Attack: walk into range and keep using the primary weapon.

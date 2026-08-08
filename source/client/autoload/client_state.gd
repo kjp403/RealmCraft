@@ -195,6 +195,7 @@ func _ready() -> void:
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
 	Client.subscribe(&"item.picked_up", _on_item_picked_up)
+	Client.subscribe(&"chest.opened", _on_chest_opened)
 	Client.subscribe(&"quest.update", func(data: Dictionary):
 		# Tracker-first routing (docs/notifications.md, 2026-07-20): PROGRESS
 		# entries arrive as dicts {q, t} — live state belongs to the TRACKER
@@ -331,6 +332,24 @@ func _on_item_picked_up(data: Dictionary) -> void:
 		# succeed server-side while the player thinks nothing arrived.
 		Toaster.toast("Received %s ×%d" % [item_name, amount] if amount > 1 \
 			else "Received %s" % item_name)
+	inventory_changed.emit(data)
+
+
+## Server-pushed loot chest open: gold + items already in the bag; show LootFeed.
+func _on_chest_opened(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	var gold: int = int(data.get("gold", 0))
+	if gold > 0 and Economy.gold_id() > 0:
+		LootFeed.add_item(Economy.gold_id(), gold, "Gold")
+	for entry: Dictionary in data.get("items", []):
+		var item_id: int = int(entry.get("id", 0))
+		var amount: int = int(entry.get("amount", 0))
+		var item_name: String = str(entry.get("name", "item"))
+		if item_id > 0 and amount > 0:
+			LootFeed.add_item(item_id, amount, item_name)
+	var chest_name: String = str(data.get("chest", "Loot Chest"))
+	Toaster.toast("Opened %s" % chest_name)
 	inventory_changed.emit(data)
 
 
