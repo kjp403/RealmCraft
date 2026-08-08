@@ -43,6 +43,9 @@ extends Resource
 @export_group("Visual")
 ## Sprite shown at the node. Use an [AtlasTexture] (right-click in the
 ## inspector → "New AtlasTexture", then assign the spritesheet to its `atlas`
-## and click "Edit Region" to pick the sub-rect visually). A plain Texture2D
-## also works for one-off art.
+## and click "Edit Region" to pick the sub-rect visually). Prefer a clean
+## 32×32 region for hub veins. A plain Texture2D also works for one-off art.
 @export var texture: Texture2D
+## Optional look when charges hit 0 (e.g. plain rubble without ore flecks).
+## Leave empty to keep [member texture] and dim it with a gray modulate instead.
+@export var depleted_texture: Texture2D

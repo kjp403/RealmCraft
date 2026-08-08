@@ -4,11 +4,27 @@
 [ext_resource type="Resource" uid="uid://3vo07t5fjdwo" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="2_ore"]
 [ext_resource type="Texture2D" uid="uid://bhpljwhf8i5cl" path="res://assets/sprites/environment/props/rocks.png" id="3_dxf7f"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_5ug66"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_copper"]
 atlas = ExtResource("3_dxf7f")
-region = Rect2(0.9250717, 112.912254, 31.33641, 47.399605)
+region = Rect2(0, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_copper_empty"]
+atlas = ExtResource("3_dxf7f")
+region = Rect2(32, 128, 32, 32)
 
 [resource]
 script = ExtResource("1_script")
 ore = ExtResource("2_ore")
-texture = SubResource("AtlasTexture_5ug66")
+yield_amount = 1
+job_xp = Dictionary[StringName, int]({
+&"mining": 10
+})
+required_level = 0
+required_tool = &"pickaxe"
+extraction_hp = 3
+max_charges = 3
+charge_regen_seconds = 12.0
+depleted_recharge_seconds = 60.0
+player_cooldown_seconds = 5.0
+texture = SubResource("AtlasTexture_copper")
+depleted_texture = SubResource("AtlasTexture_copper_empty")

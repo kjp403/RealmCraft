@@ -281,6 +281,7 @@ func apply_visual_state(progress_hp: int, extraction_hp: int, charges: int, max_
 		_bar.max_value = maxi(1, extraction_hp)
 		_bar.value = progress_hp
 	_set_displayed_charges(charges, max_charges)
+	_apply_depleted_visual(charges <= 0)
 
 
 # ---------------------------------------------------------------------------
@@ -328,6 +329,8 @@ func _refresh_charge_label() -> void:
 	_visual_state.visible = _bar.visible or partial
 	if partial:
 		_charge_label.text = "%d / %d" % [_disp_charges, _disp_max]
+	if _disp_charges >= 0:
+		_apply_depleted_visual(_disp_charges <= 0)
 
 
 # ---------------------------------------------------------------------------
@@ -378,6 +381,23 @@ func _apply_sprite() -> void:
 	# Works whether `data.texture` is a plain Texture2D or an AtlasTexture —
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
+	_sprite.modulate = Color.WHITE
+
+
+## Dim / swap the rock when empty so players can see a depleted vein at a glance.
+func _apply_depleted_visual(depleted: bool) -> void:
+	if _sprite == null or data == null:
+		return
+	if depleted:
+		if data.depleted_texture != null:
+			_sprite.texture = data.depleted_texture
+			_sprite.modulate = Color.WHITE
+		else:
+			_sprite.texture = data.texture
+			_sprite.modulate = Color(0.55, 0.55, 0.55, 0.9)
+	else:
+		_sprite.texture = data.texture
+		_sprite.modulate = Color.WHITE
 
 
 func _apply_name_label() -> void:
