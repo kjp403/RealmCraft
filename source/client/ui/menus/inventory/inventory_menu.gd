@@ -523,7 +523,10 @@ func _make_bag_button(entry: Dictionary) -> Button:
 	if int(entry.uid) >= 0:
 		button.set_drag_forwarding(
 			func(_at: Vector2) -> Variant:
-				button.set_drag_preview(BagOrder.make_drag_preview((entry.item as Item).item_icon, Vector2(56, 56)))
+				BagOrder.elevate_drag_preview(
+					button,
+					BagOrder.make_drag_preview((entry.item as Item).item_icon, Vector2(56, 56))
+				)
 				return {"bag_uid": int(entry.uid)},
 			func(_at: Vector2, data: Variant) -> bool:
 				return data is Dictionary and (data as Dictionary).has("bag_uid"),

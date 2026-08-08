@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://f51d21a5ec844"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/cloth_enchanted.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Enchanted Cloth"
+item_icon = ExtResource("1_icon")
+description = "Soft blue arcane cloth for Enchanted robes."
+holdable = false
+can_trade = true
+vendor_value = 8
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"enchanted_cloth"
+metadata/id = 213

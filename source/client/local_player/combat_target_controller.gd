@@ -8,7 +8,9 @@ extends Node
 ## press alone only draws. This controller auto-releases at full charge.
 
 
-const MELEE_ENGAGE_RANGE: float = 72.0
+## Must sit inside the melee hit arc (~32 px from origin for sword swings).
+## 72 left players stopping short and swinging into empty air.
+const MELEE_ENGAGE_RANGE: float = 36.0
 const RANGED_ENGAGE_RANGE: float = 220.0
 
 

@@ -202,6 +202,17 @@ var _bar_hide_tween: Tween
 
 func _on_stat_changed(stat_name: StringName, value: float) -> void:
 	if stat_name == Stat.HEALTH:
+		if value <= 0.0:
+			# Dead / emptied: snap the bar, clear the number, and don't leave a
+			# mid-tween label stuck on the last living HP for the flash window.
+			if _bar_value_tween != null and _bar_value_tween.is_valid():
+				_bar_value_tween.kill()
+			progress_bar.value = 0.0
+			_refresh_hp_label(0.0)
+			if health_bar_auto_hide:
+				_flash_health_bar()
+			_last_health_seen = value
+			return
 		if _last_health_seen < 0.0:
 			progress_bar.value = value # first sync — snap, no flash/feedback
 		elif value != _last_health_seen:
@@ -216,17 +227,23 @@ func _on_stat_changed(stat_name: StringName, value: float) -> void:
 			if health_bar_auto_hide:
 				_flash_health_bar()
 		_last_health_seen = value
-		_refresh_hp_label()
+		_refresh_hp_label(value)
 	if stat_name == Stat.HEALTH_MAX:
 		progress_bar.max_value = value
 		_refresh_hp_label()
 
 
 ## Remaining life points drawn on the over-head bar (e.g. "42").
-func _refresh_hp_label() -> void:
+## Prefer the authoritative health value — the bar may still be tweening.
+func _refresh_hp_label(health_override: float = -1.0) -> void:
 	if hp_label == null:
 		return
-	var current: int = maxi(0, int(ceil(progress_bar.value)))
+	var current_f: float = health_override
+	if current_f < 0.0 and stats_component != null:
+		current_f = stats_component.get_stat(Stat.HEALTH)
+	elif current_f < 0.0:
+		current_f = progress_bar.value
+	var current: int = maxi(0, int(ceil(current_f)))
 	hp_label.text = str(current) if current > 0 else ""
 
 

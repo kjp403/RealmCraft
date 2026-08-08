@@ -45,6 +45,7 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="47_mine"]
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="48_copper"]
 [ext_resource type="Resource" uid="uid://ctinvein001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres" id="49_tin"]
+[ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="51_coal"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="50_tree"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6ao3"]
@@ -617,6 +618,16 @@ data = ExtResource("49_tin")
 y_sort_enabled = true
 position = Vector2(248, 520)
 data = ExtResource("49_tin")
+
+[node name="CoalVein1" parent="MineableNodes" unique_id=1888000010 instance=ExtResource("47_mine")]
+y_sort_enabled = true
+position = Vector2(-16, 300)
+data = ExtResource("51_coal")
+
+[node name="CoalVein2" parent="MineableNodes" unique_id=1888000011 instance=ExtResource("47_mine")]
+y_sort_enabled = true
+position = Vector2(-16, 420)
+data = ExtResource("51_coal")
 
 [node name="Tree1" parent="MineableNodes" unique_id=1888000101 instance=ExtResource("47_mine")]
 y_sort_enabled = true

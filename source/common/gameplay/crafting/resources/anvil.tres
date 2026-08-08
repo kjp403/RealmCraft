@@ -35,6 +35,12 @@
 [ext_resource type="Resource" uid="uid://dhip37ume8mm6" path="res://source/common/gameplay/items/gears/rings/ring_guard_silver.tres" id="44_gua_ag"]
 [ext_resource type="Resource" uid="uid://b01u4m663krn6" path="res://source/common/gameplay/items/gears/rings/ring_guard_gold.tres" id="45_gua_au"]
 [ext_resource type="Resource" uid="uid://dut1iwma7xwhi" path="res://source/common/gameplay/items/gears/metal/gold_boots.tres" id="46_au_boots"]
+[ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="50_dr_ore"]
+[ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="51_dr_gem"]
+[ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="52_dr_cloth"]
+[ext_resource type="Resource" uid="uid://1d77013414524" path="res://source/common/gameplay/items/gears/metal/dragon_helmet.tres" id="53_dr_helm"]
+[ext_resource type="Resource" uid="uid://a61a08ff189d4" path="res://source/common/gameplay/items/gears/metal/dragon_chest.tres" id="54_dr_chest"]
+[ext_resource type="Resource" uid="uid://82d10bddb7344" path="res://source/common/gameplay/items/gears/metal/dragon_boots.tres" id="55_dr_boots"]
 
 [sub_resource type="Resource" id="I_cu2a"]
 script = ExtResource("3_ingred")
@@ -407,8 +413,71 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_up_gua_au_ring"), S
 required_level = 4
 xp_reward = 36
 
+[sub_resource type="Resource" id="I_drh_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_dr_ore")
+amount = 3
+
+[sub_resource type="Resource" id="I_drh_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_dr_gem")
+
+[sub_resource type="Resource" id="I_drh_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_dr_cloth")
+amount = 2
+
+[sub_resource type="Resource" id="R_dr_helm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("53_dr_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_drh_ore"), SubResource("I_drh_gem"), SubResource("I_drh_cloth")])
+required_level = 50
+xp_reward = 140
+
+[sub_resource type="Resource" id="I_drc_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_dr_ore")
+amount = 4
+
+[sub_resource type="Resource" id="I_drc_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_dr_gem")
+
+[sub_resource type="Resource" id="I_drc_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_dr_cloth")
+amount = 3
+
+[sub_resource type="Resource" id="R_dr_chest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("54_dr_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_drc_ore"), SubResource("I_drc_gem"), SubResource("I_drc_cloth")])
+required_level = 50
+xp_reward = 160
+
+[sub_resource type="Resource" id="I_drb_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_dr_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_drb_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_dr_gem")
+
+[sub_resource type="Resource" id="I_drb_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_dr_cloth")
+amount = 2
+
+[sub_resource type="Resource" id="R_dr_boots"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("55_dr_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_drb_ore"), SubResource("I_drb_gem"), SubResource("I_drb_cloth")])
+required_level = 50
+xp_reward = 130
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Anvil"
 craft_fee = 5
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_cu_helm"), SubResource("R_cu_chest"), SubResource("R_cu_boots"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_ag_helm"), SubResource("R_ag_chest"), SubResource("R_ag_boots"), SubResource("R_au_helm"), SubResource("R_au_chest"), SubResource("R_au_boots"), SubResource("R_vit_cu"), SubResource("R_foc_cu"), SubResource("R_agi_cu"), SubResource("R_gua_cu"), SubResource("R_vit_fe"), SubResource("R_foc_fe"), SubResource("R_agi_fe"), SubResource("R_gua_fe"), SubResource("R_vit_ag"), SubResource("R_foc_ag"), SubResource("R_agi_ag"), SubResource("R_gua_ag"), SubResource("R_vit_au"), SubResource("R_foc_au"), SubResource("R_agi_au"), SubResource("R_gua_au")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_cu_helm"), SubResource("R_cu_chest"), SubResource("R_cu_boots"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_ag_helm"), SubResource("R_ag_chest"), SubResource("R_ag_boots"), SubResource("R_au_helm"), SubResource("R_au_chest"), SubResource("R_au_boots"), SubResource("R_vit_cu"), SubResource("R_foc_cu"), SubResource("R_agi_cu"), SubResource("R_gua_cu"), SubResource("R_vit_fe"), SubResource("R_foc_fe"), SubResource("R_agi_fe"), SubResource("R_gua_fe"), SubResource("R_vit_ag"), SubResource("R_foc_ag"), SubResource("R_agi_ag"), SubResource("R_gua_ag"), SubResource("R_vit_au"), SubResource("R_foc_au"), SubResource("R_agi_au"), SubResource("R_gua_au"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])
