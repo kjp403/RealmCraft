@@ -8,8 +8,12 @@ class_name RewardService
 ## Server-only.
 
 ## A player must have dealt at least this fraction of the mob's max HP to share in
-## the kill (anti-leech). The killer is always included regardless.
+## the kill (anti-leech). The killer is always included regardless. Bosses use a
+## lower bar so anyone who meaningfully poked them still gets a roll.
 const MIN_DAMAGE_FRACTION: float = 0.1
+const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
+## Ground piles stay reserved to their earner for this long (anti-ninja).
+const LOOT_EXCLUSIVE_MS: int = 60_000
 
 
 ## [param contributors] = peer_id -> total damage dealt this life (HostileNpc
@@ -19,7 +23,8 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 		return
 	if npc.xp_reward <= 0 and (npc.loot == null or npc.loot.is_empty()):
 		return # nothing to give (a shadow mob) — don't even resolve players
-	var threshold: float = npc.stats_component.get_stat(Stat.HEALTH_MAX) * MIN_DAMAGE_FRACTION
+	var frac: float = BOSS_MIN_DAMAGE_FRACTION if npc.is_boss else MIN_DAMAGE_FRACTION
+	var threshold: float = npc.stats_component.get_stat(Stat.HEALTH_MAX) * frac
 	var killer_peer: int = -1
 	if killer is Player and (killer as Player).player_resource != null:
 		killer_peer = int((killer as Player).player_resource.current_peer_id)
@@ -29,12 +34,14 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 			continue
 		var player: Player = _resolve_player(peer_id)
 		if player != null:
-			_reward(player, npc)
+			# Each contributor gets their own loot roll, reserved to THEM for 60s
+			# so nearby players can't ninja-loot (top damager included).
+			_reward(player, npc, peer_id)
 		rewarded[peer_id] = true
 	if killer_peer > 0 and not rewarded.has(killer_peer):
 		var kp: Player = _resolve_player(killer_peer)
 		if kp != null:
-			_reward(kp, npc)
+			_reward(kp, npc, killer_peer)
 
 
 ## The live Player for a peer (null if they logged off / left), via its current
@@ -49,7 +56,8 @@ static func _resolve_player(peer_id: int) -> Player:
 
 
 ## All of one participant's reward, and the combat.reward push to their client.
-static func _reward(player: Player, npc: HostileNpc) -> void:
+## [param reserved_peer] owns the ground piles for [constant LOOT_EXCLUSIVE_MS].
+static func _reward(player: Player, npc: HostileNpc, reserved_peer: int = 0) -> void:
 	var resource: PlayerResource = player.player_resource
 	if resource == null:
 		return
@@ -58,7 +66,7 @@ static func _reward(player: Player, npc: HostileNpc) -> void:
 	var progress: Dictionary = resource.add_experience(npc.xp_reward)
 	var loot_gained: Array = _roll_loot(npc)
 	# Drops land on the ground for click-pickup — not auto-bagged.
-	_spawn_ground_loot(player, npc, loot_gained)
+	_spawn_ground_loot(player, npc, loot_gained, reserved_peer)
 
 	# Weapon mastery: practicing a category = killing with it. Same xp number.
 	var mastery: Dictionary = {}
@@ -111,8 +119,14 @@ static func _roll_loot(npc: HostileNpc) -> Array:
 	return out
 
 
-## Scatter rolled loot as clickable GroundItems around the corpse.
-static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Array) -> void:
+## Scatter rolled loot as clickable GroundItems around the corpse. Piles are
+## reserved to [param reserved_peer] (top damage) for 60s, then free-for-all.
+static func _spawn_ground_loot(
+	player: Player,
+	npc: HostileNpc,
+	loot_gained: Array,
+	reserved_peer: int = 0
+) -> void:
 	if loot_gained.is_empty():
 		return
 	var peer_id: int = int(player.player_resource.current_peer_id) if player.player_resource != null else 0
@@ -124,6 +138,8 @@ static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Arr
 		return
 	var container: ReplicatedPropsContainer = map.replicated_props_container
 	var origin: Vector2 = npc.global_position
+	var owner_peer: int = reserved_peer if reserved_peer > 0 else peer_id
+	var exclusive_until: int = Time.get_ticks_msec() + LOOT_EXCLUSIVE_MS
 	var i: int = 0
 	for entry: Dictionary in loot_gained:
 		var item_id: int = int(entry.get("id", 0))
@@ -142,6 +158,8 @@ static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Arr
 				"item_id": item_id,
 				"amount": amount,
 				"position": drop_local,
+				"owner_peer_id": owner_peer,
+				"exclusive_until_ms": exclusive_until,
 			}
 		)
 		i += 1

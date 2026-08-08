@@ -78,5 +78,7 @@ func _on_pickup_response(data: Dictionary) -> void:
 			Toaster.toast("Move closer to pick that up.")
 		"missing":
 			Toaster.toast("That item is gone.")
+		"reserved":
+			Toaster.toast("That loot is reserved for another player.")
 		_:
 			pass
