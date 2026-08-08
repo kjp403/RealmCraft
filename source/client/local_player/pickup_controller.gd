@@ -1,6 +1,7 @@
 class_name PickupController
 extends Node
-## Click a [GroundItem] once: walk into range, then request [code]item.pickup[/code].
+## Click a [GroundItem] or [LootChest] once: walk into range, then request
+## [code]item.pickup[/code] / [code]chest.open[/code].
 ## Mirrors [HarvestController] so drops use the same interactable click stack
 ## (hover suppresses click-move / combat; WASD or a ground click cancels).
 
@@ -10,6 +11,7 @@ var _player: LocalPlayer
 var _target: Node2D
 var _active: bool = false
 var _prop_id: int = -1
+var _request: StringName = &"item.pickup"
 
 
 func setup(player: LocalPlayer) -> void:
@@ -20,13 +22,14 @@ func is_active() -> bool:
 	return _active and _target != null and is_instance_valid(_target)
 
 
-func start(item: Node2D, prop_id: int) -> void:
+func start(item: Node2D, prop_id: int, request: StringName = &"item.pickup") -> void:
 	if _player == null or item == null or not is_instance_valid(item):
 		return
 	if prop_id < 0:
 		return
 	_target = item
 	_prop_id = prop_id
+	_request = request if request != &"" else &"item.pickup"
 	_active = true
 	_player._follow_peer_id = 0
 	if _player._harvest_controller != null:
@@ -37,6 +40,7 @@ func cancel() -> void:
 	_active = false
 	_target = null
 	_prop_id = -1
+	_request = &"item.pickup"
 
 
 ## Called from [method LocalPlayer.process_input] each frame while active.
@@ -60,9 +64,10 @@ func tick() -> bool:
 		return false
 
 	var prop_id: int = _prop_id
+	var request: StringName = _request
 	cancel()
 	Client.request_data(
-		&"item.pickup",
+		request,
 		Callable(self, "_on_pickup_response"),
 		{"prop_id": prop_id},
 		InstanceClient.current.name
@@ -77,7 +82,7 @@ func _on_pickup_response(data: Dictionary) -> void:
 		"too_far":
 			Toaster.toast("Move closer to pick that up.")
 		"missing":
-			Toaster.toast("That item is gone.")
+			Toaster.toast("That loot is gone.")
 		"reserved":
 			Toaster.toast("That loot is reserved for another player.")
 		_:

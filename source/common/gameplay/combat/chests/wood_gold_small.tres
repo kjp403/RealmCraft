@@ -1,0 +1,78 @@
+[gd_resource type="Resource" script_class="ChestResource" format=3 uid="uid://ca78c3c4815e85"]
+
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
+[ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
+[ext_resource type="Texture2D" uid="uid://koph0nkujcra" path="res://assets/sprites/environment/chests/wood_gold_small.png" id="3_icon"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://dtb5bin7denb7" path="res://source/common/gameplay/items/materials/leather/leather_bandit.tres" id="item_2"]
+[ext_resource type="Resource" uid="uid://b8i2jeggl5x64" path="res://source/common/gameplay/items/materials/leather/leather_cave.tres" id="item_3"]
+[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="item_4"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="item_5"]
+[ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_6"]
+[ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_7"]
+
+[sub_resource type="Resource" id="Drop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("item_0")
+min_amount = 10
+max_amount = 35
+chance = 0.8
+
+[sub_resource type="Resource" id="Drop_1"]
+script = ExtResource("1_loot")
+item = ExtResource("item_1")
+min_amount = 10
+max_amount = 35
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_2"]
+script = ExtResource("1_loot")
+item = ExtResource("item_2")
+min_amount = 10
+max_amount = 35
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_3"]
+script = ExtResource("1_loot")
+item = ExtResource("item_3")
+min_amount = 10
+max_amount = 35
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_4"]
+script = ExtResource("1_loot")
+item = ExtResource("item_4")
+min_amount = 10
+max_amount = 35
+chance = 0.75
+
+[sub_resource type="Resource" id="Drop_5"]
+script = ExtResource("1_loot")
+item = ExtResource("item_5")
+min_amount = 10
+max_amount = 35
+chance = 0.65
+
+[sub_resource type="Resource" id="Drop_6"]
+script = ExtResource("1_loot")
+item = ExtResource("item_6")
+min_amount = 10
+max_amount = 35
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_7"]
+script = ExtResource("1_loot")
+item = ExtResource("item_7")
+min_amount = 10
+max_amount = 35
+chance = 0.35
+
+[resource]
+script = ExtResource("2_chest")
+display_name = "Wood Chest (Gold, Small)"
+icon = ExtResource("3_icon")
+tier = 2
+gold_min = 2500
+gold_max = 5000
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7")])

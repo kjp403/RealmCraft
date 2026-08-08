@@ -1,0 +1,133 @@
+[gd_resource type="Resource" script_class="ChestResource" format=3 uid="uid://cd27a9807dc0c3"]
+
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
+[ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
+[ext_resource type="Texture2D" uid="uid://bvgqwndicqjnd" path="res://assets/sprites/environment/chests/gold_pink_large.png" id="3_icon"]
+[ext_resource type="Resource" uid="uid://cfb82bd722210b" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://c2d1d8b13a1643" path="res://source/common/gameplay/items/materials/fish/turtle.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://dfbcb377cc5d4" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="item_2"]
+[ext_resource type="Resource" uid="uid://cd4yooe27ja23" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="item_3"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_4"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_5"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_6"]
+[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="item_7"]
+[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="item_8"]
+[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="item_9"]
+[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="item_10"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_11"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_12"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_13"]
+[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="item_14"]
+[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="item_15"]
+[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="item_16"]
+
+[sub_resource type="Resource" id="Drop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("item_0")
+min_amount = 35
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_1"]
+script = ExtResource("1_loot")
+item = ExtResource("item_1")
+min_amount = 35
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_2"]
+script = ExtResource("1_loot")
+item = ExtResource("item_2")
+min_amount = 35
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_3"]
+script = ExtResource("1_loot")
+item = ExtResource("item_3")
+min_amount = 35
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_4"]
+script = ExtResource("1_loot")
+item = ExtResource("item_4")
+min_amount = 50
+max_amount = 100
+
+[sub_resource type="Resource" id="Drop_5"]
+script = ExtResource("1_loot")
+item = ExtResource("item_5")
+min_amount = 50
+max_amount = 100
+
+[sub_resource type="Resource" id="Drop_6"]
+script = ExtResource("1_loot")
+item = ExtResource("item_6")
+min_amount = 50
+max_amount = 100
+
+[sub_resource type="Resource" id="Drop_7"]
+script = ExtResource("1_loot")
+item = ExtResource("item_7")
+min_amount = 25
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_8"]
+script = ExtResource("1_loot")
+item = ExtResource("item_8")
+min_amount = 25
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_9"]
+script = ExtResource("1_loot")
+item = ExtResource("item_9")
+min_amount = 75
+max_amount = 125
+
+[sub_resource type="Resource" id="Drop_10"]
+script = ExtResource("1_loot")
+item = ExtResource("item_10")
+min_amount = 50
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_11"]
+script = ExtResource("1_loot")
+item = ExtResource("item_11")
+max_amount = 3
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_12"]
+script = ExtResource("1_loot")
+item = ExtResource("item_12")
+max_amount = 2
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_13"]
+script = ExtResource("1_loot")
+item = ExtResource("item_13")
+max_amount = 2
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_14"]
+script = ExtResource("1_loot")
+item = ExtResource("item_14")
+max_amount = 3
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_15"]
+script = ExtResource("1_loot")
+item = ExtResource("item_15")
+max_amount = 2
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_16"]
+script = ExtResource("1_loot")
+item = ExtResource("item_16")
+max_amount = 2
+chance = 0.18
+
+[resource]
+script = ExtResource("2_chest")
+display_name = "Ornate Gold Chest (Pink)"
+icon = ExtResource("3_icon")
+tier = 3
+gold_min = 10000
+gold_max = 25000
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
