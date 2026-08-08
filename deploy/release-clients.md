@@ -56,14 +56,17 @@ Manual “Upload files” on the itch edit page fights the butler channel and ma
 
 ## If Update still opens a browser
 
-That install was created from a **browser Download**, not an itch **Install**. Fix once:
+That Library entry was created from a **browser Download** (or a hand Upload), not an itch **Install**. The itch app cannot patch those — it can only open Download again. Fix **once**:
 
-1. itch app → Library → Arkenelle → **Uninstall** / Manage → Forget
-2. Open the game page **inside the itch app**
-3. Click **Install** again
-4. From then on, Update patches in-app
+1. Confirm you deleted every **manual Upload** on https://kjp403.itch.io/arkenelle/edit (step 3)
+2. itch app → Library → Arkenelle → ⋯ → **Uninstall** / **Forget**
+3. Still in the itch app, open https://kjp403.itch.io/arkenelle
+4. Click **Install** (green / “Install with the itch.io app”) — **not** Download
+5. Later: Library → Arkenelle → **Update** patches in-app and relaunches
 
-Also confirm you deleted manual Uploads (step 3 above) and the latest CI push shows channel `windows` with your version (e.g. `0.28.4`).
+In-game **Update** uses `itch://install/?game_id=…` so it opens the itch app’s Install/Update flow and does **not** open the browser Download page.
+
+Also confirm the latest CI push shows channel `windows` with your version (e.g. `0.28.18`) via `butler status kjp403/arkenelle`.
 
 ---
 

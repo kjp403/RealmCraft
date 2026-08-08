@@ -248,4 +248,37 @@ jobs:
             # Arkenelle.apk.idsig that sideloaders don't need.
             ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android" --userversion "${USERVERSION}"
           fi
+
+      - name: Verify itch channel userversions
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          want() { [ "$PLATFORMS" = "all" ] || [ "$PLATFORMS" = "$1" ]; }
+          # butler finishes "processing" a few seconds after push; poll until the
+          # channel reports our --userversion so Library Update can find it.
+          wait_channel() {
+            local channel="$1"
+            local i
+            for i in $(seq 1 36); do
+              local status
+              status="$(./butler status "${ITCH_GAME}:${channel}" 2>&1 || true)"
+              echo "$status"
+              if echo "$status" | grep -Eq "[[:space:]]${USERVERSION}[[:space:]]*$|[[:space:]]${USERVERSION}$"; then
+                echo "OK ${channel} -> ${USERVERSION}"
+                return 0
+              fi
+              # Also accept VERSION column match anywhere on a windows/linux row.
+              if echo "$status" | grep -F "${USERVERSION}" >/dev/null; then
+                echo "OK ${channel} mentions ${USERVERSION}"
+                return 0
+              fi
+              sleep 5
+            done
+            echo "::error::Channel ${channel} never showed userversion ${USERVERSION}"
+            ./butler status "${ITCH_GAME}" || true
+            return 1
+          }
+          if want windows; then wait_channel windows; fi
+          if want linux; then wait_channel linux; fi
           ./butler status "${ITCH_GAME}"
