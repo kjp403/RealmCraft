@@ -26,12 +26,12 @@ func data_request_handler(
 	var prop_ids: Array = container.dynamic_nodes.keys()
 	for prop_id: Variant in prop_ids:
 		var node: Node = container.dynamic_nodes.get(prop_id, null)
-		if node == null or not (node is GroundItem):
+		# Prefer duck-typing so a missing class_name never breaks F-loot parse.
+		if node == null or not node.has_method(&"try_pickup"):
 			continue
-		var pile: GroundItem = node as GroundItem
-		if player.global_position.distance_to(pile.global_position) > AREA_RANGE:
+		if player.global_position.distance_to(node.global_position) > AREA_RANGE:
 			continue
-		var result: Dictionary = pile.try_pickup(player)
+		var result: Dictionary = node.call(&"try_pickup", player)
 		if bool(result.get("ok", false)):
 			picked += 1
 			var display: String = str(result.get("name", "item"))

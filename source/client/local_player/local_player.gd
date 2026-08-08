@@ -283,6 +283,9 @@ func request_area_loot() -> void:
 	Client.request_data(&"item.pickup_area", func(result: Dictionary) -> void:
 		var count: int = int(result.get("picked", 0))
 		if count <= 0:
+			var reason: String = str(result.get("reason", ""))
+			if reason == "none" or reason.is_empty():
+				Toaster.toast("Nothing to loot nearby.")
 			return
 		var names: PackedStringArray = PackedStringArray(result.get("names", []))
 		if names.is_empty():

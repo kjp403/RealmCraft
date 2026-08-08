@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+instance_name = &"the_hollow"
+map_path = "res://source/common/gameplay/maps/maps/the_hollow/the_hollow.tscn"
+zone_title = "The Hollow"
+level_min = 35
+level_max = 40
+show_discovery = true
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

@@ -5,7 +5,10 @@ extends MenuShell
 
 
 const VIEW_SIZE: Vector2i = Vector2i(720, 420)
-const MAP_ZOOM: float = 0.09
+## Fallback zoom when a map has unbounded camera limits (follow-player).
+const FALLBACK_ZOOM: float = 0.28
+## Keep a little padding so map edges aren't flush with the frame.
+const FIT_PADDING: float = 0.92
 
 
 var _sub_viewport: SubViewport
@@ -14,6 +17,10 @@ var _map_texture: TextureRect
 var _area_label: Label
 var _legend: VBoxContainer
 var _player_marker: Label
+## Live zoom used for click projection (updated when the current map changes).
+var _map_zoom: float = FALLBACK_ZOOM
+var _camera_center: Vector2 = Vector2.ZERO
+var _resolved_map: Node = null
 
 
 func _ready() -> void:
@@ -41,9 +48,18 @@ func _process(_delta: float) -> void:
 	if not visible:
 		return
 	var player: LocalPlayer = ClientState.local_player
-	if is_instance_valid(player) and _map_camera != null:
-		_map_camera.global_position = player.global_position
-		_update_player_marker(player)
+	if not is_instance_valid(player) or _map_camera == null:
+		return
+	var current_map: Node = (
+		InstanceClient.current.instance_map
+		if InstanceClient.current != null
+		else null
+	)
+	if current_map != _resolved_map:
+		_resolved_map = current_map
+		_fit_camera_to_map(current_map)
+	_map_camera.global_position = _camera_center
+	_update_player_marker(player)
 
 
 func _build_body() -> void:
@@ -66,7 +82,7 @@ func _build_body() -> void:
 	map_column.add_child(_area_label)
 
 	var hint := Label.new()
-	hint.text = "Hold and drag is free look via the camera follow. Click the map to walk there. Press M to close."
+	hint.text = "Click the map to walk there. Press M to close."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override(&"font_size", 12)
 	hint.add_theme_color_override(&"font_color", Color(0.65, 0.68, 0.75))
@@ -97,7 +113,7 @@ func _build_body() -> void:
 
 	_map_camera = Camera2D.new()
 	_map_camera.name = "WorldMapCamera"
-	_map_camera.zoom = Vector2.ONE * MAP_ZOOM
+	_map_camera.zoom = Vector2.ONE * FALLBACK_ZOOM
 	_map_camera.enabled = true
 	_sub_viewport.add_child(_map_camera)
 
@@ -164,11 +180,58 @@ func _attach_world() -> void:
 		if InstanceClient.current != null
 		else null
 	)
+	_resolved_map = map
+	_fit_camera_to_map(map)
 	_area_label.text = (
 		String(map.name).replace("_", " ")
 		if map != null
 		else "World Map"
 	)
+
+
+## Fit the SubViewport camera so the current map's authored camera limits fill
+## the black frame and stay centered. Unbounded maps fall back to a tighter
+## follow-player zoom (old 0.09 left hub as a tiny island in void).
+func _fit_camera_to_map(map: Node) -> void:
+	var player: LocalPlayer = ClientState.local_player
+	var player_pos: Vector2 = (
+		player.global_position if is_instance_valid(player) else Vector2.ZERO
+	)
+	_map_zoom = FALLBACK_ZOOM
+	_camera_center = player_pos
+	if map is Map:
+		var m: Map = map
+		var has_bounds: bool = (
+			m.camera_limit_left > -1_000_000
+			and m.camera_limit_top > -1_000_000
+			and m.camera_limit_right < 1_000_000
+			and m.camera_limit_bottom < 1_000_000
+			and m.camera_limit_right > m.camera_limit_left
+			and m.camera_limit_bottom > m.camera_limit_top
+		)
+		if has_bounds:
+			var map_w: float = float(m.camera_limit_right - m.camera_limit_left)
+			var map_h: float = float(m.camera_limit_bottom - m.camera_limit_top)
+			var zoom_x: float = float(VIEW_SIZE.x) / map_w
+			var zoom_y: float = float(VIEW_SIZE.y) / map_h
+			_map_zoom = minf(zoom_x, zoom_y) * FIT_PADDING
+			_camera_center = Vector2(
+				float(m.camera_limit_left + m.camera_limit_right) * 0.5,
+				float(m.camera_limit_top + m.camera_limit_bottom) * 0.5,
+			)
+			if _map_camera != null:
+				_map_camera.limit_left = m.camera_limit_left
+				_map_camera.limit_top = m.camera_limit_top
+				_map_camera.limit_right = m.camera_limit_right
+				_map_camera.limit_bottom = m.camera_limit_bottom
+		elif _map_camera != null:
+			_map_camera.limit_left = -10000000
+			_map_camera.limit_top = -10000000
+			_map_camera.limit_right = 10000000
+			_map_camera.limit_bottom = 10000000
+	if _map_camera != null:
+		_map_camera.zoom = Vector2.ONE * _map_zoom
+		_map_camera.global_position = _camera_center
 
 
 func _refresh_legend() -> void:
@@ -226,23 +289,30 @@ func _on_map_gui_input(event: InputEvent) -> void:
 	var player: LocalPlayer = ClientState.local_player
 	if not is_instance_valid(player):
 		return
-	# Same projection as NavigationMinimap: camera follows the player, so world
-	# = player + (click - view centre) / zoom.
+	var view_size: Vector2 = (
+		_map_texture.size if _map_texture != null and _map_texture.size.x > 0.0
+		else Vector2(VIEW_SIZE)
+	)
 	var world_position: Vector2 = (
-		player.global_position
-		+ (local_pos - Vector2(VIEW_SIZE) * 0.5) / MAP_ZOOM
+		_camera_center
+		+ (local_pos - view_size * 0.5) / _map_zoom
 	)
 	player.set_click_move_target(world_position)
 	if _map_texture != null:
 		_map_texture.accept_event()
 
 
-func _update_player_marker(_player: LocalPlayer) -> void:
+func _update_player_marker(player: LocalPlayer) -> void:
 	if _player_marker == null or _map_texture == null:
 		return
-	# Camera follows the player — marker stays centred on the view.
-	var center: Vector2 = _map_texture.size * 0.5
-	_player_marker.position = center - Vector2(8, 12)
+	var view_size: Vector2 = (
+		_map_texture.size if _map_texture.size.x > 0.0 else Vector2(VIEW_SIZE)
+	)
+	var screen_pos: Vector2 = (
+		view_size * 0.5
+		+ (player.global_position - _camera_center) * _map_zoom
+	)
+	_player_marker.position = screen_pos - Vector2(8, 12)
 
 
 func _frame_style() -> StyleBoxFlat:
