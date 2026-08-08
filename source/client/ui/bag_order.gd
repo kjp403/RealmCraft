@@ -89,13 +89,16 @@ static func save_order(order: Array) -> void:
 	ClientState.settings.set_value(SECTION, PROPERTY, order)
 
 
-## Merge live inventory uids into the saved order: keep known order (and empty
-## gaps), append new uids, drop missing ones.
+## Merge live inventory uids into the saved order.
+## Missing uids leave an EMPTY hole so neighbors do NOT shift left (equip / drink
+## / deposit must not reshuffle the grid). New uids fill the earliest hole, then
+## append — only player drag calls [method move_to_index] / [method swap] /
+## [method move_before] rearrange occupied slots.
 static func sync_with_entries(entries: Array) -> Array:
-	var live: Array = []
+	var live: Dictionary = {}
 	for entry: Variant in entries:
 		if entry is Dictionary and entry.has("uid"):
-			live.append(int(entry["uid"]))
+			live[int(entry["uid"])] = true
 	var order: Array = load_order()
 	var kept: Array = []
 	var used: Dictionary = {}
@@ -104,15 +107,29 @@ static func sync_with_entries(entries: Array) -> Array:
 		if id == EMPTY:
 			kept.append(EMPTY)
 			continue
-		if id in live and not used.has(id):
+		if live.has(id) and not used.has(id):
 			kept.append(id)
 			used[id] = true
-	# Drop trailing empties so newly gained items pack after the last real slot.
+		else:
+			# Left the bag — keep the square empty so later items stay put.
+			kept.append(EMPTY)
+	# New stacks: reuse holes first so loot / unequip don't always jump to the end.
+	for id: int in live:
+		if used.has(id):
+			continue
+		var placed: bool = false
+		for i: int in kept.size():
+			if int(kept[i]) == EMPTY:
+				kept[i] = id
+				used[id] = true
+				placed = true
+				break
+		if not placed:
+			kept.append(id)
+			used[id] = true
+	# Trim only empties past the last occupied slot (holes between items stay).
 	while not kept.is_empty() and int(kept[kept.size() - 1]) == EMPTY:
 		kept.pop_back()
-	for id: int in live:
-		if not used.has(id):
-			kept.append(id)
 	if kept != order:
 		save_order(kept)
 	return kept
