@@ -57,9 +57,8 @@ static func _reward(player: Player, npc: HostileNpc) -> void:
 	var level_before: int = resource.level
 	var progress: Dictionary = resource.add_experience(npc.xp_reward)
 	var loot_gained: Array = _roll_loot(npc)
-	for entry: Dictionary in loot_gained:
-		Inventory.add_item(resource.inventory, int(entry["id"]), int(entry["amount"]))
-		DailyQuestService.on_collect(resource, int(entry["id"]), int(entry["amount"]))
+	# Drops land on the ground for click-pickup — not auto-bagged.
+	_spawn_ground_loot(player, npc, loot_gained)
 
 	# Weapon mastery: practicing a category = killing with it. Same xp number.
 	var mastery: Dictionary = {}
@@ -78,6 +77,7 @@ static func _reward(player: Player, npc: HostileNpc) -> void:
 			"experience": resource.experience,
 			"xp_to_next": resource.level_xp_to_next(),
 			"loot": loot_gained,
+			"ground": true,
 			"mastery": mastery,
 		})
 
@@ -109,3 +109,39 @@ static func _roll_loot(npc: HostileNpc) -> Array:
 					"name": str(drop.item.item_name),
 				})
 	return out
+
+
+## Scatter rolled loot as clickable GroundItems around the corpse.
+static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Array) -> void:
+	if loot_gained.is_empty():
+		return
+	var peer_id: int = int(player.player_resource.current_peer_id) if player.player_resource != null else 0
+	var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
+	if inst == null or not inst is ServerInstance:
+		return
+	var map: Map = (inst as ServerInstance).instance_map
+	if map == null or map.replicated_props_container == null:
+		return
+	var container: ReplicatedPropsContainer = map.replicated_props_container
+	var origin: Vector2 = npc.global_position
+	var i: int = 0
+	for entry: Dictionary in loot_gained:
+		var item_id: int = int(entry.get("id", 0))
+		var amount: int = int(entry.get("amount", 0))
+		if item_id <= 0 or amount <= 0:
+			continue
+		var angle: float = TAU * float(i) / float(maxi(1, loot_gained.size()))
+		var offset := Vector2(cos(angle), sin(angle)) * randf_range(12.0, 22.0)
+		offset += Vector2(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
+		var drop_global: Vector2 = origin + offset
+		var drop_local: Vector2 = container.to_local(drop_global)
+		container.spawn_dynamic(
+			ReplicatedPropsContainer.SCENE_GROUND_ITEM,
+			drop_local,
+			{
+				"item_id": item_id,
+				"amount": amount,
+				"position": drop_local,
+			}
+		)
+		i += 1
