@@ -4,9 +4,8 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_tp"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/fishshop1.png" id="3_shop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/dock.png" id="10_dock"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/dock2.png" id="11_dock2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat.png" id="12_boat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/palm.png" id="p6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_teal.png" id="p11"]
@@ -16,7 +15,7 @@
 [ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h3"]
 
 [sub_resource type="RectangleShape2D" id="BoatShape"]
-size = Vector2(56, 36)
+size = Vector2(72, 56)
 
 [node name="WoodlandDeepCove" type="Node2D"]
 y_sort_enabled = true
@@ -55,23 +54,20 @@ texture = ExtResource("p5")
 offset = Vector2(0, -8)
 
 [node name="Dock" type="Sprite2D" parent="."]
-position = Vector2(352, 134)
+z_index = 1
+position = Vector2(352, 180)
 texture = ExtResource("10_dock")
-
-[node name="Dock2" type="Sprite2D" parent="."]
-position = Vector2(352, 198)
-texture = ExtResource("11_dock2")
 
 [node name="FishingBoat" type="Sprite2D" parent="."]
 z_index = 2
-position = Vector2(352, 206)
+position = Vector2(404, 228)
 texture = ExtResource("12_boat")
 
 [node name="BoatLabel" type="Label" parent="."]
-offset_left = 312
-offset_top = 178
-offset_right = 392
-offset_bottom = 194
+offset_left = 368
+offset_top = 186
+offset_right = 448
+offset_bottom = 202
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 3
@@ -80,7 +76,7 @@ text = "Beach"
 horizontal_alignment = 1
 
 [node name="BoatToBeach" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(352, 206)
+position = Vector2(384, 232)
 target = NodePath("../../WoodlandBeach/BoatToDeepCove")
 
 [node name="CollisionShape2D" parent="BoatToBeach" index="0"]
