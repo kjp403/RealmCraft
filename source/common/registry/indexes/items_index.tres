@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786200699
-next_id = 221
+version = 1786201688
+next_id = 227
 entries = Array[Dictionary]([{
 &"hash": "6a6a704f22ddb42015d16e9950c1301b137b1ff6bf4c12ac87d5a5bb784fbb0e",
 &"id": 74,
@@ -183,21 +183,6 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/gears/cloth/scholars_robe.tres",
 &"slug": &"scholars_robe"
 }, {
-&"hash": "cedd4491df3a9259f34aa3c8db2cb6b99e5ea8645f2ccf0c8829cfe27df7006f",
-&"id": 206,
-&"path": "res://source/common/gameplay/items/gears/leather/dragon_hood.tres",
-&"slug": &"dragon_hood"
-}, {
-&"hash": "e5de375bf7d7b9b01e265705d5cde836c08861fa880f298268182be9f707b8f9",
-&"id": 207,
-&"path": "res://source/common/gameplay/items/gears/leather/dragon_sandals.tres",
-&"slug": &"dragon_sandals"
-}, {
-&"hash": "b8065f58d52442a69776429b1d3eb8aed6489fd6322278ff5f4f53786b0f2a50",
-&"id": 208,
-&"path": "res://source/common/gameplay/items/gears/leather/dragon_vest.tres",
-&"slug": &"dragon_vest"
-}, {
 &"hash": "89e69e9e2042c5c2b8393428ee6f726ccf6a3430b5512c1b283a00663fc888e2",
 &"id": 139,
 &"path": "res://source/common/gameplay/items/gears/leather/leather_boots.tres",
@@ -242,6 +227,21 @@ entries = Array[Dictionary]([{
 &"id": 31,
 &"path": "res://source/common/gameplay/items/gears/leather/shadow_vest.tres",
 &"slug": &"shadow_vest"
+}, {
+&"hash": "4f0d806dfc14a012baee82cb3aadc5396038af90b34d4f58e845b847bd9c3779",
+&"id": 224,
+&"path": "res://source/common/gameplay/items/gears/leather/sirenic_hood.tres",
+&"slug": &"sirenic_hood"
+}, {
+&"hash": "72ef2d4109d761b97d65c6c96991358e373d1afe5811485f44e99a24e1b62377",
+&"id": 226,
+&"path": "res://source/common/gameplay/items/gears/leather/sirenic_sandals.tres",
+&"slug": &"sirenic_sandals"
+}, {
+&"hash": "afbdd756c90cfe25a439d5882cae0160944cf37dc7342780acc8f1c53fc8ceeb",
+&"id": 225,
+&"path": "res://source/common/gameplay/items/gears/leather/sirenic_vest.tres",
+&"slug": &"sirenic_vest"
 }, {
 &"hash": "7d08a65e73bb6d62c47d26b97d160844e0a98074565b8f99cd569269d4ce2ecc",
 &"id": 142,
@@ -463,6 +463,11 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/cloth/phantom_cloth.tres",
 &"slug": &"phantom_cloth"
 }, {
+&"hash": "f8330360df5ac5b0bd8d4251b40a08f393ae7f0ed2094cb5b939574e66f66427",
+&"id": 223,
+&"path": "res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres",
+&"slug": &"sirenic_cloth"
+}, {
 &"hash": "3f20f2fbe964830dc404a70eb15eafa7d970ea66c22d8219bb167fbd2aa7b851",
 &"id": 191,
 &"path": "res://source/common/gameplay/items/materials/fish/anglerfish.tres",
@@ -538,6 +543,11 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/gems/phantom_gem.tres",
 &"slug": &"phantom_gem"
 }, {
+&"hash": "6d7a878abd603ed1c5e62c68b09b5b650ad47fc152d04af46cd0af4a68773543",
+&"id": 222,
+&"path": "res://source/common/gameplay/items/materials/gems/sirenic_gem.tres",
+&"slug": &"sirenic_gem"
+}, {
 &"hash": "4da98db67ad3d3a01ea5defcfb28745d1670a1e2c3472531e014c638a3d6fa4a",
 &"id": 58,
 &"path": "res://source/common/gameplay/items/materials/herbs/healing_herb.tres",
@@ -582,6 +592,11 @@ entries = Array[Dictionary]([{
 &"id": 113,
 &"path": "res://source/common/gameplay/items/materials/leather/leather_sewer.tres",
 &"slug": &"leather_sewer"
+}, {
+&"hash": "9be2de55595dfc6e6d3059e73409e0975d34c5d928023aadf3c73fd69d1faad6",
+&"id": 221,
+&"path": "res://source/common/gameplay/items/materials/leather/sirenic_leather.tres",
+&"slug": &"sirenic_leather"
 }, {
 &"hash": "afbb0243e69c7d31c803d481e7d2bfc3252400736a4c870fb29449c6a2a4d073",
 &"id": 53,

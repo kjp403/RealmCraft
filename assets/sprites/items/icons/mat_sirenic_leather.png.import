@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqt7jpmas0afo"
-path="res://.godot/imported/gear_dragon_leather_boots.png-0a2e40669f8b2df938c1be2e46c60c08.ctex"
+uid="uid://dx2dmnbt2o2rx"
+path="res://.godot/imported/mat_sirenic_leather.png-b56677db61ef2896d64893a1b5a136ce.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/items/icons/gear_dragon_leather_boots.png"
-dest_files=["res://.godot/imported/gear_dragon_leather_boots.png-0a2e40669f8b2df938c1be2e46c60c08.ctex"]
+source_file="res://assets/sprites/items/icons/mat_sirenic_leather.png"
+dest_files=["res://.godot/imported/mat_sirenic_leather.png-b56677db61ef2896d64893a1b5a136ce.ctex"]
 
 [params]
 

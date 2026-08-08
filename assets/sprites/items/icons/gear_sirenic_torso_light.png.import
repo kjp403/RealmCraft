@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b23q46kydlt0u"
-path="res://.godot/imported/gear_dragon_leather_hood.png-e00f13ada9b44a94d3e4ea58e5c562a9.ctex"
+uid="uid://dm70c1f3t4ax1"
+path="res://.godot/imported/gear_sirenic_torso_light.png-3f7dd41aa62b217a445cc6146993e15c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/items/icons/gear_dragon_leather_hood.png"
-dest_files=["res://.godot/imported/gear_dragon_leather_hood.png-e00f13ada9b44a94d3e4ea58e5c562a9.ctex"]
+source_file="res://assets/sprites/items/icons/gear_sirenic_torso_light.png"
+dest_files=["res://.godot/imported/gear_sirenic_torso_light.png-3f7dd41aa62b217a445cc6146993e15c.ctex"]
 
 [params]
 
