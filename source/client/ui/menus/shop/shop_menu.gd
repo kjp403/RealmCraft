@@ -168,32 +168,59 @@ func _build_buy_rows() -> void:
 		_add_row(slot, STOCK_INFINITE_TEXT)
 
 
-## The whole sell side: this vendor's accepted trades — fixed item/amount/payout
-## bundles (gold buy-backs included). THE CURATED ECONOMY: there is no generic
-## junk-sell; a vendor buys exactly what its trades list says (docs/economy.md).
+## Sell side: specialty accepted_trades first, then owned items with vendor_value
+## (when the shop buys vendor-priced junk — gatherable ores/logs/fish/etc.).
 func _build_trade_rows() -> void:
-	if _shop.accepted_trades.is_empty():
+	var specialty_ids: Dictionary = {} # item_id -> true
+	if _shop.accepted_trades != null:
+		for i in _shop.accepted_trades.size():
+			var trade: ShopTrade = _shop.accepted_trades[i]
+			if trade == null or trade.item == null or trade.amount <= 0:
+				continue
+			var item_id: int = int(trade.item.get_meta(&"id", 0))
+			specialty_ids[item_id] = true
+			var owned: int = _owned.get(item_id, 0)
+			@warning_ignore("integer_division")
+			var bundles_available: int = owned / trade.amount
+			var slot: ShopSlot = ShopSlot.new()
+			slot.item = trade.item
+			slot.item_id = item_id
+			slot.price = trade.payout
+			slot.quantity = owned
+			slot.is_trade = true
+			slot.trade_index = i
+			slot.trade_amount = trade.amount
+			slot.trade_payout = trade.payout
+			slot.trade_bundles_available = bundles_available
+			var middle: String = "x%d → %d g" % [trade.amount, trade.payout]
+			_add_row(slot, middle)
+
+	if not _shop.buys_vendor_priced:
 		return
-	for i in _shop.accepted_trades.size():
-		var trade: ShopTrade = _shop.accepted_trades[i]
-		if trade == null or trade.item == null or trade.amount <= 0:
+	var sellables: Array[Dictionary] = []
+	for item_id: int in _owned.keys():
+		if specialty_ids.has(item_id):
 			continue
-		var item_id: int = int(trade.item.get_meta(&"id", 0))
-		var owned: int = _owned.get(item_id, 0)
-		@warning_ignore("integer_division")
-		var bundles_available: int = owned / trade.amount
+		var owned: int = int(_owned[item_id])
+		if owned <= 0:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if item == null or item.is_currency or item.vendor_value <= 0:
+			continue
+		if item_id in _equipped_ids:
+			continue
+		sellables.append({"item": item, "id": item_id, "owned": owned, "price": item.vendor_value})
+	sellables.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return String(a["item"].item_name) < String(b["item"].item_name)
+	)
+	for entry: Dictionary in sellables:
 		var slot: ShopSlot = ShopSlot.new()
-		slot.item = trade.item
-		slot.item_id = item_id
-		slot.price = trade.payout
-		slot.quantity = owned
-		slot.is_trade = true
-		slot.trade_index = i
-		slot.trade_amount = trade.amount
-		slot.trade_payout = trade.payout
-		slot.trade_bundles_available = bundles_available
-		var middle: String = "x%d → %d g" % [trade.amount, trade.payout]
-		_add_row(slot, middle)
+		slot.item = entry["item"]
+		slot.item_id = int(entry["id"])
+		slot.price = int(entry["price"])
+		slot.quantity = int(entry["owned"])
+		slot.is_trade = false
+		_add_row(slot, "owned %d" % slot.quantity)
 
 
 func _add_row(slot: ShopSlot, middle_text: String) -> void:
@@ -419,8 +446,10 @@ func _on_action_button_pressed() -> void:
 		return
 	if _mode == Mode.BUY:
 		_buy()
+	elif _selected_slot.is_trade:
+		_trade()
 	else:
-		_trade() # the sell side is trades-only (curated economy)
+		_sell()
 
 
 func _buy() -> void:
@@ -470,6 +499,28 @@ func _trade() -> void:
 	await _request_inventory()
 	for slot in _slots:
 		if slot.is_trade and slot.trade_index == trade_index:
+			_on_row_pressed(slot)
+			return
+	_clear_detail()
+
+
+## Flat junk-sell: amount * item.vendor_value gold.
+func _sell() -> void:
+	var item_id: int = _selected_slot.item_id
+	var amount: int = int(quantity_spinbox.value)
+	action_button.disabled = true
+	var result: Array = await Client.request_data_await(
+		&"shop.sell.item",
+		{"shop_key": _shop_key, "id": item_id, "amount": amount},
+		InstanceClient.current.name
+	)
+	if result[1] != OK or not result[0].get("ok", false):
+		Toaster.toast("Couldn't sell that.")
+		action_button.disabled = false
+		return
+	await _request_inventory()
+	for slot in _slots:
+		if not slot.is_trade and slot.item_id == item_id:
 			_on_row_pressed(slot)
 			return
 	_clear_detail()

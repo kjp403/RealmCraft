@@ -38,6 +38,9 @@ enum InventoryTab {
 ## If 0 any price can be choosen.
 ## This is not shop price. If an item is sold at a shop, the price is defined in shop logic.
 @export var market_minimum_price: int = 0
+## Gold paid per unit when sold to a vendor with [member ShopResource.buys_vendor_priced].
+## 0 = not junk-sellable (specialty [ShopTrade]s can still buy it). Used for gatherables.
+@export var vendor_value: int = 0
 
 
 # Inventory

@@ -86,6 +86,10 @@ var _windows_focus: bool = true
 var _mouse_in_game: bool = true
 var _mouse_aiming: bool
 var _was_stick_aim_active: bool
+## Edge state for optional LMB-as-attack (not an InputMap action).
+var _lmb_was_down: bool = false
+var _lmb_press_frame: int = -1
+var _lmb_release_frame: int = -1
 
 var _last_look_direction: Vector2
 
@@ -105,6 +109,14 @@ func _ready() -> void:
 
 # Deals with input detection and stick attack sync.
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and not _lmb_was_down:
+			_lmb_press_frame = Engine.get_process_frames()
+		elif not mb.pressed and _lmb_was_down:
+			_lmb_release_frame = Engine.get_process_frames()
+		_lmb_was_down = mb.pressed
+
 	if _is_event_relevant(event):
 
 		var is_fake_mouse: bool = (event is InputEventMouseButton or event is InputEventMouseMotion and event.device == -1)
@@ -288,12 +300,20 @@ func _ui_blocks_combat() -> bool:
 	return hovered != null and hovered.mouse_filter == Control.MOUSE_FILTER_STOP
 
 
+## Optional LMB attack (Settings → Controls). Space remains the primary bind;
+## this is an additive preference so click-to-move users can opt in.
+func _lmb_also_attacks() -> bool:
+	return ClientState.settings.get_value(&"mouse_keyboard", &"lmb_also_attacks") == true
+
+
 ## Returns [code]true[/code] while the attack action is held.
 func is_attack_pressed() -> bool:
 	if not enabled: return false
 	if _mouse_aiming and not is_mouse_onscreen: return false
 	if _ui_blocks_combat(): return false
-	return Input.is_action_pressed(&"player_shoot")
+	if Input.is_action_pressed(&"player_shoot"):
+		return true
+	return _lmb_also_attacks() and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 
 
 ## Returns [code]true[/code] on the frame attack action was pressed.
@@ -303,7 +323,11 @@ func is_attack_just_pressed() -> bool:
 	if _ui_blocks_combat(): return false
 	# Drop leftover UI focus so Space (attack) isn't delayed by a focused Control
 	# still owning the viewport after a menu click.
-	if Input.is_action_just_pressed(&"player_shoot"):
+	var pressed: bool = (
+		Input.is_action_just_pressed(&"player_shoot")
+		or (_lmb_also_attacks() and _lmb_press_frame == Engine.get_process_frames())
+	)
+	if pressed:
 		var focused: Control = get_viewport().gui_get_focus_owner()
 		if focused != null and not (focused is LineEdit or focused is TextEdit):
 			focused.release_focus()
@@ -315,7 +339,9 @@ func is_attack_just_pressed() -> bool:
 func is_attack_just_released() -> bool:
 	if not enabled: return false
 	if _mouse_aiming and not is_mouse_onscreen: return false
-	return Input.is_action_just_released(&"player_shoot")
+	if Input.is_action_just_released(&"player_shoot"):
+		return true
+	return _lmb_also_attacks() and _lmb_release_frame == Engine.get_process_frames()
 
 
 ## Special / secondary attack — second weapon ability slot. Mirrors the

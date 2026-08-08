@@ -8,5 +8,6 @@ script = ExtResource("2_mat")
 item_name = &"Trout"
 item_icon = ExtResource("1_icon")
 description = "Fresh river trout with speckled sides."
+vendor_value = 3
 metadata/slug = &"trout"
 metadata/id = 183

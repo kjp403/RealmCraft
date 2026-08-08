@@ -302,6 +302,12 @@ vertical_alignment = 1
 layout_mode = 2
 theme_override_constants/separation = 6
 
+[node name="LmbAlsoAttacks" parent="MainContainer/Root/HBoxContainer/ControlsSettings/ScrollContainer/VBoxContainer" unique_id=1161182399 instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"mouse_keyboard"
+setting_property = &"lmb_also_attacks"
+label_override = "Left click also attacks"
+
 [node name="TouchSettings" type="VBoxContainer" parent="MainContainer/Root/HBoxContainer/ControlsSettings/ScrollContainer/VBoxContainer" unique_id=716593243 node_paths=PackedStringArray("widgets")]
 visible = false
 layout_mode = 2

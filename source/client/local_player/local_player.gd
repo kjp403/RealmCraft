@@ -633,6 +633,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	var hovered: Control = get_viewport().gui_get_hovered_control()
 	if hovered != null and hovered.mouse_filter == Control.MOUSE_FILTER_STOP:
 		return
+	# When LMB-also-attacks is on and a weapon is drawn, LMB is combat — don't
+	# also start click-to-move (that would yank you mid-swing). Holstered /
+	# unarmed still click-moves as usual.
+	if (
+		ClientState.settings.get_value(&"mouse_keyboard", &"lmb_also_attacks") == true
+		and is_armed()
+	):
+		return
 	set_click_move_target(get_global_mouse_position())
 	get_viewport().set_input_as_handled()
 
