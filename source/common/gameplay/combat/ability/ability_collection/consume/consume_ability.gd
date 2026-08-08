@@ -51,11 +51,14 @@ func use_ability(entity: Entity, _direction: Vector2) -> void:
 	if not GameMode.is_world_server() or consumable == null or entity is not Character:
 		return
 	consumable.on_use(entity as Character)
-	# Drank the LAST one → put the empty hand away so no dangling un-drinkable potion is
-	# left mounted. Clearing the synced slot unequips it for everyone and the quickslot
-	# un-highlights.
+	# Drank the LAST one of a HELD potion → clear the hand. Never wipe a real weapon:
+	# inventory/compact Use and double-click drink via item.consume while a sword/wand
+	# stays equipped, and blindly erasing &"weapon" permanently destroyed that gear.
 	if entity is Player:
 		var player: Player = entity as Player
-		if not Inventory.has_item(player.player_resource.inventory, int(consumable.get_meta(&"id", 0))):
-			player.equipment_component.set_hand(0)
-			player.player_resource.equipment.erase(&"weapon")
+		var potion_id: int = int(consumable.get_meta(&"id", 0))
+		if not Inventory.has_item(player.player_resource.inventory, potion_id):
+			var hand_id: int = int(player.equipment_component.slots.values.get(&"weapon", 0))
+			if hand_id == potion_id:
+				player.equipment_component.set_hand(0)
+				player.player_resource.equipment.erase(&"weapon")
