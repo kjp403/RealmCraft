@@ -116,7 +116,7 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Click a stack, set amount, Deposit — or Deposit All."
+		"Left-click stacks over 2 to deposit. Qty 1–2: set amount, then Deposit. Or Deposit All."
 		if is_bag
 		else "Click a stack, set amount, Withdraw."
 	)
@@ -256,7 +256,14 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 		button.set_pressed_no_signal(int(uid) == _selected_uid and is_bag == _selected_from_bag)
 		if item != null:
 			PixelIcon.mount(button, item.item_icon)
-			button.tooltip_text = ItemTooltip.hover_text(item)
+			var tip: String = ItemTooltip.hover_text(item)
+			if is_bag:
+				tip += (
+					"\nLeft-click: deposit all"
+					if amount > 2
+					else "\nLeft-click: select · use Deposit below for amount"
+				)
+			button.tooltip_text = tip
 		else:
 			button.tooltip_text = "Unknown item"
 		if amount > 1:
@@ -277,6 +284,11 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 
 
 func _on_stack_selected(uid: int, from_bag: bool, have: int, item: Item) -> void:
+	# Bag stacks larger than 2 deposit on left-click; qty 1–2 must use Deposit below.
+	if from_bag and have > 2:
+		_transfer_stack(uid, true, have)
+		return
+
 	_selected_uid = uid
 	_selected_from_bag = from_bag
 	_selected_have = maxi(1, have)
@@ -325,18 +337,23 @@ func _clear_selection() -> void:
 
 
 func _on_transfer_pressed() -> void:
-	if _busy or InstanceClient.current == null or _selected_uid < 0:
+	if _selected_uid < 0:
 		return
-	var amount: int = int(_amount_spin.value)
+	_transfer_stack(_selected_uid, _selected_from_bag, int(_amount_spin.value))
+
+
+func _transfer_stack(uid: int, from_bag: bool, amount: int) -> void:
+	if _busy or InstanceClient.current == null or uid < 0:
+		return
 	if amount <= 0:
 		return
 	_busy = true
 	if _deposit_all_button != null:
 		_deposit_all_button.disabled = true
-	var type: StringName = &"bank.deposit" if _selected_from_bag else &"bank.withdraw"
+	var type: StringName = &"bank.deposit" if from_bag else &"bank.withdraw"
 	var result: Array = await Client.request_data_await(
 		type,
-		{"uid": _selected_uid, "amount": amount},
+		{"uid": uid, "amount": amount},
 		InstanceClient.current.name
 	)
 	_busy = false
