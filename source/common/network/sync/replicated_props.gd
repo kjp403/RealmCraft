@@ -89,16 +89,14 @@ var _pending_by_cpid: Dictionary[int, Variant]
 var _smooth_position_fid: int = -1
 
 func _enter_tree() -> void:
-	# Packed-scene children are already parented when the container enters the
-	# tree, and HostileNPC._ready (child-first) reads child_id_of_node. Bake
-	# here so unbaked maps still get stable static IDs on server + client —
-	# without this, ops/pairs (attack anims, telegraphs, position) never resolve.
-	if id_to_node.is_empty():
-		_bake_static_map()
+	# Always rebuild from live children. Serialized NodePath→Node dictionaries
+	# can leave node_to_id looking non-empty while child_id_of_node(self) still
+	# misses (HostileNPC._ready is child-first and needs real Node keys).
+	_bake_static_map()
 
 
 func _ready() -> void:
-	if id_to_node.is_empty():
+	if id_to_node.is_empty() or node_to_id.is_empty():
 		_bake_static_map()
 
 
@@ -108,15 +106,26 @@ func _notification(what: int) -> void:
 			_bake_static_map()
 
 
-## Bake: all immediate children become "static props" with stable IDs.
+## Bake: immediate static children get stable IDs. Dynamic spawns (ids >
+## STATIC_MAX) keep their reverse lookups — a full clear would orphan them.
 func _bake_static_map() -> void:
+	var preserved_dynamics: Dictionary = {} # Node -> child_id
+	for dyn_id: Variant in dynamic_nodes.keys():
+		var dyn_node: Node = dynamic_nodes[dyn_id] as Node
+		if dyn_node != null and is_instance_valid(dyn_node):
+			preserved_dynamics[dyn_node] = int(dyn_id)
+
 	id_to_node.clear()
 	node_to_id.clear()
 	var next_id: int = 0
 	for node: Node in get_children():
+		if preserved_dynamics.has(node):
+			continue
 		id_to_node[next_id] = node
 		node_to_id[node] = next_id
 		next_id += 1
+	for dyn_node: Variant in preserved_dynamics.keys():
+		node_to_id[dyn_node as Node] = int(preserved_dynamics[dyn_node])
 	notify_property_list_changed()
 
 
@@ -240,6 +249,8 @@ func apply_despawns(ids: Array) -> void:
 
 # --- Server-side marking & collection
 func mark_child_prop(child_id: int, field_id: int, value: Variant, only_if_changed: bool = true) -> void:
+	if child_id < 0:
+		return
 	var cpid: int = make_cpid(child_id, field_id)
 	if only_if_changed:
 		var prev: Variant = _state_by_cpid.get(cpid, null)
@@ -264,6 +275,8 @@ func queue_despawn(child_id: int) -> void:
 
 
 func queue_op(child_id: int, method: String, args: Array = []) -> void:
+	if child_id < 0:
+		return
 	_ops_named_queued.append([child_id, StringName(method), args])
 
 
@@ -372,7 +385,7 @@ func capture_bootstrap_block() -> Dictionary:
 	# - current dynamics (spawns with scene_id from node.meta),
 	# - optional pairs baseline,
 	# - named ops baseline (scene-owned state like rp_pause).
-	# Client apply order must be: spawns → ops_named → pairs → despawns
+	# Client apply order must be: spawns → pairs → ops_named → despawns
 	var spawns: Array = []
 	for child_id: int in dynamic_nodes:
 		var n: Node = dynamic_nodes[child_id]
@@ -393,12 +406,39 @@ func capture_bootstrap_block() -> Dictionary:
 
 # --- Resolve / utility
 func child_id_of_node(node: Node) -> int:
-	return node_to_id.get(node, -1)
+	if node == null:
+		return -1
+	var direct: int = int(node_to_id.get(node, -1))
+	if direct >= 0:
+		return direct
+	# Fallback: serialized maps sometimes keep NodePath values; match by identity
+	# against id_to_node and repair the reverse lookup for next time.
+	for child_id: Variant in id_to_node.keys():
+		var mapped: Variant = id_to_node[child_id]
+		var resolved: Node = mapped as Node
+		if resolved == null and mapped is NodePath:
+			resolved = get_node_or_null(mapped as NodePath)
+			if resolved != null:
+				id_to_node[child_id] = resolved
+		if resolved == node:
+			var cid: int = int(child_id)
+			node_to_id[node] = cid
+			return cid
+	return -1
 
 
 func _resolve_child(child_id: int) -> Node:
 	if child_id <= STATIC_MAX:
-		return id_to_node.get(child_id, null)
+		var mapped: Variant = id_to_node.get(child_id, null)
+		if mapped is Node:
+			return mapped as Node
+		if mapped is NodePath:
+			var resolved: Node = get_node_or_null(mapped as NodePath)
+			if resolved != null:
+				id_to_node[child_id] = resolved
+				node_to_id[resolved] = child_id
+			return resolved
+		return null
 	else:
 		return dynamic_nodes.get(child_id, null)
 

@@ -67,9 +67,11 @@ func _ready() -> void:
 		return
 	_load_config()
 	var now: int = Time.get_ticks_msec()
-	_next_slam_ms = now + int(slam_interval_s * 1000.0)
-	_next_laser_ms = now + int(maxi(1, int(laser_interval_s * 500.0)))
-	_next_arm_ms = now + int(maxi(1, int(arm_shot_interval_s * 700.0)))
+	# Give the body a clear chase window on pull before the first cast roots it —
+	# otherwise a freshly engaged boss looks glued in place while it winds up.
+	_next_slam_ms = now + int(maxi(slam_interval_s, 4.0) * 1000.0)
+	_next_laser_ms = now + int(maxi(laser_interval_s, 5.5) * 1000.0)
+	_next_arm_ms = now + int(maxi(arm_shot_interval_s, 3.5) * 1000.0)
 	# Boss-event music is driven by the boss's own lifecycle — automatic for EVERY boss
 	# (world + dungeon both attach this brain): the combat track on spawn, the victory
 	# sting on death. An admin abort (boss removed WITHOUT dying) is cued as "end" by
