@@ -454,6 +454,11 @@ func _find_targets() -> void:
 	# doesn't acquire targets; its behavior re-targets when it stands up.
 	if is_dead: return
 	if enemy_state == EnemyState.RETURNING or enemy_state == EnemyState.DEAD: return
+	# Passive / skiller-safe mobs (chase_on_area=false): never auto-aggro just
+	# because a player walked nearby. They only engage when hit (take_damage)
+	# or when a pack-mate is attacked (_on_ally_attacked).
+	if not chase_on_area:
+		return
 
 	# Self-heal the cached list against the physics truth first: a player who never
 	# LEFT the area after we dropped them is invisible to us otherwise. stop_chase
