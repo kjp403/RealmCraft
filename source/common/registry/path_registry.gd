@@ -29,6 +29,8 @@ static func _static_init() -> void:
 	register_field(":scale", Wire.Type.VEC2_F32)
 	
 	register_field(":display_name", Wire.Type.VARIANT)
+	# Staff badge slug: "" | "moderator" | "admin" (senior_admin collapses to admin).
+	register_field(":staff_role", Wire.Type.VARIANT)
 	
 	register_field(":skin_id", Wire.Type.U16)
 	

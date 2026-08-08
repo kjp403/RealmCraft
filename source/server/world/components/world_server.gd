@@ -192,8 +192,15 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 	# The token is a one-time bearer credential. Log the peer, never the secret.
 	print("Peer: %d supplied world authentication data." % peer_id)
 	if is_valid_authentication_token(auth_token):
+		var pending: PlayerResource = token_list[auth_token]
+		# Account bans block world entry entirely (character switch can't dodge).
+		if pending != null and BanList.is_banned(pending.account_name):
+			print("Peer: %d rejected — account banned (%s)." % [peer_id, pending.account_name])
+			token_list.erase(auth_token)
+			peer.disconnect_peer(peer_id)
+			return
 		multiplayer.complete_auth(peer_id)
-		connected_players[peer_id] = token_list[auth_token]
+		connected_players[peer_id] = pending
 		connected_players[peer_id].current_peer_id = peer_id
 		# Stamp the session start so the played_seconds counter can advance on
 		# disconnect. Reset on every fresh login.

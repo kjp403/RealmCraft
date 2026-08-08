@@ -1,11 +1,12 @@
 extends ChatCommand
-## Give an item to a player by item id (testing helper).
+## Give an item to a player by item id OR slug (testing helper).
+## Examples: /give self 51 10   |   /give self copper_ore 10
 
 
 func _init() -> void:
 	command_name = "give"
-	command_priority = 100 # senior_admin
-	command_usage = "/give <self|@account|#id> <item_id> [amount]"
+	command_priority = 2 # admin+ (testing / content QA — spawn items into bags)
+	command_usage = "/give <self|@account|#id> <item_id|slug> [amount]"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
@@ -18,14 +19,22 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	if not target.online:
 		return "%s must be online." % target.label()
 
-	var item_id: int = args[2].to_int()
 	var amount: int = args[3].to_int() if args.size() == 4 else 1
-	if item_id <= 0 or amount <= 0:
-		return "Invalid item id or amount."
+	if amount <= 0:
+		return "Invalid amount."
 
-	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	var item: Item = null
+	var token: String = args[2]
+	if token.is_valid_int():
+		item = ContentRegistryHub.load_by_id(&"items", token.to_int()) as Item
+	else:
+		item = ContentRegistryHub.load_by_slug(&"items", StringName(token)) as Item
 	if item == null:
-		return "No item with id %d." % item_id
+		return "No item matching '%s'." % token
+
+	var item_id: int = int(item.get_meta(&"id", 0))
+	if item_id <= 0:
+		return "Item '%s' has no registry id." % token
 
 	Inventory.add_item(target.resource.inventory, item_id, amount)
 	return "Gave %d x %s (id %d) to %s." % [amount, str(item.item_name), item_id, target.label()]

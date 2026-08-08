@@ -310,6 +310,7 @@ func _on_chat_message(message: Dictionary) -> void:
 		return
 	var sender_title: String = str(message.get("title", ""))
 	var sender_guild: String = str(message.get("guild_name", ""))
+	var sender_staff_role: String = str(message.get("staff_role", ""))
 	var msg_id: int = int(message.get("msg_id", 0))
 	var time_ms: int = int(message.get("time_ms", 0))
 	var is_history: bool = bool(message.get("is_history", false))
@@ -344,6 +345,7 @@ func _on_chat_message(message: Dictionary) -> void:
 		"name": sender_name,
 		"title": sender_title,
 		"guild_name": sender_guild,
+		"staff_role": sender_staff_role,
 		"text": text,
 		"time_ms": time_ms,
 		"msg_id": msg_id,
@@ -372,7 +374,9 @@ func _on_chat_message(message: Dictionary) -> void:
 		_inc_unread(convo_id)
 
 	if not is_history and _should_show_in_peek(convo_id):
-		var peek_line: String = _format_message_peek(convo_id, sender_id, sender_name, text)
+		var peek_line: String = _format_message_peek(
+			convo_id, sender_id, sender_name, text, sender_staff_role
+		)
 		peek_feed_text_display.append_text(peek_line)
 		peek_feed_text_display.newline()
 
@@ -810,6 +814,7 @@ func _format_header(record: Dictionary, show_channel_prefix: bool) -> String:
 	var sender_name: String = str(record.get("name", ""))
 	var title: String = str(record.get("title", ""))
 	var guild_name: String = str(record.get("guild_name", ""))
+	var staff_role: String = str(record.get("staff_role", ""))
 	var is_self: bool = bool(record.get("is_self", false))
 	var is_system: bool = bool(record.get("is_system", false))
 
@@ -838,6 +843,10 @@ func _format_header(record: Dictionary, show_channel_prefix: bool) -> String:
 		if not prefix.is_empty():
 			var pc: String = _tag_color_for_conversation(convo_id)
 			pieces.append("[color=%s][%s][/color]" % [pc, prefix])
+
+	var badge: String = _staff_badge_bbcode(staff_role)
+	if not badge.is_empty():
+		pieces.append(badge)
 
 	pieces.append(name_chunk)
 
@@ -869,7 +878,22 @@ func _format_timestamp(time_ms: int) -> String:
 	return "%02d:%02d" % [int(t.get("hour", 0)), int(t.get("minute", 0))]
 
 
-func _format_message_peek(convo_id: String, sender_id: int, sender_name: String, text: String) -> String:
+func _staff_badge_bbcode(role: String) -> String:
+	match role:
+		"admin":
+			return "[img=12]res://assets/sprites/ui/ranks/admin.png[/img]"
+		"moderator":
+			return "[img=12]res://assets/sprites/ui/ranks/moderator.png[/img]"
+	return ""
+
+
+func _format_message_peek(
+	convo_id: String,
+	sender_id: int,
+	sender_name: String,
+	text: String,
+	staff_role: String = ""
+) -> String:
 	var name_color: String
 	if sender_id == ChatConstants.SYSTEM_SENDER_ID:
 		name_color = SYSTEM_NAME_COLOR
@@ -883,6 +907,10 @@ func _format_message_peek(convo_id: String, sender_id: int, sender_name: String,
 		name_chunk = "[color=%s]%s[/color]" % [name_color, sender_name]
 	else:
 		name_chunk = "[color=%s][url=%d]%s[/url][/color]" % [name_color, sender_id, sender_name]
+
+	var badge: String = _staff_badge_bbcode(staff_role)
+	if not badge.is_empty():
+		name_chunk = "%s %s" % [badge, name_chunk]
 
 	var base: String = "%s: %s" % [name_chunk, text]
 

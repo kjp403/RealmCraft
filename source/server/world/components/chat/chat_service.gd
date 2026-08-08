@@ -75,6 +75,7 @@ func handle_send_dm(
 		"peer_id": sender.current_peer_id,
 		"title": sender.display_title,
 		"guild_name": sender_guild_name,
+		"staff_role": CommandPermissions.effective_role_slug(sender, instance),
 		"msg_id": int(saved.get("msg_id", 0)),
 		"time_ms": now_ms,
 	}
@@ -165,6 +166,7 @@ func _handle_send_guild(instance: ServerInstance, player: PlayerResource, text: 
 		"peer_id": player.current_peer_id,
 		"title": player.display_title,
 		"guild_name": guild_name,
+		"staff_role": CommandPermissions.effective_role_slug(player, instance),
 		"msg_id": int(saved.get("msg_id", 0)),
 		"time_ms": now_ms,
 	}
@@ -226,6 +228,7 @@ func _broadcast_world_to_instance(
 		"peer_id": player.current_peer_id,
 		"title": player.display_title,
 		"guild_name": world_guild_name,
+		"staff_role": CommandPermissions.effective_role_slug(player, instance),
 		"msg_id": _world_msg_seq,
 		"time_ms": now_ms,
 	}

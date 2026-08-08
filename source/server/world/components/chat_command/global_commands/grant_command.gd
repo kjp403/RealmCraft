@@ -28,4 +28,17 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 
 	target.resource.server_roles[role] = {}
 	server_instance.world_server.database.save_player(target.resource)
+	_refresh_staff_badge(target, server_instance)
 	return "Granted role '%s' to %s." % [role, target.label()]
+
+
+func _refresh_staff_badge(target: CommandTarget.Result, server_instance: ServerInstance) -> void:
+	if not target.online:
+		return
+	var player: Player = server_instance.players_by_peer_id.get(target.peer_id, null)
+	if player == null or player.state_synchronizer == null:
+		return
+	player.state_synchronizer.set_by_path(
+		^":staff_role",
+		CommandPermissions.effective_role_slug(target.resource, server_instance)
+	)
