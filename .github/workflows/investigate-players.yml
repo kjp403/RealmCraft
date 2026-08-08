@@ -27,96 +27,110 @@ jobs:
           command_timeout: 5m
           request_pty: true
           script: |
-            set -euo pipefail
+            set -uo pipefail
             ACCOUNTS="Nesato,qqqqq"
             OUT=/tmp/arkenelle-player-lookup-latest.txt
-            exec > >(tee "$OUT") 2>&1
+            {
             echo "=== Arkenelle player lookup @ $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
             echo "Query: $ACCOUNTS"
             echo
             echo "== service user =="
             getent passwd arkenelle || true
+            echo "HOME_arkenelle=$(getent passwd arkenelle | cut -d: -f6)"
             echo
-            echo "== installing sqlite3 if needed =="
             if ! command -v sqlite3 >/dev/null 2>&1; then
               sudo apt-get update -y
               sudo apt-get install -y sqlite3
             fi
-            if ! command -v rg >/dev/null 2>&1; then
-              sudo apt-get install -y ripgrep || true
-            fi
+            echo "== searching as root for live userdata =="
+            sudo find /opt/arkenelle /home /var/lib /root -type f \( \
+              -name 'classic.db' -o -name 'account_collection.tres' \
+              -o -name 'server_bans.cfg' -o -name 'server_jail.cfg' \
+              -o -name 'server_mutes.cfg' -o -name 'server_admins.cfg' \
+            \) 2>/dev/null | sort -u
             echo
-            echo "== candidate userdata / db files =="
-            find /opt/arkenelle /home/arkenelle /var/lib/arkenelle -type f \( -name 'classic.db' -o -name 'account_collection.tres' -o -name 'server_bans.cfg' -o -name 'server_jail.cfg' -o -name 'server_mutes.cfg' -o -name 'server_admins.cfg' \) 2>/dev/null | sort -u
-            echo
-            DB="$(find /opt/arkenelle /home/arkenelle /var/lib/arkenelle -name 'classic.db' 2>/dev/null | head -1 || true)"
-            echo "DB=$DB"
-            echo
+            # Prefer live Godot user:// DB over the repo seed at source/server/world/data/classic.db
+            DB="$(sudo find /opt/arkenelle/.local /home/arkenelle /var/lib/arkenelle /root/.local \
+              -name 'classic.db' 2>/dev/null | head -1 || true)"
             if [ -z "$DB" ]; then
-              echo "ERROR: classic.db not found"
-              exit 1
+              DB="$(sudo find /opt/arkenelle -path '*/app_userdata/*/db/classic.db' 2>/dev/null | head -1 || true)"
             fi
+            if [ -z "$DB" ]; then
+              echo "WARNING: no user:// classic.db found; listing godot dirs:"
+              sudo ls -la /opt/arkenelle/.local/share/godot/app_userdata/ 2>/dev/null || true
+              sudo find /opt/arkenelle -iname '*userdata*' -o -iname 'classic.db' 2>/dev/null | head -50 || true
+              # Last resort: copy while world is running is risky; still try repo path for completeness
+              DB=/opt/arkenelle/source/server/world/data/classic.db
+              echo "FALLBACK_DB=$DB (likely seed, not live)"
+            fi
+            echo "DB=$DB"
+            sudo ls -la "$DB" || true
+            echo
+            # Snapshot to /tmp so sqlite can read without fighting locks as much
+            SNAP=/tmp/classic-lookup-snap.db
+            sudo cp -a "$DB" "$SNAP"
+            sudo chmod a+r "$SNAP"
+            echo "players_count=$(sqlite3 "$SNAP" 'SELECT COUNT(*) FROM players;')"
+            echo "accounts_table=$(sqlite3 "$SNAP" "SELECT COUNT(*) FROM accounts;" 2>/dev/null || echo n/a)"
+            echo
             IFS=',' read -ra NAMES <<< "$ACCOUNTS"
             for raw in "${NAMES[@]}"; do
               name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
               [ -z "$name" ] && continue
               echo "######## PLAYER MATCH: $name ########"
-              sqlite3 -header -column "$DB" "SELECT player_id, account_name, display_name, level, experience, available_attributes_points, skin_id, active_guild_id, led_guild_id, server_roles_json, profile_status FROM players WHERE account_name LIKE '%' || '$name' || '%' COLLATE NOCASE OR display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;"
+              sqlite3 -header -column "$SNAP" "SELECT player_id, account_name, display_name, level, experience, available_attributes_points, skin_id, active_guild_id, led_guild_id, server_roles_json, profile_status FROM players WHERE account_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE OR display_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE;"
               echo
-              echo "-- full JSON blobs --"
-              sqlite3 "$DB" "SELECT json_object('player_id', player_id, 'account_name', account_name, 'display_name', display_name, 'level', level, 'experience', experience, 'available_attributes_points', available_attributes_points, 'skin_id', skin_id, 'active_guild_id', active_guild_id, 'led_guild_id', led_guild_id, 'attributes_json', attributes_json, 'inventory_json', inventory_json, 'bank_json', bank_json, 'equipment_json', equipment_json, 'skills_json', skills_json, 'mastery_json', mastery_json, 'quests_json', quests_json, 'friends_json', friends_json, 'blocked_ids_json', blocked_ids_json, 'owned_skins_json', owned_skins_json, 'server_roles_json', server_roles_json, 'stats_json', stats_json, 'titles_json', titles_json, 'dailies_json', dailies_json, 'dungeon_lockouts_json', dungeon_lockouts_json, 'redeemed_codes_json', redeemed_codes_json, 'wardstones_json', wardstones_json, 'joined_guild_ids_json', joined_guild_ids_json) FROM players WHERE account_name LIKE '%' || '$name' || '%' COLLATE NOCASE OR display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;"
+              echo "-- full row as JSON --"
+              sqlite3 "$SNAP" "SELECT json_object('player_id', player_id, 'account_name', account_name, 'display_name', display_name, 'level', level, 'experience', experience, 'available_attributes_points', available_attributes_points, 'skin_id', skin_id, 'active_guild_id', active_guild_id, 'led_guild_id', led_guild_id, 'attributes_json', json(attributes_json), 'inventory_json', json(inventory_json), 'bank_json', json(bank_json), 'equipment_json', json(equipment_json), 'skills_json', json(skills_json), 'mastery_json', json(mastery_json), 'quests_json', json(quests_json), 'friends_json', json(friends_json), 'blocked_ids_json', json(blocked_ids_json), 'owned_skins_json', json(owned_skins_json), 'server_roles_json', json(server_roles_json), 'stats_json', json(stats_json), 'titles_json', json(titles_json), 'dailies_json', json(dailies_json), 'dungeon_lockouts_json', json(dungeon_lockouts_json), 'redeemed_codes_json', json(redeemed_codes_json), 'wardstones_json', json(wardstones_json), 'joined_guild_ids_json', json(joined_guild_ids_json)) FROM players WHERE account_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE OR display_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE;" 2>/dev/null \
+              || sqlite3 "$SNAP" "SELECT player_id, account_name, display_name, attributes_json, inventory_json, bank_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, joined_guild_ids_json FROM players WHERE account_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE OR display_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE;"
               echo
               echo "-- guild membership --"
-              sqlite3 -header -column "$DB" "SELECT gm.player_id, p.account_name, p.display_name, gm.guild_id, g.name AS guild_name, gm.rank FROM guild_members gm LEFT JOIN players p ON p.player_id = gm.player_id LEFT JOIN guilds g ON g.guild_id = gm.guild_id WHERE p.account_name LIKE '%' || '$name' || '%' COLLATE NOCASE OR p.display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;" 2>/dev/null || true
+              sqlite3 -header -column "$SNAP" "SELECT gm.player_id, p.account_name, p.display_name, gm.guild_id, g.name AS guild_name, gm.rank FROM guild_members gm LEFT JOIN players p ON p.player_id = gm.player_id LEFT JOIN guilds g ON g.guild_id = gm.guild_id WHERE p.account_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE OR p.display_name LIKE '%' || trim('$name') || '%' COLLATE NOCASE;" 2>/dev/null || true
               echo
-              echo "-- recent chat messages --"
-              sqlite3 -header -column "$DB" "SELECT * FROM messages WHERE sender_name LIKE '%' || '$name' || '%' COLLATE NOCASE OR CAST(text AS TEXT) LIKE '%' || '$name' || '%' COLLATE NOCASE ORDER BY rowid DESC LIMIT 50;" 2>/dev/null || true
-              echo
-              echo "-- mail --"
-              sqlite3 -header -column "$DB" "SELECT * FROM mail WHERE CAST(mail AS TEXT) LIKE '%' || '$name' || '%' COLLATE NOCASE OR CAST(to_player_id AS TEXT) IN (SELECT CAST(player_id AS TEXT) FROM players WHERE account_name LIKE '%' || '$name' || '%' COLLATE NOCASE OR display_name LIKE '%' || '$name' || '%' COLLATE NOCASE) LIMIT 50;" 2>/dev/null || sqlite3 -header -column "$DB" "PRAGMA table_info(mail);" 2>/dev/null || true
+              echo "-- messages schema / matches --"
+              sqlite3 -header -column "$SNAP" "PRAGMA table_info(messages);" 2>/dev/null || true
+              sqlite3 -header -column "$SNAP" "SELECT * FROM messages WHERE CAST(sender_name AS TEXT) LIKE '%' || trim('$name') || '%' COLLATE NOCASE OR CAST(text AS TEXT) LIKE '%' || trim('$name') || '%' COLLATE NOCASE ORDER BY rowid DESC LIMIT 50;" 2>/dev/null || true
               echo
             done
             echo "######## ALL STAFF / ROLES IN DB ########"
-            sqlite3 -header -column "$DB" "SELECT player_id, account_name, display_name, level, server_roles_json FROM players WHERE server_roles_json IS NOT NULL AND server_roles_json NOT IN ('{}', '') ORDER BY account_name;"
+            sqlite3 -header -column "$SNAP" "SELECT player_id, account_name, display_name, level, server_roles_json FROM players WHERE server_roles_json IS NOT NULL AND server_roles_json NOT IN ('{}', '') ORDER BY account_name;"
+            echo
+            echo "######## ALL PLAYERS (summary) ########"
+            sqlite3 -header -column "$SNAP" "SELECT player_id, account_name, display_name, level, server_roles_json FROM players ORDER BY level DESC, account_name LIMIT 200;"
             echo
             echo "######## BANS / JAIL / MUTES / ADMIN CFG ########"
             for cfg in server_bans.cfg server_jail.cfg server_mutes.cfg server_admins.cfg; do
               echo "-- $cfg --"
-              find /opt/arkenelle /home/arkenelle -name "$cfg" 2>/dev/null | while read -r f; do
+              sudo find /opt/arkenelle /home/arkenelle /root -name "$cfg" 2>/dev/null | while read -r f; do
                 echo "FILE $f"
-                sed -n '1,300p' "$f" || true
+                sudo sed -n '1,300p' "$f" || true
               done
             done
             echo
             echo "######## MASTER ACCOUNT COLLECTION MATCHES ########"
-            find /opt/arkenelle /home/arkenelle -name 'account_collection.tres' 2>/dev/null | while read -r f; do
+            sudo find /opt/arkenelle /home/arkenelle /root -name 'account_collection.tres' 2>/dev/null | while read -r f; do
               echo "FILE $f"
               for raw in "${NAMES[@]}"; do
                 name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
                 echo "--- matches for $name ---"
-                if command -v rg >/dev/null 2>&1; then
-                  rg -i -n -C 8 "$name" "$f" || echo "(no match)"
-                else
-                  grep -i -n -C 8 "$name" "$f" || echo "(no match)"
-                fi
+                sudo grep -i -n -C 10 "$name" "$f" || echo "(no match)"
               done
             done
             echo
             echo "######## RECENT SERVER LOG MENTIONS ########"
-            find /opt/arkenelle /home/arkenelle -path '*/logs/*.log' 2>/dev/null | sort | tail -8 | while read -r log; do
+            sudo find /opt/arkenelle /home/arkenelle /root -path '*/logs/*.log' 2>/dev/null | sort | tail -10 | while read -r log; do
               echo "LOG $log"
               for raw in "${NAMES[@]}"; do
                 name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
-                if command -v rg >/dev/null 2>&1; then
-                  rg -i -n --max-count 40 "$name" "$log" || true
-                else
-                  grep -i -n "$name" "$log" | head -40 || true
-                fi
+                sudo grep -i -n "$name" "$log" | tail -40 || true
               done
             done
             echo
             echo "=== END ==="
+            } 2>&1 | tee "$OUT"
             wc -l "$OUT"
+            # Always succeed once the report is written so the artifact uploads.
+            exit 0
 
       - name: Fetch lookup file
         uses: appleboy/scp-action@v0.1.7
