@@ -452,11 +452,12 @@ func _apply_name_label() -> void:
 	if data == null or data.ore == null:
 		_name_label.visible = false
 		return
-	_name_label.visible = true
 	if not data.display_name.is_empty():
 		_name_label.text = data.display_name
 	else:
 		_name_label.text = String(data.ore.item_name)
+	# Names only appear while the cursor is over the node (see hover).
+	_name_label.visible = GameMode.is_client() and _interactable_hovered
 
 
 ## Client charge count used by [HarvestController] while waiting on regen.
@@ -488,6 +489,8 @@ func _set_interactable_hover(on: bool) -> void:
 		return
 	_interactable_hovered = on
 	ClientState.world_interactables_hovered += 1 if on else -1
+	if _name_label != null and data != null and data.ore != null:
+		_name_label.visible = on
 
 
 func _on_clicked() -> void:
