@@ -349,6 +349,6 @@ func _on_unequip_pressed() -> void:
 		&"item.unequip", {"slot": _selected_slot}, InstanceClient.current.name)
 	var payload: Dictionary = result[0] if result[1] == OK and result[0] is Dictionary else {}
 	if str(payload.get("reason", "")) == "in_combat":
-		Toaster.toast("Can't change gear in combat (weapons only).")
+		Toaster.toast("You cannot do that while in combat.")
 		return
 	_refresh()

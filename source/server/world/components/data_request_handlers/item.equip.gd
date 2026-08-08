@@ -53,15 +53,11 @@ func data_request_handler(
 			return {"ok": false, "reason": "gear_level", "level": sync_level}
 
 	if item is GearItem:
-		# Combat lock — but WEAPONS stay swappable mid-fight (sword for melee,
-		# bow for range is core play). Only armor/rings/etc. are locked so you
-		# can't re-spec defenses under pressure.
-		if player.is_in_combat() and item.slot.key != &"weapon":
-			return {"ok": false, "reason": "in_combat"}
 		var slot_key: StringName = item.slot.key
 		# Weapons DRAW over a short cast (anti fast-swap + RPG commitment): the real
 		# equip + inventory swap happen in begin_hand_draw when the draw lands, and
-		# abilities stay locked until then. Other gear equips instantly.
+		# abilities stay locked until then. Other gear (including armor in combat)
+		# equips instantly.
 		if slot_key == &"weapon":
 			player.begin_hand_draw(item_id)
 			return {"ok": true}

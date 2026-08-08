@@ -31,6 +31,8 @@ const COMBAT_TARGET_CONTROLLER_SCRIPT: Script = preload(
 )
 const FOLLOW_REPATH_MS: int = 300
 const FOLLOW_STOP_DISTANCE: float = 28.0
+## Auto-retaliate ignores hits after this much idle time (no move/attack/ability).
+const AFK_RETALIATE_MS: int = 5 * 60 * 1000
 
 
 ## Fallback move speed until the synced MOVE_SPEED stat arrives. Actual movement
@@ -67,6 +69,9 @@ var _pickup_controller: PickupController
 var _combat_target_controller: CombatTargetController
 var _follow_peer_id: int = 0
 var _follow_repath_at_ms: int = 0
+## Last ticks_msec the local player provided intentional input (movement, attack,
+## abilities, interact, click-nav). Used to disable auto-retaliate while AFK.
+var _last_input_ms: int = 0
 
 @onready var camera_2d: Camera2D = $Camera2D
 @onready var controller: InputComponent = $InputComponent
@@ -86,6 +91,7 @@ func _ready() -> void:
 	_combat_target_controller = COMBAT_TARGET_CONTROLLER_SCRIPT.new()
 	add_child(_combat_target_controller)
 	_combat_target_controller.setup(self)
+	_last_input_ms = Time.get_ticks_msec()
 	ClientState.local_player_ready.emit(self)
 	
 	super._ready()
@@ -471,6 +477,7 @@ func process_input() -> void:
 
 	var manual_direction: Vector2 = controller.get_move_direction()
 	if manual_direction != Vector2.ZERO:
+		_note_input_activity()
 		_follow_peer_id = 0
 		_click_navigation.cancel()
 		if _harvest_controller != null:
@@ -485,6 +492,8 @@ func process_input() -> void:
 		input_direction = _click_navigation.movement_direction()
 	look_direction = controller.get_look_direction()
 	action_input = controller.is_attack_pressed()
+	if action_input:
+		_note_input_activity()
 
 	# Mid weapon-draw / drink-cast: abilities are locked (the server gates too). A
 	# weapon draw stays move-free; a drink roots via the movement lock above.
@@ -495,12 +504,18 @@ func process_input() -> void:
 	# Recall (B): a universal channel anyone can start — ask the server to begin
 	# it. Not while already channeling (re-press is ignored; cancel by moving).
 	if Input.is_action_just_pressed(&"player_recall"):
+		_note_input_activity()
 		request_recall()
 
 	# Area loot (F / player_interact): vacuum every pile reserved to us (or free)
 	# within pickup range.
 	if Input.is_action_just_pressed(&"player_interact"):
+		_note_input_activity()
 		request_area_loot()
+
+	if Input.is_action_just_pressed(&"player_special") \
+			or Input.is_action_just_pressed(&"player_special_2"):
+		_note_input_activity()
 
 	# Channeling: rooted (process_movement zeroes velocity). A move key CANCELS
 	# the channel and frees us from this frame on; otherwise suppress all actions
@@ -608,6 +623,7 @@ func set_camera_zoom(zoom: Vector2) -> void:
 func set_click_move_target(world_target: Vector2) -> void:
 	if _dead or ClientState.menu_open or _has_gui_focus():
 		return
+	_note_input_activity()
 	_follow_peer_id = 0
 	if _harvest_controller != null:
 		_harvest_controller.cancel()
@@ -641,13 +657,47 @@ func start_auto_pickup(item: Node2D, prop_id: int) -> void:
 
 ## Right-click Attack: walk into range and keep using the primary weapon.
 func start_hostile_attack(npc: HostileNpc) -> void:
-	if _combat_target_controller == null:
+	_note_input_activity()
+	_begin_hostile_attack(npc)
+
+
+func _begin_hostile_attack(npc: HostileNpc) -> void:
+	if _combat_target_controller == null or npc == null:
 		return
 	if _harvest_controller != null:
 		_harvest_controller.cancel()
 	if _pickup_controller != null:
 		_pickup_controller.cancel()
 	_combat_target_controller.start(npc)
+
+
+func _note_input_activity() -> void:
+	_last_input_ms = Time.get_ticks_msec()
+
+
+func is_afk_for_retaliate() -> bool:
+	return Time.get_ticks_msec() - _last_input_ms >= AFK_RETALIATE_MS
+
+
+## Server combat.hit on this local player: auto-target the attacking hostile
+## unless the player has been AFK for [constant AFK_RETALIATE_MS].
+## Does not refresh the AFK timer — retaliate alone cannot keep AFK farming alive.
+func try_auto_retaliate(attacker_prop_id: int) -> void:
+	if attacker_prop_id < 0 or _dead or is_afk_for_retaliate():
+		return
+	if InstanceClient.current == null or InstanceClient.current.instance_map == null:
+		return
+	if _combat_target_controller != null and _combat_target_controller.is_active():
+		return
+	var map: Map = InstanceClient.current.instance_map as Map
+	if map == null or map.replicated_props_container == null:
+		return
+	var node: Node = map.replicated_props_container.dynamic_nodes.get(attacker_prop_id, null)
+	if node is HostileNpc:
+		var npc: HostileNpc = node as HostileNpc
+		if npc.is_dead:
+			return
+		_begin_hostile_attack(npc)
 
 
 func is_auto_gathering() -> bool:

@@ -405,6 +405,15 @@ func _on_combat_hit(payload: Dictionary) -> void:
 	# real position instead of (0,0).
 	number.set_spawn(pos)
 	instance_map.add_child(number)
+	# Auto-retaliate when WE were the victim of a hostile hit.
+	if local_player == null or local_player.player_resource == null:
+		return
+	var victim_peer: int = int(payload.get("victim_peer", -1))
+	if victim_peer != int(local_player.player_resource.player_id):
+		return
+	var attacker_prop_id: int = int(payload.get("attacker_prop_id", -1))
+	if attacker_prop_id >= 0:
+		local_player.try_auto_retaliate(attacker_prop_id)
 
 
 @rpc("authority", "call_remote", "reliable", 0)
