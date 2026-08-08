@@ -307,8 +307,8 @@ func get_account_max_role_priority(account_name: String, role_definitions: Dicti
 		if not (roles_v is Dictionary):
 			continue
 		for role: String in roles_v as Dictionary:
-			# Mirror CommandPermissions live rule: ignore DB senior_admin in LIVE.
-			if role == "senior_admin" and ServerEnvironment.is_live():
+			# Mirror CommandPermissions live rule: ignore DB owner/senior_admin in LIVE.
+			if role in ["owner", "senior_admin"] and ServerEnvironment.is_live():
 				continue
 			var role_data: Dictionary = role_definitions.get(role, {})
 			best = maxi(best, int(role_data.get("priority", 0)))

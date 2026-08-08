@@ -64,11 +64,11 @@ func _open_for_peer(peer_id: int) -> void:
 	_menu.add_item("Examine", ACTION_EXAMINE)
 	_menu.add_item("Follow", ACTION_FOLLOW)
 	_menu.add_item("Trade", ACTION_TRADE)
-	# Admin+ only (synced staff_role; senior_admin is mapped to "admin" on the wire).
-	# Hide Kick/Ban/IP Ban on other admin+ targets — server also rejects these.
-	# (senior_admin can still /ban a rogue admin via chat; client can't tell ranks apart.)
+	# Admin+ only (synced staff_role; owner/senior_admin are mapped to "admin").
+	# Menu is shown even on other staff — owners need to right-click-ban a rogue
+	# senior_admin. Server enforces rank (admin cannot punish admin+).
 	var me: Player = ClientState.local_player
-	if me != null and me.staff_role == "admin" and target.staff_role != "admin":
+	if me != null and me.staff_role == "admin":
 		_menu.add_separator()
 		_menu.add_item("Kick", ACTION_KICK)
 		_menu.add_item("Ban", ACTION_BAN)

@@ -7,9 +7,12 @@ class_name CommandPermissions
 ## A command runs when its command_priority is <= that effective priority
 ## (command_priority <= 0 means "anyone").
 ##
-## LIVE hardening: senior_admin can NEVER come from the DB — only from
+## LIVE hardening: owner / senior_admin can NEVER come from the DB — only from
 ## AdminConfig. That closes the old /selfadmin → autosave → permanent
 ## senior_admin persistence path even if a stale role row somehow remains.
+##
+## Rank ladder (priority): owner (1000) > senior_admin (100) > admin (2) > mod (1).
+## Owners (kjp403 / KJP in server_admins.cfg) outrank every other staff tier.
 
 
 ## The highest role priority this player effectively has.
@@ -32,7 +35,7 @@ static func effective_priority(player: PlayerResource, instance: ServerInstance)
 
 
 ## Highest-priority role name for badges / chat ("" = regular player).
-## Maps senior_admin → "admin" so both use the Admin crown badge.
+## Maps owner / senior_admin → "admin" so all top staff use the Admin crown badge.
 static func effective_role_slug(player: PlayerResource, instance: ServerInstance) -> String:
 	if player == null or instance == null:
 		return ""
@@ -51,7 +54,7 @@ static func effective_role_slug(player: PlayerResource, instance: ServerInstance
 		if p > best_priority:
 			best_priority = p
 			best_role = config_role
-	if best_role == "senior_admin":
+	if best_role in ["owner", "senior_admin"]:
 		return "admin"
 	if best_role in ["admin", "moderator"]:
 		return best_role
@@ -74,9 +77,11 @@ const STAFF_PROTECT_PRIORITY: int = 2 # admin
 ## If [param issuer] may not kick/ban/ipban [param target], return a player-facing
 ## error. Empty string means the action is allowed.
 ## Hierarchy: you may only punish targets with a *strictly lower* effective
-## priority than yours — so admin cannot punish admin/senior_admin, and
-## senior_admin cannot punish another senior_admin. Owners can still punish
-## regular admins.
+## priority than yours. So:
+##   - admin cannot punish admin / senior_admin / owner
+##   - senior_admin cannot punish senior_admin / owner (can punish admin)
+##   - owner (kjp403 / KJP) can punish anyone below them, including malicious
+##     senior_admins. Fellow owners (equal priority) remain protected.
 static func staff_moderation_block_reason(
 	issuer: PlayerResource,
 	target: CommandTarget.Result,
@@ -90,6 +95,8 @@ static func staff_moderation_block_reason(
 		return ""
 	if issuer_p > target_p:
 		return ""
+	if target_p >= 1000:
+		return "You can't moderate the server owner."
 	if target_p >= 100:
 		return "You can't moderate a senior admin."
 	return "You can't moderate another admin (or higher)."
@@ -137,9 +144,9 @@ static func _priority_from_roles_dict(roles: Dictionary, instance: ServerInstanc
 
 
 static func _db_role_blocked(role: String) -> bool:
-	# On live servers, DB-held senior_admin is ignored. Owner bootstrap is
-	# AdminConfig-only. Local/dev keeps DB senior_admin for testing.
-	if role == "senior_admin" and ServerEnvironment.is_live():
+	# On live servers, DB-held owner/senior_admin is ignored. Those ranks are
+	# AdminConfig-only. Local/dev keeps them for testing.
+	if role in ["owner", "senior_admin"] and ServerEnvironment.is_live():
 		return true
 	return false
 

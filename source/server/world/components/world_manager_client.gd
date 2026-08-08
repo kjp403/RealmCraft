@@ -293,9 +293,9 @@ func master_kick(player_id: int) -> void:
 
 @rpc("authority")
 func master_grant_role(player_id: int, role: String) -> void:
-	if role == "senior_admin":
+	if role in ["owner", "senior_admin"]:
 		ServerLog.warn(
-			"Dashboard grant refused: senior_admin is config-only (player #%d)." % player_id
+			"Dashboard grant refused: %s is config-only (player #%d)." % [role, player_id]
 		)
 		return
 	var peer_id: int = world_server.player_id_to_peer_id.get(player_id, 0)
