@@ -4,10 +4,17 @@ extends Character
 
 var player_resource: PlayerResource
 
+signal staff_role_changed(role: String)
+
 ## Synced guild tag — drives the blue ally health-bar tint guildmates see on each
 ## other. Synced like display_name (set_by_path → baseline + live dirty).
 var active_guild_id: int = 0:
 	set = _set_active_guild_id
+
+## Staff badge slug synced to all clients: "" | "moderator" | "admin".
+## Drives the nameplate icon + chat rank glyph.
+var staff_role: String = "":
+	set = _set_staff_role
 
 var zone_flags: int = 0
 
@@ -168,6 +175,12 @@ func _ready() -> void:
 func _set_active_guild_id(value: int) -> void:
 	active_guild_id = value
 	_apply_team_bar_color()
+
+
+func _set_staff_role(value: String) -> void:
+	staff_role = value
+	if not multiplayer.is_server():
+		staff_role_changed.emit(value)
 
 
 ## Client-only: color this (remote) player's HP bar — blue for a guildmate, neutral

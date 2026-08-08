@@ -26,4 +26,10 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 
 	target.resource.server_roles.erase(role)
 	server_instance.world_server.database.save_player(target.resource)
+	var player: Player = server_instance.players_by_peer_id.get(target.peer_id, null)
+	if player != null and player.state_synchronizer != null:
+		player.state_synchronizer.set_by_path(
+			^":staff_role",
+			CommandPermissions.effective_role_slug(target.resource, server_instance)
+		)
 	return "Revoked role '%s' from %s." % [role, target.label()]

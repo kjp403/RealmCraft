@@ -25,6 +25,31 @@ static func effective_priority(player: PlayerResource, instance: ServerInstance)
 	return best
 
 
+## Highest-priority role name for badges / chat ("" = regular player).
+## Maps senior_admin → "admin" so both use the Admin crown badge.
+static func effective_role_slug(player: PlayerResource, instance: ServerInstance) -> String:
+	if player == null or instance == null:
+		return ""
+	var best_priority: int = 0
+	var best_role: String = ""
+	for role: String in player.server_roles:
+		var p: int = _role_priority(instance, role)
+		if p > best_priority:
+			best_priority = p
+			best_role = role
+	var config_role: String = AdminConfig.role_for(player.account_name)
+	if not config_role.is_empty():
+		var p: int = _role_priority(instance, config_role)
+		if p > best_priority:
+			best_priority = p
+			best_role = config_role
+	if best_role == "senior_admin":
+		return "admin"
+	if best_role in ["admin", "moderator"]:
+		return best_role
+	return ""
+
+
 ## Whether this player may run this command right now.
 static func can_run(command: ChatCommand, player: PlayerResource, instance: ServerInstance) -> bool:
 	if command == null or player == null:

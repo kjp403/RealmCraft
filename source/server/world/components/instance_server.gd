@@ -225,6 +225,10 @@ func instantiate_player(peer_id: int) -> Player:
 		syn.set_by_path(^":skin_id", new_player.player_resource.skin_id)
 		syn.set_by_path(^":display_name", new_player.player_resource.display_name)
 		syn.set_by_path(^":active_guild_id", new_player.player_resource.active_guild_id)
+		syn.set_by_path(
+			^":staff_role",
+			CommandPermissions.effective_role_slug(new_player.player_resource, self)
+		)
 
 		# BASE_STATS is a const (read-only); copy it into a fresh dict before mutating.
 		var player_stats: Dictionary[StringName, float]
