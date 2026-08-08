@@ -253,26 +253,19 @@ static func _on_dungeon_left(payload: Dictionary) -> void:
 	Toaster.toast("Left %s." % str(payload.get("dungeon", "the dungeon")))
 
 
-## A player in this instance leveled up — flare a gold pillar on their character so
-## the moment reads for EVERYONE nearby, not just the one who leveled (broadcast
-## from LevelMilestoneService). The local player also gets a small camera kick;
-## their banner rides the combat.reward push (ClientState), not this.
+## A player in this instance leveled up — fireworks above their character so
+## the moment reads for EVERYONE nearby (broadcast from LevelMilestoneService).
+## Local player also gets the jingle + "Your Combat level has achieved N".
 static func _on_level_up(payload: Dictionary) -> void:
 	if current == null:
 		return
 	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
 	if player == null:
 		return
-	var frames: SpriteFrames = load("res://source/common/gameplay/combat/vfx/light_pillar.tres") as SpriteFrames
-	if frames != null:
-		SpriteEffect.spawn(player, frames, {
-			"scale": Vector2(0.9, 0.9),
-			"modulate": Color(1.0, 0.9, 0.45),
-			"offset": Vector2(0.0, -10.0),
-			"z_index": 1,
-		})
-	if player is LocalPlayer:
-		(player as LocalPlayer).shake_camera(0.3)
+	var level: int = int(payload.get("level", 1))
+	# Skill / combat label optional — character levels default to "Combat".
+	var skill: String = str(payload.get("skill", "Combat"))
+	LevelUpFx.celebrate(player, skill, level)
 
 
 ## Guard so we only subscribe ONCE per process — Client lives in the
