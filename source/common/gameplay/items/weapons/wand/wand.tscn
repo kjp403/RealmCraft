@@ -9,8 +9,9 @@
 abilities = Array[ExtResource("2_ability")]([ExtResource("3_bolt")])
 
 [node name="WeaponSprite" parent="." index="0" unique_id=2118713155]
-position = Vector2(-6, -26)
-rotation = 1.5707964
+position = Vector2(2, -4)
+rotation = 0.0
 texture = ExtResource("5_tex")
-centered = false
+centered = true
+offset = Vector2(0, -10)
 region_rect = Rect2(80, 0, 32, 16)

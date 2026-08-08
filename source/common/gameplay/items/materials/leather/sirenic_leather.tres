@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://dcb9fcb729f94"]
+
+[ext_resource type="Texture2D" uid="uid://dx2dmnbt2o2rx" path="res://assets/sprites/items/icons/mat_sirenic_leather.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Sirenic Leather"
+item_icon = ExtResource("1_icon")
+description = "Deep-blue scaled leather. Dropped by elite archers and used to craft Sirenic gear."
+vendor_value = 12
+can_trade = true
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"sirenic_leather"
+metadata/id = 221

@@ -41,6 +41,13 @@ func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
 	weapon_sprite.texture = atlas.atlas
 	weapon_sprite.region_enabled = true
 	weapon_sprite.region_rect = atlas.region
+	# Wand icons mix horizontal (wood 32×16) and vertical (fire 16×32) atlas
+	# regions. Rotate wide art upright so the shaft sits in the hand; tall art
+	# already points up and must NOT keep a leftover 90° from the type scene.
+	if atlas.region.size.x > atlas.region.size.y * 1.15:
+		weapon_sprite.rotation = PI * 0.5
+	elif atlas.region.size.y > atlas.region.size.x * 1.15:
+		weapon_sprite.rotation = 0.0
 	weapon_sprite.position += extra_offset
 
 

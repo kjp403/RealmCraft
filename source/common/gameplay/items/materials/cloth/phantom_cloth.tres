@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://02631491a4034"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/cloth_phantom.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Phantom Cloth"
+item_icon = ExtResource("1_icon")
+description = "Shadow-dyed cloth favored by archers."
+holdable = false
+can_trade = true
+vendor_value = 8
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"phantom_cloth"
+metadata/id = 214

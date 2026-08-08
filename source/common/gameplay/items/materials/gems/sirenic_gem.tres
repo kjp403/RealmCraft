@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://2b0e9c5409264"]
+
+[ext_resource type="Texture2D" uid="uid://jwlowwsonyml" path="res://assets/sprites/items/icons/gem_sirenic.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Sirenic Gem"
+item_icon = ExtResource("1_icon")
+description = "A sapphire-dark gemstone used in Sirenic armor fittings."
+vendor_value = 12
+can_trade = true
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"sirenic_gem"
+metadata/id = 222

@@ -42,6 +42,22 @@
 [ext_resource type="Resource" uid="uid://btdujtiithkco" path="res://source/common/gameplay/items/gears/leather/shadow_boots.tres" id="42_sh_boots"]
 [ext_resource type="Resource" uid="uid://yia66hexrv8y" path="res://source/common/gameplay/items/gears/leather/phantom_vest.tres" id="43_ph_vest"]
 
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="50_ench_ore"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="51_ench_gem"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="52_ench_cloth"]
+[ext_resource type="Resource" uid="uid://a0d9d687a07d4" path="res://source/common/gameplay/items/materials/metals/phantom_ore.tres" id="53_ph_ore"]
+[ext_resource type="Resource" uid="uid://1353f39cac7b4" path="res://source/common/gameplay/items/materials/gems/phantom_gem.tres" id="54_ph_gem"]
+[ext_resource type="Resource" uid="uid://02631491a4034" path="res://source/common/gameplay/items/materials/cloth/phantom_cloth.tres" id="55_ph_cloth"]
+[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="65_si_leather"]
+[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="66_si_gem"]
+[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="67_si_cloth"]
+[ext_resource type="Resource" uid="uid://0c84185c0e3a4" path="res://source/common/gameplay/items/gears/leather/sirenic_hood.tres" id="59_si_hood"]
+[ext_resource type="Resource" uid="uid://4c120531efdf4" path="res://source/common/gameplay/items/gears/leather/sirenic_vest.tres" id="60_si_vest"]
+[ext_resource type="Resource" uid="uid://65817194c4984" path="res://source/common/gameplay/items/gears/leather/sirenic_sandals.tres" id="61_si_sandals"]
+[ext_resource type="Resource" uid="uid://3dvgbkbeix7f" path="res://source/common/gameplay/items/gears/cloth/ancient_hood.tres" id="62_an_hood"]
+[ext_resource type="Resource" uid="uid://46fxdoabe5fs" path="res://source/common/gameplay/items/gears/cloth/ancient_robe.tres" id="63_an_robe"]
+[ext_resource type="Resource" uid="uid://4fjd4pngwx5b" path="res://source/common/gameplay/items/gears/cloth/ancient_shoes.tres" id="64_an_shoes"]
+
 [sub_resource type="Resource" id="I_cure_f"]
 script = ExtResource("3_ingred")
 item = ExtResource("8_hi_forest")
@@ -191,49 +207,68 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_schb_cl")])
 required_level = 3
 xp_reward = 26
 
-[sub_resource type="Resource" id="I_enh_cl"]
+[sub_resource type="Resource" id="I_enh_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_cl_sewer")
-amount = 4
+item = ExtResource("50_ench_ore")
+amount = 2
 
-[sub_resource type="Resource" id="I_enh_au"]
+[sub_resource type="Resource" id="I_enh_gem"]
 script = ExtResource("3_ingred")
-item = ExtResource("17_gold_bar")
+item = ExtResource("51_ench_gem")
+
+[sub_resource type="Resource" id="I_enh_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 3
 
 [sub_resource type="Resource" id="R_ench_hood"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("26_ench_hood")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enh_cl"), SubResource("I_enh_au")])
-required_level = 4
-xp_reward = 44
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enh_ore"), SubResource("I_enh_gem"), SubResource("I_enh_cloth")])
+required_level = 50
+xp_reward = 120
 
-[sub_resource type="Resource" id="I_enr_cl"]
+[sub_resource type="Resource" id="I_enr_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_cl_sewer")
-amount = 6
+item = ExtResource("50_ench_ore")
+amount = 3
 
-[sub_resource type="Resource" id="I_enr_au"]
+[sub_resource type="Resource" id="I_enr_gem"]
 script = ExtResource("3_ingred")
-item = ExtResource("17_gold_bar")
+item = ExtResource("51_ench_gem")
+
+[sub_resource type="Resource" id="I_enr_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 4
 
 [sub_resource type="Resource" id="R_ench_robe"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("27_ench_robe")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enr_cl"), SubResource("I_enr_au")])
-required_level = 4
-xp_reward = 55
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enr_ore"), SubResource("I_enr_gem"), SubResource("I_enr_cloth")])
+required_level = 50
+xp_reward = 140
 
-[sub_resource type="Resource" id="I_enchs_cl"]
+[sub_resource type="Resource" id="I_enchs_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("7_cl_sewer")
-amount = 3
+item = ExtResource("50_ench_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_enchs_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_ench_gem")
+
+[sub_resource type="Resource" id="I_enchs_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 2
 
 [sub_resource type="Resource" id="R_ench_shoes"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("39_ench_shoes")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enchs_cl")])
-required_level = 4
-xp_reward = 40
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_enchs_ore"), SubResource("I_enchs_gem"), SubResource("I_enchs_cloth")])
+required_level = 50
+xp_reward = 110
 
 [sub_resource type="Resource" id="I_cap_le"]
 script = ExtResource("3_ingred")
@@ -351,44 +386,198 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shb_le")])
 required_level = 3
 xp_reward = 26
 
-[sub_resource type="Resource" id="I_phh_le"]
+[sub_resource type="Resource" id="I_phh_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("15_le_sewer")
-amount = 4
+item = ExtResource("53_ph_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_phh_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("54_ph_gem")
+
+[sub_resource type="Resource" id="I_phh_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("55_ph_cloth")
+amount = 3
 
 [sub_resource type="Resource" id="R_ph_hood"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("34_ph_hood")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phh_le")])
-required_level = 4
-xp_reward = 44
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phh_ore"), SubResource("I_phh_gem"), SubResource("I_phh_cloth")])
+required_level = 50
+xp_reward = 120
 
-[sub_resource type="Resource" id="I_phv_le"]
+[sub_resource type="Resource" id="I_phv_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("15_le_sewer")
-amount = 5
+item = ExtResource("53_ph_ore")
+amount = 3
+
+[sub_resource type="Resource" id="I_phv_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("54_ph_gem")
+
+[sub_resource type="Resource" id="I_phv_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("55_ph_cloth")
+amount = 4
 
 [sub_resource type="Resource" id="R_ph_vest"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("43_ph_vest")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phv_le")])
-required_level = 4
-xp_reward = 50
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phv_ore"), SubResource("I_phv_gem"), SubResource("I_phv_cloth")])
+required_level = 50
+xp_reward = 140
 
-[sub_resource type="Resource" id="I_phs_le"]
+[sub_resource type="Resource" id="I_phs_ore"]
 script = ExtResource("3_ingred")
-item = ExtResource("15_le_sewer")
-amount = 3
+item = ExtResource("53_ph_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_phs_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("54_ph_gem")
+
+[sub_resource type="Resource" id="I_phs_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("55_ph_cloth")
+amount = 2
 
 [sub_resource type="Resource" id="R_ph_sandals"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("35_ph_sandals")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phs_le")])
-required_level = 4
-xp_reward = 40
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_phs_ore"), SubResource("I_phs_gem"), SubResource("I_phs_cloth")])
+required_level = 50
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_sih_le"]
+script = ExtResource("3_ingred")
+item = ExtResource("65_si_leather")
+amount = 3
+
+[sub_resource type="Resource" id="I_sih_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("66_si_gem")
+
+[sub_resource type="Resource" id="I_sih_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("67_si_cloth")
+amount = 2
+
+[sub_resource type="Resource" id="R_si_hood"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("59_si_hood")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sih_le"), SubResource("I_sih_gem"), SubResource("I_sih_cloth")])
+required_level = 50
+xp_reward = 130
+
+[sub_resource type="Resource" id="I_siv_le"]
+script = ExtResource("3_ingred")
+item = ExtResource("65_si_leather")
+amount = 4
+
+[sub_resource type="Resource" id="I_siv_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("66_si_gem")
+
+[sub_resource type="Resource" id="I_siv_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("67_si_cloth")
+amount = 3
+
+[sub_resource type="Resource" id="R_si_vest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("60_si_vest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_siv_le"), SubResource("I_siv_gem"), SubResource("I_siv_cloth")])
+required_level = 50
+xp_reward = 150
+
+[sub_resource type="Resource" id="I_sis_le"]
+script = ExtResource("3_ingred")
+item = ExtResource("65_si_leather")
+amount = 2
+
+[sub_resource type="Resource" id="I_sis_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("66_si_gem")
+
+[sub_resource type="Resource" id="I_sis_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("67_si_cloth")
+amount = 2
+
+[sub_resource type="Resource" id="R_si_sandals"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("61_si_sandals")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_sis_le"), SubResource("I_sis_gem"), SubResource("I_sis_cloth")])
+required_level = 50
+xp_reward = 120
+
+[sub_resource type="Resource" id="I_anh_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_ench_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_anh_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_ench_gem")
+
+[sub_resource type="Resource" id="I_anh_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 4
+
+[sub_resource type="Resource" id="R_an_hood"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("62_an_hood")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_anh_ore"), SubResource("I_anh_gem"), SubResource("I_anh_cloth")])
+required_level = 50
+xp_reward = 160
+
+[sub_resource type="Resource" id="I_anr_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_ench_ore")
+amount = 3
+
+[sub_resource type="Resource" id="I_anr_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_ench_gem")
+amount = 2
+
+[sub_resource type="Resource" id="I_anr_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 5
+
+[sub_resource type="Resource" id="R_an_robe"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("63_an_robe")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_anr_ore"), SubResource("I_anr_gem"), SubResource("I_anr_cloth")])
+required_level = 50
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_ans_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_ench_ore")
+amount = 2
+
+[sub_resource type="Resource" id="I_ans_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("51_ench_gem")
+
+[sub_resource type="Resource" id="I_ans_cloth"]
+script = ExtResource("3_ingred")
+item = ExtResource("52_ench_cloth")
+amount = 3
+
+[sub_resource type="Resource" id="R_an_shoes"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("64_an_shoes")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ans_ore"), SubResource("I_ans_gem"), SubResource("I_ans_cloth")])
+required_level = 50
+xp_reward = 150
 
 [resource]
 script = ExtResource("2_station")
 profession = &"outfitting"
 craft_fee = 5
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes")])

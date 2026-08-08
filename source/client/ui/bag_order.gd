@@ -17,6 +17,9 @@ static func make_drag_preview(texture: Texture2D, box: Vector2 = Vector2(48, 48)
 	var host := Control.new()
 	host.custom_minimum_size = box
 	host.size = box
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.z_as_relative = false
+	host.z_index = 4096
 	var panel := Panel.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -40,6 +43,39 @@ static func make_drag_preview(texture: Texture2D, box: Vector2 = Vector2(48, 48)
 	icon.offset_bottom = -4
 	host.add_child(icon)
 	return host
+
+
+## Godot parents set_drag_preview() under the root Viewport (canvas layer 0),
+## so the ghost draws UNDER the UI CanvasLayer (layer 10). Reparent onto the
+## UI layer (or a temporary high layer) so it tracks above inventory menus.
+static func elevate_drag_preview(host: Control, preview: Control) -> void:
+	if host == null or preview == null:
+		return
+	host.set_drag_preview(preview)
+	var ui_layer: CanvasLayer = _find_ui_canvas_layer(host)
+	if ui_layer != null:
+		# Defer: set_drag_preview parents under the viewport first.
+		preview.call_deferred(&"reparent", ui_layer)
+		return
+	# Fallback when UI isn't mounted yet — own a high CanvasLayer for the drag.
+	var layer := CanvasLayer.new()
+	layer.layer = 128
+	layer.name = &"BagDragLayer"
+	host.get_tree().root.add_child(layer)
+	preview.tree_exiting.connect(layer.queue_free)
+	preview.call_deferred(&"reparent", layer)
+
+
+static func _find_ui_canvas_layer(from: Node) -> CanvasLayer:
+	var node: Node = from
+	while node != null:
+		if node is CanvasLayer and String(node.name) == "UI":
+			return node as CanvasLayer
+		node = node.get_parent()
+	var tree := from.get_tree()
+	if tree == null:
+		return null
+	return tree.root.find_child("UI", true, false) as CanvasLayer
 
 
 static func load_order() -> Array:

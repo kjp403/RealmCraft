@@ -303,7 +303,10 @@ func _bag_get_drag_data(
 	entry: Dictionary,
 	slot: Control
 ) -> Variant:
-	slot.set_drag_preview(BagOrder.make_drag_preview((entry["item"] as Item).item_icon, Vector2(48, 48)))
+	BagOrder.elevate_drag_preview(
+		slot,
+		BagOrder.make_drag_preview((entry["item"] as Item).item_icon, Vector2(48, 48))
+	)
 	return {"bag_uid": int(entry["uid"])}
 
 

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://a0d9d687a07d4"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/ore_phantom.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Phantom Ore"
+item_icon = ExtResource("1_icon")
+description = "Shadow-veined ore prized by archers. Used to craft Phantom gear."
+holdable = false
+can_trade = true
+vendor_value = 8
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"phantom_ore"
+metadata/id = 220
