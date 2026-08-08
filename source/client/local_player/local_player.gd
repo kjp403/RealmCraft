@@ -23,6 +23,9 @@ const CLICK_NAVIGATION_SCRIPT: Script = preload(
 const HARVEST_CONTROLLER_SCRIPT: Script = preload(
 	"res://source/client/local_player/harvest_controller.gd"
 )
+const PICKUP_CONTROLLER_SCRIPT: Script = preload(
+	"res://source/client/local_player/pickup_controller.gd"
+)
 const FOLLOW_REPATH_MS: int = 300
 const FOLLOW_STOP_DISTANCE: float = 28.0
 
@@ -57,6 +60,7 @@ var _net_send_accum: float = 0.0
 var synchronizer_manager: StateSynchronizerManagerClient
 var _click_navigation: ClickNavigation
 var _harvest_controller: HarvestController
+var _pickup_controller: PickupController
 var _follow_peer_id: int = 0
 var _follow_repath_at_ms: int = 0
 
@@ -72,6 +76,9 @@ func _ready() -> void:
 	_harvest_controller = HARVEST_CONTROLLER_SCRIPT.new()
 	add_child(_harvest_controller)
 	_harvest_controller.setup(self)
+	_pickup_controller = PICKUP_CONTROLLER_SCRIPT.new()
+	add_child(_pickup_controller)
+	_pickup_controller.setup(self)
 	ClientState.local_player_ready.emit(self)
 	
 	super._ready()
@@ -406,6 +413,8 @@ func process_input() -> void:
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
+		if _pickup_controller != null:
+			_pickup_controller.cancel()
 		input_direction = Vector2.ZERO
 		action_input = false
 		return
@@ -416,6 +425,8 @@ func process_input() -> void:
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
+		if _pickup_controller != null:
+			_pickup_controller.cancel()
 		input_direction = manual_direction
 	else:
 		_update_follow_navigation()
@@ -465,6 +476,11 @@ func process_input() -> void:
 	if _harvest_controller != null and _harvest_controller.is_active():
 		if _harvest_controller.tick():
 			equipment_component.process_input(self)
+			return
+
+	# Click-to-loot: walk into range then request item.pickup.
+	if _pickup_controller != null and _pickup_controller.is_active():
+		if _pickup_controller.tick():
 			return
 
 	equipment_component.process_input(self)
@@ -532,6 +548,8 @@ func set_click_move_target(world_target: Vector2) -> void:
 	_follow_peer_id = 0
 	if _harvest_controller != null:
 		_harvest_controller.cancel()
+	if _pickup_controller != null:
+		_pickup_controller.cancel()
 	_click_navigation.request_move(world_target)
 
 
@@ -540,7 +558,16 @@ func set_click_move_target(world_target: Vector2) -> void:
 func start_auto_gather(node: MineableNode) -> void:
 	if _harvest_controller == null:
 		return
+	if _pickup_controller != null:
+		_pickup_controller.cancel()
 	_harvest_controller.start(node)
+
+
+## Walk to a ground drop and pick it up. Cancel with WASD or a ground click.
+func start_auto_pickup(item: Node2D, prop_id: int) -> void:
+	if _pickup_controller == null:
+		return
+	_pickup_controller.start(item, prop_id)
 
 
 func is_auto_gathering() -> bool:
@@ -614,6 +641,8 @@ func _on_instance_changed_camera_limits(instance: InstanceClient) -> void:
 	_follow_peer_id = 0
 	if _harvest_controller != null:
 		_harvest_controller.cancel()
+	if _pickup_controller != null:
+		_pickup_controller.cancel()
 	_apply_camera_limits(instance.instance_map if instance != null else null)
 	if _click_navigation != null:
 		_click_navigation.rebuild_for_map(

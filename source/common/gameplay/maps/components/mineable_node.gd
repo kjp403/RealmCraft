@@ -200,19 +200,29 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	_progress_hp_by_player.erase(player_id)
 
 	# Award. Bonus-yield + cooldown discount come from the primary job's perk tree.
+	# Secondary catch (e.g. Cod at a Herring hole) replaces the primary yield when
+	# it rolls — rarer fish, more XP, mutually exclusive with the common catch.
 	var amount: int = data.yield_amount
 	if job_perks_resource != null \
 			and randf() < job_perks_resource.effective_bonus_yield_chance(job_level, job_perks):
 		amount += 1
 
-	var ore_id: int = int(data.ore.get_meta(&"id", 0))
+	var caught: Item = data.ore
+	var xp_table: Dictionary[StringName, int] = data.job_xp
+	if data.secondary_ore != null and data.secondary_chance > 0.0 \
+			and randf() < data.secondary_chance:
+		caught = data.secondary_ore
+		if not data.secondary_job_xp.is_empty():
+			xp_table = data.secondary_job_xp
+
+	var ore_id: int = int(caught.get_meta(&"id", 0))
 	Inventory.add_item(player.player_resource.inventory, ore_id, amount)
 	DailyQuestService.on_collect(player.player_resource, ore_id, amount)
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
-	for job_name: StringName in data.job_xp:
-		var raw: int = int(data.job_xp[job_name])
+	for job_name: StringName in xp_table:
+		var raw: int = int(xp_table[job_name])
 		var xp_gain: int = raw
 		var jp: JobPerks = JobRegistry.perks_for(job_name)
 		if jp != null:
@@ -242,7 +252,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"ok": true,
 		"extracted": true,
 		"ore_id": ore_id,
-		"ore_name": String(data.ore.item_name),
+		"ore_name": String(caught.item_name),
 		"amount": amount,
 		"xp": int(first.get("xp", 0)),
 		"job": first_job,

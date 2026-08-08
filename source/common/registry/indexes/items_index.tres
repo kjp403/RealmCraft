@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786164712
-next_id = 179
+version = 1786166423
+next_id = 204
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -687,6 +687,156 @@ entries = Array[Dictionary]([{
 &"id": 171,
 &"path": "res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres",
 &"slug": &"wand_sunsteel.item"
+},
+{
+&"hash": "ddcd669d98abb135532a703bf4f82fab34d61a1d1c05447c09930e165b7828af",
+&"id": 203,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres",
+&"slug": &"cooked_anglerfish"
+},
+{
+&"hash": "ca4345bdfc61a85e66804443dc78f9274ddf954fa765344a286c0acab237db22",
+&"id": 194,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_cod.tres",
+&"slug": &"cooked_cod"
+},
+{
+&"hash": "bfbd9d6201fb215cddf4262526dee061b3c6862e2d38080f46831ab3c2d62ce9",
+&"id": 200,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_crab.tres",
+&"slug": &"cooked_crab"
+},
+{
+&"hash": "4a61a420114defbd167cdc6d60487fbbfadd49a409f962b5af11a11a05baf92f",
+&"id": 193,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_herring.tres",
+&"slug": &"cooked_herring"
+},
+{
+&"hash": "eba19f7022305a668f113025836ec69aa9be22d307cab2ab76ce51d0ef33639b",
+&"id": 199,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_lionfish.tres",
+&"slug": &"cooked_lionfish"
+},
+{
+&"hash": "2c89db0ebabc3c0aa6c1bc55b586e3506783d3603da44712ec0431cee85b1ab0",
+&"id": 198,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_lobster.tres",
+&"slug": &"cooked_lobster"
+},
+{
+&"hash": "1c44fd7fee916400bdc093efcdf089e74e43c91feafaad4270fcf0d8d3de8686",
+&"id": 202,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_parrot_fish.tres",
+&"slug": &"cooked_parrot_fish"
+},
+{
+&"hash": "c750bef463db2d399eac98fc31c95c7b3b54e9d59e3731bff59516efbce5d10b",
+&"id": 196,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_salmon.tres",
+&"slug": &"cooked_salmon"
+},
+{
+&"hash": "18664f483fedd327724c22966dffbdecbb69d8506a5e0dd357740592316413e8",
+&"id": 192,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_shrimp.tres",
+&"slug": &"cooked_shrimp"
+},
+{
+&"hash": "a4f9f7e01d5beec026455e530108ca66c640d49c54c75ef155446a064486c0f7",
+&"id": 195,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_trout.tres",
+&"slug": &"cooked_trout"
+},
+{
+&"hash": "eabf662488babaa16e23c590bc3531feb65e2be3cca0f3d3c157512ebd417b37",
+&"id": 197,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_tuna.tres",
+&"slug": &"cooked_tuna"
+},
+{
+&"hash": "91f595e627c53ac98b290193462428c05ffc54e961dc68e0530da3ded23b9ad9",
+&"id": 201,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_turtle.tres",
+&"slug": &"cooked_turtle"
+},
+{
+&"hash": "23b2693ca4c4388e8b4e315cdfa00aa73173afbe65cf9c2606ef74231a5a6b82",
+&"id": 191,
+&"path": "res://source/common/gameplay/items/materials/fish/anglerfish.tres",
+&"slug": &"anglerfish"
+},
+{
+&"hash": "21301d0d621d7d19e0a52f61c6109e0e20507c2df7e1a8628a766a3a2d4130a5",
+&"id": 182,
+&"path": "res://source/common/gameplay/items/materials/fish/cod.tres",
+&"slug": &"cod"
+},
+{
+&"hash": "c82f124ac3f291dbb067177248011bf47b454213e4fa45a40e79baf8bd7e38a7",
+&"id": 188,
+&"path": "res://source/common/gameplay/items/materials/fish/crab.tres",
+&"slug": &"crab"
+},
+{
+&"hash": "43a7ad70a41a8ec88d847808c992210589dee7a3c4c7c166787b19ddce000841",
+&"id": 181,
+&"path": "res://source/common/gameplay/items/materials/fish/herring.tres",
+&"slug": &"herring"
+},
+{
+&"hash": "708d4ce34e44a85ef36062e625f442fc32c1863e69da25d1335ef20c02db3ab0",
+&"id": 187,
+&"path": "res://source/common/gameplay/items/materials/fish/lionfish.tres",
+&"slug": &"lionfish"
+},
+{
+&"hash": "ccdfdcd97aaee0ae2e1d86428b001921ad9a697939161e0527fd907905490645",
+&"id": 186,
+&"path": "res://source/common/gameplay/items/materials/fish/lobster.tres",
+&"slug": &"lobster"
+},
+{
+&"hash": "89b4966ebb107a1994246b229a76c3cb07dad931c9897a865750b686bda4542d",
+&"id": 190,
+&"path": "res://source/common/gameplay/items/materials/fish/parrot_fish.tres",
+&"slug": &"parrot_fish"
+},
+{
+&"hash": "45e92f1eb9a4671258e7526ef1de0701e73cfacee53e28af95faf950704464d3",
+&"id": 184,
+&"path": "res://source/common/gameplay/items/materials/fish/salmon.tres",
+&"slug": &"salmon"
+},
+{
+&"hash": "3d3822687575a2783b9e22b6fc40d545097df826638c52bce420d60827757fc0",
+&"id": 180,
+&"path": "res://source/common/gameplay/items/materials/fish/shrimp.tres",
+&"slug": &"shrimp"
+},
+{
+&"hash": "56c098b8b81378ee0ea70e9d81bcbd89d0feea49d7916a2375fa560aa5285f14",
+&"id": 183,
+&"path": "res://source/common/gameplay/items/materials/fish/trout.tres",
+&"slug": &"trout"
+},
+{
+&"hash": "1075b1f4007590e3ed9264cddab01003526cac1306a5315dd8c5c9cdb98058b8",
+&"id": 185,
+&"path": "res://source/common/gameplay/items/materials/fish/tuna.tres",
+&"slug": &"tuna"
+},
+{
+&"hash": "c880b8cae66255642bb6fa310d31c69a421aeafe301abff9cf02a324e75c282f",
+&"id": 189,
+&"path": "res://source/common/gameplay/items/materials/fish/turtle.tres",
+&"slug": &"turtle"
+},
+{
+&"hash": "5e333f98498dcdccfb9dbc5b3b5783b1f80778a716478d89d182c242832eb96c",
+&"id": 179,
+&"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod.tres",
+&"slug": &"fishing_rod"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

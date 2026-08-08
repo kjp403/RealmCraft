@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://c2ed488b63efd1"]
+
+[ext_resource type="Script" uid="uid://bprsise4rcsak" path="res://source/common/gameplay/items/consumable_item.gd" id="1_con"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_crab_cooked.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_con")
+heal_amount = 32
+shared_cooldown_ms = 5000
+cooldown_category = &"food"
+use_freeze_ms = 700
+item_name = &"Cooked Crab"
+item_icon = ExtResource("2_icon")
+description = "Grilled crab. Restores 32 health."
+metadata/slug = &"cooked_crab"
+metadata/id = 200

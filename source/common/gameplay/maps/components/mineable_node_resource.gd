@@ -27,6 +27,16 @@ extends Resource
 ## Tool the player must have equipped (matched against ToolItem.tool_type).
 @export var required_tool: StringName = &"pickaxe"
 
+@export_group("Secondary Catch")
+## Optional rarer catch rolled instead of [member ore] (e.g. Cod at a Herring hole).
+## When set and the roll succeeds, the player receives this item and
+## [member secondary_job_xp] instead of the primary yield.
+@export var secondary_ore: Item
+## Chance (0–1) to catch [member secondary_ore] instead of [member ore] on a yield.
+@export_range(0.0, 1.0, 0.01) var secondary_chance: float = 0.0
+## Job XP granted when the secondary catch wins. Empty → reuse [member job_xp].
+@export var secondary_job_xp: Dictionary[StringName, int] = {}
+
 @export_group("Extraction")
 ## HP the per-player progress drains before one charge is consumed and the
 ## player gets the yield. Each pickaxe swing chips this down by the swing's

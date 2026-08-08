@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cfb82bd722210b"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_anglerfish.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Anglerfish"
+item_icon = ExtResource("1_icon")
+description = "Deep-lure nightmare. Culinary prize."
+metadata/slug = &"anglerfish"
+metadata/id = 191

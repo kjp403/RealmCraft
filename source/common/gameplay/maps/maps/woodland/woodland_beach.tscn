@@ -1,0 +1,144 @@
+[gd_scene format=3 uid="uid://cf9f162e5c50c5"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_beach_ground.png" id="1_ground"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar2.png" id="2_bar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/fishshop2.png" id="3_shop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar1.png" id="4_bar2"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
+[ext_resource type="Resource" uid="uid://c7bc2b3bd11a32" path="res://source/common/gameplay/crafting/resources/cooking_station.tres" id="7_cook"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/structures/stations/cooking_station/cooker/cooker_01.png" id="8_cookart"]
+[ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_tp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_red.png" id="p0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_blue.png" id="p1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/chair_red.png" id="p2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/palm.png" id="p6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
+[ext_resource type="Resource" uid="uid://cda7f206562b2b" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_shrimp.tres" id="h0"]
+[ext_resource type="Resource" uid="uid://ca1a2c6ce3fae3" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_herring.tres" id="h1"]
+[ext_resource type="Resource" uid="uid://cb0192f335f9fc" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_trout.tres" id="h2"]
+[ext_resource type="Resource" uid="uid://c387cddeb037ad" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_tuna.tres" id="h3"]
+
+[sub_resource type="RectangleShape2D" id="BoatShape"]
+size = Vector2(64, 64)
+
+[node name="WoodlandBeach" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Ground" type="Sprite2D" parent="."]
+z_index = -5
+centered = false
+texture = ExtResource("1_ground")
+
+[node name="BeachBar" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(170, 120)
+texture = ExtResource("2_bar")
+offset = Vector2(0, -40)
+
+[node name="FishShop" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(320, 100)
+texture = ExtResource("3_shop")
+offset = Vector2(0, -32)
+
+[node name="BeachHut" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(500, 125)
+texture = ExtResource("4_bar2")
+offset = Vector2(0, -40)
+
+[node name="Palm1" type="Sprite2D" parent="."]
+z_index = 3
+position = Vector2(70, 90)
+texture = ExtResource("p6")
+offset = Vector2(0, -24)
+
+[node name="Palm2" type="Sprite2D" parent="."]
+z_index = 3
+position = Vector2(680, 110)
+texture = ExtResource("p6")
+offset = Vector2(0, -24)
+
+[node name="Umbrella1" type="Sprite2D" parent="."]
+position = Vector2(240, 170)
+texture = ExtResource("p0")
+offset = Vector2(0, -16)
+
+[node name="Umbrella2" type="Sprite2D" parent="."]
+position = Vector2(420, 180)
+texture = ExtResource("p1")
+offset = Vector2(0, -16)
+
+[node name="Chair1" type="Sprite2D" parent="."]
+position = Vector2(220, 190)
+texture = ExtResource("p2")
+
+[node name="Torch1" type="Sprite2D" parent="."]
+position = Vector2(130, 140)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="Torch2" type="Sprite2D" parent="."]
+position = Vector2(560, 145)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="CookingStation" parent="." instance=ExtResource("6_craft")]
+position = Vector2(250, 145)
+station = ExtResource("7_cook")
+
+[node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
+position = Vector2(0, -16)
+texture = ExtResource("8_cookart")
+
+[node name="Dock" type="Sprite2D" parent="."]
+z_index = 1
+centered = false
+position = Vector2(400, 140)
+texture = ExtResource("10_dock")
+
+[node name="FishingBoat" type="Sprite2D" parent="."]
+z_index = 2
+centered = false
+position = Vector2(452, 200)
+texture = ExtResource("12_boat")
+
+[node name="BoatLabel" type="Label" parent="."]
+offset_left = 444
+offset_top = 180
+offset_right = 524
+offset_bottom = 196
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+text = "Deep Cove"
+horizontal_alignment = 1
+
+[node name="BoatToDeepCove" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
+position = Vector2(440, 232)
+target = NodePath("../../WoodlandDeepCove/BoatToBeach")
+
+[node name="CollisionShape2D" parent="BoatToDeepCove" index="0"]
+shape = SubResource("BoatShape")
+
+[node name="MineableNodes" type="Node2D" parent="."]
+
+[node name="ShrimpHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(112, 309)
+data = ExtResource("h0")
+
+[node name="HerringHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(224, 242)
+data = ExtResource("h1")
+
+[node name="TroutHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(320, 212)
+data = ExtResource("h2")
+
+[node name="TunaHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(672, 289)
+data = ExtResource("h3")

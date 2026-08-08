@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://c00d4891f82d48"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/tools/fishing_rod.png" id="1_tex"]
+[ext_resource type="Script" uid="uid://b5hsnu4140fky" path="res://source/common/gameplay/items/weapons/tool_item.gd" id="2_toolitem"]
+[ext_resource type="Resource" uid="uid://qav4p12rsbn3" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="3_slot"]
+[ext_resource type="PackedScene" uid="uid://ca3506b34964c7" path="res://source/common/gameplay/items/weapons/tools/fishing_rod.tscn" id="4_scene"]
+
+[resource]
+script = ExtResource("2_toolitem")
+tool_type = &"fishing_rod"
+right_hand_scene = ExtResource("4_scene")
+slot = ExtResource("3_slot")
+item_name = &"Fishing Rod"
+item_icon = ExtResource("1_tex")
+description = "A simple rod and line. Equip it to fish at fishing holes."
+metadata/slug = &"fishing_rod"
+metadata/id = 179

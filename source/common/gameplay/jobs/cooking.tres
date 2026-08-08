@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="JobPerks" format=3 uid="uid://cb1e3b1dd10dda"]
+
+[ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_item"]
+[ext_resource type="Resource" uid="uid://cb400a04d53868" path="res://source/common/gameplay/items/consumables/food/cooked_shrimp.tres" id="c0"]
+[ext_resource type="Resource" uid="uid://cbf89345340ab8" path="res://source/common/gameplay/items/consumables/food/cooked_herring.tres" id="c1"]
+[ext_resource type="Resource" uid="uid://c4497784e92e03" path="res://source/common/gameplay/items/consumables/food/cooked_cod.tres" id="c2"]
+[ext_resource type="Resource" uid="uid://c623b49d3b1c65" path="res://source/common/gameplay/items/consumables/food/cooked_trout.tres" id="c3"]
+[ext_resource type="Resource" uid="uid://c4f13d31aa5cf7" path="res://source/common/gameplay/items/consumables/food/cooked_salmon.tres" id="c4"]
+[ext_resource type="Resource" uid="uid://cc7bcbbd7cfb55" path="res://source/common/gameplay/items/consumables/food/cooked_tuna.tres" id="c5"]
+[ext_resource type="Resource" uid="uid://c1d6ef5a2fd6d0" path="res://source/common/gameplay/items/consumables/food/cooked_lobster.tres" id="c6"]
+[ext_resource type="Resource" uid="uid://c67566de76e887" path="res://source/common/gameplay/items/consumables/food/cooked_lionfish.tres" id="c7"]
+[ext_resource type="Resource" uid="uid://c2ed488b63efd1" path="res://source/common/gameplay/items/consumables/food/cooked_crab.tres" id="c8"]
+[ext_resource type="Resource" uid="uid://c4ab069be0cdf7" path="res://source/common/gameplay/items/consumables/food/cooked_turtle.tres" id="c9"]
+[ext_resource type="Resource" uid="uid://c15b2d57c00622" path="res://source/common/gameplay/items/consumables/food/cooked_parrot_fish.tres" id="c10"]
+[ext_resource type="Resource" uid="uid://c7704cedbdbb03" path="res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres" id="c11"]
+
+[resource]
+script = ExtResource("1_jp")
+job_slug = &"cooking"
+display_name = "Cooking"
+category = &"crafting"
+sort_order = 2
+perks = Array[Dictionary]([{
+"effect": "xp",
+"id": "sous_chef",
+"max_rank": 3,
+"name": "Sous Chef",
+"per_rank": 0.1
+}, {
+"effect": "refund",
+"id": "careful",
+"max_rank": 3,
+"name": "Careful Hands",
+"per_rank": 0.05
+}, {
+"effect": "extra_item",
+"id": "double_portion",
+"max_rank": 3,
+"name": "Double Portion",
+"per_rank": 0.04
+}])
+recipe_items = Array[ExtResource("1_item")]([ExtResource("c0"), ExtResource("c1"), ExtResource("c2"), ExtResource("c3"), ExtResource("c4"), ExtResource("c5"), ExtResource("c6"), ExtResource("c7"), ExtResource("c8"), ExtResource("c9"), ExtResource("c10"), ExtResource("c11")])
+recipe_levels = Array[int]([1, 5, 5, 10, 10, 20, 20, 25, 30, 30, 40, 50])
+describe_lines = Array[String](["Cooking XP +{xp}%", "Material refund: {refund}%", "Extra portion: {extra_item}%"])

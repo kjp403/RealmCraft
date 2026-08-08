@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3 uid="uid://ca1a2c6ce3fae3"]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="2_ore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/props/fishing_hole.png" id="3_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/props/fishing_hole_empty.png" id="4_empty"]
+[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="5_sec"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Herring Hole"
+ore = ExtResource("2_ore")
+yield_amount = 1
+job_xp = Dictionary[StringName, int]({
+&"fishing": 20
+})
+required_level = 5
+required_tool = &"fishing_rod"
+secondary_ore = ExtResource("5_sec")
+secondary_chance = 0.25
+secondary_job_xp = Dictionary[StringName, int]({
+&"fishing": 45
+})
+extraction_hp = 3
+max_charges = 4
+charge_regen_seconds = 14.0
+depleted_recharge_seconds = 70.0
+player_cooldown_seconds = 5.0
+texture = ExtResource("3_tex")
+depleted_texture = ExtResource("4_empty")

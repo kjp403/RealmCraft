@@ -1,0 +1,180 @@
+[gd_resource type="Resource" script_class="CraftingStationResource" format=3 uid="uid://c7bc2b3bd11a32"]
+
+[ext_resource type="Script" uid="uid://btm2w18d3d327" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://dou76lfuf6clf" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
+[ext_resource type="Script" uid="uid://cgkqi5dwtob32" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
+[ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="r0"]
+[ext_resource type="Resource" uid="uid://cb400a04d53868" path="res://source/common/gameplay/items/consumables/food/cooked_shrimp.tres" id="c0"]
+[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="r1"]
+[ext_resource type="Resource" uid="uid://cbf89345340ab8" path="res://source/common/gameplay/items/consumables/food/cooked_herring.tres" id="c1"]
+[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="r2"]
+[ext_resource type="Resource" uid="uid://c4497784e92e03" path="res://source/common/gameplay/items/consumables/food/cooked_cod.tres" id="c2"]
+[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="r3"]
+[ext_resource type="Resource" uid="uid://c623b49d3b1c65" path="res://source/common/gameplay/items/consumables/food/cooked_trout.tres" id="c3"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="r4"]
+[ext_resource type="Resource" uid="uid://c4f13d31aa5cf7" path="res://source/common/gameplay/items/consumables/food/cooked_salmon.tres" id="c4"]
+[ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="r5"]
+[ext_resource type="Resource" uid="uid://cc7bcbbd7cfb55" path="res://source/common/gameplay/items/consumables/food/cooked_tuna.tres" id="c5"]
+[ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="r6"]
+[ext_resource type="Resource" uid="uid://c1d6ef5a2fd6d0" path="res://source/common/gameplay/items/consumables/food/cooked_lobster.tres" id="c6"]
+[ext_resource type="Resource" uid="uid://cea4283660b1ab" path="res://source/common/gameplay/items/materials/fish/lionfish.tres" id="r7"]
+[ext_resource type="Resource" uid="uid://c67566de76e887" path="res://source/common/gameplay/items/consumables/food/cooked_lionfish.tres" id="c7"]
+[ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="r8"]
+[ext_resource type="Resource" uid="uid://c2ed488b63efd1" path="res://source/common/gameplay/items/consumables/food/cooked_crab.tres" id="c8"]
+[ext_resource type="Resource" uid="uid://c2d1d8b13a1643" path="res://source/common/gameplay/items/materials/fish/turtle.tres" id="r9"]
+[ext_resource type="Resource" uid="uid://c4ab069be0cdf7" path="res://source/common/gameplay/items/consumables/food/cooked_turtle.tres" id="c9"]
+[ext_resource type="Resource" uid="uid://c595d065e50ed1" path="res://source/common/gameplay/items/materials/fish/parrot_fish.tres" id="r10"]
+[ext_resource type="Resource" uid="uid://c15b2d57c00622" path="res://source/common/gameplay/items/consumables/food/cooked_parrot_fish.tres" id="c10"]
+[ext_resource type="Resource" uid="uid://cfb82bd722210b" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="r11"]
+[ext_resource type="Resource" uid="uid://c7704cedbdbb03" path="res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres" id="c11"]
+
+[sub_resource type="Resource" id="I_shrimp"]
+script = ExtResource("3_ingred")
+item = ExtResource("r0")
+amount = 1
+
+[sub_resource type="Resource" id="R_shrimp"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c0")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shrimp")])
+required_level = 1
+xp_reward = 15
+
+[sub_resource type="Resource" id="I_herring"]
+script = ExtResource("3_ingred")
+item = ExtResource("r1")
+amount = 1
+
+[sub_resource type="Resource" id="R_herring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c1")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_herring")])
+required_level = 5
+xp_reward = 25
+
+[sub_resource type="Resource" id="I_cod"]
+script = ExtResource("3_ingred")
+item = ExtResource("r2")
+amount = 1
+
+[sub_resource type="Resource" id="R_cod"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c2")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cod")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_trout"]
+script = ExtResource("3_ingred")
+item = ExtResource("r3")
+amount = 1
+
+[sub_resource type="Resource" id="R_trout"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c3")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_trout")])
+required_level = 10
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_salmon"]
+script = ExtResource("3_ingred")
+item = ExtResource("r4")
+amount = 1
+
+[sub_resource type="Resource" id="R_salmon"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c4")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_salmon")])
+required_level = 10
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_tuna"]
+script = ExtResource("3_ingred")
+item = ExtResource("r5")
+amount = 1
+
+[sub_resource type="Resource" id="R_tuna"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c5")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tuna")])
+required_level = 20
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_lobster"]
+script = ExtResource("3_ingred")
+item = ExtResource("r6")
+amount = 1
+
+[sub_resource type="Resource" id="R_lobster"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c6")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_lobster")])
+required_level = 20
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_lionfish"]
+script = ExtResource("3_ingred")
+item = ExtResource("r7")
+amount = 1
+
+[sub_resource type="Resource" id="R_lionfish"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c7")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_lionfish")])
+required_level = 25
+xp_reward = 90
+
+[sub_resource type="Resource" id="I_crab"]
+script = ExtResource("3_ingred")
+item = ExtResource("r8")
+amount = 1
+
+[sub_resource type="Resource" id="R_crab"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c8")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_crab")])
+required_level = 30
+xp_reward = 100
+
+[sub_resource type="Resource" id="I_turtle"]
+script = ExtResource("3_ingred")
+item = ExtResource("r9")
+amount = 1
+
+[sub_resource type="Resource" id="R_turtle"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c9")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_turtle")])
+required_level = 30
+xp_reward = 120
+
+[sub_resource type="Resource" id="I_parrot_fish"]
+script = ExtResource("3_ingred")
+item = ExtResource("r10")
+amount = 1
+
+[sub_resource type="Resource" id="R_parrot_fish"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c10")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_parrot_fish")])
+required_level = 40
+xp_reward = 140
+
+[sub_resource type="Resource" id="I_anglerfish"]
+script = ExtResource("3_ingred")
+item = ExtResource("r11")
+amount = 1
+
+[sub_resource type="Resource" id="R_anglerfish"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("c11")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_anglerfish")])
+required_level = 50
+xp_reward = 160
+
+[resource]
+script = ExtResource("2_station")
+station_name = "Cooking Station"
+profession = &"cooking"
+craft_fee = 0
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_shrimp"), SubResource("R_herring"), SubResource("R_cod"), SubResource("R_trout"), SubResource("R_salmon"), SubResource("R_tuna"), SubResource("R_lobster"), SubResource("R_lionfish"), SubResource("R_crab"), SubResource("R_turtle"), SubResource("R_parrot_fish"), SubResource("R_anglerfish")])
