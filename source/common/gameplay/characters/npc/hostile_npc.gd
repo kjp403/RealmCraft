@@ -264,6 +264,7 @@ var spawn_position: Vector2
 var _prop_id: int
 var _position_fid: int
 var _anim_fid: int
+var _flipped_fid: int
 var _state_fid: int
 var _health_fid: int
 var _health_max_fid: int
@@ -271,6 +272,9 @@ var _health_max_fid: int
 var _respawn_at_ms: int
 ## When the next auto-attack is allowed.
 var _next_attack_ms: int
+## Client: true while a one-shot attack/special SpriteFrames clip is playing so
+## incoming :anim locomotion travels don't stomp the action mid-swing.
+var _skin_action_playing: bool = false
 
 
 func _ready() -> void:
@@ -337,8 +341,17 @@ func _ready() -> void:
 	container = get_parent()
 
 	_prop_id = container.child_id_of_node(self)
+	if _prop_id < 0:
+		container._bake_static_map()
+		_prop_id = container.child_id_of_node(self)
+	if _prop_id < 0:
+		push_error(
+			"HostileNPC '%s' has no ReplicatedProps child id under %s — motion/anims will not sync."
+			% [name, str(container.get_path())]
+		)
 	_position_fid = PathRegistry.ensure_id(^":position")
 	_anim_fid = PathRegistry.ensure_id(^":anim")
+	_flipped_fid = PathRegistry.ensure_id(^":flipped")
 	_state_fid = PathRegistry.register_field(":enemy_state", Wire.Type.VARIANT)
 	_health_fid = PathRegistry.ensure_id("StatsComponent:stats:health")
 	_health_max_fid = PathRegistry.ensure_id("StatsComponent:stats:health_max")
@@ -670,18 +683,39 @@ func rp_play_skin_anim(anim_name: StringName) -> void:
 	var frames: SpriteFrames = animated_sprite.sprite_frames
 	if frames == null or not frames.has_animation(anim_name):
 		return
+	_skin_action_playing = true
 	if animation_tree != null:
 		animation_tree.active = false
+	# Restart even if the same clip just finished (otherwise a second swing can
+	# no-op when the sprite is still sitting on the last attack frame).
 	animated_sprite.play(anim_name)
-	if not animated_sprite.animation_finished.is_connected(_on_skin_action_finished):
-		animated_sprite.animation_finished.connect(_on_skin_action_finished, CONNECT_ONE_SHOT)
+	if animated_sprite.animation_finished.is_connected(_on_skin_action_finished):
+		animated_sprite.animation_finished.disconnect(_on_skin_action_finished)
+	animated_sprite.animation_finished.connect(_on_skin_action_finished, CONNECT_ONE_SHOT)
 
 
 func _on_skin_action_finished() -> void:
+	_skin_action_playing = false
 	if animation_tree != null:
 		animation_tree.active = true
 	# Re-kick locomotion from the current synced anim (IDLE/RUN/DEATH).
 	_set_anim(anim)
+
+
+func _set_anim(new_anim: Animations) -> void:
+	# Keep the synced enum current, but don't travel locomotion over a one-shot
+	# (same-tick :anim IDLE pairs used to erase rp_play_skin_anim swings).
+	if _skin_action_playing and new_anim != Animations.DEATH:
+		anim = new_anim
+		return
+	match new_anim:
+		Animations.IDLE:
+			locomotion_state_machine.travel(&"locomotion_idle")
+		Animations.RUN:
+			locomotion_state_machine.travel(&"locomotion_run")
+		Animations.DEATH:
+			locomotion_state_machine.travel(&"locomotion_death")
+	anim = new_anim
 
 
 ## Client-visual: a short laser blast along a world corridor (Mecha Golem). The
@@ -785,11 +819,23 @@ func _process_animations() -> void:
 
 
 func _process_synchronization() -> void:
+	if _prop_id < 0 and container != null:
+		_prop_id = container.child_id_of_node(self)
 	container.mark_child_prop(_prop_id, _position_fid, position, true)
 	container.mark_child_prop(_prop_id, _anim_fid, anim, true)
+	container.mark_child_prop(_prop_id, _flipped_fid, flipped, true)
 	container.mark_child_prop(_prop_id, _state_fid, enemy_state, true)
 	container.mark_child_prop(_prop_id, _health_fid, stats_component.get_stat(Stat.HEALTH), true)
 	container.mark_child_prop(_prop_id, _health_max_fid, stats_component.get_stat(Stat.HEALTH_MAX), true)
+
+
+## Face the active target so run/attack clips read directionally on clients.
+func _face_target() -> void:
+	if targeted_player == null or not is_instance_valid(targeted_player):
+		return
+	var face_left: bool = targeted_player.global_position.x < global_position.x
+	if flipped != face_left:
+		flipped = face_left
 
 
 ## Slow passive heal while idling. Without this, a mob that took a snipe
@@ -843,6 +889,7 @@ func _process_chase() -> void:
 		stop_chase()
 		return
 
+	_face_target()
 	var direction: Vector2 = global_position.direction_to(targeted_player.global_position)
 	velocity = direction * move_speed
 	move_and_slide()
@@ -893,11 +940,16 @@ func _process_attack() -> void:
 		enemy_state = EnemyState.CHASE
 		return
 
+	_face_target()
 	# Attack starts at distance_to_attack, but keep CLOSING IN while firing
 	# until comfortably inside range — mobs shoot on the move like players do
-	# instead of freezing at the range boundary. Melee mobs are already nearly
-	# point-blank when this state starts, so only ranged feel changes.
-	if distance_from_player > distance_to_attack * ATTACK_ADVANCE_STOP_FRACTION:
+	# instead of freezing at the range boundary. Oversized bosses use a larger
+	# plant radius so they keep walking across their big sprite instead of
+	# looking glued to the spawn point while meleeing.
+	var plant_at: float = distance_to_attack * ATTACK_ADVANCE_STOP_FRACTION
+	if enemy_data != null and enemy_data.visual_scale > 1.0:
+		plant_at = maxf(plant_at, 18.0 * enemy_data.visual_scale)
+	if distance_from_player > plant_at:
 		velocity = global_position.direction_to(targeted_player.global_position) * move_speed
 		move_and_slide()
 	else:
@@ -951,8 +1003,13 @@ func rp_spawn_effect() -> void:
 ## orchestrator (a BossController) drive the body's telegraphs without reaching
 ## into its private prop id. Server-side; no-op if not yet baked into a container.
 func replicate_visual(method: StringName, args: Array) -> void:
-	if container != null:
-		container.queue_op(_prop_id, method, args)
+	if container == null:
+		return
+	if _prop_id < 0:
+		_prop_id = container.child_id_of_node(self)
+	if _prop_id < 0:
+		return
+	container.queue_op(_prop_id, method, args)
 
 
 ## Scale this mob's combat stats for a harder run (dungeon Hard mode): multiply max

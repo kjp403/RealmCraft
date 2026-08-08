@@ -151,7 +151,7 @@ func _send_container_deltas_one_shot() -> void:
 		var ops_named: Array = out.get("ops_named", [])
 		if spawns.is_empty() and pairs.is_empty() and despawns.is_empty() and ops_named.is_empty():
 			continue
-		# Client apply order: spawns → ops_named → pairs → despawns
+		# Client apply order: spawns → pairs → ops_named → despawns
 		cont_blocks.append(WireCodec.encode_container_block_named(cid, spawns, pairs, despawns, ops_named))
 
 	if cont_blocks.is_empty():
