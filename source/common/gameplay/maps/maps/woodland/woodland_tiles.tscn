@@ -530,10 +530,23 @@ sources/6 = SubResource("atlas_tree4")
 sources/7 = SubResource("atlas_wallvar")
 sources/8 = SubResource("atlas_water")
 
+[sub_resource type="RectangleShape2D" id="BeachVoidSouth"]
+size = Vector2(1800, 64)
+
+[sub_resource type="RectangleShape2D" id="BeachVoidGap"]
+size = Vector2(180, 480)
+
+[sub_resource type="RectangleShape2D" id="BeachVoidWest"]
+size = Vector2(48, 560)
+
+[sub_resource type="RectangleShape2D" id="BeachVoidEast"]
+size = Vector2(48, 560)
+
 [node name="Woodland" type="Node2D" unique_id=618164945 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("0_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_6wtwb")
+camera_limit_bottom = 2048
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Ground" type="TileMapLayer" parent="." unique_id=591198804]
@@ -1188,3 +1201,24 @@ position = Vector2(900, 1520)
 
 [node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
 position = Vector2(1900, 1540)
+
+[node name="BeachVoidBounds" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+position = Vector2(0, 0)
+
+[node name="SouthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(1750, 2064)
+shape = SubResource("BeachVoidSouth")
+
+[node name="GapWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(1816, 1800)
+shape = SubResource("BeachVoidGap")
+
+[node name="WestWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(876, 1780)
+shape = SubResource("BeachVoidWest")
+
+[node name="EastWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(2628, 1780)
+shape = SubResource("BeachVoidEast")

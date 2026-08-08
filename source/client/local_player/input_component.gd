@@ -301,7 +301,14 @@ func is_attack_just_pressed() -> bool:
 	if not enabled: return false
 	if _mouse_aiming and not is_mouse_onscreen: return false
 	if _ui_blocks_combat(): return false
-	return Input.is_action_just_pressed(&"player_shoot")
+	# Drop leftover UI focus so Space (attack) isn't delayed by a focused Control
+	# still owning the viewport after a menu click.
+	if Input.is_action_just_pressed(&"player_shoot"):
+		var focused: Control = get_viewport().gui_get_focus_owner()
+		if focused != null and not (focused is LineEdit or focused is TextEdit):
+			focused.release_focus()
+		return true
+	return false
 
 
 ## Returns [code]true[/code] on the frame attack action was released.

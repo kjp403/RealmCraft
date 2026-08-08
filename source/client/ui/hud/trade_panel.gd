@@ -41,7 +41,10 @@ var _cancel_button: Button
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	build_shell("Secure Trade")
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	# Fullscreen shell: thin outer inset so Cancel / Confirm aren't clipped against
+	# the window edge (the floating 22px bottom margin was shorter than the dock).
+	build_shell("Secure Trade", null, true)
 	_build_body()
 	_build_picker_overlay()
 	close_requested.connect(_on_leave)
@@ -54,9 +57,8 @@ func _ready() -> void:
 
 func _build_body() -> void:
 	var body := VBoxContainer.new()
-	body.custom_minimum_size = Vector2(720, 440)
-	body.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	body.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override(&"separation", 10)
 	content.add_child(body)
 

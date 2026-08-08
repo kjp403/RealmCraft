@@ -122,6 +122,12 @@ func _ready() -> void:
 	# Dungeon run HUD (live clock + revive pool) — self-contained; shows itself on dungeon.hud pushes.
 	add_child(DungeonHud.new())
 
+	# Dock icons must never take keyboard focus — Space is the attack bind, and Godot's default
+	# Button FOCUS_ALL would let ui_accept / focused-button activation toggle inventory on Space.
+	for dock_button: Node in $BottomMenuDock.get_children():
+		if dock_button is BaseButton:
+			(dock_button as BaseButton).focus_mode = Control.FOCUS_NONE
+
 	# UI sound: wire every Button under the HUD to tap/hover cues (menus build theirs lazily, so also
 	# watch node_added). The gateway has its own wiring; this is scoped to the in-game HUD subtree.
 	_wire_subtree(self)
@@ -334,11 +340,19 @@ func _refresh_hud_for_menus() -> void:
 		# quest is tracked). Re-entrancy from stacked menus is a no-op (list already populated).
 		if _hidden_for_menu.is_empty():
 			for node: CanvasItem in [
-				$TwinSticks, $Chat, $QuestTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons
+				$TwinSticks, $Chat, $QuestTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons,
+				$BottomMenuDock,
 			]:
 				if node.visible:
 					node.hide()
 					_hidden_for_menu.append(node)
+		# Trade is a standalone overlay (not a display_menu). Keep dock + compact panels from
+		# sitting above / intercepting its footer buttons.
+		if trade_panel.visible:
+			_hide_compact_panels()
+			trade_panel.z_index = 20
+			trade_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+			trade_panel.move_to_front()
 	else:
 		for node: CanvasItem in _hidden_for_menu:
 			node.show()
@@ -548,6 +562,9 @@ func _hide_compact_panels() -> void:
 
 
 func _toggle_compact_panel(selected_panel: Control) -> void:
+	# Secure Trade owns the screen — dock icons must not open over / under it.
+	if trade_panel.visible:
+		return
 	var should_open: bool = not selected_panel.visible
 	_hide_compact_panels()
 	selected_panel.visible = should_open

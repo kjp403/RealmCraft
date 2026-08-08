@@ -13,12 +13,19 @@
 [ext_resource type="Resource" uid="uid://c9af9405ce45a6" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_crab.tres" id="h1"]
 [ext_resource type="Resource" uid="uid://c77e507ca6a840" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_parrot.tres" id="h2"]
 [ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h3"]
+[ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="99_col"]
 
 [sub_resource type="RectangleShape2D" id="BoatShape"]
 size = Vector2(64, 64)
 
 [node name="WoodlandDeepCove" type="Node2D"]
 y_sort_enabled = true
+script = ExtResource("99_col")
+ground_size = Vector2(704, 480)
+shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
+dock_walk = Rect2(324, 120, 56, 140)
+boat_pad = Rect2(344, 180, 72, 56)
+solid_footprints = Array[Rect2]([Rect2(170, 84, 60, 24), Rect2(52, 82, 16, 12), Rect2(552, 92, 16, 12), Rect2(268, 142, 24, 14), Rect2(144, 124, 12, 12)])
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
