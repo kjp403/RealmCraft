@@ -8,21 +8,61 @@ Deploys the three game servers behind Caddy (auto HTTPS) on one VPS.
 
 The game servers bind to `127.0.0.1`, so only Caddy (ports 80/443) is public.
 
+---
+
+## Auto-deploy (recommended — do this once)
+
+After a **one-time** GitHub secrets setup, merging to `main` updates the live
+server automatically. No SSH, no PowerShell paste.
+
+### 1. Add three GitHub Actions secrets
+
+Repo page → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+| Secret name | Value |
+|-------------|--------|
+| `VPS_HOST` | `144.217.91.100` |
+| `VPS_USER` | `ubuntu` |
+| `VPS_SSH_KEY` | Full contents of your private key file (usually `C:\Users\YOU\.ssh\arkenelle_ovh`) — include the `-----BEGIN … KEY-----` lines |
+
+To copy the key on Windows PowerShell:
+
+```powershell
+Get-Content $env:USERPROFILE\.ssh\arkenelle_ovh | Set-Clipboard
+```
+
+Then paste into the `VPS_SSH_KEY` secret box.
+
+### 2. Merge the auto-deploy PR / push to `main`
+
+That installs `.github/workflows/deploy-vps.yml` and `deploy/update.sh`.
+
+### 3. From then on
+
+| What you want | What you do |
+|---------------|-------------|
+| Put content live | Merge (or push) to `main` → wait for the green **Deploy VPS** check |
+| Redeploy without code changes | GitHub → **Actions** → **Deploy VPS** → **Run workflow** |
+| Update Godot project on your PC | Double-click `deploy/Sync-Game-From-GitHub.ps1` (or run it in PowerShell) |
+
+Watch deploys: GitHub → **Actions** → **Deploy VPS**.
+
+---
+
 ## Prerequisites (already done)
 - DNS: `api` and `play` A records → your VPS IP.
 - VPS reachable over SSH with your key.
 
-## Deploy (run these on the VPS)
+## First-time VPS install (already done for Arkenelle)
 
 ```bash
-# 1. Connect (from Windows PowerShell). Replace USER with your VPS user.
-ssh USER@144.217.91.100
+# 1. Connect (from Windows PowerShell).
+ssh -i $env:USERPROFILE\.ssh\arkenelle_ovh ubuntu@144.217.91.100
 
 # 2. Get the project onto the VPS at /opt/arkenelle
 sudo mkdir -p /opt/arkenelle
 sudo chown "$USER":"$USER" /opt/arkenelle
 git clone https://github.com/kjp403/RealmCraft.git /opt/arkenelle   # first time
-# (later updates: cd /opt/arkenelle && git pull)
 
 # 3. Run the setup script (installs Godot + Caddy, firewall, services)
 cd /opt/arkenelle
@@ -33,18 +73,18 @@ sudo bash deploy/setup-vps.sh
 
 ```bash
 systemctl status arkenelle-master arkenelle-gateway arkenelle-world caddy --no-pager
-# From your PC, these should return HTTPS (a certificate + a response):
+# From your PC:
 curl -I https://api.arkenelle.com
 ```
 
-Live logs for a service: `journalctl -u arkenelle-world -f`
+Live logs: `journalctl -u arkenelle-world -f`
 
-## Updating later
+## Manual update (only if auto-deploy is not set up)
+
+On the VPS:
 
 ```bash
-cd /opt/arkenelle && git pull
-sudo -u arkenelle godot --headless --path /opt/arkenelle --import
-sudo systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
+sudo bash /opt/arkenelle/deploy/update.sh
 ```
 
 ## Client build
@@ -59,3 +99,5 @@ and share it once the servers are live.
   binary later.
 - The self-signed certs in `data/config/tls/` are only used for the internal
   loopback links between master/gateway/world. Public TLS is Caddy's job.
+- Auto-deploy uses fast-forward only. If someone edits files directly on the VPS,
+  the Action will fail until those edits are discarded or committed.
