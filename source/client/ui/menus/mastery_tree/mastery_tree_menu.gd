@@ -49,6 +49,7 @@ func _ready() -> void:
 	resized.connect(_place_modal)
 
 	visibility_changed.connect(_on_visibility_changed)
+	Client.subscribe(&"combat.reward", _on_combat_reward)
 	close_requested.connect(_on_back_requested)
 
 	var back_button: Button = header_right.get_child(0) as Button
@@ -134,6 +135,14 @@ func _on_visibility_changed() -> void:
 		_refresh()
 	else:
 		_close_slot_picker()
+
+
+func _on_combat_reward(data: Dictionary) -> void:
+	if not is_visible_in_tree():
+		return
+	if data.get("mastery", {}).is_empty():
+		return
+	_refresh()
 
 
 func _refresh() -> void:
