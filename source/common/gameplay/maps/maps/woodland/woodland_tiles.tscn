@@ -28,6 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
+[ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
@@ -824,3 +825,6 @@ data = ExtResource("28_svn3l")
 [node name="SecretHerbNode" parent="MineableNodes" unique_id=548743243 instance=ExtResource("7_jiw8u")]
 position = Vector2(2760, 680)
 data = ExtResource("28_svn3l")
+
+[node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
+position = Vector2(900, 1200)

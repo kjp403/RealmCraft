@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cb21da4ad3a1bd"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_lobster.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Lobster"
+item_icon = ExtResource("1_icon")
+description = "Hard-shelled and highly prized."
+metadata/slug = &"lobster"
+metadata/id = 186

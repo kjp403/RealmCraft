@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
 [ext_resource type="Resource" uid="uid://clvjdo7an4ctq" path="res://source/common/gameplay/items/weapons/tools/pickaxe.tres" id="3_pickaxe"]
 [ext_resource type="Resource" uid="uid://cwoodaxeitem01" path="res://source/common/gameplay/items/weapons/tools/axe.tres" id="4_axe"]
+[ext_resource type="Resource" uid="uid://c00d4891f82d48" path="res://source/common/gameplay/items/weapons/tools/fishing_rod.tres" id="5_rod"]
 
 [sub_resource type="Resource" id="Entry_pickaxe"]
 script = ExtResource("1_entry")
@@ -18,10 +19,16 @@ item = ExtResource("4_axe")
 price = 3
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
+[sub_resource type="Resource" id="Entry_rod"]
+script = ExtResource("1_entry")
+item = ExtResource("5_rod")
+price = 3
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
 [resource]
 script = ExtResource("2_shop")
 shop_name = "Quarry Counter"
-entries = Array[ExtResource("1_entry")]([SubResource("Entry_pickaxe"), SubResource("Entry_axe")])
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_pickaxe"), SubResource("Entry_axe"), SubResource("Entry_rod")])
 metadata/_custom_type_script = "uid://bsed5oxrf1q15"
 metadata/slug = &"quarry_counter"
 metadata/id = 5

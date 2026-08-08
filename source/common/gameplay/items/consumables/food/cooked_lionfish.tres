@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3 uid="uid://c67566de76e887"]
+
+[ext_resource type="Script" uid="uid://bprsise4rcsak" path="res://source/common/gameplay/items/consumable_item.gd" id="1_con"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_lionfish_cooked.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_con")
+heal_amount = 28
+shared_cooldown_ms = 5000
+cooldown_category = &"food"
+use_freeze_ms = 700
+item_name = &"Cooked Lionfish"
+item_icon = ExtResource("2_icon")
+description = "Grilled lionfish. Restores 28 health."
+metadata/slug = &"cooked_lionfish"
+metadata/id = 199

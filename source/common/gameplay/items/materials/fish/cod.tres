@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://c7051a88b0c7ea"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_cod.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Cod"
+item_icon = ExtResource("1_icon")
+description = "A meatier catch than herring."
+metadata/slug = &"cod"
+metadata/id = 182

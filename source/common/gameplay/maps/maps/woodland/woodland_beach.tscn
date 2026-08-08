@@ -1,0 +1,135 @@
+[gd_scene format=3 uid="uid://cf9f162e5c50c5"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_beach_ground.png" id="1_ground"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar2.png" id="2_bar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/fishshop2.png" id="3_shop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/beachbar1.png" id="4_bar2"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
+[ext_resource type="Resource" uid="uid://c7bc2b3bd11a32" path="res://source/common/gameplay/crafting/resources/cooking_station.tres" id="7_cook"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/structures/stations/cooking_station/cooker/cooker_01.png" id="8_cookart"]
+[ext_resource type="Resource" uid="uid://cda7f206562b2b" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_shrimp.tres" id="h0"]
+[ext_resource type="Resource" uid="uid://ca1a2c6ce3fae3" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_herring.tres" id="h1"]
+[ext_resource type="Resource" uid="uid://cb0192f335f9fc" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_trout.tres" id="h2"]
+[ext_resource type="Resource" uid="uid://c387cddeb037ad" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_tuna.tres" id="h3"]
+[ext_resource type="Resource" uid="uid://c9d71fdd6d025a" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_lionfish.tres" id="h4"]
+[ext_resource type="Resource" uid="uid://c9af9405ce45a6" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_crab.tres" id="h5"]
+[ext_resource type="Resource" uid="uid://c77e507ca6a840" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_parrot.tres" id="h6"]
+[ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_a.png" id="d0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_b.png" id="d1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_c.png" id="d2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deco_d.png" id="d3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_0.png" id="s0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_1.png" id="s1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_2.png" id="s2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fish_shadow_3.png" id="s3"]
+
+[node name="WoodlandBeach" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Ground" type="Sprite2D" parent="."]
+z_index = -2
+texture = ExtResource("1_ground")
+centered = false
+position = Vector2(0, 0)
+
+[node name="BeachBar" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(140, 120)
+texture = ExtResource("2_bar")
+offset = Vector2(0, -40)
+
+[node name="FishShop" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(280, 100)
+texture = ExtResource("3_shop")
+offset = Vector2(0, -32)
+
+[node name="BeachHut" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(420, 128)
+texture = ExtResource("4_bar2")
+offset = Vector2(0, -40)
+
+[node name="DecoA" type="Sprite2D" parent="."]
+position = Vector2(80, 160)
+texture = ExtResource("d0")
+
+[node name="DecoB" type="Sprite2D" parent="."]
+position = Vector2(340, 168)
+texture = ExtResource("d1")
+
+[node name="DecoC" type="Sprite2D" parent="."]
+position = Vector2(200, 180)
+texture = ExtResource("d2")
+
+[node name="DecoD" type="Sprite2D" parent="."]
+position = Vector2(500, 150)
+texture = ExtResource("d3")
+
+[node name="CookingStation" parent="." instance=ExtResource("6_craft")]
+position = Vector2(200, 150)
+station = ExtResource("7_cook")
+
+[node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
+position = Vector2(0, -16)
+texture = ExtResource("8_cookart")
+
+
+[node name="FishShadows" type="Node2D" parent="."]
+z_index = -1
+
+[node name="S0" type="Sprite2D" parent="FishShadows"]
+position = Vector2(80, 280)
+texture = ExtResource("s0")
+modulate = Color(1, 1, 1, 0.7)
+
+[node name="S1" type="Sprite2D" parent="FishShadows"]
+position = Vector2(200, 300)
+texture = ExtResource("s1")
+modulate = Color(1, 1, 1, 0.65)
+
+[node name="S2" type="Sprite2D" parent="FishShadows"]
+position = Vector2(360, 288)
+texture = ExtResource("s2")
+modulate = Color(1, 1, 1, 0.7)
+
+[node name="S3" type="Sprite2D" parent="FishShadows"]
+position = Vector2(480, 304)
+texture = ExtResource("s3")
+modulate = Color(1, 1, 1, 0.6)
+
+[node name="MineableNodes" type="Node2D" parent="."]
+
+[node name="ShrimpHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(48, 248)
+data = ExtResource("h0")
+
+[node name="HerringHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(112, 256)
+data = ExtResource("h1")
+
+[node name="TroutHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(176, 248)
+data = ExtResource("h2")
+
+[node name="TunaHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(240, 260)
+data = ExtResource("h3")
+
+[node name="LionfishHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(304, 252)
+data = ExtResource("h4")
+
+[node name="CrabHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(368, 256)
+data = ExtResource("h5")
+
+[node name="ParrotHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(432, 248)
+data = ExtResource("h6")
+
+[node name="AnglerHole" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(496, 260)
+data = ExtResource("h7")

@@ -280,7 +280,7 @@ func _on_gather_result(data: Dictionary) -> void:
 			"no_tool":
 				Toaster.toast("You need a gathering tool equipped.")
 			"wrong_tool":
-				Toaster.toast("You need a %s for this." % str(data.get("required_tool", "different tool")).capitalize())
+				Toaster.toast("You need a %s for this." % str(data.get("required_tool", "different tool")).replace("_", " ").capitalize())
 			"too_far":
 				Toaster.toast("Too far from the node.")
 			"level":
@@ -313,9 +313,12 @@ func _on_gather_result(data: Dictionary) -> void:
 
 	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.
 	var job_slug: String = str(data.get("job", "mining"))
-	var title: String = "Chopped" if job_slug == "woodcutting" else (
-		"Harvested" if job_slug == "harvesting" else "Mined"
+	var title: String = "Caught" if job_slug == "fishing" else (
+		"Chopped" if job_slug == "woodcutting" else (
+			"Harvested" if job_slug == "harvesting" else "Mined"
+		)
 	)
+
 	var lines: PackedStringArray = PackedStringArray()
 	var amount: int = int(data.get("amount", 0))
 	if amount > 0:

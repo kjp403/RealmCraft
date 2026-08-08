@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_pce05")
 content_name = &"abilities"
-version = 1783762922
-next_id = 65
+version = 1786166423
+next_id = 67
 entries = Array[Dictionary]([{
 &"hash": "2c4332ebd7e89e96bb711600fa07ed4788ddf437949d1102ff8827a8ce5a8c7f",
 &"id": 12,
@@ -317,6 +317,12 @@ entries = Array[Dictionary]([{
 &"id": 65,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/pick_swing/wooden_axe_swing.tres",
 &"slug": &"wooden_axe_swing"
+},
+{
+&"hash": "e43999f7fadda10a57fce60bd8ccd57cb5f3ea0c3a112c8df95e44ba3219811b",
+&"id": 66,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/pick_swing/wooden_fishing_rod_swing.tres",
+&"slug": &"wooden_fishing_rod_swing"
 }, {
 &"hash": "e49670ae838d9241d939a5405c05e1dbab20e6a4c3b903ed4c341bc48dacce8e",
 &"id": 61,

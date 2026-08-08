@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://c3cca9a7b00ef1"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_salmon.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Salmon"
+item_icon = ExtResource("1_icon")
+description = "A strong upstream fighter."
+metadata/slug = &"salmon"
+metadata/id = 184

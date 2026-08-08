@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://ca3506b34964c7"]
+
+[ext_resource type="PackedScene" uid="uid://64u3mmswdrma" path="res://source/common/gameplay/items/weapons/weapon.tscn" id="1_weapon"]
+[ext_resource type="Script" uid="uid://bfishrodscr001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod.gd" id="2_rod"]
+[ext_resource type="Script" uid="uid://b41gujk35w421" path="res://source/common/gameplay/combat/ability/ability.gd" id="3_ability_script"]
+[ext_resource type="Resource" uid="uid://c5fd386f7e4671" path="res://source/common/gameplay/combat/ability/ability_collection/pick_swing/wooden_fishing_rod_swing.tres" id="4_swing"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/tools/fishing_rod.png" id="5_tex"]
+
+[node name="FishingRod" instance=ExtResource("1_weapon")]
+script = ExtResource("2_rod")
+abilities = Array[ExtResource("3_ability_script")]([ExtResource("4_swing")])
+
+[node name="WeaponSprite" parent="." index="0"]
+texture = ExtResource("5_tex")
+offset = Vector2(0, -10)
+flip_h = false
+region_enabled = false
