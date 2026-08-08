@@ -312,7 +312,7 @@ func _refresh() -> void:
 			button.text = ""
 			PixelIcon.set_art(pixel, item.item_icon)
 			pixel.modulate = Color.WHITE
-			button.tooltip_text = str(item.item_name)
+			button.tooltip_text = ItemTooltip.hover_text(item)
 		else:
 			var slot_resource: ItemSlot = _slots.get(
 				slot_key,

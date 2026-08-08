@@ -489,6 +489,7 @@ func _make_bag_button(entry: Dictionary) -> Button:
 	button.button_group = _tile_group
 	var item: Item = entry.item
 	PixelIcon.mount(button, item.item_icon)
+	button.tooltip_text = ItemTooltip.hover_text(item)
 	if int(entry.qty) > 1:
 		var qty: Label = Label.new()
 		qty.text = "x%d" % int(entry.qty)

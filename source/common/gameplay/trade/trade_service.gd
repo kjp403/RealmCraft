@@ -391,6 +391,7 @@ static func _build_session_state(
 		seats.append({
 			"name": player.display_name if player != null else "Player",
 			"id": player.player_resource.player_id if player != null else 0,
+			"peer": int(peers[i]),
 			"accepted": bool(accepted[i]),
 			"gold": int(offers[i].get("gold", 0)),
 			"items": _items_view(offers[i].get("items", {})),

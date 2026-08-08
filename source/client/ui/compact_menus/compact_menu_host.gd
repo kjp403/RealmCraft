@@ -6,7 +6,8 @@ const BOTTOM_CLEARANCE := 52.0
 
 const GRID_COLUMNS := 4
 const GRID_ROWS := 5
-const SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
+## Minimum visible squares; grows with bag contents so /give / loot past 20 still show.
+const MIN_SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
 const SLOT_SIZE := Vector2(36.0, 36.0)
 
 const ACTION_PRIMARY := 0
@@ -111,12 +112,16 @@ func _build_context_menu() -> void:
 	add_child(context_menu)
 
 
-func _build_empty_grid() -> void:
+func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 	for child: Node in inventory_grid.get_children():
 		inventory_grid.remove_child(child)
 		child.queue_free()
 
-	for _index: int in range(SLOT_COUNT):
+	var count: int = maxi(MIN_SLOT_COUNT, slot_count)
+	if count % GRID_COLUMNS != 0:
+		count += GRID_COLUMNS - (count % GRID_COLUMNS)
+
+	for _index: int in range(count):
 		var slot := Button.new()
 
 		# Both minimum and maximum are fixed so item textures cannot resize rows.
@@ -215,7 +220,7 @@ func _refresh_inventory() -> void:
 		})
 
 	var order: Array = BagOrder.sync_with_entries(entries)
-	_build_empty_grid()
+	_build_empty_grid(maxi(order.size() + GRID_COLUMNS, MIN_SLOT_COUNT))
 	_display_entries(entries, order)
 
 
@@ -254,7 +259,7 @@ func _display_entries(entries: Array[Dictionary], order: Array) -> void:
 		var item: Item = entry["item"]
 
 		slot.icon = item.item_icon
-		slot.tooltip_text = String(item.item_name)
+		slot.tooltip_text = ItemTooltip.hover_text(item)
 
 		slot.gui_input.connect(
 			_on_slot_gui_input.bind(entry, slot),

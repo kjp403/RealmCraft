@@ -16,6 +16,29 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	return "Unknown command."
 
 
+## Tell the target's client their bag changed (currency pouch / inventory dock).
+## Quiet = no left-side LootFeed pill — used by /give and /gold.
+static func notify_inventory_changed(
+	peer_id: int,
+	item_id: int,
+	amount: int,
+	item_name: String
+) -> void:
+	if peer_id <= 0 or WorldServer.curr == null:
+		return
+	var multiplayer_api: MultiplayerAPI = WorldServer.curr.multiplayer
+	if multiplayer_api == null or not multiplayer_api.has_multiplayer_peer():
+		return
+	if peer_id not in multiplayer_api.get_peers():
+		return
+	WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
+		"id": item_id,
+		"amount": amount,
+		"name": item_name,
+		"quiet": true,
+	})
+
+
 ## Parse a duration token like "30s", "10m", "2h", "1d" into milliseconds.
 ## Returns 0 if the input is empty or has no valid unit suffix — callers use
 ## that as the "no duration / treat as reason instead" sentinel. Bare numbers

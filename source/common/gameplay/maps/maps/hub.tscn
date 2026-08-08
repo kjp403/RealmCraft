@@ -9,6 +9,7 @@
 [ext_resource type="Resource" uid="uid://c0xqjh15bmdkm" path="res://source/common/gameplay/maps/instance/instance_collection/building/guild_house.tres" id="8_m02lb"]
 [ext_resource type="Resource" uid="uid://c0m2t2hjlih2p" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres" id="12_sgxfe"]
 [ext_resource type="Resource" uid="uid://dicfbsg4ycah2" path="res://source/common/gameplay/characters/npc/npcs/foreman.tres" id="13_anjaa"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="14_banker"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="16_da30u"]
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="17_hnnrj"]
 [ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="18_ujyhf"]
@@ -500,6 +501,10 @@ npc_resource = SubResource("Resource_jubm3")
 [node name="TheTailor" parent="NPCs" unique_id=1048618121 instance=ExtResource("16_da30u")]
 position = Vector2(-592, -88)
 npc_resource = SubResource("Resource_p483h")
+
+[node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
+position = Vector2(232, -120)
+npc_resource = ExtResource("14_banker")
 
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]
 

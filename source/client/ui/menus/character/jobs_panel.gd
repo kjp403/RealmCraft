@@ -15,6 +15,7 @@ var _skills: Dictionary = {}
 func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
+	Client.subscribe(&"skills.get", _on_skills_received)
 	_refresh()
 
 

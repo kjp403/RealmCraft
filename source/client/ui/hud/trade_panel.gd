@@ -12,6 +12,9 @@ const MUTED_COLOR: Color = Color(0.6, 0.62, 0.7)
 const SLOT_SIZE: Vector2 = Vector2(54, 54)
 
 var _trade_id: int = 0
+## Bumps on every open/close so stale async `_refresh` awaits can't close a
+## newer trade (typing in chat + accept races were doing exactly that).
+var _refresh_generation: int = 0
 var _owned: Dictionary = {}
 var _owned_gold: int = 0
 var _my_items: Dictionary = {}
@@ -45,6 +48,11 @@ func _ready() -> void:
 	# Fullscreen shell: thin outer inset so Cancel / Confirm aren't clipped against
 	# the window edge (the floating 22px bottom margin was shorter than the dock).
 	build_shell("Secure Trade", null, true)
+	# Default MenuShell backdrop is 50% — trade content sat on StyleBoxEmpty so the
+	# world bled through and the panel looked "too transparent". Use a solid card.
+	if backdrop != null:
+		backdrop.color = Color(0.04, 0.05, 0.08, 0.82)
+	_apply_solid_trade_card()
 	_build_body()
 	_build_picker_overlay()
 	close_requested.connect(_on_leave)
@@ -53,6 +61,30 @@ func _ready() -> void:
 	Client.subscribe(&"trade.state", _on_trade_state)
 	Client.subscribe(&"trade.result", _on_trade_result)
 	Client.subscribe(&"trade.closed", _on_trade_closed)
+
+
+## Replace the empty fullscreen card style with an opaque panel so offers stay readable.
+func _apply_solid_trade_card() -> void:
+	# MenuShell tree: card → pad → root → content
+	var node: Node = content
+	var card: PanelContainer = null
+	while node != null:
+		if node is PanelContainer:
+			card = node as PanelContainer
+			break
+		node = node.get_parent()
+	if card == null:
+		return
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.1, 0.14, 0.96)
+	style.set_corner_radius_all(10)
+	style.set_border_width_all(1)
+	style.border_color = Color(0.28, 0.3, 0.38, 0.9)
+	style.content_margin_left = 4
+	style.content_margin_right = 4
+	style.content_margin_top = 2
+	style.content_margin_bottom = 4
+	card.add_theme_stylebox_override(&"panel", style)
 
 
 func _build_body() -> void:
@@ -191,41 +223,52 @@ func _build_picker_overlay() -> void:
 
 
 func _on_viewed_changed(trade_id: int) -> void:
+	_refresh_generation += 1
 	_trade_id = trade_id
 	if trade_id <= 0:
 		_close_picker()
 		hide()
 		return
 	_gold_pending = false
+	# Typing in chat holds LineEdit focus; release it so the trade overlay owns input.
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
 	show()
+	move_to_front()
 	_refresh()
 
 
 func _refresh() -> void:
 	if InstanceClient.current == null or _trade_id <= 0:
 		return
+	var generation: int = _refresh_generation
+	var trade_id: int = _trade_id
 	var inventory_result: Array = await Client.request_data_await(
 		&"inventory.get",
 		{},
 		InstanceClient.current.name
 	)
-	if not is_instance_valid(self) or not visible:
+	if not is_instance_valid(self) or generation != _refresh_generation \
+			or trade_id != _trade_id or not visible:
 		return
 	if inventory_result.size() >= 2 and inventory_result[1] == OK:
 		_recompute_owned(inventory_result[0])
 	var state_result: Array = await Client.request_data_await(
 		&"trade.state",
-		{"trade": _trade_id},
+		{"trade": trade_id},
 		InstanceClient.current.name
 	)
-	if not is_instance_valid(self) or not visible:
+	if not is_instance_valid(self) or generation != _refresh_generation \
+			or trade_id != _trade_id or not visible:
 		return
 	var state_payload: Dictionary = {}
 	if state_result.size() >= 2 and state_result[1] == OK \
 			and state_result[0] is Dictionary:
 		state_payload = state_result[0]
+	# Empty reply is usually a transient rate-limit / race — keep the panel open
+	# and wait for the authoritative trade.state push instead of closing.
 	if state_payload.is_empty():
-		ClientState.set_viewed_trade(0)
 		return
 	_render(state_payload)
 
@@ -247,8 +290,18 @@ func _recompute_owned(inventory: Dictionary) -> void:
 
 
 func _on_trade_state(data: Dictionary) -> void:
-	if not visible or int(data.get("id", 0)) != _trade_id:
+	var state_id: int = int(data.get("id", 0))
+	if state_id <= 0:
 		return
+	# Apply even if show() hasn't painted yet — open + broadcast can race while
+	# chat focus / HUD hide is mid-flight.
+	if _trade_id <= 0:
+		_trade_id = state_id
+	if state_id != _trade_id:
+		return
+	if not visible:
+		show()
+		move_to_front()
 	_render(data)
 
 
@@ -256,18 +309,38 @@ func _render(data: Dictionary) -> void:
 	var seats: Array = data.get("seats", [])
 	if seats.size() != 2:
 		return
-	var my_index: int = -1
-	for i: int in seats.size():
-		if int(seats[i].get("id", 0)) == ClientState.player_id:
-			my_index = i
-			break
+	var my_index: int = _seat_index_for_local(seats)
 	if my_index < 0:
-		ClientState.set_viewed_trade(0)
+		# Don't hard-close on a single mismatched frame (player_id push can lag);
+		# retry once via refresh instead of vanishing the window for one peer.
 		return
 	_locked = bool(data.get("locked", false))
 	_render_you(seats[my_index], my_index)
 	_render_them(seats[1 - my_index], 1 - my_index)
 	_render_footer(int(data.get("countdown", 0)))
+
+
+func _seat_index_for_local(seats: Array) -> int:
+	var my_id: int = int(ClientState.player_id)
+	if my_id > 0:
+		for i: int in seats.size():
+			if int(seats[i].get("id", 0)) == my_id:
+				return i
+	# Fallback: peer_id carried in the seat payload (added for this race).
+	var my_peer: int = multiplayer.get_unique_id() if multiplayer != null else 0
+	if my_peer > 0:
+		for i: int in seats.size():
+			if int(seats[i].get("peer", 0)) == my_peer:
+				return i
+	# Last resort: match local display name so a late player_id.set can't blank the UI.
+	var local_name: String = ""
+	if ClientState.local_player != null:
+		local_name = str(ClientState.local_player.display_name)
+	if not local_name.is_empty():
+		for i: int in seats.size():
+			if str(seats[i].get("name", "")) == local_name:
+				return i
+	return -1
 
 
 func _render_you(mine: Dictionary, seat_index: int) -> void:
@@ -336,7 +409,7 @@ func _make_slot(item_id: int, amount: int, mine: bool) -> Button:
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null:
 		PixelIcon.mount(slot, item.item_icon)
-		slot.tooltip_text = str(item.item_name)
+		slot.tooltip_text = ItemTooltip.hover_text(item)
 	slot.add_child(_count_badge(amount))
 	if mine and not _locked:
 		slot.pressed.connect(_remove_from_offer.bind(item_id))

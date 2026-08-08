@@ -1,0 +1,42 @@
+extends DataRequestHandler
+## Move a bag stack (or part of it) into the personal bank. No storage cap.
+
+
+func data_request_handler(
+	peer_id: int,
+	instance: ServerInstance,
+	args: Dictionary
+) -> Dictionary:
+	var player: Player = instance.players_by_peer_id.get(peer_id, null)
+	if player == null or player.player_resource == null:
+		return {"ok": false, "reason": "missing"}
+	if player.is_dead:
+		return {"ok": false, "reason": "dead"}
+
+	var slot_uid: int = int(args.get("uid", -1))
+	var inventory: Dictionary = player.player_resource.inventory
+	if slot_uid < 0 or not inventory.has(slot_uid):
+		return {"ok": false, "reason": "missing"}
+
+	var slot: Dictionary = inventory[slot_uid]
+	var item_id: int = int(slot.get("id", 0))
+	var have: int = int(slot.get("a", 0))
+	if item_id <= 0 or have <= 0:
+		return {"ok": false, "reason": "missing"}
+
+	var amount: int = int(args.get("amount", have))
+	if amount <= 0:
+		amount = have
+	amount = mini(amount, have)
+
+	var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
+	if removed <= 0:
+		return {"ok": false, "reason": "missing"}
+
+	Inventory.add_item(player.player_resource.bank, item_id, removed)
+	instance.world_server.database.save_player(player.player_resource)
+	return {
+		"ok": true,
+		"inventory": player.player_resource.inventory,
+		"bank": player.player_resource.bank,
+	}

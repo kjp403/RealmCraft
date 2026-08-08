@@ -53,15 +53,13 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "Item '%s' has no registry id." % token
 
 	Inventory.add_item(target.resource.inventory, item_id, amount)
-	# Quiet pickup push → bag UIs refresh without spamming the loot feed.
-	var target_peer: int = int(target.resource.current_peer_id)
-	if target_peer > 0 and WorldServer.curr != null:
-		WorldServer.curr.data_push.rpc_id(target_peer, &"item.picked_up", {
-			"id": item_id,
-			"amount": amount,
-			"name": str(item.item_name),
-			"quiet": true,
-		})
+	server_instance.world_server.database.save_player(target.resource)
+	# Prefer CommandTarget.peer_id (live connection map) over current_peer_id,
+	# which can lag after reconnects and leave the bag UI stale while chat still
+	# reports success to the issuer.
+	ChatCommand.notify_inventory_changed(
+		target.peer_id, item_id, amount, str(item.item_name)
+	)
 	return "Gave %d x %s (id %d) to %s." % [amount, str(item.item_name), item_id, target.label()]
 
 
