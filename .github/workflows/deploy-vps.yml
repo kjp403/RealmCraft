@@ -60,5 +60,9 @@ jobs:
           request_pty: true
           script: |
             set -euo pipefail
+            # Pull first so brand-new files (like deploy/update.sh) exist on the VPS
+            # before we try to execute them. Then run the full update script.
             cd /opt/arkenelle
-            sudo bash deploy/update.sh
+            sudo -u arkenelle git fetch --prune origin main
+            sudo -u arkenelle git merge --ff-only origin/main
+            sudo bash /opt/arkenelle/deploy/update.sh
