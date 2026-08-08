@@ -258,7 +258,9 @@ func _complete_hand_draw(item_id: int) -> void:
 	var previous_id: int = int(equipment_component.slots.values.get(&"weapon", 0))
 	var previous_is_gear: bool = previous_id > 0 \
 		and ContentRegistryHub.load_by_id(&"items", previous_id) is GearItem
-	equipment_component.set_hand(item_id)
+	# Reconcile the bag BEFORE publishing the hand slot. Clients refresh inventory
+	# on equipment_changed; if set_hand ran first they still saw the weapon in the
+	# bag and the compact dock kept a ghost icon after equip.
 	# A WEAPON (gear) moves bag->hand: removed from the bag and PERSISTED as equipment.
 	# A consumable / material is REFERENCED — it stays in the bag, so it must NOT be
 	# persisted as equipment, or the relog / instance-change re-equip loop would
@@ -270,6 +272,7 @@ func _complete_hand_draw(item_id: int) -> void:
 		player_resource.equipment.erase(&"weapon")
 	if previous_is_gear:
 		Inventory.add_item(inventory, previous_id, 1)
+	equipment_component.set_hand(item_id)
 
 
 #region Overhead chat

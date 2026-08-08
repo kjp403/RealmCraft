@@ -24,7 +24,7 @@ enum InventoryTab {
 ## Can this item be drawn into the player's HAND (shown off, and tapped to act if it has
 ## an action)? True for nearly everything — set false only for items that should never be
 ## wielded. Gear ignores it (armor equips to its body slot via its own path); this gates
-## plain items (materials, trophies) and consumables.
+## plain items (materials, trophies) and consumables. MaterialItem forces false.
 @export var holdable: bool = true
 
 # Trading / Economy
@@ -47,6 +47,12 @@ enum InventoryTab {
 @export_range(0, 99, 1.0) var stack_limit: int = 0
 ## Optional free-form tags for filters/crafting
 @export var tags: PackedStringArray = []
+
+
+## Can this item be discarded onto the ground from the bag? Currency and quest
+## items override to false; materials (and most junk) return true.
+func can_drop() -> bool:
+	return not is_currency
 
 
 func is_stackable() -> bool:

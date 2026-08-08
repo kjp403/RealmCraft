@@ -134,8 +134,11 @@ func _ready() -> void:
 	_clear_detail()
 	fill_inventory()
 	visibility_changed.connect(fill_inventory)
-	# Refresh the bag live when ore is gathered while the menu is open.
+	# Refresh the bag live when ore is gathered / ground loot is picked up.
 	ClientState.gather_succeeded.connect(func(_result: Dictionary):
+		if visible:
+			fill_inventory())
+	ClientState.inventory_changed.connect(func(_result: Dictionary):
 		if visible:
 			fill_inventory())
 
@@ -542,11 +545,18 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 	elif _selected_item.holdable:
 		action_button.text = "Hold"
 		action_button.disabled = false
+	elif _selected_item.can_drop():
+		action_button.text = "Drop"
+		action_button.disabled = false
 	else:
 		action_button.text = "—"
 		action_button.disabled = true
-	# Anything you can equip / use / hold can sit on a quick slot.
-	hotkey_button.disabled = action_button.disabled
+	# Quick slots are for equip / use / hold — not Drop-only materials.
+	hotkey_button.disabled = not (
+		_selected_item is GearItem
+		or _selected_item is ConsumableItem
+		or _selected_item.holdable
+	)
 	pin_button.disabled = false
 	pin_button.text = "Unfavorite" if _selected_pinned else "Favorite"
 
@@ -591,9 +601,29 @@ func _on_action_button_pressed() -> void:
 		if not _surface_item_rejection(unequip_result):
 			fill_inventory()
 		return
-	if _selected_item_id > 0 and (_selected_item is GearItem or _selected_item.holdable):
+	if _selected_item == null or _selected_item_id <= 0:
+		return
+	if _selected_item is ConsumableItem:
+		var consume_result: Array = await Client.request_data_await(
+			&"item.consume",
+			{"id": _selected_item_id},
+			InstanceClient.current.name
+		)
+		if not _surface_item_rejection(consume_result):
+			fill_inventory()
+		return
+	if _selected_item is GearItem or _selected_item.holdable:
 		var result: Array = await Client.request_data_await(&"item.equip", {"id": _selected_item_id}, InstanceClient.current.name)
 		if not _surface_item_rejection(result):
+			fill_inventory()
+		return
+	if _selected_item.can_drop() and _selected_slot_uid >= 0:
+		var drop_result: Array = await Client.request_data_await(
+			&"item.drop",
+			{"uid": _selected_slot_uid},
+			InstanceClient.current.name
+		)
+		if not _surface_item_rejection(drop_result):
 			fill_inventory()
 
 
@@ -639,7 +669,12 @@ func _on_pin_button_pressed() -> void:
 ## Toasts a server rejection (combat lock, cooldown) and returns true if the
 ## action was rejected, so the caller skips the success refresh.
 func _surface_item_rejection(result: Array) -> bool:
-	var payload: Dictionary = result[0] if result[1] == OK and result[0] is Dictionary else {}
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("That action failed.")
+		return true
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if bool(payload.get("ok", false)):
+		return false
 	match str(payload.get("reason", "")):
 		"in_combat":
 			Toaster.toast("Can't change gear in combat (weapons only).")
@@ -653,6 +688,21 @@ func _surface_item_rejection(result: Array) -> bool:
 		"cant_equip":
 			Toaster.toast("You can't equip that.")
 			return true
+		"cant_drop":
+			Toaster.toast("That item cannot be dropped.")
+			return true
+		"dead":
+			Toaster.toast("You cannot do that while dead.")
+			return true
+		"missing":
+			Toaster.toast("That item is no longer in your inventory.")
+			return true
+		"no_map", "spawn_failed":
+			Toaster.toast("Could not drop that item here.")
+			return true
+	if not payload.is_empty() and not bool(payload.get("ok", true)):
+		Toaster.toast("That action failed.")
+		return true
 	return false
 
 

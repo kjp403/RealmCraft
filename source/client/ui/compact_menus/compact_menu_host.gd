@@ -10,6 +10,7 @@ const SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
 const SLOT_SIZE := Vector2(36.0, 36.0)
 
 const ACTION_PRIMARY := 0
+const ACTION_DROP := 1
 
 @onready var header: HBoxContainer = $MarginContainer/MainColumn/Header
 @onready var close_button: Button = $MarginContainer/MainColumn/Header/CloseButton
@@ -43,6 +44,7 @@ func _ready() -> void:
 	# Mining / gathering awards go to the server bag; refresh while the dock is open
 	# so ore counts climb without close→reopen (fullscreen inventory already does this).
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
+	ClientState.inventory_changed.connect(_on_inventory_changed)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -137,6 +139,11 @@ func _on_visibility_changed() -> void:
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
+	if visible:
+		_refresh_inventory()
+
+
+func _on_inventory_changed(_result: Dictionary) -> void:
 	if visible:
 		_refresh_inventory()
 
@@ -290,8 +297,16 @@ func _on_slot_gui_input(
 		mouse_event.button_index == MOUSE_BUTTON_LEFT
 		and mouse_event.double_click
 	):
-		slot.accept_event()
-		_perform_primary_action(entry)
+		# Materials / non-holdables have no primary action — ignore double-click
+		# so players don't get a misleading "could not be used" toast.
+		var item: Item = entry["item"]
+		if (
+			item is ConsumableItem
+			or item is GearItem
+			or item.holdable
+		):
+			slot.accept_event()
+			_perform_primary_action(entry)
 
 
 func _open_context_menu(entry: Dictionary) -> void:
@@ -299,14 +314,20 @@ func _open_context_menu(entry: Dictionary) -> void:
 	context_menu.clear()
 
 	var item: Item = entry["item"]
-	var action_text := "Hold"
 
 	if item is ConsumableItem:
-		action_text = "Use"
+		context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is GearItem:
-		action_text = "Equip"
+		context_menu.add_item("Equip", ACTION_PRIMARY)
+	elif item.holdable:
+		context_menu.add_item("Hold", ACTION_PRIMARY)
 
-	context_menu.add_item(action_text, ACTION_PRIMARY)
+	if item.can_drop():
+		context_menu.add_item("Drop", ACTION_DROP)
+
+	if context_menu.item_count == 0:
+		return
+
 	context_menu.position = Vector2i(
 		get_viewport().get_mouse_position()
 	)
@@ -314,8 +335,63 @@ func _open_context_menu(entry: Dictionary) -> void:
 
 
 func _on_context_action(action_id: int) -> void:
-	if action_id == ACTION_PRIMARY and not context_entry.is_empty():
+	if context_entry.is_empty():
+		return
+	if action_id == ACTION_PRIMARY:
 		_perform_primary_action(context_entry)
+	elif action_id == ACTION_DROP:
+		_perform_drop(context_entry)
+
+
+func _perform_drop(entry: Dictionary) -> void:
+	if primary_action_in_progress or InstanceClient.current == null:
+		return
+
+	var item: Item = entry["item"]
+	if not item.can_drop():
+		Toaster.toast("That item cannot be dropped.")
+		return
+
+	var slot_uid: int = int(entry.get("uid", -1))
+	if slot_uid < 0:
+		return
+
+	primary_action_in_progress = true
+	var result: Array = await Client.request_data_await(
+		&"item.drop",
+		{"uid": slot_uid},
+		InstanceClient.current.name
+	)
+	primary_action_in_progress = false
+
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("Could not drop that item.")
+		return
+
+	var payload: Dictionary = (
+		result[0] if result[0] is Dictionary else {}
+	)
+	match str(payload.get("reason", "")):
+		"dead":
+			Toaster.toast("You cannot drop items while dead.")
+			return
+		"missing":
+			Toaster.toast("That item is no longer in your inventory.")
+			_refresh_inventory()
+			return
+		"cant_drop":
+			Toaster.toast("That item cannot be dropped.")
+			return
+		"no_map", "spawn_failed":
+			Toaster.toast("Could not drop that item here.")
+			return
+
+	if not bool(payload.get("ok", false)):
+		Toaster.toast("Could not drop that item.")
+		return
+
+	Toaster.toast("Dropped %s." % str(payload.get("name", item.item_name)))
+	_refresh_inventory()
 
 
 func _perform_primary_action(entry: Dictionary) -> void:
@@ -326,6 +402,10 @@ func _perform_primary_action(entry: Dictionary) -> void:
 	var item_id: int = int(item.get_meta(&"id", 0))
 
 	if item_id <= 0:
+		return
+
+	# Materials and other non-holdables are Drop-only — never send item.equip.
+	if not (item is ConsumableItem or item is GearItem or item.holdable):
 		return
 
 	var request_name: StringName = &"item.equip"

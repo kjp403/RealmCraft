@@ -17,6 +17,9 @@ signal dm_requested(id: int)
 ## Emitted on the client after a successful gather (mining, ...). Carries the
 ## gather result so UI can refresh xp/inventory.
 signal gather_succeeded(result: Dictionary)
+## Bag contents changed outside gather (e.g. picked up a ground drop). Inventory
+## UIs listening to gather_succeeded also listen here for a refresh.
+signal inventory_changed(result: Dictionary)
 ## The quest currently shown on the HUD tracker changed (0 = none).
 signal tracked_quest_changed(quest_id: int)
 ## An objective of [quest_id] ticked forward (server quest.update progress entry) —
@@ -139,6 +142,7 @@ func _ready() -> void:
 	)
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
+	Client.subscribe(&"item.picked_up", _on_item_picked_up)
 	Client.subscribe(&"quest.update", func(data: Dictionary):
 		# Tracker-first routing (docs/notifications.md, 2026-07-20): PROGRESS
 		# entries arrive as dicts {q, t} — live state belongs to the TRACKER
@@ -241,6 +245,16 @@ func _on_combat_reward(data: Dictionary) -> void:
 ## Throttle for the "depleted" toast — depleted swings are now rejected
 ## server-side on every hit, so without this the message would spam.
 var _last_depleted_toast_ms: int
+
+
+func _on_item_picked_up(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	var item_id: int = int(data.get("id", 0))
+	var amount: int = int(data.get("amount", 0))
+	if item_id > 0 and amount > 0:
+		LootFeed.add_item(item_id, amount, str(data.get("name", "item")))
+	inventory_changed.emit(data)
 
 
 func _on_gather_result(data: Dictionary) -> void:

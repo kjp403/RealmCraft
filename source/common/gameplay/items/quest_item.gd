@@ -16,3 +16,7 @@ func inventory_tab() -> InventoryTab:
 
 func group_key() -> StringName:
 	return &"quest"
+
+
+func can_drop() -> bool:
+	return false
