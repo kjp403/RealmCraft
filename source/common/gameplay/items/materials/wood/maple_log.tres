@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://clogmat000003"]
+
+[ext_resource type="Texture2D" uid="uid://clogicon00003" path="res://assets/sprites/items/icons/maple_log.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Maple Log"
+item_icon = ExtResource("1_icon")
+description = "A sturdy maple log with a warm amber grain."
+metadata/slug = &"maple_log"
+metadata/id = 177

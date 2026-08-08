@@ -284,7 +284,10 @@ func _on_gather_result(data: Dictionary) -> void:
 			"too_far":
 				Toaster.toast("Too far from the node.")
 			"level":
-				Toaster.toast("Requires Mining Lv %d." % int(data.get("required_level", 0)))
+				var job_label: String = str(data.get("job_display", "")).strip_edges()
+				if job_label.is_empty():
+					job_label = str(data.get("job", "skill")).capitalize()
+				Toaster.toast("Requires %s Lv %d." % [job_label, int(data.get("required_level", 0))])
 			"depleted":
 				# Auto-gather waits silently for regen; only toast when the player
 				# was swinging manually.
@@ -294,7 +297,7 @@ func _on_gather_result(data: Dictionary) -> void:
 					var now_ms: int = Time.get_ticks_msec()
 					if now_ms - _last_depleted_toast_ms > 4000:
 						_last_depleted_toast_ms = now_ms
-						Toaster.toast("This vein is depleted. Come back later.")
+						Toaster.toast("This resource is depleted. Come back later.")
 			# "cooldown" stays silent — players will spam swings during it.
 		return
 
@@ -309,7 +312,10 @@ func _on_gather_result(data: Dictionary) -> void:
 	gather_succeeded.emit(data)
 
 	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.
-	var title: String = "Mined"
+	var job_slug: String = str(data.get("job", "mining"))
+	var title: String = "Chopped" if job_slug == "woodcutting" else (
+		"Harvested" if job_slug == "harvesting" else "Mined"
+	)
 	var lines: PackedStringArray = PackedStringArray()
 	var amount: int = int(data.get("amount", 0))
 	if amount > 0:
@@ -322,13 +328,13 @@ func _on_gather_result(data: Dictionary) -> void:
 	# Level-up / perk = one-off → its own card; the yield body coalesces per ore.
 	var big: PackedStringArray = PackedStringArray()
 	if data.get("leveled_up", false):
-		big.append("%s — Level %d!" % [str(data.get("job", "mining")).capitalize(), int(data.get("level", 1))])
+		big.append("%s — Level %d!" % [job_slug.capitalize(), int(data.get("level", 1))])
 	if int(data.get("perk_points_gained", 0)) > 0:
 		big.append("Perk point available. Spend in Character → Jobs.")
 	if not big.is_empty():
 		Toaster.toast_group("Level Up!", big)
 
-	Toaster.toast_feed("mine:" + str(data.get("ore_name", "ore")), title, lines)
+	Toaster.toast_feed("gather:" + str(data.get("ore_name", "ore")), title, lines)
 
 
 ## Look up the MineableNode the result is about and push the new progress +

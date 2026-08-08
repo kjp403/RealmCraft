@@ -32,6 +32,8 @@
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="30_qncuc"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="31_qncuc"]
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="32_bvke5"]
+[ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="33_oak"]
+[ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="34_willow"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_w1xny"]
 normal = Vector2(-1, 0)
@@ -352,3 +354,43 @@ data = ExtResource("32_bvke5")
 [node name="CopperOre4" parent="MineableNodes" unique_id=340649084 instance=ExtResource("29_uexkn")]
 position = Vector2(1653.1404, 2027.0826)
 data = ExtResource("32_bvke5")
+
+[node name="OakTree1" parent="MineableNodes" unique_id=1888100001 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1200, 1400)
+data = ExtResource("33_oak")
+
+[node name="OakTree2" parent="MineableNodes" unique_id=1888100002 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1320, 1520)
+data = ExtResource("33_oak")
+
+[node name="OakTree3" parent="MineableNodes" unique_id=1888100003 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1480, 1360)
+data = ExtResource("33_oak")
+
+[node name="OakTree4" parent="MineableNodes" unique_id=1888100004 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1100, 1680)
+data = ExtResource("33_oak")
+
+[node name="WillowTree1" parent="MineableNodes" unique_id=1888100005 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1900, 1700)
+data = ExtResource("34_willow")
+
+[node name="WillowTree2" parent="MineableNodes" unique_id=1888100006 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2040, 1820)
+data = ExtResource("34_willow")
+
+[node name="WillowTree3" parent="MineableNodes" unique_id=1888100007 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1760, 1880)
+data = ExtResource("34_willow")
+
+[node name="WillowTree4" parent="MineableNodes" unique_id=1888100008 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2160, 1600)
+data = ExtResource("34_willow")

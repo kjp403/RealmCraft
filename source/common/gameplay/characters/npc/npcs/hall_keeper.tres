@@ -27,7 +27,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_professions"]
 script = ExtResource("5_dialogue")
-lines = Array[String](["Mining, Harvesting, and Woodcutting are gathering professions. Interacting with suitable resource nodes grants materials and experience for the profession tied to that resource.", "Smithing and Outfitting are crafting professions. Use the appropriate crafting station and complete recipes to earn experience in that profession.", "Each profession has its own level and progression. You can train all of them, and the Skills panel shows their current levels.", "Some resources and recipes require higher profession levels. Start with the lowest-level sources available, keep the materials you gather, and use them in matching recipes. Trees and ore veins sit in the castle gathering yard."])
+lines = Array[String](["Mining, Harvesting, and Woodcutting are gathering professions. Interacting with suitable resource nodes grants materials and experience for the profession tied to that resource.", "Smithing and Outfitting are crafting professions. Use the appropriate crafting station and complete recipes to earn experience in that profession.", "Each profession has its own level and progression, capped at 99. You can train all of them, and the Skills panel shows their current levels.", "Some resources and recipes require higher profession levels. Start with ordinary trees and copper in the castle gathering yard, then seek oak, willow, maple, and yew farther afield as your Woodcutting rises."])
 label_override = "How do I train professions?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

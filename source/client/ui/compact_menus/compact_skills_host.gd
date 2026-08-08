@@ -192,18 +192,23 @@ func _sort_skills(a: Dictionary, b: Dictionary) -> bool:
 func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))
-	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var remaining: int = maxi(0, xp_to_next - xp)
+	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 
 	var tile := Button.new()
 	tile.custom_minimum_size = TILE_SIZE
 	tile.size = TILE_SIZE
 	tile.clip_contents = true
 	tile.focus_mode = Control.FOCUS_NONE
-	tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next level\nClick for details" % [
-		display, level, xp, xp_to_next, remaining
-	]
+	if at_cap:
+		tile.tooltip_text = "%s\nLv %d — Max level\nClick for details" % [display, level]
+	else:
+		tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next level\nClick for details" % [
+			display, level, xp, xp_to_next, remaining
+		]
 	tile.pressed.connect(_show_detail.bind(skill_name))
 	_apply_tile_styles(tile)
 
@@ -247,7 +252,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var bar := ProgressBar.new()
 	bar.min_value = 0
 	bar.max_value = xp_to_next
-	bar.value = xp
+	bar.value = xp_to_next if at_cap else xp
 	bar.show_percentage = false
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -275,8 +280,10 @@ func _rebuild_detail() -> void:
 	var display: String = str(info.get("display_name", _selected_slug.capitalize()))
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))
-	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
-	var remaining: int = maxi(0, xp_to_next - xp)
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 	title_label.text = display
 
 	_back_button = Button.new()
@@ -295,7 +302,7 @@ func _rebuild_detail() -> void:
 	var bar := ProgressBar.new()
 	bar.min_value = 0
 	bar.max_value = xp_to_next
-	bar.value = xp
+	bar.value = xp_to_next if at_cap else xp
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, 14)
 	bar.add_theme_stylebox_override(&"background", _make_bar_bg())
@@ -303,7 +310,10 @@ func _rebuild_detail() -> void:
 	_detail_root.add_child(bar)
 
 	var xp_label := Label.new()
-	xp_label.text = "%d / %d XP  (%d to next)" % [xp, xp_to_next, remaining]
+	xp_label.text = (
+		"Max level (%d)" % SkillXp.LEVEL_CAP if at_cap
+		else "%d / %d XP  (%d to next)" % [xp, xp_to_next, remaining]
+	)
 	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	xp_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	xp_label.add_theme_font_size_override(&"font_size", 11)

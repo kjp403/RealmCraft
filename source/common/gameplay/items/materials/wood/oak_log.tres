@@ -7,6 +7,6 @@
 script = ExtResource("2_mat")
 item_name = &"Oak Log"
 item_icon = ExtResource("1_icon")
-description = "A rough oak log. Chopped from young trees around the castle yard."
+description = "A solid oak log with grey-brown bark. Chopped from oak trees."
 metadata/slug = &"oak_log"
 metadata/id = 173

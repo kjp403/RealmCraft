@@ -284,10 +284,6 @@ func add_experience(amount: int) -> Dictionary:
 	}
 
 
-## Baseline xp needed to advance a profession skill (scales with current level).
-const SKILL_XP_BASE: int = 100
-
-
 ## Returns the {"level", "xp", "perks"} entry for a skill, creating it at level 1 if
 ## missing. Also backfills "perks" on entries loaded from older saves.
 func get_skill(skill_name: StringName) -> Dictionary:
@@ -296,24 +292,40 @@ func get_skill(skill_name: StringName) -> Dictionary:
 	var skill: Dictionary = skills[skill_name]
 	if not skill.has("perks"):
 		skill["perks"] = {}
+	# Clamp legacy saves that overshot the OSRS 99 cap under the old linear curve.
+	if int(skill.get("level", 1)) > SkillXp.LEVEL_CAP:
+		skill["level"] = SkillXp.LEVEL_CAP
+		skill["xp"] = 0
 	return skill
 
 
+## XP needed to advance from [param skill_level] → next. 0 at/above the 99 cap.
 func skill_xp_to_next(skill_level: int) -> int:
-	return SKILL_XP_BASE * maxi(1, skill_level)
+	return SkillXp.xp_to_next(skill_level)
 
 
-## Adds xp to a profession skill, applying any level-ups. Returns the new
-## {"level", "xp", "leveled_up"} so callers can report progress to the client.
+## Adds xp to a profession skill, applying any level-ups. Caps at SkillXp.LEVEL_CAP
+## (99 / 13,034,431 total XP). Returns {"level", "xp", "leveled_up"}.
 func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	var skill: Dictionary = get_skill(skill_name)
+	var level: int = int(skill["level"])
+	if level >= SkillXp.LEVEL_CAP or amount <= 0:
+		skill["xp"] = 0
+		return {"level": level, "xp": 0, "leveled_up": false}
+
 	skill["xp"] = int(skill["xp"]) + amount
 	var leveled_up: bool = false
-	while int(skill["xp"]) >= skill_xp_to_next(int(skill["level"])):
-		skill["xp"] = int(skill["xp"]) - skill_xp_to_next(int(skill["level"]))
-		skill["level"] = int(skill["level"]) + 1
+	while level < SkillXp.LEVEL_CAP:
+		var need: int = skill_xp_to_next(level)
+		if need <= 0 or int(skill["xp"]) < need:
+			break
+		skill["xp"] = int(skill["xp"]) - need
+		level += 1
 		leveled_up = true
-	return {"level": int(skill["level"]), "xp": int(skill["xp"]), "leveled_up": leveled_up}
+	skill["level"] = level
+	if level >= SkillXp.LEVEL_CAP:
+		skill["xp"] = 0
+	return {"level": level, "xp": int(skill["xp"]), "leveled_up": leveled_up}
 
 
 ## Baseline xp to advance a weapon-mastery level (scales linearly, like skills).

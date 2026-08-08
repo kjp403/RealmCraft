@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://clogmat000002"]
+
+[ext_resource type="Texture2D" uid="uid://clogicon00002" path="res://assets/sprites/items/icons/willow_log.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Willow Log"
+item_icon = ExtResource("1_icon")
+description = "A soft willow log. Light and springy."
+metadata/slug = &"willow_log"
+metadata/id = 176
