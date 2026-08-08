@@ -56,10 +56,17 @@ class Stats extends RefCounted:
 
 
 	func _set(property: StringName, value: Variant) -> bool:
+		# Coerce ints from VARIANT wire payloads so client sync can't reject
+		# an unequip/attribute delta and leave a stale combat read-out.
+		var as_float: float = 0.0
+		match typeof(value):
+			TYPE_FLOAT:
+				as_float = value
+			TYPE_INT:
+				as_float = float(value)
+			_:
+				return false
 
-		if typeof(value) != TYPE_FLOAT:
-			return false
-
-		values[property] = value
-		stat_changed.emit(property, value)
+		values[property] = as_float
+		stat_changed.emit(property, as_float)
 		return true

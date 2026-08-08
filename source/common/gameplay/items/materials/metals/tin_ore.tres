@@ -7,7 +7,7 @@
 script = ExtResource("2_mat")
 item_name = &"Tin Ore"
 item_icon = ExtResource("1_icon")
-description = "Soft silvery ore. Pair it with copper when you are ready to learn bronze work."
+description = "Soft silvery ore. Smelt with copper ore at a furnace to make bronze bars."
 vendor_value = 5
 metadata/slug = &"tin_ore"
 metadata/id = 174

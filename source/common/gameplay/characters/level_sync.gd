@@ -56,20 +56,28 @@ static func apply(player: Player, sync_level: int) -> void:
 	comp.set_stat(Stat.HEALTH, final_stats.get(Stat.HEALTH_MAX, 0.0))
 
 
-## Undo apply(): every pre-sync stat returns exactly as snapshotted.
+## Undo apply(): restore the true-level baseline from PlayerResource.stats, then
+## re-apply CURRENT equipment + live buffs. Using the raw pre-sync snapshot alone
+## re-granted gear bonuses after an unequip mid-spar.
 static func restore(player: Player) -> void:
 	if player == null or not player.has_meta(META_SNAPSHOT):
 		return
-	var snapshot: Dictionary = player.get_meta(META_SNAPSHOT)
 	player.remove_meta(META_SNAPSHOT)
 	var res: PlayerResource = player.player_resource
 	var comp: StatsComponent = player.stats_component
-	# Stats that only exist because of the sync fall back to the spawn baseline.
+	# Clear anything the sync invented, then write the spawn baseline.
 	for stat_name: StringName in comp.stats.values.keys():
-		if not snapshot.has(stat_name):
-			comp.set_stat(stat_name, float(res.stats.get(stat_name, 0.0)))
-	for stat_name: StringName in snapshot:
-		comp.set_stat(stat_name, float(snapshot[stat_name]))
+		comp.set_stat(stat_name, float(res.stats.get(stat_name, 0.0)))
+	for stat_name: StringName in res.stats:
+		comp.set_stat(stat_name, float(res.stats[stat_name]))
+	if player.equipment_component != null:
+		player.equipment_component.reapply_all_gear_stats()
+	BuffService.reapply(player)
+	var hmax: float = comp.get_stat(Stat.HEALTH_MAX)
+	comp.set_stat(Stat.HEALTH, hmax)
+	var mmax: float = comp.get_stat(Stat.MANA_MAX)
+	if comp.get_stat(Stat.MANA) > mmax:
+		comp.set_stat(Stat.MANA, mmax)
 
 
 ## Rescale an attribute spread to [param budget] total points, preserving its

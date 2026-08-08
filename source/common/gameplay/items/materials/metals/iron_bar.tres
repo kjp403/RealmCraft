@@ -7,7 +7,7 @@
 script = ExtResource("2_iron_b")
 item_name = &"Iron Bar"
 item_icon = ExtResource("1_iron_b")
-description = "A refined iron ingot. The base material of tier-3 weapons and armor."
+description = "A solid iron ingot. Smelted from iron ore at smithing level 5."
 vendor_value = 10
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"iron_bar"
