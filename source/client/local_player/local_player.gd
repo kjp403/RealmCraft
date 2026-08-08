@@ -652,7 +652,8 @@ func set_click_move_target(world_target: Vector2) -> void:
 
 
 ## Begin commercial-style auto-gather on [param node] (walk in, swing until
-## depleted, wait for regen, repeat). Cancel with WASD or a ground click.
+## this player's charge pool is depleted, then stop — re-click to resume after
+## regen). Cancel with WASD or a ground click.
 func start_auto_gather(node: MineableNode) -> void:
 	if _harvest_controller == null:
 		return

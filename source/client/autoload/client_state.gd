@@ -381,15 +381,15 @@ func _on_gather_result(data: Dictionary) -> void:
 					job_label = str(data.get("job", "skill")).capitalize()
 				Toaster.toast("Requires %s Lv %d." % [job_label, int(data.get("required_level", 0))])
 			"depleted":
-				# Auto-gather waits silently for regen; only toast when the player
-				# was swinging manually.
+				# HarvestController toasts when auto-gather stops on deplete;
+				# only toast here for manual / stray swings.
 				if local_player != null and local_player.is_auto_gathering():
 					pass
 				else:
 					var now_ms: int = Time.get_ticks_msec()
 					if now_ms - _last_depleted_toast_ms > 4000:
 						_last_depleted_toast_ms = now_ms
-						Toaster.toast("This resource is depleted. Come back later.")
+						Toaster.toast("Resource depleted. Click again when it regenerates.")
 			# "cooldown" stays silent — players will spam swings during it.
 		return
 

@@ -1,9 +1,9 @@
 class_name HarvestController
 extends Node
 ## Commercial-MMO gather loop: click a [MineableNode] once, walk into range,
-## auto-swing the equipped tool until the node is depleted, then wait for it
-## to regenerate and keep going. Cancel with WASD, a ground click, death, or
-## opening a menu.
+## auto-swing the equipped tool until THIS player's charge pool on the node is
+## depleted, then stop and require a fresh click. Cancel with WASD, a ground
+## click, death, or opening a menu.
 ##
 ## Authority stays on the server — this only drives the existing
 ## [code]action.perform[/code] → PickArc → [method MineableNode.register_gather_hit]
@@ -11,9 +11,7 @@ extends Node
 
 ## How close (px) before we stop pathing and start swinging.
 const GATHER_RANGE: float = 48.0
-## After the vein hits 0 charges, keep the gather locked on and resume when
-## client charge prediction ticks back above 0.
-const WAIT_FOR_REGEN: bool = true
+
 
 var _player: LocalPlayer
 var _target: MineableNode
@@ -78,11 +76,10 @@ func tick() -> bool:
 
 	_player._click_navigation.cancel()
 
-	# Waiting on a depleted vein: sit still until client charge prediction refills.
+	# Fully depleted for this player: stop and require a new click after regen.
 	var charges: int = _target.client_charges_left()
 	if charges == 0:
-		if WAIT_FOR_REGEN:
-			return true
+		Toaster.toast("Resource depleted. Click again when it regenerates.")
 		cancel()
 		return false
 
@@ -109,13 +106,15 @@ func on_gather_result(data: Dictionary) -> void:
 
 	if not data.get("ok", false):
 		match str(data.get("reason", "")):
-			"wrong_tool", "no_tool", "level":
+			"wrong_tool", "no_tool", "level", "depleted":
 				cancel()
-			"depleted":
-				if not WAIT_FOR_REGEN:
-					cancel()
 			# cooldown / mid-swing: keep going
 		return
+
+	# Last charge just yielded — stop so the player must re-click after regen.
+	if int(data.get("charges_left", 1)) <= 0:
+		Toaster.toast("Resource depleted. Click again when it regenerates.")
+		cancel()
 
 
 func _has_correct_tool(node: MineableNode) -> bool:

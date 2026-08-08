@@ -6,14 +6,15 @@ extends Area2D
 ## yield once the player's progress drains the per-extraction HP.
 ##
 ## Design notes:
-## - **Shared charges**: the node's pool of yields is shared (3 by default).
+## - **Per-player charges**: each player has their own yield pool on the node
+##   (max_charges each). One miner depleting their pool does not empty it for
+##   anyone else — no shared depletion race.
 ## - **Per-player progress**: each player tracks their own swings toward the
-##   next yield, so two players mining the same vein don't steal from each
-##   other's progress.
-## - **Continuous regen while charges > 0**: +1 every charge_regen_seconds.
-## - **Snap-refill when fully depleted**: a depleted node waits longer
-##   (depleted_recharge_seconds), then refills all charges at once. Prevents
-##   the "1 charge appears → 3 players race to grab it" griefing pattern.
+##   next yield, so two players mining the same vein don't steal swing progress.
+## - **Continuous regen while charges > 0**: +1 every charge_regen_seconds
+##   (per player).
+## - **Snap-refill when fully depleted**: a player's depleted pool waits longer
+##   (depleted_recharge_seconds), then refills ALL of that player's charges.
 ## - **Job XP routing**: data.job_xp is a dict so a healing herb can grant
 ##   both harvesting AND medicine; an ore vein just grants mining.
 ##
@@ -33,12 +34,12 @@ extends Area2D
 @onready var _visual_state: Control = $VisualState
 
 # --- Server-only state ------------------------------------------------------
-var _charges: int
-## Stamp of the last regen tick. Two meanings depending on _charges:
-##   _charges > 0     → time of last continuous regen
-##   _charges == 0    → time the node hit empty (waits depleted_recharge_seconds
-##                      from this stamp before snap-refilling)
-var _last_regen_ms: int
+## player_id → remaining yields for that player on this node.
+var _charges_by_player: Dictionary[int, int]
+## player_id → stamp of last regen tick. Meaning depends on that player's charges:
+##   charges > 0  → time of last continuous regen
+##   charges == 0 → time they hit empty (waits depleted_recharge_seconds)
+var _last_regen_ms_by_player: Dictionary[int, int]
 ## player_id → remaining extraction HP for that player's current yield.
 var _progress_hp_by_player: Dictionary[int, int]
 ## player_id → ticks_msec at which their cooldown ends.
@@ -80,8 +81,6 @@ func _ready() -> void:
 	input_pickable = false
 
 	if multiplayer.is_server():
-		_charges = data.max_charges
-		_last_regen_ms = Time.get_ticks_msec()
 		set_process(false)
 		return
 
@@ -153,16 +152,15 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 				"job_display": JobRegistry.display_name(primary_job),
 			}
 
-	# Lazy-regen first so a swing on a depleted node that just timed out
+	# Lazy-regen first so a swing on a depleted pool that just timed out
 	# refills before we ask for a charge.
-	_regen()
+	_regen(player_id)
 
-	# Depleted nodes reject the swing outright — we drain nothing so the
-	# client never shows a teasing progress bar on a vein that can't yield.
-	# The 0/N charge label + client-side regen prediction tell the player to
-	# come back later. (Checked here, before draining, so a fresh swinger
-	# doesn't get the first few "free" progress ticks on an empty node.)
-	if _charges <= 0:
+	# This player's depleted pool rejects the swing — drain nothing so the
+	# client never shows a teasing progress bar. Other players keep their own
+	# charge pools and can still harvest.
+	var charges_left: int = _charges_for(player_id)
+	if charges_left <= 0:
 		_progress_hp_by_player.erase(player_id)
 		return {
 			"ok": false,
@@ -185,14 +183,15 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"extracted": false,
 			"progress_hp": progress,
 			"extraction_hp": data.extraction_hp,
-			"charges_left": _charges,
+			"charges_left": charges_left,
 			"max_charges": data.max_charges,
 			"node_path": node_path,
 		}
 
-	# Full drain — consume a charge (guaranteed > 0 by the early reject above).
-	_consume_charge(now_ms)
+	# Full drain — consume one of THIS player's charges.
+	_consume_charge(player_id, now_ms)
 	_progress_hp_by_player.erase(player_id)
+	charges_left = _charges_for(player_id)
 
 	# Award. Bonus-yield + cooldown discount come from the primary job's perk tree.
 	# Secondary catch (e.g. Cod at a Herring hole) replaces the primary yield when
@@ -257,7 +256,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"grants": grants,
 		"progress_hp": 0,
 		"extraction_hp": data.extraction_hp,
-		"charges_left": _charges,
+		"charges_left": charges_left,
 		"max_charges": data.max_charges,
 		"node_path": node_path,
 	}
@@ -347,40 +346,50 @@ func _refresh_charge_label() -> void:
 
 
 # ---------------------------------------------------------------------------
-# Charge management (server-only)
+# Charge management (server-only, per-player pools)
 # ---------------------------------------------------------------------------
 
-func _consume_charge(now_ms: int) -> void:
-	_charges -= 1
-	if _charges == 0:
+func _charges_for(player_id: int) -> int:
+	if not _charges_by_player.has(player_id):
+		_charges_by_player[player_id] = data.max_charges
+		_last_regen_ms_by_player[player_id] = Time.get_ticks_msec()
+	return int(_charges_by_player[player_id])
+
+
+func _consume_charge(player_id: int, now_ms: int) -> void:
+	var charges: int = _charges_for(player_id) - 1
+	_charges_by_player[player_id] = charges
+	if charges == 0:
 		# Mark the depletion time so the longer recharge window starts here.
-		_last_regen_ms = now_ms
-	elif _charges == data.max_charges - 1:
+		_last_regen_ms_by_player[player_id] = now_ms
+	elif charges == data.max_charges - 1:
 		# Just dropped from full → start the continuous regen clock.
-		_last_regen_ms = now_ms
+		_last_regen_ms_by_player[player_id] = now_ms
 
 
 ## Continuous regen while > 0, snap-refill at == 0. Lazy: only updates on
-## access so depleted veins don't burn CPU on a timer.
-func _regen() -> void:
-	if _charges >= data.max_charges:
+## access so depleted pools don't burn CPU on a timer. Per-player.
+func _regen(player_id: int) -> void:
+	var charges: int = _charges_for(player_id)
+	if charges >= data.max_charges:
 		return
 	var now_ms: int = Time.get_ticks_msec()
-	if _charges == 0:
+	var last_ms: int = int(_last_regen_ms_by_player.get(player_id, now_ms))
+	if charges == 0:
 		# Depleted state: wait the longer interval, then snap to full.
-		if now_ms - _last_regen_ms >= int(data.depleted_recharge_seconds * 1000.0):
-			_charges = data.max_charges
-			_last_regen_ms = now_ms
+		if now_ms - last_ms >= int(data.depleted_recharge_seconds * 1000.0):
+			_charges_by_player[player_id] = data.max_charges
+			_last_regen_ms_by_player[player_id] = now_ms
 		return
 	# Continuous: tick +1 per interval elapsed (handles long-idle catch-up).
 	var regen_ms: int = int(data.charge_regen_seconds * 1000.0)
 	if regen_ms <= 0:
 		return
 	@warning_ignore("integer_division")
-	var gained: int = (now_ms - _last_regen_ms) / regen_ms
+	var gained: int = (now_ms - last_ms) / regen_ms
 	if gained > 0:
-		_charges = mini(data.max_charges, _charges + gained)
-		_last_regen_ms += gained * regen_ms
+		_charges_by_player[player_id] = mini(data.max_charges, charges + gained)
+		_last_regen_ms_by_player[player_id] = last_ms + gained * regen_ms
 
 
 # ---------------------------------------------------------------------------
