@@ -51,7 +51,9 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
-const LINK_WEBSITE: String = "https://arkenelle.com"
+const LINK_WEBSITE: String = Distribution.WEBSITE_URL
+## Client downloads + itch.app auto-updates (outdated-build dialog opens this).
+const LINK_DOWNLOAD: String = Distribution.ITCH_URL
 const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
@@ -264,12 +266,13 @@ func _wire_button_audio(button: Button, is_back: bool = false) -> void:
 
 
 ## Hard block for an outdated client: nothing's playable on a mismatched build, so
-## loop a non-dismissable "please update" (each press opens the download page).
+## loop a non-dismissable "please update" (each press opens the itch download page —
+## players on the itch.app get the update there automatically).
 func _block_outdated(detail: String) -> void:
 	var message: String = detail if not detail.is_empty() else tr("ERR_OUTDATED")
 	while true:
 		await popup_panel.confirm_message(message, &"UPDATE_TITLE", &"UPDATE")
-		OS.shell_open(LINK_WEBSITE)
+		OS.shell_open(LINK_DOWNLOAD)
 
 
 ## Reveal the main menu (no saved session): show it, focus the first action, then

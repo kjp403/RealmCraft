@@ -1,13 +1,16 @@
 name: Release clients to itch.io
 
-# Tag a release (e.g. `git tag v0.2.0 && git push --tags`) → exports the four
-# game clients with the slim templates and pushes them to itch.io via butler.
-# Server deploy is a separate workflow (deploy-server.yml) on purpose — this one
-# never touches the live server, so it's safe to run often.
+# Tag a release (e.g. `git tag v0.28.1 && git push origin v0.28.1`) → exports
+# Windows / Linux / Web clients and pushes them to itch.io via butler.
+# Server deploy is a separate workflow (deploy-vps.yml) — this one never
+# restarts the live server.
 #
-# Android is opt-in: every Android step is gated on the ANDROID_KEYSTORE_BASE64
-# secret being set. Until you add it (see docs/release_pipeline.md), the
-# Windows/Linux/Web release runs exactly as before — Android is simply skipped.
+# Prerequisites (one-time): see deploy/release-clients.md
+#   1. Create itch project https://kjp403.itch.io/arkenelle
+#   2. Add GitHub secret BUTLER_API_KEY
+#
+# Android is opt-in: gated on ANDROID_KEYSTORE_BASE64. Until set, Win/Linux/Web
+# ship and Android is skipped.
 on:
   push:
     tags: ["v*"]
@@ -20,15 +23,15 @@ on:
         options: [all, windows, linux, web, android]
 
 env:
-  GODOT_REF: "4.6.3-stable"        # editor + source tag
-  GODOT_VERSION_DIR: "4.6.3.stable" # export_templates subfolder name
-  ITCH_GAME: "kjp403/arkenelle"        # TODO: set to your real itch.io project slug
+  # Must match project.godot features / the editor you develop with.
+  GODOT_REF: "4.7.1-stable"
+  GODOT_VERSION_DIR: "4.7.1.stable"
+  ITCH_GAME: "kjp403/arkenelle"
 
 jobs:
   release:
     runs-on: ubuntu-22.04
     permissions:
-      actions: read   # needed for `gh run download` to read the build-templates run
       contents: read
     steps:
       - name: Checkout
@@ -36,21 +39,25 @@ jobs:
 
       - name: Resolve target platforms
         run: |
-          # Tag pushes ship everything; a manual run can target one platform via
-          # the workflow_dispatch dropdown. github.event.inputs is empty on a tag
-          # push, so default to "all".
           P="${{ github.event.inputs.platforms }}"
           echo "PLATFORMS=${P:-all}" >> "$GITHUB_ENV"
           echo "Target platforms: ${P:-all}"
 
+      - name: Require BUTLER_API_KEY
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUTLER_API_KEY:-}" ]; then
+            echo "::error::BUTLER_API_KEY secret is missing. Create an itch API key at https://itch.io/user/settings/api-keys and add it as a repo Actions secret. See deploy/release-clients.md"
+            exit 1
+          fi
+
       - name: Info - server-class references in client-shipped code
         run: |
           set -euo pipefail
-          # Since the stub-generating export plugin (tinymmo export_plugin.gd),
-          # naming server classes in common//client/ is SUPPORTED on client
-          # exports — stubs are injected at export time. This step is
-          # informational only (it lists the references that depend on the stub
-          # plugin staying enabled); it never fails the build.
+          # Naming server classes in common//client/ is supported — stubs are
+          # injected at export time by addons/tinymmo/export_plugin.
           CLASSES=$(grep -rh '^class_name ' source/server/ --include='*.gd' | sed 's/^class_name \([A-Za-z0-9_]*\).*/\1/' | sort -u | paste -sd'|')
           echo "Server-only classes: $CLASSES"
           grep -rEn "^[^#]*\b($CLASSES)\b" source/common/ source/client/ --include='*.gd' \
@@ -59,9 +66,6 @@ jobs:
 
       - name: Detect Android config
         id: android
-        # `secrets` is NOT allowed in `if:` conditions (GitHub limitation), but it
-        # IS allowed in a step's `env`. So read it here ONCE into a plain output
-        # flag, and gate every Android step on steps.android.outputs.enabled.
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
@@ -74,56 +78,38 @@ jobs:
             echo "::notice::ANDROID_KEYSTORE_BASE64 not set — Android skipped (Win/Linux/Web unaffected)."
           fi
 
-      - name: Download slim export templates (latest successful build)
-        env:
-          GH_TOKEN: ${{ github.token }}
-          # "true"/"false" from the detect step above — never the secret itself.
-          HAS_ANDROID: ${{ steps.android.outputs.enabled }}
-        run: |
-          set -euo pipefail
-          RUN_ID=$(gh run list --workflow=build-templates.yml --status=success \
-            --limit=1 --json databaseId --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ]; then
-            echo "::error::No successful 'Build slim export templates' run found. Run that workflow first."
-            exit 1
-          fi
-          echo "Using build-templates run $RUN_ID"
-          gh run download "$RUN_ID" --name godot-template-linux   --dir tpl/linux
-          gh run download "$RUN_ID" --name godot-template-windows --dir tpl/windows
-          gh run download "$RUN_ID" --name godot-template-web     --dir tpl/web
-          if [ "$HAS_ANDROID" = "true" ]; then
-            gh run download "$RUN_ID" --name godot-template-android --dir tpl/android
-          else
-            echo "::notice::ANDROID_KEYSTORE_BASE64 not set — skipping Android template + export."
-          fi
-
-      - name: Install templates where Godot expects them
-        env:
-          HAS_ANDROID: ${{ steps.android.outputs.enabled }}
-        run: |
-          set -euo pipefail
-          DEST="$HOME/.local/share/godot/export_templates/${GODOT_VERSION_DIR}"
-          mkdir -p "$DEST"
-          echo "$GODOT_VERSION_DIR" > "$DEST/version.txt"
-          cp tpl/linux/godot.linuxbsd.template_release.x86_64        "$DEST/linux_release.x86_64"
-          cp tpl/windows/godot.windows.template_release.x86_64.exe   "$DEST/windows_release_x86_64.exe"
-          cp tpl/web/godot.web.template_release.wasm32.nothreads.zip "$DEST/web_nothreads_release.zip"
-          if [ "$HAS_ANDROID" = "true" ]; then
-            cp tpl/android/android_release.apk "$DEST/android_release.apk"
-            cp tpl/android/android_debug.apk   "$DEST/android_debug.apk"
-            cp tpl/android/android_source.zip  "$DEST/android_source.zip"
-          fi
-          ls -lah "$DEST"
-
       - name: Fetch headless Godot editor ${{ env.GODOT_REF }}
         run: |
           set -euo pipefail
           curl -fL -o godot.zip \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_REF}/Godot_v${GODOT_REF}_linux.x86_64.zip"
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_REF}/Godot_v${GODOT_REF}_linux.x86_64.zip"
           unzip -q godot.zip
           mv "Godot_v${GODOT_REF}_linux.x86_64" godot
           chmod +x godot
           ./godot --headless --version
+
+      - name: Install official export templates
+        env:
+          HAS_ANDROID: ${{ steps.android.outputs.enabled }}
+        run: |
+          set -euo pipefail
+          # Official templates match the editor ABI. (Optional slim custom templates
+          # from build-templates.yml can replace these later for smaller downloads.)
+          curl -fL -o export_templates.tpz \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_REF}/Godot_v${GODOT_REF}_export_templates.tpz"
+          DEST="$HOME/.local/share/godot/export_templates/${GODOT_VERSION_DIR}"
+          mkdir -p "$DEST"
+          unzip -q export_templates.tpz -d tpl_extract
+          # .tpz unpacks to templates/*
+          cp -a tpl_extract/templates/. "$DEST/"
+          echo "${GODOT_VERSION_DIR}" > "$DEST/version.txt"
+          ls -lah "$DEST" | head -40
+          test -f "$DEST/windows_release_x86_64.exe"
+          test -f "$DEST/linux_release.x86_64"
+          test -f "$DEST/web_nothreads_release.zip" || test -f "$DEST/web_release.zip"
+          if [ "$HAS_ANDROID" = "true" ]; then
+            test -f "$DEST/android_release.apk"
+          fi
 
       # ---- Android toolchain (only when the keystore secret is configured) ----
 
@@ -140,8 +126,6 @@ jobs:
           set -eo pipefail
           SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
-          # Match GODOT_REF's platform/android/java/app/config.gradle
-          # (buildTools / targetSdk): 4.6.3 → build-tools 36.1.0, android-36.
           "$SDK/cmdline-tools/latest/bin/sdkmanager" \
             "platform-tools" "build-tools;36.1.0" "platforms;android-36"
 
@@ -149,11 +133,6 @@ jobs:
         if: steps.android.outputs.enabled == 'true'
         run: |
           set -euo pipefail
-          # Headless Godot reads the Android SDK / JDK paths from editor settings.
-          # A minimal file with just these two keys is enough; Godot fills the
-          # rest with defaults on load. (VERIFY on first run: if Godot reports an
-          # "invalid Android SDK path", confirm this filename — Godot 4 uses
-          # editor_settings-4.tres — and that both paths exist.)
           mkdir -p "$HOME/.config/godot"
           cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
@@ -177,14 +156,11 @@ jobs:
       - name: Import project (warm the .godot cache)
         run: |
           # Cold-start import first — exporting on a fresh checkout otherwise
-          # segfaults (Godot 4 CLI quirk; same trick as deploy-server.sh).
+          # can segfault (Godot 4 CLI quirk).
           ./godot --headless --path . --import || true
 
       - name: Export clients
         env:
-          # Godot reads these for release signing when the preset's keystore
-          # fields are empty — exactly so the keystore never lives in the repo.
-          # Empty when the secret is unset; the Android export is guarded below.
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ runner.temp }}/release.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -231,9 +207,7 @@ jobs:
           if want web;     then ./butler push exports/web     "${ITCH_GAME}:web"; fi
           if want android && [ -f exports/android/Arkenelle.apk ]; then
             # Push only the .apk, NOT the whole dir — Godot also drops an
-            # Arkenelle.apk.idsig (APK Signature Scheme v4, for incremental installs)
-            # that sideloaders don't need. Pushing the bare file makes itch serve
-            # the .apk directly (no .zip → no file-explorer/unzip step on Android).
+            # Arkenelle.apk.idsig that sideloaders don't need.
             ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android"
           fi
           ./butler status "${ITCH_GAME}"
