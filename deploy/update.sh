@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Update the live Arkenelle world from the latest main branch.
+# Safe to re-run. Prefer calling via GitHub Actions; you can also run manually:
+#   sudo bash /opt/arkenelle/deploy/update.sh
+set -euo pipefail
+
+APP_DIR="/opt/arkenelle"
+APP_USER="arkenelle"
+BRANCH="${ARKENELLE_DEPLOY_BRANCH:-main}"
+
+if [[ "$(id -u)" -ne 0 ]]; then
+	echo "Run as root: sudo bash $0" >&2
+	exit 1
+fi
+
+if [[ ! -d "$APP_DIR/.git" ]]; then
+	echo "Missing git repo at $APP_DIR" >&2
+	exit 1
+fi
+
+echo "==> Fetching origin/${BRANCH}"
+sudo -u "$APP_USER" git -C "$APP_DIR" fetch --prune origin "$BRANCH"
+
+echo "==> Fast-forward to origin/${BRANCH}"
+# ff-only keeps any accidental local VPS edits from being silently wiped.
+if ! sudo -u "$APP_USER" git -C "$APP_DIR" merge --ff-only "origin/${BRANCH}"; then
+	echo "ERROR: VPS repo cannot fast-forward. Someone changed files on the server." >&2
+	echo "Fix with (careful — discards local VPS edits):" >&2
+	echo "  sudo -u $APP_USER git -C $APP_DIR reset --hard origin/${BRANCH}" >&2
+	exit 1
+fi
+
+echo "==> Importing Godot assets"
+sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import
+
+echo "==> Restarting game services"
+systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
+
+echo "==> Status"
+systemctl --no-pager --lines=0 status arkenelle-master arkenelle-gateway arkenelle-world || true
+
+echo
+echo "Deploy OK @ $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+sudo -u "$APP_USER" git -C "$APP_DIR" rev-parse --short HEAD
