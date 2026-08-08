@@ -65,16 +65,43 @@ func roll_and_grant(player: Player) -> Dictionary:
 	}
 
 
+## Cooked fish granted from a chest would skip Cooking XP — remap to the raw
+## material so bag-chest / world-chest fish stays cookable.
+const COOKED_FISH_TO_RAW: Dictionary = {
+	&"cooked_shrimp": &"shrimp",
+	&"cooked_herring": &"herring",
+	&"cooked_cod": &"cod",
+	&"cooked_trout": &"trout",
+	&"cooked_salmon": &"salmon",
+	&"cooked_tuna": &"tuna",
+	&"cooked_lobster": &"lobster",
+	&"cooked_lionfish": &"lionfish",
+	&"cooked_crab": &"crab",
+	&"cooked_turtle": &"turtle",
+	&"cooked_parrot_fish": &"parrot_fish",
+	&"cooked_anglerfish": &"anglerfish",
+}
+
+
 static func _grant_drop(resource: PlayerResource, drop: LootDrop, items: Array) -> void:
 	var amount: int = randi_range(drop.min_amount, drop.max_amount)
 	if amount <= 0:
 		return
-	var item_id: int = int(drop.item.get_meta(&"id", 0))
+	var grant_item: Resource = drop.item
+	var slug: StringName = grant_item.get_meta(&"slug", &"") as StringName
+	if COOKED_FISH_TO_RAW.has(slug):
+		var raw: Resource = ContentRegistryHub.load_by_slug(
+			&"items", COOKED_FISH_TO_RAW[slug] as StringName
+		)
+		if raw != null:
+			grant_item = raw
+	var item_id: int = int(grant_item.get_meta(&"id", 0))
 	if item_id <= 0:
 		return
 	Inventory.add_item(resource.inventory, item_id, amount)
+	var display_name: String = str((grant_item as Item).item_name) if grant_item is Item else "Item"
 	items.append({
 		"id": item_id,
 		"amount": amount,
-		"name": str(drop.item.item_name),
+		"name": display_name,
 	})

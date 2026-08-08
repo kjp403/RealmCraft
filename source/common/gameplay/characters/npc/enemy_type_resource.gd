@@ -25,8 +25,9 @@ extends Resource
 ## Sprite the NPC renders with. Keep this on the resource so a re-skin is a
 ## one-file change.
 @export var skin: SpriteFrames
-## Visual size multiplier — a boss reads BIGGER. Scales the SPRITE only, never the
-## collision / attack reach (a scaled node can't close to melee range). 1.0 = normal.
+## Visual size multiplier — a boss reads BIGGER. Scales the sprite (and matching
+## HurtBox / click volume). The CharacterBody2D nav capsule stays unscaled so the
+## mob can still close to melee range. 1.0 = normal.
 @export var visual_scale: float = 1.0
 ## A BOSS type. A dungeon RoomNode gives any boss-type mob it spawns a BossController
 ## (phases, telegraphed slam, enrage) and keeps its loot — no per-marker flag needed.

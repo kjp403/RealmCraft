@@ -1,9 +1,10 @@
 class_name CombatTargetController
 extends Node
-## Right-click Attack: walk into range of a hostile and keep swinging the
-## primary weapon until the target dies, you cancel (WASD / ground click), or
+## Right-click / Spacebar Attack: walk into range of a hostile and keep swinging
+## the primary weapon until the target dies, you cancel (WASD / ground click), or
 ## you open a menu. Mirrors [HarvestController]'s click-to-act loop.
 ##
+## Spacebar acquires a lock (remembered target after a move cancel, else nearest).
 ## Bows (and other [ChargeAbility] primaries) need an explicit release phase —
 ## press alone only draws. This controller auto-releases at full charge.
 
@@ -12,11 +13,15 @@ extends Node
 ## 72 left players stopping short and swinging into empty air.
 const MELEE_ENGAGE_RANGE: float = 36.0
 const RANGED_ENGAGE_RANGE: float = 220.0
+## How far Spacebar will snag a hostile (or re-acquire the remembered target).
+const SPACEBAR_ACQUIRE_RANGE: float = 320.0
 
 
 var _player: LocalPlayer
 var _target: HostileNpc
 var _active: bool = false
+## Survives WASD / ground-click cancel so the next Spacebar re-locks the same NPC.
+var _last_target: HostileNpc
 ## True after we locally began a charge-shot draw for this Attack loop.
 var _charge_held: bool = false
 
@@ -34,6 +39,7 @@ func start(npc: HostileNpc) -> void:
 		return
 	_clear_target_nameplate()
 	_target = npc
+	_last_target = npc
 	_active = true
 	_charge_held = false
 	_player._follow_peer_id = 0
@@ -42,10 +48,22 @@ func start(npc: HostileNpc) -> void:
 
 
 func cancel() -> void:
+	if _target != null and is_instance_valid(_target) and not _target_is_dead(_target):
+		_last_target = _target
 	_clear_target_nameplate()
 	_active = false
 	_target = null
 	_charge_held = false
+
+
+## Spacebar: prefer the remembered fight target, else the nearest living hostile.
+## Returns null when nothing is in [constant SPACEBAR_ACQUIRE_RANGE] (free-aim).
+func acquire_for_spacebar() -> HostileNpc:
+	if _player == null:
+		return null
+	if _is_valid_acquire_target(_last_target):
+		return _last_target
+	return find_nearest_hostile(_player.global_position, SPACEBAR_ACQUIRE_RANGE)
 
 
 ## Called from [method LocalPlayer.process_input]. Returns true when it handled
@@ -91,6 +109,12 @@ func _target_is_dead(npc: HostileNpc) -> bool:
 	return false
 
 
+func _is_valid_acquire_target(npc: HostileNpc) -> bool:
+	if _target_is_dead(npc) or _player == null:
+		return false
+	return _player.global_position.distance_to(npc.global_position) <= SPACEBAR_ACQUIRE_RANGE
+
+
 func _clear_target_nameplate() -> void:
 	Character.combat_target_instance_id = 0
 	if _target != null and is_instance_valid(_target):
@@ -101,13 +125,22 @@ func _engage_range() -> float:
 	var weapon_item: WeaponItem = (
 		_player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
 	)
-	if weapon_item == null:
-		return MELEE_ENGAGE_RANGE
-	match weapon_item.category:
-		&"bow", &"wand", &"book":
-			return RANGED_ENGAGE_RANGE
-		_:
-			return MELEE_ENGAGE_RANGE
+	var base: float = MELEE_ENGAGE_RANGE
+	if weapon_item != null:
+		match weapon_item.category:
+			&"bow", &"wand", &"book":
+				base = RANGED_ENGAGE_RANGE
+			_:
+				base = MELEE_ENGAGE_RANGE
+	# Oversized bosses: stop near the hurtbox edge, not the tiny origin.
+	return base + _target_reach_bonus()
+
+
+func _target_reach_bonus() -> float:
+	if _target == null or _target.enemy_data == null:
+		return 0.0
+	var vs: float = maxf(1.0, _target.enemy_data.visual_scale)
+	return maxf(0.0, (vs - 1.0) * 40.0)
 
 
 func _primary_ability() -> AbilityResource:
@@ -174,3 +207,43 @@ func _tick_charge_attack(ability: AbilityResource) -> void:
 		{"d": _player.look_direction, "i": 0, "r": true},
 		InstanceClient.current.name
 	)
+
+
+## Nearest living HostileNpc under the current map's ReplicatedPropsContainer.
+static func find_nearest_hostile(origin: Vector2, max_range: float) -> HostileNpc:
+	if InstanceClient.current == null or InstanceClient.current.instance_map == null:
+		return null
+	var map: Map = InstanceClient.current.instance_map as Map
+	if map == null or map.replicated_props_container == null:
+		return null
+	var container: ReplicatedPropsContainer = map.replicated_props_container
+	var best: HostileNpc = null
+	var best_dist: float = max_range
+	for node: Node in container.get_children():
+		var npc: HostileNpc = node as HostileNpc
+		if npc == null or not is_instance_valid(npc):
+			continue
+		if npc.is_dead or npc.enemy_state == HostileNpc.EnemyState.DEAD \
+				or npc.enemy_state == HostileNpc.EnemyState.REVIVING:
+			continue
+		if npc.stats_component != null and npc.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+			continue
+		var dist: float = origin.distance_to(npc.global_position)
+		if dist <= best_dist:
+			best_dist = dist
+			best = npc
+	for child_id: Variant in container.dynamic_nodes.keys():
+		var dyn: Node = container.dynamic_nodes[child_id] as Node
+		var npc2: HostileNpc = dyn as HostileNpc
+		if npc2 == null or not is_instance_valid(npc2):
+			continue
+		if npc2.is_dead or npc2.enemy_state == HostileNpc.EnemyState.DEAD \
+				or npc2.enemy_state == HostileNpc.EnemyState.REVIVING:
+			continue
+		if npc2.stats_component != null and npc2.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+			continue
+		var dist2: float = origin.distance_to(npc2.global_position)
+		if dist2 <= best_dist:
+			best_dist = dist2
+			best = npc2
+	return best
