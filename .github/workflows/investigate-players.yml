@@ -1,0 +1,198 @@
+name: Investigate Players
+
+# One-shot VPS lookup for account/character intel. Does NOT restart services.
+on:
+  workflow_dispatch:
+    inputs:
+      accounts:
+        description: "Comma-separated account or display names"
+        required: true
+        default: "Nesato,qqqqq"
+
+jobs:
+  lookup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Query VPS player data
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: 22
+          command_timeout: 5m
+          request_pty: true
+          script: |
+            set -euo pipefail
+            ACCOUNTS='${{ inputs.accounts }}'
+            OUT=/tmp/arkenelle-player-lookup.txt
+            : > "$OUT"
+            {
+              echo "=== Arkenelle player lookup @ $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+              echo "Query: $ACCOUNTS"
+              echo
+              echo "== service user home / userdata =="
+              getent passwd arkenelle || true
+              echo
+              echo "== candidate userdata roots =="
+              for root in \
+                /opt/arkenelle/.local/share/godot/app_userdata/Arkenelle \
+                /home/arkenelle/.local/share/godot/app_userdata/Arkenelle \
+                /var/lib/arkenelle/.local/share/godot/app_userdata/Arkenelle \
+                /root/.local/share/godot/app_userdata/Arkenelle
+              do
+                if [ -d "$root" ]; then
+                  echo "FOUND $root"
+                  find "$root" -maxdepth 3 -type f \( -name '*.db' -o -name '*.cfg' -o -name 'account_collection.tres' -o -name '*.log' \) 2>/dev/null | head -80
+                fi
+              done
+              echo
+              # Prefer the live world DB under the arkenelle service user.
+              DB=""
+              for cand in \
+                /opt/arkenelle/.local/share/godot/app_userdata/Arkenelle/db/classic.db \
+                /home/arkenelle/.local/share/godot/app_userdata/Arkenelle/db/classic.db
+              do
+                if [ -f "$cand" ]; then DB="$cand"; break; fi
+              done
+              if [ -z "$DB" ]; then
+                DB="$(find /opt/arkenelle /home/arkenelle /var/lib/arkenelle -name 'classic.db' 2>/dev/null | head -1 || true)"
+              fi
+              echo "DB=$DB"
+              echo
+              if [ -n "$DB" ] && command -v sqlite3 >/dev/null 2>&1; then
+                IFS=',' read -ra NAMES <<< "$ACCOUNTS"
+                for raw in "${NAMES[@]}"; do
+                  name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
+                  [ -z "$name" ] && continue
+                  echo "######## PLAYER MATCH: $name ########"
+                  sqlite3 -header -column "$DB" "
+                    SELECT player_id, account_name, display_name, level, experience,
+                           available_attributes_points, skin_id, active_guild_id, led_guild_id,
+                           server_roles_json, profile_status
+                    FROM players
+                    WHERE account_name LIKE '%' || '$name' || '%' COLLATE NOCASE
+                       OR display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;
+                  " || true
+                  echo
+                  echo "-- full JSON blobs --"
+                  sqlite3 -header "$DB" "
+                    SELECT player_id, account_name, display_name,
+                           attributes_json, inventory_json, bank_json, equipment_json,
+                           skills_json, mastery_json, quests_json, friends_json,
+                           blocked_ids_json, owned_skins_json, server_roles_json,
+                           stats_json, titles_json, dailies_json, dungeon_lockouts_json,
+                           redeemed_codes_json, wardstones_json, joined_guild_ids_json
+                    FROM players
+                    WHERE account_name LIKE '%' || '$name' || '%' COLLATE NOCASE
+                       OR display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;
+                  " || true
+                  echo
+                  echo "-- guild membership --"
+                  sqlite3 -header -column "$DB" "
+                    SELECT gm.player_id, p.account_name, p.display_name, gm.guild_id, g.name AS guild_name, gm.rank
+                    FROM guild_members gm
+                    LEFT JOIN players p ON p.player_id = gm.player_id
+                    LEFT JOIN guilds g ON g.guild_id = gm.guild_id
+                    WHERE p.account_name LIKE '%' || '$name' || '%' COLLATE NOCASE
+                       OR p.display_name LIKE '%' || '$name' || '%' COLLATE NOCASE;
+                  " 2>/dev/null || true
+                  echo
+                  echo "-- recent chat messages (if any) --"
+                  sqlite3 -header -column "$DB" "
+                    SELECT msg_id, conversation_id, sender_id, sender_name, channel, text, time_ms
+                    FROM messages
+                    WHERE sender_name LIKE '%' || '$name' || '%' COLLATE NOCASE
+                    ORDER BY time_ms DESC LIMIT 50;
+                  " 2>/dev/null || true
+                  echo
+                done
+                echo "######## ALL STAFF / ROLES IN DB ########"
+                sqlite3 -header -column "$DB" "
+                  SELECT player_id, account_name, display_name, level, server_roles_json
+                  FROM players
+                  WHERE server_roles_json IS NOT NULL
+                    AND server_roles_json NOT IN ('{}', '')
+                  ORDER BY account_name;
+                " || true
+              else
+                echo "sqlite3 missing or DB not found — installing sqlite3 and retrying find"
+                sudo apt-get update -y >/dev/null 2>&1 || true
+                sudo apt-get install -y sqlite3 >/dev/null 2>&1 || true
+                find /opt/arkenelle /home /var/lib -name 'classic.db' 2>/dev/null | head
+              fi
+              echo
+              echo "######## BANS / JAIL / MUTES / ADMIN CFG ########"
+              for cfg in server_bans.cfg server_jail.cfg server_mutes.cfg server_admins.cfg; do
+                echo "-- $cfg --"
+                find /opt/arkenelle /home/arkenelle -name "$cfg" 2>/dev/null | while read -r f; do
+                  echo "FILE $f"
+                  sed -n '1,200p' "$f" || true
+                done
+              done
+              echo
+              echo "######## MASTER ACCOUNT COLLECTION (matching names only) ########"
+              find /opt/arkenelle /home/arkenelle -name 'account_collection.tres' 2>/dev/null | while read -r f; do
+                echo "FILE $f"
+                # Resource text — print blocks mentioning the names (no password hashes echoed in full if avoidable; still dump matching account stanzas).
+                python3 - <<'PY' "$f" "$ACCOUNTS" || true
+import sys,re
+path, accounts = sys.argv[1], sys.argv[2]
+text=open(path,errors='replace').read()
+names=[a.strip().lstrip('@') for a in accounts.split(',') if a.strip()]
+# Print nearby lines for each name match (case-insensitive)
+low=text.lower()
+for name in names:
+    n=name.lower()
+    idx=0
+    found=False
+    while True:
+        i=low.find(n, idx)
+        if i<0: break
+        found=True
+        start=max(0, text.rfind('\n', 0, i)-200)
+        end=min(len(text), text.find('\n', i)+400)
+        print(f'--- match {name} @ {i} ---')
+        print(text[start:end])
+        idx=i+len(n)
+    if not found:
+        print(f'(no account_collection text match for {name})')
+PY
+              done
+              echo
+              echo "######## RECENT SERVER LOG LINES MENTIONING NAMES ########"
+              find /opt/arkenelle /home/arkenelle -path '*/logs/*.log' 2>/dev/null | sort | tail -5 | while read -r log; do
+                echo "LOG $log"
+                IFS=',' read -ra NAMES <<< "$ACCOUNTS"
+                for raw in "${NAMES[@]}"; do
+                  name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
+                  rg -i -n --max-count 40 "$name" "$log" || true
+                done
+              done
+              echo
+              echo "=== END ==="
+            } 2>&1 | tee "$OUT"
+            # Also copy to a path the action can scp later if needed
+            cp "$OUT" /tmp/arkenelle-player-lookup-latest.txt
+            wc -l "$OUT"
+
+      - name: Fetch lookup file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: 22
+          source: /tmp/arkenelle-player-lookup-latest.txt
+          target: lookup-out
+          strip_components: 1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-lookup
+          path: lookup-out/
+          retention-days: 7
