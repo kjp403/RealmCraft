@@ -141,19 +141,24 @@ func _create_skill_tile(
 ) -> Control:
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))
-	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(
 		info.get("display_name", skill_name.capitalize())
 	)
-	var remaining: int = maxi(0, xp_to_next - xp)
+	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 
 	var tile := Button.new()
 	tile.custom_minimum_size = Vector2(76, 88)
 	tile.focus_mode = Control.FOCUS_NONE
 	tile.clip_contents = true
-	tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next\nClick for sources" % [
-		display, level, xp, xp_to_next, remaining
-	]
+	if at_cap:
+		tile.tooltip_text = "%s\nLv %d — Max level\nClick for sources" % [display, level]
+	else:
+		tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next\nClick for sources" % [
+			display, level, xp, xp_to_next, remaining
+		]
 	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
 	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
 	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
@@ -211,7 +216,7 @@ func _create_skill_tile(
 	var bar := ProgressBar.new()
 	bar.min_value = 0
 	bar.max_value = xp_to_next
-	bar.value = xp
+	bar.value = xp_to_next if at_cap else xp
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, 8)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -224,10 +229,14 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))
-	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
-	var lines: PackedStringArray = [
-		"%d / %d XP (%d to next level)" % [xp, xp_to_next, maxi(0, xp_to_next - xp)],
-	]
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	var xp_line: String = (
+		"Max level (%d)" % SkillXp.LEVEL_CAP if at_cap
+		else "%d / %d XP (%d to next level)" % [xp, xp_to_next, maxi(0, xp_to_next - xp)]
+	)
+	var lines: PackedStringArray = [xp_line]
 	var jp: JobPerks = JobRegistry.perks_for(StringName(skill_name))
 	if jp != null and not jp.source_items.is_empty():
 		lines.append("Can gather:")

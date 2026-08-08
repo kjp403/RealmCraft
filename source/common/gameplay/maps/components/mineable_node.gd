@@ -72,6 +72,7 @@ func _ready() -> void:
 	# Apply visuals on every peer (server included; harmless and keeps the
 	# editor's preview honest).
 	_apply_sprite()
+	_layout_from_texture()
 	_apply_name_label()
 	_visual_state.visible = false
 	# Lift the progress bar + charge label above map decorations (plants, rocks)
@@ -104,9 +105,9 @@ func _ready() -> void:
 ## On full drain, consumes a charge, awards items + job XP, returns a result
 ## the caller can push to the player's client.
 ##
-## Generic across gather types (ore veins, herb patches, etc.). The
-## mining-specific perk tree (level gate, bonus-ore chance, XP multiplier,
-## cooldown discount) only applies when this node's primary job is mining.
+## Generic across gather types (ore veins, trees, herb patches, etc.).
+## Level gate + bonus-yield + cooldown perks use the node's *primary* job
+## (first key in data.job_xp). XP multipliers still apply per job entry.
 ##
 ## Returns {"ok": bool, ...}. On success the dict also carries a
 ## `node_path` so the client can route per-node visual state updates.
@@ -138,20 +139,24 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	if int(_cooldown_until_ms_by_player.get(player_id, 0)) > now_ms:
 		return {"ok": false, "reason": "cooldown"}
 
-	# Mining-tree gates only apply to mining nodes. The check is "is mining
-	# in this node's job_xp dict" — that lets a future "ore that also grants
-	# smithing XP" still respect mining level/perks while keeping herbs
-	# free of mining bias.
-	var is_mining_node: bool = data.job_xp.has(&"mining")
-	var mining_perks_resource: JobPerks = JobRegistry.perks_for(&"mining")
-	var mining_level: int = 1
-	var mining_perks: Dictionary = {}
-	if is_mining_node:
-		var mining_skill: Dictionary = player.player_resource.skills.get(&"mining", {})
-		mining_level = int(mining_skill.get("level", 1))
-		mining_perks = mining_skill.get("perks", {})
-		if mining_level < data.required_level:
-			return {"ok": false, "reason": "level", "required_level": data.required_level}
+	# Primary job drives the level gate + gathering perk bonuses (cooldown /
+	# bonus yield). Herbs with required_level 0 skip the gate naturally.
+	var primary_job: StringName = _primary_job()
+	var job_perks_resource: JobPerks = JobRegistry.perks_for(primary_job)
+	var job_level: int = 1
+	var job_perks: Dictionary = {}
+	if primary_job != &"":
+		var job_skill: Dictionary = player.player_resource.skills.get(primary_job, {})
+		job_level = int(job_skill.get("level", 1))
+		job_perks = job_skill.get("perks", {})
+		if data.required_level > 0 and job_level < data.required_level:
+			return {
+				"ok": false,
+				"reason": "level",
+				"required_level": data.required_level,
+				"job": String(primary_job),
+				"job_display": JobRegistry.display_name(primary_job),
+			}
 
 	# Lazy-regen first so a swing on a depleted node that just timed out
 	# refills before we ask for a charge.
@@ -194,11 +199,10 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	_consume_charge(now_ms)
 	_progress_hp_by_player.erase(player_id)
 
-	# Award. Bonus-yield + cooldown discount come from the mining perk tree
-	# and only apply to mining nodes (gated by is_mining_node above).
+	# Award. Bonus-yield + cooldown discount come from the primary job's perk tree.
 	var amount: int = data.yield_amount
-	if is_mining_node and mining_perks_resource != null \
-			and randf() < mining_perks_resource.effective_bonus_yield_chance(mining_level, mining_perks):
+	if job_perks_resource != null \
+			and randf() < job_perks_resource.effective_bonus_yield_chance(job_level, job_perks):
 		amount += 1
 
 	var ore_id: int = int(data.ore.get_meta(&"id", 0))
@@ -212,30 +216,27 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		var xp_gain: int = raw
 		var jp: JobPerks = JobRegistry.perks_for(job_name)
 		if jp != null:
-			var job_skill: Dictionary = player.player_resource.skills.get(job_name, {})
-			var job_perks_dict: Dictionary = job_skill.get("perks", {})
+			var skill_entry: Dictionary = player.player_resource.skills.get(job_name, {})
+			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
 			xp_gain = roundi(raw * jp.xp_multiplier(job_perks_dict))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
 		grants.append({"job": String(job_name), "xp": xp_gain, "progress": prog})
 
-	# Per-player cooldown after extraction. Shortened by mining perks on
-	# mining nodes; flat duration otherwise.
 	var cooldown_factor: float = 1.0
-	if is_mining_node and mining_perks_resource != null:
-		cooldown_factor = mining_perks_resource.effective_cooldown_factor(mining_level, mining_perks)
+	if job_perks_resource != null:
+		cooldown_factor = job_perks_resource.effective_cooldown_factor(job_level, job_perks)
 	_cooldown_until_ms_by_player[player_id] = now_ms + int(
 		data.player_cooldown_seconds * 1000.0 * cooldown_factor
 	)
 
-	# Build the "first grant" mining-style payload for backwards-compatible
-	# toast / gather_succeeded handling on the client.
+	# Build the "first grant" payload for toast / gather_succeeded handling.
 	var first: Dictionary = grants[0] if not grants.is_empty() else {}
 	var first_progress: Dictionary = first.get("progress", {})
 	var first_job: String = first.get("job", "")
 	var new_level: int = int(first_progress.get("level", 1))
 	var perk_points_gained: int = 0
-	if is_mining_node and mining_perks_resource != null and first_job == "mining":
-		perk_points_gained = mining_perks_resource.earned_points(new_level) - mining_perks_resource.earned_points(mining_level)
+	if job_perks_resource != null and first_job == String(primary_job):
+		perk_points_gained = job_perks_resource.earned_points(new_level) - job_perks_resource.earned_points(job_level)
 
 	return {
 		"ok": true,
@@ -255,6 +256,13 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"max_charges": data.max_charges,
 		"node_path": node_path,
 	}
+
+
+## First key in data.job_xp — drives level gate / gathering perk bonuses.
+func _primary_job() -> StringName:
+	if data == null or data.job_xp.is_empty():
+		return &""
+	return data.job_xp.keys()[0]
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +392,39 @@ func _apply_sprite() -> void:
 	_sprite.modulate = Color.WHITE
 
 
+## Size the hitbox / labels for short rocks vs tall trees so the trunk base
+## sits on the node origin (y-sort feet) and axe arcs can still connect.
+func _layout_from_texture() -> void:
+	if data == null or data.texture == null or _sprite == null:
+		return
+	var tex_size: Vector2 = data.texture.get_size()
+	if tex_size.y > 48.0:
+		_sprite.position = Vector2(0.0, -tex_size.y * 0.5)
+	else:
+		_sprite.position = Vector2(0.0, -8.0)
+
+	var collision: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision != null and collision.shape is RectangleShape2D:
+		var rect: RectangleShape2D = collision.shape as RectangleShape2D
+		if tex_size.y > 48.0:
+			# Trunk / lower canopy — tall enough for axe arcs, not the whole crown.
+			rect.size = Vector2(maxi(28.0, tex_size.x * 0.55), maxi(36.0, mini(56.0, tex_size.y * 0.45)))
+			collision.position = Vector2(0.0, -rect.size.y * 0.45)
+		else:
+			rect.size = Vector2(32, 32)
+			collision.position = Vector2(0.0, -8.0)
+
+	if _name_label != null:
+		var top_y: float = _sprite.position.y - tex_size.y * 0.5
+		_name_label.position = Vector2(-56.0, top_y - 18.0)
+		_name_label.size = Vector2(112.0, 20.0)
+
+	if _visual_state != null:
+		var bar_y: float = _sprite.position.y - tex_size.y * 0.5 - 28.0
+		_visual_state.position = Vector2(-32.0, bar_y)
+		_visual_state.size = Vector2(64.0, 26.0)
+
+
 ## Dim / swap the rock when empty so players can see a depleted vein at a glance.
 func _apply_depleted_visual(depleted: bool) -> void:
 	if _sprite == null or data == null:
@@ -407,7 +448,10 @@ func _apply_name_label() -> void:
 		_name_label.visible = false
 		return
 	_name_label.visible = true
-	_name_label.text = String(data.ore.item_name)
+	if not data.display_name.is_empty():
+		_name_label.text = data.display_name
+	else:
+		_name_label.text = String(data.ore.item_name)
 
 
 ## Client charge count used by [HarvestController] while waiting on regen.

@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786076385
-next_id = 172
+version = 1786164712
+next_id = 179
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -408,16 +408,6 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/metals/copper_ore.tres",
 &"slug": &"copper_ore"
 }, {
-&"hash": "2df1c1886cad980c9df0e0ee769a897dc29b571bb45d606287dd71184c5195db",
-&"id": 174,
-&"path": "res://source/common/gameplay/items/materials/metals/tin_ore.tres",
-&"slug": &"tin_ore"
-}, {
-&"hash": "a060fd13f1986b0c0dd73757305f0e874aa124774e8d771292fb837d4eea63a4",
-&"id": 173,
-&"path": "res://source/common/gameplay/items/materials/wood/oak_log.tres",
-&"slug": &"oak_log"
-}, {
 &"hash": "bac21725fd399664892f252a9757de6226a3a0c3cf2e1bc3bfd9fe11615f8d01",
 &"id": 105,
 &"path": "res://source/common/gameplay/items/materials/metals/gold_bar.tres",
@@ -448,10 +438,40 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/metals/silver_ore.tres",
 &"slug": &"silver_ore"
 }, {
+&"hash": "2df1c1886cad980c9df0e0ee769a897dc29b571bb45d606287dd71184c5195db",
+&"id": 174,
+&"path": "res://source/common/gameplay/items/materials/metals/tin_ore.tres",
+&"slug": &"tin_ore"
+}, {
 &"hash": "29e5ee2e401ceb8ef0cd04e250ffac1734e6fd5f631db4e1720efadfd353cd26",
 &"id": 64,
 &"path": "res://source/common/gameplay/items/materials/sealed_letter.tres",
 &"slug": &"sealed_letter"
+}, {
+&"hash": "d054c18feceb95e44c2738ed0a76d3db0f6228dd4cff2b3c14902a36c2697650",
+&"id": 175,
+&"path": "res://source/common/gameplay/items/materials/wood/logs.tres",
+&"slug": &"logs"
+}, {
+&"hash": "5c47fb18923c7c1da0e3e58bebd00ee93cc29a4f4acfd268a2daed4ff7e9d9da",
+&"id": 177,
+&"path": "res://source/common/gameplay/items/materials/wood/maple_log.tres",
+&"slug": &"maple_log"
+}, {
+&"hash": "9d1ea5fc454c3214ac8a8a58ec4d1fadc77e38b81a2acfe3a476112d96cc20e6",
+&"id": 173,
+&"path": "res://source/common/gameplay/items/materials/wood/oak_log.tres",
+&"slug": &"oak_log"
+}, {
+&"hash": "fd51dedaf6efd05ee5bc2c4cbc225807bb994bf7c0db4470ca41deae5d80525d",
+&"id": 176,
+&"path": "res://source/common/gameplay/items/materials/wood/willow_log.tres",
+&"slug": &"willow_log"
+}, {
+&"hash": "ab4349505459d0b2a28e9f35c2584803c510d7d75400bb19a0604a4d45396076",
+&"id": 178,
+&"path": "res://source/common/gameplay/items/materials/wood/yew_log.tres",
+&"slug": &"yew_log"
 }, {
 &"hash": "66f64ab67a61212a7b9ad2e523732eed039448d532651020ce4a806eb254c7d0",
 &"id": 95,
@@ -613,6 +633,11 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres",
 &"slug": &"sword_sunsteel.item"
 }, {
+&"hash": "d21e570f629f9952b49b1aa1f50d6945695ed5e862864844733b66067cf471c0",
+&"id": 172,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe.tres",
+&"slug": &"axe"
+}, {
 &"hash": "3729fc73c172be2b715a7de56f891337ba81ace13c30510917b5ce078523e793",
 &"id": 52,
 &"path": "res://source/common/gameplay/items/weapons/tools/pickaxe.tres",
@@ -622,11 +647,6 @@ entries = Array[Dictionary]([{
 &"id": 66,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle.tres",
 &"slug": &"sickle"
-}, {
-&"hash": "d21e570f629f9952b49b1aa1f50d6945695ed5e862864844733b66067cf471c0",
-&"id": 172,
-&"path": "res://source/common/gameplay/items/weapons/tools/axe.tres",
-&"slug": &"axe"
 }, {
 &"hash": "f24f017aa9c28d608f978c20c0cd0a8738bb7ce8a8b795d9d521ccd384edb9b3",
 &"id": 90,

@@ -12,6 +12,8 @@ extends Resource
 ## resource's `job_xp` dict, and auto-populate the matching JobPerks
 ## `source_slugs` lists — killing the hand-maintained content drift.
 
+## Optional world label (e.g. "Oak Tree"). Empty → falls back to the ore item name.
+@export var display_name: String = ""
 ## The item granted per yield (a MaterialItem; its outlet is a vendor trade or a recipe).
 @export var ore: Item
 @export var yield_amount: int = 1
@@ -19,8 +21,8 @@ extends Resource
 ##   { &"mining": 10 }                          # ore vein
 ##   { &"harvesting": 5, &"medicine": 5 }       # herb that teaches both
 @export var job_xp: Dictionary[StringName, int] = {&"mining": 10}
-## Minimum job level required (legacy: still gated on mining specifically
-## for ore veins). Set 0 for non-ore nodes.
+## Minimum level in the node's primary job (first key in [member job_xp]).
+## 0 / 1 = no meaningful gate for a fresh level-1 character.
 @export var required_level: int = 0
 ## Tool the player must have equipped (matched against ToolItem.tool_type).
 @export var required_tool: StringName = &"pickaxe"
