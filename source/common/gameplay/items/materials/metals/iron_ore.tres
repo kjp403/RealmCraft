@@ -8,6 +8,7 @@ script = ExtResource("2_iron_o")
 item_name = &"Iron Ore"
 item_icon = ExtResource("1_iron_o")
 description = "Raw iron, mined from veins deep in the rock. Smelt it at a forge with coal to make iron bars."
+vendor_value = 4
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"iron_ore"
 metadata/id = 61

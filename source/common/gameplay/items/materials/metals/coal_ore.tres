@@ -8,6 +8,7 @@ script = ExtResource("2_26gqe")
 item_name = &"Coal Ore"
 item_icon = ExtResource("1_1imlr")
 description = "Brittle black coal. Fuel for every smelting recipe."
+vendor_value = 3
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"coal_ore"
 metadata/id = 53

@@ -28,16 +28,14 @@ const DEBUG_NPC: bool = false
 ## drag them home in slow motion while still in their max chase range.
 const RETURN_SPEED_MULTIPLIER: float = 1.4
 
-## % of max HP regenerated per second while RETURNING. At 0.25 a mob at
-## near-zero HP fully heals over ~4s of walking. Reads visibly on the bar
-## without being instant.
-const RETURN_REGEN_RATE: float = 0.25
+## % of max HP regenerated per second while RETURNING. Kept slow so a kited
+## mob doesn't full-heal before the player can re-engage (~20s from empty).
+const RETURN_REGEN_RATE: float = 0.05
 
-## % of max HP regenerated per second while idling — catches the edge case
-## of a sniped mob taking damage from outside its detection ring, since
-## that hit can't trigger CHASE if the attacker stays out of range. ~5%/s
-## means a mob recovers from a missed snipe over 5-10 seconds.
-const IDLE_REGEN_RATE: float = 0.05
+## % of max HP regenerated per second while idling — catches snipes from
+## outside the detection ring. ~1.5%/s recovers a missed poke over ~1 minute,
+## not a few seconds.
+const IDLE_REGEN_RATE: float = 0.015
 
 ## A mob holds still (AI suspended via action_root_until_ms) for this long on spawn / respawn so the
 ## summon burst reads on a still body instead of a mob blinking in mid-stride.

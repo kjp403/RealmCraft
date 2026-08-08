@@ -19,6 +19,9 @@ var _lines: Array = []
 var _line_index: int = 0
 var _typing: bool = false
 var _option_rows: int = 1
+## True while a Talk page is showing Continue/Back — Space advances here only
+## (attack stays frozen via ClientState.menu_open for the whole NPC menu).
+var _advancing_dialogue: bool = false
 
 var _card: PanelContainer
 var _name_label: Label
@@ -31,6 +34,17 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_place_card)
+	set_process_unhandled_input(true)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible or not _advancing_dialogue:
+		return
+	# Space is player_shoot; Enter is ui_accept. Both advance dialogue pages
+	# without reaching combat (menu_open already gates attack).
+	if event.is_action_pressed(&"player_shoot") or event.is_action_pressed(&"ui_accept"):
+		_on_continue()
+		get_viewport().set_input_as_handled()
 
 
 func open(arg: Variant) -> void:
@@ -155,6 +169,7 @@ func _fit_card() -> void:
 
 
 func _show_options() -> void:
+	_advancing_dialogue = false
 	_set_text(str(_data.get("greeting", "...")))
 	_clear_options()
 
@@ -234,9 +249,11 @@ func _on_entry(entry: Dictionary) -> void:
 
 func _show_line() -> void:
 	if _line_index >= _lines.size():
+		_advancing_dialogue = false
 		_show_options()
 		return
 
+	_advancing_dialogue = true
 	_set_text(str(_lines[_line_index]))
 	_clear_options()
 

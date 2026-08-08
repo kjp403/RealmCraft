@@ -5,14 +5,28 @@
 [ext_resource type="Script" uid="uid://bhs3kv3tyysi7" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_slfuc"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="Resource" uid="uid://vhgsmnbqslo6" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="3_cloth"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="3_gold"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="3_potion"]
 [ext_resource type="SpriteFrames" uid="uid://b3kb4pkejph4" path="res://source/common/gameplay/characters/sprite_frames/goblin.tres" id="4_skin"]
 [ext_resource type="Resource" uid="uid://dspsv5pyhjuwi" path="res://source/common/gameplay/items/weapons/wand/wand.item.tres" id="5_wand"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_loot")
+item = ExtResource("3_gold")
+min_amount = 2
+max_amount = 6
+chance = 0.9
 
 [sub_resource type="Resource" id="Drop_cloth"]
 script = ExtResource("2_loot")
 item = ExtResource("3_cloth")
 max_amount = 2
-chance = 0.4
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("3_potion")
+chance = 0.12
 
 [resource]
 script = ExtResource("1_script")
@@ -30,6 +44,6 @@ detection_radius = 70
 chase_on_area = false
 xp_reward = 15
 respawn_delay = 15.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_cloth")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_potion")])
 metadata/slug = &"goblin_slinger"
 metadata/id = 26

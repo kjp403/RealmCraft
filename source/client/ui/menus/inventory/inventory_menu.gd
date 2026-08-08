@@ -461,7 +461,9 @@ func _entry_less_than(a: Dictionary, b: Dictionary) -> bool:
 		return rank_a < rank_b
 	if a.sort != b.sort:
 		return a.sort < b.sort
-	return int(a.uid) < int(b.uid)
+	# Honor drag-arranged bag order (shared with the compact dock).
+	var order: Array = BagOrder.load_order()
+	return BagOrder.index_of(order, int(a.uid)) < BagOrder.index_of(order, int(b.uid))
 
 
 func _group_rank(key: StringName) -> int:
@@ -513,6 +515,29 @@ func _make_bag_button(entry: Dictionary) -> Button:
 			_on_entry_pressed(entry)
 			if not action_button.disabled:
 				_on_action_button_pressed())
+	# Drag bag tiles onto each other to rearrange (client-persisted order).
+	if int(entry.uid) >= 0:
+		button.set_drag_forwarding(
+			func(_at: Vector2) -> Variant:
+				var preview := TextureRect.new()
+				preview.texture = (entry.item as Item).item_icon
+				preview.custom_minimum_size = Vector2(40, 40)
+				preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				button.set_drag_preview(preview)
+				return {"bag_uid": int(entry.uid)},
+			func(_at: Vector2, data: Variant) -> bool:
+				return data is Dictionary and (data as Dictionary).has("bag_uid"),
+			func(_at: Vector2, data: Variant) -> void:
+				if data is not Dictionary:
+					return
+				var from_uid: int = int((data as Dictionary).get("bag_uid", -1))
+				var to_uid: int = int(entry.uid)
+				if from_uid < 0 or to_uid < 0 or from_uid == to_uid:
+					return
+				BagOrder.swap(BagOrder.load_order(), from_uid, to_uid)
+				fill_inventory()
+		)
 	return button
 
 

@@ -8,6 +8,7 @@ script = ExtResource("2_script")
 item_name = &"Bandit Hide"
 item_icon = ExtResource("1_i18wi")
 description = "Tough hide from the hideout's guard hounds. Cures into Bandit Leather."
+vendor_value = 2
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"hide_bandit"
 metadata/id = 106
