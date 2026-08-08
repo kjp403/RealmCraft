@@ -6,7 +6,11 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tin"]
 atlas = ExtResource("3_tex")
-region = Rect2(96, 16, 32, 48)
+region = Rect2(96, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tin_empty"]
+atlas = ExtResource("3_tex")
+region = Rect2(64, 96, 32, 32)
 
 [resource]
 script = ExtResource("1_script")
@@ -23,3 +27,4 @@ charge_regen_seconds = 12.0
 depleted_recharge_seconds = 60.0
 player_cooldown_seconds = 5.0
 texture = SubResource("AtlasTexture_tin")
+depleted_texture = SubResource("AtlasTexture_tin_empty")
