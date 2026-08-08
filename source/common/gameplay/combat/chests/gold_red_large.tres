@@ -17,75 +17,72 @@
 [ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="item_11"]
 [ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="item_12"]
 [ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="item_13"]
-[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="item_14"]
-[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="item_15"]
-[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="item_16"]
 
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
-min_amount = 35
-max_amount = 50
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_5"]
 script = ExtResource("1_loot")
 item = ExtResource("item_5")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_6"]
 script = ExtResource("1_loot")
 item = ExtResource("item_6")
-min_amount = 50
-max_amount = 100
+min_amount = 18
+max_amount = 35
 
 [sub_resource type="Resource" id="Drop_7"]
 script = ExtResource("1_loot")
 item = ExtResource("item_7")
-min_amount = 25
-max_amount = 50
+min_amount = 9
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_8"]
 script = ExtResource("1_loot")
 item = ExtResource("item_8")
-min_amount = 25
-max_amount = 50
+min_amount = 9
+max_amount = 18
 
 [sub_resource type="Resource" id="Drop_9"]
 script = ExtResource("1_loot")
 item = ExtResource("item_9")
-min_amount = 75
-max_amount = 125
+min_amount = 26
+max_amount = 44
 
 [sub_resource type="Resource" id="Drop_10"]
 script = ExtResource("1_loot")
 item = ExtResource("item_10")
-min_amount = 50
-max_amount = 75
+min_amount = 18
+max_amount = 26
 
 [sub_resource type="Resource" id="Drop_11"]
 script = ExtResource("1_loot")
@@ -105,24 +102,6 @@ item = ExtResource("item_13")
 max_amount = 2
 chance = 0.18
 
-[sub_resource type="Resource" id="Drop_14"]
-script = ExtResource("1_loot")
-item = ExtResource("item_14")
-max_amount = 3
-chance = 0.22
-
-[sub_resource type="Resource" id="Drop_15"]
-script = ExtResource("1_loot")
-item = ExtResource("item_15")
-max_amount = 2
-chance = 0.18
-
-[sub_resource type="Resource" id="Drop_16"]
-script = ExtResource("1_loot")
-item = ExtResource("item_16")
-max_amount = 2
-chance = 0.18
-
 [resource]
 script = ExtResource("2_chest")
 display_name = "Ornate Gold Chest (Red)"
@@ -130,4 +109,4 @@ icon = ExtResource("3_icon")
 tier = 3
 gold_min = 10000
 gold_max = 25000
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13")])
