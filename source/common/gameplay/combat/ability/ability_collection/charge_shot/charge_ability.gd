@@ -122,6 +122,22 @@ func can_use_release() -> bool:
 	return charging
 
 
+## 0..1 draw progress while charging (0 when idle). Used by click-to-Attack
+## auto-release so bows fire once the draw is full.
+func charge_progress() -> float:
+	if not charging or _charge_start < 0.0 or charge_time_s <= 0.0:
+		return 0.0
+	return clampf(
+		((Time.get_ticks_msec() / 1000.0) - _charge_start) / charge_time_s,
+		0.0,
+		1.0
+	)
+
+
+func is_fully_charged() -> bool:
+	return charging and charge_progress() >= 1.0
+
+
 func predict_release() -> void:
 	# Flip ONLY the flag — keep _charge_start so the server echo's
 	# release_ability still computes the right charge ratio for the local

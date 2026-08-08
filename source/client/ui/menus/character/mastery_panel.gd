@@ -29,6 +29,7 @@ var _row_buttons: Dictionary[String, Button]
 
 func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
+	Client.subscribe(&"combat.reward", _on_combat_reward)
 	_build_layout()
 	_refresh()
 
@@ -55,6 +56,14 @@ func _build_layout() -> void:
 func _on_visibility_changed() -> void:
 	if is_visible_in_tree():
 		_refresh()
+
+
+func _on_combat_reward(data: Dictionary) -> void:
+	if not is_visible_in_tree():
+		return
+	if data.get("mastery", {}).is_empty():
+		return
+	_refresh()
 
 
 func _refresh() -> void:

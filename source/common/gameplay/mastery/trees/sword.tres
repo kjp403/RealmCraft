@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="MasteryTreeResource" format=3 uid="uid://b2lg7cppdgh6i"]
 
+[ext_resource type="Texture2D" path="res://source/common/gameplay/mastery/trees/swordsmanship.png" id="1_sword_icon"]
 [ext_resource type="Script" uid="uid://cx1btl22f4mft" path="res://source/common/gameplay/mastery/mastery_tree_resource.gd" id="1_tree"]
 [ext_resource type="Script" uid="uid://dmdvxcrsmfmo2" path="res://source/common/gameplay/mastery/mastery_node.gd" id="2_node"]
 [ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="3_mod"]
@@ -133,4 +134,5 @@ upgrades = &"sword_rally"
 script = ExtResource("1_tree")
 category = &"sword"
 display_name = "Sword"
+category_icon = ExtResource("1_sword_icon")
 nodes = Array[ExtResource("2_node")]([SubResource("Node_ww1"), SubResource("Node_ww2"), SubResource("Node_ww3"), SubResource("Node_bsk1"), SubResource("Node_bsk2"), SubResource("Node_bsk3"), SubResource("Node_parry"), SubResource("Node_deflect"), SubResource("Node_deflect2"), SubResource("Node_tempo"), SubResource("Node_rally"), SubResource("Node_rally2")])

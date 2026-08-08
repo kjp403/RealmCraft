@@ -65,6 +65,8 @@ func _ready() -> void:
 
 	close_button.pressed.connect(hide)
 	visibility_changed.connect(_on_visibility_changed)
+	# Kill rewards push mastery XP — refresh live like Skills does on gather.
+	Client.subscribe(&"combat.reward", _on_combat_reward)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -214,6 +216,14 @@ func _make_loadout_chip(key_text: String) -> PanelContainer:
 func _on_visibility_changed() -> void:
 	if visible:
 		_refresh()
+
+
+func _on_combat_reward(data: Dictionary) -> void:
+	if not visible:
+		return
+	if data.get("mastery", {}).is_empty():
+		return
+	_refresh()
 
 
 func _refresh() -> void:
