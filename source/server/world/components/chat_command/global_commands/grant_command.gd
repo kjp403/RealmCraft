@@ -19,6 +19,10 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "Unknown role '%s'. Known roles: %s" % [
 			role, ", ".join(server_instance.global_role_definitions.keys())
 		]
+	# senior_admin is config-file only — never persist it via /grant (closes the
+	# selfadmin → /grant @alt senior_admin replication path).
+	if role == "senior_admin":
+		return "senior_admin can only be granted via server_admins.cfg, not /grant."
 
 	var target: CommandTarget.Result = CommandTarget.resolve(args[1], peer_id, server_instance)
 	if not target.ok:

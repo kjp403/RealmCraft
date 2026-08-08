@@ -183,16 +183,10 @@ func handle_login(payload: Dictionary) -> Dictionary:
 	return result
 
 
-func handle_guest(payload: Dictionary) -> Dictionary:
-	if not _rate_ok(payload, &"guest", 5, 60000):
-		return {"error": GatewayAPI.ERR_RATE_LIMITED}
-	var result: Dictionary = await send_request("guest", payload)
-	var error: Error = result.get("error", 0)
-	if error != OK:
-		return {"error": error}
-	
-	result["session_id"] = create_session(result)
-	return result
+func handle_guest(_payload: Dictionary) -> Dictionary:
+	# Permanently disabled. Guest accounts used to be named guestN and could
+	# match server_admins.cfg entries for free senior_admin.
+	return {"error": GatewayAPI.ERR_GUEST_DISABLED}
 
 
 func handle_character_create(payload: Dictionary) -> Dictionary:

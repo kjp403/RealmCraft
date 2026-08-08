@@ -54,12 +54,23 @@ func setup_global_commands_and_roles() -> void:
 		return
 	
 	var commands := ServerInstance.global_chat_commands
+	# Names that must never become chat commands again (privilege bootstraps).
+	var banned_names: PackedStringArray = [
+		"selfadmin", "makeadmin", "giveadmin", "op", "sudo", "promote",
+	]
 	for file_path: String in files:
 		var command = load(file_path).new()
-		# Permanently refuse the removed /selfadmin bootstrap — never re-register
-		# even if a stale file somehow lands on a host.
-		if str(command.command_name) == "selfadmin":
-			push_warning("Refusing to register removed command: /selfadmin")
+		var cmd_name: String = str(command.command_name).strip_edges().to_lower()
+		if cmd_name in banned_names:
+			push_warning("Refusing to register banned command: /%s (%s)" % [cmd_name, file_path])
+			continue
+		# Anyone-runnable commands must not mutate server_roles (defense in depth
+		# against a reintroduced /selfadmin-style bootstrap with priority 0).
+		if int(command.command_priority) <= 0 and cmd_name.contains("admin"):
+			push_warning(
+				"Refusing open-priority admin-ish command: /%s (priority %s)"
+				% [cmd_name, str(command.command_priority)]
+			)
 			continue
 		commands.set(command.command_name, command)
 

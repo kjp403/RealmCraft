@@ -21,6 +21,8 @@ const ERR_ACCOUNT_CREATE_FAILED: int = 30
 const ERR_BAD_CREDENTIALS: int = 50
 const ERR_ALREADY_CONNECTED: int = 51
 const ERR_RATE_LIMITED: int = 60
+## Guest login endpoint is permanently disabled.
+const ERR_GUEST_DISABLED: int = 61
 ## Client build doesn't match the server's. The boot handshake (and login) return
 ## this so the client can show a hard "please update" instead of letting them in.
 const ERR_OUTDATED_VERSION: int = 70

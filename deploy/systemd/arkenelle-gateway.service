@@ -9,7 +9,8 @@ User=arkenelle
 WorkingDirectory=/opt/arkenelle
 # Wait for the master's gateway-manager port before starting so we connect cleanly.
 ExecStartPre=/bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8064) 2>/dev/null; do sleep 1; done'
-ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=gateway-server
+# --env=live is REQUIRED on the VPS (editor binary would otherwise look like "editor").
+ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=gateway-server --env=live
 Restart=always
 RestartSec=3
 
