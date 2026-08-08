@@ -46,12 +46,18 @@ func _ready() -> void:
 	if animation_tree != null:
 		animation_tree.active = true
 	anim = Animations.IDLE
+	refresh_nameplate_color()
 	# An interactive NPC needs a click target + a floating "talk" glyph — spawn
 	# both dynamically so the scene stays clean and the server carries no useless
 	# nodes.
 	if not npc_resource.interactions.is_empty():
 		_spawn_click_area()
 		_spawn_marker()
+
+
+## Friendly NPCs: yellow nameplates.
+func refresh_nameplate_color() -> void:
+	set_nameplate_color(NAME_COLOR_NPC)
 
 
 ## This NPC's quest-giver key — the slug of its NPCResource (its filename). Quests

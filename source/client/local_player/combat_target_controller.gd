@@ -24,19 +24,23 @@ func setup(player: LocalPlayer) -> void:
 
 
 func is_active() -> bool:
-	return _active and _target != null and is_instance_valid(_target) and not _target.is_dead
+	return _active and _target != null and is_instance_valid(_target) and not _target_is_dead(_target)
 
 
 func start(npc: HostileNpc) -> void:
-	if _player == null or npc == null or not is_instance_valid(npc) or npc.is_dead:
+	if _player == null or npc == null or not is_instance_valid(npc) or _target_is_dead(npc):
 		return
+	_clear_target_nameplate()
 	_target = npc
 	_active = true
 	_charge_held = false
 	_player._follow_peer_id = 0
+	Character.combat_target_instance_id = npc.get_instance_id()
+	npc.refresh_nameplate_color()
 
 
 func cancel() -> void:
+	_clear_target_nameplate()
 	_active = false
 	_target = null
 	_charge_held = false
@@ -68,6 +72,27 @@ func tick() -> bool:
 	_player._click_navigation.cancel()
 	_perform_attack()
 	return true
+
+
+## Clients never receive [member Character.is_dead] for hostiles — death is
+## replicated via enemy_state + HEALTH. Treat any of those as "stop attacking".
+func _target_is_dead(npc: HostileNpc) -> bool:
+	if npc == null or not is_instance_valid(npc):
+		return true
+	if npc.is_dead:
+		return true
+	if npc.enemy_state == HostileNpc.EnemyState.DEAD \
+			or npc.enemy_state == HostileNpc.EnemyState.REVIVING:
+		return true
+	if npc.stats_component != null and npc.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+		return true
+	return false
+
+
+func _clear_target_nameplate() -> void:
+	Character.combat_target_instance_id = 0
+	if _target != null and is_instance_valid(_target):
+		_target.refresh_nameplate_color()
 
 
 func _engage_range() -> float:
@@ -111,10 +136,15 @@ func _perform_attack() -> void:
 ## flag quiets can_use while we wait.
 func _tick_charge_attack(ability: AbilityResource) -> void:
 	var charge: ChargeAbility = ability as ChargeAbility
+	# Release echoes clear ChargeAbility.charging while our local _charge_held
+	# may still be true — sync so the next draw can start cleanly.
+	if _charge_held and charge != null and not charge.charging:
+		_charge_held = false
+		return
+
 	if not _charge_held:
 		if not _player.equipment_component.can_use(&"weapon", 0):
 			return
-		# Predictive press — same as Weapon, so hold-to-attack stays quiet.
 		ability.use_ability(_player, Vector2.ZERO)
 		_charge_held = true
 		Client.request_data(

@@ -87,10 +87,22 @@ const BAR_COLOR_ALLY: Color = Color(0.30, 0.62, 1.0)     # guildmate / guard
 const BAR_COLOR_NEUTRAL: Color = Color(0.82, 0.82, 0.86) # other players
 const BAR_COLOR_HOSTILE: Color = Color(0.86, 0.33, 0.28) # mobs / default
 
+## Over-head nameplate colors (distinct from HP-bar tints).
+const NAME_COLOR_SELF: Color = Color(0.55, 0.92, 1.0)      # light cyan
+const NAME_COLOR_PLAYER: Color = Color(1.0, 1.0, 1.0)      # white
+const NAME_COLOR_FRIEND: Color = Color(0.35, 1.0, 0.40)    # green
+const NAME_COLOR_NPC: Color = Color(1.0, 0.90, 0.25)       # yellow
+const NAME_COLOR_TARGET: Color = Color(1.0, 0.28, 0.28)    # red (combat target)
+
 ## The local viewer's tagged guild, mirrored here from ClientState. Static so
 ## Player can read it WITHOUT referencing ClientState — that reference would close
 ## a ClientState → LocalPlayer → Player → ClientState compile cycle.
 static var local_viewer_guild_id: int = 0
+## Local friend's player_ids (persistent ids), mirrored from ClientState so Player
+## nameplates can go green without importing ClientState.
+static var local_friend_ids: Dictionary = {}
+## instance_id of the HostileNPC currently under Right-click → Attack (0 = none).
+static var combat_target_instance_id: int = 0
 
 ## Peer ids of the local player's CURRENT spar teammates / opponents (empty when
 ## not in a match). Same static-mirror pattern as local_viewer_guild_id; set by
@@ -112,8 +124,22 @@ func _ready() -> void:
 	_on_stat_changed(Stat.HEALTH_MAX, stats_component.get_stat(Stat.HEALTH_MAX))
 	stats_component.stats.stat_changed.connect(_on_stat_changed)
 	set_health_bar_fill(BAR_COLOR_HOSTILE) # default; subclasses recolor by team
+	refresh_nameplate_color()
 	if health_bar_auto_hide:
 		progress_bar.hide() # surfaces only on HP change (see _flash_health_bar)
+
+
+## Client: paint the over-head name by relationship. Subclasses override.
+func refresh_nameplate_color() -> void:
+	if multiplayer.is_server() or display_name_label == null:
+		return
+	set_nameplate_color(NAME_COLOR_PLAYER)
+
+
+func set_nameplate_color(color: Color) -> void:
+	if display_name_label == null:
+		return
+	display_name_label.add_theme_color_override(&"font_color", color)
 
 
 ## Whether networked :position writes should route through the NetMotionSmoother

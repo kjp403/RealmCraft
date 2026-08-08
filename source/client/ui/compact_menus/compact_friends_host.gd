@@ -130,6 +130,7 @@ func _refresh_friends() -> void:
 
 func _on_friend_list_received(payload: Dictionary) -> void:
 	_clear_list()
+	ClientState.set_friend_ids_from_list(payload)
 
 	if payload.is_empty():
 		_add_empty_message(

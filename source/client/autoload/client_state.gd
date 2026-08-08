@@ -92,6 +92,11 @@ var blocked_ids: Dictionary[int, bool]
 ## their UI mirrors the live state without a refresh round-trip.
 signal blocked_ids_changed
 
+## Persistent friend player_ids for green nameplates. Hydrated from friend.list
+## on spawn and kept in sync when the friends menu refreshes / accepts / removes.
+var friend_ids: Dictionary[int, bool]
+signal friend_ids_changed
+
 var language: String:
 	set(value):
 		var loaded_locales: PackedStringArray = TranslationServer.get_loaded_locales()
@@ -117,6 +122,49 @@ func _retint_local_players() -> void:
 	for child: Node in map.get_children():
 		if child.has_method(&"_apply_team_bar_color"):
 			child.call(&"_apply_team_bar_color")
+		if child.has_method(&"refresh_nameplate_color"):
+			child.call(&"refresh_nameplate_color")
+
+
+func set_friend_ids_from_list(payload: Dictionary) -> void:
+	friend_ids.clear()
+	for friend_id: Variant in payload:
+		var id: int = int(friend_id)
+		if id > 0:
+			friend_ids[id] = true
+	Character.local_friend_ids = friend_ids.duplicate()
+	friend_ids_changed.emit()
+	_retint_local_players()
+
+
+func add_friend_id(id: int) -> void:
+	if id <= 0:
+		return
+	friend_ids[id] = true
+	Character.local_friend_ids = friend_ids.duplicate()
+	friend_ids_changed.emit()
+	_retint_local_players()
+
+
+func remove_friend_id(id: int) -> void:
+	if id <= 0:
+		return
+	friend_ids.erase(id)
+	Character.local_friend_ids = friend_ids.duplicate()
+	friend_ids_changed.emit()
+	_retint_local_players()
+
+
+func _hydrate_friend_ids(_lp: LocalPlayer = null) -> void:
+	# friend.list is a world-server social handler (no instance id), same as the
+	# Friends menu — keep nameplates green even if the dock is never opened.
+	Client.request_data(
+		&"friend.list",
+		func(payload: Dictionary) -> void:
+			if payload.has("ok") and not bool(payload.get("ok", true)):
+				return
+			set_friend_ids_from_list(payload)
+	)
 
 
 func _ready() -> void:
@@ -126,6 +174,8 @@ func _ready() -> void:
 		player_id = payload.get("player_id", 0))
 	Client.subscribe(&"active_guild_id.set", func(payload: Dictionary):
 		active_guild_id = payload.get("active_guild_id", 0))
+	# Friend-green nameplates: pull the list once we have a local player + world.
+	local_player_ready.connect(_hydrate_friend_ids)
 	Client.subscribe(&"wardstones.set", func(payload: Dictionary):
 		wardstones = PackedStringArray(payload.get("wardstones", []))
 		wardstones_changed.emit())
