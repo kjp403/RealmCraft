@@ -1085,7 +1085,12 @@ func _build_client_click_area() -> void:
 
 
 func _on_client_right_clicked() -> void:
-	if is_dead or not is_instance_valid(ClientState):
+	if not is_instance_valid(ClientState):
+		return
+	# is_dead is server-authoritative and not synced — clients use HEALTH.
+	if is_dead or (
+		stats_component != null and stats_component.get_stat(Stat.HEALTH) <= 0.0
+	):
 		return
 	ClientState.hostile_context_requested.emit(self)
 

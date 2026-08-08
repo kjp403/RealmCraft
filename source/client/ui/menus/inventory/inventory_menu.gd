@@ -535,7 +535,9 @@ func _make_bag_button(entry: Dictionary) -> Button:
 				var to_uid: int = int(entry.uid)
 				if from_uid < 0 or to_uid < 0 or from_uid == to_uid:
 					return
-				BagOrder.swap(BagOrder.load_order(), from_uid, to_uid)
+				# Insert-style move so dragging onto a tile shifts order
+				# (matches the compact dock's empty-slot placement).
+				BagOrder.move_before(BagOrder.load_order(), from_uid, to_uid)
 				fill_inventory()
 		)
 	return button

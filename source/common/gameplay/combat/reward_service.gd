@@ -60,11 +60,13 @@ static func _reward(player: Player, npc: HostileNpc) -> void:
 	# Drops land on the ground for click-pickup — not auto-bagged.
 	_spawn_ground_loot(player, npc, loot_gained)
 
-	# Weapon mastery: practicing a category = killing with it. Same xp number.
+	# Weapon mastery: practicing a category = killing with it. Fraction of kill
+	# XP — mastery levels to 50 and the curve is steeper than character XP.
 	var mastery: Dictionary = {}
 	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
 	if weapon_item != null and not weapon_item.category.is_empty():
-		mastery = resource.add_mastery_xp(weapon_item.category, npc.xp_reward)
+		var mastery_xp: int = maxi(1, int(round(float(npc.xp_reward) * 0.35)))
+		mastery = resource.add_mastery_xp(weapon_item.category, mastery_xp)
 
 	var peer_id: int = int(resource.current_peer_id)
 	if peer_id > 0:

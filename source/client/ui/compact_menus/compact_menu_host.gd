@@ -126,7 +126,8 @@ func _build_empty_grid() -> void:
 		slot.expand_icon = true
 		slot.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		slot.focus_mode = Control.FOCUS_NONE
-		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		# STOP so empty squares can accept bag-drag drops.
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 		slot.add_theme_constant_override(&"icon_max_width", 24)
 
 		inventory_grid.add_child(slot)
@@ -214,36 +215,46 @@ func _refresh_inventory() -> void:
 		})
 
 	var order: Array = BagOrder.sync_with_entries(entries)
-	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return BagOrder.index_of(order, int(a["uid"])) < BagOrder.index_of(order, int(b["uid"]))
-	)
 	_build_empty_grid()
-	_display_entries(entries)
+	_display_entries(entries, order)
 
 
-func _display_entries(entries: Array[Dictionary]) -> void:
+func _display_entries(entries: Array[Dictionary], order: Array) -> void:
+	var by_uid: Dictionary = {}
+	for entry: Dictionary in entries:
+		by_uid[int(entry["uid"])] = entry
+
 	var slots: Array[Node] = inventory_grid.get_children()
-
 	for index: int in range(slots.size()):
 		var slot := slots[index] as Button
 
 		slot.icon = null
 		slot.tooltip_text = ""
-		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
+		slot.focus_mode = Control.FOCUS_NONE
 		for child: Node in slot.get_children():
 			slot.remove_child(child)
 			child.queue_free()
 
-		if index >= entries.size():
+		# Every square accepts drops so items can land on empty cells.
+		slot.set_drag_forwarding(
+			_bag_get_drag_data_empty,
+			_bag_can_drop_data,
+			_bag_drop_data.bind(index),
+		)
+
+		var uid: int = BagOrder.EMPTY
+		if index < order.size():
+			uid = int(order[index])
+		if uid == BagOrder.EMPTY or not by_uid.has(uid):
 			continue
 
-		var entry: Dictionary = entries[index]
+		var entry: Dictionary = by_uid[uid]
 		var data: Dictionary = entry["data"]
 		var item: Item = entry["item"]
 
 		slot.icon = item.item_icon
 		slot.tooltip_text = String(item.item_name)
-		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 
 		slot.gui_input.connect(
 			_on_slot_gui_input.bind(entry, slot),
@@ -251,7 +262,7 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 		slot.set_drag_forwarding(
 			_bag_get_drag_data.bind(entry, slot),
 			_bag_can_drop_data,
-			_bag_drop_data.bind(entry),
+			_bag_drop_data.bind(index),
 		)
 
 		var amount: int = int(data.get("a", 1))
@@ -278,6 +289,10 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 			quantity.offset_bottom -= 2
 
 
+func _bag_get_drag_data_empty(_at_position: Vector2) -> Variant:
+	return null
+
+
 func _bag_get_drag_data(
 	_at_position: Vector2,
 	entry: Dictionary,
@@ -296,14 +311,22 @@ func _bag_can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	return data is Dictionary and (data as Dictionary).has("bag_uid")
 
 
-func _bag_drop_data(_at_position: Vector2, data: Variant, target: Dictionary) -> void:
+func _bag_drop_data(_at_position: Vector2, data: Variant, to_index: int) -> void:
 	if data is not Dictionary:
 		return
 	var from_uid: int = int((data as Dictionary).get("bag_uid", -1))
-	var to_uid: int = int(target.get("uid", -1))
-	if from_uid < 0 or to_uid < 0 or from_uid == to_uid:
+	if from_uid < 0 or to_index < 0:
 		return
-	BagOrder.swap(BagOrder.load_order(), from_uid, to_uid)
+	var order: Array = BagOrder.load_order()
+	if BagOrder.index_of(order, from_uid) == to_index:
+		return
+	var dest_uid: int = BagOrder.EMPTY
+	if to_index < order.size():
+		dest_uid = int(order[to_index])
+	if dest_uid >= 0 and dest_uid != from_uid:
+		BagOrder.swap(order, from_uid, dest_uid)
+	else:
+		BagOrder.move_to_index(order, from_uid, to_index)
 	_refresh_inventory()
 
 
