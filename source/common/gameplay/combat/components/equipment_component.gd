@@ -40,8 +40,16 @@ var _special_ability_ids: Array[int] = [0, 0]
 var _applied_gear_mods: Array[Dictionary] = []
 
 
+const EMPTY_HAND_SCENE: PackedScene = preload(
+	"res://source/common/gameplay/items/weapons/empty_hand/empty_hand.tscn"
+)
+
+
 func _ready() -> void:
 	slots.slot_changed.connect(_on_slot_changed)
+	# Players with an empty weapon slot still need a punch so they can fight
+	# before buying/equipping a weapon. Deferred: right_hand_spot must exist.
+	call_deferred(&"_ensure_unarmed_if_empty")
 
 
 func equip_item(item_id: int) -> bool:
@@ -102,11 +110,15 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 	_clear_slot(slot)
 
 	if item_id == 0:
+		if slot == &"weapon":
+			_mount_unarmed()
 		_clamp_vitals_to_max()
 		equipment_changed.emit(slot, 0)
 		return
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
 	if not item:
+		if slot == &"weapon":
+			_mount_unarmed()
 		return
 
 	equipped_items[slot] = item
@@ -123,11 +135,44 @@ func _apply_special_to_mounted() -> void:
 		mounted.mount_specials(_special_ability_ids)
 
 
+## Bare-hands punch mount for players with nothing in the weapon slot.
+func _mount_unarmed() -> void:
+	if character == null or not (character is Player):
+		return
+	if character.right_hand_spot == null:
+		return
+	_free_mounted(&"weapon")
+	var hand: Weapon = EMPTY_HAND_SCENE.instantiate() as Weapon
+	if hand == null:
+		return
+	hand.character = character
+	mounted_nodes[&"weapon"] = hand
+	character.right_hand_spot.add_child(hand)
+
+
+func _ensure_unarmed_if_empty() -> void:
+	if character == null or not (character is Player):
+		return
+	var weapon_id: int = int(slots.values.get(&"weapon", 0))
+	if weapon_id == 0 and not mounted_nodes.has(&"weapon"):
+		_mount_unarmed()
+
+
+func _free_mounted(slot: StringName) -> void:
+	var node: Node = mounted_nodes.get(slot, null)
+	if node != null:
+		node.queue_free()
+	mounted_nodes.erase(slot)
+
+
 func _clear_slot(slot: StringName) -> void:
 	var item: Item = equipped_items.get(slot, null)
 
 	if item:
 		item.unequip(character)
+	else:
+		# Empty-hand punch (and any other non-Item mount) still occupies the node.
+		_free_mounted(slot)
 	equipped_items.erase(slot)
 	_remove_gear_stats(slot)
 

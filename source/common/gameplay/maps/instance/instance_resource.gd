@@ -33,6 +33,14 @@ enum SpawnOverride {
 ## open. Checked server-side in can_join_instance; levels are advisory only.
 @export var required_wardstone: StringName = &""
 
+@export_group("Death return")
+## When set, dying in this instance ejects the player here (e.g. boss arenas
+## return to Castle Garden) instead of the local RespawnPoint. Empty = stay
+## on this map and use [method Map.get_spawn_position].
+@export var death_return_instance: InstanceResource
+## Warper id inside [member death_return_instance] to land on (0 = default spawn).
+@export var death_return_warper_id: int = 0
+
 var loading_instances: Array
 var charged_instances: Array[Node]
 

@@ -106,6 +106,24 @@ func die(killer: Character) -> void:
 			spawn_position = sparring_pos
 		SparringService.on_player_died_in_match(self, killer)
 
+	# Boss arenas (The Hollow): eject to Castle Garden instead of the local pad.
+	var return_home: bool = false
+	if (
+		player_resource != null
+		and not player_resource.in_match
+		and WorldServer.curr != null
+		and WorldServer.curr.instance_manager != null
+	):
+		var cur_inst: ServerInstance = WorldServer.curr.instance_manager.find_instance_for_peer(
+			int(player_resource.current_peer_id)
+		)
+		if (
+			cur_inst != null
+			and cur_inst.instance_resource != null
+			and cur_inst.instance_resource.death_return_instance != null
+		):
+			return_home = true
+
 	var peer_id: int = int(player_resource.current_peer_id)
 	if peer_id > 0:
 		# Death-screen attribution. Every Character carries a display_name (the
@@ -116,6 +134,7 @@ func die(killer: Character) -> void:
 			"respawn_in": RESPAWN_DELAY,
 			"spawn": spawn_position,
 			"killed_by": killed_by,
+			"return_home": return_home,
 		})
 
 	await get_tree().create_timer(RESPAWN_DELAY).timeout
@@ -134,6 +153,10 @@ func die(killer: Character) -> void:
 		_pvp_death_streak = 0
 		_last_pvp_death_ms = 0
 		WorldServer.curr.instance_manager.send_player_to_jail(peer_id)
+		return
+
+	if return_home and peer_id > 0:
+		WorldServer.curr.instance_manager.send_player_death_return(peer_id)
 
 
 ## Top HP and mana back to full (does NOT touch the dead flag). The dungeon enter/exit refill uses it

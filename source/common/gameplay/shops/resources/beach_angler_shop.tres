@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="ShopResource" format=3 uid="uid://cbeachanglshop"]
+
+[ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
+[ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
+[ext_resource type="Resource" uid="uid://c00d4891f82d48" path="res://source/common/gameplay/items/weapons/tools/fishing_rod.tres" id="3_rod1"]
+[ext_resource type="Resource" uid="uid://cfishrodlv1001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv10.tres" id="4_rod10"]
+[ext_resource type="Resource" uid="uid://cfishrodlv2001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv20.tres" id="5_rod20"]
+[ext_resource type="Resource" uid="uid://cfishrodlv3001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv30.tres" id="6_rod30"]
+
+[sub_resource type="Resource" id="Entry_rod1"]
+script = ExtResource("1_entry")
+item = ExtResource("3_rod1")
+price = 3
+
+[sub_resource type="Resource" id="Entry_rod10"]
+script = ExtResource("1_entry")
+item = ExtResource("4_rod10")
+price = 25
+
+[sub_resource type="Resource" id="Entry_rod20"]
+script = ExtResource("1_entry")
+item = ExtResource("5_rod20")
+price = 75
+
+[sub_resource type="Resource" id="Entry_rod30"]
+script = ExtResource("1_entry")
+item = ExtResource("6_rod30")
+price = 200
+
+[resource]
+script = ExtResource("2_shop")
+shop_name = "Beach Tackle"
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_rod1"), SubResource("Entry_rod10"), SubResource("Entry_rod20"), SubResource("Entry_rod30")])
+metadata/slug = &"beach_angler_shop"

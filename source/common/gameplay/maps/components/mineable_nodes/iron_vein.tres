@@ -15,7 +15,8 @@ job_xp = Dictionary[StringName, int]({
 &"mining": 18
 })
 required_level = 5
+required_tool = &"pickaxe"
 extraction_hp = 4
-charge_regen_seconds = 18.0
-depleted_recharge_seconds = 90.0
+charge_regen_seconds = 14.0
+depleted_recharge_seconds = 72.0
 texture = SubResource("AtlasTexture_enuqk")

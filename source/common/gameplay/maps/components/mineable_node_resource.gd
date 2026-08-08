@@ -42,12 +42,12 @@ extends Resource
 ## player gets the yield. Each pickaxe swing chips this down by the swing's
 ## extraction_damage.
 @export var extraction_hp: int = 3
-## Total shared yields before depletion. Snap-refills as a group.
+## Yields each player can take before THEIR pool depletes. Independent per player.
 @export var max_charges: int = 3
-## Continuous regen while at least 1 charge remains: +1 charge every X sec.
+## Continuous regen while at least 1 charge remains for that player: +1 every X sec.
 @export var charge_regen_seconds: float = 12.0
-## Recharge time after the node hits 0 charges. Longer than continuous regen,
-## refills ALL charges at once.
+## Recharge time after a player's pool hits 0. Longer than continuous regen,
+## refills ALL of that player's charges at once.
 @export var depleted_recharge_seconds: float = 60.0
 ## Per-player cooldown after a successful extraction.
 @export var player_cooldown_seconds: float = 5.0

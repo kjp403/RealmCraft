@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://cyxm7wgu1engl" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
 [ext_resource type="Resource" uid="uid://bdg1wvajij76o" path="res://source/common/gameplay/characters/npc/npcs/woodland/warden_bren.tres" id="25_bren"]
 [ext_resource type="Resource" uid="uid://m6ronoxklq18" path="res://source/common/gameplay/characters/npc/npcs/woodland/hermit.tres" id="26_hermit"]
+[ext_resource type="Resource" uid="uid://cbeachangler01" path="res://source/common/gameplay/characters/npc/npcs/woodland/beach_angler.tres" id="26_angler"]
 [ext_resource type="Resource" uid="uid://dsvbif0isp6d5" path="res://source/common/gameplay/maps/components/mineable_nodes/flax.tres" id="27_lebv5"]
 [ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
@@ -820,6 +821,10 @@ npc_resource = ExtResource("25_bren")
 [node name="SecretHermit" parent="NPCs" unique_id=957533930 instance=ExtResource("6_mn6pe")]
 position = Vector2(2696, 600)
 npc_resource = ExtResource("26_hermit")
+
+[node name="BeachAngler" parent="NPCs" unique_id=1900000201 instance=ExtResource("6_mn6pe")]
+position = Vector2(1220, 1640)
+npc_resource = ExtResource("26_angler")
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=59547489]
 

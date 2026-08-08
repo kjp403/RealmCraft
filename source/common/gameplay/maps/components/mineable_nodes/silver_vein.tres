@@ -16,6 +16,6 @@ job_xp = Dictionary[StringName, int]({
 })
 required_level = 20
 extraction_hp = 5
-charge_regen_seconds = 22.0
-depleted_recharge_seconds = 110.0
+charge_regen_seconds = 18.0
+depleted_recharge_seconds = 88.0
 texture = SubResource("AtlasTexture_silver")

@@ -173,15 +173,19 @@ func refresh_nameplate_color() -> void:
 
 
 ## Lock control while dead, then teleport ourselves to the spawn point (the server owns
-## HP + the dead flag; position is ours to set).
+## HP + the dead flag; position is ours to set). Boss-arena deaths set return_home —
+## the server switches instance after the delay, so skip the local snap.
 func _on_player_died(data: Dictionary) -> void:
 	_dead = true
 	_respawn_position = data.get("spawn", global_position)
+	var return_home: bool = bool(data.get("return_home", false))
 	await get_tree().create_timer(float(data.get("respawn_in", 3.0))).timeout
 	if not is_instance_valid(self):
 		return
-	global_position = _respawn_position
 	_dead = false
+	if return_home:
+		return
+	global_position = _respawn_position
 
 
 ## Server-driven teleport for the start/end of a sparring match. Pushes carry
@@ -320,10 +324,10 @@ func freeze_movement(seconds: float) -> void:
 	_movement_lock_until_ms = maxi(_movement_lock_until_ms, Time.get_ticks_msec() + int(seconds * 1000.0))
 
 
-## True while a real WEAPON (one with a primary attack) is in hand — i.e. combat mode.
-## Bare hands, a held potion, or a held material all read as UNARMED. The world click-
-## to-inspect gate uses this: you only open a player's profile while holstered, so a
-## click in a fight is always a shot, never a profile.
+## True while a primary attack is available — a real weapon, or bare-hands punch.
+## A held potion / material with no primary attack still reads as UNARMED. The world
+## click-to-inspect gate uses this: you only open a player's profile while holstered,
+## so a click in a fight is always a swing/shot, never a profile.
 func is_armed() -> bool:
 	var weapon: Weapon = equipment_component.mounted_nodes.get(&"weapon", null) as Weapon
 	return weapon != null and not weapon.abilities.is_empty() and weapon.abilities[0] != null
@@ -648,7 +652,8 @@ func set_click_move_target(world_target: Vector2) -> void:
 
 
 ## Begin commercial-style auto-gather on [param node] (walk in, swing until
-## depleted, wait for regen, repeat). Cancel with WASD or a ground click.
+## this player's charge pool is depleted, then stop — re-click to resume after
+## regen). Cancel with WASD or a ground click.
 func start_auto_gather(node: MineableNode) -> void:
 	if _harvest_controller == null:
 		return

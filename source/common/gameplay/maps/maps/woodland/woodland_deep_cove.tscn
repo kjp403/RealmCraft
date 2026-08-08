@@ -3,10 +3,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_deep_cove_ground.png" id="1_ground"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_tp"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/buildings/fishshop1.png" id="3_shop"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/palm.png" id="p6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_teal.png" id="p11"]
 [ext_resource type="Resource" uid="uid://c9d71fdd6d025a" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_lionfish.tres" id="h0"]
@@ -25,30 +23,12 @@ ground_size = Vector2(704, 480)
 shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
 dock_walk = Rect2(324, 120, 56, 140)
 boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(170, 84, 60, 24), Rect2(52, 82, 16, 12), Rect2(552, 92, 16, 12), Rect2(268, 142, 24, 14), Rect2(144, 124, 12, 12)])
+solid_footprints = Array[Rect2]([Rect2(268, 142, 24, 14), Rect2(144, 124, 12, 12)])
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
 centered = false
 texture = ExtResource("1_ground")
-
-[node name="FishShop" type="Sprite2D" parent="."]
-z_index = 2
-position = Vector2(200, 100)
-texture = ExtResource("3_shop")
-offset = Vector2(0, -32)
-
-[node name="Palm1" type="Sprite2D" parent="."]
-z_index = 3
-position = Vector2(60, 90)
-texture = ExtResource("p6")
-offset = Vector2(0, -24)
-
-[node name="Palm2" type="Sprite2D" parent="."]
-z_index = 3
-position = Vector2(560, 100)
-texture = ExtResource("p6")
-offset = Vector2(0, -24)
 
 [node name="Umbrella1" type="Sprite2D" parent="."]
 position = Vector2(280, 150)

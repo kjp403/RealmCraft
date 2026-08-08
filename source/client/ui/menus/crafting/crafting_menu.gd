@@ -31,6 +31,11 @@ var _selected: int = -1
 ## Active category tab; empty when the station has a single category (no tabs).
 var _tab: StringName = &""
 var _has_tabs: bool = false
+## Cooking stations auto-loop: one cook every COOK_INTERVAL seconds until
+## the selected raw fish runs out (or the player stops / closes the menu).
+const COOK_INTERVAL: float = 2.0
+var _cooking: bool = false
+var _cook_generation: int = 0
 
 var _tab_buttons: Dictionary[StringName, Button] = {}
 var _tab_group: ButtonGroup = ButtonGroup.new()
@@ -65,6 +70,7 @@ func _ready() -> void:
 ## Hand the crafting menu the station's catalog directly (rendered client-side)
 ## plus the node name the server resolves the station by.
 func open(arg: Dictionary) -> void:
+	_stop_cooking()
 	_station_key = str(arg.get("key", ""))
 	_station = arg.get("station") as CraftingStationResource
 	if _station == null:
@@ -78,8 +84,24 @@ func open(arg: Dictionary) -> void:
 
 
 func _on_visibility_changed() -> void:
-	if visible and _station != null:
+	if not visible:
+		_stop_cooking()
+		return
+	if _station != null:
 		_refresh()
+
+
+func _is_cooking_station() -> bool:
+	return _station != null and _station.profession == &"cooking"
+
+
+func _action_verb() -> String:
+	return "Cook" if _is_cooking_station() else "Craft"
+
+
+func _stop_cooking() -> void:
+	_cooking = false
+	_cook_generation += 1
 
 
 ## Profession chip + XP bar + gold balance, inserted left of the Close button.
@@ -317,6 +339,8 @@ func _make_row(index: int, recipe: CraftingRecipe) -> Button:
 
 
 func _on_row_pressed(index: int) -> void:
+	if _selected != index:
+		_stop_cooking()
 	_selected = index
 	_render_detail()
 
@@ -336,7 +360,7 @@ func _render_detail() -> void:
 		fee_label.text = ""
 		xp_label.text = ""
 		craft_button.disabled = true
-		craft_button.text = "Craft"
+		craft_button.text = _action_verb()
 		return
 
 	var recipe: CraftingRecipe = _station.recipes[_selected]
@@ -376,6 +400,11 @@ func _render_detail() -> void:
 		JobRegistry.display_name(_station.profession),
 	]
 
+	if _cooking and _is_cooking_station():
+		craft_button.disabled = false
+		craft_button.text = "Stop"
+		return
+
 	craft_button.disabled = not (meets_level and has_mats and can_pay)
 	if not meets_level:
 		craft_button.text = "Requires Lv %d" % recipe.required_level
@@ -384,7 +413,7 @@ func _render_detail() -> void:
 	elif not can_pay:
 		craft_button.text = "Not enough gold"
 	else:
-		craft_button.text = "Craft"
+		craft_button.text = _action_verb()
 
 
 ## "Helmet · wearable at level N" for gear, "Material" for mats.
@@ -459,8 +488,51 @@ func _has_ingredients(recipe: CraftingRecipe) -> bool:
 # --- Crafting ----------------------------------------------------------------
 
 func _on_craft_pressed() -> void:
-	if _selected < 0:
+	if _selected < 0 or _station == null:
 		return
+	if _is_cooking_station():
+		if _cooking:
+			_stop_cooking()
+			_render_detail()
+			return
+		_start_cooking_loop()
+		return
+	await _craft_once()
+
+
+## Starts a cook loop: wait 2s per cook, then craft, repeating until the selected
+## raw fish stack is gone, the player hits Stop, or the menu closes.
+func _start_cooking_loop() -> void:
+	_cooking = true
+	_cook_generation += 1
+	var gen: int = _cook_generation
+	_render_detail()
+	while _cooking and gen == _cook_generation and visible and _selected >= 0:
+		var recipe: CraftingRecipe = _station.recipes[_selected]
+		if _profession_level < recipe.required_level or not _has_ingredients(recipe):
+			break
+		if _station.craft_fee > 0 and _golds < _station.craft_fee:
+			break
+		var waited: float = 0.0
+		while waited < COOK_INTERVAL and _cooking and gen == _cook_generation and visible:
+			await get_tree().create_timer(0.1).timeout
+			waited += 0.1
+		if not _cooking or gen != _cook_generation or not visible:
+			break
+		if not _has_ingredients(recipe):
+			break
+		var ok: bool = await _craft_once()
+		if not ok:
+			break
+	_stop_cooking()
+	if is_inside_tree():
+		_render_detail()
+
+
+## Single craft/cook request. Returns true on success.
+func _craft_once() -> bool:
+	if _selected < 0 or _station == null:
+		return false
 	var recipe: CraftingRecipe = _station.recipes[_selected]
 	var result: Array = await Client.request_data_await(
 		&"craft.item",
@@ -469,22 +541,25 @@ func _on_craft_pressed() -> void:
 	)
 	if result[1] != OK or not result[0].get("ok", false):
 		_toast_failure(result[0] if result[1] == OK else {})
-		return
+		return false
 
 	var data: Dictionary = result[0]
-	Toaster.toast("Crafted %d %s" % [int(data.get("amount", 1)), str(recipe.output_item.item_name)])
+	var verb: String = "Cooked" if _is_cooking_station() else "Crafted"
+	Toaster.toast("%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)])
 	if data.get("leveled_up", false):
 		Toaster.toast("%s — Level %d!" % [JobRegistry.display_name(_station.profession), int(data.get("level", 1))])
-	_refresh()
+	await _refresh()
+	return true
 
 
 func _toast_failure(data: Dictionary) -> void:
+	var verb: String = "cook" if _is_cooking_station() else "craft"
 	match String(data.get("reason", "")):
 		"level":
-			Toaster.toast("Requires level %d to craft this." % int(data.get("required_level", 0)))
+			Toaster.toast("Requires level %d to %s this." % [int(data.get("required_level", 0)), verb])
 		"ingredients":
 			Toaster.toast("You don't have the ingredients.")
 		"gold":
 			Toaster.toast("Not enough gold for the station fee (%d)." % int(data.get("fee", 0)))
 		_:
-			Toaster.toast("Can't craft that right now.")
+			Toaster.toast("Can't %s that right now." % verb)
