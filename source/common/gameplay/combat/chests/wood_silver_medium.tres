@@ -12,33 +12,36 @@
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
-min_amount = 2
-max_amount = 5
+min_amount = 10
+max_amount = 25
 chance = 0.9
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
-max_amount = 3
+min_amount = 10
+max_amount = 25
 chance = 0.7
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 2
-max_amount = 4
+min_amount = 10
+max_amount = 25
 chance = 0.85
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
-max_amount = 3
+min_amount = 10
+max_amount = 25
 chance = 0.75
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
-max_amount = 3
+min_amount = 10
+max_amount = 25
 chance = 0.6
 
 [resource]
@@ -46,6 +49,6 @@ script = ExtResource("2_chest")
 display_name = "Wood Chest (Silver, Medium)"
 icon = ExtResource("3_icon")
 tier = 1
-gold_min = 35
-gold_max = 70
+gold_min = 1000
+gold_max = 2500
 loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4")])
