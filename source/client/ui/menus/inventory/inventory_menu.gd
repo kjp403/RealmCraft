@@ -514,8 +514,22 @@ func _make_bag_button(entry: Dictionary) -> Button:
 		button.add_child(badge)
 	button.pressed.connect(_on_entry_pressed.bind(entry))
 	# Double-click / double-tap = the primary action (equip/use/unequip).
+	# Shift+Left on bag armor = instant Equip (fluent mid-fight swaps).
 	button.gui_input.connect(func(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
+		if event is not InputEventMouseButton:
+			return
+		var mouse: InputEventMouseButton = event as InputEventMouseButton
+		if not mouse.pressed or mouse.button_index != MOUSE_BUTTON_LEFT:
+			return
+		if mouse.shift_pressed and not bool(entry.equipped) \
+				and entry.item is GearItem \
+				and (entry.item as GearItem).slot != null \
+				and (entry.item as GearItem).slot.key != &"weapon":
+			_on_entry_pressed(entry)
+			if not action_button.disabled:
+				_on_action_button_pressed()
+			return
+		if mouse.double_click:
 			_on_entry_pressed(entry)
 			if not action_button.disabled:
 				_on_action_button_pressed())

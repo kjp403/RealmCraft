@@ -128,3 +128,13 @@ extends Resource
 @export var arm_shot_speed: float = 220.0
 @export var arm_shot_lifetime_s: float = 1.4
 @export var enraged_arm_shot_interval_s: float = 0.0
+## DPS-ranked ornate chest grants (bag LootChestItems: blue/red/pink). When
+## ornate_chest_top_max > 0, RewardService sorts contributors by damage and
+## awards: top → [top_min, top_max], 2nd → [second_min, second_max], everyone
+## else → 1 chest at consolation_chance (e.g. 0.25). Each chest is rolled
+## independently among the three ornate tiers. 0 top_max = disabled.
+@export var ornate_chest_top_min: int = 0
+@export var ornate_chest_top_max: int = 0
+@export var ornate_chest_second_min: int = 0
+@export var ornate_chest_second_max: int = 0
+@export_range(0.0, 1.0, 0.01) var ornate_chest_consolation_chance: float = 0.0

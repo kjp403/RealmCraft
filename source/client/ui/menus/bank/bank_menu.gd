@@ -258,11 +258,7 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 			PixelIcon.mount(button, item.item_icon)
 			var tip: String = ItemTooltip.hover_text(item)
 			if is_bag:
-				tip += (
-					"\nLeft-click: deposit all"
-					if amount > 2
-					else "\nLeft-click: select · use Deposit below for amount"
-				)
+				tip += "\nLeft-click: deposit all"
 			button.tooltip_text = tip
 		else:
 			button.tooltip_text = "Unknown item"
@@ -284,8 +280,9 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 
 
 func _on_stack_selected(uid: int, from_bag: bool, have: int, item: Item) -> void:
-	# Bag stacks larger than 2 deposit on left-click; qty 1–2 must use Deposit below.
-	if from_bag and have > 2:
+	# Bag: left-click deposits the whole stack (qty 1 included). Withdraw still
+	# selects + uses the amount spinner / Withdraw button.
+	if from_bag:
 		_transfer_stack(uid, true, have)
 		return
 

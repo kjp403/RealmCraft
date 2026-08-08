@@ -6,6 +6,13 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="4_gold"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="5_iron"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="6_bar"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="7_coal"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="8_steel"]
+[ext_resource type="Resource" uid="uid://bcyv8agmtbwjt" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="9_sword"]
+[ext_resource type="Resource" uid="uid://dp76go82xd8il" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="10_hammer"]
+[ext_resource type="Resource" uid="uid://odkhbap0vf6s" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="11_wand"]
+[ext_resource type="Resource" uid="uid://rmr0ohwx8ooc" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="12_book"]
+[ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="13_bow"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 
@@ -20,20 +27,57 @@ lunge_cooldown = 6.5
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
 item = ExtResource("4_gold")
-min_amount = 80
-max_amount = 140
+min_amount = 120
+max_amount = 220
 
 [sub_resource type="Resource" id="Drop_iron"]
 script = ExtResource("2_loot")
 item = ExtResource("5_iron")
-min_amount = 4
-max_amount = 8
+min_amount = 6
+max_amount = 12
 
 [sub_resource type="Resource" id="Drop_bar"]
 script = ExtResource("2_loot")
 item = ExtResource("6_bar")
+min_amount = 3
+max_amount = 6
+
+[sub_resource type="Resource" id="Drop_coal"]
+script = ExtResource("2_loot")
+item = ExtResource("7_coal")
+min_amount = 8
+max_amount = 16
+
+[sub_resource type="Resource" id="Drop_steel"]
+script = ExtResource("2_loot")
+item = ExtResource("8_steel")
 min_amount = 2
-max_amount = 4
+max_amount = 5
+
+[sub_resource type="Resource" id="Drop_sword"]
+script = ExtResource("2_loot")
+item = ExtResource("9_sword")
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_hammer"]
+script = ExtResource("2_loot")
+item = ExtResource("10_hammer")
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_wand"]
+script = ExtResource("2_loot")
+item = ExtResource("11_wand")
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_book"]
+script = ExtResource("2_loot")
+item = ExtResource("12_book")
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("13_bow")
+chance = 0.18
 
 [resource]
 script = ExtResource("1_script")
@@ -56,7 +100,7 @@ chase_on_area = true
 xp_reward = 900
 respawns = true
 respawn_delay = 300.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow")])
 enrage_health_fraction = 0.4
 slam_radius = 140.0
 slam_windup_s = 1.4
@@ -78,5 +122,10 @@ add_enemy_slug = &"iron_golem"
 add_count = 2
 add_spread_px = 72.0
 enrage_speed_mult = 1.35
+ornate_chest_top_min = 1
+ornate_chest_top_max = 3
+ornate_chest_second_min = 1
+ornate_chest_second_max = 2
+ornate_chest_consolation_chance = 0.25
 metadata/slug = &"mecha_stone_golem"
 metadata/id = 40
