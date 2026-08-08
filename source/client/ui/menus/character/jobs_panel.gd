@@ -226,9 +226,7 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 	var xp: int = int(info.get("xp", 0))
 	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
 	var lines: PackedStringArray = [
-		"%s — Lv %d" % [display, level],
 		"%d / %d XP (%d to next level)" % [xp, xp_to_next, maxi(0, xp_to_next - xp)],
-		"",
 	]
 	var jp: JobPerks = JobRegistry.perks_for(StringName(skill_name))
 	if jp != null and not jp.source_items.is_empty():
@@ -252,7 +250,7 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 			lines.append("• %s — %s" % [String(item.item_name), gate])
 	else:
 		lines.append("No source list authored for this skill yet.")
-	Toaster.toast("\n".join(lines), 4.0)
+	Toaster.toast_group("%s — Lv %d" % [display, level], lines, 4.5)
 
 
 func _create_locked_tile() -> Control:
