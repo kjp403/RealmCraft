@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://1lvvopw0erqjg"]
+
+[ext_resource type="Texture2D" uid="uid://1s2ljkysclyvt" path="res://assets/sprites/items/icons/mat_bronze_arrowheads.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Bronze Arrowheads"
+item_icon = ExtResource("1_icon")
+description = "A handful of bronze tips ready for fletching."
+vendor_value = 3
+can_trade = true
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"bronze_arrowheads"
+metadata/id = 229

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/interactable_marker.tscn" id="2_marker"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_default"]
-size = Vector2(32, 32)
+size = Vector2(96, 96)
 
 [node name="CraftingStation" type="Area2D"]
 script = ExtResource("1_script")

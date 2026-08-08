@@ -109,21 +109,12 @@ func meets_mastery_requirement(res: PlayerResource) -> bool:
 	return false
 
 
-func equip(character: Character) -> void:
-	if not character.multiplayer.is_server():
-		# Client side logic - visual
-		return
-	for modifier: StatModifier in base_modifiers:
-		character.stats_component.modify_stat(
-			modifier.stat_name, modifier.value
-		)
+func equip(_character: Character) -> void:
+	# Visual / mount hooks live on WeaponItem and Item. Combat stats from
+	# base_modifiers are applied by EquipmentComponent's gear ledger so
+	# unequip can't leave orphaned boosts behind.
+	pass
 
 
-func unequip(character: Character) -> void:
-	if not character.multiplayer.is_server():
-		# Client side logic - visual
-		return
-	for modifier: StatModifier in base_modifiers:
-		character.stats_component.modify_stat(
-			modifier.stat_name, modifier.value * -1
-		)
+func unequip(_character: Character) -> void:
+	pass

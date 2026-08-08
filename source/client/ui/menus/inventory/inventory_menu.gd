@@ -527,7 +527,10 @@ func _make_bag_button(entry: Dictionary) -> Button:
 					button,
 					BagOrder.make_drag_preview((entry.item as Item).item_icon, Vector2(56, 56))
 				)
-				return {"bag_uid": int(entry.uid)},
+				return {
+					"bag_uid": int(entry.uid),
+					"item_id": int((entry.item as Item).get_meta(&"id", 0)),
+				},
 			func(_at: Vector2, data: Variant) -> bool:
 				return data is Dictionary and (data as Dictionary).has("bag_uid"),
 			func(_at: Vector2, data: Variant) -> void:

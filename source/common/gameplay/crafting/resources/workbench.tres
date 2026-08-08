@@ -579,5 +579,5 @@ xp_reward = 150
 [resource]
 script = ExtResource("2_station")
 profession = &"outfitting"
-craft_fee = 5
+craft_fee = 0
 recipes = Array[ExtResource("1_recipe")]([SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes")])

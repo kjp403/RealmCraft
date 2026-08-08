@@ -12,6 +12,7 @@ const SLOT_SIZE := Vector2(36.0, 36.0)
 
 const ACTION_PRIMARY := 0
 const ACTION_DROP := 1
+const ACTION_HOTKEY := 2
 
 @onready var header: HBoxContainer = $MarginContainer/MainColumn/Header
 @onready var close_button: Button = $MarginContainer/MainColumn/Header/CloseButton
@@ -307,7 +308,10 @@ func _bag_get_drag_data(
 		slot,
 		BagOrder.make_drag_preview((entry["item"] as Item).item_icon, Vector2(48, 48))
 	)
-	return {"bag_uid": int(entry["uid"])}
+	return {
+		"bag_uid": int(entry["uid"]),
+		"item_id": int((entry["item"] as Item).get_meta(&"id", 0)),
+	}
 
 
 func _bag_can_drop_data(_at_position: Vector2, data: Variant) -> bool:
@@ -380,6 +384,9 @@ func _open_context_menu(entry: Dictionary) -> void:
 	elif item.holdable:
 		context_menu.add_item("Hold", ACTION_PRIMARY)
 
+	if item is ConsumableItem or item is GearItem or item.holdable:
+		context_menu.add_item("Bind to 1-2-3", ACTION_HOTKEY)
+
 	if item.can_drop():
 		context_menu.add_item("Drop", ACTION_DROP)
 
@@ -399,6 +406,31 @@ func _on_context_action(action_id: int) -> void:
 		_perform_primary_action(context_entry)
 	elif action_id == ACTION_DROP:
 		_perform_drop(context_entry)
+	elif action_id == ACTION_HOTKEY:
+		_assign_hotkey(context_entry)
+
+
+func _assign_hotkey(entry: Dictionary) -> void:
+	var item: Item = entry.get("item", null) as Item
+	if item == null:
+		return
+	var entries: PackedStringArray = PackedStringArray()
+	for i: int in 3:
+		var occupant: Item = ClientState.quick_slots.get_key(i) as Item
+		var occupant_name: String = String(occupant.item_name) if occupant != null else "empty"
+		entries.append("Slot %d (key %d)  —  %s" % [i + 1, i + 1, occupant_name])
+	SlotPickerOverlay.open(self, "Place %s on which quick slot?" % item.item_name, entries,
+		func(slot: int) -> void:
+			var occupant: Item = ClientState.quick_slots.get_key(slot) as Item
+			if occupant == item:
+				ClientState.quick_slots.set_key(slot, null)
+				return
+			for i: int in 3:
+				if (ClientState.quick_slots.get_key(i) as Item) == item:
+					ClientState.quick_slots.set_key(i, null)
+			ClientState.quick_slots.set_key(slot, item)
+			Toaster.toast("Bound %s to key %d." % [item.item_name, slot + 1])
+	)
 
 
 func _perform_drop(entry: Dictionary) -> void:
