@@ -43,6 +43,11 @@ jobs:
               sudo apt-get install -y sqlite3
             fi
             echo "== searching as root for live userdata =="
+            echo "== known legacy userdata (project was SlayHorizon) =="
+            sudo ls -la /opt/arkenelle/.local/share/slayhorizon/ 2>/dev/null || true
+            sudo ls -la /opt/arkenelle/.local/share/slayhorizon/db/ 2>/dev/null || true
+            sudo ls -la /opt/arkenelle/.local/share/godot/app_userdata/ 2>/dev/null || true
+            sudo find /opt/arkenelle/.local/share/slayhorizon -type f 2>/dev/null | head -80 || true
             sudo find /opt/arkenelle /home /var/lib /root -type f \( \
               -name 'classic.db' -o -name 'account_collection.tres' \
               -o -name 'server_bans.cfg' -o -name 'server_jail.cfg' \
@@ -50,8 +55,18 @@ jobs:
             \) 2>/dev/null | sort -u
             echo
             # Prefer live Godot user:// DB over the repo seed at source/server/world/data/classic.db
-            DB="$(sudo find /opt/arkenelle/.local /home/arkenelle /var/lib/arkenelle /root/.local \
-              -name 'classic.db' 2>/dev/null | head -1 || true)"
+            DB=""
+            for cand in \
+              /opt/arkenelle/.local/share/slayhorizon/db/classic.db \
+              /opt/arkenelle/.local/share/godot/app_userdata/Arkenelle/db/classic.db \
+              /opt/arkenelle/.local/share/godot/app_userdata/SlayHorizon/db/classic.db
+            do
+              if sudo test -f "$cand"; then DB="$cand"; break; fi
+            done
+            if [ -z "$DB" ]; then
+              DB="$(sudo find /opt/arkenelle/.local /home/arkenelle /var/lib/arkenelle /root/.local \
+                -name 'classic.db' 2>/dev/null | head -1 || true)"
+            fi
             if [ -z "$DB" ]; then
               DB="$(sudo find /opt/arkenelle -path '*/app_userdata/*/db/classic.db' 2>/dev/null | head -1 || true)"
             fi
@@ -101,14 +116,14 @@ jobs:
             echo "######## BANS / JAIL / MUTES / ADMIN CFG ########"
             for cfg in server_bans.cfg server_jail.cfg server_mutes.cfg server_admins.cfg; do
               echo "-- $cfg --"
-              sudo find /opt/arkenelle /home/arkenelle /root -name "$cfg" 2>/dev/null | while read -r f; do
+              sudo find /opt/arkenelle/.local/share/slayhorizon /opt/arkenelle /home/arkenelle /root -name "$cfg" 2>/dev/null | while read -r f; do
                 echo "FILE $f"
                 sudo sed -n '1,300p' "$f" || true
               done
             done
             echo
             echo "######## MASTER ACCOUNT COLLECTION MATCHES ########"
-            sudo find /opt/arkenelle /home/arkenelle /root -name 'account_collection.tres' 2>/dev/null | while read -r f; do
+            sudo find /opt/arkenelle/.local/share/slayhorizon /opt/arkenelle /home/arkenelle /root -name 'account_collection.tres' 2>/dev/null | while read -r f; do
               echo "FILE $f"
               for raw in "${NAMES[@]}"; do
                 name="$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/^@//')"
