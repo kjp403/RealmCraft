@@ -390,7 +390,9 @@ func _perform_drop(entry: Dictionary) -> void:
 		Toaster.toast("Could not drop that item.")
 		return
 
-	Toaster.toast("Dropped %s." % str(payload.get("name", item.item_name)))
+	Toaster.toast(
+		"Dropped %s. Click it to pick up." % str(payload.get("name", item.item_name))
+	)
 	_refresh_inventory()
 
 
