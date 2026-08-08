@@ -30,6 +30,20 @@ const DELTA_UP_COLOR: String = "82c785"
 const DELTA_DOWN_COLOR: String = "d98080"
 
 
+## Plain multi-line hover string for native Control tooltips (bag slots, hotkeys).
+## Includes heal/mana lines so potions show "Heals 20" without opening a panel.
+static func hover_text(item: Item) -> String:
+	if item == null:
+		return ""
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append(String(item.item_name))
+	for entry: Dictionary in item.stat_lines():
+		var text: String = str(entry.get("text", "")).strip_edges()
+		if not text.is_empty():
+			lines.append(text)
+	return "\n".join(lines)
+
+
 ## Builds the tooltip body. Pass [param compare_with] (the equipped
 ## counterpart) to append green/red per-stat deltas — stats only the equipped
 ## item has are listed as a red loss line. Null keeps the plain rendering, so

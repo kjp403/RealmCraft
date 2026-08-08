@@ -242,7 +242,7 @@ func _display_entries(entries: Array[Dictionary]) -> void:
 		var item: Item = entry["item"]
 
 		slot.icon = item.item_icon
-		slot.tooltip_text = String(item.item_name)
+		slot.tooltip_text = ItemTooltip.hover_text(item)
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 
 		slot.gui_input.connect(

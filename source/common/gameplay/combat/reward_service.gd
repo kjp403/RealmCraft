@@ -111,7 +111,8 @@ static func _roll_loot(npc: HostileNpc) -> Array:
 	return out
 
 
-## Scatter rolled loot as clickable GroundItems around the corpse.
+## Scatter rolled loot as clickable GroundItems around the corpse. Gold stacks
+## merge into one pile (same kill + nearby existing piles) so pickup stays easy.
 static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Array) -> void:
 	if loot_gained.is_empty():
 		return
@@ -124,16 +125,26 @@ static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Arr
 		return
 	var container: ReplicatedPropsContainer = map.replicated_props_container
 	var origin: Vector2 = npc.global_position
+	var gold_id: int = Economy.gold_id()
+	var entries: Array = _coalesce_gold_entries(loot_gained, gold_id)
 	var i: int = 0
-	for entry: Dictionary in loot_gained:
+	for entry: Dictionary in entries:
 		var item_id: int = int(entry.get("id", 0))
 		var amount: int = int(entry.get("amount", 0))
 		if item_id <= 0 or amount <= 0:
 			continue
-		var angle: float = TAU * float(i) / float(maxi(1, loot_gained.size()))
+		var angle: float = TAU * float(i) / float(maxi(1, entries.size()))
 		var offset := Vector2(cos(angle), sin(angle)) * randf_range(12.0, 22.0)
 		offset += Vector2(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
 		var drop_global: Vector2 = origin + offset
+		if item_id == gold_id and gold_id > 0:
+			var existing: GroundItem = _find_nearby_gold_pile(
+				container, drop_global, gold_id
+			) as GroundItem
+			if existing != null:
+				existing.add_stack(amount)
+				i += 1
+				continue
 		var drop_local: Vector2 = container.to_local(drop_global)
 		container.spawn_dynamic(
 			ReplicatedPropsContainer.SCENE_GROUND_ITEM,
@@ -145,3 +156,51 @@ static func _spawn_ground_loot(player: Player, npc: HostileNpc, loot_gained: Arr
 			}
 		)
 		i += 1
+
+
+## Collapse every gold roll in one kill into a single entry.
+static func _coalesce_gold_entries(loot_gained: Array, gold_id: int) -> Array:
+	if gold_id <= 0:
+		return loot_gained
+	var gold_total: int = 0
+	var gold_name: String = "Gold"
+	var others: Array = []
+	for entry: Variant in loot_gained:
+		if entry is not Dictionary:
+			continue
+		var item_id: int = int((entry as Dictionary).get("id", 0))
+		var amount: int = int((entry as Dictionary).get("amount", 0))
+		if item_id == gold_id:
+			gold_total += amount
+			var n: String = str((entry as Dictionary).get("name", ""))
+			if not n.is_empty():
+				gold_name = n
+		else:
+			others.append(entry)
+	if gold_total > 0:
+		others.insert(0, {"id": gold_id, "amount": gold_total, "name": gold_name})
+	return others
+
+
+static func _find_nearby_gold_pile(
+	container: ReplicatedPropsContainer,
+	near_global: Vector2,
+	gold_id: int
+) -> Node:
+	var best: Node = null
+	var best_dist: float = INF
+	for child_id: int in container.dynamic_nodes:
+		var node: Node = container.dynamic_nodes[child_id]
+		if node == null or not is_instance_valid(node):
+			continue
+		if not (node is Node2D):
+			continue
+		if int(node.get("item_id")) != gold_id:
+			continue
+		if bool(node.get("collected")):
+			continue
+		var dist: float = (node as Node2D).global_position.distance_to(near_global)
+		if dist <= GroundItem.GOLD_MERGE_RANGE and dist < best_dist:
+			best = node
+			best_dist = dist
+	return best

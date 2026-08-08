@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_ad_hammer"]
 script = ExtResource("1_b5lkq")
 stat_name = "ad"
-value = 11.0
+value = 26.0
 
 [sub_resource type="Resource" id="Mod_ms_hammer"]
 script = ExtResource("1_b5lkq")
