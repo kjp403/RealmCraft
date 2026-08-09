@@ -134,19 +134,31 @@ func _rate_ok(payload: Dictionary, endpoint: StringName, max_calls: int, window_
 	return AuthRateLimiter.allow(ip, endpoint, max_calls, window_ms)
 
 
-## Exact-match version gate (server build == client build). Returns {} when OK, else
-## {error: ERR_OUTDATED_VERSION, msg}. Shared by login + the boot handshake so the
-## two never drift.
+## Version gate: accept clients in [min_client_version, server_version].
+## Exact match still preferred; the min floor stops Deploy-before-Release from
+## locking every itch install out. Returns {} when OK, else ERR_OUTDATED_VERSION.
+## Shared by login + the boot handshake so the two never drift.
 func _check_version(payload: Dictionary) -> Dictionary:
 	var server_version: String = GatewayAPI.game_version()
-	var client_version: String = str(payload.get(GatewayAPI.KEY_CLIENT_VERSION, ""))
-	if client_version == server_version:
-		return {}
+	var min_client: String = GatewayAPI.min_client_version()
+	var client_version: String = str(payload.get(GatewayAPI.KEY_CLIENT_VERSION, "")).strip_edges()
 	var have: String = client_version if not client_version.is_empty() else "unknown"
-	return {
-		"error": GatewayAPI.ERR_OUTDATED_VERSION,
-		"msg": "Outdated game version. Please update. (server %s, you have %s)" % [server_version, have],
-	}
+	if client_version.is_empty():
+		return {
+			"error": GatewayAPI.ERR_OUTDATED_VERSION,
+			"msg": "Outdated game version. Please update. (server %s, you have %s)" % [server_version, have],
+		}
+	if GatewayAPI.compare_versions(client_version, min_client) < 0:
+		return {
+			"error": GatewayAPI.ERR_OUTDATED_VERSION,
+			"msg": "Outdated game version. Please update. (need %s+, you have %s)" % [min_client, have],
+		}
+	if GatewayAPI.compare_versions(client_version, server_version) > 0:
+		return {
+			"error": GatewayAPI.ERR_OUTDATED_VERSION,
+			"msg": "Outdated game version. Please update. (server %s, you have %s)" % [server_version, have],
+		}
+	return {}
 
 
 ## Boot healthcheck (no auth): the gateway client calls this before showing any menu.

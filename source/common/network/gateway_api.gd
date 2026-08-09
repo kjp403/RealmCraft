@@ -23,8 +23,9 @@ const ERR_ALREADY_CONNECTED: int = 51
 const ERR_RATE_LIMITED: int = 60
 ## Guest login endpoint is permanently disabled.
 const ERR_GUEST_DISABLED: int = 61
-## Client build doesn't match the server's. The boot handshake (and login) return
-## this so the client can show a hard "please update" instead of letting them in.
+## Client build is below the server's min_client_version (or newer than the
+## server). The boot handshake (and login) return this so the client can show a
+## hard "please update" instead of letting them in.
 const ERR_OUTDATED_VERSION: int = 70
 
 
@@ -32,6 +33,33 @@ const ERR_OUTDATED_VERSION: int = 70
 ## call returns the client's version on the client and the server's on the server.
 static func game_version() -> String:
 	return str(ProjectSettings.get_setting("application/config/version", ""))
+
+
+## Oldest client build the gateway still accepts. Defaults to [method game_version]
+## (exact match) when unset. Set application/config/min_client_version when the
+## live server must accept the currently published itch build during a release lag.
+static func min_client_version() -> String:
+	var configured: String = str(
+		ProjectSettings.get_setting("application/config/min_client_version", "")
+	).strip_edges()
+	if configured.is_empty():
+		return game_version()
+	return configured
+
+
+## Compare dotted numeric versions (e.g. 0.28.63). Returns -1 / 0 / 1.
+static func compare_versions(a: String, b: String) -> int:
+	var a_parts: PackedStringArray = a.strip_edges().split(".")
+	var b_parts: PackedStringArray = b.strip_edges().split(".")
+	var n: int = maxi(a_parts.size(), b_parts.size())
+	for i in range(n):
+		var av: int = int(a_parts[i]) if i < a_parts.size() else 0
+		var bv: int = int(b_parts[i]) if i < b_parts.size() else 0
+		if av < bv:
+			return -1
+		if av > bv:
+			return 1
+	return 0
 
 const ACTION_LOGIN := "login"
 const ACTION_CREATE_ACCOUNT := "create_account"

@@ -14,6 +14,10 @@ name: Release clients to itch.io
 on:
   push:
     tags: ["v*"]
+    # Auto-ship Windows when application/config/version changes on main so
+    # Deploy VPS cannot get ahead of the itch channel again.
+    branches: [main]
+    paths: ["project.godot"]
   workflow_dispatch:
     inputs:
       platforms:
@@ -29,7 +33,50 @@ env:
   ITCH_GAME: "kjp403/arkenelle"
 
 jobs:
+  # Skip main-branch runs that touched project.godot without bumping config/version
+  # (icons, features, min_client_version-only edits, etc.).
+  gate:
+    runs-on: ubuntu-22.04
+    outputs:
+      should_release: ${{ steps.decide.outputs.should_release }}
+      platforms: ${{ steps.decide.outputs.platforms }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Decide whether to release
+        id: decide
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "platforms=${{ github.event.inputs.platforms }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "platforms=all" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # push to main (project.godot path filter already applied)
+          curr="$(grep -E '^config/version=' project.godot | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+          prev="$(git show HEAD^:project.godot 2>/dev/null | grep -E '^config/version=' | head -1 | sed -E 's/.*"([^"]+)".*/\1/' || true)"
+          echo "Version before='${prev:-}' after='${curr}'"
+          if [ -n "$curr" ] && [ "$curr" != "$prev" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            # Windows first on auto bumps — that's what itch Library Update needs.
+            echo "platforms=windows" >> "$GITHUB_OUTPUT"
+          else
+            echo "config/version unchanged — skipping client release"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "platforms=windows" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
+    needs: gate
+    if: needs.gate.outputs.should_release == 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -39,7 +86,7 @@ jobs:
 
       - name: Resolve target platforms
         run: |
-          P="${{ github.event.inputs.platforms }}"
+          P="${{ needs.gate.outputs.platforms }}"
           echo "PLATFORMS=${P:-all}" >> "$GITHUB_ENV"
           echo "Target platforms: ${P:-all}"
 
