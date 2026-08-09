@@ -406,6 +406,8 @@ func _make_slot(item_id: int, amount: int, mine: bool) -> Button:
 	slot.custom_minimum_size = SLOT_SIZE
 	slot.clip_contents = true
 	slot.focus_mode = Control.FOCUS_NONE
+	# Keep mouse events so tooltips work on their offer / locked slots too.
+	# Only wire remove-on-click while the offer is still editable.
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null:
 		PixelIcon.mount(slot, item.item_icon)
@@ -413,8 +415,6 @@ func _make_slot(item_id: int, amount: int, mine: bool) -> Button:
 	slot.add_child(_count_badge(amount))
 	if mine and not _locked:
 		slot.pressed.connect(_remove_from_offer.bind(item_id))
-	else:
-		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return slot
 
 
@@ -539,8 +539,8 @@ func _rebuild_picker() -> void:
 		button.focus_mode = Control.FOCUS_NONE
 		if item != null:
 			PixelIcon.mount(button, item.item_icon)
-			button.tooltip_text = "%s (have %d)" % [
-				str(item.item_name),
+			button.tooltip_text = "%s\n(have %d)" % [
+				ItemTooltip.hover_text(item),
 				int(_owned[item_id]),
 			]
 			button.add_child(_count_badge(int(_owned[item_id])))

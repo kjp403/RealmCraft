@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1786204421
-next_id = 253
+next_id = 259
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -712,6 +712,36 @@ entries = Array[Dictionary]([{
 &"id": 61,
 &"path": "res://source/common/gameplay/items/materials/metals/iron_ore.tres",
 &"slug": &"iron_ore"
+}, {
+&"hash": "mithril_ore_v1",
+&"id": 253,
+&"path": "res://source/common/gameplay/items/materials/metals/mithril_ore.tres",
+&"slug": &"mithril_ore"
+}, {
+&"hash": "adamant_ore_v1",
+&"id": 254,
+&"path": "res://source/common/gameplay/items/materials/metals/adamant_ore.tres",
+&"slug": &"adamant_ore"
+}, {
+&"hash": "runite_ore_v1",
+&"id": 255,
+&"path": "res://source/common/gameplay/items/materials/metals/runite_ore.tres",
+&"slug": &"runite_ore"
+}, {
+&"hash": "mithril_bar_v1",
+&"id": 256,
+&"path": "res://source/common/gameplay/items/materials/metals/mithril_bar.tres",
+&"slug": &"mithril_bar"
+}, {
+&"hash": "adamant_bar_v1",
+&"id": 257,
+&"path": "res://source/common/gameplay/items/materials/metals/adamant_bar.tres",
+&"slug": &"adamant_bar"
+}, {
+&"hash": "runite_bar_v1",
+&"id": 258,
+&"path": "res://source/common/gameplay/items/materials/metals/runite_bar.tres",
+&"slug": &"runite_bar"
 }, {
 &"hash": "3c9b0858fc6a8a6d83ca10541d2b0c4b33c8ae0f0276cf70926146d68a268a80",
 &"id": 220,

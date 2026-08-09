@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cmithriloremat1"]
+
+[ext_resource type="Texture2D" uid="uid://d01e86fa64baa" path="res://assets/sprites/items/icons/ore_mithril.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Mithril Ore"
+item_icon = ExtResource("1_icon")
+description = "Pale blue ore. Smelt at a furnace into mithril bars."
+vendor_value = 12
+stack_limit = 10
+can_trade = true
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"mithril_ore"
+metadata/id = 253

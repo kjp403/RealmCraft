@@ -664,6 +664,7 @@ func _on_action_button_pressed() -> void:
 			InstanceClient.current.name
 		)
 		if not _surface_item_rejection(consume_result):
+			ConsumableItem.stamp_client_cooldown(_selected_item as ConsumableItem)
 			fill_inventory()
 		return
 	if _selected_item is GearItem or _selected_item.holdable:

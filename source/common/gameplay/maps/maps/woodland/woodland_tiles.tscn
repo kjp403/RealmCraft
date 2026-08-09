@@ -38,6 +38,9 @@
 [ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
 [ext_resource type="Resource" uid="uid://csilvervein001" path="res://source/common/gameplay/maps/components/mineable_nodes/silver_vein.tres" id="35_silver"]
 [ext_resource type="Resource" uid="uid://cgoldvein00001" path="res://source/common/gameplay/maps/components/mineable_nodes/gold_vein.tres" id="36_gold"]
+[ext_resource type="Resource" uid="uid://cmithrilvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/mithril_vein.tres" id="37_mith"]
+[ext_resource type="Resource" uid="uid://cadamantvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres" id="38_adam"]
+[ext_resource type="Resource" uid="uid://crunitevein001" path="res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres" id="39_rune"]
 
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
@@ -1209,6 +1212,36 @@ data = ExtResource("36_gold")
 y_sort_enabled = true
 position = Vector2(240, 720)
 data = ExtResource("36_gold")
+
+[node name="MithrilVein1" parent="MineableNodes" unique_id=1900000171 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(520, 560)
+data = ExtResource("37_mith")
+
+[node name="MithrilVein2" parent="MineableNodes" unique_id=1900000172 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1480, 600)
+data = ExtResource("37_mith")
+
+[node name="AdamantVein1" parent="MineableNodes" unique_id=1900000173 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(640, 700)
+data = ExtResource("38_adam")
+
+[node name="AdamantVein2" parent="MineableNodes" unique_id=1900000174 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(1720, 700)
+data = ExtResource("38_adam")
+
+[node name="RuniteVein1" parent="MineableNodes" unique_id=1900000175 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(2000, 760)
+data = ExtResource("39_rune")
+
+[node name="RuniteVein2" parent="MineableNodes" unique_id=1900000176 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(320, 800)
+data = ExtResource("39_rune")
 
 [node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
 position = Vector2(900, 1520)
