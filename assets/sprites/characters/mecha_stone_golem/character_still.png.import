@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6i4fldcc8ieg"
-path="res://.godot/imported/walk.png-f21179959ce8269829f2b1a05e944cdf.ctex"
+uid="uid://c267yhogwp7gi"
+path="res://.godot/imported/character_still.png-58be369175cbd03dbe2d6d0175c411b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/characters/mecha_stone_golem/walk.png"
-dest_files=["res://.godot/imported/walk.png-f21179959ce8269829f2b1a05e944cdf.ctex"]
+source_file="res://assets/sprites/characters/mecha_stone_golem/character_still.png"
+dest_files=["res://.godot/imported/character_still.png-58be369175cbd03dbe2d6d0175c411b9.ctex"]
 
 [params]
 

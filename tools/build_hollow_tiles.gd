@@ -30,8 +30,10 @@ func _initialize() -> void:
 		Vector2i(10, 15), Vector2i(6, 15), Vector2i(8, 16), Vector2i(7, 14),
 		Vector2i(9, 14), Vector2i(10, 14)
 	]
+	# Boss-pad tint comes from BossPad Polygon2D — do NOT use atlas (11-14,15):
+	# those cells are empty/black fragments and show as void holes in-game.
 	var darks: Array[Vector2i] = [
-		Vector2i(13, 15), Vector2i(14, 15), Vector2i(12, 15), Vector2i(11, 15), Vector2i(13, 14)
+		Vector2i(8, 15), Vector2i(7, 15), Vector2i(9, 15), Vector2i(8, 14), Vector2i(10, 15)
 	]
 
 	# Full multi-tile ORIGINS only — fragment atlas cells render as half-rocks.
