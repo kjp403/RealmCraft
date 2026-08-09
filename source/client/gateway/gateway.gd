@@ -54,10 +54,8 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 const LINK_WEBSITE: String = Distribution.WEBSITE_URL
 ## Browser marketing page only — never use this for the Update button.
 const LINK_DOWNLOAD: String = Distribution.ITCH_URL
-## Opens Arkenelle's page inside the itch.io desktop app.
+## Opens Arkenelle's page inside the itch.io desktop app (Install / Update).
 const LINK_ITCH_APP: String = Distribution.ITCH_APP_URL
-## Queues Install/Update in the itch.io app (in-game Update button target).
-const LINK_ITCH_UPDATE: String = Distribution.ITCH_INSTALL_URL
 const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
