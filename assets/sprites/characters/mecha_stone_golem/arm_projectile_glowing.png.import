@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6i4fldcc8ieg"
-path="res://.godot/imported/walk.png-f21179959ce8269829f2b1a05e944cdf.ctex"
+uid="uid://bb6xx1sdgo76e"
+path="res://.godot/imported/arm_projectile_glowing.png-d214e10db2caede3219266b7593eec99.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/characters/mecha_stone_golem/walk.png"
-dest_files=["res://.godot/imported/walk.png-f21179959ce8269829f2b1a05e944cdf.ctex"]
+source_file="res://assets/sprites/characters/mecha_stone_golem/arm_projectile_glowing.png"
+dest_files=["res://.godot/imported/arm_projectile_glowing.png-d214e10db2caede3219266b7593eec99.ctex"]
 
 [params]
 

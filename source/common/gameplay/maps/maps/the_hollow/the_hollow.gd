@@ -1,13 +1,13 @@
 class_name TheHollowMap
 extends Map
-## Boss arena for the Mecha-stone Golem. The golem is spawned dynamically on the
-## server (same path as world bosses / dungeon bosses) so clients receive a real
-## spawn op + prop id — a static scene child kept freezing on clients even after
-## bake fixes because its sync id never resolved reliably across instance charge.
+## Boss arena for the Mecha-stone Golem.
+##
+## The golem is a STATIC HostileNPC under ReplicatedPropsContainer (same pattern
+## as FungalHeart in fungus_cave). Dynamic-only spawn was unreliable across
+## instance charge / client bootstrap; baked static IDs sync every join.
 
 
-const GOLEM_SLUG: StringName = &"mecha_stone_golem"
-## Arena boss pad center (matches BossPad / BossLight in the_hollow.tscn).
+const GOLEM_NODE: StringName = &"MechaGolem"
 const GOLEM_SPAWN: Vector2 = Vector2(472, 296)
 
 
@@ -15,42 +15,36 @@ func _ready() -> void:
 	super._ready()
 	if Engine.is_editor_hint():
 		return
-	# Dedicated world + listen-server both count; prefer GameMode so a late
-	# multiplayer peer flip can't skip the spawn.
-	if not GameMode.is_world_server() and not multiplayer.is_server():
+	if not GameMode.is_world_server():
 		return
-	call_deferred(&"_spawn_golem")
+	call_deferred(&"_ensure_golem_brain")
 
 
-func _spawn_golem() -> void:
+## Server-only: guarantee the scene-placed boss has a named BossController.
+func _ensure_golem_brain() -> void:
 	if replicated_props_container == null:
 		replicated_props_container = get_node_or_null(^"ReplicatedPropsContainer") as ReplicatedPropsContainer
 	if replicated_props_container == null:
-		push_error("TheHollowMap: missing replicated_props_container — golem not spawned.")
+		push_error("TheHollowMap: missing ReplicatedPropsContainer.")
 		return
-	for child: Node in replicated_props_container.get_children():
-		var existing: HostileNpc = child as HostileNpc
-		if existing != null and existing.enemy_type == GOLEM_SLUG:
-			return
-	var boss: HostileNpc = replicated_props_container.spawn_dynamic(
-		ReplicatedPropsContainer.SCENE_HOSTILE_NPC,
-		GOLEM_SPAWN,
-		{"enemy_type_slug": GOLEM_SLUG}
-	) as HostileNpc
+	var boss: HostileNpc = replicated_props_container.get_node_or_null(NodePath(GOLEM_NODE)) as HostileNpc
 	if boss == null:
-		push_error("TheHollowMap: failed to spawn Mecha-stone Golem (slug '%s')." % GOLEM_SLUG)
-		return
-	# Attach a named brain up-front (same as EventService / RoomNode) so
-	# HostileNPC._ensure_boss_brain does not double-attach.
-	var has_brain: bool = false
+		# Safety net if the scene child was deleted — spawn once like world boss.
+		boss = replicated_props_container.spawn_dynamic(
+			ReplicatedPropsContainer.SCENE_HOSTILE_NPC,
+			GOLEM_SPAWN,
+			{"enemy_type_slug": &"mecha_stone_golem", "position": GOLEM_SPAWN}
+		) as HostileNpc
+		if boss == null:
+			push_error("TheHollowMap: MechaGolem missing and dynamic spawn failed.")
+			return
+		boss.name = String(GOLEM_NODE)
+		print("TheHollowMap: dynamic fallback spawned MechaGolem at %s" % str(GOLEM_SPAWN))
 	for child: Node in boss.get_children():
 		if child is BossController:
-			has_brain = true
-			break
-	if not has_brain:
-		var brain: BossController = BossController.new()
-		brain.name = "BossController"
-		brain.boss = boss
-		boss.add_child(brain)
-	# common/ can't reference ServerLog (server tree is stripped from clients).
-	print("TheHollowMap: spawned Mecha-stone Golem at %s" % str(GOLEM_SPAWN))
+			return
+	var brain: BossController = BossController.new()
+	brain.name = "BossController"
+	brain.boss = boss
+	boss.add_child(brain)
+	print("TheHollowMap: BossController attached to MechaGolem at %s" % str(boss.position))

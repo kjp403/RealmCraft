@@ -4,42 +4,106 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_laser_0"]
 atlas = ExtResource("1_laser")
-region = Rect2(0, 0, 300, 300)
+region = Rect2(0, 0, 300, 100)
+
 [sub_resource type="AtlasTexture" id="Atlas_laser_1"]
 atlas = ExtResource("1_laser")
-region = Rect2(0, 300, 300, 300)
+region = Rect2(0, 100, 300, 100)
+
 [sub_resource type="AtlasTexture" id="Atlas_laser_2"]
 atlas = ExtResource("1_laser")
-region = Rect2(0, 600, 300, 300)
+region = Rect2(0, 200, 300, 100)
+
 [sub_resource type="AtlasTexture" id="Atlas_laser_3"]
 atlas = ExtResource("1_laser")
-region = Rect2(0, 900, 300, 300)
+region = Rect2(0, 300, 300, 100)
+
 [sub_resource type="AtlasTexture" id="Atlas_laser_4"]
 atlas = ExtResource("1_laser")
-region = Rect2(0, 1200, 300, 300)
+region = Rect2(0, 400, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_5"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 500, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_6"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 600, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_7"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 700, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_8"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 800, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_9"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 900, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_10"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 1000, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_11"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 1100, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_12"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 1200, 300, 100)
+
+[sub_resource type="AtlasTexture" id="Atlas_laser_13"]
+atlas = ExtResource("1_laser")
+region = Rect2(0, 1300, 300, 100)
+
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("Atlas_laser_0")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("Atlas_laser_1")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("Atlas_laser_2")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("Atlas_laser_3")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("Atlas_laser_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_8")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_9")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_11")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_12")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_laser_13")
 }],
 "loop": false,
 "name": &"default",
-"speed": 12.0
+"speed": 14.0
 }]
