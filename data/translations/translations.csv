@@ -34,7 +34,8 @@ ERR_CANT_REACH,Couldn't reach Arkenelle. Check your connection and retry.,Não f
 RETRY,Retry,Tentar novamente,Reintentar
 UPDATE_TITLE,Update required,Atualização necessária,Actualización requerida
 UPDATE,Update,Atualizar,Actualizar
-ERR_OUTDATED,"Your game is out of date. Click Update to open the itch.io app and apply the patch, then relaunch Arkenelle from your Library. Do not use the browser Download button.","Seu jogo está desatualizado. Clique em Atualizar para abrir o app itch.io e aplicar o patch; depois abra Arkenelle pela Biblioteca. Não use o Download do navegador.","Tu juego está desactualizado. Pulsa Actualizar para abrir la app de itch.io y aplicar el parche; luego abre Arkenelle desde tu Biblioteca. No uses Descargar en el navegador."
+DOWNLOAD,Open download page,Abrir página de download,Abrir página de descarga
+ERR_OUTDATED,"Your game is out of date. Click Update to open Arkenelle in the itch.io app, then Install/Update and relaunch from your Library. If itch says no compatible downloads, click again for the browser download page.","Seu jogo está desatualizado. Clique em Atualizar para abrir o Arkenelle no app itch.io, use Instalar/Atualizar e abra pela Biblioteca. Se o itch disser que não há downloads compatíveis, clique de novo para a página no navegador.","Tu juego está desactualizado. Pulsa Actualizar para abrir Arkenelle en la app de itch.io, usa Instalar/Actualizar y ábrelo desde tu Biblioteca. Si itch dice que no hay descargas compatibles, pulsa de nuevo para la página del navegador."
 WELCOME_TINY_MMO,Welcome to Arkenelle!,Bem vindo ao Arkenelle!,¡Bienvenido a Arkenelle!
 RECONNECT_POPUP,No world available.\nTrying again in \n%d\n%s,Nenhum mundo disponível.\nTentando novamente em \n%d\n%s,No hay mundos disponibles. Reintentando en \n%d\n%s
 CONTINUE_WORLD_ACC,Continue\n%s - %s,Continue\n%s - %s,Continúa\n%s - %s

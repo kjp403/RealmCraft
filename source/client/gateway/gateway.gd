@@ -269,24 +269,31 @@ func _wire_button_audio(button: Button, is_back: bool = false) -> void:
 		button.focus_entered.connect(_on_focus_hover)
 
 
-## Hard block for an outdated client: nothing's playable on a mismatched build, so
-## loop a non-dismissable "please update". Opens the itch.io *app* Install/Update
-## deep link only — never the public browser Download page (that forces a full
-## reinstall and breaks auto-update).
+## Hard block for an outdated client: nothing's playable below min_client_version,
+## so loop a non-dismissable "please update". Prefer the itch *app* game page
+## (Install/Update there). After two tries, offer the browser page so a broken
+## itch Library entry cannot soft-lock the player forever.
 func _block_outdated(detail: String) -> void:
 	var message: String = detail if not detail.is_empty() else tr("ERR_OUTDATED")
+	var attempts: int = 0
 	while true:
-		await popup_panel.confirm_message(message, &"UPDATE_TITLE", &"UPDATE")
-		_open_itch_update()
+		attempts += 1
+		var button: StringName = &"UPDATE" if attempts <= 2 else &"DOWNLOAD"
+		await popup_panel.confirm_message(message, &"UPDATE_TITLE", button)
+		if attempts <= 2:
+			_open_itch_update()
+		else:
+			# Escape hatch when itch:// shows "No compatible downloads".
+			OS.shell_open(LINK_DOWNLOAD)
+			attempts = 0
 
 
-## Ask the itch.io desktop app to install/update Arkenelle in-place.
+## Ask the itch.io desktop app to show Arkenelle's page (Install / Update).
 func _open_itch_update() -> void:
-	var err: Error = OS.shell_open(LINK_ITCH_UPDATE)
+	var err: Error = OS.shell_open(LINK_ITCH_APP)
 	if err != OK:
-		# App protocol handler missing — open the in-app game page as a softer fallback.
-		# Still avoid LINK_DOWNLOAD (browser Download).
-		OS.shell_open(LINK_ITCH_APP)
+		# Protocol handler missing — last resort is the public page.
+		OS.shell_open(LINK_DOWNLOAD)
 
 
 ## Reveal the main menu (no saved session): show it, focus the first action, then

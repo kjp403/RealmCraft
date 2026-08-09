@@ -46,27 +46,36 @@ Manual “Upload files” on the itch edit page fights the butler channel and ma
 ## How to ship a client update
 
 1. Bump `application/config/version` in `project.godot` when the client must change
-2. Merge to `main` (VPS deploys matching server version)
-3. GitHub → **Actions** → **Release clients to itch.io** → **Run workflow**  
+2. Merge to `main` (VPS deploys; a `config/version` bump also auto-runs **Release clients** for Windows)
+3. Or manually: GitHub → **Actions** → **Release clients to itch.io** → **Run workflow**  
    (or `git tag vX.Y.Z && git push origin vX.Y.Z`)
 4. Wait for green — butler pushes a **portable folder** (`Arkenelle.exe` + `Arkenelle.pck`) with `--userversion`
 5. Players: itch app → Library → Arkenelle → **Update** (stays in the app)
 
 ---
 
-## If Update still opens a browser
+## If Install shows “No compatible downloads were found”
 
-That Library entry was created from a **browser Download** (or a hand Upload), not an itch **Install**. The itch app cannot patch those — it can only open Download again. Fix **once**:
+The itch app only lists uploads tagged for your OS. On https://kjp403.itch.io/arkenelle/edit → **Uploads**, open the butler `windows` row and confirm the **Windows** checkbox is on (public page should show the Windows icon next to `arkenelle-windows.zip`).
 
-1. Confirm you deleted every **manual Upload** on https://kjp403.itch.io/arkenelle/edit (step 3)
-2. itch app → Library → Arkenelle → ⋯ → **Uninstall** / **Forget**
-3. Still in the itch app, open https://kjp403.itch.io/arkenelle
-4. Click **Install** (green / “Install with the itch.io app”) — **not** Download
-5. Later: Library → Arkenelle → **Update** patches in-app and relaunches
+Then recover the Library entry:
 
-In-game **Update** uses `itch://install/?game_id=…` so it opens the itch app’s Install/Update flow and does **not** open the browser Download page.
+1. Fully quit the itch app (tray icon → Quit), then reopen it
+2. Library → Arkenelle → ⋯ → **Uninstall** / **Forget** (if present)
+3. Still **inside the itch app**, open https://kjp403.itch.io/arkenelle
+4. Click **Install** — pick **windows** / `arkenelle-windows.zip` if the dropdown offers it
+5. Install under a stable path (e.g. `AppData\Roaming\itch\apps` or `Games\Arkenelle`) — **not** Desktop / OneDrive
+6. Always launch from itch **Library**
 
-Also confirm the latest CI push shows channel `windows` with your version (e.g. `0.28.18`) via `butler status kjp403/arkenelle`.
+If the Install dropdown stays empty after that, use browser **Download** once to play, then fix tags/re-push with **Release clients to itch.io**. Moving the itch install folder by hand breaks Update until you Uninstall + Install again.
+
+In-game **Update** opens `itch://games/<id>` (the app game page). After two tries it offers the browser download page so a broken Library entry cannot soft-lock login.
+
+Also confirm the latest CI push shows channel `windows` with your version via `butler status kjp403/arkenelle`.
+
+## Version gate vs itch lag
+
+`application/config/version` is the server build. `application/config/min_client_version` is the oldest itch client still allowed in. When you bump `version` for a server-only merge before Release finishes, leave `min_client_version` on the last published itch userversion so players are not locked out. Bump `min_client_version` only when you intend to force Update.
 
 ---
 

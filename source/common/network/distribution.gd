@@ -14,10 +14,11 @@ const ITCH_GAME_ID: int = 4874380
 const ITCH_PUSH_TARGET: String = ITCH_USER + "/" + ITCH_GAME
 ## Public game page (browser fallback / marketing — NOT the updater).
 const ITCH_URL: String = "https://kjp403.itch.io/arkenelle"
-## Opens the game page inside the itch.io desktop app.
+## Opens the game page inside the itch.io desktop app (Install / Update live there).
+## Prefer this over the raw install deep link — `itch://install/?game_id=…` often
+## opens an empty "No compatible downloads" dialog after a broken Library entry.
 const ITCH_APP_URL: String = "itch://games/%d" % ITCH_GAME_ID
-## Queues Install/Update inside the itch.io desktop app (preferred Update button).
-## Must NOT fall back to [constant ITCH_URL] automatically — that opens browser Download.
+## Legacy install-queue deep link. Kept for docs; in-game Update uses ITCH_APP_URL.
 const ITCH_INSTALL_URL: String = "itch://install/?game_id=%d" % ITCH_GAME_ID
 ## Marketing site (community links, landing page — not the auto-updater).
 const WEBSITE_URL: String = "https://arkenelle.com"
