@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/umbrella_teal.png" id="p11"]
 [ext_resource type="Resource" uid="uid://c9d71fdd6d025a" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_lionfish.tres" id="h0"]
 [ext_resource type="Resource" uid="uid://c9af9405ce45a6" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_crab.tres" id="h1"]
 [ext_resource type="Resource" uid="uid://c77e507ca6a840" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_parrot.tres" id="h2"]
@@ -21,19 +20,15 @@ y_sort_enabled = true
 script = ExtResource("99_col")
 ground_size = Vector2(704, 480)
 shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
-dock_walk = Rect2(324, 120, 56, 140)
+dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(268, 142, 24, 14), Rect2(144, 124, 12, 12)])
+solid_footprints = Array[Rect2]([Rect2(144, 124, 12, 12)])
+rim_west = false
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
 centered = false
 texture = ExtResource("1_ground")
-
-[node name="Umbrella1" type="Sprite2D" parent="."]
-position = Vector2(280, 150)
-texture = ExtResource("p11")
-offset = Vector2(0, -16)
 
 [node name="Torch1" type="Sprite2D" parent="."]
 position = Vector2(150, 130)

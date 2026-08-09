@@ -287,7 +287,7 @@ position = Vector2(139.9191, -1114.0907)
 data = ExtResource("24_iron")
 
 [node name="CoalVein" parent="MineableNodes" unique_id=806920154 instance=ExtResource("23_n7hu4")]
-position = Vector2(-96, -48)
+position = Vector2(-280, -340)
 data = ExtResource("25_coal")
 
 [node name="IronVein2" parent="MineableNodes" unique_id=1129547795 instance=ExtResource("23_n7hu4")]
@@ -295,19 +295,19 @@ position = Vector2(-220, -900)
 data = ExtResource("24_iron")
 
 [node name="CoalVein2" parent="MineableNodes" unique_id=806920155 instance=ExtResource("23_n7hu4")]
-position = Vector2(96, -48)
+position = Vector2(-220, -380)
 data = ExtResource("25_coal")
 
 [node name="CoalVein3" parent="MineableNodes" unique_id=806920156 instance=ExtResource("23_n7hu4")]
-position = Vector2(-48, -112)
+position = Vector2(-180, -300)
 data = ExtResource("25_coal")
 
 [node name="CoalVein4" parent="MineableNodes" unique_id=806920157 instance=ExtResource("23_n7hu4")]
-position = Vector2(48, -112)
+position = Vector2(-320, -300)
 data = ExtResource("25_coal")
 
 [node name="CoalVein5" parent="MineableNodes" unique_id=806920158 instance=ExtResource("23_n7hu4")]
-position = Vector2(0, -160)
+position = Vector2(-250, -280)
 data = ExtResource("25_coal")
 
 [node name="Label" type="Label" parent="." unique_id=1332924517]
