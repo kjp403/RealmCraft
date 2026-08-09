@@ -788,12 +788,16 @@ debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
+[node name="Entrance" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
+position = Vector2(920, 1280)
+warper_id = 23
+
 [node name="HubPortal" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
 position = Vector2(984, 1320)
 portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
 destination_label = "Castle Garden"
 target_instance = ExtResource("28_hub")
-warper_id = 23
+warper_id = 123
 target_id = 23
 
 [node name="FungusCavePortal" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]

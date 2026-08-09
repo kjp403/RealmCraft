@@ -122,6 +122,8 @@ func _ready() -> void:
 
 	# Sparring countdown — big centered text fired each second by the server.
 	Client.subscribe(&"sparring.countdown", _on_sparring_countdown)
+	# /players opens a centered online roster panel (public command).
+	Client.subscribe(&"players.list", _on_players_list)
 
 	# Dungeon run HUD (live clock + revive pool) — self-contained; shows itself on dungeon.hud pushes.
 	add_child(DungeonHud.new())
@@ -514,6 +516,10 @@ func _on_sparring_countdown(payload: Dictionary) -> void:
 		label.modulate.a = 1.0
 		_countdown_tween = null
 	)
+
+
+func _on_players_list(payload: Dictionary) -> void:
+	display_menu(&"players", payload)
 
 
 # --- UI sound + menu motion ------------------------------------------------
