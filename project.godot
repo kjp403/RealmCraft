@@ -15,11 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-<<<<<<< HEAD
-config/version="0.28.58"
-=======
-config/version="0.28.59"
->>>>>>> origin/main
+config/version="0.28.60"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
