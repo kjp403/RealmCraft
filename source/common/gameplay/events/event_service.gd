@@ -12,10 +12,10 @@ class_name EventService
 ## this is the seed of a broader admin event system: new event types can reuse the
 ## same spawn / announce / cleanup shape. Server-only; one event at a time.
 
-## The world boss archetype — a dedicated boss EnemyTypeResource (big stats +
-## visual, leashes=false so it commits, is_boss, single-life, the Boss tuning
-## group). Registered in the enemy_types content index.
-const WORLD_BOSS_SLUG: StringName = &"world_boss"
+## World-boss archetype — mecha_stone_golem (attack/special clips + laser/arm
+## timing). world_boss.tres is a stone_golem reskin with no cast anims and
+## zeroed laser/arm intervals, so it looked like a frozen statue in fights.
+const WORLD_BOSS_SLUG: StringName = &"mecha_stone_golem"
 
 ## The live world boss + the instance it was rallied from (used for announces).
 ## Only one world boss at a time. Static — the trigger command and the death
@@ -42,11 +42,11 @@ static func start_world_boss(instance: ServerInstance, spawn_container: Replicat
 	if boss == null:
 		return "Failed to spawn the world boss (slug '%s', is it registered?)." % WORLD_BOSS_SLUG
 
-	# world_boss.tres already defines the whole fight (big stats + visual,
-	# leashes=false so it commits, single-life, the Boss tuning group). Here we
-	# only bolt on the polished boss brain — the same BossController node RoomNode
-	# attaches to dungeon bosses (telegraphed slam, enrage, adds).
+	# mecha_stone_golem.tres defines the fight (clips + Boss tuning). Bolt on
+	# the same named BossController RoomNode / Hollow use — the name matters so
+	# HostileNPC._ensure_boss_brain does not attach a second brain.
 	var brain: BossController = BossController.new()
+	brain.name = "BossController"
 	brain.boss = boss
 	boss.add_child(brain)
 

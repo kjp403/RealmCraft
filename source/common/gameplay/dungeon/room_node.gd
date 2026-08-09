@@ -163,6 +163,7 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		npc.apply_difficulty(_hp_mult, _dmg_mult)
 	if is_boss and npc != null:
 		var brain: BossController = BossController.new()
+		brain.name = "BossController"
 		brain.boss = npc
 		npc.add_child(brain) # _ready() loads slam_damage from enemy_data...
 		if _hard:

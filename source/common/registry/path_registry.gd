@@ -21,6 +21,9 @@ static func _static_init() -> void:
 	# client-pushed field that used to be VARIANT. Typed as U8 so a crafted client delta
 	# can't smuggle an arbitrary Variant through get_var (docs/netcode_security_audit.md P1).
 	register_field(":anim", Wire.Type.U8)
+	# HostileNPC.EnemyState — tiny int; baked so client/server agree on id+width
+	# without a runtime VARIANT registration racing the pairs stream.
+	register_field(":enemy_state", Wire.Type.U8)
 	# Hand aim angle in radians (~ -PI..PI), snapped to 0.05 on send (local_player).
 	# F16 half-float: precision ~0.002 rad at the extremes, far finer than the 0.05
 	# snap, so visually lossless — and 2 bytes on the wire instead of 4.
