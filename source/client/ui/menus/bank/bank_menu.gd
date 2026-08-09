@@ -1,7 +1,8 @@
 extends MenuShell
-## Personal bank vault. Left = bag, right = bank. Click a stack to select it,
-## choose an amount, then Transfer. Gold stays in the currency pouch — never
-## banked as a stack.
+## Personal bank vault. Left = bag, right = bank. Vault (and bag) stacks can be
+## drag-rearranged like inventory. Bag left-click deposits only a single item;
+## stacks of 2+ select into the amount row (X / Max / Deposit). Gold stays in
+## the currency pouch — never banked as a stack.
 
 
 const GRID_COLUMNS: int = 6
@@ -116,9 +117,9 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Left-click a bag stack to deposit it all. Or Deposit All."
+		"Qty 1: left-click deposits. Qty 2+: set amount (X/Max). Drag to rearrange. Or Deposit All."
 		if is_bag
-		else "Click a stack, set amount, Withdraw."
+		else "Drag to rearrange. Click a stack, set amount (X/Max), Withdraw."
 	)
 	hint.add_theme_color_override(&"font_color", MUTED)
 	hint.add_theme_font_size_override(&"font_size", 12)
@@ -167,9 +168,23 @@ func _build_transfer_row() -> HBoxContainer:
 	_amount_spin.editable = false
 	row.add_child(_amount_spin)
 
+	# "X" = custom amount: focus the spinner so the player can type a count.
+	var x_btn := Button.new()
+	x_btn.text = "X"
+	x_btn.focus_mode = Control.FOCUS_NONE
+	x_btn.tooltip_text = "Type a custom amount"
+	x_btn.pressed.connect(func() -> void:
+		if _selected_have <= 0:
+			return
+		_amount_spin.editable = true
+		_amount_spin.get_line_edit().grab_focus()
+		_amount_spin.get_line_edit().select_all())
+	row.add_child(x_btn)
+
 	var max_btn := Button.new()
 	max_btn.text = "Max"
 	max_btn.focus_mode = Control.FOCUS_NONE
+	max_btn.tooltip_text = "Set amount to the full stack"
 	max_btn.pressed.connect(func() -> void:
 		if _selected_have > 0:
 			_amount_spin.value = _selected_have)
@@ -235,18 +250,31 @@ func _count_stacks(store: Dictionary) -> int:
 func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 	for child: Node in grid.get_children():
 		child.queue_free()
-	var uids: Array = store.keys()
-	uids.sort()
-	for uid: Variant in uids:
+	var live_uids: Array = []
+	for uid: Variant in store.keys():
 		var data: Dictionary = store[uid]
 		var item_id: int = int(data.get("id", 0))
 		var amount: int = int(data.get("a", 0))
 		if item_id <= 0 or amount <= 0:
 			continue
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
-		# Gold lives in the currency pouch — never shown as a bankable stack.
 		if item != null and item.is_currency:
 			continue
+		live_uids.append(int(uid))
+	var order: Array
+	if is_bag:
+		order = BagOrder.sync_with_entries(_bag_entries_for_order(live_uids))
+	else:
+		order = BankOrder.sync_with_uids(live_uids)
+	live_uids.sort_custom(func(a: Variant, b: Variant) -> bool:
+		var ia: int = BagOrder.index_of(order, int(a)) if is_bag else BankOrder.index_of(order, int(a))
+		var ib: int = BagOrder.index_of(order, int(b)) if is_bag else BankOrder.index_of(order, int(b))
+		return ia < ib)
+	for uid: Variant in live_uids:
+		var data: Dictionary = store[uid]
+		var item_id: int = int(data.get("id", 0))
+		var amount: int = int(data.get("a", 0))
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		var button := Button.new()
 		button.custom_minimum_size = SLOT_SIZE
 		button.clip_contents = true
@@ -258,7 +286,9 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 			PixelIcon.mount(button, item.item_icon)
 			var tip: String = ItemTooltip.hover_text(item)
 			if is_bag:
-				tip += "\nLeft-click: deposit all"
+				tip += "\nLeft-click: deposit" if amount <= 1 else "\nLeft-click: choose amount (X/Max)"
+			else:
+				tip += "\nLeft-click: choose amount (X/Max)\nDrag: rearrange"
 			button.tooltip_text = tip
 		else:
 			button.tooltip_text = "Unknown item"
@@ -271,6 +301,7 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 			badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 			button.add_child(badge)
 		button.pressed.connect(_on_stack_selected.bind(int(uid), is_bag, amount, item))
+		_wire_slot_drag(button, int(uid), is_bag, item)
 		grid.add_child(button)
 	if grid.get_child_count() == 0:
 		var empty := Label.new()
@@ -279,10 +310,54 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 		grid.add_child(empty)
 
 
+func _bag_entries_for_order(uids: Array) -> Array:
+	var entries: Array = []
+	for uid: Variant in uids:
+		entries.append({"uid": int(uid)})
+	return entries
+
+
+func _wire_slot_drag(button: Button, uid: int, is_bag: bool, item: Item) -> void:
+	if item == null:
+		return
+	button.set_drag_forwarding(
+		func(_at: Vector2) -> Variant:
+			BagOrder.elevate_drag_preview(
+				button,
+				BagOrder.make_drag_preview(item.item_icon, Vector2(56, 56))
+			)
+			return {
+				"bank_uid": uid,
+				"from_bag": is_bag,
+				"item_id": int(item.get_meta(&"id", 0)),
+				"bag_uid": uid if is_bag else -1,
+			},
+		func(_at: Vector2, data: Variant) -> bool:
+			if data is not Dictionary:
+				return false
+			var dict: Dictionary = data
+			if not dict.has("bank_uid"):
+				return false
+			# Only rearrange within the same pane (bag↔bag or vault↔vault).
+			return bool(dict.get("from_bag", false)) == is_bag,
+		func(_at: Vector2, data: Variant) -> void:
+			if data is not Dictionary:
+				return
+			var dict: Dictionary = data
+			var from_uid: int = int(dict.get("bank_uid", -1))
+			if from_uid < 0 or from_uid == uid:
+				return
+			if is_bag:
+				BagOrder.move_before(BagOrder.load_order(), from_uid, uid)
+			else:
+				BankOrder.move_before(BankOrder.load_order(), from_uid, uid)
+			_rebuild_grids()
+	)
+
+
 func _on_stack_selected(uid: int, from_bag: bool, have: int, item: Item) -> void:
-	# Bag: left-click deposits the whole stack (qty 1 included). Withdraw still
-	# selects + uses the amount spinner / Withdraw button.
-	if from_bag:
+	# Bag qty 1: instant deposit. Qty 2+ (and all vault clicks): select + amount UI.
+	if from_bag and have <= 1:
 		_transfer_stack(uid, true, have)
 		return
 

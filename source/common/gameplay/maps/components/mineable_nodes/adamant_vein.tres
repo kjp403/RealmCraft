@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3 uid="uid://cadamantvein01"]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="2_ore"]
+[ext_resource type="Texture2D" uid="uid://gnjyhy0bja67" path="res://assets/sprites/environment/props/vein_adamant.png" id="3_tex"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Adamant Vein"
+ore = ExtResource("2_ore")
+job_xp = Dictionary[StringName, int]({
+&"mining": 38
+})
+required_level = 30
+required_tool = &"pickaxe"
+extraction_hp = 6
+charge_regen_seconds = 20.0
+depleted_recharge_seconds = 96.0
+texture = ExtResource("3_tex")

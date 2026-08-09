@@ -15,6 +15,9 @@ extends Node2D
 @export var solid_footprints: Array[Rect2] = []
 ## Thickness of the outer rim walls (local px).
 @export var rim_thickness: float = 24.0
+## When false, that side stays open so adjacent beach strips can join.
+@export var rim_west: bool = true
+@export var rim_east: bool = true
 
 
 func _ready() -> void:
@@ -110,10 +113,12 @@ func _add_rim(body: StaticBody2D) -> void:
 	var t: float = rim_thickness
 	var w: float = ground_size.x
 	var h: float = ground_size.y
-	# Bottom + sides only — top stays open so the beach connects to woodland.
+	# Bottom + optional sides — top stays open so the beach connects to woodland.
 	_add_rect(body, Rect2(0.0, h - t, w, t * 2.0))
-	_add_rect(body, Rect2(-t, 0.0, t, h))
-	_add_rect(body, Rect2(w, 0.0, t, h))
+	if rim_west:
+		_add_rect(body, Rect2(-t, 0.0, t, h))
+	if rim_east:
+		_add_rect(body, Rect2(w, 0.0, t, h))
 
 
 func _add_rect(body: StaticBody2D, rect: Rect2) -> void:

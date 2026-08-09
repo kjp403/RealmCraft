@@ -6,6 +6,9 @@
 [ext_resource type="Resource" uid="uid://25erkqwlk35t5" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="2_br_bar"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="3_fe_bar"]
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="4_st_bar"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="4b_mith_bar"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="4c_adam_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="4d_rune_bar"]
 [ext_resource type="Resource" uid="uid://2gsl864x53vil" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="5_br_helm"]
 [ext_resource type="Resource" uid="uid://220bc63rtaob7" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="6_br_chest"]
 [ext_resource type="Resource" uid="uid://2q7ip57npoho8" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="7_br_boots"]
@@ -41,6 +44,6 @@ perks = Array[Dictionary]([{
 "name": "Steady Hand",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("1_qh35w")]([ExtResource("2_br_bar"), ExtResource("5_br_helm"), ExtResource("6_br_chest"), ExtResource("7_br_boots"), ExtResource("3_fe_bar"), ExtResource("8_fe_helm"), ExtResource("9_fe_chest"), ExtResource("10_fe_boots"), ExtResource("4_st_bar"), ExtResource("11_st_helm"), ExtResource("12_st_chest"), ExtResource("13_st_boots")])
-recipe_levels = Array[int]([1, 1, 1, 1, 5, 5, 5, 5, 15, 15, 15, 15])
+recipe_items = Array[ExtResource("1_qh35w")]([ExtResource("2_br_bar"), ExtResource("5_br_helm"), ExtResource("6_br_chest"), ExtResource("7_br_boots"), ExtResource("3_fe_bar"), ExtResource("8_fe_helm"), ExtResource("9_fe_chest"), ExtResource("10_fe_boots"), ExtResource("4_st_bar"), ExtResource("11_st_helm"), ExtResource("12_st_chest"), ExtResource("13_st_boots"), ExtResource("4b_mith_bar"), ExtResource("4c_adam_bar"), ExtResource("4d_rune_bar")])
+recipe_levels = Array[int]([1, 1, 1, 1, 5, 5, 5, 5, 15, 15, 15, 15, 20, 30, 45])
 describe_lines = Array[String](["Smithing XP +{xp}%", "Material refund: {refund}%", "Extra item: {extra_item}%"])
