@@ -1,11 +1,11 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" uid="uid://ciinxju4m0dge" path="res://assets/sprites/characters/mecha_stone_golem/death.png" id="1_death"]
-[ext_resource type="Texture2D" uid="uid://oh6f8no2vis1" path="res://assets/sprites/characters/mecha_stone_golem/idle.png" id="2_idle"]
-[ext_resource type="Texture2D" uid="uid://dgtjbx6w3dst0" path="res://assets/sprites/characters/mecha_stone_golem/run.png" id="3_run"]
-[ext_resource type="Texture2D" uid="uid://c3xnr3lh22ie3" path="res://assets/sprites/characters/mecha_stone_golem/attack.png" id="4_attack"]
-[ext_resource type="Texture2D" uid="uid://fpsgrpod0ml3" path="res://assets/sprites/characters/mecha_stone_golem/special.png" id="5_special"]
-[ext_resource type="Texture2D" uid="uid://bqxvgknxtsjb0" path="res://assets/sprites/characters/mecha_stone_golem/walk.png" id="6_walk"]
+[ext_resource type="Texture2D" uid="uid://wt6f5611q1ui" path="res://assets/sprites/characters/mecha_stone_golem/death.png" id="1_death"]
+[ext_resource type="Texture2D" uid="uid://boo51j24u7f1q" path="res://assets/sprites/characters/mecha_stone_golem/idle.png" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://dwl1g1e3vp0y1" path="res://assets/sprites/characters/mecha_stone_golem/run.png" id="3_run"]
+[ext_resource type="Texture2D" uid="uid://br5dnklc76xie" path="res://assets/sprites/characters/mecha_stone_golem/attack.png" id="4_attack"]
+[ext_resource type="Texture2D" uid="uid://c6u6giidvsp5n" path="res://assets/sprites/characters/mecha_stone_golem/special.png" id="5_special"]
+[ext_resource type="Texture2D" uid="uid://b6i4fldcc8ieg" path="res://assets/sprites/characters/mecha_stone_golem/walk.png" id="6_walk"]
 
 [sub_resource type="AtlasTexture" id="Atlas_death_0"]
 atlas = ExtResource("1_death")

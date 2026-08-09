@@ -1,6 +1,6 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" uid="uid://d3kvmqiomg5v8" path="res://assets/sprites/characters/mecha_stone_golem/laser_sheet.png" id="1_laser"]
+[ext_resource type="Texture2D" uid="uid://c6o8t4wmwcgeq" path="res://assets/sprites/characters/mecha_stone_golem/laser_sheet.png" id="1_laser"]
 
 [sub_resource type="AtlasTexture" id="Atlas_laser_0"]
 atlas = ExtResource("1_laser")
