@@ -53,6 +53,7 @@ var boss: HostileNpc
 
 var _enraged: bool = false
 var _casting: bool = false
+var _engaged: bool = false
 var _next_slam_ms: int = 0
 var _next_laser_ms: int = 0
 var _next_arm_ms: int = 0
@@ -66,19 +67,21 @@ func _ready() -> void:
 		queue_free()
 		return
 	_load_config()
-	var now: int = Time.get_ticks_msec()
-	# Give the body a clear chase window on pull before the first cast roots it —
-	# otherwise a freshly engaged boss looks glued in place while it winds up.
-	_next_slam_ms = now + int(maxi(slam_interval_s, 4.0) * 1000.0)
-	_next_laser_ms = now + int(maxi(laser_interval_s, 5.5) * 1000.0)
-	_next_arm_ms = now + int(maxi(arm_shot_interval_s, 3.5) * 1000.0)
-	# Boss-event music is driven by the boss's own lifecycle — automatic for EVERY boss
-	# (world + dungeon both attach this brain): the combat track on spawn, the victory
-	# sting on death. An admin abort (boss removed WITHOUT dying) is cued as "end" by
-	# EventService. Client side: Client._on_boss_music. boss.container is wired by now
-	# (spawn_dynamic returned before our parent attached us), so _instance() resolves.
-	push_boss_music(_instance(), "fight")
+	# Prime cooldowns now, but re-arm on first engage — Hollow golems sit from
+	# instance charge with no target, so spawn-primed timers expire before pull.
+	_arm_pull_grace()
+	# Victory sting on death. Fight music cues on first engage (covers Hollow /
+	# late joiners). Admin abort (boss removed WITHOUT dying) is "end" via EventService.
 	boss.died.connect(_on_boss_died_music)
+
+
+## Push every cooldown out by a fresh grace window so a pull always opens with a
+## chase, never a stack of ready casts. Uses maxf — maxi truncates 9.5 → 9.
+func _arm_pull_grace() -> void:
+	var now: int = Time.get_ticks_msec()
+	_next_slam_ms = now + int(maxf(slam_interval_s, 4.0) * 1000.0)
+	_next_laser_ms = now + int(maxf(laser_interval_s, 5.5) * 1000.0)
+	_next_arm_ms = now + int(maxf(arm_shot_interval_s, 3.5) * 1000.0)
 
 
 ## Server → clients: a boss-event music cue (fight / victory / end) for everyone in
@@ -92,6 +95,13 @@ static func push_boss_music(instance: Node, state: String) -> void:
 
 func _on_boss_died_music(_killer: Character) -> void:
 	push_boss_music(_instance(), "victory")
+	# Mecha golem respawns: drop phase-2 state + speed buff so the next fight
+	# gets its enrage, adds, and cadence back.
+	_enraged = false
+	_engaged = false
+	_casting = false
+	if is_instance_valid(boss) and boss.enemy_data != null:
+		boss.move_speed = boss.enemy_data.move_speed
 
 
 ## Pull tuning from the body's EnemyTypeResource so each boss is configured in
@@ -133,7 +143,14 @@ func _physics_process(_delta: float) -> void:
 	if not _enraged and _health_fraction() <= enrage_at_health_fraction:
 		_enrage()
 	# Only cast while someone is actually engaging — no flailing at an empty room.
-	if _casting or boss.targeted_player == null:
+	if boss.targeted_player == null:
+		_engaged = false
+		return
+	if not _engaged:
+		_engaged = true
+		_arm_pull_grace()
+		push_boss_music(_instance(), "fight")
+	if _casting:
 		return
 	var now: int = Time.get_ticks_msec()
 	# Prefer the next move in rotation when several are ready — forces a mix of
@@ -171,6 +188,7 @@ func _health_fraction() -> float:
 func _slam() -> void:
 	_casting = true
 	var center: Vector2 = boss.global_position
+	boss._face_target()
 	# Commit the body: hold position through the wind-up + a short recovery so it
 	# doesn't stroll out of its own danger ring while the slam resolves.
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((slam_windup_s + SLAM_RECOVER_S) * 1000.0)
@@ -209,6 +227,7 @@ func _laser() -> void:
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
 	var end: Vector2 = origin + dir * laser_range
+	boss._face_target()
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((laser_windup_s + LASER_RECOVER_S) * 1000.0)
 	boss.replicate_visual(&"rp_play_skin_anim", [&"special"])
 	boss.replicate_visual(&"rp_lunge_telegraph", [end, laser_width, laser_windup_s + 0.15])
@@ -240,6 +259,7 @@ func _arm_shot() -> void:
 	var dir: Vector2 = boss.global_position.direction_to(target.global_position)
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
+	boss._face_target()
 	boss.action_root_until_ms = Time.get_ticks_msec() + int(ARM_RECOVER_S * 1000.0)
 	boss.replicate_visual(&"rp_play_skin_anim", [&"attack"])
 	boss.fire_arm_projectile(dir, arm_shot_speed, arm_shot_lifetime_s, arm_shot_damage)

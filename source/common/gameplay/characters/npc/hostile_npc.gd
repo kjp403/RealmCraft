@@ -275,6 +275,8 @@ var _next_attack_ms: int
 ## Client: true while a one-shot attack/special SpriteFrames clip is playing so
 ## incoming :anim locomotion travels don't stomp the action mid-swing.
 var _skin_action_playing: bool = false
+## Bumps each rp_play_skin_anim so a stale watchdog timer can't clear a newer clip.
+var _skin_action_token: int = 0
 
 
 func _ready() -> void:
@@ -352,7 +354,7 @@ func _ready() -> void:
 	_position_fid = PathRegistry.ensure_id(^":position")
 	_anim_fid = PathRegistry.ensure_id(^":anim")
 	_flipped_fid = PathRegistry.ensure_id(^":flipped")
-	_state_fid = PathRegistry.register_field(":enemy_state", Wire.Type.VARIANT)
+	_state_fid = PathRegistry.ensure_id(":enemy_state")
 	_health_fid = PathRegistry.ensure_id("StatsComponent:stats:health")
 	_health_max_fid = PathRegistry.ensure_id("StatsComponent:stats:health_max")
 
@@ -378,8 +380,11 @@ func _ready() -> void:
 func _ensure_boss_brain() -> void:
 	if not multiplayer.is_server() or enemy_data == null or not enemy_data.is_boss:
 		return
-	if get_node_or_null("BossController") != null:
-		return
+	# Identity check — spawners used to add an unnamed BossController (@Node@N),
+	# which a name lookup would miss and then double-attach.
+	for child: Node in get_children():
+		if child is BossController:
+			return
 	var brain: BossController = BossController.new()
 	brain.name = "BossController"
 	brain.boss = self
@@ -428,12 +433,14 @@ func _physics_process(_delta: float) -> void:
 
 	# Rooted for a telegraphed cast — or STUNNED (Pinning Arrow): hold position and do
 	# nothing. DEAD still processes so death isn't deferred behind the wind-up.
-	# Still sync + animate: a boss cast can last >1s and players keep hitting it —
-	# skipping sync here froze the over-head HP bar (and idle/run) for the whole wind-up.
+	# Still sync: a boss cast can last >1s and players keep hitting it — skipping
+	# sync froze the over-head HP bar for the whole wind-up. Force IDLE (not RUN)
+	# so a rooted body reads planted instead of sprinting in place.
 	if enemy_state != EnemyState.DEAD and (
 			Time.get_ticks_msec() < action_root_until_ms or is_stunned()):
 		velocity = Vector2.ZERO
-		_process_animations()
+		if anim != Character.Animations.IDLE:
+			anim = Character.Animations.IDLE
 		_process_synchronization()
 		return
 
@@ -684,6 +691,8 @@ func rp_play_skin_anim(anim_name: StringName) -> void:
 	if frames == null or not frames.has_animation(anim_name):
 		return
 	_skin_action_playing = true
+	_skin_action_token += 1
+	var token: int = _skin_action_token
 	if animation_tree != null:
 		animation_tree.active = false
 	# Restart even if the same clip just finished (otherwise a second swing can
@@ -692,9 +701,22 @@ func rp_play_skin_anim(anim_name: StringName) -> void:
 	if animated_sprite.animation_finished.is_connected(_on_skin_action_finished):
 		animated_sprite.animation_finished.disconnect(_on_skin_action_finished)
 	animated_sprite.animation_finished.connect(_on_skin_action_finished, CONNECT_ONE_SHOT)
+	# Watchdog: a same-frame locomotion play() (AnimationTree DEFERRED method
+	# track at an idle/run loop boundary) can swallow animation_finished for this
+	# clip and leave the tree switched off forever — frozen sprite, no death.
+	var fps: float = maxf(1.0, frames.get_animation_speed(anim_name) * maxf(0.01, animated_sprite.speed_scale))
+	var clip_s: float = float(frames.get_frame_count(anim_name)) / fps
+	get_tree().create_timer(clip_s + 0.25).timeout.connect(
+		func() -> void:
+			if _skin_action_playing and _skin_action_token == token:
+				_on_skin_action_finished(),
+		CONNECT_ONE_SHOT
+	)
 
 
 func _on_skin_action_finished() -> void:
+	if not _skin_action_playing:
+		return
 	_skin_action_playing = false
 	if animation_tree != null:
 		animation_tree.active = true

@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_evshk"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="3_iron_ore"]
+[ext_resource type="SpriteFrames" uid="uid://c45uyyneimrpk" path="res://source/common/gameplay/characters/sprite_frames/stone_golem.tres" id="4_skin"]
 
 [sub_resource type="Resource" id="Drop_iron_ore"]
 script = ExtResource("2_loot")
@@ -15,6 +16,8 @@ max_amount = 2
 script = ExtResource("1_script")
 enemy_type = &"iron_golem"
 display_name = "Iron Golem"
+skin = ExtResource("4_skin")
+visual_scale = 1.2
 max_health = 340.0
 attack_damage = 20.0
 attack_cooldown = 2.0
