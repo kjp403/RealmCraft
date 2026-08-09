@@ -112,15 +112,6 @@ required_amount = 5
 max_level = 10
 reward_xp = 30
 
-[sub_resource type="Resource" id="T_spar"]
-script = ExtResource("1_tmpl")
-template_id = 12
-kind = 2
-required_amount = 2
-reward_xp = 40
-reward_gold = 4
-description = "Play 2 arena duels"
-
 [sub_resource type="Resource" id="T_dungeon"]
 script = ExtResource("1_tmpl")
 template_id = 13
@@ -140,6 +131,6 @@ description = "Craft 2 items"
 
 [resource]
 script = ExtResource("2_pool")
-templates = Array[ExtResource("1_tmpl")]([SubResource("T_kill_slime"), SubResource("T_kill_goblin"), SubResource("T_kill_wolf"), SubResource("T_kill_bandit"), SubResource("T_kill_iron_golem"), SubResource("T_col_coal"), SubResource("T_col_copper"), SubResource("T_col_iron"), SubResource("T_col_linen"), SubResource("T_col_hide"), SubResource("T_col_herb"), SubResource("T_spar"), SubResource("T_dungeon"), SubResource("T_craft")])
+templates = Array[ExtResource("1_tmpl")]([SubResource("T_kill_slime"), SubResource("T_kill_goblin"), SubResource("T_kill_wolf"), SubResource("T_kill_bandit"), SubResource("T_kill_iron_golem"), SubResource("T_col_coal"), SubResource("T_col_copper"), SubResource("T_col_iron"), SubResource("T_col_linen"), SubResource("T_col_hide"), SubResource("T_col_herb"), SubResource("T_dungeon"), SubResource("T_craft")])
 metadata/slug = &"daily_pool"
 metadata/id = 8

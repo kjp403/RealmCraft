@@ -9,6 +9,9 @@
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="5_su7rm"]
 [ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="6_silver"]
 [ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="7_gold"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="8_mith"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="9_adam"]
+[ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="10_rune"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -37,6 +40,6 @@ perks = Array[Dictionary]([{
 "name": "Diligent",
 "per_rank": 0.1
 }])
-source_items = Array[ExtResource("1_eebcb")]([ExtResource("4_3aric"), ExtResource("4_tin"), ExtResource("5_su7rm"), ExtResource("3_hb6fp"), ExtResource("6_silver"), ExtResource("7_gold")])
-source_levels = Array[int]([0, 0, 5, 15, 20, 40])
+source_items = Array[ExtResource("1_eebcb")]([ExtResource("4_3aric"), ExtResource("4_tin"), ExtResource("5_su7rm"), ExtResource("3_hb6fp"), ExtResource("6_silver"), ExtResource("8_mith"), ExtResource("9_adam"), ExtResource("7_gold"), ExtResource("10_rune")])
+source_levels = Array[int]([0, 0, 5, 15, 20, 20, 30, 40, 45])
 describe_lines = Array[String](["Gather speed +{cooldown}%", "Bonus ore +{bonus_yield}%", "Mining XP +{xp}%"])

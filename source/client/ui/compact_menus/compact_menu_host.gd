@@ -598,6 +598,7 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		return
 
 	if item is ConsumableItem:
+		ConsumableItem.stamp_client_cooldown(item as ConsumableItem)
 		Toaster.toast("Potion consumed.")
 	# LootChestItem loot toast rides the chest.opened push.
 

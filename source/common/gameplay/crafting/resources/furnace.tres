@@ -14,6 +14,12 @@
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="12_steel_bar"]
 [ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="13_silver_bar"]
 [ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="14_gold_bar"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="15_mith_ore"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="16_adam_ore"]
+[ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="17_rune_ore"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="18_mith_bar"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="19_adam_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="20_rune_bar"]
 
 [sub_resource type="Resource" id="I_br_cu"]
 script = ExtResource("3_ingred")
@@ -78,8 +84,41 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_ore")])
 required_level = 15
 xp_reward = 70
 
+[sub_resource type="Resource" id="I_mith_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mith_ore")
+
+[sub_resource type="Resource" id="R_mithril_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("18_mith_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mith_ore")])
+required_level = 20
+xp_reward = 55
+
+[sub_resource type="Resource" id="I_adam_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_adam_ore")
+
+[sub_resource type="Resource" id="R_adamant_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("19_adam_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_adam_ore")])
+required_level = 30
+xp_reward = 65
+
+[sub_resource type="Resource" id="I_rune_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_rune_ore")
+
+[sub_resource type="Resource" id="R_runite_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_rune_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_rune_ore")])
+required_level = 45
+xp_reward = 80
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Furnace"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_bronze_bar"), SubResource("R_iron_bar"), SubResource("R_steel_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_bronze_bar"), SubResource("R_iron_bar"), SubResource("R_steel_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar"), SubResource("R_mithril_bar"), SubResource("R_adamant_bar"), SubResource("R_runite_bar")])

@@ -6,7 +6,7 @@ extends NPCInteraction
 ## the displayed price and the charged price can't drift.
 
 ## Gold fee for a respec. Single source of truth — the server handler reads it too.
-const COST: int = 10
+const COST: int = 25000
 
 
 func menu_entry(_npc: Node) -> Dictionary:

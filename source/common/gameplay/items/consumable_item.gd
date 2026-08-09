@@ -37,6 +37,17 @@ func group_key() -> StringName:
 	return &"consumables"
 
 
+## Client-side: after a successful item.consume, stamp the shared category cooldown
+## onto the local player so hotbar overlays (and held Drink) match the server gate.
+static func stamp_client_cooldown(consumable: ConsumableItem) -> void:
+	if consumable == null or not GameMode.is_client():
+		return
+	if ClientState.local_player == null:
+		return
+	var key: String = "consumable:" + str(consumable.cooldown_category)
+	ClientState.local_player.ability_cooldowns[key] = Time.get_ticks_msec() / 1000.0
+
+
 func stat_lines() -> Array[Dictionary]:
 	var lines: Array[Dictionary] = []
 	if heal_amount > 0:
