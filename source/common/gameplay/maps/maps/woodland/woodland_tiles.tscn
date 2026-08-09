@@ -536,10 +536,7 @@ sources/7 = SubResource("atlas_wallvar")
 sources/8 = SubResource("atlas_water")
 
 [sub_resource type="RectangleShape2D" id="BeachVoidSouth"]
-size = Vector2(1800, 64)
-
-[sub_resource type="RectangleShape2D" id="BeachVoidGap"]
-size = Vector2(180, 480)
+size = Vector2(1700, 64)
 
 [sub_resource type="RectangleShape2D" id="BeachVoidWest"]
 size = Vector2(48, 560)
@@ -551,6 +548,9 @@ size = Vector2(48, 560)
 script = ExtResource("0_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_6wtwb")
+camera_limit_left = 400
+camera_limit_top = 200
+camera_limit_right = 2900
 camera_limit_bottom = 2048
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
@@ -797,7 +797,7 @@ warper_id = 23
 target_id = 23
 
 [node name="FungusCavePortal" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]
-position = Vector2(2648, 520)
+position = Vector2(2696, 648)
 portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
 destination_label = "Fungus Cave"
 target_instance = ExtResource("28_fungus")
@@ -1247,7 +1247,7 @@ data = ExtResource("39_rune")
 position = Vector2(900, 1520)
 
 [node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
-position = Vector2(1900, 1540)
+position = Vector2(1732, 1540)
 
 [node name="BeachVoidBounds" type="StaticBody2D" parent="."]
 collision_layer = 2
@@ -1255,17 +1255,13 @@ collision_mask = 0
 position = Vector2(0, 0)
 
 [node name="SouthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(1750, 2064)
+position = Vector2(1668, 2064)
 shape = SubResource("BeachVoidSouth")
-
-[node name="GapWall" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(1816, 1800)
-shape = SubResource("BeachVoidGap")
 
 [node name="WestWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(876, 1780)
 shape = SubResource("BeachVoidWest")
 
 [node name="EastWall" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(2628, 1780)
+position = Vector2(2460, 1780)
 shape = SubResource("BeachVoidEast")
