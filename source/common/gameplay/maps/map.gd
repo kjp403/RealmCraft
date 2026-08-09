@@ -120,6 +120,11 @@ func _ready() -> void:
 	set_process(Engine.is_editor_hint())
 	if Engine.is_editor_hint():
 		return
+	# Node-typed @exports need scene `node_paths=...` or they stay null after load.
+	# Resolve from the conventional child name so maps that omit node_paths still
+	# register their prop container (client sync + server spawn both depend on it).
+	if replicated_props_container == null:
+		replicated_props_container = get_node_or_null(^"ReplicatedPropsContainer") as ReplicatedPropsContainer
 	# Components (warpers, stations, tables, flags, duel masters, NPC shops/quests)
 	# self-register via Map.of() + register_keyed() from their own _ready.
 	if not multiplayer.is_server():

@@ -26,7 +26,7 @@ size = Vector2(24, 704)
 [sub_resource type="RectangleShape2D" id="WallW"]
 size = Vector2(24, 704)
 
-[node name="the_hollow" type="Node2D"]
+[node name="the_hollow" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
