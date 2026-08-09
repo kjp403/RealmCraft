@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Generate The Hollow boss-arena tile_map_data + rewrite the_hollow.tscn."""
+"""DEPRECATED skeleton helper — use tools/build_hollow_tiles.gd instead.
+
+Godot set_cell + footprint occupancy is required so multi-tile rocks
+(2x2 / 2x3) are placed at their atlas ORIGIN only. Placing fragment
+cells (e.g. 4:1, 5:1, 2:3) shows as half-rocks in-game.
+
+  godot --headless --path . -s tools/build_hollow_tiles.gd
+"""
 from __future__ import annotations
 
 import base64
