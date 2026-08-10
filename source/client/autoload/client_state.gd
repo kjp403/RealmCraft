@@ -446,7 +446,7 @@ func _on_gather_result(data: Dictionary) -> void:
 			# would stack the same sentence twice in the toast lane.
 			LevelUpFx.celebrate_skill(local_player, StringName(slug), new_lv)
 	if int(data.get("perk_points_gained", 0)) > 0:
-		Toaster.toast("Perk point available. Spend in Character → Jobs.")
+		Toaster.toast("Perk point available. Spend in Mastery → Perks.")
 
 	Toaster.toast_feed("gather:" + str(data.get("ore_name", "ore")), title, lines)
 
