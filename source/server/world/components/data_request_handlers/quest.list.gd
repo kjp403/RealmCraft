@@ -169,6 +169,10 @@ func _quest_view(
 		"reward_gold": quest.reward_gold,
 		"min_level": quest.min_level,
 		"meets_level": resource.level >= quest.min_level,
+		# Profession-skill gate. skill_req is pre-formatted ("Mining 14") so the
+		# client doesn't need JobRegistry display names; "" = no skill gate.
+		"skill_req": quest.skill_gate_label(),
+		"meets_skill": quest.meets_skill_gate(resource),
 		"completion": int(quest.completion),
 		"meets_prereq": (
 			resource.quest_state(quest_id) != &""

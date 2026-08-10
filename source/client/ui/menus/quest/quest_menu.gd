@@ -174,6 +174,10 @@ func _status_tag(quest: Dictionary) -> String:
 				return "LOCKED"
 			if not bool(quest.get("meets_level", true)):
 				return "LV %d" % int(quest.get("min_level", 0))
+			if not bool(quest.get("meets_skill", true)):
+				# Name the skill: a bare "LV 14" here reads as combat level,
+				# which is exactly the confusion the skill gate exists to avoid.
+				return str(quest.get("skill_req", "")).to_upper()
 			return "NEW"
 
 
@@ -185,7 +189,11 @@ func _status_color(quest: Dictionary) -> Color:
 		"turned_in":
 			return COLOR_DONE
 		_:
-			if not bool(quest.get("meets_prereq", true)) or not bool(quest.get("meets_level", true)):
+			if (
+				not bool(quest.get("meets_prereq", true))
+				or not bool(quest.get("meets_level", true))
+				or not bool(quest.get("meets_skill", true))
+			):
 				return COLOR_LOCKED
 			return COLOR_NEW
 
@@ -273,6 +281,8 @@ func _unmet_conditions(quest: Dictionary) -> Array[String]:
 				conditions.append("Complete \"%s\"" % str(prereq_name))
 	if not bool(quest.get("meets_level", true)):
 		conditions.append("Requires level %d" % int(quest.get("min_level", 0)))
+	if not bool(quest.get("meets_skill", true)):
+		conditions.append("Requires %s" % str(quest.get("skill_req", "")))
 	return conditions
 
 

@@ -30,6 +30,16 @@ enum RequiresMode { ALL, ANY }
 ## Used by the milestone notification system: when a player levels up to N, any
 ## quest with min_level == N triggers an unlock notification.
 @export var min_level: int = 0
+## Profession skill gate, ANDed on top of min_level: the job slug the player
+## has to have leveled (&"mining", &"woodcutting", ... — see JobRegistry).
+## Empty = no skill requirement. Use this instead of min_level for gathering
+## and crafting quests, where "can you do the work" is a skill question, not a
+## combat-level one. Skill gates are NOT part of the milestone notification
+## system (that buckets by min_level only), so a skill-gated quest's
+## unlock_message never fires on a skill level-up.
+@export var min_skill: StringName
+## Level the [member min_skill] skill must reach. Ignored when min_skill is empty.
+@export var min_skill_level: int = 0
 ## Optional system-channel message pushed to the player the moment the quest
 ## becomes ACCEPTABLE (all gates open: min_level reached AND prerequisites
 ## satisfied — see LevelMilestoneService), styled to look like it's from the
@@ -88,6 +98,26 @@ static func load_quest(quest_id: int) -> QuestResource:
 ## offered it (turn_in_giver left empty). The turn-in handlers compare against this.
 func turn_in_giver_key() -> StringName:
 	return turn_in_giver.giver_key() if turn_in_giver else &""
+
+
+## True when [param player] meets the profession-skill gate (or the quest sets
+## none). Its own gate, like min_level, so callers can tell "mining too low"
+## apart from "chain not done".
+func meets_skill_gate(player: PlayerResource) -> bool:
+	if min_skill.is_empty() or min_skill_level <= 0:
+		return true
+	# Read the dict directly instead of get_skill(): this runs on every
+	# quest.list, and get_skill() writes a level-1 entry as a side effect.
+	# A missing entry is level 1, which is what get_skill() would seed anyway.
+	var skill: Dictionary = player.skills.get(min_skill, {})
+	return int(skill.get("level", 1)) >= min_skill_level
+
+
+## Human-readable skill requirement ("Mining 14"), or "" when ungated.
+func skill_gate_label() -> String:
+	if min_skill.is_empty() or min_skill_level <= 0:
+		return ""
+	return "%s %d" % [JobRegistry.display_name(min_skill), min_skill_level]
 
 
 ## True when this quest's prerequisite gates are open for [param player]:
