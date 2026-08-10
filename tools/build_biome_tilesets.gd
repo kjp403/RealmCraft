@@ -42,11 +42,23 @@ func _build_desert() -> void:
 		16,
 		true
 	)
-	# Cliff / rock cells used as Walls get collision.
+	# Cliff / rock / temple shell cells used as Walls get collision.
 	_mark_collision(ts, 0, [
+		Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3), Vector2i(0, 4),
+		Vector2i(5, 1), Vector2i(5, 2), Vector2i(5, 3), Vector2i(5, 4),
+		Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0),
+		Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5), Vector2i(4, 5),
 		Vector2i(7, 5), Vector2i(8, 5), Vector2i(7, 6), Vector2i(8, 6), Vector2i(9, 6),
 		Vector2i(7, 12), Vector2i(8, 12), Vector2i(7, 13), Vector2i(8, 13),
-		Vector2i(5, 4), Vector2i(4, 5), Vector2i(2, 5), Vector2i(3, 5),
+		# Temple modular shell (rows 7–14)
+		Vector2i(0, 7), Vector2i(1, 7), Vector2i(2, 7), Vector2i(3, 7), Vector2i(4, 7), Vector2i(5, 7),
+		Vector2i(0, 8), Vector2i(1, 8), Vector2i(4, 8), Vector2i(5, 8),
+		Vector2i(0, 9), Vector2i(1, 9), Vector2i(4, 9), Vector2i(5, 9),
+		Vector2i(0, 10), Vector2i(1, 10), Vector2i(4, 10), Vector2i(5, 10),
+		Vector2i(0, 11), Vector2i(1, 11), Vector2i(4, 11), Vector2i(5, 11),
+		Vector2i(0, 12), Vector2i(1, 12), Vector2i(4, 12), Vector2i(5, 12),
+		Vector2i(0, 13), Vector2i(5, 13),
+		Vector2i(0, 14), Vector2i(1, 14), Vector2i(4, 14), Vector2i(5, 14),
 	])
 	_save(ts, OUT_DIR + "desert_tileset.tres")
 
@@ -74,13 +86,15 @@ func _build_sewers() -> void:
 	ts.set_physics_layer_collision_mask(0, 0)
 	_add_atlas(ts, 0, "res://assets/sprites/environment/pixel_dungeon/dungeon_tileset.png", 16, true)
 	_add_atlas(ts, 1, "res://assets/sprites/environment/rf_catacombs/mainlevbuild.png", 32, true)
-	# Pixel dungeon wall-ish purple stone
+	# Wall edges / dark fills only — never mark walkable brick floors (1–4,1–2).
 	_mark_collision(ts, 0, [
-		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0),
-		Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
-		Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2),
-		Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3),
-		Vector2i(0, 4), Vector2i(5, 4),
+		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0),
+		Vector2i(0, 1), Vector2i(5, 1),
+		Vector2i(0, 2), Vector2i(5, 2),
+		Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3), Vector2i(5, 3),
+		Vector2i(0, 4), Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4), Vector2i(5, 4),
+		Vector2i(6, 0), Vector2i(7, 0), Vector2i(8, 0), Vector2i(9, 0),
+		Vector2i(6, 1), Vector2i(7, 1), Vector2i(8, 1), Vector2i(9, 1),
 	])
 	# RF wall blocks (source 1) — coarse 32px collision for accents if used on Walls
 	_mark_collision(ts, 1, [
