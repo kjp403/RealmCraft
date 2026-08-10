@@ -13,6 +13,10 @@ const CHANNEL_SYSTEM: int = ChatConstants.CHANNEL_SYSTEM
 ## Synthetic channel — local-only aggregate view across every conversation.
 const CHANNEL_ALL: int = -1
 const ALL_CONVERSATION_ID: String = "all"
+## Synthetic channel — local-only "DM inbox": every private thread merged in
+## time order. Picking a thread from the chip strip narrows to that dm: id.
+const CHANNEL_PRIVATE: int = -2
+const PRIVATE_CONVERSATION_ID: String = "private"
 
 const TAG_COLOR_DM: String = "#d56bff"
 const TAG_COLOR_WORLD: String = "#66d9ff"
@@ -40,7 +44,7 @@ const TIMESTAMP_DIVIDER_GAP_MS: int = 10 * 60 * 1000
 const BOOTSTRAP_LIMIT: int = 50
 const HISTORY_LIMIT: int = 50
 
-## How far the full-feed content slides in (px from the left) on open, matched to the menu overlay's
+## How far the chatbox slides in (px from the left) on open, matched to the menu overlay's
 ## slide so both panels animate consistently.
 const FULL_FEED_SLIDE: float = 48.0
 
@@ -89,54 +93,59 @@ var peek_fade_seconds: int = 5
 ## chat / self_name_color (hex with leading "#").
 var self_name_color_override: String = ""
 
-var _public_label_world: String = "World"
-var _public_label_team: String = "Team"
-var _public_label_guild: String = "Guild"
+var _tab_label_all: String = "All"
+var _tab_label_system: String = "System"
+var _tab_label_world: String = "World"
+var _tab_label_private: String = "Private"
 
 var fade_out_tween: Tween
 var _full_feed_tween: Tween
+## Authored x of the chatbox inside FullFeed. Read from the scene's offset (not
+## from a resolved rect) so the open/close slide has a stable base even before
+## the first layout pass.
+var _full_feed_base_x: float = 0.0
 #endregion
 
 
 #region Nodes
 @onready var peek_feed: VBoxContainer = $PeekFeed
 @onready var full_feed: Control = $FullFeed
-## The visible chat block (sidebar + chat panel). FullFeed itself spans most
-## of the screen with an offset, so we check this tighter rect for the
-## click-outside-to-close behaviour.
-@onready var full_feed_content: Control = $FullFeed/Control
+## The chatbox itself. FullFeed is a full-screen click-through Control, so we
+## check this tighter rect for the click-outside-to-close behaviour.
+@onready var full_feed_content: Control = $FullFeed/Chatbox
 
 @onready var peek_feed_text_display: RichTextLabel = $PeekFeed/MessageDisplay
 @onready var peek_feed_message_edit: LineEdit = $PeekFeed/MessageEdit
 @onready var fade_out_timer: Timer = $PeekFeed/FadeOutTimer
 
-@onready var full_feed_text_display: RichTextLabel = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/RichTextLabel
-@onready var full_feed_message_edit: LineEdit = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HBoxContainer2/LineEdit
+@onready var full_feed_text_display: RichTextLabel = $FullFeed/Chatbox/Root/Feed
+@onready var full_feed_message_edit: LineEdit = $FullFeed/Chatbox/Root/InputRow/MessageEdit
 
-@onready var dm_container: VBoxContainer = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/ScrollContainer/VBoxContainer
+## Chip strip listing the open DM threads. Only shown while the Private tab is
+## the active view — the tabs replaced the old always-on contact sidebar.
+@onready var dm_bar: ScrollContainer = $FullFeed/Chatbox/Root/PrivateBar
+@onready var dm_container: HBoxContainer = $FullFeed/Chatbox/Root/PrivateBar/DmStrip
 
-@onready var system_chat_button: Button = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/SystemChatButton
-@onready var all_chat_button: Button = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/AllChatButton
-@onready var world_chat_button: Button = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/WorldChatButton
-@onready var team_chat_button: Button = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/TeamChatButton
-@onready var guild_chat_button: Button = $FullFeed/Control/HBoxContainer/ContactPanel/VBoxContainer/GuildChatButton
-@onready var send_button: Button = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HBoxContainer2/Button
+@onready var all_chat_button: Button = $FullFeed/Chatbox/Root/TabRow/AllChatButton
+@onready var system_chat_button: Button = $FullFeed/Chatbox/Root/TabRow/SystemChatButton
+@onready var world_chat_button: Button = $FullFeed/Chatbox/Root/TabRow/WorldChatButton
+@onready var private_chat_button: Button = $FullFeed/Chatbox/Root/TabRow/PrivateChatButton
+@onready var send_button: Button = $FullFeed/Chatbox/Root/InputRow/SendButton
 
-@onready var chat_title_label: Label = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HBoxContainer/ChatTitleLabel
-@onready var settings_button: Button = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HBoxContainer/SettingsButton
+@onready var settings_button: Button = $FullFeed/Chatbox/Root/TabRow/SettingsButton
 
-# Settings panel nodes — laid out in chat_menu.tscn under ChatPanel/VBoxContainer2/SettingsPanel.
-@onready var settings_panel: ScrollContainer = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel
-@onready var settings_blocked_list: VBoxContainer = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/BlockedScroll/BlockedList
-@onready var settings_blocked_empty: Label = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/BlockedScroll/BlockedList/EmptyLabel
-@onready var settings_peek_show_world: CheckBox = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/PeekShowWorld
-@onready var settings_peek_show_dm: CheckBox = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/PeekShowDM
-@onready var settings_peek_show_system: CheckBox = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/PeekShowSystem
-@onready var settings_peek_fade_option: OptionButton = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/PeekFadeRow/PeekFadeOption
-@onready var settings_name_color_row: HBoxContainer = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/SettingsPanel/SettingsContent/NameColorRow
+# Settings panel nodes — laid out in chat_menu.tscn under Chatbox/Root/SettingsPanel.
+@onready var settings_panel: ScrollContainer = $FullFeed/Chatbox/Root/SettingsPanel
+@onready var settings_blocked_list: VBoxContainer = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/BlockedScroll/BlockedList
+@onready var settings_blocked_empty: Label = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/BlockedScroll/BlockedList/EmptyLabel
+@onready var settings_peek_show_world: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowWorld
+@onready var settings_peek_show_dm: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowDM
+@onready var settings_peek_show_system: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowSystem
+@onready var settings_peek_fade_option: OptionButton = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekFadeRow/PeekFadeOption
+@onready var settings_name_color_row: HBoxContainer = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/NameColorRow
 
-@onready var full_feed_input_row: HBoxContainer = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HBoxContainer2
-@onready var full_feed_sep_above_input: HSeparator = $FullFeed/Control/HBoxContainer/ChatPanel/VBoxContainer2/HSeparator2
+@onready var full_feed_input_row: HBoxContainer = $FullFeed/Chatbox/Root/InputRow
+@onready var full_feed_sep_above_input: HSeparator = $FullFeed/Chatbox/Root/InputSeparator
 #endregion
 
 
@@ -169,15 +178,17 @@ func _ready() -> void:
 	full_feed_message_edit.focus_exited.connect(_reset_keyboard_lift)
 	set_process(false)
 
-	_public_label_world = world_chat_button.text
-	_public_label_team = team_chat_button.text
-	_public_label_guild = guild_chat_button.text
+	_full_feed_base_x = full_feed_content.offset_left
 
-	world_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_WORLD))
-	team_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_TEAM))
-	guild_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_GUILD))
-	system_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_SYSTEM))
+	_tab_label_all = all_chat_button.text
+	_tab_label_system = system_chat_button.text
+	_tab_label_world = world_chat_button.text
+	_tab_label_private = private_chat_button.text
+
 	all_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_ALL))
+	system_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_SYSTEM))
+	world_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_WORLD))
+	private_chat_button.pressed.connect(func() -> void: open_channel(CHANNEL_PRIVATE))
 
 	send_button.pressed.connect(_on_send_button_pressed)
 	settings_button.pressed.connect(_toggle_settings_panel)
@@ -188,8 +199,8 @@ func _ready() -> void:
 	current_conversation_id = ChatConstants.channel_conversation_id(CHANNEL_WORLD)
 	_ensure_conversation_exists(current_conversation_id)
 
-	_sync_channel_buttons()
-	_update_public_button_labels()
+	_sync_tab_buttons()
+	_update_tab_labels()
 
 	peek_feed.show()
 	full_feed.hide()
@@ -203,7 +214,6 @@ func _ready() -> void:
 	peek_feed_message_edit.focus_exited.connect(_apply_input_mode)
 
 	_refresh_full_feed()
-	_refresh_title_and_input()
 	_update_input_enabled_state()
 
 
@@ -250,10 +260,9 @@ func toggle_feed() -> void:
 		return
 	peek_feed.hide()
 	_show_full_feed()
-	_sync_channel_buttons()
-	_update_public_button_labels()
+	_sync_tab_buttons()
+	_update_tab_labels()
 	_refresh_full_feed()
-	_refresh_title_and_input()
 	_update_input_enabled_state()
 
 
@@ -366,7 +375,7 @@ func _on_chat_message(message: Dictionary) -> void:
 			i -= 1
 		convo_records[i] = record
 
-	var is_viewing: bool = full_feed.visible and (current_conversation_id == convo_id or current_conversation_id == ALL_CONVERSATION_ID)
+	var is_viewing: bool = full_feed.visible and _view_shows_conversation(convo_id)
 
 	# Count as unread when we're NOT actually looking at it — is_viewing already folds in
 	# full_feed.visible, so a closed feed (even on the last-opened DM) correctly badges new messages.
@@ -404,7 +413,7 @@ func _on_chat_message(message: Dictionary) -> void:
 			peek_feed_text_display.show()
 			_start_peek_fade()
 
-	_update_public_button_labels()
+	_update_tab_labels()
 #endregion
 
 
@@ -431,11 +440,10 @@ func _on_peek_feed_gui_input(event: InputEvent) -> void:
 		peek_feed.hide()
 		_show_full_feed()
 
-		_sync_channel_buttons()
-		_update_public_button_labels()
+		_sync_tab_buttons()
+		_update_tab_labels()
 
 		_refresh_full_feed()
-		_refresh_title_and_input()
 		_update_input_enabled_state()
 
 
@@ -468,17 +476,17 @@ func _start_peek_fade() -> void:
 func _show_full_feed() -> void:
 	# Navigating to any channel/DM always lands on the feed, never a stale Chat-options view.
 	_set_settings_open(false)
-	# Already open (e.g. switching channels from the sidebar) — don't replay the slide.
+	# Already open (e.g. switching tabs) — don't replay the slide.
 	if full_feed.visible:
 		return
 	if _full_feed_tween != null and _full_feed_tween.is_valid():
 		_full_feed_tween.kill()
 	full_feed.visible = true
 	full_feed.modulate.a = 0.0
-	full_feed_content.position.x = -FULL_FEED_SLIDE
+	full_feed_content.position.x = _full_feed_base_x - FULL_FEED_SLIDE
 	_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	_full_feed_tween.tween_property(full_feed, ^"modulate:a", 1.0, 0.18)
-	_full_feed_tween.tween_property(full_feed_content, ^"position:x", 0.0, 0.18)
+	_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x, 0.18)
 
 
 ## The open effect in reverse: slide back out to the left + fade, THEN hide.
@@ -487,7 +495,7 @@ func _hide_full_feed() -> void:
 		_full_feed_tween.kill()
 	_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
 	_full_feed_tween.tween_property(full_feed, ^"modulate:a", 0.0, 0.16)
-	_full_feed_tween.tween_property(full_feed_content, ^"position:x", -FULL_FEED_SLIDE, 0.16)
+	_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x - FULL_FEED_SLIDE, 0.16)
 	_full_feed_tween.chain().tween_callback(full_feed.hide)
 #endregion
 
@@ -524,6 +532,12 @@ func _on_text_submitted(new_text: String, line_edit: LineEdit) -> void:
 		return
 
 	if _is_system_conversation(current_conversation_id):
+		return
+
+	if current_conversation_id == PRIVATE_CONVERSATION_ID:
+		# The merged inbox has no single recipient. The field is read-only in
+		# this view, so this only catches a stray programmatic submit.
+		_show_full_notice("Pick a conversation to reply to.")
 		return
 
 	if current_conversation_id == ALL_CONVERSATION_ID:
@@ -614,22 +628,40 @@ func open_channel(channel: int) -> void:
 
 	elif channel == CHANNEL_ALL:
 		current_conversation_id = ALL_CONVERSATION_ID
+		# Guild lost its own tab, so All is where guild chat is read now —
+		# backfill it here or the merge would only ever hold live messages.
+		var all_guild_id: int = _get_active_guild_id()
+		if all_guild_id > 0:
+			_request_history_once(
+				ChatConstants.guild_conversation_id(all_guild_id),
+				&"chat.guild.history",
+				{"limit": HISTORY_LIMIT}
+			)
+
+	elif channel == CHANNEL_PRIVATE:
+		current_conversation_id = PRIVATE_CONVERSATION_ID
 
 	else:
 		current_conversation_id = ChatConstants.channel_conversation_id(CHANNEL_WORLD)
 
 	_clear_unread(current_conversation_id)
+	# An aggregate tab puts its whole membership on screen at once, so the
+	# per-conversation badges it covers are read too.
+	if channel == CHANNEL_ALL or channel == CHANNEL_PRIVATE:
+		var dm_only: bool = channel == CHANNEL_PRIVATE
+		for convo_id: String in unread_by_conversation.keys():
+			if not dm_only or convo_id.begins_with("dm:"):
+				_clear_unread(convo_id)
 
 	_show_full_feed()
 	peek_feed.hide()
 
 	_ensure_conversation_exists(current_conversation_id)
 
-	_sync_channel_buttons()
-	_update_public_button_labels()
+	_sync_tab_buttons()
+	_update_tab_labels()
 
 	_refresh_full_feed()
-	_refresh_title_and_input()
 	_update_input_enabled_state()
 
 
@@ -647,11 +679,10 @@ func open_conversation(conversation_id: String) -> void:
 	_show_full_feed()
 	peek_feed.hide()
 
-	_sync_channel_buttons()
-	_update_public_button_labels()
+	_sync_tab_buttons()
+	_update_tab_labels()
 
 	_refresh_full_feed()
-	_refresh_title_and_input()
 	_update_input_enabled_state()
 
 
@@ -668,11 +699,10 @@ func open_dm(other_id: int) -> void:
 	_show_full_feed()
 	peek_feed.hide()
 
-	_sync_channel_buttons()
-	_update_public_button_labels()
+	_sync_tab_buttons()
+	_update_tab_labels()
 
 	_refresh_full_feed()
-	_refresh_title_and_input()
 	_update_input_enabled_state()
 
 	_request_player_name_if_needed(other_id)
@@ -692,9 +722,17 @@ func _refresh_full_feed() -> void:
 	full_feed_text_display.text = ""
 
 	var records: Array = _records_for_current_view()
-	var prev: Dictionary = {}
-	var show_channel_prefix: bool = current_conversation_id == ALL_CONVERSATION_ID
+	# Aggregate views mix conversations, so each line needs its origin tag.
+	var show_channel_prefix: bool = _is_aggregate_view(current_conversation_id)
 
+	if records.is_empty() and current_conversation_id == PRIVATE_CONVERSATION_ID:
+		full_feed_text_display.append_text(
+			"[center][color=%s]No private messages yet.\nOpen a player's profile to start one.[/color][/center]"
+			% SUBTLE_COLOR
+		)
+		return
+
+	var prev: Dictionary = {}
 	for record: Dictionary in records:
 		var block: String = _format_message_block(record, prev, show_channel_prefix)
 		if not block.is_empty():
@@ -703,16 +741,20 @@ func _refresh_full_feed() -> void:
 		prev = record
 
 
-## Returns the records to draw for the active conversation. For the ALL
-## synthetic view we merge every real conversation in time order; otherwise
-## we just hand back the per-conversation log.
+## Returns the records to draw for the active conversation. The ALL and
+## PRIVATE tabs are synthetic: they merge their member conversations in time
+## order. Everything else is just the per-conversation log.
 func _records_for_current_view() -> Array:
-	if current_conversation_id != ALL_CONVERSATION_ID:
+	if not _is_aggregate_view(current_conversation_id):
 		return raw_messages_by_conversation.get(current_conversation_id, [])
+
+	var private_only: bool = current_conversation_id == PRIVATE_CONVERSATION_ID
 
 	var merged: Array = []
 	for convo_id: String in raw_messages_by_conversation.keys():
-		if convo_id == ALL_CONVERSATION_ID:
+		if _is_aggregate_view(convo_id):
+			continue
+		if private_only and not convo_id.begins_with("dm:"):
 			continue
 		for r: Dictionary in raw_messages_by_conversation[convo_id]:
 			merged.append(r)
@@ -723,14 +765,33 @@ func _records_for_current_view() -> Array:
 	return merged
 
 
-func _refresh_title_and_input() -> void:
-	if chat_title_label != null:
-		chat_title_label.text = _title_for_current()
+## True for the two synthetic tab views (ALL / PRIVATE) that draw a merge of
+## other conversations rather than a log of their own.
+func _is_aggregate_view(convo_id: String) -> bool:
+	return convo_id == ALL_CONVERSATION_ID or convo_id == PRIVATE_CONVERSATION_ID
 
 
+## True when a message landing in convo_id belongs on screen right now — the
+## exact conversation, or an aggregate tab that includes it.
+func _view_shows_conversation(convo_id: String) -> bool:
+	if current_conversation_id == convo_id:
+		return true
+	if current_conversation_id == ALL_CONVERSATION_ID:
+		return true
+	if current_conversation_id == PRIVATE_CONVERSATION_ID:
+		return convo_id.begins_with("dm:")
+	return false
+
+
+## The tabs carry the "where am I" job now, so the only remaining title
+## surface is the compose field's placeholder ("Message World" / "Message
+## Thara") — see _update_input_enabled_state.
 func _title_for_current() -> String:
 	if current_conversation_id == ALL_CONVERSATION_ID:
-		return "All"
+		return _tab_label_all
+
+	if current_conversation_id == PRIVATE_CONVERSATION_ID:
+		return _tab_label_private
 
 	if current_conversation_id.begins_with("dm:"):
 		var other_id: int = current_dm_other_id
@@ -740,16 +801,16 @@ func _title_for_current() -> String:
 		return title_text if not title_text.is_empty() else "DM %d" % other_id
 
 	if _is_system_conversation(current_conversation_id):
-		return "System"
+		return _tab_label_system
 
 	if current_conversation_id.begins_with("guild:"):
-		return _public_label_guild
+		return "Guild"
 
 	if current_conversation_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD):
-		return _public_label_world
+		return _tab_label_world
 
 	if current_conversation_id == ChatConstants.channel_conversation_id(CHANNEL_TEAM):
-		return _public_label_team
+		return "Team"
 
 	return "Chat"
 
@@ -1005,14 +1066,19 @@ func _ensure_conversation_exists(convo_id: String) -> void:
 #endregion
 
 
-#region DM buttons / names
+#region DM chips / names
+## One chip per open DM thread, in the strip that appears under the tabs while
+## the Private tab is active. Toggle + no button group: the chip's pressed look
+## marks the thread you've narrowed to, and _sync_dm_chips owns that state.
 func _ensure_dm_button(convo_id: String, other_id: int) -> void:
 	if conversation_buttons.has(convo_id):
 		_update_dm_button_label(convo_id, other_id)
 		return
 
 	var button: Button = Button.new()
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.theme_type_variation = &"Chip"
+	button.toggle_mode = true
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(open_conversation.bind(convo_id))
 
 	dm_container.add_child(button)
@@ -1020,6 +1086,22 @@ func _ensure_dm_button(convo_id: String, other_id: int) -> void:
 
 	_update_dm_button_label(convo_id, other_id)
 	_request_player_name_if_needed(other_id)
+	_sync_dm_chips()
+
+
+## Reflect the active thread in the chip strip, and keep the strip itself
+## visible only for the Private tab (a DM thread counts as Private).
+func _sync_dm_chips() -> void:
+	for convo_id: String in conversation_buttons:
+		var chip: Button = conversation_buttons[convo_id]
+		if chip != null:
+			chip.set_pressed_no_signal(convo_id == current_conversation_id)
+
+	if dm_bar == null:
+		return
+	var in_private: bool = (current_conversation_id == PRIVATE_CONVERSATION_ID
+		or current_conversation_id.begins_with("dm:"))
+	dm_bar.visible = in_private and not conversation_buttons.is_empty() and not settings_panel.visible
 
 
 func _update_dm_button_label(convo_id: String, other_id: int) -> void:
@@ -1070,11 +1152,11 @@ func _on_profile_received(profile: Dictionary, player_id: int) -> void:
 	_update_dm_button_label(convo_id, player_id)
 
 	if current_conversation_id == convo_id:
-		_refresh_title_and_input()
+		_update_input_enabled_state()
 #endregion
 
 
-#region Unread + public labels
+#region Unread + tab labels
 func _get_unread(convo_id: String) -> int:
 	return int(unread_by_conversation.get(convo_id, 0))
 
@@ -1082,7 +1164,7 @@ func _get_unread(convo_id: String) -> int:
 func _set_unread(convo_id: String, v: int) -> void:
 	unread_by_conversation[convo_id] = maxi(v, 0)
 	_update_dm_button_if_needed(convo_id)
-	_update_public_button_labels()
+	_update_tab_labels()
 	var has_dm: bool = _has_unread_dm()
 	if has_dm != _last_unread_dm:
 		_last_unread_dm = has_dm
@@ -1116,26 +1198,32 @@ func _update_dm_button_if_needed(convo_id: String) -> void:
 		_update_dm_button_label(convo_id, other_id)
 
 
-func _update_public_button_labels() -> void:
+## Tab captions carry their own unread count, e.g. "World (3)". The All tab
+## sums every conversation and Private sums the DM threads, so a badge is
+## never stranded behind a tab you can't see.
+func _update_tab_labels() -> void:
 	var self_id: int = int(ClientState.player_id)
 
-	_set_public_button_text(world_chat_button, _public_label_world, ChatConstants.channel_conversation_id(CHANNEL_WORLD))
-	_set_public_button_text(team_chat_button, _public_label_team, ChatConstants.channel_conversation_id(CHANNEL_TEAM))
-
-	var guild_id: int = _get_active_guild_id()
-	if guild_id > 0:
-		_set_public_button_text(guild_chat_button, _public_label_guild, ChatConstants.guild_conversation_id(guild_id))
-	else:
-		guild_chat_button.text = _public_label_guild
-
-	_set_public_button_text(system_chat_button, "System", ChatConstants.system_conversation_id(self_id))
+	_set_tab_text(world_chat_button, _tab_label_world, _get_unread(ChatConstants.channel_conversation_id(CHANNEL_WORLD)))
+	_set_tab_text(system_chat_button, _tab_label_system, _get_unread(ChatConstants.system_conversation_id(self_id)))
+	_set_tab_text(private_chat_button, _tab_label_private, _unread_total("dm:"))
+	_set_tab_text(all_chat_button, _tab_label_all, _unread_total(""))
 
 
-func _set_public_button_text(button: Button, base_label: String, convo_id: String) -> void:
+## Total unread across every conversation whose id starts with the given
+## prefix. Empty prefix = everything.
+func _unread_total(prefix: String) -> int:
+	var total: int = 0
+	for convo_id: String in unread_by_conversation:
+		if prefix.is_empty() or convo_id.begins_with(prefix):
+			total += int(unread_by_conversation[convo_id])
+	return total
+
+
+func _set_tab_text(button: Button, base_label: String, unread: int) -> void:
 	if button == null:
 		return
 
-	var unread: int = _get_unread(convo_id)
 	button.text = ("%s (%d)" % [base_label, unread]) if unread > 0 else base_label
 #endregion
 
@@ -1209,7 +1297,7 @@ func echo_system(text: String) -> void:
 			"convo_id": convo_id,
 		}
 		(raw_messages_by_conversation[convo_id] as Array).append(record)
-		if full_feed.visible and (current_conversation_id == convo_id or current_conversation_id == ALL_CONVERSATION_ID):
+		if full_feed.visible and _view_shows_conversation(convo_id):
 			_refresh_full_feed()
 	if not full_feed.visible:
 		_reset_peek_view()
@@ -1325,22 +1413,46 @@ func _on_chat_typing(payload: Dictionary) -> void:
 #region UI state
 func _update_input_enabled_state() -> void:
 	var writable: bool = true
+	var read_only_hint: String = "Read-only"
 
 	if _is_system_conversation(current_conversation_id):
 		writable = false
+	elif current_conversation_id == PRIVATE_CONVERSATION_ID:
+		# The merged inbox has no single recipient — pick a thread to reply.
+		writable = false
+		read_only_hint = "Pick a conversation to reply"
 	elif current_channel == CHANNEL_TEAM:
 		writable = false
 	elif current_conversation_id.begins_with("guild:") and _get_active_guild_id() <= 0:
 		writable = false
 
+	# Composing from the All tab broadcasts to World (see _on_text_submitted),
+	# so name the real destination rather than the tab.
+	var target_label: String = (
+		_tab_label_world if current_conversation_id == ALL_CONVERSATION_ID else _title_for_current()
+	)
+
 	full_feed_message_edit.editable = writable
-	full_feed_message_edit.placeholder_text = "Read-only" if not writable else "Enter a message"
+	full_feed_message_edit.placeholder_text = (
+		read_only_hint if not writable else "Message %s" % target_label
+	)
 
 
-func _sync_channel_buttons() -> void:
-	var guild_id: int = _get_active_guild_id()
-	guild_chat_button.disabled = guild_id <= 0
-	team_chat_button.disabled = true
+## Light up the tab matching the active view. A DM thread (or the merged
+## inbox) lights Private; a guild conversation has no tab of its own, so it
+## reads under All — which is where /g output lands.
+func _sync_tab_buttons() -> void:
+	var self_id: int = int(ClientState.player_id)
+
+	all_chat_button.set_pressed_no_signal(current_conversation_id == ALL_CONVERSATION_ID)
+	system_chat_button.set_pressed_no_signal(current_conversation_id == ChatConstants.system_conversation_id(self_id))
+	world_chat_button.set_pressed_no_signal(current_conversation_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD))
+	private_chat_button.set_pressed_no_signal(
+		current_conversation_id == PRIVATE_CONVERSATION_ID
+		or current_conversation_id.begins_with("dm:")
+	)
+
+	_sync_dm_chips()
 #endregion
 
 
@@ -1382,7 +1494,7 @@ func _is_system_conversation(convo_id: String) -> bool:
 
 #region Settings panel
 ## Settings panel is laid out in chat_menu.tscn under
-## ChatPanel/VBoxContainer2/SettingsPanel. This region only wires controls,
+## Chatbox/Root/SettingsPanel. This region only wires controls,
 ## populates the dynamic content (block list buttons, name-colour swatches),
 ## and persists choices to ClientState.settings.
 
@@ -1556,12 +1668,13 @@ func _toggle_settings_panel() -> void:
 func _set_settings_open(open: bool) -> void:
 	settings_panel.visible = open
 	# Feed + separator + input row swap places with the settings panel — same
-	# chat-panel real estate, no overlay layering required.
+	# chatbox real estate, no overlay layering required.
 	full_feed_text_display.visible = not open
 	full_feed_sep_above_input.visible = not open
 	full_feed_input_row.visible = not open
-	settings_button.text = "Back" if open else "Settings"
-	chat_title_label.text = "Chat options" if open else _title_for_current()
+	settings_button.text = "Back" if open else "Options"
+	# The DM chips belong to the feed, not to options.
+	_sync_dm_chips()
 	if open:
 		_refresh_block_list_request()
 
