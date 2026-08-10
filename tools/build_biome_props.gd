@@ -31,6 +31,38 @@ func _initialize() -> void:
 		13, 14, 5, 0.1
 	)
 
+	# Top Down Lava pack — animated forge décor (individual frames, not full sheets).
+	_numbered_frames(
+		"res://assets/sprites/environment/lava_forge_16/animated/torch",
+		"torch%d.png", 1, 7,
+		OUT_DECO + "deco_forge_torch.tres",
+		0.11
+	)
+	_numbered_frames(
+		"res://assets/sprites/environment/lava_forge_16/animated/burning_lava",
+		"burninglava%d.png", 1, 7,
+		OUT_DECO + "deco_burning_lava.tres",
+		0.12
+	)
+	_numbered_frames(
+		"res://assets/sprites/environment/lava_forge_16/animated/land_on_lava",
+		"lavaonland%d.png", 1, 7,
+		OUT_DECO + "deco_land_lava.tres",
+		0.12
+	)
+	_numbered_frames(
+		"res://assets/sprites/environment/lava_forge_16/animated/lava_rock_1",
+		"lavarock%d.png", 1, 7,
+		OUT_DECO + "deco_lava_rock.tres",
+		0.14
+	)
+	_numbered_frames(
+		"res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2",
+		"lavarock%d.png", 2, 8,
+		OUT_DECO + "deco_lava_rock_b.tres",
+		0.14
+	)
+
 	# SE idle only — full strip includes graze/turn that reads as "glitching" at distance.
 	# Frame widths MUST match content pitch (stag cells are 32px, not 48).
 	_critter(
@@ -84,6 +116,30 @@ func _strip_frames(tex_path: String, out_path: String, fw: int, fh: int, n: int,
 		at.atlas = tex
 		at.region = Rect2(i * fw, 0, fw, fh)
 		frames.add_frame(&"default", at)
+	var err := ResourceSaver.save(frames, out_path)
+	assert(err == OK, "save failed %s" % out_path)
+	print("wrote ", out_path)
+
+
+func _numbered_frames(
+	dir_path: String,
+	pattern: String,
+	start: int,
+	last: int,
+	out_path: String,
+	speed: float
+) -> void:
+	var frames := SpriteFrames.new()
+	if frames.has_animation(&"default"):
+		frames.remove_animation(&"default")
+	frames.add_animation(&"default")
+	frames.set_animation_speed(&"default", 1.0 / speed)
+	frames.set_animation_loop(&"default", true)
+	for i in range(start, last + 1):
+		var path: String = "%s/%s" % [dir_path, pattern % i]
+		var tex: Texture2D = load(path) as Texture2D
+		assert(tex != null, "missing %s" % path)
+		frames.add_frame(&"default", tex)
 	var err := ResourceSaver.save(frames, out_path)
 	assert(err == OK, "save failed %s" % out_path)
 	print("wrote ", out_path)

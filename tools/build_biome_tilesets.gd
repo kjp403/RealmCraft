@@ -58,42 +58,34 @@ func _build_fire_forge() -> void:
 	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 2)
 	ts.set_physics_layer_collision_mask(0, 0)
-	# 0 = main forge sheet, 1 = SciGho starter fire, 2 = DG Fire Zone free masonry
-	_add_atlas(ts, 0, "res://assets/sprites/environment/fire_forge/tiles.png", 16, true)
-	_add_atlas(ts, 1, "res://assets/sprites/environment/starter_platformer/FireSet.png", 16, true)
-	_add_atlas(ts, 2, "res://assets/sprites/environment/dg_fire/all_tiles_free.png", 16, true)
-	var wall_and_block: Array = [
-		# shell
-		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1),
-		Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2),
-		Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3),
-		Vector2i(2, 0), Vector2i(0, 2), Vector2i(4, 2),
-		Vector2i(0, 0), Vector2i(4, 0), Vector2i(0, 4), Vector2i(4, 4),
-		Vector2i(1, 0), Vector2i(3, 0), Vector2i(1, 4), Vector2i(3, 4),
-		# fence / rail
-		Vector2i(10, 16), Vector2i(11, 16), Vector2i(12, 16),
-		Vector2i(10, 17), Vector2i(11, 17), Vector2i(12, 17),
-		Vector2i(10, 18), Vector2i(11, 18), Vector2i(12, 18),
-		Vector2i(10, 19), Vector2i(11, 19), Vector2i(12, 19),
-		Vector2i(8, 19),
-	]
-	# Lava hazard tiles (collision when painted on Ground)
-	for y in range(13, 25):
-		for x in range(19, 25):
-			wall_and_block.append(Vector2i(x, y))
-	_mark_collision(ts, 0, wall_and_block)
-	# Starter FireSet — lava / fire vents / spikes / rock (blocking)
-	_mark_collision(ts, 1, [
-		Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3), Vector2i(4, 4),
-		Vector2i(0, 4), Vector2i(1, 4), Vector2i(2, 4),
-		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1),
-		Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2),
-		Vector2i(3, 0), Vector2i(4, 0), Vector2i(4, 1),
+	# 0 = Top Down Lava sheet (floors / lava fill — individual 16×16 only)
+	# 1 = GIF-derived animated lava (7 frames × N rows; paint origin cell only)
+	# 2 = packed 16×16 props (rocks / chest)
+	# 3 = DG Fire free masonry (proper wall shell tiles)
+	_add_atlas(ts, 0, "res://assets/sprites/environment/lava_forge_16/freelavatileset_sheet.png", 16, true)
+	_add_atlas(ts, 1, "res://assets/sprites/environment/lava_forge_16/lava_tile_anim_strip.png", 16, true)
+	_add_atlas(ts, 2, "res://assets/sprites/environment/lava_forge_16/forge_props_16.png", 16, true)
+	_add_atlas(ts, 3, "res://assets/sprites/environment/dg_fire/all_tiles_free.png", 16, true)
+	_setup_row_animations(ts, 1, 7, 8.0)
+
+	# Lava hazard on source 0 (static fill + edges) + anim origins on source 1.
+	_mark_collision(ts, 0, [
+		Vector2i(1, 11), Vector2i(2, 11), Vector2i(7, 11),
+		Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11),
+		Vector2i(2, 13), Vector2i(3, 13), Vector2i(6, 13),
+		Vector2i(18, 13), Vector2i(19, 13), Vector2i(20, 13), Vector2i(26, 13),
 	])
-	# DG fire free — brick shells / well rings / pillars
-	_mark_collision(ts, 2, [
-		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
-		Vector2i(1, 2), Vector2i(4, 2), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3),
+	var anim_block: Array = []
+	var anim_src := ts.get_source(1) as TileSetAtlasSource
+	var anim_rows: int = int(anim_src.texture.get_height() / 16)
+	for y in anim_rows:
+		anim_block.append(Vector2i(0, y))
+	_mark_collision(ts, 1, anim_block)
+	# DG Fire wall shells / pillars / well rings
+	_mark_collision(ts, 3, [
+		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0),
+		Vector2i(0, 1), Vector2i(3, 1), Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2),
+		Vector2i(1, 1), Vector2i(2, 1),
 		Vector2i(8, 1), Vector2i(9, 1), Vector2i(10, 1),
 		Vector2i(8, 2), Vector2i(10, 2), Vector2i(8, 3), Vector2i(9, 3), Vector2i(10, 3),
 		Vector2i(6, 2), Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5),
@@ -111,6 +103,8 @@ func _build_sewers() -> void:
 	_add_atlas(ts, 1, "res://assets/sprites/environment/rf_catacombs/mainlevbuild.png", 32, true)
 	_add_atlas(ts, 2, "res://assets/sprites/environment/starter_platformer/DarkCastle.png", 16, true)
 	_add_atlas(ts, 3, "res://assets/sprites/environment/dg_dungeon/set1.png", 16, true)
+	# Wall shell only — do NOT mark (6,1)/(7,1) as floor-safe; those are wall-fill
+	# and must never be painted on Ground (that created the sewers "invisible horizontal walls").
 	_mark_collision(ts, 0, [
 		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0),
 		Vector2i(0, 1), Vector2i(5, 1),
@@ -119,6 +113,9 @@ func _build_sewers() -> void:
 		Vector2i(0, 4), Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4), Vector2i(5, 4),
 		Vector2i(6, 0), Vector2i(7, 0), Vector2i(8, 0), Vector2i(9, 0),
 		Vector2i(6, 1), Vector2i(7, 1), Vector2i(8, 1), Vector2i(9, 1),
+		# Doors — if ever painted on Props they still block; keep collision so they
+		# are only safe when used as intentional wall openings (we no longer stamp them on floors).
+		Vector2i(6, 6), Vector2i(7, 6),
 	])
 	_mark_collision(ts, 1, [
 		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0),
@@ -143,6 +140,26 @@ func _build_sewers() -> void:
 			dg_walls.append(Vector2i(x, y))
 	_mark_collision(ts, 3, dg_walls)
 	_save(ts, OUT_DIR + "sewers_tileset.tres")
+
+
+func _setup_row_animations(ts: TileSet, source_id: int, frames: int, speed: float) -> void:
+	var src := ts.get_source(source_id) as TileSetAtlasSource
+	var rows: int = int(src.texture.get_height() / src.texture_region_size.y)
+	for y in rows:
+		var origin := Vector2i(0, y)
+		# Animation frames occupy the next (frames-1) atlas cells — remove any
+		# pre-created tiles there or set_tile_animation_* will fail.
+		for x in range(1, frames):
+			var cell := Vector2i(x, y)
+			if src.has_tile(cell):
+				src.remove_tile(cell)
+		if not src.has_tile(origin):
+			src.create_tile(origin)
+		src.set_tile_animation_columns(origin, frames)
+		src.set_tile_animation_separation(origin, Vector2i(0, 0))
+		src.set_tile_animation_frames_count(origin, frames)
+		src.set_tile_animation_speed(origin, speed)
+	print("animated source=", source_id, " rows=", rows, " frames=", frames)
 
 
 func _add_atlas(ts: TileSet, source_id: int, tex_path: String, tile: int, create_all: bool) -> void:

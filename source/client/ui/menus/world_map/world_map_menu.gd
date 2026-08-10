@@ -4,11 +4,13 @@ extends MenuShell
 ## the map surface matches the minimap.
 
 
-const VIEW_SIZE: Vector2i = Vector2i(720, 420)
+const VIEW_SIZE: Vector2i = Vector2i(520, 300)
 ## Fallback zoom when a map has unbounded camera limits (follow-player).
 const FALLBACK_ZOOM: float = 0.28
 ## Letterbox padding so map edges aren't flush with the frame.
 const FIT_PADDING: float = 0.88
+## Legend width — keep map+legend under 960×540 with shell margins.
+const LEGEND_WIDTH: float = 168.0
 
 
 var _sub_viewport: SubViewport
@@ -27,10 +29,33 @@ var _view_size: Vector2 = Vector2(VIEW_SIZE)
 
 func _ready() -> void:
 	build_shell("World Map", null, true)
+	# Shell defaults assume a roomy viewport; clamp padding so title/Close/map
+	# stay inside the 960×540 client window instead of cropping off-screen.
+	_tighten_shell_for_viewport()
 	_build_body()
 	visibility_changed.connect(_on_visibility_changed)
 	set_process(false)
 	hide()
+
+
+func _tighten_shell_for_viewport() -> void:
+	for child in get_children():
+		if child is MarginContainer and child != content:
+			var margin: MarginContainer = child
+			margin.add_theme_constant_override(&"margin_left", 8)
+			margin.add_theme_constant_override(&"margin_right", 8)
+			margin.add_theme_constant_override(&"margin_top", 8)
+			margin.add_theme_constant_override(&"margin_bottom", 8)
+			if margin.get_child_count() > 0 and margin.get_child(0) is PanelContainer:
+				var pad: Node = margin.get_child(0).get_child(0) if margin.get_child(0).get_child_count() > 0 else null
+				if pad is MarginContainer:
+					(pad as MarginContainer).add_theme_constant_override(&"margin_left", 10)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_right", 10)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_top", 6)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_bottom", 8)
+			break
+	if _title_label != null:
+		_title_label.add_theme_font_size_override(&"font_size", 18)
 
 
 func open(_arg: Variant = null) -> void:
@@ -96,13 +121,13 @@ func _build_body() -> void:
 	var map_frame := PanelContainer.new()
 	map_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	map_frame.custom_minimum_size = Vector2(VIEW_SIZE)
+	map_frame.custom_minimum_size = Vector2(280, 180)
 	map_frame.clip_contents = true
 	map_frame.add_theme_stylebox_override(&"panel", _frame_style())
 	map_column.add_child(map_frame)
 
 	_map_host = Control.new()
-	_map_host.custom_minimum_size = Vector2(VIEW_SIZE)
+	_map_host.custom_minimum_size = Vector2(280, 180)
 	_map_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_map_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_map_host.clip_contents = true
@@ -144,7 +169,7 @@ func _build_body() -> void:
 	_map_host.add_child(_player_marker)
 
 	var legend_panel := PanelContainer.new()
-	legend_panel.custom_minimum_size = Vector2(220, 0)
+	legend_panel.custom_minimum_size = Vector2(LEGEND_WIDTH, 0)
 	legend_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	legend_panel.add_theme_stylebox_override(&"panel", _legend_style())
 	row.add_child(legend_panel)

@@ -1,0 +1,38 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock2.png" id="1_wsrv1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock3.png" id="2_cshne"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock4.png" id="3_rg5wg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock5.png" id="4_s43pv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock6.png" id="5_511gq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock7.png" id="6_jvg26"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/lava_rock_2/lavarock8.png" id="7_inj0d"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_wsrv1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_cshne")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rg5wg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_s43pv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_511gq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_jvg26")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_inj0d")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 7.142857142857142
+}]
