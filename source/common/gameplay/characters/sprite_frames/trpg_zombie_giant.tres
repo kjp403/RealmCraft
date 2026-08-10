@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_zombie_giant/trpg_zombie_giant_attack.png" id="1_mjonn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_zombie_giant/trpg_zombie_giant_death.png" id="2_3wxur"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_zombie_giant/trpg_zombie_giant_idle.png" id="3_6s7ya"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_zombie_giant/trpg_zombie_giant_run.png" id="4_vs4hh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_zombie_giant/trpg_zombie_giant_walk.png" id="5_clxpv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ccm5p"]
+atlas = ExtResource("1_mjonn")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_am3c2"]
+atlas = ExtResource("1_mjonn")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5nvtd"]
+atlas = ExtResource("1_mjonn")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idr8a"]
+atlas = ExtResource("1_mjonn")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6uup"]
+atlas = ExtResource("2_3wxur")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qr0xu"]
+atlas = ExtResource("2_3wxur")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qavbo"]
+atlas = ExtResource("2_3wxur")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fbsn"]
+atlas = ExtResource("2_3wxur")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e18iu"]
+atlas = ExtResource("3_6s7ya")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fmw4m"]
+atlas = ExtResource("3_6s7ya")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3gf2"]
+atlas = ExtResource("3_6s7ya")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f6cyh"]
+atlas = ExtResource("3_6s7ya")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nolwv"]
+atlas = ExtResource("4_vs4hh")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_duc13"]
+atlas = ExtResource("4_vs4hh")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r62ce"]
+atlas = ExtResource("4_vs4hh")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sasfm"]
+atlas = ExtResource("4_vs4hh")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ajicu"]
+atlas = ExtResource("5_clxpv")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ksi6c"]
+atlas = ExtResource("5_clxpv")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7jiv"]
+atlas = ExtResource("5_clxpv")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ases"]
+atlas = ExtResource("5_clxpv")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ccm5p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_am3c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5nvtd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idr8a")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6uup")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qr0xu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qavbo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fbsn")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e18iu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fmw4m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3gf2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f6cyh")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nolwv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_duc13")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r62ce")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sasfm")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ajicu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ksi6c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7jiv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ases")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_zombie_giant"
+metadata/id = 77

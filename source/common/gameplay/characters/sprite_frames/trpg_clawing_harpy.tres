@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_clawing_harpy/trpg_clawing_harpy_attack.png" id="1_tvqb3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_clawing_harpy/trpg_clawing_harpy_death.png" id="2_vl7y0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_clawing_harpy/trpg_clawing_harpy_idle.png" id="3_lyavq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_clawing_harpy/trpg_clawing_harpy_run.png" id="4_81joc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_clawing_harpy/trpg_clawing_harpy_walk.png" id="5_ulwef"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ovbmt"]
+atlas = ExtResource("1_tvqb3")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ltqd"]
+atlas = ExtResource("1_tvqb3")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n4bmy"]
+atlas = ExtResource("1_tvqb3")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_suvyh"]
+atlas = ExtResource("1_tvqb3")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n27dv"]
+atlas = ExtResource("2_vl7y0")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7cmxy"]
+atlas = ExtResource("2_vl7y0")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_34bew"]
+atlas = ExtResource("2_vl7y0")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dg0ip"]
+atlas = ExtResource("2_vl7y0")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u0clq"]
+atlas = ExtResource("3_lyavq")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mcff4"]
+atlas = ExtResource("3_lyavq")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3kdxc"]
+atlas = ExtResource("3_lyavq")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6hqh5"]
+atlas = ExtResource("3_lyavq")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tvp30"]
+atlas = ExtResource("4_81joc")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dil5o"]
+atlas = ExtResource("4_81joc")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l01xb"]
+atlas = ExtResource("4_81joc")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ron4b"]
+atlas = ExtResource("4_81joc")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j21iq"]
+atlas = ExtResource("5_ulwef")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d4b76"]
+atlas = ExtResource("5_ulwef")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k68pg"]
+atlas = ExtResource("5_ulwef")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3eul"]
+atlas = ExtResource("5_ulwef")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ovbmt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ltqd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n4bmy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_suvyh")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n27dv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7cmxy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_34bew")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dg0ip")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u0clq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mcff4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3kdxc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6hqh5")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tvp30")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dil5o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l01xb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ron4b")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j21iq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d4b76")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k68pg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3eul")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_clawing_harpy"
+metadata/id = 65

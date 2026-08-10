@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_snow_yeti/trpg_snow_yeti_attack.png" id="1_mpkb5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_snow_yeti/trpg_snow_yeti_death.png" id="2_gavr7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_snow_yeti/trpg_snow_yeti_idle.png" id="3_r3cnd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_snow_yeti/trpg_snow_yeti_run.png" id="4_m2ulh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_snow_yeti/trpg_snow_yeti_walk.png" id="5_n5acs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_06udn"]
+atlas = ExtResource("1_mpkb5")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bipch"]
+atlas = ExtResource("1_mpkb5")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_87rbk"]
+atlas = ExtResource("1_mpkb5")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1v5th"]
+atlas = ExtResource("1_mpkb5")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fvg4"]
+atlas = ExtResource("2_gavr7")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l58b2"]
+atlas = ExtResource("2_gavr7")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yq5gl"]
+atlas = ExtResource("2_gavr7")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2hlmv"]
+atlas = ExtResource("2_gavr7")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5uvle"]
+atlas = ExtResource("3_r3cnd")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j5csu"]
+atlas = ExtResource("3_r3cnd")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_83fws"]
+atlas = ExtResource("3_r3cnd")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_panp0"]
+atlas = ExtResource("3_r3cnd")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_42pqf"]
+atlas = ExtResource("4_m2ulh")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ifw33"]
+atlas = ExtResource("4_m2ulh")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ptr3"]
+atlas = ExtResource("4_m2ulh")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uy72t"]
+atlas = ExtResource("4_m2ulh")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oit2n"]
+atlas = ExtResource("5_n5acs")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e63of"]
+atlas = ExtResource("5_n5acs")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k1q7y"]
+atlas = ExtResource("5_n5acs")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s8gju"]
+atlas = ExtResource("5_n5acs")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_06udn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bipch")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_87rbk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1v5th")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fvg4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l58b2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yq5gl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2hlmv")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5uvle")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j5csu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_83fws")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_panp0")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_42pqf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ifw33")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ptr3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uy72t")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oit2n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e63of")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k1q7y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s8gju")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_snow_yeti"
+metadata/id = 73

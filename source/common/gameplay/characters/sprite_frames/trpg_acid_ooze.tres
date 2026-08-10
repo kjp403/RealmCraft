@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_acid_ooze/trpg_acid_ooze_attack.png" id="1_o4mjg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_acid_ooze/trpg_acid_ooze_death.png" id="2_0h5ur"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_acid_ooze/trpg_acid_ooze_idle.png" id="3_dhoyg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_acid_ooze/trpg_acid_ooze_run.png" id="4_vwt2s"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_acid_ooze/trpg_acid_ooze_walk.png" id="5_xw07o"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_se057"]
+atlas = ExtResource("1_o4mjg")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ph1ns"]
+atlas = ExtResource("1_o4mjg")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8frma"]
+atlas = ExtResource("1_o4mjg")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nxqyq"]
+atlas = ExtResource("1_o4mjg")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sxg07"]
+atlas = ExtResource("2_0h5ur")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_we2vv"]
+atlas = ExtResource("2_0h5ur")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yldpj"]
+atlas = ExtResource("2_0h5ur")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2bn5y"]
+atlas = ExtResource("2_0h5ur")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qvv46"]
+atlas = ExtResource("3_dhoyg")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_an7ho"]
+atlas = ExtResource("3_dhoyg")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qiq2n"]
+atlas = ExtResource("3_dhoyg")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_auuqb"]
+atlas = ExtResource("3_dhoyg")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tsd2v"]
+atlas = ExtResource("4_vwt2s")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4diww"]
+atlas = ExtResource("4_vwt2s")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ht7y5"]
+atlas = ExtResource("4_vwt2s")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ctbs"]
+atlas = ExtResource("4_vwt2s")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ihgd"]
+atlas = ExtResource("5_xw07o")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g7kuk"]
+atlas = ExtResource("5_xw07o")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ksabh"]
+atlas = ExtResource("5_xw07o")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tpoye"]
+atlas = ExtResource("5_xw07o")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_se057")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ph1ns")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8frma")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nxqyq")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sxg07")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_we2vv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yldpj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2bn5y")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qvv46")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_an7ho")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qiq2n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_auuqb")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tsd2v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4diww")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ht7y5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ctbs")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ihgd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g7kuk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ksabh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tpoye")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_acid_ooze"
+metadata/id = 63
