@@ -608,11 +608,16 @@ func _build_desert() -> void:
 	var critters: Array = []
 	var names := ["critter_stag", "critter_boar", "critter_badger", "critter_wolf"]
 	var ci := 0
-	for spot in [Vector2i(30, 46), Vector2i(74, 46), Vector2i(52, 34), Vector2i(52, 58)]:
+	for spot in [
+		Vector2i(30, 46), Vector2i(74, 46), Vector2i(52, 34), Vector2i(52, 58),
+		Vector2i(20, 25), Vector2i(84, 25), Vector2i(20, 55), Vector2i(84, 55),
+		Vector2i(40, 18), Vector2i(64, 18), Vector2i(36, 62), Vector2i(68, 62),
+		Vector2i(15, 40), Vector2i(90, 40), Vector2i(48, 48), Vector2i(60, 36),
+	]:
 		var cell := _pick_open(walk, spot)
 		critters.append({
 			"name": "DesertCritter%d" % (ci + 1),
-			"frames": names[ci],
+			"frames": names[ci % names.size()],
 			"pos": _tile_pos(cell),
 			"scale": 0.9,
 			"wander_radius": 40.0,

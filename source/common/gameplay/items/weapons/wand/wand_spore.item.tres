@@ -44,6 +44,6 @@ item_name = &"Spore Wand"
 item_icon = SubResource("Atlas_icon")
 description = "A wand sprouting luminous spores from the cave."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"wand_spore.item"
 metadata/id = 91

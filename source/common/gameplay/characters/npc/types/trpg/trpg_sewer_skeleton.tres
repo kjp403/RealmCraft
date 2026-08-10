@@ -8,37 +8,39 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
+[ext_resource type="Resource" uid="uid://deajqapim5otj" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
+[ext_resource type="Resource" uid="uid://d2xyv5ipfxgwa" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_66s4p")
 item = ExtResource("loot_gold")
-min_amount = 5
-max_amount = 11
+min_amount = 2
+max_amount = 5
 chance = 0.9
 
-[sub_resource type="Resource" id="Drop_bone"]
+[sub_resource type="Resource" id="Drop_hide_sewer"]
 script = ExtResource("3_66s4p")
-item = ExtResource("loot_bone")
-max_amount = 3
-chance = 0.55
+item = ExtResource("loot_hide_sewer")
+max_amount = 2
+chance = 0.45
 
-[sub_resource type="Resource" id="Drop_cloth_bandit"]
+[sub_resource type="Resource" id="Drop_cloth_sewer"]
 script = ExtResource("3_66s4p")
-item = ExtResource("loot_cloth_bandit")
-chance = 0.2
+item = ExtResource("loot_cloth_sewer")
+chance = 0.25
 
 [resource]
 script = ExtResource("4_62m1e")
-enemy_type = &"trpg_skeleton"
-display_name = "Skeleton"
+enemy_type = &"trpg_sewer_skeleton"
+display_name = "Sewer Skeleton"
 skin = ExtResource("5_ad8bg")
-combat_level = 29
+combat_level = 16
 visual_scale = 1.0
 is_boss = false
-max_health = 240.0
-attack_damage = 18.0
+max_health = 130.0
+attack_damage = 11.0
 attack_cooldown = 1.4
-armor = 3.0
+armor = 2.0
 mr = 0.0
 behaviors = Array[ExtResource("2_bllcr")]([])
 attacks = Array[ExtResource("1_itp0q")]([])
@@ -52,10 +54,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 20
+xp_reward = 9
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_66s4p")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit")])
+loot = Array[ExtResource("3_66s4p")]([SubResource("Drop_gold"), SubResource("Drop_hide_sewer"), SubResource("Drop_cloth_sewer")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
@@ -82,5 +84,5 @@ ornate_chest_top_max = 0
 ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
-metadata/slug = &"trpg_skeleton"
+metadata/slug = &"trpg_sewer_skeleton"
 metadata/id = 58

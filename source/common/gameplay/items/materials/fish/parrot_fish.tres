@@ -9,5 +9,6 @@ item_name = &"Raw Parrot Fish"
 item_icon = ExtResource("1_icon")
 description = "Bright-beaked reef grazer."
 vendor_value = 7
+stack_limit = 10
 metadata/slug = &"parrot_fish"
 metadata/id = 190

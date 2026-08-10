@@ -51,13 +51,10 @@ func display_title() -> String:
 	return zone_title if not zone_title.is_empty() else String(instance_name).capitalize()
 
 
-## Banner subtitle from the level band ("Levels 1-5"); empty when no band is set.
+## Banner subtitle from the level band. Zone level bands are retired — combat
+## level now lives on NPCs — so this always returns empty.
 func level_band() -> String:
-	if level_min <= 0:
-		return ""
-	if level_max > level_min:
-		return "Levels %d-%d" % [level_min, level_max]
-	return "Level %d+" % level_min
+	return ""
 
 
 @warning_ignore("unused_parameter")

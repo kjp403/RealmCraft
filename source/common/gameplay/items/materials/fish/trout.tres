@@ -9,5 +9,6 @@ item_name = &"Raw Trout"
 item_icon = ExtResource("1_icon")
 description = "Fresh river trout with speckled sides."
 vendor_value = 3
+stack_limit = 10
 metadata/slug = &"trout"
 metadata/id = 183

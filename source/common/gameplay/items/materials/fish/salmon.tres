@@ -9,5 +9,6 @@ item_name = &"Raw Salmon"
 item_icon = ExtResource("1_icon")
 description = "A strong upstream fighter."
 vendor_value = 4
+stack_limit = 10
 metadata/slug = &"salmon"
 metadata/id = 184

@@ -5,18 +5,40 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_n3gpa"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_1s8of"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_orc_rider.tres" id="5_0srqi"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="loot_hide_bandit"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("3_n3gpa")
+item = ExtResource("loot_gold")
+min_amount = 4
+max_amount = 9
+chance = 0.9
+
+[sub_resource type="Resource" id="Drop_hide_bandit"]
+script = ExtResource("3_n3gpa")
+item = ExtResource("loot_hide_bandit")
+max_amount = 2
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_cloth_bandit"]
+script = ExtResource("3_n3gpa")
+item = ExtResource("loot_cloth_bandit")
+chance = 0.3
 
 [resource]
 script = ExtResource("4_1s8of")
 enemy_type = &"trpg_orc_rider"
 display_name = "Orc rider"
 skin = ExtResource("5_0srqi")
+combat_level = 26
 visual_scale = 1.0
 is_boss = false
-max_health = 80.0
-attack_damage = 8.0
+max_health = 250.0
+attack_damage = 18.0
 attack_cooldown = 1.4
-armor = 0.0
+armor = 4.0
 mr = 0.0
 behaviors = Array[ExtResource("2_gy3qy")]([])
 attacks = Array[ExtResource("1_mh77u")]([])
@@ -30,10 +52,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 10
+xp_reward = 18
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_n3gpa")]([])
+loot = Array[ExtResource("3_n3gpa")]([SubResource("Drop_gold"), SubResource("Drop_hide_bandit"), SubResource("Drop_cloth_bandit")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

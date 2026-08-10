@@ -12,5 +12,6 @@ use_freeze_ms = 700
 item_name = &"Cooked Tuna"
 item_icon = ExtResource("2_icon")
 description = "Grilled tuna. Restores 25 health."
+stack_limit = 10
 metadata/slug = &"cooked_tuna"
 metadata/id = 197

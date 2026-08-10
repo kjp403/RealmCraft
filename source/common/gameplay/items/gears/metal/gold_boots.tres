@@ -32,5 +32,7 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource(
 item_name = &"Gold Boots"
 item_icon = ExtResource("2_icon")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
+stack_limit = 5
+vendor_value = 28
 metadata/slug = &"gold_boots"
 metadata/id = 144

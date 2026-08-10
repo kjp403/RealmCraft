@@ -29,6 +29,6 @@ item_name = &"Spore Sword"
 item_icon = SubResource("Atlas_icon")
 description = "A blade grown through with pale cave fungus."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"sword_spore.item"
 metadata/id = 89

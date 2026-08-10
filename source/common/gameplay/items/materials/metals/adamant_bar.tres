@@ -11,5 +11,6 @@ description = "A dense green bar smelted from adamant ore."
 vendor_value = 26
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
+stack_limit = 10
 metadata/slug = &"adamant_bar"
 metadata/id = 257

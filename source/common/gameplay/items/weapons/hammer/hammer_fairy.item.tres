@@ -39,6 +39,6 @@ item_name = &"Fairy Hammer"
 item_icon = SubResource("Atlas_icon")
 description = "Fae-touched work from the corrupted forest. Light in the hand, quick as a whisper."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"hammer_fairy.item"
 metadata/id = 163

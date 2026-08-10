@@ -12,5 +12,6 @@ use_freeze_ms = 700
 item_name = &"Cooked Lobster"
 item_icon = ExtResource("2_icon")
 description = "Grilled lobster. Restores 30 health."
+stack_limit = 10
 metadata/slug = &"cooked_lobster"
 metadata/id = 198

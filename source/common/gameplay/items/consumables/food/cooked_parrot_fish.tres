@@ -12,5 +12,6 @@ use_freeze_ms = 700
 item_name = &"Cooked Parrot Fish"
 item_icon = ExtResource("2_icon")
 description = "Grilled parrot fish. Restores 45 health."
+stack_limit = 10
 metadata/slug = &"cooked_parrot_fish"
 metadata/id = 202

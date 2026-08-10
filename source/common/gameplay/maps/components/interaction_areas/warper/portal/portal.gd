@@ -70,12 +70,9 @@ func _apply() -> void:
 		material_shader.set_shader_parameter(&"hue_offset", wrapf(portal_color.h - SOURCE_HUE, 0.0, 1.0))
 		material_shader.set_shader_parameter(&"sat_scale", portal_color.s / SOURCE_SAT)
 		material_shader.set_shader_parameter(&"val_scale", portal_color.v / SOURCE_VAL)
-	# Gated portals self-document ("Fungus Cave (Lv 5+)"). The floor comes from the
-	# DESTINATION InstanceResource (gate_level()), so the label can never disagree
-	# with the zone's actual band. Future-biome portals with no target_instance yet
-	# bake their "(Lv N+)" into destination_label by hand.
-	var gate_suffix: String = " (Lv %d+)" % gate_level() if gate_level() > 0 else ""
-	label.text = destination_label + gate_suffix
+	# Destination label only — zone level bands are retired (combat level lives
+	# on NPCs). Wardstone seals still gate entry independently.
+	label.text = destination_label
 	label.visible = not destination_label.is_empty()
 
 
@@ -148,8 +145,7 @@ func _apply_sealed() -> void:
 	animated_sprite.modulate = Color(0.42, 0.42, 0.5) if sealed else Color.WHITE
 	animated_sprite.speed_scale = 0.35 if sealed else 1.0
 	if not destination_label.is_empty() and target_instance != null:
-		var suffix: String = " (Lv %d+)" % gate_level() if gate_level() > 0 else ""
-		label.text = destination_label + (" (Sealed)" if sealed else suffix)
+		label.text = destination_label + (" (Sealed)" if sealed else "")
 
 
 ## Begin the visible warp commitment in two phases: the swirl revs on a CLEAR

@@ -26,6 +26,6 @@ item_name = &"Wood Sword"
 item_icon = SubResource("AtlasTexture_uqqke")
 description = "A simple wooden training sword. Swing close, swing fast."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"sword.item"
 metadata/id = 65

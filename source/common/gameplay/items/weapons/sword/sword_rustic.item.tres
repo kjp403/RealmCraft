@@ -29,6 +29,6 @@ item_name = &"Rustic Sword"
 item_icon = SubResource("AtlasTexture_ct1ie")
 description = "A rugged, well-forged blade. A real step up from your first."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"sword_rustic.item"
 metadata/id = 80

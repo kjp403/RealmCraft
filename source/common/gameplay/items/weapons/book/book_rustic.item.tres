@@ -43,6 +43,6 @@ item_name = &"Rustic Tome"
 item_icon = SubResource("AtlasTexture_1iesv")
 description = "A worn battlemage's tome. A solid mana pool and a little bulk for fighting up close."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"book_rustic.item"
 metadata/id = 97

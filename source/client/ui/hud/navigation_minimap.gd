@@ -6,7 +6,7 @@ extends PanelContainer
 
 const PANEL_SIZE: Vector2 = Vector2(150.0, 112.0)
 const VIEW_SIZE: Vector2i = Vector2i(140, 82)
-const MAP_ZOOM: float = 0.22
+const MAP_ZOOM: float = 0.12
 const EDGE_PADDING: float = 9.0
 const VISIT_PREFIX: String = "Speak with "
 const TARGET_FIX_VERSION: String = "2026-08-07-c"
