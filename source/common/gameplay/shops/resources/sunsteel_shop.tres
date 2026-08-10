@@ -3,10 +3,22 @@
 [ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
 [ext_resource type="Script" uid="uid://b1my10ee17j5b" path="res://source/common/gameplay/shops/shop_trade.gd" id="2_trade"]
 [ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="3_shop"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="4_hp"]
+[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="5_mp"]
+
+[sub_resource type="Resource" id="Entry_hp"]
+script = ExtResource("1_entry")
+item = ExtResource("4_hp")
+price = 350
+
+[sub_resource type="Resource" id="Entry_mp"]
+script = ExtResource("1_entry")
+item = ExtResource("5_mp")
+price = 350
 
 [resource]
 script = ExtResource("3_shop")
 shop_name = "The Tomb Bazaar"
-entries = Array[ExtResource("1_entry")]([])
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_hp"), SubResource("Entry_mp")])
 accepted_trades = Array[ExtResource("2_trade")]([])
 metadata/slug = &"sunsteel_shop"

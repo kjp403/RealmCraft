@@ -107,11 +107,13 @@ func _build_sewers() -> void:
 	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 2)
 	ts.set_physics_layer_collision_mask(0, 0)
-	# 0 = pixel dungeon, 1 = RF catacombs 32px, 2 = DarkCastle, 3 = DG Set 1
+	# 0 = pixel dungeon, 1 = RF catacombs 32px, 2 = DarkCastle, 3 = DG Set 1,
+	# 4 = DG water ripples (overlay only — sparse alpha over solid stone floors)
 	_add_atlas(ts, 0, "res://assets/sprites/environment/pixel_dungeon/dungeon_tileset.png", 16, true)
 	_add_atlas(ts, 1, "res://assets/sprites/environment/rf_catacombs/mainlevbuild.png", 32, true)
 	_add_atlas(ts, 2, "res://assets/sprites/environment/starter_platformer/DarkCastle.png", 16, true)
 	_add_atlas(ts, 3, "res://assets/sprites/environment/dg_dungeon/set1.png", 16, true)
+	_add_atlas(ts, 4, "res://assets/sprites/environment/dg_dungeon/water.png", 16, true)
 	# Wall shell only — do NOT mark (6,1)/(7,1) as floor-safe; those are wall-fill
 	# and must never be painted on Ground (that created the sewers "invisible horizontal walls").
 	_mark_collision(ts, 0, [

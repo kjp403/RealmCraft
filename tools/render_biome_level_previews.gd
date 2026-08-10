@@ -11,12 +11,12 @@ extends SceneTree
 const MAPS := "res://source/common/gameplay/maps/maps/"
 
 const SHOTS: Array[Dictionary] = [
-	{"name": "sunspire-terraces", "path": MAPS + "desert/sunspire_terraces.tscn", "size": Vector2i(100, 74)},
-	{"name": "sunken-tombs", "path": MAPS + "desert/sunken_tombs.tscn", "size": Vector2i(108, 84)},
-	{"name": "gutterworks", "path": MAPS + "sewers/gutterworks.tscn", "size": Vector2i(104, 78)},
-	{"name": "drowned-cistern", "path": MAPS + "sewers/drowned_cistern.tscn", "size": Vector2i(112, 86)},
-	{"name": "bellows-gallery", "path": MAPS + "fire_forge/bellows_gallery.tscn", "size": Vector2i(104, 78)},
-	{"name": "cinder-deeps", "path": MAPS + "fire_forge/cinder_deeps.tscn", "size": Vector2i(112, 86)},
+	{"name": "sunspire-terraces", "path": MAPS + "desert/sunspire_terraces.tscn", "size": Vector2i(500, 370)},
+	{"name": "sunken-tombs", "path": MAPS + "desert/sunken_tombs.tscn", "size": Vector2i(540, 420)},
+	{"name": "gutterworks", "path": MAPS + "sewers/gutterworks.tscn", "size": Vector2i(520, 390)},
+	{"name": "drowned-cistern", "path": MAPS + "sewers/drowned_cistern.tscn", "size": Vector2i(560, 430)},
+	{"name": "bellows-gallery", "path": MAPS + "fire_forge/bellows_gallery.tscn", "size": Vector2i(520, 390)},
+	{"name": "cinder-deeps", "path": MAPS + "fire_forge/cinder_deeps.tscn", "size": Vector2i(560, 430)},
 ]
 
 const VIEW := Vector2i(1400, 1100)
