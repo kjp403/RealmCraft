@@ -39,6 +39,7 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource(
 item_name = &"Sirenic Hood"
 item_icon = ExtResource("2_icon")
 can_trade = true
+vendor_value = 120
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"sirenic_hood"
 metadata/id = 224

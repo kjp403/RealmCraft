@@ -299,6 +299,24 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="SB_tooltip"]
+bg_color = Color(0.06, 0.055, 0.05, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.48, 0.36, 0.95)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+content_margin_left = 8
+content_margin_top = 6
+content_margin_right = 8
+content_margin_bottom = 6
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 4
+
 [resource]
 Button/colors/font_color = Color(0.929, 0.894, 0.82, 1)
 Button/colors/font_focus_color = Color(0.929, 0.894, 0.82, 1)
@@ -386,6 +404,11 @@ SettingRow/base_type = &"PanelContainer"
 SettingRow/styles/panel = SubResource("SB_setting_row")
 TitleDivider/base_type = &"HSeparator"
 TitleDivider/styles/separator = SubResource("StyleBoxLine_rxe50")
+TooltipLabel/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+TooltipLabel/colors/font_shadow_color = Color(0, 0, 0, 0.85)
+TooltipLabel/constants/shadow_offset_x = 1
+TooltipLabel/constants/shadow_offset_y = 1
+TooltipPanel/styles/panel = SubResource("SB_tooltip")
 VScrollBar/styles/grabber = SubResource("SB_grab")
 VScrollBar/styles/grabber_highlight = SubResource("SB_grab_hi")
 VScrollBar/styles/grabber_pressed = SubResource("SB_grab_hi")

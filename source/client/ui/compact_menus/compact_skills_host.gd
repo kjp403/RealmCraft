@@ -223,6 +223,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 
 	var tile := Button.new()
 	tile.custom_minimum_size = TILE_SIZE
@@ -231,10 +232,12 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	tile.focus_mode = Control.FOCUS_NONE
 	tile.flat = true
 	if at_cap:
-		tile.tooltip_text = "%s\nLv %d — Max level\nClick for details" % [display, level]
+		tile.tooltip_text = "%s\nLv %d — Max level\nTotal XP: %s\nClick for details" % [
+			display, level, _format_xp(total_xp)
+		]
 	else:
-		tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next level\nClick for details" % [
-			display, level, xp, xp_to_next, remaining
+		tile.tooltip_text = "%s\nLv %d — %s / %s XP\n%s XP to next level\nTotal XP: %s\nClick for details" % [
+			display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
 		]
 	tile.pressed.connect(_show_detail.bind(skill_name))
 	_apply_tile_styles(tile)
@@ -367,9 +370,12 @@ func _rebuild_detail() -> void:
 	_detail_root.add_child(bar)
 
 	var xp_label := Label.new()
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 	xp_label.text = (
-		"Max level (%d)" % SkillXp.LEVEL_CAP if at_cap
-		else "%d / %d XP  (%d to next)" % [xp, xp_to_next, remaining]
+		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, _format_xp(total_xp)] if at_cap
+		else "%s / %s XP  (%s to next)\nTotal XP: %s" % [
+			_format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+		]
 	)
 	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	xp_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -520,6 +526,18 @@ func _make_bar_fill() -> StyleBoxFlat:
 	style.bg_color = Color(0.95, 0.75, 0.28, 1.0)
 	style.set_corner_radius_all(2)
 	return style
+
+
+func _format_xp(value: int) -> String:
+	var text := str(maxi(0, value))
+	var out := ""
+	var count: int = 0
+	for i: int in range(text.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = text[i] + out
+		count += 1
+	return out
 
 
 func _place_panel() -> void:

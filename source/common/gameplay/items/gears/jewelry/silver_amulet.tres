@@ -27,6 +27,7 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource(
 item_name = &"Silver Amulet"
 item_icon = ExtResource("2_icon")
 can_trade = true
+vendor_value = 36
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"silver_amulet"
 metadata/id = 240

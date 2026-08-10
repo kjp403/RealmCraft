@@ -127,7 +127,9 @@ func try_pickup(player: Player) -> Dictionary:
 		return {"ok": false, "reason": "reserved"}
 
 	collected = true
-	Inventory.add_item(player.player_resource.inventory, item_id, amount)
+	if not Inventory.try_add_item(player.player_resource.inventory, item_id, amount):
+		collected = false
+		return {"ok": false, "reason": "inventory_full"}
 
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	var display_name: String = String(item.item_name) if item != null else "item"

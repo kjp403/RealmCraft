@@ -418,6 +418,10 @@ func _on_unequip_pressed() -> void:
 		Toaster.toast("You cannot do that while in combat.")
 		_render_selected_slot()
 		return
+	if str(payload.get("reason", "")) == "inventory_full":
+		Toaster.toast("Your bag is full. Bank some items first.")
+		_render_selected_slot()
+		return
 
 	if not bool(payload.get("ok", false)):
 		Toaster.toast("The item could not be unequipped.")

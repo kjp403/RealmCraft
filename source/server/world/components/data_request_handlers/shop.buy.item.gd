@@ -40,12 +40,19 @@ func data_request_handler(
 	# registry failed to resolve gold — surface that separately from a real shortfall.
 	if currency_id <= 0:
 		return {"ok": false, "reason": "no_currency"}
+	if not Inventory.can_add(inventory, item_id, amount):
+		return {"ok": false, "reason": "inventory_full"}
 	if not Inventory.remove_amount_by_id(inventory, currency_id, total):
 		return {"ok": false, "reason": "cant_afford"}
 
 	# Add one at a time so stackable items merge and non-stackable get separate slots.
 	for i: int in amount:
-		Inventory.add_item(inventory, item_id, 1)
+		if not Inventory.try_add_item(inventory, item_id, 1):
+			# Shouldn't happen after can_add — refund remaining gold for safety.
+			var refund: int = int(entry.get("price", 0)) * (amount - i)
+			if refund > 0:
+				Inventory.add_item(inventory, currency_id, refund)
+			return {"ok": false, "reason": "inventory_full"}
 
 	# Silent quest refresh: a bought item may satisfy a "Bring N item" (COLLECT)
 	# objective, which has no advance event of its own. Empty messages = no toast,

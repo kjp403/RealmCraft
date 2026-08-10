@@ -471,6 +471,7 @@ func _buy() -> void:
 			"not_sold_here": Toaster.toast("This item isn't sold here.")
 			"no_currency": Toaster.toast("Shop currency is unavailable. Try again after a server update.")
 			"cant_afford": Toaster.toast("Not enough funds.")
+			"inventory_full": Toaster.toast("Your bag is full. Bank some items first.")
 			_: Toaster.toast("Purchase failed.")
 		_refresh_buy_action()
 		return

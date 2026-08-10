@@ -37,7 +37,7 @@ extends Resource
 
 @export_group("Perk points")
 ## One perk point granted every N levels.
-@export var perk_every_levels: int = 3
+@export var perk_every_levels: int = 10
 
 @export_group("Baseline (gathering only — leave 0 for crafting jobs)")
 @export var cooldown_reduction_per_level: float = 0.0
