@@ -40,6 +40,15 @@ func _initialize() -> void:
 	assert(rat != null and float(rat.get("max_health")) < 50.0)
 	assert(float(wolf.get("wander_radius")) > 0.0)
 	assert(float(rat.get("wander_radius")) > 0.0)
+	# Combat skins must be set — missing skin falls back to knight.
+	var wolf_skin: Resource = wolf.get("skin")
+	var rat_skin: Resource = rat.get("skin")
+	assert(wolf_skin != null, "Wild Wolf missing skin (would render as knight)")
+	assert(rat_skin != null, "Woodland Rat missing skin")
+	assert(String(wolf_skin.resource_path).ends_with("wolf.tres"), "wolf skin path=%s" % wolf_skin.resource_path)
+	assert(String(rat_skin.resource_path).ends_with("woodland_rat.tres"), "rat skin path=%s" % rat_skin.resource_path)
+	assert(not String(rat_skin.resource_path).ends_with("rat_base.tres"), "rat must not use bipedal rat_base")
+
 
 	print("counts=", counts)
 	print("on_wall=", on_wall, " missing_data=", missing_data)

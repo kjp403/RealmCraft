@@ -32,18 +32,19 @@ func _initialize() -> void:
 	)
 
 	# SE idle only — full strip includes graze/turn that reads as "glitching" at distance.
+	# Frame widths MUST match content pitch (stag cells are 32px, not 48).
 	_critter(
 		"stag",
 		"res://assets/sprites/characters/critters/stag/critter_stag_SE_idle.png",
-		48, 41, 4,
+		32, 41, 4,
 		"res://assets/sprites/characters/critters/stag/critter_stag_SE_walk.png",
-		44, 41, 8,
+		32, 41, 8,
 		0.9
 	)
 	_critter(
 		"badger",
 		"res://assets/sprites/characters/critters/badger/badger_idle_strip.png",
-		44, 32, 21,
+		42, 32, 8,
 		"res://assets/sprites/characters/critters/badger/badger_walk_strip.png",
 		42, 32, 9,
 		1.0
