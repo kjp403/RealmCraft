@@ -331,11 +331,11 @@ func _build_desert() -> void:
 	props.tile_set = ts
 	var walk: Dictionary = {}
 
-	# Clean sand ONLY — Ground source 0, no rock/rubble atlases on floor paint.
+	# Clean sand ONLY — low-variance ripple tiles (no rock/rubble atlases).
 	var sand: Array = [
-		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
-		Vector2i(2, 2), Vector2i(3, 2),
-		Vector2i(2, 3), Vector2i(3, 3),
+		Vector2i(7, 1), Vector2i(2, 3), Vector2i(1, 2), Vector2i(4, 2),
+		Vector2i(3, 1), Vector2i(2, 1), Vector2i(3, 2), Vector2i(2, 2),
+		Vector2i(3, 3), Vector2i(7, 3), Vector2i(7, 2), Vector2i(8, 3),
 	]
 
 	# Organic dune basin
@@ -362,8 +362,8 @@ func _build_desert() -> void:
 	)
 	_clear_walls_on_walk(walls, walk)
 
-	# At most 3 non-overlapping mesas
-	for origin in [Vector2i(12, 14), Vector2i(50, 14), Vector2i(30, 34)]:
+	# Two mesas only — keep open sand readable
+	for origin in [Vector2i(12, 14), Vector2i(50, 14)]:
 		_stamp_mesa(ground, walls, walk, origin, sand)
 	_paint_floors(ground, walk, sand, 0)
 	_clear_walls_on_walk(walls, walk)
@@ -406,11 +406,12 @@ func _build_desert() -> void:
 	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 46)], "desert spawn")
 	_assert_connected(walk, entrance, [portal, Vector2i(cx, 14), Vector2i(18, 24), Vector2i(54, 24)], "desert")
 
+	# Critters on open sand only — away from mesas, cacti, and temple props.
 	var critters := [
-		{"name": "Stag1", "frames": "critter_stag", "pos": _tile_pos(Vector2i(14, 22)), "scale": 0.85, "wander_radius": 40.0},
-		{"name": "Boar1", "frames": "critter_boar", "pos": _tile_pos(Vector2i(58, 24)), "scale": 1.0, "wander_radius": 40.0},
-		{"name": "Badger1", "frames": "critter_badger", "pos": _tile_pos(Vector2i(16, 40)), "scale": 0.95, "wander_radius": 40.0},
-		{"name": "Wolf1", "frames": "critter_wolf", "pos": _tile_pos(Vector2i(56, 38)), "scale": 0.75, "wander_radius": 40.0},
+		{"name": "Stag1", "frames": "critter_stag", "pos": _tile_pos(Vector2i(28, 28)), "scale": 0.85, "wander_radius": 36.0},
+		{"name": "Boar1", "frames": "critter_boar", "pos": _tile_pos(Vector2i(44, 30)), "scale": 1.0, "wander_radius": 36.0},
+		{"name": "Badger1", "frames": "critter_badger", "pos": _tile_pos(Vector2i(24, 36)), "scale": 0.95, "wander_radius": 32.0},
+		{"name": "Wolf1", "frames": "critter_wolf", "pos": _tile_pos(Vector2i(48, 34)), "scale": 0.75, "wander_radius": 36.0},
 	]
 	var decos := [
 		{"name": "TempleCandleL", "frames": "deco_candle_b", "pos": _tile_pos(Vector2i(32, 14)), "scale": 1.4, "light": 0.7, "color": "Color(0.55, 0.75, 1, 1)"},
@@ -422,7 +423,7 @@ func _build_desert() -> void:
 		"out": "res://source/common/gameplay/maps/maps/desert/desert.tscn",
 		"tileset": DESERT_TS,
 		"bg": "Color(0.1, 0.07, 0.05, 1)",
-		"modulate": "Color(1.0, 0.94, 0.82, 1)",
+		"modulate": "Color(0.96, 0.9, 0.78, 1)",
 		"music": "res://assets/audio/music/lost_woods.ogg",
 		"ground_b64": _b64(ground),
 		"walls_b64": _b64(walls),
@@ -441,17 +442,11 @@ func _build_desert() -> void:
 		"cam_bottom": H * 16 + 16,
 		"lights": (
 			"\n[node name=\"SunGlow\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(576, 260)\ncolor = Color(1, 0.92, 0.62, 1)\nenergy = 0.55\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 4.2\n"
+			+ "position = Vector2(576, 300)\ncolor = Color(1, 0.92, 0.62, 1)\nenergy = 0.4\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 3.6\n"
 			+ "\n[node name=\"TempleGlow\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(576, 240)\ncolor = Color(0.45, 0.75, 1, 1)\nenergy = 0.65\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.0\n"
-			+ "\n[node name=\"DuneGlowW\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(280, 360)\ncolor = Color(1, 0.85, 0.5, 1)\nenergy = 0.45\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
-			+ "\n[node name=\"DuneGlowE\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(880, 360)\ncolor = Color(1, 0.85, 0.5, 1)\nenergy = 0.45\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
+			+ "position = Vector2(576, 240)\ncolor = Color(0.45, 0.75, 1, 1)\nenergy = 0.5\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.6\n"
 		),
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
@@ -717,8 +712,9 @@ func _build_sewers() -> void:
 	_place_prop(props, walk, walls, Vector2i(16, 32), Vector2i(0, 8), 0, keepout, true)
 	_place_prop(props, walk, walls, Vector2i(108, 28), Vector2i(1, 8), 0, keepout, true)
 
-	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83)], "sewers spawn")
-	_assert_connected(walk, entrance, [portal, Vector2i(24, 24), Vector2i(104, 24), Vector2i(cx, 28)], "sewers")
+	# World (509,395) ≈ tile (31,24) — must stay open (old ArenaWalls blockage).
+	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83), Vector2i(31, 24)], "sewers spawn")
+	_assert_connected(walk, entrance, [portal, Vector2i(24, 24), Vector2i(31, 24), Vector2i(104, 24), Vector2i(cx, 28)], "sewers")
 
 	var decos: Array = []
 	var ti := 0

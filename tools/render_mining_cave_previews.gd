@@ -12,33 +12,34 @@ func _go() -> void:
 	root.multiplayer.multiplayer_peer = peer
 	DirAccess.make_dir_recursive_absolute("/opt/cursor/artifacts/screenshots")
 
+	# RPGW 32×32 map — staging ~(272,848), copper ~(592,272), coal ~(1360,336)
 	await _shot(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn",
-		Vector2(560, 336),
-		Vector2i(1100, 640),
+		Vector2(780, 560),
+		Vector2i(1280, 720),
 		"/opt/cursor/artifacts/screenshots/mining-cave-overview.png",
-		1.0
+		0.55
 	)
 	await _shot(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn",
-		Vector2(160, 336),
-		Vector2i(720, 480),
+		Vector2(272, 848),
+		Vector2i(900, 560),
 		"/opt/cursor/artifacts/screenshots/mining-cave-entrance-chamber.png",
-		1.0
+		0.85
 	)
 	await _shot(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn",
-		Vector2(480, 176),
-		Vector2i(720, 480),
+		Vector2(592, 272),
+		Vector2i(900, 560),
 		"/opt/cursor/artifacts/screenshots/mining-cave-copper-spur.png",
-		1.0
+		0.85
 	)
 	await _shot(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn",
-		Vector2(976, 320),
-		Vector2i(720, 480),
+		Vector2(1360, 336),
+		Vector2i(900, 560),
 		"/opt/cursor/artifacts/screenshots/mining-cave-coal-chamber.png",
-		1.0
+		0.85
 	)
 	await _shot(
 		"res://source/common/gameplay/maps/maps/fungus_cave/fungus_cave.tscn",
