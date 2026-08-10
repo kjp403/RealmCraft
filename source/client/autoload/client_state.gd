@@ -442,10 +442,8 @@ func _on_gather_result(data: Dictionary) -> void:
 			if slug.is_empty():
 				continue
 			var new_lv: int = int(leveled_jobs[job_key])
-			var skill_label: String = JobRegistry.display_name(StringName(slug))
-			if skill_label.is_empty():
-				skill_label = slug.capitalize()
-			lines.append("Your %s level has achieved %d" % [skill_label, new_lv])
+			# celebrate_skill owns the wording — repeating it on the gather card
+			# would stack the same sentence twice in the toast lane.
 			LevelUpFx.celebrate_skill(local_player, StringName(slug), new_lv)
 	if int(data.get("perk_points_gained", 0)) > 0:
 		Toaster.toast("Perk point available. Spend in Character → Jobs.")
