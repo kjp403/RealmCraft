@@ -1,6 +1,6 @@
 extends SceneTree
 ## Render Desert / Fire Forge / Sewers to PNGs for review.
-##   godot --path . -s tools/render_biome_previews.gd
+##   godot --path . --mode=client -s tools/render_biome_previews.gd
 
 
 func _initialize() -> void:
@@ -13,9 +13,9 @@ func _go() -> void:
 	DirAccess.make_dir_recursive_absolute("/opt/cursor/artifacts/screenshots")
 
 	for entry in [
-		["desert", "res://source/common/gameplay/maps/maps/desert/desert.tscn", Vector2(480, 360)],
-		["fire_forge", "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn", Vector2(480, 360)],
-		["sewers", "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", Vector2(480, 360)],
+		["desert", "res://source/common/gameplay/maps/maps/desert/desert.tscn", Vector2(512, 384)],
+		["fire_forge", "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn", Vector2(512, 384)],
+		["sewers", "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", Vector2(512, 384)],
 	]:
 		await _render(entry[0], entry[1], entry[2])
 

@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rf_catacombs/candleB_strip.png" id="1_ro7s5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nlv7y"]
+atlas = ExtResource("1_ro7s5")
+region = Rect2(0, 0, 13, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qquf2"]
+atlas = ExtResource("1_ro7s5")
+region = Rect2(13, 0, 13, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k6ms2"]
+atlas = ExtResource("1_ro7s5")
+region = Rect2(26, 0, 13, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gegrb"]
+atlas = ExtResource("1_ro7s5")
+region = Rect2(39, 0, 13, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nlv7y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qquf2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k6ms2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gegrb")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 7.142857142857142
+}]
