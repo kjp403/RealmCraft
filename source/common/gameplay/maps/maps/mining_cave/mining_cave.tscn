@@ -45,7 +45,7 @@ tile_set = ExtResource("2_tiles")
 
 [node name="Props" type="TileMapLayer" parent="Tiles"]
 y_sort_enabled = true
-tile_map_data = PackedByteArray("AAAEABIABAAAAAcAAAAIABgABAAGAAEAAAAMABEABAACAAcAAAAeAAYABAAAAAEAAAAaAAwABAAGAAEAAAAmABwABAAAAAEAAAAsAB4ABAAGAAEAAAAoACIABAAGAAEAAAA0ABAABAAGAAEAAAA8ABIABAAAAAEAAABCABYABAAAAAcAAAA=")
+tile_map_data = PackedByteArray("AAAEABIA//////////8IABgA//////////8MABEA//////////8eAAYA//////////8aAAwA//////////8mABwA//////////8sAB4A//////////8oACIA//////////80ABAA//////////88ABIA//////////9CABYA//////////8GABAABAACAAEAAAAMABAABAACAAEAAAAWAAYABAACAAEAAAAYABMABAAGAAEAAAAkABsABAACAAcAAAAoABkABAAIAAEAAAA0AA0ABAAIAAEAAAAwABQABAAAAAcAAAA9AA8ABAACAAEAAAA=")
 tile_set = ExtResource("2_tiles")
 
 [node name="SceneProps" type="Node2D" parent="."]
@@ -96,92 +96,92 @@ y_sort_enabled = true
 
 [node name="CopperVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(104.0, 296.0)
+position = Vector2(248.0, 264.0)
 data = ExtResource("11_copper")
 
 [node name="CopperVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(200.0, 328.0)
+position = Vector2(296.0, 296.0)
 data = ExtResource("11_copper")
 
 [node name="TinVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(168.0, 360.0)
+position = Vector2(296.0, 376.0)
 data = ExtResource("12_tin")
 
 [node name="CopperVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(424.0, 104.0)
+position = Vector2(408.0, 88.0)
 data = ExtResource("11_copper")
 
 [node name="CopperVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(488.0, 136.0)
+position = Vector2(472.0, 88.0)
 data = ExtResource("11_copper")
 
 [node name="CopperVein5" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(456.0, 200.0)
+position = Vector2(520.0, 88.0)
 data = ExtResource("11_copper")
 
 [node name="TinVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(520.0, 168.0)
+position = Vector2(584.0, 120.0)
 data = ExtResource("12_tin")
 
 [node name="TinVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(424.0, 232.0)
+position = Vector2(376.0, 280.0)
 data = ExtResource("12_tin")
 
 [node name="TinVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(552.0, 232.0)
+position = Vector2(600.0, 296.0)
 data = ExtResource("12_tin")
 
 [node name="IronVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(648.0, 456.0)
+position = Vector2(616.0, 392.0)
 data = ExtResource("13_iron")
 
 [node name="IronVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(712.0, 488.0)
+position = Vector2(808.0, 408.0)
 data = ExtResource("13_iron")
 
 [node name="IronVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(680.0, 552.0)
+position = Vector2(840.0, 456.0)
 data = ExtResource("13_iron")
 
 [node name="IronVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(744.0, 520.0)
+position = Vector2(840.0, 536.0)
 data = ExtResource("13_iron")
 
 [node name="CoalVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(872.0, 264.0)
+position = Vector2(888.0, 216.0)
 data = ExtResource("14_coal")
 
 [node name="CoalVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(968.0, 296.0)
+position = Vector2(1032.0, 248.0)
 data = ExtResource("14_coal")
 
 [node name="CoalVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(936.0, 360.0)
+position = Vector2(1096.0, 280.0)
 data = ExtResource("14_coal")
 
 [node name="CoalVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1032.0, 328.0)
+position = Vector2(1112.0, 392.0)
 data = ExtResource("14_coal")
 
 [node name="CoalVein5" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1064.0, 392.0)
+position = Vector2(1192.0, 376.0)
 data = ExtResource("14_coal")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]

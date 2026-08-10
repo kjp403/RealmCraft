@@ -233,6 +233,7 @@ func _open_floor(walls: TileMapLayer, walk: Dictionary) -> Dictionary:
 
 func _paint_rock_props(props: TileMapLayer, walls: TileMapLayer, walk: Dictionary) -> void:
 	# Source 4 = rocks.png (never CaveProps mushrooms).
+	# Wall-aligned decorative rocks only — never surround the staging portal.
 	var rocks: Array[Dictionary] = [
 		{"atlas": Vector2i(0, 1), "size": Vector2i(2, 3)},
 		{"atlas": Vector2i(2, 1), "size": Vector2i(2, 2)},
@@ -243,10 +244,14 @@ func _paint_rock_props(props: TileMapLayer, walls: TileMapLayer, walk: Dictionar
 	]
 	var occupied: Dictionary = {}
 	var spots: Array[Vector2i] = [
-		Vector2i(4, 18), Vector2i(8, 24), Vector2i(12, 17),
-		Vector2i(24, 4), Vector2i(30, 6), Vector2i(26, 12),
-		Vector2i(38, 28), Vector2i(44, 30), Vector2i(40, 34),
-		Vector2i(52, 16), Vector2i(60, 18), Vector2i(66, 22), Vector2i(56, 26),
+		# staging — north lip only (portal keepout clear)
+		Vector2i(6, 16), Vector2i(12, 16),
+		# copper spur
+		Vector2i(22, 6), Vector2i(24, 19),
+		# iron
+		Vector2i(36, 27), Vector2i(40, 25),
+		# coal
+		Vector2i(52, 13), Vector2i(48, 20), Vector2i(61, 15),
 	]
 	for spot in spots:
 		if not walk.has(spot) or walls.get_cell_source_id(spot) >= 0:
@@ -268,38 +273,39 @@ func _paint_rock_props(props: TileMapLayer, walls: TileMapLayer, walk: Dictionar
 
 
 func _place_ores(open: Dictionary) -> Array:
-	## Returns [{kind, pos_px}, ...] on verified open floor.
+	## Wall-aligned ore layout: clusters sit against chamber walls, entrance clear.
+	## Prefer the authored tile when open; otherwise snap to a nearby wall-adjacent cell.
 	var plan: Array = [
-		# staging — starter copper so the entrance isn't empty
-		{"kind": "copper", "tile": Vector2i(6, 18)},
-		{"kind": "copper", "tile": Vector2i(12, 20)},
-		{"kind": "tin", "tile": Vector2i(10, 22)},
-		# copper spur
-		{"kind": "copper", "tile": Vector2i(26, 6)},
-		{"kind": "copper", "tile": Vector2i(30, 8)},
-		{"kind": "copper", "tile": Vector2i(28, 12)},
-		{"kind": "tin", "tile": Vector2i(32, 10)},
-		{"kind": "tin", "tile": Vector2i(26, 14)},
-		{"kind": "tin", "tile": Vector2i(34, 14)},
-		# iron chamber
-		{"kind": "iron", "tile": Vector2i(40, 28)},
-		{"kind": "iron", "tile": Vector2i(44, 30)},
-		{"kind": "iron", "tile": Vector2i(42, 34)},
-		{"kind": "iron", "tile": Vector2i(46, 32)},
-		# coal gallery
-		{"kind": "coal", "tile": Vector2i(54, 16)},
-		{"kind": "coal", "tile": Vector2i(60, 18)},
-		{"kind": "coal", "tile": Vector2i(58, 22)},
-		{"kind": "coal", "tile": Vector2i(64, 20)},
-		{"kind": "coal", "tile": Vector2i(66, 24)},
+		# staging — east/north lips only (portal/campfire keepout stays open)
+		{"kind": "copper", "tile": Vector2i(15, 16)},
+		{"kind": "copper", "tile": Vector2i(18, 18)},
+		{"kind": "tin", "tile": Vector2i(18, 23)},
+		# copper spur — neat north-wall seam + east/west pockets
+		{"kind": "copper", "tile": Vector2i(25, 5)},
+		{"kind": "copper", "tile": Vector2i(29, 5)},
+		{"kind": "copper", "tile": Vector2i(32, 5)},
+		{"kind": "tin", "tile": Vector2i(36, 7)},
+		{"kind": "tin", "tile": Vector2i(23, 17)},
+		{"kind": "tin", "tile": Vector2i(37, 18)},
+		# iron chamber — north + east walls
+		{"kind": "iron", "tile": Vector2i(38, 24)},
+		{"kind": "iron", "tile": Vector2i(50, 25)},
+		{"kind": "iron", "tile": Vector2i(52, 28)},
+		{"kind": "iron", "tile": Vector2i(52, 33)},
+		# coal gallery — north gallery then east wall
+		{"kind": "coal", "tile": Vector2i(55, 13)},
+		{"kind": "coal", "tile": Vector2i(64, 15)},
+		{"kind": "coal", "tile": Vector2i(68, 17)},
+		{"kind": "coal", "tile": Vector2i(69, 24)},
+		{"kind": "coal", "tile": Vector2i(74, 23)},
 	]
 	var used: Dictionary = {}
 	var out: Array = []
 	for entry in plan:
 		var tile: Vector2i = entry["tile"]
-		var placed := _find_open_near(open, used, tile, 4)
+		var placed := _find_wall_ore_near(open, used, tile, 5)
 		if placed == Vector2i(-999, -999):
-			push_warning("no open floor for ore %s near %s" % [entry["kind"], tile])
+			push_warning("no wall-adjacent floor for ore %s near %s" % [entry["kind"], tile])
 			continue
 		used[placed] = true
 		# Keep neighbors free so veins aren't stacked.
@@ -312,7 +318,9 @@ func _place_ores(open: Dictionary) -> Array:
 	return out
 
 
-func _find_open_near(open: Dictionary, used: Dictionary, origin: Vector2i, radius: int) -> Vector2i:
+func _find_wall_ore_near(open: Dictionary, used: Dictionary, origin: Vector2i, radius: int) -> Vector2i:
+	## Prefer the exact tile when open+unused; otherwise nearest open cell.
+	## Callers author wall-adjacent tiles; this is a rebuild safety net only.
 	if open.has(origin) and not used.has(origin):
 		return origin
 	for r in range(1, radius + 1):

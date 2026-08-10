@@ -84,6 +84,12 @@ extends Resource
 ## pull nearby allies via was_attacked, and it won't help neighbors either.
 ## Use for early trash (goblins) so you can fight one at a time.
 @export var is_lone: bool = false
+## Idle stroll radius around spawn (px). 0 = stand still while idle.
+## Kept well under max_distance_from_spawn so wander never fights the leash.
+@export var wander_radius: float = 0.0
+## Pause between idle wander legs (seconds).
+@export var wander_pause_min_s: float = 1.5
+@export var wander_pause_max_s: float = 4.0
 
 @export_group("Rewards")
 @export var xp_reward: int = 25
