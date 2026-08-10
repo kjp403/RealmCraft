@@ -145,6 +145,17 @@ var max_distance_from_spawn: int = 300
 var detection_radius: int = 150
 ## Start chasing as soon as a player steps inside detection_area.
 var chase_on_area: bool = false
+## Idle stroll around spawn. Copied from enemy_data; 0 disables wander.
+var wander_radius: float = 0.0
+var wander_pause_min_s: float = 1.5
+var wander_pause_max_s: float = 4.0
+## Idle wander scratch — not synced; clients see position/anim only.
+var _wander_target: Vector2 = Vector2.ZERO
+var _has_wander_target: bool = false
+var _wander_pause_until_ms: int = 0
+## Soft stuck detector: if we keep colliding without closing on the target,
+## abandon that leg and pick another point.
+var _wander_stuck_frames: int = 0
 ## Opt out of pack assist (driven by enemy_data.is_lone). See EnemyTypeResource.
 var is_lone: bool = false
 ## Composable server-side behaviors (docs/hostile_npc_refactor.md P1): built
@@ -191,6 +202,9 @@ func _apply_enemy_data() -> void:
 	detection_radius = enemy_data.detection_radius
 	chase_on_area = enemy_data.chase_on_area
 	is_lone = enemy_data.is_lone
+	wander_radius = enemy_data.wander_radius
+	wander_pause_min_s = enemy_data.wander_pause_min_s
+	wander_pause_max_s = enemy_data.wander_pause_max_s
 	# Composable behaviors (docs/hostile_npc_refactor.md). The legacy flat
 	# lunge fields are gone — every archetype authors behaviors directly.
 	behaviors = []
@@ -448,7 +462,7 @@ func _physics_process(_delta: float) -> void:
 		EnemyState.RETURNING:
 			_process_return()
 		EnemyState.IDLE:
-			_process_idle_regen()
+			_process_idle()
 		EnemyState.CHASE:
 			_process_chase()
 		EnemyState.ATTACK:
@@ -819,8 +833,13 @@ func _process_animations() -> void:
 			if anim != Character.Animations.RUN:
 				anim = Character.Animations.RUN
 		EnemyState.IDLE:
-			if anim != Character.Animations.IDLE:
-				anim = Character.Animations.IDLE
+			# Strolling idle uses RUN so clients see walk clips while wandering.
+			var idle_anim: Character.Animations = (
+				Character.Animations.RUN if velocity.length_squared() > 1.0
+				else Character.Animations.IDLE
+			)
+			if anim != idle_anim:
+				anim = idle_anim
 		EnemyState.CHASE:
 			if anim != Character.Animations.RUN:
 				anim = Character.Animations.RUN
@@ -877,6 +896,90 @@ func _process_idle_regen() -> void:
 	stats_component.set_stat(Stat.HEALTH, minf(hmax, current_h + regen))
 
 
+## Idle = regen + optional short strolls around spawn (wander_radius > 0).
+## Combat / return / behavior states never call this — chase_on_area and
+## hit-to-aggro still work unchanged. Direct steering (no A*); wall hits
+## abandon the current leg so goblins don't pin against trees forever.
+func _process_idle() -> void:
+	_process_idle_regen()
+	if wander_radius <= 0.0:
+		velocity = Vector2.ZERO
+		return
+
+	var now: int = Time.get_ticks_msec()
+	if now < _wander_pause_until_ms:
+		velocity = Vector2.ZERO
+		return
+
+	if _has_wander_target and global_position.distance_to(_wander_target) <= 10.0:
+		_clear_wander_leg(now, true)
+		return
+
+	if not _has_wander_target:
+		_pick_wander_target()
+		if not _has_wander_target:
+			_wander_pause_until_ms = now + 1000
+			velocity = Vector2.ZERO
+			return
+
+	var direction: Vector2 = global_position.direction_to(_wander_target)
+	# Idle stroll — slower than chase so packs read as milling, not hunting.
+	velocity = direction * float(move_speed) * 0.55
+	if absf(direction.x) > 0.05:
+		flipped = direction.x < 0.0
+	var before: Vector2 = global_position
+	move_and_slide()
+	if get_slide_collision_count() > 0 and before.distance_to(global_position) < 0.4:
+		_wander_stuck_frames += 1
+		if _wander_stuck_frames >= 12:
+			_clear_wander_leg(now, true)
+	else:
+		_wander_stuck_frames = 0
+
+
+func _clear_wander_leg(now: int, pause: bool) -> void:
+	_has_wander_target = false
+	_wander_stuck_frames = 0
+	velocity = Vector2.ZERO
+	if pause:
+		var lo: float = maxf(0.4, wander_pause_min_s)
+		var hi: float = maxf(lo, wander_pause_max_s)
+		_wander_pause_until_ms = now + int(randf_range(lo, hi) * 1000.0)
+
+
+func _pick_wander_target() -> void:
+	_has_wander_target = false
+	_wander_stuck_frames = 0
+	if wander_radius <= 0.0:
+		return
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	if space == null:
+		return
+	# Stay inside a fraction of the leash so wander never trips RETURNING.
+	var max_r: float = minf(wander_radius, float(max_distance_from_spawn) * 0.55)
+	if max_r < 12.0:
+		return
+	for _attempt: int in 8:
+		var angle: float = randf() * TAU
+		var dist: float = randf_range(max_r * 0.35, max_r)
+		var candidate: Vector2 = spawn_position + Vector2.from_angle(angle) * dist
+		var ray := PhysicsRayQueryParameters2D.create(global_position, candidate)
+		ray.collision_mask = 2 # world solids (walls / water / void)
+		ray.exclude = [get_rid()]
+		if not space.intersect_ray(ray).is_empty():
+			continue
+		var point := PhysicsPointQueryParameters2D.new()
+		point.position = candidate
+		point.collision_mask = 2
+		point.collide_with_areas = false
+		point.exclude = [get_rid()]
+		if not space.intersect_point(point, 1).is_empty():
+			continue
+		_wander_target = candidate
+		_has_wander_target = true
+		return
+
+
 func _process_return() -> void:
 	# Move toward spawn at the boosted return speed — outpaces typical
 	# player movement so leashed mobs can't be re-kited.
@@ -900,6 +1003,7 @@ func _process_return() -> void:
 		# where the return walk ended a hair before full regen completed.
 		if stats_component.get_stat(Stat.HEALTH) < hmax:
 			stats_component.set_stat(Stat.HEALTH, hmax)
+		_clear_wander_leg(Time.get_ticks_msec(), true)
 		enemy_state = EnemyState.IDLE
 
 
@@ -1288,6 +1392,7 @@ func _process_death() -> void:
 	if post_h <= 0.0:
 		printerr("NPC %s respawn: HEALTH wrote=%f got=%f HEALTH_MAX=%f — zombie forming" % [enemy_type, hmax, post_h, stats_component.get_stat(Stat.HEALTH_MAX)])
 	is_dead = false
+	_clear_wander_leg(Time.get_ticks_msec(), true)
 	enemy_state = EnemyState.IDLE
 	_contributors.clear() # fresh life — past damage no longer counts for rewards
 	behavior_state.clear() # fresh scratch too: lunge cooldowns, spent second winds…
