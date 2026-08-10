@@ -1,5 +1,15 @@
 extends DataRequestHandler
 
+## Minimum seconds between two crafts by the same player. The client paces its
+## craft loop at CraftingMenu.CRAFT_INTERVAL (2s); this is the authoritative
+## floor so a hand-rolled client can't spam the request for free xp. Set a hair
+## under the client interval so network jitter never eats a legitimate craft.
+const MIN_CRAFT_INTERVAL_MS: int = 1500
+
+## player_id -> ticks_msec of their last accepted craft. The handler is cached
+## per request type, so this survives between requests.
+var _last_craft_ms: Dictionary[int, int] = {}
+
 
 func data_request_handler(
 	peer_id: int,
@@ -12,6 +22,11 @@ func data_request_handler(
 	var player: Player = instance.players_by_peer_id.get(peer_id, null)
 	if not player:
 		return {"ok": false}
+
+	var player_id: int = int(player.player_resource.player_id)
+	var now_ms: int = Time.get_ticks_msec()
+	if now_ms - int(_last_craft_ms.get(player_id, -MIN_CRAFT_INTERVAL_MS)) < MIN_CRAFT_INTERVAL_MS:
+		return {"ok": false, "reason": "too_fast"}
 
 	# Resolve the station from the player's map (authoritative + verifies they're at it).
 	var station: CraftingStationResource = instance.instance_map.get_crafting_station(station_key)
@@ -44,6 +59,9 @@ func data_request_handler(
 		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
 		if Inventory.count(inventory, ing_id) < ingredient.amount:
 			return {"ok": false, "reason": "ingredients"}
+
+	# Past every gate — this craft is happening, so start the next cooldown.
+	_last_craft_ms[player_id] = now_ms
 
 	# Consume ingredients, then the station fee.
 	for ingredient: CraftIngredient in recipe.ingredients:

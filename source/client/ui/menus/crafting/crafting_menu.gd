@@ -31,11 +31,15 @@ var _selected: int = -1
 ## Active category tab; empty when the station has a single category (no tabs).
 var _tab: StringName = &""
 var _has_tabs: bool = false
-## Cooking stations auto-loop: one cook every COOK_INTERVAL seconds until
-## the selected raw fish runs out (or the player stops / closes the menu).
-const COOK_INTERVAL: float = 2.0
-var _cooking: bool = false
-var _cook_generation: int = 0
+## Every station auto-loops: one craft every CRAFT_INTERVAL seconds until the
+## materials run out (or the player stops / closes the menu). The wait comes
+## BEFORE the craft, so a click can never buy an instant item — smelting, armour
+## smithing and outfitting all cost real time instead of rewarding spam-clicking.
+## `craft.item` enforces the same floor server-side.
+const CRAFT_INTERVAL: float = 2.0
+var _looping: bool = false
+var _loop_generation: int = 0
+var _progress_bar: ProgressBar
 
 var _tab_buttons: Dictionary[StringName, Button] = {}
 var _tab_group: ButtonGroup = ButtonGroup.new()
@@ -63,6 +67,7 @@ func _ready() -> void:
 	_gold_id = Economy.gold_id()
 	build_shell("Crafting", $Body, true)
 	_build_header()
+	_build_progress_bar()
 	craft_button.pressed.connect(_on_craft_pressed)
 	visibility_changed.connect(_on_visibility_changed)
 
@@ -70,7 +75,7 @@ func _ready() -> void:
 ## Hand the crafting menu the station's catalog directly (rendered client-side)
 ## plus the node name the server resolves the station by.
 func open(arg: Dictionary) -> void:
-	_stop_cooking()
+	_stop_loop()
 	_station_key = str(arg.get("key", ""))
 	_station = arg.get("station") as CraftingStationResource
 	if _station == null:
@@ -85,7 +90,7 @@ func open(arg: Dictionary) -> void:
 
 func _on_visibility_changed() -> void:
 	if not visible:
-		_stop_cooking()
+		_stop_loop()
 		return
 	if _station != null:
 		_refresh()
@@ -99,9 +104,32 @@ func _action_verb() -> String:
 	return "Cook" if _is_cooking_station() else "Craft"
 
 
-func _stop_cooking() -> void:
-	_cooking = false
-	_cook_generation += 1
+func _stop_loop() -> void:
+	_looping = false
+	_loop_generation += 1
+	_set_progress(0.0)
+
+
+## Fill bar for the current item's CRAFT_INTERVAL wait, sitting between the
+## fee/xp row and the Craft button so the timer reads as part of the action.
+func _build_progress_bar() -> void:
+	_progress_bar = ProgressBar.new()
+	_progress_bar.theme_type_variation = &"XPBar"
+	_progress_bar.custom_minimum_size = Vector2(0, 8)
+	_progress_bar.show_percentage = false
+	_progress_bar.max_value = 1.0
+	_progress_bar.value = 0.0
+	_progress_bar.visible = false
+	var column: Node = craft_button.get_parent()
+	column.add_child(_progress_bar)
+	column.move_child(_progress_bar, craft_button.get_index())
+
+
+func _set_progress(ratio: float) -> void:
+	if _progress_bar == null:
+		return
+	_progress_bar.visible = _looping
+	_progress_bar.value = clampf(ratio, 0.0, 1.0)
 
 
 ## Profession chip + XP bar + gold balance, inserted left of the Close button.
@@ -340,7 +368,7 @@ func _make_row(index: int, recipe: CraftingRecipe) -> Button:
 
 func _on_row_pressed(index: int) -> void:
 	if _selected != index:
-		_stop_cooking()
+		_stop_loop()
 	_selected = index
 	_render_detail()
 
@@ -361,6 +389,7 @@ func _render_detail() -> void:
 		xp_label.text = ""
 		craft_button.disabled = true
 		craft_button.text = _action_verb()
+		_set_progress(0.0)
 		return
 
 	var recipe: CraftingRecipe = _station.recipes[_selected]
@@ -400,10 +429,12 @@ func _render_detail() -> void:
 		JobRegistry.display_name(_station.profession),
 	]
 
-	if _cooking and _is_cooking_station():
+	if _looping:
 		craft_button.disabled = false
 		craft_button.text = "Stop"
+		_set_progress(_progress_bar.value if _progress_bar != null else 0.0)
 		return
+	_set_progress(0.0)
 
 	craft_button.disabled = not (meets_level and has_mats and can_pay)
 	if not meets_level:
@@ -490,41 +521,41 @@ func _has_ingredients(recipe: CraftingRecipe) -> bool:
 func _on_craft_pressed() -> void:
 	if _selected < 0 or _station == null:
 		return
-	if _is_cooking_station():
-		if _cooking:
-			_stop_cooking()
-			_render_detail()
-			return
-		_start_cooking_loop()
+	if _looping:
+		_stop_loop()
+		_render_detail()
 		return
-	await _craft_once()
+	_start_craft_loop()
 
 
-## Starts a cook loop: wait 2s per cook, then craft, repeating until the selected
-## raw fish stack is gone, the player hits Stop, or the menu closes.
-func _start_cooking_loop() -> void:
-	_cooking = true
-	_cook_generation += 1
-	var gen: int = _cook_generation
+## Wait CRAFT_INTERVAL, craft one, repeat until the materials run out, the
+## player hits Stop, or the menu closes. Used by every station — smelting,
+## smithing, outfitting and cooking all tick at the same rate.
+func _start_craft_loop() -> void:
+	_looping = true
+	_loop_generation += 1
+	var gen: int = _loop_generation
 	_render_detail()
-	while _cooking and gen == _cook_generation and visible and _selected >= 0:
+	while _looping and gen == _loop_generation and visible and _selected >= 0:
 		var recipe: CraftingRecipe = _station.recipes[_selected]
 		if _profession_level < recipe.required_level or not _has_ingredients(recipe):
 			break
 		if _station.craft_fee > 0 and _golds < _station.craft_fee:
 			break
 		var waited: float = 0.0
-		while waited < COOK_INTERVAL and _cooking and gen == _cook_generation and visible:
-			await get_tree().create_timer(0.1).timeout
-			waited += 0.1
-		if not _cooking or gen != _cook_generation or not visible:
+		while waited < CRAFT_INTERVAL and _looping and gen == _loop_generation and visible:
+			await get_tree().create_timer(0.05).timeout
+			waited += 0.05
+			_set_progress(waited / CRAFT_INTERVAL)
+		if not _looping or gen != _loop_generation or not visible:
 			break
 		if not _has_ingredients(recipe):
 			break
 		var ok: bool = await _craft_once()
 		if not ok:
 			break
-	_stop_cooking()
+		_set_progress(0.0)
+	_stop_loop()
 	if is_inside_tree():
 		_render_detail()
 
@@ -565,5 +596,7 @@ func _toast_failure(data: Dictionary) -> void:
 			Toaster.toast("You don't have the ingredients.")
 		"gold":
 			Toaster.toast("Not enough gold for the station fee (%d)." % int(data.get("fee", 0)))
+		"too_fast":
+			Toaster.toast("Steady on — one at a time.")
 		_:
 			Toaster.toast("Can't %s that right now." % verb)
