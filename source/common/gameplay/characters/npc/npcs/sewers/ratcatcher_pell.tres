@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/bandit_tracker.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Dialogue_pell"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["Rats I can handle. It is the things that have started eating the rats that worry me.", "Four ways out of every junction. Learn them or the oozes will learn you.", "The green lamps are mine. Where they stop, I stopped too."])
+label_override = "Ask about the junctions"
+
+[sub_resource type="Resource" id="Dialogue_deep"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["Down past the culverts there is water that does not move. That is the cistern.", "Something in it grew fat on everything the city threw away. Take that how you like."])
+label_override = "Ask what is below"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Ratcatcher Pell"
+skin = ExtResource("6_skin")
+greeting = "Careful where you put your boots. Half of what is on this floor used to be moving."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Dialogue_pell"), SubResource("Dialogue_deep")])

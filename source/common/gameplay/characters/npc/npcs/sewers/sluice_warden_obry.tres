@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="3_shop"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/poison_shop.tres" id="5_shop"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/royal_soldier.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Shop_obry"]
+script = ExtResource("3_shop")
+shop = ExtResource("5_shop")
+
+[sub_resource type="Resource" id="Dialogue_obry"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["City above, culverts below, and me in the middle keeping the grates shut. Mostly shut.", "The crews stopped coming down a year back. Their stock is still in the crates if you can reach it.", "Anything that comes up through a grate is my problem. Anything that goes down is yours."])
+label_override = "Ask about the works"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Sluice Warden Obry"
+skin = ExtResource("6_skin")
+greeting = "Mind the grates. I have lost two lanterns and one apprentice to them this season."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_obry"), SubResource("Dialogue_obry")])

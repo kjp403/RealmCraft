@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/bandit_scout.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Dialogue_ilka"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["Count the obelisks on your way round. There should be five. Some days I count six.", "Riders come over the north rim at dusk. Do not be standing in the open at dusk.", "If the sand starts running uphill, that is not wind. Get to stone."])
+label_override = "Ask what she watches for"
+
+[sub_resource type="Resource" id="Dialogue_below"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["There is a shaft under the basin. Sefu pretends it is not there.", "The delvers who went down came back with gold and a stutter. Draw your own conclusions."])
+label_override = "Ask about the shaft"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Dune Scout Ilka"
+skin = ExtResource("6_skin")
+greeting = "Keep low and keep moving. I will tell you what is worth looking at."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Dialogue_ilka"), SubResource("Dialogue_below")])

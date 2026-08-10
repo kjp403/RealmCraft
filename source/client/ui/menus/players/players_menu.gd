@@ -244,6 +244,12 @@ func _pretty_zone(raw: String) -> String:
 		"fire_forge": "Fire Forge",
 		"sewers": "Sewers",
 		"guild_house": "Guild House",
+		"sunspire_terraces": "Sunspire Terraces",
+		"sunken_tombs": "The Sunken Tombs",
+		"gutterworks": "The Gutterworks",
+		"drowned_cistern": "The Drowned Cistern",
+		"bellows_gallery": "The Bellows Gallery",
+		"cinder_deeps": "The Cinder Deeps",
 	}
 	var key: String = raw.strip_edges().to_lower()
 	if titles.has(key):

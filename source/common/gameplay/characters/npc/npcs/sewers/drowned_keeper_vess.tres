@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/wizard.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Dialogue_vess"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["This was a reservoir before it was a grave. The mosaic on the floor was meant to be admired from a balcony.", "The balcony is gone. The mosaic is not. Neither is what stands on it.", "Wade the shallows if you must — they only come up to the knee. It is what wades with you."])
+label_override = "Ask about the reservoir"
+
+[sub_resource type="Resource" id="Dialogue_sovereign"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["It has no name that anyone wrote down, so the crews called it the Sovereign and stopped coming.", "It splits when it is hurt. Kill the small ones fast or you will be fighting a crowd."])
+label_override = "Ask about the Sovereign"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Drowned Keeper Vess"
+skin = ExtResource("6_skin")
+greeting = "Quietly, now. Sound carries strangely over standing water, and it is listening."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Dialogue_vess"), SubResource("Dialogue_sovereign")])

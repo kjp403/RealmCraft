@@ -90,6 +90,15 @@ func _build_fire_forge() -> void:
 		Vector2i(8, 2), Vector2i(10, 2), Vector2i(8, 3), Vector2i(9, 3), Vector2i(10, 3),
 		Vector2i(6, 2), Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5),
 	])
+	# Raw volcanic rock mass on the lava sheet (cols 1-7, rows 3-8). The Cinder
+	# Deeps fills the deep void with this instead of foundry masonry, so it has
+	# to block like a wall. Unpainted by fire_forge.tscn, which only ever touches
+	# source 0 at the lava row, so marking it cannot change that map.
+	var rock_block: Array = []
+	for y in range(3, 9):
+		for x in range(1, 8):
+			rock_block.append(Vector2i(x, y))
+	_mark_collision(ts, 0, rock_block)
 	_save(ts, OUT_DIR + "fire_forge_tileset.tres")
 
 

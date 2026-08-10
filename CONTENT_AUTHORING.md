@@ -141,6 +141,44 @@ Root folder: `source/common/gameplay/maps/maps/`
 | `misc_buildings/*` | Misc houses / mining vendor |
 | `template/map_template.tscn` | Blank map starter (`source/common/gameplay/maps/template/`) |
 
+#### Generated biome maps — do not hand-edit
+
+Desert, Fire Forge and Sewers, plus their six sub-levels, are **written by
+scripts**. Editing the `.tscn` by hand will be lost the next time the generator
+runs. Change the generator instead.
+
+| Map | Generator |
+|-----|-----------|
+| `desert/desert.tscn`, `fire_forge/fire_forge.tscn`, `sewers/sewers.tscn` | `tools/build_stub_biomes.gd` |
+| `desert/sunspire_terraces.tscn`, `desert/sunken_tombs.tscn` | `tools/build_biome_levels.gd` |
+| `sewers/gutterworks.tscn`, `sewers/drowned_cistern.tscn` | `tools/build_biome_levels.gd` |
+| `fire_forge/bellows_gallery.tscn`, `fire_forge/cinder_deeps.tscn` | `tools/build_biome_levels.gd` |
+
+The three tilesets come from `tools/build_biome_tilesets.gd`, which is
+reproducible — running it with no source change rewrites the `.tres` files
+byte-for-byte. **A tile only blocks the player if that atlas cell carries a
+collision polygon there**; props stamped onto the Props layer are decorative
+unless their tile is marked. This is the trap to remember when picking new
+tiles: several banks that look like floor (the OutdoorHouseSet paving, for
+instance) are marked solid because they came from a platformer wall set.
+
+The stair portals joining each surface map to its two sub-levels are appended by
+`tools/add_biome_stairs.gd`. It inserts nodes as text and never touches a
+`tile_map_data` line, so the surface maps' art is untouched; re-running it is a
+no-op once the stairs exist.
+
+Gates to run after any change here:
+
+```bash
+godot --headless --path . -s tools/build_biome_levels.gd && godot --headless --path . -s tools/audit_biome_collision.gd && godot --headless --path . -s tools/verify_biome_levels.gd && godot --headless --path . -s tools/verify_stub_biomes.gd
+```
+
+Overview renders for eyeballing layout:
+
+```bash
+godot --path . -s tools/render_biome_level_previews.gd -- --outdir=<dir>
+```
+
 ### Instance resources (what portals point at)
 
 `source/common/gameplay/maps/instance/instance_collection/`
@@ -152,6 +190,9 @@ Root folder: `source/common/gameplay/maps/maps/`
 | `biomes/forest.tres` | forest |
 | `biomes/fungus_cave.tres` | fungus cave |
 | `biomes/bandit_hideout.tres` | bandit hideout |
+| `biomes/sunspire_terraces.tres` / `sunken_tombs.tres` | Desert upper / lower levels |
+| `biomes/gutterworks.tres` / `drowned_cistern.tres` | Sewers upper / lower levels |
+| `biomes/bellows_gallery.tres` / `cinder_deeps.tres` | Fire Forge upper / lower levels |
 | `building/guild_house.tres` | guild house inside |
 | `building/smith_house.tres` | smith inside |
 | `building/trade_house.tres` | trade house inside |

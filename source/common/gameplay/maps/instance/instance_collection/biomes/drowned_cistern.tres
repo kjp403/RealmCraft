@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+instance_name = &"drowned_cistern"
+map_path = "res://source/common/gameplay/maps/maps/sewers/drowned_cistern.tscn"
+zone_title = "The Drowned Cistern"
+level_min = 18
+level_max = 22
+show_discovery = true
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

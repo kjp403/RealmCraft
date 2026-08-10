@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786335323
-next_id = 81
+version = 1786391972
+next_id = 84
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -382,6 +382,21 @@ entries = Array[Dictionary]([{
 &"id": 80,
 &"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_zombie_giant.tres",
 &"slug": &"trpg_zombie_giant"
+}, {
+&"hash": "d9c860d845ce56c8c3e7437fe52788b978c90616eb6d073d18868b15f69d9a2f",
+&"id": 81,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres",
+&"slug": &"cinderborn"
+}, {
+&"hash": "66962e985082bf56009c5c4941c8b51449c4fc5839fa306126770296afc7283a",
+&"id": 82,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
+&"slug": &"cistern_sovereign"
+}, {
+&"hash": "7817fd1c029014c4f7cf8a251c955e7654f9116098faa218b165f0b8d8ce8609",
+&"id": 83,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
+&"slug": &"sand_king"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

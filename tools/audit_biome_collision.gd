@@ -13,6 +13,13 @@ const MAPS := [
 	{"path": "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn", "min": 1500},
 	{"path": "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", "min": 1500},
 	{"path": "res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn", "min": 1000},
+	# Biome sub-levels (tools/build_biome_levels.gd).
+	{"path": "res://source/common/gameplay/maps/maps/desert/sunspire_terraces.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/desert/sunken_tombs.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/sewers/gutterworks.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/sewers/drowned_cistern.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/fire_forge/bellows_gallery.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/fire_forge/cinder_deeps.tscn", "min": 1200},
 ]
 
 

@@ -13,6 +13,8 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/props/animated_deco.tscn" id="deco"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_forge_torch.tres" id="sf0"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/bellows_gallery.tres" id="stair_bellows_gallery"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/cinder_deeps.tres" id="stair_cinder_deeps"]
 [node name="fire_forge" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
@@ -205,3 +207,27 @@ destination_label = "Castle Garden"
 target_instance = ExtResource("7_hub")
 warper_id = 126
 target_id = 26
+
+[node name="GalleryLanding" parent="." instance=ExtResource("5_warper")]
+position = Vector2(776.0, 1112.0)
+warper_id = 54
+
+[node name="GalleryStair" parent="." instance=ExtResource("6_portal")]
+position = Vector2(776.0, 1176.0)
+portal_color = Color(0.95, 0.55, 0.2, 1)
+destination_label = "The Bellows Gallery"
+target_instance = ExtResource("stair_bellows_gallery")
+warper_id = 154
+target_id = 44
+
+[node name="DeepsLanding" parent="." instance=ExtResource("5_warper")]
+position = Vector2(1032.0, 1112.0)
+warper_id = 55
+
+[node name="DeepsStair" parent="." instance=ExtResource("6_portal")]
+position = Vector2(1032.0, 1192.0)
+portal_color = Color(0.6, 0.14, 0.04, 1)
+destination_label = "The Cinder Deeps"
+target_instance = ExtResource("stair_cinder_deeps")
+warper_id = 155
+target_id = 45
