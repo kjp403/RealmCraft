@@ -6,7 +6,7 @@
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
 version = 1784473722
-next_id = 41
+next_id = 42
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -182,6 +182,11 @@ entries = Array[Dictionary]([{
 &"id": 40,
 &"path": "res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres",
 &"slug": &"mecha_stone_golem"
+}, {
+&"hash": "woodland_rat_v1",
+&"id": 41,
+&"path": "res://source/common/gameplay/characters/npc/types/woodland_rat.tres",
+&"slug": &"woodland_rat"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")
