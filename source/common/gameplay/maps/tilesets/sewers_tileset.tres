@@ -1,12 +1,13 @@
 [gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/pixel_dungeon/dungeon_tileset.png" id="1_r5k8v"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/rf_catacombs/mainlevbuild.png" id="2_k3ejf"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/starter_platformer/DarkCastle.png" id="3_jxcn4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/dg_dungeon/set1.png" id="4_lsmiq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/pixel_dungeon/dungeon_tileset.png" id="1_k3ejf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rf_catacombs/mainlevbuild.png" id="2_jxcn4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/starter_platformer/DarkCastle.png" id="3_lsmiq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/dg_dungeon/set1.png" id="4_eiubd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/dg_dungeon/water.png" id="5_seqeb"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eiubd"]
-texture = ExtResource("1_r5k8v")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ra1er"]
+texture = ExtResource("1_k3ejf")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:0/0 = 0
@@ -140,8 +141,8 @@ texture = ExtResource("1_r5k8v")
 8:9/0 = 0
 9:9/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_seqeb"]
-texture = ExtResource("2_k3ejf")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yte70"]
+texture = ExtResource("2_jxcn4")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
@@ -796,8 +797,8 @@ texture_region_size = Vector2i(32, 32)
 30:19/0 = 0
 31:19/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ra1er"]
-texture = ExtResource("3_jxcn4")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_efvap"]
+texture = ExtResource("3_lsmiq")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:0/0 = 0
@@ -839,8 +840,8 @@ texture = ExtResource("3_jxcn4")
 4:4/0 = 0
 4:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yte70"]
-texture = ExtResource("4_lsmiq")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m0w1n"]
+texture = ExtResource("4_eiubd")
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -1481,10 +1482,30 @@ texture = ExtResource("4_lsmiq")
 26:19/0 = 0
 27:19/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qd8ak"]
+texture = ExtResource("5_seqeb")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+
 [resource]
 physics_layer_0/collision_layer = 2
 physics_layer_0/collision_mask = 0
-sources/0 = SubResource("TileSetAtlasSource_eiubd")
-sources/1 = SubResource("TileSetAtlasSource_seqeb")
-sources/2 = SubResource("TileSetAtlasSource_ra1er")
-sources/3 = SubResource("TileSetAtlasSource_yte70")
+sources/0 = SubResource("TileSetAtlasSource_ra1er")
+sources/1 = SubResource("TileSetAtlasSource_yte70")
+sources/2 = SubResource("TileSetAtlasSource_efvap")
+sources/3 = SubResource("TileSetAtlasSource_m0w1n")
+sources/4 = SubResource("TileSetAtlasSource_qd8ak")

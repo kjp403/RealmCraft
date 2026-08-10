@@ -139,12 +139,27 @@ target_instance = ExtResource("7_hub")
 warper_id = 128
 target_id = 28
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [node name="GutterLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(776.0, 1112.0)
+position = Vector2(440.0, 264.0)
 warper_id = 52
 
 [node name="GutterStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(776.0, 1192.0)
+position = Vector2(392.0, 296.0)
 portal_color = Color(0.45, 0.7, 0.5, 1)
 destination_label = "The Gutterworks"
 target_instance = ExtResource("stair_gutterworks")
@@ -152,11 +167,11 @@ warper_id = 152
 target_id = 42
 
 [node name="CisternLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(1032.0, 1112.0)
+position = Vector2(1384.0, 280.0)
 warper_id = 53
 
 [node name="CisternStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(1032.0, 1192.0)
+position = Vector2(1432.0, 328.0)
 portal_color = Color(0.2, 0.5, 0.55, 1)
 destination_label = "The Drowned Cistern"
 target_instance = ExtResource("stair_drowned_cistern")

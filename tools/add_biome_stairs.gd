@@ -197,11 +197,18 @@ func _free_near(reachable: Dictionary, used: Dictionary, wanted: Vector2i) -> Ve
 	return best
 
 
-## Prefer the farthest reachable cell on the requested side of the entrance,
-## still past MIN_DIST_FRAC of the map diameter.
+## Prefer a far cell in the west or east wing of the reachable footprint so the
+## two stairs never cluster on the same tip of a north-south spine.
 func _pick_far(
 	dist: Dictionary, used: Dictionary, origin: Vector2i, min_d: int, side: int
 ) -> Vector2i:
+	var min_x: int = origin.x
+	var max_x: int = origin.x
+	for cell: Vector2i in dist.keys():
+		min_x = mini(min_x, cell.x)
+		max_x = maxi(max_x, cell.x)
+	var span: int = maxi(1, max_x - min_x)
+	var wing: int = maxi(8, int(span * 0.28))
 	var best := origin
 	var best_score: float = -1.0
 	for cell: Vector2i in dist.keys():
@@ -210,18 +217,17 @@ func _pick_far(
 		var d: int = int(dist[cell])
 		if d < min_d:
 			continue
-		# Side bias: west exits want negative dx, east want positive.
-		var dx: int = cell.x - origin.x
-		if side < 0 and dx > 0:
+		# West stair lives in the left wing; east stair in the right wing.
+		if side < 0 and cell.x > min_x + wing:
 			continue
-		if side > 0 and dx < 0:
+		if side > 0 and cell.x < max_x - wing:
 			continue
-		# Score: distance first, then how far to the side.
-		var score: float = float(d) * 1000.0 + float(absi(dx))
+		var lateral: int = absi(cell.x - origin.x)
+		var score: float = float(d) * 1000.0 + float(lateral) * 25.0
 		if score > best_score:
 			best_score = score
 			best = cell
-	# Fallback without side filter if the wing is too small.
+	# Fallback: strict side of origin if wings are empty.
 	if best_score < 0.0:
 		for cell: Vector2i in dist.keys():
 			if used.has(cell):
@@ -229,7 +235,12 @@ func _pick_far(
 			var d2: int = int(dist[cell])
 			if d2 < min_d:
 				continue
-			var score2: float = float(d2)
+			var dx: int = cell.x - origin.x
+			if side < 0 and dx >= 0:
+				continue
+			if side > 0 and dx <= 0:
+				continue
+			var score2: float = float(d2) * 1000.0 + float(absi(dx)) * 10.0
 			if score2 > best_score:
 				best_score = score2
 				best = cell

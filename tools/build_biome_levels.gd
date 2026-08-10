@@ -54,7 +54,7 @@ func _dense(rate: float) -> float:
 
 
 func _gap(n: int) -> int:
-	return maxi(n, (n * S) // 2)
+	return maxi(n, int((n * S) / 2.0))
 
 
 func _initialize() -> void:
