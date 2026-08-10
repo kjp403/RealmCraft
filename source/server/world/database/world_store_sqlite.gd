@@ -512,8 +512,8 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		player.slayer_points = int((slayer_v as Dictionary).get("points", 0))
 		player.slayer_streak = int((slayer_v as Dictionary).get("streak", 0))
 		player.slayer_tasks_completed = int((slayer_v as Dictionary).get("tasks_completed", 0))
-		var blocked_v: Variant = (slayer_v as Dictionary).get("blocked", {})
-		player.slayer_blocked_tasks = blocked_v if blocked_v is Dictionary else {}
+		var slayer_blocked_v: Variant = (slayer_v as Dictionary).get("blocked", {})
+		player.slayer_blocked_tasks = slayer_blocked_v if slayer_blocked_v is Dictionary else {}
 
 	player.active_guild_id = int(row.get("active_guild_id", 0))
 
