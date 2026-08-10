@@ -18,12 +18,13 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_orc_rider.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_archer.tres" id="e16"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_wretched_fomorian.tres" id="e17"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/caravan_master_sefu.tres" id="e19"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/dune_scout_ilka.tres" id="e20"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e21"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e22"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e23"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_orc.tres" id="e18"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e19"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/caravan_master_sefu.tres" id="e20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/dune_scout_ilka.tres" id="e21"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e22"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e23"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e24"]
 
 [node name="sunspire_terraces" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -129,25 +130,97 @@ light_color = Color(1, 0.84, 0.55, 1)
 position = Vector2(1928.0, 3528.0)
 sprite_frames = ExtResource("e8")
 scale_factor = 0.9
-wander_radius = 44.0
+wander_radius = 48.0
 
 [node name="TerraceCritter2" parent="SceneProps" instance=ExtResource("e7")]
 position = Vector2(6216.0, 3624.0)
 sprite_frames = ExtResource("e9")
 scale_factor = 0.9
-wander_radius = 44.0
+wander_radius = 48.0
 
 [node name="TerraceCritter3" parent="SceneProps" instance=ExtResource("e7")]
 position = Vector2(3496.0, 1576.0)
 sprite_frames = ExtResource("e10")
 scale_factor = 0.9
-wander_radius = 44.0
+wander_radius = 48.0
 
 [node name="TerraceCritter4" parent="SceneProps" instance=ExtResource("e7")]
 position = Vector2(3528.0, 4648.0)
 sprite_frames = ExtResource("e11")
 scale_factor = 0.9
-wander_radius = 44.0
+wander_radius = 48.0
+
+[node name="TerraceCritter5" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(1448.0, 2888.0)
+sprite_frames = ExtResource("e8")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter6" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(6568.0, 2888.0)
+sprite_frames = ExtResource("e9")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter7" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(2296.0, 1672.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter8" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(5608.0, 1928.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter9" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(2920.0, 4376.0)
+sprite_frames = ExtResource("e8")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter10" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(5272.0, 4312.0)
+sprite_frames = ExtResource("e9")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter11" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(4008.0, 3832.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter12" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(1768.0, 4424.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter13" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(6248.0, 4488.0)
+sprite_frames = ExtResource("e8")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter14" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(3368.0, 1448.0)
+sprite_frames = ExtResource("e9")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter15" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(4648.0, 1256.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.9
+wander_radius = 48.0
+
+[node name="TerraceCritter16" parent="SceneProps" instance=ExtResource("e7")]
+position = Vector2(4008.0, 4968.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.9
+wander_radius = 48.0
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 y_sort_enabled = true
@@ -156,25 +229,49 @@ id_to_node = {
 0: NodePath("Harpy"),
 1: NodePath("Harpy2"),
 2: NodePath("Harpy3"),
-3: NodePath("Cockatrice"),
-4: NodePath("Cockatrice2"),
-5: NodePath("OrcRider"),
-6: NodePath("OrcRider2"),
-7: NodePath("DuneArcher"),
-8: NodePath("DuneArcher2"),
-9: NodePath("Fomorian")
+3: NodePath("Harpy4"),
+4: NodePath("Harpy5"),
+5: NodePath("Cockatrice"),
+6: NodePath("Cockatrice2"),
+7: NodePath("Cockatrice3"),
+8: NodePath("Cockatrice4"),
+9: NodePath("OrcRider"),
+10: NodePath("OrcRider2"),
+11: NodePath("OrcRider3"),
+12: NodePath("OrcRider4"),
+13: NodePath("DuneArcher"),
+14: NodePath("DuneArcher2"),
+15: NodePath("DuneArcher3"),
+16: NodePath("DuneArcher4"),
+17: NodePath("Fomorian"),
+18: NodePath("Fomorian2"),
+19: NodePath("Fomorian3"),
+20: NodePath("Orc"),
+21: NodePath("Orc2")
 }
 node_to_id = {
 NodePath("Harpy"): 0,
 NodePath("Harpy2"): 1,
 NodePath("Harpy3"): 2,
-NodePath("Cockatrice"): 3,
-NodePath("Cockatrice2"): 4,
-NodePath("OrcRider"): 5,
-NodePath("OrcRider2"): 6,
-NodePath("DuneArcher"): 7,
-NodePath("DuneArcher2"): 8,
-NodePath("Fomorian"): 9
+NodePath("Harpy4"): 3,
+NodePath("Harpy5"): 4,
+NodePath("Cockatrice"): 5,
+NodePath("Cockatrice2"): 6,
+NodePath("Cockatrice3"): 7,
+NodePath("Cockatrice4"): 8,
+NodePath("OrcRider"): 9,
+NodePath("OrcRider2"): 10,
+NodePath("OrcRider3"): 11,
+NodePath("OrcRider4"): 12,
+NodePath("DuneArcher"): 13,
+NodePath("DuneArcher2"): 14,
+NodePath("DuneArcher3"): 15,
+NodePath("DuneArcher4"): 16,
+NodePath("Fomorian"): 17,
+NodePath("Fomorian2"): 18,
+NodePath("Fomorian3"): 19,
+NodePath("Orc"): 20,
+NodePath("Orc2"): 21
 }
 
 [node name="Harpy" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
@@ -195,6 +292,18 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e13")
 weapon = null
 
+[node name="Harpy4" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(2728.0, 1448.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
+[node name="Harpy5" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(5288.0, 1448.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
 [node name="Cockatrice" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
 position = Vector2(1704.0, 2520.0)
 debug_draw_ranges = false
@@ -203,6 +312,18 @@ weapon = null
 
 [node name="Cockatrice2" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
 position = Vector2(6296.0, 2600.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
+[node name="Cockatrice3" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(3656.0, 1400.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
+[node name="Cockatrice4" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(1880.0, 3256.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e14")
 weapon = null
@@ -219,8 +340,20 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e15")
 weapon = null
 
+[node name="OrcRider3" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(3208.0, 4328.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="OrcRider4" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(4872.0, 4488.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
 [node name="DuneArcher" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
-position = Vector2(1912.0, 3320.0)
+position = Vector2(1928.0, 3432.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
@@ -231,34 +364,70 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
 
+[node name="DuneArcher3" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(1944.0, 3608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
+[node name="DuneArcher4" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(5912.0, 3896.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
 [node name="Fomorian" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
 position = Vector2(4008.0, 3832.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e17")
 weapon = null
 
+[node name="Fomorian2" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(3832.0, 3912.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e17")
+weapon = null
+
+[node name="Fomorian3" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(4184.0, 3912.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e17")
+weapon = null
+
+[node name="Orc" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(1608.0, 3368.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e18")
+weapon = null
+
+[node name="Orc2" parent="ReplicatedPropsContainer" instance=ExtResource("e12")]
+position = Vector2(6408.0, 3368.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e18")
+weapon = null
+
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="CaravanMasterSefu" parent="NPCs" instance=ExtResource("e18")]
+[node name="CaravanMasterSefu" parent="NPCs" instance=ExtResource("e19")]
 position = Vector2(3688.0, 4968.0)
-npc_resource = ExtResource("e19")
-
-[node name="DuneScoutIlka" parent="NPCs" instance=ExtResource("e18")]
-position = Vector2(4328.0, 4968.0)
 npc_resource = ExtResource("e20")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e21")]
+[node name="DuneScoutIlka" parent="NPCs" instance=ExtResource("e19")]
+position = Vector2(4328.0, 4968.0)
+npc_resource = ExtResource("e21")
+
+[node name="RespawnPoint" parent="." instance=ExtResource("e22")]
 position = Vector2(4008.0, 5128.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e21")]
+[node name="Entrance" parent="." instance=ExtResource("e22")]
 position = Vector2(4008.0, 5128.0)
 warper_id = 40
 
-[node name="DescentPortal" parent="." instance=ExtResource("e22")]
+[node name="DescentPortal" parent="." instance=ExtResource("e23")]
 position = Vector2(4008.0, 5528.0)
 portal_color = Color(0.85, 0.66, 0.25, 1)
 destination_label = "Desert"
-target_instance = ExtResource("e23")
+target_instance = ExtResource("e24")
 warper_id = 140
 target_id = 50

@@ -1182,11 +1182,10 @@ func _build_forge_gallery() -> void:
 	# 5× scale the floor reads as a flat slab without these hazards breaking it up.
 	var lava_cells: Dictionary = {}
 	for spot in [
-		[Vector2i(west, _N(24)), _R(4.2), 651], [Vector2i(east, _N(24)), _R(4.2), 652],
-		[Vector2i(west, _N(36)), _R(3.8), 653], [Vector2i(east, _N(36)), _R(3.8), 654],
-		[Vector2i(west, _N(48)), _R(4.0), 655], [Vector2i(east, _N(48)), _R(4.0), 656],
-		[_L(52, 42), _R(3.4), 657], [_L(40, 30), _R(3.0), 658], [_L(64, 30), _R(3.0), 659],
-		[_L(40, 54), _R(2.8), 660], [_L(64, 54), _R(2.8), 661],
+		[Vector2i(west, _N(24)), _R(2.6), 651], [Vector2i(east, _N(24)), _R(2.6), 652],
+		[Vector2i(west, _N(36)), _R(2.4), 653], [Vector2i(east, _N(36)), _R(2.4), 654],
+		[Vector2i(west, _N(48)), _R(2.5), 655], [Vector2i(east, _N(48)), _R(2.5), 656],
+		[_L(52, 42), _R(2.2), 657], [_L(40, 30), _R(2.0), 658], [_L(64, 30), _R(2.0), 659],
 	]:
 		var pool: Dictionary = {}
 		MapKit.blob(pool, spot[0], spot[1], 0.28, int(spot[2]), _bounds)
@@ -1198,6 +1197,16 @@ func _build_forge_gallery() -> void:
 	for cell: Vector2i in lava_cells.keys():
 		ground.set_cell(cell, 0, MapKit._pick(lava_tiles, cell, 662))
 		walk.erase(cell)
+	# Heat-stained masonry around each pit so the floor isn't one flat wash.
+	var hot_floors := [Vector2i(6, 1), Vector2i(6, 2), Vector2i(6, 3), Vector2i(4, 1), Vector2i(4, 2)]
+	for cell: Vector2i in lava_cells.keys():
+		for ox in range(-2, 3):
+			for oy in range(-2, 3):
+				if ox == 0 and oy == 0:
+					continue
+				var n := cell + Vector2i(ox, oy)
+				if walk.has(n) and MapKit.hash2(n.x, n.y, 663) % 3 == 0:
+					ground.set_cell(n, 3, MapKit._pick(hot_floors, n, 664))
 	walk = MapKit.largest_region(walk, entrance)
 
 	var blocked_all := blocked.duplicate()
@@ -1220,13 +1229,13 @@ func _build_forge_gallery() -> void:
 	]:
 		LevelKit.stamp_landmark(props, 3, [8, 1, 3, 3], LevelKit.pick_open(free, spot), free, solid)
 	# Slag heaps and cooled rock along the hall walls.
-	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], _dense(0.18), _N(3), 671, free, solid)
+	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], _dense(0.14), _N(4), 671, free, solid)
 	# Braziers, coal heaps and crystal growths from the lava sheet.
-	LevelKit.scatter_props(props, 0, inner, [[0, 1, 1, 2], [2, 1, 1, 1], [0, 2, 1, 1], [1, 2, 1, 1]], _dense(0.09), _N(5), 672, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[0, 1, 1, 2], [2, 1, 1, 1], [0, 2, 1, 1], [1, 2, 1, 1]], _dense(0.07), _N(5), 672, free, solid)
 	# Forge stock: the props sheet chest and coal piles.
-	LevelKit.scatter_props(props, 2, edges, [[0, 0, 1, 1], [1, 0, 1, 1], [2, 0, 1, 1]], _dense(0.07), _N(5), 673, free, solid)
+	LevelKit.scatter_props(props, 2, edges, [[0, 0, 1, 1], [1, 0, 1, 1], [2, 0, 1, 1]], _dense(0.055), _N(6), 673, free, solid)
 	# Cracked floor / ember overlays so the masonry doesn't read as one flat wash.
-	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(1, 1), Vector2i(3, 1), Vector2i(2, 1)], _dense(0.06), _N(4), 674, solid)
+	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(1, 1), Vector2i(3, 1), Vector2i(2, 1), Vector2i(0, 1)], _dense(0.10), _N(3), 674, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
@@ -1252,7 +1261,7 @@ func _build_forge_gallery() -> void:
 	var lights: Array = []
 	var li := 0
 	for cell: Vector2i in lava_cells.keys():
-		if MapKit.hash2(cell.x, cell.y, 675) % 37 != 0:
+		if MapKit.hash2(cell.x, cell.y, 675) % 61 != 0:
 			continue
 		li += 1
 		lights.append({

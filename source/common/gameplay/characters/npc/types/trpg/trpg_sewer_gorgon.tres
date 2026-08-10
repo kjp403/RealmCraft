@@ -5,11 +5,9 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_bf05w"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_qag53"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_poisonous_gorgon.tres" id="5_hqg67"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
-[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
-[ext_resource type="Resource" uid="uid://deajqapim5otj" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
-[ext_resource type="Resource" uid="uid://d2xyv5ipfxgwa" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_bf05w")
@@ -34,9 +32,9 @@ script = ExtResource("4_qag53")
 enemy_type = &"trpg_sewer_gorgon"
 display_name = "Sewer Gorgon"
 skin = ExtResource("5_hqg67")
-combat_level = 20
 visual_scale = 1.0
 is_boss = false
+combat_level = 20
 max_health = 180.0
 attack_damage = 15.0
 attack_cooldown = 1.4
@@ -85,4 +83,4 @@ ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
 metadata/slug = &"trpg_sewer_gorgon"
-metadata/id = 75
+metadata/id = 86

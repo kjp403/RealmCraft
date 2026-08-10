@@ -5,11 +5,9 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_4cja5"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_ctvvq"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_umber_hulk.tres" id="5_k8cq1"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="loot_coal"]
-[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="loot_iron"]
-[ext_resource type="Resource" uid="uid://deajqapim5otj" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
-[ext_resource type="Resource" uid="uid://d2xyv5ipfxgwa" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_4cja5")
@@ -34,9 +32,9 @@ script = ExtResource("4_ctvvq")
 enemy_type = &"trpg_cistern_hulk"
 display_name = "Cistern Hulk"
 skin = ExtResource("5_k8cq1")
-combat_level = 22
 visual_scale = 1.0
 is_boss = false
+combat_level = 22
 max_health = 260.0
 attack_damage = 17.0
 attack_cooldown = 1.4
@@ -85,4 +83,4 @@ ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
 metadata/slug = &"trpg_cistern_hulk"
-metadata/id = 77
+metadata/id = 85

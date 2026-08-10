@@ -12,16 +12,17 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_demon_a.tres" id="e9"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_conjuring_oni.tres" id="e10"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_ogre_mage.tres" id="e11"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_wretched_fomorian.tres" id="e12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cinder_fomorian.tres" id="e12"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_umber_hulk.tres" id="e13"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_blood_monster_a.tres" id="e14"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_elite_orc.tres" id="e15"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres" id="e16"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/cinderwright_maro.tres" id="e18"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_axeman.tres" id="e16"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres" id="e17"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/cinderwright_maro.tres" id="e19"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="e22"]
 
 [node name="cinder_deeps" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -837,35 +838,59 @@ id_to_node = {
 0: NodePath("Demon"),
 1: NodePath("Demon2"),
 2: NodePath("Demon3"),
-3: NodePath("Oni"),
-4: NodePath("Oni2"),
-5: NodePath("OgreMage"),
-6: NodePath("OgreMage2"),
-7: NodePath("Fomorian"),
-8: NodePath("Fomorian2"),
-9: NodePath("UmberHulk"),
-10: NodePath("BloodMonster"),
-11: NodePath("BloodMonster2"),
-12: NodePath("EliteOrc"),
-13: NodePath("EliteOrc2"),
-14: NodePath("Cinderborn")
+3: NodePath("Demon4"),
+4: NodePath("Demon5"),
+5: NodePath("Oni"),
+6: NodePath("Oni2"),
+7: NodePath("Oni3"),
+8: NodePath("OgreMage"),
+9: NodePath("OgreMage2"),
+10: NodePath("OgreMage3"),
+11: NodePath("Fomorian"),
+12: NodePath("Fomorian2"),
+13: NodePath("Fomorian3"),
+14: NodePath("UmberHulk"),
+15: NodePath("UmberHulk2"),
+16: NodePath("UmberHulk3"),
+17: NodePath("BloodMonster"),
+18: NodePath("BloodMonster2"),
+19: NodePath("BloodMonster3"),
+20: NodePath("EliteOrc"),
+21: NodePath("EliteOrc2"),
+22: NodePath("EliteOrc3"),
+23: NodePath("EliteOrc4"),
+24: NodePath("Axeman"),
+25: NodePath("Axeman2"),
+26: NodePath("Cinderborn")
 }
 node_to_id = {
 NodePath("Demon"): 0,
 NodePath("Demon2"): 1,
 NodePath("Demon3"): 2,
-NodePath("Oni"): 3,
-NodePath("Oni2"): 4,
-NodePath("OgreMage"): 5,
-NodePath("OgreMage2"): 6,
-NodePath("Fomorian"): 7,
-NodePath("Fomorian2"): 8,
-NodePath("UmberHulk"): 9,
-NodePath("BloodMonster"): 10,
-NodePath("BloodMonster2"): 11,
-NodePath("EliteOrc"): 12,
-NodePath("EliteOrc2"): 13,
-NodePath("Cinderborn"): 14
+NodePath("Demon4"): 3,
+NodePath("Demon5"): 4,
+NodePath("Oni"): 5,
+NodePath("Oni2"): 6,
+NodePath("Oni3"): 7,
+NodePath("OgreMage"): 8,
+NodePath("OgreMage2"): 9,
+NodePath("OgreMage3"): 10,
+NodePath("Fomorian"): 11,
+NodePath("Fomorian2"): 12,
+NodePath("Fomorian3"): 13,
+NodePath("UmberHulk"): 14,
+NodePath("UmberHulk2"): 15,
+NodePath("UmberHulk3"): 16,
+NodePath("BloodMonster"): 17,
+NodePath("BloodMonster2"): 18,
+NodePath("BloodMonster3"): 19,
+NodePath("EliteOrc"): 20,
+NodePath("EliteOrc2"): 21,
+NodePath("EliteOrc3"): 22,
+NodePath("EliteOrc4"): 23,
+NodePath("Axeman"): 24,
+NodePath("Axeman2"): 25,
+NodePath("Cinderborn"): 26
 }
 
 [node name="Demon" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
@@ -886,6 +911,18 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e9")
 weapon = null
 
+[node name="Demon4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4104.0, 5544.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e9")
+weapon = null
+
+[node name="Demon5" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4904.0, 5592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e9")
+weapon = null
+
 [node name="Oni" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(2184.0, 3736.0)
 debug_draw_ranges = false
@@ -894,6 +931,12 @@ weapon = null
 
 [node name="Oni2" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(6840.0, 3800.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e10")
+weapon = null
+
+[node name="Oni3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4488.0, 4168.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e10")
 weapon = null
@@ -910,6 +953,12 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e11")
 weapon = null
 
+[node name="OgreMage3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4488.0, 2088.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e11")
+weapon = null
+
 [node name="Fomorian" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(4488.0, 1128.0)
 debug_draw_ranges = false
@@ -922,8 +971,26 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e12")
 weapon = null
 
+[node name="Fomorian3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(5752.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e12")
+weapon = null
+
 [node name="UmberHulk" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
-position = Vector2(5768.0, 1448.0)
+position = Vector2(5768.0, 1592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
+[node name="UmberHulk2" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(2888.0, 2568.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
+[node name="UmberHulk3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(6232.0, 2376.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e13")
 weapon = null
@@ -940,6 +1007,12 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e14")
 weapon = null
 
+[node name="BloodMonster3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4488.0, 4968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
 [node name="EliteOrc" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(3800.0, 4808.0)
 debug_draw_ranges = false
@@ -952,30 +1025,54 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e15")
 weapon = null
 
+[node name="EliteOrc3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(2568.0, 3528.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="EliteOrc4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(6456.0, 3592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="Axeman" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(3880.0, 968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
+[node name="Axeman2" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(5400.0, 1288.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
 [node name="Cinderborn" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(4488.0, 4408.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e16")
+enemy_data = ExtResource("e17")
 weapon = null
 
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="CinderwrightMaro" parent="NPCs" instance=ExtResource("e17")]
+[node name="CinderwrightMaro" parent="NPCs" instance=ExtResource("e18")]
 position = Vector2(4168.0, 5928.0)
-npc_resource = ExtResource("e18")
+npc_resource = ExtResource("e19")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e19")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 6088.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e19")]
+[node name="Entrance" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 6088.0)
 warper_id = 45
 
-[node name="AscentPortal" parent="." instance=ExtResource("e20")]
+[node name="AscentPortal" parent="." instance=ExtResource("e21")]
 position = Vector2(4488.0, 6488.0)
 portal_color = Color(0.7, 0.2, 0.05, 1)
 destination_label = "Fire Forge"
-target_instance = ExtResource("e21")
+target_instance = ExtResource("e22")
 warper_id = 145
 target_id = 55

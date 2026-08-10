@@ -14,7 +14,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_acid_ooze.tres" id="e11"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_zombie_giant.tres" id="e12"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_carrion_crawler.tres" id="e13"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton.tres" id="e14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_skeleton.tres" id="e14"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/sluice_warden_obry.tres" id="e16"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/ratcatcher_pell.tres" id="e17"]
@@ -143,31 +143,53 @@ id_to_node = {
 0: NodePath("Slime"),
 1: NodePath("Slime2"),
 2: NodePath("Slime3"),
-3: NodePath("GutterBat"),
-4: NodePath("GutterBat2"),
-5: NodePath("GutterBat3"),
-6: NodePath("AcidOoze"),
-7: NodePath("AcidOoze2"),
-8: NodePath("Zombie"),
-9: NodePath("Crawler"),
-10: NodePath("Crawler2"),
-11: NodePath("Skeleton"),
-12: NodePath("Skeleton2")
+3: NodePath("Slime4"),
+4: NodePath("Slime5"),
+5: NodePath("GutterBat"),
+6: NodePath("GutterBat2"),
+7: NodePath("GutterBat3"),
+8: NodePath("GutterBat4"),
+9: NodePath("GutterBat5"),
+10: NodePath("AcidOoze"),
+11: NodePath("AcidOoze2"),
+12: NodePath("AcidOoze3"),
+13: NodePath("AcidOoze4"),
+14: NodePath("Zombie"),
+15: NodePath("Zombie2"),
+16: NodePath("Zombie3"),
+17: NodePath("Crawler"),
+18: NodePath("Crawler2"),
+19: NodePath("Crawler3"),
+20: NodePath("Skeleton"),
+21: NodePath("Skeleton2"),
+22: NodePath("Skeleton3"),
+23: NodePath("Skeleton4")
 }
 node_to_id = {
 NodePath("Slime"): 0,
 NodePath("Slime2"): 1,
 NodePath("Slime3"): 2,
-NodePath("GutterBat"): 3,
-NodePath("GutterBat2"): 4,
-NodePath("GutterBat3"): 5,
-NodePath("AcidOoze"): 6,
-NodePath("AcidOoze2"): 7,
-NodePath("Zombie"): 8,
-NodePath("Crawler"): 9,
-NodePath("Crawler2"): 10,
-NodePath("Skeleton"): 11,
-NodePath("Skeleton2"): 12
+NodePath("Slime4"): 3,
+NodePath("Slime5"): 4,
+NodePath("GutterBat"): 5,
+NodePath("GutterBat2"): 6,
+NodePath("GutterBat3"): 7,
+NodePath("GutterBat4"): 8,
+NodePath("GutterBat5"): 9,
+NodePath("AcidOoze"): 10,
+NodePath("AcidOoze2"): 11,
+NodePath("AcidOoze3"): 12,
+NodePath("AcidOoze4"): 13,
+NodePath("Zombie"): 14,
+NodePath("Zombie2"): 15,
+NodePath("Zombie3"): 16,
+NodePath("Crawler"): 17,
+NodePath("Crawler2"): 18,
+NodePath("Crawler3"): 19,
+NodePath("Skeleton"): 20,
+NodePath("Skeleton2"): 21,
+NodePath("Skeleton3"): 22,
+NodePath("Skeleton4"): 23
 }
 
 [node name="Slime" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
@@ -184,6 +206,18 @@ weapon = null
 
 [node name="Slime3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(4168.0, 4648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e9")
+weapon = null
+
+[node name="Slime4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(2968.0, 4648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e9")
+weapon = null
+
+[node name="Slime5" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(5368.0, 4648.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e9")
 weapon = null
@@ -206,6 +240,18 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e10")
 weapon = null
 
+[node name="GutterBat4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(2968.0, 3208.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e10")
+weapon = null
+
+[node name="GutterBat5" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(5368.0, 3208.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e10")
+weapon = null
+
 [node name="AcidOoze" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(1768.0, 1608.0)
 debug_draw_ranges = false
@@ -218,8 +264,32 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e11")
 weapon = null
 
+[node name="AcidOoze3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4168.0, 2248.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e11")
+weapon = null
+
+[node name="AcidOoze4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(2968.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e11")
+weapon = null
+
 [node name="Zombie" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(4168.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e12")
+weapon = null
+
+[node name="Zombie2" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(1912.0, 2424.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e12")
+weapon = null
+
+[node name="Zombie3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(6104.0, 2040.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e12")
 weapon = null
@@ -236,6 +306,12 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e13")
 weapon = null
 
+[node name="Crawler3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4168.0, 3848.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
 [node name="Skeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(2984.0, 3480.0)
 debug_draw_ranges = false
@@ -244,6 +320,18 @@ weapon = null
 
 [node name="Skeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
 position = Vector2(5544.0, 3432.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
+[node name="Skeleton3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(1768.0, 3928.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
+[node name="Skeleton4" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(6568.0, 3928.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e14")
 weapon = null
