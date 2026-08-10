@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cadaarrowhead01"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_adamant_arrowheads.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Adamant Arrowheads"
+item_icon = ExtResource("1_icon")
+description = "Green-tinged adamant tips that punch through plate."
+holdable = false
+can_trade = true
+vendor_value = 13
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"adamant_arrowheads"
+metadata/id = 259

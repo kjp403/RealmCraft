@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786204421
-next_id = 259
+version = 1786356000
+next_id = 262
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -1072,6 +1072,21 @@ entries = Array[Dictionary]([{
 &"id": 249,
 &"path": "res://source/common/gameplay/items/chests/gold_pink_large.tres",
 &"slug": &"gold_pink_large"
+}, {
+&"hash": "99a0ff050108d78cd69983e95a183eae69b28f47d3a5ed7a8b1f2101effed322",
+&"id": 259,
+&"path": "res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres",
+&"slug": &"adamant_arrowheads"
+}, {
+&"hash": "5d9974d83245563f959a4ad875f92ddf0d4e351c58d46f280bd58a756bf6fb58",
+&"id": 260,
+&"path": "res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres",
+&"slug": &"mithril_arrowheads"
+}, {
+&"hash": "2318006f2fdd57b7c2cf0696eb0b4ed706f7221d8aeb7efedc98b68b0a7055a2",
+&"id": 261,
+&"path": "res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres",
+&"slug": &"runite_arrowheads"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

@@ -60,12 +60,17 @@ script = ExtResource("1_hxcw4")
 
 [node name="PeekFeed" type="VBoxContainer" parent="." unique_id=2093161680]
 visible = false
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
 offset_left = 10.0
-offset_top = 10.0
+offset_top = -205.0
 offset_right = 310.0
-offset_bottom = 205.0
+offset_bottom = -10.0
+grow_vertical = 0
 mouse_filter = 0
+alignment = 2
 
 [node name="MessageDisplay" type="RichTextLabel" parent="PeekFeed" unique_id=1999926943]
 custom_minimum_size = Vector2(300, 125)

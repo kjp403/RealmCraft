@@ -20,6 +20,12 @@
 [ext_resource type="Resource" uid="uid://1lvvopw0erqjg" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_arr"]
 [ext_resource type="Resource" uid="uid://1iiaqnhrs3xsd" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_arr"]
 [ext_resource type="Resource" uid="uid://3f1wcpqzydqkt" path="res://source/common/gameplay/items/materials/metals/steel_arrowheads.tres" id="32_st_arr"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="15_mi_bar"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="16_ad_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="17_ru_bar"]
+[ext_resource type="Resource" uid="uid://cmitharrowhead1" path="res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres" id="33_mi_arr"]
+[ext_resource type="Resource" uid="uid://cadaarrowhead01" path="res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres" id="34_ad_arr"]
+[ext_resource type="Resource" uid="uid://crunarrowhead01" path="res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres" id="35_ru_arr"]
 [ext_resource type="Resource" uid="uid://vg35b9ctogly" path="res://source/common/gameplay/items/gears/jewelry/silver_necklace.tres" id="40_ag_neck"]
 [ext_resource type="Resource" uid="uid://11c0mdf16j8or" path="res://source/common/gameplay/items/gears/jewelry/silver_ring.tres" id="41_ag_ring"]
 [ext_resource type="Resource" uid="uid://2134ru3aty4tm" path="res://source/common/gameplay/items/gears/jewelry/silver_amulet.tres" id="42_ag_amu"]
@@ -244,6 +250,39 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_arr")])
 required_level = 15
 xp_reward = 40
 
+[sub_resource type="Resource" id="I_mi_arr"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+
+[sub_resource type="Resource" id="R_mi_arr"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("33_mi_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_arr")])
+required_level = 20
+xp_reward = 55
+
+[sub_resource type="Resource" id="I_ad_arr"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+
+[sub_resource type="Resource" id="R_ad_arr"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("34_ad_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_arr")])
+required_level = 30
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_ru_arr"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+
+[sub_resource type="Resource" id="R_ru_arr"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("35_ru_arr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_arr")])
+required_level = 45
+xp_reward = 90
+
 [sub_resource type="Resource" id="I_ag_neck"]
 script = ExtResource("3_ingred")
 item = ExtResource("13_ag_bar")
@@ -369,4 +408,4 @@ xp_reward = 130
 script = ExtResource("2_station")
 station_name = "Smithing Table"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])

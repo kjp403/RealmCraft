@@ -2,6 +2,10 @@ class_name LevelUpFx
 ## Shared level-up ceremony: fireworks above the character, the level-up jingle,
 ## and "Your [skill] level has achieved [#]". Call from any client path that
 ## detects a character / profession level gain.
+##
+## The announcement rides the toast lane and the chat log only. The old
+## centre-screen "Level up!" banner was removed — it duplicated both of those
+## and buried the middle of the screen while gathering.
 
 
 const FIREWORKS_TEX: Texture2D = preload("res://assets/sprites/vfx/level_up/fireworks.png")
@@ -12,9 +16,7 @@ const COLS: int = 8
 const FRAME_COUNT: int = 40
 ## Seconds per frame (~2.0s total at 40 frames).
 const FRAME_DURATION: float = 0.05
-## Center-screen banner dwell — long enough to read while gathering.
-const BANNER_DURATION: float = 8.0
-## Corner toast dwell (backup lane if the banner is missed).
+## Toast dwell — long enough to read while gathering.
 const TOAST_DURATION: float = 6.0
 
 static var _frames: SpriteFrames
@@ -22,7 +24,7 @@ static var _frames: SpriteFrames
 
 ## Celebrate a level-up on [param player]. [param skill_label] is the display
 ## name ("Mining", "Combat", "Crafting", ...). [param level] is the new level.
-## VFX plays for any visible player; jingle + banner only fire for the local one.
+## VFX plays for any visible player; jingle + toast only fire for the local one.
 static func celebrate(player: Player, skill_label: String, level: int) -> void:
 	if not GameMode.is_client() or player == null or not is_instance_valid(player):
 		return
@@ -41,14 +43,8 @@ static func celebrate(player: Player, skill_label: String, level: int) -> void:
 			label = "skill"
 		var msg: String = "Your %s level has achieved %d" % [label, level]
 		# Cut any still-playing level-up jingle, then restart — rapid multi-levels
-		# must not stack the audio. Keyed banner replaces itself so the text
-		# refreshes to the newest skill/level instead of queuing.
+		# must not stack the audio.
 		UISound.play_levelup()
-		Announcer.announce(
-			"Level up!",
-			msg,
-			{"sfx": "", "sound": false, "duration": BANNER_DURATION, "key": "level_up"},
-		)
 		Toaster.toast(msg, TOAST_DURATION)
 		_echo_game_message(msg)
 		if player.has_method("shake_camera"):

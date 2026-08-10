@@ -43,8 +43,17 @@ extends Resource
 ## extraction_damage.
 @export var extraction_hp: int = 3
 ## Yields each player can take before THEIR pool depletes. Independent per player.
+## With [member min_charges] set this is the TOP of the random roll.
 @export var max_charges: int = 3
+## Bottom of the random pool roll. When > 0 (and below [member max_charges]) the
+## node hands each player a fresh random pool size in
+## [code][min_charges, max_charges][/code] every time it fills, and skips the
+## per-charge trickle regen — the vein simply runs until it is mined out, then
+## respawns after [member depleted_recharge_seconds] with a new roll.
+## 0 = fixed pool of [member max_charges] with trickle regen (trees, fishing).
+@export var min_charges: int = 0
 ## Continuous regen while at least 1 charge remains for that player: +1 every X sec.
+## Ignored by nodes with a random pool ([member min_charges] > 0).
 @export var charge_regen_seconds: float = 12.0
 ## Recharge time after a player's pool hits 0. Longer than continuous regen,
 ## refills ALL of that player's charges at once.
