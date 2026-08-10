@@ -1,0 +1,1106 @@
+[
+  {
+    "slug": "trpg_archer",
+    "display_name": "Archer",
+    "anims": {
+      "attack": {
+        "file": "trpg_archer_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_archer_special.png",
+        "frames": 12,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_archer_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_archer_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_archer_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_archer_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_armored_axeman",
+    "display_name": "Armored Axeman",
+    "anims": {
+      "attack": {
+        "file": "trpg_armored_axeman_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_armored_axeman_special.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_armored_axeman_attack_3.png",
+        "frames": 12,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_armored_axeman_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_armored_axeman_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_armored_axeman_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_armored_axeman_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_armored_orc",
+    "display_name": "Armored Orc",
+    "anims": {
+      "attack": {
+        "file": "trpg_armored_orc_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_armored_orc_special.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_armored_orc_attack_3.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "block": {
+        "file": "trpg_armored_orc_block.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_armored_orc_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_armored_orc_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_armored_orc_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_armored_orc_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_armored_skeleton",
+    "display_name": "Armored Skeleton",
+    "anims": {
+      "attack": {
+        "file": "trpg_armored_skeleton_attack.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_armored_skeleton_special.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_armored_skeleton_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_armored_skeleton_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_armored_skeleton_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_armored_skeleton_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_bat",
+    "display_name": "Bat",
+    "anims": {
+      "attack": {
+        "file": "trpg_bat_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_bat_special.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_bat_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_bat_walk.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_bat_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_bat_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_elite_orc",
+    "display_name": "Elite Orc",
+    "anims": {
+      "attack": {
+        "file": "trpg_elite_orc_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_elite_orc_special.png",
+        "frames": 11,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_elite_orc_attack_3.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_elite_orc_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_elite_orc_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_elite_orc_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_elite_orc_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_greatsword_skeleton",
+    "display_name": "Greatsword Skeleton",
+    "anims": {
+      "attack": {
+        "file": "trpg_greatsword_skeleton_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_greatsword_skeleton_special.png",
+        "frames": 12,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_greatsword_skeleton_attack_3.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_greatsword_skeleton_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_greatsword_skeleton_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_greatsword_skeleton_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_greatsword_skeleton_walk.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_knight",
+    "display_name": "Knight",
+    "anims": {
+      "attack": {
+        "file": "trpg_knight_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_knight_special.png",
+        "frames": 10,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_knight_attack_3.png",
+        "frames": 11,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "block": {
+        "file": "trpg_knight_block.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_knight_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_knight_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_knight_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_knight_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_knight_templar",
+    "display_name": "Knight Templar",
+    "anims": {
+      "attack": {
+        "file": "trpg_knight_templar_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_knight_templar_special.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_knight_templar_attack_3.png",
+        "frames": 11,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "block": {
+        "file": "trpg_knight_templar_block.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_knight_templar_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_knight_templar_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_knight_templar_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_knight_templar_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_lancer",
+    "display_name": "Lancer",
+    "anims": {
+      "attack": {
+        "file": "trpg_lancer_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_lancer_special.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_lancer_attack_3.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_lancer_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_lancer_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_lancer_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_lancer_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_necromancer",
+    "display_name": "Necromancer",
+    "anims": {
+      "attack": {
+        "file": "trpg_necromancer_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_necromancer_special.png",
+        "frames": 10,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_necromancer_death.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_necromancer_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_necromancer_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_necromancer_walk.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_orc",
+    "display_name": "Orc",
+    "anims": {
+      "attack": {
+        "file": "trpg_orc_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_orc_special.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_orc_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_orc_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_orc_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_orc_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_orc_rider",
+    "display_name": "Orc rider",
+    "anims": {
+      "attack": {
+        "file": "trpg_orc_rider_attack.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_orc_rider_special.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_orc_rider_attack_3.png",
+        "frames": 11,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "block": {
+        "file": "trpg_orc_rider_block.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_orc_rider_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_orc_rider_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_orc_rider_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_orc_rider_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_priest",
+    "display_name": "Priest",
+    "anims": {
+      "attack": {
+        "file": "trpg_priest_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_priest_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_priest_special.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_priest_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_priest_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_priest_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_skeleton",
+    "display_name": "Skeleton",
+    "anims": {
+      "attack": {
+        "file": "trpg_skeleton_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_skeleton_special.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "block": {
+        "file": "trpg_skeleton_block.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_skeleton_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_skeleton_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_skeleton_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_skeleton_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_skeleton_archer",
+    "display_name": "Skeleton Archer",
+    "anims": {
+      "attack": {
+        "file": "trpg_skeleton_archer_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_skeleton_archer_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_skeleton_archer_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_skeleton_archer_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_skeleton_archer_special.png",
+        "frames": 5,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_skeleton_archer_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_slime",
+    "display_name": "Slime",
+    "anims": {
+      "attack": {
+        "file": "trpg_slime_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_slime_special.png",
+        "frames": 12,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_slime_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_slime_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_slime_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_slime_walk.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_soldier",
+    "display_name": "Soldier",
+    "anims": {
+      "attack": {
+        "file": "trpg_soldier_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_soldier_special.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_soldier_attack_3.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_soldier_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_soldier_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_soldier_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_soldier_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_swordsman",
+    "display_name": "Swordsman",
+    "anims": {
+      "attack": {
+        "file": "trpg_swordsman_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_swordsman_special.png",
+        "frames": 15,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_swordsman_attack_3.png",
+        "frames": 12,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_swordsman_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_swordsman_hurt.png",
+        "frames": 5,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_swordsman_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_swordsman_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_werebear",
+    "display_name": "Werebear",
+    "anims": {
+      "attack": {
+        "file": "trpg_werebear_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_werebear_special.png",
+        "frames": 13,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "attack_3": {
+        "file": "trpg_werebear_attack_3.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_werebear_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_werebear_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_werebear_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_werebear_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_werewolf",
+    "display_name": "Werewolf",
+    "anims": {
+      "attack": {
+        "file": "trpg_werewolf_attack.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_werewolf_special.png",
+        "frames": 13,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_werewolf_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_werewolf_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_werewolf_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_werewolf_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_wizard",
+    "display_name": "Wizard",
+    "anims": {
+      "attack": {
+        "file": "trpg_wizard_attack.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_wizard_special.png",
+        "frames": 9,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_wizard_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_wizard_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_wizard_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_wizard_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_blood_monster_a",
+    "display_name": "Blood Monster_A",
+    "anims": {
+      "attack": {
+        "file": "trpg_blood_monster_a_attack.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_blood_monster_a_special.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_blood_monster_a_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_blood_monster_a_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_blood_monster_a_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_blood_monster_a_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  },
+  {
+    "slug": "trpg_demon_a",
+    "display_name": "Demon_A",
+    "anims": {
+      "attack": {
+        "file": "trpg_demon_a_attack.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "special": {
+        "file": "trpg_demon_a_special.png",
+        "frames": 7,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "death": {
+        "file": "trpg_demon_a_death.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "hurt": {
+        "file": "trpg_demon_a_hurt.png",
+        "frames": 4,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "idle": {
+        "file": "trpg_demon_a_idle.png",
+        "frames": 6,
+        "frame_w": 100,
+        "frame_h": 100
+      },
+      "walk": {
+        "file": "trpg_demon_a_walk.png",
+        "frames": 8,
+        "frame_w": 100,
+        "frame_h": 100
+      }
+    }
+  }
+]

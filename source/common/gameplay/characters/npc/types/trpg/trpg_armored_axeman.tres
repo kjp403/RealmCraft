@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="EnemyTypeResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_vivky"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_25rxd"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_xyi35"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_mioib"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_armored_axeman.tres" id="5_trxfv"]
+
+[resource]
+script = ExtResource("4_mioib")
+enemy_type = &"trpg_armored_axeman"
+display_name = "Armored Axeman"
+skin = ExtResource("5_trxfv")
+visual_scale = 1.0
+is_boss = false
+max_health = 80.0
+attack_damage = 8.0
+attack_cooldown = 1.4
+armor = 0.0
+mr = 0.0
+behaviors = Array[ExtResource("2_25rxd")]([])
+attacks = Array[ExtResource("1_vivky")]([])
+move_speed = 70
+distance_to_attack = 22
+max_distance_from_spawn = 260
+leashes = true
+detection_radius = 120
+chase_on_area = false
+is_lone = true
+wander_radius = 48.0
+wander_pause_min_s = 1.5
+wander_pause_max_s = 4.0
+xp_reward = 10
+respawn_delay = 12.0
+respawns = true
+loot = Array[ExtResource("3_xyi35")]([])
+enrage_health_fraction = 0.5
+slam_radius = 110.0
+slam_windup_s = 1.1
+slam_damage = 45.0
+slam_interval_s = 6.0
+enraged_slam_interval_s = 3.5
+add_enemy_slug = &"rat_base"
+add_count = 2
+add_spread_px = 48.0
+enrage_speed_mult = 1.3
+laser_range = 0.0
+laser_width = 28.0
+laser_windup_s = 1.15
+laser_damage = 55.0
+laser_interval_s = 8.0
+enraged_laser_interval_s = 5.0
+arm_shot_interval_s = 0.0
+arm_shot_damage = 40.0
+arm_shot_speed = 220.0
+arm_shot_lifetime_s = 1.4
+enraged_arm_shot_interval_s = 0.0
+ornate_chest_top_min = 0
+ornate_chest_top_max = 0
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+metadata/slug = &"trpg_armored_axeman"
+metadata/id = 43
