@@ -38,6 +38,11 @@ func data_request_handler(
 	if quest.min_level > 0 and resource.level < quest.min_level:
 		return {"ok": false, "reason": "level"}
 
+	# Profession-skill gate (gathering/crafting quests gate on the job, not on
+	# combat level). Same fail-closed shape as the level gate above.
+	if not quest.meets_skill_gate(resource):
+		return {"ok": false, "reason": "skill"}
+
 	# Prerequisite gate (quest chains + the wardstone-flag seam). The giver list
 	# shows unmet quests as locked rows with no Accept, but enforce here too so
 	# a stale menu can't accept early.
