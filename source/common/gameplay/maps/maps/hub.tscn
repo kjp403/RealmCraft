@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="7_aris3"]
 [ext_resource type="Resource" uid="uid://c0xqjh15bmdkm" path="res://source/common/gameplay/maps/instance/instance_collection/building/guild_house.tres" id="8_m02lb"]
 [ext_resource type="Resource" uid="uid://c0m2t2hjlih2p" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres" id="12_sgxfe"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/mining_cave.tres" id="12_mining"]
 [ext_resource type="Resource" uid="uid://dicfbsg4ycah2" path="res://source/common/gameplay/characters/npc/npcs/foreman.tres" id="13_anjaa"]
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="14_banker"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="16_da30u"]
@@ -558,6 +559,14 @@ destination_label = "Goblin Woodland"
 target_instance = ExtResource("12_sgxfe")
 warper_id = 23
 target_id = 23
+
+[node name="MiningCavePortal" parent="Warpers" unique_id=686472753 instance=ExtResource("29_2sqao")]
+position = Vector2(120, -336)
+portal_color = Color(0.35, 0.75, 1.0, 1)
+destination_label = "Mining Cave"
+target_instance = ExtResource("12_mining")
+warper_id = 25
+target_id = 30
 
 [node name="DesertPortal" parent="Warpers" unique_id=151131626 instance=ExtResource("29_2sqao")]
 position = Vector2(992, -48)
