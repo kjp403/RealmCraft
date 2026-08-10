@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rf_catacombs/torch_strip.png" id="1_jqaei"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8kf7a"]
+atlas = ExtResource("1_jqaei")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ubhew"]
+atlas = ExtResource("1_jqaei")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3icym"]
+atlas = ExtResource("1_jqaei")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tjq4r"]
+atlas = ExtResource("1_jqaei")
+region = Rect2(48, 0, 16, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8kf7a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ubhew")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3icym")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tjq4r")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.333333333333334
+}]
