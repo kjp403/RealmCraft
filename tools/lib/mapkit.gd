@@ -361,7 +361,8 @@ static func paint_rim(
 ) -> void:
 	for cell: Vector2i in void_mask.keys():
 		blocked[cell] = true
-	# South face occupies the two rows under the bottom edge of the void.
+	# South face occupies the rows under the bottom edge of the void. Packs whose
+	# walls sit inside their own cell use face_rows = 0 and skip this entirely.
 	for cell: Vector2i in void_mask.keys():
 		if void_mask.has(cell + Vector2i.DOWN):
 			continue
@@ -399,7 +400,7 @@ static func paint_rim(
 			atlas = diag if diag != Vector2i(-1, -1) else _pick(spec.fill, cell, 15)
 		layer.set_cell(cell, spec.source, atlas)
 
-		if down:
+		if down and spec.face_rows >= 1:
 			var face_atlas: Vector2i = _pick(spec.s_face, cell, 16)
 			var base_atlas: Vector2i = _pick(spec.s_base, cell, 17)
 			if left:
