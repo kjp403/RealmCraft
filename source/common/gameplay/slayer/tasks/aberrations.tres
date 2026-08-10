@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://db7i2tyckayyx"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Aberrations"
+enemy_types = Array[StringName]([&"trpg_acid_ooze", &"trpg_slime", &"trpg_carrion_crawler", &"trpg_intellect_devourer", &"trpg_poisonous_gorgon", &"trpg_lacerating_cockatrice", &"trpg_clawing_harpy", &"trpg_fog_giant", &"trpg_wretched_fomorian", &"trpg_blood_monster_a", &"trpg_demon_a"])
+min_slayer_level = 80
+xp_per_kill = 117
+guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned — the endgame Slayer bracket (80-99)."

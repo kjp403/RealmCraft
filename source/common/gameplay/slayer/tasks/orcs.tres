@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://c8wewe177nb0j"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Orcs"
+enemy_types = Array[StringName]([&"orc", &"orc_rogue"])
+min_slayer_level = 15
+xp_per_kill = 25
+guide_notes = "Hard-hitting melee with real hit points behind them — bring healing. Orc Leader does NOT count toward this task."

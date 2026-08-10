@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://dp7e3nyq2kenn"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Fungal Creatures"
+enemy_types = Array[StringName]([&"sporeling", &"puffcap", &"spore_swarm", &"myconid_brute"])
+min_slayer_level = 5
+xp_per_kill = 10
+guide_notes = "The fungus cave's non-boss residents. Spore swarms die in a hit or two but poison on burst — keep a cure or just outrange them."

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://d9vrlusj0yewe"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Skeletons"
+enemy_types = Array[StringName]([&"skeleton", &"skeleton_warrior", &"skeleton_rogue"])
+min_slayer_level = 10
+xp_per_kill = 20
+guide_notes = "No poison, no magic to worry about — just steady melee damage. A reliable task to level combat and Slayer side by side."

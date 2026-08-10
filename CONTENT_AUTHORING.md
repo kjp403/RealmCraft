@@ -53,6 +53,7 @@ Scripts under `source/common/gameplay/characters/npc/interactions/`:
 | `ShopInteraction` | `shop_interaction.gd` | `shop` → `ShopResource` |
 | `DialogueInteraction` | `dialogue_interaction.gd` | `lines` (`Array[String]`, one page each), optional `label_override` |
 | `QuestInteraction` | `quest_interaction.gd` | `quests` → `Array[QuestResource]` |
+| `SlayerInteraction` | `slayer_interaction.gd` | `master` → `SlayerMasterResource` (from `source/common/gameplay/slayer/masters/`) |
 | Base | `npc_interaction.gd` | optional `label_override`, `icon_override` on every interaction |
 
 Also available: `wardrobe_interaction.gd`, `name_change_interaction.gd`, `attribute_reset_interaction.gd`, `dungeon_interaction.gd`, `menu_interaction.gd`.

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://bbrl34bnx7p58"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Mercenary Company"
+enemy_types = Array[StringName]([&"trpg_soldier", &"trpg_swordsman", &"trpg_archer", &"trpg_lancer", &"trpg_knight", &"trpg_knight_templar", &"trpg_armored_axeman", &"trpg_priest", &"trpg_wizard"])
+min_slayer_level = 75
+xp_per_kill = 91
+guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned. Named to avoid clashing with the existing royal_* guard faction."

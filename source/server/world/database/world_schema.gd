@@ -42,6 +42,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 11:
 		_migration_v11(db)
 		_set_schema_version(db, 11)
+	if version < 12:
+		_migration_v12(db)
+		_set_schema_version(db, 12)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -256,6 +259,15 @@ static func _migration_v10(db: SQLite) -> void:
 static func _migration_v11(db: SQLite) -> void:
 	if not _column_exists(db, "players", "bank_json"):
 		db.query("ALTER TABLE players ADD COLUMN bank_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v12: Slayer skill state (docs/slayer_skill.md) — current task, points, streak,
+## lifetime completions, and blocked task slugs, bundled into one JSON blob the
+## same way dailies_json bundles daily_quests + dailies_refresh_at_ms. ADD
+## COLUMN — no DB wipe.
+static func _migration_v12(db: SQLite) -> void:
+	if not _column_exists(db, "players", "slayer_json"):
+		db.query("ALTER TABLE players ADD COLUMN slayer_json TEXT NOT NULL DEFAULT '{}';")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

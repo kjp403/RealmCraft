@@ -129,6 +129,25 @@ const HEALTH_PER_LEVEL: float = 5.0
 @export var daily_quests: Array
 @export var dailies_refresh_at_ms: int
 
+## Slayer: the currently assigned task, or {} for none. Shape:
+## {"task": String (SlayerTaskDef slug), "master": String (SlayerMasterResource
+## slug), "remaining": int, "assigned_amount": int}. See SlayerTaskService.
+@export var current_slayer_task: Dictionary = {}
+## Account-wide Slayer reward points. Spent on skips (paid masters), blocks, and
+## eventually the Slayer Shop — never an inventory item, same reasoning as
+## lb_stats: it can't be traded, dropped, or duped.
+@export var slayer_points: int = 0
+## Consecutive tasks completed WITHOUT a Turael-style free reassignment breaking
+## the chain. Drives the OSRS streak-milestone point bonus (SlayerTaskService).
+@export var slayer_streak: int = 0
+## Lifetime completed-task counter. Unlike slayer_streak this never resets — kept
+## for a future "Slayer log" / milestone titles, same role lb_stats' *_total
+## counters play for combat.
+@export var slayer_tasks_completed: int = 0
+## task_id (SlayerTaskDef slug) -> true. Permanently blocked tasks (never
+## assigned). Reserved for the Slayer Shop; empty until that ships.
+@export var slayer_blocked_tasks: Dictionary = {}
+
 ## Soft dungeon lockout: dungeon_name -> unix-SECONDS of the last completion
 ## reward. A clear within the dungeon's lockout window grants no reward (you can
 ## still run it to help a group). Persisted as dungeon_lockouts_json.

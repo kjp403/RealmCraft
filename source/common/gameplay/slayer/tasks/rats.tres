@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://d466xhrkpy7o6"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Rats"
+enemy_types = Array[StringName]([&"rat_base", &"woodland_rat"])
+min_slayer_level = 1
+xp_per_kill = 8
+guide_notes = "The first assignment every Slayer walks away with. Rats spawn in the castle yard and the woodland edge — no detour needed, just start swinging."

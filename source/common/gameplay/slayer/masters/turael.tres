@@ -1,0 +1,62 @@
+[gd_resource type="Resource" script_class="SlayerMasterResource" format=3 uid="uid://coqpl4tricui5"]
+
+[ext_resource type="Script" uid="uid://daoxrav1scyiz" path="res://source/common/gameplay/slayer/slayer_master_resource.gd" id="1_master"]
+[ext_resource type="Script" uid="uid://bt75msaup4s48" path="res://source/common/gameplay/slayer/slayer_master_task_entry.gd" id="2_entry"]
+[ext_resource type="Resource" uid="uid://d466xhrkpy7o6" path="res://source/common/gameplay/slayer/tasks/rats.tres" id="3_rats"]
+[ext_resource type="Resource" uid="uid://cj8zotf94cazx" path="res://source/common/gameplay/slayer/tasks/wolves.tres" id="4_wolves"]
+[ext_resource type="Resource" uid="uid://b6vtn6cnuz67f" path="res://source/common/gameplay/slayer/tasks/goblins.tres" id="5_goblins"]
+[ext_resource type="Resource" uid="uid://dp7e3nyq2kenn" path="res://source/common/gameplay/slayer/tasks/fungus.tres" id="6_fungus"]
+[ext_resource type="Resource" uid="uid://d9vrlusj0yewe" path="res://source/common/gameplay/slayer/tasks/skeletons.tres" id="7_skeletons"]
+[ext_resource type="Resource" uid="uid://bb2g5t0x8hj8j" path="res://source/common/gameplay/slayer/tasks/bandits.tres" id="8_bandits"]
+
+[sub_resource type="Resource" id="Entry_rats"]
+script = ExtResource("2_entry")
+task = ExtResource("3_rats")
+weight = 10
+min_amount = 15
+max_amount = 30
+
+[sub_resource type="Resource" id="Entry_wolves"]
+script = ExtResource("2_entry")
+task = ExtResource("4_wolves")
+weight = 9
+min_amount = 15
+max_amount = 25
+
+[sub_resource type="Resource" id="Entry_goblins"]
+script = ExtResource("2_entry")
+task = ExtResource("5_goblins")
+weight = 9
+min_amount = 15
+max_amount = 30
+
+[sub_resource type="Resource" id="Entry_fungus"]
+script = ExtResource("2_entry")
+task = ExtResource("6_fungus")
+weight = 8
+min_amount = 15
+max_amount = 25
+
+[sub_resource type="Resource" id="Entry_skeletons"]
+script = ExtResource("2_entry")
+task = ExtResource("7_skeletons")
+weight = 7
+min_amount = 15
+max_amount = 30
+
+[sub_resource type="Resource" id="Entry_bandits"]
+script = ExtResource("2_entry")
+task = ExtResource("8_bandits")
+weight = 7
+min_amount = 15
+max_amount = 25
+
+[resource]
+script = ExtResource("1_master")
+master_name = "Turael"
+greeting = "No task is too small for me, and none too large that you must keep it. Ask, and I will send you after something new whenever you like — I ask nothing for it, and give nothing but the doing."
+min_slayer_level = 1
+base_points_per_task = 0
+free_reassign = true
+reassign_point_cost = 0
+pool = Array[ExtResource("2_entry")]([SubResource("Entry_rats"), SubResource("Entry_wolves"), SubResource("Entry_goblins"), SubResource("Entry_fungus"), SubResource("Entry_skeletons"), SubResource("Entry_bandits")])

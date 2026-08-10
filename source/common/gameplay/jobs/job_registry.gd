@@ -17,6 +17,11 @@ static var JOBS: Dictionary[StringName, JobPerks] = {
 	&"smithing": preload("res://source/common/gameplay/jobs/smithing.tres"),
 	&"outfitting": preload("res://source/common/gameplay/jobs/outfitting.tres"),
 	&"cooking": preload("res://source/common/gameplay/jobs/cooking.tres"),
+	# Combat skill, not gathering/crafting — reuses this same registry purely for
+	# its xp curve + perk-point plumbing (SkillXp, PlayerResource.skills). See
+	# docs/slayer_skill.md. category == &"combat" is new; the Jobs UI's
+	# gathering/crafting bucketing needs a third bucket to show it.
+	&"slayer": preload("res://source/common/gameplay/jobs/slayer.tres"),
 }
 
 
