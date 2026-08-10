@@ -469,14 +469,33 @@ func _build_desert() -> void:
 # AAA authored halls: discrete rooms + short links (scaled from 64×48 polish).
 # Do NOT merge everything into one plaza — solid rock between chambers is the look.
 
-func _paint_lava_rect(ground: TileMapLayer, walk: Dictionary, a: Vector2i, b: Vector2i, lavas: Array, source: int = 0) -> void:
-	for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):
-		for x in range(mini(a.x, b.x), maxi(a.x, b.x) + 1):
+func _paint_lava_rect(
+	ground: TileMapLayer,
+	walk: Dictionary,
+	walls: TileMapLayer,
+	a: Vector2i,
+	b: Vector2i,
+	lavas: Array,
+	source: int = 0
+) -> void:
+	var x0 := mini(a.x, b.x)
+	var x1 := maxi(a.x, b.x)
+	var y0 := mini(a.y, b.y)
+	var y1 := maxi(a.y, b.y)
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
 			var cell := Vector2i(x, y)
 			if not _in_bounds(cell):
 				continue
 			walk.erase(cell)
-			ground.set_cell(cell, source, _pick(lavas, cell))
+			var on_rim := x == x0 or x == x1 or y == y0 or y == y1
+			var atlas: Vector2i = _pick(lavas, cell)
+			# Prefer a slightly textured neighbor for rim so pools aren't a flat stamp.
+			if on_rim and lavas.size() > 0:
+				atlas = Vector2i(atlas.x + 1, atlas.y) if atlas.x < 6 else atlas
+			ground.set_cell(cell, source, atlas)
+			if walls.get_cell_source_id(cell) >= 0:
+				walls.erase_cell(cell)
 
 
 func _build_fire_forge() -> void:
@@ -493,16 +512,16 @@ func _build_fire_forge() -> void:
 	props.tile_set = ts
 	var walk: Dictionary = {}
 
-	# ONE solid floor atlas — mixing plate/edge tiles stripes the whole hall.
-	var floors: Array = [Vector2i(5, 8)]
-	var lavas: Array = [
-		Vector2i(20, 14), Vector2i(20, 15), Vector2i(20, 16), Vector2i(19, 15), Vector2i(21, 15),
-	]
-	var wall_n: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
-	var wall_s: Array = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)]
-	var wall_w: Array = [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]
-	var wall_e: Array = [Vector2i(4, 1), Vector2i(4, 2), Vector2i(4, 3)]
-	var wall_fill: Array = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(1, 2), Vector2i(3, 2)]
+	# ONE solid floor tile from lava pack — mixing platform variants stripes the halls.
+	var floors: Array = [Vector2i(5, 5)]
+	# Solid lava FILL (1,11) — not edge-banded surface tiles (those stack into fake sheet strips).
+	var lavas: Array = [Vector2i(1, 11)]
+	# DG Fire (source 3) — proper 16×16 wall shell, not lava-pack cliff props.
+	var wall_n: Array = [Vector2i(1, 0), Vector2i(2, 0)]
+	var wall_s: Array = [Vector2i(1, 2), Vector2i(2, 2)]
+	var wall_w: Array = [Vector2i(0, 1)]
+	var wall_e: Array = [Vector2i(3, 1)]
+	var wall_fill: Array = [Vector2i(1, 1), Vector2i(2, 1)]
 
 	# Discrete chambers (2× of the polished 64×48 layout) — leave rock between.
 	_carve_rect(walk, Vector2i(44, 68), Vector2i(82, 88))  # staging
@@ -523,86 +542,59 @@ func _build_fire_forge() -> void:
 
 	_paint_floors(ground, walk, floors, 0)
 
-	# Narrow lava troughs INSIDE foundries (framed) + grate bridges
-	_paint_lava_rect(ground, walk, Vector2i(18, 24), Vector2i(22, 38), lavas, 0)
-	_paint_lava_rect(ground, walk, Vector2i(104, 24), Vector2i(108, 38), lavas, 0)
-	_paint_lava_rect(ground, walk, Vector2i(56, 18), Vector2i(70, 20), lavas, 0)
-	# Grate bridges restore connectivity
-	for x in range(18, 23):
-		var cell := Vector2i(x, 30)
-		walk[cell] = true
-		ground.set_cell(cell, 0, Vector2i(8 + _hash(cell) % 2, 6))
-	for x in range(104, 109):
-		var cell2 := Vector2i(x, 30)
-		walk[cell2] = true
-		ground.set_cell(cell2, 0, Vector2i(8 + _hash(cell2) % 2, 6))
-	for x in range(56, 71):
-		var cell3 := Vector2i(x, 19)
-		if x == cx or x == cx - 1 or x == cx + 1:
-			walk[cell3] = true
-			ground.set_cell(cell3, 0, Vector2i(8 + _hash(cell3) % 2, 6))
-	# Accent grates (short runs, not full runways)
-	for cell4 in [
-		Vector2i(24, 28), Vector2i(25, 28), Vector2i(26, 28), Vector2i(27, 28),
-		Vector2i(98, 28), Vector2i(99, 28), Vector2i(100, 28), Vector2i(101, 28),
-		Vector2i(60, 36), Vector2i(61, 36), Vector2i(62, 36),
-		Vector2i(cx - 1, 60), Vector2i(cx, 60), Vector2i(cx + 1, 60),
-	]:
-		if walk.has(cell4):
-			ground.set_cell(cell4, 0, Vector2i(8 + _hash(cell4) % 2, 6))
-
 	_paint_wall_shell(
 		walls, walk, wall_n, wall_s, wall_w, wall_e, wall_fill,
-		Vector2i(0, 0), Vector2i(4, 0), Vector2i(0, 4), Vector2i(4, 4), 0, 2
+		Vector2i(0, 0), Vector2i(3, 0), Vector2i(0, 2), Vector2i(3, 2), 3, 2
 	)
 	_clear_walls_on_walk(walls, walk)
+
+	# Lava AFTER walls so pits don't get brick shells (that looked like sheet stamps).
+	_paint_lava_rect(ground, walk, walls, Vector2i(18, 28), Vector2i(26, 34), lavas, 0)
+	_paint_lava_rect(ground, walk, walls, Vector2i(100, 28), Vector2i(108, 34), lavas, 0)
+	_paint_lava_rect(ground, walk, walls, Vector2i(56, 20), Vector2i(70, 24), lavas, 0)
+	# Stone bridges restore connectivity (same solid floor tile).
+	for x in range(20, 25):
+		var cell := Vector2i(x, 31)
+		walk[cell] = true
+		ground.set_cell(cell, 0, Vector2i(5, 5))
+		if walls.get_cell_source_id(cell) >= 0:
+			walls.erase_cell(cell)
+	for x in range(102, 107):
+		var cell2 := Vector2i(x, 31)
+		walk[cell2] = true
+		ground.set_cell(cell2, 0, Vector2i(5, 5))
+		if walls.get_cell_source_id(cell2) >= 0:
+			walls.erase_cell(cell2)
+	for x in range(56, 71):
+		var cell3 := Vector2i(x, 22)
+		if x == cx or x == cx - 1 or x == cx + 1:
+			walk[cell3] = true
+			ground.set_cell(cell3, 0, Vector2i(5, 5))
+			if walls.get_cell_source_id(cell3) >= 0:
+				walls.erase_cell(cell3)
 
 	var entrance := Vector2i(cx, 84)
 	var portal := Vector2i(cx, 90)
 	var keepout: Array = [entrance, portal, Vector2i(cx, 83), Vector2i(cx, 86)]
 
-	# Sparse wall-adjacent décor (not a spam grid)
-	var decor: Array = [
-		Vector2i(8, 16), Vector2i(9, 16), Vector2i(10, 16), Vector2i(11, 16),
-		Vector2i(12, 16), Vector2i(12, 18), Vector2i(8, 18), Vector2i(10, 18),
-	]
+	# Sparse 16×16 transparent rocks / chests only (source 2 — never opaque sheet cells).
+	var decor: Array = [Vector2i(1, 0), Vector2i(2, 0)]
 	var placed := 0
 	var cells: Array = walk.keys()
 	cells.sort_custom(func(a, b): return _hash(a) < _hash(b))
 	for cell: Vector2i in cells:
-		if placed >= 70:
+		if placed >= 28:
 			break
-		if _hash(cell) % 5 != 0:
+		if _hash(cell) % 7 != 0:
 			continue
-		if _place_prop(props, walk, walls, cell, _pick(decor, cell), 0, keepout, true):
+		if _place_prop(props, walk, walls, cell, _pick(decor, cell), 2, keepout, true):
 			placed += 1
-	# Authored landmarks — statues / anvils / barrels
-	for spot in [Vector2i(24, 24), Vector2i(100, 24), Vector2i(56, 20), Vector2i(68, 20), Vector2i(cx, 28)]:
-		_place_prop(props, walk, walls, spot, Vector2i(12, 18), 0, keepout, false)
-	for spot in [Vector2i(20, 36), Vector2i(104, 36), Vector2i(48, 68), Vector2i(76, 68), Vector2i(30, 48), Vector2i(96, 48)]:
-		_place_prop(props, walk, walls, spot, Vector2i(8, 16), 0, keepout, true)
-	for spot in [Vector2i(28, 20), Vector2i(96, 20), Vector2i(52, 70), Vector2i(72, 70)]:
-		_place_prop(props, walk, walls, spot, Vector2i(15, 6), 0, keepout, true)
-	# Interior support pillars (break empty halls without wall-noise)
-	for spot in [
-		Vector2i(52, 28), Vector2i(76, 28), Vector2i(52, 52), Vector2i(76, 52),
-		Vector2i(28, 32), Vector2i(36, 32), Vector2i(92, 32), Vector2i(100, 32),
-		Vector2i(56, 72), Vector2i(72, 72),
-	]:
-		_place_prop(props, walk, walls, spot, Vector2i(10, 1), 0, keepout, false)
-	# FireSet accents near lava (source 1) — sparse
-	for spot in [Vector2i(24, 30), Vector2i(100, 30), Vector2i(54, 22), Vector2i(72, 22)]:
-		if walk.has(spot) and props.get_cell_source_id(spot) < 0:
-			props.set_cell(spot, 1, Vector2i(_hash(spot) % 3, 4))
-	# DG brick pad accents (source 2)
-	for origin in [Vector2i(32, 42), Vector2i(92, 42)]:
-		if walk.has(origin):
-			props.set_cell(origin, 2, Vector2i(2, 2))
-			if walk.has(origin + Vector2i.RIGHT):
-				props.set_cell(origin + Vector2i.RIGHT, 2, Vector2i(3, 2))
+	# Landmark chests (single 16×16 tile)
+	for spot in [Vector2i(24, 24), Vector2i(100, 24), Vector2i(cx, 28), Vector2i(56, 70), Vector2i(72, 70)]:
+		_place_prop(props, walk, walls, spot, Vector2i(0, 0), 2, keepout, false)
 
 	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83)], "forge spawn")
-	_assert_connected(walk, entrance, [portal, Vector2i(28, 28), Vector2i(100, 28), Vector2i(cx, 24), Vector2i(36, 48), Vector2i(90, 48)], "forge")
+	_assert_connected(walk, entrance, [portal, Vector2i(28, 28), Vector2i(96, 28), Vector2i(cx, 28), Vector2i(36, 48), Vector2i(90, 48)], "forge")
 
 	var decos: Array = []
 	var torch_spots: Array = [
@@ -619,24 +611,11 @@ func _build_fire_forge() -> void:
 		ti += 1
 		decos.append({
 			"name": "ForgeTorch%d" % ti,
-			"frames": "deco_torch",
+			"frames": "deco_forge_torch",
 			"pos": _tile_pos(spot),
-			"scale": 1.6,
-			"light": 1.15,
+			"scale": 1.5,
+			"light": 1.2,
 			"color": "Color(1, 0.45, 0.12, 1)",
-		})
-	var si := 0
-	for spot in [Vector2i(28, 36), Vector2i(96, 36), Vector2i(60, 44), Vector2i(68, 44)]:
-		if not walk.has(spot):
-			continue
-		si += 1
-		decos.append({
-			"name": "HeatSpike%d" % si,
-			"frames": "deco_spike",
-			"pos": _tile_pos(spot),
-			"scale": 1.3,
-			"light": 0.0,
-			"color": "Color(1, 1, 1, 1)",
 		})
 
 	_write_map({
@@ -736,12 +715,14 @@ func _build_sewers() -> void:
 	_fill_enclosed_voids(walk)
 
 	_paint_floors(ground, walk, floors, 0)
-	# Drainage channel through mid hall
+	# Drainage channel through mid hall — visual ONLY.
+	# Never paint wall-fill atlas (6,1)/(7,1) on Ground: those tiles have collision and
+	# created the invisible horizontal walls across the cistern.
 	for x in range(36, 92):
 		for y in [44, 45]:
 			var cell := Vector2i(x, y)
 			if walk.has(cell):
-				ground.set_cell(cell, 0, Vector2i(6 + (x + y) % 2, 1))
+				ground.set_cell(cell, 0, Vector2i(2 + ((x + y) % 3), 2))
 
 	_paint_wall_shell(
 		walls, walk, wall_n, wall_s, wall_w, wall_e, wall_fill,
@@ -754,10 +735,10 @@ func _build_sewers() -> void:
 	var portal := Vector2i(cx, 90)
 	var keepout: Array = [entrance, portal, Vector2i(cx, 83), Vector2i(cx, 86)]
 
-	# Sparse wall décor only
+	# Sparse wall décor only — bones/skulls/slime (never door or hatch tiles).
 	var decor: Array = [
 		Vector2i(4, 6), Vector2i(5, 6), Vector2i(7, 7), Vector2i(8, 6),
-		Vector2i(5, 7), Vector2i(6, 7), Vector2i(0, 8), Vector2i(1, 8),
+		Vector2i(5, 7), Vector2i(9, 6), Vector2i(9, 7),
 	]
 	var placed := 0
 	var cells: Array = walk.keys()
@@ -770,27 +751,15 @@ func _build_sewers() -> void:
 		if _place_prop(props, walk, walls, cell, _pick(decor, cell), 0, keepout, true):
 			placed += 1
 
-	# Doors at chamber mouths only
-	for door in [Vector2i(60, 66), Vector2i(44, 28), Vector2i(80, 28)]:
-		if walk.has(door):
-			props.set_cell(door, 0, Vector2i(6, 6))
-		if walk.has(door + Vector2i.RIGHT):
-			props.set_cell(door + Vector2i.RIGHT, 0, Vector2i(7, 6))
-	# DarkCastle landmarks (source 2) — banners / grates / gargoyles at mouths
+	# DarkCastle landmarks — banners / gargoyles only (no tiny doors / manholes on floor).
 	for spot in [Vector2i(48, 20), Vector2i(76, 20)]:
 		if walk.has(spot):
 			props.set_cell(spot, 2, Vector2i(3, 0))
 			if walk.has(spot + Vector2i.DOWN):
 				props.set_cell(spot + Vector2i.DOWN, 2, Vector2i(3, 1))
-	for spot in [Vector2i(36, 28), Vector2i(92, 28)]:
-		if walk.has(spot):
-			props.set_cell(spot, 2, Vector2i(2, 1))
 	for spot in [Vector2i(28, 36), Vector2i(100, 36)]:
 		if walk.has(spot):
 			props.set_cell(spot, 2, Vector2i(1, 1))
-	for spot in [Vector2i(40, 16), Vector2i(84, 16), Vector2i(cx, 36)]:
-		if walk.has(spot):
-			props.set_cell(spot, 2, Vector2i(2, 3))  # manhole
 	for spot in [Vector2i(24, 20), Vector2i(104, 20)]:
 		if walk.has(spot):
 			props.set_cell(spot, 2, Vector2i(3, 3))  # gargoyle
@@ -802,8 +771,8 @@ func _build_sewers() -> void:
 	]:
 		if walk.has(spot):
 			props.set_cell(spot, 3, Vector2i(10 + _hash(spot) % 4, 10))
-	_place_prop(props, walk, walls, Vector2i(16, 32), Vector2i(0, 8), 0, keepout, true)
-	_place_prop(props, walk, walls, Vector2i(108, 28), Vector2i(1, 8), 0, keepout, true)
+	_place_prop(props, walk, walls, Vector2i(16, 32), Vector2i(8, 6), 0, keepout, true)
+	_place_prop(props, walk, walls, Vector2i(108, 28), Vector2i(7, 7), 0, keepout, true)
 
 	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83), Vector2i(31, 24)], "sewers spawn")
 	_assert_connected(walk, entrance, [portal, Vector2i(24, 24), Vector2i(31, 24), Vector2i(104, 24), Vector2i(cx, 28)], "sewers")
