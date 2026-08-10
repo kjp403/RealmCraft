@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_conjuring_oni/trpg_conjuring_oni_attack.png" id="1_v0ky2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_conjuring_oni/trpg_conjuring_oni_death.png" id="2_5gmhv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_conjuring_oni/trpg_conjuring_oni_idle.png" id="3_jt6cu"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_conjuring_oni/trpg_conjuring_oni_run.png" id="4_3besi"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_conjuring_oni/trpg_conjuring_oni_walk.png" id="5_q6mqo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_32o3x"]
+atlas = ExtResource("1_v0ky2")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7iis3"]
+atlas = ExtResource("1_v0ky2")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lpo3y"]
+atlas = ExtResource("1_v0ky2")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ih5y7"]
+atlas = ExtResource("1_v0ky2")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8i7kr"]
+atlas = ExtResource("2_5gmhv")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xxqts"]
+atlas = ExtResource("2_5gmhv")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lflve"]
+atlas = ExtResource("2_5gmhv")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2vpu"]
+atlas = ExtResource("2_5gmhv")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lrvng"]
+atlas = ExtResource("3_jt6cu")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egpbg"]
+atlas = ExtResource("3_jt6cu")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8if0b"]
+atlas = ExtResource("3_jt6cu")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gf1vd"]
+atlas = ExtResource("3_jt6cu")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_17wbh"]
+atlas = ExtResource("4_3besi")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mfov7"]
+atlas = ExtResource("4_3besi")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y0csi"]
+atlas = ExtResource("4_3besi")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2yck"]
+atlas = ExtResource("4_3besi")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_haevr"]
+atlas = ExtResource("5_q6mqo")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rs7n2"]
+atlas = ExtResource("5_q6mqo")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wkfvj"]
+atlas = ExtResource("5_q6mqo")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qgvca"]
+atlas = ExtResource("5_q6mqo")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_32o3x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7iis3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lpo3y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ih5y7")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8i7kr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xxqts")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lflve")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g2vpu")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lrvng")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egpbg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8if0b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gf1vd")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_17wbh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mfov7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y0csi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2yck")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_haevr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rs7n2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wkfvj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qgvca")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_conjuring_oni"
+metadata/id = 66

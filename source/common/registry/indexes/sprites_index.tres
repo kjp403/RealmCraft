@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ccyyb")
 content_name = &"sprites"
-version = 1786335136
-next_id = 63
+version = 1786335323
+next_id = 78
 entries = Array[Dictionary]([{
 &"hash": "a713957cf45109970dd71e6452edebdcc4b11cad4c3c8326d19d8086dbdf657e",
 &"id": 6,
@@ -307,6 +307,81 @@ entries = Array[Dictionary]([{
 &"id": 62,
 &"path": "res://source/common/gameplay/characters/sprite_frames/trpg_wizard.tres",
 &"slug": &"trpg_wizard"
+}, {
+&"hash": "f4a25af58f5a36aed5c062840d2bef31112c5bb8cac4d30865a26a3c147ce4e8",
+&"id": 63,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_acid_ooze.tres",
+&"slug": &"trpg_acid_ooze"
+}, {
+&"hash": "8c273081a7548bc1b7bfaee408b6a32364c1456503be50812d44857055351117",
+&"id": 64,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_carrion_crawler.tres",
+&"slug": &"trpg_carrion_crawler"
+}, {
+&"hash": "c930d9acb2f13144d8e86fa77572b8bc4cf383845a3dda2f481c26cd5e2ccefc",
+&"id": 65,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_clawing_harpy.tres",
+&"slug": &"trpg_clawing_harpy"
+}, {
+&"hash": "6d44520954bcaa01307dcd74003c64a0f0440679894648ba4ca17512d3412489",
+&"id": 66,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_conjuring_oni.tres",
+&"slug": &"trpg_conjuring_oni"
+}, {
+&"hash": "8703e92c2341eecc975f418bb1b2ac27804f8490fdd39521bc9fbd6cc7f46082",
+&"id": 67,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_crag_yeti.tres",
+&"slug": &"trpg_crag_yeti"
+}, {
+&"hash": "87384a431b1d860b2c1ea76dc96cdcf56fdf98d992a38d592b1e1fb39ca68a93",
+&"id": 68,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_fog_giant.tres",
+&"slug": &"trpg_fog_giant"
+}, {
+&"hash": "bec9ceba285dfac7bcb4a3b9ef030369bb988c5647e3724a9b24ac29dbbdeb8d",
+&"id": 69,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_intellect_devourer.tres",
+&"slug": &"trpg_intellect_devourer"
+}, {
+&"hash": "a8f1d86b122c3f0fa61c7813a1f426ac9f1685c1c6d36c066ffbbafea1bd70c0",
+&"id": 70,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_lacerating_cockatrice.tres",
+&"slug": &"trpg_lacerating_cockatrice"
+}, {
+&"hash": "7943169741e43fd9ee4ef9b669f738a2d194a748801ba4b2a741f70865901803",
+&"id": 71,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_ogre_mage.tres",
+&"slug": &"trpg_ogre_mage"
+}, {
+&"hash": "7dfbeb177f467363abdb0ebc0adfd79f29a2108b34c35551e167d74550a76077",
+&"id": 72,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_poisonous_gorgon.tres",
+&"slug": &"trpg_poisonous_gorgon"
+}, {
+&"hash": "f43d396a6bb3d09b0b062bf3026031812b3c7cfd72ffe2e964f8b8b7470504e5",
+&"id": 73,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_snow_yeti.tres",
+&"slug": &"trpg_snow_yeti"
+}, {
+&"hash": "db067def24aa0e5d3dba39a9792d8fbc6414fce646c38fb3a34ea83bc3fd00ac",
+&"id": 74,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_umber_hulk.tres",
+&"slug": &"trpg_umber_hulk"
+}, {
+&"hash": "5671be6af260cdc10f7b8db7f8a8b27c3fdd131537cef63f1b1b53336ee7484e",
+&"id": 75,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_werewolf_stalker.tres",
+&"slug": &"trpg_werewolf_stalker"
+}, {
+&"hash": "be73554e3793d961a18bfac4e94371d8ce4d8cd40a65c7b9f835b752aafaeec8",
+&"id": 76,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_wretched_fomorian.tres",
+&"slug": &"trpg_wretched_fomorian"
+}, {
+&"hash": "febca4daf115ffdd61672e2303412b4fb8e66ba59da3360590b2bd4b397d8a5f",
+&"id": 77,
+&"path": "res://source/common/gameplay/characters/sprite_frames/trpg_zombie_giant.tres",
+&"slug": &"trpg_zombie_giant"
 }])
 scan_path = "res://source/common/gameplay/characters/sprite_frames"
 filters = PackedStringArray("*.tres", "*.tscn")

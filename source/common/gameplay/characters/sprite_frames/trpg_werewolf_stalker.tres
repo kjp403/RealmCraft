@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_werewolf_stalker/trpg_werewolf_stalker_attack.png" id="1_3tba2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_werewolf_stalker/trpg_werewolf_stalker_death.png" id="2_x5vrt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_werewolf_stalker/trpg_werewolf_stalker_idle.png" id="3_34iil"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_werewolf_stalker/trpg_werewolf_stalker_run.png" id="4_jci44"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_werewolf_stalker/trpg_werewolf_stalker_walk.png" id="5_x4sfc"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbl26"]
+atlas = ExtResource("1_3tba2")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_afrja"]
+atlas = ExtResource("1_3tba2")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_64ldh"]
+atlas = ExtResource("1_3tba2")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4swgj"]
+atlas = ExtResource("1_3tba2")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pswmd"]
+atlas = ExtResource("2_x5vrt")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vswty"]
+atlas = ExtResource("2_x5vrt")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7qito"]
+atlas = ExtResource("2_x5vrt")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7gdic"]
+atlas = ExtResource("2_x5vrt")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xn15j"]
+atlas = ExtResource("3_34iil")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ueyoo"]
+atlas = ExtResource("3_34iil")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ypjuv"]
+atlas = ExtResource("3_34iil")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qu4uj"]
+atlas = ExtResource("3_34iil")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l17tx"]
+atlas = ExtResource("4_jci44")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bh6sj"]
+atlas = ExtResource("4_jci44")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ij3jy"]
+atlas = ExtResource("4_jci44")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rok0e"]
+atlas = ExtResource("4_jci44")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2l6c5"]
+atlas = ExtResource("5_x4sfc")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g6sxm"]
+atlas = ExtResource("5_x4sfc")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0q635"]
+atlas = ExtResource("5_x4sfc")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b0enj"]
+atlas = ExtResource("5_x4sfc")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbl26")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_afrja")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_64ldh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4swgj")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pswmd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vswty")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qito")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7gdic")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xn15j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ueyoo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ypjuv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qu4uj")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l17tx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bh6sj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ij3jy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rok0e")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2l6c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g6sxm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0q635")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b0enj")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_werewolf_stalker"
+metadata/id = 75

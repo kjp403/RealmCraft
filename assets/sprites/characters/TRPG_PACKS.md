@@ -4,6 +4,7 @@ Ready-to-place skins + stub enemy types from:
 
 - Tiny RPG Character Asset Pack 01 (22 characters)
 - Blood Monsters / Demon_A pack (2 characters)
+- Supporter Asset Pack (15 monsters; 16×16 loops upscaled 4× to 64×64)
 
 ## Where things live
 
@@ -28,7 +29,10 @@ Slugs are prefixed `trpg_` so they do not collide with existing `orc` / `skeleto
 ## Re-import
 
 ```bash
-python3 tools/copy_trpg_character_sheets.py   # needs packs extracted under /tmp/asset_packs
+python3 tools/copy_trpg_character_sheets.py   # Tiny RPG + Blood under /tmp/asset_packs
+python3 tools/copy_supporter_monster_sheets.py  # Supporter pack under /tmp/asset_packs/supporter_fresh
 godot --headless --path . --import
 godot --headless --path . -s tools/build_trpg_sprite_frames.gd
 ```
+
+Supporter monsters only ship a short 4-frame loop; `idle` / `walk` / `run` / `attack` reuse it and `death` holds the last frame.

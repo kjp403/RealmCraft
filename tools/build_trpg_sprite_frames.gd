@@ -71,6 +71,14 @@ func _build_one(slug: String, display: String, anims: Dictionary) -> bool:
 		_add_anim(frames, slug, ks, anims[key])
 
 	var skin_path := SPRITES_DIR + slug + ".tres"
+	var prev_skin_id: Variant = null
+	if FileAccess.file_exists(skin_path):
+		var prev_skin: Resource = load(skin_path)
+		if prev_skin != null and prev_skin.has_meta(&"id"):
+			prev_skin_id = prev_skin.get_meta(&"id")
+	frames.set_meta(&"slug", StringName(slug))
+	if prev_skin_id != null:
+		frames.set_meta(&"id", prev_skin_id)
 	var err := ResourceSaver.save(frames, skin_path)
 	if err != OK:
 		push_error("Failed save skin %s: %s" % [skin_path, error_string(err)])
@@ -78,25 +86,34 @@ func _build_one(slug: String, display: String, anims: Dictionary) -> bool:
 	print("skin ", skin_path)
 
 	# Stub enemy type — ready to place later; not spawned on maps.
-	var etype := EnemyTypeResource.new()
+	var type_path := TYPES_DIR + slug + ".tres"
+	var prev_type_id: Variant = null
+	var etype: EnemyTypeResource = null
+	if FileAccess.file_exists(type_path):
+		etype = load(type_path) as EnemyTypeResource
+		if etype != null and etype.has_meta(&"id"):
+			prev_type_id = etype.get_meta(&"id")
+	if etype == null:
+		etype = EnemyTypeResource.new()
+		etype.max_health = 80.0
+		etype.attack_damage = 8.0
+		etype.attack_cooldown = 1.4
+		etype.move_speed = 70
+		etype.distance_to_attack = 22
+		etype.max_distance_from_spawn = 260
+		etype.detection_radius = 120
+		etype.chase_on_area = false
+		etype.is_lone = true
+		etype.wander_radius = 48.0
+		etype.xp_reward = 10
+		etype.respawn_delay = 12.0
 	etype.enemy_type = StringName(slug)
 	etype.display_name = display
 	etype.skin = load(skin_path) as SpriteFrames
-	etype.max_health = 80.0
-	etype.attack_damage = 8.0
-	etype.attack_cooldown = 1.4
-	etype.move_speed = 70
-	etype.distance_to_attack = 22
-	etype.max_distance_from_spawn = 260
-	etype.detection_radius = 120
-	etype.chase_on_area = false
-	etype.is_lone = true
-	etype.wander_radius = 48.0
-	etype.xp_reward = 10
-	etype.respawn_delay = 12.0
 	etype.set_meta(&"slug", StringName(slug))
+	if prev_type_id != null:
+		etype.set_meta(&"id", prev_type_id)
 
-	var type_path := TYPES_DIR + slug + ".tres"
 	err = ResourceSaver.save(etype, type_path)
 	if err != OK:
 		push_error("Failed save type %s: %s" % [type_path, error_string(err)])

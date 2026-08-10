@@ -1102,5 +1102,560 @@
         "frame_h": 100
       }
     }
+  },
+  {
+    "slug": "trpg_acid_ooze",
+    "display_name": "Acid Ooze",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_acid_ooze_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_acid_ooze_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_acid_ooze_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_acid_ooze_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_acid_ooze_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_carrion_crawler",
+    "display_name": "Carrion Crawler",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_carrion_crawler_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_carrion_crawler_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_carrion_crawler_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_carrion_crawler_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_carrion_crawler_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_clawing_harpy",
+    "display_name": "Clawing Harpy",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_clawing_harpy_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_clawing_harpy_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_clawing_harpy_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_clawing_harpy_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_clawing_harpy_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_conjuring_oni",
+    "display_name": "Conjuring Oni",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_conjuring_oni_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_conjuring_oni_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_conjuring_oni_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_conjuring_oni_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_conjuring_oni_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_crag_yeti",
+    "display_name": "Crag Yeti",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_crag_yeti_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_crag_yeti_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_crag_yeti_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_crag_yeti_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_crag_yeti_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_fog_giant",
+    "display_name": "Fog Giant",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_fog_giant_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_fog_giant_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_fog_giant_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_fog_giant_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_fog_giant_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_intellect_devourer",
+    "display_name": "Intellect Devourer",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_intellect_devourer_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_intellect_devourer_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_intellect_devourer_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_intellect_devourer_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_intellect_devourer_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_lacerating_cockatrice",
+    "display_name": "Lacerating Cockatrice",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_lacerating_cockatrice_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_lacerating_cockatrice_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_lacerating_cockatrice_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_lacerating_cockatrice_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_lacerating_cockatrice_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_ogre_mage",
+    "display_name": "Ogre Mage",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_ogre_mage_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_ogre_mage_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_ogre_mage_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_ogre_mage_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_ogre_mage_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_poisonous_gorgon",
+    "display_name": "Poisonous Gorgon",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_poisonous_gorgon_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_poisonous_gorgon_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_poisonous_gorgon_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_poisonous_gorgon_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_poisonous_gorgon_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_snow_yeti",
+    "display_name": "Snow Yeti",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_snow_yeti_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_snow_yeti_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_snow_yeti_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_snow_yeti_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_snow_yeti_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_umber_hulk",
+    "display_name": "Umber Hulk",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_umber_hulk_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_umber_hulk_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_umber_hulk_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_umber_hulk_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_umber_hulk_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_werewolf_stalker",
+    "display_name": "Werewolf Stalker",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_werewolf_stalker_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_werewolf_stalker_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_werewolf_stalker_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_werewolf_stalker_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_werewolf_stalker_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_wretched_fomorian",
+    "display_name": "Wretched Fomorian",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_wretched_fomorian_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_wretched_fomorian_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_wretched_fomorian_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_wretched_fomorian_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_wretched_fomorian_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
+  },
+  {
+    "slug": "trpg_zombie_giant",
+    "display_name": "Zombie Giant",
+    "pack": "supporter",
+    "anims": {
+      "idle": {
+        "file": "trpg_zombie_giant_idle.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "walk": {
+        "file": "trpg_zombie_giant_walk.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "run": {
+        "file": "trpg_zombie_giant_run.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "attack": {
+        "file": "trpg_zombie_giant_attack.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      },
+      "death": {
+        "file": "trpg_zombie_giant_death.png",
+        "frames": 4,
+        "frame_w": 64,
+        "frame_h": 64
+      }
+    }
   }
 ]

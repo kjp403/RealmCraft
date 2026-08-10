@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_wretched_fomorian/trpg_wretched_fomorian_attack.png" id="1_k72u3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_wretched_fomorian/trpg_wretched_fomorian_death.png" id="2_t8xgo"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_wretched_fomorian/trpg_wretched_fomorian_idle.png" id="3_e2gvt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_wretched_fomorian/trpg_wretched_fomorian_run.png" id="4_k3gag"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_wretched_fomorian/trpg_wretched_fomorian_walk.png" id="5_sd0is"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d5dnj"]
+atlas = ExtResource("1_k72u3")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8mu65"]
+atlas = ExtResource("1_k72u3")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jstxg"]
+atlas = ExtResource("1_k72u3")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meelw"]
+atlas = ExtResource("1_k72u3")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o0ywx"]
+atlas = ExtResource("2_t8xgo")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nc0os"]
+atlas = ExtResource("2_t8xgo")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f4mv4"]
+atlas = ExtResource("2_t8xgo")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sg786"]
+atlas = ExtResource("2_t8xgo")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jb21v"]
+atlas = ExtResource("3_e2gvt")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fflpp"]
+atlas = ExtResource("3_e2gvt")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lfloe"]
+atlas = ExtResource("3_e2gvt")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jt6uc"]
+atlas = ExtResource("3_e2gvt")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pistc"]
+atlas = ExtResource("4_k3gag")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rtfn0"]
+atlas = ExtResource("4_k3gag")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4tpca"]
+atlas = ExtResource("4_k3gag")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nc2xv"]
+atlas = ExtResource("4_k3gag")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gygsm"]
+atlas = ExtResource("5_sd0is")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dhchh"]
+atlas = ExtResource("5_sd0is")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vga1u"]
+atlas = ExtResource("5_sd0is")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yhyd2"]
+atlas = ExtResource("5_sd0is")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d5dnj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8mu65")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jstxg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_meelw")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o0ywx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nc0os")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f4mv4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sg786")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jb21v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fflpp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lfloe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jt6uc")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pistc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rtfn0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4tpca")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nc2xv")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gygsm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dhchh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vga1u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yhyd2")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_wretched_fomorian"
+metadata/id = 76

@@ -1,7 +1,8 @@
 extends SceneTree
 func _initialize() -> void:
 	var slugs := [
-		&"trpg_archer", &"trpg_slime", &"trpg_werewolf", &"trpg_blood_monster_a", &"trpg_demon_a", &"trpg_bat"
+		&"trpg_archer", &"trpg_slime", &"trpg_werewolf", &"trpg_blood_monster_a", &"trpg_demon_a", &"trpg_bat",
+		&"trpg_acid_ooze", &"trpg_fog_giant", &"trpg_werewolf_stalker", &"trpg_zombie_giant",
 	]
 	for slug: StringName in slugs:
 		var skin: SpriteFrames = ContentRegistryHub.load_by_slug(&"sprites", slug) as SpriteFrames

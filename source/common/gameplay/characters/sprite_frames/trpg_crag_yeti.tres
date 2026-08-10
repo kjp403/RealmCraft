@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_crag_yeti/trpg_crag_yeti_attack.png" id="1_qr6sg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_crag_yeti/trpg_crag_yeti_death.png" id="2_15ji8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_crag_yeti/trpg_crag_yeti_idle.png" id="3_fxcoc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_crag_yeti/trpg_crag_yeti_run.png" id="4_3wnmr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_crag_yeti/trpg_crag_yeti_walk.png" id="5_da2os"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_md7tg"]
+atlas = ExtResource("1_qr6sg")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dkces"]
+atlas = ExtResource("1_qr6sg")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jso6c"]
+atlas = ExtResource("1_qr6sg")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kagng"]
+atlas = ExtResource("1_qr6sg")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_edsh7"]
+atlas = ExtResource("2_15ji8")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wk5j6"]
+atlas = ExtResource("2_15ji8")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f70c3"]
+atlas = ExtResource("2_15ji8")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jwbr0"]
+atlas = ExtResource("2_15ji8")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uefcl"]
+atlas = ExtResource("3_fxcoc")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n078m"]
+atlas = ExtResource("3_fxcoc")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3fmlx"]
+atlas = ExtResource("3_fxcoc")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xi6rf"]
+atlas = ExtResource("3_fxcoc")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1k5r2"]
+atlas = ExtResource("4_3wnmr")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0u7ps"]
+atlas = ExtResource("4_3wnmr")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fkp8d"]
+atlas = ExtResource("4_3wnmr")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xcruy"]
+atlas = ExtResource("4_3wnmr")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sub54"]
+atlas = ExtResource("5_da2os")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e7td0"]
+atlas = ExtResource("5_da2os")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lym2j"]
+atlas = ExtResource("5_da2os")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onjxf"]
+atlas = ExtResource("5_da2os")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_md7tg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dkces")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jso6c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kagng")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_edsh7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wk5j6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f70c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jwbr0")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uefcl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n078m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3fmlx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xi6rf")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1k5r2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0u7ps")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fkp8d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xcruy")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sub54")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e7td0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lym2j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_onjxf")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_crag_yeti"
+metadata/id = 67
