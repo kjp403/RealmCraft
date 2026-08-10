@@ -1123,9 +1123,10 @@ func _build_sewers_cistern() -> void:
 # =============================================================================
 
 # --- The Bellows Gallery -----------------------------------------------------
-# The working floor above the foundry: two long masonry halls joined by cross
-# bridges, dry and built rather than molten. Uses the DG Fire well rings and the
-# lava sheet's braziers, coal heaps and crystal clusters — all unpainted below.
+# Working floor above the foundry: two masonry halls joined by clear bridges.
+# Mining Cave standard — reserve travel lanes first, place a few authored
+# forge stations (basin + quench well + torch + coal), wall-foot slag only,
+# never scatter unverified atlas cells or decorate lava shores.
 
 func _build_forge_gallery() -> void:
 	_set_size(_N(104), _N(78))
@@ -1154,12 +1155,23 @@ func _build_forge_gallery() -> void:
 		links.append([Vector2i(west, hall_rows[i]), Vector2i(west, hall_rows[i + 1]), _R(2.6), _R(1.8), seed_j])
 		links.append([Vector2i(east, hall_rows[i]), Vector2i(east, hall_rows[i + 1]), _R(2.6), _R(1.8), seed_j + 40])
 		seed_j += 1
-	# Cross bridges between the two halls.
 	for ry in [_N(18), _N(42)]:
 		links.append([Vector2i(west, ry), Vector2i(east, ry), _R(2.0), _R(2.6), seed_j])
 		seed_j += 1
+	# Side alcoves hold the forge basins so the hall spines stay clear travel space.
+	var alcove_centers: Array[Vector2i] = [
+		Vector2i(west - _N(10), _N(24)), Vector2i(east + _N(10), _N(24)),
+		Vector2i(west - _N(10), _N(36)), Vector2i(east + _N(10), _N(36)),
+		Vector2i(west - _N(10), _N(48)), Vector2i(east + _N(10), _N(48)),
+	]
+	for i in alcove_centers.size():
+		var ac: Vector2i = alcove_centers[i]
+		chambers.append([ac, _R(4.4), 0.22, 680 + i])
+		var hall_x: int = west if ac.x < int((west + east) / 2.0) else east
+		links.append([Vector2i(hall_x, ac.y), ac, _R(2.1), _R(1.7), 690 + i])
 	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
+	# Verified flat DG terracotta only — floor interest comes from stations, not noise.
 	var forge_floors := [
 		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
 		Vector2i(7, 2), Vector2i(5, 3), Vector2i(7, 3),
@@ -1178,114 +1190,233 @@ func _build_forge_gallery() -> void:
 	walk = MapKit.largest_region(walk, entrance)
 	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
-	# Magma pits sit inside the west/east hall chambers only — never on the
-	# cross bridges (those must stay fully walkable so players can cross).
-	var lava_cells: Dictionary = {}
-	var bridge_keepout: Dictionary = {}
+	# --- Reserve movement before any hazard / prop lands ---------------------
+	var lane_keepout: Dictionary = {}
 	for ry in [_N(18), _N(42)]:
 		for x in range(mini(west, east), maxi(west, east) + 1):
 			for dy in range(-_gap(3), _gap(3) + 1):
-				bridge_keepout[Vector2i(x, ry + dy)] = true
-	for spot in [
-		[Vector2i(west, _N(24)), _R(2.6), 651], [Vector2i(east, _N(24)), _R(2.6), 652],
-		[Vector2i(west, _N(36)), _R(2.4), 653], [Vector2i(east, _N(36)), _R(2.4), 654],
-		[Vector2i(west, _N(48)), _R(2.5), 655], [Vector2i(east, _N(48)), _R(2.5), 656],
-		[Vector2i(west, _N(30)), _R(2.0), 658], [Vector2i(east, _N(30)), _R(2.0), 659],
-	]:
+				lane_keepout[Vector2i(x, ry + dy)] = true
+	for hx in [west, east]:
+		for y in range(_N(14), _N(60) + 1):
+			for dx in range(-_gap(3), _gap(3) + 1):
+				lane_keepout[Vector2i(hx + dx, y)] = true
+	for cell: Vector2i in LevelKit.keepout([entrance, exit_cell], _gap(5)).keys():
+		lane_keepout[cell] = true
+	# Alcove mouths — the short tunnels from each hall into a basin bay.
+	for ac: Vector2i in alcove_centers:
+		var hall_x: int = west if ac.x < int((west + east) / 2.0) else east
+		for step in range(0, 11):
+			var x: int = int(lerpf(float(hall_x), float(ac.x), step / 10.0))
+			for dy in range(-_gap(2), _gap(2) + 1):
+				lane_keepout[Vector2i(x, ac.y + dy)] = true
+
+	# One forge basin per alcove — never stamped onto the hall floor itself.
+	var basin_plan: Array = []
+	for i in alcove_centers.size():
+		basin_plan.append({"center": alcove_centers[i], "r": _R(2.15), "seed": 651 + i})
+	var lava_cells: Dictionary = {}
+	var basin_centroids: Array[Vector2i] = []
+	for basin: Dictionary in basin_plan:
 		var pool: Dictionary = {}
-		MapKit.blob(pool, spot[0], spot[1], 0.28, int(spot[2]), _bounds)
+		MapKit.blob(pool, basin["center"], basin["r"], 0.26, int(basin["seed"]), _bounds)
 		pool = MapKit.smooth(pool, _bounds, 1, 5, 4)
+		var kept: Dictionary = {}
 		for cell: Vector2i in pool.keys():
-			if walk.has(cell) and not bridge_keepout.has(cell):
-				lava_cells[cell] = true
+			if walk.has(cell) and not lane_keepout.has(cell):
+				kept[cell] = true
+		if kept.is_empty():
+			continue
+		var sx := 0
+		var sy := 0
+		for cell: Vector2i in kept.keys():
+			lava_cells[cell] = true
+			sx += cell.x
+			sy += cell.y
+		basin_centroids.append(Vector2i(int(sx / float(kept.size())), int(sy / float(kept.size()))))
+
 	var lava_tiles := [Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11)]
 	for cell: Vector2i in lava_cells.keys():
 		ground.set_cell(cell, 0, MapKit._pick(lava_tiles, cell, 662))
 		walk.erase(cell)
-	# Heat-stained masonry around each pit so the floor isn't one flat wash.
-	var hot_floors := [Vector2i(6, 1), Vector2i(6, 2), Vector2i(6, 3), Vector2i(4, 1), Vector2i(4, 2)]
+	# Pull basins off the masonry — a 3-tile shore keeps players from wedging
+	# between lava collision and the wall rim (Mining Cave roominess).
+	var shore_cut: Array[Vector2i] = []
 	for cell: Vector2i in lava_cells.keys():
-		for ox in range(-2, 3):
-			for oy in range(-2, 3):
-				if ox == 0 and oy == 0:
-					continue
-				var n := cell + Vector2i(ox, oy)
-				if walk.has(n) and MapKit.hash2(n.x, n.y, 663) % 3 == 0:
-					ground.set_cell(n, 3, MapKit._pick(hot_floors, n, 664))
+		var too_close := false
+		for oy in range(-3, 4):
+			for ox in range(-3, 4):
+				if blocked.has(cell + Vector2i(ox, oy)):
+					too_close = true
+					break
+			if too_close:
+				break
+		if too_close:
+			shore_cut.append(cell)
+	for cell: Vector2i in shore_cut:
+		lava_cells.erase(cell)
+		ground.set_cell(cell, 3, MapKit._pick(forge_floors, cell, 665))
+		walk[cell] = true
+	# Recompute basin centroids after the shore trim.
+	basin_centroids.clear()
+	var labeled: Dictionary = {}
+	for cell: Vector2i in lava_cells.keys():
+		if labeled.has(cell):
+			continue
+		var q: Array[Vector2i] = [cell]
+		var blob_cells: Array[Vector2i] = []
+		labeled[cell] = true
+		var qi := 0
+		while qi < q.size():
+			var cur: Vector2i = q[qi]
+			qi += 1
+			blob_cells.append(cur)
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = cur + d
+				if lava_cells.has(n) and not labeled.has(n):
+					labeled[n] = true
+					q.append(n)
+		if blob_cells.size() < 12:
+			# Tiny leftovers from the trim — restore to floor rather than leave freckles.
+			for c: Vector2i in blob_cells:
+				lava_cells.erase(c)
+				ground.set_cell(c, 3, MapKit._pick(forge_floors, c, 666))
+				walk[c] = true
+			continue
+		var sx := 0
+		var sy := 0
+		for c: Vector2i in blob_cells:
+			sx += c.x
+			sy += c.y
+		basin_centroids.append(Vector2i(int(sx / float(blob_cells.size())), int(sy / float(blob_cells.size()))))
 	walk = MapKit.largest_region(walk, entrance)
-	# Both cross bridges must still join the two halls after lava carving.
+
+	# Lava rocks live IN the basins only (opaque lava-sheet tiles).
+	for cell in MapKit.scatter(lava_cells.keys(), 0.22, _N(2), 663):
+		if not lava_cells.has(cell):
+			continue
+		var rock: Vector2i = Vector2i(0, 0) if MapKit.hash2(cell.x, cell.y, 664) % 2 == 0 else Vector2i(0, 1)
+		ground.set_cell(cell, 0, rock)
+
 	for ry in [_N(18), _N(42)]:
-		var mid := Vector2i(int((west + east) / 2.0), ry)
-		assert(walk.has(LevelKit.pick_open(walk, mid)), "gallery cross-bridge blocked at y=%d" % ry)
-		assert(walk.has(LevelKit.pick_open(walk, Vector2i(west, ry))), "gallery west bridge mouth blocked")
-		assert(walk.has(LevelKit.pick_open(walk, Vector2i(east, ry))), "gallery east bridge mouth blocked")
+		var wm := Vector2i(west, ry)
+		var em := Vector2i(east, ry)
+		assert(walk.has(wm) and walk.has(em), "gallery bridge mouth missing at y=%d" % ry)
+		var reach := MapKit.largest_region(walk, wm)
+		assert(reach.has(em), "gallery bridge blocked west->east at y=%d" % ry)
 
 	var blocked_all := blocked.duplicate()
 	for cell: Vector2i in lava_cells.keys():
 		blocked_all[cell] = true
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
-	for cell: Vector2i in bridge_keepout.keys():
-		no_build[cell] = true
+	var no_build := lane_keepout.duplicate()
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
 		if not no_build.has(cell):
 			free[cell] = true
 	var solid: Dictionary = {}
-	var edges := MapKit.edge_cells(walk, blocked_all)
-	var inner := MapKit.interior_cells(walk, blocked_all, _gap(3))
+	# Wall feet only — never lava shores.
+	var wall_edges := MapKit.edge_cells(walk, blocked)
+	var slag_edges: Array = []
+	for cell: Vector2i in wall_edges:
+		if free.has(cell):
+			slag_edges.append(cell)
 
-	# Quench wells down the middle of each hall (away from magma / bridges).
-	for spot in [
-		Vector2i(west, _N(18)), Vector2i(east, _N(18)), Vector2i(west, _N(54)), Vector2i(east, _N(54)),
-		Vector2i(west, _N(36)), Vector2i(east, _N(36)),
-	]:
-		LevelKit.stamp_landmark(props, 3, [8, 1, 3, 3], LevelKit.pick_open(free, spot), free, solid)
-	# Slag heaps and cooled rock along the hall walls.
-	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], _dense(0.14), _N(4), 671, free, solid)
-	# Braziers, coal heaps and crystal growths from the lava sheet.
-	LevelKit.scatter_props(props, 0, inner, [[0, 1, 1, 2], [2, 1, 1, 1], [0, 2, 1, 1], [1, 2, 1, 1]], _dense(0.07), _N(5), 672, free, solid)
-	# Forge stock: the props sheet chest and coal piles.
-	LevelKit.scatter_props(props, 2, edges, [[0, 0, 1, 1], [1, 0, 1, 1], [2, 0, 1, 1]], _dense(0.055), _N(6), 673, free, solid)
-	# Cracked floor / ember overlays so the masonry doesn't read as one flat wash.
-	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(1, 1), Vector2i(3, 1), Vector2i(2, 1), Vector2i(0, 1)], _dense(0.10), _N(3), 674, solid)
+	# Four quench wells as authored landmarks in the hall end-bays.
+	var well_spots: Array[Vector2i] = [
+		Vector2i(west - _N(3), _N(16)), Vector2i(east + _N(3), _N(16)),
+		Vector2i(west - _N(3), _N(56)), Vector2i(east + _N(3), _N(56)),
+	]
+	var well_anchors: Array[Vector2i] = []
+	for spot: Vector2i in well_spots:
+		var anchor := LevelKit.pick_open(free, spot)
+		var placed := LevelKit.stamp_landmark(props, 3, [8, 1, 3, 3], anchor, free, solid)
+		if not placed.is_empty():
+			well_anchors.append(anchor)
+
+	# Coal beside each well, and one shore accent per basin (verified forge_props).
+	for anchor: Vector2i in well_anchors:
+		for offset in [Vector2i(_N(2), 0), Vector2i(-_N(2), 1)]:
+			var coal_at := LevelKit.pick_open(free, anchor + offset)
+			if not free.has(coal_at):
+				continue
+			var tile: Vector2i = Vector2i(1, 0) if MapKit.hash2(coal_at.x, coal_at.y, 670) % 2 == 0 else Vector2i(2, 0)
+			props.set_cell(coal_at, 2, tile)
+			free.erase(coal_at)
+	for c: Vector2i in basin_centroids:
+		var shore_candidates: Array[Vector2i] = []
+		for d in [Vector2i(3, 0), Vector2i(-3, 0), Vector2i(0, 3), Vector2i(0, -3), Vector2i(2, 2), Vector2i(-2, 2)]:
+			var n: Vector2i = c + d
+			if free.has(n):
+				shore_candidates.append(n)
+		if shore_candidates.is_empty():
+			continue
+		var pick: Vector2i = shore_candidates[MapKit.hash2(c.x, c.y, 672) % shore_candidates.size()]
+		props.set_cell(pick, 2, Vector2i(2, 0) if MapKit.hash2(pick.x, pick.y, 673) % 2 == 0 else Vector2i(1, 0))
+		free.erase(pick)
+
+	# Sparse slag at masonry wall feet with a roomy-neighbourhood gate.
+	var roomy: Array = []
+	for cell: Vector2i in slag_edges:
+		if not free.has(cell):
+			continue
+		var open_n := 0
+		for oy in range(-1, 2):
+			for ox in range(-1, 2):
+				if walk.has(cell + Vector2i(ox, oy)) and not solid.has(cell + Vector2i(ox, oy)):
+					open_n += 1
+		if open_n >= 6:
+			roomy.append(cell)
+	LevelKit.scatter_props(
+		props, 3, roomy,
+		[[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]],
+		0.28, _N(5), 671, free, solid
+	)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
+	# Animated braziers: shore torches per basin + arrival / bridge mouths.
 	var decos: Array = []
 	var ti := 0
-	for spot in [
-		Vector2i(west, _N(18)), Vector2i(east, _N(18)), Vector2i(west, _N(30)), Vector2i(east, _N(30)),
-		Vector2i(west, _N(42)), Vector2i(east, _N(42)), Vector2i(west, _N(54)), Vector2i(east, _N(54)),
-		Vector2i(52, 67), Vector2i(52, 60), Vector2i(west, _N(24)), Vector2i(east, _N(24)),
-		_L(52, 36), _L(46, 48), _L(58, 48),
-	]:
+	var torch_hints: Array[Vector2i] = [
+		entrance + _L(-3, -2), entrance + _L(3, -2),
+		Vector2i(west, _N(18)), Vector2i(east, _N(18)),
+		Vector2i(west, _N(42)), Vector2i(east, _N(42)),
+	]
+	for c: Vector2i in basin_centroids:
+		torch_hints.append(c + Vector2i(_N(3), 0))
+		torch_hints.append(c + Vector2i(-_N(3), 0))
+	var torch_taken: Dictionary = {}
+	for hint: Vector2i in torch_hints:
+		var cell := LevelKit.pick_open(walk, hint)
+		if torch_taken.has(cell):
+			continue
+		torch_taken[cell] = true
 		ti += 1
 		decos.append({
 			"name": "GalleryTorch%d" % ti,
 			"frames": "deco_forge_torch",
-			"pos": LevelKit.tile_pos(LevelKit.pick_open(walk, spot)),
-			"scale": 1.3,
-			"light": 0.75,
+			"pos": LevelKit.tile_pos(cell),
+			"scale": 1.25,
+			"light": 0.7,
 			"color": "Color(1, 0.58, 0.22, 1)",
 		})
 
+	# One glow per basin centroid — not a hash spray across every lava cell.
 	var lights: Array = []
-	var li := 0
-	for cell: Vector2i in lava_cells.keys():
-		if MapKit.hash2(cell.x, cell.y, 675) % 61 != 0:
-			continue
-		li += 1
+	for i in basin_centroids.size():
 		lights.append({
-			"name": "GalleryMagma%d" % li,
-			"pos": LevelKit.tile_pos(cell),
+			"name": "GalleryMagma%d" % (i + 1),
+			"pos": LevelKit.tile_pos(basin_centroids[i]),
 			"color": "Color(1, 0.38, 0.1, 1)",
-			"energy": 0.6,
-			"scale": 1.25,
+			"energy": 0.7,
+			"scale": 1.55,
 		})
 
 	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
+	for ry in [_N(18), _N(42)]:
+		for cell: Vector2i in LevelKit.keepout([Vector2i(west, ry), Vector2i(east, ry)], _gap(3)).keys():
+			taken[cell] = true
 	var mob_plan: Array = [
 		["ForgeAxeman", "trpg/trpg_armored_axeman", Vector2i(west, _N(54))],
 		["ForgeAxeman2", "trpg/trpg_armored_axeman", Vector2i(east, _N(54))],
@@ -1327,6 +1458,8 @@ func _build_forge_gallery() -> void:
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "gallery spawn blocked")
 	assert(walk.size() > 30000, "gallery too small: %d" % walk.size())
+	assert(basin_centroids.size() >= 4, "gallery needs forge basins: %d" % basin_centroids.size())
+	assert(well_anchors.size() >= 2, "gallery quench wells missing: %d" % well_anchors.size())
 	_log("bellows_gallery", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
