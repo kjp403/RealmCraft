@@ -1178,20 +1178,25 @@ func _build_forge_gallery() -> void:
 	walk = MapKit.largest_region(walk, entrance)
 	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
-	# Magma pits and runnels along the halls — the gallery was dry masonry; at
-	# 5× scale the floor reads as a flat slab without these hazards breaking it up.
+	# Magma pits sit inside the west/east hall chambers only — never on the
+	# cross bridges (those must stay fully walkable so players can cross).
 	var lava_cells: Dictionary = {}
+	var bridge_keepout: Dictionary = {}
+	for ry in [_N(18), _N(42)]:
+		for x in range(mini(west, east), maxi(west, east) + 1):
+			for dy in range(-_gap(3), _gap(3) + 1):
+				bridge_keepout[Vector2i(x, ry + dy)] = true
 	for spot in [
 		[Vector2i(west, _N(24)), _R(2.6), 651], [Vector2i(east, _N(24)), _R(2.6), 652],
 		[Vector2i(west, _N(36)), _R(2.4), 653], [Vector2i(east, _N(36)), _R(2.4), 654],
 		[Vector2i(west, _N(48)), _R(2.5), 655], [Vector2i(east, _N(48)), _R(2.5), 656],
-		[_L(52, 42), _R(2.2), 657], [_L(40, 30), _R(2.0), 658], [_L(64, 30), _R(2.0), 659],
+		[Vector2i(west, _N(30)), _R(2.0), 658], [Vector2i(east, _N(30)), _R(2.0), 659],
 	]:
 		var pool: Dictionary = {}
 		MapKit.blob(pool, spot[0], spot[1], 0.28, int(spot[2]), _bounds)
 		pool = MapKit.smooth(pool, _bounds, 1, 5, 4)
 		for cell: Vector2i in pool.keys():
-			if walk.has(cell):
+			if walk.has(cell) and not bridge_keepout.has(cell):
 				lava_cells[cell] = true
 	var lava_tiles := [Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11)]
 	for cell: Vector2i in lava_cells.keys():
@@ -1208,12 +1213,20 @@ func _build_forge_gallery() -> void:
 				if walk.has(n) and MapKit.hash2(n.x, n.y, 663) % 3 == 0:
 					ground.set_cell(n, 3, MapKit._pick(hot_floors, n, 664))
 	walk = MapKit.largest_region(walk, entrance)
+	# Both cross bridges must still join the two halls after lava carving.
+	for ry in [_N(18), _N(42)]:
+		var mid := Vector2i(int((west + east) / 2.0), ry)
+		assert(walk.has(LevelKit.pick_open(walk, mid)), "gallery cross-bridge blocked at y=%d" % ry)
+		assert(walk.has(LevelKit.pick_open(walk, Vector2i(west, ry))), "gallery west bridge mouth blocked")
+		assert(walk.has(LevelKit.pick_open(walk, Vector2i(east, ry))), "gallery east bridge mouth blocked")
 
 	var blocked_all := blocked.duplicate()
 	for cell: Vector2i in lava_cells.keys():
 		blocked_all[cell] = true
 
 	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
+	for cell: Vector2i in bridge_keepout.keys():
+		no_build[cell] = true
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
 		if not no_build.has(cell):
@@ -1222,10 +1235,10 @@ func _build_forge_gallery() -> void:
 	var edges := MapKit.edge_cells(walk, blocked_all)
 	var inner := MapKit.interior_cells(walk, blocked_all, _gap(3))
 
-	# Quench wells down the middle of each hall (away from magma).
+	# Quench wells down the middle of each hall (away from magma / bridges).
 	for spot in [
 		Vector2i(west, _N(18)), Vector2i(east, _N(18)), Vector2i(west, _N(54)), Vector2i(east, _N(54)),
-		Vector2i(west, _N(42)), Vector2i(east, _N(42)),
+		Vector2i(west, _N(36)), Vector2i(east, _N(36)),
 	]:
 		LevelKit.stamp_landmark(props, 3, [8, 1, 3, 3], LevelKit.pick_open(free, spot), free, solid)
 	# Slag heaps and cooled rock along the hall walls.
