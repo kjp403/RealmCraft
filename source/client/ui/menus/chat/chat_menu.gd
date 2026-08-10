@@ -48,9 +48,7 @@ const HISTORY_LIMIT: int = 50
 ## slide so both panels animate consistently.
 const FULL_FEED_SLIDE: float = 48.0
 
-## Emitted when the unread-DM state flips, so the HUD chat button (now in the menu rail) can
-## swap to/from the exclamation glyph. Only DMs badge it (public/guild/system are ambient,
-## shown in the peek). See HUD._on_chat_unread.
+## Emitted when the unread-DM state flips. Kept for HUD/listeners; tab captions also show counts.
 signal unread_changed(has_unread: bool)
 #endregion
 
@@ -68,8 +66,7 @@ var dm_name_by_player_id: Dictionary[int, String] = {}
 var pending_name_fetch_at_ms: Dictionary[int, int] = {}
 
 var unread_by_conversation: Dictionary[String, int] = {}
-## Last emitted DM-unread state, so unread_changed fires only on a real flip — not on every
-## incoming message / channel open (each would otherwise redundantly re-swap the HUD icon).
+## Last emitted DM-unread state, so unread_changed fires only on a real flip.
 var _last_unread_dm: bool = false
 
 var seen_msg_ids_by_conversation: Dictionary[String, Dictionary] = {}
@@ -79,18 +76,9 @@ var current_channel: int = CHANNEL_WORLD
 var current_conversation_id: String = ""
 var current_dm_other_id: int = 0
 
-var mute_peek_system: bool = false
-var mute_peek_dm: bool = false
-var mute_peek_world: bool = false
-
-## How long the peek feed stays fully visible before the fade animation
-## starts. 0 = "never fade" (peek stays until dismissed). Persisted to
-## ClientState.settings under chat / peek_fade_seconds.
-var peek_fade_seconds: int = 5
-## Client-only override for the local player's name color in chat (peek +
-## full feed). Empty string = use the default hashed color. Pure vanity, not
-## shipped to other clients. Persisted to ClientState.settings under
-## chat / self_name_color (hex with leading "#").
+## Client-only override for the local player's name color in chat.
+## Empty string = use the default hashed color. Pure vanity, not shipped to
+## other clients. Persisted to ClientState.settings under chat / self_name_color.
 var self_name_color_override: String = ""
 
 var _tab_label_all: String = "All"
@@ -98,7 +86,6 @@ var _tab_label_system: String = "System"
 var _tab_label_world: String = "World"
 var _tab_label_private: String = "Private"
 
-var fade_out_tween: Tween
 var _full_feed_tween: Tween
 ## Authored x of the chatbox inside FullFeed. Read from the scene's offset (not
 ## from a resolved rect) so the open/close slide has a stable base even before
@@ -108,15 +95,10 @@ var _full_feed_base_x: float = 0.0
 
 
 #region Nodes
-@onready var peek_feed: VBoxContainer = $PeekFeed
 @onready var full_feed: Control = $FullFeed
 ## The chatbox itself. FullFeed is a full-screen click-through Control, so we
 ## check this tighter rect for the click-outside-to-close behaviour.
 @onready var full_feed_content: Control = $FullFeed/Chatbox
-
-@onready var peek_feed_text_display: RichTextLabel = $PeekFeed/MessageDisplay
-@onready var peek_feed_message_edit: LineEdit = $PeekFeed/MessageEdit
-@onready var fade_out_timer: Timer = $PeekFeed/FadeOutTimer
 
 @onready var full_feed_text_display: RichTextLabel = $FullFeed/Chatbox/Root/Feed
 @onready var full_feed_message_edit: LineEdit = $FullFeed/Chatbox/Root/InputRow/MessageEdit
@@ -138,10 +120,6 @@ var _full_feed_base_x: float = 0.0
 @onready var settings_panel: ScrollContainer = $FullFeed/Chatbox/Root/SettingsPanel
 @onready var settings_blocked_list: VBoxContainer = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/BlockedScroll/BlockedList
 @onready var settings_blocked_empty: Label = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/BlockedScroll/BlockedList/EmptyLabel
-@onready var settings_peek_show_world: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowWorld
-@onready var settings_peek_show_dm: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowDM
-@onready var settings_peek_show_system: CheckBox = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekShowSystem
-@onready var settings_peek_fade_option: OptionButton = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekFadeRow/PeekFadeOption
 @onready var settings_name_color_row: HBoxContainer = $FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/NameColorRow
 
 @onready var full_feed_input_row: HBoxContainer = $FullFeed/Chatbox/Root/InputRow
@@ -161,19 +139,15 @@ func _ready() -> void:
 	# have already in flight.
 	Client.request_data(&"social.block.list", _on_block_list_received, {}, InstanceClient.current.name)
 
-	peek_feed_message_edit.text_submitted.connect(_on_text_submitted.bind(peek_feed_message_edit))
 	full_feed_message_edit.text_submitted.connect(_on_text_submitted.bind(full_feed_message_edit))
 
 	# Typing indicator: notify the server when the local user starts/stops
 	# composing. Idempotent server-side; we also de-dupe locally via
 	# _typing_state so flipping focus quickly doesn't spam packets.
-	peek_feed_message_edit.focus_entered.connect(_on_chat_input_focus_changed.bind(true))
-	peek_feed_message_edit.focus_exited.connect(_on_chat_input_focus_changed.bind(false))
 	full_feed_message_edit.focus_entered.connect(_on_chat_input_focus_changed.bind(true))
 	full_feed_message_edit.focus_exited.connect(_on_chat_input_focus_changed.bind(false))
 
-	# Mobile: lift the chat above the on-screen keyboard while composing in the full feed
-	# (its input is at the screen bottom; the peek input sits up top and stays visible).
+	# Mobile: lift the chat above the on-screen keyboard while composing.
 	full_feed_message_edit.focus_entered.connect(func() -> void: set_process(true))
 	full_feed_message_edit.focus_exited.connect(_reset_keyboard_lift)
 	set_process(false)
@@ -202,31 +176,22 @@ func _ready() -> void:
 	_sync_tab_buttons()
 	_update_tab_labels()
 
-	peek_feed.show()
 	full_feed.hide()
-	# Also start the fade countdown at spawn, so the initial (empty) peek doesn't linger forever waiting
-	# for the first message to trigger it.
-	_start_peek_fade()
-
-	_apply_input_mode()
-	ClientState.input_changed.connect(func(_t: InputComponent.InputType) -> void: _apply_input_mode())
-	# PC: hide the compose field again when focus leaves it (Enter re-opens).
-	peek_feed_message_edit.focus_exited.connect(_apply_input_mode)
+	# Touch has no Enter key and the rail chat bubble is gone — keep the panel
+	# available so mobile players can still read and send.
+	if ClientState.input_type == InputComponent.InputType.TOUCH:
+		_show_full_feed()
+	ClientState.input_changed.connect(_on_input_type_changed_for_chat)
 
 	_refresh_full_feed()
 	_update_input_enabled_state()
 
 
-## PC: the peek feed is read-only SCENERY — fighting near the top-left corner
-## must neither unfade it, open it, nor (via InputComponent's UI gate) block
-## attacks. Compose with Enter; the full panel opens from the bubble button.
-## Touch keeps tap-to-open: there's no mouse to aim with, taps are deliberate.
-func _apply_input_mode() -> void:
-	var touch: bool = ClientState.input_type == InputComponent.InputType.TOUCH
-	var filter: Control.MouseFilter = Control.MOUSE_FILTER_STOP if touch else Control.MOUSE_FILTER_IGNORE
-	peek_feed.mouse_filter = filter
-	peek_feed_text_display.mouse_filter = filter
-	peek_feed_message_edit.visible = touch or peek_feed_message_edit.has_focus()
+func _on_input_type_changed_for_chat(input_type: InputComponent.InputType) -> void:
+	if input_type == InputComponent.InputType.TOUCH and not full_feed.visible:
+		_show_full_feed()
+		_refresh_full_feed()
+		_update_input_enabled_state()
 
 
 ## Mobile keyboard lift: while composing in the full feed on a touch device, shift the
@@ -252,46 +217,43 @@ func _reset_keyboard_lift() -> void:
 	set_process(false)
 
 
-## Toggle the full chat panel. Called by the HUD's chat button (it lives in the menu rail
-## now, not here) and by the click-away handler; the panel also has its own Close button.
+## Toggle the full chat panel. Enter (player_chat) and DM/profile openers call this;
+## the panel also has its own Close button.
 func toggle_feed() -> void:
 	if full_feed.visible:
 		_on_close_button_pressed()
 		return
-	peek_feed.hide()
 	_show_full_feed()
 	_sync_tab_buttons()
 	_update_tab_labels()
 	_refresh_full_feed()
 	_update_input_enabled_state()
+	full_feed_message_edit.grab_focus()
 
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"player_chat"):
-		if not full_feed.visible and not peek_feed_message_edit.has_focus():
-			get_viewport().set_input_as_handled()
-			accept_event()
-			_open_peek_for_typing()
+		if full_feed_message_edit.has_focus():
+			return
+		get_viewport().set_input_as_handled()
+		accept_event()
+		if not full_feed.visible:
+			toggle_feed()
+		else:
+			full_feed_message_edit.grab_focus()
 
 	if event is InputEventMouseButton and event.is_pressed():
 		var mouse_position: Vector2 = event.global_position
 
-		if peek_feed_message_edit.has_focus() and not peek_feed_message_edit.get_global_rect().has_point(mouse_position):
-			peek_feed_message_edit.release_focus()
-		
 		if full_feed_message_edit.has_focus() and not full_feed_message_edit.get_global_rect().has_point(mouse_position):
 			full_feed_message_edit.release_focus()
 
 		if full_feed.visible and not full_feed_content.get_global_rect().has_point(mouse_position):
-			_on_close_button_pressed()
-
-
-func _open_peek_for_typing() -> void:
-	peek_feed.show()
-	_reset_peek_view()
-	peek_feed_message_edit.show() # hidden on PC until composing
-	peek_feed_message_edit.grab_focus()
-	fade_out_timer.stop()
+			if ClientState.input_type != InputComponent.InputType.TOUCH:
+				_on_close_button_pressed()
+			else:
+				full_feed_message_edit.release_focus()
+				_set_settings_open(false)
 
 
 #region Incoming
@@ -382,13 +344,6 @@ func _on_chat_message(message: Dictionary) -> void:
 	if not is_history and not is_self and not is_viewing:
 		_inc_unread(convo_id)
 
-	if not is_history and _should_show_in_peek(convo_id):
-		var peek_line: String = _format_message_peek(
-			convo_id, sender_id, sender_name, text, sender_staff_role
-		)
-		peek_feed_text_display.append_text(peek_line)
-		peek_feed_text_display.newline()
-
 	# Overhead chat bubble: only on live WORLD messages (proximity chat).
 	# DMs/guild/system stay UI-only so they don't leak through the world.
 	var is_world_channel: bool = convo_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD)
@@ -407,68 +362,18 @@ func _on_chat_message(message: Dictionary) -> void:
 			# scroll to the bottom so they always see what they just typed,
 			# even if they had scrolled up to read history.
 			full_feed_text_display.scroll_to_line.call_deferred(full_feed_text_display.get_line_count())
-	else:
-		if not is_history and not full_feed.visible:
-			_reset_peek_view()
-			peek_feed_text_display.show()
-			_start_peek_fade()
 
 	_update_tab_labels()
 #endregion
 
 
-#region Peek fade
-func _on_fade_out_timer_timeout() -> void:
-	if peek_feed_message_edit.has_focus():
-		_start_peek_fade()
-		return
-
-	if fade_out_tween != null:
-		fade_out_tween.kill()
-
-	fade_out_tween = create_tween()
-	fade_out_tween.tween_property(peek_feed, ^"modulate:a", 0.0, 0.3)
-
-
-func _on_peek_feed_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and peek_feed.modulate.a < 1.0:
-		_reset_peek_view()
-		_start_peek_fade()
-		return
-
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		peek_feed.hide()
-		_show_full_feed()
-
-		_sync_tab_buttons()
-		_update_tab_labels()
-
-		_refresh_full_feed()
-		_update_input_enabled_state()
-
-
 func _on_close_button_pressed() -> void:
-	peek_feed.show()
-	_reset_peek_view()
-	_start_peek_fade()
-	_hide_full_feed()
-
-
-func _reset_peek_view() -> void:
-	if fade_out_tween != null and fade_out_tween.is_running():
-		fade_out_tween.kill()
-	peek_feed.modulate.a = 1.0
-
-
-## Kick off the peek fade-out countdown, honouring the user-chosen duration.
-## When peek_fade_seconds == 0 the peek is "never fade" — we just skip
-## starting the timer, so the feed stays visible until explicitly dismissed.
-func _start_peek_fade() -> void:
-	if peek_fade_seconds <= 0:
-		fade_out_timer.stop()
+	# On touch the panel is the only chat entry point — closing just drops focus.
+	if ClientState.input_type == InputComponent.InputType.TOUCH:
+		full_feed_message_edit.release_focus()
+		_set_settings_open(false)
 		return
-	fade_out_timer.wait_time = float(peek_fade_seconds)
-	fade_out_timer.start()
+	_hide_full_feed()
 
 
 ## Open the full feed with a slide-in-from-left + fade, mirroring the right-side menu overlay so both
@@ -509,10 +414,6 @@ func _on_text_submitted(new_text: String, line_edit: LineEdit) -> void:
 	line_edit.clear()
 	line_edit.release_focus()
 
-	var is_peek: bool = (line_edit == peek_feed_message_edit)
-	if is_peek:
-		_start_peek_fade()
-
 	new_text = new_text.strip_edges(true, true)
 	if new_text.is_empty():
 		return
@@ -521,10 +422,6 @@ func _on_text_submitted(new_text: String, line_edit: LineEdit) -> void:
 
 	if new_text.begins_with("/"):
 		_handle_command(new_text)
-		return
-
-	if is_peek:
-		_send_channel_message(CHANNEL_WORLD, new_text)
 		return
 
 	if current_conversation_id.begins_with("dm:"):
@@ -576,7 +473,7 @@ func _handle_command(raw: String) -> void:
 	var cmd: String = split[0].to_lower()
 
 	if cmd == "mute":
-		_handle_local_mute_command(split)
+		_system_echo("Open chat with Enter to read channels.")
 		return
 
 	if cmd == "g":
@@ -654,7 +551,6 @@ func open_channel(channel: int) -> void:
 				_clear_unread(convo_id)
 
 	_show_full_feed()
-	peek_feed.hide()
 
 	_ensure_conversation_exists(current_conversation_id)
 
@@ -677,7 +573,6 @@ func open_conversation(conversation_id: String) -> void:
 			current_channel = int(conversation_id.replace("global_", ""))
 
 	_show_full_feed()
-	peek_feed.hide()
 
 	_sync_tab_buttons()
 	_update_tab_labels()
@@ -697,7 +592,6 @@ func open_dm(other_id: int) -> void:
 	_ensure_dm_button(current_conversation_id, other_id)
 
 	_show_full_feed()
-	peek_feed.hide()
 
 	_sync_tab_buttons()
 	_update_tab_labels()
@@ -948,41 +842,6 @@ func _staff_badge_bbcode(role: String) -> String:
 	return ""
 
 
-func _format_message_peek(
-	convo_id: String,
-	sender_id: int,
-	sender_name: String,
-	text: String,
-	staff_role: String = ""
-) -> String:
-	var name_color: String
-	if sender_id == ChatConstants.SYSTEM_SENDER_ID:
-		name_color = SYSTEM_NAME_COLOR
-	elif sender_id == int(ClientState.player_id):
-		name_color = self_name_color_override if not self_name_color_override.is_empty() else SELF_NAME_COLOR
-	else:
-		name_color = _hashed_name_color(sender_id, sender_name)
-
-	var name_chunk: String
-	if sender_id == ChatConstants.SYSTEM_SENDER_ID:
-		name_chunk = "[color=%s]%s[/color]" % [name_color, sender_name]
-	else:
-		name_chunk = "[color=%s][url=%d]%s[/url][/color]" % [name_color, sender_id, sender_name]
-
-	var badge: String = _staff_badge_bbcode(staff_role)
-	if not badge.is_empty():
-		name_chunk = "%s %s" % [badge, name_chunk]
-
-	var base: String = "%s: %s" % [name_chunk, text]
-
-	var prefix: String = _peek_prefix_for_conversation(convo_id)
-	if prefix.is_empty():
-		return base
-
-	var tag_color: String = _tag_color_for_conversation(convo_id)
-	return "[color=%s][%s][/color] %s" % [tag_color, prefix, base]
-
-
 ## Short channel-prefix shown in the ALL view so the reader can see at a
 ## glance which channel produced each line. DM gets the partner's name when
 ## known so two DM threads don't collide visually.
@@ -998,20 +857,6 @@ func _channel_prefix_for_conversation(convo_id: String) -> String:
 		return "SYS"
 	if convo_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD):
 		return "WORLD"
-	if convo_id == ChatConstants.channel_conversation_id(CHANNEL_TEAM):
-		return "TEAM"
-	return "CHAT"
-
-
-func _peek_prefix_for_conversation(convo_id: String) -> String:
-	if convo_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD):
-		return ""
-	if convo_id.begins_with("dm:"):
-		return "DM"
-	if convo_id.begins_with("guild:"):
-		return "GUILD"
-	if _is_system_conversation(convo_id):
-		return "SYS"
 	if convo_id == ChatConstants.channel_conversation_id(CHANNEL_TEAM):
 		return "TEAM"
 	return "CHAT"
@@ -1179,8 +1024,8 @@ func _clear_unread(convo_id: String) -> void:
 	_set_unread(convo_id, 0)
 
 
-## True if any DM conversation has unread messages — drives the HUD toggle's exclamation icon. We badge
-## ONLY DMs (directed at the player); public/guild/system stream through the peek and would just be noise.
+## True if any DM conversation has unread messages. We badge ONLY DMs (directed at the player);
+## public/guild/system unread still ride their own tab captions.
 func _has_unread_dm() -> bool:
 	for convo_id: String in unread_by_conversation:
 		if convo_id.begins_with("dm:") and unread_by_conversation[convo_id] > 0:
@@ -1228,82 +1073,38 @@ func _set_tab_text(button: Button, base_label: String, unread: int) -> void:
 #endregion
 
 
-#region Peek mutes + echo
-func _should_show_in_peek(convo_id: String) -> bool:
-	if convo_id.begins_with("dm:"):
-		return not mute_peek_dm
-
-	if convo_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD):
-		return not mute_peek_world
-
-	if _is_system_conversation(convo_id):
-		return not mute_peek_system
-
-	return true
-
-
-func _handle_local_mute_command(args: PackedStringArray) -> void:
-	if args.size() < 2:
-		_system_echo("Usage: /mute dm|world|sys|off")
-		return
-
-	var what: String = args[1].to_lower()
-
-	if what == "dm":
-		mute_peek_dm = not mute_peek_dm
-		_system_echo("Peek DM mute: %s" % ("ON" if mute_peek_dm else "OFF"))
-	elif what == "sys" or what == "system":
-		mute_peek_system = not mute_peek_system
-		_system_echo("Peek System mute: %s" % ("ON" if mute_peek_system else "OFF"))
-	elif what == "world":
-		mute_peek_world = not mute_peek_world
-		_system_echo("Peek World mute: %s" % ("ON" if mute_peek_world else "OFF"))
-	elif what == "off":
-		mute_peek_dm = false
-		mute_peek_world = false
-		mute_peek_system = false
-		_system_echo("Peek mutes cleared.")
-	else:
-		_system_echo("Unknown: %s" % what)
-
-
+#region System echo
 func _system_echo(text: String) -> void:
 	echo_system(text)
 
 
-## Local-only system line in the peek feed (and full System conversation).
+## Local-only system line persisted into the System conversation.
 ## Used for client-side game messages like skill level-ups.
 func echo_system(text: String) -> void:
-	if text.is_empty() or peek_feed_text_display == null:
+	if text.is_empty():
 		return
-	peek_feed_text_display.append_text("[color=%s][SYS][/color] %s" % [TAG_COLOR_SYSTEM, text])
-	peek_feed_text_display.newline()
-	# Persist into the System conversation so it isn't peek-only ephemera.
 	var self_id: int = int(ClientState.player_id)
-	if self_id > 0:
-		var convo_id: String = ChatConstants.system_conversation_id(self_id)
-		_ensure_conversation_exists(convo_id)
-		var record: Dictionary = {
-			"id": ChatConstants.SYSTEM_SENDER_ID,
-			"name": "System",
-			"title": "",
-			"guild_name": "",
-			"staff_role": "",
-			"text": text,
-			"time_ms": int(Time.get_unix_time_from_system() * 1000.0),
-			"msg_id": 0,
-			"is_self": false,
-			"is_system": true,
-			"convo_id": convo_id,
-		}
-		(raw_messages_by_conversation[convo_id] as Array).append(record)
-		if full_feed.visible and _view_shows_conversation(convo_id):
-			_refresh_full_feed()
-	if not full_feed.visible:
-		_reset_peek_view()
-		peek_feed.show()
-		peek_feed_text_display.show()
-		_start_peek_fade()
+	if self_id <= 0:
+		return
+	var convo_id: String = ChatConstants.system_conversation_id(self_id)
+	_ensure_conversation_exists(convo_id)
+	var record: Dictionary = {
+		"id": ChatConstants.SYSTEM_SENDER_ID,
+		"name": "System",
+		"title": "",
+		"guild_name": "",
+		"staff_role": "",
+		"text": text,
+		"time_ms": int(Time.get_unix_time_from_system() * 1000.0),
+		"msg_id": 0,
+		"is_self": false,
+		"is_system": true,
+		"convo_id": convo_id,
+	}
+	(raw_messages_by_conversation[convo_id] as Array).append(record)
+	if full_feed.visible and _view_shows_conversation(convo_id):
+		_refresh_full_feed()
+	_update_tab_labels()
 #endregion
 
 
@@ -1347,16 +1148,13 @@ func _on_chat_send_result(result: Dictionary) -> void:
 
 
 ## Tracks whether the server believes the local player is currently typing.
-## Both chat inputs share this flag — focus moving between peek and full
-## feed doesn't re-fire the network call.
 var _typing_state_sent: bool = false
 
 
 func _on_chat_input_focus_changed(now_focused: bool) -> void:
 	# A focus signal fires for the leaving control before the entering one,
-	# so check whether ANY chat input still has focus before declaring stop.
-	var any_focused: bool = (peek_feed_message_edit.has_focus()
-		or full_feed_message_edit.has_focus())
+	# so check whether the compose field still has focus before declaring stop.
+	var any_focused: bool = full_feed_message_edit.has_focus()
 	# Defer the actual decision one frame so the just-focused field has
 	# registered its focus state by the time we read it.
 	_set_typing_state.call_deferred(now_focused or any_focused)
@@ -1365,10 +1163,7 @@ func _on_chat_input_focus_changed(now_focused: bool) -> void:
 func _set_typing_state(should_be_typing: bool) -> void:
 	# Re-read focus after the deferred bounce — the cheap dedupe below
 	# handles redundant transitions either way.
-	var actually_typing: bool = should_be_typing and (
-		peek_feed_message_edit.has_focus()
-		or full_feed_message_edit.has_focus()
-	)
+	var actually_typing: bool = should_be_typing and full_feed_message_edit.has_focus()
 	if actually_typing == _typing_state_sent:
 		return
 	_typing_state_sent = actually_typing
@@ -1499,20 +1294,7 @@ func _is_system_conversation(convo_id: String) -> bool:
 ## and persists choices to ClientState.settings.
 
 const SETTINGS_SECTION: StringName = &"chat"
-const SETTINGS_PEEK_FADE_KEY: StringName = &"peek_fade_seconds"
 const SETTINGS_SELF_COLOR_KEY: StringName = &"self_name_color"
-const SETTINGS_PEEK_SHOW_WORLD: StringName = &"peek_show_world"
-const SETTINGS_PEEK_SHOW_DM: StringName = &"peek_show_dm"
-const SETTINGS_PEEK_SHOW_SYSTEM: StringName = &"peek_show_system"
-
-## Peek fade duration presets shown in the OptionButton.
-## Label → seconds (0 means "never fade").
-const PEEK_FADE_PRESETS: Array[Dictionary] = [
-	{"label": "3 seconds", "seconds": 3},
-	{"label": "5 seconds", "seconds": 5},
-	{"label": "10 seconds", "seconds": 10},
-	{"label": "Never fade", "seconds": 0},
-]
 
 ## Curated swatches for the "Your name color" picker. Empty hex means "use
 ## the default neutral self-tone" — first slot is always the reset.
@@ -1535,40 +1317,6 @@ var _blocked_names_by_id: Dictionary[int, String]
 func _init_settings_panel() -> void:
 	# Hydrate the persisted prefs first so the controls reflect saved state.
 	_load_chat_settings()
-
-	# Per-channel peek toggles.
-	settings_peek_show_world.button_pressed = not mute_peek_world
-	settings_peek_show_world.toggled.connect(func(pressed: bool) -> void:
-		mute_peek_world = not pressed
-		_save_chat_setting(SETTINGS_PEEK_SHOW_WORLD, pressed)
-	)
-	settings_peek_show_dm.button_pressed = not mute_peek_dm
-	settings_peek_show_dm.toggled.connect(func(pressed: bool) -> void:
-		mute_peek_dm = not pressed
-		_save_chat_setting(SETTINGS_PEEK_SHOW_DM, pressed)
-	)
-	settings_peek_show_system.button_pressed = not mute_peek_system
-	settings_peek_show_system.toggled.connect(func(pressed: bool) -> void:
-		mute_peek_system = not pressed
-		_save_chat_setting(SETTINGS_PEEK_SHOW_SYSTEM, pressed)
-	)
-
-	# Peek fade preset OptionButton.
-	settings_peek_fade_option.clear()
-	var selected_index: int = 0
-	for i: int in PEEK_FADE_PRESETS.size():
-		var preset: Dictionary = PEEK_FADE_PRESETS[i]
-		settings_peek_fade_option.add_item(str(preset["label"]), i)
-		if int(preset["seconds"]) == peek_fade_seconds:
-			selected_index = i
-	settings_peek_fade_option.select(selected_index)
-	_apply_peek_fade_seconds()
-	settings_peek_fade_option.item_selected.connect(func(index: int) -> void:
-		var preset: Dictionary = PEEK_FADE_PRESETS[index]
-		peek_fade_seconds = int(preset["seconds"])
-		_apply_peek_fade_seconds()
-		_save_chat_setting(SETTINGS_PEEK_FADE_KEY, peek_fade_seconds)
-	)
 
 	# Name-colour swatches (programmatic because they're a uniform grid of
 	# coloured buttons — fits the data-driven SWATCHES constant better than
@@ -1628,25 +1376,10 @@ func _set_self_name_color(hex: String) -> void:
 	_refresh_full_feed()
 
 
-func _apply_peek_fade_seconds() -> void:
-	# 0 = never fade. We accomplish that by giving the timer a huge wait_time
-	# and never actually starting it (caller already gates with peek_fade_seconds).
-	if peek_fade_seconds > 0:
-		fade_out_timer.wait_time = float(peek_fade_seconds)
-
-
 func _load_chat_settings() -> void:
 	var section: Dictionary = ClientState.settings.data.get(SETTINGS_SECTION, {})
-	if section.has(SETTINGS_PEEK_FADE_KEY):
-		peek_fade_seconds = int(section[SETTINGS_PEEK_FADE_KEY])
 	if section.has(SETTINGS_SELF_COLOR_KEY):
 		self_name_color_override = str(section[SETTINGS_SELF_COLOR_KEY])
-	if section.has(SETTINGS_PEEK_SHOW_WORLD):
-		mute_peek_world = not bool(section[SETTINGS_PEEK_SHOW_WORLD])
-	if section.has(SETTINGS_PEEK_SHOW_DM):
-		mute_peek_dm = not bool(section[SETTINGS_PEEK_SHOW_DM])
-	if section.has(SETTINGS_PEEK_SHOW_SYSTEM):
-		mute_peek_system = not bool(section[SETTINGS_PEEK_SHOW_SYSTEM])
 
 
 func _save_chat_setting(key: StringName, value: Variant) -> void:

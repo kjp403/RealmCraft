@@ -2,26 +2,6 @@
 
 [ext_resource type="Script" uid="uid://678x32kmrkb5" path="res://source/client/ui/menus/chat/chat_menu.gd" id="1_hxcw4"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_14md2"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-bg_color = Color(0.11, 0.12, 0.14, 0.834)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.3, 0.32, 0.36, 1)
-border_blend = true
-corner_radius_top_left = 1
-corner_radius_top_right = 1
-corner_radius_bottom_right = 1
-corner_radius_bottom_left = 1
-shadow_color = Color(0, 0, 0, 0.22)
-shadow_size = 6
-shadow_offset = Vector2(0, 2)
-
 [sub_resource type="StyleBoxFlat" id="SB_chatbox"]
 content_margin_left = 10.0
 content_margin_top = 8.0
@@ -53,41 +33,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_hxcw4")
-
-[node name="PeekFeed" type="VBoxContainer" parent="." unique_id=2093161680]
-visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = -205.0
-offset_right = 310.0
-offset_bottom = -10.0
-grow_vertical = 0
-mouse_filter = 0
-alignment = 2
-
-[node name="MessageDisplay" type="RichTextLabel" parent="PeekFeed" unique_id=1999926943]
-custom_minimum_size = Vector2(300, 125)
-layout_mode = 2
-mouse_filter = 1
-theme_override_styles/normal = SubResource("StyleBoxFlat_14md2")
-bbcode_enabled = true
-scroll_active = false
-scroll_following = true
-
-[node name="MessageEdit" type="LineEdit" parent="PeekFeed" unique_id=998192108]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_placeholder_color = Color(1, 1, 1, 0.34902)
-theme_override_colors/caret_color = Color(1, 1, 1, 1)
-theme_override_styles/normal = SubResource("StyleBoxFlat_14md2")
-placeholder_text = "Enter your message here"
-
-[node name="FadeOutTimer" type="Timer" parent="PeekFeed" unique_id=91928970]
-wait_time = 3.0
-one_shot = true
 
 [node name="FullFeed" type="Control" parent="." unique_id=809452961]
 layout_mode = 1
@@ -226,38 +171,6 @@ modulate = Color(1, 1, 1, 0.55)
 layout_mode = 2
 text = "No blocked players."
 
-[node name="SepNotif" type="HSeparator" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037416]
-layout_mode = 2
-
-[node name="NotifHeader" type="Label" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037417]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Peek notifications"
-
-[node name="PeekShowWorld" type="CheckBox" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037418]
-layout_mode = 2
-text = "Show world chat in peek"
-
-[node name="PeekShowDM" type="CheckBox" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037419]
-layout_mode = 2
-text = "Show DMs in peek"
-
-[node name="PeekShowSystem" type="CheckBox" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037420]
-layout_mode = 2
-text = "Show system in peek"
-
-[node name="PeekFadeRow" type="HBoxContainer" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037421]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="PeekFadeLabel" type="Label" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekFadeRow" unique_id=1812037422]
-layout_mode = 2
-text = "Peek fade"
-
-[node name="PeekFadeOption" type="OptionButton" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent/PeekFadeRow" unique_id=1812037423]
-layout_mode = 2
-size_flags_horizontal = 3
-
 [node name="SepColor" type="HSeparator" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037424]
 layout_mode = 2
 
@@ -293,7 +206,5 @@ layout_mode = 2
 focus_mode = 0
 text = "Send"
 
-[connection signal="gui_input" from="PeekFeed" to="." method="_on_peek_feed_gui_input"]
-[connection signal="timeout" from="PeekFeed/FadeOutTimer" to="." method="_on_fade_out_timer_timeout"]
 [connection signal="pressed" from="FullFeed/Chatbox/Root/TabRow/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="meta_clicked" from="FullFeed/Chatbox/Root/Feed" to="." method="_on_rich_text_label_meta_clicked"]

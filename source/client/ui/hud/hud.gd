@@ -1,8 +1,6 @@
 class_name HUD
 extends Control
 
-const CHAT_ICON: Texture2D = preload("res://assets/sprites/ui/menu_icons_shadow/32px/message.png")
-const CHAT_ICON_UNREAD: Texture2D = preload("res://assets/sprites/ui/menu_icons_shadow/32px/message_exclamation.png")
 const NAVIGATION_MINIMAP_SCRIPT: Script = preload(
 	"res://source/client/ui/hud/navigation_minimap.gd"
 )
@@ -18,7 +16,6 @@ const HOSTILE_CONTEXT_MENU_SCRIPT: Script = preload(
 var notifications: Array[Dictionary]
 var menus: Dictionary[StringName, Control]
 var _xp_tween: Tween
-var _chat_icon: TextureRect
 var _navigation_minimap: Control
 ## Bumped on every player.died push so an in-flight respawn countdown can detect that a newer
 ## death event superseded it and bail (the newest invocation owns the death overlay).
@@ -31,15 +28,6 @@ var _hidden_for_menu: Array[CanvasItem] = []
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var notification_button: Button = $MenuButtons/ButtonRail/NotificationButton
 @onready var menu_button: Button = $MenuButtons/ButtonRail/MenuButton
-@onready var chat_button: Button = $MenuButtons/ButtonRail/ChatButton
-@onready var actions_button: Button = $MenuButtons/ButtonRail/ActionsButton
-@onready var recall_button: Button = $MenuButtons/ButtonRail/RecallButton
-
-## The ACTIONS FLYOUT: the rail's expandable drawer of deliberate, non-twitch character
-## actions (docs/ui.md two-tier rule — this is how the HUD scales without top-level creep).
-## Today: Recall. Future tenants (torch/light, emotes, sit, …) just join this list.
-@onready var _action_items: Array[Button] = [recall_button]
-var _actions_open: bool = false
 @onready var chat: ChatMenu = $Chat
 @onready var twin_sticks: Control = $TwinSticks
 @onready var quest_tracker: QuestTracker = $QuestTracker
@@ -77,27 +65,12 @@ func _ready() -> void:
 	# whole-pixel centered) — visible in the scene, sharp at runtime.
 	PixelIcon.from_button(menu_button)
 	PixelIcon.from_button(notification_button)
-	# Chat button now lives in this rail (was self-placed by chat_menu); it toggles the chat
-	# feed and badges with the exclamation glyph when a DM is unread.
-	_chat_icon = PixelIcon.from_button(chat_button)
-	chat_button.pressed.connect(chat.toggle_feed)
-	chat.unread_changed.connect(_on_chat_unread)
-	# The Actions flyout: one stable rail button expands the drawer of deliberate
-	# character actions — reachable on MOBILE (no B key there) without top-level creep.
-	PixelIcon.from_button(actions_button)
-	PixelIcon.from_button(recall_button)
-	actions_button.pressed.connect(_toggle_actions_flyout)
-	# Recall: same guarded path as the B key; an accidental tap self-corrects (moving
-	# cancels the channel). Firing an action collapses the drawer.
-	recall_button.pressed.connect(func() -> void:
-		if ClientState.local_player != null:
-			ClientState.local_player.request_recall()
-		_toggle_actions_flyout())
+	# Chat opens with Enter (player_chat); the old rail bubble + actions heart are gone.
 	Client.subscribe(&"notification", _on_notification_received)
 	ClientState.player_profile_requested.connect(open_player_profile)
 	ClientState.player_profile_by_peer_requested.connect(open_player_profile_by_peer)
 	ClientState.open_menu_requested.connect(_on_menu_requested)
-	# Submenus sit ABOVE the chat (z=1) so the chat peek / full feed never floats over an open menu.
+	# Submenus sit ABOVE the chat (z=1) so the chat panel never floats over an open menu.
 	if sub_menu != null:
 		sub_menu.z_index = 2
 	# The launcher isn't a display_menu submenu, so hook its show/hide into the same HUD-hide path.
@@ -138,11 +111,6 @@ func _ready() -> void:
 	# watch node_added). The gateway has its own wiring; this is scoped to the in-game HUD subtree.
 	_wire_subtree(self)
 	get_tree().node_added.connect(_on_node_added)
-
-
-## Swap the rail chat button to the exclamation glyph while a DM is unread (chat_menu emits).
-func _on_chat_unread(has_unread: bool) -> void:
-	PixelIcon.set_art(_chat_icon, CHAT_ICON_UNREAD if has_unread else CHAT_ICON)
 
 
 ## Fetch the current level/xp once (e.g. on spawn / map change). A fetch is a
@@ -425,16 +393,6 @@ func display_menu(menu_name: StringName, arg: Variant = null) -> void:
 
 func _on_overlay_menu_button_pressed() -> void:
 	menu_overlay.open()
-
-
-## Open/close the Actions drawer: the rail simply grows by the action buttons while
-## open. The Actions button warms up as the "this is expanded" tell; firing any action
-## (or re-tapping) collapses it.
-func _toggle_actions_flyout() -> void:
-	_actions_open = not _actions_open
-	for item: Button in _action_items:
-		item.visible = _actions_open
-	actions_button.modulate = Color(1.0, 0.9, 0.6) if _actions_open else Color.WHITE
 
 
 func _on_notification_button_pressed() -> void:
