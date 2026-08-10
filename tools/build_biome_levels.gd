@@ -29,6 +29,33 @@ var H: int = 72
 var _bounds := Rect2i(0, 0, 96, 72)
 var _report: Array[String] = []
 
+## Layout scale for sub-levels. Authored coordinates / radii below describe the
+## original compact maps; `_L` / `_R` / `_N` expand them so large TRPG sprites
+## have room to move (Mining Cave freedom standard). Atlas cells are never
+## scaled — only world layout.
+const S := 5
+
+
+func _L(x: int, y: int) -> Vector2i:
+	return Vector2i(x * S, y * S)
+
+
+func _R(v: float) -> float:
+	return v * float(S)
+
+
+func _N(n: int) -> int:
+	return n * S
+
+
+func _dense(rate: float) -> float:
+	# Keep absolute prop counts stable as floor area grows with S^2.
+	return rate / float(S * S)
+
+
+func _gap(n: int) -> int:
+	return maxi(n, int((n * S) / 2.0))
+
 
 func _initialize() -> void:
 	_build_desert_terraces()
@@ -87,7 +114,7 @@ func _ring_links(centre: Vector2i, radius: int, count: int, width: float, seed_v
 		var b: float = TAU * float((i + 1) % count) / float(count)
 		var p := centre + Vector2i(int(cos(a) * radius), int(sin(a) * radius * 0.72))
 		var q := centre + Vector2i(int(cos(b) * radius), int(sin(b) * radius * 0.72))
-		out.append([p, q, width, 2.5, seed_value + i])
+		out.append([p, q, width, 2.5 * float(S), seed_value + i])
 	return out
 
 
@@ -202,24 +229,24 @@ func _populate(walk: Dictionary, taken: Dictionary, spots: Array, gap: int = 3) 
 # Props monuments, the Sand dune overlays, and the OutdoorHouseSet paving.
 
 func _build_desert_terraces() -> void:
-	_set_size(100, 74)
+	_set_size(_N(100), _N(74))
 	var ts: TileSet = load(DESERT_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(50, 64)
-	var centre := Vector2i(50, 36)
-	var chambers: Array = [[Vector2i(50, 63), 9.0, 0.26, 201]]
-	chambers.append_array(_ring(centre, 38, 7, 9.5, 210))
-	var links: Array = [[Vector2i(50, 58), Vector2i(50, 50), 3.0, 2.0, 220]]
-	links.append_array(_ring_links(centre, 38, 7, 2.8, 230))
-	var floor_mask := _carve(chambers, links, 4, arrival)
+	var arrival := _L(50, 64)
+	var centre := _L(50, 36)
+	var chambers: Array = [[_L(50, 63), _R(9.0), 0.26, 201]]
+	chambers.append_array(_ring(centre, _N(38), 7, _R(9.5), 210))
+	var links: Array = [[_L(50, 58), _L(50, 50), _R(3.0), _R(2.0), 220]]
+	links.append_array(_ring_links(centre, _N(38), 7, _R(2.8), 230))
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
 	# The spire the terraces circle: a solid mesa left standing in the middle.
 	var spire: Dictionary = {}
-	MapKit.blob(spire, centre, 11.0, 0.24, 240, _bounds)
+	MapKit.blob(spire, centre, _R(11.0), 0.24, 240, _bounds)
 	spire = MapKit.smooth(spire, _bounds, 1, 5, 4)
 	for cell: Vector2i in spire.keys():
 		floor_mask.erase(cell)
@@ -241,16 +268,16 @@ func _build_desert_terraces() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
 		if not no_build.has(cell):
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked)
-	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 	# Tall monuments need a block of clear cells, so they anchor on interior
 	# floor rather than the nearest free cell — which is often against a cliff
 	# where the stamp would silently fail to fit.
@@ -263,13 +290,13 @@ func _build_desert_terraces() -> void:
 	# their pick of open ground before the scatter fills the gaps.
 	var monuments: Array = [
 		[Vector2i(50, 12), [0, 0, 3, 8]],    # great obelisk, north gate
-		[Vector2i(16, 32), [2, 2, 3, 6]],    # lesser obelisk, west terrace
-		[Vector2i(84, 32), [2, 2, 3, 6]],    # lesser obelisk, east terrace
-		[Vector2i(24, 58), [4, 4, 2, 4]],    # roadside shrines on the south run
-		[Vector2i(76, 58), [4, 4, 2, 4]],
-		[Vector2i(30, 16), [0, 8, 2, 3]],    # stepped bases flanking the spire
-		[Vector2i(70, 16), [2, 8, 2, 3]],
-		[Vector2i(50, 54), [4, 8, 2, 3]],
+		[_L(16, 32), [2, 2, 3, 6]],    # lesser obelisk, west terrace
+		[_L(84, 32), [2, 2, 3, 6]],    # lesser obelisk, east terrace
+		[_L(24, 58), [4, 4, 2, 4]],    # roadside shrines on the south run
+		[_L(76, 58), [4, 4, 2, 4]],
+		[_L(30, 16), [0, 8, 2, 3]],    # stepped bases flanking the spire
+		[_L(70, 16), [2, 8, 2, 3]],
+		[_L(50, 54), [4, 8, 2, 3]],
 	]
 	for m in monuments:
 		LevelKit.stamp_landmark(props, 1, m[1], LevelKit.pick_open(inner_free, m[0]), inner_free, solid)
@@ -277,17 +304,17 @@ func _build_desert_terraces() -> void:
 	# Sun-bleached bones and dead trees on the exposed rims.
 	for b in [
 		[Vector2i(14, 48), [0, 11, 3, 5]], [Vector2i(86, 48), [3, 11, 2, 3]],
-		[Vector2i(22, 20), [0, 16, 3, 5]], [Vector2i(78, 20), [4, 16, 2, 2]],
+		[_L(22, 20), [0, 16, 3, 5]], [_L(78, 20), [4, 16, 2, 2]],
 	]:
 		LevelKit.stamp_landmark(props, 1, b[1], LevelKit.pick_open(inner_free, b[0]), inner_free, solid)
 	for cell: Vector2i in solid.keys():
 		free.erase(cell)
 
 	# Boulders hug the cliff feet, cacti stand in the open.
-	LevelKit.scatter_props(props, 0, edges, [[10, 7, 2, 2], [12, 7, 2, 2], [10, 1, 2, 2]], 0.09, 5, 261, free, solid)
-	LevelKit.scatter_props(props, 0, inner, [[10, 14, 1, 3], [11, 14, 1, 3], [12, 14, 1, 3]], 0.045, 6, 262, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[10, 7, 2, 2], [12, 7, 2, 2], [10, 1, 2, 2]], _dense(0.09), _N(5), 261, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[10, 14, 1, 3], [11, 14, 1, 3], [12, 14, 1, 3]], _dense(0.045), _N(6), 262, free, solid)
 	# Caravan urns and chests around the camp end.
-	LevelKit.scatter_props(props, 1, inner, [[6, 0, 2, 2], [8, 0, 2, 2], [6, 2, 2, 2]], 0.02, 9, 263, free, solid)
+	LevelKit.scatter_props(props, 1, inner, [[6, 0, 2, 2], [8, 0, 2, 2], [6, 2, 2, 2]], _dense(0.02), _N(9), 263, free, solid)
 	# Stone lanterns ringing the camp. `free` already excludes the arrival
 	# keepout, so these stay clear of the stair.
 	for spot in [
@@ -304,21 +331,21 @@ func _build_desert_terraces() -> void:
 	# read as wind ripples drifting over everything else.
 	LevelKit.scatter_flat(props, 0, inner, [
 		Vector2i(10, 5), Vector2i(11, 5), Vector2i(12, 5), Vector2i(13, 5), Vector2i(14, 5),
-	], 0.10, 3, 264, solid)
+	], _dense(0.10), _N(3), 264, solid)
 	LevelKit.scatter_flat(props, 1, inner, [
 		Vector2i(6, 4), Vector2i(7, 4), Vector2i(8, 4), Vector2i(9, 4),
 		Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5), Vector2i(9, 5),
-	], 0.015, 7, 265, solid)
+	], _dense(0.015), _N(7), 265, solid)
 	LevelKit.scatter_flat(overlay, 2, inner, [
 		Vector2i(4, 1), Vector2i(5, 1), Vector2i(6, 1), Vector2i(3, 2),
 		Vector2i(10, 1), Vector2i(11, 1), Vector2i(15, 2), Vector2i(16, 2),
-	], 0.07, 4, 266, {})
+	], _dense(0.07), _N(4), 266, {})
 	# No paved apron here: every OutdoorHouseSet paving cell carries a collision
 	# polygon (it is a platformer wall set) and the Ground sheet's cut slabs read
 	# as a foreign grey patch dropped on open sand. The camp is marked instead by
 	# its lanterns, fire and scrub, which is what the surface basin does too.
 
-	var lit: Dictionary = LevelKit.keepout([entrance, exit_cell], 2)
+	var lit: Dictionary = LevelKit.keepout([entrance, exit_cell], _gap(2))
 	var decos: Array = []
 	var ti := 0
 	for spot in [
@@ -338,7 +365,7 @@ func _build_desert_terraces() -> void:
 	var critters: Array = []
 	var names := ["critter_stag", "critter_boar", "critter_badger", "critter_wolf"]
 	var ci := 0
-	for spot in [Vector2i(24, 44), Vector2i(76, 44), Vector2i(50, 30), Vector2i(44, 58)]:
+	for spot in [_L(24, 44), _L(76, 44), _L(50, 30), _L(44, 58)]:
 		critters.append({
 			"name": "TerraceCritter%d" % (ci + 1),
 			"frames": names[ci],
@@ -349,20 +376,20 @@ func _build_desert_terraces() -> void:
 		ci += 1
 
 	# Population: raiders and cliff beasts working the loop.
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
 		["Harpy", "trpg/trpg_clawing_harpy", Vector2i(50, 18)],
-		["Harpy2", "trpg/trpg_clawing_harpy", Vector2i(44, 22)],
-		["Harpy3", "trpg/trpg_clawing_harpy", Vector2i(56, 22)],
-		["Cockatrice", "trpg/trpg_lacerating_cockatrice", Vector2i(22, 32)],
-		["Cockatrice2", "trpg/trpg_lacerating_cockatrice", Vector2i(78, 32)],
-		["OrcRider", "trpg/trpg_orc_rider", Vector2i(24, 50)],
-		["OrcRider2", "trpg/trpg_orc_rider", Vector2i(76, 50)],
-		["DuneArcher", "trpg/trpg_archer", Vector2i(34, 40)],
-		["DuneArcher2", "trpg/trpg_archer", Vector2i(66, 40)],
-		["Fomorian", "trpg/trpg_wretched_fomorian", Vector2i(50, 46)],
+		["Harpy2", "trpg/trpg_clawing_harpy", _L(44, 22)],
+		["Harpy3", "trpg/trpg_clawing_harpy", _L(56, 22)],
+		["Cockatrice", "trpg/trpg_lacerating_cockatrice", _L(22, 32)],
+		["Cockatrice2", "trpg/trpg_lacerating_cockatrice", _L(78, 32)],
+		["OrcRider", "trpg/trpg_orc_rider", _L(24, 50)],
+		["OrcRider2", "trpg/trpg_orc_rider", _L(76, 50)],
+		["DuneArcher", "trpg/trpg_archer", _L(34, 40)],
+		["DuneArcher2", "trpg/trpg_archer", _L(66, 40)],
+		["Fomorian", "trpg/trpg_wretched_fomorian", _L(50, 46)],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -371,10 +398,10 @@ func _build_desert_terraces() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2), entrance + Vector2i(4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2), entrance + _L(4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "terraces spawn blocked")
-	assert(walk.size() > 1400, "terraces too small: %d" % walk.size())
+	assert(walk.size() > 35000, "terraces too small: %d" % walk.size())
 	_log("sunspire_terraces", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -392,7 +419,7 @@ func _build_desert_terraces() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "CaravanFire", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "CaravanFire", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"critters": critters,
 		"hostiles": hostiles,
@@ -419,42 +446,42 @@ func _build_desert_terraces() -> void:
 # though the wall border resolves with the same cliff ring as the surface.
 
 func _build_desert_tombs() -> void:
-	_set_size(108, 84)
+	_set_size(_N(108), _N(84))
 	var ts: TileSet = load(DESERT_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(54, 74)
+	var arrival := _L(54, 74)
 	var floor_mask := _carve(
 		[
-			[Vector2i(54, 73), 8.0, 0.24, 301],   # stair hall
-			[Vector2i(54, 62), 7.0, 0.26, 302],
-			[Vector2i(32, 58), 7.5, 0.28, 303],   # paired alcoves down the spine
-			[Vector2i(76, 58), 7.5, 0.28, 304],
-			[Vector2i(54, 48), 7.0, 0.26, 305],
-			[Vector2i(28, 42), 8.0, 0.28, 306],
-			[Vector2i(80, 42), 8.0, 0.28, 307],
-			[Vector2i(54, 34), 7.5, 0.26, 308],
-			[Vector2i(34, 24), 7.0, 0.28, 309],
-			[Vector2i(74, 24), 7.0, 0.28, 310],
-			[Vector2i(54, 16), 13.0, 0.20, 311],  # king's chamber
+			[Vector2i(54, 73), _R(8.0), 0.24, 301],   # stair hall
+			[_L(54, 62), _R(7.0), 0.26, 302],
+			[_L(32, 58), _R(7.5), 0.28, 303],   # paired alcoves down the spine
+			[_L(76, 58), _R(7.5), 0.28, 304],
+			[_L(54, 48), _R(7.0), 0.26, 305],
+			[_L(28, 42), _R(8.0), 0.28, 306],
+			[_L(80, 42), _R(8.0), 0.28, 307],
+			[_L(54, 34), _R(7.5), 0.26, 308],
+			[_L(34, 24), _R(7.0), 0.28, 309],
+			[_L(74, 24), _R(7.0), 0.28, 310],
+			[_L(54, 16), _R(13.0), 0.20, 311],  # king's chamber
 		],
 		[
-			[Vector2i(54, 68), Vector2i(54, 56), 2.6, 1.8, 321],
-			[Vector2i(48, 60), Vector2i(36, 58), 2.2, 2.4, 322],
-			[Vector2i(60, 60), Vector2i(72, 58), 2.2, 2.4, 323],
-			[Vector2i(54, 54), Vector2i(54, 42), 2.6, 1.8, 324],
-			[Vector2i(46, 46), Vector2i(32, 42), 2.2, 2.6, 325],
-			[Vector2i(62, 46), Vector2i(76, 42), 2.2, 2.6, 326],
-			[Vector2i(54, 40), Vector2i(54, 26), 2.6, 1.8, 327],
-			[Vector2i(46, 30), Vector2i(38, 24), 2.2, 2.4, 328],
-			[Vector2i(62, 30), Vector2i(70, 24), 2.2, 2.4, 329],
-			[Vector2i(38, 22), Vector2i(48, 16), 2.4, 2.2, 330],
-			[Vector2i(70, 22), Vector2i(60, 16), 2.4, 2.2, 331],
+			[Vector2i(54, 68), Vector2i(54, 56), _R(2.6), _R(1.8), 321],
+			[_L(48, 60), _L(36, 58), _R(2.2), _R(2.4), 322],
+			[_L(60, 60), _L(72, 58), _R(2.2), _R(2.4), 323],
+			[_L(54, 54), _L(54, 42), _R(2.6), _R(1.8), 324],
+			[_L(46, 46), _L(32, 42), _R(2.2), _R(2.6), 325],
+			[_L(62, 46), _L(76, 42), _R(2.2), _R(2.6), 326],
+			[_L(54, 40), _L(54, 26), _R(2.6), _R(1.8), 327],
+			[_L(46, 30), _L(38, 24), _R(2.2), _R(2.4), 328],
+			[_L(62, 30), _L(70, 24), _R(2.2), _R(2.4), 329],
+			[_L(38, 22), _L(48, 16), _R(2.4), _R(2.2), 330],
+			[_L(70, 22), _L(60, 16), _R(2.4), _R(2.2), 331],
 		],
-		4,
+		_N(4),
 		arrival
 	)
 
@@ -484,11 +511,11 @@ func _build_desert_tombs() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
-	var throne := LevelKit.pick_open(walk, Vector2i(54, 16))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
+	var throne := LevelKit.pick_open(walk, _L(54, 16))
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
-	for cell: Vector2i in LevelKit.keepout([throne], 6).keys():
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
+	for cell: Vector2i in LevelKit.keepout([throne], _gap(6)).keys():
 		no_build[cell] = true
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
@@ -496,7 +523,7 @@ func _build_desert_tombs() -> void:
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked)
-	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 
 	# Sarcophagi line the alcoves — the gilded coffin bank on Ground rows 15-18.
 	for spot in [
@@ -510,9 +537,9 @@ func _build_desert_tombs() -> void:
 		][MapKit.hash2(anchor.x, anchor.y, 351) % 3]
 		LevelKit.stamp_landmark(props, 0, bank, anchor, free, solid)
 	# Grave goods heaped against the walls.
-	LevelKit.scatter_props(props, 1, edges, [[6, 0, 2, 2], [8, 0, 2, 2], [6, 2, 2, 2], [8, 2, 2, 2]], 0.07, 5, 352, free, solid)
-	LevelKit.scatter_props(props, 1, inner, [[0, 8, 2, 3], [2, 8, 2, 3], [4, 8, 2, 3]], 0.035, 7, 353, free, solid)
-	LevelKit.scatter_props(props, 1, edges, [[0, 11, 3, 5], [3, 11, 2, 3]], 0.03, 8, 354, free, solid)
+	LevelKit.scatter_props(props, 1, edges, [[6, 0, 2, 2], [8, 0, 2, 2], [6, 2, 2, 2], [8, 2, 2, 2]], _dense(0.07), _N(5), 352, free, solid)
+	LevelKit.scatter_props(props, 1, inner, [[0, 8, 2, 3], [2, 8, 2, 3], [4, 8, 2, 3]], _dense(0.035), _N(7), 353, free, solid)
+	LevelKit.scatter_props(props, 1, edges, [[0, 11, 3, 5], [3, 11, 2, 3]], _dense(0.03), _N(8), 354, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
@@ -522,10 +549,10 @@ func _build_desert_tombs() -> void:
 		Vector2i(6, 4), Vector2i(7, 4), Vector2i(8, 4), Vector2i(9, 4),
 		Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5), Vector2i(9, 5),
 		Vector2i(6, 6), Vector2i(7, 6), Vector2i(8, 6), Vector2i(9, 6),
-	], 0.05, 4, 355, solid)
+	], _dense(0.05), _N(4), 355, solid)
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(10, 11), Vector2i(11, 11), Vector2i(12, 11), Vector2i(13, 11),
-	], 0.02, 8, 356, {})
+	], _dense(0.02), _N(8), 356, {})
 
 	var decos: Array = []
 	var ti := 0
@@ -546,7 +573,7 @@ func _build_desert_tombs() -> void:
 
 	var lights: Array = []
 	var li := 0
-	for spot in [Vector2i(54, 16), Vector2i(48, 14), Vector2i(60, 14)]:
+	for spot in [_L(54, 16), _L(48, 14), _L(60, 14)]:
 		li += 1
 		lights.append({
 			"name": "ThroneGlow%d" % li,
@@ -556,25 +583,25 @@ func _build_desert_tombs() -> void:
 			"scale": 1.6,
 		})
 
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
 		["TombSkeleton", "trpg/trpg_skeleton", Vector2i(54, 62)],
-		["TombSkeleton2", "trpg/trpg_skeleton", Vector2i(48, 60)],
-		["TombSkeleton3", "trpg/trpg_skeleton", Vector2i(60, 60)],
-		["ArmoredSkeleton", "trpg/trpg_armored_skeleton", Vector2i(32, 58)],
-		["ArmoredSkeleton2", "trpg/trpg_armored_skeleton", Vector2i(76, 58)],
-		["BoneArcher", "trpg/trpg_skeleton_archer", Vector2i(28, 42)],
-		["BoneArcher2", "trpg/trpg_skeleton_archer", Vector2i(80, 42)],
-		["Greatsword", "trpg/trpg_greatsword_skeleton", Vector2i(54, 48)],
-		["Greatsword2", "trpg/trpg_greatsword_skeleton", Vector2i(54, 34)],
-		["Necromancer", "trpg/trpg_necromancer", Vector2i(34, 24)],
-		["Necromancer2", "trpg/trpg_necromancer", Vector2i(74, 24)],
-		["Gorgon", "trpg/trpg_poisonous_gorgon", Vector2i(44, 34)],
-		["Gorgon2", "trpg/trpg_poisonous_gorgon", Vector2i(64, 34)],
-		["ThroneGuard", "trpg/trpg_armored_skeleton", Vector2i(46, 18)],
-		["ThroneGuard2", "trpg/trpg_armored_skeleton", Vector2i(62, 18)],
+		["TombSkeleton2", "trpg/trpg_skeleton", _L(48, 60)],
+		["TombSkeleton3", "trpg/trpg_skeleton", _L(60, 60)],
+		["ArmoredSkeleton", "trpg/trpg_armored_skeleton", _L(32, 58)],
+		["ArmoredSkeleton2", "trpg/trpg_armored_skeleton", _L(76, 58)],
+		["BoneArcher", "trpg/trpg_skeleton_archer", _L(28, 42)],
+		["BoneArcher2", "trpg/trpg_skeleton_archer", _L(80, 42)],
+		["Greatsword", "trpg/trpg_greatsword_skeleton", _L(54, 48)],
+		["Greatsword2", "trpg/trpg_greatsword_skeleton", _L(54, 34)],
+		["Necromancer", "trpg/trpg_necromancer", _L(34, 24)],
+		["Necromancer2", "trpg/trpg_necromancer", _L(74, 24)],
+		["Gorgon", "trpg/trpg_poisonous_gorgon", _L(44, 34)],
+		["Gorgon2", "trpg/trpg_poisonous_gorgon", _L(64, 34)],
+		["ThroneGuard", "trpg/trpg_armored_skeleton", _L(46, 18)],
+		["ThroneGuard2", "trpg/trpg_armored_skeleton", _L(62, 18)],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -588,11 +615,11 @@ func _build_desert_tombs() -> void:
 		"pos": LevelKit.tile_pos(throne),
 	})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "tombs spawn blocked")
 	assert(walk.has(throne), "tombs throne blocked")
-	assert(walk.size() > 1400, "tombs too small: %d" % walk.size())
+	assert(walk.size() > 35000, "tombs too small: %d" % walk.size())
 	_log("sunken_tombs", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -610,7 +637,7 @@ func _build_desert_tombs() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "StairFire", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "StairFire", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"lights": lights,
 		"hostiles": hostiles,
@@ -639,34 +666,34 @@ func _build_desert_tombs() -> void:
 # below never paint.
 
 func _build_sewers_gutterworks() -> void:
-	_set_size(104, 78)
+	_set_size(_N(104), _N(78))
 	var ts: TileSet = load(SEWERS_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(52, 68)
-	var cols := [22, 52, 82]
-	var rows := [20, 40, 58]
-	var chambers: Array = [[Vector2i(52, 67), 7.0, 0.24, 401]]
+	var arrival := _L(52, 68)
+	var cols := [_N(22), _N(52), _N(82)]
+	var rows := [_N(20), _N(40), _N(58)]
+	var chambers: Array = [[_L(52, 67), _R(7.0), 0.24, 401]]
 	var seed_i := 410
 	for cx in cols:
 		for ry in rows:
-			chambers.append([Vector2i(cx, ry), 7.0, 0.26, seed_i])
+			chambers.append([Vector2i(cx, ry), _R(7.0), 0.26, seed_i])
 			seed_i += 1
-	var links: Array = [[Vector2i(52, 64), Vector2i(52, 60), 2.6, 1.6, 430]]
+	var links: Array = [[_L(52, 64), _L(52, 60), _R(2.6), _R(1.6), 430]]
 	# Grid of service runs: every neighbouring junction joined both ways.
 	var seed_j := 440
 	for ry in rows:
 		for i in range(cols.size() - 1):
-			links.append([Vector2i(cols[i], ry), Vector2i(cols[i + 1], ry), 2.2, 2.0, seed_j])
+			links.append([Vector2i(cols[i], ry), Vector2i(cols[i + 1], ry), _R(2.2), _R(2.0), seed_j])
 			seed_j += 1
 	for cx in cols:
 		for i in range(rows.size() - 1):
-			links.append([Vector2i(cx, rows[i]), Vector2i(cx, rows[i + 1]), 2.2, 2.0, seed_j])
+			links.append([Vector2i(cx, rows[i]), Vector2i(cx, rows[i + 1]), _R(2.2), _R(2.0), seed_j])
 			seed_j += 1
-	var floor_mask := _carve(chambers, links, 4, arrival)
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
 	# DarkCastle cobble paving instead of the culverts' purple flagstone.
 	var cobble := [Vector2i(0, 4), Vector2i(1, 4)]
@@ -686,16 +713,16 @@ func _build_sewers_gutterworks() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
 		if not no_build.has(cell):
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked)
-	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 
 	# Junction furniture: portcullis frames and gargoyle heads at the crossings.
 	for spot in [
@@ -704,22 +731,22 @@ func _build_sewers_gutterworks() -> void:
 	]:
 		LevelKit.stamp_landmark(props, 2, [3, 3, 1, 1], LevelKit.pick_open(free, spot), free, solid)
 	# Wooden beams and brick piers from the pixel-dungeon shell.
-	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], 0.14, 4, 461, free, solid)
-	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], 0.05, 6, 462, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.14), _N(4), 461, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _dense(0.05), _N(6), 462, free, solid)
 	# Stores left behind by the works crews: chests, crates and cauldrons.
-	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [2, 8, 1, 1], [3, 8, 1, 1], [4, 7, 1, 1]], 0.05, 6, 463, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [2, 8, 1, 1], [3, 8, 1, 1], [4, 7, 1, 1]], _dense(0.05), _N(6), 463, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
 	# Drain grates and spilled stock on the cobbles.
-	LevelKit.scatter_flat(props, 2, inner, [Vector2i(2, 4)], 0.035, 5, 464, solid)
+	LevelKit.scatter_flat(props, 2, inner, [Vector2i(2, 4)], _dense(0.035), _N(5), 464, solid)
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
 		Vector2i(6, 8), Vector2i(7, 8), Vector2i(9, 8),
-	], 0.055, 3, 465, {})
+	], _dense(0.055), _N(3), 465, {})
 	# Banners hung on the wall faces flanking the runs.
-	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], 0.05, 5, 466, solid)
+	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _dense(0.05), _N(5), 466, solid)
 
 	var decos: Array = []
 	var ti := 0
@@ -738,23 +765,23 @@ func _build_sewers_gutterworks() -> void:
 			"color": "Color(0.55, 0.95, 0.6, 1)" if ti % 3 == 0 else "Color(1, 0.74, 0.4, 1)",
 		})
 
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
 		["Slime", "trpg/trpg_slime", Vector2i(22, 58)],
-		["Slime2", "trpg/trpg_slime", Vector2i(82, 58)],
-		["Slime3", "trpg/trpg_slime", Vector2i(52, 58)],
-		["GutterBat", "trpg/trpg_bat", Vector2i(22, 40)],
-		["GutterBat2", "trpg/trpg_bat", Vector2i(52, 40)],
-		["GutterBat3", "trpg/trpg_bat", Vector2i(82, 40)],
-		["AcidOoze", "trpg/trpg_acid_ooze", Vector2i(22, 20)],
-		["AcidOoze2", "trpg/trpg_acid_ooze", Vector2i(82, 20)],
-		["Zombie", "trpg/trpg_zombie_giant", Vector2i(52, 20)],
-		["Crawler", "trpg/trpg_carrion_crawler", Vector2i(37, 30)],
-		["Crawler2", "trpg/trpg_carrion_crawler", Vector2i(67, 30)],
-		["Skeleton", "trpg/trpg_skeleton", Vector2i(37, 49)],
-		["Skeleton2", "trpg/trpg_skeleton", Vector2i(67, 49)],
+		["Slime2", "trpg/trpg_slime", _L(82, 58)],
+		["Slime3", "trpg/trpg_slime", _L(52, 58)],
+		["GutterBat", "trpg/trpg_bat", _L(22, 40)],
+		["GutterBat2", "trpg/trpg_bat", _L(52, 40)],
+		["GutterBat3", "trpg/trpg_bat", _L(82, 40)],
+		["AcidOoze", "trpg/trpg_acid_ooze", _L(22, 20)],
+		["AcidOoze2", "trpg/trpg_acid_ooze", _L(82, 20)],
+		["Zombie", "trpg/trpg_zombie_giant", _L(52, 20)],
+		["Crawler", "trpg/trpg_carrion_crawler", _L(37, 30)],
+		["Crawler2", "trpg/trpg_carrion_crawler", _L(67, 30)],
+		["Skeleton", "trpg/trpg_skeleton", _L(37, 49)],
+		["Skeleton2", "trpg/trpg_skeleton", _L(67, 49)],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -763,10 +790,10 @@ func _build_sewers_gutterworks() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2), entrance + Vector2i(4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2), entrance + _L(4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "gutterworks spawn blocked")
-	assert(walk.size() > 1200, "gutterworks too small: %d" % walk.size())
+	assert(walk.size() > 30000, "gutterworks too small: %d" % walk.size())
 	_log("gutterworks", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -784,7 +811,7 @@ func _build_sewers_gutterworks() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "CrewBrazier", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "CrewBrazier", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"hostiles": hostiles,
 		"npcs": [
@@ -809,36 +836,39 @@ func _build_sewers_gutterworks() -> void:
 # pools bank, and rubble walls behind the rim. The boss holds the mosaic floor.
 
 func _build_sewers_cistern() -> void:
-	_set_size(112, 86)
+	_set_size(_N(112), _N(86))
 	var ts: TileSet = load(SEWERS_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(56, 76)
-	var basin := Vector2i(56, 38)
+	var arrival := _L(56, 76)
+	var basin := _L(56, 38)
 	var chambers: Array = [
-		[Vector2i(56, 75), 7.5, 0.24, 501],
-		[Vector2i(56, 64), 7.0, 0.26, 502],
-		[basin, 20.0, 0.14, 503],  # the reservoir itself
+		[Vector2i(56, 75), _R(7.5), 0.24, 501],
+		[_L(56, 64), _R(7.0), 0.26, 502],
+		[basin, _R(20.0), 0.14, 503],  # the reservoir itself
 	]
-	chambers.append_array(_ring(basin, 34, 7, 7.0, 510))
+	chambers.append_array(_ring(basin, _N(34), 7, _R(7.0), 510))
 	var links: Array = [
-		[Vector2i(56, 70), Vector2i(56, 58), 2.8, 1.8, 520],
-		[Vector2i(56, 58), basin, 3.0, 1.6, 521],
+		[Vector2i(56, 70), Vector2i(56, 58), _R(2.8), _R(1.8), 520],
+		[_L(56, 58), basin, _R(3.0), _R(1.6), 521],
 	]
-	links.append_array(_ring_links(basin, 34, 7, 2.2, 530))
+	links.append_array(_ring_links(basin, _N(34), 7, _R(2.2), 530))
 	# Spokes from the holding tanks into the reservoir.
 	var seed_s := 540
 	for i in 7:
 		var a: float = TAU * float(i) / 7.0
-		var p := basin + Vector2i(int(cos(a) * 34), int(sin(a) * 34 * 0.72))
-		links.append([p, basin, 2.0, 2.4, seed_s])
+		var p := basin + Vector2i(int(cos(a) * _N(34)), int(sin(a) * _N(34) * 0.72))
+		links.append([p, basin, _R(2.0), _R(2.4), seed_s])
 		seed_s += 1
-	var floor_mask := _carve(chambers, links, 4, arrival)
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
-	var dg_floor := [Vector2i(4, 13), Vector2i(5, 13), Vector2i(6, 13), Vector2i(7, 13)]
+	var dg_floor := [
+		Vector2i(5, 13), Vector2i(6, 13), Vector2i(7, 13),
+		Vector2i(8, 13), Vector2i(9, 13), Vector2i(10, 13),
+	]
 	for cell: Vector2i in floor_mask.keys():
 		ground.set_cell(cell, 3, MapKit._pick(dg_floor, cell, 551))
 
@@ -857,7 +887,7 @@ func _build_sewers_cistern() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 	var dais := LevelKit.pick_open(walk, basin)
 
 	# The ornate hall mosaic laid as the reservoir's drained floor plate.
@@ -872,9 +902,9 @@ func _build_sewers_cistern() -> void:
 	# carry no collision, so the water is wadeable rather than a barrier.
 	var shallows: Dictionary = {}
 	for spot in [
-		[basin + Vector2i(-14, 4), 5.0, 561], [basin + Vector2i(14, 4), 5.0, 562],
-		[basin + Vector2i(-12, -8), 4.4, 563], [basin + Vector2i(12, -8), 4.4, 564],
-		[Vector2i(56, 62), 4.0, 565],
+		[basin + Vector2i(-14, 4), _R(5.0), 561], [basin + Vector2i(14, 4), _R(5.0), 562],
+		[basin + _L(-12, -8), _R(4.4), 563], [basin + _L(12, -8), _R(4.4), 564],
+		[_L(56, 62), _R(4.0), 565],
 	]:
 		var pool: Dictionary = {}
 		MapKit.blob(pool, spot[0], spot[1], 0.30, int(spot[2]), _bounds)
@@ -882,12 +912,14 @@ func _build_sewers_cistern() -> void:
 		for cell: Vector2i in pool.keys():
 			if walk.has(cell) and ground.get_cell_atlas_coords(cell).x < 21:
 				shallows[cell] = true
-	var water := [Vector2i(4, 11), Vector2i(5, 11), Vector2i(6, 11)]
+	# Real water is a sparse-alpha sheet — paint it on Overlay over solid stone
+	# so transparent pixels never punch holes through the map (Mining Cave rule).
+	var water := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
 	for cell: Vector2i in shallows.keys():
-		ground.set_cell(cell, 3, MapKit._pick(water, cell, 566))
+		overlay.set_cell(cell, 4, MapKit._pick(water, cell, 566))
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
-	for cell: Vector2i in LevelKit.keepout([dais], 7).keys():
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
+	for cell: Vector2i in LevelKit.keepout([dais], _gap(7)).keys():
 		no_build[cell] = true
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
@@ -895,7 +927,7 @@ func _build_sewers_cistern() -> void:
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked)
-	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 
 	# Fallen pillars and stair blocks from the DG set, plus catacomb urns.
 	for spot in [
@@ -903,20 +935,20 @@ func _build_sewers_cistern() -> void:
 		Vector2i(56, 20), Vector2i(40, 64), Vector2i(72, 64),
 	]:
 		LevelKit.stamp_landmark(props, 3, [16, 7, 3, 3], LevelKit.pick_open(free, spot), free, solid)
-	for spot in [Vector2i(38, 40), Vector2i(74, 40), Vector2i(56, 28)]:
+	for spot in [_L(38, 40), _L(74, 40), _L(56, 28)]:
 		LevelKit.stamp_landmark(props, 3, [17, 10, 2, 4], LevelKit.pick_open(free, spot), free, solid)
-	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], 0.12, 5, 571, free, solid)
-	LevelKit.scatter_props(props, 3, inner, [[2, 12, 1, 1]], 0.04, 6, 572, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.12), _N(5), 571, free, solid)
+	LevelKit.scatter_props(props, 3, inner, [[2, 12, 1, 1]], _dense(0.04), _N(6), 572, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
 	LevelKit.scatter_flat(overlay, 3, inner, [
 		Vector2i(19, 8), Vector2i(20, 8), Vector2i(21, 8),
-	], 0.02, 8, 573, solid)
+	], _dense(0.02), _N(8), 573, solid)
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
-	], 0.06, 3, 574, solid)
+	], _dense(0.06), _N(3), 574, solid)
 
 	var decos: Array = []
 	var ti := 0
@@ -949,24 +981,24 @@ func _build_sewers_cistern() -> void:
 			"scale": 1.1,
 		})
 
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
 		["Crawler", "trpg/trpg_carrion_crawler", Vector2i(56, 64)],
-		["Crawler2", "trpg/trpg_carrion_crawler", Vector2i(46, 60)],
-		["Crawler3", "trpg/trpg_carrion_crawler", Vector2i(66, 60)],
-		["AcidOoze", "trpg/trpg_acid_ooze", Vector2i(30, 52)],
-		["AcidOoze2", "trpg/trpg_acid_ooze", Vector2i(82, 52)],
-		["AcidOoze3", "trpg/trpg_acid_ooze", Vector2i(30, 30)],
-		["Gorgon", "trpg/trpg_poisonous_gorgon", Vector2i(82, 30)],
-		["Gorgon2", "trpg/trpg_poisonous_gorgon", Vector2i(56, 20)],
-		["Devourer", "trpg/trpg_intellect_devourer", Vector2i(40, 40)],
-		["Devourer2", "trpg/trpg_intellect_devourer", Vector2i(72, 40)],
-		["Zombie", "trpg/trpg_zombie_giant", Vector2i(44, 26)],
-		["Zombie2", "trpg/trpg_zombie_giant", Vector2i(68, 26)],
-		["TankGuard", "trpg/trpg_umber_hulk", Vector2i(46, 48)],
-		["TankGuard2", "trpg/trpg_umber_hulk", Vector2i(66, 48)],
+		["Crawler2", "trpg/trpg_carrion_crawler", _L(46, 60)],
+		["Crawler3", "trpg/trpg_carrion_crawler", _L(66, 60)],
+		["AcidOoze", "trpg/trpg_acid_ooze", _L(30, 52)],
+		["AcidOoze2", "trpg/trpg_acid_ooze", _L(82, 52)],
+		["AcidOoze3", "trpg/trpg_acid_ooze", _L(30, 30)],
+		["Gorgon", "trpg/trpg_poisonous_gorgon", _L(82, 30)],
+		["Gorgon2", "trpg/trpg_poisonous_gorgon", _L(56, 20)],
+		["Devourer", "trpg/trpg_intellect_devourer", _L(40, 40)],
+		["Devourer2", "trpg/trpg_intellect_devourer", _L(72, 40)],
+		["Zombie", "trpg/trpg_zombie_giant", _L(44, 26)],
+		["Zombie2", "trpg/trpg_zombie_giant", _L(68, 26)],
+		["TankGuard", "trpg/trpg_umber_hulk", _L(46, 48)],
+		["TankGuard2", "trpg/trpg_umber_hulk", _L(66, 48)],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -980,11 +1012,11 @@ func _build_sewers_cistern() -> void:
 		"pos": LevelKit.tile_pos(dais),
 	})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "cistern spawn blocked")
 	assert(walk.has(dais), "cistern dais blocked")
-	assert(walk.size() > 1400, "cistern too small: %d" % walk.size())
+	assert(walk.size() > 35000, "cistern too small: %d" % walk.size())
 	_log("drowned_cistern", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -1002,7 +1034,7 @@ func _build_sewers_cistern() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "LandingFire", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "LandingFire", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"lights": lights,
 		"hostiles": hostiles,
@@ -1030,37 +1062,37 @@ func _build_sewers_cistern() -> void:
 # lava sheet's braziers, coal heaps and crystal clusters — all unpainted below.
 
 func _build_forge_gallery() -> void:
-	_set_size(104, 78)
+	_set_size(_N(104), _N(78))
 	var ts: TileSet = load(FORGE_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(52, 68)
-	var west := 30
-	var east := 74
-	var hall_rows := [18, 30, 42, 54]
-	var chambers: Array = [[Vector2i(52, 67), 7.5, 0.24, 601]]
+	var arrival := _L(52, 68)
+	var west := _N(30)
+	var east := _N(74)
+	var hall_rows := [_N(18), _N(30), _N(42), _N(54)]
+	var chambers: Array = [[_L(52, 67), _R(7.5), 0.24, 601]]
 	var seed_i := 610
 	for ry in hall_rows:
-		chambers.append([Vector2i(west, ry), 7.0, 0.26, seed_i])
-		chambers.append([Vector2i(east, ry), 7.0, 0.26, seed_i + 50])
+		chambers.append([Vector2i(west, ry), _R(7.0), 0.26, seed_i])
+		chambers.append([Vector2i(east, ry), _R(7.0), 0.26, seed_i + 50])
 		seed_i += 1
 	var links: Array = [
-		[Vector2i(52, 64), Vector2i(west, 54), 2.6, 2.2, 630],
-		[Vector2i(52, 64), Vector2i(east, 54), 2.6, 2.2, 631],
+		[Vector2i(52, 64), Vector2i(west, _N(54)), _R(2.6), _R(2.2), 630],
+		[_L(52, 64), Vector2i(east, _N(54)), _R(2.6), _R(2.2), 631],
 	]
 	var seed_j := 640
 	for i in range(hall_rows.size() - 1):
-		links.append([Vector2i(west, hall_rows[i]), Vector2i(west, hall_rows[i + 1]), 2.6, 1.8, seed_j])
-		links.append([Vector2i(east, hall_rows[i]), Vector2i(east, hall_rows[i + 1]), 2.6, 1.8, seed_j + 40])
+		links.append([Vector2i(west, hall_rows[i]), Vector2i(west, hall_rows[i + 1]), _R(2.6), _R(1.8), seed_j])
+		links.append([Vector2i(east, hall_rows[i]), Vector2i(east, hall_rows[i + 1]), _R(2.6), _R(1.8), seed_j + 40])
 		seed_j += 1
 	# Cross bridges between the two halls.
-	for ry in [18, 42]:
-		links.append([Vector2i(west, ry), Vector2i(east, ry), 2.0, 2.6, seed_j])
+	for ry in [_N(18), _N(42)]:
+		links.append([Vector2i(west, ry), Vector2i(east, ry), _R(2.0), _R(2.6), seed_j])
 		seed_j += 1
-	var floor_mask := _carve(chambers, links, 4, arrival)
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
 	var forge_floors := [
 		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
@@ -1078,40 +1110,40 @@ func _build_forge_gallery() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
 		if not no_build.has(cell):
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked)
-	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 
 	# Quench wells down the middle of each hall.
 	for spot in [
-		Vector2i(west, 24), Vector2i(east, 24), Vector2i(west, 48), Vector2i(east, 48),
-		Vector2i(west, 36), Vector2i(east, 36),
+		Vector2i(west, _N(24)), Vector2i(east, _N(24)), Vector2i(west, _N(48)), Vector2i(east, _N(48)),
+		Vector2i(west, _N(36)), Vector2i(east, _N(36)),
 	]:
 		LevelKit.stamp_landmark(props, 3, [8, 1, 3, 3], LevelKit.pick_open(free, spot), free, solid)
 	# Slag heaps and cooled rock along the hall walls.
-	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], 0.13, 4, 661, free, solid)
+	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], _dense(0.13), _N(4), 661, free, solid)
 	# Braziers, coal heaps and crystal growths from the lava sheet.
-	LevelKit.scatter_props(props, 0, inner, [[0, 1, 1, 2], [2, 1, 1, 1], [0, 2, 1, 1], [1, 2, 1, 1]], 0.05, 6, 662, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[0, 1, 1, 2], [2, 1, 1, 1], [0, 2, 1, 1], [1, 2, 1, 1]], _dense(0.05), _N(6), 662, free, solid)
 	# Forge stock: the props sheet chest and coal piles.
-	LevelKit.scatter_props(props, 2, edges, [[0, 0, 1, 1], [1, 0, 1, 1], [2, 0, 1, 1]], 0.045, 7, 663, free, solid)
+	LevelKit.scatter_props(props, 2, edges, [[0, 0, 1, 1], [1, 0, 1, 1], [2, 0, 1, 1]], _dense(0.045), _N(7), 663, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
-	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(1, 1), Vector2i(3, 1)], 0.03, 6, 664, solid)
+	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(1, 1), Vector2i(3, 1)], _dense(0.03), _N(6), 664, solid)
 
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(west, 18), Vector2i(east, 18), Vector2i(west, 30), Vector2i(east, 30),
-		Vector2i(west, 42), Vector2i(east, 42), Vector2i(west, 54), Vector2i(east, 54),
+		Vector2i(west, _N(18)), Vector2i(east, _N(18)), Vector2i(west, _N(30)), Vector2i(east, _N(30)),
+		Vector2i(west, _N(42)), Vector2i(east, _N(42)), Vector2i(west, _N(54)), Vector2i(east, _N(54)),
 		Vector2i(52, 67), Vector2i(52, 60),
 	]:
 		ti += 1
@@ -1124,22 +1156,22 @@ func _build_forge_gallery() -> void:
 			"color": "Color(1, 0.58, 0.22, 1)",
 		})
 
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
-		["ForgeAxeman", "trpg/trpg_armored_axeman", Vector2i(west, 54)],
-		["ForgeAxeman2", "trpg/trpg_armored_axeman", Vector2i(east, 54)],
-		["EliteOrc", "trpg/trpg_elite_orc", Vector2i(west, 42)],
-		["EliteOrc2", "trpg/trpg_elite_orc", Vector2i(east, 42)],
-		["ArmoredOrc", "trpg/trpg_armored_orc", Vector2i(west, 30)],
-		["ArmoredOrc2", "trpg/trpg_armored_orc", Vector2i(east, 30)],
-		["Lancer", "trpg/trpg_lancer", Vector2i(west, 18)],
-		["Lancer2", "trpg/trpg_lancer", Vector2i(east, 18)],
-		["Templar", "trpg/trpg_knight_templar", Vector2i(52, 18)],
-		["Templar2", "trpg/trpg_knight_templar", Vector2i(52, 42)],
-		["Wizard", "trpg/trpg_wizard", Vector2i(west, 36)],
-		["Wizard2", "trpg/trpg_wizard", Vector2i(east, 36)],
+		["ForgeAxeman", "trpg/trpg_armored_axeman", Vector2i(west, _N(54))],
+		["ForgeAxeman2", "trpg/trpg_armored_axeman", Vector2i(east, _N(54))],
+		["EliteOrc", "trpg/trpg_elite_orc", Vector2i(west, _N(42))],
+		["EliteOrc2", "trpg/trpg_elite_orc", Vector2i(east, _N(42))],
+		["ArmoredOrc", "trpg/trpg_armored_orc", Vector2i(west, _N(30))],
+		["ArmoredOrc2", "trpg/trpg_armored_orc", Vector2i(east, _N(30))],
+		["Lancer", "trpg/trpg_lancer", Vector2i(west, _N(18))],
+		["Lancer2", "trpg/trpg_lancer", Vector2i(east, _N(18))],
+		["Templar", "trpg/trpg_knight_templar", _L(52, 18)],
+		["Templar2", "trpg/trpg_knight_templar", _L(52, 42)],
+		["Wizard", "trpg/trpg_wizard", Vector2i(west, _N(36))],
+		["Wizard2", "trpg/trpg_wizard", Vector2i(east, _N(36))],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -1148,10 +1180,10 @@ func _build_forge_gallery() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2), entrance + Vector2i(4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2), entrance + _L(4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "gallery spawn blocked")
-	assert(walk.size() > 1200, "gallery too small: %d" % walk.size())
+	assert(walk.size() > 30000, "gallery too small: %d" % walk.size())
 	_log("bellows_gallery", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -1169,7 +1201,7 @@ func _build_forge_gallery() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "GalleryHearth", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "GalleryHearth", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"hostiles": hostiles,
 		"npcs": [
@@ -1195,31 +1227,31 @@ func _build_forge_gallery() -> void:
 # only way around. The masonry rim survives only at the chamber edges.
 
 func _build_forge_deeps() -> void:
-	_set_size(112, 86)
+	_set_size(_N(112), _N(86))
 	var ts: TileSet = load(FORGE_TS)
 	var ground := _new_layer(ts)
 	var walls := _new_layer(ts)
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	var arrival := Vector2i(56, 76)
-	var lake := Vector2i(56, 40)
+	var arrival := _L(56, 76)
+	var lake := _L(56, 40)
 	# Spiral: eight ledges stepping inward and around the lake.
-	var chambers: Array = [[Vector2i(56, 75), 7.5, 0.24, 701]]
-	var links: Array = [[Vector2i(56, 70), Vector2i(56, 64), 2.8, 1.8, 702]]
-	var prev := Vector2i(56, 64)
+	var chambers: Array = [[_L(56, 75), _R(7.5), 0.24, 701]]
+	var links: Array = [[_L(56, 70), _L(56, 64), _R(2.8), _R(1.8), 702]]
+	var prev := _L(56, 64)
 	var steps := 9
 	for i in steps:
 		var a: float = -PI * 0.5 + TAU * float(i) / float(steps - 1)
-		var r: float = 34.0 - float(i) * 1.4
+		var r: float = _R(34.0) - float(i) * _R(1.4)
 		var c := lake + Vector2i(int(cos(a) * r), int(sin(a) * r * 0.74))
-		chambers.append([c, 7.5 - float(i) * 0.12, 0.27, 710 + i])
-		links.append([prev, c, 2.4, 2.4, 730 + i])
+		chambers.append([c, _R(7.5) - float(i) * 0.12 * float(S), 0.27, 710 + i])
+		links.append([prev, c, _R(2.4), _R(2.4), 730 + i])
 		prev = c
 	# A short causeway from the last ledge to the lake shore.
-	links.append([prev, lake + Vector2i(0, 16), 2.4, 1.6, 749])
-	chambers.append([lake, 17.0, 0.16, 750])
-	var floor_mask := _carve(chambers, links, 4, arrival)
+	links.append([prev, lake + _L(0, 16), _R(2.4), _R(1.6), 749])
+	chambers.append([lake, _R(17.0), 0.16, 750])
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
 	var forge_floors := [
 		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
@@ -1244,20 +1276,20 @@ func _build_forge_deeps() -> void:
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, arrival)
 	walk = MapKit.largest_region(walk, entrance)
-	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
 
 	# The magma lake: animated lava, and a hazard rather than scenery.
 	var lava_cells: Dictionary = {}
 	var pool: Dictionary = {}
-	MapKit.blob(pool, lake, 8.5, 0.22, 761, _bounds)
+	MapKit.blob(pool, lake, _R(8.5), 0.22, 761, _bounds)
 	pool = MapKit.smooth(pool, _bounds, 1, 5, 4)
 	for cell: Vector2i in pool.keys():
 		if walk.has(cell):
 			lava_cells[cell] = true
 	# Runnels spilling off the lake into the lower ledges.
 	for spot in [
-		[lake + Vector2i(-20, 10), 4.0, 762], [lake + Vector2i(20, 10), 4.0, 763],
-		[lake + Vector2i(-18, -12), 3.6, 764], [lake + Vector2i(18, -12), 3.6, 765],
+		[lake + Vector2i(-20, 10), _R(4.0), 762], [lake + Vector2i(20, 10), _R(4.0), 763],
+		[lake + _L(-18, -12), _R(3.6), 764], [lake + _L(18, -12), _R(3.6), 765],
 	]:
 		var run: Dictionary = {}
 		MapKit.blob(run, spot[0], spot[1], 0.30, int(spot[2]), _bounds)
@@ -1271,13 +1303,13 @@ func _build_forge_deeps() -> void:
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 	# The boss holds the shore the causeway lands on.
-	var shore := LevelKit.pick_open(walk, lake + Vector2i(0, 15))
+	var shore := LevelKit.pick_open(walk, lake + _L(0, 15))
 
 	var blocked_all := blocked.duplicate()
 	for cell: Vector2i in lava_cells.keys():
 		blocked_all[cell] = true
-	var no_build := LevelKit.keepout([entrance, exit_cell], 4)
-	for cell: Vector2i in LevelKit.keepout([shore], 6).keys():
+	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
+	for cell: Vector2i in LevelKit.keepout([shore], _gap(6)).keys():
 		no_build[cell] = true
 	var free: Dictionary = {}
 	for cell: Vector2i in walk.keys():
@@ -1285,24 +1317,24 @@ func _build_forge_deeps() -> void:
 			free[cell] = true
 	var solid: Dictionary = {}
 	var edges := MapKit.edge_cells(walk, blocked_all)
-	var inner := MapKit.interior_cells(walk, blocked_all, 3)
+	var inner := MapKit.interior_cells(walk, blocked_all, _gap(3))
 
-	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], 0.15, 4, 771, free, solid)
+	LevelKit.scatter_props(props, 3, edges, [[8, 5, 1, 1], [9, 5, 1, 1], [10, 5, 1, 1]], _dense(0.15), _N(4), 771, free, solid)
 	# Crystal growths and coal heaps thrown up by the vents.
-	LevelKit.scatter_props(props, 0, inner, [[0, 2, 1, 1], [1, 2, 1, 1], [1, 1, 1, 1]], 0.06, 5, 772, free, solid)
-	LevelKit.scatter_props(props, 2, edges, [[1, 0, 1, 1], [2, 0, 1, 1]], 0.05, 6, 773, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[0, 2, 1, 1], [1, 2, 1, 1], [1, 1, 1, 1]], _dense(0.06), _N(5), 772, free, solid)
+	LevelKit.scatter_props(props, 2, edges, [[1, 0, 1, 1], [2, 0, 1, 1]], _dense(0.05), _N(6), 773, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
-	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(2, 1), Vector2i(3, 1)], 0.025, 7, 774, solid)
+	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(2, 1), Vector2i(3, 1)], _dense(0.025), _N(7), 774, solid)
 
 	var decos: Array = []
 	var ti := 0
-	var deco_spots: Array = [Vector2i(56, 75), Vector2i(56, 64)]
+	var deco_spots: Array = [_L(56, 75), _L(56, 64)]
 	for i in steps:
 		var a: float = -PI * 0.5 + TAU * float(i) / float(steps - 1)
-		var r: float = 34.0 - float(i) * 1.4
+		var r: float = _R(34.0) - float(i) * _R(1.4)
 		deco_spots.append(lake + Vector2i(int(cos(a) * r), int(sin(a) * r * 0.74)))
 	for spot: Vector2i in deco_spots:
 		ti += 1
@@ -1332,24 +1364,24 @@ func _build_forge_deeps() -> void:
 			"scale": 1.3,
 		})
 
-	var taken := LevelKit.keepout([entrance, exit_cell], 6)
+	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
 	var mob_plan: Array = [
 		["Demon", "trpg/trpg_demon_a", Vector2i(56, 64)],
-		["Demon2", "trpg/trpg_demon_a", Vector2i(44, 62)],
-		["Demon3", "trpg/trpg_demon_a", Vector2i(68, 62)],
-		["Oni", "trpg/trpg_conjuring_oni", lake + Vector2i(-30, 8)],
-		["Oni2", "trpg/trpg_conjuring_oni", lake + Vector2i(30, 8)],
-		["OgreMage", "trpg/trpg_ogre_mage", lake + Vector2i(-28, -10)],
-		["OgreMage2", "trpg/trpg_ogre_mage", lake + Vector2i(28, -10)],
-		["Fomorian", "trpg/trpg_wretched_fomorian", lake + Vector2i(0, -26)],
-		["Fomorian2", "trpg/trpg_wretched_fomorian", lake + Vector2i(-16, -22)],
-		["UmberHulk", "trpg/trpg_umber_hulk", lake + Vector2i(16, -22)],
-		["BloodMonster", "trpg/trpg_blood_monster_a", lake + Vector2i(-22, 18)],
-		["BloodMonster2", "trpg/trpg_blood_monster_a", lake + Vector2i(22, 18)],
-		["EliteOrc", "trpg/trpg_elite_orc", lake + Vector2i(-10, 20)],
-		["EliteOrc2", "trpg/trpg_elite_orc", lake + Vector2i(10, 20)],
+		["Demon2", "trpg/trpg_demon_a", _L(44, 62)],
+		["Demon3", "trpg/trpg_demon_a", _L(68, 62)],
+		["Oni", "trpg/trpg_conjuring_oni", lake + _L(-30, 8)],
+		["Oni2", "trpg/trpg_conjuring_oni", lake + _L(30, 8)],
+		["OgreMage", "trpg/trpg_ogre_mage", lake + _L(-28, -10)],
+		["OgreMage2", "trpg/trpg_ogre_mage", lake + _L(28, -10)],
+		["Fomorian", "trpg/trpg_wretched_fomorian", lake + _L(0, -26)],
+		["Fomorian2", "trpg/trpg_wretched_fomorian", lake + _L(-16, -22)],
+		["UmberHulk", "trpg/trpg_umber_hulk", lake + _L(16, -22)],
+		["BloodMonster", "trpg/trpg_blood_monster_a", lake + _L(-22, 18)],
+		["BloodMonster2", "trpg/trpg_blood_monster_a", lake + _L(22, 18)],
+		["EliteOrc", "trpg/trpg_elite_orc", lake + _L(-10, 20)],
+		["EliteOrc2", "trpg/trpg_elite_orc", lake + _L(10, 20)],
 	]
-	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), 4)
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
 	var hostiles: Array = []
 	for i in mob_plan.size():
 		hostiles.append({
@@ -1363,11 +1395,11 @@ func _build_forge_deeps() -> void:
 		"pos": LevelKit.tile_pos(shore),
 	})
 
-	var npc_cells := _populate(walk, taken, [entrance + Vector2i(-4, -2)], 2)
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "deeps spawn blocked")
 	assert(walk.has(shore), "deeps shore blocked")
-	assert(walk.size() > 1200, "deeps too small: %d" % walk.size())
+	assert(walk.size() > 30000, "deeps too small: %d" % walk.size())
 	_log("cinder_deeps", walk, walls, props, hostiles)
 
 	LevelKit.write_map({
@@ -1385,7 +1417,7 @@ func _build_forge_deeps() -> void:
 		},
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
-		"camps": [{"name": "DeepHearth", "pos": LevelKit.tile_pos(entrance + Vector2i(3, -3))}],
+		"camps": [{"name": "DeepHearth", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
 		"decos": decos,
 		"lights": lights,
 		"hostiles": hostiles,

@@ -131,12 +131,27 @@ target_instance = ExtResource("7_hub")
 warper_id = 125
 target_id = 25
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [node name="TerraceLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(712.0, 984.0)
+position = Vector2(360.0, 200.0)
 warper_id = 50
 
 [node name="TerraceStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(712.0, 1064.0)
+position = Vector2(312.0, 216.0)
 portal_color = Color(0.92, 0.78, 0.4, 1)
 destination_label = "Sunspire Terraces"
 target_instance = ExtResource("stair_sunspire_terraces")
@@ -144,11 +159,11 @@ warper_id = 150
 target_id = 40
 
 [node name="TombLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(968.0, 984.0)
+position = Vector2(1384.0, 216.0)
 warper_id = 51
 
 [node name="TombStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(968.0, 1064.0)
+position = Vector2(1432.0, 248.0)
 portal_color = Color(0.52, 0.42, 0.24, 1)
 destination_label = "The Sunken Tombs"
 target_instance = ExtResource("stair_sunken_tombs")

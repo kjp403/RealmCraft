@@ -208,12 +208,27 @@ target_instance = ExtResource("7_hub")
 warper_id = 126
 target_id = 26
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [node name="GalleryLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(776.0, 1112.0)
+position = Vector2(328.0, 264.0)
 warper_id = 54
 
 [node name="GalleryStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(776.0, 1176.0)
+position = Vector2(280.0, 296.0)
 portal_color = Color(0.95, 0.55, 0.2, 1)
 destination_label = "The Bellows Gallery"
 target_instance = ExtResource("stair_bellows_gallery")
@@ -221,11 +236,11 @@ warper_id = 154
 target_id = 44
 
 [node name="DeepsLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(1032.0, 1112.0)
+position = Vector2(1480.0, 248.0)
 warper_id = 55
 
 [node name="DeepsStair" parent="." instance=ExtResource("6_portal")]
-position = Vector2(1032.0, 1192.0)
+position = Vector2(1528.0, 280.0)
 portal_color = Color(0.6, 0.14, 0.04, 1)
 destination_label = "The Cinder Deeps"
 target_instance = ExtResource("stair_cinder_deeps")
