@@ -66,10 +66,19 @@ extends Resource
 @export var source_levels: Array[int] = []
 ## Items this job can craft (the recipe outputs). Shown in the "Recipes"
 ## tab the same way. Bake tool fills from CraftingStationResource scans.
+## Do NOT put WeaponItem (or other scene-heavy items) here — JobRegistry
+## preloads every JobPerks at startup, and WeaponItem → weapon scene →
+## Client creates a circular load that freezes Skills at Total level 0.
 @export var recipe_items: Array[Item] = []
 ## Parallel to [member recipe_items] — the required job-level on each
 ## recipe. 0 = no requirement.
 @export var recipe_levels: Array[int] = []
+## Recipe outputs loaded on demand when the Skills detail opens (not at
+## JobRegistry preload). Use for WeaponItem and anything else that pulls
+## Client-dependent scenes. Parallel to [member recipe_deferred_levels].
+@export var recipe_deferred_paths: PackedStringArray = []
+## Required job-level for each [member recipe_deferred_paths] entry.
+@export var recipe_deferred_levels: Array[int] = []
 
 @export_group("UI")
 ## describe() formats these against a context dict built from the current
@@ -81,6 +90,42 @@ extends Resource
 ##   {extra_item}    extra_item_chance * 100
 ## Example: "Gather speed +{cooldown}%"
 @export var describe_lines: Array[String] = []
+
+
+# ---------------------------------------------------------------------------
+# Recipe guide (eager + deferred)
+# ---------------------------------------------------------------------------
+
+## True when this job has any craft recipe listed for the Skills UI.
+func has_recipe_guide() -> bool:
+	return not recipe_items.is_empty() or not recipe_deferred_paths.is_empty()
+
+
+## Resolved craft-guide rows for the Skills / Jobs UI. Eager [member
+## recipe_items] first (sorted by bake), then deferred paths loaded now.
+## Each entry: `{ "item": Item, "level": int }`. Missing paths are skipped.
+func recipe_guide_entries() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for i: int in recipe_items.size():
+		var item: Item = recipe_items[i]
+		if item == null:
+			continue
+		var lvl: int = recipe_levels[i] if i < recipe_levels.size() else 0
+		out.append({"item": item, "level": lvl})
+	for i: int in recipe_deferred_paths.size():
+		var path: String = recipe_deferred_paths[i]
+		if path.is_empty():
+			continue
+		var loaded: Resource = load(path)
+		var item: Item = loaded as Item
+		if item == null:
+			push_warning("JobPerks %s: deferred recipe path failed: %s" % [job_slug, path])
+			continue
+		var lvl: int = (
+			recipe_deferred_levels[i] if i < recipe_deferred_levels.size() else 0
+		)
+		out.append({"item": item, "level": lvl})
+	return out
 
 
 # ---------------------------------------------------------------------------

@@ -238,13 +238,13 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 			var gate: String = "any level" if req <= 0 else ("Lv %d" % req)
 			var lock: String = "" if req <= level else " (locked)"
 			lines.append("• %s — %s%s" % [String(item.item_name), gate, lock])
-	elif jp != null and not jp.recipe_items.is_empty():
+	elif jp != null and jp.has_recipe_guide():
 		lines.append("Can craft:")
-		for i: int in jp.recipe_items.size():
-			var item: Item = jp.recipe_items[i]
+		for entry: Dictionary in jp.recipe_guide_entries():
+			var item: Item = entry.get("item", null) as Item
 			if item == null:
 				continue
-			var req: int = jp.recipe_levels[i] if i < jp.recipe_levels.size() else 0
+			var req: int = int(entry.get("level", 0))
 			var gate: String = "any level" if req <= 0 else ("Lv %d" % req)
 			lines.append("• %s — %s" % [String(item.item_name), gate])
 	else:
