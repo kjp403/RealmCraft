@@ -85,19 +85,24 @@ func _initialize() -> void:
 	var pits: Dictionary = {}
 
 	# Staging chamber (SW) — entrance + portal
-	_fill_disk(walk, Vector2i(8, 26), 7.5)
-	_fill_disk(walk, Vector2i(10, 24), 5.0)
+	_fill_disk(walk, Vector2i(8, 26), 8.5)
+	_fill_disk(walk, Vector2i(10, 24), 6.0)
+	_fill_disk(walk, Vector2i(12, 28), 4.5)
 	# Copper spur (NW)
-	_fill_disk(walk, Vector2i(18, 8), 6.5)
-	_fill_disk(walk, Vector2i(22, 10), 5.0)
+	_fill_disk(walk, Vector2i(18, 8), 7.5)
+	_fill_disk(walk, Vector2i(22, 10), 6.0)
+	_fill_disk(walk, Vector2i(16, 10), 4.5)
 	# Iron hall (center-east)
-	_fill_disk(walk, Vector2i(30, 22), 7.0)
-	_fill_disk(walk, Vector2i(34, 20), 5.5)
+	_fill_disk(walk, Vector2i(30, 22), 8.0)
+	_fill_disk(walk, Vector2i(34, 20), 6.5)
+	_fill_disk(walk, Vector2i(32, 26), 5.0)
 	# Coal gallery (NE) with pit ring
-	_fill_disk(walk, Vector2i(42, 10), 7.0)
-	_fill_disk(walk, Vector2i(40, 14), 5.0)
+	_fill_disk(walk, Vector2i(42, 10), 8.0)
+	_fill_disk(walk, Vector2i(40, 14), 6.0)
+	_fill_disk(walk, Vector2i(44, 8), 5.0)
 	# Central junction
-	_fill_disk(walk, Vector2i(24, 16), 6.0)
+	_fill_disk(walk, Vector2i(24, 16), 7.0)
+	_fill_disk(walk, Vector2i(26, 18), 5.0)
 
 	# Haulage corridors
 	_carve_corridor(walk, Vector2i(10, 22), Vector2i(18, 12), 3)
@@ -121,6 +126,18 @@ func _initialize() -> void:
 	_paint_floors(ground, walk, pits)
 	_paint_bridge(ground, Vector2i(22, 16), Vector2i(26, 16))
 	_paint_wall_shell(walls, walk, pits)
+
+	# Rock pillar islands (authored mass inside chambers — Fungus-style depth)
+	# Keep clear of entrance (8,26), bridge (23-27,15), and main corridors.
+	for island2 in [
+		Vector2i(14, 20), Vector2i(20, 8), Vector2i(34, 22), Vector2i(44, 10), Vector2i(28, 14),
+	]:
+		for d2 in [Vector2i.ZERO, Vector2i.LEFT, Vector2i.UP]:
+			var ic2: Vector2i = island2 + d2
+			if _in_bounds(ic2) and not pits.has(ic2) and walk.has(ic2):
+				walk.erase(ic2)
+				walls.set_cell(ic2, 0, _pick(WALL_FILL, ic2))
+				ground.erase_cell(ic2)
 	_clear_walls_on_walk(walls, walk)
 
 	var open := _open_floor(walls, walk)
@@ -241,10 +258,10 @@ func _paint_wall_shell(walls: TileMapLayer, walk: Dictionary, pits: Dictionary) 
 			w = w or pw
 			e = e or pe
 			if not (n or s or w or e):
-				# Deep fill only near walk (2-cell halo) so map isn't a solid rock slab
+				# Deep fill halo (3 cells) — thick rock mass like Fungus / reference caves
 				var near := false
-				for dy in range(-2, 3):
-					for dx in range(-2, 3):
+				for dy in range(-3, 4):
+					for dx in range(-3, 4):
 						if walk.has(cell + Vector2i(dx, dy)):
 							near = true
 							break
@@ -306,13 +323,14 @@ func _is_wall_adjacent(walls: TileMapLayer, cell: Vector2i) -> bool:
 
 func _paint_props(props: TileMapLayer, walls: TileMapLayer, open: Dictionary) -> void:
 	var occupied: Dictionary = {}
-	# Wall-adjacent rocks / stalagmites
+	# Dense wall-adjacent rocks / stalagmites (authored clusters)
 	var rock_spots: Array[Vector2i] = [
-		Vector2i(6, 22), Vector2i(12, 22), Vector2i(14, 28),
-		Vector2i(16, 6), Vector2i(22, 6), Vector2i(20, 12),
-		Vector2i(28, 18), Vector2i(34, 18), Vector2i(36, 24),
-		Vector2i(40, 8), Vector2i(46, 10), Vector2i(44, 16),
-		Vector2i(26, 14), Vector2i(22, 18),
+		Vector2i(6, 22), Vector2i(12, 22), Vector2i(14, 28), Vector2i(8, 20), Vector2i(14, 24),
+		Vector2i(16, 6), Vector2i(22, 6), Vector2i(20, 12), Vector2i(18, 6), Vector2i(24, 12),
+		Vector2i(28, 18), Vector2i(34, 18), Vector2i(36, 24), Vector2i(30, 18), Vector2i(34, 26),
+		Vector2i(40, 8), Vector2i(46, 10), Vector2i(44, 16), Vector2i(42, 6), Vector2i(46, 14),
+		Vector2i(26, 14), Vector2i(22, 18), Vector2i(24, 20), Vector2i(28, 14),
+		Vector2i(12, 26), Vector2i(16, 28), Vector2i(36, 22), Vector2i(40, 14),
 	]
 	for spot in rock_spots:
 		if not open.has(spot) or occupied.has(spot):
@@ -322,12 +340,12 @@ func _paint_props(props: TileMapLayer, walls: TileMapLayer, open: Dictionary) ->
 		props.set_cell(spot, 1, _pick(ROCK_DECO, spot))
 		occupied[spot] = true
 
-	# Crystal clusters tucked into corners (visual only; ores are separate nodes)
+	# Crystal clusters tucked into corners
 	var crystal_spots: Array[Vector2i] = [
-		Vector2i(14, 6), Vector2i(20, 6), Vector2i(24, 8),
-		Vector2i(28, 20), Vector2i(36, 18), Vector2i(38, 24),
-		Vector2i(40, 6), Vector2i(46, 8), Vector2i(44, 14),
-		Vector2i(6, 24), Vector2i(12, 24),
+		Vector2i(14, 6), Vector2i(20, 6), Vector2i(24, 8), Vector2i(16, 8),
+		Vector2i(28, 20), Vector2i(36, 18), Vector2i(38, 24), Vector2i(32, 24),
+		Vector2i(40, 6), Vector2i(46, 8), Vector2i(44, 14), Vector2i(42, 8),
+		Vector2i(6, 24), Vector2i(12, 24), Vector2i(8, 28), Vector2i(26, 12),
 	]
 	var ci := 0
 	for spot in crystal_spots:
@@ -340,20 +358,20 @@ func _paint_props(props: TileMapLayer, walls: TileMapLayer, open: Dictionary) ->
 		occupied[spot] = true
 		ci += 1
 
-	# Sparse pebbles / moss — keep floors readable
+	# Moss / pebbles along walls — denser but still readable
 	var placed := 0
 	var cells: Array = open.keys()
 	cells.sort_custom(func(a, b): return _hash(a) < _hash(b))
 	for cell: Vector2i in cells:
-		if placed >= 55:
+		if placed >= 90:
 			break
 		if occupied.has(cell):
 			continue
-		if _hash(cell) % 5 != 0:
+		if _hash(cell) % 4 != 0:
 			continue
 		if _is_wall_adjacent(walls, cell):
 			props.set_cell(cell, 1, _pick(MOSS if _hash(cell) % 3 == 0 else PEBBLE, cell))
-		elif _hash(cell) % 11 == 0:
+		elif _hash(cell) % 13 == 0:
 			props.set_cell(cell, 1, _pick(PEBBLE, cell))
 		else:
 			continue
