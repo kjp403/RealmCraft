@@ -8,6 +8,9 @@ extends Interactable
 ## Setup: an Area2D with this script, a CollisionShape2D over the station, and a
 ## CraftingStationResource assigned. Place as a direct child of the Map.
 
+## Match [constant NPC.INTERACT_RANGE] — walk up to craft; no remote clicks.
+const INTERACT_RANGE: float = 90.0
+
 @export var station: CraftingStationResource
 
 
@@ -28,3 +31,26 @@ func _ready() -> void:
 ## this node's name as the key the server resolves the station by.
 func _build_menu_arg() -> Variant:
 	return {"key": String(name), "station": station}
+
+
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	var clicked: bool = (
+		(event is InputEventMouseButton
+			and event.button_index == MOUSE_BUTTON_LEFT
+			and event.pressed)
+		or (event is InputEventScreenTouch and event.pressed)
+	)
+	if not clicked or menu_name == &"":
+		return
+	if not _player_in_range():
+		var who: String = hover_name if not hover_name.is_empty() else "the station"
+		Toaster.toast("Too far from %s." % who)
+		return
+	ClientState.open_menu_requested.emit(menu_name, _build_menu_arg())
+
+
+func _player_in_range() -> bool:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or not is_instance_valid(lp):
+		return false
+	return global_position.distance_to(lp.global_position) <= INTERACT_RANGE
