@@ -32,6 +32,10 @@ func data_request_handler(
 	var station: CraftingStationResource = instance.instance_map.get_crafting_station(station_key)
 	if station == null:
 		return {"ok": false}
+	# Enforce the same walk-up range as client CraftingStation / NPC interact.
+	var station_node: Node2D = instance.instance_map.get_node_or_null(NodePath(String(station_key))) as Node2D
+	if station_node == null or player.global_position.distance_to(station_node.global_position) > CraftingStation.INTERACT_RANGE:
+		return {"ok": false, "reason": "too_far"}
 	if recipe_index < 0 or recipe_index >= station.recipes.size():
 		return {"ok": false}
 	var recipe: CraftingRecipe = station.recipes[recipe_index]

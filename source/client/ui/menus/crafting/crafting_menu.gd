@@ -598,6 +598,8 @@ func _toast_failure(data: Dictionary) -> void:
 			Toaster.toast("Not enough gold for the station fee (%d)." % int(data.get("fee", 0)))
 		"too_fast":
 			Toaster.toast("Steady on — one at a time.")
+		"too_far":
+			Toaster.toast("Move closer to the station.")
 		"inventory_full":
 			Toaster.toast("Your bag is full. Bank some items first.")
 		_:
