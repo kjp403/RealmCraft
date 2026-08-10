@@ -440,6 +440,8 @@ func _transfer_stack(uid: int, from_bag: bool, amount: int) -> void:
 		match str(payload.get("reason", "")):
 			"currency":
 				Toaster.toast("Gold stays in your currency pouch.")
+			"inventory_full":
+				Toaster.toast("Your bag is full. Deposit or drop something first.")
 			_:
 				Toaster.toast("That transfer failed.")
 		_rebuild_grids()

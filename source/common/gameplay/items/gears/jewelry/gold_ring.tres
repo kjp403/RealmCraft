@@ -21,6 +21,7 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0")])
 item_name = &"Gold Ring"
 item_icon = ExtResource("2_icon")
 can_trade = true
+vendor_value = 20
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"gold_ring"
 metadata/id = 241

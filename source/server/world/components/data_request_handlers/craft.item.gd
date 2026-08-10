@@ -74,8 +74,21 @@ func data_request_handler(
 
 	# Grant the output (one at a time so stackables merge / non-stackables get slots).
 	var output_id: int = int(recipe.output_item.get_meta(&"id", 0))
+	# Ingredients already freed space; still gate so a full bag of unrelated gear
+	# can't absorb a craft that needs a new square.
+	if not Inventory.can_add(inventory, output_id, recipe.output_amount):
+		# Rollback ingredients + fee so the craft stays atomic.
+		for ingredient: CraftIngredient in recipe.ingredients:
+			if ingredient == null or ingredient.item == null:
+				continue
+			var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
+			Inventory.add_item(inventory, ing_id, ingredient.amount)
+		if fee > 0:
+			Inventory.add_item(inventory, gold_id, fee)
+		_last_craft_ms.erase(player_id)
+		return {"ok": false, "reason": "inventory_full"}
 	for _i: int in recipe.output_amount:
-		Inventory.add_item(inventory, output_id, 1)
+		Inventory.try_add_item(inventory, output_id, 1)
 
 	# Award crafting-profession xp.
 	var progress: Dictionary = {}

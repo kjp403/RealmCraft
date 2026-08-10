@@ -195,14 +195,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"node_path": node_path,
 		}
 
-	# Full drain — consume one of THIS player's charges.
-	_consume_charge(player_id, now_ms)
-	_progress_hp_by_player.erase(player_id)
-	charges_left = _charges_for(player_id)
-
-	# Award. Bonus-yield + cooldown discount come from the primary job's perk tree.
-	# Secondary catch (e.g. Cod at a Herring hole) replaces the primary yield when
-	# it rolls — rarer fish, more XP, mutually exclusive with the common catch.
+	# Full drain — decide the yield first so a full bag rejects without eating a charge.
 	var amount: int = data.yield_amount
 	if job_perks_resource != null \
 			and randf() < job_perks_resource.effective_bonus_yield_chance(job_level, job_perks):
@@ -217,7 +210,26 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			xp_table = data.secondary_job_xp
 
 	var ore_id: int = int(caught.get_meta(&"id", 0))
-	Inventory.add_item(player.player_resource.inventory, ore_id, amount)
+	if not Inventory.can_add(player.player_resource.inventory, ore_id, amount):
+		# Keep progress drained? Prefer restoring progress so they can bank and finish.
+		_progress_hp_by_player[player_id] = 1
+		return {
+			"ok": false,
+			"reason": "inventory_full",
+			"extracted": false,
+			"progress_hp": 1,
+			"extraction_hp": data.extraction_hp,
+			"charges_left": charges_left,
+			"max_charges": _pool_for(player_id),
+			"node_path": node_path,
+		}
+
+	# Consume one of THIS player's charges now that the bag can take the yield.
+	_consume_charge(player_id, now_ms)
+	_progress_hp_by_player.erase(player_id)
+	charges_left = _charges_for(player_id)
+
+	Inventory.try_add_item(player.player_resource.inventory, ore_id, amount)
 	DailyQuestService.on_collect(player.player_resource, ore_id, amount)
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.

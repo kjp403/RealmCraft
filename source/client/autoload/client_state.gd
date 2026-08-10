@@ -396,6 +396,10 @@ func _on_gather_result(data: Dictionary) -> void:
 					if now_ms - _last_depleted_toast_ms > 4000:
 						_last_depleted_toast_ms = now_ms
 						Toaster.toast("Resource depleted. Click again when it regenerates.")
+			"inventory_full":
+				Toaster.toast("Your bag is full (%d/%d). Bank some items." % [
+					Inventory.MAX_SLOTS, Inventory.MAX_SLOTS
+				])
 			# "cooldown" stays silent — players will spam swings during it.
 		return
 

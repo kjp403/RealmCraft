@@ -204,6 +204,8 @@ func _on_item_action_result(result: Dictionary) -> void:
 			Toaster.toast("Fair arena: level %d gear only." % int(result.get("level", 0)))
 		"cant_equip":
 			Toaster.toast("You can't equip that.")
+		"inventory_full":
+			Toaster.toast("Your bag is full. Bank some items first.")
 
 
 func _is_equipped(item: Item) -> bool:

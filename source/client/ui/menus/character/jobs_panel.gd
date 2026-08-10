@@ -129,6 +129,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 
 	var tile := Button.new()
 	tile.custom_minimum_size = TILE_SIZE
@@ -136,10 +137,12 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	tile.clip_contents = true
 	tile.flat = true
 	if at_cap:
-		tile.tooltip_text = "%s\nLv %d — Max level\nClick for sources" % [display, level]
+		tile.tooltip_text = "%s\nLv %d — Max level\nTotal XP: %s\nClick for sources" % [
+			display, level, _format_xp(total_xp)
+		]
 	else:
-		tile.tooltip_text = "%s\nLv %d — %d / %d XP\n%d XP to next\nClick for sources" % [
-			display, level, xp, xp_to_next, remaining
+		tile.tooltip_text = "%s\nLv %d — %s / %s XP\n%s XP to next\nTotal XP: %s\nClick for sources" % [
+			display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
 		]
 	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
 	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
@@ -216,9 +219,12 @@ func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
 	var raw_next: int = int(info.get("xp_to_next", 1))
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 	var xp_line: String = (
-		"Max level (%d)" % SkillXp.LEVEL_CAP if at_cap
-		else "%d / %d XP (%d to next level)" % [xp, xp_to_next, maxi(0, xp_to_next - xp)]
+		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, _format_xp(total_xp)] if at_cap
+		else "%s / %s XP (%s to next) · Total XP: %s" % [
+			_format_xp(xp), _format_xp(xp_to_next), _format_xp(maxi(0, xp_to_next - xp)), _format_xp(total_xp)
+		]
 	)
 	var lines: PackedStringArray = [xp_line]
 	var jp: JobPerks = JobRegistry.perks_for(StringName(skill_name))
@@ -292,3 +298,15 @@ func _make_total_bar_style() -> StyleBoxFlat:
 	style.content_margin_top = 4
 	style.content_margin_bottom = 4
 	return style
+
+
+func _format_xp(value: int) -> String:
+	var text := str(maxi(0, value))
+	var out := ""
+	var count: int = 0
+	for i: int in range(text.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = text[i] + out
+		count += 1
+	return out

@@ -1,13 +1,14 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 262.0)
+const PANEL_SIZE := Vector2(180.0, 300.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 
 const GRID_COLUMNS := 4
-const GRID_ROWS := 5
-## Minimum visible squares; grows with bag contents so /give / loot past 20 still show.
+const GRID_ROWS := 7
+## Fixed 28-slot bag (4×7). Matches [constant Inventory.MAX_SLOTS].
 const MIN_SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
+const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
 const SLOT_SIZE := Vector2(36.0, 36.0)
 
 const ACTION_PRIMARY := 0
@@ -118,9 +119,9 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		inventory_grid.remove_child(child)
 		child.queue_free()
 
-	var count: int = maxi(MIN_SLOT_COUNT, slot_count)
+	var count: int = clampi(slot_count, MIN_SLOT_COUNT, MAX_SLOT_COUNT)
 	if count % GRID_COLUMNS != 0:
-		count += GRID_COLUMNS - (count % GRID_COLUMNS)
+		count = mini(MAX_SLOT_COUNT, count + (GRID_COLUMNS - (count % GRID_COLUMNS)))
 
 	for _index: int in range(count):
 		var slot := Button.new()
@@ -221,7 +222,7 @@ func _refresh_inventory() -> void:
 		})
 
 	var order: Array = BagOrder.sync_with_entries(entries)
-	_build_empty_grid(maxi(order.size() + GRID_COLUMNS, MIN_SLOT_COUNT))
+	_build_empty_grid(MAX_SLOT_COUNT)
 	_display_entries(entries, order)
 
 
@@ -591,6 +592,9 @@ func _perform_primary_action(entry: Dictionary) -> void:
 			return
 		"cant_equip":
 			Toaster.toast("You cannot equip that item.")
+			return
+		"inventory_full":
+			Toaster.toast("Your bag is full. Bank some items first.")
 			return
 
 	if not bool(payload.get("ok", false)):

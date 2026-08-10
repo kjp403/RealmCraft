@@ -2,7 +2,8 @@ extends PanelContainer
 ## Compact Mastery dock — Weapons (ability loadouts) + Perks (skilling perk points).
 
 const PANEL_SIZE_WEAPONS := Vector2(180.0, 278.0)
-const PANEL_SIZE_PERKS := Vector2(248.0, 340.0)
+## Match Skills dock height so the Perks tab stays on-screen; list/detail scroll.
+const PANEL_SIZE_PERKS := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const TAB_SIZE := Vector2(29.0, 29.0)
@@ -264,6 +265,7 @@ func _build_perks_layout(main_box: VBoxContainer) -> void:
 	_perks_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_perks_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_perks_list_root.add_child(_perks_scroll)
+	DragScroll.enable(_perks_scroll)
 
 	var list := VBoxContainer.new()
 	list.name = "SkillList"
@@ -746,6 +748,7 @@ func _rebuild_perk_detail() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_perks_detail_root.add_child(scroll)
+	DragScroll.enable(scroll)
 
 	var body := VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -892,9 +895,13 @@ func _place_panel() -> void:
 	var panel_size: Vector2 = (
 		PANEL_SIZE_PERKS if _mode == Mode.PERKS else PANEL_SIZE_WEAPONS
 	)
+	# Shrink slightly on short viewports so the panel never starts above y=0.
+	var max_h: float = maxf(180.0, hud.size.y - BOTTOM_CLEARANCE)
+	if panel_size.y > max_h:
+		panel_size.y = max_h
 	custom_minimum_size = panel_size
 	size = panel_size
 	position = Vector2(
 		hud.size.x - panel_size.x - RIGHT_MARGIN,
-		hud.size.y - panel_size.y - BOTTOM_CLEARANCE
+		maxi(0, int(hud.size.y - panel_size.y - BOTTOM_CLEARANCE))
 	)

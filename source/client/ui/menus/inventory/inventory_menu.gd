@@ -755,6 +755,9 @@ func _surface_item_rejection(result: Array) -> bool:
 		"missing":
 			Toaster.toast("That item is no longer in your inventory.")
 			return true
+		"inventory_full":
+			Toaster.toast("Your bag is full. Bank some items first.")
+			return true
 		"no_map", "spawn_failed":
 			Toaster.toast("Could not drop that item here.")
 			return true

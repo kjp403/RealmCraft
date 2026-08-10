@@ -351,4 +351,7 @@ func _on_unequip_pressed() -> void:
 	if str(payload.get("reason", "")) == "in_combat":
 		Toaster.toast("You cannot do that while in combat.")
 		return
+	if str(payload.get("reason", "")) == "inventory_full":
+		Toaster.toast("Your bag is full. Bank some items first.")
+		return
 	_refresh()

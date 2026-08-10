@@ -25,12 +25,16 @@ func data_request_handler(
 	if slot == &"weapon":
 		BattleFormState.cancel_on(player)
 
+	# Gear returns to the bag — need a free square first.
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
+	if item is GearItem and not Inventory.can_add(player.player_resource.inventory, item_id, 1):
+		return {"ok": false, "reason": "inventory_full"}
+
 	player.equipment_component.unequip(slot)
 	# Return it to the bag only if it was bag-OWNED (gear/weapon). Consumables and
 	# materials are REFERENCED while held — they never left the bag, so re-adding
 	# would duplicate them.
-	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
 	if item is GearItem:
-		Inventory.add_item(player.player_resource.inventory, item_id, 1)
+		Inventory.try_add_item(player.player_resource.inventory, item_id, 1)
 	player.player_resource.equipment.erase(slot)
 	return {"ok": true}

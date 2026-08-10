@@ -85,5 +85,9 @@ func _on_pickup_response(data: Dictionary) -> void:
 			Toaster.toast("That loot is gone.")
 		"reserved":
 			Toaster.toast("That loot is reserved for another player.")
+		"inventory_full":
+			Toaster.toast("Your bag is full (%d/%d). Bank some items." % [
+				Inventory.MAX_SLOTS, Inventory.MAX_SLOTS
+			])
 		_:
 			pass

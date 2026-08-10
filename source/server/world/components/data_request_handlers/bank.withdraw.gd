@@ -43,11 +43,17 @@ func data_request_handler(
 		amount = have
 	amount = mini(amount, have)
 
+	if not Inventory.can_add(player.player_resource.inventory, item_id, amount):
+		return {"ok": false, "reason": "inventory_full"}
+
 	var removed: int = Inventory.remove_from_slot(bank, slot_uid, amount)
 	if removed <= 0:
 		return {"ok": false, "reason": "missing"}
 
-	Inventory.add_item(player.player_resource.inventory, item_id, removed)
+	if not Inventory.try_add_item(player.player_resource.inventory, item_id, removed):
+		# Restore to bank if the bag somehow rejected the stack.
+		Inventory.add_item(bank, item_id, removed)
+		return {"ok": false, "reason": "inventory_full"}
 	instance.world_server.database.save_player(player.player_resource)
 	return {
 		"ok": true,
