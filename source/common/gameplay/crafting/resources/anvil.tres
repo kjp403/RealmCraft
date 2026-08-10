@@ -46,6 +46,37 @@
 [ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="65_gold_ore"]
 
 
+[ext_resource type="Resource" uid="uid://7db100a3cd75e" path="res://source/common/gameplay/items/weapons/sword/sword_bronze.item.tres" id="70_br_sw"]
+[ext_resource type="Resource" uid="uid://8126da878a1e4" path="res://source/common/gameplay/items/weapons/hammer/hammer_bronze.item.tres" id="70_br_hm"]
+[ext_resource type="Resource" uid="uid://36240d593a4fa" path="res://source/common/gameplay/items/weapons/wand/wand_bronze.item.tres" id="70_br_wd"]
+[ext_resource type="Resource" uid="uid://a8be7a35b8f6a" path="res://source/common/gameplay/items/weapons/book/book_bronze.item.tres" id="70_br_tm"]
+[ext_resource type="Resource" uid="uid://a94b2a8535482" path="res://source/common/gameplay/items/weapons/bow/bronze_bow.item.tres" id="70_br_bw"]
+[ext_resource type="Resource" uid="uid://4c62a2b2a090b" path="res://source/common/gameplay/items/weapons/sword/sword_iron.item.tres" id="70_fe_sw"]
+[ext_resource type="Resource" uid="uid://57b5f849f20d4" path="res://source/common/gameplay/items/weapons/hammer/hammer_iron.item.tres" id="70_fe_hm"]
+[ext_resource type="Resource" uid="uid://7670aef450f91" path="res://source/common/gameplay/items/weapons/wand/wand_iron.item.tres" id="70_fe_wd"]
+[ext_resource type="Resource" uid="uid://2223d2476d1c1" path="res://source/common/gameplay/items/weapons/book/book_iron.item.tres" id="70_fe_tm"]
+[ext_resource type="Resource" uid="uid://70f654e2dffe4" path="res://source/common/gameplay/items/weapons/bow/iron_bow.item.tres" id="70_fe_bw"]
+[ext_resource type="Resource" uid="uid://9b1a412ba3383" path="res://source/common/gameplay/items/weapons/sword/sword_steel.item.tres" id="70_st_sw"]
+[ext_resource type="Resource" uid="uid://2c0e5b222831f" path="res://source/common/gameplay/items/weapons/hammer/hammer_steel.item.tres" id="70_st_hm"]
+[ext_resource type="Resource" uid="uid://a6e0950369832" path="res://source/common/gameplay/items/weapons/wand/wand_steel.item.tres" id="70_st_wd"]
+[ext_resource type="Resource" uid="uid://28891b08e54ed" path="res://source/common/gameplay/items/weapons/book/book_steel.item.tres" id="70_st_tm"]
+[ext_resource type="Resource" uid="uid://d06841445f5e3" path="res://source/common/gameplay/items/weapons/bow/steel_bow.item.tres" id="70_st_bw"]
+[ext_resource type="Resource" uid="uid://13e0b92d2610c" path="res://source/common/gameplay/items/weapons/sword/sword_mithril.item.tres" id="70_mi_sw"]
+[ext_resource type="Resource" uid="uid://ff7753070bdaf" path="res://source/common/gameplay/items/weapons/hammer/hammer_mithril.item.tres" id="70_mi_hm"]
+[ext_resource type="Resource" uid="uid://47ea5e753b446" path="res://source/common/gameplay/items/weapons/wand/wand_mithril.item.tres" id="70_mi_wd"]
+[ext_resource type="Resource" uid="uid://1a192e14fe034" path="res://source/common/gameplay/items/weapons/book/book_mithril.item.tres" id="70_mi_tm"]
+[ext_resource type="Resource" uid="uid://2734e6b318d23" path="res://source/common/gameplay/items/weapons/bow/mithril_bow.item.tres" id="70_mi_bw"]
+[ext_resource type="Resource" uid="uid://28a3298f1b24c" path="res://source/common/gameplay/items/weapons/sword/sword_adamant.item.tres" id="70_ad_sw"]
+[ext_resource type="Resource" uid="uid://3b488cd43ab47" path="res://source/common/gameplay/items/weapons/hammer/hammer_adamant.item.tres" id="70_ad_hm"]
+[ext_resource type="Resource" uid="uid://311bce28c4a0b" path="res://source/common/gameplay/items/weapons/wand/wand_adamant.item.tres" id="70_ad_wd"]
+[ext_resource type="Resource" uid="uid://839168fd8acf6" path="res://source/common/gameplay/items/weapons/book/book_adamant.item.tres" id="70_ad_tm"]
+[ext_resource type="Resource" uid="uid://c10f0ae86815f" path="res://source/common/gameplay/items/weapons/bow/adamant_bow.item.tres" id="70_ad_bw"]
+[ext_resource type="Resource" uid="uid://5837ac4420626" path="res://source/common/gameplay/items/weapons/sword/sword_runite.item.tres" id="70_ru_sw"]
+[ext_resource type="Resource" uid="uid://4caf0e682394f" path="res://source/common/gameplay/items/weapons/hammer/hammer_runite.item.tres" id="70_ru_hm"]
+[ext_resource type="Resource" uid="uid://759606c716efa" path="res://source/common/gameplay/items/weapons/wand/wand_runite.item.tres" id="70_ru_wd"]
+[ext_resource type="Resource" uid="uid://85ef84b2cd0e7" path="res://source/common/gameplay/items/weapons/book/book_runite.item.tres" id="70_ru_tm"]
+[ext_resource type="Resource" uid="uid://40bdcc9fa6597" path="res://source/common/gameplay/items/weapons/bow/runite_bow.item.tres" id="70_ru_bw"]
+
 [sub_resource type="Resource" id="I_sm_br_cu"]
 script = ExtResource("3_ingred")
 item = ExtResource("60_cop_ore")
@@ -404,8 +435,369 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_drb_ore"), SubResou
 required_level = 50
 xp_reward = 130
 
+[sub_resource type="Resource" id="I_wpn_bronze_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_bronze_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_br_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_bronze_sword")])
+required_level = 1
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_wpn_bronze_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_bronze_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_br_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_bronze_hammer")])
+required_level = 1
+xp_reward = 55
+
+[sub_resource type="Resource" id="I_wpn_bronze_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_bronze_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_br_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_bronze_wand")])
+required_level = 1
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_wpn_bronze_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_bronze_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_br_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_bronze_book")])
+required_level = 1
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_wpn_bronze_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_br_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_bronze_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_br_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_bronze_bow")])
+required_level = 1
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_wpn_iron_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_iron_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_fe_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_iron_sword")])
+required_level = 5
+xp_reward = 50
+
+[sub_resource type="Resource" id="I_wpn_iron_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_iron_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_fe_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_iron_hammer")])
+required_level = 5
+xp_reward = 65
+
+[sub_resource type="Resource" id="I_wpn_iron_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_iron_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_fe_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_iron_wand")])
+required_level = 5
+xp_reward = 50
+
+[sub_resource type="Resource" id="I_wpn_iron_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_iron_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_fe_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_iron_book")])
+required_level = 5
+xp_reward = 50
+
+[sub_resource type="Resource" id="I_wpn_iron_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_fe_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_iron_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_fe_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_iron_bow")])
+required_level = 5
+xp_reward = 50
+
+[sub_resource type="Resource" id="I_wpn_steel_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_steel_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_st_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_steel_sword")])
+required_level = 15
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_wpn_steel_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_steel_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_st_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_steel_hammer")])
+required_level = 15
+xp_reward = 75
+
+[sub_resource type="Resource" id="I_wpn_steel_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_steel_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_st_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_steel_wand")])
+required_level = 15
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_wpn_steel_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_steel_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_st_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_steel_book")])
+required_level = 15
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_wpn_steel_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_st_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_steel_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_st_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_steel_bow")])
+required_level = 15
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_wpn_mithril_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_mithril_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_mi_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_sword")])
+required_level = 20
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_wpn_mithril_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_mithril_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_mi_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_hammer")])
+required_level = 20
+xp_reward = 85
+
+[sub_resource type="Resource" id="I_wpn_mithril_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_mithril_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_mi_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_wand")])
+required_level = 20
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_wpn_mithril_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_mithril_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_mi_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_book")])
+required_level = 20
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_wpn_mithril_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_mithril_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_mi_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_bow")])
+required_level = 20
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_wpn_adamant_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_adamant_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ad_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_sword")])
+required_level = 30
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_wpn_adamant_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_adamant_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ad_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_hammer")])
+required_level = 30
+xp_reward = 95
+
+[sub_resource type="Resource" id="I_wpn_adamant_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_adamant_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ad_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_wand")])
+required_level = 30
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_wpn_adamant_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_adamant_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ad_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_book")])
+required_level = 30
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_wpn_adamant_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_adamant_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ad_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_bow")])
+required_level = 30
+xp_reward = 80
+
+[sub_resource type="Resource" id="I_wpn_runite_sword"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_runite_sword"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ru_sw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_sword")])
+required_level = 45
+xp_reward = 90
+
+[sub_resource type="Resource" id="I_wpn_runite_hammer"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_wpn_runite_hammer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ru_hm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_hammer")])
+required_level = 45
+xp_reward = 105
+
+[sub_resource type="Resource" id="I_wpn_runite_wand"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_runite_wand"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ru_wd")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_wand")])
+required_level = 45
+xp_reward = 90
+
+[sub_resource type="Resource" id="I_wpn_runite_book"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_runite_book"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ru_tm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_book")])
+required_level = 45
+xp_reward = 90
+
+[sub_resource type="Resource" id="I_wpn_runite_bow"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_wpn_runite_bow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("70_ru_bw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_bow")])
+required_level = 45
+xp_reward = 90
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Smithing Table"
+profession = &"smithing"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow")])
