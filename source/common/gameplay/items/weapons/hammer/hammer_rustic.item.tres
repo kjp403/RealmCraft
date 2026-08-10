@@ -34,6 +34,6 @@ item_name = &"Rustic Hammer"
 item_icon = SubResource("AtlasTexture_urfkj")
 description = "A heavy, iron-banded maul. Rugged and dependable."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"hammer_rustic.item"
 metadata/id = 78

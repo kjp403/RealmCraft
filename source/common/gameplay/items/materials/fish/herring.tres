@@ -9,5 +9,6 @@ item_name = &"Raw Herring"
 item_icon = ExtResource("1_icon")
 description = "A common silvery school fish."
 vendor_value = 2
+stack_limit = 10
 metadata/slug = &"herring"
 metadata/id = 181

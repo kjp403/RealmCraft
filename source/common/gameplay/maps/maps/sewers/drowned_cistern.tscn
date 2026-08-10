@@ -12,16 +12,17 @@
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="e9"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_carrion_crawler.tres" id="e10"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_acid_ooze.tres" id="e11"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_gorgon.tres" id="e12"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_intellect_devourer.tres" id="e13"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_zombie_giant.tres" id="e14"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_umber_hulk.tres" id="e15"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="e16"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/drowned_keeper_vess.tres" id="e18"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cistern_hulk.tres" id="e15"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_slime.tres" id="e16"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="e17"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/drowned_keeper_vess.tres" id="e19"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="e22"]
 
 [node name="drowned_cistern" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -1523,35 +1524,55 @@ id_to_node = {
 0: NodePath("Crawler"),
 1: NodePath("Crawler2"),
 2: NodePath("Crawler3"),
-3: NodePath("AcidOoze"),
-4: NodePath("AcidOoze2"),
-5: NodePath("AcidOoze3"),
-6: NodePath("Gorgon"),
-7: NodePath("Gorgon2"),
-8: NodePath("Devourer"),
-9: NodePath("Devourer2"),
-10: NodePath("Zombie"),
-11: NodePath("Zombie2"),
-12: NodePath("TankGuard"),
-13: NodePath("TankGuard2"),
-14: NodePath("CisternSovereign")
+3: NodePath("Crawler4"),
+4: NodePath("AcidOoze"),
+5: NodePath("AcidOoze2"),
+6: NodePath("AcidOoze3"),
+7: NodePath("AcidOoze4"),
+8: NodePath("AcidOoze5"),
+9: NodePath("Gorgon"),
+10: NodePath("Gorgon2"),
+11: NodePath("Gorgon3"),
+12: NodePath("Gorgon4"),
+13: NodePath("Devourer"),
+14: NodePath("Devourer2"),
+15: NodePath("Devourer3"),
+16: NodePath("Zombie"),
+17: NodePath("Zombie2"),
+18: NodePath("Zombie3"),
+19: NodePath("TankGuard"),
+20: NodePath("TankGuard2"),
+21: NodePath("TankGuard3"),
+22: NodePath("Slime"),
+23: NodePath("Slime2"),
+24: NodePath("CisternSovereign")
 }
 node_to_id = {
 NodePath("Crawler"): 0,
 NodePath("Crawler2"): 1,
 NodePath("Crawler3"): 2,
-NodePath("AcidOoze"): 3,
-NodePath("AcidOoze2"): 4,
-NodePath("AcidOoze3"): 5,
-NodePath("Gorgon"): 6,
-NodePath("Gorgon2"): 7,
-NodePath("Devourer"): 8,
-NodePath("Devourer2"): 9,
-NodePath("Zombie"): 10,
-NodePath("Zombie2"): 11,
-NodePath("TankGuard"): 12,
-NodePath("TankGuard2"): 13,
-NodePath("CisternSovereign"): 14
+NodePath("Crawler4"): 3,
+NodePath("AcidOoze"): 4,
+NodePath("AcidOoze2"): 5,
+NodePath("AcidOoze3"): 6,
+NodePath("AcidOoze4"): 7,
+NodePath("AcidOoze5"): 8,
+NodePath("Gorgon"): 9,
+NodePath("Gorgon2"): 10,
+NodePath("Gorgon3"): 11,
+NodePath("Gorgon4"): 12,
+NodePath("Devourer"): 13,
+NodePath("Devourer2"): 14,
+NodePath("Devourer3"): 15,
+NodePath("Zombie"): 16,
+NodePath("Zombie2"): 17,
+NodePath("Zombie3"): 18,
+NodePath("TankGuard"): 19,
+NodePath("TankGuard2"): 20,
+NodePath("TankGuard3"): 21,
+NodePath("Slime"): 22,
+NodePath("Slime2"): 23,
+NodePath("CisternSovereign"): 24
 }
 
 [node name="Crawler" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
@@ -1568,6 +1589,12 @@ weapon = null
 
 [node name="Crawler3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(5288.0, 4808.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e10")
+weapon = null
+
+[node name="Crawler4" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(4488.0, 4168.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e10")
 weapon = null
@@ -1590,6 +1617,18 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e11")
 weapon = null
 
+[node name="AcidOoze4" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(6568.0, 3176.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e11")
+weapon = null
+
+[node name="AcidOoze5" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(4488.0, 2888.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e11")
+weapon = null
+
 [node name="Gorgon" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(6568.0, 2408.0)
 debug_draw_ranges = false
@@ -1598,6 +1637,18 @@ weapon = null
 
 [node name="Gorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(4488.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e12")
+weapon = null
+
+[node name="Gorgon3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(3256.0, 2024.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e12")
+weapon = null
+
+[node name="Gorgon4" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(5768.0, 1928.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e12")
 weapon = null
@@ -1614,6 +1665,12 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e13")
 weapon = null
 
+[node name="Devourer3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(4488.0, 3528.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e13")
+weapon = null
+
 [node name="Zombie" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(3528.0, 2088.0)
 debug_draw_ranges = false
@@ -1622,6 +1679,12 @@ weapon = null
 
 [node name="Zombie2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(5448.0, 2088.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e14")
+weapon = null
+
+[node name="Zombie3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(4488.0, 2408.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e14")
 weapon = null
@@ -1638,30 +1701,48 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e15")
 weapon = null
 
+[node name="TankGuard3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(4488.0, 3848.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="Slime" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(2888.0, 4488.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
+[node name="Slime2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+position = Vector2(6088.0, 4488.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
 [node name="CisternSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
 position = Vector2(4488.0, 3048.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e16")
+enemy_data = ExtResource("e17")
 weapon = null
 
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="DrownedKeeperVess" parent="NPCs" instance=ExtResource("e17")]
+[node name="DrownedKeeperVess" parent="NPCs" instance=ExtResource("e18")]
 position = Vector2(4168.0, 5512.0)
-npc_resource = ExtResource("e18")
+npc_resource = ExtResource("e19")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e19")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 5672.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e19")]
+[node name="Entrance" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 5672.0)
 warper_id = 43
 
-[node name="AscentPortal" parent="." instance=ExtResource("e20")]
+[node name="AscentPortal" parent="." instance=ExtResource("e21")]
 position = Vector2(4488.0, 5672.0)
 portal_color = Color(0, 0.5, 0.34, 1)
 destination_label = "The Sewers"
-target_instance = ExtResource("e21")
+target_instance = ExtResource("e22")
 warper_id = 143
 target_id = 53

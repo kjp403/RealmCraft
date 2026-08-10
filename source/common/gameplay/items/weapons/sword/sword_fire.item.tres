@@ -29,6 +29,6 @@ item_name = &"Fire Sword"
 item_icon = SubResource("AtlasTexture_3p2t8")
 description = "A blade wreathed in everlasting embers, heavy with an old power."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"sword_fire.item"
 metadata/id = 79

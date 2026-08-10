@@ -10,5 +10,6 @@ item_icon = ExtResource("1_sp4wx")
 description = "A refined copper ingot. The first metal a smith learns to work."
 vendor_value = 5
 metadata/_custom_type_script = "uid://nsr1timk430j"
+stack_limit = 10
 metadata/slug = &"copper_bar"
 metadata/id = 54

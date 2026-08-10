@@ -34,6 +34,6 @@ item_name = &"Bone Hammer"
 item_icon = SubResource("Atlas_bone_hammer")
 description = "Hollow bone keeps it light. Swings come faster and it slows you less, but it lands softer than iron."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"hammer_bone.item"
 metadata/id = 81

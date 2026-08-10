@@ -34,6 +34,6 @@ item_name = &"Spore Bow"
 item_icon = SubResource("Atlas_icon")
 description = "A bow strung with fibrous mycelium."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"spore_bow.item"
 metadata/id = 87

@@ -45,6 +45,6 @@ item_name = &"Rustic Wand"
 item_icon = SubResource("AtlasTexture_wand")
 description = "A crooked wand pried from a bandit sorcerer."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"wand_bandit.item"
 metadata/id = 76

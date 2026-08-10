@@ -5,40 +5,41 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_nvlna"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_w7g6l"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_wretched_fomorian.tres" id="5_l5hsc"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="loot_hide_bandit"]
-[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="loot_coal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="loot_iron"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_nvlna")
 item = ExtResource("loot_gold")
-min_amount = 4
-max_amount = 9
-chance = 0.9
+min_amount = 8
+max_amount = 16
+chance = 0.92
 
-[sub_resource type="Resource" id="Drop_hide_bandit"]
+[sub_resource type="Resource" id="Drop_coal"]
 script = ExtResource("3_nvlna")
-item = ExtResource("loot_hide_bandit")
-max_amount = 2
+item = ExtResource("loot_coal")
+max_amount = 3
 chance = 0.5
 
-[sub_resource type="Resource" id="Drop_cloth_bandit"]
+[sub_resource type="Resource" id="Drop_iron"]
 script = ExtResource("3_nvlna")
-item = ExtResource("loot_cloth_bandit")
-chance = 0.3
+item = ExtResource("loot_iron")
+max_amount = 3
+chance = 0.4
 
 [resource]
 script = ExtResource("4_w7g6l")
-enemy_type = &"trpg_wretched_fomorian"
-display_name = "Wretched Fomorian"
+enemy_type = &"trpg_cinder_fomorian"
+display_name = "Cinder Fomorian"
 skin = ExtResource("5_l5hsc")
-combat_level = 28
 visual_scale = 1.0
 is_boss = false
-max_health = 280.0
-attack_damage = 20.0
+combat_level = 35
+max_health = 430.0
+attack_damage = 30.0
 attack_cooldown = 1.4
-armor = 5.0
+armor = 10.0
 mr = 0.0
 behaviors = Array[ExtResource("2_xryji")]([])
 attacks = Array[ExtResource("1_hbdmc")]([])
@@ -52,10 +53,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 22
+xp_reward = 36
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_nvlna")]([SubResource("Drop_gold"), SubResource("Drop_hide_bandit"), SubResource("Drop_cloth_bandit")])
+loot = Array[ExtResource("3_nvlna")]([SubResource("Drop_gold"), SubResource("Drop_coal"), SubResource("Drop_iron")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
@@ -82,5 +83,5 @@ ornate_chest_top_max = 0
 ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
-metadata/slug = &"trpg_wretched_fomorian"
-metadata/id = 79
+metadata/slug = &"trpg_cinder_fomorian"
+metadata/id = 84

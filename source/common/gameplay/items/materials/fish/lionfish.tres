@@ -9,5 +9,6 @@ item_name = &"Raw Lionfish"
 item_icon = ExtResource("1_icon")
 description = "Spiny and striking reef predator."
 vendor_value = 6
+stack_limit = 10
 metadata/slug = &"lionfish"
 metadata/id = 187

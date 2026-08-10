@@ -70,6 +70,36 @@ static func free_slots(inventory: Dictionary) -> int:
 	return maxi(0, MAX_SLOTS - used_slots(inventory))
 
 
+## Largest amount of [param item_id] that still fits in the bag (existing stack
+## space + free slots × stack_limit). Used by bank Max-withdraw to fill the bag.
+static func max_fit(inventory: Dictionary, item_id: int) -> int:
+	if item_id <= 0:
+		return 0
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item != null and item.is_currency:
+		return 1 << 30
+	var free: int = free_slots(inventory)
+	var stackable: bool = item != null and item.is_stackable()
+	if not stackable:
+		return free
+	var limit: int = 0 if item == null else int(item.stack_limit)
+	if limit <= 0:
+		# Pseudo-infinite: one existing stack absorbs any amount; else need 1 free slot.
+		for slot_uid in inventory:
+			if int(inventory[slot_uid].get("id", 0)) == item_id:
+				return 1 << 30
+		return 1 << 30 if free > 0 else 0
+	var space: int = 0
+	for slot_uid in inventory:
+		if int(inventory[slot_uid].get("id", 0)) != item_id:
+			continue
+		var have: int = int(inventory[slot_uid].get("a", 0))
+		if have < limit:
+			space += limit - have
+	space += free * limit
+	return space
+
+
 ## How many *new* bag slots [param amount] of [param item_id] would open after
 ## filling existing stacks up to [member Item.stack_limit]. Currency always 0.
 static func slots_needed(inventory: Dictionary, item_id: int, amount: int) -> int:

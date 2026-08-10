@@ -11,5 +11,6 @@ description = "An alloy of copper and tin. The foundation of early smithing."
 vendor_value = 6
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
+stack_limit = 10
 metadata/slug = &"bronze_bar"
 metadata/id = 227

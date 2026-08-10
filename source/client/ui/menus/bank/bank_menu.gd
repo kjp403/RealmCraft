@@ -26,6 +26,7 @@ var _selected_uid: int = -1
 var _selected_from_bag: bool = true
 var _selected_have: int = 0
 var _selected_name: String = ""
+var _selected_item_id: int = 0
 
 
 func _ready() -> void:
@@ -184,10 +185,8 @@ func _build_transfer_row() -> HBoxContainer:
 	var max_btn := Button.new()
 	max_btn.text = "Max"
 	max_btn.focus_mode = Control.FOCUS_NONE
-	max_btn.tooltip_text = "Set amount to the full stack"
-	max_btn.pressed.connect(func() -> void:
-		if _selected_have > 0:
-			_amount_spin.value = _selected_have)
+	max_btn.tooltip_text = "Fill your bag with as many as will fit"
+	max_btn.pressed.connect(_on_max_pressed)
 	row.add_child(max_btn)
 
 	_transfer_button = Button.new()
@@ -364,9 +363,15 @@ func _on_stack_selected(uid: int, from_bag: bool, have: int, item: Item) -> void
 	_selected_uid = uid
 	_selected_from_bag = from_bag
 	_selected_have = maxi(1, have)
+	_selected_item_id = int(item.get_meta(&"id", 0)) if item != null else 0
 	_selected_name = String(item.item_name) if item != null else "Item"
 	_amount_spin.editable = true
-	_amount_spin.max_value = _selected_have
+	# Withdraw Max can span every bank pile of this item, so cap the spinner at
+	# the vault total (still clamped to bag fit when Max is pressed).
+	var spin_cap: int = _selected_have
+	if not from_bag and _selected_item_id > 0:
+		spin_cap = maxi(1, Inventory.count(_bank, _selected_item_id))
+	_amount_spin.max_value = spin_cap
 	_amount_spin.min_value = 1
 	_amount_spin.value = _selected_have
 	_transfer_button.disabled = false
@@ -398,6 +403,7 @@ func _sync_selection_highlights() -> void:
 func _clear_selection() -> void:
 	_selected_uid = -1
 	_selected_have = 0
+	_selected_item_id = 0
 	_selected_name = ""
 	_amount_spin.editable = false
 	_amount_spin.max_value = 1
@@ -406,6 +412,21 @@ func _clear_selection() -> void:
 	_transfer_button.text = "Transfer"
 	_selection_label.text = "Select a stack"
 	_selection_label.add_theme_color_override(&"font_color", MUTED)
+
+
+func _on_max_pressed() -> void:
+	if _selected_have <= 0 or _selected_item_id <= 0:
+		return
+	if _selected_from_bag:
+		_amount_spin.value = _selected_have
+		return
+	# Withdraw: fill the bag with as many of this item as inventory space allows,
+	# pulling across every bank pile of the same id.
+	var banked: int = Inventory.count(_bank, _selected_item_id)
+	var fit: int = Inventory.max_fit(_inventory, _selected_item_id)
+	var amount: int = mini(banked, fit)
+	_amount_spin.max_value = maxi(1, banked)
+	_amount_spin.value = maxi(1, amount)
 
 
 func _on_transfer_pressed() -> void:

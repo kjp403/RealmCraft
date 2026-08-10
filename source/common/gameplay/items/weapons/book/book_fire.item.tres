@@ -43,6 +43,6 @@ item_name = &"Fire Tome"
 item_icon = SubResource("Icon")
 description = "A fire-bound tome, heaviest of the battlemage's books. A deep mana pool and quick regen to nuke from the heart of melee."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"book_fire.item"
 metadata/id = 96

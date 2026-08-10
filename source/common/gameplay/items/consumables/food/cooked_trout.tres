@@ -12,5 +12,6 @@ use_freeze_ms = 700
 item_name = &"Cooked Trout"
 item_icon = ExtResource("2_icon")
 description = "Grilled trout. Restores 15 health."
+stack_limit = 10
 metadata/slug = &"cooked_trout"
 metadata/id = 195

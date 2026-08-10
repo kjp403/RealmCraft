@@ -9,19 +9,24 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/props/animated_deco.tscn" id="e6"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_torch.tres" id="e7"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_candle_a.tres" id="e8"]
-[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="e9"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton.tres" id="e10"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_skeleton.tres" id="e11"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton_archer.tres" id="e12"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_greatsword_skeleton.tres" id="e13"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="e14"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e15"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="e16"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e18"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e21"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/props/ambient_critter.tscn" id="e9"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_stag.tres" id="e10"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_boar.tres" id="e11"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_badger.tres" id="e12"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_wolf.tres" id="e13"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="e14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton.tres" id="e15"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_skeleton.tres" id="e16"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton_archer.tres" id="e17"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_greatsword_skeleton.tres" id="e18"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="e19"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="e21"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e22"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e23"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e24"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e25"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e26"]
 
 [node name="sunken_tombs" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -172,6 +177,78 @@ scale_factor = 1.3
 light_energy = 0.85
 light_color = Color(0.6, 0.9, 0.75, 1)
 
+[node name="TombCritter1" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(2408.0, 5128.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter2" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(6248.0, 5128.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter3" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(3272.0, 3848.0)
+sprite_frames = ExtResource("e12")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter4" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(5368.0, 3800.0)
+sprite_frames = ExtResource("e13")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter5" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(1928.0, 2888.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter6" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(6728.0, 2888.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter7" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(4120.0, 4424.0)
+sprite_frames = ExtResource("e12")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter8" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(2888.0, 2248.0)
+sprite_frames = ExtResource("e13")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter9" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(5768.0, 2248.0)
+sprite_frames = ExtResource("e10")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter10" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(4328.0, 3208.0)
+sprite_frames = ExtResource("e11")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter11" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(2280.0, 4216.0)
+sprite_frames = ExtResource("e12")
+scale_factor = 0.85
+wander_radius = 40.0
+
+[node name="TombCritter12" parent="SceneProps" instance=ExtResource("e9")]
+position = Vector2(6408.0, 4200.0)
+sprite_frames = ExtResource("e13")
+scale_factor = 0.85
+wander_radius = 40.0
+
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 y_sort_enabled = true
 script = ExtResource("e2")
@@ -179,153 +256,233 @@ id_to_node = {
 0: NodePath("TombSkeleton"),
 1: NodePath("TombSkeleton2"),
 2: NodePath("TombSkeleton3"),
-3: NodePath("ArmoredSkeleton"),
-4: NodePath("ArmoredSkeleton2"),
-5: NodePath("BoneArcher"),
-6: NodePath("BoneArcher2"),
-7: NodePath("Greatsword"),
-8: NodePath("Greatsword2"),
-9: NodePath("Necromancer"),
-10: NodePath("Necromancer2"),
-11: NodePath("Gorgon"),
-12: NodePath("Gorgon2"),
-13: NodePath("ThroneGuard"),
-14: NodePath("ThroneGuard2"),
-15: NodePath("SandKing")
+3: NodePath("TombSkeleton4"),
+4: NodePath("TombSkeleton5"),
+5: NodePath("ArmoredSkeleton"),
+6: NodePath("ArmoredSkeleton2"),
+7: NodePath("ArmoredSkeleton3"),
+8: NodePath("ArmoredSkeleton4"),
+9: NodePath("BoneArcher"),
+10: NodePath("BoneArcher2"),
+11: NodePath("BoneArcher3"),
+12: NodePath("BoneArcher4"),
+13: NodePath("Greatsword"),
+14: NodePath("Greatsword2"),
+15: NodePath("Greatsword3"),
+16: NodePath("Necromancer"),
+17: NodePath("Necromancer2"),
+18: NodePath("Necromancer3"),
+19: NodePath("Gorgon"),
+20: NodePath("Gorgon2"),
+21: NodePath("Gorgon3"),
+22: NodePath("ThroneGuard"),
+23: NodePath("ThroneGuard2"),
+24: NodePath("ThroneGuard3"),
+25: NodePath("SandKing")
 }
 node_to_id = {
 NodePath("TombSkeleton"): 0,
 NodePath("TombSkeleton2"): 1,
 NodePath("TombSkeleton3"): 2,
-NodePath("ArmoredSkeleton"): 3,
-NodePath("ArmoredSkeleton2"): 4,
-NodePath("BoneArcher"): 5,
-NodePath("BoneArcher2"): 6,
-NodePath("Greatsword"): 7,
-NodePath("Greatsword2"): 8,
-NodePath("Necromancer"): 9,
-NodePath("Necromancer2"): 10,
-NodePath("Gorgon"): 11,
-NodePath("Gorgon2"): 12,
-NodePath("ThroneGuard"): 13,
-NodePath("ThroneGuard2"): 14,
-NodePath("SandKing"): 15
+NodePath("TombSkeleton4"): 3,
+NodePath("TombSkeleton5"): 4,
+NodePath("ArmoredSkeleton"): 5,
+NodePath("ArmoredSkeleton2"): 6,
+NodePath("ArmoredSkeleton3"): 7,
+NodePath("ArmoredSkeleton4"): 8,
+NodePath("BoneArcher"): 9,
+NodePath("BoneArcher2"): 10,
+NodePath("BoneArcher3"): 11,
+NodePath("BoneArcher4"): 12,
+NodePath("Greatsword"): 13,
+NodePath("Greatsword2"): 14,
+NodePath("Greatsword3"): 15,
+NodePath("Necromancer"): 16,
+NodePath("Necromancer2"): 17,
+NodePath("Necromancer3"): 18,
+NodePath("Gorgon"): 19,
+NodePath("Gorgon2"): 20,
+NodePath("Gorgon3"): 21,
+NodePath("ThroneGuard"): 22,
+NodePath("ThroneGuard2"): 23,
+NodePath("ThroneGuard3"): 24,
+NodePath("SandKing"): 25
 }
 
-[node name="TombSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="TombSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(2328.0, 1576.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e10")
+enemy_data = ExtResource("e15")
 weapon = null
 
-[node name="TombSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="TombSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(3848.0, 4808.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e10")
+enemy_data = ExtResource("e15")
 weapon = null
 
-[node name="TombSkeleton3" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="TombSkeleton3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4808.0, 4808.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e10")
+enemy_data = ExtResource("e15")
 weapon = null
 
-[node name="ArmoredSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="TombSkeleton4" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(3304.0, 5000.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="TombSkeleton5" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(5448.0, 4952.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e15")
+weapon = null
+
+[node name="ArmoredSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(2568.0, 4648.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e11")
+enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="ArmoredSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="ArmoredSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(6088.0, 4648.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e11")
+enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="BoneArcher" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="ArmoredSkeleton3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(3752.0, 4040.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
+[node name="ArmoredSkeleton4" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(4888.0, 4008.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e16")
+weapon = null
+
+[node name="BoneArcher" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(2248.0, 3368.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e12")
+enemy_data = ExtResource("e17")
 weapon = null
 
-[node name="BoneArcher2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="BoneArcher2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(6408.0, 3368.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e12")
+enemy_data = ExtResource("e17")
 weapon = null
 
-[node name="Greatsword" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="BoneArcher3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(2760.0, 3032.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e17")
+weapon = null
+
+[node name="BoneArcher4" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(5880.0, 3016.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e17")
+weapon = null
+
+[node name="Greatsword" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4328.0, 3848.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e13")
+enemy_data = ExtResource("e18")
 weapon = null
 
-[node name="Greatsword2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Greatsword2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4328.0, 2728.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e13")
+enemy_data = ExtResource("e18")
 weapon = null
 
-[node name="Necromancer" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Greatsword3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(3640.0, 3496.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e18")
+weapon = null
+
+[node name="Necromancer" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(2728.0, 1928.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e14")
+enemy_data = ExtResource("e19")
 weapon = null
 
-[node name="Necromancer2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Necromancer2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(5928.0, 1928.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e14")
+enemy_data = ExtResource("e19")
 weapon = null
 
-[node name="Gorgon" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Necromancer3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(4328.0, 1768.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e19")
+weapon = null
+
+[node name="Gorgon" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(3624.0, 2552.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e15")
+enemy_data = ExtResource("e20")
 weapon = null
 
-[node name="Gorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Gorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(5048.0, 2584.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e15")
+enemy_data = ExtResource("e20")
 weapon = null
 
-[node name="ThroneGuard" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="Gorgon3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(4328.0, 2248.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e20")
+weapon = null
+
+[node name="ThroneGuard" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(3688.0, 1448.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e11")
+enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="ThroneGuard2" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="ThroneGuard2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4968.0, 1448.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e11")
+enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="SandKing" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
+[node name="ThroneGuard3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4328.0, 1288.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
 
+[node name="SandKing" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
+position = Vector2(4328.0, 1288.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e21")
+weapon = null
+
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e17")]
+[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e22")]
 position = Vector2(4008.0, 5416.0)
-npc_resource = ExtResource("e18")
+npc_resource = ExtResource("e23")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e19")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e24")]
 position = Vector2(4328.0, 5576.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e19")]
+[node name="Entrance" parent="." instance=ExtResource("e24")]
 position = Vector2(4328.0, 5576.0)
 warper_id = 41
 
-[node name="AscentPortal" parent="." instance=ExtResource("e20")]
+[node name="AscentPortal" parent="." instance=ExtResource("e25")]
 position = Vector2(4328.0, 5576.0)
 portal_color = Color(0.72, 0.6, 0.3, 1)
 destination_label = "Desert"
-target_instance = ExtResource("e21")
+target_instance = ExtResource("e26")
 warper_id = 141
 target_id = 51

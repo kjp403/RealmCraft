@@ -38,6 +38,6 @@ base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ap"), SubResource
 item_name = &"Spore Tome"
 description = "A tome grown thick with cave spores. Its pages breathe. A step up in mana for the battlemage who braves the caves."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"book_spore.item"
 metadata/id = 158

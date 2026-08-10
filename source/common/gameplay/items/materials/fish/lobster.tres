@@ -9,5 +9,6 @@ item_name = &"Raw Lobster"
 item_icon = ExtResource("1_icon")
 description = "Hard-shelled and highly prized."
 vendor_value = 8
+stack_limit = 10
 metadata/slug = &"lobster"
 metadata/id = 186

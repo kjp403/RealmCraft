@@ -180,7 +180,9 @@ var _state_owner: MobBehavior
 func _apply_enemy_data() -> void:
 	assert(enemy_data != null, "HostileNpc requires an enemy_data resource — see characters/npc/types/.")
 	enemy_type = enemy_data.enemy_type
-	display_name = enemy_data.display_name # drives the shared over-head name label
+	var base_name: String = enemy_data.display_name
+	var lvl: int = enemy_data.resolved_combat_level()
+	display_name = "%s (Lv %d)" % [base_name, lvl] if not base_name.is_empty() else "Enemy (Lv %d)" % lvl
 	max_health = enemy_data.max_health
 	attack_damage = enemy_data.attack_damage
 	attack_cooldown = enemy_data.attack_cooldown

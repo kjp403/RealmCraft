@@ -41,6 +41,6 @@ item_name = &"Wood Tome"
 item_icon = SubResource("AtlasTexture_uerpw")
 description = "A plain wooden-board tome. A modest mana pool to learn the battlemage's craft."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"book_wood.item"
 metadata/id = 98

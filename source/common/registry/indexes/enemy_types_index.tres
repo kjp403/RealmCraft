@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786391972
-next_id = 84
+version = 1786401510
+next_id = 88
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -397,6 +397,26 @@ entries = Array[Dictionary]([{
 &"id": 83,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
 &"slug": &"sand_king"
+}, {
+&"hash": "38f4a3db5af383188fa851323c28428b5f68d78b1b1125cf27d3dec41b0e2704",
+&"id": 84,
+&"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_cinder_fomorian.tres",
+&"slug": &"trpg_cinder_fomorian"
+}, {
+&"hash": "046153266e57d7de6dd73e1e5a9c4bd05bc805f8a72ea26032632b1b64fffba4",
+&"id": 85,
+&"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_cistern_hulk.tres",
+&"slug": &"trpg_cistern_hulk"
+}, {
+&"hash": "d076acb11f9966e7be9b6aea38973b1d7676f1f72ba5de55f5e374e4a2927424",
+&"id": 86,
+&"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_gorgon.tres",
+&"slug": &"trpg_sewer_gorgon"
+}, {
+&"hash": "717cf5b8a3cf5a43e19d2bde26df0ca9a1e8b95471c1cf1dc4aa5d70b41d3eda",
+&"id": 87,
+&"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_skeleton.tres",
+&"slug": &"trpg_sewer_skeleton"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

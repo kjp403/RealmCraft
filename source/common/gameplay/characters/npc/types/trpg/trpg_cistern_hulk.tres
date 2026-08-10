@@ -5,41 +5,40 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_4cja5"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_ctvvq"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_umber_hulk.tres" id="5_k8cq1"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="loot_coal"]
-[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="loot_iron"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_4cja5")
 item = ExtResource("loot_gold")
-min_amount = 8
-max_amount = 16
-chance = 0.92
+min_amount = 2
+max_amount = 5
+chance = 0.9
 
-[sub_resource type="Resource" id="Drop_coal"]
+[sub_resource type="Resource" id="Drop_hide_sewer"]
 script = ExtResource("3_4cja5")
-item = ExtResource("loot_coal")
-max_amount = 3
-chance = 0.5
+item = ExtResource("loot_hide_sewer")
+max_amount = 2
+chance = 0.45
 
-[sub_resource type="Resource" id="Drop_iron"]
+[sub_resource type="Resource" id="Drop_cloth_sewer"]
 script = ExtResource("3_4cja5")
-item = ExtResource("loot_iron")
-max_amount = 3
-chance = 0.4
+item = ExtResource("loot_cloth_sewer")
+chance = 0.25
 
 [resource]
 script = ExtResource("4_ctvvq")
-enemy_type = &"trpg_umber_hulk"
-display_name = "Umber Hulk"
+enemy_type = &"trpg_cistern_hulk"
+display_name = "Cistern Hulk"
 skin = ExtResource("5_k8cq1")
-combat_level = 35
 visual_scale = 1.0
 is_boss = false
-max_health = 450.0
-attack_damage = 29.0
+combat_level = 22
+max_health = 260.0
+attack_damage = 17.0
 attack_cooldown = 1.4
-armor = 14.0
+armor = 8.0
 mr = 0.0
 behaviors = Array[ExtResource("2_3vxdw")]([])
 attacks = Array[ExtResource("1_5fs8o")]([])
@@ -53,10 +52,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 36
+xp_reward = 16
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_4cja5")]([SubResource("Drop_gold"), SubResource("Drop_coal"), SubResource("Drop_iron")])
+loot = Array[ExtResource("3_4cja5")]([SubResource("Drop_gold"), SubResource("Drop_hide_sewer"), SubResource("Drop_cloth_sewer")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
@@ -83,5 +82,5 @@ ornate_chest_top_max = 0
 ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
-metadata/slug = &"trpg_umber_hulk"
-metadata/id = 77
+metadata/slug = &"trpg_cistern_hulk"
+metadata/id = 85

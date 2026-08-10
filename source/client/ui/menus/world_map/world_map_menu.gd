@@ -315,8 +315,7 @@ func _refresh_legend() -> void:
 		title.add_theme_color_override(&"font_color", Color(0.92, 0.93, 0.96))
 		entry.add_child(title)
 		var band := Label.new()
-		var band_text: String = zone.level_band()
-		band.text = band_text if not band_text.is_empty() else "Open area"
+		band.text = "Open area"
 		band.add_theme_font_size_override(&"font_size", 11)
 		band.add_theme_color_override(&"font_color", Color(0.7, 0.74, 0.8))
 		entry.add_child(band)

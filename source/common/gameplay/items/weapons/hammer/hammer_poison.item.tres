@@ -34,6 +34,6 @@ item_name = &"Poison Hammer"
 item_icon = SubResource("Atlas_icon")
 description = "Steeped in the sewers under the Capital. The rot never quite washes off."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"hammer_poison.item"
 metadata/id = 164

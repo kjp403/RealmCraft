@@ -19,8 +19,8 @@ const _SLOT_ORDER: Dictionary = {
 ## Main Stats (Base stats)
 @export var base_modifiers: Array[StatModifier]
 func _init() -> void:
-	# Equipment must occupy individual inventory slots.
-	stack_limit = 1
+	# Smithable gear stacks (armor / weapons); tools override to 1 in their .tres.
+	stack_limit = 5
 
 
 func inventory_tab() -> InventoryTab:

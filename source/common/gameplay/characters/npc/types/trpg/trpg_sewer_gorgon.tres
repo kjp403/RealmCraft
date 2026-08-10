@@ -5,40 +5,40 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_bf05w"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_qag53"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_poisonous_gorgon.tres" id="5_hqg67"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
-[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_bf05w")
 item = ExtResource("loot_gold")
-min_amount = 5
-max_amount = 11
+min_amount = 2
+max_amount = 5
 chance = 0.9
 
-[sub_resource type="Resource" id="Drop_bone"]
+[sub_resource type="Resource" id="Drop_hide_sewer"]
 script = ExtResource("3_bf05w")
-item = ExtResource("loot_bone")
-max_amount = 3
-chance = 0.55
+item = ExtResource("loot_hide_sewer")
+max_amount = 2
+chance = 0.45
 
-[sub_resource type="Resource" id="Drop_cloth_bandit"]
+[sub_resource type="Resource" id="Drop_cloth_sewer"]
 script = ExtResource("3_bf05w")
-item = ExtResource("loot_cloth_bandit")
-chance = 0.2
+item = ExtResource("loot_cloth_sewer")
+chance = 0.25
 
 [resource]
 script = ExtResource("4_qag53")
-enemy_type = &"trpg_poisonous_gorgon"
-display_name = "Poisonous Gorgon"
+enemy_type = &"trpg_sewer_gorgon"
+display_name = "Sewer Gorgon"
 skin = ExtResource("5_hqg67")
-combat_level = 30
 visual_scale = 1.0
 is_boss = false
-max_health = 270.0
-attack_damage = 21.0
+combat_level = 20
+max_health = 180.0
+attack_damage = 15.0
 attack_cooldown = 1.4
-armor = 4.0
+armor = 3.0
 mr = 0.0
 behaviors = Array[ExtResource("2_3dtni")]([])
 attacks = Array[ExtResource("1_h0dhp")]([])
@@ -52,10 +52,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 25
+xp_reward = 14
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_bf05w")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit")])
+loot = Array[ExtResource("3_bf05w")]([SubResource("Drop_gold"), SubResource("Drop_hide_sewer"), SubResource("Drop_cloth_sewer")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
@@ -82,5 +82,5 @@ ornate_chest_top_max = 0
 ornate_chest_second_min = 0
 ornate_chest_second_max = 0
 ornate_chest_consolation_chance = 0.0
-metadata/slug = &"trpg_poisonous_gorgon"
-metadata/id = 75
+metadata/slug = &"trpg_sewer_gorgon"
+metadata/id = 86

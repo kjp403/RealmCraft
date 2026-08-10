@@ -1,6 +1,8 @@
 extends DataRequestHandler
-## Move a bank stack (or part of it) back into the bag. No storage cap.
-## Currency stacks that somehow landed in the vault are purged back to the pouch.
+## Move bank stacks of an item back into the bag. Starts from the selected bank
+## slot, then continues draining other bank slots of the same item_id until
+## [code]amount[/code] is satisfied or the bag can't hold more. That lets Max
+## fill the inventory with many capped stacks (ores/logs/bars) instead of one.
 
 
 func data_request_handler(
@@ -38,21 +40,41 @@ func data_request_handler(
 			"bank": player.player_resource.bank,
 		}
 
+	var banked_total: int = Inventory.count(bank, item_id)
 	var amount: int = int(args.get("amount", have))
 	if amount <= 0:
-		amount = have
-	amount = mini(amount, have)
-
-	if not Inventory.can_add(player.player_resource.inventory, item_id, amount):
+		amount = banked_total
+	amount = mini(amount, banked_total)
+	# Never try to pull more than the bag can accept — fill as much as fits.
+	var fit: int = Inventory.max_fit(player.player_resource.inventory, item_id)
+	amount = mini(amount, fit)
+	if amount <= 0:
 		return {"ok": false, "reason": "inventory_full"}
 
-	var removed: int = Inventory.remove_from_slot(bank, slot_uid, amount)
-	if removed <= 0:
+	var remaining: int = amount
+	var total_removed: int = 0
+	# Prefer the selected slot first, then any other pile of the same item.
+	var order: Array[int] = [slot_uid]
+	for other_uid in bank.keys():
+		var ouid: int = int(other_uid)
+		if ouid == slot_uid:
+			continue
+		if int(bank[ouid].get("id", 0)) == item_id:
+			order.append(ouid)
+	for uid: int in order:
+		if remaining <= 0:
+			break
+		if not bank.has(uid):
+			continue
+		var removed: int = Inventory.remove_from_slot(bank, uid, remaining)
+		remaining -= removed
+		total_removed += removed
+
+	if total_removed <= 0:
 		return {"ok": false, "reason": "missing"}
 
-	if not Inventory.try_add_item(player.player_resource.inventory, item_id, removed):
-		# Restore to bank if the bag somehow rejected the stack.
-		Inventory.add_item(bank, item_id, removed)
+	if not Inventory.try_add_item(player.player_resource.inventory, item_id, total_removed):
+		Inventory.add_item(bank, item_id, total_removed)
 		return {"ok": false, "reason": "inventory_full"}
 	instance.world_server.database.save_player(player.player_resource)
 	return {

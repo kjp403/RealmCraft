@@ -9,5 +9,6 @@ item_name = &"Raw Shrimp"
 item_icon = ExtResource("1_icon")
 description = "A tiny coastal shrimp. Easy first catch."
 vendor_value = 1
+stack_limit = 10
 metadata/slug = &"shrimp"
 metadata/id = 180

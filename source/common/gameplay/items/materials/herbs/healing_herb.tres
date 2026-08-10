@@ -14,5 +14,6 @@ item_icon = SubResource("AtlasTexture_21x3k")
 description = "A common wildflower with mild healing properties. Found in clearings and along roadsides."
 vendor_value = 1
 metadata/_custom_type_script = "uid://nsr1timk430j"
+stack_limit = 10
 metadata/slug = &"healing_herb"
 metadata/id = 58

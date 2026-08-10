@@ -290,6 +290,25 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"player_map"):
 		display_menu(&"world_map", null)
 		get_viewport().set_input_as_handled()
+		return
+	# ESC closes every open interface (menus, launcher overlay, trade).
+	if event.is_action_pressed(&"ui_cancel"):
+		var closed: bool = false
+		for menu: Control in menus.values():
+			if menu.visible:
+				menu.hide()
+				closed = true
+		if menu_overlay != null and menu_overlay.visible:
+			menu_overlay.close()
+			closed = true
+		if trade_panel != null and trade_panel.visible:
+			if trade_panel.has_method(&"close"):
+				trade_panel.close()
+			else:
+				trade_panel.hide()
+			closed = true
+		if closed:
+			get_viewport().set_input_as_handled()
 
 
 func open_player_profile(player_id: int) -> void:

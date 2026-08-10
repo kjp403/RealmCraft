@@ -32,6 +32,9 @@ var sell_tab: Button
 var golds_icon: TextureRect
 var golds_label: Label
 @onready var item_list: VBoxContainer = %ItemList
+@onready var items_header: Label = %ItemsHeader
+@onready var stock_header: Label = %StockHeader
+@onready var price_header: Label = %PriceHeader
 @onready var detail_icon: TextureRect = %DetailIcon
 @onready var detail_name_label: Label = %DetailNameLabel
 @onready var detail_price_label: Label = %DetailPriceLabel
@@ -108,8 +111,7 @@ func open(arg: Dictionary) -> void:
 	var currency: Item = ContentRegistryHub.load_by_id(&"items", _currency_id)
 	if currency and golds_icon:
 		golds_icon.texture = currency.item_icon
-	# Tab bar shown if the shop offers both flavors of interaction. The sell side
-	# IS the trades list (curated economy — no generic junk-sell).
+	# Tab bar shown if the shop offers both flavors of interaction.
 	var has_sell_side: bool = _shop.has_trades()
 	mode_tabs.visible = _shop.allows_buying() and has_sell_side
 	# Hide the unused tab so the available one is obviously the active one.
@@ -125,8 +127,31 @@ func _set_mode(mode: Mode) -> void:
 	_mode = mode
 	buy_tab.button_pressed = mode == Mode.BUY
 	sell_tab.button_pressed = mode == Mode.SELL
+	_refresh_mode_labels()
 	_build_list()
 	_clear_detail()
+
+
+## Make Buy vs Sell unmistakable — even sell-only vendors (Forge Smith) get a
+## clear "Selling" title and column headers instead of a generic stock list.
+func _refresh_mode_labels() -> void:
+	var base_name: String = _shop.shop_name if _shop and not _shop.shop_name.is_empty() else "Shop"
+	if _mode == Mode.SELL:
+		set_title("Selling — %s" % base_name)
+		if items_header:
+			items_header.text = "Your Items"
+		if stock_header:
+			stock_header.text = "Owned"
+		if price_header:
+			price_header.text = "You Get"
+	else:
+		set_title("Buying — %s" % base_name)
+		if items_header:
+			items_header.text = "Items"
+		if stock_header:
+			stock_header.text = "Stock"
+		if price_header:
+			price_header.text = "Price"
 
 
 ## Build the row list synchronously (no await -> double-emit can't duplicate rows).

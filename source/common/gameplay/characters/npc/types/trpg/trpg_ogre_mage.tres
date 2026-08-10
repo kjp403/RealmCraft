@@ -5,18 +5,41 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_a5ygq"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_pt3ne"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_ogre_mage.tres" id="5_57a71"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="loot_coal"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="loot_iron"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("3_a5ygq")
+item = ExtResource("loot_gold")
+min_amount = 8
+max_amount = 16
+chance = 0.92
+
+[sub_resource type="Resource" id="Drop_coal"]
+script = ExtResource("3_a5ygq")
+item = ExtResource("loot_coal")
+max_amount = 3
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_iron"]
+script = ExtResource("3_a5ygq")
+item = ExtResource("loot_iron")
+max_amount = 3
+chance = 0.4
 
 [resource]
 script = ExtResource("4_pt3ne")
 enemy_type = &"trpg_ogre_mage"
 display_name = "Ogre Mage"
 skin = ExtResource("5_57a71")
+combat_level = 36
 visual_scale = 1.0
 is_boss = false
-max_health = 80.0
-attack_damage = 8.0
+max_health = 420.0
+attack_damage = 32.0
 attack_cooldown = 1.4
-armor = 0.0
+armor = 8.0
 mr = 0.0
 behaviors = Array[ExtResource("2_17rtx")]([])
 attacks = Array[ExtResource("1_5g6yr")]([])
@@ -30,10 +53,10 @@ is_lone = true
 wander_radius = 48.0
 wander_pause_min_s = 1.5
 wander_pause_max_s = 4.0
-xp_reward = 10
+xp_reward = 38
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_a5ygq")]([])
+loot = Array[ExtResource("3_a5ygq")]([SubResource("Drop_gold"), SubResource("Drop_coal"), SubResource("Drop_iron")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

@@ -34,6 +34,9 @@ extends Resource
 @export var is_boss: bool = false
 
 @export_group("Combat")
+## Player-facing combat level shown on the nameplate ("Slime (Lv 16)").
+## 0 = derive a band from HP / damage / armor so every hostile still shows one.
+@export var combat_level: int = 0
 @export var max_health: float = 50.0
 @export var attack_damage: float = 8.0
 ## Seconds between auto-attacks while in range.
@@ -145,3 +148,12 @@ extends Resource
 @export var ornate_chest_second_min: int = 0
 @export var ornate_chest_second_max: int = 0
 @export_range(0.0, 1.0, 0.01) var ornate_chest_consolation_chance: float = 0.0
+
+
+## Combat level for the nameplate. Authored value wins; otherwise derive a
+## readable band from HP / damage / armor so every hostile shows something.
+func resolved_combat_level() -> int:
+	if combat_level > 0:
+		return combat_level
+	var derived: int = int(round((max_health / 12.0) + (attack_damage * 1.4) + (armor * 0.8)))
+	return clampi(derived, 1, 99)

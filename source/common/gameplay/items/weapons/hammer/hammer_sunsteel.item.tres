@@ -38,6 +38,6 @@ item_name = &"Sunsteel Hammer"
 item_icon = SubResource("Atlas_icon")
 description = "Forged from sun-metal pulled out of the desert tombs. It never cools completely."
 can_trade = true
-stack_limit = 1
+stack_limit = 5
 metadata/slug = &"hammer_sunsteel.item"
 metadata/id = 165
