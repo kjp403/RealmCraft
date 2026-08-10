@@ -230,9 +230,18 @@ func _rebuild_details() -> void:
 		specs.append(["Sources", _build_item_list_section(
 			jp.source_items, jp.source_levels,
 			"Gather these to feed this profession's XP.")])
-	if jp != null and not jp.recipe_items.is_empty():
+	if jp != null and jp.has_recipe_guide():
+		var guide: Array[Dictionary] = jp.recipe_guide_entries()
+		var items: Array[Item] = []
+		var levels: Array[int] = []
+		for entry: Dictionary in guide:
+			var it: Item = entry.get("item", null) as Item
+			if it == null:
+				continue
+			items.append(it)
+			levels.append(int(entry.get("level", 0)))
 		specs.append(["Recipes", _build_item_list_section(
-			jp.recipe_items, jp.recipe_levels,
+			items, levels,
 			"Items this profession can craft.")])
 
 	_section_index = clampi(_section_index, 0, specs.size() - 1)

@@ -110,15 +110,25 @@ func _apply_to_job_perks(
 
 		var r_items: Array[Item] = []
 		var r_levels: Array[int] = []
-		_flatten_sorted(recipes_by_job.get(jp.job_slug, {}), r_items, r_levels)
+		var r_deferred_paths: PackedStringArray = PackedStringArray()
+		var r_deferred_levels: Array[int] = []
+		_flatten_sorted_split(
+			recipes_by_job.get(jp.job_slug, {}),
+			r_items, r_levels,
+			r_deferred_paths, r_deferred_levels
+		)
 		jp.recipe_items = r_items
 		jp.recipe_levels = r_levels
+		jp.recipe_deferred_paths = r_deferred_paths
+		jp.recipe_deferred_levels = r_deferred_levels
 
 		var err: int = ResourceSaver.save(jp, path)
 		if err != OK:
 			push_error("Failed to save %s (err %d)" % [path, err])
 			continue
-		print("  baked %s: sources=%d recipes=%d" % [path, s_items.size(), r_items.size()])
+		print("  baked %s: sources=%d recipes=%d deferred=%d" % [
+			path, s_items.size(), r_items.size(), r_deferred_paths.size()
+		])
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +170,43 @@ func _flatten_sorted(
 	for p: Array in pairs:
 		out_items.append(p[0])
 		out_levels.append(p[1])
+
+
+## Like [_flatten_sorted], but WeaponItem (and any Item with a packed weapon
+## scene) go into deferred path arrays so JobRegistry preload stays safe.
+func _flatten_sorted_split(
+	bucket: Dictionary,
+	out_items: Array[Item],
+	out_levels: Array[int],
+	out_deferred_paths: PackedStringArray,
+	out_deferred_levels: Array[int]
+) -> void:
+	var pairs: Array = []
+	for item: Item in bucket:
+		pairs.append([item, int(bucket[item])])
+	pairs.sort_custom(func(a, b):
+		if a[1] != b[1]:
+			return a[1] < b[1]
+		return String(a[0].item_name) < String(b[0].item_name))
+	for p: Array in pairs:
+		var item: Item = p[0]
+		var level: int = int(p[1])
+		if _must_defer_recipe_item(item):
+			var path: String = item.resource_path
+			if path.is_empty():
+				push_warning("Bake: deferred recipe item has empty path: %s" % item.item_name)
+				continue
+			out_deferred_paths.append(path)
+			out_deferred_levels.append(level)
+		else:
+			out_items.append(item)
+			out_levels.append(level)
+
+
+func _must_defer_recipe_item(item: Item) -> bool:
+	# WeaponItem pulls PackedScene → weapon.gd → Client. Preloading that
+	# through JobRegistry deadlocks startup (Skills Total level 0).
+	return item is WeaponItem
 
 
 ## Lists every `.tres` directly inside [param dir] (non-recursive — current

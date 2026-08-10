@@ -406,17 +406,17 @@ func _rebuild_detail() -> void:
 				continue
 			var req: int = jp.source_levels[i] if i < jp.source_levels.size() else 0
 			list.add_child(_make_source_row(item, req, level))
-	elif jp != null and not jp.recipe_items.is_empty():
+	elif jp != null and jp.has_recipe_guide():
 		var recipes_title := Label.new()
 		recipes_title.text = "Can craft"
 		recipes_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
 		recipes_title.add_theme_font_size_override(&"font_size", 12)
 		list.add_child(recipes_title)
-		for i: int in jp.recipe_items.size():
-			var item: Item = jp.recipe_items[i]
+		for entry: Dictionary in jp.recipe_guide_entries():
+			var item: Item = entry.get("item", null) as Item
 			if item == null:
 				continue
-			var req: int = jp.recipe_levels[i] if i < jp.recipe_levels.size() else 0
+			var req: int = int(entry.get("level", 0))
 			list.add_child(_make_source_row(item, req, level))
 	else:
 		var empty := Label.new()
