@@ -182,6 +182,36 @@ func describe(level: int, player_perks: Dictionary) -> PackedStringArray:
 	return out
 
 
+## Human-readable "what one rank does" for the perk picker UI.
+static func describe_perk_effect(effect: String, per_rank: float) -> String:
+	var pct: int = roundi(per_rank * 100.0)
+	match effect:
+		"xp":
+			return "+%d%% skill XP per rank" % pct
+		"cooldown":
+			return "+%d%% gather speed per rank" % pct
+		"bonus_yield":
+			return "+%d%% bonus yield chance per rank" % pct
+		"refund":
+			return "+%d%% material refund chance per rank" % pct
+		"extra_item":
+			return "+%d%% extra item chance per rank" % pct
+		"skip_discount":
+			return "-%d%% Slayer task reassignment cost per rank" % pct
+		_:
+			return "Specializes this skill (+%.0f%% per rank)." % (per_rank * 100.0)
+
+
+## Short explanation of how perk points are earned for this job.
+func points_rules_text() -> String:
+	if perk_every_levels <= 0:
+		return "This skill does not grant perk points."
+	return (
+		"Earn 1 perk point every %d levels in this skill. Spend points to specialize — each rank stacks a permanent bonus. Unspent points do nothing until assigned."
+		% perk_every_levels
+	)
+
+
 # ---------------------------------------------------------------------------
 # Compatibility shim — older code calls perks_class.PERKS expecting a dict.
 # Returns a generated dict keyed by perk id so the perk-picker UI keeps

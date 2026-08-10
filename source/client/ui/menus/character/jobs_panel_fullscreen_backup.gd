@@ -449,22 +449,10 @@ func _make_perk_row(skill_name: String, choice: Dictionary, available_points: in
 
 
 func _describe_perk(choice: Dictionary) -> String:
-	var effect: String = str(choice.get("effect", ""))
-	var per_rank: float = float(choice.get("per_rank", 0.0))
-	var pct: int = roundi(per_rank * 100.0)
-	match effect:
-		"xp":
-			return "+%d%% XP per rank" % pct
-		"cooldown":
-			return "+%d%% gather speed per rank" % pct
-		"bonus_yield":
-			return "+%d%% bonus yield chance per rank" % pct
-		"refund":
-			return "+%d%% material refund chance per rank" % pct
-		"extra_item":
-			return "+%d%% extra item chance per rank" % pct
-		_:
-			return ""
+	return JobPerks.describe_perk_effect(
+		str(choice.get("effect", "")),
+		float(choice.get("per_rank", 0.0))
+	)
 
 
 func _on_perk_pressed(skill_name: String, perk_id: String) -> void:

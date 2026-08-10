@@ -1,6 +1,8 @@
 extends PanelContainer
+## Compact Mastery dock — Weapons (ability loadouts) + Perks (skilling perk points).
 
-const PANEL_SIZE := Vector2(180.0, 262.0)
+const PANEL_SIZE_WEAPONS := Vector2(180.0, 278.0)
+const PANEL_SIZE_PERKS := Vector2(248.0, 340.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const TAB_SIZE := Vector2(29.0, 29.0)
@@ -12,6 +14,20 @@ const CATEGORY_ORDER: Array[StringName] = [
 	&"book",
 	&"wand",
 ]
+
+## Skill list order for the Perks tab (matches Skills dock).
+const SKILL_ORDER: Array[String] = [
+	"mining",
+	"smithing",
+	"fishing",
+	"cooking",
+	"outfitting",
+	"woodcutting",
+	"harvesting",
+	"slayer",
+]
+
+enum Mode { WEAPONS, PERKS }
 
 @onready var title_label: Label = (
 	$MarginContainer/MainColumn/Header/TitleLabel
@@ -26,15 +42,23 @@ const CATEGORY_ORDER: Array[StringName] = [
 	$MarginContainer/MainColumn/Content
 )
 
+var _mode: Mode = Mode.WEAPONS
+var _mode_tabs: HBoxContainer
+var _weapons_tab: Button
+var _perks_tab: Button
+var _mode_group := ButtonGroup.new()
+
+var _weapons_root: VBoxContainer
+var _perks_root: VBoxContainer
+
+# --- Weapons state ---
 var _state: Dictionary = {}
 var _wielded: Dictionary = {}
 var _categories: Array[StringName] = []
 var _selected_category: StringName = &""
-
 var _category_tabs: HBoxContainer
 var _tab_buttons: Dictionary[StringName, Button] = {}
-var _tab_group := ButtonGroup.new()
-
+var _category_group := ButtonGroup.new()
 var _level_label: Label
 var _xp_bar: ProgressBar
 var _status_label: Label
@@ -43,11 +67,18 @@ var _e_name: Label
 var _power_label: Label
 var _manage_button: Button
 
+# --- Perks state ---
+var _skills: Dictionary = {}
+var _selected_skill: String = ""
+var _perks_list_root: VBoxContainer
+var _perks_detail_root: VBoxContainer
+var _perks_scroll: ScrollContainer
+
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	custom_minimum_size = PANEL_SIZE
-	size = PANEL_SIZE
+	custom_minimum_size = PANEL_SIZE_WEAPONS
+	size = PANEL_SIZE_WEAPONS
 
 	content.add_theme_constant_override(&"margin_left", 6)
 	content.add_theme_constant_override(&"margin_right", 6)
@@ -63,10 +94,11 @@ func _ready() -> void:
 
 	_build_layout()
 
-	close_button.pressed.connect(hide)
+	close_button.pressed.connect(_on_close_pressed)
 	visibility_changed.connect(_on_visibility_changed)
-	# Kill rewards push mastery XP — refresh live like Skills does on gather.
 	Client.subscribe(&"combat.reward", _on_combat_reward)
+	ClientState.gather_succeeded.connect(_on_gather_succeeded)
+	Client.subscribe(&"skills.get", _on_skills_received)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -83,6 +115,64 @@ func _build_layout() -> void:
 	main_box.add_theme_constant_override(&"separation", 4)
 	content.add_child(main_box)
 
+	_mode_tabs = HBoxContainer.new()
+	_mode_tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_mode_tabs.add_theme_constant_override(&"separation", 4)
+	main_box.add_child(_mode_tabs)
+
+	_weapons_tab = _make_mode_tab("Weapons", true)
+	_perks_tab = _make_mode_tab("Perks", false)
+	_weapons_tab.pressed.connect(_set_mode.bind(Mode.WEAPONS))
+	_perks_tab.pressed.connect(_set_mode.bind(Mode.PERKS))
+	_mode_tabs.add_child(_weapons_tab)
+	_mode_tabs.add_child(_perks_tab)
+
+	_weapons_root = VBoxContainer.new()
+	_weapons_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_weapons_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_weapons_root.add_theme_constant_override(&"separation", 4)
+	main_box.add_child(_weapons_root)
+	_build_weapons_layout(_weapons_root)
+
+	_perks_root = VBoxContainer.new()
+	_perks_root.visible = false
+	_perks_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perks_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_perks_root.add_theme_constant_override(&"separation", 4)
+	main_box.add_child(_perks_root)
+	_build_perks_layout(_perks_root)
+
+
+func _make_mode_tab(label: String, pressed: bool) -> Button:
+	var tab := Button.new()
+	tab.text = label
+	tab.toggle_mode = true
+	tab.button_group = _mode_group
+	tab.button_pressed = pressed
+	tab.focus_mode = Control.FOCUS_NONE
+	tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab.custom_minimum_size = Vector2(0.0, 22.0)
+	tab.add_theme_font_size_override(&"font_size", 10)
+	_apply_mode_tab_styles(tab)
+	return tab
+
+
+func _apply_mode_tab_styles(tab: Button) -> void:
+	tab.add_theme_stylebox_override(
+		&"normal",
+		_make_tab_style(Color(0.035, 0.03, 0.055, 0.88), Color(0.35, 0.25, 0.18, 0.75))
+	)
+	tab.add_theme_stylebox_override(
+		&"hover",
+		_make_tab_style(Color(0.11, 0.075, 0.07, 0.96), Color(0.86, 0.57, 0.25, 1.0))
+	)
+	tab.add_theme_stylebox_override(
+		&"pressed",
+		_make_tab_style(Color(0.18, 0.11, 0.055, 1.0), Color(1.0, 0.72, 0.30, 1.0))
+	)
+
+
+func _build_weapons_layout(main_box: VBoxContainer) -> void:
 	var tabs_center := CenterContainer.new()
 	tabs_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_box.add_child(tabs_center)
@@ -95,10 +185,7 @@ func _build_layout() -> void:
 	_level_label.text = "No mastery selected"
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_level_label.add_theme_font_size_override(&"font_size", 11)
-	_level_label.add_theme_color_override(
-		&"font_color",
-		Color(1.0, 0.9, 0.55)
-	)
+	_level_label.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.55))
 	main_box.add_child(_level_label)
 
 	_xp_bar = ProgressBar.new()
@@ -113,10 +200,7 @@ func _build_layout() -> void:
 	_status_label = Label.new()
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.add_theme_font_size_override(&"font_size", 8)
-	_status_label.add_theme_color_override(
-		&"font_color",
-		Color(0.72, 0.73, 0.78)
-	)
+	_status_label.add_theme_color_override(&"font_color", Color(0.72, 0.73, 0.78))
 	main_box.add_child(_status_label)
 
 	var loadout_title := Label.new()
@@ -144,10 +228,7 @@ func _build_layout() -> void:
 	_power_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_power_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_power_label.add_theme_font_size_override(&"font_size", 8)
-	_power_label.add_theme_color_override(
-		&"font_color",
-		Color(0.70, 0.78, 0.88)
-	)
+	_power_label.add_theme_color_override(&"font_color", Color(0.70, 0.78, 0.88))
 	main_box.add_child(_power_label)
 
 	var spacer := Control.new()
@@ -163,25 +244,48 @@ func _build_layout() -> void:
 	main_box.add_child(_manage_button)
 
 
+func _build_perks_layout(main_box: VBoxContainer) -> void:
+	_perks_list_root = VBoxContainer.new()
+	_perks_list_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perks_list_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_perks_list_root.add_theme_constant_override(&"separation", 4)
+	main_box.add_child(_perks_list_root)
+
+	var intro := Label.new()
+	intro.name = "Intro"
+	intro.text = "Skill perk points — specialize gathering & crafting."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_font_size_override(&"font_size", 9)
+	intro.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+	_perks_list_root.add_child(intro)
+
+	_perks_scroll = ScrollContainer.new()
+	_perks_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perks_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_perks_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_perks_list_root.add_child(_perks_scroll)
+
+	var list := VBoxContainer.new()
+	list.name = "SkillList"
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override(&"separation", 3)
+	_perks_scroll.add_child(list)
+
+	_perks_detail_root = VBoxContainer.new()
+	_perks_detail_root.visible = false
+	_perks_detail_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perks_detail_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_perks_detail_root.add_theme_constant_override(&"separation", 4)
+	main_box.add_child(_perks_detail_root)
+
+
 func _make_loadout_chip(key_text: String) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(0.0, 36.0)
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.035, 0.03, 0.055, 0.88)
-	style.border_color = Color(0.42, 0.28, 0.18, 0.85)
-
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-
-	style.corner_radius_top_left = 3
-	style.corner_radius_top_right = 3
-	style.corner_radius_bottom_left = 3
-	style.corner_radius_bottom_right = 3
-
-	panel.add_theme_stylebox_override(&"panel", style)
+	panel.add_theme_stylebox_override(
+		&"panel",
+		_make_tab_style(Color(0.035, 0.03, 0.055, 0.88), Color(0.42, 0.28, 0.18, 0.85))
+	)
 
 	var box := VBoxContainer.new()
 	box.name = "Content"
@@ -193,10 +297,7 @@ func _make_loadout_chip(key_text: String) -> PanelContainer:
 	key_label.text = key_text
 	key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	key_label.add_theme_font_size_override(&"font_size", 10)
-	key_label.add_theme_color_override(
-		&"font_color",
-		Color(1.0, 0.88, 0.55)
-	)
+	key_label.add_theme_color_override(&"font_color", Color(1.0, 0.88, 0.55))
 	box.add_child(key_label)
 
 	var name_label := Label.new()
@@ -204,13 +305,17 @@ func _make_loadout_chip(key_text: String) -> PanelContainer:
 	name_label.text = "Empty"
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override(&"font_size", 7)
-	name_label.add_theme_color_override(
-		&"font_color",
-		Color(0.62, 0.64, 0.70)
-	)
+	name_label.add_theme_color_override(&"font_color", Color(0.62, 0.64, 0.70))
 	box.add_child(name_label)
 
 	return panel
+
+
+func _on_close_pressed() -> void:
+	if _mode == Mode.PERKS and _perks_detail_root.visible:
+		_show_perks_list()
+		return
+	hide()
 
 
 func _on_visibility_changed() -> void:
@@ -221,18 +326,42 @@ func _on_visibility_changed() -> void:
 func _on_combat_reward(data: Dictionary) -> void:
 	if not visible:
 		return
-	if data.get("mastery", {}).is_empty():
+	if _mode == Mode.WEAPONS and data.get("mastery", {}).is_empty():
 		return
+	if _mode == Mode.WEAPONS:
+		_refresh_weapons()
+
+
+func _on_gather_succeeded(_result: Dictionary) -> void:
+	if not visible:
+		return
+	# Refresh perk badge (and detail if open) after skill XP / level-ups.
+	_refresh_perks()
+
+
+func _set_mode(mode: Mode) -> void:
+	_mode = mode
+	_weapons_tab.button_pressed = mode == Mode.WEAPONS
+	_perks_tab.button_pressed = mode == Mode.PERKS
+	_weapons_root.visible = mode == Mode.WEAPONS
+	_perks_root.visible = mode == Mode.PERKS
+	title_label.text = "Mastery" if mode == Mode.WEAPONS else "Skill Perks"
+	_place_panel()
 	_refresh()
 
 
 func _refresh() -> void:
 	if not visible:
 		return
+	# Skills fetch keeps the Perks tab badge accurate on either mode.
+	_refresh_perks()
+	if _mode == Mode.WEAPONS:
+		_refresh_weapons()
 
+
+func _refresh_weapons() -> void:
 	if InstanceClient.current == null:
 		return
-
 	Client.request_data(
 		&"mastery.get",
 		_on_mastery_received,
@@ -241,13 +370,48 @@ func _refresh() -> void:
 	)
 
 
+func _refresh_perks() -> void:
+	if InstanceClient.current == null:
+		return
+	Client.request_data(
+		&"skills.get",
+		_on_skills_received,
+		{},
+		InstanceClient.current.name
+	)
+
+
 func _on_mastery_received(data: Dictionary) -> void:
 	_state = data.get("masteries", {})
 	_wielded = data.get("wielded", {})
-
 	_populate_category_tabs()
 	_render_selected_category()
 
+
+func _on_skills_received(data: Dictionary) -> void:
+	_skills = data.get("skills", {})
+	_update_perks_tab_badge()
+	if _mode != Mode.PERKS:
+		return
+	if _perks_detail_root.visible and not _selected_skill.is_empty():
+		_rebuild_perk_detail()
+	else:
+		_rebuild_perks_list()
+
+
+func _update_perks_tab_badge() -> void:
+	var total_points: int = 0
+	for skill_name: Variant in _skills:
+		total_points += int((_skills[skill_name] as Dictionary).get("points", 0))
+	if total_points > 0:
+		_perks_tab.text = "Perks (%d)" % total_points
+	else:
+		_perks_tab.text = "Perks"
+
+
+# ---------------------------------------------------------------------------
+# Weapons — category tabs + summary
+# ---------------------------------------------------------------------------
 
 func _populate_category_tabs() -> void:
 	for child: Node in _category_tabs.get_children():
@@ -269,23 +433,15 @@ func _populate_category_tabs() -> void:
 		_selected_category = &""
 		return
 
-	if (
-		_selected_category.is_empty()
-		or not _categories.has(_selected_category)
-	):
+	if _selected_category.is_empty() or not _categories.has(_selected_category):
 		_selected_category = _categories[0]
 
 	for category: StringName in _categories:
-		var tree: MasteryTreeResource = (
-			MasteryService.tree_for(category)
-		)
+		var tree: MasteryTreeResource = MasteryService.tree_for(category)
 		if tree == null:
 			continue
 
-		var info: Dictionary = _state.get(
-			String(category),
-			{}
-		)
+		var info: Dictionary = _state.get(String(category), {})
 		var level: int = int(info.get("level", 0))
 		var display_name: String = (
 			tree.display_name
@@ -298,14 +454,9 @@ func _populate_category_tabs() -> void:
 		tab.size = TAB_SIZE
 		tab.focus_mode = Control.FOCUS_NONE
 		tab.toggle_mode = true
-		tab.button_group = _tab_group
-		tab.button_pressed = (
-			category == _selected_category
-		)
-		tab.tooltip_text = "%s\nLevel %d" % [
-			display_name,
-			level,
-		]
+		tab.button_group = _category_group
+		tab.button_pressed = category == _selected_category
+		tab.tooltip_text = "%s\nLevel %d" % [display_name, level]
 		tab.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		tab.expand_icon = true
 		tab.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -317,69 +468,34 @@ func _populate_category_tabs() -> void:
 			tab.text = display_name.left(1).to_upper()
 			tab.add_theme_font_size_override(&"font_size", 10)
 
-		_apply_tab_styles(tab)
+		_apply_mode_tab_styles(tab)
 		tab.pressed.connect(_select_category.bind(category))
 
 		_category_tabs.add_child(tab)
 		_tab_buttons[category] = tab
 
 
-func _apply_tab_styles(tab: Button) -> void:
-	tab.add_theme_stylebox_override(
-		&"normal",
-		_make_tab_style(
-			Color(0.035, 0.03, 0.055, 0.88),
-			Color(0.35, 0.25, 0.18, 0.75)
-		)
-	)
-	tab.add_theme_stylebox_override(
-		&"hover",
-		_make_tab_style(
-			Color(0.11, 0.075, 0.07, 0.96),
-			Color(0.86, 0.57, 0.25, 1.0)
-		)
-	)
-	tab.add_theme_stylebox_override(
-		&"pressed",
-		_make_tab_style(
-			Color(0.18, 0.11, 0.055, 1.0),
-			Color(1.0, 0.72, 0.30, 1.0)
-		)
-	)
-
-
-func _make_tab_style(
-	background_color: Color,
-	border_color: Color
-) -> StyleBoxFlat:
+func _make_tab_style(background_color: Color, border_color: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = background_color
 	style.border_color = border_color
-
 	style.border_width_left = 1
 	style.border_width_top = 1
 	style.border_width_right = 1
 	style.border_width_bottom = 1
-
 	style.corner_radius_top_left = 3
 	style.corner_radius_top_right = 3
 	style.corner_radius_bottom_left = 3
 	style.corner_radius_bottom_right = 3
-
 	return style
 
 
 func _select_category(category: StringName) -> void:
 	if not _categories.has(category):
 		return
-
 	_selected_category = category
-
 	for category_key: StringName in _tab_buttons:
-		_tab_buttons[category_key].button_pressed = (
-			category_key == _selected_category
-		)
-
+		_tab_buttons[category_key].button_pressed = category_key == _selected_category
 	_render_selected_category()
 
 
@@ -394,35 +510,23 @@ func _render_selected_category() -> void:
 		_manage_button.disabled = true
 		return
 
-	var tree: MasteryTreeResource = MasteryService.tree_for(
-		_selected_category
-	)
+	var tree: MasteryTreeResource = MasteryService.tree_for(_selected_category)
 	if tree == null:
 		_manage_button.disabled = true
 		return
 
-	var info: Dictionary = _state.get(
-		String(_selected_category),
-		{}
-	)
+	var info: Dictionary = _state.get(String(_selected_category), {})
 	var level: int = int(info.get("level", 0))
 	var points: int = int(info.get("points", 0))
 	var xp: int = int(info.get("xp", 0))
-	var xp_to_next: int = maxi(
-		1,
-		int(info.get("xp_to_next", 1))
-	)
+	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))
 	var display_name: String = (
 		tree.display_name
 		if not tree.display_name.is_empty()
 		else String(_selected_category).capitalize()
 	)
 
-	_level_label.text = "%s · Lv %d" % [
-		display_name,
-		level,
-	]
-
+	_level_label.text = "%s · Lv %d" % [display_name, level]
 	_xp_bar.visible = level > 0
 	_xp_bar.max_value = xp_to_next
 	_xp_bar.value = xp
@@ -441,18 +545,14 @@ func _render_selected_category() -> void:
 
 	_status_label.add_theme_color_override(
 		&"font_color",
-		Color(1.0, 0.86, 0.48)
-		if points > 0
-		else Color(0.72, 0.73, 0.78)
+		Color(1.0, 0.86, 0.48) if points > 0 else Color(0.72, 0.73, 0.78)
 	)
 
 	var loadout: Array = info.get("loadout", [])
-
 	_q_name.text = _loadout_name(loadout, 0, tree)
 	_e_name.text = _loadout_name(loadout, 1, tree)
 
-	var capacity: int = _wielded_capacity()
-	if capacity < 0:
+	if _wielded_capacity() < 0:
 		_power_label.text = "Equip this weapon type to use its abilities."
 	else:
 		_power_label.text = "Abilities channel while this weapon is held."
@@ -460,64 +560,328 @@ func _render_selected_category() -> void:
 	_manage_button.disabled = false
 
 
-func _loadout_name(
-	loadout: Array,
-	index: int,
-	tree: MasteryTreeResource
-) -> String:
+func _loadout_name(loadout: Array, index: int, tree: MasteryTreeResource) -> String:
 	if index < 0 or index >= loadout.size():
 		return "Empty"
-
 	var node_id: String = str(loadout[index])
 	if node_id.is_empty():
 		return "Empty"
-
-	var mastery_node: MasteryNode = tree.get_node_by_id(
-		StringName(node_id)
-	)
+	var mastery_node: MasteryNode = tree.get_node_by_id(StringName(node_id))
 	if mastery_node == null:
 		return node_id
-
 	return mastery_node.display_name()
 
 
 func _wielded_capacity() -> int:
-	if str(_wielded.get("category", "")) == String(
-		_selected_category
-	):
+	if str(_wielded.get("category", "")) == String(_selected_category):
 		return int(_wielded.get("capacity", 0))
-
 	return -1
-
-
-func _loadout_power_used(
-	loadout: Array,
-	tree: MasteryTreeResource
-) -> int:
-	var total: int = 0
-
-	for selection: Variant in loadout:
-		var node_id: String = str(selection)
-		if node_id.is_empty():
-			continue
-
-		var mastery_node: MasteryNode = tree.get_node_by_id(
-			StringName(node_id)
-		)
-		if mastery_node != null:
-			total += mastery_node.tier
-
-	return total
 
 
 func _open_mastery_tree() -> void:
 	if _selected_category.is_empty():
 		return
-
 	hide()
-	ClientState.open_menu_requested.emit(
-		&"mastery_tree",
-		String(_selected_category)
+	ClientState.open_menu_requested.emit(&"mastery_tree", String(_selected_category))
+
+
+# ---------------------------------------------------------------------------
+# Perks — skill list + spend detail
+# ---------------------------------------------------------------------------
+
+func _show_perks_list() -> void:
+	_selected_skill = ""
+	_perks_detail_root.visible = false
+	_perks_list_root.visible = true
+	title_label.text = "Skill Perks"
+	_rebuild_perks_list()
+
+
+func _show_perk_detail(slug: String) -> void:
+	_selected_skill = slug
+	_perks_list_root.visible = false
+	_perks_detail_root.visible = true
+	_rebuild_perk_detail()
+
+
+func _rebuild_perks_list() -> void:
+	var list: VBoxContainer = _perks_scroll.get_node("SkillList") as VBoxContainer
+	for child: Node in list.get_children():
+		list.remove_child(child)
+		child.queue_free()
+
+	var total_points: int = 0
+	for slug: String in SKILL_ORDER:
+		var info: Dictionary = _skills.get(slug, {}) as Dictionary
+		if info.is_empty() and JobRegistry.has_job(StringName(slug)):
+			info = {
+				"display_name": JobRegistry.display_name(StringName(slug)),
+				"level": 1,
+				"points": 0,
+				"choices": [],
+				"perks": [],
+			}
+		elif info.is_empty():
+			continue
+		total_points += int(info.get("points", 0))
+		list.add_child(_make_skill_row(slug, info))
+
+	# Also surface any registered jobs not in SKILL_ORDER (future skills).
+	for job_slug: StringName in JobRegistry.JOBS:
+		var slug: String = String(job_slug)
+		if SKILL_ORDER.has(slug):
+			continue
+		var info: Dictionary = _skills.get(slug, {}) as Dictionary
+		if info.is_empty():
+			info = {
+				"display_name": JobRegistry.display_name(job_slug),
+				"level": 1,
+				"points": 0,
+				"choices": [],
+				"perks": [],
+			}
+		total_points += int(info.get("points", 0))
+		list.add_child(_make_skill_row(slug, info))
+
+	var intro: Label = _perks_list_root.get_node_or_null("Intro") as Label
+	if intro != null:
+		if total_points > 0:
+			intro.text = "%d perk point%s ready to spend. Tap a skill." % [
+				total_points,
+				"" if total_points == 1 else "s",
+			]
+			intro.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.48))
+		else:
+			intro.text = "Level skills to earn perk points (usually every 3 levels). Tap a skill for the full breakdown."
+			intro.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+
+
+func _make_skill_row(slug: String, info: Dictionary) -> Button:
+	var display: String = str(info.get("display_name", slug.capitalize()))
+	var level: int = int(info.get("level", 1))
+	var points: int = int(info.get("points", 0))
+
+	var row := Button.new()
+	row.focus_mode = Control.FOCUS_NONE
+	row.custom_minimum_size = Vector2(0.0, 28.0)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.pressed.connect(_show_perk_detail.bind(slug))
+	_apply_mode_tab_styles(row)
+
+	var box := HBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override(&"separation", 6)
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 6
+	box.offset_right = -6
+	row.add_child(box)
+
+	var name_label := Label.new()
+	name_label.text = "%s  Lv %d" % [display, level]
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override(&"font_size", 10)
+	name_label.add_theme_color_override(&"font_color", Color(0.92, 0.90, 0.86))
+	box.add_child(name_label)
+
+	var pts := Label.new()
+	if points > 0:
+		pts.text = "%d pt%s" % [points, "" if points == 1 else "s"]
+		pts.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.48))
+	else:
+		pts.text = "—"
+		pts.add_theme_color_override(&"font_color", Color(0.55, 0.56, 0.60))
+	pts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pts.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pts.add_theme_font_size_override(&"font_size", 10)
+	box.add_child(pts)
+
+	return row
+
+
+func _rebuild_perk_detail() -> void:
+	for child: Node in _perks_detail_root.get_children():
+		_perks_detail_root.remove_child(child)
+		child.queue_free()
+
+	if _selected_skill.is_empty():
+		_show_perks_list()
+		return
+
+	var info: Dictionary = _skills.get(_selected_skill, {}) as Dictionary
+	if info.is_empty():
+		_show_perks_list()
+		return
+
+	var jp: JobPerks = JobRegistry.perks_for(StringName(_selected_skill))
+	var display: String = str(info.get("display_name", _selected_skill.capitalize()))
+	var level: int = int(info.get("level", 1))
+	var points: int = int(info.get("points", 0))
+	title_label.text = display
+
+	var back := Button.new()
+	back.text = "← All skills"
+	back.focus_mode = Control.FOCUS_NONE
+	back.add_theme_font_size_override(&"font_size", 10)
+	back.pressed.connect(_show_perks_list)
+	_perks_detail_root.add_child(back)
+
+	var header := Label.new()
+	header.text = "Lv %d · %d point%s available" % [
+		level,
+		points,
+		"" if points == 1 else "s",
+	]
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.add_theme_font_size_override(&"font_size", 11)
+	header.add_theme_color_override(
+		&"font_color",
+		Color(1.0, 0.86, 0.48) if points > 0 else Color(0.85, 0.82, 0.70)
+	)
+	_perks_detail_root.add_child(header)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_perks_detail_root.add_child(scroll)
+
+	var body := VBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override(&"separation", 6)
+	scroll.add_child(body)
+
+	# How points work
+	var rules_title := Label.new()
+	rules_title.text = "How perk points work"
+	rules_title.add_theme_font_size_override(&"font_size", 10)
+	rules_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	body.add_child(rules_title)
+
+	var rules := Label.new()
+	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rules.add_theme_font_size_override(&"font_size", 9)
+	rules.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+	if jp != null:
+		rules.text = jp.points_rules_text()
+	else:
+		rules.text = "Train this skill to unlock perk choices."
+	body.add_child(rules)
+
+	# Current effective bonuses
+	var bonus_lines: Array = info.get("perks", [])
+	if not bonus_lines.is_empty():
+		var bonus_title := Label.new()
+		bonus_title.text = "Current bonuses"
+		bonus_title.add_theme_font_size_override(&"font_size", 10)
+		bonus_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+		body.add_child(bonus_title)
+		for line: Variant in bonus_lines:
+			var bullet := Label.new()
+			bullet.text = "• " + str(line)
+			bullet.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			bullet.add_theme_font_size_override(&"font_size", 9)
+			bullet.add_theme_color_override(&"font_color", Color(0.60, 0.85, 1.0))
+			body.add_child(bullet)
+
+	# Spendable choices
+	var choices: Array = info.get("choices", [])
+	var spend_title := Label.new()
+	spend_title.text = "Spend points"
+	spend_title.add_theme_font_size_override(&"font_size", 10)
+	spend_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	body.add_child(spend_title)
+
+	if choices.is_empty():
+		var empty := Label.new()
+		empty.text = "No perk choices authored for this skill yet."
+		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty.add_theme_font_size_override(&"font_size", 9)
+		empty.add_theme_color_override(&"font_color", Color(0.65, 0.66, 0.70))
+		body.add_child(empty)
+	else:
+		for choice: Variant in choices:
+			body.add_child(_make_perk_choice_row(_selected_skill, choice as Dictionary, points))
+
+
+func _make_perk_choice_row(skill_name: String, choice: Dictionary, available_points: int) -> Control:
+	var rank: int = int(choice.get("rank", 0))
+	var max_rank: int = int(choice.get("max_rank", 0))
+	var perk_id: String = str(choice.get("id", ""))
+	var perk_name: String = str(choice.get("name", ""))
+	var effect: String = str(choice.get("effect", ""))
+	var per_rank: float = float(choice.get("per_rank", 0.0))
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override(
+		&"panel",
+		_make_tab_style(Color(0.04, 0.035, 0.06, 0.92), Color(0.40, 0.28, 0.18, 0.80))
+	)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override(&"margin_left", 6)
+	margin.add_theme_constant_override(&"margin_right", 6)
+	margin.add_theme_constant_override(&"margin_top", 4)
+	margin.add_theme_constant_override(&"margin_bottom", 4)
+	panel.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 6)
+	margin.add_child(row)
+
+	var text_col := VBoxContainer.new()
+	text_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_col.add_theme_constant_override(&"separation", 1)
+	row.add_child(text_col)
+
+	var name_label := Label.new()
+	name_label.text = "%s  (%d/%d)" % [perk_name, rank, max_rank]
+	name_label.add_theme_font_size_override(&"font_size", 10)
+	name_label.add_theme_color_override(&"font_color", Color(0.95, 0.92, 0.86))
+	text_col.add_child(name_label)
+
+	var desc := Label.new()
+	desc.text = JobPerks.describe_perk_effect(effect, per_rank)
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_font_size_override(&"font_size", 8)
+	desc.add_theme_color_override(&"font_color", Color(0.62, 0.74, 0.86))
+	text_col.add_child(desc)
+
+	if rank > 0:
+		var earned := Label.new()
+		earned.text = "Active: %s" % JobPerks.describe_perk_effect(effect, per_rank * float(rank)).replace(
+			" per rank", ""
+		)
+		earned.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		earned.add_theme_font_size_override(&"font_size", 8)
+		earned.add_theme_color_override(&"font_color", Color(0.55, 0.82, 0.62))
+		text_col.add_child(earned)
+
+	var btn := Button.new()
+	btn.text = "+"
+	btn.custom_minimum_size = Vector2(28, 28)
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	btn.disabled = available_points <= 0 or rank >= max_rank
+	btn.tooltip_text = (
+		"Max rank reached" if rank >= max_rank
+		else ("No points available" if available_points <= 0 else "Spend 1 perk point")
+	)
+	btn.pressed.connect(_on_perk_pressed.bind(skill_name, perk_id))
+	row.add_child(btn)
+
+	return panel
+
+
+func _on_perk_pressed(skill_name: String, perk_id: String) -> void:
+	if InstanceClient.current == null:
+		return
+	Client.request_data(
+		&"skill.perk.choose",
+		func(_d: Dictionary) -> void: _refresh_perks(),
+		{"skill": skill_name, "perk": perk_id},
+		InstanceClient.current.name
 	)
 
 
@@ -525,9 +889,12 @@ func _place_panel() -> void:
 	var hud := get_parent() as Control
 	if hud == null:
 		return
-
-	size = PANEL_SIZE
+	var panel_size: Vector2 = (
+		PANEL_SIZE_PERKS if _mode == Mode.PERKS else PANEL_SIZE_WEAPONS
+	)
+	custom_minimum_size = panel_size
+	size = panel_size
 	position = Vector2(
-		hud.size.x - PANEL_SIZE.x - RIGHT_MARGIN,
-		hud.size.y - PANEL_SIZE.y - BOTTOM_CLEARANCE
+		hud.size.x - panel_size.x - RIGHT_MARGIN,
+		hud.size.y - panel_size.y - BOTTOM_CLEARANCE
 	)
