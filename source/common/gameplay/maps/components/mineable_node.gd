@@ -11,8 +11,12 @@ extends Area2D
 ##   anyone else — no shared depletion race.
 ## - **Per-player progress**: each player tracks their own swings toward the
 ##   next yield, so two players mining the same vein don't steal swing progress.
+## - **Random pool size** (data.min_charges > 0, how ore veins are tuned): each
+##   fill rolls a new pool in [min_charges, max_charges], so a vein is worth an
+##   unpredictable haul instead of a flat 3. Those nodes skip the trickle regen
+##   below — they run until mined out, then respawn with a fresh roll.
 ## - **Continuous regen while charges > 0**: +1 every charge_regen_seconds
-##   (per player).
+##   (per player). Fixed-pool nodes only (trees, herbs, fishing holes).
 ## - **Snap-refill when fully depleted**: a player's depleted pool waits longer
 ##   (depleted_recharge_seconds), then refills ALL of that player's charges.
 ## - **Job XP routing**: data.job_xp is a dict so a healing herb can grant
@@ -40,6 +44,9 @@ var _charges_by_player: Dictionary[int, int]
 ##   charges > 0  → time of last continuous regen
 ##   charges == 0 → time they hit empty (waits depleted_recharge_seconds)
 var _last_regen_ms_by_player: Dictionary[int, int]
+## player_id → the pool size rolled for their current fill. Equals
+## data.max_charges on fixed-pool nodes; a fresh roll each refill on random ones.
+var _pool_size_by_player: Dictionary[int, int]
 ## player_id → remaining extraction HP for that player's current yield.
 var _progress_hp_by_player: Dictionary[int, int]
 ## player_id → ticks_msec at which their cooldown ends.
@@ -167,7 +174,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"extracted": false,
 			"reason": "depleted",
 			"charges_left": 0,
-			"max_charges": data.max_charges,
+			"max_charges": _pool_for(player_id),
 			"node_path": node_path,
 		}
 
@@ -184,7 +191,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"progress_hp": progress,
 			"extraction_hp": data.extraction_hp,
 			"charges_left": charges_left,
-			"max_charges": data.max_charges,
+			"max_charges": _pool_for(player_id),
 			"node_path": node_path,
 		}
 
@@ -257,7 +264,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"progress_hp": 0,
 		"extraction_hp": data.extraction_hp,
 		"charges_left": charges_left,
-		"max_charges": data.max_charges,
+		"max_charges": _pool_for(player_id),
 		"node_path": node_path,
 	}
 
@@ -314,6 +321,11 @@ func _arm_regen_prediction() -> void:
 	if data == null or _disp_charges < 0 or _disp_charges >= _disp_max:
 		set_process(false)
 		return
+	# Random pools don't trickle, so a partially mined vein has nothing to
+	# predict — only the post-depletion respawn is worth counting down to.
+	if _disp_charges > 0 and _has_random_pool():
+		set_process(false)
+		return
 	var interval_s: float = data.depleted_recharge_seconds if _disp_charges <= 0 else data.charge_regen_seconds
 	_next_regen_ms = Time.get_ticks_msec() + int(interval_s * 1000.0)
 	set_process(true)
@@ -349,20 +361,43 @@ func _refresh_charge_label() -> void:
 # Charge management (server-only, per-player pools)
 # ---------------------------------------------------------------------------
 
+## True when this node type hands out a randomly sized pool per fill.
+func _has_random_pool() -> bool:
+	return data.min_charges > 0 and data.min_charges < data.max_charges
+
+
+## Pool size for a fresh fill: a roll for random-pool nodes, the flat
+## max_charges otherwise.
+func _roll_pool_size() -> int:
+	if not _has_random_pool():
+		return data.max_charges
+	return randi_range(data.min_charges, data.max_charges)
+
+
+## The pool size this player's current fill was rolled at — the denominator the
+## client shows and the ceiling trickle regen tops out at.
+func _pool_for(player_id: int) -> int:
+	_charges_for(player_id)
+	return int(_pool_size_by_player.get(player_id, data.max_charges))
+
+
 func _charges_for(player_id: int) -> int:
 	if not _charges_by_player.has(player_id):
-		_charges_by_player[player_id] = data.max_charges
+		var pool: int = _roll_pool_size()
+		_pool_size_by_player[player_id] = pool
+		_charges_by_player[player_id] = pool
 		_last_regen_ms_by_player[player_id] = Time.get_ticks_msec()
 	return int(_charges_by_player[player_id])
 
 
 func _consume_charge(player_id: int, now_ms: int) -> void:
+	var pool: int = _pool_for(player_id)
 	var charges: int = _charges_for(player_id) - 1
 	_charges_by_player[player_id] = charges
 	if charges == 0:
 		# Mark the depletion time so the longer recharge window starts here.
 		_last_regen_ms_by_player[player_id] = now_ms
-	elif charges == data.max_charges - 1:
+	elif charges == pool - 1:
 		# Just dropped from full → start the continuous regen clock.
 		_last_regen_ms_by_player[player_id] = now_ms
 
@@ -371,15 +406,23 @@ func _consume_charge(player_id: int, now_ms: int) -> void:
 ## access so depleted pools don't burn CPU on a timer. Per-player.
 func _regen(player_id: int) -> void:
 	var charges: int = _charges_for(player_id)
-	if charges >= data.max_charges:
+	var pool: int = _pool_for(player_id)
+	if charges >= pool:
 		return
 	var now_ms: int = Time.get_ticks_msec()
 	var last_ms: int = int(_last_regen_ms_by_player.get(player_id, now_ms))
 	if charges == 0:
-		# Depleted state: wait the longer interval, then snap to full.
+		# Depleted state: wait the longer interval, then refill — random-pool
+		# nodes roll a new size, so the next visit is worth a different haul.
 		if now_ms - last_ms >= int(data.depleted_recharge_seconds * 1000.0):
-			_charges_by_player[player_id] = data.max_charges
+			var fresh: int = _roll_pool_size()
+			_pool_size_by_player[player_id] = fresh
+			_charges_by_player[player_id] = fresh
 			_last_regen_ms_by_player[player_id] = now_ms
+		return
+	# Random pools are all-or-nothing: mine it out, wait for the respawn. No
+	# trickle, or a big vein would refill faster than a player can drain it.
+	if _has_random_pool():
 		return
 	# Continuous: tick +1 per interval elapsed (handles long-idle catch-up).
 	var regen_ms: int = int(data.charge_regen_seconds * 1000.0)
@@ -388,7 +431,7 @@ func _regen(player_id: int) -> void:
 	@warning_ignore("integer_division")
 	var gained: int = (now_ms - last_ms) / regen_ms
 	if gained > 0:
-		_charges_by_player[player_id] = mini(data.max_charges, charges + gained)
+		_charges_by_player[player_id] = mini(pool, charges + gained)
 		_last_regen_ms_by_player[player_id] = last_ms + gained * regen_ms
 
 
