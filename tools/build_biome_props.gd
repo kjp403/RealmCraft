@@ -31,11 +31,12 @@ func _initialize() -> void:
 		13, 14, 5, 0.1
 	)
 
+	# SE idle only — full strip includes graze/turn that reads as "glitching" at distance.
 	_critter(
 		"stag",
-		"res://assets/sprites/characters/critters/stag/stag_idle_strip.png",
-		48, 41, 16,
-		"res://assets/sprites/characters/critters/stag/stag_walk_strip.png",
+		"res://assets/sprites/characters/critters/stag/critter_stag_SE_idle.png",
+		48, 41, 4,
+		"res://assets/sprites/characters/critters/stag/critter_stag_SE_walk.png",
 		44, 41, 8,
 		0.9
 	)

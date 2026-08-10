@@ -13,9 +13,11 @@ func _go() -> void:
 	DirAccess.make_dir_recursive_absolute("/opt/cursor/artifacts/screenshots")
 
 	for entry in [
-		["desert", "res://source/common/gameplay/maps/maps/desert/desert.tscn", Vector2(512, 384)],
-		["fire_forge", "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn", Vector2(512, 384)],
-		["sewers", "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", Vector2(512, 384)],
+		["desert", "res://source/common/gameplay/maps/maps/desert/desert.tscn", Vector2(576, 420)],
+		["fire_forge", "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn", Vector2(1024, 720)],
+		["sewers", "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", Vector2(1024, 720)],
+		# Old blockage report at world (509,395) ≈ tile (31,24) — confirm open corridor.
+		["sewers_coords_509_395", "res://source/common/gameplay/maps/maps/sewers/sewers.tscn", Vector2(509, 395)],
 	]:
 		await _render(entry[0], entry[1], entry[2])
 
