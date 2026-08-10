@@ -19,13 +19,27 @@ That creates: `C:\Users\<you>\Documents\RealmCraft`
 
 ## 2. Restart local servers (easy way)
 
-1. Open the `RealmCraft` folder in File Explorer.  
-2. Double-click **`Restart-LocalServers.bat`**  
-3. Leave the three server windows open.  
-4. Start the game client (Godot → open this project → run client), or from PowerShell inside the repo:
+**Important:** `-GodotExe` must be the Godot **engine `.exe` file**, not the `RealmCraft` folder.
+
+1. Open PowerShell and go to the repo:
 
 ```powershell
-godot --path . --mode=client
+cd $HOME\Documents\RealmCraft
+```
+
+2. Start servers (use your real Godot path):
+
+```powershell
+.\Restart-LocalServers.ps1 -GodotExe "C:\Godot\Godot_v4.7.1-stable_win64.exe"
+```
+
+Or double-click **`Restart-LocalServers.bat`** only if `godot` is already on your PATH.
+
+3. Leave the three server windows open.  
+4. Start the client with the **same** Godot exe:
+
+```powershell
+& "C:\Godot\Godot_v4.7.1-stable_win64.exe" --path . --mode=client
 ```
 
 ## 3. Update to latest code (before restarting)
