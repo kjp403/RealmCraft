@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://678x32kmrkb5" path="res://source/client/ui/menus/chat/chat_menu.gd" id="1_hxcw4"]
 
 [sub_resource type="StyleBoxFlat" id="SB_chatbox"]
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 bg_color = Color(0.0705882, 0.0784314, 0.0941176, 0.94)
 border_width_left = 1
 border_width_top = 1
@@ -18,8 +18,8 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 8
-shadow_offset = Vector2(0, 3)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
 
 [sub_resource type="ButtonGroup" id="BG_tabs"]
 
@@ -49,22 +49,22 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 10.0
-offset_top = -320.0
-offset_right = 530.0
+offset_top = -190.0
+offset_right = 350.0
 offset_bottom = -10.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("SB_chatbox")
 
 [node name="Root" type="VBoxContainer" parent="FullFeed/Chatbox"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="TabRow" type="HBoxContainer" parent="FullFeed/Chatbox/Root"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="AllChatButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
@@ -73,7 +73,7 @@ button_group = SubResource("BG_tabs")
 text = "All"
 
 [node name="SystemChatButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
@@ -82,7 +82,7 @@ button_group = SubResource("BG_tabs")
 text = "System"
 
 [node name="WorldChatButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
@@ -91,7 +91,7 @@ button_group = SubResource("BG_tabs")
 text = "World"
 
 [node name="PrivateChatButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
@@ -105,19 +105,19 @@ size_flags_horizontal = 3
 mouse_filter = 2
 
 [node name="SettingsButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "Options"
 
 [node name="CloseButton" type="Button" parent="FullFeed/Chatbox/Root/TabRow"]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"FlatButton"
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "Close"
 
 [node name="TabSeparator" type="HSeparator" parent="FullFeed/Chatbox/Root"]
@@ -157,7 +157,7 @@ theme_override_font_sizes/font_size = 16
 text = "Blocked players"
 
 [node name="BlockedScroll" type="ScrollContainer" parent="FullFeed/Chatbox/Root/SettingsPanel/SettingsContent" unique_id=1812037413]
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -201,7 +201,7 @@ size_flags_horizontal = 3
 placeholder_text = "Enter a message"
 
 [node name="SendButton" type="Button" parent="FullFeed/Chatbox/Root/InputRow"]
-custom_minimum_size = Vector2(64, 32)
+custom_minimum_size = Vector2(56, 26)
 layout_mode = 2
 focus_mode = 0
 text = "Send"
