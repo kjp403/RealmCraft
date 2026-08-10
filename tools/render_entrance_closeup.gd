@@ -1,6 +1,11 @@
 extends SceneTree
+## Close-up of Woodland Mining Cave portal (mid-plateau west face).
+## Run: xvfb-run -a godot --path . -s tools/render_entrance_closeup.gd
+
 func _initialize() -> void:
 	call_deferred("_go")
+
+
 func _go() -> void:
 	var peer := OfflineMultiplayerPeer.new()
 	root.multiplayer.multiplayer_peer = peer
@@ -15,17 +20,14 @@ func _go() -> void:
 	var map = packed.instantiate()
 	sv.add_child(map)
 	var cam := Camera2D.new()
-	cam.position = Vector2(416, 480)
-	cam.zoom = Vector2(1.2, 1.2)
+	cam.position = Vector2(1600, 504)
+	cam.zoom = Vector2(1.25, 1.25)
 	cam.make_current()
 	map.add_child(cam)
-	for i in 16: await process_frame
-	sv.get_texture().get_image().save_png("/opt/cursor/artifacts/screenshots/mining-portal-west-closeup.png")
-	print("SAVED closeup")
-	# wider context
-	cam.position = Vector2(700, 600)
-	cam.zoom = Vector2(0.7, 0.7)
-	for i in 8: await process_frame
-	sv.get_texture().get_image().save_png("/opt/cursor/artifacts/screenshots/mining-portal-west-context.png")
-	print("SAVED context")
+	for i in 16:
+		await process_frame
+	sv.get_texture().get_image().save_png(
+		"/opt/cursor/artifacts/screenshots/mining-portal-plateau-west-face.png"
+	)
+	print("SAVED plateau west face portal")
 	quit(0)
