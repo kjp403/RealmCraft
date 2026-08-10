@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+instance_name = &"cinder_deeps"
+map_path = "res://source/common/gameplay/maps/maps/fire_forge/cinder_deeps.tscn"
+zone_title = "The Cinder Deeps"
+level_min = 33
+level_max = 38
+show_discovery = true
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

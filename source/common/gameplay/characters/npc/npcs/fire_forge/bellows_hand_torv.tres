@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/orc_warrior.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Dialogue_torv"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["Forty years on the bellows. My hearing is gone and my arms are excellent.", "Helka says hold the halls. I say hold the bridges. Bridges are where they have to come to you.", "You want the west hall first. East hall has the templars and they do not tire."])
+label_override = "Ask where to start"
+
+[sub_resource type="Resource" id="Dialogue_down"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["The stair down goes past where the masonry stops. After that it is just the mountain.", "There is a lake down there that is not water. Something walks its shore."])
+label_override = "Ask about the descent"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Bellows Hand Torv"
+skin = ExtResource("6_skin")
+greeting = "Speak up. Forty years of bellows and I hear about half of what anyone says to me."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Dialogue_torv"), SubResource("Dialogue_down")])

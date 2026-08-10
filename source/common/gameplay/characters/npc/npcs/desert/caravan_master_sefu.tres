@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
+[ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="3_shop"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/sunsteel_shop.tres" id="5_shop"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/scholar_director.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Shop_sefu"]
+script = ExtResource("3_shop")
+shop = ExtResource("5_shop")
+
+[sub_resource type="Resource" id="Dialogue_terraces"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["We stopped climbing when the wind started taking the mules. So: we trade up here now.", "The spire in the middle was a watchtower once. Whoever watched from it is not telling.", "Walk the ring, not across it. Across it is where the harpies nest."])
+label_override = "Ask about the terraces"
+
+[resource]
+script = ExtResource("1_npcres")
+npc_name = "Caravan Master Sefu"
+skin = ExtResource("6_skin")
+greeting = "You came up the stair? Then you have legs and no sense. Good — both sell well here."
+interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_sefu"), SubResource("Dialogue_terraces")])
