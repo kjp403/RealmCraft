@@ -84,6 +84,10 @@ var trade_tables: Dictionary[int, TradeTable]
 ## flag_id -> TerritoryFlag node, gathered from the basing flags placed in this
 ## map. The server resolves which flag is being damaged/captured.
 var territory_flags: Dictionary[int, TerritoryFlag]
+## master slug -> Slayer source: a SlayerInteraction on an NPC (registered by its
+## register(), keyed by the NPCResource filename slug — same pattern as
+## quest_givers). Exposes `master` (a SlayerMasterResource) + `master_name`.
+var slayer_masters: Dictionary[StringName, Object]
 ## master_id -> DuelMaster NPC. The server queues sparring through these.
 var duel_masters: Dictionary[int, DuelMaster]
 
@@ -151,6 +155,11 @@ func get_crafting_station(station_key: StringName) -> CraftingStationResource:
 ## The quest-giver NPC with this slug in this map, or null.
 func get_quest_giver(giver_key: StringName) -> Object:
 	return quest_givers.get(giver_key)
+
+
+## The Slayer master NPC with this slug in this map, or null.
+func get_slayer_master(master_key: StringName) -> Object:
+	return slayer_masters.get(master_key)
 
 
 ## The trade table with this id in this map, or null.

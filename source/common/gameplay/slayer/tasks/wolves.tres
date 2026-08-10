@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://cj8zotf94cazx"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Wolves"
+enemy_types = Array[StringName]([&"wolf"])
+min_slayer_level = 1
+xp_per_kill = 9
+guide_notes = "Fast attackers with no ranged threat — a clean melee task. Found roaming the woodland trails in small packs."

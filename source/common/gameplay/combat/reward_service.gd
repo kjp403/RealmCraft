@@ -175,6 +175,10 @@ static func _reward(
 	DailyQuestService.on_kill(resource, npc.enemy_type)
 	LeaderboardService.record_pve_kill(player)
 
+	var slayer_result: Dictionary = SlayerTaskService.on_kill(resource, npc.enemy_type)
+	if peer_id > 0 and not slayer_result.is_empty():
+		WorldServer.curr.data_push.rpc_id(peer_id, &"slayer.update", slayer_result)
+
 	if int(progress.get("levels_gained", 0)) > 0:
 		var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
 		LevelMilestoneService.on_levels_gained(resource, level_before, int(progress.get("level", 1)), inst)

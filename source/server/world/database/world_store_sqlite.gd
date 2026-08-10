@@ -60,6 +60,13 @@ func save_player(player: PlayerResource) -> bool:
 	var dungeon_lockouts_json: String = JSON.stringify(player.dungeon_lockouts)
 	var redeemed_codes_json: String = JSON.stringify(player.redeemed_codes)
 	var wardstones_json: String = JSON.stringify(player.wardstones)
+	var slayer_json: String = JSON.stringify({
+		"current_task": player.current_slayer_task,
+		"points": player.slayer_points,
+		"streak": player.slayer_streak,
+		"tasks_completed": player.slayer_tasks_completed,
+		"blocked": player.slayer_blocked_tasks,
+	})
 
 	var joined_guild_ids_json: String = JSON.stringify(player.joined_guild_ids)
 
@@ -67,9 +74,9 @@ func save_player(player: PlayerResource) -> bool:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, bank_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, "
+		+ "attributes_json, inventory_json, bank_json, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -99,6 +106,7 @@ func save_player(player: PlayerResource) -> bool:
 			dungeon_lockouts_json,
 			redeemed_codes_json,
 			wardstones_json,
+			slayer_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -496,6 +504,16 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 
 	var lockouts_v: Variant = JSON.parse_string(str(row.get("dungeon_lockouts_json", "{}")))
 	player.dungeon_lockouts = lockouts_v if lockouts_v is Dictionary else {}
+
+	var slayer_v: Variant = JSON.parse_string(str(row.get("slayer_json", "{}")))
+	if slayer_v is Dictionary:
+		var current_task_v: Variant = (slayer_v as Dictionary).get("current_task", {})
+		player.current_slayer_task = current_task_v if current_task_v is Dictionary else {}
+		player.slayer_points = int((slayer_v as Dictionary).get("points", 0))
+		player.slayer_streak = int((slayer_v as Dictionary).get("streak", 0))
+		player.slayer_tasks_completed = int((slayer_v as Dictionary).get("tasks_completed", 0))
+		var blocked_v: Variant = (slayer_v as Dictionary).get("blocked", {})
+		player.slayer_blocked_tasks = blocked_v if blocked_v is Dictionary else {}
 
 	player.active_guild_id = int(row.get("active_guild_id", 0))
 

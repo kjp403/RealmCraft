@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://cftcvkv790eth"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "The Undead Legion"
+enemy_types = Array[StringName]([&"trpg_skeleton", &"trpg_skeleton_archer", &"trpg_armored_skeleton", &"trpg_greatsword_skeleton", &"trpg_zombie_giant", &"trpg_necromancer"])
+min_slayer_level = 60
+xp_per_kill = 46
+guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned."

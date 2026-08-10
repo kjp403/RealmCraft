@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://b6vtn6cnuz67f"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Goblins"
+enemy_types = Array[StringName]([&"goblin_runt", &"goblin_cutter", &"goblin_slinger", &"goblin_shaman"])
+min_slayer_level = 1
+xp_per_kill = 17
+guide_notes = "Any goblin in the woodland warren counts — runts fall fastest, shamans and slingers hit at range so close the gap quickly. Avoid pulling the whole camp at once."

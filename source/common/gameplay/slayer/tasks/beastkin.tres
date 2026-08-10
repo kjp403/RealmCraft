@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://c3fw8wrmeyyvj"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Beastkin"
+enemy_types = Array[StringName]([&"trpg_bat", &"trpg_crag_yeti", &"trpg_snow_yeti", &"trpg_werewolf", &"trpg_werewolf_stalker", &"trpg_werebear", &"trpg_umber_hulk"])
+min_slayer_level = 65
+xp_per_kill = 52
+guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned."

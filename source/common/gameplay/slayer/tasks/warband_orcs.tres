@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3 uid="uid://di1t6lhlngvli"]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "War-band Orcs"
+enemy_types = Array[StringName]([&"trpg_orc", &"trpg_armored_orc", &"trpg_elite_orc", &"trpg_orc_rider", &"trpg_ogre_mage", &"trpg_conjuring_oni"])
+min_slayer_level = 70
+xp_per_kill = 72
+guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned."

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="JobPerks" format=3 uid="uid://dr2wn342ksin7"]
+
+[ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+
+[ext_resource type="Texture2D" uid="uid://cs1ay3rvq7k2n" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Slayer.png" id="icon_tex"]
+
+[resource]
+script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
+job_slug = &"slayer"
+display_name = "Slayer"
+category = &"combat"
+perk_every_levels = 15
+perks = Array[Dictionary]([{
+"effect": "xp",
+"id": "focused",
+"max_rank": 3,
+"name": "Focused Hunter",
+"per_rank": 0.05
+}, {
+"effect": "skip_discount",
+"id": "efficient_reassignment",
+"max_rank": 2,
+"name": "Efficient Reassignment",
+"per_rank": 0.15
+}])
+describe_lines = Array[String](["Slayer XP +{xp}%", "Cheaper task reassignment from Durael"])
