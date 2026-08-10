@@ -35,6 +35,6 @@ item_icon = ExtResource("2_icon")
 can_trade = true
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 stack_limit = 5
-vendor_value = 12
+vendor_value = 15
 metadata/slug = &"bronze_helmet"
 metadata/id = 232
