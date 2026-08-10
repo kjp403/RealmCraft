@@ -806,12 +806,8 @@ func _build_sewers() -> void:
 	var floors: Array = [
 		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
 		Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2),
-	]
-	# DG Set1 textured slabs (avoid arrow UI tiles in top-left)
-	var dg_floors: Array = [
-		Vector2i(9, 2), Vector2i(9, 3), Vector2i(10, 3), Vector2i(11, 1), Vector2i(11, 4),
-		Vector2i(9, 12), Vector2i(9, 13), Vector2i(10, 13), Vector2i(8, 13),
-		Vector2i(12, 3), Vector2i(14, 4), Vector2i(2, 9),
+		Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5), Vector2i(4, 5),
+		Vector2i(6, 2), Vector2i(7, 2), Vector2i(8, 2),
 	]
 	var wall_n: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]
 	var wall_s: Array = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4)]
@@ -854,11 +850,7 @@ func _build_sewers() -> void:
 	_fill_enclosed_voids(walk)
 
 	_paint_floors(ground, walk, floors, 0)
-	# DG floors in side halls + plaza + cisterns
-	for cell: Vector2i in walk.keys():
-		if cell.x < 40 or cell.x > 88 or (cell.y >= 40 and cell.y <= 56) or cell.y >= 64:
-			if _hash(cell) % 3 == 0:
-				ground.set_cell(cell, 3, _pick(dg_floors, cell))
+	# Keep DG Set1 for props only — its blue-gray slabs turn cyan under sewer modulate.
 
 	# Drainage channel + DarkCastle sludge / water accents
 	for x in range(36, 92):
