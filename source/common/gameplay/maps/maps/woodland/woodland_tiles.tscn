@@ -19,6 +19,8 @@
 [ext_resource type="Resource" uid="uid://tr5yubwcqy8" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_cutter.tres" id="19_cutter"]
 [ext_resource type="Resource" uid="uid://bolo6wgji05kf" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_shaman.tres" id="20_shaman"]
 [ext_resource type="Resource" uid="uid://i26d4k5wypcy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_slinger.tres" id="21_slinger"]
+[ext_resource type="Resource" uid="uid://c43oawxmbygiq" path="res://source/common/gameplay/characters/npc/types/wolf.tres" id="35_wolf"]
+[ext_resource type="Resource" uid="uid://bq8woodlandrat01" path="res://source/common/gameplay/characters/npc/types/woodland_rat.tres" id="36_wrat"]
 [ext_resource type="Resource" uid="uid://deo2ei3h78ouy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres" id="22_chief"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
 [ext_resource type="Texture2D" uid="uid://cyxm7wgu1engl" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
@@ -602,185 +604,362 @@ id_to_node = {
 21: NodePath("Shaman2"),
 22: NodePath("ChiefGuardRunt1"),
 23: NodePath("GoblinChief"),
-24: NodePath("ChiefGuardRunt2")
+24: NodePath("ChiefGuardRunt2"),
+25: NodePath("WildWolf1"),
+26: NodePath("WildWolf2"),
+27: NodePath("WildWolf3"),
+28: NodePath("WildWolf4"),
+29: NodePath("WildWolf5"),
+30: NodePath("WildWolf6"),
+31: NodePath("WildWolf7"),
+32: NodePath("WildWolf8"),
+33: NodePath("WoodlandRat1"),
+34: NodePath("WoodlandRat2"),
+35: NodePath("WoodlandRat3"),
+36: NodePath("WoodlandRat4"),
+37: NodePath("WoodlandRat5"),
+38: NodePath("WoodlandRat6"),
+39: NodePath("WoodlandRat7"),
+40: NodePath("WoodlandRat8"),
+41: NodePath("WoodlandRat9"),
+42: NodePath("WoodlandRat10"),
+43: NodePath("WoodlandRat11"),
+44: NodePath("WoodlandRat12"),
+45: NodePath("WoodlandRat13"),
+46: NodePath("WoodlandRat14")
 }
 node_to_id = {
-NodePath("ChiefGuardRunt2"): 24,
-NodePath("GoblinChief"): 23,
-NodePath("ChiefGuardRunt1"): 22,
-NodePath("Shaman2"): 21,
-NodePath("ShamanEscortCutter"): 20,
-NodePath("Shaman1"): 19,
-NodePath("Slinger3"): 18,
-NodePath("Slinger2"): 17,
-NodePath("Slinger1"): 16,
-NodePath("CampRunt2"): 15,
-NodePath("CampCutter4"): 14,
-NodePath("CampCutter3"): 13,
-NodePath("CampRunt1"): 12,
-NodePath("CampCutter2"): 11,
-NodePath("CampCutter1"): 10,
-NodePath("PathCutter3"): 9,
-NodePath("PathCutter2"): 8,
-NodePath("PathCutter1"): 7,
-NodePath("PathRunt2"): 6,
-NodePath("PathRunt1"): 5,
-NodePath("GateRunt5"): 4,
-NodePath("GateRunt4"): 3,
-NodePath("GateRunt3"): 2,
+NodePath("GateRunt1"): 0,
 NodePath("GateRunt2"): 1,
-NodePath("GateRunt1"): 0
+NodePath("GateRunt3"): 2,
+NodePath("GateRunt4"): 3,
+NodePath("GateRunt5"): 4,
+NodePath("PathRunt1"): 5,
+NodePath("PathRunt2"): 6,
+NodePath("PathCutter1"): 7,
+NodePath("PathCutter2"): 8,
+NodePath("PathCutter3"): 9,
+NodePath("CampCutter1"): 10,
+NodePath("CampCutter2"): 11,
+NodePath("CampRunt1"): 12,
+NodePath("CampCutter3"): 13,
+NodePath("CampCutter4"): 14,
+NodePath("CampRunt2"): 15,
+NodePath("Slinger1"): 16,
+NodePath("Slinger2"): 17,
+NodePath("Slinger3"): 18,
+NodePath("Shaman1"): 19,
+NodePath("ShamanEscortCutter"): 20,
+NodePath("Shaman2"): 21,
+NodePath("ChiefGuardRunt1"): 22,
+NodePath("GoblinChief"): 23,
+NodePath("ChiefGuardRunt2"): 24,
+NodePath("WildWolf1"): 25,
+NodePath("WildWolf2"): 26,
+NodePath("WildWolf3"): 27,
+NodePath("WildWolf4"): 28,
+NodePath("WildWolf5"): 29,
+NodePath("WildWolf6"): 30,
+NodePath("WildWolf7"): 31,
+NodePath("WildWolf8"): 32,
+NodePath("WoodlandRat1"): 33,
+NodePath("WoodlandRat2"): 34,
+NodePath("WoodlandRat3"): 35,
+NodePath("WoodlandRat4"): 36,
+NodePath("WoodlandRat5"): 37,
+NodePath("WoodlandRat6"): 38,
+NodePath("WoodlandRat7"): 39,
+NodePath("WoodlandRat8"): 40,
+NodePath("WoodlandRat9"): 41,
+NodePath("WoodlandRat10"): 42,
+NodePath("WoodlandRat11"): 43,
+NodePath("WoodlandRat12"): 44,
+NodePath("WoodlandRat13"): 45,
+NodePath("WoodlandRat14"): 46
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
 [node name="GateRunt1" parent="ReplicatedPropsContainer" unique_id=138946250 instance=ExtResource("3_2hhap")]
-position = Vector2(392, 1000)
+position = Vector2(296, 1096)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="GateRunt2" parent="ReplicatedPropsContainer" unique_id=1405547471 instance=ExtResource("3_2hhap")]
-position = Vector2(616, 808)
+position = Vector2(504, 936)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="GateRunt3" parent="ReplicatedPropsContainer" unique_id=1885119429 instance=ExtResource("3_2hhap")]
-position = Vector2(264, 680)
+position = Vector2(216, 760)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="GateRunt4" parent="ReplicatedPropsContainer" unique_id=520457107 instance=ExtResource("3_2hhap")]
-position = Vector2(520, 552)
+position = Vector2(424, 616)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="GateRunt5" parent="ReplicatedPropsContainer" unique_id=1894583821 instance=ExtResource("3_2hhap")]
-position = Vector2(744, 1032)
+position = Vector2(680, 1080)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="PathRunt1" parent="ReplicatedPropsContainer" unique_id=1173835823 instance=ExtResource("3_2hhap")]
-position = Vector2(952, 968)
+position = Vector2(824, 984)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="PathRunt2" parent="ReplicatedPropsContainer" unique_id=1331615902 instance=ExtResource("3_2hhap")]
-position = Vector2(968, 984)
+position = Vector2(1080, 1064)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="PathCutter1" parent="ReplicatedPropsContainer" unique_id=1994546004 instance=ExtResource("3_2hhap")]
-position = Vector2(888, 792)
+position = Vector2(904, 744)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="PathCutter2" parent="ReplicatedPropsContainer" unique_id=173491673 instance=ExtResource("3_2hhap")]
-position = Vector2(1160, 728)
+position = Vector2(1144, 680)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="PathCutter3" parent="ReplicatedPropsContainer" unique_id=1999618966 instance=ExtResource("3_2hhap")]
-position = Vector2(1368, 664)
+position = Vector2(1384, 696)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="CampCutter1" parent="ReplicatedPropsContainer" unique_id=1055611707 instance=ExtResource("3_2hhap")]
-position = Vector2(1400, 440)
+position = Vector2(1496, 376)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="CampCutter2" parent="ReplicatedPropsContainer" unique_id=1258013794 instance=ExtResource("3_2hhap")]
-position = Vector2(1432, 456)
+position = Vector2(1752, 456)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="CampRunt1" parent="ReplicatedPropsContainer" unique_id=181245692 instance=ExtResource("3_2hhap")]
-position = Vector2(1416, 472)
+position = Vector2(1576, 552)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="CampCutter3" parent="ReplicatedPropsContainer" unique_id=2086749782 instance=ExtResource("3_2hhap")]
-position = Vector2(1480, 488)
+position = Vector2(1816, 376)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="CampCutter4" parent="ReplicatedPropsContainer" unique_id=438744078 instance=ExtResource("3_2hhap")]
-position = Vector2(1512, 472)
+position = Vector2(1896, 536)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="CampRunt2" parent="ReplicatedPropsContainer" unique_id=91795151 instance=ExtResource("3_2hhap")]
-position = Vector2(1464, 520)
+position = Vector2(1464, 616)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="Slinger1" parent="ReplicatedPropsContainer" unique_id=1868700488 instance=ExtResource("3_2hhap")]
-position = Vector2(1192, 376)
+position = Vector2(1240, 296)
 debug_draw_ranges = false
 enemy_data = ExtResource("21_slinger")
 weapon = null
 
 [node name="Slinger2" parent="ReplicatedPropsContainer" unique_id=1022336770 instance=ExtResource("3_2hhap")]
-position = Vector2(968, 344)
+position = Vector2(1064, 264)
 debug_draw_ranges = false
 enemy_data = ExtResource("21_slinger")
 weapon = null
 
 [node name="Slinger3" parent="ReplicatedPropsContainer" unique_id=915204169 instance=ExtResource("3_2hhap")]
-position = Vector2(744, 328)
+position = Vector2(824, 280)
 debug_draw_ranges = false
 enemy_data = ExtResource("21_slinger")
 weapon = null
 
 [node name="Shaman1" parent="ReplicatedPropsContainer" unique_id=1361130257 instance=ExtResource("3_2hhap")]
-position = Vector2(648, 312)
+position = Vector2(568, 280)
 debug_draw_ranges = false
 enemy_data = ExtResource("20_shaman")
 weapon = null
 
 [node name="ShamanEscortCutter" parent="ReplicatedPropsContainer" unique_id=1043721412 instance=ExtResource("3_2hhap")]
-position = Vector2(664, 328)
+position = Vector2(744, 424)
 debug_draw_ranges = false
 enemy_data = ExtResource("19_cutter")
 weapon = null
 
 [node name="Shaman2" parent="ReplicatedPropsContainer" unique_id=1439415590 instance=ExtResource("3_2hhap")]
-position = Vector2(840, 376)
+position = Vector2(984, 424)
 debug_draw_ranges = false
 enemy_data = ExtResource("20_shaman")
 weapon = null
 
 [node name="ChiefGuardRunt1" parent="ReplicatedPropsContainer" unique_id=949143438 instance=ExtResource("3_2hhap")]
-position = Vector2(408, 200)
+position = Vector2(344, 168)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
 weapon = null
 
 [node name="GoblinChief" parent="ReplicatedPropsContainer" unique_id=608139457 instance=ExtResource("3_2hhap")]
-position = Vector2(456, 232)
+position = Vector2(472, 232)
 debug_draw_ranges = false
 enemy_data = ExtResource("22_chief")
 weapon = null
 
 [node name="ChiefGuardRunt2" parent="ReplicatedPropsContainer" unique_id=1611268690 instance=ExtResource("3_2hhap")]
-position = Vector2(520, 264)
+position = Vector2(568, 168)
 debug_draw_ranges = false
 enemy_data = ExtResource("18_runt")
+weapon = null
+
+
+[node name="WildWolf1" parent="ReplicatedPropsContainer" unique_id=1900001000 instance=ExtResource("3_2hhap")]
+position = Vector2(184, 504)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf2" parent="ReplicatedPropsContainer" unique_id=1900001001 instance=ExtResource("3_2hhap")]
+position = Vector2(536, 696)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf3" parent="ReplicatedPropsContainer" unique_id=1900001002 instance=ExtResource("3_2hhap")]
+position = Vector2(984, 536)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf4" parent="ReplicatedPropsContainer" unique_id=1900001003 instance=ExtResource("3_2hhap")]
+position = Vector2(1416, 904)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf5" parent="ReplicatedPropsContainer" unique_id=1900001004 instance=ExtResource("3_2hhap")]
+position = Vector2(1736, 696)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf6" parent="ReplicatedPropsContainer" unique_id=1900001005 instance=ExtResource("3_2hhap")]
+position = Vector2(1960, 376)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf7" parent="ReplicatedPropsContainer" unique_id=1900001006 instance=ExtResource("3_2hhap")]
+position = Vector2(1224, 1144)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WildWolf8" parent="ReplicatedPropsContainer" unique_id=1900001007 instance=ExtResource("3_2hhap")]
+position = Vector2(200, 904)
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
+
+[node name="WoodlandRat1" parent="ReplicatedPropsContainer" unique_id=1900001008 instance=ExtResource("3_2hhap")]
+position = Vector2(856, 1176)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat2" parent="ReplicatedPropsContainer" unique_id=1900001009 instance=ExtResource("3_2hhap")]
+position = Vector2(1096, 1224)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat3" parent="ReplicatedPropsContainer" unique_id=1900001010 instance=ExtResource("3_2hhap")]
+position = Vector2(696, 824)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat4" parent="ReplicatedPropsContainer" unique_id=1900001011 instance=ExtResource("3_2hhap")]
+position = Vector2(456, 456)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat5" parent="ReplicatedPropsContainer" unique_id=1900001012 instance=ExtResource("3_2hhap")]
+position = Vector2(264, 984)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat6" parent="ReplicatedPropsContainer" unique_id=1900001013 instance=ExtResource("3_2hhap")]
+position = Vector2(1304, 824)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat7" parent="ReplicatedPropsContainer" unique_id=1900001014 instance=ExtResource("3_2hhap")]
+position = Vector2(1576, 744)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat8" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
+position = Vector2(1864, 904)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat9" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
+position = Vector2(696, 184)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat10" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
+position = Vector2(1624, 216)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat11" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
+position = Vector2(2024, 616)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat12" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
+position = Vector2(1096, 456)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat13" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
+position = Vector2(360, 312)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
+
+[node name="WoodlandRat14" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
+position = Vector2(904, 600)
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
 weapon = null
 
 [node name="Entrance" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
