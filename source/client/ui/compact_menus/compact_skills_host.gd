@@ -17,6 +17,9 @@ const SKILL_ORDER: Array[String] = [
 	"outfitting",
 	"woodcutting",
 	"harvesting",
+	# Combat skill (category == &"combat"), listed last so the existing
+	# gathering/crafting tiles keep their grid positions.
+	"slayer",
 ]
 
 @onready var title_label: Label = (
