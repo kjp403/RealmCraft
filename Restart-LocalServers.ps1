@@ -35,8 +35,29 @@ if (-not (Test-Path (Join-Path $RepoRoot "project.godot"))) {
     exit 1
 }
 
+$classCache = Join-Path $RepoRoot ".godot\global_script_class_cache.cfg"
+if (-not (Test-Path $classCache)) {
+    Write-Host ""
+    Write-Host "Godot has not finished importing this project yet." -ForegroundColor Red
+    Write-Host "Local servers will spam fake 'GameMode not declared' errors without this step."
+    Write-Host ""
+    Write-Host "Do this ONCE:"
+    Write-Host "  1) Open Godot 4.7"
+    Write-Host "  2) Open C:\Users\$env:USERNAME\Documents\RealmCraft\project.godot"
+    Write-Host "  3) Wait until the bottom status bar is idle (no 'Scanning' / 'Importing')"
+    Write-Host "  4) In Godot menu: Project -> Reload Current Project"
+    Write-Host "  5) Wait again until idle"
+    Write-Host "  6) Confirm this file exists:"
+    Write-Host "       $classCache"
+    Write-Host "  7) Then run this restart script again"
+    Write-Host ""
+    Write-Host "Or just play live: https://play.arkenelle.com  (no local servers needed)"
+    exit 1
+}
+
 Write-Host "Repo:   $RepoRoot"
 Write-Host "Godot:  $godot"
+Write-Host "Cache:  OK ($classCache)"
 Write-Host "Stopping old local Godot servers (if any)..."
 
 # Stop previous headless server windows started for this project (best-effort).

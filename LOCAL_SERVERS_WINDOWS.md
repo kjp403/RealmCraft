@@ -6,7 +6,7 @@ If you just play at **https://play.arkenelle.com**, you do **not** need local se
 ## 1. One-time setup
 
 1. Install **Git for Windows**: https://git-scm.com/download/win  
-2. Install **Godot 4.7** (same major version as the project) and make sure the `godot` command works in a terminal, **or** edit `Restart-LocalServers.ps1` and set `$GodotExe` to your Godot `.exe` path.  
+2. Install **Godot 4.7** (same major version as the project).  
 3. Open **PowerShell** and clone the game once:
 
 ```powershell
@@ -16,6 +16,13 @@ cd RealmCraft
 ```
 
 That creates: `C:\Users\<you>\Documents\RealmCraft`
+
+4. **Required before servers will work:** open the project in the Godot editor once:
+   - Open `Documents\RealmCraft\project.godot`
+   - Wait until Godot finishes scanning/importing (bottom status bar idle)
+   - Menu: **Project → Reload Current Project**, wait again
+   - Confirm this file exists: `Documents\RealmCraft\.godot\global_script_class_cache.cfg`  
+     (If it’s missing, servers will fail with confusing `GameMode not declared` spam.)
 
 ## 2. Restart local servers (easy way)
 
