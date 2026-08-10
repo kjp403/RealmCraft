@@ -130,6 +130,10 @@ func _fade_out() -> void:
 	_fade_tween.chain().tween_callback(func() -> void: visible = false)
 
 
+func return_to_login() -> void:
+	_back_to_login()
+
+
 func _back_to_login() -> void:
 	_active = false
 	Client.close_connection()

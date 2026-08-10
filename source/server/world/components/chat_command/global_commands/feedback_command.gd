@@ -15,7 +15,7 @@ const MAX_PER_WINDOW: int = 3
 const WINDOW_MS: int = 60_000
 ## Shown in the reply so players know where to send screenshots/clips (chat can't
 ## carry attachments). Hardcoded on purpose — no config lookup.
-const DISCORD_INVITE: String = "https://discord.gg/QE5JwpFzgK"
+const DISCORD_INVITE: String = Distribution.DISCORD_URL
 
 
 func _init() -> void:

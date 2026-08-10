@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://source/client/ui/menus/settings/components/setting_toggle.tscn" id="10_toggle"]
 [ext_resource type="PackedScene" path="res://source/client/ui/menus/settings/components/setting_option.tscn" id="11_option"]
 [ext_resource type="Shader" path="res://source/client/ui/shared/menu_blur_backdrop.gdshader" id="12_blur"]
+[ext_resource type="Script" path="res://source/client/ui/menus/settings/settings_account_section.gd" id="13_account"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8ix7g"]
 content_margin_left = 24.0
@@ -199,6 +200,27 @@ setting_section = &"general"
 setting_property = &"language"
 setting_label = NodePath("HBox/SettingName")
 controller = NodePath("HBox/Cell/Options")
+
+[node name="Account" type="VBoxContainer" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+script = ExtResource("13_account")
+
+[node name="AccountTitle" type="Label" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer/Account"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Account"
+horizontal_alignment = 1
+
+[node name="DiscordButton" type="Button" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer/Account"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Join Discord"
+
+[node name="LogoutButton" type="Button" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer/Account"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Log out"
 
 [node name="GraphicsSettings" type="PanelContainer" parent="MainContainer/Root/HBoxContainer" unique_id=700000010]
 visible = false
