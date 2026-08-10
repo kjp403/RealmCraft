@@ -56,7 +56,7 @@ const LINK_WEBSITE: String = Distribution.WEBSITE_URL
 const LINK_DOWNLOAD: String = Distribution.ITCH_URL
 ## Opens Arkenelle's page inside the itch.io desktop app (Install / Update).
 const LINK_ITCH_APP: String = Distribution.ITCH_APP_URL
-const LINK_DISCORD: String = "https://discord.gg/QE5JwpFzgK"
+const LINK_DISCORD: String = Distribution.DISCORD_URL
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
 # polyphonic UI player (Sound bus, volume-bound to settings). Swap the files in

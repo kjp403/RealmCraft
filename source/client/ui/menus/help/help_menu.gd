@@ -15,7 +15,7 @@ Join or found a guild, then take a territory by capturing its banner, and earn G
 [b]Community and feedback[/b]
 This is an alpha, so expect rough edges, and patch notes land in your Mailbox.
 Type /players in chat to see who is online. Found a bug or have an idea? Type /feedback to send it straight to us.
-Come say hi: join our [url=https://discord.gg/QE5JwpFzgK][color=#6cc5ff]Discord[/color][/url], grab the client on [url=https://kjp403.itch.io/arkenelle][color=#6cc5ff]itch.io[/color][/url] (install with the itch app for auto-updates), or visit the [url=https://arkenelle.com][color=#6cc5ff]website[/color][/url]."""
+Come say hi: join our [url={discord}][color=#6cc5ff]Discord[/color][/url], grab the client on [url=https://kjp403.itch.io/arkenelle][color=#6cc5ff]itch.io[/color][/url] (install with the itch app for auto-updates), or visit the [url=https://arkenelle.com][color=#6cc5ff]website[/color][/url]."""
 
 
 func _ready() -> void:
@@ -32,8 +32,7 @@ func _ready() -> void:
 	label.fit_content = true
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_constant_override(&"line_separation", 5)
-	label.text = HELP_TEXT
-	# Clickable [url=...] links (Discord / website) open in the player's browser.
+	label.text = HELP_TEXT.replace("{discord}", Distribution.DISCORD_URL)	# Clickable [url=...] links (Discord / website) open in the player's browser.
 	label.meta_clicked.connect(func(meta: Variant) -> void: OS.shell_open(str(meta)))
 	scroll.add_child(label)
 
