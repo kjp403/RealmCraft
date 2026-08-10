@@ -1,0 +1,38 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava1.png" id="1_j0t0v"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava2.png" id="2_k6fi8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava3.png" id="3_x6v62"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava4.png" id="4_ip0oe"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava5.png" id="5_82sul"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava6.png" id="6_cric0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/lava_forge_16/animated/burning_lava/burninglava7.png" id="7_jrh4t"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_j0t0v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_k6fi8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_x6v62")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_ip0oe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_82sul")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_cric0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_jrh4t")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.333333333333334
+}]

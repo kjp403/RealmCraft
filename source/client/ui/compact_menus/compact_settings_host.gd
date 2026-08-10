@@ -1,6 +1,6 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 262.0)
+const PANEL_SIZE := Vector2(180.0, 340.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const SECTION := &"general"
@@ -118,6 +118,29 @@ func _build_layout() -> void:
 	reset_button.tooltip_text = "Restore audio, zoom and weather defaults."
 	reset_button.pressed.connect(_on_reset_pressed)
 	main_box.add_child(reset_button)
+
+	main_box.add_child(HSeparator.new())
+
+	var discord_button := Button.new()
+	discord_button.text = "Join Discord"
+	discord_button.custom_minimum_size = Vector2(0.0, 26.0)
+	discord_button.add_theme_font_size_override(&"font_size", 9)
+	discord_button.tooltip_text = "Open the Arkenelle Discord invite in your browser."
+	discord_button.pressed.connect(SettingsAccountActions.open_discord)
+	main_box.add_child(discord_button)
+
+	var logout_button := Button.new()
+	logout_button.text = "Log out"
+	logout_button.custom_minimum_size = Vector2(0.0, 26.0)
+	logout_button.add_theme_font_size_override(&"font_size", 9)
+	logout_button.tooltip_text = "Disconnect and return to the login screen."
+	logout_button.pressed.connect(_on_logout_pressed)
+	main_box.add_child(logout_button)
+
+
+func _on_logout_pressed() -> void:
+	hide()
+	SettingsAccountActions.logout_to_login()
 
 
 func _add_slider_setting(

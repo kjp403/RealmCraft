@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_umber_hulk/trpg_umber_hulk_attack.png" id="1_wd0fi"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_umber_hulk/trpg_umber_hulk_death.png" id="2_tnloy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_umber_hulk/trpg_umber_hulk_idle.png" id="3_s5nkg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_umber_hulk/trpg_umber_hulk_run.png" id="4_r2ack"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_umber_hulk/trpg_umber_hulk_walk.png" id="5_qntkq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_otvc2"]
+atlas = ExtResource("1_wd0fi")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f4vld"]
+atlas = ExtResource("1_wd0fi")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o0lr6"]
+atlas = ExtResource("1_wd0fi")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_algg7"]
+atlas = ExtResource("1_wd0fi")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jw2v2"]
+atlas = ExtResource("2_tnloy")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pc7tt"]
+atlas = ExtResource("2_tnloy")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cta6q"]
+atlas = ExtResource("2_tnloy")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xxufg"]
+atlas = ExtResource("2_tnloy")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mtcj8"]
+atlas = ExtResource("3_s5nkg")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bcsou"]
+atlas = ExtResource("3_s5nkg")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2up54"]
+atlas = ExtResource("3_s5nkg")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e5r16"]
+atlas = ExtResource("3_s5nkg")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b1d63"]
+atlas = ExtResource("4_r2ack")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gpkwv"]
+atlas = ExtResource("4_r2ack")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a7nt6"]
+atlas = ExtResource("4_r2ack")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_peoy8"]
+atlas = ExtResource("4_r2ack")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xbcm1"]
+atlas = ExtResource("5_qntkq")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hv8uu"]
+atlas = ExtResource("5_qntkq")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gjdlr"]
+atlas = ExtResource("5_qntkq")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xln4n"]
+atlas = ExtResource("5_qntkq")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_otvc2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f4vld")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o0lr6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_algg7")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jw2v2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pc7tt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cta6q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xxufg")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mtcj8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bcsou")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2up54")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e5r16")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b1d63")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gpkwv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a7nt6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_peoy8")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xbcm1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hv8uu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gjdlr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xln4n")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_umber_hulk"
+metadata/id = 74

@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_intellect_devourer/trpg_intellect_devourer_attack.png" id="1_7482k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_intellect_devourer/trpg_intellect_devourer_death.png" id="2_ma8kl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_intellect_devourer/trpg_intellect_devourer_idle.png" id="3_713kn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_intellect_devourer/trpg_intellect_devourer_run.png" id="4_5u6it"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_intellect_devourer/trpg_intellect_devourer_walk.png" id="5_4wrkl"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mowbn"]
+atlas = ExtResource("1_7482k")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q5bmb"]
+atlas = ExtResource("1_7482k")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l1ipn"]
+atlas = ExtResource("1_7482k")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_35j1r"]
+atlas = ExtResource("1_7482k")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xkcm6"]
+atlas = ExtResource("2_ma8kl")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ivslx"]
+atlas = ExtResource("2_ma8kl")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_korpk"]
+atlas = ExtResource("2_ma8kl")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8a7bg"]
+atlas = ExtResource("2_ma8kl")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lmo5g"]
+atlas = ExtResource("3_713kn")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g6fto"]
+atlas = ExtResource("3_713kn")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jwooe"]
+atlas = ExtResource("3_713kn")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0kqxx"]
+atlas = ExtResource("3_713kn")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s4ru4"]
+atlas = ExtResource("4_5u6it")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m0e4p"]
+atlas = ExtResource("4_5u6it")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ixuh5"]
+atlas = ExtResource("4_5u6it")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ijcq8"]
+atlas = ExtResource("4_5u6it")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxwq8"]
+atlas = ExtResource("5_4wrkl")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nfhcd"]
+atlas = ExtResource("5_4wrkl")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j6bxo"]
+atlas = ExtResource("5_4wrkl")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbmsi"]
+atlas = ExtResource("5_4wrkl")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mowbn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q5bmb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l1ipn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_35j1r")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xkcm6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ivslx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_korpk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8a7bg")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lmo5g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g6fto")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jwooe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0kqxx")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s4ru4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m0e4p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ixuh5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ijcq8")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxwq8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nfhcd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j6bxo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbmsi")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_intellect_devourer"
+metadata/id = 69

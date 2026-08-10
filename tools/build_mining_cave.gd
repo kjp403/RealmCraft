@@ -1,338 +1,496 @@
 extends SceneTree
-## Build Mining Cave by stamping authored Fungus wall ROOMS onto chambers.
-## Floors are always mine dirt/stone (never fungus grass). Layout/ores/lighting
-## stay mine-specific.
-## Run: godot --headless --path . -s tools/build_mining_cave.gd
+## Rebuild the Mining Cave from the RPG Worlds Caves pack (32×32).
+##
+## Nothing here stamps a rectangle of atlas cells. Caverns are organic masks,
+## the chasm rim resolves per-cell from its neighbours, ground patches are
+## painted with Godot terrain autotiling, and detail is blue-noise scattered.
+##
+##   godot --headless --path . --import
+##   godot --headless --path . -s tools/build_rpgw_cave_tileset.gd
+##   godot --headless --path . -s tools/build_mining_cave.gd
 
-const TILESET := "res://source/common/gameplay/maps/tilesets/mining_cave_tileset.tres"
+const MapKit := preload("res://tools/lib/mapkit.gd")
+
+const TILESET := "res://source/common/gameplay/maps/tilesets/rpgw_caves_tileset.tres"
 const OUT_TSCN := "res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn"
-const STAMP_DIR := "res://tools/stamps/"
 
-const W := 78
+const W := 64
 const H := 46
+const TILE := 32
 
-## Dirt / packed earth only. Never (11–14, 14–16) grass/moss from CaveTiles.
-const DIRT_FLOORS: Array[Vector2i] = [
-	Vector2i(8, 15), Vector2i(7, 15), Vector2i(9, 15), Vector2i(8, 14),
-	Vector2i(10, 15), Vector2i(6, 15), Vector2i(10, 13), Vector2i(8, 13),
-	Vector2i(7, 14), Vector2i(9, 14), Vector2i(7, 16), Vector2i(9, 16),
+## The ground bank is one large gradient block, not a set of interchangeable
+## variants: every tile outside its flat middle carries directional shading that
+## tiles up as square wedges. Only the flat cells are safe to repeat, and floor
+## interest comes from the scattered props instead.
+const GROUND_PLAIN: Array[Vector2i] = [
+	Vector2i(32, 28), Vector2i(33, 28), Vector2i(32, 29), Vector2i(33, 29),
+]
+## Solid dark rock, laid under every void cell as a backing for the rim art.
+const VOID_FILL := Vector2i(4, 3)
+
+## Bridge pieces (see MainLev2.0 rows 32–37).
+const BRIDGE_DECK: Array[Vector2i] = [
+	Vector2i(45, 32), Vector2i(46, 32), Vector2i(47, 32), Vector2i(48, 32), Vector2i(49, 32),
+]
+const BRIDGE_UNDER: Array[Vector2i] = [
+	Vector2i(45, 33), Vector2i(46, 33), Vector2i(47, 33), Vector2i(48, 33), Vector2i(49, 33),
 ]
 
-## Authored 2-tile north wall columns (atlas pairs) sampled from Fungus stamps.
-const NORTH_WALL_COLS: Array = [
-	[Vector2i(2, 6), Vector2i(2, 7)],
-	[Vector2i(2, 15), Vector2i(2, 16)],
-	[Vector2i(3, 15), Vector2i(3, 16)],
-	[Vector2i(4, 5), Vector2i(4, 6)],
-]
+## Regions of decorative.png. Actual props are discovered as connected clusters
+## inside these bands, so a formation is never sliced apart.
+## Props verified against the sheet as complete, self-contained rectangles.
+## Rows 8–15 hold near-black silhouette variants that stamp as black boxes on a
+## lit floor, so only the lit bank (rows 1–7) is used.
+## Format: x, y, width, height.
+const SMALL_ROCKS := [[11, 3, 1, 1], [0, 7, 1, 1]]
+const MED_ROCKS := [[9, 2, 2, 2], [5, 2, 2, 2], [7, 2, 2, 2]]
+const BIG_ROCKS := [[0, 1, 3, 3], [3, 1, 2, 3]]
+const CRYSTALS := [[0, 18], [3, 18], [0, 20], [3, 20], [5, 18], [8, 18], [5, 20], [8, 20]]
+const FLOOR_SPECKS := [[1, 25], [3, 25], [5, 25], [1, 28], [3, 28], [5, 28]]
+
+var _bounds := Rect2i(0, 0, W, H)
 
 
 func _initialize() -> void:
 	var ts: TileSet = load(TILESET)
+	assert(ts != null, "missing rpgw tileset — run build_rpgw_cave_tileset.gd first")
+
 	var ground := TileMapLayer.new()
 	ground.tile_set = ts
+	var detail := TileMapLayer.new()
+	detail.tile_set = ts
 	var walls := TileMapLayer.new()
 	walls.tile_set = ts
 	var props := TileMapLayer.new()
 	props.tile_set = ts
 
-	var walk: Dictionary = {} # Vector2i -> true (ground cells)
-	var chambers: Array = [
-		{"name": "staging", "origin": Vector2i(2, 14), "stamp": "fungus_square.txt"},
-		{"name": "copper", "origin": Vector2i(22, 2), "stamp": "fungus_tall.txt"},
-		{"name": "iron", "origin": Vector2i(36, 24), "stamp": "fungus_square.txt"},
-		{"name": "coal", "origin": Vector2i(48, 12), "stamp": "fungus_wide.txt"},
-	]
-	for ch in chambers:
-		_stamp_room(ground, walls, walk, ch["origin"], STAMP_DIR + String(ch["stamp"]))
-		print("stamped ", ch["name"], " @ ", ch["origin"])
+	var floor_mask := _carve_caverns()
+	var void_mask: Dictionary = {}
+	for y in H:
+		for x in W:
+			var cell := Vector2i(x, y)
+			if not floor_mask.has(cell):
+				void_mask[cell] = true
 
-	# Haulage corridors between stamped rooms.
-	_carve_corridor(ground, walls, walk, Vector2i(18, 20), Vector2i(24, 22))
-	_carve_corridor(ground, walls, walk, Vector2i(24, 18), Vector2i(38, 22))
-	_carve_corridor(ground, walls, walk, Vector2i(38, 20), Vector2i(50, 24))
-	_carve_corridor(ground, walls, walk, Vector2i(28, 14), Vector2i(32, 18))
-	_carve_corridor(ground, walls, walk, Vector2i(40, 22), Vector2i(44, 26))
+	_paint_ground(ground, floor_mask)
+	# Rim corner tiles are only ~70% opaque — they expect solid rock behind them.
+	# Without this underlay their transparent corners punch through to the
+	# background and read as flat grey squares.
+	for cell: Vector2i in void_mask.keys():
+		ground.set_cell(cell, 0, VOID_FILL)
 
-	_repaint_all_dirt(ground, walk)
-	_strip_walls_from_open_floor(walls, walk)
-	_paint_rock_props(props, walls, walk)
+	var spec := _rim_spec()
+	var blocked: Dictionary = {}
+	MapKit.paint_rim(walls, void_mask, spec, _bounds, blocked)
 
-	var grass_left := _count_grass(ground)
-	if grass_left > 0:
-		push_error("grass tiles remain after dirt repaint: %d" % grass_left)
-		quit(1)
-		return
+	# Walkable is the floor minus whatever the cliff face covers.
+	var walk: Dictionary = {}
+	for cell: Vector2i in floor_mask.keys():
+		if not blocked.has(cell):
+			walk[cell] = true
 
-	var open := _open_floor(walls, walk)
-	var ores := _place_ores(open)
+	var bridges := _build_bridges(props, walls, walk, void_mask)
+
+	var entrance := _pick_open(walk, Vector2i(11, 37))
+	walk = MapKit.largest_region(walk, entrance)
+	var portal := _pick_open(walk, entrance + Vector2i(-3, 2))
+
+	# Patches are painted across the whole floor, including the strip the cliff
+	# face covers, so a seam never stops dead against a wall.
+	_paint_ground_patches(detail, floor_mask, walk)
+
+	var keepout: Dictionary = {}
+	for spot in [entrance, portal, entrance + Vector2i(2, -1)]:
+		for oy in range(-2, 3):
+			for ox in range(-2, 3):
+				keepout[spot + Vector2i(ox, oy)] = true
+	var solid_props := _paint_detail(props, walk, blocked, keepout)
+	for cell: Vector2i in solid_props.keys():
+		walk.erase(cell)
+	walk = MapKit.largest_region(walk, entrance)
+
+	var ores := _place_ores(walk, blocked)
+	var lights := _light_positions(walk)
+
+	_verify(walk, entrance, portal, bridges)
+
 	_write_tscn(
-		Marshalls.raw_to_base64(ground.tile_map_data),
-		Marshalls.raw_to_base64(walls.tile_map_data),
-		Marshalls.raw_to_base64(props.tile_map_data),
-		ores
+		MapKit.to_base64(ground),
+		MapKit.to_base64(detail),
+		MapKit.to_base64(walls),
+		MapKit.to_base64(props),
+		ores,
+		lights,
+		entrance,
+		portal
 	)
 	print(
-		"OK mining_cave walk=", walk.size(),
-		" open=", open.size(),
+		"OK mining_cave floor=", floor_mask.size(),
+		" walk=", walk.size(),
+		" void=", void_mask.size(),
 		" ground=", ground.get_used_cells().size(),
+		" detail=", detail.get_used_cells().size(),
 		" walls=", walls.get_used_cells().size(),
 		" props=", props.get_used_cells().size(),
 		" ores=", ores.size(),
-		" grass=", grass_left
+		" bridges=", bridges.size()
 	)
 	quit(0)
 
 
-func _load_stamp(path: String) -> Dictionary:
-	var text := FileAccess.get_file_as_string(path)
-	var size := Vector2i.ZERO
-	var ground_cells: Array = []
-	var wall_cells: Array = []
-	for line in text.split("\n"):
-		var p := line.strip_edges().split(" ")
-		if p.is_empty() or p[0].is_empty():
+# --- Shape ------------------------------------------------------------------
+
+func _carve_caverns() -> Dictionary:
+	var mask: Dictionary = {}
+	# Chambers: wide irregular caverns rather than discs, each with a satellite
+	# lobe so the silhouette is never a clean circle.
+	var chambers := [
+		{"c": Vector2i(12, 36), "r": 8.0, "w": 0.30, "s": 11},   # entrance hall
+		{"c": Vector2i(17, 31), "r": 5.5, "w": 0.34, "s": 12},
+		{"c": Vector2i(12, 22), "r": 7.5, "w": 0.32, "s": 13},   # west gallery
+		{"c": Vector2i(18, 17), "r": 5.0, "w": 0.36, "s": 14},
+		{"c": Vector2i(28, 12), "r": 8.0, "w": 0.30, "s": 15},   # north hall
+		{"c": Vector2i(35, 16), "r": 5.5, "w": 0.34, "s": 16},
+		{"c": Vector2i(33, 27), "r": 8.5, "w": 0.28, "s": 17},   # central junction
+		{"c": Vector2i(27, 33), "r": 5.5, "w": 0.34, "s": 18},
+		{"c": Vector2i(48, 13), "r": 7.5, "w": 0.30, "s": 19},   # north-east hall
+		{"c": Vector2i(54, 20), "r": 6.0, "w": 0.33, "s": 20},
+		{"c": Vector2i(52, 30), "r": 8.0, "w": 0.30, "s": 21},   # east gallery
+		{"c": Vector2i(44, 37), "r": 7.0, "w": 0.31, "s": 22},   # south-east hall
+	]
+	for ch in chambers:
+		MapKit.blob(mask, ch["c"], ch["r"], ch["w"], int(ch["s"]), _bounds)
+
+	# Haulage tunnels — wandering, not L-pipes.
+	var links := [
+		[Vector2i(12, 32), Vector2i(12, 26), 2.2, 2.5, 31],
+		[Vector2i(15, 20), Vector2i(24, 13), 2.0, 3.0, 32],
+		[Vector2i(31, 15), Vector2i(33, 22), 2.4, 2.5, 33],
+		[Vector2i(17, 34), Vector2i(26, 33), 2.2, 2.5, 34],
+		[Vector2i(29, 31), Vector2i(38, 36), 2.2, 3.0, 35],
+		[Vector2i(38, 14), Vector2i(44, 13), 2.2, 2.5, 36],
+		[Vector2i(52, 24), Vector2i(52, 26), 2.6, 1.5, 37],
+		[Vector2i(48, 36), Vector2i(50, 33), 2.4, 2.0, 38],
+		[Vector2i(38, 27), Vector2i(46, 29), 2.4, 3.0, 39],
+	]
+	for link in links:
+		MapKit.tunnel(mask, link[0], link[1], link[2], link[3], int(link[4]), _bounds)
+
+	# Keep a solid rock margin so the cavern never touches the map border.
+	var trimmed: Dictionary = {}
+	for cell: Vector2i in mask.keys():
+		if cell.x >= 3 and cell.y >= 4 and cell.x < W - 3 and cell.y < H - 3:
+			trimmed[cell] = true
+	# Smooth away single-cell spikes; rims read as continuous rock afterwards.
+	var smoothed := MapKit.smooth(trimmed, _bounds, 2, 5, 4)
+	return MapKit.largest_region(smoothed, _pick_open(smoothed, Vector2i(12, 36)))
+
+
+func _pick_open(mask: Dictionary, wanted: Vector2i) -> Vector2i:
+	if mask.has(wanted):
+		return wanted
+	var best := wanted
+	var best_d := 1 << 30
+	for cell: Vector2i in mask.keys():
+		var d: int = (cell - wanted).length_squared()
+		if d < best_d:
+			best_d = d
+			best = cell
+	return best
+
+
+# --- Painting ---------------------------------------------------------------
+
+func _rim_spec() -> MapKit.RimSpec:
+	var spec := MapKit.RimSpec.new()
+	spec.source = 0
+	# One dark interior tile: the fill covers huge areas and any variation in it
+	# tiles up as a visible checker.
+	spec.fill = [Vector2i(4, 3)]
+	spec.n = [Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0), Vector2i(6, 0)]
+	spec.s = [Vector2i(3, 6), Vector2i(4, 6), Vector2i(5, 6), Vector2i(6, 6)]
+	spec.w = [Vector2i(2, 1), Vector2i(2, 2), Vector2i(2, 3), Vector2i(2, 4), Vector2i(2, 5)]
+	spec.e = [Vector2i(7, 1), Vector2i(7, 2), Vector2i(7, 3), Vector2i(7, 4), Vector2i(7, 5)]
+	spec.nw = Vector2i(2, 0)
+	spec.ne = Vector2i(7, 0)
+	spec.sw = Vector2i(2, 6)
+	spec.se = Vector2i(7, 6)
+	spec.s_face = [Vector2i(3, 7), Vector2i(4, 7), Vector2i(5, 7), Vector2i(6, 7)]
+	spec.s_base = [Vector2i(3, 8), Vector2i(4, 8), Vector2i(5, 8), Vector2i(6, 8)]
+	spec.sw_face = Vector2i(2, 7)
+	spec.sw_base = Vector2i(2, 8)
+	spec.se_face = Vector2i(7, 7)
+	spec.se_base = Vector2i(7, 8)
+	spec.face_rows = 2
+	return spec
+
+
+func _paint_ground(ground: TileMapLayer, floor_mask: Dictionary) -> void:
+	for cell: Vector2i in floor_mask.keys():
+		ground.set_cell(cell, 0, MapKit._pick(GROUND_PLAIN, cell, 41))
+
+
+## Soft mineral seams. The builder only says *where*; the blend tile for every
+## cell is resolved from its four corners against a table read off the artwork.
+func _paint_ground_patches(detail: TileMapLayer, floor_mask: Dictionary, _walk: Dictionary) -> void:
+	var atlas := (load(TILESET) as TileSet).get_source(0) as TileSetAtlasSource
+	var tex: Texture2D = atlas.texture
+	var lookups := {
+		1: MapKit.corner_lookup(tex, 32, Rect2i(10, 31, 5, 9), Color8(61, 68, 45)),
+		2: MapKit.corner_lookup(tex, 32, Rect2i(25, 31, 5, 9), Color8(53, 57, 58)),
+		3: MapKit.corner_lookup(tex, 32, Rect2i(40, 31, 5, 9), Color8(77, 59, 48)),
+	}
+	var patches := [
+		{"terrain": 3, "c": Vector2i(12, 36), "r": 5.5, "s": 61},
+		{"terrain": 3, "c": Vector2i(33, 27), "r": 6.0, "s": 62},
+		{"terrain": 3, "c": Vector2i(48, 14), "r": 4.5, "s": 63},
+		{"terrain": 2, "c": Vector2i(28, 12), "r": 5.5, "s": 64},
+		{"terrain": 2, "c": Vector2i(52, 30), "r": 5.0, "s": 65},
+		{"terrain": 2, "c": Vector2i(13, 22), "r": 4.5, "s": 66},
+		{"terrain": 1, "c": Vector2i(44, 37), "r": 4.5, "s": 67},
+		{"terrain": 1, "c": Vector2i(17, 31), "r": 3.5, "s": 68},
+		{"terrain": 1, "c": Vector2i(54, 21), "r": 3.5, "s": 69},
+	]
+	for patch in patches:
+		var blob_mask: Dictionary = {}
+		MapKit.blob(blob_mask, patch["c"], patch["r"], 0.22, int(patch["s"]), _bounds)
+		# Smooth before painting: a ragged 1-cell edge makes the autotiled border
+		# read as a starburst instead of a mineral seam.
+		blob_mask = MapKit.smooth(blob_mask, _bounds, 2, 5, 4)
+		var cells: Dictionary = {}
+		for cell: Vector2i in blob_mask.keys():
+			if floor_mask.has(cell):
+				cells[cell] = true
+		if cells.size() < 6:
 			continue
-		if p[0] == "SIZE":
-			size = Vector2i(int(p[1]), int(p[2]))
-		elif p[0] == "G":
-			ground_cells.append({
-				"pos": Vector2i(int(p[1]), int(p[2])),
-				"atlas": Vector2i(int(p[3]), int(p[4])),
-			})
-		elif p[0] == "W":
-			wall_cells.append({
-				"pos": Vector2i(int(p[1]), int(p[2])),
-				"atlas": Vector2i(int(p[3]), int(p[4])),
-			})
-	return {"size": size, "ground": ground_cells, "walls": wall_cells}
+		MapKit.paint_corner_patch(
+			detail, 0, lookups[int(patch["terrain"])], cells, _bounds, int(patch["s"]), floor_mask
+		)
 
 
-func _dirt_at(cell: Vector2i) -> Vector2i:
-	var h: int = absi((cell.x * 73856093) ^ (cell.y * 19349663))
-	return DIRT_FLOORS[h % DIRT_FLOORS.size()]
-
-
-func _is_grass(atlas: Vector2i) -> bool:
-	return atlas.x >= 11 and atlas.x <= 14 and atlas.y >= 14 and atlas.y <= 16
-
-
-func _stamp_room(
-	ground: TileMapLayer,
-	walls: TileMapLayer,
+## Detail is deliberately sparse: the reference shots keep large clear floors and
+## concentrate silhouettes against the rock. Returns the cells that now block.
+func _paint_detail(
+	props: TileMapLayer,
 	walk: Dictionary,
-	origin: Vector2i,
-	stamp_path: String
-) -> void:
-	var stamp := _load_stamp(stamp_path)
-	# Floors: keep stamp footprint, force dirt atlases (no fungus grass).
-	for g in stamp["ground"]:
-		var cell: Vector2i = origin + g["pos"]
-		if cell.x < 0 or cell.y < 0 or cell.x >= W or cell.y >= H:
-			continue
-		ground.set_cell(cell, 0, _dirt_at(cell))
-		walk[cell] = true
-	# Walls: exact authored Fungus clusters — this is what makes them look right.
-	for wcell in stamp["walls"]:
-		var cell2: Vector2i = origin + wcell["pos"]
-		if cell2.x < 0 or cell2.y < 0 or cell2.x >= W or cell2.y >= H:
-			continue
-		walls.set_cell(cell2, 0, wcell["atlas"])
+	blocked: Dictionary,
+	keepout: Dictionary
+) -> Dictionary:
+	var boulders: Array = []
+	for r in SMALL_ROCKS:
+		boulders.append(MapKit.rect_cluster(r[0], r[1], r[2], r[3]))
+	var formations: Array = []
+	for r in MED_ROCKS + BIG_ROCKS:
+		formations.append(MapKit.rect_cluster(r[0], r[1], r[2], r[3]))
+	var small_crystals: Array = []
+	for r in CRYSTALS:
+		small_crystals.append(MapKit.rect_cluster(r[0], r[1], 1, 1))
+	var specks: Array = []
+	for r in FLOOR_SPECKS:
+		specks.append(MapKit.rect_cluster(r[0], r[1], 1, 1))
 
+	var edges := MapKit.edge_cells(walk, blocked)
+	var inner := MapKit.interior_cells(walk, blocked, 3)
+	var solid: Dictionary = {}
 
-func _carve_corridor(
-	ground: TileMapLayer,
-	walls: TileMapLayer,
-	walk: Dictionary,
-	a: Vector2i,
-	b: Vector2i
-) -> void:
-	var x0: int = mini(a.x, b.x)
-	var x1: int = maxi(a.x, b.x)
-	var y0: int = mini(a.y, b.y)
-	var y1: int = maxi(a.y, b.y)
-	for y in range(y0, y1 + 1):
-		for x in range(x0, x1 + 1):
-			var cell := Vector2i(x, y)
-			if cell.x < 0 or cell.y < 0 or cell.x >= W or cell.y >= H:
+	# A blocking prop may only stand where the floor is wide enough that losing
+	# the cell cannot plug a tunnel.
+	var roomy := func(cell: Vector2i) -> bool:
+		if keepout.has(cell):
+			return false
+		var n: int = 0
+		for oy in range(-1, 2):
+			for ox in range(-1, 2):
+				if walk.has(cell + Vector2i(ox, oy)):
+					n += 1
+		return n >= 6
+
+	# Big rock formations as landmarks, stamped whole.
+	if not formations.is_empty():
+		var free: Dictionary = {}
+		for cell: Vector2i in inner:
+			if not keepout.has(cell):
+				free[cell] = true
+		var anchors := MapKit.scatter(inner, 0.5, 6, 70, roomy)
+		var used: int = 0
+		for anchor: Vector2i in anchors:
+			if used >= 7:
+				break
+			var cluster: Dictionary = formations[MapKit.hash2(anchor.x, anchor.y, 69) % formations.size()]
+			var placed := MapKit.stamp_cluster(props, 1, cluster, anchor, free, _bounds)
+			if placed.is_empty():
 				continue
-			if walls.get_cell_source_id(cell) >= 0:
-				walls.erase_cell(cell)
-			ground.set_cell(cell, 0, _dirt_at(cell))
-			walk[cell] = true
+			for cell: Vector2i in placed:
+				solid[cell] = true
+				free.erase(cell)
+			used += 1
 
-	# Corridor edge lips OUTSIDE the walk rect only (never stamp walls onto floor).
-	var horiz := (x1 - x0) >= (y1 - y0)
-	if horiz:
-		var i := 0
-		for x in range(x0, x1 + 1):
-			var col: Array = NORTH_WALL_COLS[i % NORTH_WALL_COLS.size()]
-			i += 1
-			var above := Vector2i(x, y0 - 1)
-			var above2 := Vector2i(x, y0 - 2)
-			if _in_bounds(above) and not walk.has(above):
-				walls.set_cell(above, 0, col[1] if col.size() > 1 else col[0])
-			if _in_bounds(above2) and not walk.has(above2):
-				walls.set_cell(above2, 0, col[0])
-			var below := Vector2i(x, y1 + 1)
-			if _in_bounds(below) and not walk.has(below):
-				# South lip: short face tile from Fungus south edges.
-				walls.set_cell(below, 0, Vector2i(1, 1))
-	else:
-		for y in range(y0, y1 + 1):
-			var left := Vector2i(x0 - 1, y)
-			var right := Vector2i(x1 + 1, y)
-			if _in_bounds(left) and not walk.has(left):
-				walls.set_cell(left, 0, Vector2i(4, 5))
-			if _in_bounds(right) and not walk.has(right):
-				walls.set_cell(right, 0, Vector2i(0, 3))
+	# Single boulders and stalagmites hug the rock walls, as in the references.
+	if not boulders.is_empty():
+		var wall_free: Dictionary = {}
+		for cell: Vector2i in walk.keys():
+			if not solid.has(cell) and not keepout.has(cell):
+				wall_free[cell] = true
+		for cell in MapKit.scatter(edges, 0.24, 3, 71, roomy):
+			if solid.has(cell):
+				continue
+			var cluster: Dictionary = boulders[MapKit.hash2(cell.x, cell.y, 72) % boulders.size()]
+			var placed := MapKit.stamp_cluster(props, 1, cluster, cell, wall_free, _bounds)
+			for c2: Vector2i in placed:
+				solid[c2] = true
+				wall_free.erase(c2)
 
+	# Crystal seams: a few clusters rather than an even sprinkle.
+	var seams := [Vector2i(28, 12), Vector2i(52, 30), Vector2i(12, 22), Vector2i(48, 13)]
+	if not small_crystals.is_empty():
+		var open_cells: Dictionary = {}
+		for cell: Vector2i in walk.keys():
+			if props.get_cell_source_id(cell) < 0 and not keepout.has(cell):
+				open_cells[cell] = true
+		for i in seams.size():
+			var seam: Vector2i = seams[i]
+			var near: Array[Vector2i] = []
+			for cell: Vector2i in edges:
+				if (cell - seam).length_squared() <= 36 and open_cells.has(cell):
+					near.append(cell)
+			for cell in MapKit.scatter(near, 0.30, 2, 80 + i):
+				var cluster: Dictionary = small_crystals[MapKit.hash2(cell.x, cell.y, 81 + i) % small_crystals.size()]
+				var placed := MapKit.stamp_cluster(props, 1, cluster, cell, open_cells, _bounds)
+				for c2: Vector2i in placed:
+					open_cells.erase(c2)
 
-func _in_bounds(cell: Vector2i) -> bool:
-	return cell.x >= 0 and cell.y >= 0 and cell.x < W and cell.y < H
-
-
-func _repaint_all_dirt(ground: TileMapLayer, walk: Dictionary) -> void:
-	for cell: Vector2i in walk.keys():
-		ground.set_cell(cell, 0, _dirt_at(cell))
-
-
-func _strip_walls_from_open_floor(walls: TileMapLayer, walk: Dictionary) -> void:
-	## Corridor carve already clears path cells. Do not strip perimeter wall/floor
-	## overlaps — CaveTiles rely on that for depth. Only clear accidental lips
-	## that landed on interior cells with 4-walk neighbors.
-	var to_clear: Array[Vector2i] = []
-	for cell: Vector2i in walk.keys():
-		if walls.get_cell_source_id(cell) < 0:
-			continue
-		var n := 0
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			if walk.has(cell + d):
-				n += 1
-		if n >= 4:
-			to_clear.append(cell)
-	for c in to_clear:
-		walls.erase_cell(c)
+	# Lichen and pebbles: flat, non-blocking floor detail.
+	if not specks.is_empty():
+		for cell in MapKit.scatter(inner, 0.13, 2, 91):
+			if props.get_cell_source_id(cell) >= 0 or keepout.has(cell):
+				continue
+			var cluster: Dictionary = specks[MapKit.hash2(cell.x, cell.y, 92) % specks.size()]
+			props.set_cell(cell, 1, cluster["origin"])
+	return solid
 
 
-func _count_grass(ground: TileMapLayer) -> int:
-	var n := 0
-	for cell in ground.get_used_cells():
-		if _is_grass(ground.get_cell_atlas_coords(cell)):
-			n += 1
-	return n
-
-
-func _open_floor(walls: TileMapLayer, walk: Dictionary) -> Dictionary:
-	var open: Dictionary = {}
-	for cell: Vector2i in walk.keys():
-		if walls.get_cell_source_id(cell) < 0:
-			open[cell] = true
-	return open
-
-
-func _paint_rock_props(props: TileMapLayer, walls: TileMapLayer, walk: Dictionary) -> void:
-	# Source 4 = rocks.png (never CaveProps mushrooms).
-	# Wall-aligned decorative rocks only — never surround the staging portal.
-	var rocks: Array[Dictionary] = [
-		{"atlas": Vector2i(0, 1), "size": Vector2i(2, 3)},
-		{"atlas": Vector2i(2, 1), "size": Vector2i(2, 2)},
-		{"atlas": Vector2i(6, 1), "size": Vector2i(2, 3)},
-		{"atlas": Vector2i(8, 1), "size": Vector2i(2, 2)},
-		{"atlas": Vector2i(0, 7), "size": Vector2i(2, 3)},
-		{"atlas": Vector2i(2, 7), "size": Vector2i(2, 2)},
+## Span the chasms that split the cavern. Each bridge reopens a run of void
+## cells, so the crossing is real geometry rather than decoration.
+func _build_bridges(
+	props: TileMapLayer,
+	walls: TileMapLayer,
+	walk: Dictionary,
+	void_mask: Dictionary
+) -> Array:
+	var built: Array = []
+	var candidates := [
+		{"y": 22, "x0": 18, "x1": 30},
+		{"y": 31, "x0": 36, "x1": 48},
+		{"y": 17, "x0": 38, "x1": 46},
 	]
-	var occupied: Dictionary = {}
-	var spots: Array[Vector2i] = [
-		# staging — north lip only (portal keepout clear)
-		Vector2i(6, 16), Vector2i(12, 16),
-		# copper spur
-		Vector2i(22, 6), Vector2i(24, 19),
-		# iron
-		Vector2i(36, 27), Vector2i(40, 25),
-		# coal
-		Vector2i(52, 13), Vector2i(48, 20), Vector2i(61, 15),
-	]
-	for spot in spots:
-		if not walk.has(spot) or walls.get_cell_source_id(spot) >= 0:
+	for cand in candidates:
+		var y: int = int(cand["y"])
+		var span: Array[Vector2i] = []
+		var ok: bool = true
+		for x in range(int(cand["x0"]), int(cand["x1"]) + 1):
+			var cell := Vector2i(x, y)
+			if not void_mask.has(cell):
+				continue
+			span.append(cell)
+		if span.size() < 3 or span.size() > 14:
 			continue
-		var rock: Dictionary = rocks[absi(spot.x * 31 + spot.y) % rocks.size()]
-		var size: Vector2i = rock["size"]
-		var ok := true
-		for oy in range(size.y):
-			for ox in range(size.x):
-				var c := spot + Vector2i(ox, oy)
-				if not walk.has(c) or walls.get_cell_source_id(c) >= 0 or occupied.has(c):
-					ok = false
+		# Both ends must land on walkable ground or the bridge leads nowhere.
+		var left_anchor := Vector2i(span[0].x - 1, y)
+		var right_anchor := Vector2i(span[span.size() - 1].x + 1, y)
+		if not walk.has(left_anchor) or not walk.has(right_anchor):
+			ok = false
 		if not ok:
 			continue
-		for oy2 in range(size.y):
-			for ox2 in range(size.x):
-				occupied[spot + Vector2i(ox2, oy2)] = true
-		props.set_cell(spot, 4, rock["atlas"])
+		for cell: Vector2i in span:
+			walls.erase_cell(cell)
+			props.set_cell(cell, 0, MapKit._pick(BRIDGE_DECK, cell, 101))
+			walk[cell] = true
+			var under := cell + Vector2i(0, 1)
+			if void_mask.has(under) and _bounds.has_point(under):
+				props.set_cell(under, 0, MapKit._pick(BRIDGE_UNDER, cell, 102))
+		built.append({"y": y, "x0": span[0].x, "x1": span[span.size() - 1].x})
+	return built
 
 
-func _place_ores(open: Dictionary) -> Array:
-	## Wall-aligned ore layout: clusters sit against chamber walls, entrance clear.
-	## Prefer the authored tile when open; otherwise snap to a nearby wall-adjacent cell.
-	var plan: Array = [
-		# staging — east/north lips only (portal/campfire keepout stays open)
-		{"kind": "copper", "tile": Vector2i(15, 16)},
-		{"kind": "copper", "tile": Vector2i(18, 18)},
-		{"kind": "tin", "tile": Vector2i(18, 23)},
-		# copper spur — neat north-wall seam + east/west pockets
-		{"kind": "copper", "tile": Vector2i(25, 5)},
-		{"kind": "copper", "tile": Vector2i(29, 5)},
-		{"kind": "copper", "tile": Vector2i(32, 5)},
-		{"kind": "tin", "tile": Vector2i(36, 7)},
-		{"kind": "tin", "tile": Vector2i(23, 17)},
-		{"kind": "tin", "tile": Vector2i(37, 18)},
-		# iron chamber — north + east walls
-		{"kind": "iron", "tile": Vector2i(38, 24)},
-		{"kind": "iron", "tile": Vector2i(50, 25)},
-		{"kind": "iron", "tile": Vector2i(52, 28)},
-		{"kind": "iron", "tile": Vector2i(52, 33)},
-		# coal gallery — north gallery then east wall
-		{"kind": "coal", "tile": Vector2i(55, 13)},
-		{"kind": "coal", "tile": Vector2i(64, 15)},
-		{"kind": "coal", "tile": Vector2i(68, 17)},
-		{"kind": "coal", "tile": Vector2i(69, 24)},
-		{"kind": "coal", "tile": Vector2i(74, 23)},
+# --- Content ----------------------------------------------------------------
+
+func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
+	var edges := MapKit.edge_cells(walk, blocked)
+	var zones := [
+		{"kind": "copper", "c": Vector2i(12, 22), "r": 9, "n": 5},
+		{"kind": "tin", "c": Vector2i(17, 31), "r": 8, "n": 4},
+		{"kind": "iron", "c": Vector2i(33, 27), "r": 10, "n": 6},
+		{"kind": "iron", "c": Vector2i(52, 30), "r": 9, "n": 4},
+		{"kind": "coal", "c": Vector2i(28, 12), "r": 9, "n": 5},
+		{"kind": "coal", "c": Vector2i(48, 13), "r": 9, "n": 4},
 	]
 	var used: Dictionary = {}
 	var out: Array = []
-	for entry in plan:
-		var tile: Vector2i = entry["tile"]
-		var placed := _find_wall_ore_near(open, used, tile, 5)
-		if placed == Vector2i(-999, -999):
-			push_warning("no wall-adjacent floor for ore %s near %s" % [entry["kind"], tile])
-			continue
-		used[placed] = true
-		# Keep neighbors free so veins aren't stacked.
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			used[placed + d] = true
+	for zone in zones:
+		var center: Vector2i = zone["c"]
+		var r2: int = int(zone["r"]) * int(zone["r"])
+		var near: Array[Vector2i] = []
+		for cell: Vector2i in edges:
+			if (cell - center).length_squared() <= r2 and not used.has(cell):
+				near.append(cell)
+		var picked := MapKit.scatter(near, 0.9, 2, 111 + out.size())
+		var count: int = 0
+		for cell: Vector2i in picked:
+			if count >= int(zone["n"]):
+				break
+			used[cell] = true
+			out.append({"kind": String(zone["kind"]), "pos": _tile_pos(cell)})
+			count += 1
+	return out
+
+
+func _light_positions(walk: Dictionary) -> Array:
+	var spots := [
+		{"c": Vector2i(12, 36), "color": "Color(1, 0.76, 0.46, 1)", "energy": 1.25, "scale": 3.0},
+		{"c": Vector2i(12, 22), "color": "Color(1, 0.7, 0.4, 1)", "energy": 1.05, "scale": 2.6},
+		{"c": Vector2i(28, 12), "color": "Color(0.6, 0.85, 1, 1)", "energy": 1.05, "scale": 2.8},
+		{"c": Vector2i(33, 27), "color": "Color(1, 0.72, 0.42, 1)", "energy": 1.15, "scale": 3.0},
+		{"c": Vector2i(48, 13), "color": "Color(0.6, 0.86, 1, 1)", "energy": 1.0, "scale": 2.6},
+		{"c": Vector2i(52, 30), "color": "Color(0.62, 1, 0.72, 1)", "energy": 1.0, "scale": 2.6},
+		{"c": Vector2i(44, 37), "color": "Color(1, 0.72, 0.42, 1)", "energy": 1.0, "scale": 2.6},
+	]
+	var out: Array = []
+	for spot in spots:
+		var cell: Vector2i = _pick_open(walk, spot["c"])
 		out.append({
-			"kind": entry["kind"],
-			"pos": Vector2(placed.x * 16 + 8, placed.y * 16 + 8),
+			"pos": _tile_pos(cell),
+			"color": String(spot["color"]),
+			"energy": float(spot["energy"]),
+			"scale": float(spot["scale"]),
 		})
 	return out
 
 
-func _find_wall_ore_near(open: Dictionary, used: Dictionary, origin: Vector2i, radius: int) -> Vector2i:
-	## Prefer the exact tile when open+unused; otherwise nearest open cell.
-	## Callers author wall-adjacent tiles; this is a rebuild safety net only.
-	if open.has(origin) and not used.has(origin):
-		return origin
-	for r in range(1, radius + 1):
-		for dy in range(-r, r + 1):
-			for dx in range(-r, r + 1):
-				var c := origin + Vector2i(dx, dy)
-				if open.has(c) and not used.has(c):
-					return c
-	return Vector2i(-999, -999)
+func _tile_pos(cell: Vector2i) -> Vector2:
+	return Vector2(cell.x * TILE + TILE / 2.0, cell.y * TILE + TILE / 2.0)
 
 
-func _write_tscn(ground_b64: String, walls_b64: String, props_b64: String, ores: Array) -> void:
+func _verify(walk: Dictionary, entrance: Vector2i, portal: Vector2i, bridges: Array) -> void:
+	assert(walk.has(entrance), "entrance not walkable")
+	assert(walk.has(portal), "portal not walkable")
+	assert(walk.size() > 900, "cavern too small: %d" % walk.size())
+	var reach := MapKit.largest_region(walk, entrance)
+	assert(reach.size() == walk.size(), "unreachable pocket: %d of %d" % [reach.size(), walk.size()])
+	print("verify walk=", walk.size(), " reachable=", reach.size(), " bridges=", bridges.size())
+
+
+# --- Scene ------------------------------------------------------------------
+
+func _write_tscn(
+	ground_b64: String,
+	detail_b64: String,
+	walls_b64: String,
+	props_b64: String,
+	ores: Array,
+	lights: Array,
+	entrance: Vector2i,
+	portal: Vector2i
+) -> void:
 	var ore_nodes := ""
 	var counts := {"copper": 0, "tin": 0, "iron": 0, "coal": 0}
 	var res_ids := {
@@ -344,25 +502,35 @@ func _write_tscn(ground_b64: String, walls_b64: String, props_b64: String, ores:
 	for ore in ores:
 		var kind: String = ore["kind"]
 		counts[kind] = int(counts[kind]) + 1
-		var n: int = counts[kind]
 		var pos: Vector2 = ore["pos"]
 		ore_nodes += (
 			"\n[node name=\"%sVein%d\" parent=\"MineableNodes\" instance=ExtResource(\"10_mine\")]\n"
 			+ "y_sort_enabled = true\n"
 			+ "position = Vector2(%s, %s)\n"
 			+ "data = ExtResource(\"%s\")\n"
-		) % [
-			kind.capitalize() if kind != "tin" else "Tin",
-			n,
-			str(pos.x),
-			str(pos.y),
-			res_ids[kind],
-		]
+		) % [kind.capitalize(), int(counts[kind]), str(pos.x), str(pos.y), res_ids[kind]]
+
+	var light_nodes := ""
+	for i in lights.size():
+		var light: Dictionary = lights[i]
+		var pos: Vector2 = light["pos"]
+		light_nodes += (
+			"\n[node name=\"CaveLamp%d\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(%s, %s)\n"
+			+ "color = %s\nenergy = %s\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = %s\n"
+		) % [i + 1, str(pos.x), str(pos.y), light["color"], str(light["energy"]), str(light["scale"])]
+
+	var entrance_pos := _tile_pos(entrance)
+	var portal_pos := _tile_pos(portal)
+	var camp_pos := _tile_pos(entrance + Vector2i(2, -1))
+	var cam_r := W * TILE + 16
+	var cam_b := H * TILE + 16
 
 	var text := """[gd_scene format=3 uid=\"uid://cminingcave001\"]
 
 [ext_resource type=\"Script\" uid=\"uid://7mbux4mybta0\" path=\"res://source/common/gameplay/maps/map.gd\" id=\"1_map\"]
-[ext_resource type=\"TileSet\" uid=\"uid://hrdxga40fogr\" path=\"res://source/common/gameplay/maps/tilesets/mining_cave_tileset.tres\" id=\"2_tiles\"]
+[ext_resource type=\"TileSet\" path=\"res://source/common/gameplay/maps/tilesets/rpgw_caves_tileset.tres\" id=\"2_tiles\"]
 [ext_resource type=\"AudioStream\" uid=\"uid://epws31tb1n8o\" path=\"res://assets/audio/music/shadow_temple.ogg\" id=\"3_music\"]
 [ext_resource type=\"Script\" uid=\"uid://wq8klpndipnu\" path=\"res://source/common/network/sync/replicated_props.gd\" id=\"4_rp\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://b2ckixon7ryh6\" path=\"res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn\" id=\"5_warper\"]
@@ -380,22 +548,26 @@ func _write_tscn(ground_b64: String, walls_b64: String, props_b64: String, ores:
 y_sort_enabled = true
 script = ExtResource(\"1_map\")
 replicated_props_container = NodePath(\"ReplicatedPropsContainer\")
-map_background_color = Color(0.04, 0.035, 0.03, 1)
+map_background_color = Color(0.02, 0.018, 0.022, 1)
 music = ExtResource(\"3_music\")
 camera_limit_left = -16
 camera_limit_top = -16
-camera_limit_right = 1264
-camera_limit_bottom = 752
+camera_limit_right = %d
+camera_limit_bottom = %d
 
 [node name=\"CanvasModulate\" type=\"CanvasModulate\" parent=\".\"]
-color = Color(0.58, 0.6, 0.64, 1)
+color = Color(0.74, 0.7, 0.72, 1)
 
 [node name=\"Tiles\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
 
 [node name=\"Ground\" type=\"TileMapLayer\" parent=\"Tiles\"]
+z_index = -2
+tile_map_data = PackedByteArray(\"%s\")
+tile_set = ExtResource(\"2_tiles\")
+
+[node name=\"GroundDetail\" type=\"TileMapLayer\" parent=\"Tiles\"]
 z_index = -1
-y_sort_enabled = true
 tile_map_data = PackedByteArray(\"%s\")
 tile_set = ExtResource(\"2_tiles\")
 
@@ -411,40 +583,9 @@ tile_set = ExtResource(\"2_tiles\")
 
 [node name=\"SceneProps\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
-
-[node name=\"LampStaging\" type=\"PointLight2D\" parent=\"SceneProps\"]
-position = Vector2(176, 336)
-color = Color(0.85, 0.9, 1, 1)
-energy = 1.0
-texture = ExtResource(\"9_glow\")
-texture_scale = 2.0
-
-[node name=\"LampCopper\" type=\"PointLight2D\" parent=\"SceneProps\"]
-position = Vector2(480, 176)
-color = Color(1, 0.85, 0.55, 1)
-energy = 0.8
-texture = ExtResource(\"9_glow\")
-texture_scale = 1.7
-
-[node name=\"LampIron\" type=\"PointLight2D\" parent=\"SceneProps\"]
-position = Vector2(720, 496)
-color = Color(1, 0.85, 0.55, 1)
-energy = 0.8
-texture = ExtResource(\"9_glow\")
-texture_scale = 1.7
-
-[node name=\"LampCoal\" type=\"PointLight2D\" parent=\"SceneProps\"]
-position = Vector2(992, 304)
-color = Color(0.75, 0.82, 0.95, 1)
-energy = 0.95
-texture = ExtResource(\"9_glow\")
-texture_scale = 1.9
-
+%s
 [node name=\"CampfireStaging\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]
-position = Vector2(144, 352)
-
-[node name=\"CampfireCoal\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]
-position = Vector2(1008, 336)
+position = Vector2(%s, %s)
 
 [node name=\"ReplicatedPropsContainer\" type=\"Node2D\" parent=\".\" node_paths=PackedStringArray(\"id_to_node\", \"node_to_id\")]
 y_sort_enabled = true
@@ -456,20 +597,29 @@ node_to_id = {}
 y_sort_enabled = true
 %s
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]
-position = Vector2(176, 336)
+position = Vector2(%s, %s)
 
 [node name=\"Entrance\" parent=\".\" instance=ExtResource(\"5_warper\")]
-position = Vector2(176, 336)
+position = Vector2(%s, %s)
 warper_id = 30
 
 [node name=\"WoodlandPortal\" parent=\".\" instance=ExtResource(\"6_portal\")]
-position = Vector2(112, 352)
+position = Vector2(%s, %s)
 portal_color = Color(0.35, 0.55, 0.28, 1)
 destination_label = \"Goblin Woodland\"
 target_instance = ExtResource(\"7_woodland\")
 warper_id = 131
 target_id = 130
-""" % [ground_b64, walls_b64, props_b64, ore_nodes]
+""" % [
+		cam_r, cam_b,
+		ground_b64, detail_b64, walls_b64, props_b64,
+		light_nodes,
+		str(camp_pos.x), str(camp_pos.y),
+		ore_nodes,
+		str(entrance_pos.x), str(entrance_pos.y),
+		str(entrance_pos.x), str(entrance_pos.y),
+		str(portal_pos.x), str(portal_pos.y),
+	]
 
 	var path := ProjectSettings.globalize_path(OUT_TSCN)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())

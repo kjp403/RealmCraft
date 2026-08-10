@@ -1,0 +1,225 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/critters/wolf/wolf-death.png" id="1_50m6k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/critters/wolf/wolf_idle_strip.png" id="2_dpocj"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/critters/wolf/wolf_walk_strip.png" id="3_nxby7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oef1o"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vfktb"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05x82"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fy37d"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fo43a"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n8kcj"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x2185"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5pyt"]
+atlas = ExtResource("1_50m6k")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_msdjk"]
+atlas = ExtResource("2_dpocj")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cyho1"]
+atlas = ExtResource("2_dpocj")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7u7ak"]
+atlas = ExtResource("2_dpocj")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ytsem"]
+atlas = ExtResource("2_dpocj")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xk2td"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4q58n"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2gvtx"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cp6bs"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j8owq"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1ccd6"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7dxf4"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_btwo5"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0edkm"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gwgtm"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uvpdq"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iuqiu"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uxtoa"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4e0ow"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a57k6"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_utfdh"]
+atlas = ExtResource("3_nxby7")
+region = Rect2(448, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oef1o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vfktb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05x82")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fy37d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fo43a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n8kcj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x2185")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5pyt")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_msdjk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cyho1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7u7ak")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ytsem")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xk2td")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4q58n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gvtx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cp6bs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j8owq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1ccd6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7dxf4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_btwo5")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0edkm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gwgtm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uvpdq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iuqiu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uxtoa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4e0ow")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a57k6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_utfdh")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+metadata/slug = &"wolf"

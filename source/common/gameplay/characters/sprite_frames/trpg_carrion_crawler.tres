@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_carrion_crawler/trpg_carrion_crawler_attack.png" id="1_7giu8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_carrion_crawler/trpg_carrion_crawler_death.png" id="2_nbmtw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_carrion_crawler/trpg_carrion_crawler_idle.png" id="3_mmwmp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_carrion_crawler/trpg_carrion_crawler_run.png" id="4_c53nf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_carrion_crawler/trpg_carrion_crawler_walk.png" id="5_dyv2n"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cg6ty"]
+atlas = ExtResource("1_7giu8")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onche"]
+atlas = ExtResource("1_7giu8")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3n1st"]
+atlas = ExtResource("1_7giu8")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5j6gn"]
+atlas = ExtResource("1_7giu8")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j5ueo"]
+atlas = ExtResource("2_nbmtw")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8npqd"]
+atlas = ExtResource("2_nbmtw")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2en2b"]
+atlas = ExtResource("2_nbmtw")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1huyp"]
+atlas = ExtResource("2_nbmtw")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0dgcf"]
+atlas = ExtResource("3_mmwmp")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_goigy"]
+atlas = ExtResource("3_mmwmp")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8rdqq"]
+atlas = ExtResource("3_mmwmp")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jjnnd"]
+atlas = ExtResource("3_mmwmp")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_00e6s"]
+atlas = ExtResource("4_c53nf")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6vg1y"]
+atlas = ExtResource("4_c53nf")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_40u0r"]
+atlas = ExtResource("4_c53nf")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_la838"]
+atlas = ExtResource("4_c53nf")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lmok1"]
+atlas = ExtResource("5_dyv2n")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nldbr"]
+atlas = ExtResource("5_dyv2n")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_biqd7"]
+atlas = ExtResource("5_dyv2n")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sdm0j"]
+atlas = ExtResource("5_dyv2n")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cg6ty")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_onche")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3n1st")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5j6gn")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j5ueo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8npqd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2en2b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1huyp")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0dgcf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_goigy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8rdqq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jjnnd")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_00e6s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6vg1y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_40u0r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_la838")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lmok1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nldbr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_biqd7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sdm0j")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_carrion_crawler"
+metadata/id = 64

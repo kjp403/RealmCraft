@@ -1,0 +1,46 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rf_catacombs/spike_strip.png" id="1_u1xme"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gib3t"]
+atlas = ExtResource("1_u1xme")
+region = Rect2(0, 0, 13, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2jg2w"]
+atlas = ExtResource("1_u1xme")
+region = Rect2(13, 0, 13, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxlsn"]
+atlas = ExtResource("1_u1xme")
+region = Rect2(26, 0, 13, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3csl8"]
+atlas = ExtResource("1_u1xme")
+region = Rect2(39, 0, 13, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p2m5l"]
+atlas = ExtResource("1_u1xme")
+region = Rect2(52, 0, 13, 14)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gib3t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2jg2w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxlsn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3csl8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p2m5l")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 10.0
+}]

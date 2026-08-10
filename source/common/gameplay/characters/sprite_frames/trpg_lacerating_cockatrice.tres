@@ -1,0 +1,177 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_lacerating_cockatrice/trpg_lacerating_cockatrice_attack.png" id="1_27vo4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_lacerating_cockatrice/trpg_lacerating_cockatrice_death.png" id="2_vilw0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_lacerating_cockatrice/trpg_lacerating_cockatrice_idle.png" id="3_21vjs"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_lacerating_cockatrice/trpg_lacerating_cockatrice_run.png" id="4_uyqp2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/trpg_lacerating_cockatrice/trpg_lacerating_cockatrice_walk.png" id="5_a04mv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gne4o"]
+atlas = ExtResource("1_27vo4")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pua57"]
+atlas = ExtResource("1_27vo4")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v5b1w"]
+atlas = ExtResource("1_27vo4")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rnt0p"]
+atlas = ExtResource("1_27vo4")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b84vq"]
+atlas = ExtResource("2_vilw0")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8whsv"]
+atlas = ExtResource("2_vilw0")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f3ybn"]
+atlas = ExtResource("2_vilw0")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_47rqg"]
+atlas = ExtResource("2_vilw0")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hi4ls"]
+atlas = ExtResource("3_21vjs")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_obyru"]
+atlas = ExtResource("3_21vjs")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xf2rj"]
+atlas = ExtResource("3_21vjs")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fupu5"]
+atlas = ExtResource("3_21vjs")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xnjyq"]
+atlas = ExtResource("4_uyqp2")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jyv7h"]
+atlas = ExtResource("4_uyqp2")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sfmqc"]
+atlas = ExtResource("4_uyqp2")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k7clu"]
+atlas = ExtResource("4_uyqp2")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qydu7"]
+atlas = ExtResource("5_a04mv")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sawhq"]
+atlas = ExtResource("5_a04mv")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1jwhp"]
+atlas = ExtResource("5_a04mv")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2f1cu"]
+atlas = ExtResource("5_a04mv")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gne4o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pua57")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v5b1w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rnt0p")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b84vq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8whsv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3ybn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_47rqg")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hi4ls")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_obyru")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xf2rj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fupu5")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xnjyq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jyv7h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sfmqc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k7clu")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qydu7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sawhq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1jwhp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2f1cu")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
+metadata/slug = &"trpg_lacerating_cockatrice"
+metadata/id = 70
