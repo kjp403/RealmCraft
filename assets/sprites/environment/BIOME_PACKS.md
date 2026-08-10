@@ -7,6 +7,9 @@
 | 2D Pixel Dungeon | `pixel_dungeon/` | Sewers floors / walls / décor |
 | RF Catacombs | `rf_catacombs/` | Animated torch / candle / spike strips + atlas accents |
 | RPG Worlds Caves | `rpgw_caves/` | Mining Cave 32×32 floors / walls / crystals (Szadi) |
+| Starter Tiles Platformer | `starter_platformer/` | FireSet lava/spikes + DarkCastle sewer décor + OutdoorHouse oasis stalls (SciGho) |
+| DG Fire Zone Free | `dg_fire/` | Terracotta masonry / brick wells (SnowHex; free pack is tiny) |
+| DG Dungeon Free | `dg_dungeon/` | Set1 floors/pillars/urns for Sewers (SnowHex) |
 | Critter GIFs + sheets | `characters/critters/{stag,boar,badger,wolf}/` | Ambient fauna (non-attackable) |
 | Decorative GIF frames | `rf_catacombs/*_strip.png` | Looping SceneProps lights / traps |
 

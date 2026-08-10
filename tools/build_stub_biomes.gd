@@ -382,6 +382,16 @@ func _build_desert() -> void:
 	_stamp_prop_block(props, Vector2i(20, 38), Vector2i(0, 12), Vector2i(5, 3), 1)
 	_stamp_prop_block(props, Vector2i(48, 38), Vector2i(6, 12), Vector2i(3, 3), 1)
 
+	# Oasis market stalls (OutdoorHouseSet) — small roofed booths + lanterns near south bowl
+	_stamp_prop_block(props, Vector2i(22, 40), Vector2i(2, 1), Vector2i(2, 2), 3)  # red roof
+	_stamp_prop_block(props, Vector2i(46, 40), Vector2i(3, 1), Vector2i(2, 2), 3)  # blue roof
+	for spot in [Vector2i(20, 42), Vector2i(28, 40), Vector2i(44, 40), Vector2i(52, 42), Vector2i(cx - 4, 44)]:
+		if walk.has(spot):
+			props.set_cell(spot, 3, Vector2i(1, 4))  # stone lantern
+	for spot in [Vector2i(24, 42), Vector2i(48, 42)]:
+		if walk.has(spot):
+			props.set_cell(spot, 3, Vector2i(0, 4))  # grass tuft
+
 	var entrance := Vector2i(cx, 47)
 	var portal := Vector2i(cx, 50)
 	var keepout: Array = [entrance, portal, Vector2i(cx, 46), Vector2i(cx, 48)]
@@ -416,6 +426,8 @@ func _build_desert() -> void:
 	var decos := [
 		{"name": "TempleCandleL", "frames": "deco_candle_b", "pos": _tile_pos(Vector2i(32, 14)), "scale": 1.4, "light": 0.7, "color": "Color(0.55, 0.75, 1, 1)"},
 		{"name": "TempleCandleR", "frames": "deco_candle_b", "pos": _tile_pos(Vector2i(39, 14)), "scale": 1.4, "light": 0.7, "color": "Color(0.55, 0.75, 1, 1)"},
+		{"name": "OasisTorchL", "frames": "deco_torch", "pos": _tile_pos(Vector2i(22, 42)), "scale": 1.35, "light": 0.85, "color": "Color(1, 0.75, 0.35, 1)"},
+		{"name": "OasisTorchR", "frames": "deco_torch", "pos": _tile_pos(Vector2i(50, 42)), "scale": 1.35, "light": 0.85, "color": "Color(1, 0.75, 0.35, 1)"},
 	]
 
 	_write_map({
@@ -457,6 +469,24 @@ func _build_desert() -> void:
 
 # --- Fire Forge -------------------------------------------------------------
 
+func _paint_lava_rect(ground: TileMapLayer, walk: Dictionary, a: Vector2i, b: Vector2i, lavas: Array, source: int = 0) -> void:
+	for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):
+		for x in range(mini(a.x, b.x), maxi(a.x, b.x) + 1):
+			var cell := Vector2i(x, y)
+			if not _in_bounds(cell):
+				continue
+			walk.erase(cell)
+			ground.set_cell(cell, source, _pick(lavas, cell))
+
+
+func _paint_grate_path(ground: TileMapLayer, walk: Dictionary, a: Vector2i, b: Vector2i, grates: Array) -> void:
+	for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):
+		for x in range(mini(a.x, b.x), maxi(a.x, b.x) + 1):
+			var cell := Vector2i(x, y)
+			if walk.has(cell):
+				ground.set_cell(cell, 0, _pick(grates, cell))
+
+
 func _build_fire_forge() -> void:
 	W = 128
 	H = 96
@@ -471,45 +501,111 @@ func _build_fire_forge() -> void:
 	props.tile_set = ts
 	var walk: Dictionary = {}
 
-	var floors: Array = [Vector2i(5, 8)]
+	# Floor variants from main forge sheet
+	var floors: Array = [
+		Vector2i(5, 8), Vector2i(4, 8), Vector2i(6, 8), Vector2i(5, 9),
+		Vector2i(0, 14), Vector2i(1, 14), Vector2i(2, 14),
+		Vector2i(0, 15), Vector2i(1, 15), Vector2i(2, 15),
+	]
+	var grates: Array = [
+		Vector2i(8, 6), Vector2i(9, 6), Vector2i(10, 6), Vector2i(11, 6),
+		Vector2i(8, 7), Vector2i(9, 7), Vector2i(10, 7), Vector2i(3, 14), Vector2i(4, 14),
+	]
+	var lavas: Array = [
+		Vector2i(20, 14), Vector2i(20, 15), Vector2i(20, 16), Vector2i(20, 17),
+		Vector2i(19, 15), Vector2i(21, 15), Vector2i(20, 20), Vector2i(20, 21),
+	]
+	var starter_lava: Array = [Vector2i(0, 3), Vector2i(1, 3), Vector2i(4, 4)]
 	var wall_n: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
 	var wall_s: Array = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)]
 	var wall_w: Array = [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]
 	var wall_e: Array = [Vector2i(4, 1), Vector2i(4, 2), Vector2i(4, 3)]
 	var wall_fill: Array = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(1, 2), Vector2i(3, 2)]
 
-	# Large overlapping halls + wide corridors (2× scaled from 64×48 layout)
-	_carve_rect(walk, Vector2i(44, 68), Vector2i(83, 88))
+	# Authored halls — leave room for lava canals + NPC plazas
+	_carve_rect(walk, Vector2i(44, 68), Vector2i(83, 88))  # staging
 	_carve_rect(walk, Vector2i(48, 56), Vector2i(79, 72))
-	_carve_rect(walk, Vector2i(12, 16), Vector2i(44, 48))
-	_carve_rect(walk, Vector2i(16, 20), Vector2i(40, 44))
-	_carve_rect(walk, Vector2i(84, 16), Vector2i(114, 48))
-	_carve_rect(walk, Vector2i(86, 20), Vector2i(110, 44))
-	_carve_rect(walk, Vector2i(44, 12), Vector2i(83, 44))
-	_carve_rect(walk, Vector2i(52, 16), Vector2i(74, 40))
+	_carve_rect(walk, Vector2i(10, 14), Vector2i(42, 48))  # west foundry
+	_carve_rect(walk, Vector2i(14, 18), Vector2i(38, 44))
+	_carve_rect(walk, Vector2i(86, 14), Vector2i(118, 48))  # east foundry
+	_carve_rect(walk, Vector2i(90, 18), Vector2i(114, 44))
+	_carve_rect(walk, Vector2i(44, 10), Vector2i(83, 46))  # central machine hall
+	_carve_rect(walk, Vector2i(52, 14), Vector2i(74, 40))
 	_carve_rect(walk, Vector2i(28, 40), Vector2i(44, 56))
 	_carve_rect(walk, Vector2i(82, 40), Vector2i(98, 56))
-	# Extra foundry wings
-	_carve_rect(walk, Vector2i(8, 52), Vector2i(28, 72))
-	_carve_rect(walk, Vector2i(100, 52), Vector2i(120, 72))
-	_carve_rect(walk, Vector2i(52, 44), Vector2i(76, 56))
-	_carve_corridor(walk, Vector2i(cx, 68), Vector2i(cx, 32), 6)
-	_carve_corridor(walk, Vector2i(40, 32), Vector2i(56, 32), 5)
-	_carve_corridor(walk, Vector2i(72, 32), Vector2i(88, 32), 5)
+	_carve_rect(walk, Vector2i(6, 52), Vector2i(30, 74))  # SW wing
+	_carve_rect(walk, Vector2i(98, 52), Vector2i(122, 74))  # SE wing
+	_carve_rect(walk, Vector2i(50, 42), Vector2i(78, 58))  # junction plaza
+	_carve_corridor(walk, Vector2i(cx, 68), Vector2i(cx, 28), 7)
+	_carve_corridor(walk, Vector2i(38, 30), Vector2i(56, 30), 5)
+	_carve_corridor(walk, Vector2i(72, 30), Vector2i(90, 30), 5)
 	_carve_corridor(walk, Vector2i(18, 60), Vector2i(44, 60), 5)
 	_carve_corridor(walk, Vector2i(84, 60), Vector2i(110, 60), 5)
 	_carve_corridor(walk, Vector2i(cx, 88), Vector2i(cx, 92), 5)
 	_fill_enclosed_voids(walk)
 
 	_paint_floors(ground, walk, floors, 0)
-	for cell in [
-		Vector2i(24, 28), Vector2i(26, 28), Vector2i(28, 28), Vector2i(30, 28),
-		Vector2i(96, 28), Vector2i(98, 28), Vector2i(100, 28), Vector2i(102, 28),
-		Vector2i(60, 36), Vector2i(62, 36), Vector2i(64, 36), Vector2i(66, 36), Vector2i(68, 36),
-		Vector2i(60, 60), Vector2i(62, 60), Vector2i(64, 60), Vector2i(66, 60), Vector2i(68, 60),
+	# Metal grate runways through halls
+	_paint_grate_path(ground, walk, Vector2i(20, 28), Vector2i(38, 30), grates)
+	_paint_grate_path(ground, walk, Vector2i(90, 28), Vector2i(110, 30), grates)
+	_paint_grate_path(ground, walk, Vector2i(54, 24), Vector2i(74, 26), grates)
+	_paint_grate_path(ground, walk, Vector2i(cx - 2, 50), Vector2i(cx + 2, 70), grates)
+	_paint_grate_path(ground, walk, Vector2i(12, 60), Vector2i(28, 62), grates)
+	_paint_grate_path(ground, walk, Vector2i(100, 60), Vector2i(118, 62), grates)
+
+	# Lava canals / pits (blocked) — west, east, central + S-curve rivulets
+	_paint_lava_rect(ground, walk, Vector2i(16, 22), Vector2i(22, 40), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(106, 22), Vector2i(112, 40), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(58, 18), Vector2i(70, 22), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(48, 48), Vector2i(52, 54), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(76, 48), Vector2i(80, 54), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(14, 64), Vector2i(24, 68), lavas, 0)
+	_paint_lava_rect(ground, walk, Vector2i(104, 64), Vector2i(114, 68), lavas, 0)
+	# Cracked ember ring around lava (FireSet) — visual warning band
+	var cracked: Array = [Vector2i(3, 3), Vector2i(4, 3)]
+	for rim in [
+		[Vector2i(15, 21), Vector2i(23, 41)], [Vector2i(105, 21), Vector2i(113, 41)],
+		[Vector2i(57, 17), Vector2i(71, 23)], [Vector2i(47, 47), Vector2i(53, 55)],
+		[Vector2i(75, 47), Vector2i(81, 55)],
 	]:
-		if walk.has(cell):
-			ground.set_cell(cell, 0, Vector2i(8 + _hash(cell) % 2, 6))
+		var ra: Vector2i = rim[0]
+		var rb: Vector2i = rim[1]
+		for y in range(mini(ra.y, rb.y), maxi(ra.y, rb.y) + 1):
+			for x in range(mini(ra.x, rb.x), maxi(ra.x, rb.x) + 1):
+				var cell := Vector2i(x, y)
+				if walk.has(cell) and (x == ra.x or x == rb.x or y == ra.y or y == rb.y):
+					if _hash(cell) % 2 == 0:
+						ground.set_cell(cell, 1, _pick(cracked, cell))
+	# Starter fire lava accents in corners of pits
+	for cell in [
+		Vector2i(16, 22), Vector2i(22, 40), Vector2i(106, 22), Vector2i(112, 40),
+		Vector2i(58, 18), Vector2i(70, 22), Vector2i(14, 64), Vector2i(114, 68),
+	]:
+		if _in_bounds(cell):
+			ground.set_cell(cell, 1, _pick(starter_lava, cell))
+			walk.erase(cell)
+
+	# Grate bridges across lava (walkable)
+	for x in range(16, 23):
+		var cell := Vector2i(x, 30)
+		walk[cell] = true
+		ground.set_cell(cell, 0, _pick(grates, cell))
+	for x in range(106, 113):
+		var cell2 := Vector2i(x, 30)
+		walk[cell2] = true
+		ground.set_cell(cell2, 0, _pick(grates, cell2))
+	for y in range(18, 23):
+		var cell3 := Vector2i(cx, y)
+		walk[cell3] = true
+		ground.set_cell(cell3, 0, _pick(grates, cell3))
+	for x in range(14, 25):
+		var cell4 := Vector2i(x, 66)
+		walk[cell4] = true
+		ground.set_cell(cell4, 0, _pick(grates, cell4))
+	for x in range(104, 115):
+		var cell5 := Vector2i(x, 66)
+		walk[cell5] = true
+		ground.set_cell(cell5, 0, _pick(grates, cell5))
 
 	_paint_wall_shell(
 		walls, walk, wall_n, wall_s, wall_w, wall_e, wall_fill,
@@ -517,39 +613,97 @@ func _build_fire_forge() -> void:
 	)
 	_clear_walls_on_walk(walls, walk)
 
+	# Fence rails along lava rims
+	for rim in [
+		[Vector2i(15, 22), Vector2i(15, 40)], [Vector2i(23, 22), Vector2i(23, 40)],
+		[Vector2i(105, 22), Vector2i(105, 40)], [Vector2i(113, 22), Vector2i(113, 40)],
+		[Vector2i(57, 17), Vector2i(71, 17)], [Vector2i(57, 23), Vector2i(71, 23)],
+	]:
+		var a: Vector2i = rim[0]
+		var b: Vector2i = rim[1]
+		for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):
+			for x in range(mini(a.x, b.x), maxi(a.x, b.x) + 1):
+				var cell := Vector2i(x, y)
+				if walk.has(cell) and walls.get_cell_source_id(cell) < 0:
+					props.set_cell(cell, 0, Vector2i(10 + _hash(cell) % 3, 16))
+
 	var entrance := Vector2i(cx, 84)
 	var portal := Vector2i(cx, 90)
 	var keepout: Array = [entrance, portal, Vector2i(cx, 83), Vector2i(cx, 86)]
 
+	# Authored props — barrels, statues, chests, pipes, starter crystals/spikes, DG brick pads
+	for spot in [
+		Vector2i(20, 36), Vector2i(104, 36), Vector2i(48, 68), Vector2i(80, 68),
+		Vector2i(24, 52), Vector2i(104, 52), Vector2i(56, 44), Vector2i(72, 44),
+		Vector2i(16, 56), Vector2i(112, 56), Vector2i(40, 70), Vector2i(88, 70),
+	]:
+		_place_prop(props, walk, walls, spot, Vector2i(8, 16), 0, keepout, true)  # barrel
+	for spot in [Vector2i(18, 36), Vector2i(102, 36), Vector2i(60, 52), Vector2i(68, 64)]:
+		_place_prop(props, walk, walls, spot, Vector2i(7, 16), 0, keepout, true)  # hazard barrel
+	for spot in [Vector2i(24, 24), Vector2i(100, 24), Vector2i(56, 16), Vector2i(68, 16), Vector2i(64, 36), Vector2i(cx, 56)]:
+		_place_prop(props, walk, walls, spot, Vector2i(12, 18), 0, keepout, false)  # statue
+	for spot in [Vector2i(30, 20), Vector2i(98, 20), Vector2i(52, 68), Vector2i(76, 68), Vector2i(20, 70), Vector2i(108, 70)]:
+		_place_prop(props, walk, walls, spot, Vector2i(15, 6), 0, keepout, true)  # chest
+	# Industrial pillars / pipes
+	for spot in [Vector2i(28, 18), Vector2i(36, 18), Vector2i(92, 18), Vector2i(100, 18), Vector2i(60, 14), Vector2i(68, 14), Vector2i(48, 58), Vector2i(80, 58)]:
+		_place_prop(props, walk, walls, spot, Vector2i(10, 1), 0, keepout, true)
+	# Starter fire spikes + crystal accents near lava
+	for spot in [Vector2i(24, 28), Vector2i(104, 28), Vector2i(54, 24), Vector2i(74, 24), Vector2i(26, 66), Vector2i(102, 66)]:
+		if walk.has(spot):
+			props.set_cell(spot, 1, Vector2i(0 + _hash(spot) % 3, 4))
+	for spot in [Vector2i(32, 36), Vector2i(96, 36), Vector2i(64, 48), Vector2i(cx, 32)]:
+		if walk.has(spot):
+			props.set_cell(spot, 1, Vector2i(3, 4))  # crystal
+	# Heat vents (FireSet fire pillars) at foundry corners
+	for spot in [Vector2i(18, 20), Vector2i(38, 20), Vector2i(90, 20), Vector2i(110, 20)]:
+		if walk.has(spot):
+			props.set_cell(spot, 1, Vector2i(1 + _hash(spot) % 2, 3))
+	# DG fire free brick platforms + circular wells as raised pads
+	for origin in [Vector2i(26, 42), Vector2i(98, 42), Vector2i(60, 60)]:
+		if walk.has(origin):
+			props.set_cell(origin, 2, Vector2i(2, 2))
+			if walk.has(origin + Vector2i.RIGHT):
+				props.set_cell(origin + Vector2i.RIGHT, 2, Vector2i(3, 2))
+	# 3×3 brick well landmarks (DG Fire free)
+	for origin in [Vector2i(30, 34), Vector2i(94, 34)]:
+		for oy in range(3):
+			for ox in range(3):
+				var wc: Vector2i = origin + Vector2i(ox, oy)
+				if walk.has(wc) and props.get_cell_source_id(wc) < 0:
+					props.set_cell(wc, 2, Vector2i(8 + ox, 1 + oy))
+					if ox == 1 and oy == 1:
+						walk.erase(wc)  # well hole blocks
+
+	# Scatter forge décor along walls
 	var decor: Array = [
 		Vector2i(8, 16), Vector2i(9, 16), Vector2i(10, 16), Vector2i(11, 16),
-		Vector2i(12, 16), Vector2i(12, 18), Vector2i(8, 18), Vector2i(10, 18),
+		Vector2i(12, 16), Vector2i(8, 18), Vector2i(10, 18), Vector2i(12, 18),
+		Vector2i(9, 2), Vector2i(11, 2), Vector2i(13, 2),
 	]
 	var placed := 0
 	var cells: Array = walk.keys()
 	cells.sort_custom(func(a, b): return _hash(a) < _hash(b))
 	for cell: Vector2i in cells:
-		if placed >= 110:
+		if placed >= 200:
 			break
-		if _hash(cell) % 4 != 0:
+		if _hash(cell) % 5 != 0:
 			continue
 		if _place_prop(props, walk, walls, cell, _pick(decor, cell), 0, keepout, true):
 			placed += 1
-	for spot in [Vector2i(24, 24), Vector2i(100, 24), Vector2i(56, 20), Vector2i(68, 20), Vector2i(64, 28)]:
-		_place_prop(props, walk, walls, spot, Vector2i(12, 18), 0, keepout, false)
-	for spot in [Vector2i(20, 36), Vector2i(104, 36), Vector2i(48, 68), Vector2i(80, 68)]:
-		_place_prop(props, walk, walls, spot, Vector2i(8, 16), 0, keepout, true)
 
 	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83)], "forge spawn")
-	_assert_connected(walk, entrance, [portal, Vector2i(28, 28), Vector2i(100, 28), Vector2i(64, 24)], "forge")
+	_assert_connected(walk, entrance, [portal, Vector2i(28, 28), Vector2i(100, 28), Vector2i(64, 24), Vector2i(18, 60), Vector2i(110, 60)], "forge")
 
 	var decos: Array = []
 	var torch_spots: Array = [
-		Vector2i(20, 20), Vector2i(36, 20), Vector2i(20, 40), Vector2i(36, 40),
-		Vector2i(90, 20), Vector2i(106, 20), Vector2i(90, 40), Vector2i(106, 40),
-		Vector2i(52, 16), Vector2i(72, 16), Vector2i(52, 40), Vector2i(72, 40),
+		Vector2i(18, 18), Vector2i(38, 18), Vector2i(18, 42), Vector2i(38, 42),
+		Vector2i(90, 18), Vector2i(110, 18), Vector2i(90, 42), Vector2i(110, 42),
+		Vector2i(52, 14), Vector2i(76, 14), Vector2i(52, 40), Vector2i(76, 40),
 		Vector2i(48, 72), Vector2i(80, 72), Vector2i(56, 56), Vector2i(72, 56),
-		Vector2i(16, 56), Vector2i(28, 56), Vector2i(100, 56), Vector2i(112, 56),
+		Vector2i(14, 56), Vector2i(28, 56), Vector2i(100, 56), Vector2i(114, 56),
+		Vector2i(20, 68), Vector2i(108, 68), Vector2i(cx - 6, 80), Vector2i(cx + 6, 80),
+		Vector2i(44, 30), Vector2i(84, 30), Vector2i(30, 48), Vector2i(98, 48),
+		Vector2i(16, 70), Vector2i(112, 70), Vector2i(40, 20), Vector2i(88, 20),
 	]
 	var ti := 0
 	for spot in torch_spots:
@@ -561,12 +715,11 @@ func _build_fire_forge() -> void:
 			"frames": "deco_torch",
 			"pos": _tile_pos(spot),
 			"scale": 1.6,
-			"light": 1.15,
-			"color": "Color(1, 0.45, 0.12, 1)",
+			"light": 1.2,
+			"color": "Color(1, 0.4, 0.1, 1)",
 		})
-	var spike_spots: Array = [Vector2i(28, 36), Vector2i(96, 36), Vector2i(60, 44), Vector2i(68, 44)]
 	var si := 0
-	for spot in spike_spots:
+	for spot in [Vector2i(26, 34), Vector2i(102, 34), Vector2i(56, 46), Vector2i(72, 46), Vector2i(64, 52), Vector2i(20, 64), Vector2i(108, 64)]:
 		if not walk.has(spot):
 			continue
 		si += 1
@@ -574,7 +727,7 @@ func _build_fire_forge() -> void:
 			"name": "HeatSpike%d" % si,
 			"frames": "deco_spike",
 			"pos": _tile_pos(spot),
-			"scale": 1.3,
+			"scale": 1.35,
 			"light": 0.0,
 			"color": "Color(1, 1, 1, 1)",
 		})
@@ -583,9 +736,9 @@ func _build_fire_forge() -> void:
 		"root": "fire_forge",
 		"out": "res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn",
 		"tileset": FORGE_TS,
-		"bg": "Color(0.03, 0.01, 0.015, 1)",
-		"modulate": "Color(0.95, 0.62, 0.48, 1)",
-		"music": "res://assets/audio/music/shadow_temple.ogg",
+		"bg": "Color(0.04, 0.015, 0.01, 1)",
+		"modulate": "Color(0.95, 0.72, 0.55, 1)",
+		"music": "res://assets/audio/music/fungus.ogg",
 		"ground_b64": _b64(ground),
 		"walls_b64": _b64(walls),
 		"props_b64": _b64(props),
@@ -595,7 +748,7 @@ func _build_fire_forge() -> void:
 		"portal": _tile_pos(portal),
 		"entrance_id": 26,
 		"portal_id": 126,
-		"portal_color": "Color(0.74, 0.25, 0, 1)",
+		"portal_color": "Color(0.85, 0.25, 0.05, 1)",
 		"walk_count": walk.size(),
 		"wall_count": walls.get_used_cells().size(),
 		"prop_count": props.get_used_cells().size(),
@@ -603,17 +756,29 @@ func _build_fire_forge() -> void:
 		"cam_bottom": H * 16 + 16,
 		"lights": (
 			"\n[node name=\"ForgeCore\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1024, 440)\ncolor = Color(1, 0.42, 0.1, 1)\nenergy = 1.5\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 3.2\n"
+			+ "position = Vector2(1024, 400)\ncolor = Color(1, 0.45, 0.12, 1)\nenergy = 1.35\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 3.4\n"
 			+ "\n[node name=\"WestFoundry\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(448, 512)\ncolor = Color(1, 0.38, 0.08, 1)\nenergy = 1.45\n"
+			+ "position = Vector2(320, 480)\ncolor = Color(1, 0.35, 0.08, 1)\nenergy = 1.25\n"
 			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.8\n"
 			+ "\n[node name=\"EastFoundry\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1568, 512)\ncolor = Color(1, 0.38, 0.08, 1)\nenergy = 1.45\n"
+			+ "position = Vector2(1728, 480)\ncolor = Color(1, 0.35, 0.08, 1)\nenergy = 1.25\n"
 			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.8\n"
 			+ "\n[node name=\"StagingGlow\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1024, 1200)\ncolor = Color(1, 0.5, 0.18, 1)\nenergy = 1.0\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.4\n"
+			+ "position = Vector2(1024, 1200)\ncolor = Color(1, 0.5, 0.18, 1)\nenergy = 1.1\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.6\n"
+			+ "\n[node name=\"LavaWest\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(304, 480)\ncolor = Color(1, 0.3, 0.05, 1)\nenergy = 1.4\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.0\n"
+			+ "\n[node name=\"LavaEast\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(1744, 480)\ncolor = Color(1, 0.3, 0.05, 1)\nenergy = 1.4\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.0\n"
+			+ "\n[node name=\"LavaSW\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(304, 1056)\ncolor = Color(1, 0.28, 0.05, 1)\nenergy = 1.2\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
+			+ "\n[node name=\"LavaSE\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(1744, 1056)\ncolor = Color(1, 0.28, 0.05, 1)\nenergy = 1.2\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
 		),
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
@@ -642,16 +807,22 @@ func _build_sewers() -> void:
 		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
 		Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2),
 	]
+	# DG Set1 textured slabs (avoid arrow UI tiles in top-left)
+	var dg_floors: Array = [
+		Vector2i(9, 2), Vector2i(9, 3), Vector2i(10, 3), Vector2i(11, 1), Vector2i(11, 4),
+		Vector2i(9, 12), Vector2i(9, 13), Vector2i(10, 13), Vector2i(8, 13),
+		Vector2i(12, 3), Vector2i(14, 4), Vector2i(2, 9),
+	]
 	var wall_n: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]
 	var wall_s: Array = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4)]
 	var wall_w: Array = [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]
 	var wall_e: Array = [Vector2i(5, 1), Vector2i(5, 2), Vector2i(5, 3)]
 	var wall_fill: Array = [Vector2i(6, 0), Vector2i(7, 0), Vector2i(6, 1), Vector2i(7, 1), Vector2i(8, 0), Vector2i(8, 1)]
+	var dark_wall: Array = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(4, 3), Vector2i(4, 4)]
 
 	var entrance := Vector2i(cx, 84)
 	var portal := Vector2i(cx, 90)
 
-	# Large chamber network (2× scaled) with wide north-south spine corridor
 	_carve_rect(walk, Vector2i(44, 68), Vector2i(83, 86))
 	_carve_rect(walk, Vector2i(48, 60), Vector2i(79, 76))
 	_carve_rect(walk, Vector2i(8, 12), Vector2i(44, 44))
@@ -662,67 +833,148 @@ func _build_sewers() -> void:
 	_carve_rect(walk, Vector2i(32, 32), Vector2i(94, 60))
 	_carve_rect(walk, Vector2i(40, 36), Vector2i(56, 52))
 	_carve_rect(walk, Vector2i(72, 40), Vector2i(88, 56))
-	# Wide spine from entrance to north halls (width 6)
+	_carve_rect(walk, Vector2i(8, 48), Vector2i(28, 70))
+	_carve_rect(walk, Vector2i(100, 48), Vector2i(120, 70))
+	# Extra cistern lobes for the 4× footprint
+	_carve_rect(walk, Vector2i(30, 64), Vector2i(44, 78))
+	_carve_rect(walk, Vector2i(84, 64), Vector2i(98, 78))
 	_carve_corridor(walk, entrance, Vector2i(cx, 28), 6)
 	_carve_corridor(walk, Vector2i(44, 28), Vector2i(36, 28), 5)
 	_carve_corridor(walk, Vector2i(84, 28), Vector2i(92, 28), 5)
 	_carve_corridor(walk, entrance, Vector2i(cx, 92), 5)
+	_carve_corridor(walk, Vector2i(18, 56), Vector2i(44, 56), 4)
+	_carve_corridor(walk, Vector2i(84, 56), Vector2i(110, 56), 4)
+	_carve_corridor(walk, Vector2i(36, 70), Vector2i(48, 70), 4)
+	_carve_corridor(walk, Vector2i(80, 70), Vector2i(92, 70), 4)
 	_fill_disk(walk, Vector2i(24, 28), 10.0)
 	_fill_disk(walk, Vector2i(104, 28), 10.0)
 	_fill_disk(walk, Vector2i(cx, 48), 12.0)
+	_fill_disk(walk, Vector2i(36, 70), 7.0)
+	_fill_disk(walk, Vector2i(92, 70), 7.0)
 	_fill_enclosed_voids(walk)
 
 	_paint_floors(ground, walk, floors, 0)
-	# Drainage channel in central hall
+	# DG floors in side halls + plaza + cisterns
+	for cell: Vector2i in walk.keys():
+		if cell.x < 40 or cell.x > 88 or (cell.y >= 40 and cell.y <= 56) or cell.y >= 64:
+			if _hash(cell) % 3 == 0:
+				ground.set_cell(cell, 3, _pick(dg_floors, cell))
+
+	# Drainage channel + DarkCastle sludge / water accents
 	for x in range(36, 92):
 		for y in [44, 45]:
 			var cell := Vector2i(x, y)
 			if walk.has(cell):
 				ground.set_cell(cell, 0, Vector2i(6 + (x + y) % 2, 1))
+	for x in range(40, 88):
+		if walk.has(Vector2i(x, 46)) and _hash(Vector2i(x, 46)) % 3 == 0:
+			ground.set_cell(Vector2i(x, 46), 2, Vector2i(_hash(Vector2i(x, 46)) % 2, 4))  # sludge floor
+	# Side cistern water rings
+	for center in [Vector2i(24, 28), Vector2i(104, 28), Vector2i(36, 70), Vector2i(92, 70)]:
+		for d in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var wc: Vector2i = center + d
+			if walk.has(wc) and _hash(wc) % 2 == 0:
+				ground.set_cell(wc, 2, Vector2i(_hash(wc) % 2, 4))
 
 	_paint_wall_shell(
 		walls, walk, wall_n, wall_s, wall_w, wall_e, wall_fill,
 		Vector2i(0, 0), Vector2i(5, 0), Vector2i(0, 4), Vector2i(5, 4), 0, 2
 	)
 	_clear_walls_on_walk(walls, walk)
-
-	# Explicit spine carve — never block the north-south corridor
 	_carve_spine(walk, ground, walls, cx, entrance.y, 8, floors)
+
+	# DarkCastle brick accents on wall faces near walk
+	for spot in [
+		Vector2i(20, 14), Vector2i(32, 14), Vector2i(96, 14), Vector2i(108, 14),
+		Vector2i(48, 14), Vector2i(76, 14), Vector2i(16, 48), Vector2i(112, 48),
+		Vector2i(30, 64), Vector2i(98, 64), Vector2i(40, 78), Vector2i(88, 78),
+	]:
+		if walls.get_cell_source_id(spot) >= 0:
+			walls.set_cell(spot, 2, _pick(dark_wall, spot))
 
 	var keepout: Array = [entrance, portal, Vector2i(cx, 83), Vector2i(cx, 86)]
 	var decor: Array = [
 		Vector2i(4, 6), Vector2i(5, 6), Vector2i(7, 7), Vector2i(8, 6),
-		Vector2i(5, 7), Vector2i(6, 7), Vector2i(8, 6), Vector2i(7, 7),
+		Vector2i(5, 7), Vector2i(6, 7), Vector2i(0, 8), Vector2i(1, 8),
 	]
 	var placed := 0
 	var cells: Array = walk.keys()
 	cells.sort_custom(func(a, b): return _hash(a) < _hash(b))
 	for cell: Vector2i in cells:
-		if placed >= 130:
+		if placed >= 220:
 			break
-		if _hash(cell) % 3 != 0:
+		if _hash(cell) % 4 != 0:
 			continue
 		if _place_prop(props, walk, walls, cell, _pick(decor, cell), 0, keepout, true):
 			placed += 1
-	for door in [Vector2i(60, 66), Vector2i(44, 28), Vector2i(80, 28)]:
+
+	# Pixel-dungeon doors / gates
+	for door in [Vector2i(60, 66), Vector2i(44, 28), Vector2i(80, 28), Vector2i(24, 48), Vector2i(104, 48)]:
 		if walk.has(door):
 			props.set_cell(door, 0, Vector2i(6, 6))
 		if walk.has(door + Vector2i.RIGHT):
 			props.set_cell(door + Vector2i.RIGHT, 0, Vector2i(7, 6))
+	# DarkCastle multi-tile wooden doors
+	for spot in [Vector2i(36, 28), Vector2i(92, 28), Vector2i(56, 40), Vector2i(72, 40)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(2, 1))
+			if walk.has(spot + Vector2i.DOWN):
+				props.set_cell(spot + Vector2i.DOWN, 2, Vector2i(2, 2))
+	# Portcullis grates (2 tiles tall)
+	for spot in [Vector2i(28, 36), Vector2i(100, 36), Vector2i(48, 56), Vector2i(80, 56)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(1, 1))
+			if walk.has(spot + Vector2i.DOWN):
+				props.set_cell(spot + Vector2i.DOWN, 2, Vector2i(1, 2))
+	# Manhole covers on plaza
+	for spot in [Vector2i(50, 48), Vector2i(78, 48), Vector2i(cx, 36), Vector2i(cx, 60), Vector2i(36, 68), Vector2i(92, 68)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(2, 3))
+	# Vertical banners (crest) — 2 tiles tall + shield accents
+	for spot in [Vector2i(48, 20), Vector2i(76, 20), Vector2i(20, 20), Vector2i(108, 20), Vector2i(40, 66), Vector2i(88, 66)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(3, 0))
+			if walk.has(spot + Vector2i.DOWN):
+				props.set_cell(spot + Vector2i.DOWN, 2, Vector2i(3, 1))
+	for spot in [Vector2i(52, 20), Vector2i(72, 20)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(4, 1))  # shield
+	# Gargoyle faces
+	for spot in [Vector2i(40, 16), Vector2i(84, 16), Vector2i(24, 52), Vector2i(104, 52), Vector2i(32, 72), Vector2i(96, 72)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(3, 3))
+	# Braziers
+	for spot in [Vector2i(44, 24), Vector2i(84, 24), Vector2i(cx - 10, 72), Vector2i(cx + 10, 72)]:
+		if walk.has(spot):
+			props.set_cell(spot, 2, Vector2i(2, 0))
+	# DG pillars / arches / urns
+	for spot in [Vector2i(52, 32), Vector2i(76, 32), Vector2i(52, 52), Vector2i(76, 52), Vector2i(cx, 40), Vector2i(34, 72), Vector2i(94, 72)]:
+		if walk.has(spot):
+			props.set_cell(spot, 3, Vector2i(10 + _hash(spot) % 4, 10))
+	for spot in [Vector2i(22, 32), Vector2i(106, 32), Vector2i(18, 60), Vector2i(110, 60)]:
+		if walk.has(spot):
+			props.set_cell(spot, 3, Vector2i(2, 12))  # urn
+	for spot in [Vector2i(56, 28), Vector2i(72, 28)]:
+		if walk.has(spot):
+			props.set_cell(spot, 3, Vector2i(12 + _hash(spot) % 3, 12))  # rubble / arch rubble
+
 	_place_prop(props, walk, walls, Vector2i(16, 32), Vector2i(0, 8), 0, keepout, true)
 	_place_prop(props, walk, walls, Vector2i(108, 28), Vector2i(1, 8), 0, keepout, true)
 
-	# World (509,395) ≈ tile (31,24) — must stay open (old ArenaWalls blockage).
 	_assert_walkable(walk, [entrance, portal, Vector2i(cx, 83), Vector2i(31, 24)], "sewers spawn")
-	_assert_connected(walk, entrance, [portal, Vector2i(24, 24), Vector2i(31, 24), Vector2i(104, 24), Vector2i(cx, 28)], "sewers")
+	_assert_connected(walk, entrance, [portal, Vector2i(24, 24), Vector2i(31, 24), Vector2i(104, 24), Vector2i(cx, 28), Vector2i(18, 56), Vector2i(110, 56)], "sewers")
 
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(20, 20), Vector2i(32, 20), Vector2i(20, 36), Vector2i(32, 36),
-		Vector2i(96, 20), Vector2i(108, 20), Vector2i(96, 32), Vector2i(108, 32),
-		Vector2i(48, 20), Vector2i(76, 20), Vector2i(48, 52), Vector2i(76, 52),
-		Vector2i(56, 40), Vector2i(72, 40), Vector2i(52, 72), Vector2i(76, 72),
+		Vector2i(18, 18), Vector2i(34, 18), Vector2i(18, 36), Vector2i(34, 36),
+		Vector2i(94, 18), Vector2i(110, 18), Vector2i(94, 36), Vector2i(110, 36),
+		Vector2i(48, 18), Vector2i(76, 18), Vector2i(48, 52), Vector2i(76, 52),
+		Vector2i(56, 36), Vector2i(72, 36), Vector2i(52, 72), Vector2i(76, 72),
+		Vector2i(16, 56), Vector2i(28, 56), Vector2i(100, 56), Vector2i(112, 56),
+		Vector2i(40, 44), Vector2i(88, 44), Vector2i(cx - 8, 60), Vector2i(cx + 8, 60),
+		Vector2i(24, 64), Vector2i(104, 64), Vector2i(60, 28), Vector2i(68, 28),
+		Vector2i(32, 70), Vector2i(96, 70), Vector2i(40, 76), Vector2i(88, 76),
 	]:
 		if not walk.has(spot):
 			continue
@@ -733,11 +985,11 @@ func _build_sewers() -> void:
 			"frames": frames,
 			"pos": _tile_pos(spot),
 			"scale": 1.5 if frames == "deco_torch" else 1.8,
-			"light": 0.95,
+			"light": 1.0,
 			"color": "Color(0.55, 0.95, 0.55, 1)" if frames != "deco_torch" else "Color(1, 0.7, 0.35, 1)",
 		})
 	var si := 0
-	for spot in [Vector2i(40, 48), Vector2i(84, 48), Vector2i(60, 52), Vector2i(68, 52), Vector2i(24, 28), Vector2i(104, 28)]:
+	for spot in [Vector2i(40, 48), Vector2i(84, 48), Vector2i(60, 52), Vector2i(68, 52), Vector2i(24, 28), Vector2i(104, 28), Vector2i(18, 60), Vector2i(110, 60), Vector2i(36, 72), Vector2i(92, 72)]:
 		if not walk.has(spot):
 			continue
 		si += 1
@@ -754,8 +1006,8 @@ func _build_sewers() -> void:
 		"root": "sewers",
 		"out": "res://source/common/gameplay/maps/maps/sewers/sewers.tscn",
 		"tileset": SEWERS_TS,
-		"bg": "Color(0.015, 0.025, 0.02, 1)",
-		"modulate": "Color(0.58, 0.76, 0.64, 1)",
+		"bg": "Color(0.015, 0.02, 0.03, 1)",
+		"modulate": "Color(0.55, 0.72, 0.68, 1)",
 		"music": "res://assets/audio/music/fungus.ogg",
 		"ground_b64": _b64(ground),
 		"walls_b64": _b64(walls),
@@ -774,17 +1026,29 @@ func _build_sewers() -> void:
 		"cam_bottom": H * 16 + 16,
 		"lights": (
 			"\n[node name=\"SewerGlow1\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(400, 440)\ncolor = Color(0.5, 0.95, 0.55, 1)\nenergy = 1.05\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.4\n"
+			+ "position = Vector2(384, 448)\ncolor = Color(0.5, 0.95, 0.55, 1)\nenergy = 1.15\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.6\n"
 			+ "\n[node name=\"SewerGlow2\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1640, 440)\ncolor = Color(0.5, 0.95, 0.55, 1)\nenergy = 1.05\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.4\n"
+			+ "position = Vector2(1664, 448)\ncolor = Color(0.5, 0.95, 0.55, 1)\nenergy = 1.15\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.6\n"
 			+ "\n[node name=\"SewerGlow3\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1024, 680)\ncolor = Color(0.45, 0.85, 0.55, 1)\nenergy = 1.0\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.8\n"
+			+ "position = Vector2(1024, 640)\ncolor = Color(0.45, 0.85, 0.55, 1)\nenergy = 1.1\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 3.0\n"
 			+ "\n[node name=\"SewerGlow4\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
-			+ "position = Vector2(1024, 1160)\ncolor = Color(0.5, 0.88, 0.55, 1)\nenergy = 0.9\n"
-			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.2\n"
+			+ "position = Vector2(1024, 1160)\ncolor = Color(0.5, 0.88, 0.55, 1)\nenergy = 1.0\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.4\n"
+			+ "\n[node name=\"SewerGlow5\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(288, 960)\ncolor = Color(0.4, 0.8, 0.7, 1)\nenergy = 0.95\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.0\n"
+			+ "\n[node name=\"SewerGlow6\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(1760, 960)\ncolor = Color(0.4, 0.8, 0.7, 1)\nenergy = 0.95\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 2.0\n"
+			+ "\n[node name=\"SewerGlow7\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(576, 1120)\ncolor = Color(0.45, 0.9, 0.6, 1)\nenergy = 0.9\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
+			+ "\n[node name=\"SewerGlow8\" type=\"PointLight2D\" parent=\"SceneProps\"]\n"
+			+ "position = Vector2(1472, 1120)\ncolor = Color(0.45, 0.9, 0.6, 1)\nenergy = 0.9\n"
+			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.8\n"
 		),
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
