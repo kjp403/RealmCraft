@@ -4,15 +4,32 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_8103r"]
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_q7gsd"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_bu0i7"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_soldier.tres" id="5_hnqr5"]
+
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="li2"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_q7gsd")
-item = ExtResource("loot_gold")
-min_amount = 4
-max_amount = 9
-chance = 0.85
+item = ExtResource("li0")
+min_amount = 7
+max_amount = 14
+chance = 0.9
+
+[sub_resource type="Resource" id="Drop_cloth_bandit"]
+script = ExtResource("3_q7gsd")
+item = ExtResource("li1")
+min_amount = 1
+max_amount = 2
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_iron_ore"]
+script = ExtResource("3_q7gsd")
+item = ExtResource("li2")
+min_amount = 1
+max_amount = 2
+chance = 0.3
 
 [resource]
 script = ExtResource("4_bu0i7")
@@ -42,7 +59,7 @@ wander_pause_max_s = 4.0
 xp_reward = 24
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_q7gsd")]([SubResource("Drop_gold")])
+loot = Array[ExtResource("3_q7gsd")]([SubResource("Drop_gold"), SubResource("Drop_cloth_bandit"), SubResource("Drop_iron_ore")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

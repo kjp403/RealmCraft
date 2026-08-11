@@ -21,12 +21,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_greatsword_skeleton.tres" id="e18"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="e19"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="e21"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e22"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e23"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e24"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e25"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e26"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e22"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e23"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e24"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e25"]
 
 [node name="sunken_tombs" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -277,8 +276,7 @@ id_to_node = {
 21: NodePath("Gorgon3"),
 22: NodePath("ThroneGuard"),
 23: NodePath("ThroneGuard2"),
-24: NodePath("ThroneGuard3"),
-25: NodePath("SandKing")
+24: NodePath("ThroneGuard3")
 }
 node_to_id = {
 NodePath("TombSkeleton"): 0,
@@ -305,8 +303,7 @@ NodePath("Gorgon2"): 20,
 NodePath("Gorgon3"): 21,
 NodePath("ThroneGuard"): 22,
 NodePath("ThroneGuard2"): 23,
-NodePath("ThroneGuard3"): 24,
-NodePath("SandKing"): 25
+NodePath("ThroneGuard3"): 24
 }
 
 [node name="TombSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
@@ -459,30 +456,24 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="SandKing" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
-position = Vector2(4328.0, 1288.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e21")
-weapon = null
-
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e22")]
+[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e21")]
 position = Vector2(4008.0, 5416.0)
-npc_resource = ExtResource("e23")
+npc_resource = ExtResource("e22")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e24")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e23")]
 position = Vector2(4328.0, 5576.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e24")]
+[node name="Entrance" parent="." instance=ExtResource("e23")]
 position = Vector2(4328.0, 5576.0)
 warper_id = 41
 
-[node name="AscentPortal" parent="." instance=ExtResource("e25")]
+[node name="AscentPortal" parent="." instance=ExtResource("e24")]
 position = Vector2(4328.0, 5576.0)
 portal_color = Color(0.72, 0.6, 0.3, 1)
 destination_label = "Desert"
-target_instance = ExtResource("e26")
+target_instance = ExtResource("e25")
 warper_id = 141
 target_id = 51

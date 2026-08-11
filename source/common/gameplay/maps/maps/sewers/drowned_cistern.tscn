@@ -17,12 +17,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_zombie_giant.tres" id="e14"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cistern_hulk.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_slime.tres" id="e16"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="e17"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/drowned_keeper_vess.tres" id="e19"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e21"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="e22"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/sewers/drowned_keeper_vess.tres" id="e18"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="e21"]
 
 [node name="drowned_cistern" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -1544,8 +1543,7 @@ id_to_node = {
 20: NodePath("TankGuard2"),
 21: NodePath("TankGuard3"),
 22: NodePath("Slime"),
-23: NodePath("Slime2"),
-24: NodePath("CisternSovereign")
+23: NodePath("Slime2")
 }
 node_to_id = {
 NodePath("Crawler"): 0,
@@ -1571,8 +1569,7 @@ NodePath("TankGuard"): 19,
 NodePath("TankGuard2"): 20,
 NodePath("TankGuard3"): 21,
 NodePath("Slime"): 22,
-NodePath("Slime2"): 23,
-NodePath("CisternSovereign"): 24
+NodePath("Slime2"): 23
 }
 
 [node name="Crawler" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
@@ -1719,30 +1716,24 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
 
-[node name="CisternSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("e9")]
-position = Vector2(4488.0, 3048.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e17")
-weapon = null
-
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="DrownedKeeperVess" parent="NPCs" instance=ExtResource("e18")]
+[node name="DrownedKeeperVess" parent="NPCs" instance=ExtResource("e17")]
 position = Vector2(4168.0, 5512.0)
-npc_resource = ExtResource("e19")
+npc_resource = ExtResource("e18")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e20")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e19")]
 position = Vector2(4488.0, 5672.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e20")]
+[node name="Entrance" parent="." instance=ExtResource("e19")]
 position = Vector2(4488.0, 5672.0)
 warper_id = 43
 
-[node name="AscentPortal" parent="." instance=ExtResource("e21")]
+[node name="AscentPortal" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 5672.0)
 portal_color = Color(0, 0.5, 0.34, 1)
 destination_label = "The Sewers"
-target_instance = ExtResource("e22")
+target_instance = ExtResource("e21")
 warper_id = 143
 target_id = 53
