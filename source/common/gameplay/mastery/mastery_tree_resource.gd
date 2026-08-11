@@ -19,8 +19,8 @@ func get_node_by_id(node_id: StringName) -> MasteryNode:
 	return null
 
 
-## Sum of every node's cost — design target: equals the points available at
-## mastery cap, so a capped player can own the whole tree.
+## Sum of every node's cost. Trees are intentionally cheaper than the full
+## level-99 point budget so players specialize instead of owning everything.
 func total_cost() -> int:
 	var total: int = 0
 	for node: MasteryNode in nodes:

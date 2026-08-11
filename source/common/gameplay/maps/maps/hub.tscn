@@ -467,7 +467,7 @@ sprite_frames = SubResource("SpriteFrames_660kg")
 frame_progress = 0.763101
 
 [node name="WorkBenchStation" parent="." unique_id=923273387 instance=ExtResource("25_og50n")]
-position = Vector2(-632, 184)
+position = Vector2(-539, -119)
 station = ExtResource("30_2opns")
 metadata/_edit_group_ = true
 

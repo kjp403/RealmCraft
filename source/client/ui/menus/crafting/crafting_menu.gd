@@ -577,11 +577,14 @@ func _craft_once() -> bool:
 	var data: Dictionary = result[0]
 	var verb: String = "Cooked" if _is_cooking_station() else "Crafted"
 	Toaster.toast("%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)])
+	var craft_level: int = int(data.get("level", 0))
+	if craft_level > 0 and _station != null:
+		ClientState.set_skill_level(_station.profession, craft_level)
 	if data.get("leveled_up", false) and ClientState.local_player != null:
 		LevelUpFx.celebrate_skill(
 			ClientState.local_player,
 			_station.profession,
-			int(data.get("level", 1)),
+			craft_level,
 		)
 	await _refresh()
 	return true
