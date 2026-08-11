@@ -40,7 +40,7 @@ const AFK_RETALIATE_MS: int = 5 * 60 * 1000
 
 ## Fallback move speed until the synced MOVE_SPEED stat arrives. Actual movement
 ## reads the stat (see process_movement) so AGILITY / gear speed bonuses apply.
-var speed: float = 90.0
+var speed: float = 112.5
 var hand_pivot_speed: float = 17.5
 
 var input_direction: Vector2 = Vector2.ZERO

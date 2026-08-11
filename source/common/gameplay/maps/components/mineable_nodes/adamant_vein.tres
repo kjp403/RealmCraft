@@ -9,9 +9,9 @@ script = ExtResource("1_script")
 display_name = "Adamant Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 38
+&"mining": 58
 })
-required_level = 30
+required_level = 50
 required_tool = &"pickaxe"
 extraction_hp = 6
 min_charges = 3

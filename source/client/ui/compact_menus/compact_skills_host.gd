@@ -1,6 +1,6 @@
 extends PanelContainer
-## Dock Skills panel — OSRS-style cells for the 7 live skills only.
-## Click a skill for gather/craft sources and XP detail.
+## Dock Skills panel — OSRS-style cells for live skills, plus a Combat tab
+## that lists mastery-gated weapons per profession (Swordsmanship, etc.).
 
 const PANEL_SIZE := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
@@ -22,6 +22,8 @@ const SKILL_ORDER: Array[String] = [
 	"slayer",
 ]
 
+enum Mode { SKILLS, COMBAT }
+
 @onready var title_label: Label = (
 	$MarginContainer/MainColumn/Header/TitleLabel
 )
@@ -35,12 +37,16 @@ const SKILL_ORDER: Array[String] = [
 	$MarginContainer/MainColumn/Content
 )
 
+var _mode: Mode = Mode.SKILLS
+var _mode_tabs: HBoxContainer
 var _skills: Dictionary = {}
 var _skills_grid: GridContainer
 var _grid_root: Control
 var _detail_root: VBoxContainer
+var _combat_root: Control
 var _total_level_bar: Label
 var _selected_slug: String = ""
+var _selected_combat_category: StringName = &""
 var _back_button: Button
 
 
@@ -80,12 +86,38 @@ func _ready() -> void:
 
 
 func _build_layout() -> void:
+	_mode_tabs = HBoxContainer.new()
+	_mode_tabs.add_theme_constant_override(&"separation", 4)
+	_mode_tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(_mode_tabs)
+	# Put tabs above grid by rebuilding: content is MarginContainer, children stack?
+	# MarginContainer only shows one child well — use a VBox as sole content child.
+	for child: Node in content.get_children():
+		content.remove_child(child)
+		child.queue_free()
+
+	var root := VBoxContainer.new()
+	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_theme_constant_override(&"separation", 4)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	content.add_child(root)
+
+	_mode_tabs = HBoxContainer.new()
+	_mode_tabs.add_theme_constant_override(&"separation", 4)
+	root.add_child(_mode_tabs)
+	var mode_group := ButtonGroup.new()
+	var skills_tab := _make_mode_tab("Skills", Mode.SKILLS, mode_group)
+	var combat_tab := _make_mode_tab("Combat", Mode.COMBAT, mode_group)
+	_mode_tabs.add_child(skills_tab)
+	_mode_tabs.add_child(combat_tab)
+	skills_tab.button_pressed = true
+
 	_grid_root = VBoxContainer.new()
 	_grid_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_grid_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_grid_root.add_theme_constant_override(&"separation", 4)
-	_grid_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	content.add_child(_grid_root)
+	root.add_child(_grid_root)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -121,27 +153,79 @@ func _build_layout() -> void:
 	_detail_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail_root.add_theme_constant_override(&"separation", 6)
-	_detail_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	content.add_child(_detail_root)
+	root.add_child(_detail_root)
+
+	_combat_root = VBoxContainer.new()
+	_combat_root.visible = false
+	_combat_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_combat_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_combat_root.add_theme_constant_override(&"separation", 4)
+	root.add_child(_combat_root)
+
+
+func _make_mode_tab(label: String, mode: Mode, group: ButtonGroup) -> Button:
+	var btn := Button.new()
+	btn.text = label
+	btn.toggle_mode = true
+	btn.button_group = group
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.add_theme_font_size_override(&"font_size", 11)
+	btn.pressed.connect(_set_mode.bind(mode))
+	return btn
+
+
+func _set_mode(mode: Mode) -> void:
+	_mode = mode
+	_selected_slug = ""
+	_selected_combat_category = &""
+	_detail_root.visible = false
+	if mode == Mode.SKILLS:
+		_combat_root.visible = false
+		_grid_root.visible = true
+		title_label.text = "Skills"
+		_build_skills_grid()
+		_total_level_bar.text = "Total level: %d" % _total_unlocked_level()
+	else:
+		_grid_root.visible = false
+		_combat_root.visible = true
+		title_label.text = "Combat"
+		_build_combat_categories()
+
 
 
 func _on_close_pressed() -> void:
 	if _detail_root.visible:
+		if _mode == Mode.COMBAT and _selected_combat_category != &"":
+			_selected_combat_category = &""
+			_detail_root.visible = false
+			_combat_root.visible = true
+			title_label.text = "Combat"
+			_build_combat_categories()
+			return
 		_show_grid()
+		return
+	if _mode == Mode.COMBAT and _combat_root.visible and _selected_combat_category != &"":
+		_selected_combat_category = &""
+		_build_combat_categories()
 		return
 	hide()
 
 
 func _on_visibility_changed() -> void:
 	if visible:
-		_show_grid()
+		if _mode == Mode.COMBAT:
+			_set_mode(Mode.COMBAT)
+		else:
+			_show_grid()
 		_refresh()
 	else:
 		_selected_slug = ""
+		_selected_combat_category = &""
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
-	if visible:
+	if visible and _mode == Mode.SKILLS:
 		_refresh()
 
 
@@ -161,6 +245,8 @@ func _refresh() -> void:
 func _on_skills_received(data: Dictionary) -> void:
 	_skills = data.get("skills", {})
 	var total_level: int = _total_unlocked_level()
+	if _mode != Mode.SKILLS:
+		return
 	if _detail_root.visible and _selected_slug != "":
 		title_label.text = str(
 			(_skills.get(_selected_slug, {}) as Dictionary).get(
@@ -183,8 +269,11 @@ func _total_unlocked_level() -> int:
 
 func _show_grid() -> void:
 	_selected_slug = ""
+	_selected_combat_category = &""
 	_detail_root.visible = false
+	_combat_root.visible = false
 	_grid_root.visible = true
+	_mode = Mode.SKILLS
 	title_label.text = "Skills"
 	_build_skills_grid()
 	_total_level_bar.text = "Total level: %d" % _total_unlocked_level()
@@ -193,8 +282,117 @@ func _show_grid() -> void:
 func _show_detail(slug: String) -> void:
 	_selected_slug = slug
 	_grid_root.visible = false
+	_combat_root.visible = false
 	_detail_root.visible = true
 	_rebuild_detail()
+
+
+func _build_combat_categories() -> void:
+	for child: Node in _combat_root.get_children():
+		_combat_root.remove_child(child)
+		child.queue_free()
+
+	var hint := Label.new()
+	hint.text = "Mastery gear unlocks"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override(&"font_size", 11)
+	hint.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	_combat_root.add_child(hint)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_combat_root.add_child(scroll)
+	DragScroll.enable(scroll)
+
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override(&"separation", 4)
+	scroll.add_child(list)
+
+	for cat: StringName in MasteryEquipmentGuide.CATEGORY_ORDER:
+		var btn := Button.new()
+		btn.text = MasteryEquipmentGuide.display_name_for(cat)
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.custom_minimum_size = Vector2(0, 28)
+		btn.pressed.connect(_show_combat_category.bind(cat))
+		list.add_child(btn)
+
+
+func _show_combat_category(category: StringName) -> void:
+	_selected_combat_category = category
+	_combat_root.visible = false
+	_detail_root.visible = true
+	title_label.text = MasteryEquipmentGuide.display_name_for(category)
+	_rebuild_combat_detail()
+
+
+func _back_to_combat_categories() -> void:
+	_selected_combat_category = &""
+	_detail_root.visible = false
+	_combat_root.visible = true
+	title_label.text = "Combat"
+	_build_combat_categories()
+
+
+func _rebuild_combat_detail() -> void:
+	for child: Node in _detail_root.get_children():
+		_detail_root.remove_child(child)
+		child.queue_free()
+
+	var back := Button.new()
+	back.text = "← Combat"
+	back.focus_mode = Control.FOCUS_NONE
+	back.add_theme_font_size_override(&"font_size", 10)
+	back.pressed.connect(_back_to_combat_categories)
+	_detail_root.add_child(back)
+
+	var blurb := Label.new()
+	blurb.text = "Mastery level required to equip"
+	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	blurb.add_theme_font_size_override(&"font_size", 10)
+	blurb.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+	_detail_root.add_child(blurb)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_detail_root.add_child(scroll)
+	DragScroll.enable(scroll)
+
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override(&"separation", 4)
+	scroll.add_child(list)
+
+	var entries: Array[Dictionary] = MasteryEquipmentGuide.weapons_for(
+		_selected_combat_category
+	)
+	if entries.is_empty():
+		var empty := Label.new()
+		empty.text = "No weapons found for this mastery."
+		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty.add_theme_color_override(&"font_color", Color(0.65, 0.66, 0.7))
+		list.add_child(empty)
+		return
+
+	for entry: Dictionary in entries:
+		var item: Item = entry.get("item", null) as Item
+		if item == null:
+			continue
+		var req: int = int(entry.get("level", 0))
+		var player_level: int = 0
+		var local_player := _local_player()
+		if local_player != null and local_player.player_resource != null:
+			player_level = local_player.player_resource.mastery_level_of(
+				_selected_combat_category
+			)
+		list.add_child(_make_source_row(item, req, player_level))
+
+
+func _local_player() -> Player:
+	return ClientState.local_player as Player
 
 
 func _build_skills_grid() -> void:

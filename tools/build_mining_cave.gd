@@ -415,14 +415,20 @@ func _build_bridges(
 # --- Content ----------------------------------------------------------------
 
 func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
+	# Copper/tin stay in the Starting Area — Mining Cave focuses on mid+ ores.
+	# East cluster (~tile 48,13 ≈ world 1550,430) is the Mining-50 deep vault:
+	# adamant + runite only. Iron 2x, coal 5x vs original counts, plus mithril.
 	var edges := MapKit.edge_cells(walk, blocked)
 	var zones := [
-		{"kind": "copper", "c": Vector2i(12, 22), "r": 9, "n": 5},
-		{"kind": "tin", "c": Vector2i(17, 31), "r": 8, "n": 4},
-		{"kind": "iron", "c": Vector2i(33, 27), "r": 10, "n": 6},
-		{"kind": "iron", "c": Vector2i(52, 30), "r": 9, "n": 4},
-		{"kind": "coal", "c": Vector2i(28, 12), "r": 9, "n": 5},
-		{"kind": "coal", "c": Vector2i(48, 13), "r": 9, "n": 4},
+		{"kind": "iron", "c": Vector2i(33, 27), "r": 11, "n": 12},
+		{"kind": "iron", "c": Vector2i(52, 30), "r": 10, "n": 8},
+		{"kind": "coal", "c": Vector2i(28, 12), "r": 10, "n": 15},
+		{"kind": "coal", "c": Vector2i(20, 28), "r": 9, "n": 15},
+		{"kind": "coal", "c": Vector2i(40, 34), "r": 9, "n": 15},
+		{"kind": "mithril", "c": Vector2i(36, 18), "r": 8, "n": 3},
+		{"kind": "mithril", "c": Vector2i(44, 28), "r": 8, "n": 2},
+		{"kind": "adamant", "c": Vector2i(48, 13), "r": 7, "n": 4},
+		{"kind": "runite", "c": Vector2i(50, 11), "r": 6, "n": 2},
 	]
 	var used: Dictionary = {}
 	var out: Array = []
@@ -492,12 +498,13 @@ func _write_tscn(
 	portal: Vector2i
 ) -> void:
 	var ore_nodes := ""
-	var counts := {"copper": 0, "tin": 0, "iron": 0, "coal": 0}
+	var counts := {"iron": 0, "coal": 0, "mithril": 0, "adamant": 0, "runite": 0}
 	var res_ids := {
-		"copper": "11_copper",
-		"tin": "12_tin",
 		"iron": "13_iron",
 		"coal": "14_coal",
+		"mithril": "15_mith",
+		"adamant": "16_adam",
+		"runite": "17_rune",
 	}
 	for ore in ores:
 		var kind: String = ore["kind"]
@@ -539,10 +546,12 @@ func _write_tscn(
 [ext_resource type=\"PackedScene\" path=\"res://source/common/gameplay/lighting/campfire.tscn\" id=\"8_camp\"]
 [ext_resource type=\"Texture2D\" path=\"res://source/common/gameplay/lighting/light_radial.tres\" id=\"9_glow\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://dqo57ux3v3lkq\" path=\"res://source/common/gameplay/maps/components/mineable_node.tscn\" id=\"10_mine\"]
-[ext_resource type=\"Resource\" uid=\"uid://d08wf1j2mhlc5\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres\" id=\"11_copper\"]
-[ext_resource type=\"Resource\" uid=\"uid://ctinvein001xx\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres\" id=\"12_tin\"]
 [ext_resource type=\"Resource\" uid=\"uid://cutpirmfqwx8b\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres\" id=\"13_iron\"]
 [ext_resource type=\"Resource\" uid=\"uid://dtpviov364y0b\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres\" id=\"14_coal\"]
+[ext_resource type=\"Resource\" uid=\"uid://cmithrilvein01\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/mithril_vein.tres\" id=\"15_mith\"]
+[ext_resource type=\"Resource\" uid=\"uid://cadamantvein01\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres\" id=\"16_adam\"]
+[ext_resource type=\"Resource\" uid=\"uid://crunitevein001\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres\" id=\"17_rune\"]
+[ext_resource type=\"Script\" path=\"res://source/common/gameplay/maps/components/skill_level_gate.gd\" id=\"18_gate\"]
 
 [node name=\"mining_cave\" type=\"Node2D\" node_paths=PackedStringArray(\"replicated_props_container\")]
 y_sort_enabled = true
@@ -596,6 +605,15 @@ node_to_id = {}
 [node name=\"MineableNodes\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
 %s
+
+[node name=\"DeepVeinGate\" type=\"StaticBody2D\" parent=\".\"]
+position = Vector2(1520, 480)
+script = ExtResource(\"18_gate\")
+required_skill = &\"mining\"
+required_level = 50
+gate_size = Vector2(120, 28)
+label_text = \"Mining 50+\"
+
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]
 position = Vector2(%s, %s)
 

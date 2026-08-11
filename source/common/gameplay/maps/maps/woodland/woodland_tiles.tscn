@@ -627,7 +627,49 @@ id_to_node = {
 44: NodePath("WoodlandRat12"),
 45: NodePath("WoodlandRat13"),
 46: NodePath("WoodlandRat14")
-}
+},
+47: NodePath("WoodlandRat15"),
+48: NodePath("WoodlandRat16"),
+49: NodePath("WoodlandRat17"),
+50: NodePath("WoodlandRat18"),
+51: NodePath("WoodlandRat19"),
+52: NodePath("WoodlandRat20"),
+53: NodePath("WoodlandRat21"),
+54: NodePath("WoodlandRat22"),
+55: NodePath("WoodlandRat23"),
+56: NodePath("WoodlandRat24"),
+57: NodePath("WoodlandRat25"),
+58: NodePath("WoodlandRat26"),
+59: NodePath("WoodlandRat27"),
+60: NodePath("WoodlandRat28"),
+61: NodePath("WoodlandRat29"),
+62: NodePath("WoodlandRat30"),
+63: NodePath("WoodlandRat31"),
+64: NodePath("WoodlandRat32"),
+65: NodePath("WoodlandRat33"),
+66: NodePath("WoodlandRat34"),
+67: NodePath("WoodlandRat35"),
+68: NodePath("WoodlandRat36"),
+69: NodePath("WoodlandRat37"),
+70: NodePath("WoodlandRat38"),
+71: NodePath("WoodlandRat39"),
+72: NodePath("WoodlandRat40"),
+73: NodePath("WoodlandRat41"),
+74: NodePath("WoodlandRat42"),
+75: NodePath("WoodlandRat43"),
+76: NodePath("WoodlandRat44"),
+77: NodePath("WoodlandRat45"),
+78: NodePath("WoodlandRat46"),
+79: NodePath("WoodlandRat47"),
+80: NodePath("WoodlandRat48"),
+81: NodePath("WoodlandRat49"),
+82: NodePath("WoodlandRat50"),
+83: NodePath("WoodlandRat51"),
+84: NodePath("WoodlandRat52"),
+85: NodePath("WoodlandRat53"),
+86: NodePath("WoodlandRat54"),
+87: NodePath("WoodlandRat55"),
+88: NodePath("WoodlandRat56")
 node_to_id = {
 NodePath("GateRunt1"): 0,
 NodePath("GateRunt2"): 1,
@@ -675,7 +717,49 @@ NodePath("WoodlandRat10"): 42,
 NodePath("WoodlandRat11"): 43,
 NodePath("WoodlandRat12"): 44,
 NodePath("WoodlandRat13"): 45,
-NodePath("WoodlandRat14"): 46
+NodePath("WoodlandRat14"): 46,
+NodePath("WoodlandRat15"): 47,
+NodePath("WoodlandRat16"): 48,
+NodePath("WoodlandRat17"): 49,
+NodePath("WoodlandRat18"): 50,
+NodePath("WoodlandRat19"): 51,
+NodePath("WoodlandRat20"): 52,
+NodePath("WoodlandRat21"): 53,
+NodePath("WoodlandRat22"): 54,
+NodePath("WoodlandRat23"): 55,
+NodePath("WoodlandRat24"): 56,
+NodePath("WoodlandRat25"): 57,
+NodePath("WoodlandRat26"): 58,
+NodePath("WoodlandRat27"): 59,
+NodePath("WoodlandRat28"): 60,
+NodePath("WoodlandRat29"): 61,
+NodePath("WoodlandRat30"): 62,
+NodePath("WoodlandRat31"): 63,
+NodePath("WoodlandRat32"): 64,
+NodePath("WoodlandRat33"): 65,
+NodePath("WoodlandRat34"): 66,
+NodePath("WoodlandRat35"): 67,
+NodePath("WoodlandRat36"): 68,
+NodePath("WoodlandRat37"): 69,
+NodePath("WoodlandRat38"): 70,
+NodePath("WoodlandRat39"): 71,
+NodePath("WoodlandRat40"): 72,
+NodePath("WoodlandRat41"): 73,
+NodePath("WoodlandRat42"): 74,
+NodePath("WoodlandRat43"): 75,
+NodePath("WoodlandRat44"): 76,
+NodePath("WoodlandRat45"): 77,
+NodePath("WoodlandRat46"): 78,
+NodePath("WoodlandRat47"): 79,
+NodePath("WoodlandRat48"): 80,
+NodePath("WoodlandRat49"): 81,
+NodePath("WoodlandRat50"): 82,
+NodePath("WoodlandRat51"): 83,
+NodePath("WoodlandRat52"): 84,
+NodePath("WoodlandRat53"): 85,
+NodePath("WoodlandRat54"): 86,
+NodePath("WoodlandRat55"): 87,
+NodePath("WoodlandRat56"): 88
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -962,6 +1046,216 @@ debug_draw_ranges = false
 enemy_data = ExtResource("36_wrat")
 weapon = null
 
+
+[node name="WoodlandRat15" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1368, 176)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat16" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(672, 392)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat17" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1560, 904)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat18" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1856, 240)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat19" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(952, 176)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat20" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(560, 712)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat21" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(192, 368)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat22" parent="ReplicatedPropsContainer" unique_id=1900001022 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1688, 928)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat23" parent="ReplicatedPropsContainer" unique_id=1900001023 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(800, 320)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat24" parent="ReplicatedPropsContainer" unique_id=1900001024 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1768, 824)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat25" parent="ReplicatedPropsContainer" unique_id=1900001025 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(872, 760)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat26" parent="ReplicatedPropsContainer" unique_id=1900001026 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1496, 192)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat27" parent="ReplicatedPropsContainer" unique_id=1900001027 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(336, 456)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat28" parent="ReplicatedPropsContainer" unique_id=1900001028 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1368, 552)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat29" parent="ReplicatedPropsContainer" unique_id=1900001029 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(656, 1192)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat30" parent="ReplicatedPropsContainer" unique_id=1900001030 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(472, 960)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat31" parent="ReplicatedPropsContainer" unique_id=1900001031 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(2040, 864)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat32" parent="ReplicatedPropsContainer" unique_id=1900001032 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1216, 912)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat33" parent="ReplicatedPropsContainer" unique_id=1900001033 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1824, 496)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat34" parent="ReplicatedPropsContainer" unique_id=1900001034 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1896, 656)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat35" parent="ReplicatedPropsContainer" unique_id=1900001035 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1224, 440)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat36" parent="ReplicatedPropsContainer" unique_id=1900001036 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1264, 1152)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat37" parent="ReplicatedPropsContainer" unique_id=1900001037 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(912, 392)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat38" parent="ReplicatedPropsContainer" unique_id=1900001038 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(352, 848)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat39" parent="ReplicatedPropsContainer" unique_id=1900001039 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1664, 616)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat40" parent="ReplicatedPropsContainer" unique_id=1900001040 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(264, 568)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat41" parent="ReplicatedPropsContainer" unique_id=1900001041 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(2056, 736)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat42" parent="ReplicatedPropsContainer" unique_id=1900001042 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(2008, 1112)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat43" parent="ReplicatedPropsContainer" unique_id=1900001043 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1456, 744)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat44" parent="ReplicatedPropsContainer" unique_id=1900001044 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1312, 312)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat45" parent="ReplicatedPropsContainer" unique_id=1900001045 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(144, 504)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat46" parent="ReplicatedPropsContainer" unique_id=1900001046 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(184, 1184)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat47" parent="ReplicatedPropsContainer" unique_id=1900001047 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1832, 1072)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat48" parent="ReplicatedPropsContainer" unique_id=1900001048 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1832, 1208)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat49" parent="ReplicatedPropsContainer" unique_id=1900001049 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(312, 688)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat50" parent="ReplicatedPropsContainer" unique_id=1900001050 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1056, 760)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat51" parent="ReplicatedPropsContainer" unique_id=1900001051 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(600, 896)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat52" parent="ReplicatedPropsContainer" unique_id=1900001052 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(552, 296)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat53" parent="ReplicatedPropsContainer" unique_id=1900001053 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1944, 784)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat54" parent="ReplicatedPropsContainer" unique_id=1900001054 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1048, 1024)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat55" parent="ReplicatedPropsContainer" unique_id=1900001055 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(1696, 360)
+enemy_data = ExtResource("36_wrat")
+
+[node name="WoodlandRat56" parent="ReplicatedPropsContainer" unique_id=1900001056 instance=ExtResource("3_2hhap")]
+y_sort_enabled = true
+position = Vector2(2032, 256)
+enemy_data = ExtResource("36_wrat")
 [node name="Entrance" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
 warper_id = 23
