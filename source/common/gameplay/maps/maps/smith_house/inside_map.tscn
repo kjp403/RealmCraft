@@ -26,7 +26,7 @@
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/crafting/visuals/anvil_sprite_frames.tres" id="35_anvil_frames"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/crafting/visuals/furnace_sprite_frames.tres" id="36_furnace_frames"]
 [ext_resource type="Texture2D" uid="uid://d1o56hk11y82e" path="res://assets/sprites/environment/structures/stations/workbench/workbench.png" id="37_wb_tex"]
-[ext_resource type="Texture2D" uid="uid://cascendedwbtex1" path="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png" id="38_asc_tex"]
+[ext_resource type="Texture2D" uid="uid://cqrq6tvykgy0o" path="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png" id="38_asc_tex"]
 
 [sub_resource type="Resource" id="Resource_h1lk8"]
 script = ExtResource("14_gl3u8")

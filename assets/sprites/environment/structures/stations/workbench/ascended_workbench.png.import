@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cascendedwbtex1"
-path="res://.godot/imported/ascended_workbench.png-ascended422e.ctex"
+uid="uid://cqrq6tvykgy0o"
+path="res://.godot/imported/ascended_workbench.png-0b900a594a101710a24bc108cfbfbd45.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png"
-dest_files=["res://.godot/imported/ascended_workbench.png-ascended422e.ctex"]
+dest_files=["res://.godot/imported/ascended_workbench.png-0b900a594a101710a24bc108cfbfbd45.ctex"]
 
 [params]
 
