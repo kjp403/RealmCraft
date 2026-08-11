@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://cnpcdesertcamel1"]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_i"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_d"]
+[ext_resource type="Script" uid="uid://tymg4stz49lmb" path="res://source/common/gameplay/characters/npc/interactions/warp_interaction.gd" id="3_w"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="4_dest"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="SpriteFrames" uid="uid://bcamelframes001" path="res://source/common/gameplay/characters/sprite_frames/camel.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Resource_dial"]
+script = ExtResource("2_d")
+lines = Array[String](["I've crossed those dunes more times than I've shed fur. Heat, tombs, and sand that bites.", "Recommended around levels 25–30. Pack water. Pack patience."])
+label_override = "What's out there?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[sub_resource type="Resource" id="Resource_warp"]
+script = ExtResource("3_w")
+target_instance = ExtResource("4_dest")
+target_id = 25
+destination_label = "Desert"
+label_override = "Travel to the Desert"
+metadata/_custom_type_script = "uid://tymg4stz49lmb"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Desert Camel"
+skin = ExtResource("6_skin")
+greeting = "*snorts* Ready for the dunes? I know the way."
+interactions = Array[ExtResource("1_i")]([SubResource("Resource_dial"), SubResource("Resource_warp")])
+metadata/_custom_type_script = "uid://ddps5vwhnf048"
