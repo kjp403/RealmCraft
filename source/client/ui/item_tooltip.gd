@@ -21,7 +21,11 @@ const STAT_ROLE: Dictionary = {
 	&"mana_max": &"utility", &"mana_regen": &"utility", &"move_speed": &"utility",
 }
 const WEAPON_COLOR: String = "e0c070"  ## amber — weapon type + power line
-const LEVEL_COLOR: String = "d98080"   ## red — level gate
+const LEVEL_COLOR: String = "d98080"   ## red — level gate the player does NOT meet
+## Muted — a gate the player already satisfies. Still listed (it's real information),
+## but red on a requirement you've met reads as "you can't use this", which is how
+## every bronze tool ended up looking locked to a level-1 character.
+const LEVEL_MET_COLOR: String = "9aa0aa"
 const HEAL_COLOR: String = "82c785"
 const MANA_COLOR: String = "6fb0e0"
 const MUTED_COLOR: String = "9aa0aa"   ## charges and the like
@@ -64,7 +68,7 @@ static func body(item: Item, compare_with: Item = null) -> String:
 	var own_stats: Dictionary = _modifier_map(item)
 	var other_stats: Dictionary = _modifier_map(compare_with)
 	for entry: Dictionary in item.stat_lines():
-		var line: String = "[color=#%s]%s[/color]" % [_entry_color(entry), str(entry.get("text", ""))]
+		var line: String = "[color=#%s]%s[/color]" % [_entry_color(entry, item), str(entry.get("text", ""))]
 		if compare_with != null and entry.has("stat"):
 			line += _delta_suffix(StringName(entry["stat"]), own_stats, other_stats)
 		stat_block.append(line)
@@ -116,13 +120,37 @@ static func _modifier_map(item: Item) -> Dictionary:
 	return out
 
 
-static func _entry_color(entry: Dictionary) -> String:
+static func _entry_color(entry: Dictionary, item: Item = null) -> String:
 	if entry.has("stat"):
 		return ROLE_COLOR.get(STAT_ROLE.get(entry["stat"], &""), DEFAULT_COLOR)
 	match StringName(entry.get("kind", &"")):
 		&"weapon": return WEAPON_COLOR
-		&"level": return LEVEL_COLOR
+		&"level": return LEVEL_MET_COLOR if _requirement_met(entry, item) else LEVEL_COLOR
 		&"heal": return HEAL_COLOR
 		&"mana": return MANA_COLOR
 		&"charges": return MUTED_COLOR
 	return DEFAULT_COLOR
+
+
+## Does the local player satisfy the gate this entry describes? Entries without
+## req_* data (or evaluated before the local player exists, e.g. a shop preview at
+## load) fall back to false, keeping the old cautious red rather than promising
+## access we can't verify.
+static func _requirement_met(entry: Dictionary, item: Item) -> bool:
+	# Profession gate (tools). ClientState mirrors skill levels for exactly this
+	# kind of client-side check, and reads missing skills as level 1.
+	if entry.has("req_skill"):
+		return ClientState.skill_level(StringName(entry["req_skill"])) \
+			>= int(entry.get("req_skill_level", 0))
+
+	var local: LocalPlayer = ClientState.local_player
+	if local == null or local.player_resource == null:
+		return false
+	var res: PlayerResource = local.player_resource
+
+	# Mastery gate: the item owns the "any / one-of these categories" rule.
+	if StringName(entry.get("req_kind", &"")) == &"mastery":
+		return item is GearItem and (item as GearItem).meets_mastery_requirement(res)
+	if entry.has("req_char_level"):
+		return res.level >= int(entry["req_char_level"])
+	return false

@@ -88,10 +88,15 @@ xp_reward = 70
 script = ExtResource("3_ingred")
 item = ExtResource("15_mith_ore")
 
+[sub_resource type="Resource" id="I_mith_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 2
+
 [sub_resource type="Resource" id="R_mithril_bar"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("18_mith_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mith_ore")])
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mith_ore"), SubResource("I_mith_coal")])
 required_level = 20
 xp_reward = 70
 
@@ -99,10 +104,15 @@ xp_reward = 70
 script = ExtResource("3_ingred")
 item = ExtResource("16_adam_ore")
 
+[sub_resource type="Resource" id="I_adam_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 3
+
 [sub_resource type="Resource" id="R_adamant_bar"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("19_adam_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_adam_ore")])
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_adam_ore"), SubResource("I_adam_coal")])
 required_level = 30
 xp_reward = 95
 
@@ -110,10 +120,15 @@ xp_reward = 95
 script = ExtResource("3_ingred")
 item = ExtResource("17_rune_ore")
 
+[sub_resource type="Resource" id="I_rune_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 4
+
 [sub_resource type="Resource" id="R_runite_bar"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("20_rune_bar")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_rune_ore")])
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_rune_ore"), SubResource("I_rune_coal")])
 required_level = 45
 xp_reward = 130
 

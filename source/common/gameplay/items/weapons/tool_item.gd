@@ -65,12 +65,18 @@ func _apply_swing_stats(character: Character) -> void:
 func stat_lines() -> Array[Dictionary]:
 	var lines: Array[Dictionary] = super()
 	if required_skill != &"" and required_skill_level > 0:
+		# req_skill/req_skill_level let the tooltip check the gate against the
+		# viewing player instead of painting every requirement as unmet — a
+		# fresh character is already Woodcutting 1, so "Requires Woodcutting 1"
+		# has no business rendering red.
 		lines.append({
 			"text": "Requires %s Lv %d" % [
 				JobRegistry.display_name(required_skill),
 				required_skill_level,
 			],
 			"kind": &"level",
+			"req_skill": required_skill,
+			"req_skill_level": required_skill_level,
 		})
 	if bonus_yield_chance > 0.0:
 		lines.append({

@@ -53,10 +53,10 @@ static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> in
 	return level * POINTS_PER_LEVEL - spent_cost(entry, tree)
 
 
-## Buys a tree node. The category entry is only CREATED by practice (first
-## kill with the weapon — add_mastery_xp), never by the menu: the first point
-## must be earned, even if earning it takes one kill. Keeps the "you get good
-## at what you practice" fantasy honest from first contact.
+## Buys a tree node. Every category starts at level 1 (see
+## PlayerResource.mastery_level_of), so its first POINTS_PER_LEVEL is spendable
+## from character creation rather than gated behind a first kill — get_mastery
+## creates the entry on demand here.
 static func spend(resource: PlayerResource, category: StringName, node_id: StringName) -> Dictionary:
 	var tree: MasteryTreeResource = tree_for(category)
 	if tree == null:
@@ -64,8 +64,6 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	var node: MasteryNode = tree.get_node_by_id(node_id)
 	if node == null:
 		return {"ok": false, "reason": "unknown_node"}
-	if resource.mastery_level_of(category) <= 0 and not _has_mastery_entry(resource, category):
-		return {"ok": false, "reason": "no_mastery"}
 	var entry: Dictionary = resource.get_mastery(category)
 	var spent: Dictionary = entry["spent"]
 	if spent.has(String(node_id)):

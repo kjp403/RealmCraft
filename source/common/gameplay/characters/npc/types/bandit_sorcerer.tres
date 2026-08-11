@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://cmnt5jyxeim02" path="res://source/common/gameplay/characters/npc/behaviors/weapon_attack.gd" id="92_wpn"]
 [ext_resource type="Resource" uid="uid://5g0cunnuw5g5" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/wand_heal.tres" id="93_wand_heal"]
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="94_cloth"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Attack_heal_ally"]
 script = ExtResource("91_heal")
@@ -32,6 +33,11 @@ item = ExtResource("94_cloth")
 max_amount = 2
 chance = 0.6
 
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("1_e3utq")
+item = ExtResource("bone_item")
+chance = 1.0
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_sorcerer"
@@ -50,6 +56,6 @@ detection_radius = 130
 chase_on_area = true
 xp_reward = 18
 respawn_delay = 20.0
-loot = Array[ExtResource("1_e3utq")]([SubResource("Drop_bandit_wand"), SubResource("Drop_cloth")])
+loot = Array[ExtResource("1_e3utq")]([SubResource("Drop_bandit_wand"), SubResource("Drop_cloth"), SubResource("Drop_bone")])
 metadata/slug = &"bandit_sorcerer"
 metadata/id = 8

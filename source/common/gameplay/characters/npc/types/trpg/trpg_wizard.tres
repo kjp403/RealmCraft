@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="loot_coal"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="loot_iron"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_1ava6")
@@ -27,6 +28,11 @@ script = ExtResource("3_1ava6")
 item = ExtResource("loot_iron")
 max_amount = 2
 chance = 0.3
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_1ava6")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("4_5eljw")
@@ -56,7 +62,7 @@ wander_pause_max_s = 4.0
 xp_reward = 30
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_1ava6")]([SubResource("Drop_gold"), SubResource("Drop_coal"), SubResource("Drop_iron")])
+loot = Array[ExtResource("3_1ava6")]([SubResource("Drop_gold"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_bone")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

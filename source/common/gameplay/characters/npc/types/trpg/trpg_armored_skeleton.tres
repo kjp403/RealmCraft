@@ -19,8 +19,7 @@ chance = 0.9
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_u7tsr")
 item = ExtResource("loot_bone")
-max_amount = 3
-chance = 0.55
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_cloth_bandit"]
 script = ExtResource("3_u7tsr")

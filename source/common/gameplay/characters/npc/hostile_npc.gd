@@ -33,14 +33,23 @@ const RETURN_SPEED_MULTIPLIER: float = 1.4
 ## without being instant.
 const RETURN_REGEN_RATE: float = 0.25
 ## Monsters only regenerate after this long with no chase/attack/damage activity.
-## Stops mid-fight "step out of the mechanic" full heals from idle/return regen.
+## THE one gate on every heal a hostile gets: no mob and no boss recovers a single
+## point while a fight is live (or was live within the window) — stepping out of a
+## mechanic, kiting past the leash, or dying to a boss no longer refills it.
 const OUT_OF_COMBAT_REGEN_DELAY_MS: int = 10000
 
-## % of max HP regenerated per second while idling — catches the edge case
-## of a sniped mob taking damage from outside its detection ring, since
-## that hit can't trigger CHASE if the attacker stays out of range. ~5%/s
-## means a mob recovers from a missed snipe over 5-10 seconds.
-const IDLE_REGEN_RATE: float = 0.05
+# Regen is a RESET, not a passive trickle: the ONLY place a hostile heals is the
+# walk home (RETURNING) plus the top-off on arrival, and only once the out-of-
+# combat window above has fully elapsed. An idling mob below full HP therefore
+# routes itself back through RETURNING — see _process_idle_recovery — which also
+# covers the sniped-from-outside-detection case the old idle trickle used to patch.
+
+## A RETURNING mob is deliberately deaf (no aggro, no re-target) until it's home,
+## so it must never be able to walk forever. The return march steers directly with
+## no pathfinding — a mob that chased around a corner CAN end up shouldering a wall
+## — and a permanently-returning mob in a dungeon room is an uncompletable run.
+## Past this, it finishes the reset wherever it's standing and goes back on duty.
+const RETURN_TIMEOUT_MS: int = 8000
 
 ## A mob holds still (AI suspended via action_root_until_ms) for this long on spawn / respawn so the
 ## summon burst reads on a still body instead of a mob blinking in mid-stride.
@@ -153,6 +162,8 @@ var wander_radius: float = 0.0
 ## Last time this mob was in active combat (chase/attack/damaged/dealt damage).
 ## Regen (idle + return) waits OUT_OF_COMBAT_REGEN_DELAY_MS after this.
 var _last_combat_activity_ms: int = 0
+## When the current RETURNING march began — bounds it via RETURN_TIMEOUT_MS.
+var _return_since_ms: int = 0
 var wander_pause_min_s: float = 1.5
 var wander_pause_max_s: float = 4.0
 ## Idle wander scratch — not synced; clients see position/anim only.
@@ -271,6 +282,10 @@ func _apply_enemy_data() -> void:
 var container: ReplicatedPropsContainer
 var enemy_state: EnemyState = EnemyState.IDLE:
 	set(value):
+		# Stamp each fresh RETURNING so _process_return can bound the march (see
+		# RETURN_TIMEOUT_MS). Cheap and side-effect-free on clients.
+		if value == EnemyState.RETURNING and enemy_state != EnemyState.RETURNING:
+			_return_since_ms = Time.get_ticks_msec()
 		enemy_state = value
 		# Client: a mob that dies mid-windup must not ghost-play its scheduled
 		# dash — abort the smoother's scripted motion the moment DEAD (or its
@@ -889,22 +904,22 @@ func _face_target() -> void:
 		flipped = face_left
 
 
-## Slow passive heal while idling — only after OUT_OF_COMBAT_REGEN_DELAY_MS with
-## no chase/attack/damage. Without the delay, stepping out of a mechanic for a
-## second lets leashing "bosses" slam idle/return regen and refill mid-fight.
-func _process_idle_regen() -> void:
-	# Committed mobs (world/dungeon bosses) don't regen — HP holds until the fight resumes.
-	if _is_committed():
-		return
+## A wounded idle mob doesn't heal where it stands — once the fight has been over
+## for OUT_OF_COMBAT_REGEN_DELAY_MS it walks home and recovers there. Applies to
+## EVERY hostile, committed bosses included: a boss that wipes a party resets like
+## any other mob instead of sitting at 4% HP forever (or, worse, topping itself up
+## while a player is still hitting it). Returns true when it took over the state.
+func _process_idle_recovery() -> bool:
 	if not _can_out_of_combat_regen():
-		return
-	var hmax: float = stats_component.get_stat(Stat.HEALTH_MAX)
-	var current_h: float = stats_component.get_stat(Stat.HEALTH)
-	if current_h >= hmax:
-		return
-	var dt: float = get_physics_process_delta_time()
-	var regen: float = hmax * IDLE_REGEN_RATE * dt
-	stats_component.set_stat(Stat.HEALTH, minf(hmax, current_h + regen))
+		return false
+	if stats_component.get_stat(Stat.HEALTH) >= stats_component.get_stat(Stat.HEALTH_MAX):
+		return false
+	# Already parked on the spawn point: RETURNING resolves it to a full bar on its
+	# very first frame (distance < 10) — no walk, no special case here.
+	enemy_state = EnemyState.RETURNING
+	velocity = Vector2.ZERO
+	_clear_wander_leg(Time.get_ticks_msec(), false)
+	return true
 
 
 func _mark_combat_activity() -> void:
@@ -915,12 +930,13 @@ func _can_out_of_combat_regen() -> bool:
 	return Time.get_ticks_msec() - _last_combat_activity_ms >= OUT_OF_COMBAT_REGEN_DELAY_MS
 
 
-## Idle = regen + optional short strolls around spawn (wander_radius > 0).
-## Combat / return / behavior states never call this — chase_on_area and
-## hit-to-aggro still work unchanged. Direct steering (no A*); wall hits
-## abandon the current leg so goblins don't pin against trees forever.
+## Idle = the out-of-combat recovery check + optional short strolls around spawn
+## (wander_radius > 0). Combat / return / behavior states never call this —
+## chase_on_area and hit-to-aggro still work unchanged. Direct steering (no A*);
+## wall hits abandon the current leg so goblins don't pin against trees forever.
 func _process_idle() -> void:
-	_process_idle_regen()
+	if _process_idle_recovery():
+		return
 	if wander_radius <= 0.0:
 		velocity = Vector2.ZERO
 		return
@@ -1017,12 +1033,24 @@ func _process_return() -> void:
 
 	var distance_from_spawn: float = global_position.distance_to(spawn_position)
 	if distance_from_spawn < 10: # minimum distance from spawn.
-		# True leash reset: once home, snap remaining HP full. Mid-fight
-		# kite-backs never reach here with a fresh combat stamp still warm.
-		if stats_component.get_stat(Stat.HEALTH) < hmax:
-			stats_component.set_stat(Stat.HEALTH, hmax)
-		_clear_wander_leg(Time.get_ticks_msec(), true)
-		enemy_state = EnemyState.IDLE
+		_finish_return(hmax)
+		return
+	# Wall-jammed (or spawn point since made unreachable): give up on the walk
+	# rather than stay a deaf, un-aggroable body forever.
+	if Time.get_ticks_msec() - _return_since_ms > RETURN_TIMEOUT_MS:
+		_finish_return(hmax)
+
+
+## End the march home: top the bar off and go back on duty. The top-off is the
+## leash RESET — but ONLY out of combat. A player who kites a boss past its leash
+## and keeps hitting it all the way home used to get a free full bar the instant it
+## touched the spawn point; now the body just idles wounded until the window is
+## clear, at which point _process_idle_recovery sends it straight back through here.
+func _finish_return(hmax: float) -> void:
+	if stats_component.get_stat(Stat.HEALTH) < hmax and _can_out_of_combat_regen():
+		stats_component.set_stat(Stat.HEALTH, hmax)
+	_clear_wander_leg(Time.get_ticks_msec(), true)
+	enemy_state = EnemyState.IDLE
 
 
 func _process_chase() -> void:
@@ -1362,10 +1390,12 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 
 ## Drops the current target and heads home (used when the target dies or is lost).
 ## A committed mob (enemy_data.leashes == false: bosses + world bosses) never leashes
-## home and never regenerates — it holds its current HP and just idles in place when it
-## loses its target, re-aggroing via _find_targets the moment a player is back in reach.
-## You can't reset a boss by dying or running off; with nobody around it simply idles.
-## (Distance-leashing mobs keep the normal march-home + regen.)
+## home MID-FIGHT — it holds its ground and its current HP, re-aggroing via
+## _find_targets the moment a player is back in reach, so you can't shed a boss by
+## stepping over an invisible line. Only once the fight has been over for the full
+## OUT_OF_COMBAT_REGEN_DELAY_MS does _process_idle_recovery walk it home to reset.
+## (Distance-leashing mobs start that march immediately on the leash break instead,
+## but they don't heal any earlier — same 10s gate on the regen itself.)
 func _is_committed() -> bool:
 	return enemy_data != null and not enemy_data.leashes
 

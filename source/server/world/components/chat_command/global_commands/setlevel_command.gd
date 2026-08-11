@@ -21,8 +21,8 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "%s must be online." % target.label()
 
 	var new_level: int = args[2].to_int()
-	if new_level < 1 or new_level > 20:
-		return "Level must be between 1 and 20."
+	if new_level < 1 or new_level > PlayerResource.COMBAT_LEVEL_CAP:
+		return "Level must be between 1 and %d." % PlayerResource.COMBAT_LEVEL_CAP
 
 	var ws: WorldServer = server_instance.world_server
 	var res: PlayerResource = target.resource
@@ -30,15 +30,21 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	res.level = new_level
 	res.experience = 0
 	# Compensate the attribute-point gain that would have happened naturally.
+	# NOTE the level set here is overwritten the next time a mastery or Slayer level
+	# lands (level is derived from those now) and recomputed on next login — this
+	# command is a temporary override for testing, not a durable grant.
 	var levels_jumped: int = new_level - level_before
+	var points_granted: int = 0
 	if levels_jumped > 0:
-		res.available_attributes_points += levels_jumped * PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL
+		points_granted = (PlayerResource.attribute_points_at_level(new_level)
+			- PlayerResource.attribute_points_at_level(level_before))
+		res.available_attributes_points += points_granted
 
 	ws.data_push.rpc_id(target.peer_id, &"combat.reward", {
 		"xp": 0,
 		"level": res.level,
 		"levels_gained": maxi(0, levels_jumped),
-		"points_gained": maxi(0, levels_jumped * PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL),
+		"points_gained": points_granted,
 		"experience": 0,
 		"xp_to_next": res.level_xp_to_next(),
 		"loot": [],

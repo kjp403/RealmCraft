@@ -31,8 +31,13 @@ const BASE_STATS: Dictionary[StringName, float] = {
 ## Free max HP per level past 1 — the PvP durability floor: levels buy baseline,
 ## attributes buy specialization, so no build can opt into being one-tapped
 ## (docs/pvp_balance.md). Composed into spawn stats (instance_server) and applied
-## live on level-up (leveled_up signal). L20 glass = 145 HP ≈ 3 basics to kill.
-const HEALTH_PER_LEVEL: float = 5.0
+## live on level-up (level_gained signal).
+##
+## Was 5.0 across the old 1–20 ladder (95 free HP at cap). The ladder is now 1–126
+## (mastery-derived), so this is scaled to hold that TOTAL roughly flat — 0.76 ×
+## 125 ≈ 95 — rather than handing out 6× the free health. Retune this if you want
+## max-level characters tankier; it is the single dial for it.
+const HEALTH_PER_LEVEL: float = 0.76
 
 @export var player_id: int
 @export var account_name: String
@@ -227,18 +232,19 @@ func init(
 	skin_id = _skin_id
 
 
+## LEGACY manual level bump — kept for the /setlevel admin command only. Normal
+## progression goes through [method sync_combat_level], which derives the level
+## from masteries and banks the matching attribute points.
 func level_up() -> void:
-	available_attributes_points += ATTRIBUTE_POINTS_PER_LEVEL
+	available_attributes_points += attribute_points_at_level(level + 1) - attribute_points_at_level(level)
 	level += 1
 	level_gained.emit()
 
 
-## Character xp to advance a level: one clean linear-incremental curve — level N
-## costs N × this. It's already super-linear, so each level is harder than the
-## last (19→20 needs ~19× the first level) and the late game gets meaty on its
-## own — no breakpoints or special-casing. Shape the PACING via xp SOURCES (quest
-## rewards + mob xp), which is the honest, flexible lever. Total to cap (20) with
-## base 70 ≈ 13,300.
+## LEGACY character-xp curve. [member level] is no longer earned this way — it is
+## DERIVED from mastery/Slayer levels (see [method derived_combat_level]). This
+## constant and [member experience] survive only so the lifetime "adventure xp"
+## counter, its save column, and the progression UI keep working unchanged.
 const LEVEL_XP_BASE: int = 70
 
 
@@ -246,9 +252,86 @@ func level_xp_to_next() -> int:
 	return LEVEL_XP_BASE * maxi(1, level)
 
 
-## Adds character experience, applying any level-ups (each grants attribute points via
-## level_up). Returns {"level", "experience", "levels_gained", "points_gained"} so the
-## caller can report progress to the client.
+# ---------------------------------------------------------------------------
+# Combat level — derived from masteries, OSRS-style
+# ---------------------------------------------------------------------------
+
+## The five weapon masteries that define a character's combat level: Swordsmanship,
+## Heavy Weapons, Archery, Battlemage and Arcanist. These and ONLY these — Slayer is
+## a support skill and does not contribute, nor do the gathering/crafting jobs.
+const COMBAT_STYLE_CATEGORIES: Array[StringName] = [&"sword", &"hammer", &"bow", &"wand", &"book"]
+
+## Combat level with all five masteries at 99. 126 is OSRS's cap, kept deliberately:
+## it reads as a combat level to anyone who has played OSRS, and the weights below
+## land on it exactly rather than by fudge.
+const COMBAT_LEVEL_CAP: int = 126
+
+## 7/11 each, applied to (best mastery + mean of all five): 198 × 7/11 = 126 exactly,
+## and a fresh character (1 + 1) floors to 1.
+const COMBAT_LEVEL_NUMERATOR: int = 7
+const COMBAT_LEVEL_DENOMINATOR: int = 11
+
+
+## Character/combat level implied by the five weapon masteries:
+##   floor( (best mastery + mean of all five) × 7/11 ), clamped to 1..126
+##
+## Mirrors OSRS's SHAPE — a "best offensive style" term plus a broad term covering
+## everything you've trained — using the skills Arkenelle actually has. The two
+## halves pull in different directions on purpose:
+##   - the BEST term means specialising is always rewarded, and a specialist is
+##     never stuck at the bottom (99 in one weapon alone = level 76)
+##   - the MEAN term means the 126 cap is reserved for a character who has trained
+##     all five, so combat level still says something breadth-wise
+## Slayer is deliberately absent: it is earned through the same kills that already
+## feed these masteries, so counting it would double-count the same activity.
+func derived_combat_level() -> int:
+	var best_style: int = 1
+	var total: int = 0
+	for category: StringName in COMBAT_STYLE_CATEGORIES:
+		var mastery_level: int = int(get_mastery(category).get("level", 1))
+		best_style = maxi(best_style, mastery_level)
+		total += mastery_level
+	var mean_style: int = total / COMBAT_STYLE_CATEGORIES.size()
+	var raw: int = (best_style + mean_style) * COMBAT_LEVEL_NUMERATOR / COMBAT_LEVEL_DENOMINATOR
+	return clampi(raw, 1, COMBAT_LEVEL_CAP)
+
+
+## Attribute points a character has earned by reaching [param char_level] — one
+## per two combat levels. Over the 1→126 range that is 62 points, holding the
+## old 1→20 × 3/level budget (57) roughly flat: this change was about how the
+## level is DERIVED, not about handing out 6× the attribute points.
+static func attribute_points_at_level(char_level: int) -> int:
+	return maxi(0, char_level - 1) / 2
+
+
+## Recomputes [member level] from the five weapon masteries and banks any attribute
+## points the climb earned. Call after any mastery XP gain. Returns the number of
+## levels gained (0 = nothing changed) so callers can report it, and fires
+## [signal level_gained] once per level so the live Player applies its per-level
+## grants exactly as it did under the old XP path.
+##
+## Only ever moves UP: masteries can't drop, and a cap/weight retune must never
+## claw back attribute points a player has already spent.
+func sync_combat_level() -> int:
+	var target: int = derived_combat_level()
+	if target <= level:
+		return 0
+	var gained: int = target - level
+	available_attributes_points += attribute_points_at_level(target) - attribute_points_at_level(level)
+	level = target
+	for _i: int in gained:
+		level_gained.emit()
+	return gained
+
+
+## Banks lifetime "adventure" experience (quest + daily + redeem + kill rewards).
+##
+## This NO LONGER LEVELS THE CHARACTER — [member level] is derived from mastery and
+## Slayer levels via [method sync_combat_level]. The counter and its save column are
+## kept so nothing that reads `experience` breaks, and levels_gained/points_gained
+## are always 0 so existing callers report honestly instead of claiming phantom
+## level-ups. Quest `reward_xp` therefore no longer advances the character —
+## see the note in docs on giving those rewards a skill destination.
 # --- Quests ---
 
 func quest_state(quest_id: int) -> StringName:
@@ -295,16 +378,11 @@ func add_experience(amount: int) -> Dictionary:
 	if amount <= 0:
 		return {"level": level, "experience": experience, "levels_gained": 0, "points_gained": 0}
 	experience += amount
-	var levels_gained: int = 0
-	while experience >= level_xp_to_next():
-		experience -= level_xp_to_next()
-		level_up()
-		levels_gained += 1
 	return {
 		"level": level,
 		"experience": experience,
-		"levels_gained": levels_gained,
-		"points_gained": levels_gained * ATTRIBUTE_POINTS_PER_LEVEL,
+		"levels_gained": 0,
+		"points_gained": 0,
 	}
 
 
@@ -349,6 +427,9 @@ func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	skill["level"] = level
 	if level >= SkillXp.LEVEL_CAP:
 		skill["xp"] = 0
+	# NOTE no combat-level resync here: character level comes from the five weapon
+	# masteries only (see COMBAT_STYLE_CATEGORIES). Slayer and the gathering jobs
+	# all flow through this function and none of them move it.
 	return {"level": level, "xp": int(skill["xp"]), "leveled_up": leveled_up}
 
 
@@ -385,12 +466,17 @@ func get_mastery(category: StringName) -> Dictionary:
 	return entry
 
 
-## Read-only mastery level for gates (0 = never practiced). Does not create entries.
+## Read-only mastery level for gates. Does not create entries. Every category
+## floors at 1 — masteries run on the same 1–99 curve as skills, so "never
+## practiced" is level 1, not level 0 (a level 0 read displayed as an unmet
+## "Requires Lv 1" gate on gear the player could actually wear). Use
+## [member masteries].has() when you need to know whether a category was ever
+## practiced; don't infer it from this returning 0, because it no longer does.
 func mastery_level_of(category: StringName) -> int:
 	for existing: Variant in masteries.keys():
 		if String(existing) == String(category):
-			return mini(int((masteries[existing] as Dictionary).get("level", 1)), MASTERY_LEVEL_CAP)
-	return 0
+			return clampi(int((masteries[existing] as Dictionary).get("level", 1)), 1, MASTERY_LEVEL_CAP)
+	return 1
 
 
 ## XP needed to advance from [param mastery_level] → next. Same table as skills.
@@ -431,6 +517,11 @@ func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 	entry["level"] = level
 	if level >= MASTERY_LEVEL_CAP:
 		entry["xp"] = 0
+	# Character level is derived from these — resync here rather than at each call
+	# site so no future mastery-XP source can silently skip it.
+	var combat_levels_gained: int = 0
+	if leveled_up:
+		combat_levels_gained = sync_combat_level()
 	return {
 		"category": String(category),
 		"level": level,
@@ -438,4 +529,6 @@ func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 		"xp_to_next": mastery_xp_to_next(level),
 		"leveled_up": leveled_up,
 		"started": started,
+		"combat_levels_gained": combat_levels_gained,
+		"combat_level": self.level,
 	}

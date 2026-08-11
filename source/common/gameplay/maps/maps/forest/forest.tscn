@@ -294,7 +294,7 @@ position = Vector2(2477.7087, 1734.8141)
 npc_resource = ExtResource("6_1iruy")
 
 [node name="Durael" parent="." instance=ExtResource("7_w1xny")]
-position = Vector2(2360, 1768)
+position = Vector2(2453, 1800)
 npc_resource = ExtResource("6_durael")
 
 [node name="Overworld" parent="." unique_id=693791312 instance=ExtResource("5_3a2x5")]

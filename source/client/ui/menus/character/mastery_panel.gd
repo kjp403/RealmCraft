@@ -109,7 +109,7 @@ func _rebuild_list() -> void:
 	for category: StringName in MasteryService.trees():
 		var tree: MasteryTreeResource = MasteryService.trees()[category]
 		var info: Dictionary = _state.get(String(category), {})
-		var level: int = int(info.get("level", 0))
+		var level: int = int(info.get("level", 1))
 		var points: int = int(info.get("points", 0))
 		var display: String = tree.display_name if not tree.display_name.is_empty() else String(category).capitalize()
 
@@ -153,7 +153,7 @@ func _rebuild_summary() -> void:
 		return
 
 	var info: Dictionary = _state.get(_selected, {})
-	var level: int = int(info.get("level", 0))
+	var level: int = int(info.get("level", 1))
 	var points: int = int(info.get("points", 0))
 	var display: String = tree.display_name if not tree.display_name.is_empty() else _selected.capitalize()
 

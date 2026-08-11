@@ -554,6 +554,16 @@ func process_input() -> void:
 			action_input = false
 			return
 
+	# Attack beats an auto-gather / auto-loot loop. Both of those tick with an early
+	# return below, so without this an ambush mid-harvest left Spacebar dead — the
+	# acquire block never ran and the player couldn't fight back until they broke the
+	# gather by walking. Cancel here so the same press falls through and locks on.
+	if controller.is_attack_just_pressed() and is_armed():
+		if _harvest_controller != null and _harvest_controller.is_active():
+			_harvest_controller.cancel()
+		if _pickup_controller != null and _pickup_controller.is_active():
+			_pickup_controller.cancel()
+
 	# Click-to-gather overrides hold-to-attack while a vein is locked.
 	if _harvest_controller != null and _harvest_controller.is_active():
 		if _harvest_controller.tick():
@@ -564,6 +574,13 @@ func process_input() -> void:
 	if _pickup_controller != null and _pickup_controller.is_active():
 		if _pickup_controller.tick():
 			return
+
+	# A lock whose target just died must be dropped HERE, not inside tick() — the
+	# is_active() guard below skips tick() entirely once the target reads as dead,
+	# so the stale lock would survive the kill and silently re-engage the same NPC
+	# the moment it respawned into the same node.
+	if _combat_target_controller != null:
+		_combat_target_controller.release_if_target_dead()
 
 	# Spacebar: lock onto a hostile (remembered fight target after WASD / click
 	# move, else nearest). Persists like Right-click → Attack until cancelled.

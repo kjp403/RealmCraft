@@ -29,8 +29,6 @@ chance = 0.6
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_loot")
 item = ExtResource("li2")
-min_amount = 5
-max_amount = 10
 chance = 1.0
 
 [sub_resource type="Resource" id="Drop_hide_sewer"]

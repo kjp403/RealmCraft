@@ -14,6 +14,7 @@
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="9_banker"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="10_subvk"]
 [ext_resource type="Resource" uid="uid://b7ty7yxpd32u2" path="res://source/common/gameplay/characters/npc/npcs/dungeon_keeper.tres" id="11_aldlr"]
+[ext_resource type="Resource" uid="uid://cfungalkeeper01" path="res://source/common/gameplay/characters/npc/npcs/fungal_keeper.tres" id="11_fungk"]
 [ext_resource type="SpriteFrames" uid="uid://dlopdt61exewy" path="res://source/common/gameplay/characters/sprite_frames/scholar_researcher.tres" id="16_aldlr"]
 [ext_resource type="Script" uid="uid://beeyftaqtiwe3" path="res://source/common/gameplay/characters/npc/interactions/attribute_reset_interaction.gd" id="17_j3473"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="19_kqnsa"]
@@ -112,6 +113,11 @@ npc_resource = ExtResource("9_lkcla")
 position = Vector2(-136, -320)
 collision_mask = 6
 npc_resource = ExtResource("11_aldlr")
+
+[node name="FungalKeeper" parent="." instance=ExtResource("10_subvk")]
+position = Vector2(-201, -320)
+collision_mask = 6
+npc_resource = ExtResource("11_fungk")
 
 [node name="Horizon" parent="." unique_id=1934967353 instance=ExtResource("10_subvk")]
 position = Vector2(-312, -184)

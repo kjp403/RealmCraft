@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://cikrefs0c7r42" path="res://source/common/gameplay/items/weapons/book/book_spore.item.tres" id="9_book"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -59,6 +60,11 @@ script = ExtResource("2_loot")
 item = ExtResource("9_book")
 chance = 0.04
 
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("bone_item")
+chance = 1.0
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"myconid_brute"
@@ -74,6 +80,6 @@ detection_radius = 110
 chase_on_area = true
 xp_reward = 12
 respawn_delay = 20.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_bone")])
 metadata/slug = &"myconid_brute"
 metadata/id = 32
