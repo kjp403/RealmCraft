@@ -13,12 +13,12 @@ shop = ExtResource("3_shop")
 
 [sub_resource type="Resource" id="Talk"]
 script = ExtResource("4_diag")
-lines = Array[String](["Every piece here cost someone a steadier life. Pay in coin, it is the cheaper price.", "I do not make these. I collect what the fire leaves behind and ask a fair markup.", "There is nothing past this counter but the fire itself. Buy well. You will not shop again."])
+lines = Array[String](["Every piece here cost someone a steadier life. Pay in coin, it is the cheaper price.", "I now also keep early Ascension stock — Basilisk ore, Godsteel gems, and blades the fire spat out incomplete.", "There is nothing past this counter but the fire itself. Buy well. You will not shop again."])
 label_override = "Ask about the wares"
 
 [resource]
 script = ExtResource("5_npc")
 npc_name = "Ashmonger"
 skin = ExtResource("6_skin")
-greeting = "You walked through everything between here and the green country to reach my counter. So look. Everything here was pulled out of the fire by people who did not all walk back."
+greeting = "You walked through everything between here and the green country to reach my counter. So look. Everything here was pulled out of the fire by people who did not all walk back — and a few Ascension scraps for those still climbing."
 interactions = Array[ExtResource("1_inter")]([SubResource("Shop"), SubResource("Talk")])

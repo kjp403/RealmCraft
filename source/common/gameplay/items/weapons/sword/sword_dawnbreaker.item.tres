@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="WeaponItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/ascension/sword_dawnbreaker.png" id="2_icon"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/items/weapons/sword/sword.tscn" id="3_scene"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/weapon_item.gd" id="4_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="5_slot"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("1_mod")
+stat_name = "ad"
+value = 44.0
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("1_mod")
+stat_name = "ability_haste"
+value = 6.0
+
+[resource]
+script = ExtResource("4_item")
+category = &"sword"
+capacity = 6
+right_hand_scene = ExtResource("3_scene")
+required_mastery_categories = Array[StringName]([&"sword"])
+required_mastery_level = 75
+slot = ExtResource("5_slot")
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+item_name = &"Dawnbreaker"
+item_icon = ExtResource("2_icon")
+description = "A molten shortblade that flares with first light. Favored by vanguard captains."
+can_trade = true
+vendor_value = 900
+stack_limit = 5
+tags = PackedStringArray("ascension")
+metadata/_custom_type_script = "uid://5hk0gl5ng64h"
+metadata/slug = &"sword_dawnbreaker.item"
+metadata/id = 483

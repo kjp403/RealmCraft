@@ -1,106 +1,195 @@
 [gd_resource type="Resource" script_class="CraftingStationResource" format=3 uid="uid://26gsysjvnvs2"]
 
-[ext_resource type="Script" uid="uid://btm2w18d3d327" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
-[ext_resource type="Script" uid="uid://dou76lfuf6clf" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
-[ext_resource type="Script" uid="uid://cgkqi5dwtob32" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
-[ext_resource type="Resource" uid="uid://25erkqwlk35t5" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="10_br_bar"]
-[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="11_fe_bar"]
-[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="12_st_bar"]
-[ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="13_ag_bar"]
-[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="14_au_bar"]
-[ext_resource type="Resource" uid="uid://2gsl864x53vil" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="20_br_helm"]
-[ext_resource type="Resource" uid="uid://220bc63rtaob7" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="21_br_chest"]
-[ext_resource type="Resource" uid="uid://2q7ip57npoho8" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="22_br_boots"]
-[ext_resource type="Resource" uid="uid://bqd4ajt5kmlcr" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="23_fe_helm"]
-[ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="24_fe_chest"]
-[ext_resource type="Resource" uid="uid://gjk4hvjre3ox" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="25_fe_boots"]
-[ext_resource type="Resource" uid="uid://3ih0n9l3vzb10" path="res://source/common/gameplay/items/gears/metal/steel_helmet.tres" id="26_st_helm"]
-[ext_resource type="Resource" uid="uid://2sqvuu6o9jrio" path="res://source/common/gameplay/items/gears/metal/steel_chest.tres" id="27_st_chest"]
-[ext_resource type="Resource" uid="uid://274t9kspo2nuo" path="res://source/common/gameplay/items/gears/metal/steel_boots.tres" id="28_st_boots"]
-[ext_resource type="Resource" uid="uid://1lvvopw0erqjg" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_arr"]
-[ext_resource type="Resource" uid="uid://1iiaqnhrs3xsd" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_arr"]
-[ext_resource type="Resource" uid="uid://3f1wcpqzydqkt" path="res://source/common/gameplay/items/materials/metals/steel_arrowheads.tres" id="32_st_arr"]
-[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="15_mi_bar"]
-[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="16_ad_bar"]
-[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="17_ru_bar"]
-[ext_resource type="Resource" uid="uid://cmitharrowhead1" path="res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres" id="33_mi_arr"]
-[ext_resource type="Resource" uid="uid://cadaarrowhead01" path="res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres" id="34_ad_arr"]
-[ext_resource type="Resource" uid="uid://crunarrowhead01" path="res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres" id="35_ru_arr"]
-[ext_resource type="Resource" uid="uid://vg35b9ctogly" path="res://source/common/gameplay/items/gears/jewelry/silver_necklace.tres" id="40_ag_neck"]
-[ext_resource type="Resource" uid="uid://11c0mdf16j8or" path="res://source/common/gameplay/items/gears/jewelry/silver_ring.tres" id="41_ag_ring"]
-[ext_resource type="Resource" uid="uid://2134ru3aty4tm" path="res://source/common/gameplay/items/gears/jewelry/silver_amulet.tres" id="42_ag_amu"]
-[ext_resource type="Resource" uid="uid://1o2nfx71t7bhn" path="res://source/common/gameplay/items/gears/jewelry/gold_necklace.tres" id="43_au_neck"]
-[ext_resource type="Resource" uid="uid://2d48a9j7xbhbh" path="res://source/common/gameplay/items/gears/jewelry/gold_ring.tres" id="44_au_ring"]
-[ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="50_dr_ore"]
-[ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="51_dr_gem"]
-[ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="52_dr_cloth"]
-[ext_resource type="Resource" uid="uid://1d77013414524" path="res://source/common/gameplay/items/gears/metal/dragon_helmet.tres" id="53_dr_helm"]
-[ext_resource type="Resource" uid="uid://a61a08ff189d4" path="res://source/common/gameplay/items/gears/metal/dragon_chest.tres" id="54_dr_chest"]
-[ext_resource type="Resource" uid="uid://82d10bddb7344" path="res://source/common/gameplay/items/gears/metal/dragon_boots.tres" id="55_dr_boots"]
-
-[ext_resource type="Resource" uid="uid://3vo07t5fjdwo" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="60_cop_ore"]
-[ext_resource type="Resource" uid="uid://ctinoremat001" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="61_tin_ore"]
-[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="62_iron_ore"]
-[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="63_coal"]
-[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="64_silver_ore"]
-[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="65_gold_ore"]
-
-
-[ext_resource type="Resource" uid="uid://7db100a3cd75e" path="res://source/common/gameplay/items/weapons/sword/sword_bronze.item.tres" id="70_br_sw"]
-[ext_resource type="Resource" uid="uid://8126da878a1e4" path="res://source/common/gameplay/items/weapons/hammer/hammer_bronze.item.tres" id="70_br_hm"]
-[ext_resource type="Resource" uid="uid://36240d593a4fa" path="res://source/common/gameplay/items/weapons/wand/wand_bronze.item.tres" id="70_br_wd"]
-[ext_resource type="Resource" uid="uid://a8be7a35b8f6a" path="res://source/common/gameplay/items/weapons/book/book_bronze.item.tres" id="70_br_tm"]
-[ext_resource type="Resource" uid="uid://a94b2a8535482" path="res://source/common/gameplay/items/weapons/bow/bronze_bow.item.tres" id="70_br_bw"]
-[ext_resource type="Resource" uid="uid://4c62a2b2a090b" path="res://source/common/gameplay/items/weapons/sword/sword_iron.item.tres" id="70_fe_sw"]
-[ext_resource type="Resource" uid="uid://57b5f849f20d4" path="res://source/common/gameplay/items/weapons/hammer/hammer_iron.item.tres" id="70_fe_hm"]
-[ext_resource type="Resource" uid="uid://7670aef450f91" path="res://source/common/gameplay/items/weapons/wand/wand_iron.item.tres" id="70_fe_wd"]
-[ext_resource type="Resource" uid="uid://2223d2476d1c1" path="res://source/common/gameplay/items/weapons/book/book_iron.item.tres" id="70_fe_tm"]
-[ext_resource type="Resource" uid="uid://70f654e2dffe4" path="res://source/common/gameplay/items/weapons/bow/iron_bow.item.tres" id="70_fe_bw"]
-[ext_resource type="Resource" uid="uid://9b1a412ba3383" path="res://source/common/gameplay/items/weapons/sword/sword_steel.item.tres" id="70_st_sw"]
-[ext_resource type="Resource" uid="uid://2c0e5b222831f" path="res://source/common/gameplay/items/weapons/hammer/hammer_steel.item.tres" id="70_st_hm"]
-[ext_resource type="Resource" uid="uid://a6e0950369832" path="res://source/common/gameplay/items/weapons/wand/wand_steel.item.tres" id="70_st_wd"]
-[ext_resource type="Resource" uid="uid://28891b08e54ed" path="res://source/common/gameplay/items/weapons/book/book_steel.item.tres" id="70_st_tm"]
-[ext_resource type="Resource" uid="uid://d06841445f5e3" path="res://source/common/gameplay/items/weapons/bow/steel_bow.item.tres" id="70_st_bw"]
-[ext_resource type="Resource" uid="uid://13e0b92d2610c" path="res://source/common/gameplay/items/weapons/sword/sword_mithril.item.tres" id="70_mi_sw"]
-[ext_resource type="Resource" uid="uid://ff7753070bdaf" path="res://source/common/gameplay/items/weapons/hammer/hammer_mithril.item.tres" id="70_mi_hm"]
-[ext_resource type="Resource" uid="uid://47ea5e753b446" path="res://source/common/gameplay/items/weapons/wand/wand_mithril.item.tres" id="70_mi_wd"]
-[ext_resource type="Resource" uid="uid://1a192e14fe034" path="res://source/common/gameplay/items/weapons/book/book_mithril.item.tres" id="70_mi_tm"]
-[ext_resource type="Resource" uid="uid://2734e6b318d23" path="res://source/common/gameplay/items/weapons/bow/mithril_bow.item.tres" id="70_mi_bw"]
-[ext_resource type="Resource" uid="uid://28a3298f1b24c" path="res://source/common/gameplay/items/weapons/sword/sword_adamant.item.tres" id="70_ad_sw"]
-[ext_resource type="Resource" uid="uid://3b488cd43ab47" path="res://source/common/gameplay/items/weapons/hammer/hammer_adamant.item.tres" id="70_ad_hm"]
-[ext_resource type="Resource" uid="uid://311bce28c4a0b" path="res://source/common/gameplay/items/weapons/wand/wand_adamant.item.tres" id="70_ad_wd"]
-[ext_resource type="Resource" uid="uid://839168fd8acf6" path="res://source/common/gameplay/items/weapons/book/book_adamant.item.tres" id="70_ad_tm"]
-[ext_resource type="Resource" uid="uid://c10f0ae86815f" path="res://source/common/gameplay/items/weapons/bow/adamant_bow.item.tres" id="70_ad_bw"]
-[ext_resource type="Resource" uid="uid://5837ac4420626" path="res://source/common/gameplay/items/weapons/sword/sword_runite.item.tres" id="70_ru_sw"]
-[ext_resource type="Resource" uid="uid://4caf0e682394f" path="res://source/common/gameplay/items/weapons/hammer/hammer_runite.item.tres" id="70_ru_hm"]
-[ext_resource type="Resource" uid="uid://759606c716efa" path="res://source/common/gameplay/items/weapons/wand/wand_runite.item.tres" id="70_ru_wd"]
-[ext_resource type="Resource" uid="uid://85ef84b2cd0e7" path="res://source/common/gameplay/items/weapons/book/book_runite.item.tres" id="70_ru_tm"]
-[ext_resource type="Resource" uid="uid://40bdcc9fa6597" path="res://source/common/gameplay/items/weapons/bow/runite_bow.item.tres" id="70_ru_bw"]
-
-
-[ext_resource type="Resource" uid="uid://cmithhelm0292" path="res://source/common/gameplay/items/gears/metal/mithril_helmet.tres" id="90_mi_helm"]
-[ext_resource type="Resource" uid="uid://cmithches0293" path="res://source/common/gameplay/items/gears/metal/mithril_chest.tres" id="91_mi_chest"]
-[ext_resource type="Resource" uid="uid://cmithboot0294" path="res://source/common/gameplay/items/gears/metal/mithril_boots.tres" id="92_mi_boots"]
-[ext_resource type="Resource" uid="uid://cadamhelm0295" path="res://source/common/gameplay/items/gears/metal/adamant_helmet.tres" id="93_ad_helm"]
-[ext_resource type="Resource" uid="uid://cadamches0296" path="res://source/common/gameplay/items/gears/metal/adamant_chest.tres" id="94_ad_chest"]
-[ext_resource type="Resource" uid="uid://cadamboot0297" path="res://source/common/gameplay/items/gears/metal/adamant_boots.tres" id="95_ad_boots"]
-[ext_resource type="Resource" uid="uid://crunihelm0298" path="res://source/common/gameplay/items/gears/metal/runite_helmet.tres" id="96_ru_helm"]
-[ext_resource type="Resource" uid="uid://cruniches0299" path="res://source/common/gameplay/items/gears/metal/runite_chest.tres" id="97_ru_chest"]
-[ext_resource type="Resource" uid="uid://cruniboot0300" path="res://source/common/gameplay/items/gears/metal/runite_boots.tres" id="98_ru_boots"]
-
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/bronze_bar.tres" id="10_br_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="11_fe_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="12_st_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="13_ag_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="14_au_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="15_mi_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="16_ad_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="17_ru_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="20_br_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="21_br_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="22_br_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/iron_helmet.tres" id="23_fe_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="24_fe_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/iron_boots.tres" id="25_fe_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/steel_helmet.tres" id="26_st_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/steel_chest.tres" id="27_st_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/steel_boots.tres" id="28_st_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_arrowheads.tres" id="32_st_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres" id="33_mi_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres" id="34_ad_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres" id="35_ru_arr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_necklace.tres" id="40_ag_neck"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_ring.tres" id="41_ag_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_amulet.tres" id="42_ag_amu"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/gold_necklace.tres" id="43_au_neck"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/gold_ring.tres" id="44_au_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="50_dr_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="51_dr_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="52_dr_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/dragon_helmet.tres" id="53_dr_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/dragon_chest.tres" id="54_dr_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/dragon_boots.tres" id="55_dr_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="60_cop_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="61_tin_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="62_iron_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="63_coal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="64_silver_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="65_gold_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/adamant_bow.item.tres" id="70_ad_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_adamant.item.tres" id="70_ad_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_adamant.item.tres" id="70_ad_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_adamant.item.tres" id="70_ad_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_adamant.item.tres" id="70_ad_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/bronze_bow.item.tres" id="70_br_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_bronze.item.tres" id="70_br_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_bronze.item.tres" id="70_br_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_bronze.item.tres" id="70_br_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_bronze.item.tres" id="70_br_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/iron_bow.item.tres" id="70_fe_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_iron.item.tres" id="70_fe_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_iron.item.tres" id="70_fe_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_iron.item.tres" id="70_fe_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_iron.item.tres" id="70_fe_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/mithril_bow.item.tres" id="70_mi_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_mithril.item.tres" id="70_mi_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_mithril.item.tres" id="70_mi_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_mithril.item.tres" id="70_mi_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_mithril.item.tres" id="70_mi_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/runite_bow.item.tres" id="70_ru_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_runite.item.tres" id="70_ru_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_runite.item.tres" id="70_ru_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_runite.item.tres" id="70_ru_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runite.item.tres" id="70_ru_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/steel_bow.item.tres" id="70_st_bw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_steel.item.tres" id="70_st_hm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_steel.item.tres" id="70_st_sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_steel.item.tres" id="70_st_tm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_steel.item.tres" id="70_st_wd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/mithril_helmet.tres" id="90_mi_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/mithril_chest.tres" id="91_mi_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/mithril_boots.tres" id="92_mi_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/adamant_helmet.tres" id="93_ad_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/adamant_chest.tres" id="94_ad_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="94_tncmc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="95_338ju"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/adamant_boots.tres" id="95_ad_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/basilisk_cloth.tres" id="96_kwjvf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/runite_helmet.tres" id="96_ru_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/basilisk_helmet.tres" id="97_p0c3l"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/runite_chest.tres" id="97_ru_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/basilisk_chest.tres" id="98_5i8yj"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/runite_boots.tres" id="98_ru_boots"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/basilisk_boots.tres" id="99_sfufq"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_bronze.tres" id="100_tool_pi_br"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="100_wl4u8"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_bronze.tres" id="101_tool_ax_br"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_basilisk.item.tres" id="101_vxmpm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runewoven_ore.tres" id="102_j2oyb"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_iron.tres" id="102_tool_pi_ir"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_iron.tres" id="103_tool_ax_ir"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/runewoven_gem.tres" id="103_whfgd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres" id="104_3gh1o"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_steel.tres" id="104_tool_pi_st"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_runewoven.item.tres" id="105_rbi3s"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_steel.tres" id="105_tool_ax_st"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres" id="106_0uf53"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_mithril.tres" id="106_tool_pi_mi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wraithsilk_gem.tres" id="107_6tdj8"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_mithril.tres" id="107_tool_ax_mi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres" id="108_botbh"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_adamant.tres" id="108_tool_pi_ad"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="109_3lxgp"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_adamant.tres" id="109_tool_ax_ad"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres" id="110_ke0v4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_runite.tres" id="110_tool_pi_ru"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres" id="111_mux5x"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_runite.tres" id="111_tool_ax_ru"]
-
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/wyrmguard_helmet.tres" id="112_mdmt2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/wyrmguard_chest.tres" id="113_p5wdw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/wyrmguard_boots.tres" id="114_u1fwi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres" id="115_0u3dk"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres" id="116_ikv37"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astral_ore.tres" id="117_pphxn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/astral_gem.tres" id="118_bibue"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres" id="119_ldfyw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_astral.item.tres" id="120_1a02c"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/nightglass_leather.tres" id="121_d8nx4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/nightglass_gem.tres" id="122_vvlek"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres" id="123_ms0jq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="124_n7k2t"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/colossus_gem.tres" id="125_v47h7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/colossus_cloth.tres" id="126_0m83c"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/colossus_helmet.tres" id="127_cquyp"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/colossus_chest.tres" id="128_jbwuq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/colossus_boots.tres" id="129_o7pi7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_colossus.item.tres" id="130_wef05"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres" id="131_na772"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/voidsilk_ore.tres" id="132_c38fh"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/voidsilk_gem.tres" id="133_grg3f"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres" id="134_v3w0h"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_voidsilk.item.tres" id="135_le1eh"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="136_tux5q"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/tempest_gem.tres" id="137_rp8f6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/tempest_bow.item.tres" id="138_42nbj"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/godsteel_ore.tres" id="139_2rs7l"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="140_ggfq4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/godsteel_cloth.tres" id="141_qvch4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_helmet.tres" id="142_wgtc1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_chest.tres" id="143_sjqd7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_boots.tres" id="144_ftioo"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres" id="145_x7to1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres" id="146_fjdcy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/aetherborn_ore.tres" id="147_jxbnx"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/aetherborn_gem.tres" id="148_41ldi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_aetherborn.item.tres" id="149_oydnt"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_aetherborn.item.tres" id="150_erp8v"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/skyrender_leather.tres" id="151_2cqyc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/skyrender_gem.tres" id="152_pbk8l"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/skyrender_bow.item.tres" id="153_vq2bx"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/behemoth_ore.tres" id="154_y47sw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/behemoth_gem.tres" id="155_h3wmt"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/behemoth_cloth.tres" id="156_rckfn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/behemoth_helmet.tres" id="157_3jwx6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/behemoth_chest.tres" id="158_1g4dh"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/behemoth_boots.tres" id="159_jufvy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_behemoth.item.tres" id="160_a2vpa"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_behemoth.item.tres" id="161_csols"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/empyrean_ore.tres" id="162_amm0e"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/empyrean_gem.tres" id="163_miox8"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_empyrean.item.tres" id="164_lsjbu"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_empyrean.item.tres" id="165_1arqn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/eclipse_leather.tres" id="166_biyyn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/eclipse_gem.tres" id="167_wywho"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/eclipse_bow.item.tres" id="168_g64p6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres" id="169_gbc83"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/worldbreaker_gem.tres" id="170_jal61"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/worldbreaker_cloth.tres" id="171_amxth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/worldbreaker_helmet.tres" id="172_nx7gq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/worldbreaker_chest.tres" id="173_awumh"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/worldbreaker_boots.tres" id="174_1r20r"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres" id="175_3sa5n"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_worldbreaker.item.tres" id="176_2upif"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/primordial_ore.tres" id="177_yvrtf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/primordial_gem.tres" id="178_qj68e"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_primordial.item.tres" id="179_wu0kr"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_primordial.item.tres" id="180_8fh83"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/starfall_leather.tres" id="181_d3uwu"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/starfall_gem.tres" id="182_dwaun"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/starfall_bow.item.tres" id="183_cht1h"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/heart_of_the_wild.tres" id="184_dque1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ember_locket.tres" id="185_4ndny"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/tideglass_amulet.tres" id="186_wnquk"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/oathstone.tres" id="187_xbvyw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="188_yuhwn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/covenant_cross.tres" id="189_q4xl0"]
 
 [sub_resource type="Resource" id="I_sm_br_cu"]
 script = ExtResource("3_ingred")
@@ -1072,10 +1161,969 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_ru")])
 required_level = 45
 xp_reward = 170
 
+[sub_resource type="Resource" id="Resource_t2nm6"]
+script = ExtResource("3_ingred")
+item = ExtResource("94_tncmc")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_yk6wh"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+
+[sub_resource type="Resource" id="Resource_hoshw"]
+script = ExtResource("3_ingred")
+item = ExtResource("96_kwjvf")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_8rxl3"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("97_p0c3l")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_t2nm6"), SubResource("Resource_yk6wh"), SubResource("Resource_hoshw")])
+required_level = 55
+xp_reward = 170
+
+[sub_resource type="Resource" id="Resource_tfvj5"]
+script = ExtResource("3_ingred")
+item = ExtResource("94_tncmc")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_iagv7"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+
+[sub_resource type="Resource" id="Resource_wiefw"]
+script = ExtResource("3_ingred")
+item = ExtResource("96_kwjvf")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_a5hfw"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("98_5i8yj")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_tfvj5"), SubResource("Resource_iagv7"), SubResource("Resource_wiefw")])
+required_level = 55
+xp_reward = 190
+
+[sub_resource type="Resource" id="Resource_o5jga"]
+script = ExtResource("3_ingred")
+item = ExtResource("94_tncmc")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_qb1a6"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+
+[sub_resource type="Resource" id="Resource_cnlvd"]
+script = ExtResource("3_ingred")
+item = ExtResource("96_kwjvf")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_2jebw"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("99_sfufq")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_o5jga"), SubResource("Resource_qb1a6"), SubResource("Resource_cnlvd")])
+required_level = 55
+xp_reward = 160
+
+[sub_resource type="Resource" id="Resource_d05ih"]
+script = ExtResource("3_ingred")
+item = ExtResource("94_tncmc")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_l3hj3"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+
+[sub_resource type="Resource" id="Resource_csi67"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("100_wl4u8")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_d05ih"), SubResource("Resource_l3hj3")])
+required_level = 55
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_8xe1j"]
+script = ExtResource("3_ingred")
+item = ExtResource("94_tncmc")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_4ux0n"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+
+[sub_resource type="Resource" id="Resource_a3qax"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("101_vxmpm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_8xe1j"), SubResource("Resource_4ux0n")])
+required_level = 55
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_ee8mx"]
+script = ExtResource("3_ingred")
+item = ExtResource("102_j2oyb")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_21qwe"]
+script = ExtResource("3_ingred")
+item = ExtResource("103_whfgd")
+
+[sub_resource type="Resource" id="Resource_axytv"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("104_3gh1o")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_ee8mx"), SubResource("Resource_21qwe")])
+required_level = 55
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_3d5d4"]
+script = ExtResource("3_ingred")
+item = ExtResource("102_j2oyb")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_hfk34"]
+script = ExtResource("3_ingred")
+item = ExtResource("103_whfgd")
+
+[sub_resource type="Resource" id="Resource_hsuoi"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("105_rbi3s")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_3d5d4"), SubResource("Resource_hfk34")])
+required_level = 55
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_qk1jc"]
+script = ExtResource("3_ingred")
+item = ExtResource("106_0uf53")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_xabjp"]
+script = ExtResource("3_ingred")
+item = ExtResource("107_6tdj8")
+
+[sub_resource type="Resource" id="Resource_rbgp3"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("108_botbh")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_qk1jc"), SubResource("Resource_xabjp")])
+required_level = 55
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_l3nw3"]
+script = ExtResource("3_ingred")
+item = ExtResource("109_3lxgp")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_2yfh2"]
+script = ExtResource("3_ingred")
+item = ExtResource("110_ke0v4")
+
+[sub_resource type="Resource" id="Resource_xi76d"]
+script = ExtResource("3_ingred")
+item = ExtResource("111_mux5x")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_uybih"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("112_mdmt2")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_l3nw3"), SubResource("Resource_2yfh2"), SubResource("Resource_xi76d")])
+required_level = 62
+xp_reward = 210
+
+[sub_resource type="Resource" id="Resource_e0ok8"]
+script = ExtResource("3_ingred")
+item = ExtResource("109_3lxgp")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_l4aab"]
+script = ExtResource("3_ingred")
+item = ExtResource("110_ke0v4")
+
+[sub_resource type="Resource" id="Resource_lpc7s"]
+script = ExtResource("3_ingred")
+item = ExtResource("111_mux5x")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_1fe81"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("113_p5wdw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_e0ok8"), SubResource("Resource_l4aab"), SubResource("Resource_lpc7s")])
+required_level = 62
+xp_reward = 230
+
+[sub_resource type="Resource" id="Resource_0ecjh"]
+script = ExtResource("3_ingred")
+item = ExtResource("109_3lxgp")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_o2clg"]
+script = ExtResource("3_ingred")
+item = ExtResource("110_ke0v4")
+
+[sub_resource type="Resource" id="Resource_tel0p"]
+script = ExtResource("3_ingred")
+item = ExtResource("111_mux5x")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_tfg02"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("114_u1fwi")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_0ecjh"), SubResource("Resource_o2clg"), SubResource("Resource_tel0p")])
+required_level = 62
+xp_reward = 200
+
+[sub_resource type="Resource" id="Resource_723vd"]
+script = ExtResource("3_ingred")
+item = ExtResource("109_3lxgp")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_2wdoa"]
+script = ExtResource("3_ingred")
+item = ExtResource("110_ke0v4")
+
+[sub_resource type="Resource" id="Resource_xuo4v"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("115_0u3dk")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_723vd"), SubResource("Resource_2wdoa")])
+required_level = 62
+xp_reward = 240
+
+[sub_resource type="Resource" id="Resource_a27e4"]
+script = ExtResource("3_ingred")
+item = ExtResource("109_3lxgp")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_2nle2"]
+script = ExtResource("3_ingred")
+item = ExtResource("110_ke0v4")
+
+[sub_resource type="Resource" id="Resource_fuwsa"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("116_ikv37")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_a27e4"), SubResource("Resource_2nle2")])
+required_level = 62
+xp_reward = 240
+
+[sub_resource type="Resource" id="Resource_0ifq6"]
+script = ExtResource("3_ingred")
+item = ExtResource("117_pphxn")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_ftjse"]
+script = ExtResource("3_ingred")
+item = ExtResource("118_bibue")
+
+[sub_resource type="Resource" id="Resource_rj68b"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("119_ldfyw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_0ifq6"), SubResource("Resource_ftjse")])
+required_level = 62
+xp_reward = 240
+
+[sub_resource type="Resource" id="Resource_mmods"]
+script = ExtResource("3_ingred")
+item = ExtResource("117_pphxn")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_m8oyp"]
+script = ExtResource("3_ingred")
+item = ExtResource("118_bibue")
+
+[sub_resource type="Resource" id="Resource_hy8bh"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("120_1a02c")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_mmods"), SubResource("Resource_m8oyp")])
+required_level = 62
+xp_reward = 240
+
+[sub_resource type="Resource" id="Resource_yimq0"]
+script = ExtResource("3_ingred")
+item = ExtResource("121_d8nx4")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_qwdwu"]
+script = ExtResource("3_ingred")
+item = ExtResource("122_vvlek")
+
+[sub_resource type="Resource" id="Resource_34ys7"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("123_ms0jq")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_yimq0"), SubResource("Resource_qwdwu")])
+required_level = 62
+xp_reward = 240
+
+[sub_resource type="Resource" id="Resource_65jw5"]
+script = ExtResource("3_ingred")
+item = ExtResource("124_n7k2t")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_rrdve"]
+script = ExtResource("3_ingred")
+item = ExtResource("125_v47h7")
+
+[sub_resource type="Resource" id="Resource_07vb2"]
+script = ExtResource("3_ingred")
+item = ExtResource("126_0m83c")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_bmawy"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("127_cquyp")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_65jw5"), SubResource("Resource_rrdve"), SubResource("Resource_07vb2")])
+required_level = 70
+xp_reward = 260
+
+[sub_resource type="Resource" id="Resource_p5bqp"]
+script = ExtResource("3_ingred")
+item = ExtResource("124_n7k2t")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_tnuny"]
+script = ExtResource("3_ingred")
+item = ExtResource("125_v47h7")
+
+[sub_resource type="Resource" id="Resource_m6rsa"]
+script = ExtResource("3_ingred")
+item = ExtResource("126_0m83c")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_8o0n1"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("128_jbwuq")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_p5bqp"), SubResource("Resource_tnuny"), SubResource("Resource_m6rsa")])
+required_level = 70
+xp_reward = 280
+
+[sub_resource type="Resource" id="Resource_8eldv"]
+script = ExtResource("3_ingred")
+item = ExtResource("124_n7k2t")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_nnxuj"]
+script = ExtResource("3_ingred")
+item = ExtResource("125_v47h7")
+
+[sub_resource type="Resource" id="Resource_lwk2s"]
+script = ExtResource("3_ingred")
+item = ExtResource("126_0m83c")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_k7wbn"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("129_o7pi7")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_8eldv"), SubResource("Resource_nnxuj"), SubResource("Resource_lwk2s")])
+required_level = 70
+xp_reward = 250
+
+[sub_resource type="Resource" id="Resource_cbi4w"]
+script = ExtResource("3_ingred")
+item = ExtResource("124_n7k2t")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_5i50l"]
+script = ExtResource("3_ingred")
+item = ExtResource("125_v47h7")
+
+[sub_resource type="Resource" id="Resource_5nw8n"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("130_wef05")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_cbi4w"), SubResource("Resource_5i50l")])
+required_level = 70
+xp_reward = 290
+
+[sub_resource type="Resource" id="Resource_m3y2p"]
+script = ExtResource("3_ingred")
+item = ExtResource("124_n7k2t")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_76q1p"]
+script = ExtResource("3_ingred")
+item = ExtResource("125_v47h7")
+
+[sub_resource type="Resource" id="Resource_7i5s1"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("131_na772")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_m3y2p"), SubResource("Resource_76q1p")])
+required_level = 70
+xp_reward = 290
+
+[sub_resource type="Resource" id="Resource_61jul"]
+script = ExtResource("3_ingred")
+item = ExtResource("132_c38fh")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_0bxpt"]
+script = ExtResource("3_ingred")
+item = ExtResource("133_grg3f")
+
+[sub_resource type="Resource" id="Resource_oc6ao"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("134_v3w0h")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_61jul"), SubResource("Resource_0bxpt")])
+required_level = 70
+xp_reward = 290
+
+[sub_resource type="Resource" id="Resource_1k7fy"]
+script = ExtResource("3_ingred")
+item = ExtResource("132_c38fh")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_ikmxl"]
+script = ExtResource("3_ingred")
+item = ExtResource("133_grg3f")
+
+[sub_resource type="Resource" id="Resource_ix534"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("135_le1eh")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_1k7fy"), SubResource("Resource_ikmxl")])
+required_level = 70
+xp_reward = 290
+
+[sub_resource type="Resource" id="Resource_fx3vn"]
+script = ExtResource("3_ingred")
+item = ExtResource("136_tux5q")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_iujf3"]
+script = ExtResource("3_ingred")
+item = ExtResource("137_rp8f6")
+
+[sub_resource type="Resource" id="Resource_812vq"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("138_42nbj")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_fx3vn"), SubResource("Resource_iujf3")])
+required_level = 70
+xp_reward = 290
+
+[sub_resource type="Resource" id="Resource_i50us"]
+script = ExtResource("3_ingred")
+item = ExtResource("139_2rs7l")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_33sed"]
+script = ExtResource("3_ingred")
+item = ExtResource("140_ggfq4")
+
+[sub_resource type="Resource" id="Resource_no501"]
+script = ExtResource("3_ingred")
+item = ExtResource("141_qvch4")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_tcup4"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("142_wgtc1")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_i50us"), SubResource("Resource_33sed"), SubResource("Resource_no501")])
+required_level = 78
+xp_reward = 320
+
+[sub_resource type="Resource" id="Resource_xd2le"]
+script = ExtResource("3_ingred")
+item = ExtResource("139_2rs7l")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_wu6g0"]
+script = ExtResource("3_ingred")
+item = ExtResource("140_ggfq4")
+
+[sub_resource type="Resource" id="Resource_ptjr3"]
+script = ExtResource("3_ingred")
+item = ExtResource("141_qvch4")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_geiv3"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("143_sjqd7")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_xd2le"), SubResource("Resource_wu6g0"), SubResource("Resource_ptjr3")])
+required_level = 78
+xp_reward = 340
+
+[sub_resource type="Resource" id="Resource_iwoeg"]
+script = ExtResource("3_ingred")
+item = ExtResource("139_2rs7l")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_myjm0"]
+script = ExtResource("3_ingred")
+item = ExtResource("140_ggfq4")
+
+[sub_resource type="Resource" id="Resource_pvb87"]
+script = ExtResource("3_ingred")
+item = ExtResource("141_qvch4")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_aa0yj"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("144_ftioo")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_iwoeg"), SubResource("Resource_myjm0"), SubResource("Resource_pvb87")])
+required_level = 78
+xp_reward = 310
+
+[sub_resource type="Resource" id="Resource_28mtn"]
+script = ExtResource("3_ingred")
+item = ExtResource("139_2rs7l")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_2q7pb"]
+script = ExtResource("3_ingred")
+item = ExtResource("140_ggfq4")
+
+[sub_resource type="Resource" id="Resource_68cqq"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("145_x7to1")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_28mtn"), SubResource("Resource_2q7pb")])
+required_level = 78
+xp_reward = 350
+
+[sub_resource type="Resource" id="Resource_6348q"]
+script = ExtResource("3_ingred")
+item = ExtResource("139_2rs7l")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_jx4vu"]
+script = ExtResource("3_ingred")
+item = ExtResource("140_ggfq4")
+
+[sub_resource type="Resource" id="Resource_6t70i"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("146_fjdcy")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_6348q"), SubResource("Resource_jx4vu")])
+required_level = 78
+xp_reward = 350
+
+[sub_resource type="Resource" id="Resource_ycnmt"]
+script = ExtResource("3_ingred")
+item = ExtResource("147_jxbnx")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_sjyur"]
+script = ExtResource("3_ingred")
+item = ExtResource("148_41ldi")
+
+[sub_resource type="Resource" id="Resource_rbx8h"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("149_oydnt")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_ycnmt"), SubResource("Resource_sjyur")])
+required_level = 78
+xp_reward = 350
+
+[sub_resource type="Resource" id="Resource_w3wh6"]
+script = ExtResource("3_ingred")
+item = ExtResource("147_jxbnx")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_llkqg"]
+script = ExtResource("3_ingred")
+item = ExtResource("148_41ldi")
+
+[sub_resource type="Resource" id="Resource_01j6p"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("150_erp8v")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_w3wh6"), SubResource("Resource_llkqg")])
+required_level = 78
+xp_reward = 350
+
+[sub_resource type="Resource" id="Resource_mifyw"]
+script = ExtResource("3_ingred")
+item = ExtResource("151_2cqyc")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_2khen"]
+script = ExtResource("3_ingred")
+item = ExtResource("152_pbk8l")
+
+[sub_resource type="Resource" id="Resource_sigp8"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("153_vq2bx")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_mifyw"), SubResource("Resource_2khen")])
+required_level = 78
+xp_reward = 350
+
+[sub_resource type="Resource" id="Resource_v48im"]
+script = ExtResource("3_ingred")
+item = ExtResource("154_y47sw")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_ufscj"]
+script = ExtResource("3_ingred")
+item = ExtResource("155_h3wmt")
+
+[sub_resource type="Resource" id="Resource_he7wo"]
+script = ExtResource("3_ingred")
+item = ExtResource("156_rckfn")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_jwuo6"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("157_3jwx6")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_v48im"), SubResource("Resource_ufscj"), SubResource("Resource_he7wo")])
+required_level = 88
+xp_reward = 400
+
+[sub_resource type="Resource" id="Resource_dfxaf"]
+script = ExtResource("3_ingred")
+item = ExtResource("154_y47sw")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_fqxcl"]
+script = ExtResource("3_ingred")
+item = ExtResource("155_h3wmt")
+
+[sub_resource type="Resource" id="Resource_k402v"]
+script = ExtResource("3_ingred")
+item = ExtResource("156_rckfn")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_qmsn4"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("158_1g4dh")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_dfxaf"), SubResource("Resource_fqxcl"), SubResource("Resource_k402v")])
+required_level = 88
+xp_reward = 420
+
+[sub_resource type="Resource" id="Resource_jra3h"]
+script = ExtResource("3_ingred")
+item = ExtResource("154_y47sw")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_jg3jf"]
+script = ExtResource("3_ingred")
+item = ExtResource("155_h3wmt")
+
+[sub_resource type="Resource" id="Resource_088tb"]
+script = ExtResource("3_ingred")
+item = ExtResource("156_rckfn")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_it84n"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("159_jufvy")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_jra3h"), SubResource("Resource_jg3jf"), SubResource("Resource_088tb")])
+required_level = 88
+xp_reward = 390
+
+[sub_resource type="Resource" id="Resource_jey1a"]
+script = ExtResource("3_ingred")
+item = ExtResource("154_y47sw")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_as54b"]
+script = ExtResource("3_ingred")
+item = ExtResource("155_h3wmt")
+
+[sub_resource type="Resource" id="Resource_2xusi"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("160_a2vpa")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_jey1a"), SubResource("Resource_as54b")])
+required_level = 88
+xp_reward = 430
+
+[sub_resource type="Resource" id="Resource_ijpue"]
+script = ExtResource("3_ingred")
+item = ExtResource("154_y47sw")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_6ffnj"]
+script = ExtResource("3_ingred")
+item = ExtResource("155_h3wmt")
+
+[sub_resource type="Resource" id="Resource_pf78e"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("161_csols")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_ijpue"), SubResource("Resource_6ffnj")])
+required_level = 88
+xp_reward = 430
+
+[sub_resource type="Resource" id="Resource_a5tbf"]
+script = ExtResource("3_ingred")
+item = ExtResource("162_amm0e")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_q3dlo"]
+script = ExtResource("3_ingred")
+item = ExtResource("163_miox8")
+
+[sub_resource type="Resource" id="Resource_j4gtm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("164_lsjbu")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_a5tbf"), SubResource("Resource_q3dlo")])
+required_level = 88
+xp_reward = 430
+
+[sub_resource type="Resource" id="Resource_hj7uh"]
+script = ExtResource("3_ingred")
+item = ExtResource("162_amm0e")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_y3fcm"]
+script = ExtResource("3_ingred")
+item = ExtResource("163_miox8")
+
+[sub_resource type="Resource" id="Resource_dvmrm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("165_1arqn")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_hj7uh"), SubResource("Resource_y3fcm")])
+required_level = 88
+xp_reward = 430
+
+[sub_resource type="Resource" id="Resource_4fy7d"]
+script = ExtResource("3_ingred")
+item = ExtResource("166_biyyn")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_kp8wn"]
+script = ExtResource("3_ingred")
+item = ExtResource("167_wywho")
+
+[sub_resource type="Resource" id="Resource_kjoqn"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("168_g64p6")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_4fy7d"), SubResource("Resource_kp8wn")])
+required_level = 88
+xp_reward = 430
+
+[sub_resource type="Resource" id="Resource_8u7wj"]
+script = ExtResource("3_ingred")
+item = ExtResource("169_gbc83")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_xth6g"]
+script = ExtResource("3_ingred")
+item = ExtResource("170_jal61")
+
+[sub_resource type="Resource" id="Resource_tmkhy"]
+script = ExtResource("3_ingred")
+item = ExtResource("171_amxth")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_dlmqp"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("172_nx7gq")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_8u7wj"), SubResource("Resource_xth6g"), SubResource("Resource_tmkhy")])
+required_level = 96
+xp_reward = 500
+
+[sub_resource type="Resource" id="Resource_1rcsa"]
+script = ExtResource("3_ingred")
+item = ExtResource("169_gbc83")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_544el"]
+script = ExtResource("3_ingred")
+item = ExtResource("170_jal61")
+
+[sub_resource type="Resource" id="Resource_f8f3e"]
+script = ExtResource("3_ingred")
+item = ExtResource("171_amxth")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_66pd4"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("173_awumh")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_1rcsa"), SubResource("Resource_544el"), SubResource("Resource_f8f3e")])
+required_level = 96
+xp_reward = 520
+
+[sub_resource type="Resource" id="Resource_odn8g"]
+script = ExtResource("3_ingred")
+item = ExtResource("169_gbc83")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_43sq6"]
+script = ExtResource("3_ingred")
+item = ExtResource("170_jal61")
+
+[sub_resource type="Resource" id="Resource_nu1bx"]
+script = ExtResource("3_ingred")
+item = ExtResource("171_amxth")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_dsqmh"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("174_1r20r")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_odn8g"), SubResource("Resource_43sq6"), SubResource("Resource_nu1bx")])
+required_level = 96
+xp_reward = 490
+
+[sub_resource type="Resource" id="Resource_dl7xv"]
+script = ExtResource("3_ingred")
+item = ExtResource("169_gbc83")
+amount = 4
+
+[sub_resource type="Resource" id="Resource_ig7wl"]
+script = ExtResource("3_ingred")
+item = ExtResource("170_jal61")
+
+[sub_resource type="Resource" id="Resource_mbpcn"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("175_3sa5n")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_dl7xv"), SubResource("Resource_ig7wl")])
+required_level = 96
+xp_reward = 530
+
+[sub_resource type="Resource" id="Resource_wyqsq"]
+script = ExtResource("3_ingred")
+item = ExtResource("169_gbc83")
+amount = 5
+
+[sub_resource type="Resource" id="Resource_b1mem"]
+script = ExtResource("3_ingred")
+item = ExtResource("170_jal61")
+
+[sub_resource type="Resource" id="Resource_l4qqf"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("176_2upif")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_wyqsq"), SubResource("Resource_b1mem")])
+required_level = 96
+xp_reward = 530
+
+[sub_resource type="Resource" id="Resource_rapeb"]
+script = ExtResource("3_ingred")
+item = ExtResource("177_yvrtf")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_iprff"]
+script = ExtResource("3_ingred")
+item = ExtResource("178_qj68e")
+
+[sub_resource type="Resource" id="Resource_8gw11"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("179_wu0kr")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_rapeb"), SubResource("Resource_iprff")])
+required_level = 96
+xp_reward = 530
+
+[sub_resource type="Resource" id="Resource_j4agl"]
+script = ExtResource("3_ingred")
+item = ExtResource("177_yvrtf")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_n3hlf"]
+script = ExtResource("3_ingred")
+item = ExtResource("178_qj68e")
+
+[sub_resource type="Resource" id="Resource_uwqqc"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("180_8fh83")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_j4agl"), SubResource("Resource_n3hlf")])
+required_level = 96
+xp_reward = 530
+
+[sub_resource type="Resource" id="Resource_gj0n8"]
+script = ExtResource("3_ingred")
+item = ExtResource("181_d3uwu")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_eevuk"]
+script = ExtResource("3_ingred")
+item = ExtResource("182_dwaun")
+
+[sub_resource type="Resource" id="Resource_vkexn"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("183_cht1h")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_gj0n8"), SubResource("Resource_eevuk")])
+required_level = 96
+xp_reward = 530
+
+[sub_resource type="Resource" id="Resource_8cmw8"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_dij1k"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_1e8l7"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("184_dque1")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_8cmw8"), SubResource("Resource_dij1k")])
+required_level = 60
+xp_reward = 220
+
+[sub_resource type="Resource" id="Resource_aekec"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_vwsjx"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_8mlec"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("185_4ndny")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_aekec"), SubResource("Resource_vwsjx")])
+required_level = 60
+xp_reward = 220
+
+[sub_resource type="Resource" id="Resource_fr4yu"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_f7do6"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_if04n"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("186_wnquk")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_fr4yu"), SubResource("Resource_f7do6")])
+required_level = 60
+xp_reward = 220
+
+[sub_resource type="Resource" id="Resource_viddx"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_l06if"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_7upco"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("187_xbvyw")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_viddx"), SubResource("Resource_l06if")])
+required_level = 60
+xp_reward = 220
+
+[sub_resource type="Resource" id="Resource_x5g3j"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_j853n"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_fvt4r"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("188_yuhwn")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_x5g3j"), SubResource("Resource_j853n")])
+required_level = 60
+xp_reward = 220
+
+[sub_resource type="Resource" id="Resource_ld0t7"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_au_bar")
+amount = 3
+
+[sub_resource type="Resource" id="Resource_3l5j6"]
+script = ExtResource("3_ingred")
+item = ExtResource("95_338ju")
+amount = 2
+
+[sub_resource type="Resource" id="Resource_2ea3t"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("189_q4xl0")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_ld0t7"), SubResource("Resource_3l5j6")])
+required_level = 60
+xp_reward = 220
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Smithing Table"
 profession = &"smithing"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru")])
-
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru"), SubResource("Resource_8rxl3"), SubResource("Resource_a5hfw"), SubResource("Resource_2jebw"), SubResource("Resource_csi67"), SubResource("Resource_a3qax"), SubResource("Resource_axytv"), SubResource("Resource_hsuoi"), SubResource("Resource_rbgp3"), SubResource("Resource_uybih"), SubResource("Resource_1fe81"), SubResource("Resource_tfg02"), SubResource("Resource_xuo4v"), SubResource("Resource_fuwsa"), SubResource("Resource_rj68b"), SubResource("Resource_hy8bh"), SubResource("Resource_34ys7"), SubResource("Resource_bmawy"), SubResource("Resource_8o0n1"), SubResource("Resource_k7wbn"), SubResource("Resource_5nw8n"), SubResource("Resource_7i5s1"), SubResource("Resource_oc6ao"), SubResource("Resource_ix534"), SubResource("Resource_812vq"), SubResource("Resource_tcup4"), SubResource("Resource_geiv3"), SubResource("Resource_aa0yj"), SubResource("Resource_68cqq"), SubResource("Resource_6t70i"), SubResource("Resource_rbx8h"), SubResource("Resource_01j6p"), SubResource("Resource_sigp8"), SubResource("Resource_jwuo6"), SubResource("Resource_qmsn4"), SubResource("Resource_it84n"), SubResource("Resource_2xusi"), SubResource("Resource_pf78e"), SubResource("Resource_j4gtm"), SubResource("Resource_dvmrm"), SubResource("Resource_kjoqn"), SubResource("Resource_dlmqp"), SubResource("Resource_66pd4"), SubResource("Resource_dsqmh"), SubResource("Resource_mbpcn"), SubResource("Resource_l4qqf"), SubResource("Resource_8gw11"), SubResource("Resource_uwqqc"), SubResource("Resource_vkexn"), SubResource("Resource_1e8l7"), SubResource("Resource_8mlec"), SubResource("Resource_if04n"), SubResource("Resource_7upco"), SubResource("Resource_fvt4r"), SubResource("Resource_2ea3t")])

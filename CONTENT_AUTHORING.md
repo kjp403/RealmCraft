@@ -391,6 +391,26 @@ Other indexes in the same folder (same workflow):
 
 For a potion, duplicate something under `consumables/` instead and set `heal_amount` / etc.
 
+### Ascension gear (mastery 40–90)
+
+Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / cloth split:
+
+| Mastery | Melee (metal) | Archery (leather) | Magic (cloth) |
+|--------:|---------------|-------------------|---------------|
+| 40 | Basilisk | Wraithsilk | Runewoven |
+| 50 | Wyrmguard | Nightglass | Astral |
+| 60 | Colossus | Tempest | Voidsilk |
+| 70 | Godsteel | Skyrender | Aetherborn |
+| 80 | Behemoth | Eclipse | Empyrean |
+| 90 | Worldbreaker | Starfall | Primordial |
+
+- Armor + matching weapons live under `gears/{metal,leather,cloth}/` and `weapons/{sword,hammer,bow,wand,book}/`.
+- Craft mats: `{set}_ore` / `{set}_gem` / `{set}_cloth` / `{set}_leather` under `materials/`.
+- Anvil crafts metal armor + all five weapon types; workbench crafts leather + cloth sets.
+- Hub NPC **Ascension Broker Vael** sells mats / jewelry (`shops/resources/ascension_shop.tres`).
+- Optional dungeon table: `dungeon/ascension_reward.tres` (attach as `hard_reward` on a `DungeonResource`).
+- Regenerator / wire / verify: `tools/generate_ascension_gear.py`, `tools/wire_ascension_gear.gd`, `tools/verify_ascension_gear.gd`.
+
 ---
 
 ## 4. Dialogue & shops

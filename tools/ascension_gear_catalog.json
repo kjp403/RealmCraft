@@ -1,0 +1,1067 @@
+{
+  "items": [
+    {
+      "slug": "basilisk_helmet",
+      "path": "source/common/gameplay/items/gears/metal/basilisk_helmet.tres",
+      "name": "Basilisk Helmet",
+      "mastery": 40
+    },
+    {
+      "slug": "basilisk_chest",
+      "path": "source/common/gameplay/items/gears/metal/basilisk_chest.tres",
+      "name": "Basilisk Chestplate",
+      "mastery": 40
+    },
+    {
+      "slug": "basilisk_boots",
+      "path": "source/common/gameplay/items/gears/metal/basilisk_boots.tres",
+      "name": "Basilisk Boots",
+      "mastery": 40
+    },
+    {
+      "slug": "wraithsilk_hood",
+      "path": "source/common/gameplay/items/gears/leather/wraithsilk_hood.tres",
+      "name": "Wraithsilk Hood",
+      "mastery": 40
+    },
+    {
+      "slug": "wraithsilk_vest",
+      "path": "source/common/gameplay/items/gears/leather/wraithsilk_vest.tres",
+      "name": "Wraithsilk Vest",
+      "mastery": 40
+    },
+    {
+      "slug": "wraithsilk_sandals",
+      "path": "source/common/gameplay/items/gears/leather/wraithsilk_sandals.tres",
+      "name": "Wraithsilk Sandals",
+      "mastery": 40
+    },
+    {
+      "slug": "runewoven_hood",
+      "path": "source/common/gameplay/items/gears/cloth/runewoven_hood.tres",
+      "name": "Runewoven Hood",
+      "mastery": 40
+    },
+    {
+      "slug": "runewoven_robe",
+      "path": "source/common/gameplay/items/gears/cloth/runewoven_robe.tres",
+      "name": "Runewoven Robe",
+      "mastery": 40
+    },
+    {
+      "slug": "runewoven_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/runewoven_shoes.tres",
+      "name": "Runewoven Shoes",
+      "mastery": 40
+    },
+    {
+      "slug": "sword_basilisk.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres",
+      "name": "Basilisk Sword",
+      "mastery": 40,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_basilisk.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_basilisk.item.tres",
+      "name": "Basilisk Hammer",
+      "mastery": 40,
+      "category": "hammer"
+    },
+    {
+      "slug": "wraithsilk_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres",
+      "name": "Wraithsilk Bow",
+      "mastery": 40,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_runewoven.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres",
+      "name": "Runewoven Wand",
+      "mastery": 40,
+      "category": "wand"
+    },
+    {
+      "slug": "book_runewoven.item",
+      "path": "source/common/gameplay/items/weapons/book/book_runewoven.item.tres",
+      "name": "Runewoven Tome",
+      "mastery": 40,
+      "category": "book"
+    },
+    {
+      "slug": "wyrmguard_helmet",
+      "path": "source/common/gameplay/items/gears/metal/wyrmguard_helmet.tres",
+      "name": "Wyrmguard Helmet",
+      "mastery": 50
+    },
+    {
+      "slug": "wyrmguard_chest",
+      "path": "source/common/gameplay/items/gears/metal/wyrmguard_chest.tres",
+      "name": "Wyrmguard Chestplate",
+      "mastery": 50
+    },
+    {
+      "slug": "wyrmguard_boots",
+      "path": "source/common/gameplay/items/gears/metal/wyrmguard_boots.tres",
+      "name": "Wyrmguard Boots",
+      "mastery": 50
+    },
+    {
+      "slug": "nightglass_hood",
+      "path": "source/common/gameplay/items/gears/leather/nightglass_hood.tres",
+      "name": "Nightglass Hood",
+      "mastery": 50
+    },
+    {
+      "slug": "nightglass_vest",
+      "path": "source/common/gameplay/items/gears/leather/nightglass_vest.tres",
+      "name": "Nightglass Vest",
+      "mastery": 50
+    },
+    {
+      "slug": "nightglass_sandals",
+      "path": "source/common/gameplay/items/gears/leather/nightglass_sandals.tres",
+      "name": "Nightglass Sandals",
+      "mastery": 50
+    },
+    {
+      "slug": "astral_hood",
+      "path": "source/common/gameplay/items/gears/cloth/astral_hood.tres",
+      "name": "Astral Hood",
+      "mastery": 50
+    },
+    {
+      "slug": "astral_robe",
+      "path": "source/common/gameplay/items/gears/cloth/astral_robe.tres",
+      "name": "Astral Robe",
+      "mastery": 50
+    },
+    {
+      "slug": "astral_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/astral_shoes.tres",
+      "name": "Astral Shoes",
+      "mastery": 50
+    },
+    {
+      "slug": "sword_wyrmguard.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres",
+      "name": "Wyrmguard Sword",
+      "mastery": 50,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_wyrmguard.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres",
+      "name": "Wyrmguard Hammer",
+      "mastery": 50,
+      "category": "hammer"
+    },
+    {
+      "slug": "nightglass_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres",
+      "name": "Nightglass Bow",
+      "mastery": 50,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_astral.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_astral.item.tres",
+      "name": "Astral Wand",
+      "mastery": 50,
+      "category": "wand"
+    },
+    {
+      "slug": "book_astral.item",
+      "path": "source/common/gameplay/items/weapons/book/book_astral.item.tres",
+      "name": "Astral Tome",
+      "mastery": 50,
+      "category": "book"
+    },
+    {
+      "slug": "colossus_helmet",
+      "path": "source/common/gameplay/items/gears/metal/colossus_helmet.tres",
+      "name": "Colossus Helmet",
+      "mastery": 60
+    },
+    {
+      "slug": "colossus_chest",
+      "path": "source/common/gameplay/items/gears/metal/colossus_chest.tres",
+      "name": "Colossus Chestplate",
+      "mastery": 60
+    },
+    {
+      "slug": "colossus_boots",
+      "path": "source/common/gameplay/items/gears/metal/colossus_boots.tres",
+      "name": "Colossus Boots",
+      "mastery": 60
+    },
+    {
+      "slug": "tempest_hood",
+      "path": "source/common/gameplay/items/gears/leather/tempest_hood.tres",
+      "name": "Tempest Hood",
+      "mastery": 60
+    },
+    {
+      "slug": "tempest_vest",
+      "path": "source/common/gameplay/items/gears/leather/tempest_vest.tres",
+      "name": "Tempest Vest",
+      "mastery": 60
+    },
+    {
+      "slug": "tempest_sandals",
+      "path": "source/common/gameplay/items/gears/leather/tempest_sandals.tres",
+      "name": "Tempest Sandals",
+      "mastery": 60
+    },
+    {
+      "slug": "voidsilk_hood",
+      "path": "source/common/gameplay/items/gears/cloth/voidsilk_hood.tres",
+      "name": "Voidsilk Hood",
+      "mastery": 60
+    },
+    {
+      "slug": "voidsilk_robe",
+      "path": "source/common/gameplay/items/gears/cloth/voidsilk_robe.tres",
+      "name": "Voidsilk Robe",
+      "mastery": 60
+    },
+    {
+      "slug": "voidsilk_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/voidsilk_shoes.tres",
+      "name": "Voidsilk Shoes",
+      "mastery": 60
+    },
+    {
+      "slug": "sword_colossus.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_colossus.item.tres",
+      "name": "Colossus Sword",
+      "mastery": 60,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_colossus.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres",
+      "name": "Colossus Hammer",
+      "mastery": 60,
+      "category": "hammer"
+    },
+    {
+      "slug": "tempest_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/tempest_bow.item.tres",
+      "name": "Tempest Bow",
+      "mastery": 60,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_voidsilk.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres",
+      "name": "Voidsilk Wand",
+      "mastery": 60,
+      "category": "wand"
+    },
+    {
+      "slug": "book_voidsilk.item",
+      "path": "source/common/gameplay/items/weapons/book/book_voidsilk.item.tres",
+      "name": "Voidsilk Tome",
+      "mastery": 60,
+      "category": "book"
+    },
+    {
+      "slug": "godsteel_helmet",
+      "path": "source/common/gameplay/items/gears/metal/godsteel_helmet.tres",
+      "name": "Godsteel Helmet",
+      "mastery": 70
+    },
+    {
+      "slug": "godsteel_chest",
+      "path": "source/common/gameplay/items/gears/metal/godsteel_chest.tres",
+      "name": "Godsteel Chestplate",
+      "mastery": 70
+    },
+    {
+      "slug": "godsteel_boots",
+      "path": "source/common/gameplay/items/gears/metal/godsteel_boots.tres",
+      "name": "Godsteel Boots",
+      "mastery": 70
+    },
+    {
+      "slug": "skyrender_hood",
+      "path": "source/common/gameplay/items/gears/leather/skyrender_hood.tres",
+      "name": "Skyrender Hood",
+      "mastery": 70
+    },
+    {
+      "slug": "skyrender_vest",
+      "path": "source/common/gameplay/items/gears/leather/skyrender_vest.tres",
+      "name": "Skyrender Vest",
+      "mastery": 70
+    },
+    {
+      "slug": "skyrender_sandals",
+      "path": "source/common/gameplay/items/gears/leather/skyrender_sandals.tres",
+      "name": "Skyrender Sandals",
+      "mastery": 70
+    },
+    {
+      "slug": "aetherborn_hood",
+      "path": "source/common/gameplay/items/gears/cloth/aetherborn_hood.tres",
+      "name": "Aetherborn Hood",
+      "mastery": 70
+    },
+    {
+      "slug": "aetherborn_robe",
+      "path": "source/common/gameplay/items/gears/cloth/aetherborn_robe.tres",
+      "name": "Aetherborn Robe",
+      "mastery": 70
+    },
+    {
+      "slug": "aetherborn_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/aetherborn_shoes.tres",
+      "name": "Aetherborn Shoes",
+      "mastery": 70
+    },
+    {
+      "slug": "sword_godsteel.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres",
+      "name": "Godsteel Sword",
+      "mastery": 70,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_godsteel.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres",
+      "name": "Godsteel Hammer",
+      "mastery": 70,
+      "category": "hammer"
+    },
+    {
+      "slug": "skyrender_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/skyrender_bow.item.tres",
+      "name": "Skyrender Bow",
+      "mastery": 70,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_aetherborn.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_aetherborn.item.tres",
+      "name": "Aetherborn Wand",
+      "mastery": 70,
+      "category": "wand"
+    },
+    {
+      "slug": "book_aetherborn.item",
+      "path": "source/common/gameplay/items/weapons/book/book_aetherborn.item.tres",
+      "name": "Aetherborn Tome",
+      "mastery": 70,
+      "category": "book"
+    },
+    {
+      "slug": "behemoth_helmet",
+      "path": "source/common/gameplay/items/gears/metal/behemoth_helmet.tres",
+      "name": "Behemoth Helmet",
+      "mastery": 80
+    },
+    {
+      "slug": "behemoth_chest",
+      "path": "source/common/gameplay/items/gears/metal/behemoth_chest.tres",
+      "name": "Behemoth Chestplate",
+      "mastery": 80
+    },
+    {
+      "slug": "behemoth_boots",
+      "path": "source/common/gameplay/items/gears/metal/behemoth_boots.tres",
+      "name": "Behemoth Boots",
+      "mastery": 80
+    },
+    {
+      "slug": "eclipse_hood",
+      "path": "source/common/gameplay/items/gears/leather/eclipse_hood.tres",
+      "name": "Eclipse Hood",
+      "mastery": 80
+    },
+    {
+      "slug": "eclipse_vest",
+      "path": "source/common/gameplay/items/gears/leather/eclipse_vest.tres",
+      "name": "Eclipse Vest",
+      "mastery": 80
+    },
+    {
+      "slug": "eclipse_sandals",
+      "path": "source/common/gameplay/items/gears/leather/eclipse_sandals.tres",
+      "name": "Eclipse Sandals",
+      "mastery": 80
+    },
+    {
+      "slug": "empyrean_hood",
+      "path": "source/common/gameplay/items/gears/cloth/empyrean_hood.tres",
+      "name": "Empyrean Hood",
+      "mastery": 80
+    },
+    {
+      "slug": "empyrean_robe",
+      "path": "source/common/gameplay/items/gears/cloth/empyrean_robe.tres",
+      "name": "Empyrean Robe",
+      "mastery": 80
+    },
+    {
+      "slug": "empyrean_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/empyrean_shoes.tres",
+      "name": "Empyrean Shoes",
+      "mastery": 80
+    },
+    {
+      "slug": "sword_behemoth.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_behemoth.item.tres",
+      "name": "Behemoth Sword",
+      "mastery": 80,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_behemoth.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_behemoth.item.tres",
+      "name": "Behemoth Hammer",
+      "mastery": 80,
+      "category": "hammer"
+    },
+    {
+      "slug": "eclipse_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/eclipse_bow.item.tres",
+      "name": "Eclipse Bow",
+      "mastery": 80,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_empyrean.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_empyrean.item.tres",
+      "name": "Empyrean Wand",
+      "mastery": 80,
+      "category": "wand"
+    },
+    {
+      "slug": "book_empyrean.item",
+      "path": "source/common/gameplay/items/weapons/book/book_empyrean.item.tres",
+      "name": "Empyrean Tome",
+      "mastery": 80,
+      "category": "book"
+    },
+    {
+      "slug": "worldbreaker_helmet",
+      "path": "source/common/gameplay/items/gears/metal/worldbreaker_helmet.tres",
+      "name": "Worldbreaker Helmet",
+      "mastery": 90
+    },
+    {
+      "slug": "worldbreaker_chest",
+      "path": "source/common/gameplay/items/gears/metal/worldbreaker_chest.tres",
+      "name": "Worldbreaker Chestplate",
+      "mastery": 90
+    },
+    {
+      "slug": "worldbreaker_boots",
+      "path": "source/common/gameplay/items/gears/metal/worldbreaker_boots.tres",
+      "name": "Worldbreaker Boots",
+      "mastery": 90
+    },
+    {
+      "slug": "starfall_hood",
+      "path": "source/common/gameplay/items/gears/leather/starfall_hood.tres",
+      "name": "Starfall Hood",
+      "mastery": 90
+    },
+    {
+      "slug": "starfall_vest",
+      "path": "source/common/gameplay/items/gears/leather/starfall_vest.tres",
+      "name": "Starfall Vest",
+      "mastery": 90
+    },
+    {
+      "slug": "starfall_sandals",
+      "path": "source/common/gameplay/items/gears/leather/starfall_sandals.tres",
+      "name": "Starfall Sandals",
+      "mastery": 90
+    },
+    {
+      "slug": "primordial_hood",
+      "path": "source/common/gameplay/items/gears/cloth/primordial_hood.tres",
+      "name": "Primordial Hood",
+      "mastery": 90
+    },
+    {
+      "slug": "primordial_robe",
+      "path": "source/common/gameplay/items/gears/cloth/primordial_robe.tres",
+      "name": "Primordial Robe",
+      "mastery": 90
+    },
+    {
+      "slug": "primordial_shoes",
+      "path": "source/common/gameplay/items/gears/cloth/primordial_shoes.tres",
+      "name": "Primordial Shoes",
+      "mastery": 90
+    },
+    {
+      "slug": "sword_worldbreaker.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres",
+      "name": "Worldbreaker Sword",
+      "mastery": 90,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_worldbreaker.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_worldbreaker.item.tres",
+      "name": "Worldbreaker Hammer",
+      "mastery": 90,
+      "category": "hammer"
+    },
+    {
+      "slug": "starfall_bow.item",
+      "path": "source/common/gameplay/items/weapons/bow/starfall_bow.item.tres",
+      "name": "Starfall Bow",
+      "mastery": 90,
+      "category": "bow"
+    },
+    {
+      "slug": "wand_primordial.item",
+      "path": "source/common/gameplay/items/weapons/wand/wand_primordial.item.tres",
+      "name": "Primordial Wand",
+      "mastery": 90,
+      "category": "wand"
+    },
+    {
+      "slug": "book_primordial.item",
+      "path": "source/common/gameplay/items/weapons/book/book_primordial.item.tres",
+      "name": "Primordial Tome",
+      "mastery": 90,
+      "category": "book"
+    },
+    {
+      "slug": "sword_nightfall.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_nightfall.item.tres",
+      "name": "Nightfall Blade",
+      "mastery": 85,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_kingsbane.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_kingsbane.item.tres",
+      "name": "Kingsbane",
+      "mastery": 85,
+      "category": "hammer"
+    },
+    {
+      "slug": "sword_dawnbreaker.item",
+      "path": "source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres",
+      "name": "Dawnbreaker",
+      "mastery": 75,
+      "category": "sword"
+    },
+    {
+      "slug": "hammer_riftedge.item",
+      "path": "source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres",
+      "name": "Riftedge Scythe",
+      "mastery": 75,
+      "category": "hammer"
+    },
+    {
+      "slug": "heart_of_the_wild",
+      "path": "source/common/gameplay/items/gears/jewelry/heart_of_the_wild.tres",
+      "name": "Heart of the Wild",
+      "mastery": 0
+    },
+    {
+      "slug": "ember_locket",
+      "path": "source/common/gameplay/items/gears/jewelry/ember_locket.tres",
+      "name": "Ember Locket",
+      "mastery": 0
+    },
+    {
+      "slug": "tideglass_amulet",
+      "path": "source/common/gameplay/items/gears/jewelry/tideglass_amulet.tres",
+      "name": "Tideglass Amulet",
+      "mastery": 0
+    },
+    {
+      "slug": "oathstone",
+      "path": "source/common/gameplay/items/gears/jewelry/oathstone.tres",
+      "name": "Oathstone",
+      "mastery": 0
+    },
+    {
+      "slug": "reliquary_of_verdance",
+      "path": "source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres",
+      "name": "Reliquary of Verdance",
+      "mastery": 0
+    },
+    {
+      "slug": "covenant_cross",
+      "path": "source/common/gameplay/items/gears/jewelry/covenant_cross.tres",
+      "name": "Covenant Cross",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_wayfarer",
+      "path": "source/common/gameplay/items/gears/rings/ring_wayfarer.tres",
+      "name": "Wayfarer's Band",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_heartfire",
+      "path": "source/common/gameplay/items/gears/rings/ring_heartfire.tres",
+      "name": "Heartfire Ring",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_starweave",
+      "path": "source/common/gameplay/items/gears/rings/ring_starweave.tres",
+      "name": "Starweave Ring",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_bulwark",
+      "path": "source/common/gameplay/items/gears/rings/ring_bulwark.tres",
+      "name": "Bulwark Signet",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_sovereign",
+      "path": "source/common/gameplay/items/gears/rings/ring_sovereign.tres",
+      "name": "Sovereign Circlet",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_stormchase",
+      "path": "source/common/gameplay/items/gears/rings/ring_stormchase.tres",
+      "name": "Stormchase Ring",
+      "mastery": 0
+    },
+    {
+      "slug": "ring_oathband",
+      "path": "source/common/gameplay/items/gears/rings/ring_oathband.tres",
+      "name": "Oathband",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_hat_azure",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_hat_azure.tres",
+      "name": "Azure Tradesman Hat",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_hat_teal",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_hat_teal.tres",
+      "name": "Teal Artisan Hat",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_hat_amber",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_hat_amber.tres",
+      "name": "Amber Gatherer's Hat",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_tunic_sanctum",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_tunic_sanctum.tres",
+      "name": "Sanctum Work Tunic",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_tunic_service",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_tunic_service.tres",
+      "name": "Service Apron Coat",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_tunic_rose",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_tunic_rose.tres",
+      "name": "Roseweave Smock",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_tunic_crimson",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_tunic_crimson.tres",
+      "name": "Crimson Craft Coat",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_trail",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_trail.tres",
+      "name": "Trailwalker Boots",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_tide",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_tide.tres",
+      "name": "Tidepath Boots",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_mist",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_mist.tres",
+      "name": "Miststride Boots",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_canopy",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_canopy.tres",
+      "name": "Canopy Striders",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_ember",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_ember.tres",
+      "name": "Emberpath Boots",
+      "mastery": 0
+    },
+    {
+      "slug": "skilling_boots_night",
+      "path": "source/common/gameplay/items/gears/skilling/skilling_boots_night.tres",
+      "name": "Nightcourier Boots",
+      "mastery": 0
+    },
+    {
+      "slug": "soulbrand_vest",
+      "path": "source/common/gameplay/items/gears/leather/soulbrand_vest.tres",
+      "name": "Soulbrand Vest",
+      "mastery": 65
+    },
+    {
+      "slug": "duskfeather_cloak",
+      "path": "source/common/gameplay/items/gears/leather/duskfeather_cloak.tres",
+      "name": "Duskfeather Cloak",
+      "mastery": 55
+    },
+    {
+      "slug": "ghostweave_jacket",
+      "path": "source/common/gameplay/items/gears/leather/ghostweave_jacket.tres",
+      "name": "Ghostweave Jacket",
+      "mastery": 45
+    },
+    {
+      "slug": "celestine_robe",
+      "path": "source/common/gameplay/items/gears/cloth/celestine_robe.tres",
+      "name": "Celestine Robe",
+      "mastery": 65
+    },
+    {
+      "slug": "eldritch_coat",
+      "path": "source/common/gameplay/items/gears/cloth/eldritch_coat.tres",
+      "name": "Eldritch Coat",
+      "mastery": 55
+    },
+    {
+      "slug": "firstlight_mantle",
+      "path": "source/common/gameplay/items/gears/cloth/firstlight_mantle.tres",
+      "name": "Firstlight Mantle",
+      "mastery": 75
+    },
+    {
+      "slug": "ironbane_cuirass",
+      "path": "source/common/gameplay/items/gears/metal/ironbane_cuirass.tres",
+      "name": "Ironbane Cuirass",
+      "mastery": 45
+    },
+    {
+      "slug": "ruinplate_chest",
+      "path": "source/common/gameplay/items/gears/metal/ruinplate_chest.tres",
+      "name": "Ruinplate Chestguard",
+      "mastery": 65
+    },
+    {
+      "slug": "adamantine_greatcloak",
+      "path": "source/common/gameplay/items/gears/metal/adamantine_greatcloak.tres",
+      "name": "Adamantine Greatcloak",
+      "mastery": 55
+    },
+    {
+      "slug": "doomforge_wrap",
+      "path": "source/common/gameplay/items/gears/metal/doomforge_wrap.tres",
+      "name": "Doomforge Wrap",
+      "mastery": 75
+    },
+    {
+      "slug": "sigilbound_sandals",
+      "path": "source/common/gameplay/items/gears/cloth/sigilbound_sandals.tres",
+      "name": "Sigilbound Sandals",
+      "mastery": 60
+    },
+    {
+      "slug": "silentwing_sandals",
+      "path": "source/common/gameplay/items/gears/leather/silentwing_sandals.tres",
+      "name": "Silentwing Sandals",
+      "mastery": 50
+    }
+  ],
+  "materials": [
+    {
+      "slug": "basilisk_ore",
+      "path": "source/common/gameplay/items/materials/metals/basilisk_ore.tres",
+      "name": "Basilisk Ore"
+    },
+    {
+      "slug": "basilisk_gem",
+      "path": "source/common/gameplay/items/materials/gems/basilisk_gem.tres",
+      "name": "Basilisk Gem"
+    },
+    {
+      "slug": "basilisk_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/basilisk_cloth.tres",
+      "name": "Basilisk Cloth"
+    },
+    {
+      "slug": "wraithsilk_leather",
+      "path": "source/common/gameplay/items/materials/leather/wraithsilk_leather.tres",
+      "name": "Wraithsilk Leather"
+    },
+    {
+      "slug": "wraithsilk_gem",
+      "path": "source/common/gameplay/items/materials/gems/wraithsilk_gem.tres",
+      "name": "Wraithsilk Gem"
+    },
+    {
+      "slug": "wraithsilk_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/wraithsilk_cloth.tres",
+      "name": "Wraithsilk Cloth"
+    },
+    {
+      "slug": "runewoven_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/runewoven_cloth.tres",
+      "name": "Runewoven Cloth"
+    },
+    {
+      "slug": "runewoven_gem",
+      "path": "source/common/gameplay/items/materials/gems/runewoven_gem.tres",
+      "name": "Runewoven Gem"
+    },
+    {
+      "slug": "runewoven_ore",
+      "path": "source/common/gameplay/items/materials/metals/runewoven_ore.tres",
+      "name": "Runewoven Ore"
+    },
+    {
+      "slug": "wyrmguard_ore",
+      "path": "source/common/gameplay/items/materials/metals/wyrmguard_ore.tres",
+      "name": "Wyrmguard Ore"
+    },
+    {
+      "slug": "wyrmguard_gem",
+      "path": "source/common/gameplay/items/materials/gems/wyrmguard_gem.tres",
+      "name": "Wyrmguard Gem"
+    },
+    {
+      "slug": "wyrmguard_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres",
+      "name": "Wyrmguard Cloth"
+    },
+    {
+      "slug": "nightglass_leather",
+      "path": "source/common/gameplay/items/materials/leather/nightglass_leather.tres",
+      "name": "Nightglass Leather"
+    },
+    {
+      "slug": "nightglass_gem",
+      "path": "source/common/gameplay/items/materials/gems/nightglass_gem.tres",
+      "name": "Nightglass Gem"
+    },
+    {
+      "slug": "nightglass_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/nightglass_cloth.tres",
+      "name": "Nightglass Cloth"
+    },
+    {
+      "slug": "astral_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/astral_cloth.tres",
+      "name": "Astral Cloth"
+    },
+    {
+      "slug": "astral_gem",
+      "path": "source/common/gameplay/items/materials/gems/astral_gem.tres",
+      "name": "Astral Gem"
+    },
+    {
+      "slug": "astral_ore",
+      "path": "source/common/gameplay/items/materials/metals/astral_ore.tres",
+      "name": "Astral Ore"
+    },
+    {
+      "slug": "colossus_ore",
+      "path": "source/common/gameplay/items/materials/metals/colossus_ore.tres",
+      "name": "Colossus Ore"
+    },
+    {
+      "slug": "colossus_gem",
+      "path": "source/common/gameplay/items/materials/gems/colossus_gem.tres",
+      "name": "Colossus Gem"
+    },
+    {
+      "slug": "colossus_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/colossus_cloth.tres",
+      "name": "Colossus Cloth"
+    },
+    {
+      "slug": "tempest_leather",
+      "path": "source/common/gameplay/items/materials/leather/tempest_leather.tres",
+      "name": "Tempest Leather"
+    },
+    {
+      "slug": "tempest_gem",
+      "path": "source/common/gameplay/items/materials/gems/tempest_gem.tres",
+      "name": "Tempest Gem"
+    },
+    {
+      "slug": "tempest_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/tempest_cloth.tres",
+      "name": "Tempest Cloth"
+    },
+    {
+      "slug": "voidsilk_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres",
+      "name": "Voidsilk Cloth"
+    },
+    {
+      "slug": "voidsilk_gem",
+      "path": "source/common/gameplay/items/materials/gems/voidsilk_gem.tres",
+      "name": "Voidsilk Gem"
+    },
+    {
+      "slug": "voidsilk_ore",
+      "path": "source/common/gameplay/items/materials/metals/voidsilk_ore.tres",
+      "name": "Voidsilk Ore"
+    },
+    {
+      "slug": "godsteel_ore",
+      "path": "source/common/gameplay/items/materials/metals/godsteel_ore.tres",
+      "name": "Godsteel Ore"
+    },
+    {
+      "slug": "godsteel_gem",
+      "path": "source/common/gameplay/items/materials/gems/godsteel_gem.tres",
+      "name": "Godsteel Gem"
+    },
+    {
+      "slug": "godsteel_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/godsteel_cloth.tres",
+      "name": "Godsteel Cloth"
+    },
+    {
+      "slug": "skyrender_leather",
+      "path": "source/common/gameplay/items/materials/leather/skyrender_leather.tres",
+      "name": "Skyrender Leather"
+    },
+    {
+      "slug": "skyrender_gem",
+      "path": "source/common/gameplay/items/materials/gems/skyrender_gem.tres",
+      "name": "Skyrender Gem"
+    },
+    {
+      "slug": "skyrender_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/skyrender_cloth.tres",
+      "name": "Skyrender Cloth"
+    },
+    {
+      "slug": "aetherborn_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/aetherborn_cloth.tres",
+      "name": "Aetherborn Cloth"
+    },
+    {
+      "slug": "aetherborn_gem",
+      "path": "source/common/gameplay/items/materials/gems/aetherborn_gem.tres",
+      "name": "Aetherborn Gem"
+    },
+    {
+      "slug": "aetherborn_ore",
+      "path": "source/common/gameplay/items/materials/metals/aetherborn_ore.tres",
+      "name": "Aetherborn Ore"
+    },
+    {
+      "slug": "behemoth_ore",
+      "path": "source/common/gameplay/items/materials/metals/behemoth_ore.tres",
+      "name": "Behemoth Ore"
+    },
+    {
+      "slug": "behemoth_gem",
+      "path": "source/common/gameplay/items/materials/gems/behemoth_gem.tres",
+      "name": "Behemoth Gem"
+    },
+    {
+      "slug": "behemoth_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/behemoth_cloth.tres",
+      "name": "Behemoth Cloth"
+    },
+    {
+      "slug": "eclipse_leather",
+      "path": "source/common/gameplay/items/materials/leather/eclipse_leather.tres",
+      "name": "Eclipse Leather"
+    },
+    {
+      "slug": "eclipse_gem",
+      "path": "source/common/gameplay/items/materials/gems/eclipse_gem.tres",
+      "name": "Eclipse Gem"
+    },
+    {
+      "slug": "eclipse_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/eclipse_cloth.tres",
+      "name": "Eclipse Cloth"
+    },
+    {
+      "slug": "empyrean_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/empyrean_cloth.tres",
+      "name": "Empyrean Cloth"
+    },
+    {
+      "slug": "empyrean_gem",
+      "path": "source/common/gameplay/items/materials/gems/empyrean_gem.tres",
+      "name": "Empyrean Gem"
+    },
+    {
+      "slug": "empyrean_ore",
+      "path": "source/common/gameplay/items/materials/metals/empyrean_ore.tres",
+      "name": "Empyrean Ore"
+    },
+    {
+      "slug": "worldbreaker_ore",
+      "path": "source/common/gameplay/items/materials/metals/worldbreaker_ore.tres",
+      "name": "Worldbreaker Ore"
+    },
+    {
+      "slug": "worldbreaker_gem",
+      "path": "source/common/gameplay/items/materials/gems/worldbreaker_gem.tres",
+      "name": "Worldbreaker Gem"
+    },
+    {
+      "slug": "worldbreaker_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/worldbreaker_cloth.tres",
+      "name": "Worldbreaker Cloth"
+    },
+    {
+      "slug": "starfall_leather",
+      "path": "source/common/gameplay/items/materials/leather/starfall_leather.tres",
+      "name": "Starfall Leather"
+    },
+    {
+      "slug": "starfall_gem",
+      "path": "source/common/gameplay/items/materials/gems/starfall_gem.tres",
+      "name": "Starfall Gem"
+    },
+    {
+      "slug": "starfall_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/starfall_cloth.tres",
+      "name": "Starfall Cloth"
+    },
+    {
+      "slug": "primordial_cloth",
+      "path": "source/common/gameplay/items/materials/cloth/primordial_cloth.tres",
+      "name": "Primordial Cloth"
+    },
+    {
+      "slug": "primordial_gem",
+      "path": "source/common/gameplay/items/materials/gems/primordial_gem.tres",
+      "name": "Primordial Gem"
+    },
+    {
+      "slug": "primordial_ore",
+      "path": "source/common/gameplay/items/materials/metals/primordial_ore.tres",
+      "name": "Primordial Ore"
+    }
+  ],
+  "icons": []
+}
