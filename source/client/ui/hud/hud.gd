@@ -54,26 +54,28 @@ const RIGHT_RAIL_GAP: float = 8.0
 const RIGHT_RAIL_WIDTH: float = 224.0
 const RIGHT_RAIL_MARGIN: float = 8.0
 
+## Top-left inset for the compact Slayer badge.
+const SLAYER_BADGE_MARGIN: float = 6.0
+
 
 func _ready() -> void:
 	_navigation_minimap = NAVIGATION_MINIMAP_SCRIPT.new()
 	add_child(_navigation_minimap)
 	add_child(PLAYER_CONTEXT_MENU_SCRIPT.new())
 	add_child(HOSTILE_CONTEXT_MENU_SCRIPT.new())
-	# The minimap owns the upper-right navigation lane; the two trackers stack
+	# The minimap owns the upper-right navigation lane; the quest tracker sits
 	# beneath it in the same rail (_place_right_rail owns the vertical order).
-	# Slayer sits ABOVE the quest tracker: it used to start at y=220, which on a
-	# short viewport dropped it behind the centre-right quickslot bar.
-	for tracker: Control in [quest_tracker, slayer_tracker]:
+	# The Slayer tracker is a compact badge pinned to the top-LEFT corner instead,
+	# well clear of the rail and the centre-right quickslot bar.
+	for tracker: Control in [quest_tracker]:
 		tracker.anchor_left = 1.0
 		tracker.anchor_top = 0.0
 		tracker.anchor_right = 1.0
 		tracker.anchor_bottom = 0.0
 		tracker.offset_left = -RIGHT_RAIL_WIDTH
 		tracker.offset_right = -RIGHT_RAIL_MARGIN
-	slayer_tracker.resized.connect(_place_right_rail)
+	_place_slayer_tracker()
 	quest_tracker.resized.connect(_place_right_rail)
-	slayer_tracker.visibility_changed.connect(_place_right_rail)
 	quest_tracker.visibility_changed.connect(_place_right_rail)
 	call_deferred(&"_place_right_rail")
 
@@ -392,20 +394,35 @@ func _refresh_hud_for_menus() -> void:
 		_place_right_rail()
 
 
-## Stack the upper-right rail top-down: minimap (fixed), Slayer tracker, quest
-## tracker. Each visible panel is placed under the last one, so a hidden panel
-## leaves no gap and neither tracker can drift down into the quickslot bar.
+## Stack the upper-right rail top-down: minimap (fixed), then the quest tracker.
+## A hidden panel leaves no gap and the tracker can't drift down into the
+## quickslot bar.
 func _place_right_rail() -> void:
-	if slayer_tracker == null or quest_tracker == null:
+	if quest_tracker == null:
 		return
 	var top: float = RIGHT_RAIL_TOP
-	for tracker: Control in [slayer_tracker, quest_tracker]:
+	for tracker: Control in [quest_tracker]:
 		if not tracker.visible:
 			continue
 		var panel_height: float = maxf(tracker.get_combined_minimum_size().y, 28.0)
 		tracker.offset_top = top
 		tracker.offset_bottom = top + panel_height
 		top += panel_height + RIGHT_RAIL_GAP
+
+
+## Pin the compact Slayer badge to the top-left corner. It sizes itself to its
+## contents (shrink anchors), so no manual height bookkeeping is needed.
+func _place_slayer_tracker() -> void:
+	if slayer_tracker == null:
+		return
+	slayer_tracker.custom_minimum_size = Vector2.ZERO
+	slayer_tracker.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	slayer_tracker.grow_horizontal = Control.GROW_DIRECTION_END
+	slayer_tracker.grow_vertical = Control.GROW_DIRECTION_END
+	slayer_tracker.offset_left = SLAYER_BADGE_MARGIN
+	slayer_tracker.offset_top = SLAYER_BADGE_MARGIN
+	slayer_tracker.offset_right = SLAYER_BADGE_MARGIN
+	slayer_tracker.offset_bottom = SLAYER_BADGE_MARGIN
 
 
 ## Suppress player movement whenever a blocking menu is up. Polled each frame (NOT
