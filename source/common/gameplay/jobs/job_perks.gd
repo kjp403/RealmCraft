@@ -102,7 +102,8 @@ func has_recipe_guide() -> bool:
 
 
 ## Resolved craft-guide rows for the Skills / Jobs UI. Eager [member
-## recipe_items] first (sorted by bake), then deferred paths loaded now.
+## recipe_items] plus deferred paths loaded on demand, sorted by level then
+## name so metal weapons sit with their bars (not buried after Dragon).
 ## Each entry: `{ "item": Item, "level": int }`. Missing paths are skipped.
 func recipe_guide_entries() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
@@ -125,6 +126,15 @@ func recipe_guide_entries() -> Array[Dictionary]:
 			recipe_deferred_levels[i] if i < recipe_deferred_levels.size() else 0
 		)
 		out.append({"item": item, "level": lvl})
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var la: int = int(a["level"])
+		var lb: int = int(b["level"])
+		if la != lb:
+			return la < lb
+		var ia: Item = a["item"] as Item
+		var ib: Item = b["item"] as Item
+		return String(ia.item_name) < String(ib.item_name)
+	)
 	return out
 
 

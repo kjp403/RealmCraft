@@ -17,7 +17,8 @@ var _qualified: Dictionary = {} # instance_id -> true
 
 
 func _ready() -> void:
-	collision_layer = 1
+	# Characters mask WORLD (layer 2) for movement — not CHARACTER_BODY.
+	collision_layer = PhysicsLayers.WORLD
 	collision_mask = 0
 
 	var shape := RectangleShape2D.new()
@@ -27,21 +28,21 @@ func _ready() -> void:
 	add_child(_collision)
 
 	_visual = ColorRect.new()
-	_visual.color = Color(0.55, 0.15, 0.85, 0.45)
+	_visual.color = Color(0.55, 0.15, 0.85, 0.55)
 	_visual.size = gate_size
 	_visual.position = -gate_size * 0.5
 	_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_visual)
 
 	var border := ColorRect.new()
-	border.color = Color(0.85, 0.55, 1.0, 0.85)
+	border.color = Color(0.85, 0.55, 1.0, 0.95)
 	border.size = Vector2(gate_size.x, 3)
 	border.position = Vector2(-gate_size.x * 0.5, -gate_size.y * 0.5)
 	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(border)
 
 	var border2 := ColorRect.new()
-	border2.color = Color(0.85, 0.55, 1.0, 0.85)
+	border2.color = Color(0.85, 0.55, 1.0, 0.95)
 	border2.size = Vector2(gate_size.x, 3)
 	border2.position = Vector2(-gate_size.x * 0.5, gate_size.y * 0.5 - 3)
 	border2.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -64,11 +65,11 @@ func _ready() -> void:
 
 	_area = Area2D.new()
 	_area.collision_layer = 0
-	_area.collision_mask = 1
+	_area.collision_mask = PhysicsLayers.CHARACTER_BODY
 	_area.monitoring = true
 	var area_shape := CollisionShape2D.new()
 	var area_rect := RectangleShape2D.new()
-	area_rect.size = gate_size + Vector2(48, 64)
+	area_rect.size = gate_size + Vector2(64, 80)
 	area_shape.shape = area_rect
 	_area.add_child(area_shape)
 	add_child(_area)
@@ -83,12 +84,12 @@ func _on_body_entered(body: Node2D) -> void:
 	if _player_qualifies(player):
 		_qualified[player.get_instance_id()] = true
 		_refresh_collision()
-	elif multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
-		# Soft bump: push under-leveled players back a step.
+	else:
+		# Soft bump on every peer so under-leveled clients feel the wall.
 		var away: Vector2 = (player.global_position - global_position).normalized()
 		if away == Vector2.ZERO:
 			away = Vector2.DOWN
-		player.global_position += away * 28.0
+		player.global_position += away * 36.0
 
 
 func _on_body_exited(body: Node2D) -> void:
@@ -105,10 +106,10 @@ func _player_qualifies(player: Player) -> bool:
 
 
 func _refresh_collision() -> void:
-	# Open the gate if ANY nearby player qualifies (local / single-instance).
-	# Under-leveled peers still collide with the StaticBody when closed.
+	# Open only while a qualifying player is in the approach area.
+	# Under-leveled peers collide with the WORLD-layer StaticBody.
 	_collision.disabled = not _qualified.is_empty()
 	_visual.color = (
 		Color(0.25, 0.75, 0.45, 0.35) if _collision.disabled
-		else Color(0.55, 0.15, 0.85, 0.45)
+		else Color(0.55, 0.15, 0.85, 0.55)
 	)

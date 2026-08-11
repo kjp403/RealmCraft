@@ -80,14 +80,22 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	custom_minimum_size = PANEL_SIZE_WEAPONS
 	size = PANEL_SIZE_WEAPONS
+	clip_contents = true
 
-	content.add_theme_constant_override(&"margin_left", 6)
-	content.add_theme_constant_override(&"margin_right", 6)
+	content.add_theme_constant_override(&"margin_left", 4)
+	content.add_theme_constant_override(&"margin_right", 4)
+	content.add_theme_constant_override(&"margin_top", 2)
+	content.add_theme_constant_override(&"margin_bottom", 2)
 
 	header_spacer.hide()
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.text = "Mastery"
+	title_label.add_theme_font_size_override(&"font_size", 13)
+	var header_row: Control = title_label.get_parent() as Control
+	if header_row != null:
+		header_row.custom_minimum_size = Vector2(0, 22)
+	close_button.custom_minimum_size = Vector2(22, 22)
 
 	for child: Node in content.get_children():
 		content.remove_child(child)
@@ -152,8 +160,8 @@ func _make_mode_tab(label: String, pressed: bool) -> Button:
 	tab.button_pressed = pressed
 	tab.focus_mode = Control.FOCUS_NONE
 	tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tab.custom_minimum_size = Vector2(0.0, 22.0)
-	tab.add_theme_font_size_override(&"font_size", 10)
+	tab.custom_minimum_size = Vector2(0.0, 18.0)
+	tab.add_theme_font_size_override(&"font_size", 9)
 	_apply_mode_tab_styles(tab)
 	return tab
 
@@ -171,6 +179,16 @@ func _apply_mode_tab_styles(tab: Button) -> void:
 		&"pressed",
 		_make_tab_style(Color(0.18, 0.11, 0.055, 1.0), Color(1.0, 0.72, 0.30, 1.0))
 	)
+	# Compact content margins so Skills/Combat/Perks tabs don't eat list space.
+	for key: StringName in [&"normal", &"hover", &"pressed", &"disabled", &"focus"]:
+		var style: StyleBox = tab.get_theme_stylebox(key)
+		if style is StyleBoxFlat:
+			var flat := style as StyleBoxFlat
+			flat.content_margin_top = 1
+			flat.content_margin_bottom = 1
+			flat.content_margin_left = 4
+			flat.content_margin_right = 4
+			tab.add_theme_stylebox_override(key, flat)
 
 
 func _build_weapons_layout(main_box: VBoxContainer) -> void:
@@ -322,6 +340,9 @@ func _on_close_pressed() -> void:
 
 func _on_visibility_changed() -> void:
 	if visible:
+		# Re-fit every open — first show can land before the HUD has a real size,
+		# which used to crop the Perks detail until a later reopen.
+		call_deferred(&"_place_panel")
 		_refresh()
 
 
@@ -604,6 +625,7 @@ func _show_perk_detail(slug: String) -> void:
 	_perks_list_root.visible = false
 	_perks_detail_root.visible = true
 	_rebuild_perk_detail()
+	call_deferred(&"_place_panel")
 
 
 func _rebuild_perks_list() -> void:
@@ -730,7 +752,9 @@ func _rebuild_perk_detail() -> void:
 	var back := Button.new()
 	back.text = "← All skills"
 	back.focus_mode = Control.FOCUS_NONE
-	back.add_theme_font_size_override(&"font_size", 10)
+	back.custom_minimum_size = Vector2(0, 18)
+	back.add_theme_font_size_override(&"font_size", 9)
+	_apply_mode_tab_styles(back)
 	back.pressed.connect(_show_perks_list)
 	_perks_detail_root.add_child(back)
 
@@ -741,7 +765,7 @@ func _rebuild_perk_detail() -> void:
 		"" if points == 1 else "s",
 	]
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override(&"font_size", 11)
+	header.add_theme_font_size_override(&"font_size", 10)
 	header.add_theme_color_override(
 		&"font_color",
 		Color(1.0, 0.86, 0.48) if points > 0 else Color(0.85, 0.82, 0.70)
@@ -752,6 +776,7 @@ func _rebuild_perk_detail() -> void:
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.clip_contents = true
 	_perks_detail_root.add_child(scroll)
 	DragScroll.enable(scroll)
 	if saved_scroll > 0:
@@ -759,7 +784,7 @@ func _rebuild_perk_detail() -> void:
 
 	var body := VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override(&"separation", 6)
+	body.add_theme_constant_override(&"separation", 4)
 	scroll.add_child(body)
 
 	# How points work
@@ -902,11 +927,16 @@ func _place_panel() -> void:
 	var panel_size: Vector2 = (
 		PANEL_SIZE_PERKS if _mode == Mode.PERKS else PANEL_SIZE_WEAPONS
 	)
-	# Shrink slightly on short viewports so the panel never starts above y=0.
+	# Shrink slightly on short viewports so the panel never starts above y=0
+	# and never spills past the bottom clearance.
 	var max_h: float = maxf(180.0, hud.size.y - BOTTOM_CLEARANCE)
 	if panel_size.y > max_h:
 		panel_size.y = max_h
 	custom_minimum_size = panel_size
+	size = panel_size
+	# Force layout before positioning so scroll areas get a real height on the
+	# first Perks detail open (avoids the "crops until reopen" glitch).
+	reset_size()
 	size = panel_size
 	position = Vector2(
 		hud.size.x - panel_size.x - RIGHT_MARGIN,

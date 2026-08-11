@@ -16,6 +16,8 @@
 [ext_resource type="Resource" uid="uid://cadamantvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres" id="16_adam"]
 [ext_resource type="Resource" uid="uid://crunitevein001" path="res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres" id="17_rune"]
 [ext_resource type="Script" path="res://source/common/gameplay/maps/components/skill_level_gate.gd" id="18_gate"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="19_npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres" id="20_bat"]
 
 [node name="mining_cave" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -114,6 +116,78 @@ y_sort_enabled = true
 script = ExtResource("4_rp")
 id_to_node = {}
 node_to_id = {}
+
+[node name="CaveBat1" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(448.0, 960.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat2" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(704.0, 576.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat3" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(960.0, 768.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat4" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1216.0, 448.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat5" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1344.0, 1024.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat6" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(832.0, 1088.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat7" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(576.0, 704.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat8" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1088.0, 960.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat9" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1472.0, 768.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat10" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(384.0, 832.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat11" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1152.0, 640.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat12" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1600.0, 896.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
 
 [node name="MineableNodes" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -449,7 +523,7 @@ position = Vector2(1520, 480)
 script = ExtResource("18_gate")
 required_skill = &"mining"
 required_level = 50
-gate_size = Vector2(120, 28)
+gate_size = Vector2(168, 40)
 label_text = "Mining 50+"
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]

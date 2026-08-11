@@ -534,6 +534,23 @@ func _write_tscn(
 	var cam_r := W * TILE + 16
 	var cam_b := H * TILE + 16
 
+	# Passive bats: passive (chase_on_area=false on trpg_bat), wander the cavern.
+	var bat_world := [
+		Vector2(448, 960), Vector2(704, 576), Vector2(960, 768), Vector2(1216, 448),
+		Vector2(1344, 1024), Vector2(832, 1088), Vector2(576, 704), Vector2(1088, 960),
+		Vector2(1472, 768), Vector2(384, 832), Vector2(1152, 640), Vector2(1600, 896),
+	]
+	var bat_nodes := ""
+	for i in bat_world.size():
+		var pos: Vector2 = bat_world[i]
+		bat_nodes += (
+			"\n[node name=\"CaveBat%d\" parent=\"ReplicatedPropsContainer\" instance=ExtResource(\"19_npc\")]\n"
+			+ "position = Vector2(%s, %s)\n"
+			+ "debug_draw_ranges = false\n"
+			+ "enemy_data = ExtResource(\"20_bat\")\n"
+			+ "weapon = null\n"
+		) % [i + 1, str(pos.x), str(pos.y)]
+
 	var text := """[gd_scene format=3 uid=\"uid://cminingcave001\"]
 
 [ext_resource type=\"Script\" uid=\"uid://7mbux4mybta0\" path=\"res://source/common/gameplay/maps/map.gd\" id=\"1_map\"]
@@ -552,6 +569,8 @@ func _write_tscn(
 [ext_resource type=\"Resource\" uid=\"uid://cadamantvein01\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres\" id=\"16_adam\"]
 [ext_resource type=\"Resource\" uid=\"uid://crunitevein001\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres\" id=\"17_rune\"]
 [ext_resource type=\"Script\" path=\"res://source/common/gameplay/maps/components/skill_level_gate.gd\" id=\"18_gate\"]
+[ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"res://source/common/gameplay/characters/npc/hostile_npc.tscn\" id=\"19_npc\"]
+[ext_resource type=\"Resource\" path=\"res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres\" id=\"20_bat\"]
 
 [node name=\"mining_cave\" type=\"Node2D\" node_paths=PackedStringArray(\"replicated_props_container\")]
 y_sort_enabled = true
@@ -601,7 +620,7 @@ y_sort_enabled = true
 script = ExtResource(\"4_rp\")
 id_to_node = {}
 node_to_id = {}
-
+%s
 [node name=\"MineableNodes\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
 %s
@@ -611,7 +630,7 @@ position = Vector2(1520, 480)
 script = ExtResource(\"18_gate\")
 required_skill = &\"mining\"
 required_level = 50
-gate_size = Vector2(120, 28)
+gate_size = Vector2(168, 40)
 label_text = \"Mining 50+\"
 
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]
@@ -633,6 +652,7 @@ target_id = 130
 		ground_b64, detail_b64, walls_b64, props_b64,
 		light_nodes,
 		str(camp_pos.x), str(camp_pos.y),
+		bat_nodes,
 		ore_nodes,
 		str(entrance_pos.x), str(entrance_pos.y),
 		str(entrance_pos.x), str(entrance_pos.y),
