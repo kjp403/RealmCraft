@@ -34,7 +34,7 @@ func _ready() -> void:
 	layer = 128 # Above the HUD and menus.
 	_container = VBoxContainer.new()
 	_container.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	_container.offset_top = 32.0
+	_container.offset_top = 48.0
 	_container.alignment = BoxContainer.ALIGNMENT_BEGIN
 	_container.add_theme_constant_override(&"separation", 6)
 	_container.mouse_filter = Control.MOUSE_FILTER_IGNORE

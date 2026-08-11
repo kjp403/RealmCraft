@@ -58,6 +58,9 @@ var _prof_name_label: Label
 var _prof_level_label: Label
 var _xp_bar: ProgressBar
 var _golds_label: Label
+## Dedicated row under the title — smithing's many metal tabs no longer fight
+## the title/close chip for header height (that was clipping the top of the UI).
+var _tab_bar: HBoxContainer
 
 @onready var recipe_list: VBoxContainer = %RecipeList
 @onready var list_scroll: ScrollContainer = %ScrollContainer
@@ -76,11 +79,37 @@ var _golds_label: Label
 func _ready() -> void:
 	_gold_id = Economy.gold_id()
 	build_shell("Crafting", $Body, true)
+	_install_tab_bar()
 	_build_header()
 	_build_quantity_row()
 	_build_progress_bar()
 	craft_button.pressed.connect(_on_craft_pressed)
 	visibility_changed.connect(_on_visibility_changed)
+
+
+## Wrap the master/detail body in a column with a full-width tab strip on top so
+## Bronze…Materials tabs don't share the title row (and get cropped with it).
+func _install_tab_bar() -> void:
+	if content.get_child_count() == 0:
+		return
+	var body: Control = content.get_child(0) as Control
+	content.remove_child(body)
+
+	var column: VBoxContainer = VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override(&"separation", 8)
+
+	_tab_bar = HBoxContainer.new()
+	_tab_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_tab_bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	_tab_bar.add_theme_constant_override(&"separation", 6)
+	column.add_child(_tab_bar)
+
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(body)
+	content.add_child(column)
 
 
 ## Hand the crafting menu the station's catalog directly (rendered client-side)
@@ -372,7 +401,9 @@ func _tab_label(cat: StringName) -> String:
 
 
 func _build_tabs() -> void:
-	for child: Node in header_center.get_children():
+	if _tab_bar == null:
+		return
+	for child: Node in _tab_bar.get_children():
 		child.queue_free()
 	_tab_buttons.clear()
 
@@ -385,6 +416,7 @@ func _build_tabs() -> void:
 			present.append(cat)
 	# A lone category needs no tab bar at all (e.g. the Furnace).
 	_has_tabs = present.size() > 1
+	_tab_bar.visible = _has_tabs
 	if not _has_tabs:
 		_tab = &""
 		return
@@ -412,9 +444,10 @@ func _build_tabs() -> void:
 		tab.button_group = _tab_group
 		tab.theme_type_variation = &"SectionTab"
 		tab.custom_minimum_size = Vector2(0, 34)
+		tab.clip_text = false
 		tab.button_pressed = (cat == _tab)
 		tab.pressed.connect(_on_tab_pressed.bind(cat))
-		header_center.add_child(tab)
+		_tab_bar.add_child(tab)
 		_tab_buttons[cat] = tab
 
 
