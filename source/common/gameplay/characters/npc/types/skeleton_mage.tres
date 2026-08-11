@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://cqu1ybl46fdes" path="res://source/common/gameplay/items/gears/relics/relic_duskglass.tres" id="relic_duskglass"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -24,6 +25,11 @@ script = ExtResource("1_4ocig")
 item = ExtResource("bone_item")
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_relic_duskglass"]
+script = ExtResource("1_4ocig")
+item = ExtResource("relic_duskglass")
+chance = 0.08
+
 [resource]
 script = ExtResource("2_q12sl")
 enemy_type = &"skeleton_mage"
@@ -31,7 +37,7 @@ display_name = "Skeleton Mage"
 skin = ExtResource("3_q12sl")
 visual_scale = 2.0
 is_boss = true
-loot = Array[ExtResource("1_4ocig")]([SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("1_4ocig")]([SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_duskglass")])
 max_health = 250.0
 attack_damage = 15.0
 mr = 5.0

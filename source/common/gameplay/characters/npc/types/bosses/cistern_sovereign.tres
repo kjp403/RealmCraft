@@ -11,6 +11,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="li2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="li3"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
+[ext_resource type="Resource" uid="uid://bmyjhw1owylja" path="res://source/common/gameplay/items/gears/relics/relic_rotmire.tres" id="relic_rotmire"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -43,6 +44,11 @@ script = ExtResource("3_loot")
 item = ExtResource("drop_dungeon_key_item")
 chance = 0.08
 
+[sub_resource type="Resource" id="Drop_relic_rotmire"]
+script = ExtResource("3_loot")
+item = ExtResource("relic_rotmire")
+chance = 0.05
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cistern_sovereign"
@@ -72,7 +78,7 @@ wander_pause_max_s = 4.0
 xp_reward = 1400
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_steel_bar"), SubResource("Drop_bone"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_steel_bar"), SubResource("Drop_bone"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_relic_rotmire")])
 enrage_health_fraction = 0.45
 slam_radius = 120.0
 slam_windup_s = 1.3

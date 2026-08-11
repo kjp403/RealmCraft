@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://5ykku6jy3om" path="res://source/common/gameplay/items/gears/relics/relic_mossgrown.tres" id="relic_mossgrown"]
 
 [sub_resource type="Resource" id="Lunge_chief"]
 script = ExtResource("91_lunge")
@@ -71,6 +72,11 @@ script = ExtResource("1_4uukv")
 item = ExtResource("bone_item")
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_relic_mossgrown"]
+script = ExtResource("1_4uukv")
+item = ExtResource("relic_mossgrown")
+chance = 0.1
+
 [resource]
 script = ExtResource("8_tvh5y")
 enemy_type = &"goblin_chief"
@@ -90,7 +96,7 @@ is_lone = true
 xp_reward = 120
 respawn_delay = 90.0
 respawns = true
-loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_mossgrown")])
 slam_radius = 100.0
 slam_windup_s = 1.2
 slam_damage = 30.0

@@ -380,6 +380,41 @@ Index file:
 Other indexes in the same folder (same workflow):  
 `abilities_index.tres`, `enemy_types_index.tres`, `quests_index.tres`, `sprites_index.tres`.
 
+### Boss-drop relics — do not hand-edit
+
+The ten relics under `source/common/gameplay/items/gears/relics/` and their drop
+entries on ten boss `.tres` files are written by `tools/build_boss_relics.gd`.
+Edit the `RELICS` table in that script and re-run it; re-running is byte-stable
+and never duplicates a drop.
+
+Five colour families, each a **lesser charm** from an early boss and a **greater
+sigil** from a late one:
+
+| Family | Lesser | Greater |
+|--------|--------|---------|
+| Moss | Mossgrown Charm — Goblin Chief | Rotmire Sigil — The Bloated Sovereign |
+| Verdant | Sporebloom Charm — The Fungal Heart | Coreblossom Sigil — Mecha-stone Golem |
+| Crimson | Bloodbrand Charm — Bandit Captain | Scarabheart Sigil — Ankhemet, the Sand King |
+| Indigo | Duskglass Charm — Skeleton Mage | Netherglass Sigil — Necromancer |
+| Ember | Emberbrand Charm — Orc Leader | Cinderheart Sigil — Vurthek, the Cinderborn |
+
+Two traps that script exists to avoid, and that any tool touching a `.tres`
+shares:
+
+- **Never `ResourceSaver.save()` an existing `.tres` from a headless `-s` run.**
+  The uid cache is not loaded, so the text saver finds no id for any path and
+  silently drops `uid=` from the file *and from every `ext_resource` in it*.
+  Edit as text instead. This is also why `update_items_index.gd` must find these
+  relics already stamped — anything it has to stamp, it re-saves.
+- **`get_slice('id="', …)` also matches `uid="`.** Search for `' id="'` with the
+  leading space, or a drop ends up with `script = ExtResource("uid://…")`.
+
+Gate:
+
+```bash
+godot --headless --path . -s tools/verify_boss_relics.gd
+```
+
 ### Recipe: add a simple new item (material)
 
 1. Duplicate `source/common/gameplay/items/materials/bone.tres`  

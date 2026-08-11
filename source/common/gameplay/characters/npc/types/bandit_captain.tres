@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://blxysmttimic7" path="res://source/common/gameplay/items/weapons/wand/wand_bandit.item.tres" id="94_wand"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://c32kds1rn3xt5" path="res://source/common/gameplay/items/gears/relics/relic_bloodbrand.tres" id="relic_bloodbrand"]
 
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
@@ -48,6 +49,11 @@ script = ExtResource("2_loot")
 item = ExtResource("bone_item")
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_relic_bloodbrand"]
+script = ExtResource("2_loot")
+item = ExtResource("relic_bloodbrand")
+chance = 0.08
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_captain"
@@ -64,7 +70,7 @@ detection_radius = 180
 chase_on_area = true
 xp_reward = 250
 respawn_delay = 120.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_bloodbrand")])
 slam_radius = 120.0
 slam_damage = 60.0
 add_enemy_slug = &"bandit_fighter"
