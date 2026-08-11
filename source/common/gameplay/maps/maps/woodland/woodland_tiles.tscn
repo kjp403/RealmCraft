@@ -1315,10 +1315,10 @@ position = Vector2(1048, 1368)
 npc_resource = ExtResource("25_bren")
 
 [node name="SlayerHouse" parent="." instance=ExtResource("40_slayer_house")]
-position = Vector2(1320, 1400)
+position = Vector2(1489, 1015)
 
 [node name="SlayerHouseDoor" parent="." instance=ExtResource("5_jiw8u")]
-position = Vector2(1320, 1464)
+position = Vector2(1489, 1079)
 target_instance = ExtResource("41_slayer_inst")
 warper_id = 31
 target_id = 32

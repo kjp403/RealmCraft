@@ -112,6 +112,7 @@ script = ExtResource("1_master")
 master_name = "Durael"
 greeting = "You've outgrown Turael's list. I keep sharper company on mine — orcs, golems, things with real teeth. Complete what I give you and I'll see you're paid for it."
 min_slayer_level = 20
+location_hint = "DimWood"
 base_points_per_task = 6
 free_reassign = false
 reassign_point_cost = 30

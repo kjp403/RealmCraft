@@ -1,11 +1,35 @@
 class_name SlayerTracker
 extends PanelContainer
 ## HUD Slayer task readout: current assignment, kills remaining, points, and
-## streak. Hidden when the player has no active task (points/streak still
-## surface briefly after a completion toast via the next refresh).
+## streak. Lives in the upper-right rail directly under the navigation minimap
+## (HUD._place_right_rail owns the stacking). Hidden when the player has no
+## active task, or when they've switched it off — see [constant SETTING_SECTION]
+## / [constant SETTING_PROPERTY], the same client-settings pair the weather layer
+## uses, so the choice persists across sessions.
+##
+## Every label AUTOWRAPS on purpose. A Label reports its full text width as its
+## minimum size, and this panel grows leftward (grow_horizontal = BEGIN), so a
+## long task line used to stretch the panel clear across the screen and out from
+## under the right rail. Wrapping pins the width to the anchored rect instead.
+
+const SETTING_SECTION: StringName = &"general"
+const SETTING_PROPERTY: StringName = &"slayer_tracker"
 
 var _content: VBoxContainer
 var _cached: Dictionary = {}
+
+
+## Whether the player has the tracker switched on (default true). Static so the
+## settings panels can read/write it without reaching into the HUD.
+static func is_enabled() -> bool:
+	var value: Variant = ClientState.settings.get_value(SETTING_SECTION, SETTING_PROPERTY)
+	if value == null:
+		value = ClientState.settings.get_default(SETTING_SECTION, SETTING_PROPERTY)
+	return true if value == null else bool(value)
+
+
+static func set_enabled(enabled: bool) -> void:
+	ClientState.settings.set_value(SETTING_SECTION, SETTING_PROPERTY, enabled)
 
 
 func _ready() -> void:
@@ -14,10 +38,10 @@ func _ready() -> void:
 
 	var margin: MarginContainer = MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override(&"margin_left", 12)
-	margin.add_theme_constant_override(&"margin_right", 10)
+	margin.add_theme_constant_override(&"margin_left", 10)
+	margin.add_theme_constant_override(&"margin_right", 6)
 	for side: String in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 7)
+		margin.add_theme_constant_override("margin_" + side, 6)
 	add_child(margin)
 
 	_content = VBoxContainer.new()
@@ -28,11 +52,26 @@ func _ready() -> void:
 	hide()
 	Client.subscribe(&"slayer.update", _on_slayer_update)
 	ClientState.local_player_ready.connect(func(_lp: LocalPlayer): refresh())
+	ClientState.settings.setting_changed.connect(_on_setting_changed)
 	refresh()
 
 
 func refresh() -> void:
 	_refresh()
+
+
+func _on_setting_changed(
+	section: StringName,
+	property: StringName,
+	_value: Variant
+) -> void:
+	if section != SETTING_SECTION or property != SETTING_PROPERTY:
+		return
+	# Re-show instantly from cache, then re-poll — the cache may be empty (or
+	# stale) if the tracker was switched off across a task change.
+	_display(_cached)
+	if is_enabled():
+		_refresh()
 
 
 func _on_slayer_update(payload: Dictionary) -> void:
@@ -73,19 +112,40 @@ func _display(data: Dictionary) -> void:
 		child.queue_free()
 
 	var has_task: bool = data.has("display_name") and not str(data.get("display_name", "")).is_empty()
-	if not has_task:
+	if not has_task or not is_enabled():
 		hide()
 		return
 
+	# Title row: the assignment, plus a hide affordance. Switching it off here
+	# writes the same setting the Settings panel toggles, so the two can't drift.
+	var title_row: HBoxContainer = HBoxContainer.new()
+	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_row.add_theme_constant_override(&"separation", 4)
+	_content.add_child(title_row)
+
 	var title: Label = Label.new()
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.add_theme_font_size_override(&"font_size", 13)
 	title.text = "Slayer: %s" % str(data.get("display_name", "?"))
 	title.add_theme_color_override(&"font_color", _accent_color())
-	_content.add_child(title)
+	title_row.add_child(title)
+
+	var hide_button: Button = Button.new()
+	hide_button.text = "✕"
+	hide_button.flat = true
+	hide_button.focus_mode = Control.FOCUS_NONE
+	hide_button.custom_minimum_size = Vector2(18, 18)
+	hide_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hide_button.add_theme_font_size_override(&"font_size", 10)
+	hide_button.tooltip_text = "Hide the Slayer tracker (turn it back on in Settings)."
+	hide_button.pressed.connect(_on_hide_pressed)
+	title_row.add_child(hide_button)
 
 	var progress: Label = Label.new()
 	progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	progress.add_theme_font_size_override(&"font_size", 12)
 	var remaining: int = int(data.get("remaining", 0))
 	var assigned: int = int(data.get("assigned_amount", 0))
@@ -96,6 +156,7 @@ func _display(data: Dictionary) -> void:
 
 	var meta: Label = Label.new()
 	meta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	meta.add_theme_font_size_override(&"font_size", 11)
 	meta.text = "%d points  ·  streak %d" % [
 		int(data.get("points", 0)),
@@ -105,6 +166,11 @@ func _display(data: Dictionary) -> void:
 	_content.add_child(meta)
 
 	show()
+
+
+func _on_hide_pressed() -> void:
+	set_enabled(false)
+	Toaster.toast("Slayer tracker hidden — turn it back on in Settings.")
 
 
 func _make_panel_style() -> StyleBoxFlat:
