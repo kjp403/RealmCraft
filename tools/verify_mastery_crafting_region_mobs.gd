@@ -7,21 +7,28 @@ extends SceneTree
 func _init() -> void:
 	var failures: PackedStringArray = PackedStringArray()
 
-	# --- Mastery: 1 point every 4 levels (24 at 99) ---------------------------
+	# --- Mastery: 1 point every 3 levels (33 at 99) ---------------------------
 	var mastery: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/mastery/mastery_service.gd"
 	)
-	if mastery.find("const LEVELS_PER_POINT: int = 4") < 0:
-		failures.append("LEVELS_PER_POINT must be 4")
+	if mastery.find("const LEVELS_PER_POINT: int = 3") < 0:
+		failures.append("LEVELS_PER_POINT must be 3")
 	if mastery.find("func point_budget") < 0:
 		failures.append("MasteryService.point_budget missing")
-	# Sanity: floor(26/4)=6, floor(99/4)=24
-	if MasteryService.point_budget(26) != 6:
-		failures.append("point_budget(26) want 6 got %d" % MasteryService.point_budget(26))
-	if MasteryService.point_budget(99) != 24:
-		failures.append("point_budget(99) want 24 got %d" % MasteryService.point_budget(99))
-	if MasteryService.point_budget(3) != 0:
-		failures.append("point_budget(3) want 0 (first point at 4)")
+	# Sanity: floor(26/3)=8, floor(99/3)=33; first point at 3
+	if MasteryService.point_budget(26) != 8:
+		failures.append("point_budget(26) want 8 got %d" % MasteryService.point_budget(26))
+	if MasteryService.point_budget(99) != 33:
+		failures.append("point_budget(99) want 33 got %d" % MasteryService.point_budget(99))
+	if MasteryService.point_budget(2) != 0:
+		failures.append("point_budget(2) want 0 (first point at 3)")
+	if MasteryService.point_budget(3) != 1:
+		failures.append("point_budget(3) want 1")
+	# Subclass budget: covers heaviest column (30) but not cheapest full tree (36)
+	if MasteryService.point_budget(99) < 30:
+		failures.append("L99 budget too low to finish heaviest subclass column")
+	if MasteryService.point_budget(99) >= 36:
+		failures.append("L99 budget high enough to clear Hammer full tree")
 
 	# --- Crafting XP buffed (outfitting only) + perk multiplier on server -----
 	var craft: String = FileAccess.get_file_as_string(

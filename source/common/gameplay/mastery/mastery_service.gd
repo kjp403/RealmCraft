@@ -42,13 +42,14 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 
 
 ## Mastery points: 1 point every LEVELS_PER_POINT mastery levels.
-## Level 99 → 24-point budget (was 1/level = 99, and before that 2/level = 198).
-## Trees cost their tier to buy (1–5), so a 24-point lifetime forces real
-## specialization instead of clearing every node.
-const LEVELS_PER_POINT: int = 4
+## Level 99 → 33-point budget. That funds one full column/subclass
+## (heaviest branch today is Bow Domination at 30) but cannot clear any
+## complete tree (cheapest full tree is Hammer at 36). Tune this one number
+## to retune the whole budget.
+const LEVELS_PER_POINT: int = 3
 
 ## Lifetime point budget for a mastery level (integer division).
-## Level 1–3: 0, 4–7: 1, …, 96–99: 24.
+## Level 1–2: 0, 3–5: 1, …, 96–98: 32, 99: 33.
 static func point_budget(level: int) -> int:
 	var capped: int = mini(maxi(level, 0), PlayerResource.MASTERY_LEVEL_CAP)
 	@warning_ignore("integer_division")
@@ -63,7 +64,7 @@ static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> in
 
 
 ## Buys a tree node. Point budget is point_budget(level); the first point
-## arrives at mastery level 4. get_mastery creates the entry on demand.
+## arrives at mastery level 3. get_mastery creates the entry on demand.
 static func spend(resource: PlayerResource, category: StringName, node_id: StringName) -> Dictionary:
 	var tree: MasteryTreeResource = tree_for(category)
 	if tree == null:
