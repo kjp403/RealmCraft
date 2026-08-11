@@ -462,8 +462,13 @@ func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 		{"kind": "coal", "c": Vector2i(28, 12), "r": 10, "n": 15, "vault": false},
 		{"kind": "coal", "c": Vector2i(20, 28), "r": 9, "n": 15, "vault": false},
 		{"kind": "coal", "c": Vector2i(40, 34), "r": 9, "n": 15, "vault": false},
-		{"kind": "mithril", "c": Vector2i(36, 18), "r": 8, "n": 3, "vault": false},
-		{"kind": "mithril", "c": Vector2i(44, 28), "r": 8, "n": 2, "vault": false},
+		# Mithril is the mid-tier public ore — scatter liberally across the
+		# open cave (not the Mining-50 vault). Min scatter spacing 4 tiles so
+		# veins aren't stacked inside one PickArc.
+		{"kind": "mithril", "c": Vector2i(36, 18), "r": 11, "n": 5, "vault": false},
+		{"kind": "mithril", "c": Vector2i(44, 28), "r": 11, "n": 5, "vault": false},
+		{"kind": "mithril", "c": Vector2i(30, 30), "r": 10, "n": 3, "vault": false},
+		{"kind": "mithril", "c": Vector2i(40, 14), "r": 9, "n": 2, "vault": false},
 		{"kind": "adamant", "c": Vector2i(56, 11), "r": 6, "n": 4, "vault": true},
 		{"kind": "runite", "c": Vector2i(57, 10), "r": 5, "n": 2, "vault": true},
 	]
@@ -477,7 +482,12 @@ func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 		for cell: Vector2i in pool:
 			if (cell - center).length_squared() <= r2 and not used.has(cell):
 				near.append(cell)
-		var picked := MapKit.scatter(near, 0.9, 2, 111 + out.size())
+		var picked := MapKit.scatter(
+			near,
+			0.9,
+			4 if String(zone["kind"]) == "mithril" else 2,
+			111 + out.size()
+		)
 		var count: int = 0
 		for cell: Vector2i in picked:
 			if count >= int(zone["n"]):

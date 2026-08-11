@@ -11,7 +11,7 @@ ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
 &"mining": 42
 })
-required_level = 20
+required_level = 30
 required_tool = &"pickaxe"
 extraction_hp = 5
 min_charges = 3
