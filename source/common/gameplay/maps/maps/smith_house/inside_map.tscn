@@ -18,6 +18,16 @@
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="21_0vs1f"]
 [ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="22_je1gg"]
 
+[ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="30_craft"]
+[ext_resource type="Resource" uid="uid://26gsysjvnvs2" path="res://source/common/gameplay/crafting/resources/anvil.tres" id="31_anvil"]
+[ext_resource type="Resource" uid="uid://ba6iuomnbqi3s" path="res://source/common/gameplay/crafting/resources/furnace.tres" id="32_furnace"]
+[ext_resource type="Resource" uid="uid://c8e62k6uutlp8" path="res://source/common/gameplay/crafting/resources/workbench.tres" id="33_wb"]
+[ext_resource type="Resource" uid="uid://cascendedwb422e" path="res://source/common/gameplay/crafting/resources/ascended_workbench.tres" id="34_asc"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/crafting/visuals/anvil_sprite_frames.tres" id="35_anvil_frames"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/crafting/visuals/furnace_sprite_frames.tres" id="36_furnace_frames"]
+[ext_resource type="Texture2D" uid="uid://d1o56hk11y82e" path="res://assets/sprites/environment/structures/stations/workbench/workbench.png" id="37_wb_tex"]
+[ext_resource type="Texture2D" uid="uid://cqrq6tvykgy0o" path="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png" id="38_asc_tex"]
+
 [sub_resource type="Resource" id="Resource_h1lk8"]
 script = ExtResource("14_gl3u8")
 shop = ExtResource("15_56e5m")
@@ -69,7 +79,9 @@ tile_set = ExtResource("2_khpmq")
 
 [node name="Entrance" parent="." unique_id=916773362 instance=ExtResource("3_dr2jr")]
 position = Vector2(120, 337)
+scale = Vector2(1.6, 1)
 target_instance = ExtResource("4_alrfp")
+warper_id = 5
 target_id = 4
 
 [node name="ForgeSmith" parent="." unique_id=1922057613 instance=ExtResource("14_qwuyn")]
@@ -79,3 +91,39 @@ npc_resource = SubResource("Resource_nbood")
 [node name="TheTailor" parent="." unique_id=254689907 instance=ExtResource("14_qwuyn")]
 position = Vector2(-68.04193, 291.33588)
 npc_resource = SubResource("Resource_s648a")
+
+[node name="FurnaceStation" parent="." unique_id=4011097083 instance=ExtResource("30_craft")]
+position = Vector2(232, 200)
+station = ExtResource("32_furnace")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FurnaceStation" unique_id=4019520093]
+sprite_frames = ExtResource("36_furnace_frames")
+autoplay = &"default"
+
+[node name="AnvilStation" parent="." unique_id=4013253846 instance=ExtResource("30_craft")]
+position = Vector2(152, 232)
+station = ExtResource("31_anvil")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="AnvilStation" unique_id=4015280220]
+sprite_frames = ExtResource("35_anvil_frames")
+autoplay = &"default"
+
+[node name="WorkBenchStation" parent="." unique_id=4019232733 instance=ExtResource("30_craft")]
+position = Vector2(-120, 248)
+station = ExtResource("33_wb")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="WorkBenchStation" unique_id=4011193171]
+texture = ExtResource("37_wb_tex")
+region_enabled = true
+region_rect = Rect2(103, 64, 73, 48)
+
+[node name="AscendedWorkBenchStation" parent="." unique_id=4019232734 instance=ExtResource("30_craft")]
+position = Vector2(-24, 216)
+station = ExtResource("34_asc")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="AscendedWorkBenchStation" unique_id=4011193172]
+texture = ExtResource("38_asc_tex")

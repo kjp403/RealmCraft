@@ -23,14 +23,22 @@ func _init() -> void:
 	if int(res.get_skill(&"mining").get("level", 1)) >= 50:
 		failures.append("get_skill mining 49 should be under gate")
 
-	# Workbench moved next to the tailor.
+	# Crafting stations live inside the smith/tailor house (not outdoors on hub).
 	var hub_text: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/hub.tscn"
 	)
-	if hub_text.find("WorkBenchStation") < 0:
-		failures.append("hub missing WorkBenchStation")
-	elif not _workbench_at(hub_text, Vector2(-539, -119)):
-		failures.append("WorkBenchStation not at (-539, -119)")
+	if hub_text.find("WorkBenchStation") >= 0:
+		failures.append("hub still has outdoor WorkBenchStation (should be in smith_house)")
+	var smith_text: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/maps/smith_house/inside_map.tscn"
+	)
+	for station_name: String in [
+		"FurnaceStation", "AnvilStation", "WorkBenchStation", "AscendedWorkBenchStation"
+	]:
+		if smith_text.find("[node name=\"%s\"" % station_name) < 0:
+			failures.append("smith_house missing %s" % station_name)
+	if smith_text.find("ascended_workbench.tres") < 0:
+		failures.append("smith_house Ascended Workbench not wired to ascended_workbench.tres")
 
 	var cave_text: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn"
@@ -55,18 +63,10 @@ func _init() -> void:
 		failures.append("DeepVeinGate missing leftward eject_direction")
 
 	if failures.is_empty():
-		print("VERIFY_PASS mining_gate workbench=(-539,-119)")
+		print("VERIFY_PASS mining_gate smith_house_stations")
 		quit(0)
 	else:
 		print("VERIFY_FAIL")
 		for line: String in failures:
 			print("  - ", line)
 		quit(1)
-
-
-func _workbench_at(hub_text: String, want: Vector2) -> bool:
-	var idx: int = hub_text.find("[node name=\"WorkBenchStation\"")
-	if idx < 0:
-		return false
-	var chunk: String = hub_text.substr(idx, 280)
-	return chunk.find("position = Vector2(%d, %d)" % [int(want.x), int(want.y)]) >= 0
