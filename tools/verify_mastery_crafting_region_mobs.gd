@@ -83,6 +83,26 @@ func _init() -> void:
 	)
 	if shell.find("outer_top") < 0:
 		failures.append("MenuShell fullscreen needs extra top inset (outer_top)")
+	# Outfitting craft gates mirror smithing ladder (1/5/10/15/30/45/50).
+	for pair: Array in [
+		["R_ap_hood", 5],
+		["R_appr_robe", 5],
+		["R_sch_hood", 10],
+		["R_sh_hood", 10],
+		["R_ench_hood", 15],
+		["R_ph_hood", 15],
+		["R_an_hood", 30],
+		["R_si_hood", 30],
+	]:
+		var ridx2: int = wb.find('id="%s"' % pair[0])
+		if ridx2 < 0:
+			failures.append("workbench missing %s" % pair[0])
+		else:
+			var chunk2: String = wb.substr(ridx2, 320)
+			if chunk2.find("required_level = %d" % pair[1]) < 0:
+				failures.append(
+					"%s craft gate should be Lv %d (smithing-scale outfitting)" % [pair[0], pair[1]]
+				)
 	# Anvil/smithing XP must NOT be globally buffed (revert to main rates).
 	var anvil: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/crafting/resources/anvil.tres"
