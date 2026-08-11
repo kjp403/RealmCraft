@@ -20,8 +20,8 @@ chance = 0.9
 [sub_resource type="Resource" id="Drop_hide_sewer"]
 script = ExtResource("3_bf05w")
 item = ExtResource("loot_hide_sewer")
-max_amount = 2
-chance = 0.45
+max_amount = 5
+chance = 0.94
 
 [sub_resource type="Resource" id="Drop_cloth_sewer"]
 script = ExtResource("3_bf05w")
@@ -31,7 +31,9 @@ chance = 0.25
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_bf05w")
 item = ExtResource("bone_item")
-chance = 1.0
+min_amount = 1
+max_amount = 4
+chance = 1
 
 [resource]
 script = ExtResource("4_qag53")

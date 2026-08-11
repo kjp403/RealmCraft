@@ -20,6 +20,7 @@
 [ext_resource type="Resource" uid="uid://bolo6wgji05kf" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_shaman.tres" id="20_shaman"]
 [ext_resource type="Resource" uid="uid://i26d4k5wypcy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_slinger.tres" id="21_slinger"]
 [ext_resource type="Resource" uid="uid://c43oawxmbygiq" path="res://source/common/gameplay/characters/npc/types/wolf.tres" id="35_wolf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/desert_badger.tres" id="et_dbadger"]
 [ext_resource type="Resource" uid="uid://bq8woodlandrat01" path="res://source/common/gameplay/characters/npc/types/woodland_rat.tres" id="36_wrat"]
 [ext_resource type="Resource" uid="uid://deo2ei3h78ouy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres" id="22_chief"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
@@ -639,8 +640,7 @@ id_to_node = {
 43: NodePath("WoodlandRat11"),
 44: NodePath("WoodlandRat12"),
 45: NodePath("WoodlandRat13"),
-46: NodePath("WoodlandRat14")
-},
+46: NodePath("WoodlandRat14"),
 47: NodePath("WoodlandRat15"),
 48: NodePath("WoodlandRat16"),
 49: NodePath("WoodlandRat17"),
@@ -682,7 +682,12 @@ id_to_node = {
 85: NodePath("WoodlandRat53"),
 86: NodePath("WoodlandRat54"),
 87: NodePath("WoodlandRat55"),
-88: NodePath("WoodlandRat56")
+88: NodePath("WoodlandRat56"),
+89: NodePath("CamelDesertBadger1"),
+90: NodePath("CamelDesertBadger2"),
+91: NodePath("CamelDesertBadger3"),
+92: NodePath("CamelDesertBadger4")
+}
 node_to_id = {
 NodePath("GateRunt1"): 0,
 NodePath("GateRunt2"): 1,
@@ -772,7 +777,11 @@ NodePath("WoodlandRat52"): 84,
 NodePath("WoodlandRat53"): 85,
 NodePath("WoodlandRat54"): 86,
 NodePath("WoodlandRat55"): 87,
-NodePath("WoodlandRat56"): 88
+NodePath("WoodlandRat56"): 88,
+NodePath("CamelDesertBadger1"): 89,
+NodePath("CamelDesertBadger2"): 90,
+NodePath("CamelDesertBadger3"): 91,
+NodePath("CamelDesertBadger4"): 92
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -1269,6 +1278,22 @@ enemy_data = ExtResource("36_wrat")
 y_sort_enabled = true
 position = Vector2(2032, 256)
 enemy_data = ExtResource("36_wrat")
+
+[node name="CamelDesertBadger1" parent="ReplicatedPropsContainer" unique_id=1900002101 instance=ExtResource("3_2hhap")]
+position = Vector2(4500, 1320)
+enemy_data = ExtResource("et_dbadger")
+
+[node name="CamelDesertBadger2" parent="ReplicatedPropsContainer" unique_id=1900002102 instance=ExtResource("3_2hhap")]
+position = Vector2(4720, 1420)
+enemy_data = ExtResource("et_dbadger")
+
+[node name="CamelDesertBadger3" parent="ReplicatedPropsContainer" unique_id=1900002103 instance=ExtResource("3_2hhap")]
+position = Vector2(4580, 1520)
+enemy_data = ExtResource("et_dbadger")
+
+[node name="CamelDesertBadger4" parent="ReplicatedPropsContainer" unique_id=1900002104 instance=ExtResource("3_2hhap")]
+position = Vector2(4800, 1280)
+enemy_data = ExtResource("et_dbadger")
 [node name="Entrance" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
 warper_id = 23

@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_task")
-display_name = "Rats"
-enemy_types = Array[StringName]([&"rat_base", &"woodland_rat"])
+display_name = "Badgers"
+enemy_types = Array[StringName]([&"woodland_rat", &"badger", &"desert_badger"])
 min_slayer_level = 1
 xp_per_kill = 180
-guide_notes = "The first assignment every Slayer walks away with. Rats spawn in the castle yard and the woodland edge — no detour needed, just start swinging."
+guide_notes = "The first assignment every Slayer walks away with. Woodland Badgers roam Goblin Woodland, tougher Badgers hold the east woods, and Desert Badgers dig near the camel trail and the desert dunes."

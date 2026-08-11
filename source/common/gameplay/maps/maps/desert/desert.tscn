@@ -32,6 +32,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_priest.tres" id="et12"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="et13"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="et14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/desert_badger.tres" id="et_dbadger"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunspire_terraces.tres" id="stair_sunspire_terraces"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
@@ -302,7 +303,15 @@ id_to_node = {
 38: NodePath("Priest"),
 39: NodePath("Priest2"),
 40: NodePath("SandKing"),
-41: NodePath("Necromancer")
+41: NodePath("Necromancer"),
+42: NodePath("DesertBadger1"),
+43: NodePath("DesertBadger2"),
+44: NodePath("DesertBadger3"),
+45: NodePath("DesertBadger4"),
+46: NodePath("DesertBadger5"),
+47: NodePath("DesertBadger6"),
+48: NodePath("DesertBadger7"),
+49: NodePath("DesertBadger8"),
 }
 node_to_id = {
 NodePath("Archer"): 0,
@@ -346,7 +355,15 @@ NodePath("Soldier2"): 37,
 NodePath("Priest"): 38,
 NodePath("Priest2"): 39,
 NodePath("SandKing"): 40,
-NodePath("Necromancer"): 41
+NodePath("Necromancer"): 41,
+NodePath("DesertBadger1"): 42,
+NodePath("DesertBadger2"): 43,
+NodePath("DesertBadger3"): 44,
+NodePath("DesertBadger4"): 45,
+NodePath("DesertBadger5"): 46,
+NodePath("DesertBadger6"): 47,
+NodePath("DesertBadger7"): 48,
+NodePath("DesertBadger8"): 49,
 }
 
 [node name="Archer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -599,6 +616,54 @@ weapon = null
 position = Vector2(776.0, 648.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et14")
+weapon = null
+
+[node name="DesertBadger1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(980.0, 1200.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1120.0, 1400.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1400.0, 1100.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1900.0, 1500.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2100.0, 1700.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(900.0, 900.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger7" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1550.0, 1900.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
+weapon = null
+
+[node name="DesertBadger8" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1750.0, 1000.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_dbadger")
 weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]

@@ -41,16 +41,18 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	return total
 
 
-## Mastery points granted per level. 2 → level 99 yields a 198-point budget.
+## Mastery points granted per level. 1 → level 99 yields a 99-point budget.
 ## Trees stay leaner than the full budget on purpose so you specialize rather
 ## than buy every node. Tune this one number to retune the whole budget.
-const POINTS_PER_LEVEL: int = 2
+## (Was 2; halved so combat~20 specialists can't clear most of a tree.)
+const POINTS_PER_LEVEL: int = 1
 
 ## Level 1 already grants a full POINTS_PER_LEVEL so the first tier-1 pick is
-## near-immediate.
+## near-immediate. Clamped so players who spent under the old 2× budget don't
+## see a negative remaining total (respec clears the overhang).
 static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	var level: int = mini(int(entry.get("level", 1)), PlayerResource.MASTERY_LEVEL_CAP)
-	return level * POINTS_PER_LEVEL - spent_cost(entry, tree)
+	return maxi(0, level * POINTS_PER_LEVEL - spent_cost(entry, tree))
 
 
 ## Buys a tree node. Every category starts at level 1 (see

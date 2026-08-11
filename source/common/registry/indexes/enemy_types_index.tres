@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786401510
-next_id = 88
+version = 1786471623
+next_id = 92
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -417,6 +417,26 @@ entries = Array[Dictionary]([{
 &"id": 87,
 &"path": "res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_skeleton.tres",
 &"slug": &"trpg_sewer_skeleton"
+}, {
+&"hash": "7b3a821ac6d9f7be8f94a49de03339b7c5180e3cbd5210bbe5d73245d899b363",
+&"id": 88,
+&"path": "res://source/common/gameplay/characters/npc/types/angry_bat.tres",
+&"slug": &"angry_bat"
+}, {
+&"hash": "95bb22e583d3cfaed413d6481c5ef1ae936428634fe2c8a9edd06ae52afbb78d",
+&"id": 89,
+&"path": "res://source/common/gameplay/characters/npc/types/badger.tres",
+&"slug": &"badger"
+}, {
+&"hash": "86041d2eddf4f3fc4109db976eed07eac8a97a760fa2e8f3db74b88b260d95bf",
+&"id": 90,
+&"path": "res://source/common/gameplay/characters/npc/types/desert_badger.tres",
+&"slug": &"desert_badger"
+}, {
+&"hash": "4c34dff0fb3f76894d23002f3a51ef1d71c570e07641e9fba739fff65511c8c2",
+&"id": 91,
+&"path": "res://source/common/gameplay/characters/npc/types/rabid_wolf.tres",
+&"slug": &"rabid_wolf"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

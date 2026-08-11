@@ -16,6 +16,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_slime.tres" id="et2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres" id="et3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_orc.tres" id="et4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/badger.tres" id="et_badger"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/rabid_wolf.tres" id="et_rabid"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/angry_bat.tres" id="et_abat"]
 
 [node name="woodland_east" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -171,7 +174,21 @@ id_to_node = {
 2: NodePath("MarshSlime"),
 3: NodePath("MarshBat"),
 4: NodePath("ShelfOrc"),
-5: NodePath("BeachScout")
+5: NodePath("BeachScout"),
+6: NodePath("EastBadger1"),
+7: NodePath("EastBadger2"),
+8: NodePath("EastBadger3"),
+9: NodePath("EastBadger4"),
+10: NodePath("EastBadger5"),
+11: NodePath("EastBadger6"),
+12: NodePath("RabidWolf1"),
+13: NodePath("RabidWolf2"),
+14: NodePath("RabidWolf3"),
+15: NodePath("RabidWolf4"),
+16: NodePath("AngryBat1"),
+17: NodePath("AngryBat2"),
+18: NodePath("AngryBat3"),
+19: NodePath("AngryBat4"),
 }
 node_to_id = {
 NodePath("EastGoblin"): 0,
@@ -179,7 +196,21 @@ NodePath("EastArcher"): 1,
 NodePath("MarshSlime"): 2,
 NodePath("MarshBat"): 3,
 NodePath("ShelfOrc"): 4,
-NodePath("BeachScout"): 5
+NodePath("BeachScout"): 5,
+NodePath("EastBadger1"): 6,
+NodePath("EastBadger2"): 7,
+NodePath("EastBadger3"): 8,
+NodePath("EastBadger4"): 9,
+NodePath("EastBadger5"): 10,
+NodePath("EastBadger6"): 11,
+NodePath("RabidWolf1"): 12,
+NodePath("RabidWolf2"): 13,
+NodePath("RabidWolf3"): 14,
+NodePath("RabidWolf4"): 15,
+NodePath("AngryBat1"): 16,
+NodePath("AngryBat2"): 17,
+NodePath("AngryBat3"): 18,
+NodePath("AngryBat4"): 19,
 }
 
 [node name="EastGoblin" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -216,6 +247,90 @@ weapon = null
 position = Vector2(2312.0, 2248.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="EastBadger1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1680.0, 920.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="EastBadger2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1920.0, 1100.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="EastBadger3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2140.0, 1280.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="EastBadger4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1560.0, 1480.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="EastBadger5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2400.0, 1000.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="EastBadger6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1880.0, 1800.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_badger")
+weapon = null
+
+[node name="RabidWolf1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1200.0, 1200.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_rabid")
+weapon = null
+
+[node name="RabidWolf2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2000.0, 1600.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_rabid")
+weapon = null
+
+[node name="RabidWolf3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2600.0, 1200.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_rabid")
+weapon = null
+
+[node name="RabidWolf4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1700.0, 2100.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_rabid")
+weapon = null
+
+[node name="AngryBat1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2900.0, 1400.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_abat")
+weapon = null
+
+[node name="AngryBat2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2550.0, 1700.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_abat")
+weapon = null
+
+[node name="AngryBat3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2200.0, 900.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_abat")
+weapon = null
+
+[node name="AngryBat4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1450.0, 1750.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et_abat")
 weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("7_warper")]
