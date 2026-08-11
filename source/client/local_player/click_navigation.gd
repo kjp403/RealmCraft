@@ -7,11 +7,22 @@ const TRANSITION_FIX_VERSION: String = "2026-08-07-b"
 
 const CELL_SIZE: float = 16.0
 const COLLISION_MASK: int = 2
-## Tight footprint so click/minimap routes hug walls and props instead of
-## fat-blocking corridors and getting the player stuck on object pads.
-const PLAYER_CLEARANCE: Vector2 = Vector2(8.0, 5.0)
+
+## Must be >= the body in `character.tscn`, or the grid marks cells walkable that
+## the player physically cannot enter and the walk ends as a grind along a wall.
+##
+## It used to be 8x5 against a 16x10 body — half size on both axes — which is
+## why click and minimap routes shoved the player into geometry. The body is now
+## 12x8, and this carries 1px of margin over it so a cell the grid calls
+## walkable is one the body genuinely fits through.
+const PLAYER_CLEARANCE: Vector2 = Vector2(13.0, 9.0)
+## Matches the CollisionShape2D offset on the character body: the box is at the
+## feet, not the sprite centre.
 const PLAYER_SHAPE_OFFSET: Vector2 = Vector2(0.0, -3.0)
-const WAYPOINT_REACHED_DISTANCE: float = 7.0
+## Tight enough that the walker stays near the cell centres the grid proved
+## clear. At the old 7.0 the player could be most of a tile off the path and
+## clip the corner the grid had just routed it around.
+const WAYPOINT_REACHED_DISTANCE: float = 4.0
 const SEARCH_RADIUS_CELLS: int = 10
 const BUILD_BATCH_SIZE: int = 320
 const UNBOUNDED_LIMIT: int = 1000000
@@ -120,7 +131,11 @@ func _build_grid(generation: int, map: Map) -> void:
 	grid.region = Rect2i(start_id, end_id - start_id)
 	grid.cell_size = Vector2.ONE * CELL_SIZE
 	grid.offset = Vector2.ONE * CELL_SIZE * 0.5
-	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_AT_LEAST_ONE_WALKABLE
+	# A diagonal step is only legal when BOTH orthogonal neighbours are clear.
+	# `AT_LEAST_ONE_WALKABLE` lets the path cut round the outside of a corner —
+	# geometrically shorter, but the body clips the corner it just routed past,
+	# which reads to the player as the character catching on nothing.
+	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	grid.default_compute_heuristic = AStarGrid2D.HEURISTIC_OCTILE
 	grid.default_estimate_heuristic = AStarGrid2D.HEURISTIC_OCTILE
 	grid.update()
