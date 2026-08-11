@@ -9,17 +9,26 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 158.0
+value = 560.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "mana_max"
-value = 175.0
+value = 288.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mana_regen"
-value = 8.75
+value = 10.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_3"]
+script = ExtResource("1_mod")
+stat_name = "ability_haste"
+value = 12.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("4_item")
@@ -29,7 +38,7 @@ right_hand_scene = ExtResource("3_scene")
 required_mastery_categories = Array[StringName]([&"wand"])
 required_mastery_level = 90
 slot = ExtResource("5_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3")])
 item_name = &"Primordial Wand"
 item_icon = ExtResource("2_icon")
 description = "A primordial focus wand. Mastery 90."

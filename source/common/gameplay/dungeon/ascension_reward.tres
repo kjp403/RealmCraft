@@ -1,147 +1,191 @@
 [gd_resource type="Resource" script_class="DungeonReward" format=3]
 
-[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_iwo68"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="2_k0eda"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres" id="3_vcj2o"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres" id="4_q71sj"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="5_mn7l5"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="6_irrpo"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="7_ky1fu"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres" id="8_h7ytm"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="9_321f0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres" id="10_372qi"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/starfall_leather.tres" id="11_10eyt"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/primordial_cloth.tres" id="12_8neae"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="13_41fpd"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres" id="14_8f7ay"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres" id="15_2vy2i"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres" id="16_enxti"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="17_ic5j0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_nightfall.item.tres" id="18_p1tky"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_kingsbane.item.tres" id="19_ss7an"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres" id="20_nrj87"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="21_0iosv"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="22_nudd7"]
-[ext_resource type="Script" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="23_idyc1"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_ky1fu"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="2_h7ytm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres" id="3_321f0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres" id="4_372qi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres" id="5_10eyt"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres" id="6_8neae"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="7_41fpd"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="8_8f7ay"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_tempest.tres" id="9_2vy2i"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres" id="10_enxti"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="11_ic5j0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres" id="12_p1tky"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="13_ss7an"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres" id="14_nrj87"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_starfall.tres" id="15_0iosv"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres" id="16_nudd7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/starfall_leather.tres" id="17_idyc1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/primordial_cloth.tres" id="18_n57bf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="19_iid6b"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres" id="20_shtv6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres" id="21_hlwn2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres" id="22_60tiv"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="23_h5vkw"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_nightfall.item.tres" id="24_htj86"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_kingsbane.item.tres" id="25_n7r0v"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres" id="26_p2iqy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="27_5r8l5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="28_kemte"]
+[ext_resource type="Script" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="29_qcai2"]
 
-[sub_resource type="Resource" id="Resource_n57bf"]
-script = ExtResource("1_iwo68")
-item = ExtResource("2_k0eda")
+[sub_resource type="Resource" id="Resource_qj52g"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("2_h7ytm")
 min_amount = 2
 max_amount = 6
 chance = 0.55
 
-[sub_resource type="Resource" id="Resource_iid6b"]
-script = ExtResource("1_iwo68")
-item = ExtResource("3_vcj2o")
+[sub_resource type="Resource" id="Resource_vir2m"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("3_321f0")
+min_amount = 2
+max_amount = 5
+chance = 0.5
+
+[sub_resource type="Resource" id="Resource_xna35"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("4_372qi")
+min_amount = 2
+max_amount = 5
+chance = 0.5
+
+[sub_resource type="Resource" id="Resource_qj0b1"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("5_10eyt")
 max_amount = 4
 chance = 0.45
 
-[sub_resource type="Resource" id="Resource_shtv6"]
-script = ExtResource("1_iwo68")
-item = ExtResource("4_q71sj")
+[sub_resource type="Resource" id="Resource_bbaa8"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("6_8neae")
 max_amount = 4
 chance = 0.45
 
-[sub_resource type="Resource" id="Resource_hlwn2"]
-script = ExtResource("1_iwo68")
-item = ExtResource("5_mn7l5")
+[sub_resource type="Resource" id="Resource_i7c5q"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("7_41fpd")
 max_amount = 2
 chance = 0.35
 
-[sub_resource type="Resource" id="Resource_60tiv"]
-script = ExtResource("1_iwo68")
-item = ExtResource("6_irrpo")
+[sub_resource type="Resource" id="Resource_nrh0g"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("8_8f7ay")
 max_amount = 3
 chance = 0.25
 
-[sub_resource type="Resource" id="Resource_h5vkw"]
-script = ExtResource("1_iwo68")
-item = ExtResource("7_ky1fu")
+[sub_resource type="Resource" id="Resource_adtts"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("9_2vy2i")
+max_amount = 4
+chance = 0.28
+
+[sub_resource type="Resource" id="Resource_ulks5"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("10_enxti")
+max_amount = 4
+chance = 0.28
+
+[sub_resource type="Resource" id="Resource_767i6"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("11_ic5j0")
 max_amount = 3
 chance = 0.22
 
-[sub_resource type="Resource" id="Resource_htj86"]
-script = ExtResource("1_iwo68")
-item = ExtResource("8_h7ytm")
+[sub_resource type="Resource" id="Resource_f8rnt"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("12_p1tky")
 max_amount = 3
 chance = 0.22
 
-[sub_resource type="Resource" id="Resource_n7r0v"]
-script = ExtResource("1_iwo68")
-item = ExtResource("9_321f0")
+[sub_resource type="Resource" id="Resource_noffe"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("13_ss7an")
 chance = 0.12
 
-[sub_resource type="Resource" id="Resource_p2iqy"]
-script = ExtResource("1_iwo68")
-item = ExtResource("10_372qi")
+[sub_resource type="Resource" id="Resource_wr1e5"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("14_nrj87")
 max_amount = 2
 chance = 0.06
 
-[sub_resource type="Resource" id="Resource_5r8l5"]
-script = ExtResource("1_iwo68")
-item = ExtResource("11_10eyt")
+[sub_resource type="Resource" id="Resource_dywvm"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("15_0iosv")
+max_amount = 3
+chance = 0.08
+
+[sub_resource type="Resource" id="Resource_0xlae"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("16_nudd7")
+max_amount = 3
+chance = 0.08
+
+[sub_resource type="Resource" id="Resource_rl0f0"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("17_idyc1")
 max_amount = 2
 chance = 0.05
 
-[sub_resource type="Resource" id="Resource_kemte"]
-script = ExtResource("1_iwo68")
-item = ExtResource("12_8neae")
+[sub_resource type="Resource" id="Resource_d24k8"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("18_n57bf")
 max_amount = 2
 chance = 0.05
 
-[sub_resource type="Resource" id="Resource_qcai2"]
-script = ExtResource("1_iwo68")
-item = ExtResource("13_41fpd")
+[sub_resource type="Resource" id="Resource_2wedu"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("19_iid6b")
 chance = 0.03
 
-[sub_resource type="Resource" id="Resource_qj52g"]
-script = ExtResource("1_iwo68")
-item = ExtResource("14_8f7ay")
+[sub_resource type="Resource" id="Resource_cspun"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("20_shtv6")
 chance = 0.03
 
-[sub_resource type="Resource" id="Resource_vir2m"]
-script = ExtResource("1_iwo68")
-item = ExtResource("15_2vy2i")
+[sub_resource type="Resource" id="Resource_bpxj7"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("21_hlwn2")
 chance = 0.03
 
-[sub_resource type="Resource" id="Resource_xna35"]
-script = ExtResource("1_iwo68")
-item = ExtResource("16_enxti")
+[sub_resource type="Resource" id="Resource_s6qbj"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("22_60tiv")
 chance = 0.015
 
-[sub_resource type="Resource" id="Resource_qj0b1"]
-script = ExtResource("1_iwo68")
-item = ExtResource("17_ic5j0")
+[sub_resource type="Resource" id="Resource_shv25"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("23_h5vkw")
 chance = 0.015
 
-[sub_resource type="Resource" id="Resource_bbaa8"]
-script = ExtResource("1_iwo68")
-item = ExtResource("18_p1tky")
+[sub_resource type="Resource" id="Resource_3elop"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("24_htj86")
 chance = 0.008
 
-[sub_resource type="Resource" id="Resource_i7c5q"]
-script = ExtResource("1_iwo68")
-item = ExtResource("19_ss7an")
+[sub_resource type="Resource" id="Resource_hnnjv"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("25_n7r0v")
 chance = 0.008
 
-[sub_resource type="Resource" id="Resource_nrh0g"]
-script = ExtResource("1_iwo68")
-item = ExtResource("20_nrj87")
+[sub_resource type="Resource" id="Resource_coojf"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("26_p2iqy")
 chance = 0.004
 
-[sub_resource type="Resource" id="Resource_adtts"]
-script = ExtResource("1_iwo68")
-item = ExtResource("21_0iosv")
+[sub_resource type="Resource" id="Resource_8dy8r"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("27_5r8l5")
 chance = 0.01
 
-[sub_resource type="Resource" id="Resource_ulks5"]
-script = ExtResource("1_iwo68")
-item = ExtResource("22_nudd7")
+[sub_resource type="Resource" id="Resource_qskg5"]
+script = ExtResource("1_ky1fu")
+item = ExtResource("28_kemte")
 chance = 0.01
 
 [resource]
-script = ExtResource("23_idyc1")
+script = ExtResource("29_qcai2")
 gold_min = 2500
 gold_max = 6000
-loot = Array[ExtResource("1_iwo68")]([SubResource("Resource_n57bf"), SubResource("Resource_iid6b"), SubResource("Resource_shtv6"), SubResource("Resource_hlwn2"), SubResource("Resource_60tiv"), SubResource("Resource_h5vkw"), SubResource("Resource_htj86"), SubResource("Resource_n7r0v"), SubResource("Resource_p2iqy"), SubResource("Resource_5r8l5"), SubResource("Resource_kemte"), SubResource("Resource_qcai2"), SubResource("Resource_qj52g"), SubResource("Resource_vir2m"), SubResource("Resource_xna35"), SubResource("Resource_qj0b1"), SubResource("Resource_bbaa8"), SubResource("Resource_i7c5q"), SubResource("Resource_nrh0g"), SubResource("Resource_adtts"), SubResource("Resource_ulks5")])
+loot = Array[ExtResource("1_ky1fu")]([SubResource("Resource_qj52g"), SubResource("Resource_vir2m"), SubResource("Resource_xna35"), SubResource("Resource_qj0b1"), SubResource("Resource_bbaa8"), SubResource("Resource_i7c5q"), SubResource("Resource_nrh0g"), SubResource("Resource_adtts"), SubResource("Resource_ulks5"), SubResource("Resource_767i6"), SubResource("Resource_f8rnt"), SubResource("Resource_noffe"), SubResource("Resource_wr1e5"), SubResource("Resource_dywvm"), SubResource("Resource_0xlae"), SubResource("Resource_rl0f0"), SubResource("Resource_d24k8"), SubResource("Resource_2wedu"), SubResource("Resource_cspun"), SubResource("Resource_bpxj7"), SubResource("Resource_s6qbj"), SubResource("Resource_shv25"), SubResource("Resource_3elop"), SubResource("Resource_hnnjv"), SubResource("Resource_coojf"), SubResource("Resource_8dy8r"), SubResource("Resource_qskg5")])

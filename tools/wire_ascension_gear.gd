@@ -29,6 +29,13 @@ const CRAFT_LVL: Dictionary = {
 const XP: Dictionary = {
 	40: 170, 50: 210, 60: 260, 70: 320, 80: 400, 90: 500,
 }
+## Material cures/weaves sit below finished-gear craft gates.
+const CURE_LVL: Dictionary = {
+	40: 48, 50: 55, 60: 62, 70: 70, 80: 80, 90: 90,
+}
+const CURE_XP: Dictionary = {
+	40: 40, 50: 55, 60: 75, 70: 100, 80: 130, 90: 170,
+}
 
 
 func _init() -> void:
@@ -152,6 +159,32 @@ func _patch_anvil() -> void:
 func _patch_workbench() -> void:
 	var station: CraftingStationResource = ResourceLoader.load(WORKBENCH) as CraftingStationResource
 	var added: int = 0
+
+	# Materials tab: cure Ascension hides → leather, weave fibers → cloth.
+	for tier: int in TIERS:
+		var akey: String = String(ARCHERY[tier])
+		var mkey: String = String(MAGIC[tier])
+		var clvl: int = int(CURE_LVL[tier])
+		var cxp: int = int(CURE_XP[tier])
+
+		var hide: Item = _load_item("res://source/common/gameplay/items/materials/leather/hide_%s.tres" % akey)
+		var leather_out: Item = _load_item("res://source/common/gameplay/items/materials/leather/%s_leather.tres" % akey)
+		if hide != null and leather_out != null and not _already_has_output(station, leather_out):
+			station.recipes.append(_recipe(leather_out, [_ing(hide, 2)], clvl, cxp))
+			added += 1
+
+		var afiber: Item = _load_item("res://source/common/gameplay/items/materials/cloth/fiber_%s.tres" % akey)
+		var acloth_out: Item = _load_item("res://source/common/gameplay/items/materials/cloth/%s_cloth.tres" % akey)
+		if afiber != null and acloth_out != null and not _already_has_output(station, acloth_out):
+			station.recipes.append(_recipe(acloth_out, [_ing(afiber, 2)], clvl, cxp))
+			added += 1
+
+		var mfiber: Item = _load_item("res://source/common/gameplay/items/materials/cloth/fiber_%s.tres" % mkey)
+		var mcloth_out: Item = _load_item("res://source/common/gameplay/items/materials/cloth/%s_cloth.tres" % mkey)
+		if mfiber != null and mcloth_out != null and not _already_has_output(station, mcloth_out):
+			station.recipes.append(_recipe(mcloth_out, [_ing(mfiber, 2)], clvl, cxp + 5))
+			added += 1
+
 	for tier: int in TIERS:
 		var akey: String = String(ARCHERY[tier])
 		var mkey: String = String(MAGIC[tier])
@@ -219,9 +252,12 @@ func _build_shops() -> void:
 			["res://source/common/gameplay/items/materials/metals/%s_ore.tres" % key, price_base],
 			["res://source/common/gameplay/items/materials/gems/%s_gem.tres" % key, price_base + 40],
 			["res://source/common/gameplay/items/materials/cloth/%s_cloth.tres" % key, price_base + 20],
+			["res://source/common/gameplay/items/materials/leather/hide_%s.tres" % akey, price_base / 2],
 			["res://source/common/gameplay/items/materials/leather/%s_leather.tres" % akey, price_base + 30],
 			["res://source/common/gameplay/items/materials/gems/%s_gem.tres" % akey, price_base + 40],
+			["res://source/common/gameplay/items/materials/cloth/fiber_%s.tres" % akey, price_base / 2],
 			["res://source/common/gameplay/items/materials/cloth/%s_cloth.tres" % akey, price_base + 20],
+			["res://source/common/gameplay/items/materials/cloth/fiber_%s.tres" % mkey, price_base / 2 + 5],
 			["res://source/common/gameplay/items/materials/cloth/%s_cloth.tres" % mkey, price_base + 30],
 			["res://source/common/gameplay/items/materials/gems/%s_gem.tres" % mkey, price_base + 40],
 			["res://source/common/gameplay/items/materials/metals/%s_ore.tres" % mkey, price_base + 20],
@@ -297,14 +333,20 @@ func _build_reward() -> void:
 	# Materials common
 	for path_chance: Array in [
 		["res://source/common/gameplay/items/materials/metals/basilisk_ore.tres", 0.55, 2, 6],
+		["res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres", 0.5, 2, 5],
+		["res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres", 0.5, 2, 5],
 		["res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres", 0.45, 1, 4],
 		["res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres", 0.45, 1, 4],
 		["res://source/common/gameplay/items/materials/gems/basilisk_gem.tres", 0.35, 1, 2],
 		["res://source/common/gameplay/items/materials/metals/colossus_ore.tres", 0.25, 1, 3],
+		["res://source/common/gameplay/items/materials/leather/hide_tempest.tres", 0.28, 1, 4],
+		["res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres", 0.28, 1, 4],
 		["res://source/common/gameplay/items/materials/leather/tempest_leather.tres", 0.22, 1, 3],
 		["res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres", 0.22, 1, 3],
 		["res://source/common/gameplay/items/materials/gems/godsteel_gem.tres", 0.12, 1, 1],
 		["res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres", 0.06, 1, 2],
+		["res://source/common/gameplay/items/materials/leather/hide_starfall.tres", 0.08, 1, 3],
+		["res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres", 0.08, 1, 3],
 		["res://source/common/gameplay/items/materials/leather/starfall_leather.tres", 0.05, 1, 2],
 		["res://source/common/gameplay/items/materials/cloth/primordial_cloth.tres", 0.05, 1, 2],
 	]:

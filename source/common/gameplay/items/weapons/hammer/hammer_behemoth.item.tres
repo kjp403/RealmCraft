@@ -9,12 +9,20 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 52.0
+value = 310.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "move_speed"
-value = -8.4
+value = -5.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_2"]
+script = ExtResource("1_mod")
+stat_name = "ability_haste"
+value = 7.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("4_item")
@@ -24,7 +32,7 @@ right_hand_scene = ExtResource("3_scene")
 required_mastery_categories = Array[StringName]([&"hammer"])
 required_mastery_level = 80
 slot = ExtResource("5_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Behemoth Hammer"
 item_icon = ExtResource("2_icon")
 description = "A crushing behemoth warhammer. Mastery 80."
