@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li3"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://x8cnc5kq8l35" path="res://source/common/gameplay/items/gears/relics/relic_scarabheart.tres" id="relic_scarabheart"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -51,6 +52,11 @@ script = ExtResource("3_loot")
 item = ExtResource("bone_item")
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_relic_scarabheart"]
+script = ExtResource("3_loot")
+item = ExtResource("relic_scarabheart")
+chance = 0.001
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sand_king"
@@ -80,7 +86,7 @@ wander_pause_max_s = 4.0
 xp_reward = 2600
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_iron_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_iron_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_scarabheart")])
 enrage_health_fraction = 0.4
 slam_radius = 132.0
 slam_windup_s = 1.2

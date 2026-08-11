@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://cg25o477i0csb" path="res://source/common/gameplay/items/gears/relics/relic_emberbrand.tres" id="relic_emberbrand"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -33,6 +34,11 @@ script = ExtResource("1_3a3qb")
 item = ExtResource("bone_item")
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_relic_emberbrand"]
+script = ExtResource("1_3a3qb")
+item = ExtResource("relic_emberbrand")
+chance = 0.001
+
 [resource]
 script = ExtResource("2_1jsux")
 enemy_type = &"orc_leader"
@@ -51,7 +57,7 @@ detection_radius = 100
 chase_on_area = true
 xp_reward = 50
 respawn_delay = 480.0
-loot = Array[ExtResource("1_3a3qb")]([SubResource("Resource_1jsux"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("1_3a3qb")]([SubResource("Resource_1jsux"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_emberbrand")])
 slam_radius = 100.0
 slam_windup_s = 2.0
 slam_interval_s = 10.0

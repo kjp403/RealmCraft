@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786438071
-next_id = 512
+version = 1786470754
+next_id = 522
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2337,6 +2337,56 @@ entries = Array[Dictionary]([{
 &"id": 511,
 &"path": "res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres",
 &"slug": &"hide_wraithsilk"
+}, {
+&"hash": "be792c6c74360bebdd1336f998fce69e8ff1400afd933251d23509450ba31015",
+&"id": 512,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_mossgrown.tres",
+&"slug": &"relic_mossgrown"
+}, {
+&"hash": "710a39b330119cf64578d75556caf88cc4f6d5089d92f33c4c7b31ef6f26b552",
+&"id": 513,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_sporebloom.tres",
+&"slug": &"relic_sporebloom"
+}, {
+&"hash": "3fdb188dfa6aa366dd0292f8507e5b489e6b01089cde6e82b1b305e9c5ca6d87",
+&"id": 514,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_bloodbrand.tres",
+&"slug": &"relic_bloodbrand"
+}, {
+&"hash": "045c0aaa80cec6f0bf6be28bb3a7c6814e4db30aada986fe633ae24d8842328d",
+&"id": 515,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_duskglass.tres",
+&"slug": &"relic_duskglass"
+}, {
+&"hash": "642d3188e743452edd895d9963baf924ecd4c78b290ad9b99cc7a05dd00621d9",
+&"id": 516,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_emberbrand.tres",
+&"slug": &"relic_emberbrand"
+}, {
+&"hash": "108c83949d73d1c342c8dae11155340ab09b367e10095115f400ef277620aa2c",
+&"id": 517,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_rotmire.tres",
+&"slug": &"relic_rotmire"
+}, {
+&"hash": "62e41341ae1c799bfa54aded1365bbc1de834a82a1f94b4e1fbaef7390029f96",
+&"id": 518,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_coreblossom.tres",
+&"slug": &"relic_coreblossom"
+}, {
+&"hash": "6ec6c22dff71113884cbafe3be159e2b9d5ef22cee5c0b72e8c393ffbea58984",
+&"id": 519,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_scarabheart.tres",
+&"slug": &"relic_scarabheart"
+}, {
+&"hash": "29ac5ae5fcd8a306a461e4f4886d5106898c08b5cdd367475975676c9595185e",
+&"id": 520,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_netherglass.tres",
+&"slug": &"relic_netherglass"
+}, {
+&"hash": "3b7552355e5282b5363c4009f19447bcdde60796062cc6b9029520e2362538ff",
+&"id": 521,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres",
+&"slug": &"relic_cinderheart"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

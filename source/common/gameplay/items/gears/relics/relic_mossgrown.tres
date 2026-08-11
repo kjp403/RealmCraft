@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="GearItem" format=3 uid="uid://5ykku6jy3om"]
+
+[ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Texture2D" uid="uid://p7yu83ob570y" path="res://assets/sprites/items/icons/relic_mossgrown.png" id="2_icon"]
+[ext_resource type="Script" uid="uid://dnmtdktay2df6" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
+[ext_resource type="Resource" uid="uid://dp67jicqi8ovy" path="res://source/common/gameplay/items/item_slot/slots/relic.tres" id="4_slot"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("1_mod")
+stat_name = "armor"
+value = 14.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("1_mod")
+stat_name = "health_max"
+value = 35.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[resource]
+script = ExtResource("3_gear")
+slot = ExtResource("4_slot")
+required_level = 0
+required_mastery_categories = Array[StringName]([])
+required_mastery_level = 0
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+item_name = &"Mossgrown Charm"
+item_icon = ExtResource("2_icon")
+description = "Green has grown over it so long it stopped being a stone and started being the moss."
+can_trade = true
+vendor_value = 2500
+stack_limit = 1
+metadata/_custom_type_script = "uid://dnmtdktay2df6"
+metadata/slug = &"relic_mossgrown"
+metadata/id = 512
