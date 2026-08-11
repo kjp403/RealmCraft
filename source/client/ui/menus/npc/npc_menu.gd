@@ -224,6 +224,29 @@ func _on_entry(entry: Dictionary) -> void:
 		_lines = entry["lines"] if entry["lines"] is Array else []
 		_line_index = 0
 		_show_line()
+	elif entry.has("request"):
+		# Immediate server action (e.g. WarpInteraction → npc.warp) — no panel.
+		_close_dialogue()
+		if InstanceClient.current == null:
+			return
+		var req: StringName = StringName(str(entry["request"]))
+		var req_args: Dictionary = entry.get("args", {}) if entry.get("args", {}) is Dictionary else {}
+		Client.request_data(
+			req,
+			func(data: Dictionary) -> void:
+				if data.get("ok", false):
+					return
+				var reason: String = str(data.get("reason", ""))
+				if reason == "too_far":
+					Toaster.toast("Too far.")
+				elif reason == "wardstone":
+					pass # server already pushed a system line
+				elif not reason.is_empty() and reason != "jailed":
+					Toaster.toast("Cannot travel right now.")
+			,
+			req_args,
+			String(InstanceClient.current.name)
+		)
 	elif entry.has("menu"):
 		_close_dialogue()
 		ClientState.open_menu_requested.emit(

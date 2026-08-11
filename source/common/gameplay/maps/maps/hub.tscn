@@ -47,10 +47,10 @@
 [ext_resource type="Resource" uid="uid://ctinvein001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/tin_vein.tres" id="49_tin"]
 [ext_resource type="Resource" uid="uid://cutpirmfqwx8b" path="res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres" id="51_iron"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="50_tree"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="52_desert"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="53_fforge"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/the_hollow.tres" id="54_hollow"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="55_sewers"]
+[ext_resource type="Resource" uid="uid://cnpcdesertcamel1" path="res://source/common/gameplay/characters/npc/npcs/desert_camel.tres" id="56_camel"]
+[ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="57_golem"]
+[ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="58_hermit"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6ao3"]
 atlas = ExtResource("27_xjjg4")
@@ -515,6 +515,18 @@ npc_resource = ExtResource("14_banker")
 position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")
 
+[node name="DesertCamel" parent="NPCs" unique_id=1888560001 instance=ExtResource("16_da30u")]
+position = Vector2(992, -48)
+npc_resource = ExtResource("56_camel")
+
+[node name="ForgeGolem" parent="NPCs" unique_id=1888560002 instance=ExtResource("16_da30u")]
+position = Vector2(992, 16)
+npc_resource = ExtResource("57_golem")
+
+[node name="SwampHermit" parent="NPCs" unique_id=1888560003 instance=ExtResource("16_da30u")]
+position = Vector2(856, 80)
+npc_resource = ExtResource("58_hermit")
+
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]
 
 [node name="Spawn" parent="Warpers" unique_id=1414716116 instance=ExtResource("7_aris3")]
@@ -559,29 +571,17 @@ target_instance = ExtResource("12_sgxfe")
 warper_id = 23
 target_id = 23
 
-[node name="DesertPortal" parent="Warpers" unique_id=151131626 instance=ExtResource("29_2sqao")]
-position = Vector2(992, -48)
-portal_color = Color(0.5308139, 0.42815638, 0, 1)
-destination_label = "Desert"
-target_instance = ExtResource("52_desert")
+[node name="DesertLanding" parent="Warpers" unique_id=151131626 instance=ExtResource("7_aris3")]
+position = Vector2(960, -48)
 warper_id = 25
-target_id = 25
 
-[node name="SewersPortal" parent="Warpers" unique_id=1638213698 instance=ExtResource("29_2sqao")]
-position = Vector2(856, 80)
-portal_color = Color(0, 0.526729, 0.27035004, 1)
-destination_label = "The Sewers"
-target_instance = ExtResource("55_sewers")
+[node name="SewersLanding" parent="Warpers" unique_id=1638213698 instance=ExtResource("7_aris3")]
+position = Vector2(824, 80)
 warper_id = 28
-target_id = 28
 
-[node name="FireForgePortal" parent="Warpers" unique_id=121112763 instance=ExtResource("29_2sqao")]
-position = Vector2(992, 16)
-portal_color = Color(0.7412448, 0.25372657, 0, 1)
-destination_label = "Fire Forge"
-target_instance = ExtResource("53_fforge")
+[node name="FireForgeLanding" parent="Warpers" unique_id=121112763 instance=ExtResource("7_aris3")]
+position = Vector2(960, 16)
 warper_id = 26
-target_id = 26
 
 [node name="CavePortal" parent="Warpers" unique_id=396714839 instance=ExtResource("29_2sqao")]
 position = Vector2(792, -48)

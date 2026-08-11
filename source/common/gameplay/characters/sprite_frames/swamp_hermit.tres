@@ -1,0 +1,150 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://bswamphermitf01"]
+
+[ext_resource type="Texture2D" uid="uid://c3p2jng8gutmj" path="res://assets/sprites/characters/swamp_hermit/swamp_hermit_idle.png" id="1_idle"]
+[ext_resource type="Texture2D" uid="uid://dx3ophpqj27fx" path="res://assets/sprites/characters/swamp_hermit/swamp_hermit_run.png" id="2_run"]
+[ext_resource type="Texture2D" uid="uid://cahd01n31a57a" path="res://assets/sprites/characters/swamp_hermit/swamp_hermit_death.png" id="3_death"]
+
+[sub_resource type="AtlasTexture" id="A_i0"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_i1"]
+atlas = ExtResource("1_idle")
+region = Rect2(80, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_i2"]
+atlas = ExtResource("1_idle")
+region = Rect2(160, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_i3"]
+atlas = ExtResource("1_idle")
+region = Rect2(240, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r0"]
+atlas = ExtResource("2_run")
+region = Rect2(0, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r1"]
+atlas = ExtResource("2_run")
+region = Rect2(80, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r2"]
+atlas = ExtResource("2_run")
+region = Rect2(160, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r3"]
+atlas = ExtResource("2_run")
+region = Rect2(240, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r4"]
+atlas = ExtResource("2_run")
+region = Rect2(320, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_r5"]
+atlas = ExtResource("2_run")
+region = Rect2(400, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d0"]
+atlas = ExtResource("3_death")
+region = Rect2(0, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d1"]
+atlas = ExtResource("3_death")
+region = Rect2(80, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d2"]
+atlas = ExtResource("3_death")
+region = Rect2(160, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d3"]
+atlas = ExtResource("3_death")
+region = Rect2(240, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d4"]
+atlas = ExtResource("3_death")
+region = Rect2(320, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="A_d5"]
+atlas = ExtResource("3_death")
+region = Rect2(400, 0, 80, 80)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A_d0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_d1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_d2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_d3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_d4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_d5")
+}],
+"loop": false,
+"name": &"death",
+"speed": 6.0
+},
+{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A_i0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_i1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_i2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_i3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+},
+{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A_r0")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_r1")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_r2")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_r3")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_r4")
+},
+{
+"duration": 1.0,
+"texture": SubResource("A_r5")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}]
