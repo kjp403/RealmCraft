@@ -91,38 +91,26 @@ func die(killer: Character) -> void:
 	if DungeonService.register_dungeon_death(self):
 		return
 
-	# Default spawn = map's spawn point.
+	# Default: Guild Hall (Hall Keeper). Sparring keeps the duel-master pad.
 	var spawn_position: Vector2 = Vector2.ZERO
 	var map: Map = get_parent() as Map
 	if map:
 		spawn_position = map.get_spawn_position()
 
+	var sparring_death: bool = false
 	# Sparring: override to the duel master's position BEFORE ending the match
 	# (on_player_died_in_match clears in_match and would un-resolve us otherwise).
 	# Then end the match so wins/losses are tallied and the opponent is healed.
 	if player_resource != null and player_resource.in_match:
+		sparring_death = true
 		var sparring_pos: Vector2 = SparringService.return_position_for(self)
 		if sparring_pos != Vector2.ZERO:
 			spawn_position = sparring_pos
 		SparringService.on_player_died_in_match(self, killer)
 
-	# Boss arenas (The Hollow): eject to Castle Garden instead of the local pad.
-	var return_home: bool = false
-	if (
-		player_resource != null
-		and not player_resource.in_match
-		and WorldServer.curr != null
-		and WorldServer.curr.instance_manager != null
-	):
-		var cur_inst: ServerInstance = WorldServer.curr.instance_manager.find_instance_for_peer(
-			int(player_resource.current_peer_id)
-		)
-		if (
-			cur_inst != null
-			and cur_inst.instance_resource != null
-			and cur_inst.instance_resource.death_return_instance != null
-		):
-			return_home = true
+	# Open-world / dungeon / boss deaths: always eject to Guild Hall (Hall Keeper),
+	# not the local map pad. Sparring stays in-arena.
+	var return_home: bool = not sparring_death
 
 	var peer_id: int = int(player_resource.current_peer_id)
 	if peer_id > 0:
@@ -156,7 +144,7 @@ func die(killer: Character) -> void:
 		return
 
 	if return_home and peer_id > 0:
-		WorldServer.curr.instance_manager.send_player_death_return(peer_id)
+		WorldServer.curr.instance_manager.recall_player(peer_id)
 
 
 ## Top HP and mana back to full (does NOT touch the dead flag). The dungeon enter/exit refill uses it
