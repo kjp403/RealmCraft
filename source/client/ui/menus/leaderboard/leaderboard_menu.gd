@@ -47,7 +47,8 @@ const DOMAINS: Array = [
 		],
 	},
 	{"id": "arena", "label": "Arena Wins", "category": "combat", "board_id": "arena_wins", "periods": []},
-	{"id": "level", "label": "Highest Level", "category": "progression", "board_id": "level", "periods": []},
+	{"id": "level", "label": "Total Level", "category": "progression", "board_id": "total_level", "periods": []},
+	{"id": "combat_level", "label": "Combat Level", "category": "progression", "board_id": "level", "periods": []},
 	{"id": "gold",  "label": "Richest", "category": "progression", "board_id": "gold", "periods": []},
 	# Dungeon fastest-clear boards (Hard only). board_id is "dungeon:<instance_name>";
 	# scores are SECONDS shown as m:ss (lower is better). One entry per ranked dungeon.

@@ -22,6 +22,7 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/skill_perk_reset_interaction.gd" id="25_perkreset"]
 [ext_resource type="AudioStream" uid="uid://cm5502pmvcc5j" path="res://assets/audio/music/market.ogg" id="mus_market"]
 [ext_resource type="AudioStream" uid="uid://ccn0gxxwbb1rh" path="res://assets/audio/music/angevin.ogg" id="mus_angevin"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/leaderboard/champion_statue.tscn" id="26_statue"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5v2ol"]
 size = Vector2(80, 50)
@@ -128,3 +129,18 @@ npc_resource = SubResource("Resource_luj30")
 position = Vector2(248, -200)
 collision_mask = 6
 npc_resource = ExtResource("9_banker")
+
+[node name="TotalLevelChampion1" parent="." unique_id=609075953 instance=ExtResource("26_statue")]
+position = Vector2(119, -411)
+category = "level"
+rank = 1
+
+[node name="TotalLevelChampion2" parent="." unique_id=224040274 instance=ExtResource("26_statue")]
+position = Vector2(79, -419)
+category = "level"
+rank = 2
+
+[node name="TotalLevelChampion3" parent="." unique_id=910175863 instance=ExtResource("26_statue")]
+position = Vector2(159, -419)
+category = "level"
+rank = 3

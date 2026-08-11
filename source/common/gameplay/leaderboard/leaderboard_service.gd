@@ -60,7 +60,8 @@ static func record_dungeon_clear(player: Player, dungeon_name: String, seconds: 
 ## board ids:
 ##   pvp_day, pvp_week, pvp_total
 ##   pve_day, pve_week, pve_total
-##   level
+##   level           (combat level)
+##   total_level     (sum of JobRegistry skill levels — Skills panel "Total level")
 ##   gold            (richest — total gold held in inventory)
 ##   glory_seasonal, glory_eternal
 ##
@@ -121,7 +122,7 @@ static func _week_start_ms(now_ms: int) -> int:
 
 static func _top_n_player(world_server: Node, board: String, limit: int) -> Array:
 	var db = world_server.database.store.db
-	db.query("SELECT player_id, display_name, level, experience, stats_json, inventory_json FROM players;")
+	db.query("SELECT player_id, display_name, level, experience, stats_json, inventory_json, skills_json FROM players;")
 	var rows: Array = db.query_result.duplicate()
 	var gold_id: int = Economy.gold_id()
 
@@ -148,19 +149,24 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 		var level: int
 		var display_name: String
 		var experience: int
+		var skills_dict: Dictionary
 		if live != null:
 			stats = live.lb_stats
 			level = live.level
 			display_name = live.display_name
 			experience = live.experience
+			skills_dict = live.skills
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
 			level = int(row.get("level", 1))
 			display_name = str(row.get("display_name", "?"))
 			experience = int(row.get("experience", 0))
+			var skills_parsed: Variant = JSON.parse_string(str(row.get("skills_json", "{}")))
+			skills_dict = skills_parsed if skills_parsed is Dictionary else {}
 
 		var score: int = 0
+		var sub: int = 0
 		match board:
 			"pvp_day":
 				if int(stats.get("lb_bucket_day_ms", 0)) == day_start:
@@ -182,6 +188,12 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 				score = int(stats.get("arena_wins", 0))
 			"level":
 				score = level
+				sub = experience
+			"total_level":
+				# Skills-panel Total level: sum of every JobRegistry skill (missing = 1).
+				# Tie-break on summed skill XP so equal totals still order by grind depth.
+				score = total_skill_level_of(skills_dict)
+				sub = _total_skill_xp_of(skills_dict)
 			"gold":
 				# Richest board — total gold held. Live players use their
 				# in-memory inventory; offline rows parse the saved JSON.
@@ -194,22 +206,60 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 				score = Inventory.count(inv, gold_id)
 			_:
 				continue
-		if score <= 0 and board != "level":
+		if score <= 0 and board != "level" and board != "total_level":
 			continue # Zero-score rows clutter the board.
 		scored.append({
 			"id": player_id,
 			"name": display_name,
 			"score": score,
-			"sub": experience if board == "level" else 0,
+			"sub": sub,
 		})
 
-	# Sort: primary descending score, secondary descending sub (experience for level board).
+	# Sort: primary descending score, secondary descending sub (XP for level boards).
 	scored.sort_custom(func(a, b):
 		if a["score"] != b["score"]:
 			return a["score"] > b["score"]
 		return a["sub"] > b["sub"]
 	)
 	return scored.slice(0, limit)
+
+
+## Skill slugs that feed Total Level. Keep in sync with JobRegistry.JOBS — listed here
+## as plain StringNames so this service never preload-cycles through JobPerks .tres files.
+const TOTAL_LEVEL_SKILLS: Array[StringName] = [
+	&"mining",
+	&"harvesting",
+	&"woodcutting",
+	&"fishing",
+	&"smithing",
+	&"outfitting",
+	&"cooking",
+	&"slayer",
+]
+
+
+## Sum of every registered job's skill level. Missing / unstarted skills count as 1 —
+## same rule as the Skills panel "Total level" line (skills.get iterates JobRegistry).
+## skills_json keys may be String (from JSON) or StringName (live PlayerResource).
+static func total_skill_level_of(skills: Dictionary) -> int:
+	var total: int = 0
+	for job_slug: StringName in TOTAL_LEVEL_SKILLS:
+		var entry: Variant = skills.get(job_slug, skills.get(String(job_slug), null))
+		if entry is Dictionary:
+			total += maxi(1, int((entry as Dictionary).get("level", 1)))
+		else:
+			total += 1
+	return total
+
+
+## Summed in-progress skill XP across Total Level skills — tie-breaker for total_level.
+static func _total_skill_xp_of(skills: Dictionary) -> int:
+	var total: int = 0
+	for job_slug: StringName in TOTAL_LEVEL_SKILLS:
+		var entry: Variant = skills.get(job_slug, skills.get(String(job_slug), null))
+		if entry is Dictionary:
+			total += maxi(0, int((entry as Dictionary).get("xp", 0)))
+	return total
 
 
 ## Fastest-clear board for one dungeon. Score = best clear SECONDS, ranked
@@ -282,12 +332,14 @@ static func _top_n_guild(world_server: Node, board: String, limit: int) -> Array
 
 # --- Server-side: in-world champion statues ---
 
-## Boards the plaza statues display (all-time totals). Each ChampionStatue picks its board
-## from its own @export category; this is just the set we resolve + cache.
-const STATUE_BOARDS: Array[String] = ["pve_total", "pvp_total", "level"]
+## Boards the plaza statues display. Guild Hall currently showcases Total Level only
+## (PvP disabled; PvE podium deferred). Each ChampionStatue picks its board from its
+## @export category; this is the set we resolve + cache.
+const STATUE_BOARDS: Array[String] = ["total_level"]
 ## How deep each board's hall of fame goes — a statue's @export rank (1..N) picks its slot, so
 ## this caps how many ranks can be enshrined per board. Ranking already sorts the whole roster
 ## either way (top_n), so a bigger N only adds that many skin lookups per board per refresh.
+## Guild Hall places ranks 1–3; keep headroom for future podiums.
 const STATUE_TOP_N: int = 10
 ## Cache so a plaza full of players doesn't each re-rank the whole roster + hit the DB for skins.
 ## Per-process (per-world). All-time champions change rarely, so the TTL is generous — the hall of
