@@ -653,11 +653,6 @@ func _build_desert_tombs() -> void:
 			"type": TYPES + mob_plan[i][1] + ".tres",
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
-	hostiles.append({
-		"name": "SandKing",
-		"type": TYPES + "bosses/sand_king.tres",
-		"pos": LevelKit.tile_pos(throne),
-	})
 
 	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
@@ -1072,11 +1067,6 @@ func _build_sewers_cistern() -> void:
 			"type": TYPES + mob_plan[i][1] + ".tres",
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
-	hostiles.append({
-		"name": "CisternSovereign",
-		"type": TYPES + "bosses/cistern_sovereign.tres",
-		"pos": LevelKit.tile_pos(dais),
-	})
 
 	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
@@ -1745,11 +1735,6 @@ func _build_forge_deeps() -> void:
 			"type": TYPES + mob_plan[i][1] + ".tres",
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
-	hostiles.append({
-		"name": "Cinderborn",
-		"type": TYPES + "bosses/cinderborn.tres",
-		"pos": LevelKit.tile_pos(shore),
-	})
 
 	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 

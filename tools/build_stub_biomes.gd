@@ -20,6 +20,8 @@ const MAP_SCRIPT := "res://source/common/gameplay/maps/map.gd"
 const RP_SCRIPT := "res://source/common/network/sync/replicated_props.gd"
 const CRITTER_SCN := "res://source/common/gameplay/props/ambient_critter.tscn"
 const DECO_SCN := "res://source/common/gameplay/props/animated_deco.tscn"
+const HOSTILE_SCN := "res://source/common/gameplay/characters/npc/hostile_npc.tscn"
+const TYPES := "res://source/common/gameplay/characters/npc/types/"
 
 var W: int = 64
 var H: int = 48
@@ -195,6 +197,46 @@ func _scatter_props(
 			solid[c] = true
 
 
+# --- Population --------------------------------------------------------------
+
+## Place one entry on the nearest free walkable cell to its authored spot,
+## reserving `gap` cells around it so packs never stack on each other or on a
+## warper.
+func _place(walk: Dictionary, taken: Dictionary, wanted: Vector2i, gap: int) -> Vector2i:
+	var pool: Dictionary = {}
+	for cell: Vector2i in walk.keys():
+		if not taken.has(cell):
+			pool[cell] = true
+	if pool.is_empty():
+		return wanted
+	var cell := _pick_open(pool, wanted)
+	for oy in range(-gap, gap + 1):
+		for ox in range(-gap, gap + 1):
+			taken[cell + Vector2i(ox, oy)] = true
+	return cell
+
+
+## Expand a pack plan into hostiles. Entries are
+## `[base_name, type_slug, spot, count]`; a count above one spreads that many of
+## the same type around the spot, which is how a zone this size gets populated
+## without a hand-written line per body.
+func _mobs(walk: Dictionary, taken: Dictionary, plan: Array, gap: int) -> Array:
+	var out: Array = []
+	for entry: Array in plan:
+		var base: String = entry[0]
+		var slug: String = entry[1]
+		var spot: Vector2i = entry[2]
+		var count: int = int(entry[3]) if entry.size() > 3 else 1
+		for i in count:
+			var cell := _place(walk, taken, spot, gap)
+			out.append({
+				"name": base if i == 0 else "%s%d" % [base, i + 1],
+				"type": TYPES + slug + ".tres",
+				"pos": _tile_pos(cell),
+			})
+	return out
+
+
 ## Props that must not block movement (flat ground detail).
 func _scatter_flat(
 	props: TileMapLayer,
@@ -327,6 +369,42 @@ func _build_sewers() -> void:
 			"color": "Color(0.55, 0.95, 0.6, 1)" if ti % 3 == 0 else "Color(1, 0.72, 0.38, 1)",
 		})
 
+	# --- Population ----------------------------------------------------------
+	# Banded to the instance's 15-20 gate: the sewer-family types only. The
+	# Bloated Sovereign holds the north cistern, the chamber furthest from the
+	# hub portal, with a wide keepout so it never leashes into a trash pack.
+	var boss_cell := _place(walk, {}, _sc(56, 16), 0)
+	var taken: Dictionary = {}
+	for spot in [entrance, portal]:
+		for oy in range(-_sn(6), _sn(6) + 1):
+			for ox in range(-_sn(6), _sn(6) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
+	for oy in range(-_sn(9), _sn(9) + 1):
+		for ox in range(-_sn(9), _sn(9) + 1):
+			taken[boss_cell + Vector2i(ox, oy)] = true
+	var hostiles := _mobs(walk, taken, [
+		["Slime", "trpg/trpg_slime", _sc(48, 62), 3],
+		["SlimeE", "trpg/trpg_slime", _sc(64, 62), 3],
+		["Bat", "trpg/trpg_bat", _sc(24, 50), 3],
+		["BatE", "trpg/trpg_bat", _sc(88, 50), 3],
+		["SewerSkeleton", "trpg/trpg_sewer_skeleton", _sc(56, 44), 3],
+		["AcidOoze", "trpg/trpg_acid_ooze", _sc(30, 24), 2],
+		["AcidOozeE", "trpg/trpg_acid_ooze", _sc(82, 24), 2],
+		["Crawler", "trpg/trpg_carrion_crawler", _sc(38, 40), 2],
+		["CrawlerE", "trpg/trpg_carrion_crawler", _sc(74, 40), 2],
+		["ZombieGiant", "trpg/trpg_zombie_giant", _sc(30, 34), 2],
+		["ZombieGiantE", "trpg/trpg_zombie_giant", _sc(82, 34), 2],
+		["SewerGorgon", "trpg/trpg_sewer_gorgon", _sc(44, 30), 2],
+		["SewerGorgonE", "trpg/trpg_sewer_gorgon", _sc(68, 30), 2],
+		["Devourer", "trpg/trpg_intellect_devourer", _sc(56, 34), 2],
+		["CisternHulk", "trpg/trpg_cistern_hulk", _sc(56, 24), 2],
+	], _sn(5))
+	hostiles.append({
+		"name": "BloatedSovereign",
+		"type": TYPES + "bosses/cistern_sovereign.tres",
+		"pos": _tile_pos(boss_cell),
+	})
+
 	assert(walk.has(entrance) and walk.has(portal), "sewers spawn blocked")
 	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "sewers too small: %d" % walk.size())
 	print("sewers walk=", walk.size(), " floor=", floor_mask.size())
@@ -343,6 +421,7 @@ func _build_sewers() -> void:
 		"props_b64": _b64(props),
 		"critters": [],
 		"decos": decos,
+		"hostiles": hostiles,
 		"entrance": _tile_pos(entrance),
 		"portal": _tile_pos(portal),
 		"entrance_id": 28,
@@ -577,6 +656,43 @@ func _build_fire_forge() -> void:
 			+ "texture = ExtResource(\"9_glow\")\ntexture_scale = 1.3\n"
 		)
 
+	# --- Population ----------------------------------------------------------
+	# Banded to the instance's 30-35 gate. Vurthek holds the north foundry, the
+	# chamber furthest from the hub portal.
+	var boss_cell := _place(walk, {}, _sc(56, 18), 0)
+	var taken: Dictionary = {}
+	for spot in [entrance, portal]:
+		for oy in range(-_sn(6), _sn(6) + 1):
+			for ox in range(-_sn(6), _sn(6) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
+	for oy in range(-_sn(9), _sn(9) + 1):
+		for ox in range(-_sn(9), _sn(9) + 1):
+			taken[boss_cell + Vector2i(ox, oy)] = true
+	var hostiles := _mobs(walk, taken, [
+		["ArmoredAxeman", "trpg/trpg_armored_axeman", _sc(56, 60), 3],
+		["Swordsman", "trpg/trpg_swordsman", _sc(44, 58), 2],
+		["Knight", "trpg/trpg_knight", _sc(68, 58), 2],
+		["ArmoredOrc", "trpg/trpg_armored_orc", _sc(26, 52), 3],
+		["ArmoredOrcE", "trpg/trpg_armored_orc", _sc(86, 52), 3],
+		["GreatswordSkeleton", "trpg/trpg_greatsword_skeleton", _sc(34, 44), 2],
+		["GreatswordSkeletonE", "trpg/trpg_greatsword_skeleton", _sc(78, 44), 2],
+		["Wizard", "trpg/trpg_wizard", _sc(44, 40), 2],
+		["WizardE", "trpg/trpg_wizard", _sc(68, 40), 2],
+		["EliteOrc", "trpg/trpg_elite_orc", _sc(56, 42), 3],
+		["KnightTemplar", "trpg/trpg_knight_templar", _sc(24, 24), 2],
+		["KnightTemplarE", "trpg/trpg_knight_templar", _sc(88, 24), 2],
+		["Demon", "trpg/trpg_demon_a", _sc(34, 32), 2],
+		["DemonE", "trpg/trpg_demon_a", _sc(78, 32), 2],
+		["ConjuringOni", "trpg/trpg_conjuring_oni", _sc(40, 22), 2],
+		["UmberHulk", "trpg/trpg_umber_hulk", _sc(72, 22), 2],
+		["CinderFomorian", "trpg/trpg_cinder_fomorian", _sc(56, 30), 2],
+	], _sn(5))
+	hostiles.append({
+		"name": "Cinderborn",
+		"type": TYPES + "bosses/cinderborn.tres",
+		"pos": _tile_pos(boss_cell),
+	})
+
 	assert(walk.has(entrance) and walk.has(portal), "forge spawn blocked")
 	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "forge too small: %d" % walk.size())
 	print("forge walk=", walk.size(), " lava=", lava_cells.size())
@@ -593,6 +709,7 @@ func _build_fire_forge() -> void:
 		"props_b64": _b64(props),
 		"critters": [],
 		"decos": decos,
+		"hostiles": hostiles,
 		"entrance": _tile_pos(entrance),
 		"portal": _tile_pos(portal),
 		"entrance_id": 26,
@@ -763,6 +880,44 @@ func _build_desert() -> void:
 			"color": "Color(1, 0.82, 0.5, 1)",
 		})
 
+	# --- Population ----------------------------------------------------------
+	# Banded to the instance's 25-30 gate. Ankhemet holds the north basin, the
+	# chamber furthest from the hub portal.
+	var boss_cell := _place(walk, {}, _sc(52, 16), 0)
+	var taken: Dictionary = {}
+	for spot in [entrance, portal]:
+		for oy in range(-_sn(6), _sn(6) + 1):
+			for ox in range(-_sn(6), _sn(6) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
+	for oy in range(-_sn(9), _sn(9) + 1):
+		for ox in range(-_sn(9), _sn(9) + 1):
+			taken[boss_cell + Vector2i(ox, oy)] = true
+	var hostiles := _mobs(walk, taken, [
+		["Archer", "trpg/trpg_archer", _sc(52, 50), 3],
+		["Orc", "trpg/trpg_orc", _sc(40, 52), 2],
+		["OrcRider", "trpg/trpg_orc_rider", _sc(64, 52), 2],
+		["Harpy", "trpg/trpg_clawing_harpy", _sc(26, 44), 3],
+		["HarpyE", "trpg/trpg_clawing_harpy", _sc(78, 44), 3],
+		["Cockatrice", "trpg/trpg_lacerating_cockatrice", _sc(34, 38), 2],
+		["CockatriceE", "trpg/trpg_lacerating_cockatrice", _sc(70, 38), 2],
+		["SkeletonArcher", "trpg/trpg_skeleton_archer", _sc(52, 32), 3],
+		["Skeleton", "trpg/trpg_skeleton", _sc(40, 30), 2],
+		["SkeletonE", "trpg/trpg_skeleton", _sc(64, 30), 2],
+		["ArmoredSkeleton", "trpg/trpg_armored_skeleton", _sc(24, 20), 2],
+		["ArmoredSkeletonE", "trpg/trpg_armored_skeleton", _sc(80, 20), 2],
+		["Lancer", "trpg/trpg_lancer", _sc(32, 26), 2],
+		["LancerE", "trpg/trpg_lancer", _sc(72, 26), 2],
+		["Gorgon", "trpg/trpg_poisonous_gorgon", _sc(52, 24), 2],
+		["Fomorian", "trpg/trpg_wretched_fomorian", _sc(44, 20), 2],
+		["Soldier", "trpg/trpg_soldier", _sc(60, 20), 2],
+		["Priest", "trpg/trpg_priest", _sc(52, 42), 2],
+	], _sn(5))
+	hostiles.append({
+		"name": "SandKing",
+		"type": TYPES + "bosses/sand_king.tres",
+		"pos": _tile_pos(boss_cell),
+	})
+
 	assert(walk.has(entrance) and walk.has(portal), "desert spawn blocked")
 	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "desert too small: %d" % walk.size())
 	print("desert walk=", walk.size(), " floor=", floor_mask.size())
@@ -779,6 +934,7 @@ func _build_desert() -> void:
 		"props_b64": _b64(props),
 		"critters": critters,
 		"decos": decos,
+		"hostiles": hostiles,
 		"entrance": _tile_pos(entrance),
 		"portal": _tile_pos(portal),
 		"entrance_id": 25,
@@ -855,6 +1011,47 @@ func _write_map(cfg: Dictionary) -> void:
 		music_ext = "[ext_resource type=\"AudioStream\" path=\"%s\" id=\"music\"]\n" % cfg["music"]
 		music_line = "music = ExtResource(\"music\")\n"
 
+	# --- Hostiles ------------------------------------------------------------
+	# Both id maps are baked on the container. A hostile missing from these never
+	# replicates to clients — that is the failure mode AGENTS.md calls out for the
+	# Hollow golem, and it is silent, so it is written here rather than left to a
+	# caller to remember.
+	var hostiles: Array = cfg.get("hostiles", [])
+	var hostile_ext := ""
+	var type_ids: Dictionary = {}
+	if not hostiles.is_empty():
+		hostile_ext += (
+			"[ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"%s\" id=\"hostile\"]\n"
+			% HOSTILE_SCN
+		)
+	for h: Dictionary in hostiles:
+		var tpath: String = h["type"]
+		if type_ids.has(tpath):
+			continue
+		var tid := "et%d" % type_ids.size()
+		type_ids[tpath] = tid
+		hostile_ext += "[ext_resource type=\"Resource\" path=\"%s\" id=\"%s\"]\n" % [tpath, tid]
+
+	var id_to_node := ""
+	var node_to_id := ""
+	var hostile_nodes := ""
+	for i in hostiles.size():
+		var h2: Dictionary = hostiles[i]
+		var nm: String = h2["name"]
+		var sep := ",\n" if i < hostiles.size() - 1 else "\n"
+		id_to_node += "%d: NodePath(\"%s\")%s" % [i, nm, sep]
+		node_to_id += "NodePath(\"%s\"): %d%s" % [nm, i, sep]
+		hostile_nodes += (
+			"\n[node name=\"%s\" parent=\"ReplicatedPropsContainer\" instance=ExtResource(\"hostile\")]\n"
+			+ "position = Vector2(%s, %s)\n"
+			+ "debug_draw_ranges = false\n"
+			+ "enemy_data = ExtResource(\"%s\")\n"
+			+ "weapon = null\n"
+		) % [nm, str(h2["pos"].x), str(h2["pos"].y), type_ids[h2["type"]]]
+	var id_map_lines := "id_to_node = {}\nnode_to_id = {}\n"
+	if not hostiles.is_empty():
+		id_map_lines = "id_to_node = {\n%s}\nnode_to_id = {\n%s}\n" % [id_to_node, node_to_id]
+
 	var cam_r: int = int(cfg.get("cam_right", W * 16 + 16))
 	var cam_b: int = int(cfg.get("cam_bottom", H * 16 + 16))
 
@@ -870,7 +1067,7 @@ func _write_map(cfg: Dictionary) -> void:
 [ext_resource type=\"Texture2D\" path=\"%s\" id=\"9_glow\"]
 [ext_resource type=\"PackedScene\" path=\"%s\" id=\"critter\"]
 [ext_resource type=\"PackedScene\" path=\"%s\" id=\"deco\"]
-%s
+%s%s
 [node name=\"%s\" type=\"Node2D\" node_paths=PackedStringArray(\"replicated_props_container\")]
 y_sort_enabled = true
 script = ExtResource(\"1_map\")
@@ -909,9 +1106,7 @@ y_sort_enabled = true
 [node name=\"ReplicatedPropsContainer\" type=\"Node2D\" parent=\".\" node_paths=PackedStringArray(\"id_to_node\", \"node_to_id\")]
 y_sort_enabled = true
 script = ExtResource(\"4_rp\")
-id_to_node = {}
-node_to_id = {}
-
+%s%s
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]
 position = Vector2(%s, %s)
 
@@ -928,10 +1123,11 @@ warper_id = %d
 target_id = %d
 """ % [
 		MAP_SCRIPT, cfg["tileset"], music_ext, RP_SCRIPT, WARPER, PORTAL, HUB, CAMP, GLOW,
-		CRITTER_SCN, DECO_SCN, frame_ext,
+		CRITTER_SCN, DECO_SCN, frame_ext, hostile_ext,
 		cfg["root"], cfg["bg"], music_line, cam_r, cam_b, cfg["modulate"],
 		cfg["ground_b64"], cfg["walls_b64"], cfg["props_b64"],
 		cfg.get("lights", ""), cfg.get("camps", ""), scene_nodes,
+		id_map_lines, hostile_nodes,
 		str(cfg["entrance"].x), str(cfg["entrance"].y),
 		str(cfg["entrance"].x), str(cfg["entrance"].y), int(cfg["entrance_id"]),
 		str(cfg["portal"].x), str(cfg["portal"].y), cfg["portal_color"],
@@ -946,5 +1142,6 @@ target_id = %d
 		" walls=", cfg.get("wall_count", 0),
 		" props=", cfg.get("prop_count", 0),
 		" critters=", critters.size(),
-		" decos=", decos.size()
+		" decos=", decos.size(),
+		" mobs=", hostiles.size()
 	)

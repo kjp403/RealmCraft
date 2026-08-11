@@ -13,6 +13,17 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/props/animated_deco.tscn" id="deco"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_torch.tres" id="sf0"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_candle_a.tres" id="sf1"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="hostile"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_slime.tres" id="et0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres" id="et1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_skeleton.tres" id="et2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_acid_ooze.tres" id="et3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_carrion_crawler.tres" id="et4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_zombie_giant.tres" id="et5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_gorgon.tres" id="et6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_intellect_devourer.tres" id="et7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cistern_hulk.tres" id="et8"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="et9"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/gutterworks.tres" id="stair_gutterworks"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/drowned_cistern.tres" id="stair_drowned_cistern"]
@@ -212,8 +223,298 @@ light_color = Color(1, 0.72, 0.38, 1)
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 y_sort_enabled = true
 script = ExtResource("4_rp")
-id_to_node = {}
-node_to_id = {}
+id_to_node = {
+0: NodePath("Slime"),
+1: NodePath("Slime2"),
+2: NodePath("Slime3"),
+3: NodePath("SlimeE"),
+4: NodePath("SlimeE2"),
+5: NodePath("SlimeE3"),
+6: NodePath("Bat"),
+7: NodePath("Bat2"),
+8: NodePath("Bat3"),
+9: NodePath("BatE"),
+10: NodePath("BatE2"),
+11: NodePath("BatE3"),
+12: NodePath("SewerSkeleton"),
+13: NodePath("SewerSkeleton2"),
+14: NodePath("SewerSkeleton3"),
+15: NodePath("AcidOoze"),
+16: NodePath("AcidOoze2"),
+17: NodePath("AcidOozeE"),
+18: NodePath("AcidOozeE2"),
+19: NodePath("Crawler"),
+20: NodePath("Crawler2"),
+21: NodePath("CrawlerE"),
+22: NodePath("CrawlerE2"),
+23: NodePath("ZombieGiant"),
+24: NodePath("ZombieGiant2"),
+25: NodePath("ZombieGiantE"),
+26: NodePath("ZombieGiantE2"),
+27: NodePath("SewerGorgon"),
+28: NodePath("SewerGorgon2"),
+29: NodePath("SewerGorgonE"),
+30: NodePath("SewerGorgonE2"),
+31: NodePath("Devourer"),
+32: NodePath("Devourer2"),
+33: NodePath("CisternHulk"),
+34: NodePath("CisternHulk2"),
+35: NodePath("BloatedSovereign")
+}
+node_to_id = {
+NodePath("Slime"): 0,
+NodePath("Slime2"): 1,
+NodePath("Slime3"): 2,
+NodePath("SlimeE"): 3,
+NodePath("SlimeE2"): 4,
+NodePath("SlimeE3"): 5,
+NodePath("Bat"): 6,
+NodePath("Bat2"): 7,
+NodePath("Bat3"): 8,
+NodePath("BatE"): 9,
+NodePath("BatE2"): 10,
+NodePath("BatE3"): 11,
+NodePath("SewerSkeleton"): 12,
+NodePath("SewerSkeleton2"): 13,
+NodePath("SewerSkeleton3"): 14,
+NodePath("AcidOoze"): 15,
+NodePath("AcidOoze2"): 16,
+NodePath("AcidOozeE"): 17,
+NodePath("AcidOozeE2"): 18,
+NodePath("Crawler"): 19,
+NodePath("Crawler2"): 20,
+NodePath("CrawlerE"): 21,
+NodePath("CrawlerE2"): 22,
+NodePath("ZombieGiant"): 23,
+NodePath("ZombieGiant2"): 24,
+NodePath("ZombieGiantE"): 25,
+NodePath("ZombieGiantE2"): 26,
+NodePath("SewerGorgon"): 27,
+NodePath("SewerGorgon2"): 28,
+NodePath("SewerGorgonE"): 29,
+NodePath("SewerGorgonE2"): 30,
+NodePath("Devourer"): 31,
+NodePath("Devourer2"): 32,
+NodePath("CisternHulk"): 33,
+NodePath("CisternHulk2"): 34,
+NodePath("BloatedSovereign"): 35
+}
+
+[node name="Slime" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1544.0, 1992.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Slime2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1544.0, 2168.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Slime3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1720.0, 1992.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="SlimeE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2056.0, 1992.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="SlimeE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2056.0, 2168.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="SlimeE3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2232.0, 1992.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Bat" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(776.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="Bat2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(776.0, 1784.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="Bat3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(952.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="BatE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2824.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="BatE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2824.0, 1784.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="BatE3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2648.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="SewerSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1800.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et2")
+weapon = null
+
+[node name="SewerSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1800.0, 1592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et2")
+weapon = null
+
+[node name="SewerSkeleton3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1624.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et2")
+weapon = null
+
+[node name="AcidOoze" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(968.0, 776.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="AcidOoze2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(968.0, 952.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="AcidOozeE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2632.0, 776.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="AcidOozeE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2632.0, 952.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="Crawler" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1256.0, 1240.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="Crawler2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1032.0, 1224.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="CrawlerE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2296.0, 1240.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="CrawlerE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2376.0, 1064.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="ZombieGiant" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(856.0, 1224.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="ZombieGiant2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1144.0, 1048.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="ZombieGiantE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2632.0, 1128.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="ZombieGiantE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2808.0, 1144.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="SewerGorgon" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1432.0, 1176.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="SewerGorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1400.0, 760.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="SewerGorgonE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2200.0, 1032.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="SewerGorgonE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2392.0, 856.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="Devourer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1800.0, 1128.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="Devourer2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1624.0, 1128.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="CisternHulk" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2104.0, 648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="CisternHulk2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1496.0, 584.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="BloatedSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1800.0, 520.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et9")
+weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(1800.0, 2312.0)
