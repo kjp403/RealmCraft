@@ -16,10 +16,13 @@ class_name LevelSync
 const META_SNAPSHOT: StringName = &"level_sync_snapshot"
 
 
-## Total attribute points a level-[param level] character has ever earned
-## (ATTRIBUTE_POINTS_PER_LEVEL at creation + the same per level-up).
+## Total attribute points a level-[param level] character has ever earned: the
+## ATTRIBUTE_POINTS_PER_LEVEL starting grant plus everything the climb to
+## [param level] banked. Must track PlayerResource.attribute_points_at_level —
+## a sync that hands out a different budget than the real ladder would silently
+## buff or nerf every synced fight.
 static func attribute_budget(level: int) -> int:
-	return PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL * maxi(level, 1)
+	return PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL + PlayerResource.attribute_points_at_level(maxi(level, 1))
 
 
 ## Sync [param player] to [param sync_level]. Idempotent — a second apply

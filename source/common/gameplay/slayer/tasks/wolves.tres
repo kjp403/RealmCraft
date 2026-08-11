@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Wolves"
 enemy_types = Array[StringName]([&"wolf"])
 min_slayer_level = 1
-xp_per_kill = 9
+xp_per_kill = 235
 guide_notes = "Fast attackers with no ranged threat — a clean melee task. Found roaming the woodland trails in small packs."

@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Rats"
 enemy_types = Array[StringName]([&"rat_base", &"woodland_rat"])
 min_slayer_level = 1
-xp_per_kill = 8
+xp_per_kill = 180
 guide_notes = "The first assignment every Slayer walks away with. Rats spawn in the castle yard and the woodland edge — no detour needed, just start swinging."

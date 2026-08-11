@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Orcs"
 enemy_types = Array[StringName]([&"orc", &"orc_rogue"])
 min_slayer_level = 15
-xp_per_kill = 25
+xp_per_kill = 392
 guide_notes = "Hard-hitting melee with real hit points behind them — bring healing. Orc Leader does NOT count toward this task."

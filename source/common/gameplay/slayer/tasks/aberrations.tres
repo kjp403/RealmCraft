@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Aberrations"
 enemy_types = Array[StringName]([&"trpg_acid_ooze", &"trpg_slime", &"trpg_carrion_crawler", &"trpg_intellect_devourer", &"trpg_poisonous_gorgon", &"trpg_lacerating_cockatrice", &"trpg_clawing_harpy", &"trpg_fog_giant", &"trpg_wretched_fomorian", &"trpg_blood_monster_a", &"trpg_demon_a"])
 min_slayer_level = 80
-xp_per_kill = 117
-guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned — the endgame Slayer bracket (80-99)."
+xp_per_kill = 469
+guide_notes = "The endgame bracket, and the least predictable: oozes and slimes fold quickly while fog giants and blood monsters hit as hard as anything in the game. Check what you have pulled before committing."

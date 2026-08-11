@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Skeletons"
 enemy_types = Array[StringName]([&"skeleton", &"skeleton_warrior", &"skeleton_rogue"])
 min_slayer_level = 10
-xp_per_kill = 20
+xp_per_kill = 186
 guide_notes = "No poison, no magic to worry about — just steady melee damage. A reliable task to level combat and Slayer side by side."

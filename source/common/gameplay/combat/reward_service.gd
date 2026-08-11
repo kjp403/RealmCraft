@@ -137,7 +137,11 @@ static func _reward(
 		return
 
 	var level_before: int = resource.level
-	var progress: Dictionary = resource.add_experience(npc.xp_reward)
+	# Character level rides the small 1–20 curve, so it keeps the authored xp_reward.
+	resource.add_experience(npc.xp_reward)
+	# Mastery and Slayer ride the SkillXp 1–99 curve (~980× bigger) and take the
+	# stat-derived number instead — see EnemyTypeResource.combat_skill_xp_for.
+	var skill_xp: int = EnemyTypeResource.combat_skill_xp_for(npc.max_health, npc.armor)
 	var loot_gained: Array = _roll_loot(npc)
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
@@ -146,20 +150,27 @@ static func _reward(
 	# piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
 	_spawn_ground_loot(player, npc, loot_gained, reserved_peer)
 
-	# Weapon mastery: practicing a category = killing with it. Same xp number.
+	# Weapon mastery: practicing a category = killing with it, on the 1–99 curve.
 	var mastery: Dictionary = {}
 	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
 	if weapon_item != null and not weapon_item.category.is_empty():
-		mastery = resource.add_mastery_xp(weapon_item.category, npc.xp_reward)
+		mastery = resource.add_mastery_xp(weapon_item.category, skill_xp)
+
+	# Slayer rides the same 1–99 curve as mastery, at SLAYER_XP_RATIO of it — so it
+	# takes the same stat-derived number, NOT the character-level xp_reward.
+	# Resolved BEFORE the combat.reward push: Slayer can raise the derived character
+	# level too, and that push reports the level, so it has to see the final value.
+	var slayer_result: Dictionary = SlayerTaskService.on_kill(resource, npc.enemy_type, skill_xp)
 
 	var peer_id: int = int(resource.current_peer_id)
 	if peer_id > 0:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"combat.reward", {
 			"enemy_type": npc.enemy_type,
 			"xp": npc.xp_reward,
-			"level": int(progress.get("level", 1)),
-			"levels_gained": int(progress.get("levels_gained", 0)),
-			"points_gained": int(progress.get("points_gained", 0)),
+			"level": resource.level,
+			"levels_gained": resource.level - level_before,
+			"points_gained": PlayerResource.attribute_points_at_level(resource.level)
+				- PlayerResource.attribute_points_at_level(level_before),
 			"experience": resource.experience,
 			"xp_to_next": resource.level_xp_to_next(),
 			"loot": loot_gained,
@@ -175,13 +186,14 @@ static func _reward(
 	DailyQuestService.on_kill(resource, npc.enemy_type)
 	LeaderboardService.record_pve_kill(player)
 
-	var slayer_result: Dictionary = SlayerTaskService.on_kill(resource, npc.enemy_type)
 	if peer_id > 0 and not slayer_result.is_empty():
 		WorldServer.curr.data_push.rpc_id(peer_id, &"slayer.update", slayer_result)
 
-	if int(progress.get("levels_gained", 0)) > 0:
+	# Character level is derived now, so milestones key off the real level delta
+	# rather than the (always-zero) levels_gained from add_experience.
+	if resource.level > level_before:
 		var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
-		LevelMilestoneService.on_levels_gained(resource, level_before, int(progress.get("level", 1)), inst)
+		LevelMilestoneService.on_levels_gained(resource, level_before, resource.level, inst)
 
 
 ## Rolls each loot entry; returns [{ "id", "amount", "name" }, ...].
