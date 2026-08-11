@@ -235,6 +235,14 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		# first: finales turned in before the system shipped still owe their stone.
 		QuestService.backfill_wardstones(connected_players[peer_id])
 		data_push.rpc_id.call_deferred(peer_id, &"wardstones.set", {"wardstones": connected_players[peer_id].wardstones})
+		# Profession levels for client-side skill gates (Mining 50+ vault, etc.).
+		# Full skills.get shape is heavier; gates only need levels at login.
+		var skill_levels: Dictionary = {}
+		for skill_name: StringName in connected_players[peer_id].skills:
+			skill_levels[String(skill_name)] = int(
+				(connected_players[peer_id].skills[skill_name] as Dictionary).get("level", 1)
+			)
+		data_push.rpc_id.call_deferred(peer_id, &"skills.levels", {"levels": skill_levels})
 	else:
 		peer.disconnect_peer(peer_id)
 

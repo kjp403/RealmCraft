@@ -53,6 +53,11 @@ var wardstones: PackedStringArray
 ## spawn/map change + combat.reward pushes — see HUD._apply_progression). Client-side
 ## cosmetic checks only (e.g. a gated Portal suppressing its fade); the server enforces.
 var player_level: int = 1
+## Profession skill levels for the local character (slug → int), mirrored from
+## skills.get / login push + gather/craft level-ups. Used by client-authoritative
+## world gates (e.g. Mining 50+ vault) — the server still owns progression.
+signal skill_levels_changed
+var skill_levels: Dictionary = {}
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -179,6 +184,12 @@ func _ready() -> void:
 	Client.subscribe(&"wardstones.set", func(payload: Dictionary):
 		wardstones = PackedStringArray(payload.get("wardstones", []))
 		wardstones_changed.emit())
+	# Profession levels for client-side skill gates (Mining vault, etc.).
+	# skills.get is also pushed at login and after /skill admin sets.
+	Client.subscribe(&"skills.get", func(payload: Dictionary):
+		apply_skills_payload(payload.get("skills", {})))
+	Client.subscribe(&"skills.levels", func(payload: Dictionary):
+		apply_skill_levels(payload.get("levels", {})))
 	# The campaign's heartbeat moment — bigger than a level-up (docs/wardstones.md).
 	Client.subscribe(&"wardstone.granted", func(payload: Dictionary):
 		var stone: String = str(payload.get("stone", ""))
@@ -413,6 +424,20 @@ func _on_gather_result(data: Dictionary) -> void:
 
 	gather_succeeded.emit(data)
 
+	# Keep the client skill mirror current even without a level-up (gates read it).
+	var gather_level: int = int(data.get("level", 0))
+	var gather_job: String = str(data.get("job", ""))
+	if gather_level > 0 and not gather_job.is_empty():
+		set_skill_level(StringName(gather_job), gather_level)
+	var grants_for_mirror: Variant = data.get("grants", [])
+	if grants_for_mirror is Array:
+		for grant: Dictionary in grants_for_mirror:
+			var prog: Dictionary = grant.get("progress", {})
+			var g_level: int = int(prog.get("level", 0))
+			var g_job: String = str(grant.get("job", ""))
+			if g_level > 0 and not g_job.is_empty():
+				set_skill_level(StringName(g_job), g_level)
+
 	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.
 	var job_slug: String = str(data.get("job", "mining"))
 	var title: String = "Caught" if job_slug == "fishing" else (
@@ -446,6 +471,7 @@ func _on_gather_result(data: Dictionary) -> void:
 			if slug.is_empty():
 				continue
 			var new_lv: int = int(leveled_jobs[job_key])
+			set_skill_level(StringName(slug), new_lv)
 			# celebrate_skill owns the wording — repeating it on the gather card
 			# would stack the same sentence twice in the toast lane.
 			LevelUpFx.celebrate_skill(local_player, StringName(slug), new_lv)
@@ -497,6 +523,55 @@ func _readable_enemy_name(slug: String) -> String:
 func set_tracked_quest(quest_id: int) -> void:
 	tracked_quest_id = quest_id
 	tracked_quest_changed.emit(quest_id)
+
+
+## Local profession level for client-side gates. Missing skills read as 1.
+func skill_level(skill_name: StringName) -> int:
+	return int(skill_levels.get(String(skill_name), 1))
+
+
+## Merge a skills.get-shaped dict ({slug: {level, ...}}) into the mirror.
+func apply_skills_payload(skills: Variant) -> void:
+	if not (skills is Dictionary):
+		return
+	var changed: bool = false
+	for raw_name: Variant in (skills as Dictionary):
+		var entry: Variant = (skills as Dictionary)[raw_name]
+		if not (entry is Dictionary):
+			continue
+		var slug: String = String(raw_name)
+		var level: int = int((entry as Dictionary).get("level", 1))
+		if int(skill_levels.get(slug, -1)) != level:
+			skill_levels[slug] = level
+			changed = true
+	if changed:
+		skill_levels_changed.emit()
+
+
+## Merge a flat {slug: level} dict (login skills.levels push).
+func apply_skill_levels(levels: Variant) -> void:
+	if not (levels is Dictionary):
+		return
+	var changed: bool = false
+	for raw_name: Variant in (levels as Dictionary):
+		var slug: String = String(raw_name)
+		var level: int = int((levels as Dictionary)[raw_name])
+		if int(skill_levels.get(slug, -1)) != level:
+			skill_levels[slug] = level
+			changed = true
+	if changed:
+		skill_levels_changed.emit()
+
+
+## Bump one profession level after gather/craft (no-op if unchanged / lower).
+func set_skill_level(skill_name: StringName, level: int) -> void:
+	var slug: String = String(skill_name)
+	if level < 1:
+		return
+	if int(skill_levels.get(slug, -1)) == level:
+		return
+	skill_levels[slug] = level
+	skill_levels_changed.emit()
 
 
 ## Replace the local block list (called after a social.block.list bootstrap).

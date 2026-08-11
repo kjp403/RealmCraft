@@ -351,13 +351,11 @@ func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	return {"level": level, "xp": int(skill["xp"]), "leveled_up": leveled_up}
 
 
-## Baseline xp to advance a weapon-mastery level (scales linearly, like skills).
-const MASTERY_XP_BASE: int = 150
-## Max mastery level per weapon category. Armor sets gate through 1 / 5 / 10 /
-## 15 / 25, so the cap sits above Ancient (25). Combined with MasteryService
-## POINTS_PER_LEVEL (2) this sets the point budget — trees exceed it on purpose
-## so you specialize (docs/mastery.md).
-const MASTERY_LEVEL_CAP: int = 50
+## Max mastery level per weapon category. Same 1–99 OSRS XP curve as profession
+## skills ([SkillXp]) so new armor/weapons can keep gating upward without a
+## hard mid-game ceiling. Combined with MasteryService POINTS_PER_LEVEL (2)
+## this sets the point budget — trees stay lean so you specialize.
+const MASTERY_LEVEL_CAP: int = SkillXp.LEVEL_CAP
 
 
 ## Returns the {"level", "xp", "spent"} entry for a weapon category, creating
@@ -372,46 +370,71 @@ func get_mastery(category: StringName) -> Dictionary:
 				var adopted: Dictionary = masteries[existing]
 				masteries.erase(existing)
 				masteries[key] = adopted
+				# Clamp legacy saves that overshot under an older lower cap.
+				if int(adopted.get("level", 1)) > MASTERY_LEVEL_CAP:
+					adopted["level"] = MASTERY_LEVEL_CAP
+					adopted["xp"] = 0
 				return adopted
 		masteries[key] = {"level": 1, "xp": 0, "spent": {}}
-	return masteries[key]
+		return masteries[key]
+	var entry: Dictionary = masteries[key]
+	if int(entry.get("level", 1)) > MASTERY_LEVEL_CAP:
+		entry["level"] = MASTERY_LEVEL_CAP
+		entry["xp"] = 0
+	return entry
 
 
 ## Read-only mastery level for gates (0 = never practiced). Does not create entries.
 func mastery_level_of(category: StringName) -> int:
 	for existing: Variant in masteries.keys():
 		if String(existing) == String(category):
-			return int((masteries[existing] as Dictionary).get("level", 1))
+			return mini(int((masteries[existing] as Dictionary).get("level", 1)), MASTERY_LEVEL_CAP)
 	return 0
 
 
+## XP needed to advance from [param mastery_level] → next. Same table as skills.
 func mastery_xp_to_next(mastery_level: int) -> int:
-	return MASTERY_XP_BASE * maxi(1, mastery_level)
+	return SkillXp.xp_to_next(mastery_level)
 
 
 ## Adds weapon-mastery xp to a category, applying level-ups (frozen at the
-## cap). Returns {"category", "level", "xp", "xp_to_next", "leveled_up",
-## "started"} so the kill-reward push can report progress to the client —
-## "started" marks the very first practice (entry creation at level 1), which
-## deserves its own toast even though no level-UP happened.
+## 99 / 13,034,431 total-XP skill cap). Returns {"category", "level", "xp",
+## "xp_to_next", "leveled_up", "started"} so the kill-reward push can report
+## progress to the client — "started" marks the very first practice (entry
+## creation at level 1), which deserves its own toast even though no level-UP
+## happened.
 func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 	var started: bool = not masteries.has(category)
 	var entry: Dictionary = get_mastery(category)
+	var level: int = int(entry["level"])
 	var leveled_up: bool = false
-	if amount > 0 and int(entry["level"]) < MASTERY_LEVEL_CAP:
-		entry["xp"] = int(entry["xp"]) + amount
-		while int(entry["xp"]) >= mastery_xp_to_next(int(entry["level"])):
-			entry["xp"] = int(entry["xp"]) - mastery_xp_to_next(int(entry["level"]))
-			entry["level"] = int(entry["level"]) + 1
-			leveled_up = true
-			if int(entry["level"]) >= MASTERY_LEVEL_CAP:
-				entry["xp"] = 0
-				break
+	if level >= MASTERY_LEVEL_CAP or amount <= 0:
+		entry["xp"] = 0
+		return {
+			"category": String(category),
+			"level": level,
+			"xp": 0,
+			"xp_to_next": 0,
+			"leveled_up": false,
+			"started": started,
+		}
+
+	entry["xp"] = int(entry["xp"]) + amount
+	while level < MASTERY_LEVEL_CAP:
+		var need: int = mastery_xp_to_next(level)
+		if need <= 0 or int(entry["xp"]) < need:
+			break
+		entry["xp"] = int(entry["xp"]) - need
+		level += 1
+		leveled_up = true
+	entry["level"] = level
+	if level >= MASTERY_LEVEL_CAP:
+		entry["xp"] = 0
 	return {
 		"category": String(category),
-		"level": int(entry["level"]),
+		"level": level,
 		"xp": int(entry["xp"]),
-		"xp_to_next": mastery_xp_to_next(int(entry["level"])),
+		"xp_to_next": mastery_xp_to_next(level),
 		"leveled_up": leveled_up,
 		"started": started,
 	}
