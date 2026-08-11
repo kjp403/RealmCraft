@@ -77,20 +77,6 @@
 [ext_resource type="Resource" uid="uid://85ef84b2cd0e7" path="res://source/common/gameplay/items/weapons/book/book_runite.item.tres" id="70_ru_tm"]
 [ext_resource type="Resource" uid="uid://40bdcc9fa6597" path="res://source/common/gameplay/items/weapons/bow/runite_bow.item.tres" id="70_ru_bw"]
 
-[ext_resource type="Resource" uid="uid://cpickbrontool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_bronze.tres" id="80_pi_br"]
-[ext_resource type="Resource" uid="uid://caxebrontool1" path="res://source/common/gameplay/items/weapons/tools/axe_bronze.tres" id="81_ax_br"]
-[ext_resource type="Resource" uid="uid://cpickirontool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_iron.tres" id="82_pi_ir"]
-[ext_resource type="Resource" uid="uid://caxeirontool1" path="res://source/common/gameplay/items/weapons/tools/axe_iron.tres" id="83_ax_ir"]
-[ext_resource type="Resource" uid="uid://cpicksteetool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_steel.tres" id="84_pi_st"]
-[ext_resource type="Resource" uid="uid://caxesteetool1" path="res://source/common/gameplay/items/weapons/tools/axe_steel.tres" id="85_ax_st"]
-[ext_resource type="Resource" uid="uid://cpickmithtool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_mithril.tres" id="86_pi_mi"]
-[ext_resource type="Resource" uid="uid://caxemithtool1" path="res://source/common/gameplay/items/weapons/tools/axe_mithril.tres" id="87_ax_mi"]
-[ext_resource type="Resource" uid="uid://cpickadamtool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_adamant.tres" id="88_pi_ad"]
-[ext_resource type="Resource" uid="uid://caxeadamtool1" path="res://source/common/gameplay/items/weapons/tools/axe_adamant.tres" id="89_ax_ad"]
-[ext_resource type="Resource" uid="uid://cpickrunitool1" path="res://source/common/gameplay/items/weapons/tools/pickaxe_runite.tres" id="90_pi_ru"]
-[ext_resource type="Resource" uid="uid://caxerunitool1" path="res://source/common/gameplay/items/weapons/tools/axe_runite.tres" id="91_ax_ru"]
-
-
 
 [ext_resource type="Resource" uid="uid://cmithhelm0292" path="res://source/common/gameplay/items/gears/metal/mithril_helmet.tres" id="90_mi_helm"]
 [ext_resource type="Resource" uid="uid://cmithches0293" path="res://source/common/gameplay/items/gears/metal/mithril_chest.tres" id="91_mi_chest"]
@@ -101,6 +87,20 @@
 [ext_resource type="Resource" uid="uid://crunihelm0298" path="res://source/common/gameplay/items/gears/metal/runite_helmet.tres" id="96_ru_helm"]
 [ext_resource type="Resource" uid="uid://cruniches0299" path="res://source/common/gameplay/items/gears/metal/runite_chest.tres" id="97_ru_chest"]
 [ext_resource type="Resource" uid="uid://cruniboot0300" path="res://source/common/gameplay/items/gears/metal/runite_boots.tres" id="98_ru_boots"]
+
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_bronze.tres" id="100_tool_pi_br"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_bronze.tres" id="101_tool_ax_br"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_iron.tres" id="102_tool_pi_ir"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_iron.tres" id="103_tool_ax_ir"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_steel.tres" id="104_tool_pi_st"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_steel.tres" id="105_tool_ax_st"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_mithril.tres" id="106_tool_pi_mi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_mithril.tres" id="107_tool_ax_mi"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_adamant.tres" id="108_tool_pi_ad"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_adamant.tres" id="109_tool_ax_ad"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_runite.tres" id="110_tool_pi_ru"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_runite.tres" id="111_tool_ax_ru"]
+
 
 [sub_resource type="Resource" id="I_sm_br_cu"]
 script = ExtResource("3_ingred")
@@ -820,12 +820,6 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_runite_bow")])
 required_level = 45
 xp_reward = 155
 
-[resource]
-script = ExtResource("2_station")
-station_name = "Smithing Table"
-profession = &"smithing"
-craft_fee = 0
-
 [sub_resource type="Resource" id="I_mi_helm"]
 script = ExtResource("3_ingred")
 item = ExtResource("15_mi_bar")
@@ -934,8 +928,6 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_boots")])
 required_level = 45
 xp_reward = 200
 
-
-
 [sub_resource type="Resource" id="I_tool_pick_br"]
 script = ExtResource("3_ingred")
 item = ExtResource("10_br_bar")
@@ -943,11 +935,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_br"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("80_pi_br")
+output_item = ExtResource("100_tool_pi_br")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_br")])
 required_level = 1
 xp_reward = 40
-
 
 [sub_resource type="Resource" id="I_tool_axe_br"]
 script = ExtResource("3_ingred")
@@ -956,11 +947,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_br"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("81_ax_br")
+output_item = ExtResource("101_tool_ax_br")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_br")])
 required_level = 1
 xp_reward = 40
-
 
 [sub_resource type="Resource" id="I_tool_pick_ir"]
 script = ExtResource("3_ingred")
@@ -969,11 +959,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_ir"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("82_pi_ir")
+output_item = ExtResource("102_tool_pi_ir")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_ir")])
 required_level = 5
 xp_reward = 50
-
 
 [sub_resource type="Resource" id="I_tool_axe_ir"]
 script = ExtResource("3_ingred")
@@ -982,11 +971,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_ir"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("83_ax_ir")
+output_item = ExtResource("103_tool_ax_ir")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_ir")])
 required_level = 5
 xp_reward = 50
-
 
 [sub_resource type="Resource" id="I_tool_pick_st"]
 script = ExtResource("3_ingred")
@@ -995,11 +983,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_st"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("84_pi_st")
+output_item = ExtResource("104_tool_pi_st")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_st")])
 required_level = 15
 xp_reward = 65
-
 
 [sub_resource type="Resource" id="I_tool_axe_st"]
 script = ExtResource("3_ingred")
@@ -1008,11 +995,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_st"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("85_ax_st")
+output_item = ExtResource("105_tool_ax_st")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_st")])
 required_level = 15
 xp_reward = 65
-
 
 [sub_resource type="Resource" id="I_tool_pick_mi"]
 script = ExtResource("3_ingred")
@@ -1021,11 +1007,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_mi"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("86_pi_mi")
+output_item = ExtResource("106_tool_pi_mi")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_mi")])
 required_level = 20
 xp_reward = 95
-
 
 [sub_resource type="Resource" id="I_tool_axe_mi"]
 script = ExtResource("3_ingred")
@@ -1034,11 +1019,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_mi"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("87_ax_mi")
+output_item = ExtResource("107_tool_ax_mi")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_mi")])
 required_level = 20
 xp_reward = 95
-
 
 [sub_resource type="Resource" id="I_tool_pick_ad"]
 script = ExtResource("3_ingred")
@@ -1047,11 +1031,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_ad"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("88_pi_ad")
+output_item = ExtResource("108_tool_pi_ad")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_ad")])
 required_level = 30
 xp_reward = 130
-
 
 [sub_resource type="Resource" id="I_tool_axe_ad"]
 script = ExtResource("3_ingred")
@@ -1060,11 +1043,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_ad"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("89_ax_ad")
+output_item = ExtResource("109_tool_ax_ad")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_ad")])
 required_level = 30
 xp_reward = 130
-
 
 [sub_resource type="Resource" id="I_tool_pick_ru"]
 script = ExtResource("3_ingred")
@@ -1073,11 +1055,10 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_pick_ru"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("90_pi_ru")
+output_item = ExtResource("110_tool_pi_ru")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_ru")])
 required_level = 45
 xp_reward = 170
-
 
 [sub_resource type="Resource" id="I_tool_axe_ru"]
 script = ExtResource("3_ingred")
@@ -1086,9 +1067,15 @@ amount = 2
 
 [sub_resource type="Resource" id="R_tool_axe_ru"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("91_ax_ru")
+output_item = ExtResource("111_tool_ax_ru")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_ru")])
 required_level = 45
 xp_reward = 170
 
+[resource]
+script = ExtResource("2_station")
+station_name = "Smithing Table"
+profession = &"smithing"
+craft_fee = 0
 recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru")])
+

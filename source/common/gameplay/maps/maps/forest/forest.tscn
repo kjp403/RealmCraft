@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="5_8w7oy"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="6_1fctu"]
 [ext_resource type="Resource" uid="uid://cwkhk34nscblr" path="res://source/common/gameplay/characters/npc/npcs/bone_carver.tres" id="6_1iruy"]
+[ext_resource type="Resource" uid="uid://bms4f2y0vr25k" path="res://source/common/gameplay/characters/npc/npcs/durael.tres" id="6_durael"]
 [ext_resource type="Resource" uid="uid://dlwfkoirmhmse" path="res://source/common/gameplay/characters/npc/types/bandit.tres" id="6_8w7oy"]
 [ext_resource type="Resource" path="res://source/common/gameplay/weather/rain.tres" id="6_o3pwt"]
 [ext_resource type="Resource" uid="uid://f0urxop3y64l" path="res://source/common/gameplay/items/weapons/sword/sword.item.tres" id="7_q7qsh"]
@@ -287,6 +288,10 @@ shape = SubResource("WorldBoundaryShape2D_w1xny")
 [node name="BoneCarver" parent="." unique_id=1922057613 instance=ExtResource("7_w1xny")]
 position = Vector2(2477.7087, 1734.8141)
 npc_resource = ExtResource("6_1iruy")
+
+[node name="Durael" parent="." instance=ExtResource("7_w1xny")]
+position = Vector2(2360, 1768)
+npc_resource = ExtResource("6_durael")
 
 [node name="Overworld" parent="." unique_id=693791312 instance=ExtResource("5_3a2x5")]
 position = Vector2(2703.0002, 1878)

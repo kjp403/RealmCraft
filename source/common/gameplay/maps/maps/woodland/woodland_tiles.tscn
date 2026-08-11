@@ -38,6 +38,8 @@
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="31_ntree"]
 [ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="32_otree"]
 [ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="33_wtree"]
+[ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/slayer_house.tres" id="41_slayer_inst"]
 [ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
@@ -1300,6 +1302,15 @@ target = NodePath("../TeleporterEntry")
 [node name="WardenBren" parent="NPCs" unique_id=61718964 instance=ExtResource("6_mn6pe")]
 position = Vector2(1048, 1368)
 npc_resource = ExtResource("25_bren")
+
+[node name="SlayerHouse" parent="." instance=ExtResource("40_slayer_house")]
+position = Vector2(1320, 1400)
+
+[node name="SlayerHouseDoor" parent="." instance=ExtResource("5_jiw8u")]
+position = Vector2(1320, 1464)
+target_instance = ExtResource("41_slayer_inst")
+warper_id = 31
+target_id = 32
 
 [node name="SecretHermit" parent="NPCs" unique_id=957533930 instance=ExtResource("6_mn6pe")]
 position = Vector2(2696, 600)
