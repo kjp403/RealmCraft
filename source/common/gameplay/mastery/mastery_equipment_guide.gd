@@ -55,9 +55,9 @@ static func weapons_for(category: StringName) -> Array[Dictionary]:
 	return out
 
 
-## Every wearable armor piece (helmet / torso / boots). Jewelry and rings are
-## excluded. Level is mastery req when set, else character [member
-## GearItem.required_level] (0 → shown as Any in the UI).
+## Every wearable armor piece (helmet / torso / boots). Jewelry, rings, and
+## silver plate (jewelry-only metal) are excluded. Level is mastery req when
+## set, else character [member GearItem.required_level] (0 → shown as Any).
 static func armor_for() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var index: ContentIndex = load(
@@ -70,6 +70,10 @@ static func armor_for() -> Array[Dictionary]:
 		if path.find("/gears/") < 0:
 			continue
 		if path.find("/jewelry/") >= 0 or path.find("/rings/") >= 0:
+			continue
+		# Silver is jewelry-only — keep amulets/rings, drop silver plate.
+		var base: String = path.get_file().get_basename()
+		if base.begins_with("silver_"):
 			continue
 		if path.ends_with(".tscn"):
 			continue

@@ -77,6 +77,17 @@
 [ext_resource type="Resource" uid="uid://85ef84b2cd0e7" path="res://source/common/gameplay/items/weapons/book/book_runite.item.tres" id="70_ru_tm"]
 [ext_resource type="Resource" uid="uid://40bdcc9fa6597" path="res://source/common/gameplay/items/weapons/bow/runite_bow.item.tres" id="70_ru_bw"]
 
+
+[ext_resource type="Resource" uid="uid://cmithhelm0292" path="res://source/common/gameplay/items/gears/metal/mithril_helmet.tres" id="90_mi_helm"]
+[ext_resource type="Resource" uid="uid://cmithches0293" path="res://source/common/gameplay/items/gears/metal/mithril_chest.tres" id="91_mi_chest"]
+[ext_resource type="Resource" uid="uid://cmithboot0294" path="res://source/common/gameplay/items/gears/metal/mithril_boots.tres" id="92_mi_boots"]
+[ext_resource type="Resource" uid="uid://cadamhelm0295" path="res://source/common/gameplay/items/gears/metal/adamant_helmet.tres" id="93_ad_helm"]
+[ext_resource type="Resource" uid="uid://cadamches0296" path="res://source/common/gameplay/items/gears/metal/adamant_chest.tres" id="94_ad_chest"]
+[ext_resource type="Resource" uid="uid://cadamboot0297" path="res://source/common/gameplay/items/gears/metal/adamant_boots.tres" id="95_ad_boots"]
+[ext_resource type="Resource" uid="uid://crunihelm0298" path="res://source/common/gameplay/items/gears/metal/runite_helmet.tres" id="96_ru_helm"]
+[ext_resource type="Resource" uid="uid://cruniches0299" path="res://source/common/gameplay/items/gears/metal/runite_chest.tres" id="97_ru_chest"]
+[ext_resource type="Resource" uid="uid://cruniboot0300" path="res://source/common/gameplay/items/gears/metal/runite_boots.tres" id="98_ru_boots"]
+
 [sub_resource type="Resource" id="I_sm_br_cu"]
 script = ExtResource("3_ingred")
 item = ExtResource("60_cop_ore")
@@ -800,4 +811,114 @@ script = ExtResource("2_station")
 station_name = "Smithing Table"
 profession = &"smithing"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow")])
+
+[sub_resource type="Resource" id="I_mi_helm"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_mi_helm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("90_mi_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_helm")])
+required_level = 20
+xp_reward = 160
+
+[sub_resource type="Resource" id="I_mi_chest"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 5
+
+[sub_resource type="Resource" id="R_mi_chest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("91_mi_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_chest")])
+required_level = 20
+xp_reward = 260
+
+[sub_resource type="Resource" id="I_mi_boots"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_mi_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_mi_boots"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("92_mi_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_boots")])
+required_level = 20
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_ad_helm"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_ad_helm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("93_ad_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_helm")])
+required_level = 30
+xp_reward = 210
+
+[sub_resource type="Resource" id="I_ad_chest"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 5
+
+[sub_resource type="Resource" id="R_ad_chest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("94_ad_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_chest")])
+required_level = 30
+xp_reward = 340
+
+[sub_resource type="Resource" id="I_ad_boots"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_ad_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_ad_boots"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("95_ad_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_boots")])
+required_level = 30
+xp_reward = 140
+
+[sub_resource type="Resource" id="I_ru_helm"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 3
+
+[sub_resource type="Resource" id="R_ru_helm"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("96_ru_helm")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_helm")])
+required_level = 45
+xp_reward = 300
+
+[sub_resource type="Resource" id="I_ru_chest"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 5
+
+[sub_resource type="Resource" id="R_ru_chest"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("97_ru_chest")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_chest")])
+required_level = 45
+xp_reward = 480
+
+[sub_resource type="Resource" id="I_ru_boots"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_ru_boots"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("98_ru_boots")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_boots")])
+required_level = 45
+xp_reward = 200
+
+
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots")])

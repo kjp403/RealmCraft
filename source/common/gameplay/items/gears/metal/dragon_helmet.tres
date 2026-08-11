@@ -25,8 +25,8 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_gear")
 required_level = 0
-required_mastery_categories = Array[StringName]([])
-required_mastery_level = 0
+required_mastery_categories = Array[StringName]([&"any"])
+required_mastery_level = 30
 slot = ExtResource("4_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Dragon Helmet"

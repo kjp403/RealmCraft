@@ -117,8 +117,7 @@ func recipe_guide_entries() -> Array[Dictionary]:
 		var path: String = recipe_deferred_paths[i]
 		if path.is_empty():
 			continue
-		var loaded: Resource = load(path)
-		var item: Item = loaded as Item
+		var item: Item = _load_deferred_guide_item(path)
 		if item == null:
 			push_warning("JobPerks %s: deferred recipe path failed: %s" % [job_slug, path])
 			continue
@@ -136,6 +135,45 @@ func recipe_guide_entries() -> Array[Dictionary]:
 		return String(ia.item_name) < String(ib.item_name)
 	)
 	return out
+
+
+## WeaponItem .tres files pull PackedScenes that reference Client; a full
+## [code]load()[/code] can fail or hang when the Skills dock opens. Peek name +
+## icon from the text for weapon paths; fall back to a normal load otherwise.
+func _load_deferred_guide_item(path: String) -> Item:
+	if path.find("/weapons/") >= 0:
+		var peeked: Item = _peek_item_display(path)
+		if peeked != null:
+			return peeked
+	var loaded: Resource = ResourceLoader.load(path)
+	return loaded as Item
+
+
+func _peek_item_display(path: String) -> Item:
+	var abs_path: String = ProjectSettings.globalize_path(path)
+	var fa: FileAccess = FileAccess.open(abs_path, FileAccess.READ)
+	if fa == null:
+		return null
+	var text: String = fa.get_as_text()
+	var name_re := RegEx.new()
+	name_re.compile("item_name = &\"([^\"]+)\"")
+	var name_m: RegExMatch = name_re.search(text)
+	if name_m == null:
+		name_re.compile("item_name = \"([^\"]+)\"")
+		name_m = name_re.search(text)
+	if name_m == null:
+		return null
+	var icon_path := ""
+	var icon_re := RegEx.new()
+	icon_re.compile("path=\"(res://assets/sprites/items/[^\"]+\\.(?:png|tres))\"")
+	var icon_m: RegExMatch = icon_re.search(text)
+	if icon_m != null:
+		icon_path = icon_m.get_string(1)
+	var item := Item.new()
+	item.item_name = StringName(name_m.get_string(1))
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		item.item_icon = load(icon_path) as Texture2D
+	return item
 
 
 # ---------------------------------------------------------------------------
