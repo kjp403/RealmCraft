@@ -46,6 +46,9 @@
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="52_siw4h"]
 [ext_resource type="SpriteFrames" uid="uid://bm8vwj7ahrduw" path="res://source/common/gameplay/characters/sprite_frames/bandit_sorcerer.tres" id="57_n1veu"]
 [ext_resource type="SpriteFrames" uid="uid://cm2d0tro8bmkh" path="res://source/common/gameplay/characters/sprite_frames/bandit_scout.tres" id="58_rklgs"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
+[ext_resource type="AudioStream" uid="uid://84qps76q3ocl" path="res://assets/audio/music/arrival.ogg" id="mus_arrival"]
+[ext_resource type="AudioStream" uid="uid://ccn0gxxwbb1rh" path="res://assets/audio/music/angevin.ogg" id="mus_angevin"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_bauih"]
 normal = Vector2(1, 0)
@@ -90,6 +93,7 @@ aoi_visible_radius_cells = 1
 preview_aoi = false
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_rklgs")
+music_playlist = Array[AudioStream]([ExtResource("mus_adventure"), ExtResource("mus_arrival"), ExtResource("mus_angevin")])
 weather = Array[ExtResource("3_0lv0g")]([ExtResource("6_huaqk")])
 camera_limit_left = -16
 metadata/_custom_type_script = "uid://7mbux4mybta0"

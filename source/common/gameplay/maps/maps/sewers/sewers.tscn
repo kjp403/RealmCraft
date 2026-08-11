@@ -27,12 +27,15 @@
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/gutterworks.tres" id="stair_gutterworks"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/drowned_cistern.tres" id="stair_drowned_cistern"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://epws31tb1n8o" path="res://assets/audio/music/shadow_temple.ogg" id="mus_shadow_temple"]
 [node name="sewers" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.015, 0.025, 0.02, 1)
 music = ExtResource("music")
+music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_shadow_temple")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 3600

@@ -42,6 +42,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_crag_yeti.tres" id="bk_t3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_snow_yeti.tres" id="bk_t4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_fog_giant.tres" id="bk_t5"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
+[ext_resource type="AudioStream" uid="uid://psn1us7ahvf1" path="res://assets/audio/music/fungus.ogg" id="mus_fungus"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_w1xny"]
 normal = Vector2(-1, 0)
@@ -56,6 +59,7 @@ preview_aoi = false
 aoi_test_point = Vector2(900, 0)
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_7mrv4")
+music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_adventure"), ExtResource("mus_fungus")])
 weather = Array[ExtResource("3_vs2bv")]([ExtResource("3_pyxru"), ExtResource("5_4tbu3"), ExtResource("6_o3pwt")])
 camera_limit_left = 400
 camera_limit_top = 350

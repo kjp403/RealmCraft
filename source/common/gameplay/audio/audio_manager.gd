@@ -18,9 +18,27 @@ extends Node
 # start that rises smoothly across the whole duration.
 const MUSIC_FADE_IN_FLOOR_DB: float = -30.0
 
+## Crossfade used when a playlist rotates to its next track.
+const PLAYLIST_FADE_S: float = 3.0
+## How long before a track's natural end the rotation starts crossing over. The old
+## track loops (every music .ogg imports with loop=true) rather than falling silent,
+## so it just fades out over the top of its own loop point.
+const PLAYLIST_FADE_LEAD_S: float = 3.0
+## Floor on the rotation timer, so a stub-length or unreadable stream can't spin the
+## playlist at frame rate.
+const PLAYLIST_MIN_HOLD_S: float = 5.0
+
 var _tweens: Dictionary[AudioStreamPlayer, Tween]
 var _cached_sounds: Dictionary[String, AudioStream]
 var _pending_music: PendingMusic
+## Area playlist: the tracks themselves, plus a shuffled play order over their indices
+## and how far into that order we are. Empty when a single track owns the music player.
+var _playlist: Array[AudioStream]
+var _playlist_order: PackedInt32Array
+var _playlist_pos: int = -1
+## Bumped on every track change and on _clear_playlist; a pending rotation timer that
+## no longer matches is a leftover from music that has already been replaced.
+var _playlist_gen: int = 0
 ## Polyphonic stream id of the last UI cue that requested replace-on-replay
 ## (level-up jingles cut themselves short when another fires mid-play).
 var _replaceable_ui_stream_id: int = -1
@@ -76,6 +94,50 @@ func play_music(music_path: String, volume: float = 0.0, at_position: float = 0.
 ## [at_position] - Play music at the given time.[br]
 ## [fade_duration] - Fade in/out duration.
 func play_music_stream(music: AudioStream, volume: float = 0.0, at_position: float = 0.0, fade_duration: float = 1.0) -> bool:
+	# A single explicit track owns the music player outright — it ends any rotation,
+	# so a boss track can't be shoved aside by the area playlist's next tick.
+	_clear_playlist()
+	return _queue_music(music, volume, at_position, fade_duration)
+
+
+## Path-based [method play_music_playlist]. Streams come from the same cache as
+## [method play_music]; paths that don't resolve are skipped.
+func play_music_paths(music_paths: Array[String], fade_duration: float = 1.0) -> bool:
+	var streams: Array[AudioStream] = []
+	for path: String in music_paths:
+		streams.append(_get_sound(path))
+	return play_music_playlist(streams, fade_duration)
+
+
+## Rotate through [param tracks] in shuffled order, crossfading into the next one just
+## before the current track would loop. This is what keeps an area from wearing a single
+## loop into the ground; a one-track list is just ordinary looping playback.
+## Re-requesting the playlist that is already running is a no-op, so walking between two
+## maps that share a rotation doesn't restart it.
+func play_music_playlist(tracks: Array[AudioStream], fade_duration: float = 1.0) -> bool:
+	var unique: Array[AudioStream] = []
+	for track: AudioStream in tracks:
+		if track != null and not unique.has(track):
+			unique.append(track)
+
+	if unique.is_empty(): return false
+	if unique.size() == 1:
+		return play_music_stream(unique[0], 0.0, 0.0, fade_duration)
+	if music_player.playing and _playlist == unique: return true
+
+	_clear_playlist()
+	_playlist = unique
+	_shuffle_playlist(-1)
+	return _play_next_in_playlist(fade_duration)
+
+
+## Stop the current playing music.
+func stop_music(fade_out_duration: float = 1.0) -> void:
+	if music_player.playing:
+		fade_volume(music_player, -80, clampf(fade_out_duration, 0.0, 10.0))
+
+
+func _queue_music(music: AudioStream, volume: float, at_position: float, fade_duration: float) -> bool:
 	if not music: return false
 	if music_player.playing and music_player.stream == music: return true
 
@@ -93,10 +155,63 @@ func play_music_stream(music: AudioStream, volume: float = 0.0, at_position: flo
 	return true
 
 
-## Stop the current playing music.
-func stop_music(fade_out_duration: float = 1.0) -> void:
-	if music_player.playing:
-		fade_volume(music_player, -80, clampf(fade_out_duration, 0.0, 10.0))
+## Start the next track in the shuffled order and arm the timer for the one after it.
+func _play_next_in_playlist(fade_duration: float) -> bool:
+	if _playlist.size() < 2: return false
+
+	_playlist_pos += 1
+	if _playlist_pos >= _playlist_order.size():
+		# Reshuffle for the next pass, keeping the track we just finished off the front
+		# so a wrap-around never plays the same thing twice in a row.
+		_shuffle_playlist(_playlist_order[_playlist_order.size() - 1])
+		_playlist_pos = 0
+
+	var track: AudioStream = _playlist[_playlist_order[_playlist_pos]]
+	_playlist_gen += 1
+	if not _queue_music(track, 0.0, 0.0, fade_duration):
+		return false
+
+	# The fade-out of this track has to start before its end, so the rotation is armed
+	# for (length - lead) rather than for the full length.
+	var hold: float = maxf(track.get_length() - PLAYLIST_FADE_LEAD_S, PLAYLIST_MIN_HOLD_S)
+	_rotate_playlist_after(hold, _playlist_gen)
+	return true
+
+
+func _rotate_playlist_after(delay: float, gen: int) -> void:
+	# process_always so the rotation keeps ticking while the tree is paused (the
+	# disconnect overlay pauses everything, and music shouldn't stall behind it).
+	await get_tree().create_timer(delay, true).timeout
+	if gen != _playlist_gen: return
+	_play_next_in_playlist(PLAYLIST_FADE_S)
+
+
+## Rebuild the shuffled order over the playlist indices. [param avoid_first] is the index
+## that must not land in slot 0 (pass -1 when nothing was playing).
+func _shuffle_playlist(avoid_first: int) -> void:
+	_playlist_order.resize(_playlist.size())
+	for i: int in _playlist.size():
+		_playlist_order[i] = i
+
+	# PackedInt32Array has no shuffle(); Fisher-Yates over it directly.
+	for i: int in range(_playlist_order.size() - 1, 0, -1):
+		var j: int = randi_range(0, i)
+		var tmp: int = _playlist_order[i]
+		_playlist_order[i] = _playlist_order[j]
+		_playlist_order[j] = tmp
+
+	if _playlist_order.size() > 1 and _playlist_order[0] == avoid_first:
+		_playlist_order[0] = _playlist_order[1]
+		_playlist_order[1] = avoid_first
+
+	_playlist_pos = -1
+
+
+func _clear_playlist() -> void:
+	_playlist_gen += 1 # orphans any armed rotation timer
+	_playlist.clear()
+	_playlist_order.clear()
+	_playlist_pos = -1
 
 #endregion
 

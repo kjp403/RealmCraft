@@ -51,6 +51,9 @@
 [ext_resource type="Resource" uid="uid://cnpcdesertcamel1" path="res://source/common/gameplay/characters/npc/npcs/desert_camel.tres" id="56_camel"]
 [ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="57_golem"]
 [ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="58_hermit"]
+[ext_resource type="AudioStream" uid="uid://b7j3i2egxdgkk" path="res://assets/audio/music/shop.ogg" id="mus_shop"]
+[ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6ao3"]
 atlas = ExtResource("27_xjjg4")
@@ -393,6 +396,7 @@ y_sort_enabled = true
 script = ExtResource("1_68sb6")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_xjjg4")
+music_playlist = Array[AudioStream]([ExtResource("mus_shop"), ExtResource("mus_al_kharid"), ExtResource("mus_adventure")])
 camera_limit_left = -640
 camera_limit_top = -384
 camera_limit_right = 1088

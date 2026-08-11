@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://source/common/gameplay/maps/tilesets/desert_tileset.tres" id="2_tiles"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/fungus.ogg" id="music"]
+[ext_resource type="AudioStream" uid="uid://va5r4f046j4q" path="res://assets/audio/music/arabian.ogg" id="music"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="4_rp"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="5_warper"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="6_portal"]
@@ -35,12 +35,15 @@
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunspire_terraces.tres" id="stair_sunspire_terraces"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
+[ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
+[ext_resource type="AudioStream" uid="uid://1lmp70um360p" path="res://assets/audio/music/arabian_2.ogg" id="mus_arabian_2"]
 [node name="desert" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.09, 0.07, 0.05, 1)
 music = ExtResource("music")
+music_playlist = Array[AudioStream]([ExtResource("mus_al_kharid"), ExtResource("mus_arabian_2")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 3344

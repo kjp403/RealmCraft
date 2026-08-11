@@ -47,6 +47,14 @@ enum ZoneModifiers {
 ## the instance (see Client._on_instance_changed). Leave empty to keep whatever track
 ## is already playing — e.g. a small building inherits the overworld's music.
 @export var music: AudioStream
+## Extra tracks for this map. With any set, [member music] joins these in a shuffled
+## rotation instead of being the one loop players hear all day — the whole point is that
+## a long session in one area doesn't sound like one song. Entry order doesn't matter
+## (the rotation is shuffled, so [member music] isn't necessarily what plays first).
+## Tracks crossfade near each other's end (AudioManager.play_music_playlist), and maps
+## that share the same rotation don't restart it when you walk between them. Ignored when
+## [member music] is empty, since that means "inherit whatever is playing".
+@export var music_playlist: Array[AudioStream]
 ## Ambient weather overlays applied when the local player enters this map. Each entry is
 ## one stacked effect, so a map can run several at once (e.g. leaves + cloud shadows +
 ## fog). Empty = clear skies. Driven by the same instance hook as [member music]. See

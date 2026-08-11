@@ -65,7 +65,13 @@ const SFX_CLICK: String = "res://assets/audio/sfx/ui/ui_click.wav"
 const SFX_BACK: String = "res://assets/audio/sfx/ui/ui_back.wav"
 const SFX_HOVER: String = "res://assets/audio/sfx/ui/ui_hover.wav"
 const SFX_REVEAL: String = "res://assets/audio/sfx/ui/ui_reveal.wav"
-const MUSIC_GATEWAY: String = "res://assets/audio/music/angevin.ogg"
+## Login-screen rotation. Players sit here through character creation and world picking,
+## so it shuffles rather than looping one theme.
+const MUSIC_GATEWAY: Array[String] = [
+	"res://assets/audio/music/angevin.ogg",
+	"res://assets/audio/music/arrival.ogg",
+	"res://assets/audio/music/alone.ogg",
+]
 
 # Release-stage tag shown after the build number in the ConnectionInfo line
 # ("Connected · Arkenelle 0.2.0 - Alpha"). The version itself comes live from
@@ -230,13 +236,13 @@ func _play_hover() -> void:
 	_play_ui(SFX_HOVER)
 
 
-## Start the looping main theme from the gateway (the menu owns the boot music, not
+## Start the menu theme rotation from the gateway (the menu owns the boot music, not
 ## the networking root). Muted in the editor so it doesn't replay every iteration —
 ## exports hear it; for multi-client testing silence extras with --mute / --no-sfx.
 func _start_gateway_music() -> void:
 	if not (is_instance_valid(Client) and Client.audio_manager):
 		return
-	Client.audio_manager.play_music.call_deferred(MUSIC_GATEWAY, 0.0, 0.0, 5.0)
+	Client.audio_manager.play_music_paths.call_deferred(MUSIC_GATEWAY, 5.0)
 
 
 ## Hover on keyboard/gamepad focus, but only while actually driving by focus — a
