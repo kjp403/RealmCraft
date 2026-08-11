@@ -1,6 +1,6 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 340.0)
+const PANEL_SIZE := Vector2(180.0, 380.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const SECTION := &"general"
@@ -111,6 +111,16 @@ func _build_layout() -> void:
 
 	main_box.add_child(HSeparator.new())
 
+	var commands_button := Button.new()
+	commands_button.text = "Chat commands"
+	commands_button.custom_minimum_size = Vector2(0.0, 26.0)
+	commands_button.add_theme_font_size_override(&"font_size", 9)
+	commands_button.tooltip_text = "Show chat commands available to your account."
+	commands_button.pressed.connect(_on_commands_pressed)
+	main_box.add_child(commands_button)
+
+	main_box.add_child(HSeparator.new())
+
 	var reset_button := Button.new()
 	reset_button.text = "Reset to defaults"
 	reset_button.custom_minimum_size = Vector2(0.0, 26.0)
@@ -136,6 +146,11 @@ func _build_layout() -> void:
 	logout_button.tooltip_text = "Disconnect and return to the login screen."
 	logout_button.pressed.connect(_on_logout_pressed)
 	main_box.add_child(logout_button)
+
+
+func _on_commands_pressed() -> void:
+	const ACTIONS := preload("res://source/client/ui/menus/settings/settings_commands_actions.gd")
+	ACTIONS.open_commands_panel(self)
 
 
 func _on_logout_pressed() -> void:

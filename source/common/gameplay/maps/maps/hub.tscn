@@ -51,7 +51,6 @@
 [ext_resource type="Resource" uid="uid://cnpcdesertcamel1" path="res://source/common/gameplay/characters/npc/npcs/desert_camel.tres" id="56_camel"]
 [ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="57_golem"]
 [ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="58_hermit"]
-[ext_resource type="Resource" uid="uid://cascensionbroker1" path="res://source/common/gameplay/characters/npc/npcs/ascension_broker_vael.tres" id="59_vael"]
 [ext_resource type="AudioStream" uid="uid://b7j3i2egxdgkk" path="res://assets/audio/music/shop.ogg" id="mus_shop"]
 [ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
 [ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
@@ -531,10 +530,6 @@ npc_resource = ExtResource("57_golem")
 [node name="SwampHermit" parent="NPCs" unique_id=1888560003 instance=ExtResource("16_da30u")]
 position = Vector2(360, -48)
 npc_resource = ExtResource("58_hermit")
-
-[node name="AscensionBrokerVael" parent="NPCs" unique_id=1888560004 instance=ExtResource("16_da30u")]
-position = Vector2(-400, 112)
-npc_resource = ExtResource("59_vael")
 
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]
 

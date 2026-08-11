@@ -10,6 +10,9 @@ const PLAYER_CONTEXT_MENU_SCRIPT: Script = preload(
 const HOSTILE_CONTEXT_MENU_SCRIPT: Script = preload(
 	"res://source/client/ui/hud/hostile_context_menu.gd"
 )
+const SLAYER_TRACKER_SCRIPT: Script = preload(
+	"res://source/client/ui/hud/slayer_tracker.gd"
+)
 
 @export var sub_menu: Control
 
@@ -31,6 +34,7 @@ var _hidden_for_menu: Array[CanvasItem] = []
 @onready var chat: ChatMenu = $Chat
 @onready var twin_sticks: Control = $TwinSticks
 @onready var quest_tracker: QuestTracker = $QuestTracker
+@onready var slayer_tracker: PanelContainer = $SlayerTracker
 @onready var trade_panel: Control = $TradePanel
 @onready var experience_bar: ProgressBar = $Resources/ExperienceBar
 @onready var experience_level_label: Label = $Resources/ExperienceBar/LevelLabel
@@ -58,6 +62,19 @@ func _ready() -> void:
 	quest_tracker.offset_top = 182.0
 	quest_tracker.offset_right = -16.0
 	quest_tracker.offset_bottom = 210.0
+	# Slayer tracker stacks under the quest tracker in the same right rail.
+	slayer_tracker.anchor_left = 1.0
+	slayer_tracker.anchor_top = 0.0
+	slayer_tracker.anchor_right = 1.0
+	slayer_tracker.anchor_bottom = 0.0
+	slayer_tracker.offset_left = -240.0
+	slayer_tracker.offset_top = 220.0
+	slayer_tracker.offset_right = -16.0
+	slayer_tracker.offset_bottom = 280.0
+	quest_tracker.resized.connect(_place_slayer_tracker)
+	slayer_tracker.visibility_changed.connect(_place_slayer_tracker)
+	quest_tracker.visibility_changed.connect(_place_slayer_tracker)
+	call_deferred(&"_place_slayer_tracker")
 
 	notification_button.visible = false
 	notification_button.disabled = true
@@ -340,7 +357,7 @@ func _refresh_hud_for_menus() -> void:
 		# quest is tracked). Re-entrancy from stacked menus is a no-op (list already populated).
 		if _hidden_for_menu.is_empty():
 			for node: CanvasItem in [
-				$TwinSticks, $Chat, $QuestTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons,
+				$TwinSticks, $Chat, $QuestTracker, $SlayerTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons,
 				$BottomMenuDock,
 			]:
 				if node.visible:
@@ -362,6 +379,22 @@ func _refresh_hud_for_menus() -> void:
 		# show() above. Sync-set covers the common cases instantly; refresh() confirms vs live quests.
 		quest_tracker.visible = ClientState.tracked_quest_id > 0 # > 0 = real pinned quest (0 = none, -1 = untracked)
 		quest_tracker.refresh()
+		if slayer_tracker.has_method(&"refresh"):
+			slayer_tracker.call(&"refresh")
+		_place_slayer_tracker()
+
+
+## Keep the Slayer panel tucked under the quest tracker when both are visible.
+func _place_slayer_tracker() -> void:
+	if slayer_tracker == null or quest_tracker == null:
+		return
+	var top: float = 182.0
+	if quest_tracker.visible:
+		top = quest_tracker.offset_top + maxf(quest_tracker.size.y, 28.0) + 8.0
+	else:
+		top = 182.0
+	slayer_tracker.offset_top = top
+	slayer_tracker.offset_bottom = top + maxf(slayer_tracker.get_combined_minimum_size().y, 64.0)
 
 
 ## Suppress player movement whenever a blocking menu is up. Polled each frame (NOT

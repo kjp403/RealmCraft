@@ -15,12 +15,21 @@ extends StaticBody2D
 @export var required_level: int = 50
 @export var gate_size: Vector2 = Vector2(40, 112)
 @export var label_text: String = "Mining 50+"
+## Safe eject axis for under-leveled players. Must point toward walkable
+## approach ground — never into walls / void beyond the sealed side.
+## Mining Cave DeepVeinGate uses LEFT (toward the cave entrance).
+@export var eject_direction: Vector2 = Vector2.LEFT
+## How far to shove along [member eject_direction] (must clear the approach Area2D).
+@export var eject_distance: float = 96.0
 
 var _collision: CollisionShape2D
 var _area: Area2D
 var _visual: ColorRect
 var _label: Label
 var _qualified: Dictionary = {} # instance_id -> true
+## Per-player cooldown so a stuck overlap can't spam-shove into a null cell.
+var _last_eject_msec: Dictionary = {} # instance_id -> int
+const _EJECT_COOLDOWN_MS: int = 750
 
 
 func _ready() -> void:
@@ -107,14 +116,11 @@ func _on_body_entered(body: Node2D) -> void:
 		_qualified[player.get_instance_id()] = true
 		_refresh_collision()
 		return
-	# Soft bump only the local avatar on clients (position is client-owned).
+	# Soft eject only the local avatar on clients (position is client-owned).
 	# Remote dummies must not be shoved — that desyncs their replicated pose.
 	if GameMode.is_client() and not _is_local_player(player):
 		return
-	var away: Vector2 = (player.global_position - global_position).normalized()
-	if away == Vector2.ZERO:
-		away = Vector2.LEFT
-	player.global_position += away * 40.0
+	_eject_player(player)
 	# Levels may still be hydrating — pull skills.get once so a late mirror
 	# can open the gate without forcing a relog.
 	if GameMode.is_client() and _is_local_player(player) and ClientState.skill_levels.is_empty():
@@ -125,8 +131,41 @@ func _on_body_exited(body: Node2D) -> void:
 	var player := body as Player
 	if player == null:
 		return
-	_qualified.erase(player.get_instance_id())
+	var id: int = player.get_instance_id()
+	_qualified.erase(id)
+	_last_eject_msec.erase(id)
 	_refresh_collision()
+
+
+## Push under-leveled players along the authored safe axis far enough to leave
+## the approach Area2D. Never use (player - gate).normalized() — near corners
+## that vector can shove into rock / void and soft-lock movement.
+func _eject_player(player: Player) -> void:
+	var id: int = player.get_instance_id()
+	var now: int = Time.get_ticks_msec()
+	if now - int(_last_eject_msec.get(id, -99999)) < _EJECT_COOLDOWN_MS:
+		return
+	_last_eject_msec[id] = now
+
+	var dir: Vector2 = eject_direction
+	if dir.length_squared() < 0.0001:
+		dir = Vector2.LEFT
+	else:
+		dir = dir.normalized()
+
+	# Already clear of the sealed side — don't yank them again.
+	var from_gate: Vector2 = player.global_position - global_position
+	if from_gate.dot(dir) >= eject_distance * 0.5:
+		return
+
+	var target: Vector2 = global_position + dir * eject_distance
+	# Keep their offset along the gate's long axis so a vertical throat-seal
+	# doesn't snap everyone to the exact center line.
+	if absf(dir.x) >= absf(dir.y):
+		target.y = player.global_position.y
+	else:
+		target.x = player.global_position.x
+	player.global_position = target
 
 
 func _on_skill_levels_changed() -> void:

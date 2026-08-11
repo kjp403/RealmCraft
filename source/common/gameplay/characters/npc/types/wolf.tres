@@ -11,7 +11,7 @@
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
-lunge_range = 130.0
+lunge_range = 90.0
 
 [sub_resource type="Resource" id="Drop_hide"]
 script = ExtResource("2_loot")
@@ -27,22 +27,24 @@ chance = 1.0
 script = ExtResource("1_script")
 enemy_type = &"wolf"
 display_name = "Wild Wolf"
+combat_level = 22
 skin = ExtResource("5_skin")
 visual_scale = 0.95
-max_health = 160.0
-attack_damage = 20.0
-attack_cooldown = 1.0
-armor = 2.0
+max_health = 90.0
+attack_damage = 10.0
+attack_cooldown = 1.15
+armor = 1.0
 behaviors = Array[ExtResource("90_mobb")]([SubResource("Lunge_migrated")])
-move_speed = 90
+move_speed = 80
 distance_to_attack = 18
-max_distance_from_spawn = 220
+max_distance_from_spawn = 180
+detection_radius = 85
 chase_on_area = false
 is_lone = true
-wander_radius = 72.0
+wander_radius = 56.0
 wander_pause_min_s = 1.0
 wander_pause_max_s = 3.0
-xp_reward = 7
+xp_reward = 3
 respawn_delay = 15.0
 loot = Array[ExtResource("2_loot")]([SubResource("Drop_hide"), SubResource("Drop_bone")])
 metadata/slug = &"wolf"

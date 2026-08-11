@@ -523,6 +523,8 @@ required_skill = &"mining"
 required_level = 50
 gate_size = Vector2(40, 112)
 label_text = "Mining 50+"
+eject_direction = Vector2(-1, 0)
+eject_distance = 96.0
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(368.0, 1200.0)

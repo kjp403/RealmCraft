@@ -225,22 +225,77 @@ func _update_header() -> void:
 
 # --- Category tabs -----------------------------------------------------------
 
-## Which tab a recipe belongs to: materials (bars, cures), rings, or an armor
-## line derived from the output's folder (metal stays plain "armor"; the
-## Workbench splits into cloth / leather). No "all" tab on purpose — mixing
-## categories interleaves unrelated rows (owner call 2026-07-02).
+## Smithing Table metal tiers shown as dedicated tabs. Lv.50+ (Dragon and
+## Ascension gear) collapses into Ascended so the list stays short.
+const _SMITHING_TIERS: Array[StringName] = [
+	&"bronze", &"iron", &"steel", &"mithril", &"adamant", &"runite", &"ascended",
+]
+const _ASCENDED_CRAFT_LEVEL: int = 50
+
+
+## Which tab a recipe belongs to. Smithing Table uses metal-tier + Jewelry +
+## Materials tabs; Workbench / other stations keep cloth / leather / materials.
+## No "all" tab — mixing categories interleaves unrelated rows.
 func _category(recipe: CraftingRecipe) -> StringName:
 	if recipe.output_item is MaterialItem:
 		return &"materials"
-	var gear: GearItem = recipe.output_item as GearItem
-	if gear != null and gear.slot != null and gear.slot.resource_path.get_file().begins_with("ring"):
-		return &"rings"
+	if _is_jewelry(recipe.output_item):
+		return &"jewelry"
+	if _is_smithing_station():
+		return _smithing_tier(recipe)
 	var path: String = recipe.output_item.resource_path
 	if path.contains("/cloth/"):
 		return &"cloth"
 	if path.contains("/leather/"):
 		return &"leather"
 	return &"armor"
+
+
+func _is_smithing_station() -> bool:
+	return _station != null and _station.profession == &"smithing"
+
+
+## Rings + necklaces / amulets / relics under gears/jewelry (or ring slot).
+func _is_jewelry(item: Item) -> bool:
+	if item == null:
+		return false
+	var path: String = item.resource_path
+	if path.contains("/jewelry/") or path.contains("/rings/"):
+		return true
+	var gear: GearItem = item as GearItem
+	if gear == null or gear.slot == null:
+		return false
+	var slot_file: String = gear.slot.resource_path.get_file()
+	return slot_file.begins_with("ring") or slot_file.begins_with("relic")
+
+
+## Bronze…Runite from the output name / path; Lv.50+ → Ascended.
+func _smithing_tier(recipe: CraftingRecipe) -> StringName:
+	if recipe.required_level >= _ASCENDED_CRAFT_LEVEL:
+		return &"ascended"
+	var haystack: String = (
+		String(recipe.output_item.item_name) + " " + recipe.output_item.resource_path
+	).to_lower()
+	# Longer / more specific tokens first so "adamant" beats a stray "adan…".
+	for tier: StringName in [
+		&"mithril", &"adamant", &"runite", &"bronze", &"steel", &"iron",
+	]:
+		if haystack.contains(String(tier)):
+			return tier
+	# Unmatched metal (tools named oddly, copper leftovers) — still smithable.
+	return &"bronze"
+
+
+func _tab_label(cat: StringName) -> String:
+	match cat:
+		&"jewelry":
+			return "Jewelry"
+		&"ascended":
+			return "Ascended"
+		&"materials":
+			return "Materials"
+		_:
+			return String(cat).capitalize()
 
 
 func _build_tabs() -> void:
@@ -262,14 +317,24 @@ func _build_tabs() -> void:
 		return
 
 	var tabs: Array[StringName] = []
-	for cat: StringName in [&"armor", &"cloth", &"leather", &"rings", &"materials"]:
+	var preferred: Array[StringName] = []
+	if _is_smithing_station():
+		preferred.append_array(_SMITHING_TIERS)
+		preferred.append_array([&"jewelry", &"materials"])
+	else:
+		preferred.append_array([&"armor", &"cloth", &"leather", &"jewelry", &"materials"])
+	for cat: StringName in preferred:
 		if present.has(cat):
+			tabs.append(cat)
+	# Any unexpected category still gets a tab rather than vanishing.
+	for cat: StringName in present:
+		if not tabs.has(cat):
 			tabs.append(cat)
 	if not tabs.has(_tab):
 		_tab = tabs[0]
 	for cat: StringName in tabs:
 		var tab: Button = Button.new()
-		tab.text = String(cat).capitalize()
+		tab.text = _tab_label(cat)
 		tab.toggle_mode = true
 		tab.button_group = _tab_group
 		tab.theme_type_variation = &"SectionTab"
@@ -398,7 +463,15 @@ func _render_detail() -> void:
 	detail_name_label.text = str(item.item_name)
 	detail_slot_label.text = _slot_line(item)
 	detail_owned_label.text = _owned_line(item)
-	stats_text.text = ItemTooltip.body(item)
+	# Craft stations gate on profession level — never show wear-mastery as a
+	# craft requirement. Mastery still appears on inventory / equip tooltips.
+	stats_text.text = ItemTooltip.body(
+		item,
+		null,
+		_station.profession,
+		recipe.required_level,
+		_profession_level,
+	)
 
 	var has_mats: bool = _has_ingredients(recipe)
 	for ingredient: CraftIngredient in recipe.ingredients:
