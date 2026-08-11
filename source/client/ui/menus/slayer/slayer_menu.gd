@@ -69,13 +69,23 @@ func _apply_state(response: Dictionary) -> void:
 			"wrong_master": "Only the master who gave this task can change it.",
 			"not_enough_points": "Not enough Slayer points.",
 		}.get(reason, "Slayer unavailable."))
-		if reason in ["too_far", "no_master", "no_player"]:
+		if reason in ["too_far", "no_master", "no_player", "no_map"]:
 			hide()
 			return
-		# Soft failures keep the panel open — refresh from status.
-		_refresh()
+		# Soft action failures (assign/skip) — keep panel, reload status once.
+		Client.request_data(
+			&"slayer.status",
+			_render_if_ok,
+			{"master": _master_key},
+			String(InstanceClient.current.name) if InstanceClient.current else ""
+		)
 		return
 	_render(response)
+
+
+func _render_if_ok(response: Dictionary) -> void:
+	if bool(response.get("ok", false)):
+		_render(response)
 
 
 func _render(data: Dictionary) -> void:
