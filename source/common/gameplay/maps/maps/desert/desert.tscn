@@ -31,6 +31,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_soldier.tres" id="et11"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_priest.tres" id="et12"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="et13"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="et14"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunspire_terraces.tres" id="stair_sunspire_terraces"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
@@ -297,7 +298,8 @@ id_to_node = {
 37: NodePath("Soldier2"),
 38: NodePath("Priest"),
 39: NodePath("Priest2"),
-40: NodePath("SandKing")
+40: NodePath("SandKing"),
+41: NodePath("Necromancer")
 }
 node_to_id = {
 NodePath("Archer"): 0,
@@ -340,7 +342,8 @@ NodePath("Soldier"): 36,
 NodePath("Soldier2"): 37,
 NodePath("Priest"): 38,
 NodePath("Priest2"): 39,
-NodePath("SandKing"): 40
+NodePath("SandKing"): 40,
+NodePath("Necromancer"): 41
 }
 
 [node name="Archer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -488,13 +491,13 @@ enemy_data = ExtResource("et6")
 weapon = null
 
 [node name="ArmoredSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(776.0, 648.0)
+position = Vector2(776.0, 952.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et7")
 weapon = null
 
 [node name="ArmoredSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(776.0, 824.0)
+position = Vector2(1080.0, 648.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et7")
 weapon = null
@@ -512,13 +515,13 @@ enemy_data = ExtResource("et7")
 weapon = null
 
 [node name="Lancer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1032.0, 840.0)
+position = Vector2(1256.0, 648.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et8")
 weapon = null
 
 [node name="Lancer2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1032.0, 664.0)
+position = Vector2(808.0, 1128.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et8")
 weapon = null
@@ -548,13 +551,13 @@ enemy_data = ExtResource("et9")
 weapon = null
 
 [node name="Fomorian" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1368.0, 600.0)
+position = Vector2(1368.0, 472.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et10")
 weapon = null
 
 [node name="Fomorian2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1032.0, 488.0)
+position = Vector2(1416.0, 1208.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et10")
 weapon = null
@@ -587,6 +590,12 @@ weapon = null
 position = Vector2(1672.0, 520.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et13")
+weapon = null
+
+[node name="Necromancer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(776.0, 648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et14")
 weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]

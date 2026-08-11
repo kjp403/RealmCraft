@@ -19,13 +19,12 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_skeleton.tres" id="e16"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton_archer.tres" id="e17"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_greatsword_skeleton.tres" id="e18"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="e19"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e20"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e21"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e22"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e23"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e24"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e25"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="e19"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/tomb_delver_asha.tres" id="e21"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e22"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e23"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e24"]
 
 [node name="sunken_tombs" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -268,15 +267,12 @@ id_to_node = {
 13: NodePath("Greatsword"),
 14: NodePath("Greatsword2"),
 15: NodePath("Greatsword3"),
-16: NodePath("Necromancer"),
-17: NodePath("Necromancer2"),
-18: NodePath("Necromancer3"),
-19: NodePath("Gorgon"),
-20: NodePath("Gorgon2"),
-21: NodePath("Gorgon3"),
-22: NodePath("ThroneGuard"),
-23: NodePath("ThroneGuard2"),
-24: NodePath("ThroneGuard3")
+16: NodePath("Gorgon"),
+17: NodePath("Gorgon2"),
+18: NodePath("Gorgon3"),
+19: NodePath("ThroneGuard"),
+20: NodePath("ThroneGuard2"),
+21: NodePath("ThroneGuard3")
 }
 node_to_id = {
 NodePath("TombSkeleton"): 0,
@@ -295,15 +291,12 @@ NodePath("BoneArcher4"): 12,
 NodePath("Greatsword"): 13,
 NodePath("Greatsword2"): 14,
 NodePath("Greatsword3"): 15,
-NodePath("Necromancer"): 16,
-NodePath("Necromancer2"): 17,
-NodePath("Necromancer3"): 18,
-NodePath("Gorgon"): 19,
-NodePath("Gorgon2"): 20,
-NodePath("Gorgon3"): 21,
-NodePath("ThroneGuard"): 22,
-NodePath("ThroneGuard2"): 23,
-NodePath("ThroneGuard3"): 24
+NodePath("Gorgon"): 16,
+NodePath("Gorgon2"): 17,
+NodePath("Gorgon3"): 18,
+NodePath("ThroneGuard"): 19,
+NodePath("ThroneGuard2"): 20,
+NodePath("ThroneGuard3"): 21
 }
 
 [node name="TombSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
@@ -402,40 +395,22 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e18")
 weapon = null
 
-[node name="Necromancer" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
-position = Vector2(2728.0, 1928.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e19")
-weapon = null
-
-[node name="Necromancer2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
-position = Vector2(5928.0, 1928.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e19")
-weapon = null
-
-[node name="Necromancer3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
-position = Vector2(4328.0, 1768.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e19")
-weapon = null
-
 [node name="Gorgon" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(3624.0, 2552.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e20")
+enemy_data = ExtResource("e19")
 weapon = null
 
 [node name="Gorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(5048.0, 2584.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e20")
+enemy_data = ExtResource("e19")
 weapon = null
 
 [node name="Gorgon3" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
 position = Vector2(4328.0, 2248.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("e20")
+enemy_data = ExtResource("e19")
 weapon = null
 
 [node name="ThroneGuard" parent="ReplicatedPropsContainer" instance=ExtResource("e14")]
@@ -459,21 +434,21 @@ weapon = null
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e21")]
+[node name="TombDelverAsha" parent="NPCs" instance=ExtResource("e20")]
 position = Vector2(4008.0, 5416.0)
-npc_resource = ExtResource("e22")
+npc_resource = ExtResource("e21")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e23")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e22")]
 position = Vector2(4328.0, 5576.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e23")]
+[node name="Entrance" parent="." instance=ExtResource("e22")]
 position = Vector2(4328.0, 5576.0)
 warper_id = 41
 
-[node name="AscentPortal" parent="." instance=ExtResource("e24")]
+[node name="AscentPortal" parent="." instance=ExtResource("e23")]
 position = Vector2(4328.0, 5576.0)
 portal_color = Color(0.72, 0.6, 0.3, 1)
 destination_label = "Desert"
-target_instance = ExtResource("e25")
+target_instance = ExtResource("e24")
 warper_id = 141
 target_id = 51

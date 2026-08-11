@@ -34,6 +34,13 @@
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="32_bvke5"]
 [ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="33_oak"]
 [ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="34_willow"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="bk_hostile"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_werewolf.tres" id="bk_t0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_werebear.tres" id="bk_t1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_werewolf_stalker.tres" id="bk_t2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_crag_yeti.tres" id="bk_t3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_snow_yeti.tres" id="bk_t4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_fog_giant.tres" id="bk_t5"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_w1xny"]
 normal = Vector2(-1, 0)
@@ -108,7 +115,25 @@ id_to_node = {
 13: NodePath("OrcRogue2"),
 14: NodePath("OrcRogue3"),
 15: NodePath("OrcRogue4"),
-16: NodePath("OrcLeader")
+16: NodePath("OrcLeader"),
+17: NodePath("Werewolf"),
+18: NodePath("Werewolf2"),
+19: NodePath("Werewolf3"),
+20: NodePath("Werewolf4"),
+21: NodePath("Werebear"),
+22: NodePath("Werebear2"),
+23: NodePath("Werebear3"),
+24: NodePath("WerewolfStalker"),
+25: NodePath("WerewolfStalker2"),
+26: NodePath("WerewolfStalker3"),
+27: NodePath("CragYeti"),
+28: NodePath("CragYeti2"),
+29: NodePath("CragYeti3"),
+30: NodePath("SnowYeti"),
+31: NodePath("SnowYeti2"),
+32: NodePath("SnowYeti3"),
+33: NodePath("FogGiant"),
+34: NodePath("FogGiant2")
 }
 node_to_id = {
 NodePath("OrcLeader"): 16,
@@ -127,7 +152,25 @@ NodePath("Bandit5"): 4,
 NodePath("Bandit4"): 3,
 NodePath("Bandit3"): 2,
 NodePath("Bandit2"): 1,
-NodePath("Bandit"): 0
+NodePath("Bandit"): 0,
+NodePath("Werewolf"): 17,
+NodePath("Werewolf2"): 18,
+NodePath("Werewolf3"): 19,
+NodePath("Werewolf4"): 20,
+NodePath("Werebear"): 21,
+NodePath("Werebear2"): 22,
+NodePath("Werebear3"): 23,
+NodePath("WerewolfStalker"): 24,
+NodePath("WerewolfStalker2"): 25,
+NodePath("WerewolfStalker3"): 26,
+NodePath("CragYeti"): 27,
+NodePath("CragYeti2"): 28,
+NodePath("CragYeti3"): 29,
+NodePath("SnowYeti"): 30,
+NodePath("SnowYeti2"): 31,
+NodePath("SnowYeti3"): 32,
+NodePath("FogGiant"): 33,
+NodePath("FogGiant2"): 34
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -401,3 +444,111 @@ data = ExtResource("34_willow")
 y_sort_enabled = true
 position = Vector2(2160, 1600)
 data = ExtResource("34_willow")
+
+[node name="Werewolf" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1304.0, 2056.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t0")
+weapon = null
+
+[node name="Werewolf2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1240.0, 1992.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t0")
+weapon = null
+
+[node name="Werewolf3" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1176.0, 1928.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t0")
+weapon = null
+
+[node name="Werewolf4" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1112.0, 1864.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t0")
+weapon = null
+
+[node name="Werebear" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1544.0, 968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t1")
+weapon = null
+
+[node name="Werebear2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(2360.0, 856.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t1")
+weapon = null
+
+[node name="Werebear3" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(2296.0, 920.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t1")
+weapon = null
+
+[node name="WerewolfStalker" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(808.0, 1336.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t2")
+weapon = null
+
+[node name="WerewolfStalker2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(680.0, 1464.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t2")
+weapon = null
+
+[node name="WerewolfStalker3" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(520.0, 1624.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t2")
+weapon = null
+
+[node name="CragYeti" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1304.0, 488.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t3")
+weapon = null
+
+[node name="CragYeti2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(2040.0, 456.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t3")
+weapon = null
+
+[node name="CragYeti3" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(1976.0, 520.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t3")
+weapon = null
+
+[node name="SnowYeti" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(520.0, 792.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t4")
+weapon = null
+
+[node name="SnowYeti2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(584.0, 728.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t4")
+weapon = null
+
+[node name="SnowYeti3" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(856.0, 456.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t4")
+weapon = null
+
+[node name="FogGiant" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(472.0, 2184.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t5")
+weapon = null
+
+[node name="FogGiant2" parent="ReplicatedPropsContainer" instance=ExtResource("bk_hostile")]
+position = Vector2(408.0, 2248.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("bk_t5")
+weapon = null
