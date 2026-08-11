@@ -25,6 +25,7 @@
 [sub_resource type="Resource" id="Node_crush"]
 script = ExtResource("2_node")
 id = &"hammer_crush"
+tier = 2
 description = "A heavy crushing slam that hits everything around you. The hammer's reliable opener."
 branch = &"domination"
 ability = ExtResource("4_crush")
@@ -64,6 +65,7 @@ value = 8.0
 [sub_resource type="Resource" id="Node_exe1"]
 script = ExtResource("2_node")
 id = &"hammer_executioner"
+tier = 2
 node_name = "Executioner"
 icon = ExtResource("15_exe1")
 description = "Your hammer deals more damage to enemies below 35% health. Finish what you start."
@@ -83,7 +85,7 @@ node_name = "Executioner II"
 icon = ExtResource("16_exe2")
 description = "Hits low-health enemies even harder."
 branch = &"domination"
-tier = 2
+tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_exe2")])
 weapon_bound = true
 upgrades = &"hammer_executioner"
@@ -100,7 +102,7 @@ node_name = "Executioner III"
 icon = ExtResource("17_exe3")
 description = "Your finisher hits hardest of all. No one walks away."
 branch = &"domination"
-tier = 3
+tier = 4
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_exe3")])
 weapon_bound = true
 upgrades = &"hammer_executioner_2"
@@ -113,6 +115,7 @@ value = 6.0
 [sub_resource type="Resource" id="Node_bulwark"]
 script = ExtResource("2_node")
 id = &"hammer_bulwark"
+tier = 2
 node_name = "Bulwark"
 icon = ExtResource("12_bul")
 description = "+6 armor."
@@ -130,12 +133,13 @@ node_name = "Juggernaut"
 icon = ExtResource("13_jug")
 description = "+20 max health."
 branch = &"resolve"
-tier = 2
+tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_juggernaut")])
 
 [sub_resource type="Resource" id="Node_ls1"]
 script = ExtResource("2_node")
 id = &"hammer_last_stand"
+tier = 2
 description = "Raise your guard, bracing against physical and magic damage for a few seconds. Your stand against the odds."
 branch = &"resolve"
 ability = ExtResource("18_laststand")
@@ -145,7 +149,7 @@ script = ExtResource("2_node")
 id = &"hammer_last_stand_2"
 description = "A stronger, longer guard. Brace harder, hold longer."
 branch = &"resolve"
-tier = 2
+tier = 3
 ability = ExtResource("19_laststand2")
 upgrades = &"hammer_last_stand"
 
@@ -154,7 +158,7 @@ script = ExtResource("2_node")
 id = &"hammer_last_stand_3"
 description = "An unbreakable stand: the most armor and magic resist, held the longest."
 branch = &"resolve"
-tier = 3
+tier = 4
 ability = ExtResource("20_laststand3")
 upgrades = &"hammer_last_stand_2"
 
@@ -166,6 +170,7 @@ value = 10.0
 [sub_resource type="Resource" id="Node_momentum"]
 script = ExtResource("2_node")
 id = &"hammer_momentum"
+tier = 2
 node_name = "Momentum"
 icon = ExtResource("14_mom")
 description = "+10 move speed. Shrug off its weight and keep advancing."

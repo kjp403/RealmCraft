@@ -24,11 +24,22 @@ func _init() -> void:
 		failures.append("point_budget(2) want 0 (first point at 3)")
 	if MasteryService.point_budget(3) != 1:
 		failures.append("point_budget(3) want 1")
-	# Subclass budget: covers heaviest column (30) but not cheapest full tree (36)
-	if MasteryService.point_budget(99) < 30:
+	# Subclass budget: covers heaviest column (~24) but not cheapest full tree (~46)
+	if MasteryService.point_budget(99) < 24:
 		failures.append("L99 budget too low to finish heaviest subclass column")
-	if MasteryService.point_budget(99) >= 36:
-		failures.append("L99 budget high enough to clear Hammer full tree")
+	if MasteryService.point_budget(99) >= 46:
+		failures.append("L99 budget high enough to clear a full tree")
+
+	# Tree totals should sit in a tight band (~46–50) so weapons feel fair.
+	var tree_dir: String = "res://source/common/gameplay/mastery/trees/"
+	for tree_file: String in ["hammer.tres", "sword.tres", "book.tres", "bow.tres", "wand.tres"]:
+		var tree_res: MasteryTreeResource = load(tree_dir + tree_file) as MasteryTreeResource
+		if tree_res == null:
+			failures.append("failed to load %s" % tree_file)
+			continue
+		var cost: int = tree_res.total_cost()
+		if cost < 44 or cost > 52:
+			failures.append("%s total_cost=%d want 44–52" % [tree_file, cost])
 
 	# --- Crafting XP buffed (outfitting only) + perk multiplier on server -----
 	var craft: String = FileAccess.get_file_as_string(
