@@ -204,7 +204,7 @@ transitions = ["Start", "OnFoot", SubResource("AnimationNodeStateMachineTransiti
 graph_offset = Vector2(13.9791, -42)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3w1m3"]
-size = Vector2(16, 10)
+size = Vector2(12, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_eyotc"]
 size = Vector2(16, 32)
