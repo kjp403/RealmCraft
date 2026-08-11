@@ -5,6 +5,15 @@
 [ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
 [ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="item_hide_cave"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="item_iron_bar"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="item_mithril_bar"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_coal_ore"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="item_mithril_ore"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_maple_log"]
+[ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="item_shrimp"]
+[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="item_trout"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="item_salmon"]
+[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="item_cod"]
+[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_herring"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
 [ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
@@ -28,19 +37,82 @@ min_amount = 50
 max_amount = 100
 chance = 0.8
 
-[sub_resource type="Resource" id="Drop_3_health_potion"]
+[sub_resource type="Resource" id="Drop_3_mithril_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mithril_bar")
+min_amount = 10
+max_amount = 25
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_4_coal_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_coal_ore")
+min_amount = 15
+max_amount = 40
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_5_mithril_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mithril_ore")
+min_amount = 8
+max_amount = 20
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_6_maple_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_maple_log")
+min_amount = 10
+max_amount = 30
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_7_shrimp"]
+script = ExtResource("2_loot")
+item = ExtResource("item_shrimp")
+min_amount = 5
+max_amount = 15
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_8_trout"]
+script = ExtResource("2_loot")
+item = ExtResource("item_trout")
+min_amount = 4
+max_amount = 12
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_9_salmon"]
+script = ExtResource("2_loot")
+item = ExtResource("item_salmon")
+min_amount = 3
+max_amount = 10
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_10_cod"]
+script = ExtResource("2_loot")
+item = ExtResource("item_cod")
+min_amount = 3
+max_amount = 10
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_11_herring"]
+script = ExtResource("2_loot")
+item = ExtResource("item_herring")
+min_amount = 4
+max_amount = 12
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_12_health_potion"]
 script = ExtResource("2_loot")
 item = ExtResource("item_health_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_4_mana_potion"]
+[sub_resource type="Resource" id="Drop_13_mana_potion"]
 script = ExtResource("2_loot")
 item = ExtResource("item_mana_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_5_wood_silver_small"]
+[sub_resource type="Resource" id="Drop_14_wood_silver_small"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wood_silver_small")
 min_amount = 1
@@ -51,5 +123,5 @@ chance = 0.16
 script = ExtResource("1_reward")
 gold_min = 3000
 gold_max = 8000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_health_potion"), SubResource("Drop_4_mana_potion"), SubResource("Drop_5_wood_silver_small")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_mithril_bar"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_maple_log"), SubResource("Drop_7_shrimp"), SubResource("Drop_8_trout"), SubResource("Drop_9_salmon"), SubResource("Drop_10_cod"), SubResource("Drop_11_herring"), SubResource("Drop_12_health_potion"), SubResource("Drop_13_mana_potion"), SubResource("Drop_14_wood_silver_small")])
 lockout_hours = 0.0

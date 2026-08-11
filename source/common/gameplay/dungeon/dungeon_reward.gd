@@ -16,5 +16,11 @@ extends Resource
 ## Loot table — each entry rolls independently (its own chance + amount range),
 ## exactly like a mob's loot. Curate it richer than trash drops.
 @export var loot: Array[LootDrop] = []
+## Optional capped pool (e.g. enchanted gem/cloth/ore). Each entry rolls
+## independently, but at most [member exclusive_max] of the hits are kept.
+@export var exclusive_loot: Array[LootDrop] = []
+## Cap on how many exclusive_loot hits can grant in one clear. 2 = can get two
+## of the three enchanted mats, never all three.
+@export var exclusive_max: int = 2
 ## Unused legacy field (soft rolling lockout). Kept for .tres compatibility.
 @export var lockout_hours: float = 0.0

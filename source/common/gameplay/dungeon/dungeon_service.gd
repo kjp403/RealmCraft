@@ -578,15 +578,30 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 
 	var items: Array = []
 	for drop: LootDrop in reward.loot:
-		if drop == null or drop.item == null:
-			continue
-		var chance: float = minf(1.0, drop.chance * chance_mult)
-		if randf() <= chance:
-			var amount: int = randi_range(drop.min_amount, drop.max_amount)
-			amount = _scale_amount(amount, amount_mult)
-			if amount > 0:
-				Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
-				items.append({"name": str(drop.item.item_name), "amount": amount})
+		_try_grant_drop(resource, drop, chance_mult, amount_mult, items)
+
+	# Exclusive pool (e.g. enchanted gem/cloth/ore): independent rolls, then
+	# cap so a clear never takes every entry (exclusive_max, default 2 of 3).
+	if not reward.exclusive_loot.is_empty():
+		var hits: Array = []
+		for drop: LootDrop in reward.exclusive_loot:
+			if drop == null or drop.item == null:
+				continue
+			var chance: float = minf(1.0, drop.chance * chance_mult)
+			if randf() <= chance:
+				var amount: int = randi_range(drop.min_amount, drop.max_amount)
+				amount = _scale_amount(amount, amount_mult)
+				if amount > 0:
+					hits.append({"drop": drop, "amount": amount})
+		var cap: int = maxi(0, reward.exclusive_max)
+		if hits.size() > cap:
+			hits.shuffle()
+			hits = hits.slice(0, cap)
+		for hit: Dictionary in hits:
+			var drop: LootDrop = hit["drop"]
+			var amount: int = int(hit["amount"])
+			Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
+			items.append({"name": str(drop.item.item_name), "amount": amount})
 
 	return {
 		"gold": gold,
@@ -594,6 +609,26 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 		"charges_left": charges_remaining(resource),
 		"solo": solo,
 	}
+
+
+static func _try_grant_drop(
+	resource: PlayerResource,
+	drop: LootDrop,
+	chance_mult: float,
+	amount_mult: float,
+	items: Array
+) -> void:
+	if drop == null or drop.item == null:
+		return
+	var chance: float = minf(1.0, drop.chance * chance_mult)
+	if randf() > chance:
+		return
+	var amount: int = randi_range(drop.min_amount, drop.max_amount)
+	amount = _scale_amount(amount, amount_mult)
+	if amount <= 0:
+		return
+	Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
+	items.append({"name": str(drop.item.item_name), "amount": amount})
 
 
 static func _scale_amount(amount: int, mult: float) -> int:
