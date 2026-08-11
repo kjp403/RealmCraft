@@ -117,6 +117,26 @@ func meets_mastery_requirement(res: PlayerResource) -> bool:
 	return false
 
 
+## Same gate evaluated against a flat {category: level} map, for callers with no
+## PlayerResource to hand. The CLIENT is exactly that case — player_resource is
+## assigned server-side only, so client tooltips read ClientState's mastery
+## mirror through here instead of silently failing every gate (which painted
+## every wear requirement red, met or not).
+func meets_mastery_levels(levels: Dictionary) -> bool:
+	if required_mastery_level <= 0 or required_mastery_categories.is_empty():
+		return true
+	if required_mastery_categories.has(&"any"):
+		var best: int = 1
+		for slug: Variant in levels:
+			best = maxi(best, int(levels[slug]))
+		return best >= required_mastery_level
+	for category: StringName in required_mastery_categories:
+		# Missing = never practiced = level 1 (PlayerResource.mastery_level_of).
+		if maxi(1, int(levels.get(String(category), 1))) >= required_mastery_level:
+			return true
+	return false
+
+
 func equip(_character: Character) -> void:
 	# Visual / mount hooks live on WeaponItem and Item. Combat stats from
 	# base_modifiers are applied by EquipmentComponent's gear ledger so

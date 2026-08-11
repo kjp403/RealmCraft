@@ -152,24 +152,24 @@ static func _entry_color(entry: Dictionary, item: Item = null) -> String:
 
 
 ## Does the local player satisfy the gate this entry describes? Entries without
-## req_* data (or evaluated before the local player exists, e.g. a shop preview at
-## load) fall back to false, keeping the old cautious red rather than promising
-## access we can't verify.
+## req_* data fall back to false, keeping the old cautious red rather than
+## promising access we can't verify.
+##
+## Every read here goes through ClientState's mirrors, NEVER
+## local_player.player_resource: that field is assigned on the world server only
+## (InstanceServer), so it is null on every client and reading it made mastery
+## and character-level gates report "unmet" unconditionally — the red
+## "Requires … mastery N" on gear the player had long since unlocked.
 static func _requirement_met(entry: Dictionary, item: Item) -> bool:
-	# Profession gate (tools). ClientState mirrors skill levels for exactly this
-	# kind of client-side check, and reads missing skills as level 1.
+	# Profession gate (tools). ClientState reads missing skills as level 1.
 	if entry.has("req_skill"):
 		return ClientState.skill_level(StringName(entry["req_skill"])) \
 			>= int(entry.get("req_skill_level", 0))
 
-	var local: LocalPlayer = ClientState.local_player
-	if local == null or local.player_resource == null:
-		return false
-	var res: PlayerResource = local.player_resource
-
 	# Mastery gate: the item owns the "any / one-of these categories" rule.
 	if StringName(entry.get("req_kind", &"")) == &"mastery":
-		return item is GearItem and (item as GearItem).meets_mastery_requirement(res)
+		return item is GearItem \
+			and (item as GearItem).meets_mastery_levels(ClientState.mastery_levels)
 	if entry.has("req_char_level"):
-		return res.level >= int(entry["req_char_level"])
+		return ClientState.player_level >= int(entry["req_char_level"])
 	return false

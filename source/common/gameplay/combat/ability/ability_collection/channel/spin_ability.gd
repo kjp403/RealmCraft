@@ -31,6 +31,13 @@ func channel_tick(caster: Character) -> void:
 		circle.radius = radius
 		shape_node.shape = circle
 	arc.damage = caster.stats_component.get_stat(Stat.AD) * damage_ratio
+	# The spin is MOBILE and the wielder keeps moving, so a static one-frame
+	# snapshot at the tick position missed anything that stepped in afterwards —
+	# the "whirlwind whiffs" complaint. Ride the caster and stay live for the
+	# WHOLE tick instead, so the radius means what it looks like it means. The
+	# arc's own dedupe still caps this at one hit per target per tick.
+	arc.follow_source = true
+	arc.lifetime = maxf(0.1, tick_interval_s)
 	caster.get_parent().add_child(arc)
 	arc.global_position = caster.global_position
 

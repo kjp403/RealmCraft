@@ -41,6 +41,16 @@ var _looping: bool = false
 var _loop_generation: int = 0
 var _progress_bar: ProgressBar
 
+## How many items one Craft press makes. ALL keeps the original "until the
+## materials run out" behaviour (the default, so nothing changes for players who
+## already lean on it); ONE and X are the opt-in batch sizes.
+enum Qty { ONE, X, ALL }
+const QTY_MAX: int = 999
+var _qty_mode: Qty = Qty.ALL
+var _qty_spin: SpinBox
+## Items completed by the run currently in flight (for the "3 / 25" readout).
+var _crafted_this_run: int = 0
+
 var _tab_buttons: Dictionary[StringName, Button] = {}
 var _tab_group: ButtonGroup = ButtonGroup.new()
 var _row_group: ButtonGroup = ButtonGroup.new()
@@ -67,6 +77,7 @@ func _ready() -> void:
 	_gold_id = Economy.gold_id()
 	build_shell("Crafting", $Body, true)
 	_build_header()
+	_build_quantity_row()
 	_build_progress_bar()
 	craft_button.pressed.connect(_on_craft_pressed)
 	visibility_changed.connect(_on_visibility_changed)
@@ -108,6 +119,68 @@ func _stop_loop() -> void:
 	_looping = false
 	_loop_generation += 1
 	_set_progress(0.0)
+
+
+## "Make: 1 | X | All" above the Craft button. X reveals a spinner the player
+## types their own batch size into. The choice sticks while the menu is open, so
+## picking a size once covers a whole crafting session.
+func _build_quantity_row() -> void:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 6)
+
+	var caption: Label = Label.new()
+	caption.text = "Make"
+	caption.add_theme_color_override(&"font_color", COLOR_MUTED)
+	caption.add_theme_font_size_override(&"font_size", 13)
+	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(caption)
+
+	var group: ButtonGroup = ButtonGroup.new()
+	for option: Array in [["1", Qty.ONE], ["X", Qty.X], ["All", Qty.ALL]]:
+		var mode: Qty = option[1]
+		var button: Button = Button.new()
+		button.text = str(option[0])
+		button.toggle_mode = true
+		button.button_group = group
+		button.theme_type_variation = &"SectionTab"
+		button.custom_minimum_size = Vector2(46, 30)
+		button.button_pressed = (mode == _qty_mode)
+		button.pressed.connect(_on_qty_pressed.bind(mode))
+		row.add_child(button)
+
+	_qty_spin = SpinBox.new()
+	_qty_spin.min_value = 1
+	_qty_spin.max_value = QTY_MAX
+	_qty_spin.step = 1
+	_qty_spin.value = 10
+	_qty_spin.custom_minimum_size = Vector2(84, 30)
+	_qty_spin.tooltip_text = "How many to make"
+	_qty_spin.visible = (_qty_mode == Qty.X)
+	_qty_spin.value_changed.connect(func(_value: float) -> void: _render_detail())
+	row.add_child(_qty_spin)
+
+	var column: Node = craft_button.get_parent()
+	column.add_child(row)
+	column.move_child(row, craft_button.get_index())
+
+
+## Switching batch size mid-run would silently change the target — stop first.
+func _on_qty_pressed(mode: Qty) -> void:
+	_qty_mode = mode
+	_qty_spin.visible = (mode == Qty.X)
+	_stop_loop()
+	_render_detail()
+
+
+## Items this Craft press should make; -1 = keep going until something stops us.
+func _qty_target() -> int:
+	match _qty_mode:
+		Qty.ONE:
+			return 1
+		Qty.X:
+			return maxi(1, int(_qty_spin.value)) if _qty_spin != null else 1
+		_:
+			return -1
 
 
 ## Fill bar for the current item's CRAFT_INTERVAL wait, sitting between the
@@ -504,7 +577,11 @@ func _render_detail() -> void:
 
 	if _looping:
 		craft_button.disabled = false
-		craft_button.text = "Stop"
+		var target: int = _qty_target()
+		craft_button.text = (
+			"Stop (%d / %d)" % [_crafted_this_run, target] if target > 0
+			else "Stop (%d)" % _crafted_this_run
+		)
 		_set_progress(_progress_bar.value if _progress_bar != null else 0.0)
 		return
 	_set_progress(0.0)
@@ -517,7 +594,19 @@ func _render_detail() -> void:
 	elif not can_pay:
 		craft_button.text = "Not enough gold"
 	else:
-		craft_button.text = _action_verb()
+		craft_button.text = _craft_button_label()
+
+
+## "Craft" / "Craft ×25" / "Craft All" — the batch size belongs on the button
+## that commits to it, not only on the selector above it.
+func _craft_button_label() -> String:
+	match _qty_mode:
+		Qty.ONE:
+			return _action_verb()
+		Qty.X:
+			return "%s ×%d" % [_action_verb(), _qty_target()]
+		_:
+			return "%s All" % _action_verb()
 
 
 ## "Helmet · wearable at level N" for gear, "Material" for mats.
@@ -601,13 +690,16 @@ func _on_craft_pressed() -> void:
 	_start_craft_loop()
 
 
-## Wait CRAFT_INTERVAL, craft one, repeat until the materials run out, the
-## player hits Stop, or the menu closes. Used by every station — smelting,
-## smithing, outfitting and cooking all tick at the same rate.
+## Wait CRAFT_INTERVAL, craft one, repeat until the batch size is reached, the
+## materials run out, the player hits Stop, or the menu closes. Used by every
+## station — smelting, smithing, outfitting and cooking all tick at the same
+## rate. A target of -1 (Make All) is the "until something stops us" case.
 func _start_craft_loop() -> void:
 	_looping = true
 	_loop_generation += 1
+	_crafted_this_run = 0
 	var gen: int = _loop_generation
+	var target: int = _qty_target()
 	_render_detail()
 	while _looping and gen == _loop_generation and visible and _selected >= 0:
 		var recipe: CraftingRecipe = _station.recipes[_selected]
@@ -627,7 +719,11 @@ func _start_craft_loop() -> void:
 		var ok: bool = await _craft_once()
 		if not ok:
 			break
+		_crafted_this_run += 1
 		_set_progress(0.0)
+		if target > 0 and _crafted_this_run >= target:
+			break
+		_render_detail() # refresh the "3 / 25" readout on the Stop button
 	_stop_loop()
 	if is_inside_tree():
 		_render_detail()

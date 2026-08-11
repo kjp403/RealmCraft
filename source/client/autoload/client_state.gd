@@ -58,6 +58,14 @@ var player_level: int = 1
 ## world gates (e.g. Mining 50+ vault) — the server still owns progression.
 signal skill_levels_changed
 var skill_levels: Dictionary = {}
+## Weapon-mastery levels for the local character (category slug → int), mirrored
+## from mastery.get on spawn + the combat.reward mastery payload. The CLIENT has
+## no PlayerResource (it is server-only — see InstanceServer), so every tooltip /
+## panel that needs "do I meet this mastery gate" reads THIS, not
+## local_player.player_resource, which is always null here. Missing categories
+## read as level 1, matching PlayerResource.mastery_level_of.
+signal mastery_levels_changed
+var mastery_levels: Dictionary = {}
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -295,6 +303,13 @@ func _on_combat_reward(data: Dictionary) -> void:
 			Toaster.toast("+%d attribute points" % pts)
 	var big: PackedStringArray = PackedStringArray()
 	var mastery: Dictionary = data.get("mastery", {})
+	# Keep the mastery mirror current off every kill — gear tooltips colour their
+	# wear-gates against it, so a stale mirror reads as "locked" on gear you just
+	# unlocked.
+	set_mastery_level(
+		StringName(str(mastery.get("category", ""))),
+		int(mastery.get("level", 0)),
+	)
 	if bool(mastery.get("started", false)):
 		big.append("%s Mastery begun! +1 mastery point (Character > Mastery)" % str(mastery.get("category", "")).capitalize())
 	elif bool(mastery.get("leveled_up", false)):
@@ -561,6 +576,50 @@ func apply_skill_levels(levels: Variant) -> void:
 			changed = true
 	if changed:
 		skill_levels_changed.emit()
+
+
+## Local weapon-mastery level for client-side gates. Missing categories read as 1
+## (masteries share the skills' 1–99 curve — never practiced is level 1, not 0).
+func mastery_level(category: StringName) -> int:
+	return maxi(1, int(mastery_levels.get(String(category), 1)))
+
+
+## Merge a mastery.get-shaped dict ({category: {level, ...}}) into the mirror.
+func apply_mastery_payload(masteries: Variant) -> void:
+	if not (masteries is Dictionary):
+		return
+	var changed: bool = false
+	for raw_name: Variant in (masteries as Dictionary):
+		var entry: Variant = (masteries as Dictionary)[raw_name]
+		if not (entry is Dictionary):
+			continue
+		var slug: String = String(raw_name)
+		var level: int = maxi(1, int((entry as Dictionary).get("level", 1)))
+		if int(mastery_levels.get(slug, -1)) != level:
+			mastery_levels[slug] = level
+			changed = true
+	if changed:
+		mastery_levels_changed.emit()
+
+
+## Bump one mastery level after a kill reward (no-op if unchanged).
+func set_mastery_level(category: StringName, level: int) -> void:
+	var slug: String = String(category)
+	if slug.is_empty() or level < 1:
+		return
+	if int(mastery_levels.get(slug, -1)) == level:
+		return
+	mastery_levels[slug] = level
+	mastery_levels_changed.emit()
+
+
+## Highest mastery level across every category the client knows about — the
+## &"any" gate on universal endgame sets.
+func best_mastery_level() -> int:
+	var best: int = 1
+	for slug: Variant in mastery_levels:
+		best = maxi(best, int(mastery_levels[slug]))
+	return best
 
 
 ## Bump one profession level after gather/craft (no-op if unchanged / lower).

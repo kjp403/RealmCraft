@@ -139,6 +139,13 @@ func _refresh_progression() -> void:
 		_apply_progression(data)
 		_hide_xp_bar_now(),
 		{}, InstanceClient.current.name)
+	# Weapon-mastery mirror, hydrated on the same beat. Gear tooltips colour
+	# their wear-gates from it (ItemTooltip), so it has to be populated before
+	# the player opens a bag or a crafting station, not only after they visit
+	# the Mastery tab.
+	Client.request_data(&"mastery.get", func(data: Dictionary) -> void:
+		ClientState.apply_mastery_payload(data.get("masteries", {})),
+		{}, InstanceClient.current.name)
 
 
 ## First-run welcome modal, shown once via a client settings flag (so per install, not per character).

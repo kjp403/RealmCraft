@@ -17,9 +17,14 @@ const BOTTOM_CLEARANCE := 52.0
 	$MarginContainer/MainColumn/Content
 )
 
+## Which slice of the log the list shows. NOT_STARTED asks the server for the
+## WHOLE quest catalog (quest.list {"all": true}) — the other two only need this
+## character's own quests, so the bigger payload is opt-in.
+enum Filter { ACTIVE, COMPLETED, NOT_STARTED }
+
 var _quests: Array = []
 var _selected_id: int = 0
-var _showing_completed: bool = false
+var _filter: Filter = Filter.ACTIVE
 
 var _list_view: VBoxContainer
 var _quest_list: VBoxContainer
@@ -27,8 +32,7 @@ var _detail_view: VBoxContainer
 var _detail_title: Label
 var _detail_body: VBoxContainer
 var _track_button: Button
-var _active_tab: Button
-var _completed_tab: Button
+var _tab_buttons: Dictionary[int, Button] = {}
 var _tab_group := ButtonGroup.new()
 
 
@@ -91,26 +95,28 @@ func _build_list_view(root: Control) -> void:
 	tabs.add_theme_constant_override(&"separation", 4)
 	_list_view.add_child(tabs)
 
-	_active_tab = Button.new()
-	_active_tab.text = "Active"
-	_active_tab.toggle_mode = true
-	_active_tab.button_group = _tab_group
-	_active_tab.button_pressed = true
-	_active_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_active_tab.custom_minimum_size = Vector2(0.0, 25.0)
-	_active_tab.add_theme_font_size_override(&"font_size", 9)
-	_active_tab.pressed.connect(_show_active_quests)
-	tabs.add_child(_active_tab)
-
-	_completed_tab = Button.new()
-	_completed_tab.text = "Completed"
-	_completed_tab.toggle_mode = true
-	_completed_tab.button_group = _tab_group
-	_completed_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_completed_tab.custom_minimum_size = Vector2(0.0, 25.0)
-	_completed_tab.add_theme_font_size_override(&"font_size", 9)
-	_completed_tab.pressed.connect(_show_completed_quests)
-	tabs.add_child(_completed_tab)
+	# Three tabs in 180px: short labels only. "New" is the same word the
+	# quest-giver menu tags unstarted quests with, so the two screens agree.
+	for option: Array in [
+		["Active", Filter.ACTIVE],
+		["Done", Filter.COMPLETED],
+		["New", Filter.NOT_STARTED],
+	]:
+		var filter: Filter = option[1]
+		var tab := Button.new()
+		tab.text = str(option[0])
+		tab.toggle_mode = true
+		tab.button_group = _tab_group
+		tab.button_pressed = (filter == _filter)
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab.custom_minimum_size = Vector2(0.0, 25.0)
+		tab.add_theme_font_size_override(&"font_size", 9)
+		tab.pressed.connect(_set_filter.bind(filter))
+		tabs.add_child(tab)
+		_tab_buttons[filter] = tab
+	_tab_buttons[Filter.NOT_STARTED].tooltip_text = (
+		"Every quest in the game you haven't picked up yet."
+	)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -204,7 +210,7 @@ func _refresh() -> void:
 	Client.request_data(
 		&"quest.list",
 		_on_quests_received,
-		{},
+		{"all": _filter == Filter.NOT_STARTED},
 		InstanceClient.current.name
 	)
 
@@ -225,17 +231,14 @@ func _on_quests_received(data: Dictionary) -> void:
 		_rebuild_detail()
 
 
-func _show_active_quests() -> void:
-	_showing_completed = false
-	_active_tab.button_pressed = true
-	_completed_tab.button_pressed = false
-	_rebuild_quest_list()
-
-
-func _show_completed_quests() -> void:
-	_showing_completed = true
-	_active_tab.button_pressed = false
-	_completed_tab.button_pressed = true
+func _set_filter(filter: Filter) -> void:
+	_filter = filter
+	# set_pressed_no_signal bypasses the ButtonGroup — sync every tab.
+	for key: int in _tab_buttons:
+		_tab_buttons[key].set_pressed_no_signal(key == filter)
+	# The NOT_STARTED slice needs the full catalog, which the current payload
+	# may not carry — re-fetch rather than filter an incomplete list.
+	_refresh()
 	_rebuild_quest_list()
 
 
@@ -258,25 +261,37 @@ func _rebuild_quest_list() -> void:
 		_quest_list.remove_child(child)
 		child.queue_free()
 
-	var expected_state: String = (
-		"turned_in" if _showing_completed else "active"
-	)
-	var visible_count: int = 0
+	var expected_state: String = ""
+	match _filter:
+		Filter.ACTIVE:
+			expected_state = "active"
+		Filter.COMPLETED:
+			expected_state = "turned_in"
+		_:
+			expected_state = "" # never accepted
 
+	var rows: Array = []
 	for quest: Dictionary in _quests:
-		if str(quest.get("state", "")) != expected_state:
-			continue
+		if str(quest.get("state", "")) == expected_state:
+			rows.append(quest)
+	if _filter == Filter.NOT_STARTED:
+		# Catalog order is registry order — sort by name so a quest keeps its
+		# place in the list between openings.
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return str(a.get("name", "")).nocasecmp_to(str(b.get("name", ""))) < 0)
 
+	for quest: Dictionary in rows:
 		_quest_list.add_child(_make_quest_row(quest))
-		visible_count += 1
 
-	if visible_count == 0:
+	if rows.is_empty():
 		var empty := Label.new()
-		empty.text = (
-			"No completed quests."
-			if _showing_completed
-			else "No active quests."
-		)
+		match _filter:
+			Filter.ACTIVE:
+				empty.text = "No active quests."
+			Filter.COMPLETED:
+				empty.text = "No completed quests."
+			_:
+				empty.text = "You've started every quest."
 		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		empty.add_theme_font_size_override(&"font_size", 9)
 		empty.add_theme_color_override(
@@ -301,15 +316,35 @@ func _make_quest_row(quest: Dictionary) -> Button:
 
 	if state == "turned_in":
 		row.text = "✓  " + quest_name
-	elif ClientState.tracked_quest_id == quest_id:
-		row.text = "◆  " + quest_name
+	elif state == "active":
+		row.text = (
+			"◆  " + quest_name
+			if ClientState.tracked_quest_id == quest_id
+			else quest_name
+		)
 	else:
-		row.text = quest_name
+		# Unstarted: say what's in the way, so the browse list reads as
+		# "what's next" rather than a bare catalog.
+		row.text = "%s  ·  %s" % [quest_name, _lock_tag(quest)]
+		if _lock_tag(quest) != "OPEN":
+			row.add_theme_color_override(&"font_color", Color(0.7, 0.5, 0.5))
 
 	_apply_row_styles(row)
 	row.pressed.connect(_show_detail.bind(quest_id))
 
 	return row
+
+
+## Shortest honest reason an unstarted quest isn't available yet. Chain lock
+## outranks the level chip — "do the earlier quest" is the actionable half.
+func _lock_tag(quest: Dictionary) -> String:
+	if not bool(quest.get("meets_prereq", true)):
+		return "LOCKED"
+	if not bool(quest.get("meets_level", true)):
+		return "LV %d" % int(quest.get("min_level", 0))
+	if not bool(quest.get("meets_skill", true)):
+		return str(quest.get("skill_req", "")).to_upper()
+	return "OPEN"
 
 
 func _apply_row_styles(row: Button) -> void:

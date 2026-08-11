@@ -84,7 +84,12 @@ static func try_damage(source: Character, body: Node2D, damage: float, damage_ty
 ## (a territory flag, a motionless mob), which an Area2D's enter-events and
 ## get_overlapping_bodies() miss for a hitbox spawned on top of them. Must be
 ## called from _physics_process (direct_space_state is only valid during physics).
-static func overlapping_bodies(hitbox: Area2D) -> Array[Node2D]:
+##
+## [param max_results] caps the query. It has to comfortably clear the busiest
+## realistic overlap — a wide AoE (whirlwind, meteor) over a packed mob camp
+## sees one result PER collider, and anything past the cap is silently dropped,
+## which reads in-game as "the ability didn't hit that one".
+static func overlapping_bodies(hitbox: Area2D, max_results: int = 48) -> Array[Node2D]:
 	var out: Array[Node2D] = []
 	var shape_node: CollisionShape2D = hitbox.get_node_or_null(^"CollisionShape2D")
 	if shape_node == null or shape_node.shape == null:
@@ -98,7 +103,7 @@ static func overlapping_bodies(hitbox: Area2D) -> Array[Node2D]:
 	params.collision_mask = hitbox.collision_mask
 	params.collide_with_bodies = true
 	params.collide_with_areas = true # also catch HurtBox areas (the hit target), not just bodies
-	for hit: Dictionary in space.intersect_shape(params, 16):
+	for hit: Dictionary in space.intersect_shape(params, max_results):
 		var collider: Object = hit.get("collider")
 		if collider is Node2D:
 			out.append(collider as Node2D)
