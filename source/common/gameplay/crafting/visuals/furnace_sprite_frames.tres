@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://dh6njikiv0sxv" path="res://assets/sprites/environment/structures/stations/furnace/iron_02_sheet.png" id="1_tex"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f5xo6"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_st78p"]
+atlas = ExtResource("1_tex")
+region = Rect2(48, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_slfv1"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2pn7"]
+atlas = ExtResource("1_tex")
+region = Rect2(48, 64, 48, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f5xo6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_st78p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_slfv1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2pn7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 2.0
+}]

@@ -68,6 +68,7 @@ func _init() -> void:
 	for path3: String in [
 		"res://source/common/gameplay/crafting/resources/anvil.tres",
 		"res://source/common/gameplay/crafting/resources/workbench.tres",
+		"res://source/common/gameplay/crafting/resources/ascended_workbench.tres",
 		"res://source/common/gameplay/shops/resources/ascension_shop.tres",
 		"res://source/common/gameplay/dungeon/ascension_reward.tres",
 	]:
@@ -80,6 +81,9 @@ func _init() -> void:
 	) as CraftingStationResource
 	var wb: CraftingStationResource = ResourceLoader.load(
 		"res://source/common/gameplay/crafting/resources/workbench.tres"
+	) as CraftingStationResource
+	var awb: CraftingStationResource = ResourceLoader.load(
+		"res://source/common/gameplay/crafting/resources/ascended_workbench.tres"
 	) as CraftingStationResource
 	var shop: ShopResource = ResourceLoader.load(
 		"res://source/common/gameplay/shops/resources/ascension_shop.tres"
@@ -109,6 +113,31 @@ func _init() -> void:
 	if not found_wb:
 		errors.append("workbench missing Wraithsilk Vest recipe")
 
+	var tempest_hood: Item = ResourceLoader.load(
+		"res://source/common/gameplay/items/gears/leather/tempest_hood.tres"
+	) as Item
+	var found_awb: bool = false
+	if awb != null and tempest_hood != null:
+		for r3: CraftingRecipe in awb.recipes:
+			if r3 != null and r3.output_item == tempest_hood:
+				found_awb = true
+				break
+	if not found_awb:
+		errors.append("ascended workbench missing Tempest Hood recipe")
+	if awb == null or awb.station_name != "Ascended Workbench":
+		errors.append("ascended workbench station_name wrong")
+	# Lv.60+ gear must not remain on the normal workbench.
+	if wb != null and tempest_hood != null:
+		for r4: CraftingRecipe in wb.recipes:
+			if r4 != null and r4.output_item == tempest_hood:
+				errors.append("normal workbench still has Tempest Hood (belongs on Ascended)")
+				break
+	if awb != null:
+		for r5: CraftingRecipe in awb.recipes:
+			if r5 != null and r5.required_level < 60:
+				errors.append("ascended workbench has sub-60 recipe lv=%d" % r5.required_level)
+				break
+
 	if shop == null or shop.entries.is_empty():
 		errors.append("ascension shop empty")
 
@@ -127,10 +156,11 @@ func _init() -> void:
 		print("AD curve sword: m40=%.1f m90=%.1f" % [ad40, ad90])
 
 	if errors.is_empty():
-		print("VERIFY_ASCENSION_PASS checked=%d anvil_recipes=%d workbench_recipes=%d shop_entries=%d" % [
+		print("VERIFY_ASCENSION_PASS checked=%d anvil_recipes=%d workbench_recipes=%d ascended_recipes=%d shop_entries=%d" % [
 			checked,
 			anvil.recipes.size() if anvil else 0,
 			wb.recipes.size() if wb else 0,
+			awb.recipes.size() if awb else 0,
 			shop.entries.size() if shop else 0,
 		])
 		quit(0)
