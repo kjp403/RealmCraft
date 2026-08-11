@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://dbmkuja8ck2pr"]
+[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://cfungusrewarh01"]
 
 [ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="item_bone"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="item_hide_cave"]
 [ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="item_adamant_bar"]
 [ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="item_runite_bar"]
 [ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="item_wood_silver_medium"]
@@ -12,53 +13,59 @@
 [ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="item_sunsteel_bow"]
 [ext_resource type="Resource" uid="uid://rmr0ohwx8ooc" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="item_book_sunsteel"]
 
-[sub_resource type="Resource" id="Drop_0_bone"]
+[sub_resource type="Resource" id="Drop_0_cloth_cave"]
 script = ExtResource("2_loot")
-item = ExtResource("item_bone")
+item = ExtResource("item_cloth_cave")
 min_amount = 75
 max_amount = 75
 
-[sub_resource type="Resource" id="Drop_1_adamant_bar"]
+[sub_resource type="Resource" id="Drop_1_hide_cave"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hide_cave")
+min_amount = 75
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_2_adamant_bar"]
 script = ExtResource("2_loot")
 item = ExtResource("item_adamant_bar")
 min_amount = 30
 max_amount = 75
 
-[sub_resource type="Resource" id="Drop_2_runite_bar"]
+[sub_resource type="Resource" id="Drop_3_runite_bar"]
 script = ExtResource("2_loot")
 item = ExtResource("item_runite_bar")
 min_amount = 20
 max_amount = 50
 chance = 0.7
 
-[sub_resource type="Resource" id="Drop_3_wood_silver_medium"]
+[sub_resource type="Resource" id="Drop_4_wood_silver_medium"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wood_silver_medium")
 min_amount = 1
 max_amount = 5
 chance = 0.22
 
-[sub_resource type="Resource" id="Drop_4_sword_sunsteel"]
+[sub_resource type="Resource" id="Drop_5_sword_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sword_sunsteel")
 chance = 0.01
 
-[sub_resource type="Resource" id="Drop_5_hammer_sunsteel"]
+[sub_resource type="Resource" id="Drop_6_hammer_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_hammer_sunsteel")
 chance = 0.01
 
-[sub_resource type="Resource" id="Drop_6_wand_sunsteel"]
+[sub_resource type="Resource" id="Drop_7_wand_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wand_sunsteel")
 chance = 0.01
 
-[sub_resource type="Resource" id="Drop_7_sunsteel_bow"]
+[sub_resource type="Resource" id="Drop_8_sunsteel_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sunsteel_bow")
 chance = 0.01
 
-[sub_resource type="Resource" id="Drop_8_book_sunsteel"]
+[sub_resource type="Resource" id="Drop_9_book_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_book_sunsteel")
 chance = 0.01
@@ -67,5 +74,5 @@ chance = 0.01
 script = ExtResource("1_reward")
 gold_min = 10000
 gold_max = 20000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_adamant_bar"), SubResource("Drop_2_runite_bar"), SubResource("Drop_3_wood_silver_medium"), SubResource("Drop_4_sword_sunsteel"), SubResource("Drop_5_hammer_sunsteel"), SubResource("Drop_6_wand_sunsteel"), SubResource("Drop_7_sunsteel_bow"), SubResource("Drop_8_book_sunsteel")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_wood_silver_medium"), SubResource("Drop_5_sword_sunsteel"), SubResource("Drop_6_hammer_sunsteel"), SubResource("Drop_7_wand_sunsteel"), SubResource("Drop_8_sunsteel_bow"), SubResource("Drop_9_book_sunsteel")])
 lockout_hours = 0.0

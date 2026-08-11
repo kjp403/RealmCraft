@@ -6,12 +6,18 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="SpriteFrames" uid="uid://b3kb4pkejph4" path="res://source/common/gameplay/characters/sprite_frames/goblin.tres" id="3_skin"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="4_bar"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Drop_boss"]
 script = ExtResource("2_loot")
 item = ExtResource("4_bar")
 min_amount = 2
 max_amount = 4
+
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("2_loot")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
 
 [resource]
 script = ExtResource("1_script")
@@ -30,6 +36,6 @@ leashes = false
 chase_on_area = true
 xp_reward = 400
 respawns = false
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_boss")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_boss"), SubResource("Drop_dungeon_key")])
 metadata/slug = &"dungeon_boss"
 metadata/id = 9

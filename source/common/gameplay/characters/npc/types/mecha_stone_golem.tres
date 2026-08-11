@@ -15,6 +15,7 @@
 [ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="13_bow"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Lunge_charge"]
 script = ExtResource("91_lunge")
@@ -79,6 +80,11 @@ script = ExtResource("2_loot")
 item = ExtResource("13_bow")
 chance = 0.18
 
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("2_loot")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"mecha_stone_golem"
@@ -100,7 +106,7 @@ chase_on_area = true
 xp_reward = 900
 respawns = true
 respawn_delay = 300.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key")])
 enrage_health_fraction = 0.4
 slam_radius = 120.0
 slam_windup_s = 1.6

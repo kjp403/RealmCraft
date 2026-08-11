@@ -6,12 +6,18 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="SpriteFrames" uid="uid://c45uyyneimrpk" path="res://source/common/gameplay/characters/sprite_frames/stone_golem.tres" id="3_skin"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="4_bar"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Drop_iron"]
 script = ExtResource("2_loot")
 item = ExtResource("4_bar")
 min_amount = 4
 max_amount = 8
+
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("2_loot")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
 
 [resource]
 script = ExtResource("1_script")
@@ -32,7 +38,7 @@ chase_on_area = true
 xp_reward = 1000
 respawn_delay = 600.0
 respawns = false
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron"), SubResource("Drop_dungeon_key")])
 slam_radius = 150.0
 slam_windup_s = 2.2
 slam_damage = 55.0

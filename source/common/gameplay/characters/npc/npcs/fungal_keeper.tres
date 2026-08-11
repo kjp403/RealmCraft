@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://cfungalkeeper01"]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_i3jo1"]
+[ext_resource type="Resource" uid="uid://cfungusdungres1" path="res://source/common/gameplay/maps/instance/instance_collection/dungeons/fungus_dungeon.tres" id="2_dung"]
+[ext_resource type="Script" uid="uid://b36k3ordtiw1u" path="res://source/common/gameplay/characters/npc/interactions/dungeon_interaction.gd" id="3_dint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dial"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="SpriteFrames" uid="uid://dkeeft051qhl3" path="res://source/common/gameplay/characters/sprite_frames/rogue.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Resource_dial"]
+script = ExtResource("4_dial")
+lines = Array[String](["The Domain is a sealed pocket past the seep. Rooms lock behind you until the spawn is dead.", "Three rewarded clears a day per character. Solo pays better — double drop chances, half-again the haul. Groups share the danger, not the bonus.", "Bosses elsewhere drop Dungeon Keys. Use one when you're out of charges. Failed runs don't spend a charge."])
+label_override = "How does this work?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[sub_resource type="Resource" id="Resource_dint"]
+script = ExtResource("3_dint")
+dungeon = ExtResource("2_dung")
+metadata/_custom_type_script = "uid://b36k3ordtiw1u"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Fungal Keeper"
+skin = ExtResource("6_skin")
+greeting = "Smell that sweet rot? That's the Domain breathing. Go alone and the loot fattens — chances double, amounts climb by half. Three rewarded clears a day; keys buy more. I keep the seal."
+interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_dial"), SubResource("Resource_dint")])
+metadata/_custom_type_script = "uid://ddps5vwhnf048"

@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="li1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="li3"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -38,6 +39,11 @@ item = ExtResource("li3")
 min_amount = 4
 max_amount = 8
 chance = 0.7
+
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("3_loot")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
 
 [resource]
 script = ExtResource("4_script")
@@ -68,7 +74,7 @@ wander_pause_max_s = 4.0
 xp_reward = 4200
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key")])
 enrage_health_fraction = 0.35
 slam_radius = 144.0
 slam_windup_s = 1.15

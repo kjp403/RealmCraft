@@ -1,39 +1,46 @@
-[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://8byl713ves8w"]
+[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://cfungusrewarn01"]
 
 [ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="item_bone"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="item_hide_cave"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="item_iron_bar"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
 [ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
 
-[sub_resource type="Resource" id="Drop_0_bone"]
+[sub_resource type="Resource" id="Drop_0_cloth_cave"]
 script = ExtResource("2_loot")
-item = ExtResource("item_bone")
+item = ExtResource("item_cloth_cave")
 min_amount = 50
 max_amount = 50
 
-[sub_resource type="Resource" id="Drop_1_iron_bar"]
+[sub_resource type="Resource" id="Drop_1_hide_cave"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hide_cave")
+min_amount = 50
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_2_iron_bar"]
 script = ExtResource("2_loot")
 item = ExtResource("item_iron_bar")
 min_amount = 50
 max_amount = 100
 chance = 0.8
 
-[sub_resource type="Resource" id="Drop_2_health_potion"]
+[sub_resource type="Resource" id="Drop_3_health_potion"]
 script = ExtResource("2_loot")
 item = ExtResource("item_health_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_3_mana_potion"]
+[sub_resource type="Resource" id="Drop_4_mana_potion"]
 script = ExtResource("2_loot")
 item = ExtResource("item_mana_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_4_wood_silver_small"]
+[sub_resource type="Resource" id="Drop_5_wood_silver_small"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wood_silver_small")
 min_amount = 1
@@ -44,5 +51,5 @@ chance = 0.16
 script = ExtResource("1_reward")
 gold_min = 3000
 gold_max = 8000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_iron_bar"), SubResource("Drop_2_health_potion"), SubResource("Drop_3_mana_potion"), SubResource("Drop_4_wood_silver_small")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_health_potion"), SubResource("Drop_4_mana_potion"), SubResource("Drop_5_wood_silver_small")])
 lockout_hours = 0.0

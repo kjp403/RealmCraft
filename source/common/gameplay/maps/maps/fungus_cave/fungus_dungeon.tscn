@@ -9,6 +9,11 @@
 [ext_resource type="Script" uid="uid://trwnxb3wdk15" path="res://source/common/gameplay/dungeon/room_node.gd" id="6_gji63"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/dungeon/spawn_marker.tscn" id="9_ij07n"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_ox4g4"]
+[ext_resource type="Resource" uid="uid://ou1wadpim68o" path="res://source/common/gameplay/characters/npc/types/fungus/sporeling.tres" id="10_spore"]
+[ext_resource type="Resource" uid="uid://dpdtw2h3td5ip" path="res://source/common/gameplay/characters/npc/types/fungus/puffcap.tres" id="11_puff"]
+[ext_resource type="Resource" uid="uid://cd8rmrp54ds2e" path="res://source/common/gameplay/characters/npc/types/fungus/myconid_brute.tres" id="12_brute"]
+[ext_resource type="Resource" uid="uid://3ne3o1ls5mdj" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="13_heart"]
+[ext_resource type="Resource" uid="uid://btnithna7holw" path="res://source/common/gameplay/characters/npc/types/fungus/spore_swarm.tres" id="14_swarm"]
 
 [node name="FungusDungeon" type="Node2D" unique_id=127073003]
 y_sort_enabled = true
@@ -90,7 +95,23 @@ metadata/_custom_type_script = "uid://trwnxb3wdk15"
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Room1" unique_id=988636708]
 polygon = PackedVector2Array(-81, 192, 120, 192, 125, 101, 206, 64, 206, -47, 88, -166, -97, -160, -197, -37, -194, 87, -129, 110)
 
-[node name="SpawnMarker" parent="Room1" unique_id=1692202306 instance=ExtResource("9_ij07n")]
+[node name="Sporeling" parent="Room1" unique_id=1692202306 instance=ExtResource("9_ij07n")]
+position = Vector2(-40, 40)
+enemy_type = ExtResource("10_spore")
+
+[node name="Sporeling2" parent="Room1" unique_id=1692202307 instance=ExtResource("9_ij07n")]
+position = Vector2(50, 20)
+enemy_type = ExtResource("10_spore")
+wave = 1
+
+[node name="Puffcap" parent="Room1" unique_id=1692202308 instance=ExtResource("9_ij07n")]
+position = Vector2(10, -30)
+enemy_type = ExtResource("11_puff")
+
+[node name="Puffcap2" parent="Room1" unique_id=1692202309 instance=ExtResource("9_ij07n")]
+position = Vector2(-70, -20)
+enemy_type = ExtResource("11_puff")
+wave = 1
 
 [node name="Room2" type="Area2D" parent="." unique_id=776019012 node_paths=PackedStringArray("doors")]
 position = Vector2(216, -1326)
@@ -102,13 +123,44 @@ metadata/_custom_type_script = "uid://trwnxb3wdk15"
 position = Vector2(7, 20)
 polygon = PackedVector2Array(-264, 275, -202, 277, 89, 86, 84, -85, -153, -316, -338, -326, -300, 235)
 
+[node name="Myconid" parent="Room2" unique_id=1692202310 instance=ExtResource("9_ij07n")]
+position = Vector2(-40, 40)
+enemy_type = ExtResource("12_brute")
+
+[node name="Sporeling" parent="Room2" unique_id=1692202311 instance=ExtResource("9_ij07n")]
+position = Vector2(60, -20)
+enemy_type = ExtResource("10_spore")
+
+[node name="Sporeling2" parent="Room2" unique_id=1692202312 instance=ExtResource("9_ij07n")]
+position = Vector2(-90, -40)
+enemy_type = ExtResource("10_spore")
+wave = 1
+
+[node name="Puffcap" parent="Room2" unique_id=1692202313 instance=ExtResource("9_ij07n")]
+position = Vector2(20, 80)
+enemy_type = ExtResource("11_puff")
+wave = 1
+
 [node name="FinalRoom" type="Area2D" parent="." unique_id=405351662]
 position = Vector2(1113, -1457)
 script = ExtResource("6_gji63")
+final_room = true
 metadata/_custom_type_script = "uid://trwnxb3wdk15"
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="FinalRoom" unique_id=391060513]
 polygon = PackedVector2Array(-121, -100, -177, -39, -184, 16, -124, 79, 107, 74, 177, 13, 181, -35, 108, -103)
+
+[node name="FungalHeart" parent="FinalRoom" unique_id=1692202314 instance=ExtResource("9_ij07n")]
+position = Vector2(0, 0)
+enemy_type = ExtResource("13_heart")
+
+[node name="SporeSwarm" parent="FinalRoom" unique_id=1692202315 instance=ExtResource("9_ij07n")]
+position = Vector2(-60, 30)
+enemy_type = ExtResource("14_swarm")
+
+[node name="SporeSwarm2" parent="FinalRoom" unique_id=1692202316 instance=ExtResource("9_ij07n")]
+position = Vector2(70, -20)
+enemy_type = ExtResource("14_swarm")
 
 [node name="Room1Teleporter" parent="." unique_id=1565970672 node_paths=PackedStringArray("target") instance=ExtResource("9_ox4g4")]
 position = Vector2(-8, -640)

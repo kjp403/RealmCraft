@@ -378,6 +378,7 @@ func _on_slot_gui_input(
 		if (
 			item is ConsumableItem
 			or item is LootChestItem
+			or item is DungeonKeyItem
 			or item is GearItem
 			or item.holdable
 		):
@@ -393,7 +394,7 @@ func _open_context_menu(entry: Dictionary) -> void:
 
 	if item is LootChestItem:
 		context_menu.add_item("Open", ACTION_PRIMARY)
-	elif item is ConsumableItem:
+	elif item is ConsumableItem or item is DungeonKeyItem:
 		context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is GearItem:
 		context_menu.add_item("Equip", ACTION_PRIMARY)
@@ -403,6 +404,7 @@ func _open_context_menu(entry: Dictionary) -> void:
 	if (
 		item is ConsumableItem
 		or item is LootChestItem
+		or item is DungeonKeyItem
 		or item is GearItem
 		or item.holdable
 	):
@@ -527,6 +529,7 @@ func _perform_primary_action(entry: Dictionary) -> void:
 	if not (
 		item is ConsumableItem
 		or item is LootChestItem
+		or item is DungeonKeyItem
 		or item is GearItem
 		or item.holdable
 	):
@@ -536,6 +539,8 @@ func _perform_primary_action(entry: Dictionary) -> void:
 
 	if item is LootChestItem:
 		request_name = &"chest.open_item"
+	elif item is DungeonKeyItem:
+		request_name = &"dungeon.key_use"
 	elif item is ConsumableItem:
 		request_name = &"item.consume"
 

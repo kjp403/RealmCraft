@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786415843
-next_id = 313
+version = 1786421165
+next_id = 314
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -1342,6 +1342,11 @@ entries = Array[Dictionary]([{
 &"id": 312,
 &"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_steel.tres",
 &"slug": &"pickaxe_steel"
+}, {
+&"hash": "e1e99abe179a35cd3c8b70ce006dd91b1a1b9342385be1711f092b6b24388224",
+&"id": 313,
+&"path": "res://source/common/gameplay/items/consumables/dungeon_key.tres",
+&"slug": &"dungeon_key"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

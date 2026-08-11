@@ -51,6 +51,14 @@ const SOLO_REVIVES: int = 4
 const HARD_HEALTH_MULT: float = 2.0
 const HARD_DAMAGE_MULT: float = 1.5
 
+## Character-wide daily free rewarded clears (Normal + Hard share the pool).
+const DAILY_FREE_CHARGES: int = 3
+## dungeon_lockouts blob key for {day, used, bonus} — avoids a schema migration.
+const DAILY_CHARGES_KEY: String = "_daily_charges"
+## Solo incentive: drop chances ×2 (capped at 100%), rolled amounts ×1.5.
+const SOLO_CHANCE_MULT: float = 2.0
+const SOLO_AMOUNT_MULT: float = 1.5
+
 
 ## Is the run living in [param instance] a Hard one? Read by RoomNode when it spawns
 ## mobs (to scale them) and picks the reward.
@@ -125,6 +133,10 @@ static func lobby_status(instance: Node, peer_id: int, station: String) -> Dicti
 		return {"ok": false, "reason": "no_dungeon"}
 	var dungeon: DungeonResource = st["dungeon"]
 	var queue: Array = _lobbies.get(_lobby_key(instance.name, station), [])
+	var charges_left: int = DAILY_FREE_CHARGES
+	var player: Player = instance.get_player(peer_id) as Player
+	if player != null and player.player_resource != null:
+		charges_left = charges_remaining(player.player_resource)
 	return {
 		"ok": true,
 		"master_name": dungeon.title(),
@@ -133,6 +145,10 @@ static func lobby_status(instance: Node, peer_id: int, station: String) -> Dicti
 		"queued": queue.has(peer_id),
 		"started": false,
 		"dungeon": _dungeon_info(dungeon),
+		"charges_left": charges_left,
+		"charges_daily": DAILY_FREE_CHARGES,
+		"solo_chance_mult": SOLO_CHANCE_MULT,
+		"solo_amount_mult": SOLO_AMOUNT_MULT,
 	}
 
 
@@ -177,20 +193,32 @@ static func _dungeon_info(dres: DungeonResource) -> Dictionary:
 	}
 
 
-## A short human string for a DungeonReward: "50–120 gold, Iron Bar".
+## A short human string for a DungeonReward: "3k–8k gold + materials".
 static func _reward_summary(reward: DungeonReward) -> String:
 	if reward == null:
 		return "—"
 	var parts: PackedStringArray = PackedStringArray()
 	if reward.gold_max > 0:
 		if reward.gold_min == reward.gold_max:
-			parts.append("%d gold" % reward.gold_max)
+			parts.append("%s gold" % _fmt_gold(reward.gold_max))
 		else:
-			parts.append("%d–%d gold" % [reward.gold_min, reward.gold_max])
+			parts.append("%s–%s gold" % [_fmt_gold(reward.gold_min), _fmt_gold(reward.gold_max)])
+	var named: int = 0
 	for drop: LootDrop in reward.loot:
-		if drop != null and drop.item != null:
-			parts.append(str(drop.item.item_name))
+		if drop == null or drop.item == null:
+			continue
+		if named >= 3:
+			parts.append("more…")
+			break
+		parts.append(str(drop.item.item_name))
+		named += 1
 	return ", ".join(parts) if not parts.is_empty() else "—"
+
+
+static func _fmt_gold(amount: int) -> String:
+	if amount >= 1000:
+		return "%dk" % int(round(float(amount) / 1000.0))
+	return str(amount)
 
 
 ## Push the live roster to everyone in the queue (so they see joins/leaves).
@@ -475,9 +503,8 @@ static func on_player_left(peer_id: int, left_instance: Node) -> void:
 
 
 ## The final room cleared — the run is COMPLETE. Grant each member their reward
-## (honoring the soft daily lockout), push a per-member recap (dungeon name,
-## completion time, what they got), then after EJECT_DELAY_S send everyone home and
-## let the group dissolve. Called from RoomNode (final_room). Server-only.
+## (honoring the character daily charge pool), push a per-member recap, then after
+## EJECT_DELAY_S send everyone home. Failed runs never spend a charge. Server-only.
 static func on_dungeon_cleared(instance: Node) -> void:
 	if instance == null or WorldServer.curr == null:
 		return
@@ -497,15 +524,15 @@ static func on_dungeon_cleared(instance: Node) -> void:
 	var reward: DungeonReward = null
 	if dres != null:
 		reward = dres.hard_reward if (hard and dres.hard_reward != null) else dres.reward
-	# Hard runs get a separate daily lockout (clear Normal AND Hard each per day) and
-	# a tagged recap label.
-	var lockout_key: String = dungeon_name + (" (Hard)" if hard else "")
+	# Tagged recap label. Normal + Hard share the character's daily charge pool.
 	var label: String = dungeon_name + (" (Hard)" if hard else "")
+	var party_size: int = GroupService.members_of(group_id).size()
+	var solo: bool = party_size <= 1
 	for peer: int in GroupService.members_of(group_id):
 		var player: Player = instance.get_player(peer) as Player # all members are in this run
 		# Only HARD clears are ranked — the fixed hand-designed course is the fair
-		# race (Normal will go procedural later). The time stands apart from the
-		# reward lockout, so a reward-locked re-run can still set a faster record.
+		# race (Normal will go procedural later). Records still count when reward
+		# charges are spent (help runs / hard-record farming).
 		if hard and player != null:
 			LeaderboardService.record_dungeon_clear(player, dungeon_name, seconds)
 		if player != null:
@@ -514,7 +541,7 @@ static func on_dungeon_cleared(instance: Node) -> void:
 			"dungeon": label,
 			"seconds": seconds,
 			"eject_in": int(EJECT_DELAY_S),
-			"reward": _grant_reward(player, lockout_key, reward),
+			"reward": _grant_reward(player, reward, solo),
 		})
 	# (The victory sting is fired by the dungeon boss's own BossController on death.)
 	# Linger on the recap, then send the party home; on_player_left dissolves the
@@ -524,24 +551,28 @@ static func on_dungeon_cleared(instance: Node) -> void:
 	)
 
 
-## Grant one player their completion reward, honoring the soft daily lockout, and
-## return the recap summary for their client: {gold, items:[{name, amount}]} on a
-## payout, or {locked: true, available_in: <seconds>} if they already collected it
-## within the window. Items land in their (server-authoritative) inventory; the
-## client sees them on its next inventory.get — same as mob loot.
-static func _grant_reward(player: Player, lockout_key: String, reward: DungeonReward) -> Dictionary:
+## Grant one player their completion reward, honoring the character daily charge
+## pool, and return the recap summary: {gold, items, charges_left, solo} on a
+## payout, or {locked: true, charges_left: 0} when charges are spent (still XP /
+## records / dailies). Solo runs double drop chances and multiply amounts by 1.5×.
+static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> Dictionary:
 	if player == null or player.player_resource == null or reward == null:
 		return {}
 	var resource: PlayerResource = player.player_resource
-	var now_s: int = int(Time.get_unix_time_from_system())
-	var window_s: int = int(reward.lockout_hours * 3600.0)
-	var last_s: int = int(resource.dungeon_lockouts.get(lockout_key, 0))
-	if window_s > 0 and now_s - last_s < window_s:
-		return {"locked": true, "available_in": window_s - (now_s - last_s)}
+	if not consume_charge(resource):
+		return {
+			"locked": true,
+			"charges_left": 0,
+			"solo": solo,
+		}
+
+	var chance_mult: float = SOLO_CHANCE_MULT if solo else 1.0
+	var amount_mult: float = SOLO_AMOUNT_MULT if solo else 1.0
 
 	var gold: int = 0
 	if reward.gold_max > 0:
 		gold = randi_range(reward.gold_min, reward.gold_max)
+		gold = _scale_amount(gold, amount_mult)
 		if gold > 0 and Economy.gold_id() > 0:
 			Inventory.add_item(resource.inventory, Economy.gold_id(), gold)
 
@@ -549,14 +580,87 @@ static func _grant_reward(player: Player, lockout_key: String, reward: DungeonRe
 	for drop: LootDrop in reward.loot:
 		if drop == null or drop.item == null:
 			continue
-		if randf() <= drop.chance:
+		var chance: float = minf(1.0, drop.chance * chance_mult)
+		if randf() <= chance:
 			var amount: int = randi_range(drop.min_amount, drop.max_amount)
+			amount = _scale_amount(amount, amount_mult)
 			if amount > 0:
 				Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
 				items.append({"name": str(drop.item.item_name), "amount": amount})
 
-	resource.dungeon_lockouts[lockout_key] = now_s
-	return {"gold": gold, "items": items}
+	return {
+		"gold": gold,
+		"items": items,
+		"charges_left": charges_remaining(resource),
+		"solo": solo,
+	}
+
+
+static func _scale_amount(amount: int, mult: float) -> int:
+	if amount <= 0 or is_equal_approx(mult, 1.0):
+		return amount
+	return maxi(1, int(round(float(amount) * mult)))
+
+
+## UTC day index (unix seconds / 86400).
+static func _utc_day(now_s: int = -1) -> int:
+	if now_s < 0:
+		now_s = int(Time.get_unix_time_from_system())
+	@warning_ignore("integer_division")
+	return now_s / 86400
+
+
+## Ensure the player's charge blob is for today. Bonus charges carry across days;
+## free-used resets at UTC midnight.
+static func _ensure_charges(resource: PlayerResource) -> Dictionary:
+	var raw: Variant = resource.dungeon_lockouts.get(DAILY_CHARGES_KEY, {})
+	var blob: Dictionary = raw if raw is Dictionary else {}
+	var today: int = _utc_day()
+	if int(blob.get("day", -1)) != today:
+		blob = {
+			"day": today,
+			"used": 0,
+			"bonus": int(blob.get("bonus", 0)),
+		}
+		resource.dungeon_lockouts[DAILY_CHARGES_KEY] = blob
+	return blob
+
+
+## How many rewarded clears this character still has today (free leftover + keys).
+static func charges_remaining(resource: PlayerResource) -> int:
+	if resource == null:
+		return 0
+	var blob: Dictionary = _ensure_charges(resource)
+	var free_left: int = maxi(0, DAILY_FREE_CHARGES - int(blob.get("used", 0)))
+	return free_left + int(blob.get("bonus", 0))
+
+
+## Spend one rewarded-clear charge. Prefer the daily free pool, then bonus keys.
+## Returns false if none left (caller withholds gold/loot).
+static func consume_charge(resource: PlayerResource) -> bool:
+	if resource == null:
+		return false
+	var blob: Dictionary = _ensure_charges(resource)
+	var used: int = int(blob.get("used", 0))
+	var bonus: int = int(blob.get("bonus", 0))
+	if used < DAILY_FREE_CHARGES:
+		blob["used"] = used + 1
+	elif bonus > 0:
+		blob["bonus"] = bonus - 1
+	else:
+		return false
+	resource.dungeon_lockouts[DAILY_CHARGES_KEY] = blob
+	return true
+
+
+## Add bonus charges from a Dungeon Key. Returns the new charges_remaining.
+static func add_bonus_charge(resource: PlayerResource, amount: int = 1) -> int:
+	if resource == null or amount <= 0:
+		return 0
+	var blob: Dictionary = _ensure_charges(resource)
+	blob["bonus"] = int(blob.get("bonus", 0)) + amount
+	resource.dungeon_lockouts[DAILY_CHARGES_KEY] = blob
+	return charges_remaining(resource)
 
 
 ## A player died inside a run. HARD runs draw from a shared revive pool: spend one and respawn as

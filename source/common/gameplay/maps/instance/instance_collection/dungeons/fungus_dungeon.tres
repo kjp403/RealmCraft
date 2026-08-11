@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonResource" format=3 uid="uid://cfungusdungres1"]
+
+[ext_resource type="Script" uid="uid://i1qmy82mdrm8" path="res://source/common/gameplay/dungeon/dungeon_resource.gd" id="1_dres"]
+[ext_resource type="Resource" uid="uid://cfungusrewarn01" path="res://source/common/gameplay/dungeon/fungus_reward_normal.tres" id="2_reward"]
+[ext_resource type="Resource" uid="uid://cfungusrewarh01" path="res://source/common/gameplay/dungeon/fungus_reward_hard.tres" id="3_hard"]
+
+[resource]
+script = ExtResource("1_dres")
+display_name = "Fungus Domain"
+description = "Spore-choked galleries under the Fungus Cave. Clear every room and cut out the Fungal Heart."
+recommended_level = 5
+reward = ExtResource("2_reward")
+hard_reward = ExtResource("3_hard")
+instance_name = &"fungus_dungeon"
+map_path = "uid://bxq6itupvblac"
+metadata/slug = &"fungus_dungeon"
