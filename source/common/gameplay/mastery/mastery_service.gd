@@ -41,24 +41,29 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	return total
 
 
-## Mastery points granted per level. 1 → level 99 yields a 99-point budget.
-## Trees stay leaner than the full budget on purpose so you specialize rather
-## than buy every node. Tune this one number to retune the whole budget.
-## (Was 2; halved so combat~20 specialists can't clear most of a tree.)
-const POINTS_PER_LEVEL: int = 1
+## Mastery points: 1 point every LEVELS_PER_POINT mastery levels.
+## Level 99 → 24-point budget (was 1/level = 99, and before that 2/level = 198).
+## Trees cost their tier to buy (1–5), so a 24-point lifetime forces real
+## specialization instead of clearing every node.
+const LEVELS_PER_POINT: int = 4
 
-## Level 1 already grants a full POINTS_PER_LEVEL so the first tier-1 pick is
-## near-immediate. Clamped so players who spent under the old 2× budget don't
-## see a negative remaining total (respec clears the overhang).
+## Lifetime point budget for a mastery level (integer division).
+## Level 1–3: 0, 4–7: 1, …, 96–99: 24.
+static func point_budget(level: int) -> int:
+	var capped: int = mini(maxi(level, 0), PlayerResource.MASTERY_LEVEL_CAP)
+	@warning_ignore("integer_division")
+	return capped / LEVELS_PER_POINT
+
+
+## Clamped so players who spent under older (looser) budgets don't see a
+## negative remaining total (respec clears the overhang).
 static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	var level: int = mini(int(entry.get("level", 1)), PlayerResource.MASTERY_LEVEL_CAP)
-	return maxi(0, level * POINTS_PER_LEVEL - spent_cost(entry, tree))
+	return maxi(0, point_budget(level) - spent_cost(entry, tree))
 
 
-## Buys a tree node. Every category starts at level 1 (see
-## PlayerResource.mastery_level_of), so its first POINTS_PER_LEVEL is spendable
-## from character creation rather than gated behind a first kill — get_mastery
-## creates the entry on demand here.
+## Buys a tree node. Point budget is point_budget(level); the first point
+## arrives at mastery level 4. get_mastery creates the entry on demand.
 static func spend(resource: PlayerResource, category: StringName, node_id: StringName) -> Dictionary:
 	var tree: MasteryTreeResource = tree_for(category)
 	if tree == null:

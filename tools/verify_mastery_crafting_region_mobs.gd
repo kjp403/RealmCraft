@@ -7,14 +7,23 @@ extends SceneTree
 func _init() -> void:
 	var failures: PackedStringArray = PackedStringArray()
 
-	# --- Mastery: 1 point per level -----------------------------------------
+	# --- Mastery: 1 point every 4 levels (24 at 99) ---------------------------
 	var mastery: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/mastery/mastery_service.gd"
 	)
-	if mastery.find("const POINTS_PER_LEVEL: int = 1") < 0:
-		failures.append("POINTS_PER_LEVEL must be 1")
+	if mastery.find("const LEVELS_PER_POINT: int = 4") < 0:
+		failures.append("LEVELS_PER_POINT must be 4")
+	if mastery.find("func point_budget") < 0:
+		failures.append("MasteryService.point_budget missing")
+	# Sanity: floor(26/4)=6, floor(99/4)=24
+	if MasteryService.point_budget(26) != 6:
+		failures.append("point_budget(26) want 6 got %d" % MasteryService.point_budget(26))
+	if MasteryService.point_budget(99) != 24:
+		failures.append("point_budget(99) want 24 got %d" % MasteryService.point_budget(99))
+	if MasteryService.point_budget(3) != 0:
+		failures.append("point_budget(3) want 0 (first point at 4)")
 
-	# --- Crafting XP buffed + perk multiplier on server ---------------------
+	# --- Crafting XP buffed (outfitting only) + perk multiplier on server -----
 	var craft: String = FileAccess.get_file_as_string(
 		"res://source/server/world/components/data_request_handlers/craft.item.gd"
 	)
@@ -26,6 +35,13 @@ func _init() -> void:
 	# leather jacket was 14 → 42 at 3×
 	if wb.find("xp_reward = 42") < 0:
 		failures.append("workbench leather jacket XP should be 42 after 3× buff")
+	# Anvil/smithing XP must NOT be globally buffed (revert to main rates).
+	var anvil: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/crafting/resources/anvil.tres"
+	)
+	# Bronze-tier boots were 40 on main; a 2× pass would make them 80.
+	if anvil.find("xp_reward = 40") < 0:
+		failures.append("anvil XP looks buffed; expected original bronze-tier 40")
 
 	# --- Slayer: Badgers (file slug stays rats for save compat) -------------
 	var rats: String = FileAccess.get_file_as_string(

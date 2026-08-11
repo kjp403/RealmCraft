@@ -20,10 +20,10 @@ func data_request_handler(
 	for category: StringName in MasteryService.trees():
 		var tree: MasteryTreeResource = MasteryService.trees()[category]
 		# No entry = never killed with this weapon. That still reads as level 1
-		# (masteries share the skills' 1–99 curve), so the tree shows its first
-		# POINTS_PER_LEVEL as spendable straight away. Read the stored entry
-		# directly rather than via get_mastery so a poll doesn't spawn a stub
-		# for every tree.
+		# (masteries share the skills' 1–99 curve). Point budget is
+		# point_budget(level) — first point at mastery level 4. Read the stored
+		# entry directly rather than via get_mastery so a poll doesn't spawn a
+		# stub for every tree.
 		var entry: Dictionary = {}
 		for existing: Variant in resource.masteries.keys():
 			if String(existing) == String(category):
