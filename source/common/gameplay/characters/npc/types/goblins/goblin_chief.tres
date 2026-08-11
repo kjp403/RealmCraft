@@ -75,7 +75,7 @@ chance = 1.0
 [sub_resource type="Resource" id="Drop_relic_mossgrown"]
 script = ExtResource("1_4uukv")
 item = ExtResource("relic_mossgrown")
-chance = 0.1
+chance = 0.001
 
 [resource]
 script = ExtResource("8_tvh5y")

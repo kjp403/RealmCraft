@@ -44,8 +44,22 @@ const INDEX := "res://source/common/registry/indexes/items_index.tres"
 ## Sized against the WEAPON ladder, not the armour one. Armour is deliberately
 ## tiny here (chest pieces cap around 15 armour / 16 health at every tier) while
 ## weapons carry the power curve — swords run 4 -> 370 ad, wands to 560 ap. An
-## accessory pinned to the armour envelope is noise by mastery 40, and these drop
-## at 3-10% off the only ten bosses in the game.
+## accessory pinned to the armour envelope is noise by mastery 40, and these are
+## 1/1000 off the only ten bosses in the game.
+##
+## Every relic sits at a flat 0.001 — one rate, easy for players to state. Two
+## things that are easy to get wrong about it:
+##
+##   - `chance` is a FRACTION, not a percent. 0.001 is 0.1%, i.e. 1/1000. Writing
+##     0.001 thinking it means 0.001% would make it a thousand times rarer.
+##   - the roll is PER CONTRIBUTING PLAYER, not per kill (RewardService.distribute
+##     gives each contributor their own roll), so a four-player team gets four
+##     rolls per boss and hits these in a quarter of the solo time.
+##
+## Because respawn timers span 4x (Goblin Chief 90s, Orc Leader 480s), a flat rate
+## does NOT mean a flat time-to-drop: solo it runs ~42h on the fastest boss and
+## ~170h on the dungeon one. Derive each chance from that boss's respawn timer
+## instead if you ever want the wall-clock grind evened out across all ten.
 ##
 ## So: lesser charms clearly outclass the craftable Gold Necklace (6 armour / 14
 ## health), and greater sigils stay worth wearing past their own tier — the top
@@ -63,62 +77,62 @@ const RELICS: Array = [
 	# --- Lesser charms: one mono-coloured stone, early bosses -------------------
 	[
 		"relic_mossgrown", "Mossgrown Charm",
-		"goblins/goblin_chief", 0.10, 2500,
+		"goblins/goblin_chief", 0.001, 2500,
 		[["armor", 14.0], ["health_max", 35.0]],
 		"Green has grown over it so long it stopped being a stone and started being the moss.",
 	],
 	[
 		"relic_sporebloom", "Sporebloom Charm",
-		"fungus/fungal_heart", 0.10, 3000,
+		"fungus/fungal_heart", 0.001, 3000,
 		[["mr", 12.0], ["health_max", 45.0]],
 		"Still breathing out spores. The cave grew this one on purpose.",
 	],
 	[
 		"relic_bloodbrand", "Bloodbrand Charm",
-		"bandit_captain", 0.08, 3500,
+		"bandit_captain", 0.001, 3500,
 		[["ad", 14.0], ["health_max", 28.0]],
 		"Taken off a captain who took it off someone else. It keeps changing hands the same way.",
 	],
 	[
 		"relic_duskglass", "Duskglass Charm",
-		"skeleton_mage", 0.08, 4000,
+		"skeleton_mage", 0.001, 4000,
 		[["ap", 13.0], ["mana_max", 55.0], ["mana_regen", 0.8]],
 		"Cave-dark glass with one cold spark left in it, circling like it is looking for the way out.",
 	],
 	[
 		"relic_emberbrand", "Emberbrand Charm",
-		"orc_leader", 0.08, 4500,
+		"orc_leader", 0.001, 4500,
 		[["move_speed", 5.0], ["ability_haste", 6.0], ["health_max", 20.0]],
 		"Warm before you touch it, warmer after. Orc warbands carry them to keep the pace up.",
 	],
 	# --- Greater sigils: a second energy veined through the same stone ----------
 	[
 		"relic_rotmire", "Rotmire Sigil",
-		"bosses/cistern_sovereign", 0.05, 8000,
+		"bosses/cistern_sovereign", 0.001, 8000,
 		[["armor", 28.0], ["health_max", 65.0], ["mr", 14.0]],
 		"Cistern water found its way into the moss and set there in a blue seam. Heavier than it looks.",
 	],
 	[
 		"relic_coreblossom", "Coreblossom Sigil",
-		"mecha_stone_golem", 0.05, 10000,
+		"mecha_stone_golem", 0.001, 10000,
 		[["mr", 20.0], ["health_max", 80.0], ["mana_regen", 1.8]],
 		"Cut out of a golem's chest, still lit. Whatever the Hollow built it to run on has not run out.",
 	],
 	[
 		"relic_scarabheart", "Scarabheart Sigil",
-		"bosses/sand_king", 0.04, 12000,
+		"bosses/sand_king", 0.001, 12000,
 		[["ad", 30.0], ["health_max", 45.0], ["ability_haste", 7.0]],
 		"A green scarab line runs through the red. Ankhemet was buried wearing it and did not stay buried.",
 	],
 	[
 		"relic_netherglass", "Netherglass Sigil",
-		"trpg/trpg_necromancer", 0.04, 14000,
+		"trpg/trpg_necromancer", 0.001, 14000,
 		[["ap", 24.0], ["mana_max", 90.0], ["mana_regen", 2.5], ["mr", 10.0]],
 		"The violet thread inside moves when nothing else does. It was doing that before the necromancer found it.",
 	],
 	[
 		"relic_cinderheart", "Cinderheart Sigil",
-		"bosses/cinderborn", 0.03, 18000,
+		"bosses/cinderborn", 0.001, 18000,
 		[["ad", 26.0], ["move_speed", 7.0], ["ability_haste", 10.0], ["health_max", 40.0]],
 		"Vurthek's own coal, banked and never gone out. It burns for whoever carries it next.",
 	],
@@ -312,7 +326,8 @@ func _wire_drop(row: Array) -> void:
 	assert(file != null, "cannot write %s" % path)
 	file.store_string("\n".join(out))
 	file.close()
-	print("  %-22s -> %-28s %.0f%%" % [slug, row[2], float(row[3]) * 100.0])
+	# Printed as 1/N — these rates round to "0%" at any sane decimal count.
+	print("  %-22s -> %-28s 1/%d" % [slug, row[2], roundi(1.0 / float(row[3]))])
 
 
 ## Remove the ext_resource line, the sub_resource block and the loot-array entry

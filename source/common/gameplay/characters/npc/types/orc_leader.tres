@@ -37,7 +37,7 @@ chance = 1.0
 [sub_resource type="Resource" id="Drop_relic_emberbrand"]
 script = ExtResource("1_3a3qb")
 item = ExtResource("relic_emberbrand")
-chance = 0.08
+chance = 0.001
 
 [resource]
 script = ExtResource("2_1jsux")
