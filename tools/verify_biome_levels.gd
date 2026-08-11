@@ -8,9 +8,10 @@ extends SceneTree
 ##   2. Warper round trips actually close. Every stair on a surface map must
 ##      find its arrival id on the destination, and the destination's exit must
 ##      find its landing id back on the surface map.
-##   3. The three surface maps still carry no hostiles of their own, so the
-##      original `verify_stub_biomes.gd` contract is not quietly broken by the
-##      stairs we appended.
+##   3. Each surface map is populated and ends on that biome's boss, with every
+##      hostile baked into both id maps. The bosses live on the surface now; the
+##      sub-levels keep their trash until they are reworked into instanced
+##      encounters, so none of them assert a boss.
 ##
 ##   godot --headless --path . -s tools/verify_biome_levels.gd
 
@@ -27,7 +28,7 @@ const LEVELS: Array[Dictionary] = [
 		"path": MAPS + "desert/sunken_tombs.tscn", "root": "sunken_tombs",
 		"entrance": 41, "exit": 141, "exit_target": 51,
 		"parent": MAPS + "desert/desert.tscn", "stair": 151,
-		"bosses": ["SandKing"], "min_mobs": 15, "min_npcs": 1,
+		"bosses": [], "min_mobs": 14, "min_npcs": 1,
 	},
 	{
 		"path": MAPS + "sewers/gutterworks.tscn", "root": "gutterworks",
@@ -39,7 +40,7 @@ const LEVELS: Array[Dictionary] = [
 		"path": MAPS + "sewers/drowned_cistern.tscn", "root": "drowned_cistern",
 		"entrance": 43, "exit": 143, "exit_target": 53,
 		"parent": MAPS + "sewers/sewers.tscn", "stair": 153,
-		"bosses": ["CisternSovereign"], "min_mobs": 14, "min_npcs": 1,
+		"bosses": [], "min_mobs": 13, "min_npcs": 1,
 	},
 	{
 		"path": MAPS + "fire_forge/bellows_gallery.tscn", "root": "bellows_gallery",
@@ -51,7 +52,7 @@ const LEVELS: Array[Dictionary] = [
 		"path": MAPS + "fire_forge/cinder_deeps.tscn", "root": "cinder_deeps",
 		"entrance": 45, "exit": 145, "exit_target": 55,
 		"parent": MAPS + "fire_forge/fire_forge.tscn", "stair": 155,
-		"bosses": ["Cinderborn"], "min_mobs": 14, "min_npcs": 1,
+		"bosses": [], "min_mobs": 13, "min_npcs": 1,
 	},
 ]
 
@@ -66,7 +67,7 @@ var _failures: int = 0
 
 func _initialize() -> void:
 	for path in SURFACES:
-		_check_surface_untouched(path)
+		_check_surface_populated(path)
 	for level in LEVELS:
 		_check_level(level)
 	if _failures == 0:
@@ -93,16 +94,41 @@ func _warper_ids(map: Node) -> Dictionary:
 	return out
 
 
-func _check_surface_untouched(path: String) -> void:
+## The surface maps used to be asserted *empty*. They are the levelled overworld
+## now: each one is populated and ends on that biome's boss, so the check is
+## that every hostile is present AND baked into both replication id maps. A
+## hostile missing from those never syncs to clients, and nothing else catches
+## it — see AGENTS.md on the Hollow golem.
+func _check_surface_populated(path: String) -> void:
 	var map: Node = (load(path) as PackedScene).instantiate()
 	var name := path.get_file()
 	var container := map.get_node_or_null("ReplicatedPropsContainer")
 	if container == null:
 		_fail("%s has no ReplicatedPropsContainer" % name)
-	elif container.get_child_count() != 0:
-		_fail("%s gained hostiles (%d)" % [name, container.get_child_count()])
+		map.free()
+		return
+	var mobs: int = container.get_child_count()
+	if mobs == 0:
+		_fail("%s has no hostiles" % name)
+		map.free()
+		return
+	var id_to_node: Dictionary = container.id_to_node
+	var node_to_id: Dictionary = container.node_to_id
+	if id_to_node.size() != mobs or node_to_id.size() != mobs:
+		_fail("%s sync ids do not cover its hostiles (mobs=%d id_to_node=%d node_to_id=%d)" % [
+			name, mobs, id_to_node.size(), node_to_id.size(),
+		])
+		map.free()
+		return
+	var bosses: int = 0
+	for child in container.get_children():
+		var data: Resource = child.get("enemy_data")
+		if data != null and bool(data.get("is_boss")):
+			bosses += 1
+	if bosses == 0:
+		_fail("%s has no boss" % name)
 	else:
-		print("OK   ", name, " still clean (no hostiles)")
+		print("OK   ", name, " mobs=", mobs, " bosses=", bosses, " sync ids baked")
 	map.free()
 
 

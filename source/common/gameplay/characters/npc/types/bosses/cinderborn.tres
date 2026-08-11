@@ -5,13 +5,39 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_loot"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_script"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_demon_a.tres" id="5_skin"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="6_bar"]
 
-[sub_resource type="Resource" id="Drop_bar"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="li1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="li3"]
+
+[sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
-item = ExtResource("6_bar")
-min_amount = 6
-max_amount = 12
+item = ExtResource("li0")
+min_amount = 520
+max_amount = 860
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_mithril_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("li1")
+min_amount = 1
+max_amount = 3
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_iron_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("li2")
+min_amount = 3
+max_amount = 6
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_coal_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("li3")
+min_amount = 4
+max_amount = 8
+chance = 0.7
 
 [resource]
 script = ExtResource("4_script")
@@ -19,7 +45,9 @@ enemy_type = &"cinderborn"
 display_name = "Vurthek, the Cinderborn"
 skin = ExtResource("5_skin")
 visual_scale = 2.0
+combat_level = 35
 is_boss = true
+
 max_health = 1250.0
 attack_damage = 55.0
 attack_cooldown = 1.7
@@ -40,7 +68,7 @@ wander_pause_max_s = 4.0
 xp_reward = 4200
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_bar")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore")])
 enrage_health_fraction = 0.35
 slam_radius = 144.0
 slam_windup_s = 1.15
@@ -62,10 +90,10 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-ornate_chest_top_min = 0
-ornate_chest_top_max = 0
-ornate_chest_second_min = 0
-ornate_chest_second_max = 0
-ornate_chest_consolation_chance = 0.0
+ornate_chest_top_min = 2
+ornate_chest_top_max = 4
+ornate_chest_second_min = 1
+ornate_chest_second_max = 2
+ornate_chest_consolation_chance = 0.3
 metadata/slug = &"cinderborn"
 metadata/id = 81

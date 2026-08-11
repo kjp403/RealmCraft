@@ -5,13 +5,39 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_loot"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_script"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_armored_skeleton.tres" id="5_skin"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="6_bar"]
 
-[sub_resource type="Resource" id="Drop_bar"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="li1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li3"]
+
+[sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
-item = ExtResource("6_bar")
-min_amount = 4
-max_amount = 8
+item = ExtResource("li0")
+min_amount = 320
+max_amount = 540
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_silver_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("li1")
+min_amount = 1
+max_amount = 3
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_iron_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("li2")
+min_amount = 2
+max_amount = 4
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_cloth_bandit"]
+script = ExtResource("3_loot")
+item = ExtResource("li3")
+min_amount = 3
+max_amount = 6
+chance = 0.5
 
 [resource]
 script = ExtResource("4_script")
@@ -19,7 +45,9 @@ enemy_type = &"sand_king"
 display_name = "Ankhemet, the Sand King"
 skin = ExtResource("5_skin")
 visual_scale = 1.9
+combat_level = 30
 is_boss = true
+
 max_health = 900.0
 attack_damage = 44.0
 attack_cooldown = 1.8
@@ -40,7 +68,7 @@ wander_pause_max_s = 4.0
 xp_reward = 2600
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_bar")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_iron_bar"), SubResource("Drop_cloth_bandit")])
 enrage_health_fraction = 0.4
 slam_radius = 132.0
 slam_windup_s = 1.2
@@ -62,10 +90,10 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-ornate_chest_top_min = 0
-ornate_chest_top_max = 0
-ornate_chest_second_min = 0
-ornate_chest_second_max = 0
-ornate_chest_consolation_chance = 0.0
+ornate_chest_top_min = 1
+ornate_chest_top_max = 3
+ornate_chest_second_min = 1
+ornate_chest_second_max = 2
+ornate_chest_consolation_chance = 0.25
 metadata/slug = &"sand_king"
 metadata/id = 83

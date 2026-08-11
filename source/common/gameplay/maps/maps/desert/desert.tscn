@@ -16,6 +16,21 @@
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_badger.tres" id="sf2"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_wolf.tres" id="sf3"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_torch.tres" id="sf4"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="hostile"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_archer.tres" id="et0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_orc.tres" id="et1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_orc_rider.tres" id="et2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_clawing_harpy.tres" id="et3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_lacerating_cockatrice.tres" id="et4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton_archer.tres" id="et5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_skeleton.tres" id="et6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_skeleton.tres" id="et7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_lancer.tres" id="et8"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_poisonous_gorgon.tres" id="et9"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_wretched_fomorian.tres" id="et10"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_soldier.tres" id="et11"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_priest.tres" id="et12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="et13"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunspire_terraces.tres" id="stair_sunspire_terraces"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
@@ -241,8 +256,338 @@ light_color = Color(1, 0.82, 0.5, 1)
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 y_sort_enabled = true
 script = ExtResource("4_rp")
-id_to_node = {}
-node_to_id = {}
+id_to_node = {
+0: NodePath("Archer"),
+1: NodePath("Archer2"),
+2: NodePath("Archer3"),
+3: NodePath("Orc"),
+4: NodePath("Orc2"),
+5: NodePath("OrcRider"),
+6: NodePath("OrcRider2"),
+7: NodePath("Harpy"),
+8: NodePath("Harpy2"),
+9: NodePath("Harpy3"),
+10: NodePath("HarpyE"),
+11: NodePath("HarpyE2"),
+12: NodePath("HarpyE3"),
+13: NodePath("Cockatrice"),
+14: NodePath("Cockatrice2"),
+15: NodePath("CockatriceE"),
+16: NodePath("CockatriceE2"),
+17: NodePath("SkeletonArcher"),
+18: NodePath("SkeletonArcher2"),
+19: NodePath("SkeletonArcher3"),
+20: NodePath("Skeleton"),
+21: NodePath("Skeleton2"),
+22: NodePath("SkeletonE"),
+23: NodePath("SkeletonE2"),
+24: NodePath("ArmoredSkeleton"),
+25: NodePath("ArmoredSkeleton2"),
+26: NodePath("ArmoredSkeletonE"),
+27: NodePath("ArmoredSkeletonE2"),
+28: NodePath("Lancer"),
+29: NodePath("Lancer2"),
+30: NodePath("LancerE"),
+31: NodePath("LancerE2"),
+32: NodePath("Gorgon"),
+33: NodePath("Gorgon2"),
+34: NodePath("Fomorian"),
+35: NodePath("Fomorian2"),
+36: NodePath("Soldier"),
+37: NodePath("Soldier2"),
+38: NodePath("Priest"),
+39: NodePath("Priest2"),
+40: NodePath("SandKing")
+}
+node_to_id = {
+NodePath("Archer"): 0,
+NodePath("Archer2"): 1,
+NodePath("Archer3"): 2,
+NodePath("Orc"): 3,
+NodePath("Orc2"): 4,
+NodePath("OrcRider"): 5,
+NodePath("OrcRider2"): 6,
+NodePath("Harpy"): 7,
+NodePath("Harpy2"): 8,
+NodePath("Harpy3"): 9,
+NodePath("HarpyE"): 10,
+NodePath("HarpyE2"): 11,
+NodePath("HarpyE3"): 12,
+NodePath("Cockatrice"): 13,
+NodePath("Cockatrice2"): 14,
+NodePath("CockatriceE"): 15,
+NodePath("CockatriceE2"): 16,
+NodePath("SkeletonArcher"): 17,
+NodePath("SkeletonArcher2"): 18,
+NodePath("SkeletonArcher3"): 19,
+NodePath("Skeleton"): 20,
+NodePath("Skeleton2"): 21,
+NodePath("SkeletonE"): 22,
+NodePath("SkeletonE2"): 23,
+NodePath("ArmoredSkeleton"): 24,
+NodePath("ArmoredSkeleton2"): 25,
+NodePath("ArmoredSkeletonE"): 26,
+NodePath("ArmoredSkeletonE2"): 27,
+NodePath("Lancer"): 28,
+NodePath("Lancer2"): 29,
+NodePath("LancerE"): 30,
+NodePath("LancerE2"): 31,
+NodePath("Gorgon"): 32,
+NodePath("Gorgon2"): 33,
+NodePath("Fomorian"): 34,
+NodePath("Fomorian2"): 35,
+NodePath("Soldier"): 36,
+NodePath("Soldier2"): 37,
+NodePath("Priest"): 38,
+NodePath("Priest2"): 39,
+NodePath("SandKing"): 40
+}
+
+[node name="Archer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1672.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Archer2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1672.0, 1784.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Archer3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1496.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et0")
+weapon = null
+
+[node name="Orc" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1288.0, 1672.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="Orc2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1288.0, 1496.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et1")
+weapon = null
+
+[node name="OrcRider" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2040.0, 1672.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et2")
+weapon = null
+
+[node name="OrcRider2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2216.0, 1608.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et2")
+weapon = null
+
+[node name="Harpy" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(840.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="Harpy2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(840.0, 1592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="Harpy3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1016.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="HarpyE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2504.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="HarpyE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2328.0, 1416.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="HarpyE3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2504.0, 1592.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et3")
+weapon = null
+
+[node name="Cockatrice" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1000.0, 1240.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="Cockatrice2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(984.0, 1064.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="CockatriceE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2248.0, 1224.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="CockatriceE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2424.0, 1224.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et4")
+weapon = null
+
+[node name="SkeletonArcher" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1672.0, 1032.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="SkeletonArcher2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1672.0, 1208.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="SkeletonArcher3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1496.0, 1032.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et5")
+weapon = null
+
+[node name="Skeleton" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1304.0, 968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="Skeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1480.0, 856.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="SkeletonE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2056.0, 968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="SkeletonE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1880.0, 968.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et6")
+weapon = null
+
+[node name="ArmoredSkeleton" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(776.0, 648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="ArmoredSkeleton2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(776.0, 824.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="ArmoredSkeletonE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2568.0, 648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="ArmoredSkeletonE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2568.0, 824.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et7")
+weapon = null
+
+[node name="Lancer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1032.0, 840.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="Lancer2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1032.0, 664.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="LancerE" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2344.0, 824.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="LancerE2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2344.0, 1000.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et8")
+weapon = null
+
+[node name="Gorgon" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1976.0, 776.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et9")
+weapon = null
+
+[node name="Gorgon2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1976.0, 600.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et9")
+weapon = null
+
+[node name="Fomorian" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1368.0, 600.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et10")
+weapon = null
+
+[node name="Fomorian2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1032.0, 488.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et10")
+weapon = null
+
+[node name="Soldier" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2152.0, 648.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et11")
+weapon = null
+
+[node name="Soldier2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2152.0, 472.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et11")
+weapon = null
+
+[node name="Priest" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1624.0, 1400.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et12")
+weapon = null
+
+[node name="Priest2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1800.0, 1384.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et12")
+weapon = null
+
+[node name="SandKing" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1672.0, 520.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et13")
+weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(1672.0, 2056.0)

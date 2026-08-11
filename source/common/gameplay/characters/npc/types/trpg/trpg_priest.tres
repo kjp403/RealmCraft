@@ -4,22 +4,33 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_g26so"]
 [ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_7s5sm"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_11eii"]
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_priest.tres" id="5_1je3m"]
+
+
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="li1"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li2"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_7s5sm")
-item = ExtResource("loot_gold")
-min_amount = 2
-max_amount = 4
-chance = 0.85
+item = ExtResource("li0")
+min_amount = 6
+max_amount = 13
+chance = 0.9
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_7s5sm")
-item = ExtResource("loot_bone")
-chance = 0.35
+item = ExtResource("li1")
+min_amount = 1
+max_amount = 2
+chance = 0.5
 
+[sub_resource type="Resource" id="Drop_cloth_bandit"]
+script = ExtResource("3_7s5sm")
+item = ExtResource("li2")
+min_amount = 1
+max_amount = 2
+chance = 0.35
 
 [resource]
 script = ExtResource("4_11eii")
@@ -49,7 +60,7 @@ wander_pause_max_s = 4.0
 xp_reward = 12
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_7s5sm")]([SubResource("Drop_gold"), SubResource("Drop_bone")])
+loot = Array[ExtResource("3_7s5sm")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
