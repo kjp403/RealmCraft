@@ -13,5 +13,6 @@ item_name = &"Cooked Lobster"
 item_icon = ExtResource("2_icon")
 description = "Grilled lobster. Restores 30 health."
 stack_limit = 10
+vendor_value = 12
 metadata/slug = &"cooked_lobster"
 metadata/id = 198

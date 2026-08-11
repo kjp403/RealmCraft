@@ -13,5 +13,6 @@ item_name = &"Cooked Lionfish"
 item_icon = ExtResource("2_icon")
 description = "Grilled lionfish. Restores 28 health."
 stack_limit = 10
+vendor_value = 22
 metadata/slug = &"cooked_lionfish"
 metadata/id = 199

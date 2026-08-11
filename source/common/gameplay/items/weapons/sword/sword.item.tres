@@ -27,5 +27,6 @@ item_icon = SubResource("AtlasTexture_uqqke")
 description = "A simple wooden training sword. Swing close, swing fast."
 can_trade = true
 stack_limit = 5
+vendor_value = 3
 metadata/slug = &"sword.item"
 metadata/id = 65

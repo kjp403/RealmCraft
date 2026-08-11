@@ -8,6 +8,7 @@
 [sub_resource type="Resource" id="Resource_uifqm"]
 script = ExtResource("1_uifqm")
 value = 5.0
+vendor_value = 8
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

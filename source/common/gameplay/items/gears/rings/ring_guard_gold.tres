@@ -9,6 +9,7 @@
 script = ExtResource("1_6abd4")
 stat_name = "armor"
 value = 4.0
+vendor_value = 320
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

@@ -1,75 +1,53 @@
 extends ChatCommand
-## Admin tool to correct inflated leaderboard counters (e.g. after a boosting /
-## spawn-camp exploit): zero or subtract a character's PvP kills, PvE kills, or
-## arena (spar) wins. Works on an online target (edits the live resource so the
-## periodic save can't clobber it) or an offline character by #id (load -> edit
-## -> save). Per-character: the counters live in the character's lb_stats
-## (stats_json), not the account, so an offline @account needs a #id.
-
-
-## Rolling buckets every kill counter carries; reset together so the leaderboards
-## (day/week/total) stay consistent.
-const KILL_BUCKETS: PackedStringArray = ["_day", "_week", "_total"]
+## Senior-admin / owner: reset every profession skill to level 1 (xp 0). Works on
+## self or another online player. Use this after testing with /skill /setlevel so
+## grind progression can be re-checked from a fresh character state.
 
 
 func _init() -> void:
 	command_name = "resetstats"
-	command_priority = 2 # admin+
-	command_usage = "/resetstats <self|@account|#id> <pvp|pve|spar|all> [amount]   (no amount = zero it; otherwise subtract that many)"
+	command_priority = 100 # senior_admin+
+	command_usage = "/resetstats <self|@account|#id>"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
-	if args.size() < 3:
+	if args.size() != 2:
 		return "Usage: " + command_usage
 
 	var target: CommandTarget.Result = CommandTarget.resolve(args[1], peer_id, server_instance)
 	if not target.ok:
 		return target.error
+	if not target.online:
+		return "%s must be online." % target.label()
 
-	var stat: String = args[2].to_lower()
-	if stat not in ["pvp", "pve", "spar", "all"]:
-		return "Unknown stat '%s'. Use pvp, pve, spar or all." % stat
+	var res: PlayerResource = target.resource
+	var names: PackedStringArray = PackedStringArray()
+	for job_slug: StringName in JobRegistry.JOBS:
+		var skill: Dictionary = res.get_skill(job_slug)
+		skill["level"] = 1
+		skill["xp"] = 0
+		names.append(JobRegistry.display_name(job_slug))
 
-	# Optional positive amount to subtract from each bucket; omitted (or <= 0) zeroes.
-	var amount: int = 0
-	if args.size() > 3 and args[3].is_valid_int():
-		amount = maxi(0, args[3].to_int())
-
-	# Pick the resource to edit: the LIVE one for an online target (so the change
-	# sticks and the next periodic save doesn't overwrite it), else load the
-	# offline character by id. An offline @account maps to no single character.
-	var ws: WorldServer = server_instance.world_server
-	var res: PlayerResource = null
-	if target.online:
-		res = target.resource
-	elif target.player_id > 0:
-		res = ws.database.get_player_resource(target.player_id)
-	else:
-		return "For an offline target, name the character by #id (try /chars <account>)."
-	if res == null:
-		return "Couldn't load that character."
-
-	var parts: PackedStringArray = []
-	if stat == "pvp" or stat == "all":
-		parts.append("PvP=%d" % _apply(res.lb_stats, "pvp_kills", amount, KILL_BUCKETS))
-	if stat == "pve" or stat == "all":
-		parts.append("PvE=%d" % _apply(res.lb_stats, "pve_kills", amount, KILL_BUCKETS))
-	if stat == "spar" or stat == "all":
-		parts.append("ArenaWins=%d" % _apply(res.lb_stats, "arena_wins", amount, [""]))
-
-	ws.database.save_player(res)
-
-	var verb: String = "zeroed" if amount == 0 else "reduced by %d" % amount
-	return "%s: %s (%s)." % [target.label(), verb, ", ".join(parts)]
+	server_instance.world_server.database.save_player(res)
+	_push_skills(target, server_instance)
+	return "Reset all skills for %s to level 1 (%s)." % [target.label(), ", ".join(names)]
 
 
-## Zero or subtract [param amount] from each [param base]+suffix counter in
-## [param stats], clamped at 0. Returns the resulting headline value (the _total
-## bucket for kills, or the bare key for arena wins) for the confirmation line.
-func _apply(stats: Dictionary, base: String, amount: int, suffixes: PackedStringArray) -> int:
-	for suffix: String in suffixes:
-		var key: String = base + suffix
-		var current: int = int(stats.get(key, 0))
-		stats[key] = 0 if amount == 0 else maxi(0, current - amount)
-	var headline_key: String = base + ("_total" if "_total" in suffixes else "")
-	return int(stats.get(headline_key, 0))
+## Push a skills.get-shaped payload so open Skills panels refresh immediately.
+func _push_skills(target: CommandTarget.Result, server_instance: ServerInstance) -> void:
+	if target.peer_id <= 0:
+		return
+	var out: Dictionary = {}
+	for skill_name: StringName in JobRegistry.JOBS:
+		var jp: JobPerks = JobRegistry.JOBS[skill_name]
+		var entry: Dictionary = target.resource.get_skill(skill_name)
+		var level: int = int(entry.get("level", 1))
+		out[String(skill_name)] = {
+			"level": level,
+			"xp": int(entry.get("xp", 0)),
+			"xp_to_next": target.resource.skill_xp_to_next(level),
+			"display_name": jp.display_name if jp != null else String(skill_name).capitalize(),
+			"category": String(jp.category) if jp != null else "",
+			"perks": entry.get("perks", {}),
+		}
+	server_instance.world_server.data_push.rpc_id(target.peer_id, &"skills.get", {"skills": out})

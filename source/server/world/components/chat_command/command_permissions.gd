@@ -73,6 +73,11 @@ static func can_run(command: ChatCommand, player: PlayerResource, instance: Serv
 ## Admin priority floor — anyone at or above this is protected staff.
 const STAFF_PROTECT_PRIORITY: int = 2 # admin
 
+## Admin+ (admin / senior_admin / owner) are hidden from player leaderboards so
+## command-boosted accounts don't crowd out regular players. Moderators (priority 1)
+## still appear — they have no leveling commands.
+const LEADERBOARD_HIDE_PRIORITY: int = 2 # admin
+
 
 ## If [param issuer] may not kick/ban/ipban [param target], return a player-facing
 ## error. Empty string means the action is allowed.
@@ -100,6 +105,24 @@ static func staff_moderation_block_reason(
 	if target_p >= 100:
 		return "You can't moderate a senior admin."
 	return "You can't moderate another admin (or higher)."
+
+
+## True when this account/roles should be omitted from public leaderboards.
+## Pass either a live PlayerResource or the offline account_name + roles dict.
+static func is_hidden_from_leaderboard(
+	account_name: String,
+	roles: Dictionary,
+	role_definitions: Dictionary
+) -> bool:
+	var best: int = 0
+	for role: String in roles:
+		if _db_role_blocked(role):
+			continue
+		best = maxi(best, int(role_definitions.get(role, {}).get("priority", 0)))
+	var config_role: String = AdminConfig.role_for(account_name)
+	if not config_role.is_empty():
+		best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
+	return best >= LEADERBOARD_HIDE_PRIORITY
 
 
 ## Effective priority for an online or offline CommandTarget (AdminConfig + DB roles).

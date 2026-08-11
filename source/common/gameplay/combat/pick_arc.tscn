@@ -8,7 +8,7 @@ radius = 28.0
 [node name="PickArc" type="Area2D"]
 monitorable = false
 collision_layer = 0
-collision_mask = 7
+collision_mask = 32
 script = ExtResource("1_pick_arc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

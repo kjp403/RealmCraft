@@ -1,7 +1,10 @@
 extends DataRequestHandler
 ## Generic vendor sell: remove `amount` of an owned item with vendor_value > 0
 ## and pay `amount * item.vendor_value` gold. Specialty ShopTrade rates still
-## go through shop.trade.item — this is the junk-sell path for gatherables.
+## go through shop.trade.item — this is the junk-sell path for gatherables /
+## craftables. Equipped gear counts as owned: we strip matching equipment
+## slots first (without requiring a free bag square) so smithing products can
+## be sold while worn.
 
 
 func data_request_handler(
@@ -35,10 +38,50 @@ func data_request_handler(
 				return {"ok": false, "reason": "use_trade"}
 
 	var inventory: Dictionary = player.player_resource.inventory
-	if Inventory.count(inventory, item_id) < amount:
+	var available: int = Inventory.count(inventory, item_id) + _equipped_count(player, item_id)
+	if available < amount:
 		return {"ok": false, "reason": "not_enough"}
-	if not Inventory.remove_amount_by_id(inventory, item_id, amount):
-		return {"ok": false}
+
+	var remaining: int = amount
+	# Take from the bag first, then strip matching worn pieces (sold directly —
+	# never bounced through the inventory, so a full bag can't block the sell).
+	var from_bag: int = mini(remaining, Inventory.count(inventory, item_id))
+	if from_bag > 0:
+		if not Inventory.remove_amount_by_id(inventory, item_id, from_bag):
+			return {"ok": false, "reason": "not_enough"}
+		remaining -= from_bag
+	if remaining > 0:
+		var stripped: int = _strip_equipped(player, item_id, remaining)
+		if stripped < remaining:
+			return {"ok": false, "reason": "not_enough"}
 
 	Inventory.add_item(inventory, Economy.gold_id(), item.vendor_value * amount)
 	return {"ok": true, "amount": amount, "paid": item.vendor_value * amount}
+
+
+## How many copies of [param item_id] are currently worn.
+func _equipped_count(player: Player, item_id: int) -> int:
+	var count: int = 0
+	for slot: StringName in player.player_resource.equipment:
+		if int(player.player_resource.equipment[slot]) == item_id:
+			count += 1
+	return count
+
+
+## Unequip up to [param amount] worn copies of [param item_id], discarding them
+## into the sell (not the bag). Returns how many were stripped.
+func _strip_equipped(player: Player, item_id: int, amount: int) -> int:
+	var stripped: int = 0
+	var slots: Array = player.player_resource.equipment.keys()
+	for slot_variant: Variant in slots:
+		if stripped >= amount:
+			break
+		var slot: StringName = slot_variant as StringName
+		if int(player.player_resource.equipment.get(slot, 0)) != item_id:
+			continue
+		if slot == &"weapon":
+			BattleFormState.cancel_on(player)
+		player.equipment_component.unequip(slot)
+		player.player_resource.equipment.erase(slot)
+		stripped += 1
+	return stripped

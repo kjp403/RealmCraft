@@ -13,5 +13,6 @@ item_name = &"Cooked Anglerfish"
 item_icon = ExtResource("2_icon")
 description = "Grilled anglerfish. Restores 55 health."
 stack_limit = 10
+vendor_value = 18
 metadata/slug = &"cooked_anglerfish"
 metadata/id = 203

@@ -122,9 +122,13 @@ static func _week_start_ms(now_ms: int) -> int:
 
 static func _top_n_player(world_server: Node, board: String, limit: int) -> Array:
 	var db = world_server.database.store.db
-	db.query("SELECT player_id, display_name, level, experience, stats_json, inventory_json, skills_json FROM players;")
+	db.query(
+		"SELECT player_id, account_name, display_name, level, experience, "
+		+ "stats_json, inventory_json, skills_json, server_roles_json FROM players;"
+	)
 	var rows: Array = db.query_result.duplicate()
 	var gold_id: int = Economy.gold_id()
+	var role_definitions: Dictionary = ServerInstance.global_role_definitions
 
 	# Index online players by player_id so live counters override the (stale)
 	# DB row. _increment doesn't flush to disk on every kill — saving each kill
@@ -150,12 +154,16 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 		var display_name: String
 		var experience: int
 		var skills_dict: Dictionary
+		var account_name: String
+		var roles: Dictionary
 		if live != null:
 			stats = live.lb_stats
 			level = live.level
 			display_name = live.display_name
 			experience = live.experience
 			skills_dict = live.skills
+			account_name = live.account_name
+			roles = live.server_roles
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
@@ -164,6 +172,13 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			experience = int(row.get("experience", 0))
 			var skills_parsed: Variant = JSON.parse_string(str(row.get("skills_json", "{}")))
 			skills_dict = skills_parsed if skills_parsed is Dictionary else {}
+			account_name = str(row.get("account_name", ""))
+			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
+			roles = roles_parsed if roles_parsed is Dictionary else {}
+
+		# Hide admin / senior_admin / owner from boards (moderators stay).
+		if CommandPermissions.is_hidden_from_leaderboard(account_name, roles, role_definitions):
+			continue
 
 		var score: int = 0
 		var sub: int = 0
@@ -267,8 +282,9 @@ static func _total_skill_xp_of(skills: Dictionary) -> int:
 ## override their stale DB row, same as _top_n_player.
 static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int) -> Array:
 	var db = world_server.database.store.db
-	db.query("SELECT player_id, display_name, stats_json FROM players;")
+	db.query("SELECT player_id, account_name, display_name, stats_json, server_roles_json FROM players;")
 	var rows: Array = db.query_result.duplicate()
+	var role_definitions: Dictionary = ServerInstance.global_role_definitions
 
 	var live_by_player_id: Dictionary = {}
 	for peer_id: int in world_server.connected_players:
@@ -282,13 +298,22 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 		var live: PlayerResource = live_by_player_id.get(player_id)
 		var stats: Dictionary
 		var display_name: String
+		var account_name: String
+		var roles: Dictionary
 		if live != null:
 			stats = live.lb_stats
 			display_name = live.display_name
+			account_name = live.account_name
+			roles = live.server_roles
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
 			display_name = str(row.get("display_name", "?"))
+			account_name = str(row.get("account_name", ""))
+			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
+			roles = roles_parsed if roles_parsed is Dictionary else {}
+		if CommandPermissions.is_hidden_from_leaderboard(account_name, roles, role_definitions):
+			continue
 		var best: Variant = stats.get("dungeon_best", {})
 		if best is not Dictionary:
 			continue

@@ -13,5 +13,6 @@ item_name = &"Cooked Salmon"
 item_icon = ExtResource("2_icon")
 description = "Grilled salmon. Restores 20 health."
 stack_limit = 10
+vendor_value = 6
 metadata/slug = &"cooked_salmon"
 metadata/id = 196
