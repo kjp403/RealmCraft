@@ -69,7 +69,9 @@ tile_set = ExtResource("2_khpmq")
 
 [node name="Entrance" parent="." unique_id=916773362 instance=ExtResource("3_dr2jr")]
 position = Vector2(120, 337)
+scale = Vector2(1.6, 1)
 target_instance = ExtResource("4_alrfp")
+warper_id = 5
 target_id = 4
 
 [node name="ForgeSmith" parent="." unique_id=1922057613 instance=ExtResource("14_qwuyn")]
