@@ -87,8 +87,9 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	return {"ok": true, "points": available_points(entry, tree)}
 
 
-## Wipes a category's spent points AND its loadout pick. Free during alpha so
-## testers experiment — pricing comes later if it matters.
+## Wipes a category's spent points AND its loadout pick. Horizon charges gold
+## for a full respec via mastery.respec (MasteryResetInteraction.COST); this
+## helper is the per-tree wipe used by that handler.
 static func reset(resource: PlayerResource, category: StringName) -> Dictionary:
 	if not _has_mastery_entry(resource, category):
 		return {"ok": false, "reason": "no_mastery"}

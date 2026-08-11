@@ -133,6 +133,32 @@ func _init() -> void:
 		if index.find("&\"%s\"" % slug) < 0:
 			failures.append("enemy_types_index missing %s" % slug)
 
+	# --- Horizon paid mastery reset (no free tree Reset) ---------------------
+	var mastery_reset: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/characters/npc/interactions/mastery_reset_interaction.gd"
+	)
+	if mastery_reset.find("const COST: int = 25000") < 0:
+		failures.append("MasteryResetInteraction.COST must be 25000")
+	var respec_handler: String = FileAccess.get_file_as_string(
+		"res://source/server/world/components/data_request_handlers/mastery.respec.gd"
+	)
+	if respec_handler.find("MasteryResetInteraction.COST") < 0:
+		failures.append("mastery.respec must charge MasteryResetInteraction.COST")
+	if respec_handler.find("reason\": \"gold\"") < 0 and respec_handler.find('"gold"') < 0:
+		failures.append("mastery.respec must return gold failure reason")
+	var tree_menu: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/menus/mastery_tree/mastery_tree_menu.gd"
+	)
+	if tree_menu.find("_on_respec_pressed") >= 0 or tree_menu.find('reset.text = "Reset"') >= 0:
+		failures.append("mastery tree must not offer free Reset")
+	var guild: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/maps/guild_house/inside_map.tscn"
+	)
+	if guild.find("mastery_reset_interaction.gd") < 0:
+		failures.append("Horizon must offer MasteryResetInteraction")
+	if not ResourceLoader.exists("res://source/client/ui/menus/mastery_reset/mastery_reset_menu.tscn"):
+		failures.append("mastery_reset_menu.tscn missing")
+
 	if failures.is_empty():
 		print("VERIFY_PASS")
 	else:
