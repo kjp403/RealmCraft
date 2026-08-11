@@ -1,19 +1,16 @@
 class_name PickArc
 extends Area2D
-## Pickaxe / sickle swing hitbox. Hybrid:
-## - bodies (players, NPCs, territory flags) → small "tool as weapon" damage via
-##   CombatHit, using the SAME deterministic shape query as MeleeArc so a swing
-##   lands on still targets (a flag) that enter-events miss.
-## - areas (MineableNode) → register_gather_hit (the actual harvest).
+## Gathering-tool swing hitbox (pickaxe / axe / fishing rod / sickle):
+## - areas / overlapping MineableNodes → register_gather_hit (the actual harvest).
+## - Characters / flags are ignored — tools are not weapons and must not aggro.
 ##
-## Server-only damage / extraction; clients spawn the same scene for visual
-## feedback but the gates keep effects server-side.
+## Server-only extraction; clients spawn the same scene for visual feedback.
 
 
 @export var lifetime: float = 0.2
 
-## Damage dealt to Character bodies + flags. Kept low — a tool is a weak weapon.
-var character_damage: float = 2.0
+## Legacy field — gathering tools always deal 0 combat damage.
+var character_damage: float = 0.0
 ## Extraction damage per swing to MineableNodes (wooden = 1, iron = 2, …).
 var extraction_damage: int = 1
 ## Which tool this swing represents (&"pickaxe", &"sickle", …) — checked against
@@ -23,15 +20,14 @@ var source: Character
 ## Instance ref so register_gather_hit can route the result back to the peer.
 var instance: Node
 
-var _hit_bodies: Array[Node] = []
 var _hit_nodes: Array[Node] = []
 var _scanned: bool = false
 
 
 func _ready() -> void:
-	collision_mask = PhysicsLayers.HARVEST_TARGET_MASK
+	# Harvestables only — do not overlap combat hurtboxes / bodies.
+	collision_mask = PhysicsLayers.HARVESTABLE
 	if GameMode.is_world_server():
-		body_entered.connect(_on_body_entered)
 		area_entered.connect(_on_area_entered)
 	else:
 		set_physics_process(false)
@@ -49,27 +45,11 @@ func _physics_process(_delta: float) -> void:
 	if _scanned:
 		return
 	_scanned = true
-	# Deterministic shape query (same as MeleeArc): enter-events miss targets that
-	# are already overlapping when this hitbox spawns. Route MineableNode areas to
-	# gather; everything else through the weak combat path.
+	# Deterministic shape query: enter-events miss targets already overlapping
+	# when this hitbox spawns. Gather only — never combat-damage.
 	for body: Node2D in CombatHit.overlapping_bodies(self):
 		if body is MineableNode:
 			_try_gather(body as MineableNode)
-		else:
-			_on_body_entered(body)
-
-
-func _on_body_entered(body: Node2D) -> void:
-	if body == source:
-		return
-	if body is MineableNode:
-		_try_gather(body as MineableNode)
-		return
-	if _hit_bodies.has(body):
-		return
-	_hit_bodies.append(body)
-	# Shared target rules (flags, PvP, sparring, guild friendly-fire) via CombatHit.
-	CombatHit.try_damage(source if source is Character else null, body, character_damage)
 
 
 # Backup path when a node walks/enters mid-swing. Primary hits come from the

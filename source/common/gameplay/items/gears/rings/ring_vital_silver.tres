@@ -8,6 +8,7 @@
 [sub_resource type="Resource" id="Resource_p3pyk"]
 script = ExtResource("1_ws5w6")
 value = 12.0
+vendor_value = 160
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

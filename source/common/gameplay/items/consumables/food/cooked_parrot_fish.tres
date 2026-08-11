@@ -13,5 +13,6 @@ item_name = &"Cooked Parrot Fish"
 item_icon = ExtResource("2_icon")
 description = "Grilled parrot fish. Restores 45 health."
 stack_limit = 10
+vendor_value = 14
 metadata/slug = &"cooked_parrot_fish"
 metadata/id = 202

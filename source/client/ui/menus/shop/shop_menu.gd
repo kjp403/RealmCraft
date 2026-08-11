@@ -194,7 +194,8 @@ func _build_buy_rows() -> void:
 
 
 ## Sell side: specialty accepted_trades first, then owned items with vendor_value
-## (when the shop buys vendor-priced junk — gatherable ores/logs/fish/etc.).
+## (when the shop buys vendor-priced junk — gatherable ores/logs/fish/etc. and
+## craftables). Equipped gear is included so smithing products can be sold while worn.
 func _build_trade_rows() -> void:
 	var specialty_ids: Dictionary = {} # item_id -> true
 	if _shop.accepted_trades != null:
@@ -223,18 +224,32 @@ func _build_trade_rows() -> void:
 	if not _shop.buys_vendor_priced:
 		return
 	var sellables: Array[Dictionary] = []
-	for item_id: int in _owned.keys():
+	# Merge bag counts with equipped copies so worn steel/iron gear shows up.
+	var sell_counts: Dictionary = _owned.duplicate()
+	for equipped_id: Variant in _equipped_ids:
+		var eid: int = int(equipped_id)
+		if eid <= 0:
+			continue
+		sell_counts[eid] = int(sell_counts.get(eid, 0)) + 1
+	for item_id: int in sell_counts.keys():
 		if specialty_ids.has(item_id):
 			continue
-		var owned: int = int(_owned[item_id])
+		var owned: int = int(sell_counts[item_id])
 		if owned <= 0:
 			continue
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item == null or item.is_currency or item.vendor_value <= 0:
 			continue
-		if item_id in _equipped_ids:
-			continue
-		sellables.append({"item": item, "id": item_id, "owned": owned, "price": item.vendor_value})
+		var middle: String = "owned %d" % owned
+		if item_id in _equipped_ids and int(_owned.get(item_id, 0)) < owned:
+			middle = "owned %d (equipped)" % owned
+		sellables.append({
+			"item": item,
+			"id": item_id,
+			"owned": owned,
+			"price": item.vendor_value,
+			"middle": middle,
+		})
 	sellables.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a["item"].item_name) < String(b["item"].item_name)
 	)
@@ -245,7 +260,7 @@ func _build_trade_rows() -> void:
 		slot.price = int(entry["price"])
 		slot.quantity = int(entry["owned"])
 		slot.is_trade = false
-		_add_row(slot, "owned %d" % slot.quantity)
+		_add_row(slot, str(entry["middle"]))
 
 
 func _add_row(slot: ShopSlot, middle_text: String) -> void:

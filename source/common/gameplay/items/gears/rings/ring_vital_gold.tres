@@ -8,6 +8,7 @@
 [sub_resource type="Resource" id="Mod_main"]
 script = ExtResource("1_mod")
 value = 16.0
+vendor_value = 320
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

@@ -17,5 +17,6 @@ slot = ExtResource("3_slot")
 item_name = &"Fishing Rod (Lv 20)"
 item_icon = ExtResource("1_tex")
 description = "A seasoned angler's rod. Higher catch rates than a Level 10 rod."
+vendor_value = 40
 metadata/slug = &"fishing_rod_lv20"
 metadata/id = 251

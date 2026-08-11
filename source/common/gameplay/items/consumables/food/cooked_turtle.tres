@@ -13,5 +13,6 @@ item_name = &"Cooked Turtle"
 item_icon = ExtResource("2_icon")
 description = "Grilled turtle. Restores 40 health."
 stack_limit = 10
+vendor_value = 25
 metadata/slug = &"cooked_turtle"
 metadata/id = 201

@@ -7,7 +7,7 @@
 script = ExtResource("2_script")
 item_name = &"Runite Ore"
 item_icon = ExtResource("1_icon")
-description = "Rare teal ore. Smelt at a furnace into runite bars."
+description = "Rare bright-blue ore. Smelt at a furnace into runite bars."
 vendor_value = 28
 stack_limit = 10
 can_trade = true

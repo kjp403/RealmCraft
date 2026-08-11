@@ -1,17 +1,17 @@
 class_name PickSwingAbility
 extends AbilityResource
-## Pickaxe / tool swing. Spawns a PickArc that:
-##   - Damages Character bodies a little (pickaxe-as-weapon: weak by design).
-##   - Triggers MineableNode.register_pickaxe_hit on overlap (the actual harvest).
+## Gathering-tool swing. Spawns a PickArc that only harvests MineableNodes —
+## never deals combat damage. Tools are separate from weapons: Spacebar / free-aim
+## while holding a ToolItem will not attack NPCs (see LocalPlayer).
 ##
-## Higher-tier pickaxes use the same ability with a tuned extraction_damage
-## to chip ore HP faster — that's the "tool tier matters" progression.
+## Higher-tier tools use the same ability with a tuned extraction_damage
+## to chip resource HP faster — that's the "tool tier matters" progression.
 
 
 @export var arc_scene: PackedScene = preload("res://source/common/gameplay/combat/pick_arc.tscn")
-## Damage when this swing accidentally clips a Player or NPC. Kept low —
-## you don't want a wooden pickaxe to be a real combat weapon.
-@export var character_damage: float = 2.0
+## Gathering tools never damage Characters / flags. Kept at 0 so a pickaxe swing
+## near bats / goblins cannot aggro them.
+@export var character_damage: float = 0.0
 ## Extraction damage applied to MineableNodes per swing. 1 = wooden, scale
 ## up for higher tiers. Combined with node.extraction_hp this sets the
 ## "swings per ore yield" feel.
@@ -39,7 +39,8 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 
 	var arc: PickArc = arc_scene.instantiate()
 	arc.source = user if user is Character else null
-	arc.character_damage = character_damage
+	# Tools never attack — even if an authored .tres left a stale value.
+	arc.character_damage = 0.0
 	arc.extraction_damage = extraction_damage
 	arc.tool_type = tool_type
 	# Pass the ServerInstance reference through so the arc's area_entered

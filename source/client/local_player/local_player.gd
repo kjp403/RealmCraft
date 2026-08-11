@@ -334,9 +334,21 @@ func freeze_movement(seconds: float) -> void:
 ## A held potion / material with no primary attack still reads as UNARMED. The world
 ## click-to-inspect gate uses this: you only open a player's profile while holstered,
 ## so a click in a fight is always a swing/shot, never a profile.
+## Gathering tools (pickaxe / axe / fishing rod / sickle) are NOT armed for combat —
+## they only swing via HarvestController when you click a resource node.
 func is_armed() -> bool:
+	if is_holding_gather_tool():
+		return false
 	var weapon: Weapon = equipment_component.mounted_nodes.get(&"weapon", null) as Weapon
 	return weapon != null and not weapon.abilities.is_empty() and weapon.abilities[0] != null
+
+
+## True when the weapon slot holds a ToolItem (pickaxe, axe, fishing rod, sickle).
+## Spacebar / free-aim must not attack while a tool is equipped — gathering is a
+## separate click-to-harvest action.
+func is_holding_gather_tool() -> bool:
+	var item: Item = equipment_component.equipped_items.get(&"weapon", null)
+	return item is ToolItem
 
 
 # --- Weapon equip-cast (client) ---
@@ -601,8 +613,13 @@ func process_input() -> void:
 			return
 
 	equipment_component.process_input(self)
-	# Free-aim hold-fire only when no hostile lock is active.
-	if action_input and equipment_component.can_use(&"weapon", 0):
+	# Free-aim hold-fire only when no hostile lock is active — and never while a
+	# gathering tool is equipped (tools only swing via HarvestController).
+	if (
+		action_input
+		and not is_holding_gather_tool()
+		and equipment_component.can_use(&"weapon", 0)
+	):
 		Client.request_data(&"action.perform", Callable(),
 		{"d": look_direction, "i": 0}, InstanceClient.current.name)
 

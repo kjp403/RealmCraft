@@ -90,7 +90,10 @@ func tick() -> bool:
 		cancel()
 		return false
 	if not _player.is_armed():
-		Toaster.toast("Can't attack right now.")
+		if _player.is_holding_gather_tool():
+			Toaster.toast("Unequip your tool to attack.")
+		else:
+			Toaster.toast("Can't attack right now.")
 		cancel()
 		return false
 

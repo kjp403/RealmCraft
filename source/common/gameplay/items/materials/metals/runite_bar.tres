@@ -7,7 +7,7 @@
 script = ExtResource("2_script")
 item_name = &"Runite Bar"
 item_icon = ExtResource("1_icon")
-description = "A prized teal bar smelted from runite ore."
+description = "A prized bright-blue bar smelted from runite ore."
 vendor_value = 100
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
