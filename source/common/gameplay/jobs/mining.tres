@@ -41,5 +41,5 @@ perks = Array[Dictionary]([{
 "per_rank": 0.1
 }])
 source_items = Array[ExtResource("1_eebcb")]([ExtResource("4_3aric"), ExtResource("4_tin"), ExtResource("5_su7rm"), ExtResource("3_hb6fp"), ExtResource("6_silver"), ExtResource("8_mith"), ExtResource("9_adam"), ExtResource("7_gold"), ExtResource("10_rune")])
-source_levels = Array[int]([0, 0, 5, 15, 20, 20, 30, 40, 45])
+source_levels = Array[int]([0, 0, 5, 15, 20, 20, 50, 40, 50])
 describe_lines = Array[String](["Gather speed +{cooldown}%", "Bonus ore +{bonus_yield}%", "Mining XP +{xp}%"])

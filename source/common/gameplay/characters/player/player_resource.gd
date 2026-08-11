@@ -24,7 +24,7 @@ const BASE_STATS: Dictionary[StringName, float] = {
 	# grows the pool.
 	Stat.MANA_MAX: 50.0,
 	Stat.MANA_REGEN: 0.5,
-	Stat.MOVE_SPEED: 90.0,
+	Stat.MOVE_SPEED: 112.5,
 	Stat.ATTACK_SPEED: 0.8
 }
 

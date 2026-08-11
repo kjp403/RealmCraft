@@ -133,6 +133,6 @@ upgrades = &"sword_rally"
 [resource]
 script = ExtResource("1_tree")
 category = &"sword"
-display_name = "Sword"
+display_name = "Swordsmanship"
 category_icon = ExtResource("1_sword_icon")
 nodes = Array[ExtResource("2_node")]([SubResource("Node_ww1"), SubResource("Node_ww2"), SubResource("Node_ww3"), SubResource("Node_bsk1"), SubResource("Node_bsk2"), SubResource("Node_bsk3"), SubResource("Node_parry"), SubResource("Node_deflect"), SubResource("Node_deflect2"), SubResource("Node_tempo"), SubResource("Node_rally"), SubResource("Node_rally2")])

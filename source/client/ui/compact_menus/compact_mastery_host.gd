@@ -703,7 +703,12 @@ func _make_skill_row(slug: String, info: Dictionary) -> Button:
 
 
 func _rebuild_perk_detail() -> void:
+	# Preserve scroll so spending a point (especially the 3rd bonus) doesn't
+	# yank the player back to the top of the Spend list.
+	var saved_scroll: int = 0
 	for child: Node in _perks_detail_root.get_children():
+		if child is ScrollContainer:
+			saved_scroll = (child as ScrollContainer).scroll_vertical
 		_perks_detail_root.remove_child(child)
 		child.queue_free()
 
@@ -749,6 +754,8 @@ func _rebuild_perk_detail() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_perks_detail_root.add_child(scroll)
 	DragScroll.enable(scroll)
+	if saved_scroll > 0:
+		scroll.set_deferred(&"scroll_vertical", saved_scroll)
 
 	var body := VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
