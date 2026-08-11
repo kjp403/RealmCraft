@@ -32,6 +32,9 @@ const RETURN_SPEED_MULTIPLIER: float = 1.4
 ## near-zero HP fully heals over ~4s of walking. Reads visibly on the bar
 ## without being instant.
 const RETURN_REGEN_RATE: float = 0.25
+## Monsters only regenerate after this long with no chase/attack/damage activity.
+## Stops mid-fight "step out of the mechanic" full heals from idle/return regen.
+const OUT_OF_COMBAT_REGEN_DELAY_MS: int = 10000
 
 ## % of max HP regenerated per second while idling — catches the edge case
 ## of a sniped mob taking damage from outside its detection ring, since
@@ -147,6 +150,9 @@ var detection_radius: int = 150
 var chase_on_area: bool = false
 ## Idle stroll around spawn. Copied from enemy_data; 0 disables wander.
 var wander_radius: float = 0.0
+## Last time this mob was in active combat (chase/attack/damaged/dealt damage).
+## Regen (idle + return) waits OUT_OF_COMBAT_REGEN_DELAY_MS after this.
+var _last_combat_activity_ms: int = 0
 var wander_pause_min_s: float = 1.5
 var wander_pause_max_s: float = 4.0
 ## Idle wander scratch — not synced; clients see position/anim only.
@@ -454,6 +460,7 @@ func _physics_process(_delta: float) -> void:
 	# so a rooted body reads planted instead of sprinting in place.
 	if enemy_state != EnemyState.DEAD and (
 			Time.get_ticks_msec() < action_root_until_ms or is_stunned()):
+		_mark_combat_activity()
 		velocity = Vector2.ZERO
 		if anim != Character.Animations.IDLE:
 			anim = Character.Animations.IDLE
@@ -475,6 +482,7 @@ func _physics_process(_delta: float) -> void:
 			# Behavior-owned states (docs/hostile_npc_refactor.md): whoever
 			# took over (try_start, or an on_death intercept) drives them
 			# until it hands control back.
+			_mark_combat_activity()
 			if _state_owner != null:
 				_state_owner.process_state(self)
 			else:
@@ -881,13 +889,14 @@ func _face_target() -> void:
 		flipped = face_left
 
 
-## Slow passive heal while idling. Without this, a mob that took a snipe
-## from outside detection range would sit at low HP forever — even the
-## new take_damage path that auto-engages doesn't help when the attacker
-## stops shooting and walks off without ever entering the detection ring.
+## Slow passive heal while idling — only after OUT_OF_COMBAT_REGEN_DELAY_MS with
+## no chase/attack/damage. Without the delay, stepping out of a mechanic for a
+## second lets leashing "bosses" slam idle/return regen and refill mid-fight.
 func _process_idle_regen() -> void:
-	# Committed mobs (bosses) don't regen — their HP holds until the fight resumes.
+	# Committed mobs (world/dungeon bosses) don't regen — HP holds until the fight resumes.
 	if _is_committed():
+		return
+	if not _can_out_of_combat_regen():
 		return
 	var hmax: float = stats_component.get_stat(Stat.HEALTH_MAX)
 	var current_h: float = stats_component.get_stat(Stat.HEALTH)
@@ -896,6 +905,14 @@ func _process_idle_regen() -> void:
 	var dt: float = get_physics_process_delta_time()
 	var regen: float = hmax * IDLE_REGEN_RATE * dt
 	stats_component.set_stat(Stat.HEALTH, minf(hmax, current_h + regen))
+
+
+func _mark_combat_activity() -> void:
+	_last_combat_activity_ms = Time.get_ticks_msec()
+
+
+func _can_out_of_combat_regen() -> bool:
+	return Time.get_ticks_msec() - _last_combat_activity_ms >= OUT_OF_COMBAT_REGEN_DELAY_MS
 
 
 ## Idle = regen + optional short strolls around spawn (wander_radius > 0).
@@ -989,20 +1006,19 @@ func _process_return() -> void:
 	velocity = direction * move_speed * RETURN_SPEED_MULTIPLIER
 	move_and_slide()
 
-	# Visible heal-on-the-walk: each physics tick credits a fraction of
-	# (max HP × regen rate × dt). Reads as the bar filling while the mob
-	# runs home, rather than a magic snap-to-full on arrival.
+	# Heal-on-the-walk only after a real out-of-combat gap — otherwise kiting
+	# just outside a mechanic starts a 25%/s refill while the fight is still on.
 	var hmax: float = stats_component.get_stat(Stat.HEALTH_MAX)
 	var current_h: float = stats_component.get_stat(Stat.HEALTH)
-	if current_h < hmax:
+	if current_h < hmax and _can_out_of_combat_regen():
 		var dt: float = get_physics_process_delta_time()
 		var regen: float = hmax * RETURN_REGEN_RATE * dt
 		stats_component.set_stat(Stat.HEALTH, minf(hmax, current_h + regen))
 
 	var distance_from_spawn: float = global_position.distance_to(spawn_position)
 	if distance_from_spawn < 10: # minimum distance from spawn.
-		# Snap remaining HP to full on arrival — handles the rounding edge
-		# where the return walk ended a hair before full regen completed.
+		# True leash reset: once home, snap remaining HP full. Mid-fight
+		# kite-backs never reach here with a fresh combat stamp still warm.
 		if stats_component.get_stat(Stat.HEALTH) < hmax:
 			stats_component.set_stat(Stat.HEALTH, hmax)
 		_clear_wander_leg(Time.get_ticks_msec(), true)
@@ -1010,6 +1026,7 @@ func _process_return() -> void:
 
 
 func _process_chase() -> void:
+	_mark_combat_activity()
 	if not _is_target_valid(targeted_player):
 		_abandon_target()
 		return
@@ -1047,6 +1064,7 @@ const ATTACK_ADVANCE_STOP_FRACTION: float = 0.65
 
 
 func _process_attack() -> void:
+	_mark_combat_activity()
 	if not _is_target_valid(targeted_player):
 		_abandon_target()
 		return
@@ -1307,6 +1325,8 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 		])
 
 	super.take_damage(amount, attacker, damage_type)
+	if amount > 0.0:
+		_mark_combat_activity()
 
 	if DEBUG_NPC:
 		var post_h: float = stats_component.get_stat(Stat.HEALTH)

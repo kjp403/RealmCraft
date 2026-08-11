@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786408827
-next_id = 301
+version = 1786415843
+next_id = 313
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -1282,6 +1282,66 @@ entries = Array[Dictionary]([{
 &"id": 300,
 &"path": "res://source/common/gameplay/items/gears/metal/runite_helmet.tres",
 &"slug": &"runite_helmet"
+}, {
+&"hash": "2b498424ede0e55344329e3e9fe8e7bf9e67bb4b42d5a8ae53679d0d46a1da09",
+&"id": 301,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_adamant.tres",
+&"slug": &"axe_adamant"
+}, {
+&"hash": "ec01de8067ae20876f95393169b51196dcd08950d5c68b20524a22ccff940c59",
+&"id": 302,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_bronze.tres",
+&"slug": &"axe_bronze"
+}, {
+&"hash": "04eaaba8e3ddd1ac8a30f225899ed1d86de0c69ea739aadabce20df6779b88d3",
+&"id": 303,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_iron.tres",
+&"slug": &"axe_iron"
+}, {
+&"hash": "7342d3b66cc0917678b58e64a1c222fd29b980a59303f7251efee29cda132ac0",
+&"id": 304,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_mithril.tres",
+&"slug": &"axe_mithril"
+}, {
+&"hash": "84994a2fe5cd12e9b3c0e83edc7dc47b715fd84719e4679afbafead1f509f00d",
+&"id": 305,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_runite.tres",
+&"slug": &"axe_runite"
+}, {
+&"hash": "65f2ddcce6617a55eabedaa807a935a228e8c1d3cc8554909eef5dda42d58250",
+&"id": 306,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_steel.tres",
+&"slug": &"axe_steel"
+}, {
+&"hash": "86fc01ea099ec13411d7480ef739381849010111f98679fb3a40afea630e61e8",
+&"id": 307,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_adamant.tres",
+&"slug": &"pickaxe_adamant"
+}, {
+&"hash": "64bbd966639f4ed0b5b9f0d28489ec62b0082235d4ffee712d4fc603f385d959",
+&"id": 308,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_bronze.tres",
+&"slug": &"pickaxe_bronze"
+}, {
+&"hash": "7fe7406109ee3163c321293cef86554baae316fbadb3bf47b9a777e21141d1c7",
+&"id": 309,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_iron.tres",
+&"slug": &"pickaxe_iron"
+}, {
+&"hash": "aa901093f8ed0878fd387c1716b756afd5ddf080404352907f61e41e3b221db7",
+&"id": 310,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_mithril.tres",
+&"slug": &"pickaxe_mithril"
+}, {
+&"hash": "a7394b17b761f4a6fb6a70988930e0295e8bebff2270685c5af39dec00304841",
+&"id": 311,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_runite.tres",
+&"slug": &"pickaxe_runite"
+}, {
+&"hash": "630dc70f5b928feb1cdd497aaf5f2709e2d12e817c7c9efcfeabecd7f0954f54",
+&"id": 312,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_steel.tres",
+&"slug": &"pickaxe_steel"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")
