@@ -14,9 +14,9 @@ const MIN_DAMAGE_FRACTION: float = 0.1
 const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
 ## Ground piles stay reserved to their earner for this long (anti-ninja).
 const LOOT_EXCLUSIVE_MS: int = 60_000
-## Ornate bag-chest item IDs (blue / red / pink). Ranked boss grants pick one
-## at random per chest so each earner gets their own mix.
-const ORNATE_CHEST_IDS: Array[int] = [247, 248, 249]
+## T3 Ornate Gold Chest (Pink, item 249). Bosses with ornate_chest_top_max > 0
+## drop these on ranked damage shares.
+const ORNATE_CHEST_IDS: Array[int] = [249]
 
 
 ## [param contributors] = peer_id -> total damage dealt this life (HostileNpc
