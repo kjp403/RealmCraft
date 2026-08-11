@@ -93,7 +93,7 @@ position = Vector2(-68.04193, 291.33588)
 npc_resource = SubResource("Resource_s648a")
 
 [node name="FurnaceStation" parent="." unique_id=4011097083 instance=ExtResource("30_craft")]
-position = Vector2(232, 200)
+position = Vector2(-133, 168)
 station = ExtResource("32_furnace")
 metadata/_edit_group_ = true
 
@@ -121,7 +121,7 @@ region_enabled = true
 region_rect = Rect2(103, 64, 73, 48)
 
 [node name="AscendedWorkBenchStation" parent="." unique_id=4019232734 instance=ExtResource("30_craft")]
-position = Vector2(-24, 216)
+position = Vector2(-15, 140)
 station = ExtResource("34_asc")
 metadata/_edit_group_ = true
 

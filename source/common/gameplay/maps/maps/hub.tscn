@@ -200,7 +200,7 @@ npc_resource = ExtResource("14_banker")
 position = Vector2(160, -88)
 
 [node name="GuildHouse" parent="Warpers" unique_id=1093900753 instance=ExtResource("7_aris3")]
-position = Vector2(432, -104)
+position = Vector2(-430, -144)
 scale = Vector2(1.76, 1)
 target_instance = ExtResource("8_m02lb")
 warper_id = 1
