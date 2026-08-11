@@ -462,27 +462,77 @@ data = ExtResource("14_coal")
 
 [node name="MithrilVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1264.0, 720.0)
+position = Vector2(1200.0, 464.0)
 data = ExtResource("15_mith")
 
 [node name="MithrilVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1200.0, 464.0)
+position = Vector2(1360.0, 432.0)
 data = ExtResource("15_mith")
 
 [node name="MithrilVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1360.0, 432.0)
+position = Vector2(1072.0, 368.0)
 data = ExtResource("15_mith")
 
 [node name="MithrilVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
-position = Vector2(1264.0, 784.0)
+position = Vector2(1328.0, 560.0)
 data = ExtResource("15_mith")
 
 [node name="MithrilVein5" parent="MineableNodes" instance=ExtResource("10_mine")]
 y_sort_enabled = true
+position = Vector2(1008.0, 560.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein6" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1264.0, 720.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein7" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1488.0, 656.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein8" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1104.0, 816.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein9" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(896.0, 656.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein10" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1440.0, 960.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein11" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1152.0, 1008.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein12" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
 position = Vector2(1360.0, 1136.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein13" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(992.0, 1104.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein14" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1520.0, 848.0)
+data = ExtResource("15_mith")
+
+[node name="MithrilVein15" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1456.0, 1232.0)
 data = ExtResource("15_mith")
 
 [node name="AdamantVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
