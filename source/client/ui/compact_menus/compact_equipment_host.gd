@@ -42,6 +42,7 @@ var _slot_pixels: Dictionary[StringName, TextureRect] = {}
 var _slot_group := ButtonGroup.new()
 
 var _selected_slot: StringName = &""
+var _combat_level: Label
 var _selected_name: Label
 var _selected_details: RichTextLabel
 var _unequip_button: Button
@@ -95,6 +96,18 @@ func _build_equipment_layout() -> void:
 	main_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	main_box.add_theme_constant_override(&"separation", 3)
 	content.add_child(main_box)
+
+	# Combat level above the paperdoll — it's the number that decides what this
+	# gear can be worn at, so it belongs on the gear screen. Derived from the
+	# five weapon masteries (PlayerResource.derived_combat_level).
+	_combat_level = Label.new()
+	_combat_level.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combat_level.add_theme_font_size_override(&"font_size", 10)
+	_combat_level.add_theme_color_override(
+		&"font_color",
+		Color(0.91, 0.78, 0.48)
+	)
+	main_box.add_child(_combat_level)
 
 	var grid_center := CenterContainer.new()
 	grid_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -298,6 +311,8 @@ func _refresh() -> void:
 	var local_player: Player = ClientState.local_player
 	if local_player == null:
 		return
+
+	_combat_level.text = "Combat Level %d" % ClientState.player_level
 
 	var values: Dictionary = (
 		local_player.equipment_component.slots.values

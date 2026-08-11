@@ -407,6 +407,9 @@ func _refresh_perks() -> void:
 func _on_mastery_received(data: Dictionary) -> void:
 	_state = data.get("masteries", {})
 	_wielded = data.get("wielded", {})
+	# Freshest mastery levels in the session — keep the shared mirror in step so
+	# gear tooltips elsewhere colour their wear-gates correctly.
+	ClientState.apply_mastery_payload(_state)
 	_populate_category_tabs()
 	_render_selected_category()
 

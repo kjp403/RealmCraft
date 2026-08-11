@@ -223,7 +223,10 @@ func _refresh() -> void:
 		_figure.sprite_frames = frames
 		_figure.play(&"idle")
 	_name_label.text = str(local_player.display_name)
-	_level_label.text = "Level %d" % ClientState.player_level
+	# Character level IS the combat level here — it's derived from the five
+	# weapon masteries (PlayerResource.derived_combat_level), not from XP. Say so
+	# on the paperdoll: a bare "Level" next to a gear set reads as a gear level.
+	_level_label.text = "Combat Level %d" % ClientState.player_level
 
 	var values: Dictionary = local_player.equipment_component.slots.values
 	for slot_key: StringName in _slot_buttons:

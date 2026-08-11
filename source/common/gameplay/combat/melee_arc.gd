@@ -16,12 +16,22 @@ extends Area2D
 ## [member max_targets] caps how many combatants a single swing can DAMAGE
 ## (0 = unlimited AoE). Basics use 1 so a pack standing on top of each other
 ## doesn't all get cleaved / pulled by one swing — closest target wins.
+##
+## [member follow_source] turns the arc into a SUSTAINED field instead: it rides
+## the caster and re-runs the shape query every physics frame for its whole
+## lifetime. Whirlwind needs that — a one-frame snapshot taken while the wielder
+## is walking (it's a mobile channel) missed anything that drifted in a frame
+## later, which is what made the spin feel like it whiffed. [member _hit_bodies]
+## still dedupes, so one arc = at most one hit per target regardless.
 
 ## A target at/below this fraction of max HP counts as "low" for the wielder's
 ## Executioner mastery passive (DAMAGE_VS_LOW_HP amp).
 const LOW_HP_THRESHOLD: float = 0.35
 
 @export var lifetime: float = 0.18
+## Ride the source and keep scanning for the arc's whole lifetime (see above).
+## False = the default one-shot snapshot at the swing position.
+@export var follow_source: bool = false
 
 var source: Character
 var damage: float = 10.0
@@ -47,7 +57,13 @@ var _targets_damaged: int = 0
 
 
 func _ready() -> void:
-	collision_mask = PhysicsLayers.COMBAT_TARGET_MASK
+	# Damage targets only. The WORLD bit that CombatHit.TARGET_MASK carries is
+	# there for PROJECTILES (which stop on walls); a melee arc discards every
+	# non-DAMAGED result, so wall tiles were pure noise — and each overlapping
+	# tile shape burned one of intersect_shape's limited result slots, which is
+	# how a wide AoE (whirlwind, bladestorm) standing near a wall could come
+	# back with no mobs at all.
+	collision_mask = PhysicsLayers.HURTBOX | PhysicsLayers.FLAG
 	if not GameMode.is_world_server():
 		set_physics_process(false)
 	else:
@@ -63,9 +79,16 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	set_physics_process(false)
-	if _scanned:
-		return
+	if follow_source:
+		# A sustained field: stay centred on the wielder and re-scan every frame.
+		if not is_instance_valid(source):
+			queue_free()
+			return
+		global_position = source.global_position
+	else:
+		set_physics_process(false)
+		if _scanned:
+			return
 	_scanned = true
 	var bodies: Array[Node2D] = CombatHit.overlapping_bodies(self)
 	# Prefer the closest combatant when capped — otherwise pack stacks feel random.

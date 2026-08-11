@@ -424,36 +424,27 @@ func _rebuild_combat_detail() -> void:
 		if item == null:
 			continue
 		var req: int = int(entry.get("level", 0))
+		# Read progression from ClientState's mirrors — player_resource is
+		# server-only and always null here, which pinned this to 0 and rendered
+		# every row locked.
 		var player_level: int = 0
-		var local_player := _local_player()
-		if local_player != null and local_player.player_resource != null:
-			if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
-				# Armor may gate on character level or any mastery — use
-				# character level so "locked" rows match can_equip's level check.
-				player_level = int(local_player.player_resource.level)
-				var gear := item as GearItem
-				if gear != null and gear.required_mastery_level > 0:
+		if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
+			# Armor may gate on character level or any mastery — use character
+			# level so "locked" rows match can_equip's level check.
+			player_level = ClientState.player_level
+			var gear := item as GearItem
+			if gear != null and gear.required_mastery_level > 0:
+				if gear.required_mastery_categories.has(&"any"):
+					player_level = ClientState.best_mastery_level()
+				else:
 					player_level = 0
 					for cat: StringName in gear.required_mastery_categories:
 						player_level = maxi(
-							player_level,
-							local_player.player_resource.mastery_level_of(cat)
+							player_level, ClientState.mastery_level(cat)
 						)
-					if gear.required_mastery_categories.has(&"any"):
-						for cat2: StringName in MasteryService.trees():
-							player_level = maxi(
-								player_level,
-								local_player.player_resource.mastery_level_of(cat2)
-							)
-			else:
-				player_level = local_player.player_resource.mastery_level_of(
-					_selected_combat_category
-				)
+		else:
+			player_level = ClientState.mastery_level(_selected_combat_category)
 		list.add_child(_make_source_row(item, req, player_level))
-
-
-func _local_player() -> Player:
-	return ClientState.local_player as Player
 
 
 func _build_skills_grid() -> void:

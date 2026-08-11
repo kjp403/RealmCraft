@@ -25,6 +25,7 @@ var _weather_toggle: CheckButton
 var _music_value: Label
 var _sound_value: Label
 var _zoom_value: Label
+var _online_label: Label
 var _syncing: bool = false
 
 
@@ -108,6 +109,22 @@ func _build_layout() -> void:
 	_weather_toggle.add_theme_font_size_override(&"font_size", 10)
 	_weather_toggle.toggled.connect(_on_weather_toggled)
 	main_box.add_child(_weather_toggle)
+
+	main_box.add_child(HSeparator.new())
+
+	# Server population. Polled on open (see _refresh_online_count) rather than
+	# pushed — an exact live counter isn't worth a subscription, and "how busy is
+	# it right now" is the question players actually open this for.
+	_online_label = Label.new()
+	_online_label.text = "Players online: —"
+	_online_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_online_label.add_theme_font_size_override(&"font_size", 9)
+	_online_label.add_theme_color_override(
+		&"font_color",
+		Color(0.91, 0.78, 0.48)
+	)
+	_online_label.tooltip_text = "Characters connected to this world right now."
+	main_box.add_child(_online_label)
 
 	main_box.add_child(HSeparator.new())
 
@@ -209,6 +226,20 @@ func _add_slider_setting(
 func _on_visibility_changed() -> void:
 	if visible:
 		_sync_controls()
+		_refresh_online_count()
+
+
+func _refresh_online_count() -> void:
+	if _online_label == null or InstanceClient.current == null:
+		return
+	Client.request_data(
+		&"players.online",
+		func(data: Dictionary) -> void:
+			if is_instance_valid(_online_label):
+				_online_label.text = "Players online: %d" % int(data.get("count", 0)),
+		{},
+		InstanceClient.current.name
+	)
 
 
 func _on_slider_value_changed(

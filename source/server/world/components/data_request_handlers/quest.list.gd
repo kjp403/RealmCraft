@@ -1,6 +1,8 @@
 extends DataRequestHandler
 ## Returns quest views. With {"giver": id} -> the quests that giver offers (with the
-## player's state on each). Without it -> the player's own quests (for a quest log).
+## player's state on each). Without it -> the player's own quests (for a quest log),
+## or with {"all": true} the WHOLE catalog, so the log can also show the quests the
+## player hasn't started yet.
 
 
 func data_request_handler(
@@ -65,6 +67,18 @@ func data_request_handler(
 				if quest and quest.turn_in_giver_key() == giver_key:
 					resources_by_id[active_quest_id] = quest
 					quest_ids.append(active_quest_id)
+	elif bool(args.get("all", false)):
+		# Whole catalog, for the log's "Not Started" browse. Registry-backed, so
+		# it only lists quests whose content index has been generated — a
+		# freshly-authored quest shows at its giver before it shows here.
+		var registry: ContentRegistry = ContentRegistryHub.registry_of(&"quests")
+		if registry != null:
+			quest_ids = registry.all_ids()
+		# Anything the player holds that the index doesn't know about (stale
+		# index) still belongs in their own log.
+		for owned_id: Variant in resource.quests.keys():
+			if not quest_ids.has(int(owned_id)):
+				quest_ids.append(int(owned_id))
 	else:
 		quest_ids = resource.quests.keys()
 
