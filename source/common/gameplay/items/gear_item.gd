@@ -51,13 +51,21 @@ func stat_lines() -> Array[Dictionary]:
 		if modifier == null or is_zero_approx(modifier.value):
 			continue
 		lines.append({"text": _format_modifier(modifier), "stat": StringName(modifier.stat_name)})
+	# The req_* keys carry the gate itself so the tooltip can colour it against the
+	# viewing player — a requirement the player already meets shouldn't read as a
+	# blocker (see ItemTooltip._requirement_met).
 	if required_mastery_level > 0 and not required_mastery_categories.is_empty():
 		lines.append({
 			"text": "Requires %s mastery %d" % [_mastery_label(), required_mastery_level],
 			"kind": &"level",
+			"req_kind": &"mastery",
 		})
 	elif required_level > 0:
-		lines.append({"text": "Requires level %d" % required_level, "kind": &"level"})
+		lines.append({
+			"text": "Requires level %d" % required_level,
+			"kind": &"level",
+			"req_char_level": required_level,
+		})
 	return lines
 
 

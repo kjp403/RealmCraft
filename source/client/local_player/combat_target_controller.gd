@@ -56,6 +56,20 @@ func cancel() -> void:
 	_charge_held = false
 
 
+## Drop the lock once the target dies, and forget it as the remembered target.
+## Called every frame from [method LocalPlayer.process_input] rather than from
+## [method tick], which stops being called the moment [method is_active] goes
+## false. Without it the kill left a live lock pointing at the corpse: hostiles
+## respawn into the SAME node, so the player could stand still and be re-engaged
+## with no input — and the next Spacebar would re-acquire the old NPC instead of
+## whatever they'd since started fighting.
+func release_if_target_dead() -> void:
+	if _target != null and _target_is_dead(_target):
+		cancel()
+	if _last_target != null and _target_is_dead(_last_target):
+		_last_target = null
+
+
 ## Spacebar: prefer the remembered fight target, else the nearest living hostile.
 ## Returns null when nothing is in [constant SPACEBAR_ACQUIRE_RANGE] (free-aim).
 func acquire_for_spacebar() -> HostileNpc:

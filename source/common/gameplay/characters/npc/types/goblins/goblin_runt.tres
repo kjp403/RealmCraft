@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="2_potion"]
 [ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="3_6vglo"]
 [ext_resource type="SpriteFrames" uid="uid://b3kb4pkejph4" path="res://source/common/gameplay/characters/sprite_frames/goblin.tres" id="4_omqau"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("1_t2je2")
@@ -25,6 +26,11 @@ chance = 0.35
 script = ExtResource("1_t2je2")
 item = ExtResource("2_potion")
 chance = 0.08
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("1_t2je2")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("3_6vglo")
@@ -46,6 +52,6 @@ wander_pause_min_s = 1.2
 wander_pause_max_s = 3.5
 xp_reward = 8
 respawn_delay = 8.0
-loot = Array[ExtResource("1_t2je2")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_potion")])
+loot = Array[ExtResource("1_t2je2")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_potion"), SubResource("Drop_bone")])
 metadata/slug = &"goblin_runt"
 metadata/id = 24

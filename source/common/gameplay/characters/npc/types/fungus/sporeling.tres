@@ -7,6 +7,7 @@
 [ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="3_cloth"]
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="3_gold"]
 [ext_resource type="SpriteFrames" uid="uid://5xabqgmgve5p" path="res://source/common/gameplay/characters/sprite_frames/fungus_immature.tres" id="4_skin"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
@@ -19,6 +20,11 @@ chance = 0.8
 script = ExtResource("2_loot")
 item = ExtResource("3_cloth")
 chance = 0.15
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -33,6 +39,6 @@ detection_radius = 90
 chase_on_area = false
 xp_reward = 6
 respawn_delay = 12.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_bone")])
 metadata/slug = &"sporeling"
 metadata/id = 35

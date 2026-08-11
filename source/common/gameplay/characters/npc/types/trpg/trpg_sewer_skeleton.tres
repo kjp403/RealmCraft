@@ -8,6 +8,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_sewer.tres" id="loot_cloth_sewer"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="loot_hide_sewer"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_66s4p")
@@ -26,6 +27,11 @@ chance = 0.45
 script = ExtResource("3_66s4p")
 item = ExtResource("loot_cloth_sewer")
 chance = 0.25
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_66s4p")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("4_62m1e")
@@ -55,7 +61,7 @@ wander_pause_max_s = 4.0
 xp_reward = 9
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_66s4p")]([SubResource("Drop_gold"), SubResource("Drop_hide_sewer"), SubResource("Drop_cloth_sewer")])
+loot = Array[ExtResource("3_66s4p")]([SubResource("Drop_gold"), SubResource("Drop_hide_sewer"), SubResource("Drop_cloth_sewer"), SubResource("Drop_bone")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

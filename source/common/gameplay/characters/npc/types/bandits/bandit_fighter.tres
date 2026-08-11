@@ -6,11 +6,17 @@
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_xgjmn"]
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="3_cloth"]
 [ext_resource type="SpriteFrames" uid="uid://cjvpbhojuaqq" path="res://source/common/gameplay/characters/sprite_frames/bandit_fighter.tres" id="4_skin"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_cloth"]
 script = ExtResource("2_loot")
 item = ExtResource("3_cloth")
 chance = 0.2
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -27,6 +33,6 @@ detection_radius = 110
 chase_on_area = true
 xp_reward = 10
 respawn_delay = 16.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_cloth")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_cloth"), SubResource("Drop_bone")])
 metadata/slug = &"bandit_fighter"
 metadata/id = 30

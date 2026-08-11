@@ -167,7 +167,7 @@ func _rebuild() -> void:
 
 	var tree: MasteryTreeResource = MasteryService.tree_for(StringName(_category))
 	var info: Dictionary = _state.get(_category, {})
-	var level: int = int(info.get("level", 0))
+	var level: int = int(info.get("level", 1))
 	var points: int = int(info.get("points", 0))
 	var display: String = _category.capitalize()
 	if tree != null and not tree.display_name.is_empty():
@@ -314,7 +314,7 @@ func _make_tile(node: MasteryNode, _tree: MasteryTreeResource, info: Dictionary,
 	var loadout: Array = info.get("loadout", [])
 	var slot_index: int = loadout.find(String(node.id))
 	var equipped: bool = slot_index >= 0
-	var level: int = int(info.get("level", 0))
+	var level: int = int(info.get("level", 1))
 	var points: int = int(info.get("points", 0))
 	var required_level: int = int(MasteryService.TIER_UNLOCK_LEVEL.get(node.tier, 1))
 	var owned_set: Dictionary = {}
@@ -525,7 +525,7 @@ func _make_action_button(node: MasteryNode, _tree: MasteryTreeResource, info: Di
 	var loadout: Array = info.get("loadout", [])
 	var slot_index: int = loadout.find(String(node.id))
 	var equipped: bool = slot_index >= 0
-	var level: int = int(info.get("level", 0))
+	var level: int = int(info.get("level", 1))
 	var points: int = int(info.get("points", 0))
 	var required_level: int = int(MasteryService.TIER_UNLOCK_LEVEL.get(node.tier, 1))
 	var owned_set: Dictionary = {}
