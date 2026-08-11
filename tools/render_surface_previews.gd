@@ -1,34 +1,45 @@
 extends SceneTree
-## Preview shots of the three Fire Forge levels, for reviewing the floor work.
+## Preview shots of the Fire Forge levels and the three surface maps, for
+## reviewing floor material and world scale.
 ##
 ## Two passes per level, because they answer different questions:
 ##   * an overview, which shows whether the paved roads read as a network;
 ##   * two gameplay-scale crops, which is the only scale at which you can tell
 ##     whether the floor under a running player has anything to track.
 ##
-##   godot --path . -s tools/render_forge_previews.gd
-##   godot --path . -s tools/render_forge_previews.gd -- --outdir=C:/tmp/shots
+##   godot --path . -s tools/render_surface_previews.gd
+##   godot --path . -s tools/render_surface_previews.gd -- --outdir=C:/tmp/shots
 
-const MAPS := "res://source/common/gameplay/maps/maps/fire_forge/"
+const MAPS := "res://source/common/gameplay/maps/maps/"
 
 ## `size` is in cells of the *emitted* map, which for the two sub-levels is the
 ## authored grid multiplied by `build_biome_levels.gd`'s SCALE. Detail cameras
 ## are in world pixels on that same emitted grid.
 const LEVELS: Array[Dictionary] = [
 	{
-		"name": "bellows-gallery", "path": MAPS + "bellows_gallery.tscn",
+		"name": "bellows-gallery", "path": MAPS + "fire_forge/bellows_gallery.tscn",
 		"size": Vector2i(520, 390),
 		"details": [Vector2(4168, 5448), Vector2(2408, 2408)],  # arrival hall, west hall
 	},
 	{
-		"name": "fire-forge", "path": MAPS + "fire_forge.tscn",
-		"size": Vector2i(112, 84),
-		"details": [Vector2(896, 1150), Vector2(896, 672)],     # entrance, centre bay
+		"name": "fire-forge", "path": MAPS + "fire_forge/fire_forge.tscn",
+		"size": Vector2i(224, 168),
+		"details": [Vector2(1800, 2312), Vector2(1800, 1352)],  # entrance, centre bay
 	},
 	{
-		"name": "cinder-deeps", "path": MAPS + "cinder_deeps.tscn",
+		"name": "cinder-deeps", "path": MAPS + "fire_forge/cinder_deeps.tscn",
 		"size": Vector2i(560, 430),
 		"details": [Vector2(4488, 6088), Vector2(6984, 3208)],  # landing, east ledge
+	},
+	{
+		"name": "desert", "path": MAPS + "desert/desert.tscn",
+		"size": Vector2i(208, 152),
+		"details": [Vector2(1672, 2056), Vector2(1672, 1032)],  # oasis camp, north basin
+	},
+	{
+		"name": "sewers", "path": MAPS + "sewers/sewers.tscn",
+		"size": Vector2i(224, 168),
+		"details": [Vector2(1800, 2312), Vector2(1800, 1416)],  # arrival, central cistern
 	},
 ]
 
