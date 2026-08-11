@@ -317,6 +317,11 @@ func _build_sewers() -> void:
 # --- Fire Forge -------------------------------------------------------------
 # Foundry halls cut into rock, walled with the DG Fire masonry ring (cols 1-4,
 # rows 1-3) and pooled with lava from the 16x16 lava pack.
+#
+# The floor is a laid-out working foundry, not a fill: cut slate everywhere,
+# paved haul roads down every corridor, a paved apron at each chamber, a work
+# plate and a quench pool in the bays, and a scorched ash apron around the lava.
+# See `tools/lib/forgefloor.gd` for why the old DG Fire bank had to go.
 
 func _build_fire_forge() -> void:
 	_set_size(112, 84)
@@ -329,6 +334,21 @@ func _build_fire_forge() -> void:
 	props.tile_set = ts
 
 	var entrance_hint := Vector2i(56, 72)
+	var bays: Array[Vector2i] = [
+		Vector2i(56, 71), Vector2i(56, 60), Vector2i(26, 52), Vector2i(86, 52),
+		Vector2i(56, 42), Vector2i(24, 24), Vector2i(88, 24), Vector2i(56, 18),
+	]
+	var links: Array = [
+		[Vector2i(56, 64), Vector2i(56, 52), 2.8, 2.0, 61],
+		[Vector2i(48, 58), Vector2i(30, 54), 2.4, 3.0, 62],
+		[Vector2i(64, 58), Vector2i(82, 54), 2.4, 3.0, 63],
+		[Vector2i(28, 44), Vector2i(26, 32), 2.4, 3.0, 64],
+		[Vector2i(84, 44), Vector2i(86, 32), 2.4, 3.0, 65],
+		[Vector2i(32, 20), Vector2i(48, 18), 2.4, 2.5, 66],
+		[Vector2i(80, 20), Vector2i(64, 18), 2.4, 2.5, 67],
+		[Vector2i(50, 38), Vector2i(34, 28), 2.2, 3.5, 68],
+		[Vector2i(62, 38), Vector2i(78, 28), 2.2, 3.5, 69],
+	]
 	var floor_mask := _carve(
 		[
 			[Vector2i(56, 71), 8.5, 0.26, 51],
@@ -340,28 +360,10 @@ func _build_fire_forge() -> void:
 			[Vector2i(88, 24), 9.0, 0.28, 57],
 			[Vector2i(56, 18), 8.5, 0.26, 58],
 		],
-		[
-			[Vector2i(56, 64), Vector2i(56, 52), 2.8, 2.0, 61],
-			[Vector2i(48, 58), Vector2i(30, 54), 2.4, 3.0, 62],
-			[Vector2i(64, 58), Vector2i(82, 54), 2.4, 3.0, 63],
-			[Vector2i(28, 44), Vector2i(26, 32), 2.4, 3.0, 64],
-			[Vector2i(84, 44), Vector2i(86, 32), 2.4, 3.0, 65],
-			[Vector2i(32, 20), Vector2i(48, 18), 2.4, 2.5, 66],
-			[Vector2i(80, 20), Vector2i(64, 18), 2.4, 2.5, 67],
-			[Vector2i(50, 38), Vector2i(34, 28), 2.2, 3.5, 68],
-			[Vector2i(62, 38), Vector2i(78, 28), 2.2, 3.5, 69],
-		],
+		links,
 		4,
 		entrance_hint
 	)
-
-	# DG Fire's own floor bank (flat terracotta) so floor and masonry share a palette.
-	var forge_floors := [
-		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
-		Vector2i(7, 2), Vector2i(5, 3), Vector2i(7, 3),
-	]
-	for cell: Vector2i in floor_mask.keys():
-		ground.set_cell(cell, 3, MapKit._pick(forge_floors, cell, 71))
 
 	var void_mask := _void_of(floor_mask)
 	# DG Fire masonry: the ring sits at cols 1-4 / rows 1-3, not at row 0.
@@ -397,6 +399,56 @@ func _build_fire_forge() -> void:
 		for cell: Vector2i in pool.keys():
 			if walk.has(cell):
 				lava_cells[cell] = true
+	# --- Floor ---------------------------------------------------------------
+	# Painted now rather than straight after the carve, because where the lava
+	# ends up decides where the ash apron goes and where a work plate must not.
+
+	# Haul roads: the same tunnel shapes the carver used, re-rasterised narrower.
+	# Deriving them from the links instead of drawing straight lines guarantees
+	# every road stays inside the corridor it belongs to.
+	var paved: Dictionary = {}
+	for link: Array in links:
+		MapKit.tunnel(paved, link[0], link[1], float(link[2]) * 0.45, float(link[3]), int(link[4]), _bounds)
+	# A paved apron at each bay and a wider one at the arrival hall, so the road
+	# network resolves into a floor instead of dead-ending at a chamber mouth.
+	# These stay well inside the chambers: the point of the paving is that a
+	# player can see where it goes, and it cannot do that if it is everywhere.
+	for bay: Vector2i in bays:
+		ForgeFloor.apron(paved, bay, 3)
+	ForgeFloor.apron(paved, entrance, 5)
+	ForgeFloor.apron(paved, portal, 3)
+	for cell: Vector2i in lava_cells.keys():
+		paved.erase(cell)
+
+	var scorch := ForgeFloor.scorch_of(lava_cells, floor_mask, 3)
+	var depth := ForgeFloor.depth_field(floor_mask)
+	var owned: Dictionary = {}
+
+	# Features first so they can claim their cells before the fills run. Work
+	# plates sit off-centre in the bays that hold a lava pool, on centre in the
+	# ones that do not; the casting pits go where the haul roads meet.
+	for spot in [
+		Vector2i(56, 60), Vector2i(30, 48), Vector2i(82, 48),
+		Vector2i(50, 38), Vector2i(28, 20), Vector2i(84, 20), Vector2i(56, 15),
+	]:
+		for cell: Vector2i in ForgeFloor.hearth(ground, floor_mask, _pick_open(walk, spot)).keys():
+			owned[cell] = true
+	for spot in [Vector2i(32, 52), Vector2i(80, 52), Vector2i(56, 66)]:
+		var pit := _pick_open(walk, spot)
+		var placed := ForgeFloor.mold_pit(ground, floor_mask, pit)
+		if placed.is_empty():
+			continue
+		for cell: Vector2i in placed.keys():
+			owned[cell] = true
+		walk.erase(pit)
+
+	for cell: Vector2i in owned.keys():
+		paved.erase(cell)
+	var paved_done := ForgeFloor.pave(ground, paved, floor_mask, depth, 72, 0.22)
+	for cell: Vector2i in paved_done.keys():
+		owned[cell] = true
+	ForgeFloor.paint_slate(ground, floor_mask, depth, 71, {"scorch": scorch, "skip": owned})
+
 	# Textured lava: the flat fill tile reads as a solid orange shape.
 	var lava_tiles := [Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11)]
 	for cell: Vector2i in lava_cells.keys():
@@ -425,6 +477,13 @@ func _build_fire_forge() -> void:
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
+
+	# Slag and broken stone swept against the walls. Flat, non-blocking, and
+	# sparse: this is wear on the floor, not another prop pass.
+	for cell in MapKit.scatter(edges, 0.11, 3, 93):
+		if solid.has(cell) or props.get_cell_source_id(cell) >= 0:
+			continue
+		props.set_cell(cell, ForgeFloor.SOURCE, MapKit._pick(ForgeFloor.RUBBLE, cell, 94))
 
 	var decos: Array = []
 	var ti := 0
