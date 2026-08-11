@@ -26,6 +26,52 @@ var H: int = 48
 var _bounds := Rect2i(0, 0, 64, 48)
 
 
+# --- Surface map world scale --------------------------------------------------
+#
+# All three surface maps share it. 2x, not 3x: at 3x a screen holds one
+# material and one torch, which needs an authored content pass, not a knob.
+#
+# Layout coordinates multiply; atlas cells never do, which is why the tiling
+# looks the same at any scale — every tile is chosen either from its neighbours
+# or from a per-cell hash, and neither knows how big the map is.
+
+const SURFACE_S := 2
+
+## Wobble has to be bumped, not just carried. `MapKit.blob` samples its wobble on
+## the unit circle and `MapKit.tunnel` parameterises wander by t, so a scaled
+## cavern otherwise keeps the *same number of lobes*, each S times longer, and
+## reads rounder and lazier than the 1x map did.
+const SURFACE_WOBBLE := 1.3
+
+
+func _sc(x: int, y: int) -> Vector2i:
+	return Vector2i(x * SURFACE_S, y * SURFACE_S)
+
+
+func _sr(v: float) -> float:
+	return v * float(SURFACE_S)
+
+
+func _sn(n: int) -> int:
+	return n * SURFACE_S
+
+
+func _sw(w: float) -> float:
+	# Capped: past ~0.45 the outline stops reading as rock and starts fraying.
+	return minf(w * SURFACE_WOBBLE, 0.45)
+
+
+## Hazard radii scale by sqrt(S), not S.
+##
+## Rooms and corridors are read at map scale, so they scale linearly. A lava
+## pool is read at *screen* scale: scaled linearly at 3x the central Forge pool
+## stopped being a thing you walk around and became a wall of orange filling the
+## viewport, with the lava tiles' horizontal seams banding across it. sqrt keeps
+## it a landmark in a bigger room instead of a room-sized hazard.
+func _sh(v: float) -> float:
+	return v * sqrt(float(SURFACE_S))
+
+
 func _initialize() -> void:
 	_build_desert()
 	_build_fire_forge()
@@ -174,7 +220,7 @@ func _scatter_flat(
 # template: rows 1-2 are floor, row 0 the north wall, row 4 the south wall.
 
 func _build_sewers() -> void:
-	_set_size(112, 84)
+	_set_size(_sn(112), _sn(84))
 	var ts: TileSet = load(SEWERS_TS)
 	var ground := TileMapLayer.new()
 	ground.tile_set = ts
@@ -183,31 +229,31 @@ func _build_sewers() -> void:
 	var props := TileMapLayer.new()
 	props.tile_set = ts
 
-	var entrance_hint := Vector2i(56, 72)
+	var entrance_hint := _sc(56, 72)
 	var floor_mask := _carve(
 		[
-			[Vector2i(56, 71), 9.0, 0.26, 11],
-			[Vector2i(48, 62), 6.5, 0.30, 12],
-			[Vector2i(64, 62), 6.5, 0.30, 13],
-			[Vector2i(24, 50), 9.5, 0.26, 14],
-			[Vector2i(88, 50), 9.5, 0.26, 15],
-			[Vector2i(56, 44), 10.0, 0.24, 16],
-			[Vector2i(30, 24), 9.0, 0.28, 17],
-			[Vector2i(82, 24), 9.0, 0.28, 18],
-			[Vector2i(56, 16), 8.0, 0.28, 19],
+			[_sc(56, 71), _sr(9.0), _sw(0.26), 11],
+			[_sc(48, 62), _sr(6.5), _sw(0.30), 12],
+			[_sc(64, 62), _sr(6.5), _sw(0.30), 13],
+			[_sc(24, 50), _sr(9.5), _sw(0.26), 14],
+			[_sc(88, 50), _sr(9.5), _sw(0.26), 15],
+			[_sc(56, 44), _sr(10.0), _sw(0.24), 16],
+			[_sc(30, 24), _sr(9.0), _sw(0.28), 17],
+			[_sc(82, 24), _sr(9.0), _sw(0.28), 18],
+			[_sc(56, 16), _sr(8.0), _sw(0.28), 19],
 		],
 		[
-			[Vector2i(56, 64), Vector2i(56, 54), 2.6, 2.5, 31],
-			[Vector2i(50, 60), Vector2i(30, 52), 2.2, 3.0, 32],
-			[Vector2i(62, 60), Vector2i(82, 52), 2.2, 3.0, 33],
-			[Vector2i(26, 44), Vector2i(30, 32), 2.2, 3.0, 34],
-			[Vector2i(86, 44), Vector2i(82, 32), 2.2, 3.0, 35],
-			[Vector2i(36, 22), Vector2i(50, 17), 2.2, 2.5, 36],
-			[Vector2i(76, 22), Vector2i(62, 17), 2.2, 2.5, 37],
-			[Vector2i(48, 42), Vector2i(34, 28), 2.0, 3.5, 38],
-			[Vector2i(64, 42), Vector2i(78, 28), 2.0, 3.5, 39],
+			[_sc(56, 64), _sc(56, 54), _sr(2.6), _sr(2.5), 31],
+			[_sc(50, 60), _sc(30, 52), _sr(2.2), _sr(3.0), 32],
+			[_sc(62, 60), _sc(82, 52), _sr(2.2), _sr(3.0), 33],
+			[_sc(26, 44), _sc(30, 32), _sr(2.2), _sr(3.0), 34],
+			[_sc(86, 44), _sc(82, 32), _sr(2.2), _sr(3.0), 35],
+			[_sc(36, 22), _sc(50, 17), _sr(2.2), _sr(2.5), 36],
+			[_sc(76, 22), _sc(62, 17), _sr(2.2), _sr(2.5), 37],
+			[_sc(48, 42), _sc(34, 28), _sr(2.0), _sr(3.5), 38],
+			[_sc(64, 42), _sc(78, 28), _sr(2.0), _sr(3.5), 39],
 		],
-		4,
+		_sn(4),
 		entrance_hint
 	)
 
@@ -236,7 +282,7 @@ func _build_sewers() -> void:
 	var walk := _walkable(floor_mask, blocked)
 	var entrance := _pick_open(walk, entrance_hint)
 	walk = MapKit.largest_region(walk, entrance)
-	var portal := _pick_open(walk, entrance + Vector2i(0, 5))
+	var portal := _pick_open(walk, entrance + Vector2i(0, _sn(5)))
 
 	var keepout: Dictionary = {}
 	for spot in [entrance, portal]:
@@ -262,9 +308,13 @@ func _build_sewers() -> void:
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(24, 50), Vector2i(88, 50), Vector2i(56, 44), Vector2i(30, 24),
-		Vector2i(82, 24), Vector2i(56, 16), Vector2i(48, 62), Vector2i(64, 62),
-		Vector2i(56, 71),
+		_sc(24, 50), _sc(88, 50), _sc(56, 44), _sc(30, 24),
+		_sc(82, 24), _sc(56, 16), _sc(48, 62), _sc(64, 62),
+		_sc(56, 71),
+		# The authored list has to grow with the span or the culverts go dark.
+		_sc(56, 54), _sc(40, 56), _sc(72, 56), _sc(27, 37), _sc(85, 37),
+		_sc(40, 22), _sc(72, 22), _sc(56, 30), _sc(56, 62), _sc(20, 50),
+		_sc(92, 50), _sc(44, 44), _sc(68, 44),
 	]:
 		var cell := _pick_open(walk, spot)
 		ti += 1
@@ -278,7 +328,7 @@ func _build_sewers() -> void:
 		})
 
 	assert(walk.has(entrance) and walk.has(portal), "sewers spawn blocked")
-	assert(walk.size() > 900, "sewers too small: %d" % walk.size())
+	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "sewers too small: %d" % walk.size())
 	print("sewers walk=", walk.size(), " floor=", floor_mask.size())
 
 	_write_map({
@@ -307,8 +357,8 @@ func _build_sewers() -> void:
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
 			+ "position = Vector2(%s, %s)\n" % [
-				str(_tile_pos(entrance + Vector2i(2, -2)).x),
-				str(_tile_pos(entrance + Vector2i(2, -2)).y),
+				str(_tile_pos(entrance + _sc(2, -2)).x),
+				str(_tile_pos(entrance + _sc(2, -2)).y),
 			]
 		),
 	})
@@ -319,7 +369,7 @@ func _build_sewers() -> void:
 # rows 1-3) and pooled with lava from the 16x16 lava pack.
 
 func _build_fire_forge() -> void:
-	_set_size(112, 84)
+	_set_size(_sn(112), _sn(84))
 	var ts: TileSet = load(FORGE_TS)
 	var ground := TileMapLayer.new()
 	ground.tile_set = ts
@@ -328,35 +378,35 @@ func _build_fire_forge() -> void:
 	var props := TileMapLayer.new()
 	props.tile_set = ts
 
-	var entrance_hint := Vector2i(56, 72)
+	var entrance_hint := _sc(56, 72)
 	var bays: Array[Vector2i] = [
-		Vector2i(56, 71), Vector2i(56, 60), Vector2i(26, 52), Vector2i(86, 52),
-		Vector2i(56, 42), Vector2i(24, 24), Vector2i(88, 24), Vector2i(56, 18),
+		_sc(56, 71), _sc(56, 60), _sc(26, 52), _sc(86, 52),
+		_sc(56, 42), _sc(24, 24), _sc(88, 24), _sc(56, 18),
 	]
 	var links: Array = [
-		[Vector2i(56, 64), Vector2i(56, 52), 2.8, 2.0, 61],
-		[Vector2i(48, 58), Vector2i(30, 54), 2.4, 3.0, 62],
-		[Vector2i(64, 58), Vector2i(82, 54), 2.4, 3.0, 63],
-		[Vector2i(28, 44), Vector2i(26, 32), 2.4, 3.0, 64],
-		[Vector2i(84, 44), Vector2i(86, 32), 2.4, 3.0, 65],
-		[Vector2i(32, 20), Vector2i(48, 18), 2.4, 2.5, 66],
-		[Vector2i(80, 20), Vector2i(64, 18), 2.4, 2.5, 67],
-		[Vector2i(50, 38), Vector2i(34, 28), 2.2, 3.5, 68],
-		[Vector2i(62, 38), Vector2i(78, 28), 2.2, 3.5, 69],
+		[_sc(56, 64), _sc(56, 52), _sr(2.8), _sr(2.0), 61],
+		[_sc(48, 58), _sc(30, 54), _sr(2.4), _sr(3.0), 62],
+		[_sc(64, 58), _sc(82, 54), _sr(2.4), _sr(3.0), 63],
+		[_sc(28, 44), _sc(26, 32), _sr(2.4), _sr(3.0), 64],
+		[_sc(84, 44), _sc(86, 32), _sr(2.4), _sr(3.0), 65],
+		[_sc(32, 20), _sc(48, 18), _sr(2.4), _sr(2.5), 66],
+		[_sc(80, 20), _sc(64, 18), _sr(2.4), _sr(2.5), 67],
+		[_sc(50, 38), _sc(34, 28), _sr(2.2), _sr(3.5), 68],
+		[_sc(62, 38), _sc(78, 28), _sr(2.2), _sr(3.5), 69],
 	]
 	var floor_mask := _carve(
 		[
-			[Vector2i(56, 71), 8.5, 0.26, 51],
-			[Vector2i(56, 60), 7.0, 0.28, 52],
-			[Vector2i(26, 52), 9.0, 0.26, 53],
-			[Vector2i(86, 52), 9.0, 0.26, 54],
-			[Vector2i(56, 42), 10.0, 0.24, 55],
-			[Vector2i(24, 24), 9.0, 0.28, 56],
-			[Vector2i(88, 24), 9.0, 0.28, 57],
-			[Vector2i(56, 18), 8.5, 0.26, 58],
+			[_sc(56, 71), _sr(8.5), _sw(0.26), 51],
+			[_sc(56, 60), _sr(7.0), _sw(0.28), 52],
+			[_sc(26, 52), _sr(9.0), _sw(0.26), 53],
+			[_sc(86, 52), _sr(9.0), _sw(0.26), 54],
+			[_sc(56, 42), _sr(10.0), _sw(0.24), 55],
+			[_sc(24, 24), _sr(9.0), _sw(0.28), 56],
+			[_sc(88, 24), _sr(9.0), _sw(0.28), 57],
+			[_sc(56, 18), _sr(8.5), _sw(0.26), 58],
 		],
 		links,
-		4,
+		_sn(4),
 		entrance_hint
 	)
 
@@ -379,17 +429,17 @@ func _build_fire_forge() -> void:
 	var walk := _walkable(floor_mask, blocked)
 	var entrance := _pick_open(walk, entrance_hint)
 	walk = MapKit.largest_region(walk, entrance)
-	var portal := _pick_open(walk, entrance + Vector2i(0, 5))
+	var portal := _pick_open(walk, entrance + Vector2i(0, _sn(5)))
 
 	# Lava pools sunk into the foundry floors — hazards, not decoration.
 	var lava_cells: Dictionary = {}
 	for spot in [
-		[Vector2i(24, 24), 4.0, 81], [Vector2i(88, 24), 4.0, 82],
-		[Vector2i(26, 52), 3.6, 83], [Vector2i(86, 52), 3.6, 84],
-		[Vector2i(56, 42), 4.4, 85],
+		[_sc(24, 24), _sh(4.0), 81], [_sc(88, 24), _sh(4.0), 82],
+		[_sc(26, 52), _sh(3.6), 83], [_sc(86, 52), _sh(3.6), 84],
+		[_sc(56, 42), _sh(4.4), 85],
 	]:
 		var pool: Dictionary = {}
-		MapKit.blob(pool, spot[0], spot[1], 0.30, int(spot[2]), _bounds)
+		MapKit.blob(pool, spot[0], spot[1], _sw(0.30), int(spot[2]), _bounds)
 		pool = MapKit.smooth(pool, _bounds, 1, 5, 4)
 		for cell: Vector2i in pool.keys():
 			if walk.has(cell):
@@ -409,9 +459,9 @@ func _build_fire_forge() -> void:
 	for link: Array in links:
 		MapKit.tunnel(paved, link[0], link[1], float(link[2]) * 0.45, float(link[3]), int(link[4]), _bounds)
 	for bay: Vector2i in bays:
-		ForgeFloor.apron(paved, bay, 3)
-	ForgeFloor.apron(paved, entrance, 5)
-	ForgeFloor.apron(paved, portal, 3)
+		ForgeFloor.apron(paved, bay, _sn(3))
+	ForgeFloor.apron(paved, entrance, _sn(5))
+	ForgeFloor.apron(paved, portal, _sn(3))
 	for cell: Vector2i in lava_cells.keys():
 		paved.erase(cell)
 
@@ -422,13 +472,17 @@ func _build_fire_forge() -> void:
 	# Features first so they can claim their cells before the fills run. Work
 	# plates sit off-centre in the bays that hold a lava pool, on centre in the
 	# ones that do not; the casting pits go where the haul roads meet.
+	# At 3x a single 3x3 stamp is lost in the room, so the plates go down as
+	# clusters of three offset by a plate width — the only honest way to make a
+	# fixed-size landmark hold a scaled space without new art.
 	for spot in [
-		Vector2i(56, 60), Vector2i(30, 48), Vector2i(82, 48),
-		Vector2i(50, 38), Vector2i(28, 20), Vector2i(84, 20), Vector2i(56, 15),
+		_sc(56, 60), _sc(30, 48), _sc(82, 48),
+		_sc(50, 38), _sc(28, 20), _sc(84, 20), _sc(56, 15),
 	]:
-		for cell: Vector2i in ForgeFloor.hearth(ground, floor_mask, _pick_open(walk, spot)).keys():
-			owned[cell] = true
-	for spot in [Vector2i(32, 52), Vector2i(80, 52), Vector2i(56, 66)]:
+		for offset in [Vector2i(0, 0), Vector2i(4, 3), Vector2i(-4, 3)]:
+			for cell: Vector2i in ForgeFloor.hearth(ground, floor_mask, _pick_open(walk, spot + offset)).keys():
+				owned[cell] = true
+	for spot in [_sc(32, 52), _sc(80, 52), _sc(56, 66)]:
 		var pit := _pick_open(walk, spot)
 		var placed := ForgeFloor.mold_pit(ground, floor_mask, pit)
 		if placed.is_empty():
@@ -439,9 +493,11 @@ func _build_fire_forge() -> void:
 
 	for cell: Vector2i in owned.keys():
 		paved.erase(cell)
-	for cell: Vector2i in ForgeFloor.pave(ground, paved, floor_mask, depth, 72, 0.22).keys():
+	for cell: Vector2i in ForgeFloor.pave(ground, paved, floor_mask, depth, 72, 0.28, float(SURFACE_S)).keys():
 		owned[cell] = true
-	ForgeFloor.paint_slate(ground, floor_mask, depth, 71, {"scorch": scorch, "skip": owned})
+	ForgeFloor.paint_slate(ground, floor_mask, depth, 71, {
+		"scorch": scorch, "skip": owned, "unit": float(SURFACE_S),
+	})
 
 	# Textured lava: the flat fill tile reads as a solid orange shape.
 	var lava_tiles := [Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11)]
@@ -479,11 +535,20 @@ func _build_fire_forge() -> void:
 			continue
 		props.set_cell(cell, ForgeFloor.SOURCE, MapKit._pick(ForgeFloor.RUBBLE, cell, 94))
 
+	# Torches are an authored list, so the list itself has to grow with the map:
+	# carrying the original eight across 3x the span leaves the corridors between
+	# bays completely unlit.
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(24, 24), Vector2i(88, 24), Vector2i(56, 18), Vector2i(56, 42),
-		Vector2i(26, 52), Vector2i(86, 52), Vector2i(56, 60), Vector2i(56, 71),
+		_sc(24, 24), _sc(88, 24), _sc(56, 18), _sc(56, 42),
+		_sc(26, 52), _sc(86, 52), _sc(56, 60), _sc(56, 71),
+		# Bay mouths and corridor midpoints.
+		_sc(56, 52), _sc(56, 66), _sc(40, 56), _sc(72, 56),
+		_sc(27, 38), _sc(85, 38), _sc(40, 22), _sc(72, 22),
+		_sc(42, 34), _sc(70, 34), _sc(56, 30), _sc(20, 52),
+		_sc(92, 52), _sc(20, 24), _sc(92, 24), _sc(48, 44),
+		_sc(64, 44), _sc(48, 64), _sc(64, 64),
 	]:
 		var cell := _pick_open(walk, spot)
 		ti += 1
@@ -499,7 +564,9 @@ func _build_fire_forge() -> void:
 	var lights := ""
 	var li := 0
 	for cell: Vector2i in lava_cells.keys():
-		if MapKit.hash2(cell.x, cell.y, 95) % 29 != 0:
+		# Every ~9th lava cell at 1x. Lava area grows with S^2, so the divisor
+		# grows with it or the pools turn into one blown-out white blob.
+		if MapKit.hash2(cell.x, cell.y, 95) % (29 * SURFACE_S * SURFACE_S) != 0:
 			continue
 		li += 1
 		var p := _tile_pos(cell)
@@ -511,7 +578,7 @@ func _build_fire_forge() -> void:
 		)
 
 	assert(walk.has(entrance) and walk.has(portal), "forge spawn blocked")
-	assert(walk.size() > 900, "forge too small: %d" % walk.size())
+	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "forge too small: %d" % walk.size())
 	print("forge walk=", walk.size(), " lava=", lava_cells.size())
 
 	_write_map({
@@ -540,8 +607,8 @@ func _build_fire_forge() -> void:
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
 			+ "position = Vector2(%s, %s)\n" % [
-				str(_tile_pos(entrance + Vector2i(2, -2)).x),
-				str(_tile_pos(entrance + Vector2i(2, -2)).y),
+				str(_tile_pos(entrance + _sc(2, -2)).x),
+				str(_tile_pos(entrance + _sc(2, -2)).y),
 			]
 		),
 	})
@@ -552,7 +619,7 @@ func _build_fire_forge() -> void:
 # middle. The cliff art hangs two rows below its cell, so face_rows = 2.
 
 func _build_desert() -> void:
-	_set_size(104, 76)
+	_set_size(_sn(104), _sn(76))
 	var ts: TileSet = load(DESERT_TS)
 	var ground := TileMapLayer.new()
 	ground.tile_set = ts
@@ -561,39 +628,39 @@ func _build_desert() -> void:
 	var props := TileMapLayer.new()
 	props.tile_set = ts
 
-	var entrance_hint := Vector2i(52, 64)
+	var entrance_hint := _sc(52, 64)
 	var floor_mask := _carve(
 		[
-			[Vector2i(52, 63), 10.0, 0.24, 101],
-			[Vector2i(52, 50), 12.0, 0.22, 102],
-			[Vector2i(26, 44), 10.0, 0.26, 103],
-			[Vector2i(78, 44), 10.0, 0.26, 104],
-			[Vector2i(52, 32), 12.0, 0.22, 105],
-			[Vector2i(24, 20), 9.0, 0.28, 106],
-			[Vector2i(80, 20), 9.0, 0.28, 107],
-			[Vector2i(52, 16), 9.0, 0.26, 108],
+			[_sc(52, 63), _sr(10.0), _sw(0.24), 101],
+			[_sc(52, 50), _sr(12.0), _sw(0.22), 102],
+			[_sc(26, 44), _sr(10.0), _sw(0.26), 103],
+			[_sc(78, 44), _sr(10.0), _sw(0.26), 104],
+			[_sc(52, 32), _sr(12.0), _sw(0.22), 105],
+			[_sc(24, 20), _sr(9.0), _sw(0.28), 106],
+			[_sc(80, 20), _sr(9.0), _sw(0.28), 107],
+			[_sc(52, 16), _sr(9.0), _sw(0.26), 108],
 		],
 		[
-			[Vector2i(52, 56), Vector2i(52, 44), 3.2, 2.0, 111],
-			[Vector2i(40, 48), Vector2i(30, 46), 2.8, 2.5, 112],
-			[Vector2i(64, 48), Vector2i(74, 46), 2.8, 2.5, 113],
-			[Vector2i(28, 36), Vector2i(26, 26), 2.6, 3.0, 114],
-			[Vector2i(76, 36), Vector2i(78, 26), 2.6, 3.0, 115],
-			[Vector2i(32, 18), Vector2i(46, 16), 2.6, 2.5, 116],
-			[Vector2i(72, 18), Vector2i(58, 16), 2.6, 2.5, 117],
+			[_sc(52, 56), _sc(52, 44), _sr(3.2), _sr(2.0), 111],
+			[_sc(40, 48), _sc(30, 46), _sr(2.8), _sr(2.5), 112],
+			[_sc(64, 48), _sc(74, 46), _sr(2.8), _sr(2.5), 113],
+			[_sc(28, 36), _sc(26, 26), _sr(2.6), _sr(3.0), 114],
+			[_sc(76, 36), _sc(78, 26), _sr(2.6), _sr(3.0), 115],
+			[_sc(32, 18), _sc(46, 16), _sr(2.6), _sr(2.5), 116],
+			[_sc(72, 18), _sc(58, 16), _sr(2.6), _sr(2.5), 117],
 		],
-		4,
+		_sn(4),
 		entrance_hint
 	)
 
 	# Mesa outcrops standing inside the basin.
 	for spot in [
-		[Vector2i(38, 40), 3.4, 121], [Vector2i(66, 40), 3.4, 122],
-		[Vector2i(52, 24), 3.0, 123], [Vector2i(34, 56), 2.8, 124],
-		[Vector2i(70, 56), 2.8, 125], [Vector2i(52, 41), 3.2, 126],
+		[_sc(38, 40), _sh(3.4), 121], [_sc(66, 40), _sh(3.4), 122],
+		[_sc(52, 24), _sh(3.0), 123], [_sc(34, 56), _sh(2.8), 124],
+		[_sc(70, 56), _sh(2.8), 125], [_sc(52, 41), _sh(3.2), 126],
 	]:
 		var mesa: Dictionary = {}
-		MapKit.blob(mesa, spot[0], spot[1], 0.28, int(spot[2]), _bounds)
+		MapKit.blob(mesa, spot[0], spot[1], _sw(0.28), int(spot[2]), _bounds)
 		mesa = MapKit.smooth(mesa, _bounds, 1, 5, 4)
 		for cell: Vector2i in mesa.keys():
 			floor_mask.erase(cell)
@@ -635,7 +702,7 @@ func _build_desert() -> void:
 	var walk := _walkable(floor_mask, blocked)
 	var entrance := _pick_open(walk, entrance_hint)
 	walk = MapKit.largest_region(walk, entrance)
-	var portal := _pick_open(walk, entrance + Vector2i(0, 5))
+	var portal := _pick_open(walk, entrance + Vector2i(0, _sn(5)))
 
 	var keepout: Dictionary = {}
 	for spot in [entrance, portal]:
@@ -662,10 +729,10 @@ func _build_desert() -> void:
 	var names := ["critter_stag", "critter_boar", "critter_badger", "critter_wolf"]
 	var ci := 0
 	for spot in [
-		Vector2i(30, 46), Vector2i(74, 46), Vector2i(52, 34), Vector2i(52, 58),
-		Vector2i(20, 25), Vector2i(84, 25), Vector2i(20, 55), Vector2i(84, 55),
-		Vector2i(40, 18), Vector2i(64, 18), Vector2i(36, 62), Vector2i(68, 62),
-		Vector2i(15, 40), Vector2i(90, 40), Vector2i(48, 48), Vector2i(60, 36),
+		_sc(30, 46), _sc(74, 46), _sc(52, 34), _sc(52, 58),
+		_sc(20, 25), _sc(84, 25), _sc(20, 55), _sc(84, 55),
+		_sc(40, 18), _sc(64, 18), _sc(36, 62), _sc(68, 62),
+		_sc(15, 40), _sc(90, 40), _sc(48, 48), _sc(60, 36),
 	]:
 		var cell := _pick_open(walk, spot)
 		critters.append({
@@ -679,7 +746,12 @@ func _build_desert() -> void:
 
 	var decos: Array = []
 	var ti := 0
-	for spot in [Vector2i(24, 20), Vector2i(80, 20), Vector2i(52, 16), Vector2i(52, 63)]:
+	for spot in [
+		_sc(24, 20), _sc(80, 20), _sc(52, 16), _sc(52, 63),
+		# Grown with the span so the basin is not dark between oases.
+		_sc(26, 44), _sc(78, 44), _sc(52, 32), _sc(52, 50),
+		_sc(38, 24), _sc(66, 24), _sc(38, 58), _sc(66, 58),
+	]:
 		var cell := _pick_open(walk, spot)
 		ti += 1
 		decos.append({
@@ -692,7 +764,7 @@ func _build_desert() -> void:
 		})
 
 	assert(walk.has(entrance) and walk.has(portal), "desert spawn blocked")
-	assert(walk.size() > 900, "desert too small: %d" % walk.size())
+	assert(walk.size() > 900 * SURFACE_S * SURFACE_S, "desert too small: %d" % walk.size())
 	print("desert walk=", walk.size(), " floor=", floor_mask.size())
 
 	_write_map({
@@ -721,8 +793,8 @@ func _build_desert() -> void:
 		"camps": (
 			"\n[node name=\"Campfire\" parent=\"SceneProps\" instance=ExtResource(\"8_camp\")]\n"
 			+ "position = Vector2(%s, %s)\n" % [
-				str(_tile_pos(entrance + Vector2i(2, -2)).x),
-				str(_tile_pos(entrance + Vector2i(2, -2)).y),
+				str(_tile_pos(entrance + _sc(2, -2)).x),
+				str(_tile_pos(entrance + _sc(2, -2)).y),
 			]
 		),
 	})
