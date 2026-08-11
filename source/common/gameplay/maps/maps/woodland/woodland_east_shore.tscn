@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://ceastshore00001"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_deep_cove_ground.png" id="1_ground"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
+[ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="99_col"]
+
+[node name="WoodlandEastShore" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("99_col")
+ground_size = Vector2(704, 480)
+shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
+solid_footprints = Array[Rect2]([])
+rim_west = false
+rim_east = true
+
+[node name="Ground" type="Sprite2D" parent="."]
+z_index = -5
+centered = false
+texture = ExtResource("1_ground")
+
+[node name="Torch1" type="Sprite2D" parent="."]
+position = Vector2(120, 130)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="Torch2" type="Sprite2D" parent="."]
+position = Vector2(520, 150)
+texture = ExtResource("p5")
+offset = Vector2(0, -8)
+
+[node name="ShoreLabel" type="Label" parent="."]
+offset_left = 280
+offset_top = 120
+offset_right = 420
+offset_bottom = 136
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+text = "East Shore"
+horizontal_alignment = 1
