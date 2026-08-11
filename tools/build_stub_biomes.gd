@@ -881,17 +881,21 @@ func _build_desert() -> void:
 		})
 
 	# --- Population ----------------------------------------------------------
-	# Banded to the instance's 25-30 gate. Ankhemet holds the north basin, the
-	# chamber furthest from the hub portal.
+	# Ankhemet holds the north basin, the chamber furthest from the hub portal.
+	# The Necromancer is a second, smaller boss in the west skeleton wing — its
+	# own trash family already spawns there, and it is far enough from Ankhemet
+	# that the two never pull together.
 	var boss_cell := _place(walk, {}, _sc(52, 16), 0)
+	var necro_cell := _place(walk, {}, _sc(24, 20), 0)
 	var taken: Dictionary = {}
 	for spot in [entrance, portal]:
 		for oy in range(-_sn(6), _sn(6) + 1):
 			for ox in range(-_sn(6), _sn(6) + 1):
 				taken[spot + Vector2i(ox, oy)] = true
-	for oy in range(-_sn(9), _sn(9) + 1):
-		for ox in range(-_sn(9), _sn(9) + 1):
-			taken[boss_cell + Vector2i(ox, oy)] = true
+	for spot in [boss_cell, necro_cell]:
+		for oy in range(-_sn(9), _sn(9) + 1):
+			for ox in range(-_sn(9), _sn(9) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
 	var hostiles := _mobs(walk, taken, [
 		["Archer", "trpg/trpg_archer", _sc(52, 50), 3],
 		["Orc", "trpg/trpg_orc", _sc(40, 52), 2],
@@ -916,6 +920,11 @@ func _build_desert() -> void:
 		"name": "SandKing",
 		"type": TYPES + "bosses/sand_king.tres",
 		"pos": _tile_pos(boss_cell),
+	})
+	hostiles.append({
+		"name": "Necromancer",
+		"type": TYPES + "trpg/trpg_necromancer.tres",
+		"pos": _tile_pos(necro_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "desert spawn blocked")
