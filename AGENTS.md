@@ -13,10 +13,13 @@ Before asking Kyle to merge Hollow/golem changes, run these gates and keep artif
 1. Headless: `godot --headless --path . -s tools/verify_hollow_golem.gd` → must print `VERIFY_PASS` (container `node_paths`, baked sync id `0` → `MechaGolem`, GIF anims present, `bad_black_tiles=0`).
 2. Visual: `godot --path . -s tools/render_hollow_preview.gd` → `/opt/cursor/artifacts/screenshots/hollow-golem-preview.png` must show the golem on the lit pad.
 3. In-game (local): enter Hub → **The Hollow** portal → confirm golem on the center pad. Prefer a levelled/admin test char (`/setlevel`, `/heal`); do not use JailRoom.
-4. Live check: `curl -sS -o /dev/null -w '%{http_code}\n' https://play.arkenelle.com/` — WebSocket upstream should not be `502`. If live is down, say so explicitly; do not claim live verification.
+4. Live check (must use an HTTP/1.1 WebSocket upgrade — a plain GET always looks like `502` because Godot only speaks WS):
+   `curl --http1.1 -sS -o /dev/null -w '%{http_code}\n' -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' https://play.arkenelle.com/`
+   Expect `101`. A plain `curl https://play.arkenelle.com/` returning `502` is **not** proof the world is down. If the WS probe fails, say so explicitly; do not claim live verification.
+
 
 Working boss maps (e.g. Fungus Cave) bake `node_paths=PackedStringArray("replicated_props_container")` on the map root **and** `node_paths` for `id_to_node`/`node_to_id` on `ReplicatedPropsContainer`. Hollow must match that pattern; `Map._ready` also resolves a missing container by child name as a safety net.
 
 ### Live deploy
-- Merges to `main` run **Deploy VPS**. This environment cannot `workflow_dispatch` that action (403) and has no VPS SSH key — ask Kyle to redeploy/check `arkenelle-world` if `play.arkenelle.com` is 502.
+- Merges to `main` run **Deploy VPS**. This environment cannot `workflow_dispatch` that action (403) and has no VPS SSH key — ask Kyle to redeploy/check `arkenelle-world` if the WS `101` probe above fails.
 - Standard deploy/update flow: `deploy/README.md`, `deploy/update.sh`.

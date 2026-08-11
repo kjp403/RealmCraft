@@ -39,7 +39,7 @@ systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
 
 # Wait until loopback ports are actually accepting connections. systemctl
 # "active" alone is not enough — godot can still be mid-boot (or crash-looping)
-# while Caddy already returns 502 for play.arkenelle.com.
+# before clients can connect.
 wait_port() {
 	local port="$1"
 	local label="$2"
@@ -58,12 +58,41 @@ wait_port() {
 	return 1
 }
 
+# Godot's world peer only speaks WebSocket. A plain HTTP GET through Caddy always
+# surfaces as 502 even when the world is healthy — probe the upgrade handshake.
+wait_world_ws() {
+	local seconds="${1:-30}"
+	local i code
+	echo "==> Waiting for world WebSocket handshake on 127.0.0.1:8087 (up to ${seconds}s)"
+	for i in $(seq 1 "$seconds"); do
+		code="$(curl --http1.1 -sS -o /dev/null -w '%{http_code}' --max-time 2 \
+			-H 'Connection: Upgrade' \
+			-H 'Upgrade: websocket' \
+			-H 'Sec-WebSocket-Version: 13' \
+			-H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+			"http://127.0.0.1:8087/" 2>/dev/null || true)"
+		if [[ "$code" == "101" ]]; then
+			echo "    world WebSocket OK (101, ${i}s)"
+			return 0
+		fi
+		sleep 1
+	done
+	echo "    ERROR: world WebSocket did not return 101 within ${seconds}s (last=$code)" >&2
+	return 1
+}
+
 wait_port 8080 "master dashboard" 60 || true
 wait_port 8088 "gateway" 90
 if ! wait_port 8087 "world" 90; then
 	echo "==> World port still closed — restarting arkenelle-world once and retrying"
 	systemctl restart arkenelle-world
 	wait_port 8087 "world" 90
+fi
+if ! wait_world_ws 45; then
+	echo "==> World WS handshake failed — restarting arkenelle-world once and retrying"
+	systemctl restart arkenelle-world
+	wait_port 8087 "world" 90
+	wait_world_ws 45
 fi
 
 echo "==> Status"
