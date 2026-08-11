@@ -41,7 +41,7 @@ func _init() -> void:
 		if cost < 44 or cost > 52:
 			failures.append("%s total_cost=%d want 44–52" % [tree_file, cost])
 
-	# --- Crafting XP buffed (outfitting only) + perk multiplier on server -----
+	# --- Crafting XP: starter recipes must not sit on the default 10 ---------
 	var craft: String = FileAccess.get_file_as_string(
 		"res://source/server/world/components/data_request_handlers/craft.item.gd"
 	)
@@ -53,6 +53,36 @@ func _init() -> void:
 	# leather jacket was 14 → 42 at 3×
 	if wb.find("xp_reward = 42") < 0:
 		failures.append("workbench leather jacket XP should be 42 after 3× buff")
+	# Recipes that previously omitted xp_reward (Godot default 10) must be explicit.
+	if wb.find('id="R_cloth_shoes"') >= 0:
+		var shoes_idx: int = wb.find('id="R_cloth_shoes"')
+		var shoes_chunk: String = wb.substr(shoes_idx, 280)
+		if shoes_chunk.find("xp_reward = 30") < 0:
+			failures.append("Cloth Shoes must grant 30 Crafting XP (was default 10)")
+	if wb.find('id="R_cloth_hood"') >= 0:
+		var hood_idx: int = wb.find('id="R_cloth_hood"')
+		var hood_chunk: String = wb.substr(hood_idx, 280)
+		if hood_chunk.find("xp_reward = 36") < 0:
+			failures.append("Cloth Hood must grant 36 Crafting XP (was default 10)")
+	for rid_xp: Array in [["R_lea_cap", 30], ["R_lea_boots", 30], ["R_leather_sewer", 30]]:
+		var ridx: int = wb.find('id="%s"' % rid_xp[0])
+		if ridx < 0:
+			failures.append("workbench missing %s" % rid_xp[0])
+		else:
+			var chunk: String = wb.substr(ridx, 280)
+			if chunk.find("xp_reward = %d" % rid_xp[1]) < 0:
+				failures.append("%s must grant %d Crafting XP" % [rid_xp[0], rid_xp[1]])
+	# Crafting UI: tabs live on their own row (not header_center) to avoid crop.
+	var craft_ui: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/menus/crafting/crafting_menu.gd"
+	)
+	if craft_ui.find("_install_tab_bar") < 0 or craft_ui.find("_tab_bar.add_child") < 0:
+		failures.append("crafting menu must host tabs on a dedicated _tab_bar row")
+	var shell: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/menus/menu_shell.gd"
+	)
+	if shell.find("outer_top") < 0:
+		failures.append("MenuShell fullscreen needs extra top inset (outer_top)")
 	# Anvil/smithing XP must NOT be globally buffed (revert to main rates).
 	var anvil: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/crafting/resources/anvil.tres"

@@ -50,11 +50,14 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 	# Content-heavy menus pass fullscreen=true for a thin outer inset (near edge-to-edge); small dialogs
 	# keep a roomy floating margin. Per-menu opt-in so we convert them one at a time.
 	var outer: int = 12 if fullscreen else 28
-	var outer_tb: int = 12 if fullscreen else 22
+	# Extra top inset so title / tabs aren't clipped by the window edge (smithing
+	# especially packs many SectionTabs into the header).
+	var outer_top: int = 28 if fullscreen else 22
+	var outer_bottom: int = 16 if fullscreen else 22
 	margin.add_theme_constant_override(&"margin_left", outer)
 	margin.add_theme_constant_override(&"margin_right", outer)
-	margin.add_theme_constant_override(&"margin_top", outer_tb)
-	margin.add_theme_constant_override(&"margin_bottom", outer_tb)
+	margin.add_theme_constant_override(&"margin_top", outer_top)
+	margin.add_theme_constant_override(&"margin_bottom", outer_bottom)
 	add_child(margin)
 
 	var card: PanelContainer = PanelContainer.new()
