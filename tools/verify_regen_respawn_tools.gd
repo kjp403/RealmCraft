@@ -14,6 +14,18 @@ func _init() -> void:
 		failures.append("missing 10s OUT_OF_COMBAT_REGEN_DELAY_MS")
 	if npc_src.find("_can_out_of_combat_regen") < 0:
 		failures.append("missing _can_out_of_combat_regen gate")
+	# Regen is walk-home-only: no passive idle trickle, and the arrival top-off is
+	# gated on the same out-of-combat window (a kited boss can't reset mid-fight).
+	if npc_src.find("IDLE_REGEN_RATE") >= 0:
+		failures.append("idle regen should be gone — recovery routes through RETURNING")
+	if npc_src.find("_process_idle_recovery") < 0:
+		failures.append("missing _process_idle_recovery (wounded idle mob walks home)")
+	if npc_src.find("< hmax and _can_out_of_combat_regen()") < 0:
+		failures.append("spawn-point top-off is not gated on the out-of-combat window")
+	# Committed bosses (leashes = false) must reset too — the old carve-out that
+	# returned early from regen for them is gone.
+	if npc_src.find("if _is_committed():\n\t\treturn\n\tif not _can_out_of_combat_regen()") >= 0:
+		failures.append("committed mobs still exempt from out-of-combat recovery")
 
 	var player_src: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/characters/player/player.gd"
