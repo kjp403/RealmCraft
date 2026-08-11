@@ -287,78 +287,67 @@ func _initialize() -> void:
 			walls.set_cell(cell, SRC_WALL, MapKit._pick(WALL, cell, 511))
 			blocked[cell] = true
 
-	# --- 8) Trees: forest masses on edges + grove interiors; KEEP PATHS CLEAR
+	# --- 8) Trees: SPARSE accents only. Large sprites block play — never pack them.
+	# Hard cap + grid spacing. Paths/landmarks/meadow/gate stay clear.
 	var path_keepout: Dictionary = {}
 	for cell: Vector2i in path.keys():
-		for oy in range(-2, 3):
-			for ox in range(-2, 3):
+		for oy in range(-3, 4):
+			for ox in range(-3, 4):
 				path_keepout[cell + Vector2i(ox, oy)] = true
-	# Clear plaza at cross / gate / landmarks — meadow gets a REAL open clearing
 	for spot in [gate, cross, marsh, shelves, shore]:
-		for oy in range(-4, 5):
-			for ox in range(-4, 5):
+		for oy in range(-5, 6):
+			for ox in range(-5, 6):
 				path_keepout[spot + Vector2i(ox, oy)] = true
 	for oy in range(-10, 11):
 		for ox in range(-10, 11):
 			if ox * ox + oy * oy <= 100:
 				path_keepout[meadow + Vector2i(ox, oy)] = true
-	# Pond shores stay walkable / visible
 	for cell: Vector2i in water_cells.keys():
 		for oy in range(-2, 3):
 			for ox in range(-2, 3):
 				path_keepout[cell + Vector2i(ox, oy)] = true
-
-	var tree_count := 0
+	# Open gate throat only (not entire west third)
 	for cell: Vector2i in floor_mask.keys():
-		if blocked.has(cell) or path_keepout.has(cell) or water_cells.has(cell):
-			continue
-		if shore_dirt.has(cell):
-			continue
-		# Near void = dense tree wall
-		var near_void := false
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			if not floor_mask.has(cell + d):
-				near_void = true
+		if cell.x < 198 and abs(cell.y - 40) <= 10:
+			path_keepout[cell] = true
+
+	const TREE_STEP := 5
+	var tree_count := 0
+	for y in range(Y0, Y1 + 1, TREE_STEP):
+		for x in range(EXP_X0 + 20, EXP_X1 + 1, TREE_STEP):
+			if tree_count >= 180:
 				break
-		var chance := 0.0
-		# Keep the gate approach OPEN — no tree pipe / void-bridge look
-		if cell.x < 208:
-			chance = 0.02 if near_void else 0.01
-		elif near_void:
-			chance = 0.38
-		elif beach_mask.has(cell) and cell.y > 80:
-			chance = 0.02
-		elif meadow_mask.has(cell) and cell.y < 34:
-			chance = 0.015 # open sunlit meadow — almost no trees in the clearing
-		elif stone_plats.has(cell) and cell.y > 58:
-			chance = 0.02
-		elif marsh_mask.has(cell):
-			chance = 0.09
-		else:
-			chance = 0.13 # general forest
-		if MapKit.rand01(cell.x, cell.y, 521) >= chance:
-			# veg instead sometimes
-			if not near_void and MapKit.rand01(cell.x, cell.y, 522) < 0.08:
-				features.set_cell(cell, SRC_VEG, MapKit._pick(VEG, cell, 523))
-			continue
-		var roll := MapKit.rand01(cell.x, cell.y, 524)
-		var src := SRC_TREE_M
-		if roll < 0.12:
-			src = SRC_TREE_S
-		elif roll < 0.50:
-			src = SRC_TREE_M
-		elif roll < 0.82:
-			src = SRC_TREE_L
-		else:
-			src = SRC_TREE_XL
-		decor.set_cell(cell, src, Vector2i(0, 0))
-		tree_count += 1
+			var jx := (MapKit.hash2(x, y, 521) % 5) - 2
+			var jy := (MapKit.hash2(x, y, 522) % 5) - 2
+			var cell := Vector2i(x + jx, y + jy)
+			if not floor_mask.has(cell):
+				continue
+			if blocked.has(cell) or path_keepout.has(cell) or water_cells.has(cell):
+				continue
+			if shore_dirt.has(cell) or beach_mask.has(cell):
+				continue
+			if meadow_mask.has(cell) and cell.y < 34:
+				continue
+			# Skip some slots for sparseness (~40% of grid points)
+			if MapKit.rand01(cell.x, cell.y, 523) < 0.28:
+				if MapKit.rand01(cell.x, cell.y, 524) < 0.12:
+					features.set_cell(cell, SRC_VEG, MapKit._pick(VEG, cell, 525))
+				continue
+			var roll := MapKit.rand01(cell.x, cell.y, 526)
+			var src := SRC_TREE_S if roll < 0.65 else SRC_TREE_M
+			if roll > 0.94:
+				src = SRC_TREE_L
+			decor.set_cell(cell, src, Vector2i(0, 0))
+			tree_count += 1
+		if tree_count >= 180:
+			break
 
-	# Marsh reeds near water (veg only)
 	for cell: Vector2i in shore_dirt.keys():
-		if MapKit.rand01(cell.x, cell.y, 525) < 0.35:
-			features.set_cell(cell, SRC_VEG, MapKit._pick(VEG, cell, 526))
+		if MapKit.rand01(cell.x, cell.y, 527) < 0.22:
+			features.set_cell(cell, SRC_VEG, MapKit._pick(VEG, cell, 528))
 
+	assert(tree_count <= 200, "too many trees: %d" % tree_count)
+	assert(tree_count >= 50, "east wing too barren: %d" % tree_count)
 	# --- 9) Write layers back into tscn -------------------------------------
 	original = _replace_layer_blob(original, "Ground", ground.tile_map_data)
 	original = _replace_layer_blob(original, "Walls", walls.tile_map_data)

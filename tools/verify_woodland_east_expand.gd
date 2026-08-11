@@ -84,8 +84,20 @@ func _initialize() -> void:
 		fails.append("stone accents missing")
 	if grass < int(float(dirt + sand + stone + water) * 1.5):
 		fails.append("grass must dominate east wing vs other materials")
-	if decor.get_used_cells().size() < 300:
-		fails.append("too few trees")
+	var decor_n := decor.get_used_cells().size()
+	var east_decor := 0
+	for c in decor.get_used_cells():
+		if c.x >= 181:
+			east_decor += 1
+	print("east_trees=", east_decor)
+	if east_decor > 220:
+		fails.append("too many trees choking walkability (%d)" % east_decor)
+	if east_decor < 40:
+		fails.append("east wing too barren (%d trees)" % east_decor)
+	# Paths must be tree-free near crossroads / gate
+	for c in [Vector2i(182, 40), Vector2i(212, 42), Vector2i(230, 16), Vector2i(300, 42)]:
+		if decor.get_cell_source_id(c) >= 0:
+			fails.append("tree on critical path cell %s" % c)
 
 	# Desert/Sewers/Fire Forge maps must exist untouched (sanity)
 	for p in [
