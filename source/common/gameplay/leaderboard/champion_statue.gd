@@ -1,19 +1,25 @@
 class_name ChampionStatue
 extends Character
-## A plaza statue wearing the current leaderboard leader's skin, with a rank / name / score
+## A plaza statue wearing a leaderboard champion's skin, with a rank / name / score
 ## plaque. Pulls the cached champions ONCE when the local player enters this map; clicking it
 ## opens the champion's profile by player_id (so it works even while they're offline). Extends
 ## Character purely to reuse the skin_id->sprite property + the AnimatedSprite/AnimationPlayer;
 ## no combat — the over-head health bar + default name label are hidden, it never takes damage.
 
-## Which board this statue honors; maps to the all-time leaderboard board id.
-@export_enum("pve", "pvp", "level") var category: String = "pve"
+## Which board this statue honors. Guild Hall currently uses "level" → Total Level only;
+## pve/pvp remain for a future podium without a scene rewrite.
+@export_enum("pve", "pvp", "level") var category: String = "level"
 ## Which place on that board this statue enshrines (1 = champion, 2/3 = podium, …). Drop several
 ## statues sharing a category with ascending rank to build a hall of fame. Capped to the service's
 ## STATUE_TOP_N; a rank with no one yet shows "(unclaimed)".
 @export_range(1, 10) var rank: int = 1
 
-const BOARD_BY_CATEGORY: Dictionary = {"pve": "pve_total", "pvp": "pvp_total", "level": "level"}
+## "level" maps to the Skills-panel Total Level board (not combat level).
+const BOARD_BY_CATEGORY: Dictionary = {
+	"pve": "pve_total",
+	"pvp": "pvp_total",
+	"level": "total_level",
+}
 const CATEGORY_LABEL: Dictionary = {"pve": "PvE", "pvp": "PvP", "level": "Level"}
 
 ## player_id of the displayed champion, for the click-to-profile (0 = none yet).
@@ -55,7 +61,7 @@ func _refresh() -> void:
 	if result[1] != OK:
 		return
 	var champions: Dictionary = (result[0] as Dictionary).get("champions", {})
-	var ranked: Array = champions.get(BOARD_BY_CATEGORY.get(category, "pve_total"), [])
+	var ranked: Array = champions.get(BOARD_BY_CATEGORY.get(category, "total_level"), [])
 	if rank < 1 or rank > ranked.size():
 		_champion_id = 0
 		_plaque.text = "%s\n(unclaimed)" % _rank_label()
@@ -73,13 +79,17 @@ func _refresh() -> void:
 	]
 
 
-## "#2 PvE" / "#1 Level" — the rank + category line atop the plaque.
+## "#2 Level" / "#1 PvE" — the rank + category line atop the plaque.
 func _rank_label() -> String:
 	return "#%d %s" % [rank, CATEGORY_LABEL.get(category, "")]
 
 
 func _score_line(score: int) -> String:
-	return "Level %d" % score if category == "level" else "%s kills" % _comma(score)
+	match category:
+		"level":
+			return "Total Level %d" % score
+		_:
+			return "%s kills" % _comma(score)
 
 
 func _build_plaque() -> void:
