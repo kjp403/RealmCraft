@@ -41,15 +41,18 @@ func open(data: Dictionary) -> void:
 
 
 ## Render the reward block from the server payload: a gold + item list on a
-## payout, or a "come back later" note when the soft daily lockout suppressed it.
+## payout, or a "charges spent" note when the daily pool is empty.
 func _render_reward(reward: Dictionary) -> void:
 	if reward.is_empty():
 		return
 	if bool(reward.get("locked", false)):
-		var hours: int = int(ceil(float(reward.get("available_in", 0)) / 3600.0))
-		_line("Already cleared today. Reward in ~%dh" % maxi(hours, 1), Color(0.86, 0.7, 0.5))
+		_line("No reward charges left today.", Color(0.86, 0.7, 0.5))
+		_line("Come back tomorrow, or use a Dungeon Key.", Color(0.82, 0.78, 0.7), 12)
 		return
-	_line("Rewards", Color(1.0, 0.92, 0.55), 15)
+	var title: String = "Rewards"
+	if bool(reward.get("solo", false)):
+		title = "Rewards (Solo bonus)"
+	_line(title, Color(1.0, 0.92, 0.55), 15)
 	var gold: int = int(reward.get("gold", 0))
 	if gold > 0:
 		_line("%d gold" % gold, Color(1.0, 0.86, 0.4))
@@ -61,6 +64,8 @@ func _render_reward(reward: Dictionary) -> void:
 			], Color(0.8, 0.9, 0.8))
 	if gold <= 0 and (reward.get("items", []) as Array).is_empty():
 		_line("(no drops this time)", Color(0.7, 0.74, 0.82))
+	if reward.has("charges_left"):
+		_line("Charges left: %d" % int(reward.get("charges_left", 0)), Color(0.75, 0.8, 0.9), 12)
 
 
 func _build_shell(failed: bool = false) -> void:

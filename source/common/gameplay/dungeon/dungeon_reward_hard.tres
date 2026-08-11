@@ -1,10 +1,143 @@
 [gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://dbmkuja8ck2pr"]
 
 [ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
-[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_vx42b"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="item_bone"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="item_adamant_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="item_runite_bar"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="item_steel_bar"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="item_mithril_bar"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="item_mithril_ore"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_coal_ore"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_maple_log"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_yew_log"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="item_wood_silver_medium"]
+[ext_resource type="Resource" uid="uid://noy0eoqm3hrk" path="res://source/common/gameplay/items/weapons/sword/sword_fairy.item.tres" id="item_sword_fairy"]
+[ext_resource type="Resource" uid="uid://bks25povs08h8" path="res://source/common/gameplay/items/weapons/hammer/hammer_fairy.item.tres" id="item_hammer_fairy"]
+[ext_resource type="Resource" uid="uid://dt6pjcxaosjlb" path="res://source/common/gameplay/items/weapons/wand/wand_fairy.item.tres" id="item_wand_fairy"]
+[ext_resource type="Resource" uid="uid://ngd2rh3ckh1o" path="res://source/common/gameplay/items/weapons/bow/fairy_bow.item.tres" id="item_fairy_bow"]
+[ext_resource type="Resource" uid="uid://bwxgmhvwau8kv" path="res://source/common/gameplay/items/weapons/book/book_fairy.item.tres" id="item_book_fairy"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_enchanted_gem"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_enchanted_cloth"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_enchanted_ore"]
+
+[sub_resource type="Resource" id="Drop_0_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("item_bone")
+min_amount = 75
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_1_adamant_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_adamant_bar")
+min_amount = 30
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_2_runite_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_runite_bar")
+min_amount = 20
+max_amount = 50
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_3_steel_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_steel_bar")
+min_amount = 20
+max_amount = 45
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_4_mithril_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mithril_bar")
+min_amount = 15
+max_amount = 35
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_5_mithril_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mithril_ore")
+min_amount = 10
+max_amount = 25
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_6_coal_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_coal_ore")
+min_amount = 20
+max_amount = 45
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_7_maple_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_maple_log")
+min_amount = 10
+max_amount = 30
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_8_yew_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_yew_log")
+min_amount = 8
+max_amount = 20
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_9_wood_silver_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_silver_medium")
+min_amount = 1
+max_amount = 5
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_10_sword_fairy"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_fairy")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_11_hammer_fairy"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_fairy")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_12_wand_fairy"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wand_fairy")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_13_fairy_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("item_fairy_bow")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_14_book_fairy"]
+script = ExtResource("2_loot")
+item = ExtResource("item_book_fairy")
+chance = 0.01
+
+[sub_resource type="Resource" id="Excl_0_enchanted_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_gem")
+chance = 0.1
+
+[sub_resource type="Resource" id="Excl_1_enchanted_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+
+[sub_resource type="Resource" id="Excl_2_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.1
 
 [resource]
 script = ExtResource("1_reward")
-gold_min = 150
-gold_max = 220
-lockout_hours = 23.0
+gold_min = 10000
+gold_max = 20000
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_adamant_bar"), SubResource("Drop_2_runite_bar"), SubResource("Drop_3_steel_bar"), SubResource("Drop_4_mithril_bar"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_maple_log"), SubResource("Drop_8_yew_log"), SubResource("Drop_9_wood_silver_medium"), SubResource("Drop_10_sword_fairy"), SubResource("Drop_11_hammer_fairy"), SubResource("Drop_12_wand_fairy"), SubResource("Drop_13_fairy_bow"), SubResource("Drop_14_book_fairy")])
+exclusive_loot = Array[ExtResource("2_loot")]([SubResource("Excl_0_enchanted_gem"), SubResource("Excl_1_enchanted_cloth"), SubResource("Excl_2_enchanted_ore")])
+exclusive_max = 2
+lockout_hours = 0.0

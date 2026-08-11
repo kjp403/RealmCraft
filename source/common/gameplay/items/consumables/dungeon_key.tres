@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DungeonKeyItem" format=3 uid="uid://cdungeonkeyitem1"]
+
+[ext_resource type="Script" uid="uid://cb5fe0f29e65e" path="res://source/common/gameplay/items/dungeon_key_item.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dws3gxka24sal" path="res://assets/sprites/items/icons/dungeon_key.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+item_name = &"Dungeon Key"
+item_icon = ExtResource("2_icon")
+description = "A glowing key forged from dungeon light. Use it to restore one daily dungeon reward charge. Dropped rarely by bosses."
+vendor_value = 250
+metadata/slug = &"dungeon_key"
+metadata/id = 313

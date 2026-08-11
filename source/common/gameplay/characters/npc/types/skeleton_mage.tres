@@ -7,10 +7,16 @@
 [ext_resource type="Resource" uid="uid://dmwwy1l2pyvar" path="res://source/common/gameplay/items/weapons/wand/wand_bone.item.tres" id="4_xt0dc"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
 lunge_range = 150.0
+
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("1_4ocig")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
 
 [resource]
 script = ExtResource("2_q12sl")
@@ -19,6 +25,7 @@ display_name = "Skeleton Mage"
 skin = ExtResource("3_q12sl")
 visual_scale = 2.0
 is_boss = true
+loot = Array[ExtResource("1_4ocig")]([SubResource("Drop_dungeon_key")])
 max_health = 250.0
 attack_damage = 15.0
 mr = 5.0

@@ -1,0 +1,190 @@
+[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://cfungusrewarh01"]
+
+[ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="item_hide_cave"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="item_adamant_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="item_runite_bar"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_maple_log"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_yew_log"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_coal_ore"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="item_mithril_ore"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="item_adamant_ore"]
+[ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="item_runite_ore"]
+[ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="item_shrimp"]
+[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="item_trout"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="item_salmon"]
+[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="item_cod"]
+[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_herring"]
+[ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_tuna"]
+[ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_lobster"]
+[ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="item_crab"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="item_wood_silver_medium"]
+[ext_resource type="Resource" uid="uid://bcyv8agmtbwjt" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="item_sword_sunsteel"]
+[ext_resource type="Resource" uid="uid://dp76go82xd8il" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="item_hammer_sunsteel"]
+[ext_resource type="Resource" uid="uid://odkhbap0vf6s" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="item_wand_sunsteel"]
+[ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="item_sunsteel_bow"]
+[ext_resource type="Resource" uid="uid://rmr0ohwx8ooc" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="item_book_sunsteel"]
+
+[sub_resource type="Resource" id="Drop_0_cloth_cave"]
+script = ExtResource("2_loot")
+item = ExtResource("item_cloth_cave")
+min_amount = 75
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_1_hide_cave"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hide_cave")
+min_amount = 75
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_2_adamant_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_adamant_bar")
+min_amount = 30
+max_amount = 75
+
+[sub_resource type="Resource" id="Drop_3_runite_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_runite_bar")
+min_amount = 20
+max_amount = 50
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_4_maple_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_maple_log")
+min_amount = 15
+max_amount = 35
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_5_yew_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_yew_log")
+min_amount = 10
+max_amount = 25
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_6_coal_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_coal_ore")
+min_amount = 20
+max_amount = 50
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_7_mithril_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mithril_ore")
+min_amount = 15
+max_amount = 35
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_8_adamant_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_adamant_ore")
+min_amount = 10
+max_amount = 25
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_9_runite_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_runite_ore")
+min_amount = 3
+max_amount = 10
+chance = 0.15
+
+[sub_resource type="Resource" id="Drop_10_shrimp"]
+script = ExtResource("2_loot")
+item = ExtResource("item_shrimp")
+min_amount = 10
+max_amount = 25
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_11_trout"]
+script = ExtResource("2_loot")
+item = ExtResource("item_trout")
+min_amount = 8
+max_amount = 20
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_12_salmon"]
+script = ExtResource("2_loot")
+item = ExtResource("item_salmon")
+min_amount = 6
+max_amount = 18
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_13_cod"]
+script = ExtResource("2_loot")
+item = ExtResource("item_cod")
+min_amount = 6
+max_amount = 18
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_14_herring"]
+script = ExtResource("2_loot")
+item = ExtResource("item_herring")
+min_amount = 8
+max_amount = 20
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_15_tuna"]
+script = ExtResource("2_loot")
+item = ExtResource("item_tuna")
+min_amount = 4
+max_amount = 12
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_16_lobster"]
+script = ExtResource("2_loot")
+item = ExtResource("item_lobster")
+min_amount = 3
+max_amount = 10
+chance = 0.35
+
+[sub_resource type="Resource" id="Drop_17_crab"]
+script = ExtResource("2_loot")
+item = ExtResource("item_crab")
+min_amount = 4
+max_amount = 12
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_18_wood_silver_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_silver_medium")
+min_amount = 1
+max_amount = 5
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_19_sword_sunsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_sunsteel")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_20_hammer_sunsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_sunsteel")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_21_wand_sunsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wand_sunsteel")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_22_sunsteel_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sunsteel_bow")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_23_book_sunsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_book_sunsteel")
+chance = 0.01
+
+[resource]
+script = ExtResource("1_reward")
+gold_min = 10000
+gold_max = 20000
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_mithril_ore"), SubResource("Drop_8_adamant_ore"), SubResource("Drop_9_runite_ore"), SubResource("Drop_10_shrimp"), SubResource("Drop_11_trout"), SubResource("Drop_12_salmon"), SubResource("Drop_13_cod"), SubResource("Drop_14_herring"), SubResource("Drop_15_tuna"), SubResource("Drop_16_lobster"), SubResource("Drop_17_crab"), SubResource("Drop_18_wood_silver_medium"), SubResource("Drop_19_sword_sunsteel"), SubResource("Drop_20_hammer_sunsteel"), SubResource("Drop_21_wand_sunsteel"), SubResource("Drop_22_sunsteel_bow"), SubResource("Drop_23_book_sunsteel")])
+lockout_hours = 0.0

@@ -148,9 +148,10 @@ const HEALTH_PER_LEVEL: float = 5.0
 ## assigned). Reserved for the Slayer Shop; empty until that ships.
 @export var slayer_blocked_tasks: Dictionary = {}
 
-## Soft dungeon lockout: dungeon_name -> unix-SECONDS of the last completion
-## reward. A clear within the dungeon's lockout window grants no reward (you can
-## still run it to help a group). Persisted as dungeon_lockouts_json.
+## Soft dungeon charge state lives in dungeon_lockouts under "_daily_charges":
+## {day, used, bonus}. Successful clears spend a charge; failed runs do not.
+## Bonus comes from Dungeon Keys. Older per-dungeon unix timestamps may still
+## linger harmlessly. Persisted as dungeon_lockouts_json.
 @export var dungeon_lockouts: Dictionary = {}
 
 ## Redeem codes this character has already claimed (upper-cased code strings).

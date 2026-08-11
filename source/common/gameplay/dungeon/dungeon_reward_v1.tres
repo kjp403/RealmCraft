@@ -1,10 +1,120 @@
 [gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://8byl713ves8w"]
 
-[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_4t1it"]
 [ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="item_bone"]
+[ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="item_iron_bar"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="item_steel_bar"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_iron_ore"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_coal_ore"]
+[ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="item_oak_log"]
+[ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="item_willow_log"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
+[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
+[ext_resource type="Resource" uid="uid://b6rg0f7dgtrn0" path="res://source/common/gameplay/items/weapons/sword/sword_rustic.item.tres" id="item_sword_rustic"]
+[ext_resource type="Resource" uid="uid://bob6a10f1tu10" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="item_hammer_rustic"]
+[ext_resource type="Resource" uid="uid://c8mlycu302745" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="item_rustic_bow"]
+[ext_resource type="Resource" uid="uid://b5u0jyyxqonrh" path="res://source/common/gameplay/items/weapons/book/book_rustic.item.tres" id="item_book_rustic"]
+
+[sub_resource type="Resource" id="Drop_0_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("item_bone")
+min_amount = 50
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_1_iron_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_iron_bar")
+min_amount = 50
+max_amount = 100
+chance = 0.8
+
+[sub_resource type="Resource" id="Drop_2_steel_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_steel_bar")
+min_amount = 10
+max_amount = 30
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_3_iron_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_iron_ore")
+min_amount = 15
+max_amount = 40
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_4_coal_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_coal_ore")
+min_amount = 15
+max_amount = 40
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_5_oak_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_oak_log")
+min_amount = 10
+max_amount = 30
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_6_willow_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_willow_log")
+min_amount = 10
+max_amount = 25
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_7_cloth_cave"]
+script = ExtResource("2_loot")
+item = ExtResource("item_cloth_cave")
+min_amount = 10
+max_amount = 30
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_8_health_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("item_health_potion")
+min_amount = 10
+max_amount = 30
+
+[sub_resource type="Resource" id="Drop_9_mana_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mana_potion")
+min_amount = 10
+max_amount = 30
+
+[sub_resource type="Resource" id="Drop_10_wood_silver_small"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_silver_small")
+min_amount = 1
+max_amount = 5
+chance = 0.16
+
+[sub_resource type="Resource" id="Drop_11_sword_rustic"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_rustic")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_12_hammer_rustic"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_rustic")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_13_rustic_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("item_rustic_bow")
+chance = 0.01
+
+[sub_resource type="Resource" id="Drop_14_book_rustic"]
+script = ExtResource("2_loot")
+item = ExtResource("item_book_rustic")
+chance = 0.01
 
 [resource]
 script = ExtResource("1_reward")
-gold_min = 40
-gold_max = 80
-lockout_hours = 23.0
+gold_min = 3000
+gold_max = 8000
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_iron_bar"), SubResource("Drop_2_steel_bar"), SubResource("Drop_3_iron_ore"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_oak_log"), SubResource("Drop_6_willow_log"), SubResource("Drop_7_cloth_cave"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_10_wood_silver_small"), SubResource("Drop_11_sword_rustic"), SubResource("Drop_12_hammer_rustic"), SubResource("Drop_13_rustic_bow"), SubResource("Drop_14_book_rustic")])
+lockout_hours = 0.0

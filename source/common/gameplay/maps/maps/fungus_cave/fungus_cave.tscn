@@ -18,25 +18,15 @@
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="12_y53hc"]
 [ext_resource type="Resource" uid="uid://btnithna7holw" path="res://source/common/gameplay/characters/npc/types/fungus/spore_swarm.tres" id="13_n7hu4"]
 [ext_resource type="Resource" uid="uid://3ne3o1ls5mdj" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="14_dysl4"]
-[ext_resource type="Script" uid="uid://cr2yg6sl43by8" path="res://source/common/gameplay/dungeon/dungeon_master.gd" id="17_vnkgl"]
-[ext_resource type="Script" uid="uid://i1qmy82mdrm8" path="res://source/common/gameplay/dungeon/dungeon_resource.gd" id="18_kouuu"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="19_pvtw6"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="23_n7hu4"]
 [ext_resource type="Resource" uid="uid://bd8w3ab76gouv" path="res://source/common/gameplay/characters/npc/npcs/forager_maela.tres" id="24_dxrxi"]
 [ext_resource type="Resource" uid="uid://cutpirmfqwx8b" path="res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres" id="24_iron"]
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="25_coal"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/cave_master.tres" id="26_cavem"]
+[ext_resource type="Resource" uid="uid://cfungalkeeper01" path="res://source/common/gameplay/characters/npc/npcs/fungal_keeper.tres" id="27_fungk"]
 
-[sub_resource type="Resource" id="Resource_pvtw6"]
-script = ExtResource("18_kouuu")
-display_name = "Fungus Domain"
-recommended_level = 5
-instance_name = &"fungus_dungeon"
-map_path = "uid://bxq6itupvblac"
-metadata/_custom_type_script = "uid://i1qmy82mdrm8"
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_kouuu"]
-size = Vector2(49, 39)
 
 [node name="FungusCave" type="Node2D" unique_id=425990119 node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -252,16 +242,6 @@ npc_resource = ExtResource("26_cavem")
 [node name="QuestGiver" parent="." unique_id=1450054875 instance=ExtResource("12_y53hc")]
 position = Vector2(725, 74)
 
-[node name="DungeonMaster" type="Area2D" parent="." unique_id=774721028]
-visible = false
-position = Vector2(520, -1236)
-script = ExtResource("17_vnkgl")
-dungeon = SubResource("Resource_pvtw6")
-metadata/_custom_type_script = "uid://cr2yg6sl43by8"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DungeonMaster" unique_id=1762807606]
-position = Vector2(-0.5, -9.5)
-shape = SubResource("RectangleShape2D_kouuu")
 
 [node name="Entrance" parent="." unique_id=1414716116 instance=ExtResource("7_msvda")]
 position = Vector2(-1, -19)
@@ -275,6 +255,11 @@ destination_label = "Castle Garden"
 target_instance = ExtResource("8_f6l70")
 warper_id = 20
 target_id = 21
+
+
+[node name="FungalKeeper" parent="." unique_id=1888477101 instance=ExtResource("12_y53hc")]
+position = Vector2(-48, -96)
+npc_resource = ExtResource("27_fungk")
 
 [node name="Maela" parent="." unique_id=1893723557 instance=ExtResource("12_y53hc")]
 position = Vector2(72, -128)

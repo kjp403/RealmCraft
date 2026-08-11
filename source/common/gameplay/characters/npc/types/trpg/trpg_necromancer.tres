@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="li1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="li2"]
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li3"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_ew0xl")
@@ -39,6 +40,11 @@ min_amount = 3
 max_amount = 6
 chance = 0.5
 
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("drop_dungeon_key_item")
+chance = 0.08
+
 [resource]
 script = ExtResource("4_hwrei")
 enemy_type = &"trpg_necromancer"
@@ -67,7 +73,7 @@ wander_pause_max_s = 4.0
 xp_reward = 3200
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit")])
+loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

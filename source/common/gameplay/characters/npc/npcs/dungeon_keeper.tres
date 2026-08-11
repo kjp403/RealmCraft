@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_0ftqf"]
 script = ExtResource("4_35bs7")
-lines = Array[String](["What's down there isn't beasts. It's less than that, shapes the dark throws off. Kill the big one and the rest go out like snuffed candles.", "Plenty go down. Most come up. 'Most' is carrying that sentence."])
+lines = Array[String](["What's down there isn't beasts. It's less than that, shapes the dark throws off. Kill the big one and the rest go out like snuffed candles.", "Three rewarded clears a day on your character — Normal or Hard, each spends one. Failures don't count. Out of charges? Still go for XP, records, dailies, or to help a group; just no gold or loot.", "Solo is the juicy run: drop chances double, and every haul multiplies by one-and-a-half. Bring friends if you need the help — but don't expect the solo cut.", "Bosses across Arkenelle sometimes drop a glowing Dungeon Key. Use it from your bag to restore a charge."])
 label_override = "What's down there?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -22,6 +22,6 @@ metadata/_custom_type_script = "uid://b36k3ordtiw1u"
 script = ExtResource("4_cjldb")
 npc_name = "DungeonKeeper"
 skin = ExtResource("6_0ftqf")
-greeting = "Feel that cold coming up the steps? That's a deep pocket. The dark gets [i]thick[/i] down there, and it doesn't die easy. Take a group, or take the long way home. I just keep the door."
+greeting = "Feel that cold coming up the steps? That's a deep pocket. Go alone and the cave pays out — double chances, half-again the loot. Three rewarded clears a day; keys buy more. I just keep the door."
 interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_0ftqf"), SubResource("Resource_5aef6")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
