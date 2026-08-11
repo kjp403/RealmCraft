@@ -1,52 +1,17 @@
 extends SceneTree
-## Preview shots for contiguous Goblin Woodlands East.
+## Preview Goblin Woodlands East (woodland art only).
 ##   godot --path . -s tools/render_woodland_east_preview.gd
 
 const OUT := "/opt/cursor/artifacts/screenshots"
 const MAPS := "res://source/common/gameplay/maps/maps/woodland/"
 
 const SHOTS: Array[Dictionary] = [
-	{
-		"name": "woodland-east-gate",
-		"path": MAPS + "woodland_tiles.tscn",
-		"center": Vector2(3648, 640),
-		"zoom": 0.55,
-		"size": Vector2i(1100, 720),
-	},
-	{
-		"name": "woodland-east-overview",
-		"path": MAPS + "woodland_east.tscn",
-		"size_cells": Vector2i(240, 180),
-		"overview": true,
-	},
-	{
-		"name": "woodland-east-crossroads",
-		"path": MAPS + "woodland_east.tscn",
-		"center": Vector2(1536, 1536),
-		"zoom": 0.45,
-		"size": Vector2i(1280, 900),
-	},
-	{
-		"name": "woodland-east-dunes",
-		"path": MAPS + "woodland_east.tscn",
-		"center": Vector2(1536, 640),
-		"zoom": 0.5,
-		"size": Vector2i(1200, 900),
-	},
-	{
-		"name": "woodland-east-wetlands",
-		"path": MAPS + "woodland_east.tscn",
-		"center": Vector2(3072, 1472),
-		"zoom": 0.5,
-		"size": Vector2i(1200, 900),
-	},
-	{
-		"name": "woodland-east-ash",
-		"path": MAPS + "woodland_east.tscn",
-		"center": Vector2(1664, 2304),
-		"zoom": 0.5,
-		"size": Vector2i(1200, 900),
-	},
+	{"name": "woodland-east-gate", "path": MAPS + "woodland_tiles.tscn", "center": Vector2(3648, 640), "zoom": 0.55, "size": Vector2i(1100, 720)},
+	{"name": "woodland-east-overview", "path": MAPS + "woodland_east.tscn", "size_cells": Vector2i(200, 160), "overview": true},
+	{"name": "woodland-east-crossroads", "path": MAPS + "woodland_east.tscn", "center": Vector2(1280, 1344), "zoom": 0.5, "size": Vector2i(1280, 900)},
+	{"name": "woodland-east-clearings", "path": MAPS + "woodland_east.tscn", "center": Vector2(1344, 576), "zoom": 0.55, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-ponds", "path": MAPS + "woodland_east.tscn", "center": Vector2(2496, 1280), "zoom": 0.55, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-shelves", "path": MAPS + "woodland_east.tscn", "center": Vector2(1408, 2048), "zoom": 0.55, "size": Vector2i(1200, 900)},
 ]
 
 
@@ -64,13 +29,7 @@ func _go() -> void:
 			var zoom: float = minf(float(vp_size.x) / world.x, float(vp_size.y) / world.y) * 0.96
 			await _shot(shot["path"], vp_size, world * 0.5, zoom, "%s/%s.png" % [OUT, shot["name"]])
 		else:
-			await _shot(
-				shot["path"],
-				shot["size"],
-				shot["center"],
-				shot["zoom"],
-				"%s/%s.png" % [OUT, shot["name"]]
-			)
+			await _shot(shot["path"], shot["size"], shot["center"], shot["zoom"], "%s/%s.png" % [OUT, shot["name"]])
 	print("WOODLAND_EAST_PREVIEW_PASS")
 	quit(0)
 

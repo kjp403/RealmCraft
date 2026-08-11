@@ -1,26 +1,20 @@
 extends SceneTree
-## Goblin Woodlands — East Expansion (contiguous outdoor wing).
+## Goblin Woodlands East — contiguous outdoor wing.
+## WOODLAND TILESET ONLY. No desert/sewers/forge tilesets. No stripe fills.
 ##
-## One authored map the player walks into from the east gate. Three terrain
-## regions (dunes / wetlands / ash) share a single walkable topology with a
-## woodland approach — MapKit chambers + tunnels, proper rims, props, lighting.
-## Reuses desert/sewers/forge TILESETS as art only. Never edits those biome maps.
+## Layout: forest approach → crossroads → northern sandy clearings (future desert),
+## eastern marsh ponds (future swamp), southern rocky shelves (future volcano),
+## SE beach apron. All still reads as Goblin Woodlands.
 ##
 ##   godot --headless --path . -s tools/build_woodland_east_expansion.gd
 
 const MapKit := preload("res://tools/lib/mapkit.gd")
-const ForgeFloor := preload("res://tools/lib/forgefloor.gd")
 
 const WOOD_TS := "res://source/common/gameplay/maps/tilesets/woodland_tileset.tres"
-const DESERT_TS := "res://source/common/gameplay/maps/tilesets/desert_tileset.tres"
-const SEWERS_TS := "res://source/common/gameplay/maps/tilesets/sewers_tileset.tres"
-const FORGE_TS := "res://source/common/gameplay/maps/tilesets/fire_forge_tileset.tres"
-
 const WARPER := "res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn"
 const PORTAL := "res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn"
 const WOODLAND := "res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres"
 const CAMP := "res://source/common/gameplay/lighting/campfire.tscn"
-const GLOW := "res://source/common/gameplay/lighting/light_radial.tres"
 const MAP_SCRIPT := "res://source/common/gameplay/maps/map.gd"
 const RP_SCRIPT := "res://source/common/network/sync/replicated_props.gd"
 const DECO_SCN := "res://source/common/gameplay/props/animated_deco.tscn"
@@ -29,13 +23,31 @@ const TYPES := "res://source/common/gameplay/characters/npc/types/"
 const OUT := "res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
 const INST_OUT := "res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east.tres"
 
-## 2x surface scale — real outdoor wing, not a stub plaza.
-const SURFACE_S := 2
-const SURFACE_WOBBLE := 1.0
+const SRC_FLOOR := 0
+const SRC_WALL := 1
+const SRC_VEG := 2
+const SRC_TREE_S := 3
+const SRC_TREE_M := 4
+const SRC_TREE_L := 5
+const SRC_TREE_XL := 6
+const SRC_WATER := 8
 
-var W: int = 240
-var H: int = 180
-var _bounds := Rect2i(0, 0, 240, 180)
+const GRASS: Array[Vector2i] = [Vector2i(1, 10), Vector2i(2, 10), Vector2i(3, 10)]
+const DIRT: Array[Vector2i] = [Vector2i(5, 7), Vector2i(6, 6), Vector2i(6, 8), Vector2i(7, 5), Vector2i(8, 6)]
+const SAND: Array[Vector2i] = [Vector2i(10, 7), Vector2i(11, 6), Vector2i(11, 8), Vector2i(12, 5), Vector2i(13, 6), Vector2i(14, 7)]
+const STONE: Array[Vector2i] = [Vector2i(16, 1), Vector2i(16, 2), Vector2i(17, 2), Vector2i(18, 1), Vector2i(18, 3)]
+const WALL: Array[Vector2i] = [Vector2i(2, 6), Vector2i(3, 6), Vector2i(2, 7), Vector2i(3, 7), Vector2i(5, 2)]
+const VEG: Array[Vector2i] = [Vector2i(1, 9), Vector2i(5, 9), Vector2i(7, 10), Vector2i(12, 2), Vector2i(8, 9)]
+const WATER: Array[Vector2i] = [
+	Vector2i(2, 2), Vector2i(2, 5), Vector2i(1, 6), Vector2i(3, 6),
+	Vector2i(0, 7), Vector2i(4, 7), Vector2i(1, 8), Vector2i(3, 8), Vector2i(2, 9),
+]
+
+const SURFACE_S := 2
+
+var W: int = 200
+var H: int = 160
+var _bounds := Rect2i(0, 0, 200, 160)
 
 
 func _sc(x: int, y: int) -> Vector2i:
@@ -51,11 +63,7 @@ func _sn(n: int) -> int:
 
 
 func _sw(w: float) -> float:
-	return minf(w * SURFACE_WOBBLE, 0.45)
-
-
-func _sh(v: float) -> float:
-	return v * sqrt(float(SURFACE_S))
+	return minf(w, 0.42)
 
 
 func _initialize() -> void:
@@ -99,101 +107,18 @@ func _carve(chambers: Array, links: Array, margin: int, anchor: Vector2i) -> Dic
 		MapKit.tunnel(mask, link[0], link[1], link[2], link[3], int(link[4]), _bounds)
 	var trimmed: Dictionary = {}
 	for cell: Vector2i in mask.keys():
-		if (
-			cell.x >= margin and cell.y >= margin + 2
-			and cell.x < W - margin and cell.y < H - margin
-		):
+		if cell.x >= margin and cell.y >= margin + 2 and cell.x < W - margin and cell.y < H - margin:
 			trimmed[cell] = true
-	var smoothed := MapKit.smooth(trimmed, _bounds, 2, 5, 4)
-	return MapKit.largest_region(smoothed, _pick_open(smoothed, anchor))
+	return MapKit.largest_region(MapKit.smooth(trimmed, _bounds, 2, 5, 4), _pick_open(trimmed, anchor))
 
 
-func _void_of(floor_mask: Dictionary) -> Dictionary:
+func _keepout(spots: Array, radius: int) -> Dictionary:
 	var out: Dictionary = {}
-	for y in H:
-		for x in W:
-			var cell := Vector2i(x, y)
-			if not floor_mask.has(cell):
-				out[cell] = true
+	for spot in spots:
+		for oy in range(-radius, radius + 1):
+			for ox in range(-radius, radius + 1):
+				out[spot + Vector2i(ox, oy)] = true
 	return out
-
-
-func _walkable(floor_mask: Dictionary, blocked: Dictionary) -> Dictionary:
-	var out: Dictionary = {}
-	for cell: Vector2i in floor_mask.keys():
-		if not blocked.has(cell):
-			out[cell] = true
-	return out
-
-
-func _rim(
-	source: int,
-	fill: Array,
-	n: Array,
-	s: Array,
-	w: Array,
-	e: Array,
-	nw: Vector2i,
-	ne: Vector2i,
-	sw: Vector2i,
-	se: Vector2i
-) -> MapKit.RimSpec:
-	var spec := MapKit.RimSpec.new()
-	spec.source = source
-	spec.fill.assign(fill)
-	spec.n.assign(n)
-	spec.s.assign(s)
-	spec.w.assign(w)
-	spec.e.assign(e)
-	spec.nw = nw
-	spec.ne = ne
-	spec.sw = sw
-	spec.se = se
-	spec.face_rows = 0
-	return spec
-
-
-func _scatter_props(
-	props: TileMapLayer,
-	source: int,
-	cells: Array,
-	rects: Array,
-	density: float,
-	spacing: int,
-	seed_value: int,
-	allowed: Dictionary,
-	solid: Dictionary
-) -> void:
-	if rects.is_empty():
-		return
-	for cell in MapKit.scatter(cells, density, spacing, seed_value):
-		if not allowed.has(cell):
-			continue
-		var r: Array = rects[MapKit.hash2(cell.x, cell.y, seed_value + 1) % rects.size()]
-		var cluster := MapKit.rect_cluster(r[0], r[1], r[2], r[3])
-		var placed := MapKit.stamp_cluster(props, source, cluster, cell, allowed, _bounds)
-		for c: Vector2i in placed:
-			allowed.erase(c)
-			solid[c] = true
-
-
-func _scatter_flat(
-	props: TileMapLayer,
-	source: int,
-	cells: Array,
-	tiles: Array,
-	density: float,
-	spacing: int,
-	seed_value: int,
-	taken: Dictionary
-) -> void:
-	if tiles.is_empty():
-		return
-	for cell in MapKit.scatter(cells, density, spacing, seed_value):
-		if taken.has(cell) or props.get_cell_source_id(cell) >= 0:
-			continue
-		var t: Array = tiles[MapKit.hash2(cell.x, cell.y, seed_value + 2) % tiles.size()]
-		props.set_cell(cell, source, Vector2i(t[0], t[1]))
 
 
 func _place(walk: Dictionary, taken: Dictionary, wanted: Vector2i, gap: int) -> Vector2i:
@@ -227,476 +152,314 @@ func _mobs(walk: Dictionary, taken: Dictionary, plan: Array, gap: int) -> Array:
 	return out
 
 
-func _keepout(spots: Array, radius: int) -> Dictionary:
-	var out: Dictionary = {}
-	for spot in spots:
-		for oy in range(-radius, radius + 1):
-			for ox in range(-radius, radius + 1):
-				out[spot + Vector2i(ox, oy)] = true
-	return out
-
-
-func _assign_biome(floor_mask: Dictionary, centers: Dictionary) -> Dictionary:
-	## Nearest landmark ownership. Path corridors stay contiguous visually because
-	## material changes only at soft boundaries — no walls between biomes.
-	var out: Dictionary = {}
-	for cell: Vector2i in floor_mask.keys():
-		var best_name := "wood"
-		var best_d := 1 << 30
-		for biome_name: String in centers.keys():
-			var c: Vector2i = centers[biome_name]
-			var d: int = (cell - c).length_squared()
-			# Soft bias: wood owns the western approach strip.
-			if biome_name == "wood" and cell.x < _sn(34):
-				d = int(float(d) * 0.55)
-			if biome_name == "dunes" and cell.y < _sn(38):
-				d = int(float(d) * 0.75)
-			if biome_name == "wet" and cell.x > _sn(78):
-				d = int(float(d) * 0.7)
-			if biome_name == "ash" and cell.y > _sn(58):
-				d = int(float(d) * 0.7)
-			if d < best_d:
-				best_d = d
-				best_name = biome_name
-		out[cell] = best_name
-	return out
-
-
-func _subset(floor_mask: Dictionary, biome_of: Dictionary, name: String) -> Dictionary:
-	var out: Dictionary = {}
-	for cell: Vector2i in floor_mask.keys():
-		if biome_of.get(cell, "") == name:
-			out[cell] = true
-	return out
-
-
 func _build() -> void:
-	_set_size(_sn(120), _sn(90))
+	_set_size(_sn(100), _sn(80))
+	var ts: TileSet = load(WOOD_TS)
+	var ground := TileMapLayer.new()
+	ground.tile_set = ts
+	var walls := TileMapLayer.new()
+	walls.tile_set = ts
+	var decor := TileMapLayer.new()
+	decor.tile_set = ts
+	var features := TileMapLayer.new()
+	features.tile_set = ts
 
-	var wood_ts: TileSet = load(WOOD_TS)
-	var desert_ts: TileSet = load(DESERT_TS)
-	var sewers_ts: TileSet = load(SEWERS_TS)
-	var forge_ts: TileSet = load(FORGE_TS)
+	var entrance_hint := _sc(12, 42)
+	var crossroads := _sc(40, 42)
+	var north_clearing := _sc(42, 18)
+	var east_marsh := _sc(78, 40)
+	var south_shelf := _sc(44, 64)
+	var beach := _sc(72, 70)
 
-	var ground_wood := TileMapLayer.new()
-	ground_wood.tile_set = wood_ts
-	var walls_wood := TileMapLayer.new()
-	walls_wood.tile_set = wood_ts
-	var decor_wood := TileMapLayer.new()
-	decor_wood.tile_set = wood_ts
-
-	var ground_dunes := TileMapLayer.new()
-	ground_dunes.tile_set = desert_ts
-	var walls_dunes := TileMapLayer.new()
-	walls_dunes.tile_set = desert_ts
-	var props_dunes := TileMapLayer.new()
-	props_dunes.tile_set = desert_ts
-
-	var ground_wet := TileMapLayer.new()
-	ground_wet.tile_set = sewers_ts
-	var walls_wet := TileMapLayer.new()
-	walls_wet.tile_set = sewers_ts
-	var props_wet := TileMapLayer.new()
-	props_wet.tile_set = sewers_ts
-
-	var ground_ash := TileMapLayer.new()
-	ground_ash.tile_set = forge_ts
-	var walls_ash := TileMapLayer.new()
-	walls_ash.tile_set = forge_ts
-	var props_ash := TileMapLayer.new()
-	props_ash.tile_set = forge_ts
-
-	# Backdrop void (desert pit fill) so the map reads as one outdoor cliff bowl.
-	var backdrop := TileMapLayer.new()
-	backdrop.tile_set = desert_ts
-
-	# --- Topology: woodland approach → crossroads → three biome lobes --------
-	var entrance_hint := _sc(14, 48)
-	var crossroads := _sc(48, 48)
-	var dunes_heart := _sc(48, 20)
-	var wet_heart := _sc(96, 46)
-	var ash_heart := _sc(52, 72)
-	var beach_heart := _sc(78, 80)
-
+	# Contiguous forest wing — lobed groves, not stripes / not foreign biomes.
 	var floor_mask := _carve(
 		[
-			# Woodland approach grove
-			[entrance_hint, _sr(9.0), _sw(0.26), 301],
-			[_sc(28, 48), _sr(8.0), _sw(0.28), 302],
-			[_sc(36, 42), _sr(6.5), _sw(0.30), 303],
-			[_sc(36, 54), _sr(6.5), _sw(0.30), 304],
-			# Crossroads clearing
-			[crossroads, _sr(11.0), _sw(0.22), 305],
-			[_sc(56, 48), _sr(7.0), _sw(0.28), 306],
-			# Dunes north
-			[dunes_heart, _sr(12.0), _sw(0.24), 307],
-			[_sc(28, 22), _sr(9.0), _sw(0.28), 308],
-			[_sc(68, 22), _sr(9.0), _sw(0.28), 309],
-			[_sc(48, 10), _sr(8.0), _sw(0.28), 310],
-			[_sc(34, 32), _sr(7.0), _sw(0.30), 311],
-			[_sc(62, 32), _sr(7.0), _sw(0.30), 312],
-			# Wetlands east
-			[wet_heart, _sr(12.0), _sw(0.24), 313],
-			[_sc(82, 34), _sr(8.5), _sw(0.28), 314],
-			[_sc(82, 58), _sr(8.5), _sw(0.28), 315],
-			[_sc(108, 34), _sr(8.0), _sw(0.28), 316],
-			[_sc(108, 58), _sr(8.0), _sw(0.28), 317],
-			[_sc(100, 20), _sr(7.0), _sw(0.30), 318],
-			[_sc(100, 70), _sr(7.0), _sw(0.30), 319],
-			# Ash south
-			[ash_heart, _sr(11.0), _sw(0.24), 320],
-			[_sc(30, 72), _sr(8.5), _sw(0.28), 321],
-			[_sc(74, 72), _sr(8.5), _sw(0.28), 322],
-			[_sc(48, 82), _sr(8.0), _sw(0.28), 323],
-			[_sc(64, 62), _sr(7.0), _sw(0.30), 324],
-			# Beach apron (south-east sand shelf)
-			[beach_heart, _sr(9.0), _sw(0.26), 325],
-			[_sc(96, 78), _sr(7.5), _sw(0.28), 326],
+			[entrance_hint, _sr(10.0), _sw(0.26), 101],
+			[_sc(24, 42), _sr(9.0), _sw(0.28), 102],
+			[_sc(32, 36), _sr(7.5), _sw(0.30), 103],
+			[_sc(32, 48), _sr(7.5), _sw(0.30), 104],
+			[crossroads, _sr(12.0), _sw(0.22), 105],
+			[_sc(50, 42), _sr(8.0), _sw(0.28), 106],
+			# Northern sandy clearings (future desert approach — woodland sand only)
+			[north_clearing, _sr(11.0), _sw(0.24), 107],
+			[_sc(28, 18), _sr(8.0), _sw(0.28), 108],
+			[_sc(56, 18), _sr(8.0), _sw(0.28), 109],
+			[_sc(42, 8), _sr(7.0), _sw(0.30), 110],
+			[_sc(34, 28), _sr(6.5), _sw(0.30), 111],
+			[_sc(50, 28), _sr(6.5), _sw(0.30), 112],
+			# Eastern wet woods (future swamp — woodland water ponds)
+			[east_marsh, _sr(11.0), _sw(0.24), 113],
+			[_sc(68, 30), _sr(8.0), _sw(0.28), 114],
+			[_sc(68, 50), _sr(8.0), _sw(0.28), 115],
+			[_sc(88, 30), _sr(7.5), _sw(0.28), 116],
+			[_sc(88, 50), _sr(7.5), _sw(0.28), 117],
+			[_sc(78, 20), _sr(6.5), _sw(0.30), 118],
+			[_sc(78, 58), _sr(6.5), _sw(0.30), 119],
+			# Southern rocky shelves (future volcano — woodland stone)
+			[south_shelf, _sr(10.0), _sw(0.24), 120],
+			[_sc(28, 64), _sr(7.5), _sw(0.28), 121],
+			[_sc(60, 64), _sr(7.5), _sw(0.28), 122],
+			[_sc(44, 74), _sr(7.0), _sw(0.28), 123],
+			[_sc(54, 54), _sr(6.5), _sw(0.30), 124],
+			# Beach apron
+			[beach, _sr(8.5), _sw(0.26), 125],
+			[_sc(86, 70), _sr(7.0), _sw(0.28), 126],
 		],
 		[
-			# Spines: west→cross→biomes
-			[_sc(14, 48), _sc(48, 48), _sr(3.2), _sr(2.0), 401],
-			[_sc(48, 48), _sc(48, 20), _sr(3.0), _sr(2.0), 402],
-			[_sc(48, 48), _sc(96, 46), _sr(3.0), _sr(2.2), 403],
-			[_sc(48, 48), _sc(52, 72), _sr(3.0), _sr(2.0), 404],
-			# Dunes internal
-			[_sc(48, 20), _sc(28, 22), _sr(2.6), _sr(2.5), 405],
-			[_sc(48, 20), _sc(68, 22), _sr(2.6), _sr(2.5), 406],
-			[_sc(48, 20), _sc(48, 10), _sr(2.4), _sr(2.0), 407],
-			[_sc(34, 32), _sc(48, 48), _sr(2.2), _sr(2.5), 408],
-			[_sc(62, 32), _sc(48, 48), _sr(2.2), _sr(2.5), 409],
-			# Wetlands internal
-			[_sc(96, 46), _sc(82, 34), _sr(2.4), _sr(2.5), 410],
-			[_sc(96, 46), _sc(82, 58), _sr(2.4), _sr(2.5), 411],
-			[_sc(96, 46), _sc(108, 34), _sr(2.4), _sr(2.5), 412],
-			[_sc(96, 46), _sc(108, 58), _sr(2.4), _sr(2.5), 413],
-			[_sc(100, 20), _sc(96, 40), _sr(2.2), _sr(2.5), 414],
-			[_sc(100, 70), _sc(96, 55), _sr(2.2), _sr(2.5), 415],
-			# Ash internal + beach join
-			[_sc(52, 72), _sc(30, 72), _sr(2.6), _sr(2.5), 416],
-			[_sc(52, 72), _sc(74, 72), _sr(2.6), _sr(2.5), 417],
-			[_sc(52, 72), _sc(48, 82), _sr(2.4), _sr(2.0), 418],
-			[_sc(74, 72), _sc(78, 80), _sr(2.4), _sr(2.5), 419],
-			[_sc(78, 80), _sc(96, 78), _sr(2.6), _sr(2.0), 420],
-			[_sc(96, 70), _sc(96, 78), _sr(2.2), _sr(2.5), 421],
+			[_sc(12, 42), _sc(40, 42), _sr(3.2), _sr(2.0), 201],
+			[_sc(40, 42), _sc(42, 18), _sr(3.0), _sr(2.0), 202],
+			[_sc(40, 42), _sc(78, 40), _sr(3.0), _sr(2.2), 203],
+			[_sc(40, 42), _sc(44, 64), _sr(3.0), _sr(2.0), 204],
+			[_sc(42, 18), _sc(28, 18), _sr(2.4), _sr(2.5), 205],
+			[_sc(42, 18), _sc(56, 18), _sr(2.4), _sr(2.5), 206],
+			[_sc(42, 18), _sc(42, 8), _sr(2.2), _sr(2.0), 207],
+			[_sc(78, 40), _sc(68, 30), _sr(2.4), _sr(2.5), 208],
+			[_sc(78, 40), _sc(68, 50), _sr(2.4), _sr(2.5), 209],
+			[_sc(78, 40), _sc(88, 30), _sr(2.4), _sr(2.5), 210],
+			[_sc(78, 40), _sc(88, 50), _sr(2.4), _sr(2.5), 211],
+			[_sc(44, 64), _sc(28, 64), _sr(2.4), _sr(2.5), 212],
+			[_sc(44, 64), _sc(60, 64), _sr(2.4), _sr(2.5), 213],
+			[_sc(44, 64), _sc(44, 74), _sr(2.2), _sr(2.0), 214],
+			[_sc(60, 64), _sc(72, 70), _sr(2.4), _sr(2.5), 215],
+			[_sc(72, 70), _sc(86, 70), _sr(2.4), _sr(2.0), 216],
+			[_sc(78, 58), _sc(72, 68), _sr(2.0), _sr(2.5), 217],
 		],
 		_sn(4),
 		entrance_hint
 	)
 
-	# Mesa islands in dunes (carve holes like east_dunes)
+	# Rock outcrop islands (carve holes) for readable outdoor topography.
 	for spot in [
-		[_sc(38, 18), _sh(3.2), 501], [_sc(58, 16), _sh(3.0), 502],
-		[_sc(48, 28), _sh(2.8), 503],
+		[_sc(36, 16), 3.4, 301], [_sc(50, 14), 3.0, 302], [_sc(42, 26), 2.8, 303],
+		[_sc(70, 36), 2.6, 304], [_sc(84, 44), 2.8, 305], [_sc(36, 60), 2.8, 306],
 	]:
 		var mesa: Dictionary = {}
-		MapKit.blob(mesa, spot[0], spot[1], _sw(0.28), int(spot[2]), _bounds)
+		MapKit.blob(mesa, spot[0], float(spot[1]) * float(SURFACE_S) * 0.55, _sw(0.28), int(spot[2]), _bounds)
 		mesa = MapKit.smooth(mesa, _bounds, 1, 5, 4)
 		for cell: Vector2i in mesa.keys():
 			floor_mask.erase(cell)
 	floor_mask = MapKit.largest_region(floor_mask, _pick_open(floor_mask, entrance_hint))
 
-	var centers := {
-		"wood": _sc(22, 48),
-		"dunes": dunes_heart,
-		"wet": wet_heart,
-		"ash": ash_heart,
-	}
-	# Beach shelf prefers ash/sand reading — pull ash ownership south-east.
-	centers["ash"] = _sc(60, 76)
-	var biome_of := _assign_biome(floor_mask, centers)
-	# Force beach apron to ash/sand material for coastal read.
-	for cell: Vector2i in floor_mask.keys():
-		if cell.y >= _sn(76) and cell.x >= _sn(70):
-			biome_of[cell] = "ash"
-
-	var wood_floor := _subset(floor_mask, biome_of, "wood")
-	var dunes_floor := _subset(floor_mask, biome_of, "dunes")
-	var wet_floor := _subset(floor_mask, biome_of, "wet")
-	var ash_floor := _subset(floor_mask, biome_of, "ash")
-
-	# Dirt path spine for readability across biomes.
+	# Trail spines
 	var path: Dictionary = {}
-	MapKit.tunnel(path, entrance_hint, crossroads, _sr(2.2), _sr(1.6), 521, _bounds)
-	MapKit.tunnel(path, crossroads, dunes_heart, _sr(2.0), _sr(1.6), 522, _bounds)
-	MapKit.tunnel(path, crossroads, wet_heart, _sr(2.0), _sr(1.8), 523, _bounds)
-	MapKit.tunnel(path, crossroads, ash_heart, _sr(2.0), _sr(1.6), 524, _bounds)
-	MapKit.tunnel(path, ash_heart, beach_heart, _sr(1.8), _sr(1.6), 525, _bounds)
+	MapKit.tunnel(path, entrance_hint, crossroads, _sr(2.4), _sr(1.6), 321, _bounds)
+	MapKit.tunnel(path, crossroads, north_clearing, _sr(2.1), _sr(1.6), 322, _bounds)
+	MapKit.tunnel(path, crossroads, east_marsh, _sr(2.1), _sr(1.8), 323, _bounds)
+	MapKit.tunnel(path, crossroads, south_shelf, _sr(2.1), _sr(1.6), 324, _bounds)
+	MapKit.tunnel(path, south_shelf, beach, _sr(1.9), _sr(1.6), 325, _bounds)
 
-	# --- Paint woodland -----------------------------------------------------
-	var grass: Array[Vector2i] = [Vector2i(1, 10), Vector2i(2, 10), Vector2i(3, 10)]
-	var dirt: Array[Vector2i] = [Vector2i(5, 7), Vector2i(6, 6), Vector2i(6, 8), Vector2i(7, 5), Vector2i(8, 6)]
-	var veg: Array[Vector2i] = [Vector2i(1, 9), Vector2i(5, 9), Vector2i(7, 10), Vector2i(12, 2)]
-	for cell: Vector2i in wood_floor.keys():
-		var atlas: Vector2i = MapKit._pick(dirt, cell, 531) if path.has(cell) or MapKit.rand01(cell.x, cell.y, 532) < 0.28 else MapKit._pick(grass, cell, 533)
-		ground_wood.set_cell(cell, 0, atlas)
-		if path.has(cell):
-			continue
-		if MapKit.rand01(cell.x, cell.y, 534) < 0.09:
-			decor_wood.set_cell(cell, 2, MapKit._pick(veg, cell, 535))
-		elif MapKit.rand01(cell.x, cell.y, 536) < 0.04:
-			decor_wood.set_cell(cell, 4 if MapKit.hash2(cell.x, cell.y, 537) % 2 == 0 else 5, Vector2i(0, 0))
+	# Region masks (still woodland materials — sand/water/stone from woodland atlas)
+	var sand_zone: Dictionary = {}
+	var marsh_zone: Dictionary = {}
+	var stone_zone: Dictionary = {}
+	var beach_zone: Dictionary = {}
+	for cell: Vector2i in floor_mask.keys():
+		var dn: float = float((cell - north_clearing).length_squared())
+		var dm: float = float((cell - east_marsh).length_squared())
+		var ds: float = float((cell - south_shelf).length_squared())
+		var db: float = float((cell - beach).length_squared())
+		var dw: float = float((cell - entrance_hint).length_squared())
+		var dc: float = float((cell - crossroads).length_squared())
+		if cell.y >= _sn(68) and cell.x >= _sn(60):
+			beach_zone[cell] = true
+		elif dn <= dm and dn <= ds and dn < dw * 0.85 and cell.y < _sn(34):
+			sand_zone[cell] = true
+		elif dm <= dn and dm <= ds and cell.x > _sn(60):
+			marsh_zone[cell] = true
+		elif ds <= dn and ds <= dm and cell.y > _sn(54):
+			stone_zone[cell] = true
+		elif dc < _sr(14.0) * _sr(14.0):
+			pass # crossroads stays grass/dirt
 
-	# --- Paint dunes --------------------------------------------------------
-	var sand := [
-		Vector2i(2, 1), Vector2i(3, 1), Vector2i(1, 2), Vector2i(2, 2),
-		Vector2i(3, 2), Vector2i(4, 2), Vector2i(2, 3), Vector2i(3, 3),
-	]
-	var sand_dirt := [Vector2i(2, 2), Vector2i(3, 2), Vector2i(1, 2), Vector2i(4, 2)]
-	for cell: Vector2i in dunes_floor.keys():
-		if path.has(cell):
-			ground_dunes.set_cell(cell, 0, MapKit._pick(sand_dirt, cell, 541))
-		else:
-			ground_dunes.set_cell(cell, 0, MapKit._pick(sand, cell, 542))
-
-	# --- Paint wetlands -----------------------------------------------------
-	var wet_floors := [
-		Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1),
-		Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2),
-	]
-	for cell: Vector2i in wet_floor.keys():
-		ground_wet.set_cell(cell, 0, MapKit._pick(wet_floors, cell, 551))
-
-	# --- Paint ash (+ beach sand via forge slate / scorch) ------------------
-	var ash_links: Array = [
-		[_sc(48, 48), _sc(52, 72), _sr(3.0), _sr(2.0), 404],
-		[_sc(52, 72), _sc(30, 72), _sr(2.6), _sr(2.5), 416],
-		[_sc(52, 72), _sc(74, 72), _sr(2.6), _sr(2.5), 417],
-		[_sc(52, 72), _sc(48, 82), _sr(2.4), _sr(2.0), 418],
-		[_sc(74, 72), _sc(78, 80), _sr(2.4), _sr(2.5), 419],
-	]
-	var lava_cells: Dictionary = {}
+	# Ponds in marsh (water = blocked). Use real woodland water atlas cells only.
+	var water_cells: Dictionary = {}
 	for spot in [
-		[_sc(30, 72), _sh(3.8), 561], [_sc(74, 70), _sh(3.6), 562],
-		[_sc(52, 78), _sh(4.0), 563], [_sc(42, 68), _sh(2.8), 564],
-		[_sc(64, 76), _sh(3.0), 565], [_sc(58, 84), _sh(2.6), 566],
+		[_sc(78, 40), 5.5, 401], [_sc(70, 48), 4.6, 402], [_sc(86, 34), 4.8, 403],
+		[_sc(82, 52), 4.4, 404], [_sc(74, 28), 4.0, 405], [_sc(90, 44), 3.8, 406],
+		[_sc(66, 38), 3.6, 407],
 	]:
 		var pool: Dictionary = {}
-		MapKit.blob(pool, spot[0], spot[1], _sw(0.30), int(spot[2]), _bounds)
+		MapKit.blob(pool, spot[0], float(spot[1]) * float(SURFACE_S) * 0.55, _sw(0.30), int(spot[2]), _bounds)
 		pool = MapKit.smooth(pool, _bounds, 1, 5, 4)
 		for cell: Vector2i in pool.keys():
-			if ash_floor.has(cell) and not path.has(cell):
-				lava_cells[cell] = true
+			if floor_mask.has(cell) and marsh_zone.has(cell) and not path.has(cell):
+				water_cells[cell] = true
 
-	var paved: Dictionary = {}
-	for link: Array in ash_links:
-		MapKit.tunnel(paved, link[0], link[1], float(link[2]) * 0.45, float(link[3]), int(link[4]), _bounds)
-	for bay in [ash_heart, _sc(30, 72), _sc(74, 72), beach_heart]:
-		ForgeFloor.apron(paved, bay, _sn(3))
-	for cell: Vector2i in lava_cells.keys():
-		paved.erase(cell)
-	for cell: Vector2i in ash_floor.keys():
-		if not path.has(cell):
+	# --- Paint floors -------------------------------------------------------
+	for cell: Vector2i in floor_mask.keys():
+		if water_cells.has(cell):
+			ground.set_cell(cell, SRC_WATER, MapKit._pick(WATER, cell, 411))
 			continue
-		paved[cell] = true
-
-	var scorch := ForgeFloor.scorch_of(lava_cells, ash_floor, 3)
-	var depth := ForgeFloor.depth_field(ash_floor)
-	var owned: Dictionary = {}
-	for spot in [_sc(52, 68), _sc(36, 72), _sc(68, 72)]:
-		if ash_floor.has(_pick_open(ash_floor, spot)):
-			for cell: Vector2i in ForgeFloor.hearth(ground_ash, ash_floor, _pick_open(ash_floor, spot)).keys():
-				owned[cell] = true
-	for cell: Vector2i in owned.keys():
-		paved.erase(cell)
-	for cell: Vector2i in ForgeFloor.pave(ground_ash, paved, ash_floor, depth, 72, 0.28, float(SURFACE_S)).keys():
-		owned[cell] = true
-	ForgeFloor.paint_slate(ground_ash, ash_floor, depth, 71, {
-		"scorch": scorch, "skip": owned, "unit": float(SURFACE_S),
-	})
-	var lava_tiles := [Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11)]
-	for cell: Vector2i in lava_cells.keys():
-		ground_ash.set_cell(cell, 1, MapKit._pick(lava_tiles, cell, 571))
-
-	# Beach shelf: override far SE ash cells with desert sand on dunes layer for coastal read.
-	for cell: Vector2i in ash_floor.keys():
-		if cell.y < _sn(78) or cell.x < _sn(72):
+		if path.has(cell):
+			ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 412))
 			continue
-		ground_ash.erase_cell(cell)
-		ground_dunes.set_cell(cell, 0, MapKit._pick(sand, cell, 575))
-		biome_of[cell] = "dunes"
-		dunes_floor[cell] = true
-		# keep in floor_mask; remove from ash paint ownership for walls
-		ash_floor.erase(cell)
+		if beach_zone.has(cell):
+			ground.set_cell(cell, SRC_FLOOR, MapKit._pick(SAND, cell, 413))
+			continue
+		if sand_zone.has(cell):
+			# Open sandy glade — reads as future desert approach without foreign art
+			if MapKit.rand01(cell.x, cell.y, 414) < 0.08:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(GRASS, cell, 415))
+			elif MapKit.rand01(cell.x, cell.y, 4145) < 0.12:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 4156))
+			else:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(SAND, cell, 416))
+			continue
+		if stone_zone.has(cell):
+			# Rocky shelf — woodland stone dominant
+			if MapKit.rand01(cell.x, cell.y, 417) < 0.18:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 418))
+			elif MapKit.rand01(cell.x, cell.y, 419) < 0.12:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(GRASS, cell, 420))
+			else:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(STONE, cell, 421))
+			continue
+		if marsh_zone.has(cell):
+			# Damp woods: dirt + grass, shore around ponds
+			var near_water := false
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				if water_cells.has(cell + d):
+					near_water = true
+					break
+			if near_water:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 422))
+			elif MapKit.rand01(cell.x, cell.y, 423) < 0.4:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 424))
+			else:
+				ground.set_cell(cell, SRC_FLOOR, MapKit._pick(GRASS, cell, 425))
+			continue
+		# Default forest floor
+		if MapKit.rand01(cell.x, cell.y, 426) < 0.18:
+			ground.set_cell(cell, SRC_FLOOR, MapKit._pick(DIRT, cell, 427))
+		else:
+			ground.set_cell(cell, SRC_FLOOR, MapKit._pick(GRASS, cell, 428))
 
-	# --- Void backdrop + biome rims (walls only vs void) --------------------
-	var void_mask := _void_of(floor_mask)
-	for cell: Vector2i in void_mask.keys():
-		backdrop.set_cell(cell, 0, Vector2i(7, 6))
-
+	# --- Rim walls (void against cliff) -------------------------------------
 	var blocked: Dictionary = {}
-
-	# Dunes rim (cliff face)
-	var dunes_void := _void_touching(void_mask, dunes_floor)
-	var dunes_spec := MapKit.RimSpec.new()
-	dunes_spec.source = 0
-	dunes_spec.fill = [Vector2i(7, 6)]
-	dunes_spec.n = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]
-	dunes_spec.s = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4)]
-	dunes_spec.w = [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]
-	dunes_spec.e = [Vector2i(5, 1), Vector2i(5, 2), Vector2i(5, 3)]
-	dunes_spec.nw = Vector2i(0, 0)
-	dunes_spec.ne = Vector2i(5, 0)
-	dunes_spec.sw = Vector2i(0, 4)
-	dunes_spec.se = Vector2i(5, 4)
-	dunes_spec.s_face = [Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5), Vector2i(4, 5)]
-	dunes_spec.s_base = [Vector2i(1, 6), Vector2i(2, 6), Vector2i(3, 6), Vector2i(4, 6)]
-	dunes_spec.sw_face = Vector2i(0, 5)
-	dunes_spec.sw_base = Vector2i(0, 6)
-	dunes_spec.se_face = Vector2i(5, 5)
-	dunes_spec.se_base = Vector2i(5, 6)
-	dunes_spec.face_rows = 2
-	MapKit.paint_rim(walls_dunes, dunes_void, dunes_spec, _bounds, blocked)
-
-	# Wetlands rim
-	var wet_void := _void_touching(void_mask, wet_floor)
-	var wet_spec := _rim(
-		0,
-		[Vector2i(6, 0), Vector2i(7, 0), Vector2i(8, 0), Vector2i(6, 1), Vector2i(7, 1), Vector2i(8, 1)],
-		[Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)],
-		[Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4)],
-		[Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)],
-		[Vector2i(5, 1), Vector2i(5, 2), Vector2i(5, 3)],
-		Vector2i(0, 0), Vector2i(5, 0), Vector2i(0, 4), Vector2i(5, 4)
-	)
-	MapKit.paint_rim(walls_wet, wet_void, wet_spec, _bounds, blocked)
-
-	# Ash rim
-	var ash_void := _void_touching(void_mask, ash_floor)
-	var ash_spec := _rim(
-		3,
-		[Vector2i(2, 2), Vector2i(3, 2)],
-		[Vector2i(2, 1), Vector2i(3, 1)],
-		[Vector2i(2, 3), Vector2i(3, 3)],
-		[Vector2i(1, 2)],
-		[Vector2i(4, 2)],
-		Vector2i(1, 1), Vector2i(4, 1), Vector2i(1, 3), Vector2i(4, 3)
-	)
-	MapKit.paint_rim(walls_ash, ash_void, ash_spec, _bounds, blocked)
-
-	# Woodland soft rim (stone wall tiles)
-	var wood_void := _void_touching(void_mask, wood_floor)
-	var wall_tiles: Array[Vector2i] = [Vector2i(2, 6), Vector2i(3, 6), Vector2i(2, 7), Vector2i(3, 7)]
-	for cell: Vector2i in wood_void.keys():
-		# Only rim cells adjacent to wood floor
-		var touch := false
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			if wood_floor.has(cell + d):
-				touch = true
-				break
-		if not touch:
-			continue
-		walls_wood.set_cell(cell, 1, MapKit._pick(wall_tiles, cell, 581))
+	for cell: Vector2i in water_cells.keys():
 		blocked[cell] = true
 
-	# Lava blocks walk
-	for cell: Vector2i in lava_cells.keys():
-		blocked[cell] = true
+	for y in H:
+		for x in W:
+			var cell := Vector2i(x, y)
+			if floor_mask.has(cell):
+				continue
+			var touch := false
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				if floor_mask.has(cell + d):
+					touch = true
+					break
+			if not touch:
+				continue
+			walls.set_cell(cell, SRC_WALL, MapKit._pick(WALL, cell, 431))
+			blocked[cell] = true
+			# Soft second rim for cliff read
+			for d2 in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = cell + d2
+				if floor_mask.has(n) or walls.get_cell_source_id(n) >= 0:
+					continue
+				if not _bounds.has_point(n):
+					continue
+				if MapKit.rand01(n.x, n.y, 432) < 0.55:
+					walls.set_cell(n, SRC_WALL, MapKit._pick(WALL, n, 433))
 
-	var walk := _walkable(floor_mask, blocked)
+	var walk: Dictionary = {}
+	for cell: Vector2i in floor_mask.keys():
+		if not blocked.has(cell):
+			walk[cell] = true
 	var entrance := _pick_open(walk, entrance_hint)
 	walk = MapKit.largest_region(walk, entrance)
 	var portal := _pick_open(walk, entrance + Vector2i(_sn(3), 0))
 	var camp_cell := _pick_open(walk, crossroads)
 
 	assert(walk.has(entrance) and walk.has(portal), "spawn blocked")
-	assert(walk.size() > 2500, "east expansion too small: %d" % walk.size())
+	assert(walk.size() > 2000, "east wing too small: %d" % walk.size())
 
-	# --- Props --------------------------------------------------------------
-	var keepout := _keepout([entrance, portal, camp_cell], 4)
+	# --- Decor: trees, veg (forest density) ---------------------------------
+	var keepout := _keepout([entrance, portal, camp_cell], 5)
 	var solid: Dictionary = {}
-	var free_dunes: Dictionary = {}
-	var free_wet: Dictionary = {}
-	var free_ash: Dictionary = {}
 	for cell: Vector2i in walk.keys():
-		if keepout.has(cell):
+		if keepout.has(cell) or path.has(cell) or water_cells.has(cell):
 			continue
-		match biome_of.get(cell, ""):
-			"dunes":
-				free_dunes[cell] = true
-			"wet":
-				free_wet[cell] = true
-			"ash":
-				free_ash[cell] = true
+		# Clearings stay more open
+		var in_clearing := sand_zone.has(cell) or stone_zone.has(cell) or beach_zone.has(cell)
+		var tree_chance := 0.02 if in_clearing else 0.12
+		var veg_chance := 0.05 if in_clearing else 0.10
+		if sand_zone.has(cell) or beach_zone.has(cell):
+			tree_chance = 0.012
+			veg_chance = 0.04
+		if marsh_zone.has(cell):
+			tree_chance = 0.09
+			veg_chance = 0.15
+		if stone_zone.has(cell):
+			tree_chance = 0.03
+			veg_chance = 0.06
+		if MapKit.rand01(cell.x, cell.y, 441) < tree_chance:
+			var roll := MapKit.rand01(cell.x, cell.y, 442)
+			var src := SRC_TREE_M
+			if roll < 0.15:
+				src = SRC_TREE_S
+			elif roll < 0.55:
+				src = SRC_TREE_M
+			elif roll < 0.85:
+				src = SRC_TREE_L
+			else:
+				src = SRC_TREE_XL
+			decor.set_cell(cell, src, Vector2i(0, 0))
+			solid[cell] = true
+			walk.erase(cell)
+		elif MapKit.rand01(cell.x, cell.y, 443) < veg_chance:
+			features.set_cell(cell, SRC_VEG, MapKit._pick(VEG, cell, 444))
 
-	_scatter_props(props_dunes, 0, MapKit.edge_cells(dunes_floor, blocked), [[10, 7, 2, 2], [12, 7, 2, 2], [10, 1, 2, 2]], 0.10, 5, 601, free_dunes, solid)
-	_scatter_flat(props_dunes, 0, MapKit.interior_cells(dunes_floor, blocked, 3), [[10, 5], [11, 5], [12, 5], [13, 5]], 0.08, 3, 602, solid)
-
-	_scatter_props(props_wet, 0, MapKit.edge_cells(wet_floor, blocked), [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], 0.12, 4, 611, free_wet, solid)
-	_scatter_flat(props_wet, 0, MapKit.interior_cells(wet_floor, blocked, 3), [[9, 4], [9, 5], [7, 7], [8, 6]], 0.06, 3, 612, solid)
-
-	for cell: Vector2i in MapKit.scatter(MapKit.edge_cells(ash_floor, blocked), 0.10, 5, 621):
-		if not free_ash.has(cell) or solid.has(cell):
-			continue
-		props_ash.set_cell(cell, ForgeFloor.SOURCE, MapKit._pick(ForgeFloor.RUBBLE, cell, 622))
-		solid[cell] = true
-
-	for cell: Vector2i in solid.keys():
-		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
+	assert(walk.has(entrance) and walk.has(portal), "trees blocked spawn")
 
-	# --- Decos / lights / mobs ---------------------------------------------
+	# --- Decos / lights / mobs / labels -------------------------------------
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		_sc(22, 48), _sc(48, 48), _sc(48, 20), _sc(28, 22), _sc(68, 22),
-		_sc(96, 46), _sc(82, 34), _sc(108, 58), _sc(52, 72), _sc(30, 72),
-		_sc(74, 72), _sc(78, 80), _sc(100, 20), _sc(36, 54),
+		_sc(12, 42), _sc(40, 42), _sc(42, 18), _sc(28, 18), _sc(56, 18),
+		_sc(78, 40), _sc(68, 30), _sc(88, 50), _sc(44, 64), _sc(28, 64),
+		_sc(60, 64), _sc(72, 70), _sc(50, 42), _sc(34, 48),
 	]:
 		var cell := _pick_open(walk, spot)
 		ti += 1
-		var biome: String = str(biome_of.get(cell, "wood"))
-		var frames := "deco_torch"
-		var color := "Color(1, 0.78, 0.42, 1)"
-		var light := 0.55
-		var scale := 1.25
-		if biome == "wet":
-			frames = "deco_torch" if ti % 3 != 0 else "deco_candle_a"
-			color = "Color(0.55, 0.95, 0.6, 1)" if ti % 3 == 0 else "Color(1, 0.72, 0.38, 1)"
-			light = 0.85
-			scale = 1.35
-		elif biome == "ash":
-			color = "Color(1, 0.55, 0.25, 1)"
-			light = 0.7
-		elif biome == "dunes":
-			color = "Color(1, 0.82, 0.5, 1)"
-			light = 0.5
 		decos.append({
-			"name": "EastTorch%d" % ti,
-			"frames": frames,
+			"name": "ForestTorch%d" % ti,
+			"frames": "deco_torch",
 			"pos": _tile_pos(cell),
-			"scale": scale,
-			"light": light,
-			"color": color,
+			"scale": 1.2,
+			"light": 0.55,
+			"color": "Color(1, 0.78, 0.42, 1)",
 		})
 
 	var taken := _keepout([entrance, portal, camp_cell], _sn(6))
 	var hostiles := _mobs(walk, taken, [
-		["DuneScout", "trpg/trpg_archer", _sc(48, 22), 1],
-		["DuneOrc", "trpg/trpg_orc", _sc(32, 24), 1],
-		["MarshSlime", "trpg/trpg_slime", _sc(96, 46), 1],
-		["MarshBat", "trpg/trpg_bat", _sc(108, 50), 1],
-		["AshCinder", "trpg/trpg_cinder_fomorian", _sc(52, 72), 1],
-		["AshOrc", "trpg/trpg_orc", _sc(74, 74), 1],
+		["EastGoblin", "trpg/trpg_orc", _sc(42, 20), 1],
+		["EastArcher", "trpg/trpg_archer", _sc(34, 28), 1],
+		["MarshSlime", "trpg/trpg_slime", _sc(78, 42), 1],
+		["MarshBat", "trpg/trpg_bat", _sc(86, 48), 1],
+		["ShelfOrc", "trpg/trpg_armored_orc", _sc(44, 64), 1],
+		["BeachScout", "trpg/trpg_archer", _sc(72, 70), 1],
 	], _sn(5))
 
-	# Soft landmark labels (not portals)
 	var labels := [
-		{"name": "LabelApproach", "text": "Goblin Woodlands East", "pos": _tile_pos(_pick_open(walk, _sc(22, 42)))},
-		{"name": "LabelCrossroads", "text": "East Crossroads", "pos": _tile_pos(camp_cell) + Vector2(0, -48)},
-		{"name": "LabelDunes", "text": "Sunken Dunes", "pos": _tile_pos(_pick_open(walk, _sc(48, 14)))},
-		{"name": "LabelWetlands", "text": "Murkwood Marsh", "pos": _tile_pos(_pick_open(walk, _sc(96, 40)))},
-		{"name": "LabelAsh", "text": "Ash Foothills", "pos": _tile_pos(_pick_open(walk, _sc(52, 66)))},
-		{"name": "LabelBeach", "text": "East Shore", "pos": _tile_pos(_pick_open(walk, _sc(84, 80)))},
+		{"name": "LabelApproach", "text": "Goblin Woodlands East", "pos": _tile_pos(_pick_open(walk, _sc(18, 36)))},
+		{"name": "LabelCrossroads", "text": "East Crossroads", "pos": _tile_pos(camp_cell) + Vector2(0, -40)},
+		{"name": "LabelSand", "text": "Sunlit Clearings", "pos": _tile_pos(_pick_open(walk, _sc(42, 12)))},
+		{"name": "LabelMarsh", "text": "Murkwood Ponds", "pos": _tile_pos(_pick_open(walk, _sc(78, 34)))},
+		{"name": "LabelShelf", "text": "Stone Shelves", "pos": _tile_pos(_pick_open(walk, _sc(44, 60)))},
+		{"name": "LabelBeach", "text": "East Shore", "pos": _tile_pos(_pick_open(walk, _sc(76, 70)))},
 	]
 
 	print(
 		"woodland_east walk=", walk.size(),
-		" wood=", wood_floor.size(),
-		" dunes=", dunes_floor.size(),
-		" wet=", wet_floor.size(),
-		" ash=", ash_floor.size(),
-		" lava=", lava_cells.size()
+		" sand=", sand_zone.size(),
+		" marsh=", marsh_zone.size(),
+		" stone=", stone_zone.size(),
+		" beach=", beach_zone.size(),
+		" water=", water_cells.size(),
+		" trees=", decor.get_used_cells().size()
 	)
 
 	_write({
@@ -706,45 +469,15 @@ func _build() -> void:
 		"decos": decos,
 		"hostiles": hostiles,
 		"labels": labels,
-		"backdrop_b64": _b64(backdrop),
-		"ground_wood_b64": _b64(ground_wood),
-		"walls_wood_b64": _b64(walls_wood),
-		"decor_wood_b64": _b64(decor_wood),
-		"ground_dunes_b64": _b64(ground_dunes),
-		"walls_dunes_b64": _b64(walls_dunes),
-		"props_dunes_b64": _b64(props_dunes),
-		"ground_wet_b64": _b64(ground_wet),
-		"walls_wet_b64": _b64(walls_wet),
-		"props_wet_b64": _b64(props_wet),
-		"ground_ash_b64": _b64(ground_ash),
-		"walls_ash_b64": _b64(walls_ash),
-		"props_ash_b64": _b64(props_ash),
+		"ground_b64": _b64(ground),
+		"walls_b64": _b64(walls),
+		"decor_b64": _b64(decor),
+		"features_b64": _b64(features),
 		"walk_count": walk.size(),
 		"cam_right": W * 16 + 16,
 		"cam_bottom": H * 16 + 16,
 	})
 	_write_instance()
-
-
-func _void_touching(void_mask: Dictionary, floor_subset: Dictionary) -> Dictionary:
-	## Void cells that border this biome's floor — rim paint target for that tileset.
-	var out: Dictionary = {}
-	for cell: Vector2i in void_mask.keys():
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN, Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]:
-			if floor_subset.has(cell + d):
-				out[cell] = true
-				break
-	# Also include deep void near those rim cells so face_rows have room (paint_rim expects full void).
-	# Use the global void but rim painter only writes adjacent-to-floor cells via neighbor tests;
-	# pass full void_mask filtered to cells within 3 of this biome.
-	var expanded: Dictionary = {}
-	for cell: Vector2i in out.keys():
-		for oy in range(-3, 4):
-			for ox in range(-3, 4):
-				var n := cell + Vector2i(ox, oy)
-				if void_mask.has(n):
-					expanded[n] = true
-	return expanded if not expanded.is_empty() else out
 
 
 func _frame_ext(decos: Array) -> Array:
@@ -766,10 +499,7 @@ func _hostile_bits(hostiles: Array) -> Dictionary:
 	var hostile_ext := ""
 	var type_ids: Dictionary = {}
 	if not hostiles.is_empty():
-		hostile_ext += (
-			"[ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"%s\" id=\"hostile\"]\n"
-			% HOSTILE_SCN
-		)
+		hostile_ext += "[ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"%s\" id=\"hostile\"]\n" % HOSTILE_SCN
 	for h: Dictionary in hostiles:
 		var tpath: String = h["type"]
 		if type_ids.has(tpath):
@@ -777,7 +507,6 @@ func _hostile_bits(hostiles: Array) -> Dictionary:
 		var tid := "et%d" % type_ids.size()
 		type_ids[tpath] = tid
 		hostile_ext += "[ext_resource type=\"Resource\" path=\"%s\" id=\"%s\"]\n" % [tpath, tid]
-
 	var id_to_node := ""
 	var node_to_id := ""
 	var hostile_nodes := ""
@@ -797,11 +526,7 @@ func _hostile_bits(hostiles: Array) -> Dictionary:
 	var id_map_lines := "id_to_node = {}\nnode_to_id = {}\n"
 	if not hostiles.is_empty():
 		id_map_lines = "id_to_node = {\n%s}\nnode_to_id = {\n%s}\n" % [id_to_node, node_to_id]
-	return {
-		"ext": hostile_ext,
-		"nodes": hostile_nodes,
-		"id_map": id_map_lines,
-	}
+	return {"ext": hostile_ext, "nodes": hostile_nodes, "id_map": id_map_lines}
 
 
 func _deco_nodes(decos: Array, frame_ids: Dictionary) -> String:
@@ -831,17 +556,13 @@ func _label_nodes(labels: Array) -> String:
 			+ "offset_top = %s\n"
 			+ "offset_right = %s\n"
 			+ "offset_bottom = %s\n"
-			+ "theme_override_colors/font_color = Color(1, 0.92, 0.7, 1)\n"
+			+ "theme_override_colors/font_color = Color(0.9, 0.95, 0.7, 1)\n"
 			+ "theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)\n"
 			+ "theme_override_constants/outline_size = 4\n"
 			+ "theme_override_font_sizes/font_size = 15\n"
 			+ "text = \"%s\"\n"
 			+ "horizontal_alignment = 1\n"
-		) % [
-			L["name"],
-			str(p.x - 70), str(p.y - 12), str(p.x + 70), str(p.y + 12),
-			L["text"],
-		]
+		) % [L["name"], str(p.x - 80), str(p.y - 12), str(p.x + 80), str(p.y + 12), L["text"]]
 	return out
 
 
@@ -860,23 +581,19 @@ func _write(cfg: Dictionary) -> void:
 
 [ext_resource type=\"Script\" uid=\"uid://7mbux4mybta0\" path=\"%s\" id=\"1_map\"]
 [ext_resource type=\"TileSet\" path=\"%s\" id=\"2_wood\"]
-[ext_resource type=\"TileSet\" path=\"%s\" id=\"3_desert\"]
-[ext_resource type=\"TileSet\" path=\"%s\" id=\"4_sewers\"]
-[ext_resource type=\"TileSet\" path=\"%s\" id=\"5_forge\"]
 [ext_resource type=\"AudioStream\" path=\"res://assets/audio/music/fungus.ogg\" id=\"music\"]
 [ext_resource type=\"Script\" uid=\"uid://wq8klpndipnu\" path=\"%s\" id=\"6_rp\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://b2ckixon7ryh6\" path=\"%s\" id=\"7_warper\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://0m5eq6iylq26\" path=\"%s\" id=\"8_portal\"]
 [ext_resource type=\"Resource\" uid=\"uid://c0m2t2hjlih2p\" path=\"%s\" id=\"9_woodland\"]
 [ext_resource type=\"PackedScene\" path=\"%s\" id=\"8_camp\"]
-[ext_resource type=\"Texture2D\" path=\"%s\" id=\"9_glow\"]
 [ext_resource type=\"PackedScene\" path=\"%s\" id=\"deco\"]
 %s%s
 [node name=\"woodland_east\" type=\"Node2D\" node_paths=PackedStringArray(\"replicated_props_container\")]
 y_sort_enabled = true
 script = ExtResource(\"1_map\")
 replicated_props_container = NodePath(\"ReplicatedPropsContainer\")
-map_background_color = Color(0.05, 0.055, 0.04, 1)
+map_background_color = Color(0.06, 0.07, 0.05, 1)
 music = ExtResource(\"music\")
 camera_limit_left = -16
 camera_limit_top = -16
@@ -887,79 +604,31 @@ aoi_cell_size = Vector2i(250, 250)
 aoi_visible_radius_cells = 2
 
 [node name=\"CanvasModulate\" type=\"CanvasModulate\" parent=\".\"]
-color = Color(0.92, 0.94, 0.88, 1)
+color = Color(0.95, 0.97, 0.9, 1)
 
 [node name=\"Tiles\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
 
-[node name=\"Backdrop\" type=\"TileMapLayer\" parent=\"Tiles\"]
-z_index = -3
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"3_desert\")
-
-[node name=\"GroundWood\" type=\"TileMapLayer\" parent=\"Tiles\"]
+[node name=\"Ground\" type=\"TileMapLayer\" parent=\"Tiles\"]
 z_index = -1
 y_sort_enabled = true
 tile_map_data = PackedByteArray(\"%s\")
 tile_set = ExtResource(\"2_wood\")
 
-[node name=\"GroundDunes\" type=\"TileMapLayer\" parent=\"Tiles\"]
-z_index = -1
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"3_desert\")
-
-[node name=\"GroundWetlands\" type=\"TileMapLayer\" parent=\"Tiles\"]
-z_index = -1
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"4_sewers\")
-
-[node name=\"GroundAsh\" type=\"TileMapLayer\" parent=\"Tiles\"]
-z_index = -1
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"5_forge\")
-
-[node name=\"WallsWood\" type=\"TileMapLayer\" parent=\"Tiles\"]
+[node name=\"Walls\" type=\"TileMapLayer\" parent=\"Tiles\"]
 y_sort_enabled = true
 tile_map_data = PackedByteArray(\"%s\")
 tile_set = ExtResource(\"2_wood\")
 
-[node name=\"WallsDunes\" type=\"TileMapLayer\" parent=\"Tiles\"]
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"3_desert\")
-
-[node name=\"WallsWetlands\" type=\"TileMapLayer\" parent=\"Tiles\"]
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"4_sewers\")
-
-[node name=\"WallsAsh\" type=\"TileMapLayer\" parent=\"Tiles\"]
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"5_forge\")
-
-[node name=\"DecorWood\" type=\"TileMapLayer\" parent=\"Tiles\"]
+[node name=\"Decor\" type=\"TileMapLayer\" parent=\"Tiles\"]
 y_sort_enabled = true
 tile_map_data = PackedByteArray(\"%s\")
 tile_set = ExtResource(\"2_wood\")
 
-[node name=\"PropsDunes\" type=\"TileMapLayer\" parent=\"Tiles\"]
+[node name=\"Features\" type=\"TileMapLayer\" parent=\"Tiles\"]
 y_sort_enabled = true
 tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"3_desert\")
-
-[node name=\"PropsWetlands\" type=\"TileMapLayer\" parent=\"Tiles\"]
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"4_sewers\")
-
-[node name=\"PropsAsh\" type=\"TileMapLayer\" parent=\"Tiles\"]
-y_sort_enabled = true
-tile_map_data = PackedByteArray(\"%s\")
-tile_set = ExtResource(\"5_forge\")
+tile_set = ExtResource(\"2_wood\")
 
 [node name=\"SceneProps\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
@@ -984,13 +653,10 @@ warper_id = 160
 target_id = 60
 %s
 """ % [
-		MAP_SCRIPT, WOOD_TS, DESERT_TS, SEWERS_TS, FORGE_TS, RP_SCRIPT, WARPER, PORTAL, WOODLAND, CAMP, GLOW,
-		DECO_SCN, frame_ext, hb["ext"],
+		MAP_SCRIPT, WOOD_TS, RP_SCRIPT, WARPER, PORTAL, WOODLAND, CAMP, DECO_SCN,
+		frame_ext, hb["ext"],
 		int(cfg["cam_right"]), int(cfg["cam_bottom"]),
-		cfg["backdrop_b64"],
-		cfg["ground_wood_b64"], cfg["ground_dunes_b64"], cfg["ground_wet_b64"], cfg["ground_ash_b64"],
-		cfg["walls_wood_b64"], cfg["walls_dunes_b64"], cfg["walls_wet_b64"], cfg["walls_ash_b64"],
-		cfg["decor_wood_b64"], cfg["props_dunes_b64"], cfg["props_wet_b64"], cfg["props_ash_b64"],
+		cfg["ground_b64"], cfg["walls_b64"], cfg["decor_b64"], cfg["features_b64"],
 		camps, _deco_nodes(decos, frame_ids),
 		hb["id_map"], hb["nodes"],
 		str(cfg["entrance"].x), str(cfg["entrance"].y),
@@ -1001,12 +667,7 @@ target_id = 60
 	var f := FileAccess.open(OUT, FileAccess.WRITE)
 	f.store_string(text)
 	f.close()
-	print(
-		"wrote ", OUT,
-		" walk=", cfg.get("walk_count", 0),
-		" decos=", decos.size(),
-		" mobs=", hostiles.size()
-	)
+	print("wrote ", OUT, " walk=", cfg.get("walk_count", 0), " decos=", decos.size(), " mobs=", hostiles.size())
 
 
 func _write_instance() -> void:
