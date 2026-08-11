@@ -385,12 +385,17 @@ func get_mastery(category: StringName) -> Dictionary:
 	return entry
 
 
-## Read-only mastery level for gates (0 = never practiced). Does not create entries.
+## Read-only mastery level for gates. Does not create entries. Every category
+## floors at 1 — masteries run on the same 1–99 curve as skills, so "never
+## practiced" is level 1, not level 0 (a level 0 read displayed as an unmet
+## "Requires Lv 1" gate on gear the player could actually wear). Use
+## [member masteries].has() when you need to know whether a category was ever
+## practiced; don't infer it from this returning 0, because it no longer does.
 func mastery_level_of(category: StringName) -> int:
 	for existing: Variant in masteries.keys():
 		if String(existing) == String(category):
-			return mini(int((masteries[existing] as Dictionary).get("level", 1)), MASTERY_LEVEL_CAP)
-	return 0
+			return clampi(int((masteries[existing] as Dictionary).get("level", 1)), 1, MASTERY_LEVEL_CAP)
+	return 1
 
 
 ## XP needed to advance from [param mastery_level] → next. Same table as skills.

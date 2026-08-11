@@ -6,11 +6,17 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="3_iron_ore"]
 [ext_resource type="SpriteFrames" uid="uid://c45uyyneimrpk" path="res://source/common/gameplay/characters/sprite_frames/stone_golem.tres" id="4_skin"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_iron_ore"]
 script = ExtResource("2_loot")
 item = ExtResource("3_iron_ore")
 max_amount = 2
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -28,6 +34,6 @@ max_distance_from_spawn = 250
 chase_on_area = true
 xp_reward = 140
 respawn_delay = 60.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron_ore")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron_ore"), SubResource("Drop_bone")])
 metadata/slug = &"iron_golem"
 metadata/id = 5

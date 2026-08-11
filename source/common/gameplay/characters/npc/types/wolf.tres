@@ -21,7 +21,7 @@ max_amount = 2
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("4_bone")
-chance = 0.3
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")

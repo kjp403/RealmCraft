@@ -465,7 +465,7 @@ func _populate_category_tabs() -> void:
 			continue
 
 		var info: Dictionary = _state.get(String(category), {})
-		var level: int = int(info.get("level", 0))
+		var level: int = int(info.get("level", 1))
 		var display_name: String = (
 			tree.display_name
 			if not tree.display_name.is_empty()
@@ -539,7 +539,7 @@ func _render_selected_category() -> void:
 		return
 
 	var info: Dictionary = _state.get(String(_selected_category), {})
-	var level: int = int(info.get("level", 0))
+	var level: int = int(info.get("level", 1))
 	var points: int = int(info.get("points", 0))
 	var xp: int = int(info.get("xp", 0))
 	var xp_to_next: int = maxi(1, int(info.get("xp_to_next", 1)))

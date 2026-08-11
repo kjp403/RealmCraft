@@ -5,12 +5,18 @@
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_1k811"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="3_iron_bar"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_iron_bars"]
 script = ExtResource("2_loot")
 item = ExtResource("3_iron_bar")
 min_amount = 3
 max_amount = 5
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -26,6 +32,6 @@ max_distance_from_spawn = 250
 chase_on_area = true
 xp_reward = 400
 respawn_delay = 600.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron_bars")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron_bars"), SubResource("Drop_bone")])
 metadata/slug = &"iron_warlord"
 metadata/id = 6

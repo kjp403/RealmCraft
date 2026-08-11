@@ -6,6 +6,12 @@
 [ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="2_yspoi"]
 [ext_resource type="SpriteFrames" uid="uid://ckldb3p6vdl3b" path="res://source/common/gameplay/characters/sprite_frames/skeleton_warrior.tres" id="3_ojjfu"]
 [ext_resource type="Resource" uid="uid://bqwbdldhjhxcq" path="res://source/common/gameplay/items/weapons/sword/sword_bone.item.tres" id="4_yspoi"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("1_ojjfu")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("2_yspoi")
@@ -25,6 +31,7 @@ leashes = false
 chase_on_area = true
 xp_reward = 15
 respawns = false
+loot = Array[ExtResource("1_ojjfu")]([SubResource("Drop_bone")])
 metadata/_custom_type_script = "uid://swk8b8q32qv2"
 metadata/slug = &"skeleton_warrior"
 metadata/id = 19

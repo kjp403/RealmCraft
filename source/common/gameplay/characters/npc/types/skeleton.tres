@@ -5,6 +5,12 @@
 [ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="2_c1a6p"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_x35go"]
 [ext_resource type="SpriteFrames" uid="uid://der3cejmcffl7" path="res://source/common/gameplay/characters/sprite_frames/skeleton.tres" id="3_c1a6p"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("1_1080s")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("2_c1a6p")
@@ -22,6 +28,7 @@ leashes = false
 chase_on_area = true
 xp_reward = 15
 respawns = false
+loot = Array[ExtResource("1_1080s")]([SubResource("Drop_bone")])
 metadata/_custom_type_script = "uid://swk8b8q32qv2"
 metadata/slug = &"skeleton"
 metadata/id = 16

@@ -16,10 +16,15 @@ class_name ZoneDiscovery
 
 const SAVE_PATH: String = "user://discovered_zones.cfg"
 
-## Map scene stem -> its InstanceResource (only show_discovery ones), built
-## lazily from the same instance_collection scan the server does — client
+## Full map resource path -> its InstanceResource (only show_discovery ones),
+## built lazily from the same instance_collection scan the server does — client
 ## builds carry the .tres files, so this stays purely client-side.
-static var _zones_by_stem: Dictionary = {}
+##
+## Keyed by the WHOLE path, not the file stem: buildings are authored as
+## <building>/inside_map.tscn, so every one of them shares the stem "inside_map"
+## and a single show_discovery building silently claimed the banner for all of
+## them (the Guild Hall respawn point announced itself as "Slayer House").
+static var _zones_by_map: Dictionary = {}
 static var _indexed: bool = false
 
 
@@ -28,16 +33,19 @@ static var _indexed: bool = false
 static func on_map_loaded(map_path: String) -> void:
 	if not _indexed:
 		_build_index()
-	var stem: String = _stem_of(map_path)
-	var zone: InstanceResource = _zones_by_stem.get(stem, null)
+	var zone: InstanceResource = _zones_by_map.get(_map_key_of(map_path), null)
 	if zone == null:
 		return
 
+	# Persist first-visit against the instance name rather than the map path:
+	# stable, unique per zone, and safe as a ConfigFile key (a res:// path is
+	# neither short nor punctuation-free).
+	var seen_key: String = String(zone.instance_name)
 	var config: ConfigFile = ConfigFile.new()
 	config.load(SAVE_PATH) # A missing file is fine — first discovery creates it.
-	var first_visit: bool = not bool(config.get_value("discovered", stem, false))
+	var first_visit: bool = not bool(config.get_value("discovered", seen_key, false))
 	if first_visit:
-		config.set_value("discovered", stem, true)
+		config.set_value("discovered", seen_key, true)
 		config.save(SAVE_PATH)
 
 	# First visit = the unlock ceremony (eyebrow + sound + long dwell); repeats
@@ -62,9 +70,9 @@ static func _build_index() -> void:
 		var res: InstanceResource = loaded
 		if not res.show_discovery:
 			continue
-		var stem: String = _stem_of(res.map_path)
-		if not stem.is_empty():
-			_zones_by_stem[stem] = res
+		var key: String = _map_key_of(res.map_path)
+		if not key.is_empty():
+			_zones_by_map[key] = res
 
 
 ## The zone whose portal [param stone] unlocks — pretty title for the grant
@@ -73,19 +81,19 @@ static func _build_index() -> void:
 static func zone_unlocked_by(stone: String) -> String:
 	if not _indexed:
 		_build_index()
-	for zone: InstanceResource in _zones_by_stem.values():
+	for zone: InstanceResource in _zones_by_map.values():
 		if String(zone.required_wardstone) == stone:
 			return zone.display_title()
 	return ""
 
 
-## The scene-file stem is the join key between the charge_new_instance map_path
+## The resolved map path is the join key between the charge_new_instance map_path
 ## and an InstanceResource's map_path. Either side may be authored as uid://
 ## (fungus_cave was; woodland res://) — resolve before comparing.
-static func _stem_of(map_path: String) -> String:
+static func _map_key_of(map_path: String) -> String:
 	if map_path.begins_with("uid://"):
 		var uid: int = ResourceUID.text_to_id(map_path)
 		if uid == ResourceUID.INVALID_ID or not ResourceUID.has_id(uid):
 			return ""
 		map_path = ResourceUID.get_id_path(uid)
-	return map_path.get_file().get_basename()
+	return map_path

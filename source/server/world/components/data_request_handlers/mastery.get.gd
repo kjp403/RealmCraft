@@ -19,23 +19,22 @@ func data_request_handler(
 	# that HAS a tree shows up, even at zero practice — mirrors skills.get.
 	for category: StringName in MasteryService.trees():
 		var tree: MasteryTreeResource = MasteryService.trees()[category]
-		# No entry = never killed with this weapon: level 0, nothing spendable.
-		# The entry is born from practice (add_mastery_xp), not from this menu.
-		var practiced: bool = resource.mastery_level_of(category) > 0 or resource.masteries.has(category)
-		# Normalize via get_mastery only when practiced so we don't spawn stubs
-		# for every tree on every mastery.get poll.
+		# No entry = never killed with this weapon. That still reads as level 1
+		# (masteries share the skills' 1–99 curve), so the tree shows its first
+		# POINTS_PER_LEVEL as spendable straight away. Read the stored entry
+		# directly rather than via get_mastery so a poll doesn't spawn a stub
+		# for every tree.
 		var entry: Dictionary = {}
 		for existing: Variant in resource.masteries.keys():
 			if String(existing) == String(category):
 				entry = resource.masteries[existing]
-				practiced = true
 				break
-		var level: int = int(entry.get("level", 0))
+		var level: int = maxi(1, int(entry.get("level", 1)))
 		out[String(category)] = {
 			"level": level,
 			"xp": int(entry.get("xp", 0)),
-			"xp_to_next": resource.mastery_xp_to_next(maxi(1, level)),
-			"points": MasteryService.available_points(entry, tree) if practiced else 0,
+			"xp_to_next": resource.mastery_xp_to_next(level),
+			"points": MasteryService.available_points(entry, tree),
 			"spent": (entry.get("spent", {}) as Dictionary).keys(),
 			"loadout": (resource.ability_loadout.get(String(category), []) as Array).duplicate(),
 		}

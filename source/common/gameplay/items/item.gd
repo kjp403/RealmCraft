@@ -48,7 +48,7 @@ enum InventoryTab {
 ## If 0 no limit.
 ## 0 = pseudo infinite stack size
 ## 1 = non-stackable
-@export_range(0, 99, 1.0) var stack_limit: int = 0
+@export_range(0, 999, 1.0) var stack_limit: int = 0
 ## Optional free-form tags for filters/crafting
 @export var tags: PackedStringArray = []
 

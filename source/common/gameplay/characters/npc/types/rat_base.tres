@@ -5,6 +5,12 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_wd74x"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_vuj2n"]
 [ext_resource type="SpriteFrames" uid="uid://bfxipsi8opukk" path="res://source/common/gameplay/characters/sprite_frames/rat_base.tres" id="3_wd74x"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("1_wd74x")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -21,5 +27,6 @@ detection_radius = 100
 chase_on_area = true
 xp_reward = 6
 respawn_delay = 10.0
+loot = Array[ExtResource("1_wd74x")]([SubResource("Drop_bone")])
 metadata/slug = &"rat_base"
 metadata/id = 27

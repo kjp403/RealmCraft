@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="loot_hide_bandit"]
 [ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="loot_cloth_bandit"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_nvlna")
@@ -26,6 +27,11 @@ chance = 0.5
 script = ExtResource("3_nvlna")
 item = ExtResource("loot_cloth_bandit")
 chance = 0.3
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_nvlna")
+item = ExtResource("bone_item")
+chance = 1.0
 
 [resource]
 script = ExtResource("4_w7g6l")
@@ -55,7 +61,7 @@ wander_pause_max_s = 4.0
 xp_reward = 22
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_nvlna")]([SubResource("Drop_gold"), SubResource("Drop_hide_bandit"), SubResource("Drop_cloth_bandit")])
+loot = Array[ExtResource("3_nvlna")]([SubResource("Drop_gold"), SubResource("Drop_hide_bandit"), SubResource("Drop_cloth_bandit"), SubResource("Drop_bone")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
