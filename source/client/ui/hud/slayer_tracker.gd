@@ -1,16 +1,15 @@
 class_name SlayerTracker
 extends PanelContainer
 ## HUD Slayer task readout: current assignment, kills remaining, points, and
-## streak. Lives in the upper-right rail directly under the navigation minimap
-## (HUD._place_right_rail owns the stacking). Hidden when the player has no
+## streak. A compact badge pinned to the top-LEFT corner
+## (HUD._place_slayer_tracker owns the placement). Hidden when the player has no
 ## active task, or when they've switched it off — see [constant SETTING_SECTION]
 ## / [constant SETTING_PROPERTY], the same client-settings pair the weather layer
 ## uses, so the choice persists across sessions.
 ##
-## Every label AUTOWRAPS on purpose. A Label reports its full text width as its
-## minimum size, and this panel grows leftward (grow_horizontal = BEGIN), so a
-## long task line used to stretch the panel clear across the screen and out from
-## under the right rail. Wrapping pins the width to the anchored rect instead.
+## Nothing wraps: the panel shrinks to its contents and grows rightward from the
+## screen edge, so labels stay on one line and the badge stays small. Keep the
+## text terse for that reason — a long assignment name widens the badge.
 
 const SETTING_SECTION: StringName = &"general"
 const SETTING_PROPERTY: StringName = &"slayer_tracker"
@@ -38,15 +37,13 @@ func _ready() -> void:
 
 	var margin: MarginContainer = MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override(&"margin_left", 10)
-	margin.add_theme_constant_override(&"margin_right", 6)
-	for side: String in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 6)
+	for side: String in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 4)
 	add_child(margin)
 
 	_content = VBoxContainer.new()
 	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_content.add_theme_constant_override(&"separation", 2)
+	_content.add_theme_constant_override(&"separation", 0)
 	margin.add_child(_content)
 
 	hide()
@@ -120,15 +117,15 @@ func _display(data: Dictionary) -> void:
 	# writes the same setting the Settings panel toggles, so the two can't drift.
 	var title_row: HBoxContainer = HBoxContainer.new()
 	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	title_row.add_theme_constant_override(&"separation", 4)
+	title_row.add_theme_constant_override(&"separation", 3)
 	_content.add_child(title_row)
 
 	var title: Label = Label.new()
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override(&"font_size", 13)
-	title.text = "Slayer: %s" % str(data.get("display_name", "?"))
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	title.add_theme_font_size_override(&"font_size", 9)
+	title.text = str(data.get("display_name", "?"))
 	title.add_theme_color_override(&"font_color", _accent_color())
 	title_row.add_child(title)
 
@@ -136,34 +133,35 @@ func _display(data: Dictionary) -> void:
 	hide_button.text = "✕"
 	hide_button.flat = true
 	hide_button.focus_mode = Control.FOCUS_NONE
-	hide_button.custom_minimum_size = Vector2(18, 18)
+	hide_button.custom_minimum_size = Vector2(12, 12)
 	hide_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hide_button.add_theme_font_size_override(&"font_size", 10)
+	hide_button.add_theme_font_size_override(&"font_size", 8)
+	hide_button.add_theme_stylebox_override(&"normal", StyleBoxEmpty.new())
 	hide_button.tooltip_text = "Hide the Slayer tracker (turn it back on in Settings)."
 	hide_button.pressed.connect(_on_hide_pressed)
 	title_row.add_child(hide_button)
 
 	var progress: Label = Label.new()
 	progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	progress.add_theme_font_size_override(&"font_size", 12)
+	progress.add_theme_font_size_override(&"font_size", 9)
 	var remaining: int = int(data.get("remaining", 0))
 	var assigned: int = int(data.get("assigned_amount", 0))
 	var killed: int = maxi(0, assigned - remaining)
-	progress.text = "Kills %d / %d  ·  %d left" % [killed, assigned, remaining]
-	progress.add_theme_color_override(&"font_color", Color(0.92, 0.9, 0.82))
-	_content.add_child(progress)
-
-	var meta: Label = Label.new()
-	meta.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	meta.add_theme_font_size_override(&"font_size", 11)
-	meta.text = "%d points  ·  streak %d" % [
+	progress.text = "%d/%d · %dp · x%d" % [
+		killed,
+		assigned,
 		int(data.get("points", 0)),
 		int(data.get("streak", 0)),
 	]
-	meta.add_theme_color_override(&"font_color", Color(0.7, 0.74, 0.8))
-	_content.add_child(meta)
+	progress.tooltip_text = "%d killed of %d · %d left · %d points · streak %d" % [
+		killed,
+		assigned,
+		remaining,
+		int(data.get("points", 0)),
+		int(data.get("streak", 0)),
+	]
+	progress.add_theme_color_override(&"font_color", Color(0.92, 0.9, 0.82))
+	_content.add_child(progress)
 
 	show()
 

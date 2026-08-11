@@ -68,16 +68,12 @@ script = ExtResource("8_qtrack")
 
 [node name="SlayerTracker" type="PanelContainer" parent="."]
 visible = false
-custom_minimum_size = Vector2(216, 0)
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -224.0
-offset_top = 128.0
-offset_right = -8.0
-offset_bottom = 188.0
-grow_horizontal = 0
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 6.0
+offset_bottom = 6.0
 mouse_filter = 2
 script = ExtResource("8_slayer")
 
