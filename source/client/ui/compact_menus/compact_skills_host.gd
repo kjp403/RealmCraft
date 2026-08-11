@@ -65,6 +65,12 @@ func _ready() -> void:
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.text = "Skills"
 	title_label.add_theme_color_override(&"font_color", Color(0.98, 0.92, 0.35))
+	title_label.add_theme_font_size_override(&"font_size", 13)
+	var header_row: Control = title_label.get_parent() as Control
+	if header_row != null:
+		header_row.custom_minimum_size = Vector2(0, 22)
+	close_button.custom_minimum_size = Vector2(22, 22)
+	clip_contents = true
 
 	for child: Node in content.get_children():
 		content.remove_child(child)
@@ -99,12 +105,12 @@ func _build_layout() -> void:
 	var root := VBoxContainer.new()
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_theme_constant_override(&"separation", 4)
+	root.add_theme_constant_override(&"separation", 2)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	content.add_child(root)
 
 	_mode_tabs = HBoxContainer.new()
-	_mode_tabs.add_theme_constant_override(&"separation", 4)
+	_mode_tabs.add_theme_constant_override(&"separation", 3)
 	root.add_child(_mode_tabs)
 	var mode_group := ButtonGroup.new()
 	var skills_tab := _make_mode_tab("Skills", Mode.SKILLS, mode_group)
@@ -152,14 +158,14 @@ func _build_layout() -> void:
 	_detail_root.visible = false
 	_detail_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_detail_root.add_theme_constant_override(&"separation", 6)
+	_detail_root.add_theme_constant_override(&"separation", 3)
 	root.add_child(_detail_root)
 
 	_combat_root = VBoxContainer.new()
 	_combat_root.visible = false
 	_combat_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_combat_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_combat_root.add_theme_constant_override(&"separation", 4)
+	_combat_root.add_theme_constant_override(&"separation", 3)
 	root.add_child(_combat_root)
 
 
@@ -170,9 +176,33 @@ func _make_mode_tab(label: String, mode: Mode, group: ButtonGroup) -> Button:
 	btn.button_group = group
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn.add_theme_font_size_override(&"font_size", 11)
+	btn.custom_minimum_size = Vector2(0, 18)
+	btn.add_theme_font_size_override(&"font_size", 9)
+	btn.add_theme_constant_override(&"outline_size", 0)
+	_apply_compact_button_style(btn)
 	btn.pressed.connect(_set_mode.bind(mode))
 	return btn
+
+
+func _apply_compact_button_style(btn: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.12, 0.11, 0.10, 0.95)
+	normal.border_color = Color(0.48, 0.40, 0.28, 0.9)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(2)
+	normal.content_margin_left = 4
+	normal.content_margin_right = 4
+	normal.content_margin_top = 1
+	normal.content_margin_bottom = 1
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.border_color = Color(0.92, 0.72, 0.28, 1.0)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.20, 0.15, 0.08, 1.0)
+	pressed.border_color = Color(1.0, 0.82, 0.30, 1.0)
+	btn.add_theme_stylebox_override(&"normal", normal)
+	btn.add_theme_stylebox_override(&"hover", hover)
+	btn.add_theme_stylebox_override(&"pressed", pressed)
+	btn.add_theme_stylebox_override(&"focus", normal)
 
 
 func _set_mode(mode: Mode) -> void:
@@ -315,7 +345,9 @@ func _build_combat_categories() -> void:
 		btn.text = MasteryEquipmentGuide.display_name_for(cat)
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 28)
+		btn.custom_minimum_size = Vector2(0, 22)
+		btn.add_theme_font_size_override(&"font_size", 10)
+		_apply_compact_button_style(btn)
 		btn.pressed.connect(_show_combat_category.bind(cat))
 		list.add_child(btn)
 
@@ -344,14 +376,20 @@ func _rebuild_combat_detail() -> void:
 	var back := Button.new()
 	back.text = "← Combat"
 	back.focus_mode = Control.FOCUS_NONE
-	back.add_theme_font_size_override(&"font_size", 10)
+	back.custom_minimum_size = Vector2(0, 18)
+	back.add_theme_font_size_override(&"font_size", 9)
+	_apply_compact_button_style(back)
 	back.pressed.connect(_back_to_combat_categories)
 	_detail_root.add_child(back)
 
 	var blurb := Label.new()
-	blurb.text = "Mastery level required to equip"
+	blurb.text = (
+		"Level / mastery required to equip"
+		if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY
+		else "Mastery level required to equip"
+	)
 	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	blurb.add_theme_font_size_override(&"font_size", 10)
+	blurb.add_theme_font_size_override(&"font_size", 9)
 	blurb.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
 	_detail_root.add_child(blurb)
 
@@ -363,7 +401,7 @@ func _rebuild_combat_detail() -> void:
 
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override(&"separation", 4)
+	list.add_theme_constant_override(&"separation", 3)
 	scroll.add_child(list)
 
 	var entries: Array[Dictionary] = MasteryEquipmentGuide.weapons_for(
@@ -371,7 +409,11 @@ func _rebuild_combat_detail() -> void:
 	)
 	if entries.is_empty():
 		var empty := Label.new()
-		empty.text = "No weapons found for this mastery."
+		empty.text = (
+			"No armor found."
+			if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY
+			else "No weapons found for this mastery."
+		)
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		empty.add_theme_color_override(&"font_color", Color(0.65, 0.66, 0.7))
 		list.add_child(empty)
@@ -385,9 +427,28 @@ func _rebuild_combat_detail() -> void:
 		var player_level: int = 0
 		var local_player := _local_player()
 		if local_player != null and local_player.player_resource != null:
-			player_level = local_player.player_resource.mastery_level_of(
-				_selected_combat_category
-			)
+			if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
+				# Armor may gate on character level or any mastery — use
+				# character level so "locked" rows match can_equip's level check.
+				player_level = int(local_player.player_resource.level)
+				var gear := item as GearItem
+				if gear != null and gear.required_mastery_level > 0:
+					player_level = 0
+					for cat: StringName in gear.required_mastery_categories:
+						player_level = maxi(
+							player_level,
+							local_player.player_resource.mastery_level_of(cat)
+						)
+					if gear.required_mastery_categories.has(&"any"):
+						for cat2: StringName in MasteryService.trees():
+							player_level = maxi(
+								player_level,
+								local_player.player_resource.mastery_level_of(cat2)
+							)
+			else:
+				player_level = local_player.player_resource.mastery_level_of(
+					_selected_combat_category
+				)
 		list.add_child(_make_source_row(item, req, player_level))
 
 
@@ -528,21 +589,24 @@ func _rebuild_detail() -> void:
 	var raw_next: int = int(info.get("xp_to_next", 1))
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
-	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 	title_label.text = display
 
 	_back_button = Button.new()
 	_back_button.text = "← All skills"
 	_back_button.focus_mode = Control.FOCUS_NONE
+	_back_button.custom_minimum_size = Vector2(0, 18)
+	_back_button.add_theme_font_size_override(&"font_size", 9)
+	_apply_compact_button_style(_back_button)
 	_back_button.pressed.connect(_show_grid)
 	_detail_root.add_child(_back_button)
 
 	var header_row := HBoxContainer.new()
-	header_row.add_theme_constant_override(&"separation", 8)
+	header_row.add_theme_constant_override(&"separation", 4)
+	header_row.custom_minimum_size = Vector2(0, 18)
 	_detail_root.add_child(header_row)
 
 	var detail_icon := TextureRect.new()
-	detail_icon.custom_minimum_size = Vector2(32, 32)
+	detail_icon.custom_minimum_size = Vector2(16, 16)
 	detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	detail_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -553,7 +617,7 @@ func _rebuild_detail() -> void:
 	header.text = "Lv %d / %d" % [level, level]
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override(&"font_size", 16)
+	header.add_theme_font_size_override(&"font_size", 11)
 	header.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	header_row.add_child(header)
 
@@ -562,7 +626,7 @@ func _rebuild_detail() -> void:
 	bar.max_value = xp_to_next
 	bar.value = xp_to_next if at_cap else xp
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(0, 14)
+	bar.custom_minimum_size = Vector2(0, 7)
 	bar.add_theme_stylebox_override(&"background", _make_bar_bg())
 	bar.add_theme_stylebox_override(&"fill", _make_bar_fill())
 	_detail_root.add_child(bar)
@@ -570,14 +634,14 @@ func _rebuild_detail() -> void:
 	var xp_label := Label.new()
 	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 	xp_label.text = (
-		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, _format_xp(total_xp)] if at_cap
-		else "%s / %s XP  (%s to next)\nTotal XP: %s" % [
-			_format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
+		else "%s / %s XP · Total %s" % [
+			_format_xp(xp), _format_xp(xp_to_next), _format_xp(total_xp)
 		]
 	)
 	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	xp_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	xp_label.add_theme_font_size_override(&"font_size", 11)
+	xp_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	xp_label.add_theme_font_size_override(&"font_size", 8)
 	xp_label.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.8))
 	_detail_root.add_child(xp_label)
 
@@ -585,10 +649,11 @@ func _rebuild_detail() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_detail_root.add_child(scroll)
+	DragScroll.enable(scroll)
 
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override(&"separation", 4)
+	list.add_theme_constant_override(&"separation", 3)
 	scroll.add_child(list)
 
 	var jp: JobPerks = JobRegistry.perks_for(StringName(_selected_slug))
