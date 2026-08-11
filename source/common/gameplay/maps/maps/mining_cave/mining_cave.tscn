@@ -18,6 +18,8 @@
 [ext_resource type="Script" path="res://source/common/gameplay/maps/components/skill_level_gate.gd" id="18_gate"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="19_npc"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres" id="20_bat"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
 
 [node name="mining_cave" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -25,6 +27,7 @@ script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.02, 0.018, 0.022, 1)
 music = ExtResource("3_music")
+music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_army_of_darkness")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 2064

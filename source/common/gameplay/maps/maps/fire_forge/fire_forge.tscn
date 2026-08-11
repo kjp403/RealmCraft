@@ -29,12 +29,15 @@
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/bellows_gallery.tres" id="stair_bellows_gallery"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/cinder_deeps.tres" id="stair_cinder_deeps"]
+[ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
+[ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
 [node name="fire_forge" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.04, 0.015, 0.012, 1)
 music = ExtResource("music")
+music_playlist = Array[AudioStream]([ExtResource("mus_attack_3"), ExtResource("mus_army_of_darkness")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 3600

@@ -22,6 +22,8 @@
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="e21"]
+[ext_resource type="AudioStream" uid="uid://uan1qcfq0s1" path="res://assets/audio/music/attack_2.ogg" id="mus_attack_2"]
+[ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 
 [node name="cinder_deeps" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -29,6 +31,7 @@ script = ExtResource("e0")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.06, 0.012, 0.008, 1)
 music = ExtResource("e3")
+music_playlist = Array[AudioStream]([ExtResource("mus_attack_2"), ExtResource("mus_attack_3")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 8976

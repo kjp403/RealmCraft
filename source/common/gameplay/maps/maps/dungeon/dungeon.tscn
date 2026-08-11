@@ -17,6 +17,8 @@
 [ext_resource type="Resource" uid="uid://0un5gdgkhaf3" path="res://source/common/gameplay/characters/npc/types/skeleton_mage.tres" id="12_mag0h"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/campfire.tscn" id="16_vgfvu"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/firefly.tscn" id="17_mag0h"]
+[ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
+[ext_resource type="AudioStream" uid="uid://uan1qcfq0s1" path="res://assets/audio/music/attack_2.ogg" id="mus_attack_2"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qjuf2"]
 radius = 233.00215
@@ -30,6 +32,7 @@ script = ExtResource("1_oefxe")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.062080286, 0.06487238, 0.036956485, 1)
 music = ExtResource("2_fd8n7")
+music_playlist = Array[AudioStream]([ExtResource("mus_army_of_darkness"), ExtResource("mus_attack_2")])
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=108267010]
 color = Color(0.427493, 0.42749307, 0.42749295, 1)

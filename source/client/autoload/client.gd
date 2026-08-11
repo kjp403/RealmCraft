@@ -14,16 +14,23 @@ var authentication_token: String
 
 ## Crossfade duration when area music changes on entering a new instance/map.
 const MUSIC_CROSSFADE_S: float = 1.5
-## Boss-event tracks (client assets): a looping combat track + a one-shot victory sting.
-const MUSIC_BOSS_FIGHT: String = "res://assets/audio/music/middle_boss.ogg"
+## Boss-event tracks (client assets): a combat rotation + a one-shot victory sting. The
+## fight music shuffles like area music does, so back-to-back boss kills don't replay the
+## same track every time.
+const MUSIC_BOSS_FIGHT: Array[String] = [
+	"res://assets/audio/music/middle_boss.ogg",
+	"res://assets/audio/music/attack_2.ogg",
+	"res://assets/audio/music/attack_3.ogg",
+	"res://assets/audio/music/army_of_darkness.ogg",
+]
 const MUSIC_BOSS_VICTORY: String = "res://assets/audio/music/boss_clear.ogg"
 
 @onready var world_clock: WorldClock = $WorldClock
 @onready var audio_manager: AudioManager = $AudioManager
 @onready var instance_manager: InstanceManagerClient = $InstanceManager
 
-## The current area track, kept so a boss fight / victory sting can return to it.
-var _area_music: AudioStream
+## The current area rotation, kept so a boss fight / victory sting can return to it.
+var _area_playlist: Array[AudioStream]
 ## Bumped on any music-context change; cancels a pending victory-sting auto-resume so a
 ## map change or a new fight during the sting isn't clobbered when it finishes.
 var _music_gen: int = 0
@@ -89,17 +96,29 @@ func _on_connection_succeeded() -> void:
 
 ## Crossfade to the new instance's map music. Maps without a `music` set keep whatever
 ## is already playing, so the world never snaps to silence (a small building inherits
-## the overworld track, etc.). See InstanceManagerClient.instance_changed.
+## the overworld track, etc.). A map with `music_playlist` entries rotates through them
+## instead of looping one track. See InstanceManagerClient.instance_changed.
 func _on_instance_changed(instance: InstanceClient) -> void:
 	_music_gen += 1 # entering a new area cancels any pending victory-sting resume
 	if instance == null or instance.instance_map == null:
 		return
-	var track: AudioStream = instance.instance_map.music
-	if track != null:
-		_area_music = track
-		audio_manager.play_music_stream(track, 0.0, 0.0, MUSIC_CROSSFADE_S)
+	var tracks: Array[AudioStream] = _map_playlist(instance.instance_map)
+	if not tracks.is_empty():
+		_area_playlist = tracks
+		audio_manager.play_music_playlist(tracks, MUSIC_CROSSFADE_S)
 	if _weather_layer != null:
 		_weather_layer.apply(instance.instance_map.weather)
+
+
+## The map's music as a rotation: its `music` track first, then `music_playlist`. Empty
+## when the map sets no `music` at all, which means "keep playing whatever is playing".
+func _map_playlist(map: Map) -> Array[AudioStream]:
+	var tracks: Array[AudioStream] = []
+	if map.music == null:
+		return tracks
+	tracks.append(map.music)
+	tracks.append_array(map.music_playlist)
+	return tracks
 
 
 ## Boss-event music cue (server-driven). "fight" overrides the area track with combat
@@ -109,7 +128,7 @@ func _on_boss_music(payload: Dictionary) -> void:
 	match String(payload.get("state", "")):
 		"fight":
 			_music_gen += 1
-			audio_manager.play_music(MUSIC_BOSS_FIGHT, 0.0, 0.0, MUSIC_CROSSFADE_S)
+			audio_manager.play_music_paths(MUSIC_BOSS_FIGHT, MUSIC_CROSSFADE_S)
 		"victory":
 			_play_victory_sting()
 		"end":
@@ -117,10 +136,10 @@ func _on_boss_music(payload: Dictionary) -> void:
 			_resume_area_music()
 
 
-## Crossfade back to the current area track after a boss fight ends.
+## Crossfade back to the current area rotation after a boss fight ends.
 func _resume_area_music() -> void:
-	if _area_music != null:
-		audio_manager.play_music_stream(_area_music, 0.0, 0.0, MUSIC_CROSSFADE_S)
+	if not _area_playlist.is_empty():
+		audio_manager.play_music_playlist(_area_playlist, MUSIC_CROSSFADE_S)
 
 
 ## Play the one-shot boss-clear sting, then auto-resume the area track when it ends.

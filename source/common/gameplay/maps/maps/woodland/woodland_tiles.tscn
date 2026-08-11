@@ -41,6 +41,9 @@
 [ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/slayer_house.tres" id="41_slayer_inst"]
 [ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://d3x02k8rxue5y" path="res://assets/audio/music/lost_woods.ogg" id="mus_lost_woods"]
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
 1:10/0 = 0
@@ -547,6 +550,7 @@ size = Vector2(48, 560)
 script = ExtResource("0_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_6wtwb")
+music_playlist = Array[AudioStream]([ExtResource("mus_adventure"), ExtResource("mus_alone"), ExtResource("mus_lost_woods")])
 camera_limit_left = 0
 camera_limit_top = 0
 camera_limit_right = 2900

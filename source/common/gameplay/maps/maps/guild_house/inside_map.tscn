@@ -19,6 +19,8 @@
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="19_kqnsa"]
 [ext_resource type="Script" uid="uid://bfh4whbd72q65" path="res://source/common/gameplay/characters/npc/interactions/wardrobe_interaction.gd" id="24_8uqpf"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/skill_perk_reset_interaction.gd" id="25_perkreset"]
+[ext_resource type="AudioStream" uid="uid://cm5502pmvcc5j" path="res://assets/audio/music/market.ogg" id="mus_market"]
+[ext_resource type="AudioStream" uid="uid://ccn0gxxwbb1rh" path="res://assets/audio/music/angevin.ogg" id="mus_angevin"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5v2ol"]
 size = Vector2(80, 50)
@@ -45,6 +47,7 @@ metadata/_custom_type_script = "uid://ddps5vwhnf048"
 y_sort_enabled = true
 script = ExtResource("1_cguwf")
 music = ExtResource("2_5dvjx")
+music_playlist = Array[AudioStream]([ExtResource("mus_market"), ExtResource("mus_angevin")])
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Ground" type="TileMapLayer" parent="." unique_id=760974860]

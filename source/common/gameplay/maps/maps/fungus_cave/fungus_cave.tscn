@@ -25,6 +25,8 @@
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="25_coal"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/cave_master.tres" id="26_cavem"]
 [ext_resource type="Resource" uid="uid://cfungalkeeper01" path="res://source/common/gameplay/characters/npc/npcs/fungal_keeper.tres" id="27_fungk"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://epws31tb1n8o" path="res://assets/audio/music/shadow_temple.ogg" id="mus_shadow_temple"]
 
 
 
@@ -34,6 +36,7 @@ script = ExtResource("1_0pyxm")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.078431375, 0.08235294, 0.05490196, 1)
 music = ExtResource("2_4ochw")
+music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_shadow_temple")])
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1011426310]

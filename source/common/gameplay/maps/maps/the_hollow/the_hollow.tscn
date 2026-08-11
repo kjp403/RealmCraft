@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fx/fog.png" id="11_fog"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="12_hostile"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres" id="13_golem"]
+[ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
+[ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 
 [sub_resource type="RectangleShape2D" id="WallN"]
 size = Vector2(944, 24)
@@ -32,6 +34,7 @@ script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.04, 0.045, 0.04, 1)
 music = ExtResource("3_music")
+music_playlist = Array[AudioStream]([ExtResource("mus_army_of_darkness"), ExtResource("mus_attack_3")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 976

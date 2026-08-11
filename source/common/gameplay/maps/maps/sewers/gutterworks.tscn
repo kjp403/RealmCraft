@@ -21,6 +21,8 @@
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e18"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e19"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="e20"]
+[ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 
 [node name="gutterworks" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -28,6 +30,7 @@ script = ExtResource("e0")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.02, 0.02, 0.03, 1)
 music = ExtResource("e3")
+music_playlist = Array[AudioStream]([ExtResource("mus_army_of_darkness"), ExtResource("mus_alone")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 8336
