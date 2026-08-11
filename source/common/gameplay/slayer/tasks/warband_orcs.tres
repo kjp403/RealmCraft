@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "War-band Orcs"
 enemy_types = Array[StringName]([&"trpg_orc", &"trpg_armored_orc", &"trpg_elite_orc", &"trpg_orc_rider", &"trpg_ogre_mage", &"trpg_conjuring_oni"])
 min_slayer_level = 70
-xp_per_kill = 72
-guide_notes = "PLACEHOLDER BALANCE (docs/slayer_skill.md §6): stats currently mirror the shared TRPG-pack defaults, not this bracket. Treat this task as reserved until the pack is individually tuned."
+xp_per_kill = 603
+guide_notes = "A disciplined war-band: heavy armour on the front line, ogre magi and oni casting from behind it. Cut the casters first or the melee never stops coming."

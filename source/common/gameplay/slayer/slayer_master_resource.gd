@@ -18,13 +18,15 @@ extends Resource
 @export var min_slayer_level: int = 1
 
 @export_group("Points economy")
-## Slayer points banked on TASK COMPLETION (not skip). Turael = 0 — she is the
-## always-free, no-reward entry master by design, exactly like OSRS Turael/Spria.
-## Durael = 6, matching Mazchna's base (the level-20 wiki slot she fills).
-@export var base_points_per_task: int = 0
-## True = Turael-style "get a different task any time, free" — but per OSRS,
-## reassigning THIS way resets the player's streak to zero (SlayerTaskService
-## enforces this; skipping via points on a paid master does NOT reset streak).
+## Slayer points banked on TASK COMPLETION (never per kill, never on skip).
+## Turael = 3, Durael = 6. Unlike OSRS — where Turael/Spria pay nothing at all —
+## every Arkenelle master pays something, so the low-level entry master is still
+## worth finishing tasks for. Turael's half rate keeps Durael the better payout
+## once her level-20 gate opens, matching her longer, higher-level task amounts.
+@export var base_points_per_task: int = 3
+## True = Turael-style "get a different task any time, free". Reassigning does NOT
+## touch the streak (nor does switching masters or blocking) — see the note on
+## SlayerTaskService.skip_task for why Arkenelle drops OSRS's Turael-reset rule.
 @export var free_reassign: bool = false
 ## Points cost to reassign when [member free_reassign] is false (Durael). Matches
 ## OSRS's flat 30-point "Cancel task" cost. A player's skip_discount slayer perk

@@ -522,6 +522,16 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 
 	player.led_guild_id = int(row.get("led_guild_id", 0))
 
+	# Character level is DERIVED from masteries + Slayer, so the stored column is a
+	# cache. Recompute it here, AFTER skills/masteries have loaded, so a save from
+	# before the derived-level change (or from a different weights/cap tuning) lands
+	# on the right number instead of trusting a stale value.
+	#
+	# Assigned directly rather than via sync_combat_level(): available_attributes_points
+	# was just loaded from its own column and already accounts for every level this
+	# character has earned. Calling sync here would re-grant them on every login.
+	player.level = maxi(player.level, player.derived_combat_level())
+
 	return player
 
 

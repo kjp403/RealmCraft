@@ -7,5 +7,5 @@ script = ExtResource("1_task")
 display_name = "Fungal Creatures"
 enemy_types = Array[StringName]([&"sporeling", &"puffcap", &"spore_swarm", &"myconid_brute"])
 min_slayer_level = 5
-xp_per_kill = 10
+xp_per_kill = 274
 guide_notes = "The fungus cave's non-boss residents. Spore swarms die in a hit or two but poison on burst — keep a cure or just outrange them."

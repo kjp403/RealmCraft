@@ -19,10 +19,21 @@ extends Resource
 ## master's own min_slayer_level (SlayerMasterResource) is a separate, usually lower,
 ## gate. Mirrors QuestResource.min_skill_level's role for skill-gated quests.
 @export var min_slayer_level: int = 1
-## Slayer XP granted per kill while this task is active. Flat per task (not
-## per-monster) — see docs/slayer_skill.md for the balancing formula
-## (≈1.3× the group's average EnemyTypeResource.xp_reward, rounded).
+## FALLBACK Slayer XP per kill, used only when the killed enemy reports no combat
+## skill XP at all. The live number is derived per-monster from that monster's own
+## stat block — EnemyTypeResource.combat_skill_xp_for(hp, armor) ×
+## SlayerTaskService.SLAYER_XP_RATIO — so a wide group never pays the same XP for
+## its weakest and strongest member. Kept in sync with the group average so it
+## still reads as documentation of the task's typical value.
+##
+## NOTE this is NOT derived from EnemyTypeResource.xp_reward: that number serves
+## the character 1–20 curve and is ~980× too small for the 1–99 skill curve.
 @export var xp_per_kill: int = 10
+## Hand-tuned per-monster Slayer XP, overriding the derived value for the listed
+## enemy_types. Currently unused — the stat-derived rule handles the whole roster,
+## including trpg_necromancer, the one boss deliberately left on a task table.
+## Kept as the escape hatch for any monster that should not follow the HP rule.
+@export var xp_overrides: Dictionary[StringName, int] = {}
 ## Flavor + a one-line strategy tip, shown in the in-game Slayer Guide panel.
 @export_multiline var guide_notes: String = ""
 

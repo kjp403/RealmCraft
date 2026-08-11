@@ -26,6 +26,16 @@ const STREAK_MILESTONES: Dictionary[int, int] = {
 const BLOCK_SLOT_LEVELS: Array[int] = [5, 30, 60, 90]
 const BLOCK_POINT_COST: int = 60
 
+## Slayer XP per kill = the killed monster's combat SKILL xp (the stat-derived
+## EnemyTypeResource.combat_skill_xp_for, NOT the character-level xp_reward) × this.
+## Slayer and weapon mastery ride the SAME SkillXp 1–99 curve (13,034,431 XP), and
+## mastery banks that number in FULL on every kill (RewardService._reward), so this
+## ratio IS the speed difference between the two: 1/3 = Slayer 1–99 takes ~3× the
+## kills mastery does. It can never make Slayer the cheaper skill — even a maxed
+## "focused" perk (+15%) only reaches 0.38×. On-task-only accrual pushes the real
+## gap slightly past 3×, which is the intended direction.
+const SLAYER_XP_RATIO: float = 1.0 / 3.0
+
 
 # ---------------------------------------------------------------------------
 # Assignment
@@ -119,20 +129,22 @@ static func status_payload(resource: PlayerResource) -> Dictionary:
 # and DailyQuestService.on_kill.
 # ---------------------------------------------------------------------------
 
-## A player killed an enemy of [param enemy_type]. Advances the active task if it
-## matches, grants slayer XP for the kill, and completes + pays out the task on
-## the final kill. Returns {} if there's no active task or it doesn't match this
-## enemy; otherwise {"advanced": true, "remaining": int, "xp_gained": int,
-## "leveled_up": bool, "complete": bool, "points_gained": int (only if complete),
+## A player killed an enemy of [param enemy_type], worth [param combat_skill_xp]
+## on the 1–99 skill curve (the same number the kill just paid to weapon mastery).
+## Advances the active task if it matches, grants Slayer XP for
+## THAT kill, and completes + pays out the task on the final kill. Returns {} if
+## there's no active task or it doesn't match this enemy; otherwise
+## {"advanced": true, "remaining": int, "xp_gained": int, "leveled_up": bool,
+## "complete": bool, "points_gained": int (only if complete),
 ## "streak": int (only if complete)}.
-static func on_kill(resource: PlayerResource, enemy_type: StringName) -> Dictionary:
+static func on_kill(resource: PlayerResource, enemy_type: StringName, combat_skill_xp: int = 0) -> Dictionary:
 	if resource == null or resource.current_slayer_task.is_empty():
 		return {}
 	var task: SlayerTaskDef = current_task_def(resource)
 	if task == null or not task.matches(enemy_type):
 		return {}
 
-	var xp: int = _xp_per_kill(resource, task)
+	var xp: int = _xp_per_kill(resource, task, enemy_type, combat_skill_xp)
 	var xp_result: Dictionary = resource.add_skill_xp(&"slayer", xp)
 
 	var remaining: int = int(resource.current_slayer_task.get("remaining", 0)) - 1
@@ -161,23 +173,43 @@ static func on_kill(resource: PlayerResource, enemy_type: StringName) -> Diction
 	return out
 
 
-## Slayer XP for one kill under [param task]: JobPerks-driven multiplier over the
-## task's flat xp_per_kill, exactly how JobPerks.xp_multiplier scales gathering XP
-## (mining.tres's "diligent" perk, etc.) — the &"slayer" job's "focused" perk is the
-## combat-skill equivalent.
-static func _xp_per_kill(resource: PlayerResource, task: SlayerTaskDef) -> int:
+## Slayer XP for ONE kill of [param enemy_type] under [param task], resolved in
+## priority order:
+##   1. task.xp_overrides[enemy_type]  — hand-tuned exception (trpg_necromancer)
+##   2. combat_skill_xp × SLAYER_XP_RATIO — the normal path, so a 1,000 HP boss and
+##      a 200 HP zombie in the same task pay out proportionally instead of both
+##      paying the group's flat average
+##   3. task.xp_per_kill — fallback when the kill reported no combat skill XP
+## then scaled by JobPerks.xp_multiplier, exactly how gathering XP scales (mining's
+## "diligent" perk) — the &"slayer" job's "focused" perk is the combat equivalent.
+static func _xp_per_kill(
+	resource: PlayerResource,
+	task: SlayerTaskDef,
+	enemy_type: StringName,
+	combat_skill_xp: int
+) -> int:
+	var base: int = 0
+	if task.xp_overrides.has(enemy_type):
+		base = int(task.xp_overrides[enemy_type])
+	elif combat_skill_xp > 0:
+		base = roundi(float(combat_skill_xp) * SLAYER_XP_RATIO)
+	else:
+		base = task.xp_per_kill
+	base = maxi(1, base)
+
 	var perks: JobPerks = JobRegistry.perks_for(&"slayer")
 	if perks == null:
-		return task.xp_per_kill
+		return base
 	var skill: Dictionary = resource.get_skill(&"slayer")
 	var mult: float = perks.xp_multiplier(skill.get("perks", {}))
-	return maxi(1, roundi(float(task.xp_per_kill) * mult))
+	return maxi(1, roundi(float(base) * mult))
 
 
 ## base_points_per_task × the OSRS streak-milestone multiplier for THIS completion
 ## (checked against [param streak_after], the count including the task just
-## finished). 0-point masters (Turael) always net 0 — the multiplier has nothing
-## to multiply, matching real OSRS exactly.
+## finished). Points are paid on COMPLETION only — never per kill, never on skip.
+## Every master pays something (Turael 3, Durael 6); a 0-point master would still
+## correctly net 0, the multiplier just has nothing to multiply.
 static func _points_for_completion(master: SlayerMasterResource, streak_after: int) -> int:
 	if master == null or master.base_points_per_task <= 0:
 		return 0
@@ -194,11 +226,14 @@ static func _points_for_completion(master: SlayerMasterResource, streak_after: i
 # ---------------------------------------------------------------------------
 
 ## Reassigns the current task. Turael-style masters (free_reassign) do this for
-## free but RESET THE STREAK TO ZERO — the one real OSRS action that does (per the
-## wiki's Slayer_task_streak page; skipping via points on a paid master, or
-## switching which master you use, does NOT reset it). Paid masters charge
-## reassign_point_cost (discounted by the &"slayer" job's skip_discount perk) and
-## do NOT touch the streak.
+## free; paid masters charge reassign_point_cost (discounted by the &"slayer" job's
+## skip_discount perk).
+##
+## NOTHING here touches the streak. Arkenelle deliberately diverges from OSRS, where
+## a Turael-style reassign is the one action that zeroes it: here the streak only
+## ever counts completions, so reassigning, blocking, and switching which master you
+## take work from all leave it alone. A streak is a record of tasks finished, not a
+## loyalty pledge to one master.
 static func skip_task(resource: PlayerResource, master: SlayerMasterResource) -> Dictionary:
 	if resource == null or master == null:
 		return {"ok": false, "reason": "no_master"}
@@ -209,10 +244,9 @@ static func skip_task(resource: PlayerResource, master: SlayerMasterResource) ->
 
 	if master.free_reassign:
 		resource.current_slayer_task = {}
-		resource.slayer_streak = 0
 		var assigned: Dictionary = _roll_and_assign(resource, master, int(resource.get_skill(&"slayer").get("level", 1)))
 		assigned["cost"] = 0
-		assigned["streak_reset"] = true
+		assigned["streak_reset"] = false
 		return assigned
 
 	var cost: int = _skip_cost(resource, master)

@@ -95,6 +95,15 @@ extends Resource
 @export var wander_pause_max_s: float = 4.0
 
 @export_group("Rewards")
+## CHARACTER experience only — the level 1–20 curve (PlayerResource.LEVEL_XP_BASE,
+## ~13,300 XP total to cap). It is correctly scaled for that curve and should stay
+## small: ~900 kills to max level.
+##
+## It is deliberately NOT the number weapon mastery and Slayer use. Those ride the
+## OSRS SkillXp 1–99 curve — 13,034,431 XP, ~980× the whole character curve — so
+## feeding them xp_reward made 99 effectively unreachable (~870k kills). They use
+## [method combat_skill_xp] instead. Do not "unify" these two: one number cannot
+## serve curves three orders of magnitude apart.
 @export var xp_reward: int = 25
 ## Seconds before respawn after death.
 @export var respawn_delay: float = 5.0
@@ -148,6 +157,41 @@ extends Resource
 @export var ornate_chest_second_min: int = 0
 @export var ornate_chest_second_max: int = 0
 @export_range(0.0, 1.0, 0.01) var ornate_chest_consolation_chance: float = 0.0
+
+
+# ---------------------------------------------------------------------------
+# Skill XP from a kill (weapon mastery + Slayer) — NOT character xp_reward.
+# ---------------------------------------------------------------------------
+
+## XP per point of effective HP, for the SkillXp 1–99 curve. 4.0 is OSRS's real
+## combat rate (XP scales with damage dealt), which lands mastery 1–99 at roughly
+## 12k–33k kills and Slayer at ~3× that — in line with this game's gathering
+## skills, already near OSRS parity on the same curve (adamant ore 58 XP ≈ 224k
+## actions to 99). This is THE pacing dial for all combat skilling: halve it to
+## double the grind, and Slayer follows automatically.
+const COMBAT_SKILL_XP_PER_HP: float = 4.0
+
+## Armor's assumed contribution to how long a kill takes. Armor [param armor]
+## behaves like (1 + armor/ARMOR_EHP_DIVISOR)× the health bar, so a tankier mob
+## pays proportionally more. Keeping XP tied to time-to-kill is what makes XP/hour
+## roughly flat across the roster — no monster is a trap, and no monster is a
+## strictly-better farm than the one the level ladder points you at.
+const ARMOR_EHP_DIVISOR: float = 20.0
+
+
+## Weapon-mastery / Slayer XP for killing this archetype: effective HP × the OSRS
+## rate. Deliberately derived from the stat block rather than read off xp_reward —
+## see the note on [member xp_reward] for why the two cannot be the same number.
+## Static so callers holding a live [HostileNpc] (which copies these stats out of
+## the resource) can use the identical rule without re-loading the resource.
+static func combat_skill_xp_for(enemy_max_health: float, enemy_armor: float) -> int:
+	var effective_hp: float = maxf(1.0, enemy_max_health) * (1.0 + maxf(0.0, enemy_armor) / ARMOR_EHP_DIVISOR)
+	return maxi(1, roundi(effective_hp * COMBAT_SKILL_XP_PER_HP))
+
+
+## [method combat_skill_xp_for] for this resource's own stat block.
+func combat_skill_xp() -> int:
+	return combat_skill_xp_for(max_health, armor)
 
 
 ## Combat level for the nameplate. Authored value wins; otherwise derive a
