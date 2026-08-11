@@ -10,32 +10,32 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="8_p8ty2"]
 [ext_resource type="Script" path="res://source/common/gameplay/shops/shop_trade.gd" id="30_trade"]
 
-[sub_resource type="Resource" id="Resource_1xoer"]
+[sub_resource type="Resource" id="Resource_mjhr3"]
 script = ExtResource("1_entry")
 item = ExtResource("3_mjhr3")
 price = 500
 
-[sub_resource type="Resource" id="Resource_wdbyg"]
+[sub_resource type="Resource" id="Resource_gmn70"]
 script = ExtResource("1_entry")
 item = ExtResource("4_gmn70")
 price = 500
 
-[sub_resource type="Resource" id="Resource_ls0y7"]
+[sub_resource type="Resource" id="Resource_5g0yj"]
 script = ExtResource("1_entry")
 item = ExtResource("5_5g0yj")
 price = 500
 
-[sub_resource type="Resource" id="Resource_yfics"]
+[sub_resource type="Resource" id="Resource_mmw2q"]
 script = ExtResource("1_entry")
 item = ExtResource("6_mmw2q")
 price = 500
 
-[sub_resource type="Resource" id="Resource_ewx4u"]
+[sub_resource type="Resource" id="Resource_x4kyu"]
 script = ExtResource("1_entry")
 item = ExtResource("7_x4kyu")
 price = 4500
 
-[sub_resource type="Resource" id="Resource_qfs4f"]
+[sub_resource type="Resource" id="Resource_p8ty2"]
 script = ExtResource("1_entry")
 item = ExtResource("8_p8ty2")
 price = 4500
@@ -43,5 +43,5 @@ price = 4500
 [resource]
 script = ExtResource("2_shop")
 shop_name = "The Ashmonger's Hoard"
-entries = Array[ExtResource("1_entry")]([SubResource("Resource_1xoer"), SubResource("Resource_wdbyg"), SubResource("Resource_ls0y7"), SubResource("Resource_yfics"), SubResource("Resource_ewx4u"), SubResource("Resource_qfs4f")])
+entries = Array[ExtResource("1_entry")]([SubResource("Resource_mjhr3"), SubResource("Resource_gmn70"), SubResource("Resource_5g0yj"), SubResource("Resource_mmw2q"), SubResource("Resource_x4kyu"), SubResource("Resource_p8ty2")])
 metadata/slug = &"fire_shop"

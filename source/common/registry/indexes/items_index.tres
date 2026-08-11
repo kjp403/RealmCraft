@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786434832
-next_id = 494
+version = 1786438071
+next_id = 512
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2247,6 +2247,96 @@ entries = Array[Dictionary]([{
 &"id": 493,
 &"path": "res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres",
 &"slug": &"wand_voidsilk.item"
+}, {
+&"hash": "10443d680d63d2df2110a410e64182747cd9540d2e6ce2277167b5459a06b446",
+&"id": 494,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_aetherborn.tres",
+&"slug": &"fiber_aetherborn"
+}, {
+&"hash": "4c9e6bb416a33fbc3270aa06418c7e390047192bc25be7021adf6779cfd8ddfb",
+&"id": 495,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_astral.tres",
+&"slug": &"fiber_astral"
+}, {
+&"hash": "ae6e817ff34567cfda69a5ed2ff91e560712a10c12f7a30eae9f4c0c188205d4",
+&"id": 496,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_eclipse.tres",
+&"slug": &"fiber_eclipse"
+}, {
+&"hash": "e4a37aa995018cc4c7424e7d2766b95e15f0e3180c35b987e97e41f2e562a8b6",
+&"id": 497,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_empyrean.tres",
+&"slug": &"fiber_empyrean"
+}, {
+&"hash": "eaaf84ca252702d5292c6b5c9ec8c608fbae8e1a89c974e1e9451c14047048f5",
+&"id": 498,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_nightglass.tres",
+&"slug": &"fiber_nightglass"
+}, {
+&"hash": "c4d6ec7ff0dba70bf10323123a787c19196c5c14cd1a1ac49a280d909bc04f2a",
+&"id": 499,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres",
+&"slug": &"fiber_primordial"
+}, {
+&"hash": "3118a0fbebd081d2e35e2b645cd27e855bafaacdac96f542ccff883f7ccfd2f8",
+&"id": 500,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres",
+&"slug": &"fiber_runewoven"
+}, {
+&"hash": "e073747d13cfc791f1aae9c610f1a9321c37f1ca7fafd350ef3a8500cdbc60d5",
+&"id": 501,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_skyrender.tres",
+&"slug": &"fiber_skyrender"
+}, {
+&"hash": "ce50c0ac0e5714d3aafda0ed6e087c83326b7fa76efb9bf3f52fc611a73f7afb",
+&"id": 502,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_starfall.tres",
+&"slug": &"fiber_starfall"
+}, {
+&"hash": "ca92337d5fa2f0887efcc1f5fe3c932d43e2c3e8da38a8703031e01331f6af93",
+&"id": 503,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_tempest.tres",
+&"slug": &"fiber_tempest"
+}, {
+&"hash": "b9529f566219ad853ac5e47405232b6141659998f1ab080b0fcf77b5d5dc0bfa",
+&"id": 504,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres",
+&"slug": &"fiber_voidsilk"
+}, {
+&"hash": "31b9971944d815a1a9a9725b6f5228db7c29504c3abc5508ed9aec7a8bf53d1e",
+&"id": 505,
+&"path": "res://source/common/gameplay/items/materials/cloth/fiber_wraithsilk.tres",
+&"slug": &"fiber_wraithsilk"
+}, {
+&"hash": "f4ee243711dd3ca99f0e9c0fddf58561cd915e0d416583dcd5bf4888b05659b2",
+&"id": 506,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_eclipse.tres",
+&"slug": &"hide_eclipse"
+}, {
+&"hash": "87e5ca20ee77e96ea539c627327075136dbf885bdfbb0318f93394e07ebdaf35",
+&"id": 507,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_nightglass.tres",
+&"slug": &"hide_nightglass"
+}, {
+&"hash": "f6a804fc303fad65132bb1159a346a75bf7cc06522dceebbdf67aa7447245d5e",
+&"id": 508,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_skyrender.tres",
+&"slug": &"hide_skyrender"
+}, {
+&"hash": "2bb7f40b35eaf552fdb10ededeb9c56e68d1cd620a1cc1f6a92f7227aab5425f",
+&"id": 509,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_starfall.tres",
+&"slug": &"hide_starfall"
+}, {
+&"hash": "99f92853bf4c334117658270d340279eb7117e9a4bb0e685c44ba71357d25d4d",
+&"id": 510,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_tempest.tres",
+&"slug": &"hide_tempest"
+}, {
+&"hash": "68dffa52841a4377dcb339bd1bfd2326d88cfcca1e7f7e81cbfb24ee2c6a146d",
+&"id": 511,
+&"path": "res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres",
+&"slug": &"hide_wraithsilk"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")
