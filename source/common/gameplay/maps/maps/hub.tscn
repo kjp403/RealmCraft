@@ -516,15 +516,15 @@ position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")
 
 [node name="DesertCamel" parent="NPCs" unique_id=1888560001 instance=ExtResource("16_da30u")]
-position = Vector2(992, -48)
+position = Vector2(240, -48)
 npc_resource = ExtResource("56_camel")
 
 [node name="ForgeGolem" parent="NPCs" unique_id=1888560002 instance=ExtResource("16_da30u")]
-position = Vector2(992, 16)
+position = Vector2(300, -48)
 npc_resource = ExtResource("57_golem")
 
 [node name="SwampHermit" parent="NPCs" unique_id=1888560003 instance=ExtResource("16_da30u")]
-position = Vector2(856, 80)
+position = Vector2(360, -48)
 npc_resource = ExtResource("58_hermit")
 
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]

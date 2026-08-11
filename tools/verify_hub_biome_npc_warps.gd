@@ -101,6 +101,9 @@ func _init() -> void:
 		for tres: String in ["desert_camel.tres", "forge_golem.tres", "swamp_hermit.tres"]:
 			if not hub_txt.contains(tres):
 				fails.append("Hub does not reference %s" % tres)
+		# Test placement: all three stand just east of Spawn for easy dialogue/warp checks.
+		if not hub_txt.contains("DesertCamel") or not _hub_npc_near_spawn(hub_txt):
+			fails.append("travel NPCs should be near Hub Spawn for testing")
 
 	var desert_txt: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/desert/desert.tscn"
@@ -146,3 +149,23 @@ func _hub_landing_ok(hub_txt: String, node_name: String, warper_id: int) -> bool
 	if block.contains("target_instance"):
 		return false
 	return block.contains("warper_id = %d" % warper_id)
+
+
+## True when Camel/Golem/Hermit are clustered just east of Hub Spawn (easy test lineup).
+func _hub_npc_near_spawn(hub_txt: String) -> bool:
+	for node_name: String in ["DesertCamel", "ForgeGolem", "SwampHermit"]:
+		var marker: String = 'name="%s"' % node_name
+		var start: int = hub_txt.find(marker)
+		if start < 0:
+			return false
+		var end: int = hub_txt.find("[node name=", start + marker.length())
+		var block: String = hub_txt.substr(start, end - start if end > start else hub_txt.length() - start)
+		# Spawn is ~(160,-88); test row uses x in 200..400, y around -48.
+		if not (
+			block.contains("Vector2(240, -48)")
+			or block.contains("Vector2(300, -48)")
+			or block.contains("Vector2(360, -48)")
+		):
+			return false
+	return true
+
