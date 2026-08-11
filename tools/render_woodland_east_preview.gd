@@ -1,17 +1,17 @@
 extends SceneTree
-## Preview Goblin Woodlands East (woodland art only).
+## Contiguous Goblin Woodlands East previews (woodland_tiles only).
 ##   godot --path . -s tools/render_woodland_east_preview.gd
 
 const OUT := "/opt/cursor/artifacts/screenshots"
-const MAPS := "res://source/common/gameplay/maps/maps/woodland/"
+const MAP := "res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn"
 
 const SHOTS: Array[Dictionary] = [
-	{"name": "woodland-east-gate", "path": MAPS + "woodland_tiles.tscn", "center": Vector2(3648, 640), "zoom": 0.55, "size": Vector2i(1100, 720)},
-	{"name": "woodland-east-overview", "path": MAPS + "woodland_east.tscn", "size_cells": Vector2i(200, 160), "overview": true},
-	{"name": "woodland-east-crossroads", "path": MAPS + "woodland_east.tscn", "center": Vector2(1280, 1344), "zoom": 0.5, "size": Vector2i(1280, 900)},
-	{"name": "woodland-east-clearings", "path": MAPS + "woodland_east.tscn", "center": Vector2(1344, 576), "zoom": 0.55, "size": Vector2i(1200, 900)},
-	{"name": "woodland-east-ponds", "path": MAPS + "woodland_east.tscn", "center": Vector2(2496, 1280), "zoom": 0.55, "size": Vector2i(1200, 900)},
-	{"name": "woodland-east-shelves", "path": MAPS + "woodland_east.tscn", "center": Vector2(1408, 2048), "zoom": 0.55, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-FULL", "center": Vector2(2500, 800), "zoom": 0.22, "size": Vector2i(1600, 1000)},
+	{"name": "woodland-east-GATE", "center": Vector2(3000, 640), "zoom": 0.5, "size": Vector2i(1200, 800)},
+	{"name": "woodland-east-CROSSROADS", "center": Vector2(3400, 672), "zoom": 0.55, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-MEADOW", "center": Vector2(3680, 256), "zoom": 0.6, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-PONDS", "center": Vector2(4800, 672), "zoom": 0.55, "size": Vector2i(1200, 900)},
+	{"name": "woodland-east-SHELVES", "center": Vector2(3760, 1152), "zoom": 0.55, "size": Vector2i(1200, 900)},
 ]
 
 
@@ -22,14 +22,19 @@ func _initialize() -> void:
 func _go() -> void:
 	root.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	DirAccess.make_dir_recursive_absolute(OUT)
+	# Remove old misleading preview names
+	for old in [
+		"woodland-east-overview.png", "woodland-east-crossroads.png", "woodland-east-clearings.png",
+		"woodland-east-ponds.png", "woodland-east-shelves.png", "woodland-east-gate.png",
+		"woodland-east-dunes.png", "woodland-east-wetlands.png", "woodland-east-ash.png",
+		"woodland-east-desert.png", "woodland-east-swamp.png", "woodland-east-volcano.png",
+		"woodland-east-wilds.png",
+	]:
+		var p := "%s/%s" % [OUT, old]
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(p)
 	for shot in SHOTS:
-		if shot.get("overview", false):
-			var world := Vector2(shot["size_cells"] as Vector2i) * 16.0
-			var vp_size := Vector2i(1600, 1200)
-			var zoom: float = minf(float(vp_size.x) / world.x, float(vp_size.y) / world.y) * 0.96
-			await _shot(shot["path"], vp_size, world * 0.5, zoom, "%s/%s.png" % [OUT, shot["name"]])
-		else:
-			await _shot(shot["path"], shot["size"], shot["center"], shot["zoom"], "%s/%s.png" % [OUT, shot["name"]])
+		await _shot(MAP, shot["size"], shot["center"], shot["zoom"], "%s/%s.png" % [OUT, shot["name"]])
 	print("WOODLAND_EAST_PREVIEW_PASS")
 	quit(0)
 
