@@ -48,9 +48,6 @@
 [ext_resource type="Resource" uid="uid://cutpirmfqwx8b" path="res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres" id="51_iron"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="50_tree"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/the_hollow.tres" id="54_hollow"]
-[ext_resource type="Resource" uid="uid://cnpcdesertcamel1" path="res://source/common/gameplay/characters/npc/npcs/desert_camel.tres" id="56_camel"]
-[ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="57_golem"]
-[ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="58_hermit"]
 [ext_resource type="AudioStream" uid="uid://b7j3i2egxdgkk" path="res://assets/audio/music/shop.ogg" id="mus_shop"]
 [ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
 [ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
@@ -518,18 +515,6 @@ npc_resource = ExtResource("14_banker")
 [node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
 position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")
-
-[node name="DesertCamel" parent="NPCs" unique_id=1888560001 instance=ExtResource("16_da30u")]
-position = Vector2(240, -48)
-npc_resource = ExtResource("56_camel")
-
-[node name="ForgeGolem" parent="NPCs" unique_id=1888560002 instance=ExtResource("16_da30u")]
-position = Vector2(300, -48)
-npc_resource = ExtResource("57_golem")
-
-[node name="SwampHermit" parent="NPCs" unique_id=1888560003 instance=ExtResource("16_da30u")]
-position = Vector2(360, -48)
-npc_resource = ExtResource("58_hermit")
 
 [node name="Warpers" type="Node2D" parent="." unique_id=220333684]
 

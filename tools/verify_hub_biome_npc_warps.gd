@@ -1,5 +1,7 @@
 extends SceneTree
-## Headless gate: Hub biome portals → travel NPCs (Camel / Forge Golem / Swamp Hermit).
+## Headless gate: biome travel NPCs (Camel / Forge Golem / Swamp Hermit).
+## The Hub keeps only their return landing pads; the NPCs themselves stand in the
+## Goblin Woodland east wing.
 ## Pure FileAccess + ResourceLoader duck-typing so ClientState autoloads are not required.
 ## Run: godot --headless --path . -s tools/verify_hub_biome_npc_warps.gd
 
@@ -95,15 +97,33 @@ func _init() -> void:
 			fails.append("FireForgeLanding warper_id/target mismatch")
 		if not _hub_landing_ok(hub_txt, "SewersLanding", 28):
 			fails.append("SewersLanding warper_id/target mismatch")
+		# The travel NPCs moved out to the Woodland east wing; the Hub keeps only
+		# the landing pads they warp players back to.
 		for n: String in ["DesertCamel", "ForgeGolem", "SwampHermit"]:
-			if not hub_txt.contains('name="%s"' % n):
-				fails.append("Hub missing travel NPC %s" % n)
+			if hub_txt.contains('name="%s"' % n):
+				fails.append("Hub still hosts travel NPC %s (they live in Woodland East)" % n)
+
+	var wood_txt: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn"
+	)
+	if wood_txt.is_empty():
+		fails.append("woodland_tiles.tscn unreadable")
+	else:
+		# East Wilds homes: camel on the East Shore sand, hermit by Murkwood Ponds,
+		# golem on the northern shelf.
+		var homes: Dictionary = {
+			"DesertCamel": "Vector2(4634, 1384)",
+			"SwampHermit": "Vector2(4804, 680)",
+			"ForgeGolem": "Vector2(4823, 245)",
+		}
+		for n: String in homes:
+			if not wood_txt.contains('name="%s"' % n):
+				fails.append("Woodland missing travel NPC %s" % n)
+			elif not _node_has_position(wood_txt, n, str(homes[n])):
+				fails.append("%s is not at %s" % [n, homes[n]])
 		for tres: String in ["desert_camel.tres", "forge_golem.tres", "swamp_hermit.tres"]:
-			if not hub_txt.contains(tres):
-				fails.append("Hub does not reference %s" % tres)
-		# Test placement: all three stand just east of Spawn for easy dialogue/warp checks.
-		if not hub_txt.contains("DesertCamel") or not _hub_npc_near_spawn(hub_txt):
-			fails.append("travel NPCs should be near Hub Spawn for testing")
+			if not wood_txt.contains(tres):
+				fails.append("Woodland does not reference %s" % tres)
 
 	var desert_txt: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/desert/desert.tscn"
@@ -151,21 +171,13 @@ func _hub_landing_ok(hub_txt: String, node_name: String, warper_id: int) -> bool
 	return block.contains("warper_id = %d" % warper_id)
 
 
-## True when Camel/Golem/Hermit are clustered just east of Hub Spawn (easy test lineup).
-func _hub_npc_near_spawn(hub_txt: String) -> bool:
-	for node_name: String in ["DesertCamel", "ForgeGolem", "SwampHermit"]:
-		var marker: String = 'name="%s"' % node_name
-		var start: int = hub_txt.find(marker)
-		if start < 0:
-			return false
-		var end: int = hub_txt.find("[node name=", start + marker.length())
-		var block: String = hub_txt.substr(start, end - start if end > start else hub_txt.length() - start)
-		# Spawn is ~(160,-88); test row uses x in 200..400, y around -48.
-		if not (
-			block.contains("Vector2(240, -48)")
-			or block.contains("Vector2(300, -48)")
-			or block.contains("Vector2(360, -48)")
-		):
-			return false
-	return true
+## True when the named node's block sets exactly the expected position.
+func _node_has_position(scene_txt: String, node_name: String, position: String) -> bool:
+	var marker: String = 'name="%s"' % node_name
+	var start: int = scene_txt.find(marker)
+	if start < 0:
+		return false
+	var end: int = scene_txt.find("[node name=", start + marker.length())
+	var block: String = scene_txt.substr(start, end - start if end > start else scene_txt.length() - start)
+	return block.contains("position = " + position)
 
