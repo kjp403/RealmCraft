@@ -8,13 +8,13 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 5.0
+value = 14.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "health_max"
-value = 8.0
+value = 28.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -28,7 +28,7 @@ item_name = &"Bloodbrand Charm"
 item_icon = ExtResource("2_icon")
 description = "Taken off a captain who took it off someone else. It keeps changing hands the same way."
 can_trade = true
-vendor_value = 1300
+vendor_value = 3500
 stack_limit = 1
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"relic_bloodbrand"

@@ -8,25 +8,25 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 7.0
+value = 26.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "move_speed"
-value = 5.0
+value = 7.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 5.0
+value = 10.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "health_max"
-value = 10.0
+value = 40.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -40,7 +40,7 @@ item_name = &"Cinderheart Sigil"
 item_icon = ExtResource("2_icon")
 description = "Vurthek\'s own coal, banked and never gone out. It burns for whoever carries it next."
 can_trade = true
-vendor_value = 6000
+vendor_value = 18000
 stack_limit = 1
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"relic_cinderheart"

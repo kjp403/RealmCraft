@@ -8,25 +8,25 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 7.0
+value = 24.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "mana_max"
-value = 25.0
+value = 90.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mana_regen"
-value = 0.8
+value = 2.5
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "mr"
-value = 3.0
+value = 10.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -40,7 +40,7 @@ item_name = &"Netherglass Sigil"
 item_icon = ExtResource("2_icon")
 description = "The violet thread inside moves when nothing else does. It was doing that before the necromancer found it."
 can_trade = true
-vendor_value = 4400
+vendor_value = 14000
 stack_limit = 1
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"relic_netherglass"

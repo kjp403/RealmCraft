@@ -8,19 +8,19 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 9.0
+value = 28.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "health_max"
-value = 18.0
+value = 65.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mr"
-value = 4.0
+value = 14.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -34,7 +34,7 @@ item_name = &"Rotmire Sigil"
 item_icon = ExtResource("2_icon")
 description = "Cistern water found its way into the moss and set there in a blue seam. Heavier than it looks."
 can_trade = true
-vendor_value = 2600
+vendor_value = 8000
 stack_limit = 1
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"relic_rotmire"

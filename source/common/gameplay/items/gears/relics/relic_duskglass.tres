@@ -8,19 +8,19 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 4.0
+value = 13.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "mana_max"
-value = 18.0
+value = 55.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mana_regen"
-value = 0.2
+value = 0.8
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -34,7 +34,7 @@ item_name = &"Duskglass Charm"
 item_icon = ExtResource("2_icon")
 description = "Cave-dark glass with one cold spark left in it, circling like it is looking for the way out."
 can_trade = true
-vendor_value = 1400
+vendor_value = 4000
 stack_limit = 1
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"relic_duskglass"
