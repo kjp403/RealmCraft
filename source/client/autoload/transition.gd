@@ -25,10 +25,16 @@ var _back_button: Button
 var _bloom: ColorRect
 var _fade_tween: Tween
 
+# How long "Entering the world…" may spin before we surface the error panel.
+# A dead world upstream (Caddy 502 / hung WebSocket) often never fires
+# connection_failed, so without this the spinner hangs forever.
+const WORLD_LOAD_TIMEOUT_S: float = 20.0
+
 var _active: bool = false
 var _address: String
 var _port: int
 var _token: String
+var _load_timeout: SceneTreeTimer
 
 
 func _ready() -> void:
@@ -52,6 +58,7 @@ func start_world_load(address: String, port: int, token: String, background: Tex
 	_active = true
 	_background.texture = background
 	_show_loading()
+	_arm_load_timeout()
 	# Enter cue plays now (audio runs off the main thread, so the world load can't
 	# freeze it). The visual bloom waits for the reveal — see _fade_out.
 	if is_instance_valid(Client) and Client.audio_manager:
@@ -63,6 +70,7 @@ func _on_world_ready(_local_player: Node) -> void:
 	if not _active:
 		return
 	_active = false
+	_clear_load_timeout()
 	_fade_out()
 
 
@@ -71,6 +79,30 @@ func _on_connection_changed(connected: bool) -> void:
 	# local_player_ready). false → the connect failed or auth was rejected.
 	if not _active or connected:
 		return
+	_clear_load_timeout()
+	_show_error()
+
+
+func _arm_load_timeout() -> void:
+	_clear_load_timeout()
+	_load_timeout = get_tree().create_timer(WORLD_LOAD_TIMEOUT_S)
+	_load_timeout.timeout.connect(_on_load_timeout, CONNECT_ONE_SHOT)
+
+
+func _clear_load_timeout() -> void:
+	# SceneTreeTimer has no cancel; drop our ref and ignore a late timeout via _active.
+	_load_timeout = null
+
+
+func _on_load_timeout() -> void:
+	if not _active:
+		return
+	# World never became playable — treat like a failed connect so the player isn't
+	# stuck on the spinner when the upstream is 502 or the WebSocket hangs.
+	print("World load timed out after %.0fs." % WORLD_LOAD_TIMEOUT_S)
+	_clear_load_timeout()
+	if is_instance_valid(Client):
+		Client.close_connection()
 	_show_error()
 
 
@@ -93,6 +125,20 @@ func _show_error() -> void:
 	_buttons.visible = true
 
 
+## Surface a load failure with a custom message (broken map, missing scene, etc.).
+func show_load_error(message: String) -> void:
+	_active = true
+	_clear_load_timeout()
+	if _fade_tween and _fade_tween.is_valid():
+		_fade_tween.kill()
+	visible = true
+	_root.modulate.a = 1.0
+	_bloom.modulate.a = 0.0
+	_label.text = message
+	_spinner.visible = false
+	_buttons.visible = true
+
+
 ## Mid-game server drop (Client.server_disconnected): replace the old silent freeze
 ## with a clear overlay + a single "Back to login" action — it reloads the scene,
 ## which re-runs the gateway's version handshake (showing the update gate if the
@@ -101,6 +147,7 @@ func _show_error() -> void:
 ## so the button stays live, and _back_to_login unpauses.
 func show_disconnected() -> void:
 	_active = false  # not a load — keep _on_world_ready / the load path from firing here
+	_clear_load_timeout()
 	if _fade_tween and _fade_tween.is_valid():
 		_fade_tween.kill()
 	visible = true
@@ -136,6 +183,7 @@ func return_to_login() -> void:
 
 func _back_to_login() -> void:
 	_active = false
+	_clear_load_timeout()
 	Client.close_connection()
 	get_tree().paused = false
 	# On web, reload_current_scene keeps the already-loaded (now stale) wasm build, so

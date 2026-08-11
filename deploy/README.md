@@ -93,8 +93,14 @@ sudo bash deploy/setup-vps.sh
 
 ```bash
 systemctl status arkenelle-master arkenelle-gateway arkenelle-world caddy --no-pager
-# From your PC:
-curl -I https://api.arkenelle.com
+# Gateway (any non-empty JSON response means Caddy → :8088 is fine):
+curl -sS https://api.arkenelle.com/ | head
+# World is WebSocket-only — plain GET/HTTP2 often looks like 502 even when healthy.
+# Expect 101 from an HTTP/1.1 upgrade probe:
+curl --http1.1 -sS -o /dev/null -w '%{http_code}\n' \
+  -H 'Connection: Upgrade' -H 'Upgrade: websocket' \
+  -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+  https://play.arkenelle.com/
 ```
 
 Live logs: `journalctl -u arkenelle-world -f`

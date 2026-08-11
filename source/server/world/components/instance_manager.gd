@@ -92,6 +92,17 @@ func charge_new_instance(_map_path: String, _instance_id: String) -> void:
 	pass
 
 
+## Resolve a joinable ServerInstance for login spawn. If the map is mid-load,
+## wait for it (same pattern as warper queue_charge_instance) instead of
+## returning null and stranding the peer on "Entering the world…".
+func _instance_for_login(res: InstanceResource) -> ServerInstance:
+	if not res.charged_instances.is_empty():
+		return res.get_instance(0)
+	if loading_instances.has(res):
+		return loading_instances[res]
+	return charge_instance(res)
+
+
 ## Deal with player respawn on login. Should replace this with proper map respawn logic later?
 func _on_peer_connected(peer_id: int) -> void:
 	var player_resource: PlayerResource = world_server.connected_players[peer_id]
@@ -102,11 +113,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	if JailList.is_jailed(player_resource.account_name):
 		var jail_res: InstanceResource = instance_collection.get(JAIL_INSTANCE_NAME, null)
 		if jail_res != null:
-			var jail_inst: ServerInstance
-			if jail_res.charged_instances.is_empty():
-				jail_inst = charge_instance(jail_res)
-			else:
-				jail_inst = jail_res.get_instance(0)
+			var jail_inst: ServerInstance = _instance_for_login(jail_res)
 			if jail_inst != null:
 				charge_new_instance.rpc_id(peer_id, jail_res.map_path, jail_inst.name)
 				jail_inst.awaiting_peers[peer_id] = {}
@@ -131,11 +138,7 @@ func _on_peer_connected(peer_id: int) -> void:
 		var saved_name: String = str(player_resource.lb_stats.get("last_instance", ""))
 		if saved_name != "" and saved_name != JAIL_INSTANCE_NAME and instance_collection.has(saved_name):
 			var saved_res: InstanceResource = instance_collection.get(saved_name)
-			var saved_inst: ServerInstance = (
-				charge_instance(saved_res)
-				if saved_res.charged_instances.is_empty()
-				else saved_res.get_instance(0)
-			)
+			var saved_inst: ServerInstance = _instance_for_login(saved_res)
 			if saved_inst != null:
 				var saved_position := Vector2(
 					float(player_resource.lb_stats.get("last_x", 0.0)),
@@ -148,11 +151,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	var target_name: String = JAIL_INSTANCE_NAME if is_first_login else TAVERN_INSTANCE_NAME
 	var target_res: InstanceResource = instance_collection.get(target_name, null)
 	if target_res != null:
-		var target_inst: ServerInstance
-		if target_res.charged_instances.is_empty():
-			target_inst = charge_instance(target_res)
-		else:
-			target_inst = target_res.get_instance(0)
+		var target_inst: ServerInstance = _instance_for_login(target_res)
 		if target_inst != null:
 			charge_new_instance.rpc_id(peer_id, target_res.map_path, target_inst.name)
 			target_inst.awaiting_peers[peer_id] = {} # {} = the map's default spawn point (index 0)
@@ -160,7 +159,15 @@ func _on_peer_connected(peer_id: int) -> void:
 
 	# Fallback: the tavern/jail map is missing or mid-load — land in the default overworld so
 	# we never strand the player in a black void.
-	charge_new_instance.rpc_id(peer_id, default_instance.map_path, default_instance.charged_instances[0].name)
+	if default_instance == null:
+		push_error("InstanceManagerServer: no default_instance for peer %d" % peer_id)
+		return
+	var fallback_inst: ServerInstance = _instance_for_login(default_instance)
+	if fallback_inst == null:
+		push_error("InstanceManagerServer: could not charge default_instance for peer %d" % peer_id)
+		return
+	charge_new_instance.rpc_id(peer_id, default_instance.map_path, fallback_inst.name)
+	fallback_inst.awaiting_peers[peer_id] = {}
 
 
 func _on_player_entered_warper(player: Player, current_instance: ServerInstance, warper: Warper) -> void:
