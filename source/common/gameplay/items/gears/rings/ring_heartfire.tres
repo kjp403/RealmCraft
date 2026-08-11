@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="GearItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/ring_ring_heartfire.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/ring.tres" id="4_slot"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("1_mod")
+value = 36.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[resource]
+script = ExtResource("3_gear")
+slot = ExtResource("4_slot")
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0")])
+item_name = &"Heartfire Ring"
+item_icon = ExtResource("2_icon")
+description = "Ruby-set gold that pulses with stubborn vitality."
+can_trade = true
+vendor_value = 750
+stack_limit = 5
+tags = PackedStringArray("ascension")
+metadata/_custom_type_script = "uid://dnmtdktay2df6"
+metadata/slug = &"ring_heartfire"
+metadata/id = 387

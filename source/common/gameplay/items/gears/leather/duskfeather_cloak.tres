@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="GearItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gear_duskfeather_cloak.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/torso.tres" id="4_slot"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("1_mod")
+stat_name = "armor"
+value = 7.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("1_mod")
+stat_name = "move_speed"
+value = 5.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_2"]
+script = ExtResource("1_mod")
+stat_name = "ad"
+value = 9.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[resource]
+script = ExtResource("3_gear")
+required_mastery_categories = Array[StringName]([&"any"])
+required_mastery_level = 55
+slot = ExtResource("4_slot")
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+item_name = &"Duskfeather Cloak"
+item_icon = ExtResource("2_icon")
+description = "Soft dusk-grey cloak favored by night stalkers."
+can_trade = true
+vendor_value = 400
+stack_limit = 5
+tags = PackedStringArray("ascension")
+metadata/_custom_type_script = "uid://dnmtdktay2df6"
+metadata/slug = &"duskfeather_cloak"
+metadata/id = 342

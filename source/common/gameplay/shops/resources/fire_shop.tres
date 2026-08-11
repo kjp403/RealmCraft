@@ -1,12 +1,47 @@
-[gd_resource type="Resource" script_class="ShopResource" format=3 uid="uid://ck0kstghphmgi"]
+[gd_resource type="Resource" script_class="ShopResource" format=3]
 
-[ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
-[ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
-[ext_resource type="Script" uid="uid://b1my10ee17j5b" path="res://source/common/gameplay/shops/shop_trade.gd" id="30_trade"]
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="3_mjhr3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="4_gmn70"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="5_5g0yj"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="6_mmw2q"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres" id="7_x4kyu"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="8_p8ty2"]
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_trade.gd" id="30_trade"]
+
+[sub_resource type="Resource" id="Resource_1xoer"]
+script = ExtResource("1_entry")
+item = ExtResource("3_mjhr3")
+price = 500
+
+[sub_resource type="Resource" id="Resource_wdbyg"]
+script = ExtResource("1_entry")
+item = ExtResource("4_gmn70")
+price = 500
+
+[sub_resource type="Resource" id="Resource_ls0y7"]
+script = ExtResource("1_entry")
+item = ExtResource("5_5g0yj")
+price = 500
+
+[sub_resource type="Resource" id="Resource_yfics"]
+script = ExtResource("1_entry")
+item = ExtResource("6_mmw2q")
+price = 500
+
+[sub_resource type="Resource" id="Resource_ewx4u"]
+script = ExtResource("1_entry")
+item = ExtResource("7_x4kyu")
+price = 4500
+
+[sub_resource type="Resource" id="Resource_qfs4f"]
+script = ExtResource("1_entry")
+item = ExtResource("8_p8ty2")
+price = 4500
 
 [resource]
 script = ExtResource("2_shop")
 shop_name = "The Ashmonger's Hoard"
-entries = Array[ExtResource("1_entry")]([])
-accepted_trades = Array[ExtResource("30_trade")]([])
+entries = Array[ExtResource("1_entry")]([SubResource("Resource_1xoer"), SubResource("Resource_wdbyg"), SubResource("Resource_ls0y7"), SubResource("Resource_yfics"), SubResource("Resource_ewx4u"), SubResource("Resource_qfs4f")])
 metadata/slug = &"fire_shop"
