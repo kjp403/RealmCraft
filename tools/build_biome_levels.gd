@@ -1171,14 +1171,6 @@ func _build_forge_gallery() -> void:
 		links.append([Vector2i(hall_x, ac.y), ac, _R(2.1), _R(1.7), 690 + i])
 	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
-	# Verified flat DG terracotta only — floor interest comes from stations, not noise.
-	var forge_floors := [
-		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
-		Vector2i(7, 2), Vector2i(5, 3), Vector2i(7, 3),
-	]
-	for cell: Vector2i in floor_mask.keys():
-		ground.set_cell(cell, 3, MapKit._pick(forge_floors, cell, 651))
-
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
 	for cell: Vector2i in void_mask.keys():
 		ground.set_cell(cell, 3, Vector2i(2, 2))
@@ -1254,7 +1246,6 @@ func _build_forge_gallery() -> void:
 			shore_cut.append(cell)
 	for cell: Vector2i in shore_cut:
 		lava_cells.erase(cell)
-		ground.set_cell(cell, 3, MapKit._pick(forge_floors, cell, 665))
 		walk[cell] = true
 	# Recompute basin centroids after the shore trim.
 	basin_centroids.clear()
@@ -1279,7 +1270,6 @@ func _build_forge_gallery() -> void:
 			# Tiny leftovers from the trim — restore to floor rather than leave freckles.
 			for c: Vector2i in blob_cells:
 				lava_cells.erase(c)
-				ground.set_cell(c, 3, MapKit._pick(forge_floors, c, 666))
 				walk[c] = true
 			continue
 		var sx := 0
@@ -1289,6 +1279,52 @@ func _build_forge_gallery() -> void:
 			sy += c.y
 		basin_centroids.append(Vector2i(int(sx / float(blob_cells.size())), int(sy / float(blob_cells.size()))))
 	walk = MapKit.largest_region(walk, entrance)
+
+	# --- Floor ---------------------------------------------------------------
+	# Painted after the basins settle, so the ash apron lands on the shores the
+	# trim actually left behind. The Gallery is the built floor of the Forge, so
+	# paving is the rule and raw slate the exception, and `bias` runs positive to
+	# put this level a value step above the Deeps.
+	var depth := ForgeFloor.depth_field(floor_mask)
+	var paved: Dictionary = {}
+	for link: Array in links:
+		MapKit.tunnel(paved, link[0], link[1], float(link[2]) * 0.5, float(link[3]), int(link[4]), _bounds)
+	for ry in hall_rows:
+		ForgeFloor.apron(paved, Vector2i(west, ry), _N(3))
+		ForgeFloor.apron(paved, Vector2i(east, ry), _N(3))
+	ForgeFloor.apron(paved, entrance, _N(4))
+	ForgeFloor.apron(paved, exit_cell, _N(2))
+	for cell: Vector2i in lava_cells.keys():
+		paved.erase(cell)
+
+	var owned: Dictionary = lava_cells.duplicate()
+	# A work plate at the head of every bay, on both halls.
+	for spot in [
+		Vector2i(west, _N(15)), Vector2i(east, _N(15)), Vector2i(west, _N(27)), Vector2i(east, _N(27)),
+		Vector2i(west, _N(39)), Vector2i(east, _N(39)), Vector2i(west, _N(51)), Vector2i(east, _N(51)),
+	]:
+		for cell: Vector2i in ForgeFloor.hearth(ground, floor_mask, LevelKit.pick_open(walk, spot)).keys():
+			owned[cell] = true
+	for cell: Vector2i in owned.keys():
+		paved.erase(cell)
+	for cell: Vector2i in ForgeFloor.pave(ground, paved, floor_mask, depth, 652, 0.34, float(S)).keys():
+		owned[cell] = true
+	ForgeFloor.paint_slate(ground, floor_mask, depth, 651, {
+		"bias": 0.10,
+		"scorch": ForgeFloor.scorch_of(lava_cells, floor_mask, _N(2)),
+		"skip": owned,
+		"unit": float(S),
+	})
+
+	# Iron decking over the middle of each cross bridge — the span itself, not
+	# the approaches. The mesh is see-through, so it goes on Props above the
+	# paving and reads as grating rather than as another floor colour.
+	var deck: Dictionary = {}
+	for ry in [_N(18), _N(42)]:
+		var a := Vector2(float(west), float(ry))
+		var b := Vector2(float(east), float(ry))
+		ForgeFloor.road(deck, Vector2i(a.lerp(b, 0.32)), Vector2i(a.lerp(b, 0.68)), _N(2))
+	ForgeFloor.catwalk(props, deck, walk, 653)
 
 	# Lava rocks live IN the basins only (opaque lava-sheet tiles).
 	for cell in MapKit.scatter(lava_cells.keys(), 0.22, _N(2), 663):
@@ -1374,6 +1410,10 @@ func _build_forge_gallery() -> void:
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
+
+	# Swept slag along the hall walls — floor wear, not another prop pass.
+	LevelKit.scatter_flat(overlay, ForgeFloor.SOURCE, wall_edges, ForgeFloor.RUBBLE, _dense(0.10), _N(3), 674, solid)
+	LevelKit.scatter_flat(overlay, ForgeFloor.SOURCE, walk.keys(), ForgeFloor.RUBBLE, _dense(0.02), _N(4), 675, solid)
 
 	# Animated braziers: shore torches per basin + arrival / bridge mouths.
 	var decos: Array = []
@@ -1530,13 +1570,6 @@ func _build_forge_deeps() -> void:
 	chambers.append([lake, _R(17.0), 0.16, 750])
 	var floor_mask := _carve(chambers, links, _N(4), arrival)
 
-	var forge_floors := [
-		Vector2i(5, 1), Vector2i(7, 1), Vector2i(5, 2),
-		Vector2i(7, 2), Vector2i(5, 3), Vector2i(7, 3),
-	]
-	for cell: Vector2i in floor_mask.keys():
-		ground.set_cell(cell, 3, MapKit._pick(forge_floors, cell, 751))
-
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
 	for cell: Vector2i in void_mask.keys():
 		ground.set_cell(cell, 3, Vector2i(2, 2))
@@ -1582,6 +1615,37 @@ func _build_forge_deeps() -> void:
 	# The boss holds the shore the causeway lands on.
 	var shore := LevelKit.pick_open(walk, lake + _L(0, 15))
 
+	# --- Floor ---------------------------------------------------------------
+	# Below the foundry nobody paves anything except the route itself. The Deeps
+	# are raw slate at a negative bias — a clear step darker than the Gallery —
+	# with an ash apron burnt into every metre near the magma, and one worn
+	# ribbon of old foundry paving winding down the spiral. That ribbon is the
+	# level's only navigation aid, and the reason a player can tell which ledge
+	# they have already walked.
+	var deeps_depth := ForgeFloor.depth_field(floor_mask)
+	var descent: Dictionary = {}
+	for link: Array in links:
+		MapKit.tunnel(descent, link[0], link[1], float(link[2]) * 0.42, float(link[3]), int(link[4]), _bounds)
+	ForgeFloor.apron(descent, entrance, _N(4))
+	ForgeFloor.apron(descent, exit_cell, _N(2))
+	ForgeFloor.apron(descent, shore, _N(5))
+	for cell: Vector2i in lava_cells.keys():
+		descent.erase(cell)
+
+	# The lava is already on Ground here, so it is excluded by name — the floor
+	# pass covers the whole carved mask, including cells under the wall rim, so
+	# no gap can open behind a transparent rim pixel. `wear` runs high: this is
+	# the oldest paving in the Forge and most of it has cracked back to rock.
+	var deeps_owned: Dictionary = lava_cells.duplicate()
+	for cell: Vector2i in ForgeFloor.pave(ground, descent, floor_mask, deeps_depth, 752, 0.42, float(S)).keys():
+		deeps_owned[cell] = true
+	ForgeFloor.paint_slate(ground, floor_mask, deeps_depth, 751, {
+		"bias": -0.14,
+		"scorch": ForgeFloor.scorch_of(lava_cells, floor_mask, _N(3)),
+		"skip": deeps_owned,
+		"unit": float(S),
+	})
+
 	var blocked_all := blocked.duplicate()
 	for cell: Vector2i in lava_cells.keys():
 		blocked_all[cell] = true
@@ -1605,6 +1669,9 @@ func _build_forge_deeps() -> void:
 	walk = MapKit.largest_region(walk, entrance)
 
 	LevelKit.scatter_flat(overlay, 0, inner, [Vector2i(2, 1), Vector2i(3, 1)], _dense(0.025), _N(7), 774, solid)
+	# Fallen rock, heavier here than in the Gallery: nothing sweeps this floor.
+	LevelKit.scatter_flat(overlay, ForgeFloor.SOURCE, edges, ForgeFloor.RUBBLE, _dense(0.14), _N(3), 785, solid)
+	LevelKit.scatter_flat(overlay, ForgeFloor.SOURCE, inner, ForgeFloor.RUBBLE, _dense(0.05), _N(5), 786, solid)
 
 	var decos: Array = []
 	var ti := 0

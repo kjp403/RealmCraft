@@ -62,10 +62,15 @@ func _build_fire_forge() -> void:
 	# 1 = GIF-derived animated lava (7 frames × N rows; paint origin cell only)
 	# 2 = packed 16×16 props (rocks / chest)
 	# 3 = DG Fire free masonry (proper wall shell tiles)
+	# 4 = Fire Forge foundry sheet — the only bank in this biome with a genuinely
+	#     textured walkable floor. DG Fire's "floor" cells (source 3, cols 5/7)
+	#     are flat single-colour fills, which is what made every Forge level read
+	#     as a painted background. `forgefloor.gd` owns the cell picks.
 	_add_atlas(ts, 0, "res://assets/sprites/environment/lava_forge_16/freelavatileset_sheet.png", 16, true)
 	_add_atlas(ts, 1, "res://assets/sprites/environment/lava_forge_16/lava_tile_anim_strip.png", 16, true)
 	_add_atlas(ts, 2, "res://assets/sprites/environment/lava_forge_16/forge_props_16.png", 16, true)
 	_add_atlas(ts, 3, "res://assets/sprites/environment/dg_fire/all_tiles_free.png", 16, true)
+	_add_atlas(ts, 4, "res://assets/sprites/environment/fire_forge/tiles.png", 16, true)
 	_setup_row_animations(ts, 1, 7, 8.0)
 
 	# Lava hazard on source 0 (static fill + edges) + anim origins on source 1.
@@ -99,6 +104,9 @@ func _build_fire_forge() -> void:
 		for x in range(1, 8):
 			rock_block.append(Vector2i(x, y))
 	_mark_collision(ts, 0, rock_block)
+	# Source 4 is deliberately collision-free: `forgefloor.gd` only ever paints
+	# walkable floor, flat wear decals and see-through catwalk mesh from it. A
+	# blocking tile in that bank would land under the player's feet on Ground.
 	_save(ts, OUT_DIR + "fire_forge_tileset.tres")
 
 
