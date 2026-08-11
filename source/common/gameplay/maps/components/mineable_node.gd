@@ -197,8 +197,17 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 
 	# Full drain — decide the yield first so a full bag rejects without eating a charge.
 	var amount: int = data.yield_amount
-	if job_perks_resource != null \
-			and randf() < job_perks_resource.effective_bonus_yield_chance(job_level, job_perks):
+	var bonus_chance: float = 0.0
+	if job_perks_resource != null:
+		bonus_chance = job_perks_resource.effective_bonus_yield_chance(job_level, job_perks)
+	# Equipped gathering tool can add a modest double-yield chance (metal tiers).
+	var tool_bonus: float = _equipped_tool_bonus_yield(player)
+	if tool_bonus > 0.0:
+		var abs_max: float = 0.5
+		if job_perks_resource != null:
+			abs_max = job_perks_resource.abs_max_bonus_yield_chance
+		bonus_chance = minf(abs_max, bonus_chance + tool_bonus)
+	if bonus_chance > 0.0 and randf() < bonus_chance:
 		amount += 1
 
 	var caught: Item = data.ore
@@ -286,6 +295,19 @@ func _primary_job() -> StringName:
 	if data == null or data.job_xp.is_empty():
 		return &""
 	return data.job_xp.keys()[0]
+
+
+## Equipped ToolItem double-yield chance (0 if bare hands / combat weapon).
+func _equipped_tool_bonus_yield(player: Player) -> float:
+	if player == null or player.player_resource == null:
+		return 0.0
+	var weapon_id: int = int(player.player_resource.equipment.get(&"weapon", 0))
+	if weapon_id <= 0:
+		return 0.0
+	var item: Item = ContentRegistryHub.load_by_id(&"items", weapon_id) as Item
+	if item is ToolItem:
+		return maxf(0.0, (item as ToolItem).bonus_yield_chance)
+	return 0.0
 
 
 # ---------------------------------------------------------------------------

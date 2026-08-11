@@ -17,6 +17,9 @@ extends WeaponItem
 ## Optional profession skill gate (e.g. &"fishing"). Empty = no skill gate.
 @export var required_skill: StringName = &""
 @export_range(0, 99, 1.0, "suffix:lvl") var required_skill_level: int = 0
+## Extra chance to yield +1 resource on a successful gather (0.0–1.0). Stacks
+## with job perk / level bonus yield, still soft-capped by JobPerks.abs_max.
+@export_range(0.0, 0.5, 0.01) var bonus_yield_chance: float = 0.0
 
 
 func group_key() -> StringName:
@@ -69,8 +72,15 @@ func stat_lines() -> Array[Dictionary]:
 			],
 			"kind": &"level",
 		})
+	if bonus_yield_chance > 0.0:
+		lines.append({
+			"text": "+%d%% double resources" % roundi(bonus_yield_chance * 100.0),
+			"kind": &"weapon",
+		})
 	if tool_type == &"fishing_rod" and extraction_damage > 0:
 		lines.append({"text": "Catch power %d" % extraction_damage, "kind": &"weapon"})
 		if swing_cooldown > 0.0 and swing_cooldown < 0.49:
 			lines.append({"text": "Faster casts", "kind": &"weapon"})
+	elif extraction_damage > 1:
+		lines.append({"text": "Gather power %d" % extraction_damage, "kind": &"weapon"})
 	return lines

@@ -179,8 +179,8 @@ func refresh_nameplate_color() -> void:
 
 
 ## Lock control while dead, then teleport ourselves to the spawn point (the server owns
-## HP + the dead flag; position is ours to set). Boss-arena deaths set return_home —
-## the server switches instance after the delay, so skip the local snap.
+## HP + the dead flag; position is ours to set). Deaths with return_home
+## (Guild Hall recall) skip the local snap — the server switches instance after the delay.
 func _on_player_died(data: Dictionary) -> void:
 	_dead = true
 	_respawn_position = data.get("spawn", global_position)
