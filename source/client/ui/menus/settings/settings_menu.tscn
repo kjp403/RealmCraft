@@ -212,6 +212,12 @@ theme_override_font_sizes/font_size = 20
 text = "Account"
 horizontal_alignment = 1
 
+[node name="CommandsButton" type="Button" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer/Account"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Chat commands"
+tooltip_text = "Show chat commands available to your account."
+
 [node name="DiscordButton" type="Button" parent="MainContainer/Root/HBoxContainer/General/ScrollContainer/VBoxContainer/Account"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2

@@ -60,7 +60,17 @@ static func hover_text(item: Item) -> String:
 ## counterpart) to append green/red per-stat deltas — stats only the equipped
 ## item has are listed as a red loss line. Null keeps the plain rendering, so
 ## shop/crafting callers are untouched.
-static func body(item: Item, compare_with: Item = null) -> String:
+##
+## When [param craft_profession] is set, mastery wear-gates are omitted and a
+## "Requires <profession> level N" line is appended instead — craft stations
+## gate on skill level; mastery is only for wearing the finished piece.
+static func body(
+	item: Item,
+	compare_with: Item = null,
+	craft_profession: StringName = &"",
+	craft_level: int = 0,
+	profession_level: int = 1,
+) -> String:
 	if item == null:
 		return ""
 	var sections: PackedStringArray = PackedStringArray()
@@ -68,10 +78,19 @@ static func body(item: Item, compare_with: Item = null) -> String:
 	var own_stats: Dictionary = _modifier_map(item)
 	var other_stats: Dictionary = _modifier_map(compare_with)
 	for entry: Dictionary in item.stat_lines():
+		if not craft_profession.is_empty() and StringName(entry.get("req_kind", &"")) == &"mastery":
+			continue
 		var line: String = "[color=#%s]%s[/color]" % [_entry_color(entry, item), str(entry.get("text", ""))]
 		if compare_with != null and entry.has("stat"):
 			line += _delta_suffix(StringName(entry["stat"]), own_stats, other_stats)
 		stat_block.append(line)
+	if not craft_profession.is_empty() and craft_level > 0:
+		var meets: bool = profession_level >= craft_level
+		stat_block.append("[color=#%s]Requires %s level %d[/color]" % [
+			LEVEL_MET_COLOR if meets else LEVEL_COLOR,
+			JobRegistry.display_name(craft_profession),
+			craft_level,
+		])
 	if compare_with != null:
 		for stat: StringName in other_stats:
 			if not own_stats.has(stat) and not is_zero_approx(float(other_stats[stat])):

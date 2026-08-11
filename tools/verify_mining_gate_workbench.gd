@@ -49,6 +49,10 @@ func _init() -> void:
 		failures.append("gate missing ClientState.skill_level client path")
 	if gate_src.find(">= required_level") < 0:
 		failures.append("gate missing >= required_level check")
+	if gate_src.find("eject_direction") < 0:
+		failures.append("gate missing eject_direction (null-spot fix)")
+	if cave_text.find("eject_direction = Vector2(-1, 0)") < 0:
+		failures.append("DeepVeinGate missing leftward eject_direction")
 
 	if failures.is_empty():
 		print("VERIFY_PASS mining_gate workbench=(-539,-119)")

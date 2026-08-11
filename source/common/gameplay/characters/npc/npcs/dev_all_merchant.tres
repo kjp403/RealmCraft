@@ -9,7 +9,6 @@
 [ext_resource type="Resource" uid="uid://djgywpgriaux" path="res://source/common/gameplay/shops/resources/spore_shop.tres" id="10_s2"]
 [ext_resource type="Resource" uid="uid://dw5hj55lha5ld" path="res://source/common/gameplay/shops/resources/rustic_shop.tres" id="10_s3"]
 [ext_resource type="Resource" uid="uid://ck0kstghphmgi" path="res://source/common/gameplay/shops/resources/fire_shop.tres" id="10_s7"]
-[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/ascension_shop.tres" id="10_s8"]
 
 [sub_resource type="Resource" id="Shop_0"]
 script = ExtResource("2_shopint")
@@ -36,14 +35,9 @@ script = ExtResource("2_shopint")
 shop = ExtResource("10_s7")
 label_override = "Fire · The Ashmonger's Hoard"
 
-[sub_resource type="Resource" id="Shop_8"]
-script = ExtResource("2_shopint")
-shop = ExtResource("10_s8")
-label_override = "Ascension · Emporium"
-
 [resource]
 script = ExtResource("5_npc")
 npc_name = "Horizon the Peddler of Everything"
 skin = ExtResource("6_skin")
 greeting = "Every shelf from the green country to the fire, in one bag. Do not ask how it fits. Testing purposes, friend. Testing purposes."
-interactions = Array[ExtResource("1_inter")]([SubResource("Shop_0"), SubResource("Shop_1"), SubResource("Shop_2"), SubResource("Shop_3"), SubResource("Shop_7"), SubResource("Shop_8")])
+interactions = Array[ExtResource("1_inter")]([SubResource("Shop_0"), SubResource("Shop_1"), SubResource("Shop_2"), SubResource("Shop_3"), SubResource("Shop_7")])

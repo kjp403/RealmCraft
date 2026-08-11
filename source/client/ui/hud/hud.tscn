@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://claf178meo0f7" path="res://source/client/ui/hud/notification_popup.gd" id="6_yow4d"]
 [ext_resource type="PackedScene" uid="uid://l5oto05m20wi" path="res://source/client/ui/hud/touch_stick/twin_sticks.tscn" id="7_popxh"]
 [ext_resource type="Script" uid="uid://clicvxchvi5an" path="res://source/client/ui/hud/quest_tracker.gd" id="8_qtrack"]
+[ext_resource type="Script" path="res://source/client/ui/hud/slayer_tracker.gd" id="8_slayer"]
 [ext_resource type="Script" uid="uid://cvras2gvcldqx" path="res://source/client/ui/hud/trade_panel.gd" id="9_trade"]
 [ext_resource type="Script" uid="uid://b573js8q3lmn8" path="res://source/client/ui/hud/ability_bar.gd" id="10_abilitybar"]
 [ext_resource type="Script" uid="uid://5w3b2d61o6d8" path="res://source/client/ui/hud/status_bar.gd" id="11_statusbar"]
@@ -64,6 +65,21 @@ offset_bottom = 37.0
 grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("8_qtrack")
+
+[node name="SlayerTracker" type="PanelContainer" parent="."]
+visible = false
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 220.0
+offset_right = -16.0
+offset_bottom = 280.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("8_slayer")
 
 [node name="ItemSlots" type="Control" parent="." unique_id=1807845814]
 layout_mode = 1
