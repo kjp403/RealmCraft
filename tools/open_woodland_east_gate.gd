@@ -1,6 +1,7 @@
 extends SceneTree
-## Open Goblin Woodland's east seal into a short transition grove + portal plaza
-## that leads to the East Wilds (real biome maps). Does NOT stripe-fill the map.
+## Open Goblin Woodland's east seal into a transition grove + portal into the
+## contiguous Goblin Woodlands East expansion. Does NOT stripe-fill the map.
+## Does NOT touch Desert / Sewers / Fire Forge maps.
 ##
 ##   godot --headless --path . -s tools/open_woodland_east_gate.gd
 
@@ -43,7 +44,7 @@ func _initialize() -> void:
 			walls.erase_cell(Vector2i(x, y))
 			ground.set_cell(Vector2i(x, y), SRC_FLOOR, MapKit._pick(DIRT, Vector2i(x, y), 1))
 
-	# Transition grove: organic blob just east of the seal
+	# Transition grove: organic blob just east of the seal — approaches the portal
 	var bounds := Rect2i(181, 20, 55, 55)
 	var grove := {}
 	MapKit.blob(grove, Vector2i(205, 40), 18.0, 0.28, 11, bounds)
@@ -94,65 +95,69 @@ func _initialize() -> void:
 	if features:
 		original = _replace_layer_blob(original, "Features", features.tile_map_data)
 
-	# Camera: cover grove + a little margin (not 17k px)
 	original = _replace_prop(original, "camera_limit_right", "4200")
 	if not original.contains("\naoi_mode ="):
 		var cam_i := original.find("camera_limit_left = 0")
 		if cam_i >= 0:
 			original = original.substr(0, cam_i) + "aoi_mode = 1\naoi_cell_size = Vector2i(250, 250)\naoi_visible_radius_cells = 2\n" + original.substr(cam_i)
 
-	# Ext resources for portal target + east shore
-	if not original.contains("woodland_east_wilds.tres"):
+	# Point at contiguous Goblin Woodlands East (not the old portal hub).
+	original = original.replace(
+		"res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east_wilds.tres",
+		"res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east.tres"
+	)
+	if not original.contains("woodland_east.tres"):
 		var anchor := original.find("[ext_resource type=\"Resource\" uid=\"uid://iuqxmo63ipnn\"")
 		var line_end := original.find("\n", anchor)
-		original = original.substr(0, line_end + 1) + '[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east_wilds.tres" id="60_eastwilds"]\n' + original.substr(line_end + 1)
+		original = original.substr(0, line_end + 1) + '[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east.tres" id="60_eastwilds"]\n' + original.substr(line_end + 1)
 	if not original.contains("woodland_east_shore.tscn"):
 		var deep := original.find("path=\"res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn\"")
 		var le := original.find("\n", deep)
 		original = original.substr(0, le + 1) + '[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_shore.tscn" id="30_eastshore"]\n' + original.substr(le + 1)
 
-	# Remove old mega-expansion nodes / stub labels if present
 	original = _strip_node_block(original, "BiomeLandmarks")
 	original = _strip_node_block(original, "WoodlandEastShore")
 	original = _strip_node_block(original, "EastWildsPortal")
 	original = _strip_node_block(original, "EastWildsLanding")
 	original = _strip_node_block(original, "EastWildsLabel")
+	original = _strip_node_block(original, "WoodlandEastPortal")
+	original = _strip_node_block(original, "WoodlandEastLanding")
+	original = _strip_node_block(original, "WoodlandEastLabel")
 
-	# Insert portal + invisible return landing + shore + label before BeachVoidBounds.
-	# Landing warper_id=60 is the return pad for East Wilds hub/biomes; the portal
-	# itself uses 59 so returns do not stack on the outbound trigger.
 	var insert_at := original.find("[node name=\"BeachVoidBounds\"")
-	var nodes := """[node name="EastWildsPortal" parent="." instance=ExtResource("4_2dprc")]
+	var nodes := """[node name="WoodlandEastPortal" parent="." instance=ExtResource("4_2dprc")]
 position = Vector2(3648, 640)
-portal_color = Color(0.55, 0.42, 0.18, 1)
-destination_label = "East Wilds"
+portal_color = Color(0.45, 0.62, 0.28, 1)
+destination_label = "Goblin Woodlands East"
 target_instance = ExtResource("60_eastwilds")
 warper_id = 59
 target_id = 60
 
-[node name="EastWildsLanding" parent="." instance=ExtResource("5_jiw8u")]
+[node name="WoodlandEastLanding" parent="." instance=ExtResource("5_jiw8u")]
 position = Vector2(3616, 672)
 warper_id = 60
 
-[node name="EastWildsLabel" type="Label" parent="."]
-offset_left = 3520.0
+[node name="WoodlandEastLabel" type="Label" parent="."]
+offset_left = 3480.0
 offset_top = 560.0
-offset_right = 3780.0
+offset_right = 3820.0
 offset_bottom = 592.0
-theme_override_colors/font_color = Color(1, 0.9, 0.55, 1)
+theme_override_colors/font_color = Color(0.85, 0.95, 0.55, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 16
-text = "East Wilds"
+text = "Goblin Woodlands East"
 horizontal_alignment = 1
 
 [node name="WoodlandEastShore" parent="." instance=ExtResource("30_eastshore")]
 position = Vector2(2436, 1540)
 
 """
+	# Keep ext_resource id stable even if still named 60_eastwilds
+	if original.contains('id="60_eastwilds"'):
+		pass
 	original = original.substr(0, insert_at) + nodes + original.substr(insert_at)
 
-	# Beach void push
 	original = original.replace(
 		"position = Vector2(2460, 1780)\nshape = SubResource(\"BeachVoidEast\")",
 		"position = Vector2(3140, 1780)\nshape = SubResource(\"BeachVoidEast\")"
@@ -178,10 +183,8 @@ func _strip_node_block(text: String, node_name: String) -> String:
 	var start := text.find(marker)
 	if start < 0:
 		return text
-	# Include child nodes until next top-level [node name= that isn't a child path
 	var i := start
 	var end := text.find("\n[node name=\"", start + marker.length())
-	# Also catch nested children: keep eating while parent="NodeName or parent="NodeName/
 	while true:
 		var next := text.find("\n[node name=\"", i + 1)
 		if next < 0:
@@ -199,20 +202,20 @@ func _strip_node_block(text: String, node_name: String) -> String:
 
 
 func _replace_layer_blob(text: String, layer_name: String, data: PackedByteArray) -> String:
-	var b64 := Marshalls.raw_to_base64(data)
-	var node_idx := text.find('[node name="%s"' % layer_name)
-	var data_key := "tile_map_data = PackedByteArray(\""
-	var data_idx := text.find(data_key, node_idx)
-	var start := data_idx + data_key.length()
-	var end := text.find("\")", start)
-	return text.substr(0, start) + b64 + text.substr(end)
-
-
-func _replace_prop(text: String, prop: String, value: String) -> String:
-	var key := prop + " = "
-	var idx := text.find(key)
-	if idx < 0:
+	var marker := '[node name="%s"' % layer_name
+	var start := text.find(marker)
+	if start < 0:
 		return text
-	var start := idx + key.length()
-	var end := text.find("\n", start)
-	return text.substr(0, start) + value + text.substr(end)
+	var data_key := "tile_map_data = PackedByteArray(\""
+	var data_i := text.find(data_key, start)
+	if data_i < 0:
+		return text
+	var q0 := data_i + data_key.length()
+	var q1 := text.find("\")", q0)
+	return text.substr(0, q0) + Marshalls.raw_to_base64(data) + text.substr(q1)
+
+
+func _replace_prop(text: String, key: String, value: String) -> String:
+	var re := RegEx.new()
+	re.compile("%s = .*" % key)
+	return re.sub(text, "%s = %s" % [key, value], false)

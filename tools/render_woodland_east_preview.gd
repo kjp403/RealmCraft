@@ -1,5 +1,5 @@
 extends SceneTree
-## Preview shots for East Wilds hub + biome stubs.
+## Preview shots for contiguous Goblin Woodlands East.
 ##   godot --path . -s tools/render_woodland_east_preview.gd
 
 const OUT := "/opt/cursor/artifacts/screenshots"
@@ -14,28 +14,38 @@ const SHOTS: Array[Dictionary] = [
 		"size": Vector2i(1100, 720),
 	},
 	{
-		"name": "woodland-east-wilds",
-		"path": MAPS + "woodland_east_wilds.tscn",
-		"size_cells": Vector2i(88, 64),
+		"name": "woodland-east-overview",
+		"path": MAPS + "woodland_east.tscn",
+		"size_cells": Vector2i(240, 180),
 		"overview": true,
+	},
+	{
+		"name": "woodland-east-crossroads",
+		"path": MAPS + "woodland_east.tscn",
+		"center": Vector2(1536, 1536),
+		"zoom": 0.45,
+		"size": Vector2i(1280, 900),
 	},
 	{
 		"name": "woodland-east-dunes",
-		"path": MAPS + "east_dunes.tscn",
-		"size_cells": Vector2i(104, 76),
-		"overview": true,
+		"path": MAPS + "woodland_east.tscn",
+		"center": Vector2(1536, 640),
+		"zoom": 0.5,
+		"size": Vector2i(1200, 900),
 	},
 	{
 		"name": "woodland-east-wetlands",
-		"path": MAPS + "east_wetlands.tscn",
-		"size_cells": Vector2i(112, 84),
-		"overview": true,
+		"path": MAPS + "woodland_east.tscn",
+		"center": Vector2(3072, 1472),
+		"zoom": 0.5,
+		"size": Vector2i(1200, 900),
 	},
 	{
 		"name": "woodland-east-ash",
-		"path": MAPS + "east_ash_fields.tscn",
-		"size_cells": Vector2i(112, 84),
-		"overview": true,
+		"path": MAPS + "woodland_east.tscn",
+		"center": Vector2(1664, 2304),
+		"zoom": 0.5,
+		"size": Vector2i(1200, 900),
 	},
 ]
 
@@ -50,7 +60,7 @@ func _go() -> void:
 	for shot in SHOTS:
 		if shot.get("overview", false):
 			var world := Vector2(shot["size_cells"] as Vector2i) * 16.0
-			var vp_size := Vector2i(1400, 1100)
+			var vp_size := Vector2i(1600, 1200)
 			var zoom: float = minf(float(vp_size.x) / world.x, float(vp_size.y) / world.y) * 0.96
 			await _shot(shot["path"], vp_size, world * 0.5, zoom, "%s/%s.png" % [OUT, shot["name"]])
 		else:

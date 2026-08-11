@@ -1,17 +1,30 @@
 extends SceneTree
-## Gate for woodland east wilds expansion (hub + 3 biomes, no stripe mega-fill).
+## Gate for contiguous Goblin Woodlands East expansion.
 ## Run: godot --headless --path . -s tools/verify_woodland_east_expand.gd
 
 func _initialize() -> void:
 	var fails: PackedStringArray = PackedStringArray()
 
+	# Never touch these biome maps.
+	for forbidden in [
+		"res://source/common/gameplay/maps/maps/desert/desert.tscn",
+		"res://source/common/gameplay/maps/maps/sewers/sewers.tscn",
+		"res://source/common/gameplay/maps/maps/fire_forge/fire_forge.tscn",
+	]:
+		if not ResourceLoader.exists(forbidden):
+			fails.append("missing reference biome (unexpected): %s" % forbidden)
+
 	var txt := FileAccess.get_file_as_string("res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn")
-	if not txt.contains("EastWildsPortal"):
-		fails.append("EastWildsPortal missing")
-	if not txt.contains("EastWildsLanding"):
-		fails.append("EastWildsLanding missing")
-	if not txt.contains("woodland_east_wilds.tres"):
-		fails.append("east wilds instance ext_resource missing")
+	if not txt.contains("WoodlandEastPortal"):
+		fails.append("WoodlandEastPortal missing")
+	if not txt.contains("WoodlandEastLanding"):
+		fails.append("WoodlandEastLanding missing")
+	if not txt.contains("woodland_east.tres"):
+		fails.append("woodland_east instance ext_resource missing")
+	if txt.contains("woodland_east_wilds.tres"):
+		fails.append("old east_wilds hub still referenced")
+	if txt.contains("EastWildsPortal"):
+		fails.append("old EastWildsPortal still present")
 	if not txt.contains("WoodlandEastShore"):
 		fails.append("WoodlandEastShore missing")
 	if txt.contains("BiomeLandmarks"):
@@ -26,7 +39,6 @@ func _initialize() -> void:
 	print("ground_rect=", rect)
 	if rect.position.x != 0 or rect.position.y != 0:
 		fails.append("west origin shifted")
-	# Short transition grove only — not the 5x stripe fill (~1000+ wide).
 	if rect.size.x >= 250:
 		fails.append("stripe mega-expansion still present (ground width=%d, want <250)" % rect.size.x)
 	if rect.size.x < 200:
@@ -42,78 +54,77 @@ func _initialize() -> void:
 	if blocked > 0:
 		fails.append("main east gate blocked (%d)" % blocked)
 
-	var portal := map.find_child("EastWildsPortal", true, false)
+	var portal := map.find_child("WoodlandEastPortal", true, false)
 	if portal == null:
-		fails.append("EastWildsPortal node missing")
+		fails.append("WoodlandEastPortal node missing")
 	elif int(portal.get("warper_id")) != 59 or int(portal.get("target_id")) != 60:
-		fails.append("EastWildsPortal ids want warper=59 target=60 got %s/%s" % [
+		fails.append("WoodlandEastPortal ids want warper=59 target=60 got %s/%s" % [
 			str(portal.get("warper_id")), str(portal.get("target_id"))
 		])
-	var landing := map.find_child("EastWildsLanding", true, false)
+	var landing := map.find_child("WoodlandEastLanding", true, false)
 	if landing == null:
-		fails.append("EastWildsLanding node missing")
+		fails.append("WoodlandEastLanding node missing")
 	elif int(landing.get("warper_id")) != 60:
-		fails.append("EastWildsLanding warper_id want 60")
+		fails.append("WoodlandEastLanding warper_id want 60")
 
-	var maps := {
-		"hub": "res://source/common/gameplay/maps/maps/woodland/woodland_east_wilds.tscn",
-		"dunes": "res://source/common/gameplay/maps/maps/woodland/east_dunes.tscn",
-		"wetlands": "res://source/common/gameplay/maps/maps/woodland/east_wetlands.tscn",
-		"ash": "res://source/common/gameplay/maps/maps/woodland/east_ash_fields.tscn",
-	}
-	var want_ids := {
-		"hub": {"Entrance": 60, "WoodlandPortal": 160, "DunesPortal": 71, "WetlandsPortal": 72, "AshPortal": 73},
-		"dunes": {"Entrance": 61, "Portal": 161},
-		"wetlands": {"Entrance": 62, "Portal": 162},
-		"ash": {"Entrance": 63, "Portal": 163},
-	}
-	for key in maps.keys():
-		var path: String = maps[key]
-		if not ResourceLoader.exists(path):
-			fails.append("%s map missing: %s" % [key, path])
-			continue
-		var scene: Node = load(path).instantiate()
-		print("loaded ", key, " root=", scene.name)
-		var g: TileMapLayer = scene.find_child("Ground", true, false)
-		if g == null:
-			fails.append("%s missing Ground" % key)
-		else:
-			var gr: Rect2i = g.get_used_rect()
-			print(key, " ground_rect=", gr)
-			if gr.size.x >= 250:
-				fails.append("%s ground too wide (stripe?): %d" % [key, gr.size.x])
-			if gr.size.x < 40 or gr.size.y < 40:
-				fails.append("%s ground too small: %s" % [key, gr])
-		for node_name in want_ids[key].keys():
-			var n: Node = scene.find_child(node_name, true, false)
-			if n == null:
-				fails.append("%s missing %s" % [key, node_name])
+	# Contiguous expansion map — one outdoor wing, not portal-hub biomes.
+	var east_path := "res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
+	if not ResourceLoader.exists(east_path):
+		fails.append("woodland_east map missing")
+	else:
+		var east: Node = load(east_path).instantiate()
+		print("loaded woodland_east root=", east.name)
+		for layer_name in ["GroundWood", "GroundDunes", "GroundWetlands", "GroundAsh", "Backdrop"]:
+			var layer: TileMapLayer = east.find_child(layer_name, true, false)
+			if layer == null:
+				fails.append("woodland_east missing %s" % layer_name)
 				continue
-			var wid: int = int(n.get("warper_id"))
-			var expect: int = int(want_ids[key][node_name])
-			if wid != expect:
-				fails.append("%s.%s warper_id=%d want %d" % [key, node_name, wid, expect])
-		if key != "hub":
-			var p: Node = scene.find_child("Portal", true, false)
-			if p and int(p.get("target_id")) != 60:
-				fails.append("%s Portal target_id want 60" % key)
-		scene.free()
+			var gr: Rect2i = layer.get_used_rect()
+			print(layer_name, " used=", gr, " cells=", layer.get_used_cells().size())
+			if layer_name != "Backdrop" and layer.get_used_cells().size() < 800:
+				fails.append("%s too sparse: %d" % [layer_name, layer.get_used_cells().size()])
+		var entrance := east.find_child("Entrance", true, false)
+		var back := east.find_child("WoodlandPortal", true, false)
+		if entrance == null or int(entrance.get("warper_id")) != 60:
+			fails.append("woodland_east Entrance warper_id want 60")
+		if back == null or int(back.get("warper_id")) != 160 or int(back.get("target_id")) != 60:
+			fails.append("woodland_east WoodlandPortal ids want 160→60")
+		# No deep-links into Desert / Sewers / Fire Forge instances.
+		var scene_txt := FileAccess.get_file_as_string(east_path)
+		for bad in ["desert.tres", "sewers.tres", "fire_forge.tres", "east_dunes", "east_wetlands", "east_ash"]:
+			if scene_txt.contains(bad):
+				fails.append("woodland_east still references %s" % bad)
+		# Camera covers the outdoor wing
+		if not scene_txt.contains("camera_limit_right = 3856"):
+			# allow nearby sizes from SURFACE_S
+			var cam_ok := false
+			for n in range(3500, 4500):
+				if scene_txt.contains("camera_limit_right = %d" % n):
+					cam_ok = true
+					break
+			if not cam_ok:
+				fails.append("woodland_east camera_limit_right unexpected")
+		east.free()
 
-	var tres := [
+	# Old hub/stub maps must not be the travel targets anymore.
+	for stale in [
 		"res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east_wilds.tres",
 		"res://source/common/gameplay/maps/instance/instance_collection/biomes/east_dunes.tres",
 		"res://source/common/gameplay/maps/instance/instance_collection/biomes/east_wetlands.tres",
 		"res://source/common/gameplay/maps/instance/instance_collection/biomes/east_ash_fields.tres",
-	]
-	for tpath in tres:
-		if not ResourceLoader.exists(tpath):
-			fails.append("missing instance: %s" % tpath)
-			continue
-		var ir = load(tpath)
-		if ir == null or String(ir.instance_name).is_empty():
-			fails.append("bad instance resource: %s" % tpath)
+	]:
+		if ResourceLoader.exists(stale):
+			fails.append("stale instance still present (remove): %s" % stale)
+
+	var tres := "res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east.tres"
+	if not ResourceLoader.exists(tres):
+		fails.append("missing instance: %s" % tres)
+	else:
+		var ir = load(tres)
+		if ir == null or String(ir.instance_name) != "woodland_east":
+			fails.append("bad woodland_east instance_name")
 		elif not ResourceLoader.exists(ir.map_path):
-			fails.append("%s map_path missing: %s" % [tpath, ir.map_path])
+			fails.append("woodland_east map_path missing: %s" % ir.map_path)
 
 	map.free()
 	if fails.is_empty():

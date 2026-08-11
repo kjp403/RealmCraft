@@ -31,7 +31,7 @@
 [ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
 [ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="28_fungus"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east_wilds.tres" id="60_eastwilds"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland_east.tres" id="60_eastwilds"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/mining_cave.tres" id="28_mining"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
@@ -1701,28 +1701,31 @@ position = Vector2(1732, 1540)
 
 
 
-[node name="EastWildsPortal" parent="." instance=ExtResource("4_2dprc")]
+
+
+
+[node name="WoodlandEastPortal" parent="." instance=ExtResource("4_2dprc")]
 position = Vector2(3648, 640)
-portal_color = Color(0.55, 0.42, 0.18, 1)
-destination_label = "East Wilds"
+portal_color = Color(0.45, 0.62, 0.28, 1)
+destination_label = "Goblin Woodlands East"
 target_instance = ExtResource("60_eastwilds")
 warper_id = 59
 target_id = 60
 
-[node name="EastWildsLanding" parent="." instance=ExtResource("5_jiw8u")]
+[node name="WoodlandEastLanding" parent="." instance=ExtResource("5_jiw8u")]
 position = Vector2(3616, 672)
 warper_id = 60
 
-[node name="EastWildsLabel" type="Label" parent="."]
-offset_left = 3520.0
+[node name="WoodlandEastLabel" type="Label" parent="."]
+offset_left = 3480.0
 offset_top = 560.0
-offset_right = 3780.0
+offset_right = 3820.0
 offset_bottom = 592.0
-theme_override_colors/font_color = Color(1, 0.9, 0.55, 1)
+theme_override_colors/font_color = Color(0.85, 0.95, 0.55, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 16
-text = "East Wilds"
+text = "Goblin Woodlands East"
 horizontal_alignment = 1
 
 [node name="WoodlandEastShore" parent="." instance=ExtResource("30_eastshore")]

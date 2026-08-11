@@ -5,9 +5,9 @@
 
 [resource]
 script = ExtResource("1_script")
-instance_name = &"east_wilds"
-map_path = "res://source/common/gameplay/maps/maps/woodland/woodland_east_wilds.tscn"
-zone_title = "East Wilds"
+instance_name = &"woodland_east"
+map_path = "res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
+zone_title = "Goblin Woodlands East"
 level_min = 5
 level_max = 15
 show_discovery = true
