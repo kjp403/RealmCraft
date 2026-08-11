@@ -115,6 +115,10 @@ func _apply_state(response: Dictionary) -> void:
 	_render_active_tab()
 
 
+## LEFT column: deliberately SHORT. Level, a one-line pitch for the place, how many
+## rewarded runs you have left, and the Solo Bonus — that's it. The drop tables used
+## to be spelled out here (Reward: / Hard:) and buried everything else in a wall of
+## text; what loot exists is for players to find, not for a lobby panel to recite.
 func _render_info(info: Dictionary) -> void:
 	# Pretty name is in the title bar; the panel leads with the at-a-glance stats.
 	for child: Node in _info_box.get_children():
@@ -125,24 +129,25 @@ func _render_info(info: Dictionary) -> void:
 	var desc: String = str(info.get("description", ""))
 	if not desc.is_empty():
 		_info_line(desc, Color(0.82, 0.84, 0.9), 12).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_info_line("Reward: %s" % str(info.get("reward", "—")), Color(0.8, 0.9, 0.8), 12)
-	_info_line("Hard: %s" % str(info.get("hard_reward", "—")), Color(0.86, 0.7, 0.5), 12)
 	if _charges_left >= 0:
 		_info_line(
 			"Reward charges: %d left (%d/day + Dungeon Keys)" % [_charges_left, _charges_daily],
 			Color(1.0, 0.9, 0.55) if _charges_left > 0 else Color(0.92, 0.55, 0.45),
 			12
 		).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_info_line("Solo Bonus:", Color(1.0, 0.85, 0.5), 13)
 	_info_line(
-		"Solo bonus: 2× drop chances, 1.5× loot amounts. Groups get standard rates. Normal and Hard each spend 1 charge.",
+		"Run it alone and drops roll at 2× chance for 1.5× the amount. A group splits the fight, not the bonus — parties get standard rates.",
 		Color(0.75, 0.82, 0.95),
 		11
 	).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_info_line(
-		"Out of charges? Still enter for XP, Hard records, dailies, and helping friends — just no gold or loot.",
-		Color(0.7, 0.74, 0.82),
-		11
-	).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Only worth the space once it actually bites — otherwise it's noise.
+	if _charges_left == 0:
+		_info_line(
+			"No charges left: you can still run it for XP, records, and dailies — but no gold or loot.",
+			Color(0.92, 0.55, 0.45),
+			11
+		).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 
 func _on_lobby_update(payload: Dictionary) -> void:
