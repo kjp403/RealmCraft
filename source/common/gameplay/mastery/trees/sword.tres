@@ -98,6 +98,7 @@ value = 18.0
 [sub_resource type="Resource" id="Node_parry"]
 script = ExtResource("2_node")
 id = &"sword_parry"
+tier = 2
 node_name = "Iron Guard"
 description = "+18 armor. Stand firm against physical blows."
 branch = &"resolve"
@@ -169,6 +170,7 @@ value = 8.0
 [sub_resource type="Resource" id="Node_tempo"]
 script = ExtResource("2_node")
 id = &"sword_tempo"
+tier = 2
 node_name = "Duelist's Tempo"
 description = "+18 ability haste and +8 attack damage. Faster swings, harder hits."
 branch = &"inspiration"
@@ -207,7 +209,7 @@ id = &"sword_bloodrush"
 node_name = "Bloodrush"
 description = "+12 move speed. Close the gap and stay on them."
 branch = &"inspiration"
-tier = 2
+tier = 3
 icon = ExtResource("17_mom")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ms_bloodrush")])
 

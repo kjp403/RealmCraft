@@ -94,10 +94,15 @@ func data_request_handler(
 	for _i: int in recipe.output_amount:
 		Inventory.try_add_item(inventory, output_id, 1)
 
-	# Award crafting-profession xp.
+	# Award crafting-profession xp (perk XP multiplier matches gathering / UI).
 	var progress: Dictionary = {}
 	if recipe.xp_reward > 0:
-		progress = resource.add_skill_xp(station.profession, recipe.xp_reward)
+		var xp_gain: int = recipe.xp_reward
+		var jp: JobPerks = JobRegistry.perks_for(station.profession)
+		if jp != null:
+			var skill_entry: Dictionary = resource.skills.get(station.profession, {}) as Dictionary
+			xp_gain = maxi(1, roundi(float(xp_gain) * jp.xp_multiplier(skill_entry.get("perks", {}))))
+		progress = resource.add_skill_xp(station.profession, xp_gain)
 
 	# Quest CRAFT progress for this output item. Push unconditionally: an empty
 	# messages array is a silent tracker refresh, so a "Bring N item" (COLLECT)

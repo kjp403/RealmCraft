@@ -25,7 +25,7 @@ max_amount = 25
 script = ExtResource("2_loot")
 item = ExtResource("3_hide")
 min_amount = 3
-max_amount = 3
+max_amount = 4
 
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
@@ -60,6 +60,8 @@ chance = 0.08
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
+min_amount = 1
+max_amount = 3
 chance = 1.0
 
 [resource]

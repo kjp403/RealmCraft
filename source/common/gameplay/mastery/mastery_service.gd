@@ -41,22 +41,30 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	return total
 
 
-## Mastery points granted per level. 2 → level 99 yields a 198-point budget.
-## Trees stay leaner than the full budget on purpose so you specialize rather
-## than buy every node. Tune this one number to retune the whole budget.
-const POINTS_PER_LEVEL: int = 2
+## Mastery points: 1 point every LEVELS_PER_POINT mastery levels.
+## Level 99 → 33-point budget. That funds one full column/subclass
+## (heaviest branch today is Bow Domination at 30) but cannot clear any
+## complete tree (cheapest full tree is Hammer at 36). Tune this one number
+## to retune the whole budget.
+const LEVELS_PER_POINT: int = 3
 
-## Level 1 already grants a full POINTS_PER_LEVEL so the first tier-1 pick is
-## near-immediate.
+## Lifetime point budget for a mastery level (integer division).
+## Level 1–2: 0, 3–5: 1, …, 96–98: 32, 99: 33.
+static func point_budget(level: int) -> int:
+	var capped: int = mini(maxi(level, 0), PlayerResource.MASTERY_LEVEL_CAP)
+	@warning_ignore("integer_division")
+	return capped / LEVELS_PER_POINT
+
+
+## Clamped so players who spent under older (looser) budgets don't see a
+## negative remaining total (respec clears the overhang).
 static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	var level: int = mini(int(entry.get("level", 1)), PlayerResource.MASTERY_LEVEL_CAP)
-	return level * POINTS_PER_LEVEL - spent_cost(entry, tree)
+	return maxi(0, point_budget(level) - spent_cost(entry, tree))
 
 
-## Buys a tree node. Every category starts at level 1 (see
-## PlayerResource.mastery_level_of), so its first POINTS_PER_LEVEL is spendable
-## from character creation rather than gated behind a first kill — get_mastery
-## creates the entry on demand here.
+## Buys a tree node. Point budget is point_budget(level); the first point
+## arrives at mastery level 3. get_mastery creates the entry on demand.
 static func spend(resource: PlayerResource, category: StringName, node_id: StringName) -> Dictionary:
 	var tree: MasteryTreeResource = tree_for(category)
 	if tree == null:
@@ -79,8 +87,9 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	return {"ok": true, "points": available_points(entry, tree)}
 
 
-## Wipes a category's spent points AND its loadout pick. Free during alpha so
-## testers experiment — pricing comes later if it matters.
+## Wipes a category's spent points AND its loadout pick. Horizon charges gold
+## for a full respec via mastery.respec (MasteryResetInteraction.COST); this
+## helper is the per-tree wipe used by that handler.
 static func reset(resource: PlayerResource, category: StringName) -> Dictionary:
 	if not _has_mastery_entry(resource, category):
 		return {"ok": false, "reason": "no_mastery"}

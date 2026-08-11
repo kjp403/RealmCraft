@@ -19,8 +19,9 @@ func get_node_by_id(node_id: StringName) -> MasteryNode:
 	return null
 
 
-## Sum of every node's cost. Trees are intentionally cheaper than the full
-## level-99 point budget so players specialize instead of owning everything.
+## Sum of every node's Power/tier cost. Full trees land around ~48 so the
+## level-99 budget (33 at 1 point / 3 levels) funds a subclass column without
+## clearing an entire weapon tree.
 func total_cost() -> int:
 	var total: int = 0
 	for node: MasteryNode in nodes:

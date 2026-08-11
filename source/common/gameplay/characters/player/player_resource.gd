@@ -435,13 +435,13 @@ func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 
 ## Max mastery level per weapon category. Same 1–99 OSRS XP curve as profession
 ## skills ([SkillXp]) so new armor/weapons can keep gating upward without a
-## hard mid-game ceiling. Combined with MasteryService POINTS_PER_LEVEL (2)
-## this sets the point budget — trees stay lean so you specialize.
+## hard mid-game ceiling. Combined with MasteryService LEVELS_PER_POINT (3)
+## this sets the point budget — one subclass column, not a full tree.
 const MASTERY_LEVEL_CAP: int = SkillXp.LEVEL_CAP
 
 
 ## Returns the {"level", "xp", "spent"} entry for a weapon category, creating
-## it at level 1 (= 1 spendable point) if missing.
+## it at level 1 (0 spendable points until level 3) if missing.
 func get_mastery(category: StringName) -> Dictionary:
 	var key := StringName(String(category))
 	if not masteries.has(key):

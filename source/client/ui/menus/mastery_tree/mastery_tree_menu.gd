@@ -6,8 +6,8 @@ extends MenuShell
 ##
 ## Tree CONTENT comes from MasteryService.trees() (common/ data the client already
 ## holds). Per-player state (level, points, owned nodes, loadout) is fetched via
-## mastery.get; learn / equip / respec are server-validated (mastery.spend /
-## mastery.loadout / mastery.respec) — this menu just re-fetches and rebuilds.
+## mastery.get; learn / equip are server-validated (mastery.spend / mastery.loadout).
+## Full tree respec is paid via Horizon (mastery.respec) — no free Reset here.
 
 const BRANCHES: Array[StringName] = [&"domination", &"resolve", &"inspiration"]
 ## Input labels per special-slot position (slot 1 = player_special, 2 = _special_2).
@@ -66,16 +66,6 @@ func _ready() -> void:
 	_points_label.add_theme_font_size_override(&"font_size", 12)
 	_points_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header_center.add_child(_points_label)
-
-	var reset := Button.new()
-	reset.text = "Reset"
-	reset.custom_minimum_size = Vector2(62, 28)
-	reset.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	reset.add_theme_font_size_override(&"font_size", 11)
-	reset.tooltip_text = "Refund all points in this Mastery."
-	reset.pressed.connect(_on_respec_pressed)
-	header_right.add_child(reset)
-	header_right.move_child(reset, 0)
 
 	call_deferred(&"_place_modal")
 
@@ -641,15 +631,6 @@ func _on_loadout_result(data: Dictionary) -> void:
 		"same_chain":
 			Toaster.toast("That's the same move as another slot. Only one tier of it at a time.")
 	_refresh()
-
-
-func _on_respec_pressed() -> void:
-	Client.request_data(
-		&"mastery.respec",
-		func(_d: Dictionary) -> void: _refresh(),
-		{"category": _category},
-		InstanceClient.current.name
-	)
 
 
 func _close_slot_picker() -> void:

@@ -97,7 +97,7 @@ func _set_mastery_level(res: PlayerResource, category: StringName, level: int) -
 	res.masteries[StringName(String(category))] = entry
 	var tree: MasteryTreeResource = MasteryService.tree_for(category)
 	if tree != null:
-		var budget: int = level * MasteryService.POINTS_PER_LEVEL
+		var budget: int = MasteryService.point_budget(level)
 		if MasteryService.spent_cost(entry, tree) > budget:
 			entry["spent"] = {}
 

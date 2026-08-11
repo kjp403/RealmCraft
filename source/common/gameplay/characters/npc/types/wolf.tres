@@ -16,11 +16,15 @@ lunge_range = 90.0
 [sub_resource type="Resource" id="Drop_hide"]
 script = ExtResource("2_loot")
 item = ExtResource("3_hide")
-max_amount = 2
+min_amount = 1
+max_amount = 4
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("4_bone")
+min_amount = 1
+max_amount = 3
 chance = 1.0
 
 [resource]
