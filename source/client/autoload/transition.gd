@@ -125,6 +125,20 @@ func _show_error() -> void:
 	_buttons.visible = true
 
 
+## Surface a load failure with a custom message (broken map, missing scene, etc.).
+func show_load_error(message: String) -> void:
+	_active = true
+	_clear_load_timeout()
+	if _fade_tween and _fade_tween.is_valid():
+		_fade_tween.kill()
+	visible = true
+	_root.modulate.a = 1.0
+	_bloom.modulate.a = 0.0
+	_label.text = message
+	_spinner.visible = false
+	_buttons.visible = true
+
+
 ## Mid-game server drop (Client.server_disconnected): replace the old silent freeze
 ## with a clear overlay + a single "Back to login" action — it reloads the scene,
 ## which re-runs the gateway's version handshake (showing the update gate if the

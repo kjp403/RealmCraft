@@ -39,8 +39,19 @@ func charge_new_instance(map_path: String, instance_id: String) -> void:
 	new_instance.name = instance_id
 	
 	print("Loading new map: %s." % map_path)
-	var map: Map = load(map_path).instantiate() as Map
-	if not map:
+	if not ResourceLoader.exists(map_path):
+		push_error("InstanceManagerClient: map path missing: %s" % map_path)
+		_fail_charge("Couldn't load the area (missing map).")
+		return
+	var map_scene: PackedScene = load(map_path) as PackedScene
+	if map_scene == null:
+		push_error("InstanceManagerClient: load() returned null for %s" % map_path)
+		_fail_charge("Couldn't load the area.")
+		return
+	var map: Map = map_scene.instantiate() as Map
+	if map == null:
+		push_error("InstanceManagerClient: instantiate() failed for %s" % map_path)
+		_fail_charge("Couldn't load the area.")
 		return
 	new_instance.instance_map = map
 	
@@ -76,4 +87,14 @@ func charge_new_instance(map_path: String, instance_id: String) -> void:
 	if not current_ui:
 		current_ui = preload("res://source/client/ui/ui.tscn").instantiate()
 		get_parent().add_sibling(current_ui)
+
+
+## Map charge failed before the local player could spawn — drop the enter overlay
+## so the player isn't stuck on "Entering the world…" with a silent load error.
+func _fail_charge(message: String) -> void:
+	push_error(message)
+	if is_instance_valid(Client):
+		Client.close_connection()
+	if is_instance_valid(Transition):
+		Transition.show_load_error(message)
 	
