@@ -142,8 +142,9 @@ func _initialize() -> void:
 
 func _carve_caverns() -> Dictionary:
 	var mask: Dictionary = {}
-	# Chambers: wide irregular caverns rather than discs, each with a satellite
-	# lobe so the silhouette is never a clean circle.
+	# Chambers: wide irregular caverns. The NE high-ore vault is a DEAD-END
+	# connected only by a narrow corridor — not an open gallery players can
+	# walk around a floating gate through.
 	var chambers := [
 		{"c": Vector2i(12, 36), "r": 8.0, "w": 0.30, "s": 11},   # entrance hall
 		{"c": Vector2i(17, 31), "r": 5.5, "w": 0.34, "s": 12},
@@ -153,22 +154,23 @@ func _carve_caverns() -> Dictionary:
 		{"c": Vector2i(35, 16), "r": 5.5, "w": 0.34, "s": 16},
 		{"c": Vector2i(33, 27), "r": 8.5, "w": 0.28, "s": 17},   # central junction
 		{"c": Vector2i(27, 33), "r": 5.5, "w": 0.34, "s": 18},
-		{"c": Vector2i(48, 13), "r": 7.5, "w": 0.30, "s": 19},   # north-east hall
-		{"c": Vector2i(54, 20), "r": 6.0, "w": 0.33, "s": 20},
-		{"c": Vector2i(52, 30), "r": 8.0, "w": 0.30, "s": 21},   # east gallery
+		{"c": Vector2i(43, 12), "r": 3.0, "w": 0.18, "s": 19},   # antechamber before vault
+		{"c": Vector2i(56, 11), "r": 4.4, "w": 0.18, "s": 20},   # Mining-50 dead-end vault
+		{"c": Vector2i(52, 30), "r": 8.0, "w": 0.30, "s": 21},   # east gallery (public)
 		{"c": Vector2i(44, 37), "r": 7.0, "w": 0.31, "s": 22},   # south-east hall
 	]
 	for ch in chambers:
 		MapKit.blob(mask, ch["c"], ch["r"], ch["w"], int(ch["s"]), _bounds)
 
-	# Haulage tunnels — wandering, not L-pipes.
+	# Haulage tunnels — wandering, not L-pipes. Vault uses a narrow throat.
 	var links := [
 		[Vector2i(12, 32), Vector2i(12, 26), 2.2, 2.5, 31],
 		[Vector2i(15, 20), Vector2i(24, 13), 2.0, 3.0, 32],
 		[Vector2i(31, 15), Vector2i(33, 22), 2.4, 2.5, 33],
 		[Vector2i(17, 34), Vector2i(26, 33), 2.2, 2.5, 34],
 		[Vector2i(29, 31), Vector2i(38, 36), 2.2, 3.0, 35],
-		[Vector2i(38, 14), Vector2i(44, 13), 2.2, 2.5, 36],
+		[Vector2i(38, 14), Vector2i(42, 12), 1.9, 1.2, 36],   # approach to antechamber
+		[Vector2i(45, 12), Vector2i(51, 11), 1.15, 0.35, 40],  # SINGLE vault corridor
 		[Vector2i(52, 24), Vector2i(52, 26), 2.6, 1.5, 37],
 		[Vector2i(48, 36), Vector2i(50, 33), 2.4, 2.0, 38],
 		[Vector2i(38, 27), Vector2i(46, 29), 2.4, 3.0, 39],
@@ -176,13 +178,35 @@ func _carve_caverns() -> Dictionary:
 	for link in links:
 		MapKit.tunnel(mask, link[0], link[1], link[2], link[3], int(link[4]), _bounds)
 
+	# Stamp an explicit 3-tall vault throat so smooth / region trim cannot
+	# disconnect the Mining-50 chamber from the antechamber.
+	for x: int in range(45, 53):
+		for y: int in range(11, 14):
+			mask[Vector2i(x, y)] = true
+	# Vault body guarantee.
+	for x: int in range(52, 60):
+		for y: int in range(8, 15):
+			if (Vector2i(x, y) - Vector2i(56, 11)).length_squared() <= 20:
+				mask[Vector2i(x, y)] = true
+
 	# Keep a solid rock margin so the cavern never touches the map border.
 	var trimmed: Dictionary = {}
 	for cell: Vector2i in mask.keys():
 		if cell.x >= 3 and cell.y >= 4 and cell.x < W - 3 and cell.y < H - 3:
 			trimmed[cell] = true
+	# Rock flanks above/below the throat — players cannot slip around the gate.
+	for x: int in range(46, 50):
+		trimmed.erase(Vector2i(x, 10))
+		trimmed.erase(Vector2i(x, 14))
 	# Smooth away single-cell spikes; rims read as continuous rock afterwards.
 	var smoothed := MapKit.smooth(trimmed, _bounds, 2, 5, 4)
+	# Re-seal throat flanks after smooth, and re-stamp the throat floor.
+	for x: int in range(46, 50):
+		smoothed.erase(Vector2i(x, 10))
+		smoothed.erase(Vector2i(x, 14))
+	for x: int in range(45, 53):
+		for y: int in range(11, 14):
+			smoothed[Vector2i(x, y)] = true
 	return MapKit.largest_region(smoothed, _pick_open(smoothed, Vector2i(12, 36)))
 
 
@@ -416,27 +440,41 @@ func _build_bridges(
 
 func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 	# Copper/tin stay in the Starting Area — Mining Cave focuses on mid+ ores.
-	# East cluster (~tile 48,13 ≈ world 1550,430) is the Mining-50 deep vault:
-	# adamant + runite only. Iron 2x, coal 5x vs original counts, plus mithril.
-	var edges := MapKit.edge_cells(walk, blocked)
+	# Adamant + runite live ONLY inside the sealed Mining-50 vault (x >= 52).
+	var vault: Dictionary = {}
+	var public_walk: Dictionary = {}
+	for cell: Vector2i in walk.keys():
+		if cell.x >= 52:
+			vault[cell] = true
+		else:
+			public_walk[cell] = true
+	assert(vault.size() >= 20, "Mining-50 vault missing from walk (%d cells)" % vault.size())
+
+	var edges_public := MapKit.edge_cells(public_walk, blocked)
+	var edges_vault := MapKit.edge_cells(vault, blocked)
+	if edges_vault.is_empty():
+		# Fall back to any vault floor cell if edges are scarce.
+		for cell: Vector2i in vault.keys():
+			edges_vault.append(cell)
 	var zones := [
-		{"kind": "iron", "c": Vector2i(33, 27), "r": 11, "n": 12},
-		{"kind": "iron", "c": Vector2i(52, 30), "r": 10, "n": 8},
-		{"kind": "coal", "c": Vector2i(28, 12), "r": 10, "n": 15},
-		{"kind": "coal", "c": Vector2i(20, 28), "r": 9, "n": 15},
-		{"kind": "coal", "c": Vector2i(40, 34), "r": 9, "n": 15},
-		{"kind": "mithril", "c": Vector2i(36, 18), "r": 8, "n": 3},
-		{"kind": "mithril", "c": Vector2i(44, 28), "r": 8, "n": 2},
-		{"kind": "adamant", "c": Vector2i(48, 13), "r": 7, "n": 4},
-		{"kind": "runite", "c": Vector2i(50, 11), "r": 6, "n": 2},
+		{"kind": "iron", "c": Vector2i(33, 27), "r": 11, "n": 12, "vault": false},
+		{"kind": "iron", "c": Vector2i(50, 30), "r": 10, "n": 8, "vault": false},
+		{"kind": "coal", "c": Vector2i(28, 12), "r": 10, "n": 15, "vault": false},
+		{"kind": "coal", "c": Vector2i(20, 28), "r": 9, "n": 15, "vault": false},
+		{"kind": "coal", "c": Vector2i(40, 34), "r": 9, "n": 15, "vault": false},
+		{"kind": "mithril", "c": Vector2i(36, 18), "r": 8, "n": 3, "vault": false},
+		{"kind": "mithril", "c": Vector2i(44, 28), "r": 8, "n": 2, "vault": false},
+		{"kind": "adamant", "c": Vector2i(56, 11), "r": 6, "n": 4, "vault": true},
+		{"kind": "runite", "c": Vector2i(57, 10), "r": 5, "n": 2, "vault": true},
 	]
 	var used: Dictionary = {}
 	var out: Array = []
 	for zone in zones:
 		var center: Vector2i = zone["c"]
 		var r2: int = int(zone["r"]) * int(zone["r"])
+		var pool: Array = edges_vault if bool(zone["vault"]) else edges_public
 		var near: Array[Vector2i] = []
-		for cell: Vector2i in edges:
+		for cell: Vector2i in pool:
 			if (cell - center).length_squared() <= r2 and not used.has(cell):
 				near.append(cell)
 		var picked := MapKit.scatter(near, 0.9, 2, 111 + out.size())
@@ -447,6 +485,8 @@ func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 			used[cell] = true
 			out.append({"kind": String(zone["kind"]), "pos": _tile_pos(cell)})
 			count += 1
+		if bool(zone["vault"]):
+			assert(count > 0, "no %s veins placed in vault" % String(zone["kind"]))
 	return out
 
 
@@ -456,7 +496,7 @@ func _light_positions(walk: Dictionary) -> Array:
 		{"c": Vector2i(12, 22), "color": "Color(1, 0.7, 0.4, 1)", "energy": 1.05, "scale": 2.6},
 		{"c": Vector2i(28, 12), "color": "Color(0.6, 0.85, 1, 1)", "energy": 1.05, "scale": 2.8},
 		{"c": Vector2i(33, 27), "color": "Color(1, 0.72, 0.42, 1)", "energy": 1.15, "scale": 3.0},
-		{"c": Vector2i(48, 13), "color": "Color(0.6, 0.86, 1, 1)", "energy": 1.0, "scale": 2.6},
+		{"c": Vector2i(56, 11), "color": "Color(0.6, 0.86, 1, 1)", "energy": 1.0, "scale": 2.6},
 		{"c": Vector2i(52, 30), "color": "Color(0.62, 1, 0.72, 1)", "energy": 1.0, "scale": 2.6},
 		{"c": Vector2i(44, 37), "color": "Color(1, 0.72, 0.42, 1)", "energy": 1.0, "scale": 2.6},
 	]
@@ -626,11 +666,11 @@ y_sort_enabled = true
 %s
 
 [node name=\"DeepVeinGate\" type=\"StaticBody2D\" parent=\".\"]
-position = Vector2(1520, 480)
+position = Vector2(1520, 400)
 script = ExtResource(\"18_gate\")
 required_skill = &\"mining\"
 required_level = 50
-gate_size = Vector2(168, 40)
+gate_size = Vector2(40, 112)
 label_text = \"Mining 50+\"
 
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]

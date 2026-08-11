@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786404105
-next_id = 292
+version = 1786408827
+next_id = 301
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -1237,6 +1237,51 @@ entries = Array[Dictionary]([{
 &"id": 291,
 &"path": "res://source/common/gameplay/items/weapons/wand/wand_steel.item.tres",
 &"slug": &"wand_steel.item"
+}, {
+&"hash": "60fe70aa3ece108d7b7fc7c494c84bf7caf6a55e6bbd858f2a166712c52e7251",
+&"id": 292,
+&"path": "res://source/common/gameplay/items/gears/metal/adamant_boots.tres",
+&"slug": &"adamant_boots"
+}, {
+&"hash": "b33a44c76e9e1c7c833b90761c49a7be5b4d44db38ebff52ca67ac9468434a83",
+&"id": 293,
+&"path": "res://source/common/gameplay/items/gears/metal/adamant_chest.tres",
+&"slug": &"adamant_chest"
+}, {
+&"hash": "fdb189023c5f97b810d41c75893538f8f432e6111db722dd7607b9a73d228701",
+&"id": 294,
+&"path": "res://source/common/gameplay/items/gears/metal/adamant_helmet.tres",
+&"slug": &"adamant_helmet"
+}, {
+&"hash": "39b3bd6fccc134e78a0f4bc8cbce77c87e9788557e76e14f439c2bd9d1b58399",
+&"id": 295,
+&"path": "res://source/common/gameplay/items/gears/metal/mithril_boots.tres",
+&"slug": &"mithril_boots"
+}, {
+&"hash": "29d0b6367396954d43970a69438acb848ff3435b02c469bc13b727aece3c555f",
+&"id": 296,
+&"path": "res://source/common/gameplay/items/gears/metal/mithril_chest.tres",
+&"slug": &"mithril_chest"
+}, {
+&"hash": "745e6d98b6f99b4455bd932e9c8c49d52cec925ec78f43e661231ae86a048b24",
+&"id": 297,
+&"path": "res://source/common/gameplay/items/gears/metal/mithril_helmet.tres",
+&"slug": &"mithril_helmet"
+}, {
+&"hash": "0784f67687b9f6efea929c45bf416b9fe39f2783c1d6bafbc3ec4296cd3be735",
+&"id": 298,
+&"path": "res://source/common/gameplay/items/gears/metal/runite_boots.tres",
+&"slug": &"runite_boots"
+}, {
+&"hash": "ebb6681fe33000376a18b06f1caf51ec04e3f3f3c530450dc82c9cceac2ef686",
+&"id": 299,
+&"path": "res://source/common/gameplay/items/gears/metal/runite_chest.tres",
+&"slug": &"runite_chest"
+}, {
+&"hash": "73dd7ddb3679e7c346a73e7ab27f8411c165ee89bf4ab8f2cdfc4b8cdaea9019",
+&"id": 300,
+&"path": "res://source/common/gameplay/items/gears/metal/runite_helmet.tres",
+&"slug": &"runite_helmet"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")
