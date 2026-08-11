@@ -18,10 +18,9 @@ extends Resource
 @export_multiline var description: String
 ## &"offensive", &"defensive" or &"supportive" — pure UI grouping.
 @export var branch: StringName = &"offensive"
-## 1-4. Doubles as point cost AND ability weight (the weapon-capacity gate).
-## Note: weapon capacity caps at 3 today, so a tier-4 ability is un-equippable
-## until the capacity system extends — it still displays in the tree.
-@export_range(1, 4) var tier: int = 1
+## 1-5. Doubles as point cost AND historical ability weight (display flavor).
+## Higher tiers unlock later via MasteryService.TIER_UNLOCK_LEVEL.
+@export_range(1, 5) var tier: int = 1
 @export var ability: AbilityResource
 @export var passive_modifiers: Array[StatModifier]
 ## Passives are PERMANENT once learned — they apply no matter which weapon you wield, so

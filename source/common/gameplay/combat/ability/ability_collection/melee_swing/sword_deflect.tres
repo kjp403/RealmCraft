@@ -7,6 +7,8 @@
 script = ExtResource("1_deflect")
 name = "Deflect"
 icon = ExtResource("2_icon")
-cooldown = 6.0
+cooldown = 5.0
+deflect_window_s = 0.7
+bubble_radius = 55.0
 metadata/slug = &"sword_deflect"
 metadata/id = 32

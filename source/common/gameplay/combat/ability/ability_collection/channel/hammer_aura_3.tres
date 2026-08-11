@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_aura")
-heal_per_tick = 6.0
+heal_per_tick = 12.0
 channel_duration_s = 12.0
 radius = 90.0
 mana_per_tick = 9.0

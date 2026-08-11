@@ -11,7 +11,7 @@ class_name MasteryService
 const TREES_DIR: String = "res://source/common/gameplay/mastery/trees/"
 
 ## Mastery level required before nodes of a tier can be bought.
-const TIER_UNLOCK_LEVEL: Dictionary[int, int] = {1: 1, 2: 3, 3: 6, 4: 10}
+const TIER_UNLOCK_LEVEL: Dictionary[int, int] = {1: 1, 2: 3, 3: 6, 4: 10, 5: 15}
 
 static var _trees: Dictionary[StringName, MasteryTreeResource]
 static var _trees_loaded: bool = false

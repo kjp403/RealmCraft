@@ -7,18 +7,18 @@
 
 [resource]
 script = ExtResource("1_nova")
-ap_ratio = 0.25
-radius = 70.0
-heal_per_hit = 6.0
-mana_per_hit = 2.0
+ap_ratio = 0.7
+radius = 65.0
+heal_per_hit = 10.0
+mana_per_hit = 3.0
 duration_s = 1.5
 tick_interval_s = 0.4
 vfx = ExtResource("2_ring")
 vfx_color = Color(0.8, 0.15, 0.15, 1)
 name = "Blood Feast"
 icon = ExtResource("3_icon")
-cooldown = 10.0
-mana_cost = 45
-cast_time_s = 0.45
+cooldown = 9.0
+mana_cost = 35
+cast_time_s = 0.4
 metadata/slug = &"blood_feast"
 metadata/id = 43

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BattleFormAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/battle_form/battle_form_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/battle_form_2.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+bonus_hp = 120.0
+scale_factor = 1.25
+reach_mult = 1.4
+name = "Battle Form"
+icon = ExtResource("2_icon")
+cooldown = 90.0
+mana_cost = 45
+metadata/slug = &"battle_form_1"
+metadata/id = 69

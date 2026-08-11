@@ -6,13 +6,16 @@
 
 [resource]
 script = ExtResource("1_rain")
-ap_ratio = 0.8
-blast_radius = 60.0
-cast_range = 150.0
-windup_s = 1.0
-name = "Rain of Arrows"
+ap_ratio = 4.0
+blast_radius = 90.0
+cast_range = 185.0
+windup_s = 0.9
+name = "Rain of Arrows IV"
 icon = ExtResource("3_icon")
-cooldown = 14.0
-mana_cost = 20
+cooldown = 11.0
+mana_cost = 30
 metadata/slug = &"rain_of_arrows"
 metadata/id = 63
+field_duration_s = 5.0
+field_slow = 32.0
+arrow_count = 11

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="BoltShootAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/bolt_shoot_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/fireball.png" id="2_icon"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/items/weapons/wand/fireball.tscn" id="x_1"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/fire_explosion.tres" id="x_2"]
+
+[resource]
+script = ExtResource("1_script")
+projectile_scene = ExtResource("x_1")
+ap_ratio = 2.0
+speed = 275.0
+burn_dps = 12.0
+burn_duration_s = 4.5
+bolt_modulate = Color(1, 1, 1, 1)
+max_range = 235.0
+impact_vfx = ExtResource("x_2")
+explode_radius = 88.0
+explode_ap_ratio = 1.6
+name = "Fireball IV"
+icon = ExtResource("2_icon")
+cooldown = 5.5
+mana_cost = 40
+metadata/slug = &"fireball_3"
+metadata/id = 73

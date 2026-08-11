@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ShotOverrideAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/shot_override_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/arrow_storm.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+projectile_count = 7
+spread_deg = 30.0
+damage_factor = 0.95
+glow_color = Color(1, 0.7, 0.25, 1)
+name = "Arrow Storm III"
+icon = ExtResource("2_icon")
+cooldown = 6.5
+mana_cost = 20
+metadata/slug = &"arrow_storm_3"
+metadata/id = 82

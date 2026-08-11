@@ -91,7 +91,8 @@ func channel_tick(caster: Character) -> void:
 
 func extra_stat_lines() -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("%d%% AP per tick" % int(round(ap_ratio * 100.0)))
+	var per_sec: float = ap_ratio / maxf(0.1, tick_interval_s)
+	lines.append("%d%% AP/s" % int(round(per_sec * 100.0)))
 	lines.append("%dpx beam" % int(beam_length))
 	if heal_per_hit > 0.0:
 		lines.append("+%s health per hit" % fmt_num(heal_per_hit))

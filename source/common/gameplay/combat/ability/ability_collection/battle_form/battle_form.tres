@@ -5,10 +5,13 @@
 
 [resource]
 script = ExtResource("1_bf")
-buff_duration_s = 10.0
-name = "Battle Form"
+buff_duration_s = 12.0
+name = "Battle Form II"
 icon = ExtResource("1_u5gxo")
-cooldown = 90.0
-mana_cost = 60
+cooldown = 84.0
+mana_cost = 55
+bonus_hp = 220.0
+scale_factor = 1.4
+reach_mult = 1.7
 metadata/slug = &"battle_form"
 metadata/id = 41

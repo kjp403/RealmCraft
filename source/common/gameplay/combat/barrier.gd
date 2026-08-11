@@ -23,8 +23,15 @@ var lifetime_s: float = 3.0
 ## the remaining pool is reduced by it and punches through (so a big nuke isn't
 ## fully eaten by a cheap cast — see absorb / arrow.gd). 0 = invincible wall.
 var block_hp: float = 0.0
+## Caster who conjured the wall (for shatter damage attribution).
+var source: Entity = null
+## AoE magic damage dealt when the wall shatters (HP break or timeout). 0 = none.
+var shatter_damage: float = 0.0
+var shatter_radius: float = 70.0
+var arc_scene: PackedScene = preload("res://source/common/gameplay/combat/melee_arc_centered.tscn")
 
 var _hp_left: float = 0.0
+var _shattered: bool = false
 
 
 ## Absorbs [param incoming] damage, returns the OVERFLOW that should still pass
@@ -39,7 +46,7 @@ func absorb(incoming: float) -> float:
 	_hp_left -= eaten
 	queue_redraw() # weaken the visual as the pool drops
 	if _hp_left <= 0.0:
-		queue_free() # shattered — deterministic across peers
+		_shatter()
 	return incoming - eaten
 
 
@@ -63,10 +70,32 @@ func _ready() -> void:
 	var timer: Timer = Timer.new()
 	timer.wait_time = lifetime_s
 	timer.one_shot = true
-	timer.timeout.connect(queue_free)
+	timer.timeout.connect(_shatter)
 	add_child(timer)
 	timer.start()
 	queue_redraw()
+
+
+## Shatter pulse: server deals AoE magic damage, then the wall frees itself.
+## Idempotent so HP-break and timeout can't double-fire.
+func _shatter() -> void:
+	if _shattered:
+		return
+	_shattered = true
+	if GameMode.is_world_server() and shatter_damage > 0.0 and source != null \
+			and is_instance_valid(source) and arc_scene != null and get_parent() != null:
+		var arc: MeleeArc = arc_scene.instantiate()
+		arc.source = source
+		var shape_node: CollisionShape2D = arc.get_node_or_null(^"CollisionShape2D") as CollisionShape2D
+		if shape_node != null and shape_node.shape is CircleShape2D:
+			var circle: CircleShape2D = shape_node.shape.duplicate()
+			circle.radius = shatter_radius
+			shape_node.shape = circle
+		arc.damage = shatter_damage
+		arc.damage_type = CombatHit.DAMAGE_MAGIC
+		get_parent().add_child(arc)
+		arc.global_position = global_position
+	queue_free()
 
 
 func _draw() -> void:

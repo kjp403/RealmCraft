@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ShotOverrideAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/shot_override_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/deadeye.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+damage_mult = 2.6
+speed_mult = 1.7
+pierce_count = 99
+glow_color = Color(0.85, 0.55, 1, 1)
+name = "Deadeye IV"
+icon = ExtResource("2_icon")
+cooldown = 5.5
+mana_cost = 20
+metadata/slug = &"deadeye_4"
+metadata/id = 99

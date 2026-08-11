@@ -6,9 +6,13 @@
 
 [resource]
 script = ExtResource("1_meteor")
-name = "Meteor"
+name = "Meteor IV"
 icon = ExtResource("2_icon")
-cooldown = 40.0
-mana_cost = 55
+cooldown = 34.0
+mana_cost = 65
+ap_ratio = 5.0
+blast_radius = 95.0
 metadata/slug = &"meteor"
 metadata/id = 57
+cast_range = 175.0
+windup_s = 1.15

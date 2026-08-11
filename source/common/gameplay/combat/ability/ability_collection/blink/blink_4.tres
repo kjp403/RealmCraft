@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlinkAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/blink/blink_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/blink.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+distance = 230.0
+name = "Blink IV"
+icon = ExtResource("2_icon")
+cooldown = 4.5
+mana_cost = 26
+metadata/slug = &"blink_4"
+metadata/id = 71

@@ -13,6 +13,10 @@ extends ChannelAbility
 
 ## Flat move speed granted to each rallied ally (and the caster).
 @export var move_speed_bonus: float = 15.0
+## Flat attack damage granted alongside the speed surge (0 = speed only).
+@export var ad_bonus: float = 0.0
+## Flat ability haste granted alongside the surge (0 = none).
+@export var haste_bonus: float = 0.0
 @export var buff_duration_s: float = 5.0
 ## Aura tint flashed on each rallied player (green = Inspiration / support).
 @export var aura_color: Color = Color(0.5, 0.95, 0.6)
@@ -37,9 +41,14 @@ func channel_complete(caster: Character) -> void:
 			_rally(target)
 
 
-## Grant the move-speed buff to [param player] and flash a green rally aura on them.
+## Grant the rally buffs to [param player] and flash a green rally aura on them.
 func _rally(player: Player) -> void:
-	BuffService.apply(player, Stat.MOVE_SPEED, move_speed_bonus, buff_duration_s)
+	if move_speed_bonus > 0.0:
+		BuffService.apply(player, Stat.MOVE_SPEED, move_speed_bonus, buff_duration_s)
+	if ad_bonus > 0.0:
+		BuffService.apply(player, Stat.AD, ad_bonus, buff_duration_s)
+	if haste_bonus > 0.0:
+		BuffService.apply(player, Stat.ABILITY_HASTE, haste_bonus, buff_duration_s)
 	if WorldServer.curr == null or player.player_resource == null:
 		return
 	var container: Node = player.get_parent()
@@ -58,7 +67,12 @@ func _rally(player: Player) -> void:
 
 func extra_stat_lines() -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("+%s move speed to allies" % fmt_num(move_speed_bonus))
+	if move_speed_bonus > 0.0:
+		lines.append("+%s move speed to allies" % fmt_num(move_speed_bonus))
+	if ad_bonus > 0.0:
+		lines.append("+%s attack damage to allies" % fmt_num(ad_bonus))
+	if haste_bonus > 0.0:
+		lines.append("+%s ability haste to allies" % fmt_num(haste_bonus))
 	lines.append("%ss buff" % fmt_num(buff_duration_s))
 	lines.append_array(super())
 	return lines

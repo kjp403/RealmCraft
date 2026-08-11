@@ -21,6 +21,10 @@ extends AbilityResource
 ## Damage the wall absorbs before shattering (overflow punches through). 0 =
 ## an invincible wall that only expires on time.
 @export var block_hp: float = 0.0
+## Shatter blast = caster AP × this (fires when the wall breaks or times out).
+@export var shatter_ap_ratio: float = 0.0
+## Radius of the shatter blast around the wall's centre.
+@export var shatter_radius: float = 70.0
 @export var cast_animation: StringName
 
 
@@ -28,6 +32,8 @@ func extra_stat_lines() -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
 	if block_hp > 0.0:
 		lines.append("blocks %s damage" % fmt_num(block_hp))
+	if shatter_ap_ratio > 0.0:
+		lines.append("%d%% AP shatter" % int(round(shatter_ap_ratio * 100.0)))
 	lines.append("%ss wall" % fmt_num(duration_s))
 	lines.append("%dpx wide" % int(length))
 	return lines
@@ -48,6 +54,11 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	barrier.thickness = thickness
 	barrier.lifetime_s = duration_s
 	barrier.block_hp = block_hp
+	barrier.source = user
+	barrier.shatter_radius = shatter_radius
+	if shatter_ap_ratio > 0.0 and user is Character \
+			and (user as Character).stats_component != null:
+		barrier.shatter_damage = (user as Character).stats_component.get_stat(Stat.AP) * shatter_ap_ratio
 	parent.add_child(barrier)
 	barrier.global_position = user.global_position + dir * distance
 	barrier.rotation = dir.angle()

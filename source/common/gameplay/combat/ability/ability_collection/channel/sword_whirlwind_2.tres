@@ -8,12 +8,13 @@
 script = ExtResource("1_spin")
 channel_duration_s = 4.0
 tick_interval_s = 0.5
-radius = 54.0
+radius = 56.0
 mana_per_tick = 5.0
 visual_kind = &"spin"
 mobile = true
 name = "Whirlwind II"
 icon = ExtResource("2_icon")
 cooldown = 8.0
+damage_ratio = 0.55
 metadata/slug = &"sword_whirlwind_2"
 metadata/id = 30

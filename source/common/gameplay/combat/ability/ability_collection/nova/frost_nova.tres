@@ -7,15 +7,15 @@
 
 [resource]
 script = ExtResource("1_nova")
-ap_ratio = 0.35
-radius = 60.0
-slow_amount = 14.0
-slow_duration_s = 1.5
+ap_ratio = 0.8
+radius = 58.0
+slow_amount = 18.0
+slow_duration_s = 1.8
 vfx = ExtResource("3_ring")
 vfx_frame_px = 256.0
 name = "Frost Nova"
 icon = ExtResource("4_icon")
-cooldown = 10.0
-mana_cost = 30
+cooldown = 9.0
+mana_cost = 25
 metadata/slug = &"frost_nova"
 metadata/id = 55

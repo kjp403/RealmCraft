@@ -7,7 +7,7 @@
 script = ExtResource("1_override")
 projectile_count = 3
 spread_deg = 16.0
-damage_factor = 0.5
+damage_factor = 0.7
 name = "Multishot"
 icon = ExtResource("9_icon")
 cooldown = 5.0

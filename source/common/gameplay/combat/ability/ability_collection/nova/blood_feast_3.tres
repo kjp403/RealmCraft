@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="NovaAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/nova/nova_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/berserk_1.png" id="2_icon"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="x_1"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/blood_spiral.tres" id="x_2"]
+
+[resource]
+script = ExtResource("1_script")
+ap_ratio = 1.4
+radius = 88.0
+heal_per_hit = 18.0
+mana_per_hit = 5.0
+duration_s = 1.5
+tick_interval_s = 0.35
+vfx = ExtResource("x_2")
+vfx_color = Color(0.8, 0.15, 0.15, 1)
+name = "Blood Feast III"
+icon = ExtResource("2_icon")
+cooldown = 8.5
+mana_cost = 50
+cast_time_s = 0.3
+metadata/slug = &"blood_feast_3"
+metadata/id = 93
