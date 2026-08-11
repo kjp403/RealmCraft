@@ -7,9 +7,13 @@
 script = ExtResource("1_rally")
 channel_duration_s = 1.5
 tick_interval_s = 1.5
-radius = 80.0
+radius = 90.0
 name = "Rally"
 icon = ExtResource("2_icon")
-cooldown = 14.0
+cooldown = 12.0
+move_speed_bonus = 25.0
+ad_bonus = 20.0
+haste_bonus = 15.0
+buff_duration_s = 6.0
 metadata/slug = &"sword_rally"
 metadata/id = 37

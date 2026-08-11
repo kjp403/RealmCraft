@@ -8,18 +8,18 @@
 [resource]
 script = ExtResource("1_script")
 projectile_scene = ExtResource("2_bolt")
-ap_ratio = 0.75
-speed = 240.0
-burn_dps = 4.0
-burn_duration_s = 3.0
+ap_ratio = 1.2
+speed = 245.0
+burn_dps = 7.0
+burn_duration_s = 3.5
 bolt_modulate = Color(1, 1, 1, 1)
-max_range = 190.0
+max_range = 195.0
 impact_vfx = ExtResource("3_boom")
-explode_radius = 55.0
-explode_ap_ratio = 0.5
-name = "Fireball"
+explode_radius = 60.0
+explode_ap_ratio = 0.9
+name = "Fireball II"
 icon = ExtResource("4_icon")
-cooldown = 7.0
+cooldown = 6.5
 mana_cost = 30
 metadata/slug = &"fireball"
 metadata/id = 53

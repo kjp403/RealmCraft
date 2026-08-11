@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ManaFontAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/channel/mana_font_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/mana_font.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+mana_restore_per_tick = 22.0
+channel_duration_s = 14.0
+radius = 125.0
+visual_kind = &"mana_font"
+name = "Mana Font IV"
+icon = ExtResource("2_icon")
+cooldown = 22.0
+metadata/slug = &"mana_font_4"
+metadata/id = 78

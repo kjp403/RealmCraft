@@ -6,11 +6,12 @@
 [resource]
 script = ExtResource("1_font")
 channel_duration_s = 12.0
-tick_interval_s = 4.0
-radius = 90.0
+tick_interval_s = 1.0
+radius = 110.0
 visual_kind = &"mana_font"
-name = "Mana Font"
+name = "Mana Font III"
 icon = ExtResource("2_icon")
-cooldown = 30.0
+cooldown = 24.0
+mana_restore_per_tick = 16.0
 metadata/slug = &"mana_font"
 metadata/id = 56

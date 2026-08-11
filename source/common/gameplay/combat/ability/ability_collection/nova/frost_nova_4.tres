@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="NovaAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/nova/nova_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/frost_nova.png" id="2_icon"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="x_1"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/frost_spikes.tres" id="x_2"]
+
+[resource]
+script = ExtResource("1_script")
+ap_ratio = 2.5
+radius = 95.0
+slow_amount = 38.0
+slow_duration_s = 3.0
+vfx = ExtResource("x_2")
+name = "Frost Nova IV"
+icon = ExtResource("2_icon")
+cooldown = 7.5
+mana_cost = 40
+metadata/slug = &"frost_nova_4"
+metadata/id = 97

@@ -7,6 +7,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_whirlwind.tres" id="4_ww1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_whirlwind_2.tres" id="5_ww2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_whirlwind_3.tres" id="6_ww3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_whirlwind_4.tres" id="6_ww4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_whirlwind_5.tres" id="6_ww5"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/melee_swing/sword_deflect.tres" id="7_df1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/melee_swing/sword_deflect_2.tres" id="8_df2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/berserk/sword_berserk.tres" id="9_bsk1"]
@@ -16,6 +18,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/haste.png" id="13_haste"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_rally.tres" id="14_rl1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_rally_2.tres" id="15_rl2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/juggernaut.png" id="16_jug"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/momentum.png" id="17_mom"]
 
 [sub_resource type="Resource" id="Node_ww1"]
 script = ExtResource("2_node")
@@ -36,16 +40,34 @@ upgrades = &"sword_whirlwind"
 [sub_resource type="Resource" id="Node_ww3"]
 script = ExtResource("2_node")
 id = &"sword_whirlwind_3"
-description = "An unrelenting steel cyclone: the widest, longest spin you can hold."
+description = "An unrelenting steel cyclone: wider, longer, and far deadlier."
 branch = &"domination"
 tier = 3
 ability = ExtResource("6_ww3")
 upgrades = &"sword_whirlwind_2"
 
+[sub_resource type="Resource" id="Node_ww4"]
+script = ExtResource("2_node")
+id = &"sword_whirlwind_4"
+description = "A roaring steel storm: 200% AD per second while you spin."
+branch = &"domination"
+tier = 4
+ability = ExtResource("6_ww4")
+upgrades = &"sword_whirlwind_3"
+
+[sub_resource type="Resource" id="Node_ww5"]
+script = ExtResource("2_node")
+id = &"sword_whirlwind_5"
+description = "The ultimate cyclone: 250% AD per second, the widest reach, the longest spin."
+branch = &"domination"
+tier = 5
+ability = ExtResource("6_ww5")
+upgrades = &"sword_whirlwind_4"
+
 [sub_resource type="Resource" id="Node_bsk1"]
 script = ExtResource("2_node")
 id = &"sword_berserk"
-description = "Go berserk. For a few seconds you heal part of every hit you land, so you can fight your way back from low health."
+description = "Go berserk. Surge with attack damage and heal from every hit you land."
 branch = &"domination"
 tier = 2
 ability = ExtResource("9_bsk1")
@@ -53,7 +75,7 @@ ability = ExtResource("9_bsk1")
 [sub_resource type="Resource" id="Node_bsk2"]
 script = ExtResource("2_node")
 id = &"sword_berserk_2"
-description = "Heals more, lasts longer, and sharpens your blade while it rages."
+description = "Deeper rage: more lifesteal, a bigger AD surge, longer bloodlust."
 branch = &"domination"
 tier = 3
 ability = ExtResource("10_bsk2")
@@ -62,7 +84,7 @@ upgrades = &"sword_berserk"
 [sub_resource type="Resource" id="Node_bsk3"]
 script = ExtResource("2_node")
 id = &"sword_berserk_3"
-description = "Full bloodlust: the strongest, longest rage you can call."
+description = "Full bloodlust: a massive AD surge and relentless lifesteal while it rages."
 branch = &"domination"
 tier = 4
 ability = ExtResource("11_bsk3")
@@ -71,16 +93,51 @@ upgrades = &"sword_berserk_2"
 [sub_resource type="Resource" id="Mod_armor_parry"]
 script = ExtResource("3_mod")
 stat_name = "armor"
-value = 6.0
+value = 18.0
 
 [sub_resource type="Resource" id="Node_parry"]
 script = ExtResource("2_node")
 id = &"sword_parry"
-node_name = "Parry Stance"
-description = "+6 armor."
+node_name = "Iron Guard"
+description = "+18 armor. Stand firm against physical blows."
 branch = &"resolve"
 icon = ExtResource("12_bulwark")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_parry")])
+
+[sub_resource type="Resource" id="Mod_hp_fortitude"]
+script = ExtResource("3_mod")
+value = 40.0
+
+[sub_resource type="Resource" id="Node_fortitude"]
+script = ExtResource("2_node")
+id = &"sword_fortitude"
+node_name = "Fortitude"
+description = "+40 max health. Survive the melee."
+branch = &"resolve"
+tier = 2
+icon = ExtResource("16_jug")
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_fortitude")])
+upgrades = &"sword_parry"
+
+[sub_resource type="Resource" id="Mod_armor_fortitude2"]
+script = ExtResource("3_mod")
+stat_name = "armor"
+value = 14.0
+
+[sub_resource type="Resource" id="Mod_hp_fortitude2"]
+script = ExtResource("3_mod")
+value = 30.0
+
+[sub_resource type="Resource" id="Node_fortitude2"]
+script = ExtResource("2_node")
+id = &"sword_fortitude_2"
+node_name = "Fortitude II"
+description = "+14 more armor and +30 more max health."
+branch = &"resolve"
+tier = 3
+icon = ExtResource("16_jug")
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_fortitude2"), SubResource("Mod_hp_fortitude2")])
+upgrades = &"sword_fortitude"
 
 [sub_resource type="Resource" id="Node_deflect"]
 script = ExtResource("2_node")
@@ -93,7 +150,7 @@ ability = ExtResource("7_df1")
 [sub_resource type="Resource" id="Node_deflect2"]
 script = ExtResource("2_node")
 id = &"sword_deflect_2"
-description = "A wider bubble that holds longer."
+description = "A wider bubble that holds longer — a true projectile wall."
 branch = &"resolve"
 tier = 3
 ability = ExtResource("8_df2")
@@ -102,21 +159,62 @@ upgrades = &"sword_deflect"
 [sub_resource type="Resource" id="Mod_haste_tempo"]
 script = ExtResource("3_mod")
 stat_name = "ability_haste"
+value = 18.0
+
+[sub_resource type="Resource" id="Mod_ad_tempo"]
+script = ExtResource("3_mod")
+stat_name = "ad"
 value = 8.0
 
 [sub_resource type="Resource" id="Node_tempo"]
 script = ExtResource("2_node")
 id = &"sword_tempo"
 node_name = "Duelist's Tempo"
-description = "+8 ability haste. Faster swings and shorter cooldowns."
+description = "+18 ability haste and +8 attack damage. Faster swings, harder hits."
 branch = &"inspiration"
 icon = ExtResource("13_haste")
-passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo")])
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo"), SubResource("Mod_ad_tempo")])
+
+[sub_resource type="Resource" id="Mod_haste_tempo2"]
+script = ExtResource("3_mod")
+stat_name = "ability_haste"
+value = 12.0
+
+[sub_resource type="Resource" id="Mod_ad_tempo2"]
+script = ExtResource("3_mod")
+stat_name = "ad"
+value = 10.0
+
+[sub_resource type="Resource" id="Node_tempo2"]
+script = ExtResource("2_node")
+id = &"sword_tempo_2"
+node_name = "Duelist's Tempo II"
+description = "+12 more ability haste and +10 more attack damage."
+branch = &"inspiration"
+tier = 2
+icon = ExtResource("13_haste")
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo2"), SubResource("Mod_ad_tempo2")])
+upgrades = &"sword_tempo"
+
+[sub_resource type="Resource" id="Mod_ms_bloodrush"]
+script = ExtResource("3_mod")
+stat_name = "move_speed"
+value = 12.0
+
+[sub_resource type="Resource" id="Node_bloodrush"]
+script = ExtResource("2_node")
+id = &"sword_bloodrush"
+node_name = "Bloodrush"
+description = "+12 move speed. Close the gap and stay on them."
+branch = &"inspiration"
+tier = 2
+icon = ExtResource("17_mom")
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ms_bloodrush")])
 
 [sub_resource type="Resource" id="Node_rally"]
 script = ExtResource("2_node")
 id = &"sword_rally"
-description = "Plant your feet and rally. After a short cry, you and nearby allies surge with move speed."
+description = "Plant your feet and rally. You and nearby allies surge with move speed, attack damage, and ability haste."
 branch = &"inspiration"
 tier = 2
 ability = ExtResource("14_rl1")
@@ -124,7 +222,7 @@ ability = ExtResource("14_rl1")
 [sub_resource type="Resource" id="Node_rally2"]
 script = ExtResource("2_node")
 id = &"sword_rally_2"
-description = "A louder cry: more speed, longer, and it reaches farther."
+description = "A war cry: bigger speed, AD, and haste buffs that reach farther and last longer."
 branch = &"inspiration"
 tier = 3
 ability = ExtResource("15_rl2")
@@ -135,4 +233,4 @@ script = ExtResource("1_tree")
 category = &"sword"
 display_name = "Swordsmanship"
 category_icon = ExtResource("1_sword_icon")
-nodes = Array[ExtResource("2_node")]([SubResource("Node_ww1"), SubResource("Node_ww2"), SubResource("Node_ww3"), SubResource("Node_bsk1"), SubResource("Node_bsk2"), SubResource("Node_bsk3"), SubResource("Node_parry"), SubResource("Node_deflect"), SubResource("Node_deflect2"), SubResource("Node_tempo"), SubResource("Node_rally"), SubResource("Node_rally2")])
+nodes = Array[ExtResource("2_node")]([SubResource("Node_ww1"), SubResource("Node_ww2"), SubResource("Node_ww3"), SubResource("Node_ww4"), SubResource("Node_ww5"), SubResource("Node_bsk1"), SubResource("Node_bsk2"), SubResource("Node_bsk3"), SubResource("Node_parry"), SubResource("Node_fortitude"), SubResource("Node_fortitude2"), SubResource("Node_deflect"), SubResource("Node_deflect2"), SubResource("Node_tempo"), SubResource("Node_tempo2"), SubResource("Node_bloodrush"), SubResource("Node_rally"), SubResource("Node_rally2")])

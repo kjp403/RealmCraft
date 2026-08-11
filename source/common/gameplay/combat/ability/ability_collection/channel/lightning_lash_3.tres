@@ -6,18 +6,18 @@
 
 [resource]
 script = ExtResource("1_lash")
-ap_ratio = 0.5
-beam_length = 160.0
-beam_width = 38.0
+ap_ratio = 1.25
+beam_length = 175.0
+beam_width = 44.0
 channel_duration_s = 3.5
 tick_interval_s = 0.2
 radius = 160.0
-mana_per_tick = 4.0
+mana_per_tick = 3.5
 visual_kind = &"lash"
 mobile = true
 name = "Lightning Lash III"
 icon = ExtResource("2_icon")
-cooldown = 5.0
-cast_time_s = 0.6
+cooldown = 4.5
+cast_time_s = 0.4
 metadata/slug = &"lightning_lash_3"
 metadata/id = 52

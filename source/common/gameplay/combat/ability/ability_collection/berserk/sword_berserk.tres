@@ -5,10 +5,12 @@
 
 [resource]
 script = ExtResource("1_berserk")
-lifesteal_percent = 20.0
+lifesteal_percent = 30.0
 name = "Berserk"
 icon = ExtResource("2_icon")
-cooldown = 18.0
+cooldown = 16.0
 mana_cost = 30
+ad_bonus = 25.0
+buff_duration_s = 6.0
 metadata/slug = &"sword_berserk"
 metadata/id = 34

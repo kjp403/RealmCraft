@@ -5,13 +5,13 @@
 
 [resource]
 script = ExtResource("1_override")
-projectile_count = 7
-spread_deg = 30.0
-damage_factor = 0.4
+projectile_count = 5
+spread_deg = 24.0
+damage_factor = 0.75
 glow_color = Color(1, 0.7, 0.25, 1)
 name = "Arrow Storm"
 icon = ExtResource("9_icon")
-cooldown = 8.0
-mana_cost = 18
+cooldown = 7.0
+mana_cost = 16
 metadata/slug = &"arrow_storm"
 metadata/id = 15

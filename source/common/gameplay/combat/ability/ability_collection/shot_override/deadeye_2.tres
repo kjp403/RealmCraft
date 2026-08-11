@@ -5,13 +5,13 @@
 
 [resource]
 script = ExtResource("1_override")
-damage_mult = 1.6
+damage_mult = 1.85
 speed_mult = 1.4
-pierce_count = 99
+pierce_count = 4
 glow_color = Color(0.75, 0.5, 1, 1)
 name = "Deadeye II"
 icon = ExtResource("9_icon")
-cooldown = 7.0
-mana_cost = 18
+cooldown = 6.5
+mana_cost = 15
 metadata/slug = &"deadeye_2"
 metadata/id = 62

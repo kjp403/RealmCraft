@@ -5,12 +5,14 @@
 
 [resource]
 script = ExtResource("1_script")
-length = 90.0
-duration_s = 6.0
-block_hp = 300.0
-name = "Arcane Wall II"
+length = 100.0
+duration_s = 6.5
+block_hp = 380.0
+name = "Arcane Wall III"
 icon = ExtResource("9_icon")
-cooldown = 9.0
+cooldown = 8.0
 mana_cost = 45
+shatter_ap_ratio = 2.5
+shatter_radius = 100.0
 metadata/slug = &"arcane_wall_2"
 metadata/id = 58

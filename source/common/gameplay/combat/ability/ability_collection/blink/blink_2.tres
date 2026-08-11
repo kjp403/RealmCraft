@@ -5,10 +5,10 @@
 
 [resource]
 script = ExtResource("1_blink")
-distance = 150.0
+distance = 155.0
 name = "Blink II"
 icon = ExtResource("2_icon")
-cooldown = 6.0
-mana_cost = 25
+cooldown = 5.5
+mana_cost = 22
 metadata/slug = &"blink_2"
 metadata/id = 45

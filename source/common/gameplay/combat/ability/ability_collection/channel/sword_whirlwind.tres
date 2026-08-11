@@ -6,10 +6,10 @@
 
 [resource]
 script = ExtResource("1_spin")
-damage_ratio = 0.25
-channel_duration_s = 3.0
+damage_ratio = 0.35
+channel_duration_s = 3.5
 tick_interval_s = 0.5
-radius = 44.0
+radius = 48.0
 mana_per_tick = 4.0
 visual_kind = &"spin"
 mobile = true

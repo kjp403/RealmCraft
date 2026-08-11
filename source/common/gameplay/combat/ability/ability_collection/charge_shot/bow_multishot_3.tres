@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ShotOverrideAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/shot_override_ability.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/multishot.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+projectile_count = 5
+spread_deg = 20.0
+damage_factor = 0.9
+name = "Multishot III"
+icon = ExtResource("2_icon")
+cooldown = 4.5
+mana_cost = 16
+metadata/slug = &"bow_multishot_3"
+metadata/id = 85
