@@ -22,6 +22,10 @@ const SKILL_ORDER: Array[String] = [
 	"slayer",
 ]
 
+## Slayer's detail page is hand-built (masters + task tables), not a JobPerks
+## source/recipe list like every other skill — see _build_slayer_guide.
+const SLAYER_SLUG: String = "slayer"
+
 enum Mode { SKILLS, COMBAT }
 
 @onready var title_label: Label = (
@@ -48,6 +52,10 @@ var _total_level_bar: Label
 var _selected_slug: String = ""
 var _selected_combat_category: StringName = &""
 var _back_button: Button
+## Latest slayer.info snapshot + the box that renders it, for the Slayer guide's
+## "Current task" section.
+var _slayer_info: Dictionary = {}
+var _slayer_task_box: VBoxContainer
 
 
 func _ready() -> void:
@@ -82,6 +90,11 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
 	Client.subscribe(&"skills.get", _on_skills_received)
+	# Keep the Slayer guide's "Current task" line ticking with the kill pushes,
+	# same as the HUD tracker does.
+	Client.subscribe(&"slayer.update", func(_payload: Dictionary) -> void:
+		if visible and _selected_slug == SLAYER_SLUG:
+			_request_slayer_info())
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -647,6 +660,12 @@ func _rebuild_detail() -> void:
 	list.add_theme_constant_override(&"separation", 3)
 	scroll.add_child(list)
 
+	# Slayer has no gather/craft table — its "sources" are the MASTERS and the
+	# tasks they hand out, so it renders its own guide (see _build_slayer_guide).
+	if _selected_slug == SLAYER_SLUG:
+		_build_slayer_guide(list)
+		return
+
 	var jp: JobPerks = JobRegistry.perks_for(StringName(_selected_slug))
 	if jp != null and not jp.source_items.is_empty():
 		var sources_title := Label.new()
@@ -679,6 +698,213 @@ func _rebuild_detail() -> void:
 		empty.add_theme_color_override(&"font_color", Color(0.65, 0.66, 0.7))
 		empty.add_theme_font_size_override(&"font_size", 11)
 		list.add_child(empty)
+
+
+# --- Slayer guide ------------------------------------------------------------
+
+## The Slayer detail page: your current assignment (so the tracker's information
+## is reachable even with the tracker switched off), then every master with its
+## gate, payout, and full weighted task table. Masters + tasks are common/
+## content (SlayerMasterRegistry), so this reads them directly — no round-trip,
+## and masters the player has never met still show up with where to find them.
+func _build_slayer_guide(list: VBoxContainer) -> void:
+	list.add_child(_slayer_section_label("Current task"))
+	_slayer_task_box = VBoxContainer.new()
+	_slayer_task_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slayer_task_box.add_theme_constant_override(&"separation", 2)
+	list.add_child(_slayer_task_box)
+	_render_slayer_task()
+	_request_slayer_info()
+
+	var player_level: int = ClientState.skill_level(StringName(SLAYER_SLUG))
+	for master_slug: StringName in SlayerMasterRegistry.MASTERS:
+		var master: SlayerMasterResource = SlayerMasterRegistry.MASTERS[master_slug]
+		if master == null:
+			continue
+		list.add_child(_slayer_master_header(master, player_level))
+		for row: Control in _slayer_task_rows(master, player_level):
+			list.add_child(row)
+
+
+## Master name + the three numbers that decide whether it's worth walking there:
+## the Slayer level it wants, what a finished task pays, and the reassign policy.
+func _slayer_master_header(
+	master: SlayerMasterResource,
+	player_level: int
+) -> Control:
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override(&"separation", 1)
+
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override(&"separation", 4)
+	box.add_child(name_row)
+
+	var locked: bool = player_level < master.min_slayer_level
+	var name_label := Label.new()
+	name_label.text = master.master_name
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.add_theme_font_size_override(&"font_size", 12)
+	name_label.add_theme_color_override(
+		&"font_color",
+		Color(0.6, 0.6, 0.64) if locked else Color(0.95, 0.85, 0.55)
+	)
+	name_row.add_child(name_label)
+
+	var gate := Label.new()
+	gate.text = "Any level" if master.min_slayer_level <= 1 else "Lv %d" % master.min_slayer_level
+	gate.add_theme_font_size_override(&"font_size", 10)
+	gate.add_theme_color_override(
+		&"font_color",
+		Color(0.9, 0.45, 0.4) if locked else Color(0.75, 0.85, 1.0)
+	)
+	name_row.add_child(gate)
+
+	if not master.location_hint.is_empty():
+		box.add_child(_slayer_note(master.location_hint, Color(0.68, 0.72, 0.8)))
+	var payout: String = "%d pts / task  ·  %s" % [
+		master.base_points_per_task,
+		"free reassign" if master.free_reassign
+			else "skip %d pts" % master.reassign_point_cost,
+	]
+	box.add_child(_slayer_note(payout, Color(0.62, 0.66, 0.72)))
+	return box
+
+
+## One row per pool entry: the task, the quantity range, and how likely it is to
+## be rolled (weight as a share of the master's whole table — the number players
+## actually want, rather than the raw weight).
+func _slayer_task_rows(
+	master: SlayerMasterResource,
+	player_level: int
+) -> Array[Control]:
+	var rows: Array[Control] = []
+	var total_weight: int = 0
+	for entry: SlayerMasterTaskEntry in master.pool:
+		if entry != null and entry.task != null and entry.weight > 0:
+			total_weight += entry.weight
+	if total_weight <= 0:
+		rows.append(_slayer_note("No tasks authored.", Color(0.65, 0.66, 0.7)))
+		return rows
+
+	var entries: Array[SlayerMasterTaskEntry] = []
+	for entry: SlayerMasterTaskEntry in master.pool:
+		if entry != null and entry.task != null and entry.weight > 0:
+			entries.append(entry)
+	# Commonest first — the table reads as "what you'll mostly be sent after".
+	entries.sort_custom(func(a: SlayerMasterTaskEntry, b: SlayerMasterTaskEntry) -> bool:
+		if a.weight != b.weight:
+			return a.weight > b.weight
+		return a.task.display_name.nocasecmp_to(b.task.display_name) < 0)
+
+	for entry: SlayerMasterTaskEntry in entries:
+		var locked: bool = player_level < entry.task.min_slayer_level
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_theme_constant_override(&"separation", 4)
+
+		var name_label := Label.new()
+		name_label.text = "   " + entry.task.display_name
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.add_theme_font_size_override(&"font_size", 10)
+		name_label.add_theme_color_override(
+			&"font_color",
+			Color(0.55, 0.55, 0.58) if locked else Color(0.88, 0.88, 0.92)
+		)
+		row.add_child(name_label)
+
+		var amount := Label.new()
+		amount.text = "%d–%d" % [entry.min_amount, entry.max_amount]
+		amount.add_theme_font_size_override(&"font_size", 9)
+		amount.add_theme_color_override(&"font_color", Color(0.7, 0.74, 0.8))
+		row.add_child(amount)
+
+		var chance := Label.new()
+		chance.text = (
+			"Lv %d" % entry.task.min_slayer_level if locked
+			else "%d%%" % int(round(100.0 * float(entry.weight) / float(total_weight)))
+		)
+		chance.custom_minimum_size = Vector2(30, 0)
+		chance.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		chance.add_theme_font_size_override(&"font_size", 9)
+		chance.add_theme_color_override(
+			&"font_color",
+			Color(0.9, 0.45, 0.4) if locked else Color(0.75, 0.85, 1.0)
+		)
+		row.add_child(chance)
+		rows.append(row)
+	return rows
+
+
+func _slayer_section_label(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override(&"font_size", 12)
+	label.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	return label
+
+
+func _slayer_note(text: String, color: Color) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override(&"font_size", 9)
+	label.add_theme_color_override(&"font_color", color)
+	return label
+
+
+func _request_slayer_info() -> void:
+	if InstanceClient.current == null:
+		return
+	Client.request_data(
+		&"slayer.info",
+		func(data: Dictionary) -> void:
+			if not bool(data.get("ok", false)):
+				return
+			_slayer_info = data
+			_render_slayer_task(),
+		{},
+		InstanceClient.current.name
+	)
+
+
+func _render_slayer_task() -> void:
+	if not is_instance_valid(_slayer_task_box):
+		return
+	for child: Node in _slayer_task_box.get_children():
+		child.queue_free()
+
+	var has_task: bool = (
+		_slayer_info.has("display_name")
+		and not str(_slayer_info.get("display_name", "")).is_empty()
+	)
+	if not has_task:
+		_slayer_task_box.add_child(_slayer_note(
+			"No task assigned. Visit a master below.", Color(0.65, 0.66, 0.7)
+		))
+		return
+
+	var assigned: int = int(_slayer_info.get("assigned_amount", 0))
+	var remaining: int = int(_slayer_info.get("remaining", 0))
+	_slayer_task_box.add_child(_slayer_note(
+		"%s — %d / %d killed, %d left" % [
+			str(_slayer_info.get("display_name", "?")),
+			maxi(0, assigned - remaining),
+			assigned,
+			remaining,
+		],
+		Color(0.95, 0.88, 0.6)
+	))
+	_slayer_task_box.add_child(_slayer_note(
+		"%d points  ·  streak %d" % [
+			int(_slayer_info.get("points", 0)),
+			int(_slayer_info.get("streak", 0)),
+		],
+		Color(0.7, 0.74, 0.8)
+	))
+	var notes: String = str(_slayer_info.get("guide_notes", ""))
+	if not notes.is_empty():
+		_slayer_task_box.add_child(_slayer_note(notes, Color(0.65, 0.7, 0.78)))
 
 
 func _make_source_row(item: Item, required_level: int, player_level: int) -> Control:

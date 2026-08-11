@@ -46,35 +46,36 @@ const BACK_BUTTON_LABELS: Array[String] = ["Close", "Back", "Cancel"]
 ## Menu open fade-in duration. Kept short + subtle on purpose (a soft arrival, not a flourish).
 const MENU_FADE_S: float = 0.10
 
+## Upper-right tracker rail. RIGHT_RAIL_TOP clears the navigation minimap
+## (which ends at y=120 — see NavigationMinimap._ready); the width/margin match
+## its lane so the whole rail reads as one column.
+const RIGHT_RAIL_TOP: float = 128.0
+const RIGHT_RAIL_GAP: float = 8.0
+const RIGHT_RAIL_WIDTH: float = 224.0
+const RIGHT_RAIL_MARGIN: float = 8.0
+
 
 func _ready() -> void:
 	_navigation_minimap = NAVIGATION_MINIMAP_SCRIPT.new()
 	add_child(_navigation_minimap)
 	add_child(PLAYER_CONTEXT_MENU_SCRIPT.new())
 	add_child(HOSTILE_CONTEXT_MENU_SCRIPT.new())
-	# The minimap owns the upper-right navigation lane. Keep the existing
-	# tracker directly below it so the two surfaces read as one system.
-	quest_tracker.anchor_left = 1.0
-	quest_tracker.anchor_top = 0.0
-	quest_tracker.anchor_right = 1.0
-	quest_tracker.anchor_bottom = 0.0
-	quest_tracker.offset_left = -240.0
-	quest_tracker.offset_top = 182.0
-	quest_tracker.offset_right = -16.0
-	quest_tracker.offset_bottom = 210.0
-	# Slayer tracker stacks under the quest tracker in the same right rail.
-	slayer_tracker.anchor_left = 1.0
-	slayer_tracker.anchor_top = 0.0
-	slayer_tracker.anchor_right = 1.0
-	slayer_tracker.anchor_bottom = 0.0
-	slayer_tracker.offset_left = -240.0
-	slayer_tracker.offset_top = 220.0
-	slayer_tracker.offset_right = -16.0
-	slayer_tracker.offset_bottom = 280.0
-	quest_tracker.resized.connect(_place_slayer_tracker)
-	slayer_tracker.visibility_changed.connect(_place_slayer_tracker)
-	quest_tracker.visibility_changed.connect(_place_slayer_tracker)
-	call_deferred(&"_place_slayer_tracker")
+	# The minimap owns the upper-right navigation lane; the two trackers stack
+	# beneath it in the same rail (_place_right_rail owns the vertical order).
+	# Slayer sits ABOVE the quest tracker: it used to start at y=220, which on a
+	# short viewport dropped it behind the centre-right quickslot bar.
+	for tracker: Control in [quest_tracker, slayer_tracker]:
+		tracker.anchor_left = 1.0
+		tracker.anchor_top = 0.0
+		tracker.anchor_right = 1.0
+		tracker.anchor_bottom = 0.0
+		tracker.offset_left = -RIGHT_RAIL_WIDTH
+		tracker.offset_right = -RIGHT_RAIL_MARGIN
+	slayer_tracker.resized.connect(_place_right_rail)
+	quest_tracker.resized.connect(_place_right_rail)
+	slayer_tracker.visibility_changed.connect(_place_right_rail)
+	quest_tracker.visibility_changed.connect(_place_right_rail)
+	call_deferred(&"_place_right_rail")
 
 	notification_button.visible = false
 	notification_button.disabled = true
@@ -388,20 +389,23 @@ func _refresh_hud_for_menus() -> void:
 		quest_tracker.refresh()
 		if slayer_tracker.has_method(&"refresh"):
 			slayer_tracker.call(&"refresh")
-		_place_slayer_tracker()
+		_place_right_rail()
 
 
-## Keep the Slayer panel tucked under the quest tracker when both are visible.
-func _place_slayer_tracker() -> void:
+## Stack the upper-right rail top-down: minimap (fixed), Slayer tracker, quest
+## tracker. Each visible panel is placed under the last one, so a hidden panel
+## leaves no gap and neither tracker can drift down into the quickslot bar.
+func _place_right_rail() -> void:
 	if slayer_tracker == null or quest_tracker == null:
 		return
-	var top: float = 182.0
-	if quest_tracker.visible:
-		top = quest_tracker.offset_top + maxf(quest_tracker.size.y, 28.0) + 8.0
-	else:
-		top = 182.0
-	slayer_tracker.offset_top = top
-	slayer_tracker.offset_bottom = top + maxf(slayer_tracker.get_combined_minimum_size().y, 64.0)
+	var top: float = RIGHT_RAIL_TOP
+	for tracker: Control in [slayer_tracker, quest_tracker]:
+		if not tracker.visible:
+			continue
+		var panel_height: float = maxf(tracker.get_combined_minimum_size().y, 28.0)
+		tracker.offset_top = top
+		tracker.offset_bottom = top + panel_height
+		top += panel_height + RIGHT_RAIL_GAP
 
 
 ## Suppress player movement whenever a blocking menu is up. Polled each frame (NOT

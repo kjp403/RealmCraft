@@ -16,6 +16,11 @@ extends Resource
 ## level gate like OSRS's Mazchna, to match how every other Arkenelle skill gate
 ## reads (QuestResource.min_skill_level).
 @export var min_slayer_level: int = 1
+## Where to find this master, in words ("Slayer House, Goblin Woodland"). Shown
+## in the in-game Slayer guide — the guide lists every master, including ones the
+## player has never met, so it has to say where to go. Plain text on purpose: a
+## map coordinate would rot the moment a building moves.
+@export var location_hint: String = ""
 
 @export_group("Points economy")
 ## Slayer points banked on TASK COMPLETION (never per kill, never on skip).

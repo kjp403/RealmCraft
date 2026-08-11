@@ -22,6 +22,7 @@ var _music_slider: HSlider
 var _sound_slider: HSlider
 var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
+var _slayer_tracker_toggle: CheckButton
 var _music_value: Label
 var _sound_value: Label
 var _zoom_value: Label
@@ -109,6 +110,16 @@ func _build_layout() -> void:
 	_weather_toggle.add_theme_font_size_override(&"font_size", 10)
 	_weather_toggle.toggled.connect(_on_weather_toggled)
 	main_box.add_child(_weather_toggle)
+
+	_slayer_tracker_toggle = CheckButton.new()
+	_slayer_tracker_toggle.text = "Slayer tracker"
+	_slayer_tracker_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_slayer_tracker_toggle.add_theme_font_size_override(&"font_size", 10)
+	_slayer_tracker_toggle.tooltip_text = (
+		"Show your current Slayer task in the top-right corner."
+	)
+	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
+	main_box.add_child(_slayer_tracker_toggle)
 
 	main_box.add_child(HSeparator.new())
 
@@ -263,6 +274,12 @@ func _on_weather_toggled(enabled: bool) -> void:
 	)
 
 
+func _on_slayer_tracker_toggled(enabled: bool) -> void:
+	if _syncing:
+		return
+	SlayerTracker.set_enabled(enabled)
+
+
 func _on_setting_changed(
 	section: StringName,
 	property: StringName,
@@ -275,6 +292,7 @@ func _on_setting_changed(
 		&"sound_volume",
 		&"camera_zoom",
 		&"weather_effects",
+		SlayerTracker.SETTING_PROPERTY,
 	]:
 		_sync_controls()
 
@@ -290,6 +308,7 @@ func _sync_controls() -> void:
 	_weather_toggle.button_pressed = bool(
 		_setting_value(&"weather_effects", true)
 	)
+	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
 
 	_update_value_label(
 		&"music_volume",
@@ -335,6 +354,7 @@ func _on_reset_pressed() -> void:
 		&"sound_volume",
 		&"camera_zoom",
 		&"weather_effects",
+		SlayerTracker.SETTING_PROPERTY,
 	]:
 		var default_value: Variant = (
 			ClientState.settings.get_default(SECTION, property)
