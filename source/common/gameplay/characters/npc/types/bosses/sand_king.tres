@@ -6,68 +6,205 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_script"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_armored_skeleton.tres" id="5_skin"]
 
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="li1"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
-[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li3"]
-[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
-[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
-[ext_resource type="Resource" uid="uid://x8cnc5kq8l35" path="res://source/common/gameplay/items/gears/relics/relic_scarabheart.tres" id="relic_scarabheart"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="adamant_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="runite_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="gold_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="silver_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="cloth_bandit"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="yew_log"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="anglerfish"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="bas_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_basilisk.item.tres" id="bas_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="bas_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="bas_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/basilisk_cloth.tres" id="bas_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres" id="wr_hide"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres" id="wr_leather"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wraithsilk_gem.tres" id="wr_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/wraithsilk_cloth.tres" id="wr_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_wraithsilk.tres" id="wr_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres" id="rw_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres" id="rw_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/runewoven_gem.tres" id="rw_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runewoven_ore.tres" id="rw_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_scarabheart.tres" id="relic_scarab"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_red_large.tres" id="chest_red"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
-item = ExtResource("li0")
-min_amount = 320
-max_amount = 540
+item = ExtResource("gold")
+min_amount = 3200
+max_amount = 5400
 chance = 1.0
-
-[sub_resource type="Resource" id="Drop_silver_bar"]
-script = ExtResource("3_loot")
-item = ExtResource("li1")
-min_amount = 1
-max_amount = 3
-chance = 0.6
-
-[sub_resource type="Resource" id="Drop_iron_bar"]
-script = ExtResource("3_loot")
-item = ExtResource("li2")
-min_amount = 2
-max_amount = 4
-chance = 1.0
-
-[sub_resource type="Resource" id="Drop_cloth_bandit"]
-script = ExtResource("3_loot")
-item = ExtResource("li3")
-min_amount = 3
-max_amount = 6
-chance = 0.5
-
-[sub_resource type="Resource" id="Drop_dungeon_key"]
-script = ExtResource("3_loot")
-item = ExtResource("drop_dungeon_key_item")
-chance = 0.08
-
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_loot")
-item = ExtResource("bone_item")
+item = ExtResource("bone")
 chance = 1.0
-
+[sub_resource type="Resource" id="Drop_steel_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("steel_bar")
+min_amount = 40
+max_amount = 100
+chance = 0.6
+[sub_resource type="Resource" id="Drop_mithril_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("mithril_bar")
+min_amount = 40
+max_amount = 80
+chance = 0.6
+[sub_resource type="Resource" id="Drop_adamant_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("adamant_bar")
+min_amount = 20
+max_amount = 40
+chance = 0.6
+[sub_resource type="Resource" id="Drop_runite_bar"]
+script = ExtResource("3_loot")
+item = ExtResource("runite_bar")
+min_amount = 5
+max_amount = 20
+chance = 0.6
+[sub_resource type="Resource" id="Drop_gold_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("gold_ore")
+min_amount = 1
+max_amount = 5
+chance = 0.6
+[sub_resource type="Resource" id="Drop_silver_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("silver_ore")
+min_amount = 5
+max_amount = 15
+chance = 0.6
+[sub_resource type="Resource" id="Drop_cloth_bandit"]
+script = ExtResource("3_loot")
+item = ExtResource("cloth_bandit")
+min_amount = 10
+max_amount = 100
+chance = 0.5
+[sub_resource type="Resource" id="Drop_maple_log"]
+script = ExtResource("3_loot")
+item = ExtResource("maple_log")
+min_amount = 20
+max_amount = 100
+chance = 0.5
+[sub_resource type="Resource" id="Drop_yew_log"]
+script = ExtResource("3_loot")
+item = ExtResource("yew_log")
+min_amount = 20
+max_amount = 100
+chance = 0.5
+[sub_resource type="Resource" id="Drop_anglerfish"]
+script = ExtResource("3_loot")
+item = ExtResource("anglerfish")
+min_amount = 10
+max_amount = 50
+chance = 0.5
+[sub_resource type="Resource" id="Drop_dungeon_key"]
+script = ExtResource("3_loot")
+item = ExtResource("dungeon_key")
+chance = 0.08
+[sub_resource type="Resource" id="Drop_basilisk_sword"]
+script = ExtResource("3_loot")
+item = ExtResource("bas_sword")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_basilisk_hammer"]
+script = ExtResource("3_loot")
+item = ExtResource("bas_hammer")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_basilisk_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("bas_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.15
+[sub_resource type="Resource" id="Drop_hide_wraithsilk"]
+script = ExtResource("3_loot")
+item = ExtResource("wr_hide")
+min_amount = 1
+max_amount = 3
+chance = 0.15
+[sub_resource type="Resource" id="Drop_basilisk_cloth"]
+script = ExtResource("3_loot")
+item = ExtResource("bas_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+[sub_resource type="Resource" id="Drop_wraithsilk_leather"]
+script = ExtResource("3_loot")
+item = ExtResource("wr_leather")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_runewoven_cloth"]
+script = ExtResource("3_loot")
+item = ExtResource("rw_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_runewoven_ore"]
+script = ExtResource("3_loot")
+item = ExtResource("rw_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_basilisk_gem"]
+script = ExtResource("3_loot")
+item = ExtResource("bas_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_wraithsilk_gem"]
+script = ExtResource("3_loot")
+item = ExtResource("wr_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_runewoven_gem"]
+script = ExtResource("3_loot")
+item = ExtResource("rw_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_wraithsilk_cloth"]
+script = ExtResource("3_loot")
+item = ExtResource("wr_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+[sub_resource type="Resource" id="Drop_fiber_wraithsilk"]
+script = ExtResource("3_loot")
+item = ExtResource("wr_fiber")
+min_amount = 1
+max_amount = 3
+chance = 0.28
+[sub_resource type="Resource" id="Drop_fiber_runewoven"]
+script = ExtResource("3_loot")
+item = ExtResource("rw_fiber")
+min_amount = 1
+max_amount = 3
+chance = 0.28
 [sub_resource type="Resource" id="Drop_relic_scarabheart"]
 script = ExtResource("3_loot")
-item = ExtResource("relic_scarabheart")
+item = ExtResource("relic_scarab")
 chance = 0.001
-
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sand_king"
 display_name = "Ankhemet, the Sand King"
 skin = ExtResource("5_skin")
 visual_scale = 1.9
-combat_level = 30
+combat_level = 222
 is_boss = true
-
+
 max_health = 900.0
-attack_damage = 44.0
+attack_damage = 22.0
 attack_cooldown = 1.8
 armor = 26.0
 mr = 14.0
@@ -76,7 +213,7 @@ attacks = Array[ExtResource("1_atk")]([])
 move_speed = 46
 distance_to_attack = 30
 max_distance_from_spawn = 420
-leashes = true
+leashes = false
 detection_radius = 190
 chase_on_area = true
 is_lone = true
@@ -86,7 +223,6 @@ wander_pause_max_s = 4.0
 xp_reward = 2600
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_iron_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_scarabheart")])
 enrage_health_fraction = 0.4
 slam_radius = 132.0
 slam_windup_s = 1.2
@@ -108,10 +244,12 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_relic_scarabheart")])
 ornate_chest_top_min = 1
 ornate_chest_top_max = 3
-ornate_chest_second_min = 1
-ornate_chest_second_max = 2
-ornate_chest_consolation_chance = 0.25
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+ornate_chest_item = ExtResource("chest_red")
 metadata/slug = &"sand_king"
 metadata/id = 83

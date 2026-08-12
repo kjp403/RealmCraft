@@ -6,9 +6,9 @@
 [resource]
 script = ExtResource("2_script")
 chest_slug = &"gold_blue_large"
-item_name = &"Ornate Gold Chest (Blue)"
+item_name = &"Ornate Blue Chest"
 item_icon = ExtResource("1_icon")
-description = "A rare ornate chest with blue trim. Use to open."
+description = "An ornate blue chest. Opens into supplies plus a chance at Sirenic, Dragon, or Ancient craft materials."
 can_trade = true
 holdable = false
 metadata/slug = &"gold_blue_large"

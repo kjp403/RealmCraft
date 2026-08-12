@@ -24,3 +24,7 @@ extends Resource
 @export var exclusive_max: int = 2
 ## Unused legacy field (soft rolling lockout). Kept for .tres compatibility.
 @export var lockout_hours: float = 0.0
+## Guaranteed T3 Ornate Gold Chest (item 249 / gold_pink_large) count on a charged
+## clear. Hard Mode tables should double Normal (e.g. 1 → 2). 0 = none. Not
+## affected by solo chance/amount multipliers — the count is exact.
+@export var ornate_chest_count: int = 0

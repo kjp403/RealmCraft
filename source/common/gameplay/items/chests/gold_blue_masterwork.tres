@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://egja0p1ceane"]
+
+[ext_resource type="Texture2D" uid="uid://rv4hd6vajo3t" path="res://assets/sprites/environment/chests/gold_blue_masterwork.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"gold_blue_masterwork"
+item_name = &"Masterwork Azure Chest"
+item_icon = ExtResource("1_icon")
+description = "A masterwork chest packed for tailors — Primordial, Empyrean and Aetherborn cloth. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"gold_blue_masterwork"
+metadata/id = 530

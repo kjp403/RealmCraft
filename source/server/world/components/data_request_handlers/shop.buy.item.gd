@@ -42,20 +42,34 @@ func data_request_handler(
 		return {"ok": false, "reason": "no_currency"}
 	if not Inventory.can_add(inventory, item_id, amount):
 		return {"ok": false, "reason": "inventory_full"}
-	if not Inventory.remove_amount_by_id(inventory, currency_id, total):
+
+	var paid_slayer_points: bool = Economy.is_slayer_points_id(currency_id)
+	if paid_slayer_points:
+		if player.player_resource.slayer_points < total:
+			return {"ok": false, "reason": "cant_afford"}
+		player.player_resource.slayer_points -= total
+	elif not Inventory.remove_amount_by_id(inventory, currency_id, total):
 		return {"ok": false, "reason": "cant_afford"}
 
 	# Add one at a time so stackable items merge and non-stackable get separate slots.
 	for i: int in amount:
 		if not Inventory.try_add_item(inventory, item_id, 1):
-			# Shouldn't happen after can_add — refund remaining gold for safety.
+			# Shouldn't happen after can_add — refund remaining currency for safety.
 			var refund: int = int(entry.get("price", 0)) * (amount - i)
 			if refund > 0:
-				Inventory.add_item(inventory, currency_id, refund)
+				if paid_slayer_points:
+					player.player_resource.slayer_points += refund
+				else:
+					Inventory.add_item(inventory, currency_id, refund)
 			return {"ok": false, "reason": "inventory_full"}
 
 	# Silent quest refresh: a bought item may satisfy a "Bring N item" (COLLECT)
 	# objective, which has no advance event of its own. Empty messages = no toast,
 	# just a HUD tracker re-fetch.
 	WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": []})
-	return {"ok": true}
+	var balance: int = (
+		player.player_resource.slayer_points
+		if paid_slayer_points
+		else Inventory.count(inventory, currency_id)
+	)
+	return {"ok": true, "currency_balance": balance}

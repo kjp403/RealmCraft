@@ -6,8 +6,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="4_gmn70"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="5_5g0yj"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="6_mmw2q"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres" id="7_x4kyu"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="8_p8ty2"]
 [ext_resource type="Script" path="res://source/common/gameplay/shops/shop_trade.gd" id="30_trade"]
 
 [sub_resource type="Resource" id="Resource_mjhr3"]
@@ -30,18 +28,8 @@ script = ExtResource("1_entry")
 item = ExtResource("6_mmw2q")
 price = 500
 
-[sub_resource type="Resource" id="Resource_x4kyu"]
-script = ExtResource("1_entry")
-item = ExtResource("7_x4kyu")
-price = 4500
-
-[sub_resource type="Resource" id="Resource_p8ty2"]
-script = ExtResource("1_entry")
-item = ExtResource("8_p8ty2")
-price = 4500
-
 [resource]
 script = ExtResource("2_shop")
 shop_name = "The Ashmonger's Hoard"
-entries = Array[ExtResource("1_entry")]([SubResource("Resource_mjhr3"), SubResource("Resource_gmn70"), SubResource("Resource_5g0yj"), SubResource("Resource_mmw2q"), SubResource("Resource_x4kyu"), SubResource("Resource_p8ty2")])
+entries = Array[ExtResource("1_entry")]([SubResource("Resource_mjhr3"), SubResource("Resource_gmn70"), SubResource("Resource_5g0yj"), SubResource("Resource_mmw2q")])
 metadata/slug = &"fire_shop"

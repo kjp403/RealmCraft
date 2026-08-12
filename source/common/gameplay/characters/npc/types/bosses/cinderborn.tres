@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://bv86s6u55kjnm" path="res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres" id="relic_cinderheart"]
+[ext_resource type="Resource" uid="uid://c4c886325d9cb9" path="res://source/common/gameplay/items/chests/gold_blue_large.tres" id="chest_blue"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -63,11 +64,11 @@ enemy_type = &"cinderborn"
 display_name = "Vurthek, the Cinderborn"
 skin = ExtResource("5_skin")
 visual_scale = 2.0
-combat_level = 35
+combat_level = 420
 is_boss = true
 
 max_health = 1250.0
-attack_damage = 55.0
+attack_damage = 23.0
 attack_cooldown = 1.7
 armor = 30.0
 mr = 22.0
@@ -76,7 +77,7 @@ attacks = Array[ExtResource("1_atk")]([])
 move_speed = 50
 distance_to_attack = 32
 max_distance_from_spawn = 460
-leashes = true
+leashes = false
 detection_radius = 210
 chase_on_area = true
 is_lone = true
@@ -110,8 +111,9 @@ arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
 ornate_chest_top_min = 2
 ornate_chest_top_max = 4
-ornate_chest_second_min = 1
-ornate_chest_second_max = 2
-ornate_chest_consolation_chance = 0.3
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+ornate_chest_item = ExtResource("chest_blue")
 metadata/slug = &"cinderborn"
 metadata/id = 81

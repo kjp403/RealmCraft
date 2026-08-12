@@ -17,13 +17,19 @@ stat_name = "health_max"
 value = 14.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
+[sub_resource type="Resource" id="Mod_2"]
+script = ExtResource("1_mod")
+stat_name = "mana_max"
+value = 10.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
 required_level = 0
 required_mastery_categories = Array[StringName]([])
 required_mastery_level = 0
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Gold Necklace"
 item_icon = ExtResource("2_icon")
 can_trade = true

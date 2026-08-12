@@ -83,8 +83,9 @@ func _init() -> void:
 			failures.append("%s has no description" % slug)
 		if not relic.can_trade:
 			failures.append("%s is untradeable" % slug)
-		if relic.vendor_value <= 0:
-			failures.append("%s has vendor_value %d" % [slug, relic.vendor_value])
+		# Boss-only keepsakes — never junk-sold (vendor_value 0).
+		if relic.vendor_value != 0:
+			failures.append("%s has vendor_value %d (must be 0 — not vendor-sellable)" % [slug, relic.vendor_value])
 		# GearItem defaults to 5 (smithable armour batches); relics are keepsakes.
 		if relic.stack_limit != 1:
 			failures.append("%s stacks to %d, expected 1" % [slug, relic.stack_limit])
@@ -131,8 +132,7 @@ func _init() -> void:
 			failures.append("%s (%.1f) does not out-stat %s (%.1f)" % [
 				greater, budgets[greater], lesser, budgets[lesser]
 			])
-		if int(vendors[greater]) <= int(vendors[lesser]):
-			failures.append("%s is not worth more than %s" % [greater, lesser])
+		# vendor_value stays 0 for all relics — no gold ladder to check.
 
 	if failures.is_empty():
 		print("VERIFY_PASS boss_relics (%d relics, %d families)" % [

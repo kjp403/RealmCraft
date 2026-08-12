@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://c1d12718bd125e"]
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://cpinklargechest01"]
 
 [ext_resource type="Texture2D" uid="uid://bvgqwndicqjnd" path="res://assets/sprites/environment/chests/gold_pink_large.png" id="1_icon"]
 [ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
@@ -6,9 +6,9 @@
 [resource]
 script = ExtResource("2_script")
 chest_slug = &"gold_pink_large"
-item_name = &"Ornate Gold Chest (Pink)"
+item_name = &"Ornate Gold Chest"
 item_icon = ExtResource("1_icon")
-description = "A rare ornate chest with pink trim. Use to open."
+description = "A rare ornate chest. Opens into supplies plus a chance at Sirenic, Dragon, or Ancient (Enchanted) craft materials."
 can_trade = true
 holdable = false
 metadata/slug = &"gold_pink_large"

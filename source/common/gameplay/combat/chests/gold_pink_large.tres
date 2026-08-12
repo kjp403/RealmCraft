@@ -14,12 +14,23 @@
 [ext_resource type="Resource" uid="uid://5m2aby8t4xmu" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="item_8"]
 [ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="item_9"]
 [ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="item_10"]
-[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_11"]
-[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_12"]
-[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_13"]
-[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="item_14"]
-[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="item_15"]
-[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="item_16"]
+[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="item_11"]
+[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="item_12"]
+[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="item_13"]
+[ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="item_14"]
+[ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="item_15"]
+[ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="item_16"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_17"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_18"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_19"]
+
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_oathband.tres" id="item_20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_wayfarer.tres" id="item_21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_heartfire.tres" id="item_22"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_starweave.tres" id="item_23"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_bulwark.tres" id="item_24"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_stormchase.tres" id="item_25"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="item_26"]
 
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
@@ -123,11 +134,67 @@ item = ExtResource("item_16")
 max_amount = 2
 chance = 0.18
 
+[sub_resource type="Resource" id="Drop_17"]
+script = ExtResource("1_loot")
+item = ExtResource("item_17")
+max_amount = 3
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_18"]
+script = ExtResource("1_loot")
+item = ExtResource("item_18")
+max_amount = 2
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_19"]
+script = ExtResource("1_loot")
+item = ExtResource("item_19")
+max_amount = 2
+chance = 0.18
+
+[sub_resource type="Resource" id="Drop_ring_oathband"]
+script = ExtResource("1_loot")
+item = ExtResource("item_20")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_wayfarer"]
+script = ExtResource("1_loot")
+item = ExtResource("item_21")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_heartfire"]
+script = ExtResource("1_loot")
+item = ExtResource("item_22")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_starweave"]
+script = ExtResource("1_loot")
+item = ExtResource("item_23")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_bulwark"]
+script = ExtResource("1_loot")
+item = ExtResource("item_24")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_stormchase"]
+script = ExtResource("1_loot")
+item = ExtResource("item_25")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_sovereign"]
+script = ExtResource("1_loot")
+item = ExtResource("item_26")
+chance = 0.02
+
+
 [resource]
 script = ExtResource("2_chest")
-display_name = "Ornate Gold Chest (Pink)"
+display_name = "Ornate Gold Chest"
 icon = ExtResource("3_icon")
 tier = 3
 gold_min = 10000
 gold_max = 25000
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16"), SubResource("Drop_17"), SubResource("Drop_18"), SubResource("Drop_19")])
+exclusive_loot = Array[ExtResource("1_loot")]([SubResource("Drop_ring_oathband"), SubResource("Drop_ring_wayfarer"), SubResource("Drop_ring_heartfire"), SubResource("Drop_ring_starweave"), SubResource("Drop_ring_bulwark"), SubResource("Drop_ring_stormchase"), SubResource("Drop_ring_sovereign")])
+exclusive_max = 1

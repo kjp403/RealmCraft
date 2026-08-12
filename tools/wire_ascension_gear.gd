@@ -270,37 +270,13 @@ func _build_shops() -> void:
 			e.price = int(path_price[1])
 			entries.append(e)
 
-	# Jewelry + rings + a few skilling pieces
-	for slug: String in [
-		"heart_of_the_wild", "ember_locket", "tideglass_amulet",
-		"oathstone", "reliquary_of_verdance", "covenant_cross",
-	]:
-		var j: Item = _load_item("res://source/common/gameplay/items/gears/jewelry/%s.tres" % slug)
-		if j == null:
-			continue
-		var e2 := ShopEntry.new()
-		e2.item = j
-		e2.price = maxi(j.vendor_value * 4, 2000)
-		entries.append(e2)
-
-	for slug2: String in [
-		"ring_wayfarer", "ring_heartfire", "ring_starweave", "ring_bulwark",
-		"ring_sovereign", "ring_stormchase", "ring_oathband",
-	]:
-		var r: Item = _load_item("res://source/common/gameplay/items/gears/rings/%s.tres" % slug2)
-		if r == null:
-			continue
-		var e3 := ShopEntry.new()
-		e3.item = r
-		e3.price = maxi(r.vendor_value * 4, 1500)
-		entries.append(e3)
-
+	# Materials only — Ascension finished gear is craft/dungeon, never gold-buyable.
 	shop.entries = entries
 	shop.set_meta(&"slug", &"ascension_shop")
 	var err: Error = ResourceSaver.save(shop, ASCENSION_SHOP)
 	print("ascension_shop entries=", entries.size(), " save=", error_string(err))
 
-	# Also stock Forgemaster Helka's empty fire shop with mid-tier mats + specials
+	# Also stock Forgemaster Helka's fire shop with mid-tier mats (no finished gear).
 	var fire: ShopResource = ResourceLoader.load(FIRE_SHOP) as ShopResource
 	if fire != null:
 		var fire_entries: Array[ShopEntry] = []
@@ -309,8 +285,6 @@ func _build_shops() -> void:
 			"res://source/common/gameplay/items/materials/gems/basilisk_gem.tres",
 			"res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres",
 			"res://source/common/gameplay/items/materials/gems/godsteel_gem.tres",
-			"res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres",
-			"res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres",
 		]:
 			var it2: Item = _load_item(path)
 			if it2 == null:
@@ -323,7 +297,6 @@ func _build_shops() -> void:
 		fire.shop_name = "The Ashmonger's Hoard"
 		var err2: Error = ResourceSaver.save(fire, FIRE_SHOP)
 		print("fire_shop entries=", fire_entries.size(), " save=", error_string(err2))
-
 
 func _build_reward() -> void:
 	var reward := DungeonReward.new()

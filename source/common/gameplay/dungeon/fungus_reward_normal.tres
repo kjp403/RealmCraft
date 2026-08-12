@@ -16,7 +16,6 @@
 [ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_herring"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
 [ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
-[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
 
 [sub_resource type="Resource" id="Drop_0_cloth_cave"]
 script = ExtResource("2_loot")
@@ -112,16 +111,10 @@ item = ExtResource("item_mana_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_14_wood_silver_small"]
-script = ExtResource("2_loot")
-item = ExtResource("item_wood_silver_small")
-min_amount = 1
-max_amount = 5
-chance = 0.16
-
 [resource]
 script = ExtResource("1_reward")
 gold_min = 3000
 gold_max = 8000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_mithril_bar"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_maple_log"), SubResource("Drop_7_shrimp"), SubResource("Drop_8_trout"), SubResource("Drop_9_salmon"), SubResource("Drop_10_cod"), SubResource("Drop_11_herring"), SubResource("Drop_12_health_potion"), SubResource("Drop_13_mana_potion"), SubResource("Drop_14_wood_silver_small")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_mithril_bar"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_maple_log"), SubResource("Drop_7_shrimp"), SubResource("Drop_8_trout"), SubResource("Drop_9_salmon"), SubResource("Drop_10_cod"), SubResource("Drop_11_herring"), SubResource("Drop_12_health_potion"), SubResource("Drop_13_mana_potion")])
+ornate_chest_count = 1
 lockout_hours = 0.0

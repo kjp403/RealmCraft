@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://0epju752htr8"]
+
+[ext_resource type="Texture2D" uid="uid://rqd4xdynqb7e" path="res://assets/sprites/environment/chests/gold_steel_grand.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"gold_steel_grand"
+item_name = &"Grand Steel Chest"
+item_icon = ExtResource("1_icon")
+description = "A grand steel-banded chest. Holds Wyrmguard, Nightglass and Astral materials. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"gold_steel_grand"
+metadata/id = 525
