@@ -7,6 +7,8 @@ class_name AdminConfig
 ## bundled "res://data/config/server_admins.cfg". Format (role names come from ServerRoles):
 ##   [admins]
 ##   MyAccount="owner"
+##   [leaderboard_hide]
+##   SomeDisplayName=1
 ##
 ## SECURITY: guest* account names are never honored — they previously matched auto-created
 ## guest logins and granted free senior_admin. owner / senior_admin belong only here.
@@ -15,6 +17,7 @@ const USER_PATH: String = "user://server_admins.cfg"
 const RES_PATH: String = "res://data/config/server_admins.cfg"
 
 static var _roles: Dictionary
+static var _leaderboard_hide: Dictionary
 static var _loaded: bool
 
 
@@ -24,6 +27,16 @@ static func role_for(account_name: String) -> String:
 	if not _loaded:
 		_load()
 	return _roles.get(account_name.to_lower(), "")
+
+
+## True when [param name] (login account or character display name) is listed under
+## [leaderboard_hide] in server_admins.cfg.
+static func is_leaderboard_hidden(name: String) -> bool:
+	if name.is_empty():
+		return false
+	if not _loaded:
+		_load()
+	return _leaderboard_hide.has(name.to_lower())
 
 
 ## All config-granted entries (account -> role), for the /staff roster. A copy, so
@@ -37,6 +50,7 @@ static func all() -> Dictionary:
 ## Re-read the file (e.g. after editing it without restarting the server).
 static func reload() -> void:
 	_roles.clear()
+	_leaderboard_hide.clear()
 	_loaded = false
 
 
@@ -52,16 +66,30 @@ static func _load() -> void:
 	_loaded = true
 	var config: ConfigFile = ConfigFile.new()
 	var path: String = USER_PATH if FileAccess.file_exists(USER_PATH) else RES_PATH
-	if config.load(path) != OK or not config.has_section("admins"):
+	if config.load(path) != OK:
 		return
-	for account: String in config.get_section_keys("admins"):
-		if _is_forbidden_account(account):
-			push_warning(
-				"AdminConfig: ignoring forbidden guest* admin entry '%s' in %s"
-				% [account, path]
-			)
-			continue
-		var role: String = str(config.get_value("admins", account, "")).strip_edges()
-		if role.is_empty():
-			continue
-		_roles[account.to_lower()] = role
+	if config.has_section("admins"):
+		for account: String in config.get_section_keys("admins"):
+			if _is_forbidden_account(account):
+				push_warning(
+					"AdminConfig: ignoring forbidden guest* admin entry '%s' in %s"
+					% [account, path]
+				)
+				continue
+			var role: String = str(config.get_value("admins", account, "")).strip_edges()
+			if role.is_empty():
+				continue
+			_roles[account.to_lower()] = role
+	if config.has_section("leaderboard_hide"):
+		for key: String in config.get_section_keys("leaderboard_hide"):
+			var raw: Variant = config.get_value("leaderboard_hide", key, 0)
+			var on: bool = false
+			if raw is bool:
+				on = raw
+			elif raw is int or raw is float:
+				on = int(raw) != 0
+			else:
+				var s: String = str(raw).strip_edges().to_lower()
+				on = s in ["1", "true", "yes", "on"]
+			if on:
+				_leaderboard_hide[key.to_lower()] = true

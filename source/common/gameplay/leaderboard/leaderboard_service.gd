@@ -177,7 +177,9 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			roles = roles_parsed if roles_parsed is Dictionary else {}
 
 		# Hide admin / senior_admin / owner from boards (moderators stay).
-		if CommandPermissions.is_hidden_from_leaderboard(account_name, roles, role_definitions):
+		if CommandPermissions.is_hidden_from_leaderboard(
+			account_name, roles, role_definitions, display_name
+		):
 			continue
 
 		var score: int = 0
@@ -312,7 +314,9 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 			account_name = str(row.get("account_name", ""))
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
-		if CommandPermissions.is_hidden_from_leaderboard(account_name, roles, role_definitions):
+		if CommandPermissions.is_hidden_from_leaderboard(
+			account_name, roles, role_definitions, display_name
+		):
 			continue
 		var best: Variant = stats.get("dungeon_best", {})
 		if best is not Dictionary:
@@ -372,6 +376,13 @@ const STATUE_TOP_N: int = 10
 const STATUE_CACHE_TTL_MS: int = 300000 # 5 min
 static var _statue_cache: Dictionary = {}
 static var _statue_cache_ms: int = 0
+
+
+## Drop the plaza champions cache (e.g. after /reloadadmins so newly hidden
+## staff leave the Guild Hall statues immediately).
+static func invalidate_champions_cache() -> void:
+	_statue_cache.clear()
+	_statue_cache_ms = 0
 
 
 ## Top-N of each statue board, best-first, each entry carrying the player's skin:

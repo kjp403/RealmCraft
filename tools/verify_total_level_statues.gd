@@ -60,6 +60,26 @@ func _init() -> void:
 	if menu.find("Total Level") < 0:
 		failures.append("leaderboard_menu missing Total Level label")
 
+	# --- Staff hide from boards (admins must not occupy Guild Hall statues) ------
+	var perms: String = FileAccess.get_file_as_string(
+		"res://source/server/world/components/chat_command/command_permissions.gd"
+	)
+	if perms.find("is_leaderboard_hidden") < 0:
+		failures.append("is_hidden_from_leaderboard must consult AdminConfig.is_leaderboard_hidden")
+	if perms.find("_db_role_blocked(role)") >= 0 and perms.find("is_hidden_from_leaderboard") >= 0:
+		# Hide path must NOT skip live-blocked senior_admin via _db_role_blocked.
+		var hide_fn: int = perms.find("static func is_hidden_from_leaderboard")
+		var hide_body: String = perms.substr(hide_fn, 900)
+		if hide_body.find("_db_role_blocked") >= 0:
+			failures.append("leaderboard hide must count DB senior_admin/owner (no _db_role_blocked)")
+	if svc.find("invalidate_champions_cache") < 0:
+		failures.append("LeaderboardService missing invalidate_champions_cache")
+	var admins_cfg: String = FileAccess.get_file_as_string("res://data/config/server_admins.cfg")
+	if admins_cfg.find("[leaderboard_hide]") < 0:
+		failures.append("server_admins.cfg missing [leaderboard_hide] section")
+	if admins_cfg.to_lower().find("tomatoface") < 0:
+		failures.append("server_admins.cfg should list Tomatoface for staff/hide")
+
 	if failures.is_empty():
 		print("VERIFY_PASS")
 	else:
