@@ -6,7 +6,8 @@ extends MenuShell
 
 
 const GRID_COLUMNS: int = 6
-const SLOT_SIZE: Vector2 = Vector2(54, 54)
+## Slightly under 54 so two 6-col grids + chrome still fit the 960×540 client.
+const SLOT_SIZE: Vector2 = Vector2(48, 48)
 const MUTED: Color = Color(0.62, 0.64, 0.7)
 
 var _inventory: Dictionary = {}
@@ -39,6 +40,9 @@ func _ready() -> void:
 	if backdrop != null:
 		backdrop.color = Color(0.04, 0.05, 0.08, 0.82)
 	_apply_solid_bank_card()
+	# Sort + upgrade chrome made the vault wider/taller than 960×540; pull the
+	# shell in and clip so title/Close/Withdraw stay on-screen.
+	_tighten_shell_for_viewport()
 	_build_body()
 	visibility_changed.connect(func() -> void:
 		if visible:
@@ -48,6 +52,28 @@ func _ready() -> void:
 
 func open(_arg: Variant = null) -> void:
 	_refresh()
+
+
+func _tighten_shell_for_viewport() -> void:
+	for child in get_children():
+		if child is MarginContainer and child != content:
+			var margin: MarginContainer = child
+			margin.add_theme_constant_override(&"margin_left", 10)
+			margin.add_theme_constant_override(&"margin_right", 10)
+			margin.add_theme_constant_override(&"margin_top", 10)
+			margin.add_theme_constant_override(&"margin_bottom", 12)
+			if margin.get_child_count() > 0 and margin.get_child(0) is PanelContainer:
+				var card: PanelContainer = margin.get_child(0) as PanelContainer
+				card.clip_contents = true
+				var pad: Node = card.get_child(0) if card.get_child_count() > 0 else null
+				if pad is MarginContainer:
+					(pad as MarginContainer).add_theme_constant_override(&"margin_left", 8)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_right", 8)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_top", 4)
+					(pad as MarginContainer).add_theme_constant_override(&"margin_bottom", 6)
+			break
+	if _title_label != null:
+		_title_label.add_theme_font_size_override(&"font_size", 18)
 
 
 func _apply_solid_bank_card() -> void:
@@ -70,19 +96,20 @@ func _apply_solid_bank_card() -> void:
 	style.content_margin_top = 2
 	style.content_margin_bottom = 4
 	card.add_theme_stylebox_override(&"panel", style)
+	card.clip_contents = true
 
 
 func _build_body() -> void:
 	var root := VBoxContainer.new()
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_theme_constant_override(&"separation", 10)
+	root.add_theme_constant_override(&"separation", 6)
 	content.add_child(root)
 
 	var sides := HBoxContainer.new()
 	sides.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sides.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sides.add_theme_constant_override(&"separation", 16)
+	sides.add_theme_constant_override(&"separation", 10)
 	root.add_child(sides)
 
 	sides.add_child(_build_side("Your bag", true))
@@ -93,20 +120,24 @@ func _build_body() -> void:
 	root.add_child(_build_transfer_row())
 
 
+func _upgrade_button_text() -> String:
+	return "Buy +%d" % BankInteraction.UPGRADE_SLOTS
+
+
 func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override(&"separation", 8)
+	col.add_theme_constant_override(&"separation", 4)
 
 	var header := HBoxContainer.new()
-	header.add_theme_constant_override(&"separation", 8)
+	header.add_theme_constant_override(&"separation", 6)
 	col.add_child(header)
 	var label := Label.new()
 	label.text = title
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.55))
-	label.add_theme_font_size_override(&"font_size", 16)
+	label.add_theme_font_size_override(&"font_size", 15)
 	header.add_child(label)
 	var count := Label.new()
 	count.add_theme_color_override(&"font_color", MUTED)
@@ -121,22 +152,29 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Qty 1: left-click deposits. Qty 2+: set amount (X/Max). Drag to rearrange. Or Deposit All."
+		"Qty 1 deposits. Qty 2+: set amount. Drag to rearrange."
 		if is_bag
-		else "Drag to rearrange, or Sort to order A-Z. Click a stack, set amount (X/Max), Withdraw."
+		else "Click a stack to withdraw. Drag or Sort to rearrange."
 	)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.add_theme_color_override(&"font_color", MUTED)
-	hint.add_theme_font_size_override(&"font_size", 12)
+	hint.add_theme_font_size_override(&"font_size", 11)
 	col.add_child(hint)
 
 	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# Critical: don't let the full vault grid dictate the shell's min height —
+	# otherwise the card grows past 540px and crops title/Close/Withdraw.
+	scroll.custom_minimum_size = Vector2(0, 80)
 	col.add_child(scroll)
+	DragScroll.enable(scroll)
 	var grid := GridContainer.new()
 	grid.columns = GRID_COLUMNS
-	grid.add_theme_constant_override(&"h_separation", 6)
-	grid.add_theme_constant_override(&"v_separation", 6)
+	grid.add_theme_constant_override(&"h_separation", 4)
+	grid.add_theme_constant_override(&"v_separation", 4)
 	scroll.add_child(grid)
 
 	if is_bag:
@@ -152,10 +190,7 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 		_sort_button.pressed.connect(_on_sort_pressed)
 		header.add_child(_sort_button)
 		_upgrade_button = Button.new()
-		_upgrade_button.text = "Buy +%d slots (%sG)" % [
-			BankInteraction.UPGRADE_SLOTS,
-			_fmt_gold(BankInteraction.UPGRADE_COST),
-		]
+		_upgrade_button.text = _upgrade_button_text()
 		_upgrade_button.focus_mode = Control.FOCUS_NONE
 		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
 			BankInteraction.UPGRADE_SLOTS,
@@ -181,13 +216,24 @@ func _fmt_gold(amount: int) -> String:
 
 func _build_transfer_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override(&"separation", 10)
+	row.add_theme_constant_override(&"separation", 8)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	_selection_label = Label.new()
 	_selection_label.text = "Select a stack"
 	_selection_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_selection_label.clip_text = true
 	_selection_label.add_theme_color_override(&"font_color", MUTED)
 	row.add_child(_selection_label)
+
+	# Transfer stays left of the amount chrome so a tight 960px width never
+	# clips Withdraw/Deposit off the right edge.
+	_transfer_button = Button.new()
+	_transfer_button.text = "Transfer"
+	_transfer_button.focus_mode = Control.FOCUS_NONE
+	_transfer_button.disabled = true
+	_transfer_button.pressed.connect(_on_transfer_pressed)
+	row.add_child(_transfer_button)
 
 	var amount_label := Label.new()
 	amount_label.text = "Amount"
@@ -199,7 +245,7 @@ func _build_transfer_row() -> HBoxContainer:
 	_amount_spin.max_value = 1
 	_amount_spin.value = 1
 	_amount_spin.rounded = true
-	_amount_spin.custom_minimum_size = Vector2(96, 0)
+	_amount_spin.custom_minimum_size = Vector2(84, 0)
 	_amount_spin.editable = false
 	row.add_child(_amount_spin)
 
@@ -222,13 +268,6 @@ func _build_transfer_row() -> HBoxContainer:
 	max_btn.tooltip_text = "Fill your bag with as many as will fit"
 	max_btn.pressed.connect(_on_max_pressed)
 	row.add_child(max_btn)
-
-	_transfer_button = Button.new()
-	_transfer_button.text = "Transfer"
-	_transfer_button.focus_mode = Control.FOCUS_NONE
-	_transfer_button.disabled = true
-	_transfer_button.pressed.connect(_on_transfer_pressed)
-	row.add_child(_transfer_button)
 	return row
 
 
@@ -269,7 +308,8 @@ func _rebuild_grids() -> void:
 		_sort_button.disabled = _busy or bank_stacks <= 1
 	if _upgrade_button != null:
 		_upgrade_button.disabled = _busy
-		_upgrade_button.text = "Buy +%d slots (%sG)" % [
+		_upgrade_button.text = _upgrade_button_text()
+		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
 			BankInteraction.UPGRADE_SLOTS,
 			_fmt_gold(BankInteraction.UPGRADE_COST),
 		]
