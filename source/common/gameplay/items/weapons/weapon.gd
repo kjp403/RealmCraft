@@ -34,25 +34,30 @@ var _base_ability_count: int = 1
 
 
 ## Drives the in-hand sprite from the equipped item's ICON, so a weapon SKIN
-## (fire / rustic / ...) is pure item data — NO per-skin scene. The icon is an
-## AtlasTexture (same sheet + region the inventory shows), so the in-hand
-## sprite always matches the icon by construction. PLACEMENT (offset, centered,
-## flip) stays from the weapon-TYPE scene; [param extra_offset] nudges a skin
-## whose art sits differently (a taller blade). Client-only — pure visual.
+## (fire / rustic / ...) is pure item data — NO per-skin scene. AtlasTexture
+## icons use the same sheet + region the inventory shows; plain Texture2D
+## icons (tiered fishing rods) replace the sprite texture outright. PLACEMENT
+## (offset, centered, flip) stays from the weapon-TYPE scene; [param
+## extra_offset] nudges a skin whose art sits differently (a taller blade).
+## Client-only — pure visual.
 func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
-	if not GameMode.is_client() or weapon_sprite == null or icon is not AtlasTexture:
+	if not GameMode.is_client() or weapon_sprite == null or icon == null:
 		return
-	var atlas: AtlasTexture = icon as AtlasTexture
-	weapon_sprite.texture = atlas.atlas
-	weapon_sprite.region_enabled = true
-	weapon_sprite.region_rect = atlas.region
-	# Wand icons mix horizontal (wood 32×16) and vertical (fire 16×32) atlas
-	# regions. Rotate wide art upright so the shaft sits in the hand; tall art
-	# already points up and must NOT keep a leftover 90° from the type scene.
-	if atlas.region.size.x > atlas.region.size.y * 1.15:
-		weapon_sprite.rotation = PI * 0.5
-	elif atlas.region.size.y > atlas.region.size.x * 1.15:
-		weapon_sprite.rotation = 0.0
+	if icon is AtlasTexture:
+		var atlas: AtlasTexture = icon as AtlasTexture
+		weapon_sprite.texture = atlas.atlas
+		weapon_sprite.region_enabled = true
+		weapon_sprite.region_rect = atlas.region
+		# Wand icons mix horizontal (wood 32×16) and vertical (fire 16×32) atlas
+		# regions. Rotate wide art upright so the shaft sits in the hand; tall art
+		# already points up and must NOT keep a leftover 90° from the type scene.
+		if atlas.region.size.x > atlas.region.size.y * 1.15:
+			weapon_sprite.rotation = PI * 0.5
+		elif atlas.region.size.y > atlas.region.size.x * 1.15:
+			weapon_sprite.rotation = 0.0
+	else:
+		weapon_sprite.texture = icon
+		weapon_sprite.region_enabled = false
 	weapon_sprite.position += extra_offset
 
 

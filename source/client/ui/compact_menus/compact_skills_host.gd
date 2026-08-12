@@ -54,6 +54,8 @@ var _combat_root: Control
 var _total_level_bar: Label
 var _selected_slug: String = ""
 var _selected_combat_category: StringName = &""
+## Gathering skill detail sub-tab: &"resources" (sources) or &"tools".
+var _detail_section: StringName = &"resources"
 var _back_button: Button
 ## Latest slayer.info snapshot + the box that renders it, for the Slayer guide's
 ## "Current task" section.
@@ -331,6 +333,7 @@ func _show_grid() -> void:
 
 func _show_detail(slug: String) -> void:
 	_selected_slug = slug
+	_detail_section = &"resources"
 	_grid_root.visible = false
 	_combat_root.visible = false
 	_detail_root.visible = true
@@ -702,6 +705,15 @@ func _rebuild_detail() -> void:
 	xp_label.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.8))
 	_detail_root.add_child(xp_label)
 
+	# Slayer has no gather/craft table — its "sources" are the MASTERS and the
+	# tasks they hand out, so it renders its own guide (see _build_slayer_guide).
+	var skill_slug := StringName(_selected_slug)
+	var show_tools_tab: bool = (
+		_selected_slug != SLAYER_SLUG and SkillToolsGuide.has_tools(skill_slug)
+	)
+	if show_tools_tab:
+		_detail_root.add_child(_make_detail_section_tabs())
+
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -713,19 +725,22 @@ func _rebuild_detail() -> void:
 	list.add_theme_constant_override(&"separation", 3)
 	scroll.add_child(list)
 
-	# Slayer has no gather/craft table — its "sources" are the MASTERS and the
-	# tasks they hand out, so it renders its own guide (see _build_slayer_guide).
 	if _selected_slug == SLAYER_SLUG:
 		_build_slayer_guide(list)
 		return
 
-	var jp: JobPerks = JobRegistry.perks_for(StringName(_selected_slug))
+	if show_tools_tab and _detail_section == &"tools":
+		_fill_tools_list(list, skill_slug, level)
+		return
+
+	var jp: JobPerks = JobRegistry.perks_for(skill_slug)
 	if jp != null and not jp.source_items.is_empty():
-		var sources_title := Label.new()
-		sources_title.text = "Can gather"
-		sources_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
-		sources_title.add_theme_font_size_override(&"font_size", 12)
-		list.add_child(sources_title)
+		if not show_tools_tab:
+			var sources_title := Label.new()
+			sources_title.text = "Resources"
+			sources_title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+			sources_title.add_theme_font_size_override(&"font_size", 12)
+			list.add_child(sources_title)
 		for i: int in jp.source_items.size():
 			var item: Item = jp.source_items[i]
 			if item == null:
@@ -995,6 +1010,76 @@ func _make_source_row(item: Item, required_level: int, player_level: int) -> Con
 	)
 	row.add_child(lvl)
 	return row
+
+
+func _make_detail_section_tabs() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 3)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var group := ButtonGroup.new()
+	for section: StringName in [&"resources", &"tools"]:
+		var btn := Button.new()
+		btn.text = "Resources" if section == &"resources" else "Tools"
+		btn.toggle_mode = true
+		btn.button_group = group
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.custom_minimum_size = Vector2(0, 18)
+		btn.add_theme_font_size_override(&"font_size", 9)
+		_apply_compact_button_style(btn)
+		btn.button_pressed = _detail_section == section
+		btn.pressed.connect(_set_detail_section.bind(section))
+		row.add_child(btn)
+	return row
+
+
+func _set_detail_section(section: StringName) -> void:
+	if _detail_section == section:
+		return
+	_detail_section = section
+	_rebuild_detail()
+
+
+func _fill_tools_list(list: VBoxContainer, skill_slug: StringName, player_level: int) -> void:
+	var entries: Array[Dictionary] = SkillToolsGuide.tools_for(skill_slug)
+	if entries.is_empty():
+		var empty := Label.new()
+		empty.text = "No tools found for this skill."
+		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty.add_theme_color_override(&"font_color", Color(0.65, 0.66, 0.7))
+		empty.add_theme_font_size_override(&"font_size", 11)
+		list.add_child(empty)
+		return
+
+	for entry: Dictionary in entries:
+		var tool: ToolItem = entry.get("item", null) as ToolItem
+		if tool == null:
+			continue
+		var req: int = int(entry.get("level", 0))
+		list.add_child(_make_tool_row(tool, req, player_level))
+
+
+func _make_tool_row(tool: ToolItem, required_level: int, player_level: int) -> Control:
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override(&"separation", 0)
+
+	var row := _make_source_row(tool, required_level, player_level)
+	box.add_child(row)
+
+	var blurb: String = SkillToolsGuide.bonus_blurb(tool)
+	if not blurb.is_empty():
+		var bonus := Label.new()
+		bonus.text = blurb
+		bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bonus.add_theme_font_size_override(&"font_size", 8)
+		var locked: bool = required_level > player_level
+		bonus.add_theme_color_override(
+			&"font_color",
+			Color(0.5, 0.5, 0.54) if locked else Color(0.62, 0.78, 0.68)
+		)
+		box.add_child(bonus)
+	return box
 
 
 func _get_skill_icon(skill_name: String) -> Texture2D:

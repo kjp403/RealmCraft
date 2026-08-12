@@ -58,6 +58,7 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 		or (event is InputEventScreenTouch and event.pressed)
 	)
 	if clicked and menu_name != &"":
+		get_viewport().set_input_as_handled()
 		_request_interact()
 
 
