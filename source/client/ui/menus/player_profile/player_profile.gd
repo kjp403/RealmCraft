@@ -19,6 +19,7 @@ enum ProfileTab {
 
 const EQUIPMENT_SLOT_ORDER: Array[StringName] = [
 	&"helmet",
+	&"amulet",
 	&"relic",
 	&"weapon",
 	&"torso",
@@ -27,6 +28,7 @@ const EQUIPMENT_SLOT_ORDER: Array[StringName] = [
 ]
 const EQUIPMENT_SLOT_NAMES: Dictionary = {
 	&"helmet": "Head",
+	&"amulet": "Amulet",
 	&"relic": "Relic",
 	&"weapon": "Weapon",
 	&"torso": "Body",

@@ -1,6 +1,7 @@
 extends DataRequestHandler
 const PUBLIC_EQUIPMENT_SLOTS: Array[StringName] = [
 	&"helmet",
+	&"amulet",
 	&"relic",
 	&"weapon",
 	&"torso",

@@ -12,7 +12,7 @@ metadata/_custom_type_script = "uid://c6e2723b26b04"
 
 [sub_resource type="Resource" id="Dialogue_banker"]
 script = ExtResource("3_dialogue")
-lines = Array[String](["I keep every Hero's vault. Deposit what you cannot carry; withdraw whenever you return.", "There is no limit to what you may store. Stacks stay intact, and your bag stays free for the road."])
+lines = Array[String](["I keep every Hero's vault. Deposit what you cannot carry; withdraw whenever you return.", "Vaults start at 50 slots. When you need more room, buy another 50 for 5,000 gold — as often as you like. Stacks stay intact, and your bag stays free for the road."])
 label_override = "How does the bank work?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -20,6 +20,6 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("5_npc")
 npc_name = "Banker"
 skin = ExtResource("4_skin")
-greeting = "Your vault is ready. Store anything — there is no cap."
+greeting = "Your vault is ready. Fifty slots to start — buy more when you need them."
 interactions = Array[ExtResource("1_interaction")]([SubResource("BankInteraction_main"), SubResource("Dialogue_banker")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

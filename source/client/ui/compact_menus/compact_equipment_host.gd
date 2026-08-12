@@ -2,11 +2,12 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 262.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 52.0
+const BOTTOM_CLEARANCE := 72.0
 const SLOT_SIZE := Vector2(38.0, 38.0)
 
 const SLOT_RES_PATHS: Dictionary = {
 	&"helmet": "res://source/common/gameplay/items/item_slot/slots/helmet.tres",
+	&"amulet": "res://source/common/gameplay/items/item_slot/slots/amulet.tres",
 	&"weapon": "res://source/common/gameplay/items/item_slot/slots/weapon.tres",
 	&"torso": "res://source/common/gameplay/items/item_slot/slots/torso.tres",
 	&"ring": "res://source/common/gameplay/items/item_slot/slots/ring.tres",
@@ -16,13 +17,14 @@ const SLOT_RES_PATHS: Dictionary = {
 }
 
 const SLOT_LAYOUT: Array[StringName] = [
-	&"", &"helmet", &"relic",
+	&"", &"helmet", &"amulet",
 	&"weapon", &"torso", &"ring",
-	&"ammo", &"boot", &"",
+	&"ammo", &"boot", &"relic",
 ]
 
 const SLOT_LABELS: Dictionary = {
 	&"helmet": "HEAD",
+	&"amulet": "AMULET",
 	&"relic": "RELIC",
 	&"weapon": "WPN",
 	&"torso": "BODY",

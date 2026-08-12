@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="9_fjcme"]
 [ext_resource type="Resource" uid="uid://dhdjy3c4ufju0" path="res://source/common/gameplay/characters/npc/npcs/starter_merchant.tres" id="9_lkcla"]
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="9_banker"]
+[ext_resource type="Resource" uid="uid://c0urierbankrun01" path="res://source/common/gameplay/characters/npc/npcs/courier.tres" id="9_courier"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="10_subvk"]
 [ext_resource type="Resource" uid="uid://b7ty7yxpd32u2" path="res://source/common/gameplay/characters/npc/npcs/dungeon_keeper.tres" id="11_aldlr"]
 [ext_resource type="Resource" uid="uid://cfungalkeeper01" path="res://source/common/gameplay/characters/npc/npcs/fungal_keeper.tres" id="11_fungk"]
@@ -133,6 +134,11 @@ npc_resource = SubResource("Resource_luj30")
 position = Vector2(248, -200)
 collision_mask = 6
 npc_resource = ExtResource("9_banker")
+
+[node name="Courier" parent="." instance=ExtResource("10_subvk")]
+position = Vector2(200, -168)
+collision_mask = 6
+npc_resource = ExtResource("9_courier")
 
 [node name="TotalLevelChampion1" parent="." unique_id=609075953 instance=ExtResource("26_statue")]
 position = Vector2(119, -411)

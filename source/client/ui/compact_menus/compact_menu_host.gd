@@ -2,7 +2,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 300.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 52.0
+const BOTTOM_CLEARANCE := 72.0
 
 const GRID_COLUMNS := 4
 const GRID_ROWS := 7

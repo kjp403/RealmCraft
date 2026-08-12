@@ -78,13 +78,63 @@ var _tab_bar: HBoxContainer
 
 func _ready() -> void:
 	_gold_id = Economy.gold_id()
-	build_shell("Crafting", $Body, true)
+	var body: HBoxContainer = $Body as HBoxContainer
+	build_shell("Crafting", body, true)
 	_install_tab_bar()
+	_wrap_detail_in_scroll()
 	_build_header()
 	_build_quantity_row()
 	_build_progress_bar()
 	craft_button.pressed.connect(_on_craft_pressed)
 	visibility_changed.connect(_on_visibility_changed)
+	# Both panes must expand vertically so the shell can shrink them on short
+	# viewports instead of overflowing past the window/taskbar.
+	if body != null:
+		body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		for child: Node in body.get_children():
+			if child is Control:
+				(child as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if list_scroll != null:
+		list_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+
+## Detail column (Make / Craft / materials) scrolls when the viewport is short so
+## Ascended / Workbench actions are never cropped off the bottom of the screen.
+func _wrap_detail_in_scroll() -> void:
+	var detail_panel: PanelContainer = null
+	if craft_button != null:
+		var walk: Node = craft_button
+		while walk != null:
+			if walk is PanelContainer and walk.name == "DetailPanel":
+				detail_panel = walk as PanelContainer
+				break
+			walk = walk.get_parent()
+	if detail_panel == null:
+		return
+	var margin: MarginContainer = detail_panel.get_node_or_null("Margin") as MarginContainer
+	if margin == null:
+		return
+	var detail_vbox: VBoxContainer = margin.get_node_or_null("DetailVBox") as VBoxContainer
+	if detail_vbox == null:
+		return
+
+	margin.remove_child(detail_vbox)
+	var scroll := ScrollContainer.new()
+	scroll.name = "DetailScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	detail_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(detail_vbox)
+	margin.add_child(scroll)
+
+	# Slightly tighter chrome so short windows keep Make/Craft reachable.
+	craft_button.custom_minimum_size = Vector2(0, 36)
+	margin.add_theme_constant_override(&"margin_top", 8)
+	margin.add_theme_constant_override(&"margin_bottom", 8)
+	margin.add_theme_constant_override(&"margin_left", 12)
+	margin.add_theme_constant_override(&"margin_right", 12)
 
 
 ## Wrap the master/detail body in a column with a full-width tab strip on top so
@@ -180,7 +230,7 @@ func _build_quantity_row() -> void:
 		button.toggle_mode = true
 		button.button_group = group
 		button.theme_type_variation = &"SectionTab"
-		button.custom_minimum_size = Vector2(46, 30)
+		button.custom_minimum_size = Vector2(42, 26)
 		button.button_pressed = (mode == _qty_mode)
 		button.pressed.connect(_on_qty_pressed.bind(mode))
 		row.add_child(button)
@@ -376,7 +426,11 @@ func _is_jewelry(item: Item) -> bool:
 	if gear == null or gear.slot == null:
 		return false
 	var slot_file: String = gear.slot.resource_path.get_file()
-	return slot_file.begins_with("ring") or slot_file.begins_with("relic")
+	return (
+		slot_file.begins_with("ring")
+		or slot_file.begins_with("amulet")
+		or slot_file.begins_with("relic")
+	)
 
 
 ## Bronze…Runite from the output name / path; Lv.50+ → Ascended.

@@ -49,7 +49,9 @@ const EQUIPPED_BADGE_COLOR: Color = Color(1.0, 0.9, 0.55)
 ## Gear slot keys that hold REAL equipment (moved out of the bag on equip).
 ## The weapon slot can also hold a bag item (a potion in hand) — synthetic
 ## equipped tiles therefore only render for GearItems.
-const EQUIP_SLOT_KEYS: Array[StringName] = [&"weapon", &"helmet", &"torso", &"boot", &"ring", &"relic", &"ammo"]
+const EQUIP_SLOT_KEYS: Array[StringName] = [
+	&"weapon", &"helmet", &"torso", &"boot", &"ring", &"amulet", &"relic", &"ammo",
+]
 
 ## Last active tab, remembered across menu opens for the whole session.
 static var _session_tab: int = Item.InventoryTab.WEAPON

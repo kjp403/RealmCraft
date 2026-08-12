@@ -225,20 +225,35 @@ func _on_entry(entry: Dictionary) -> void:
 		_line_index = 0
 		_show_line()
 	elif entry.has("request"):
-		# Immediate server action (e.g. WarpInteraction → npc.warp) — no panel.
+		# Immediate server action (e.g. WarpInteraction → npc.warp, or
+		# RemoteBankInteraction → bank.remote_open then open the bank menu).
 		_close_dialogue()
 		if InstanceClient.current == null:
 			return
 		var req: StringName = StringName(str(entry["request"]))
 		var req_args: Dictionary = entry.get("args", {}) if entry.get("args", {}) is Dictionary else {}
+		var open_menu: StringName = StringName(str(entry.get("open_menu", "")))
+		var menu_arg: Variant = entry.get("arg", null)
 		var on_result := func(data: Dictionary) -> void:
 			if data.get("ok", false):
+				if not open_menu.is_empty():
+					if data.has("inventory"):
+						ClientState.inventory_changed.emit({"quiet": true})
+					ClientState.open_menu_requested.emit(open_menu, menu_arg)
 				return
 			var reason: String = str(data.get("reason", ""))
 			if reason == "too_far":
 				Toaster.toast("Too far.")
 			elif reason == "wardstone":
 				pass # server already pushed a system line
+			elif reason == "gold":
+				var cost: int = int(data.get("cost", 0))
+				if cost > 0:
+					Toaster.toast("You need %d gold." % cost)
+				else:
+					Toaster.toast("You cannot afford that.")
+			elif not open_menu.is_empty():
+				Toaster.toast("Could not open the bank.")
 			elif not reason.is_empty() and reason != "jailed":
 				Toaster.toast("Cannot travel right now.")
 		Client.request_data(

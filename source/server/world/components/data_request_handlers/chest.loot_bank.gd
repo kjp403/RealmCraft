@@ -1,6 +1,7 @@
 extends DataRequestHandler
-## Move staged chest loot into the personal bank (unlimited).
+## Move staged chest loot into the personal bank (capacity-capped).
 ## Args: { "id": item_id, "amount": optional } — omit id to Bank All.
+## Stacking into existing piles still works when full; new stacks are skipped.
 
 
 func data_request_handler(
@@ -15,11 +16,23 @@ func data_request_handler(
 		return {"ok": false, "reason": "dead"}
 
 	var resource: PlayerResource = player.player_resource
+	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, resource.bank_slots)
 	var item_id: int = int(args.get("id", 0))
 	var moved: int = 0
 	if item_id > 0:
 		var amount: int = int(args.get("amount", -1))
+		var had: int = PendingChestLoot.count(resource.pending_chest_loot, item_id)
 		moved = PendingChestLoot.bank(resource, item_id, amount)
+		if moved <= 0 and had > 0:
+			return {
+				"ok": false,
+				"reason": "full",
+				"moved": 0,
+				"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
+				"free_slots": Inventory.free_slots(resource.inventory),
+				"bank": resource.bank,
+				"bank_slots": capacity,
+			}
 	else:
 		moved = PendingChestLoot.flush_to_bank(resource)
 
@@ -30,4 +43,5 @@ func data_request_handler(
 		"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
 		"free_slots": Inventory.free_slots(resource.inventory),
 		"bank": resource.bank,
+		"bank_slots": capacity,
 	}

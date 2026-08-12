@@ -284,11 +284,36 @@ func instantiate_player(peer_id: int) -> Player:
 
 		# Re-equip persisted gear (adds its stat modifiers on top of base + attributes).
 		var saved_equipment: Dictionary = player_resource.equipment.duplicate()
+		# Neckwear used to live in "relic"; move amulet-slot items into "amulet".
+		if saved_equipment.has(&"relic"):
+			var relic_id: int = int(saved_equipment[&"relic"])
+			var relic_gear: GearItem = (
+				ContentRegistryHub.load_by_id(&"items", relic_id) as GearItem
+			)
+			if (
+				relic_gear
+				and relic_gear.slot
+				and relic_gear.slot.key == &"amulet"
+			):
+				var occupied: int = int(saved_equipment.get(&"amulet", 0))
+				if occupied <= 0:
+					saved_equipment[&"amulet"] = relic_id
+					saved_equipment.erase(&"relic")
+				else:
+					# Amulet already filled — return the old relic-slot necklace.
+					saved_equipment.erase(&"relic")
+					Inventory.add_item(player_resource.inventory, relic_id, 1)
 		player_resource.equipment.clear()
 		for slot_key: StringName in saved_equipment:
 			var equip_id: int = int(saved_equipment[slot_key])
 			if new_player.equipment_component.equip_item(equip_id):
-				player_resource.equipment[slot_key] = equip_id
+				var equipped: GearItem = (
+					ContentRegistryHub.load_by_id(&"items", equip_id) as GearItem
+				)
+				var actual_slot: StringName = slot_key
+				if equipped and equipped.slot:
+					actual_slot = equipped.slot.key
+				player_resource.equipment[actual_slot] = equip_id
 			else:
 				# Rule changed (level/slot) -> return it to inventory rather than lose it.
 				Inventory.add_item(player_resource.inventory, equip_id, 1)

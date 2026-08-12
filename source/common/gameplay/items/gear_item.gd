@@ -3,8 +3,8 @@ extends Item
 
 # Armor renders in body order, not alphabetically.
 const _SLOT_ORDER: Dictionary = {
-	&"weapon": 0, &"helmet": 1, &"torso": 2, &"boot": 3, &"ring": 4, &"relic": 5,
-	&"ammo": 6,
+	&"weapon": 0, &"helmet": 1, &"torso": 2, &"boot": 3, &"ring": 4, &"amulet": 5,
+	&"relic": 6, &"ammo": 7,
 }
 
 ## Character-level gate (mostly legacy). Armor sets use mastery instead.
@@ -35,6 +35,8 @@ func inventory_tab() -> InventoryTab:
 func group_key() -> StringName:
 	if slot and slot.key == &"ring":
 		return &"rings"
+	if slot and slot.key == &"amulet":
+		return &"amulets"
 	if slot and slot.key == &"relic":
 		return &"relics"
 	var set_word: String = String(item_name).get_slice(" ", 0)

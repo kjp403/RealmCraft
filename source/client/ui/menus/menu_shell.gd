@@ -50,10 +50,10 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 	# Content-heavy menus pass fullscreen=true for a thin outer inset (near edge-to-edge); small dialogs
 	# keep a roomy floating margin. Per-menu opt-in so we convert them one at a time.
 	var outer: int = 12 if fullscreen else 28
-	# Extra top inset so title / tabs aren't clipped by the window edge (smithing
-	# especially packs many SectionTabs into the header).
-	var outer_top: int = 28 if fullscreen else 22
-	var outer_bottom: int = 16 if fullscreen else 22
+	# Extra top/bottom inset so title / tabs / craft actions aren't clipped by the
+	# window edge or OS taskbar (crafting + smithing are the worst offenders).
+	var outer_top: int = 24 if fullscreen else 22
+	var outer_bottom: int = 40 if fullscreen else 22
 	margin.add_theme_constant_override(&"margin_left", outer)
 	margin.add_theme_constant_override(&"margin_right", outer)
 	margin.add_theme_constant_override(&"margin_top", outer_top)
@@ -68,14 +68,14 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 	margin.add_child(card)
 
 	var pad: MarginContainer = MarginContainer.new()
-	pad.add_theme_constant_override(&"margin_left", 14)
-	pad.add_theme_constant_override(&"margin_right", 14)
-	pad.add_theme_constant_override(&"margin_top", 10)
-	pad.add_theme_constant_override(&"margin_bottom", 12)
+	pad.add_theme_constant_override(&"margin_left", 10 if fullscreen else 14)
+	pad.add_theme_constant_override(&"margin_right", 10 if fullscreen else 14)
+	pad.add_theme_constant_override(&"margin_top", 6 if fullscreen else 10)
+	pad.add_theme_constant_override(&"margin_bottom", 6 if fullscreen else 12)
 	card.add_child(pad)
 
 	var root: VBoxContainer = VBoxContainer.new()
-	root.add_theme_constant_override(&"separation", 10)
+	root.add_theme_constant_override(&"separation", 6 if fullscreen else 10)
 	pad.add_child(root)
 
 	# --- Header bar: title (left) / centre slot / close (right) ---

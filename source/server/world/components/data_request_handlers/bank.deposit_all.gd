@@ -1,6 +1,8 @@
 extends DataRequestHandler
 ## Deposit every non-currency bag stack into the personal bank in one request.
 ## Gold stays in the currency pouch (same rule as [code]bank.deposit[/code]).
+## Skips stacks that would open a new vault slot when at capacity; stacking into
+## existing piles still proceeds.
 
 
 func data_request_handler(
@@ -16,10 +18,12 @@ func data_request_handler(
 
 	var inventory: Dictionary = player.player_resource.inventory
 	var bank: Dictionary = player.player_resource.bank
+	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, player.player_resource.bank_slots)
 	# Snapshot keys — remove_from_slot mutates the dictionary.
 	var uids: Array = inventory.keys()
 	var stacks: int = 0
 	var units: int = 0
+	var skipped_full: bool = false
 	for uid_variant: Variant in uids:
 		var slot_uid: int = int(uid_variant)
 		if not inventory.has(slot_uid):
@@ -32,15 +36,33 @@ func data_request_handler(
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item != null and item.is_currency:
 			continue
-		var removed: int = Inventory.remove_from_slot(inventory, slot_uid, have)
+		var fit: int = Inventory.max_fit(bank, item_id, capacity)
+		var amount: int = mini(have, fit)
+		if amount <= 0:
+			skipped_full = true
+			continue
+		var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
 		if removed <= 0:
 			continue
 		Inventory.add_item(bank, item_id, removed)
 		stacks += 1
 		units += removed
+		if removed < have:
+			skipped_full = true
 
 	if stacks > 0:
 		instance.world_server.database.save_player(player.player_resource)
+
+	if stacks <= 0 and skipped_full:
+		return {
+			"ok": false,
+			"reason": "full",
+			"stacks": 0,
+			"units": 0,
+			"inventory": player.player_resource.inventory,
+			"bank": player.player_resource.bank,
+			"bank_slots": capacity,
+		}
 
 	return {
 		"ok": true,
@@ -48,4 +70,5 @@ func data_request_handler(
 		"units": units,
 		"inventory": player.player_resource.inventory,
 		"bank": player.player_resource.bank,
+		"bank_slots": capacity,
 	}

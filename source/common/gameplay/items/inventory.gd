@@ -10,8 +10,9 @@ class_name Inventory
 ## items each get their own slot.
 ##
 ## Player bags are capped at [constant MAX_SLOTS] (currency pouch excluded).
-## Banks and other unlimited stores use [method add_item]; bag grants that must
-## respect the cap use [method try_add_item] / [method can_add].
+## Banks use the same helpers with [member PlayerResource.bank_slots] as capacity.
+## Uncapped grants use [method add_item]; capacity-checked grants use
+## [method try_add_item] / [method can_add].
 ##
 ## Note: stored as JSON in SQLite, which turns int keys into strings and ints into
 ## floats on load. Always run loaded data through normalize() first.
@@ -65,20 +66,20 @@ static func used_slots(inventory: Dictionary) -> int:
 	return total
 
 
-## Remaining free bag squares under [constant MAX_SLOTS].
-static func free_slots(inventory: Dictionary) -> int:
-	return maxi(0, MAX_SLOTS - used_slots(inventory))
+## Remaining free squares under [param capacity] (bag default [constant MAX_SLOTS]).
+static func free_slots(inventory: Dictionary, capacity: int = MAX_SLOTS) -> int:
+	return maxi(0, capacity - used_slots(inventory))
 
 
-## Largest amount of [param item_id] that still fits in the bag (existing stack
-## space + free slots × stack_limit). Used by bank Max-withdraw to fill the bag.
-static func max_fit(inventory: Dictionary, item_id: int) -> int:
+## Largest amount of [param item_id] that still fits (existing stack space + free
+## slots × stack_limit). Used by bank Max-withdraw and capacity-capped deposits.
+static func max_fit(inventory: Dictionary, item_id: int, capacity: int = MAX_SLOTS) -> int:
 	if item_id <= 0:
 		return 0
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null and item.is_currency:
 		return 1 << 30
-	var free: int = free_slots(inventory)
+	var free: int = free_slots(inventory, capacity)
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		return free
@@ -134,17 +135,27 @@ static func slots_needed(inventory: Dictionary, item_id: int, amount: int) -> in
 	return 1
 
 
-## True if the bag can accept the full [param amount] without exceeding
-## [constant MAX_SLOTS]. Currency always fits.
-static func can_add(inventory: Dictionary, item_id: int, amount: int = 1) -> bool:
-	return slots_needed(inventory, item_id, amount) <= free_slots(inventory)
+## True if the store can accept the full [param amount] without exceeding
+## [param capacity]. Currency always fits.
+static func can_add(
+	inventory: Dictionary,
+	item_id: int,
+	amount: int = 1,
+	capacity: int = MAX_SLOTS
+) -> bool:
+	return slots_needed(inventory, item_id, amount) <= free_slots(inventory, capacity)
 
 
-## Add to a capacity-capped bag. Returns false without mutating when the full
+## Add to a capacity-capped store. Returns false without mutating when the full
 ## amount would not fit. Currency / stacking into free stack space still works
-## on a "full" bag.
-static func try_add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> bool:
-	if not can_add(inventory, item_id, amount):
+## on a "full" bag or bank.
+static func try_add_item(
+	inventory: Dictionary,
+	item_id: int,
+	amount: int = 1,
+	capacity: int = MAX_SLOTS
+) -> bool:
+	if not can_add(inventory, item_id, amount, capacity):
 		return false
 	add_item(inventory, item_id, amount)
 	return true
@@ -152,8 +163,8 @@ static func try_add_item(inventory: Dictionary, item_id: int, amount: int = 1) -
 
 ## Add an item to the inventory, stacking when the item allows it.
 ## Respects [member Item.stack_limit]: fill existing stacks up to the cap, then
-## open new slots for the remainder. No bag-slot cap — use [method try_add_item]
-## for the player bag (28 slots). Banks and admin grants use this directly.
+## open new slots for the remainder. No capacity check — use [method try_add_item]
+## for the player bag or bank.
 static func add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> void:
 	if item_id <= 0 or amount <= 0:
 		return

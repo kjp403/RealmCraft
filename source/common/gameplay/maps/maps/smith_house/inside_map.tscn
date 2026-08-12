@@ -112,7 +112,7 @@ sprite_frames = ExtResource("35_anvil_frames")
 autoplay = &"default"
 
 [node name="WorkBenchStation" parent="." unique_id=4019232733 instance=ExtResource("30_craft")]
-position = Vector2(-120, 248)
+position = Vector2(42, 136)
 station = ExtResource("33_wb")
 metadata/_edit_group_ = true
 
@@ -130,7 +130,7 @@ metadata/_edit_group_ = true
 texture = ExtResource("38_asc_tex")
 
 [node name="FletchingBenchStation" parent="." unique_id=4019232735 instance=ExtResource("30_craft")]
-position = Vector2(64, 232)
+position = Vector2(-71, 148)
 station = ExtResource("39_fletch")
 metadata/_edit_group_ = true
 

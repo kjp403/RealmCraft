@@ -17,9 +17,11 @@ const MUTED_TEXT: Color = Color(0.56, 0.6, 0.66)
 ## display name.
 const SLOT_RES_PATHS: Dictionary = {
 	&"helmet": "res://source/common/gameplay/items/item_slot/slots/helmet.tres",
+	&"amulet": "res://source/common/gameplay/items/item_slot/slots/amulet.tres",
 	&"weapon": "res://source/common/gameplay/items/item_slot/slots/weapon.tres",
 	&"torso": "res://source/common/gameplay/items/item_slot/slots/torso.tres",
 	&"ring": "res://source/common/gameplay/items/item_slot/slots/ring.tres",
+	&"relic": "res://source/common/gameplay/items/item_slot/slots/relic.tres",
 	&"boot": "res://source/common/gameplay/items/item_slot/slots/boot.tres",
 	&"ammo": "res://source/common/gameplay/items/item_slot/slots/ammo.tres",
 }
@@ -97,9 +99,12 @@ func _build_layout() -> void:
 	center_col.alignment = BoxContainer.ALIGNMENT_CENTER
 	center_col.add_theme_constant_override(&"separation", 8)
 	doll_row.add_child(center_col)
-	var helmet_center: CenterContainer = CenterContainer.new()
-	helmet_center.add_child(_make_slot_button(&"helmet"))
-	center_col.add_child(helmet_center)
+	var helmet_row: HBoxContainer = HBoxContainer.new()
+	helmet_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	helmet_row.add_theme_constant_override(&"separation", 8)
+	helmet_row.add_child(_make_slot_button(&"helmet"))
+	helmet_row.add_child(_make_slot_button(&"amulet"))
+	center_col.add_child(helmet_row)
 	var figure_box: Control = Control.new()
 	figure_box.custom_minimum_size = FIGURE_BOX
 	center_col.add_child(figure_box)
@@ -118,7 +123,7 @@ func _build_layout() -> void:
 	_level_label.add_theme_color_override(&"font_color", MUTED_TEXT)
 	center_col.add_child(_level_label)
 
-	var right_col: VBoxContainer = _make_slot_column([&"torso", &"boot"])
+	var right_col: VBoxContainer = _make_slot_column([&"torso", &"boot", &"relic"])
 	doll_row.add_child(right_col)
 
 	# Right side: totals card + selected piece card.
@@ -341,7 +346,7 @@ func _piece_subtitle(item: Item, slot_key: StringName) -> String:
 	var slot_name: String = slot_res.display_name if slot_res else String(slot_key).capitalize()
 	if item is WeaponItem and not item.category.is_empty():
 		return "%s · %s" % [slot_name, String(item.category).capitalize()]
-	if item is GearItem and slot_key != &"ring" and slot_key != &"relic" and item.slot and item.slot.key != &"weapon":
+	if item is GearItem and slot_key != &"ring" and slot_key != &"amulet" and slot_key != &"relic" and item.slot and item.slot.key != &"weapon":
 		return "%s · %s set" % [slot_name, String(item.group_key()).capitalize()]
 	return slot_name
 

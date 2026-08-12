@@ -198,7 +198,13 @@ func _request_claim(request: StringName, args: Dictionary, close_after: bool = f
 		return
 	var payload: Dictionary = result[0] as Dictionary
 	if not bool(payload.get("ok", false)):
-		Toaster.toast("Could not claim loot.")
+		match str(payload.get("reason", "")):
+			"full":
+				Toaster.toast("Your bank is full. Buy more slots or withdraw something.")
+			"inventory_full":
+				Toaster.toast("Bag is full — bank some items or free slots.")
+			_:
+				Toaster.toast("Could not claim loot.")
 		return
 	_apply_payload(payload)
 	ClientState.inventory_changed.emit(payload)
@@ -212,3 +218,5 @@ func _request_claim(request: StringName, args: Dictionary, close_after: bool = f
 		hide()
 	elif request == &"chest.loot_take" and moved <= 0 and not _pending.is_empty():
 		Toaster.toast("Bag is full — bank some items or free slots.")
+	elif request == &"chest.loot_bank" and moved <= 0 and not _pending.is_empty():
+		Toaster.toast("Your bank is full. Buy more slots or withdraw something.")

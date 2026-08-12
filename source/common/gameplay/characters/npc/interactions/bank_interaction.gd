@@ -1,8 +1,16 @@
 class_name BankInteraction
 extends NPCInteraction
-## NPC capability: open the personal bank vault. Storage is unlimited and
-## persisted on the player (`bank_json`). Drop a BankInteraction into any NPC's
-## `interactions` array to make them a banker.
+## NPC capability: open the personal bank vault. Capacity starts at
+## [constant STARTING_SLOTS] and expands via [code]bank.upgrade[/code]
+## ([constant UPGRADE_SLOTS] for [constant UPGRADE_COST] gold, no purchase cap).
+## Drop a BankInteraction into any NPC's `interactions` array to make them a banker.
+
+## Default vault size for new characters / migrated rows.
+const STARTING_SLOTS: int = 50
+## Slots added per [code]bank.upgrade[/code] purchase.
+const UPGRADE_SLOTS: int = 50
+## Gold fee per upgrade. Single source of truth for UI + server handler.
+const UPGRADE_COST: int = 5000
 
 
 func menu_entry(_npc: Node) -> Dictionary:
