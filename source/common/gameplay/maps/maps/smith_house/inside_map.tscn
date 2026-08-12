@@ -94,7 +94,7 @@ position = Vector2(-68.04193, 291.33588)
 npc_resource = SubResource("Resource_s648a")
 
 [node name="FurnaceStation" parent="." unique_id=4011097083 instance=ExtResource("30_craft")]
-position = Vector2(232, 200)
+position = Vector2(122, 148)
 station = ExtResource("32_furnace")
 metadata/_edit_group_ = true
 
