@@ -704,8 +704,20 @@ func _summon_adds() -> void:
 			container.to_local(spot),
 			{"enemy_type_slug": add_enemy_slug}
 		)
-		if add != null:
-			RoomNode.make_dungeon_mob(add, false)
+		if add == null:
+			continue
+		RoomNode.make_dungeon_mob(add, false)
+		var npc: HostileNpc = add as HostileNpc
+		if npc == null:
+			continue
+		# World trash archetypes (yeti, demon adds, …) ship chase_on_area=false so
+		# they don't jump skillers. Enrage summons must fight immediately — stamp
+		# aggro + a spawn burst, and beef them a touch so they aren't free food.
+		npc.apply_difficulty(1.75, 1.35)
+		npc._process_synchronization()
+		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
+		npc.replicate_visual(&"rp_spawn_effect", [])
+		npc.engage_nearest_player()
 
 
 ## boss → ReplicatedPropsContainer → Map → ServerInstance.

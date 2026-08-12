@@ -331,6 +331,14 @@ func _ready() -> void:
 	# Pull archetype values from enemy_data BEFORE Character._ready reads any
 	# stats — so a data-driven NPC's @exports already reflect the resource.
 	_apply_enemy_data()
+	# Client dynamics spawn with Stats defaulting every key to 0. Until the first
+	# health sync pair arrives, CombatTargetController treats HEALTH<=0 as dead —
+	# which made boss enrage adds (and any fresh dynamic) look untargetable even
+	# though the server body was fine. Seed from the archetype; the sync pair
+	# overwrites with the live (difficulty-scaled) values a tick later.
+	if not multiplayer.is_server() and enemy_data != null:
+		stats_component.set_stat(Stat.HEALTH_MAX, enemy_data.max_health)
+		stats_component.set_stat(Stat.HEALTH, enemy_data.max_health)
 	# Character._ready wires the client-side health bar (stat_changed -> ProgressBar);
 	# without this the NPC's bar is never initialised or connected. On the server it
 	# returns immediately.
@@ -1783,15 +1791,62 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 
 
 ## Drops the current target and heads home (used when the target dies or is lost).
-## A committed mob (enemy_data.leashes == false: bosses + world bosses) never leashes
-## home MID-FIGHT — it holds its ground and its current HP, re-aggroing via
-## _find_targets the moment a player is back in reach, so you can't shed a boss by
-## stepping over an invisible line. Only once the fight has been over for the full
-## OUT_OF_COMBAT_REGEN_DELAY_MS does _process_idle_recovery walk it home to reset.
-## (Distance-leashing mobs start that march immediately on the leash break instead,
-## but they don't heal any earlier — same 10s gate on the regen itself.)
+## A committed mob never leashes home MID-FIGHT — it holds its ground and its
+## current HP, re-aggroing via _find_targets the moment a player is back in reach,
+## so you can't shed a boss by stepping over an invisible line. Only once the
+## fight has been over for the full OUT_OF_COMBAT_REGEN_DELAY_MS does
+## _process_idle_recovery walk it home to reset.
+##
+## Commitment is either authored (enemy_data.leashes == false: bosses) OR stamped
+## at spawn by [method RoomNode.make_dungeon_mob] / boss enrage adds, which set
+## [member max_distance_from_spawn] to [constant NO_LEASH_DISTANCE]. Checking only
+## the resource left dungeon/summoned trash (yeti adds, etc.) still leashing home
+## and refusing to re-aggro mid-fight.
 func _is_committed() -> bool:
+	if max_distance_from_spawn >= NO_LEASH_DISTANCE:
+		return true
 	return enemy_data != null and not enemy_data.leashes
+
+
+## Server: force-aggro the nearest living hostile player in this instance. Used by
+## boss enrage summons so passive archetypes (chase_on_area=false world trash)
+## still join the fight the moment they spawn instead of idling until hit.
+func engage_nearest_player() -> void:
+	if not multiplayer.is_server() or is_dead:
+		return
+	chase_on_area = true
+	_resync_possible_targets()
+	var best: Player = null
+	var best_d: float = INF
+	for candidate: Player in possible_targets:
+		if not _is_target_valid(candidate) or not _is_hostile_to(candidate):
+			continue
+		var d: float = global_position.distance_squared_to(candidate.global_position)
+		if d < best_d:
+			best_d = d
+			best = candidate
+	# Detection area may still be empty on the spawn frame (physics hasn't
+	# flushed overlaps yet) — fall back to every player in the instance.
+	if best == null and container != null:
+		var map: Node = container.get_parent()
+		var instance: Node = map.get_parent() if map != null else null
+		if instance != null:
+			var roster: Variant = instance.get("players_by_peer_id")
+			if roster is Dictionary:
+				for peer_id: Variant in roster:
+					var p: Player = roster[peer_id] as Player
+					if not _is_target_valid(p) or not _is_hostile_to(p):
+						continue
+					var d2: float = global_position.distance_squared_to(p.global_position)
+					if d2 < best_d:
+						best_d = d2
+						best = p
+	if best == null:
+		return
+	if not possible_targets.has(best):
+		possible_targets.append(best)
+	targeted_player = best
+	enemy_state = EnemyState.CHASE
 
 
 func _abandon_target() -> void:

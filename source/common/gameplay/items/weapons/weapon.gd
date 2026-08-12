@@ -36,13 +36,20 @@ var _base_ability_count: int = 1
 ## Drives the in-hand sprite from the equipped item's ICON, so a weapon SKIN
 ## (fire / rustic / ...) is pure item data — NO per-skin scene. AtlasTexture
 ## icons use the same sheet + region the inventory shows; plain Texture2D
-## icons (tiered fishing rods) replace the sprite texture outright. PLACEMENT
-## (offset, centered, flip) stays from the weapon-TYPE scene; [param
+## icons (tiered fishing rods, Ascension 32×32 inventory art) replace the sprite
+## texture outright. PLACEMENT (offset, centered, flip) stays from the weapon-
+## TYPE scene for authored tall/wide sheets; square inventory icons get a grip
+## pass so the handle sits in the Hand instead of floating beside it. [param
 ## extra_offset] nudges a skin whose art sits differently (a taller blade).
 ## Client-only — pure visual.
 func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
 	if not GameMode.is_client() or weapon_sprite == null or icon == null:
 		return
+	# Capture the type-scene's authored placement BEFORE we rewrite it — remounts
+	# must not accumulate offsets on top of a previous apply_skin call.
+	var base_pos: Vector2 = weapon_sprite.position
+	var base_offset: Vector2 = weapon_sprite.offset
+	var base_rot: float = weapon_sprite.rotation
 	if icon is AtlasTexture:
 		var atlas: AtlasTexture = icon as AtlasTexture
 		weapon_sprite.texture = atlas.atlas
@@ -55,10 +62,31 @@ func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
 			weapon_sprite.rotation = PI * 0.5
 		elif atlas.region.size.y > atlas.region.size.x * 1.15:
 			weapon_sprite.rotation = 0.0
+		else:
+			weapon_sprite.rotation = base_rot
+		weapon_sprite.offset = base_offset
+		weapon_sprite.position = base_pos + extra_offset
 	else:
 		weapon_sprite.texture = icon
 		weapon_sprite.region_enabled = false
-	weapon_sprite.position += extra_offset
+		var sz: Vector2 = icon.get_size()
+		# Ascension / inventory icons are ≈square and drawn on the NE diagonal.
+		# Authored in-hand sheets are tall (16×48) or wide — leave those alone.
+		var roughly_square: bool = sz.y <= sz.x * 1.2 and sz.x <= sz.y * 1.2
+		if roughly_square:
+			# NE diagonal → tip-up. Grip sits near the bottom of the rotated art;
+			# park that on the Hand origin (WeaponSprite child Hand is at 0,0).
+			weapon_sprite.rotation = -PI * 0.25
+			weapon_sprite.centered = true
+			weapon_sprite.offset = Vector2(0.0, 0.0)
+			# 32px inventory art at the type scene's 0.65 scale reads tiny and
+			# leaves a gap to the Hand — bump to ~1.0 so the hilt covers it.
+			weapon_sprite.scale = Vector2(1.0, 1.0)
+			weapon_sprite.position = Vector2(2.0, 2.0) + extra_offset
+		else:
+			weapon_sprite.rotation = base_rot
+			weapon_sprite.offset = base_offset
+			weapon_sprite.position = base_pos + extra_offset
 
 
 ## Drive the in-hand WeaponSprite from [param icon] — the held item's own icon (a
