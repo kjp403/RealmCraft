@@ -8,4 +8,4 @@ display_name = "The Undead Legion"
 enemy_types = Array[StringName]([&"trpg_skeleton", &"trpg_skeleton_archer", &"trpg_armored_skeleton", &"trpg_greatsword_skeleton", &"trpg_zombie_giant", &"trpg_necromancer"])
 min_slayer_level = 60
 xp_per_kill = 762
-guide_notes = "Armoured skeletons with real weight behind them - chip through the armour rather than trading blows. The Necromancer roams this ground too: a genuine boss on a four-minute respawn, and by far the largest single Slayer payout on the table if you can take him."
+guide_notes = "Armoured skeletons with real weight behind them - chip through the armour rather than trading blows. The Necromancer roams this ground too: a genuine T50 test on a four-minute respawn. Expect a long fight and telegraphed death magic — still the largest single Slayer payout on the table if you can take him."

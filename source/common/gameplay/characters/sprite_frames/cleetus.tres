@@ -233,7 +233,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"attack",
-"speed": 16.0}, {"frames": [{
+"speed": 8.0}, {"frames": [{
 "duration": 1.0,
 "texture": SubResource("Atlas_cast_staff_0")
 }, {
