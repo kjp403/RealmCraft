@@ -20,7 +20,6 @@ byproduct_job = &"fletching"
 required_level = 20
 required_tool = &"axe"
 extraction_hp = 4
-max_charges = 4
 charge_regen_seconds = 14.0
 depleted_recharge_seconds = 70.0
 player_cooldown_seconds = 5.0
