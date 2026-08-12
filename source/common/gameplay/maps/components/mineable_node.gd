@@ -20,7 +20,7 @@ extends Area2D
 ## - **Snap-refill when fully depleted**: a player's depleted pool waits longer
 ##   (depleted_recharge_seconds), then refills ALL of that player's charges.
 ## - **Job XP routing**: data.job_xp is a dict so a healing herb can grant
-##   both harvesting AND medicine; an ore vein just grants mining.
+##   both harvesting AND herblore; an ore vein just grants mining.
 ##
 ## Setup: instance mineable_node.tscn under the Map, assign a
 ## [MineableNodeResource] on [member data], position it. Identity is the
@@ -218,8 +218,29 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		if not data.secondary_job_xp.is_empty():
 			xp_table = data.secondary_job_xp
 
+	# Perk-gated byproduct (trees -> Headless Arrows). Resolved BEFORE the bag
+	# check so both items are validated together — a bag that can take the log
+	# but not the shafts must not silently eat the shafts.
+	var byproduct_id: int = 0
+	var byproduct_amount: int = 0
+	if data.byproduct_item != null and data.byproduct_amount > 0:
+		var by_jp: JobPerks = JobRegistry.perks_for(data.byproduct_job)
+		if by_jp != null:
+			var by_skill: Dictionary = player.player_resource.skills.get(data.byproduct_job, {})
+			var factor: float = by_jp.shaft_yield_factor(by_skill.get("perks", {}))
+			byproduct_amount = roundi(float(data.byproduct_amount) * factor)
+			if byproduct_amount > 0:
+				byproduct_id = int(data.byproduct_item.get_meta(&"id", 0))
+			else:
+				byproduct_amount = 0
+
 	var ore_id: int = int(caught.get_meta(&"id", 0))
-	if not Inventory.can_add(player.player_resource.inventory, ore_id, amount):
+	var bag_full: bool = not Inventory.can_add(player.player_resource.inventory, ore_id, amount)
+	if not bag_full and byproduct_amount > 0:
+		bag_full = not Inventory.can_add(
+			player.player_resource.inventory, byproduct_id, byproduct_amount
+		)
+	if bag_full:
 		# Keep progress drained? Prefer restoring progress so they can bank and finish.
 		_progress_hp_by_player[player_id] = 1
 		return {
@@ -240,6 +261,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 
 	Inventory.try_add_item(player.player_resource.inventory, ore_id, amount)
 	DailyQuestService.on_collect(player.player_resource, ore_id, amount)
+	if byproduct_amount > 0:
+		Inventory.try_add_item(player.player_resource.inventory, byproduct_id, byproduct_amount)
+		DailyQuestService.on_collect(player.player_resource, byproduct_id, byproduct_amount)
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
@@ -276,6 +300,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"ore_id": ore_id,
 		"ore_name": String(caught.item_name),
 		"amount": amount,
+		"byproduct_id": byproduct_id,
+		"byproduct_name": String(data.byproduct_item.item_name) if byproduct_amount > 0 else "",
+		"byproduct_amount": byproduct_amount,
 		"xp": int(first.get("xp", 0)),
 		"job": first_job,
 		"level": new_level,

@@ -140,8 +140,16 @@ func _is_cooking_station() -> bool:
 	return _station != null and _station.profession == &"cooking"
 
 
+func _is_herblore_station() -> bool:
+	return _station != null and _station.profession == &"herblore"
+
+
 func _action_verb() -> String:
-	return "Cook" if _is_cooking_station() else "Craft"
+	if _is_cooking_station():
+		return "Cook"
+	if _is_herblore_station():
+		return "Brew"
+	return "Craft"
 
 
 func _stop_loop() -> void:
@@ -517,7 +525,10 @@ func _make_row(index: int, recipe: CraftingRecipe) -> Button:
 	hbox.add_child(icon)
 
 	var name_label: Label = Label.new()
-	name_label.text = str(recipe.output_item.item_name)
+	var out_name: String = str(recipe.output_item.item_name)
+	if recipe.output_amount > 1:
+		out_name = "%s ×%d" % [out_name, recipe.output_amount]
+	name_label.text = out_name
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -566,7 +577,10 @@ func _render_detail() -> void:
 	var recipe: CraftingRecipe = _station.recipes[_selected]
 	var item: Item = recipe.output_item
 	detail_icon.texture = item.item_icon
-	detail_name_label.text = str(item.item_name)
+	var detail_name: String = str(item.item_name)
+	if recipe.output_amount > 1:
+		detail_name = "%s ×%d" % [detail_name, recipe.output_amount]
+	detail_name_label.text = detail_name
 	detail_slot_label.text = _slot_line(item)
 	detail_owned_label.text = _owned_line(item)
 	# Craft stations gate on profession level — never show wear-mastery as a
@@ -777,7 +791,7 @@ func _craft_once() -> bool:
 		return false
 
 	var data: Dictionary = result[0]
-	var verb: String = "Cooked" if _is_cooking_station() else "Crafted"
+	var verb: String = "Brewed" if _is_herblore_station() else ("Cooked" if _is_cooking_station() else "Crafted")
 	Toaster.toast("%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)])
 	var craft_level: int = int(data.get("level", 0))
 	if craft_level > 0 and _station != null:
@@ -793,7 +807,7 @@ func _craft_once() -> bool:
 
 
 func _toast_failure(data: Dictionary) -> void:
-	var verb: String = "cook" if _is_cooking_station() else "craft"
+	var verb: String = "brew" if _is_herblore_station() else ("cook" if _is_cooking_station() else "craft")
 	match String(data.get("reason", "")):
 		"level":
 			Toaster.toast("Requires level %d to %s this." % [int(data.get("required_level", 0)), verb])

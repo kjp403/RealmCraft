@@ -67,21 +67,45 @@ func data_request_handler(
 	# Past every gate — this craft is happening, so start the next cooldown.
 	_last_craft_ms[player_id] = now_ms
 
-	# Consume ingredients, then the station fee.
+	# Perks for this station's profession, resolved once — they drive the refund
+	# and extra-item rolls below as well as the XP multiplier further down.
+	var perks: JobPerks = JobRegistry.perks_for(station.profession)
+	var player_perks: Dictionary = {}
+	if perks != null:
+		player_perks = (resource.skills.get(station.profession, {}) as Dictionary).get("perks", {})
+
+	# Consume ingredients, then the station fee. `refund` rolls PER INGREDIENT
+	# UNIT, so a 3-bar helmet can refund 0-3 bars rather than all-or-nothing.
+	var refund: float = 0.0 if perks == null else perks.refund_chance(player_perks)
+	var refunded: Dictionary[int, int] = {}
 	for ingredient: CraftIngredient in recipe.ingredients:
 		if ingredient == null or ingredient.item == null:
 			continue
 		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
 		Inventory.remove_amount_by_id(inventory, ing_id, ingredient.amount)
+		if refund <= 0.0:
+			continue
+		var kept: int = 0
+		for _u: int in ingredient.amount:
+			if randf() < refund:
+				kept += 1
+		if kept > 0:
+			refunded[ing_id] = kept
 	if fee > 0:
 		Inventory.remove_amount_by_id(inventory, gold_id, fee)
 
 	# Grant the output (one at a time so stackables merge / non-stackables get slots).
 	var output_id: int = int(recipe.output_item.get_meta(&"id", 0))
+	# `extra_item` pays one bonus unit of the SAME output — for a batch recipe
+	# (10 arrows a craft) that is one extra arrow, not a second batch.
+	var output_amount: int = recipe.output_amount
+	if perks != null and randf() < perks.extra_item_chance(player_perks):
+		output_amount += 1
 	# Ingredients already freed space; still gate so a full bag of unrelated gear
 	# can't absorb a craft that needs a new square.
-	if not Inventory.can_add(inventory, output_id, recipe.output_amount):
-		# Rollback ingredients + fee so the craft stays atomic.
+	if not Inventory.can_add(inventory, output_id, output_amount):
+		# Rollback ingredients + fee so the craft stays atomic. Refunds are only
+		# granted below, so there is nothing of theirs to undo here.
 		for ingredient: CraftIngredient in recipe.ingredients:
 			if ingredient == null or ingredient.item == null:
 				continue
@@ -91,17 +115,22 @@ func data_request_handler(
 			Inventory.add_item(inventory, gold_id, fee)
 		_last_craft_ms.erase(player_id)
 		return {"ok": false, "reason": "inventory_full"}
-	for _i: int in recipe.output_amount:
+	for _i: int in output_amount:
 		Inventory.try_add_item(inventory, output_id, 1)
+	# Refunded ingredients go back last. They came out of the bag moments ago so
+	# the space exists; can_add still guards the case where the output claimed
+	# the freed square.
+	for ing_id: int in refunded:
+		var kept: int = refunded[ing_id]
+		if Inventory.can_add(inventory, ing_id, kept):
+			Inventory.try_add_item(inventory, ing_id, kept)
 
 	# Award crafting-profession xp (perk XP multiplier matches gathering / UI).
 	var progress: Dictionary = {}
 	if recipe.xp_reward > 0:
 		var xp_gain: int = recipe.xp_reward
-		var jp: JobPerks = JobRegistry.perks_for(station.profession)
-		if jp != null:
-			var skill_entry: Dictionary = resource.skills.get(station.profession, {}) as Dictionary
-			xp_gain = maxi(1, roundi(float(xp_gain) * jp.xp_multiplier(skill_entry.get("perks", {}))))
+		if perks != null:
+			xp_gain = maxi(1, roundi(float(xp_gain) * perks.xp_multiplier(player_perks)))
 		progress = resource.add_skill_xp(station.profession, xp_gain)
 
 	# Quest CRAFT progress for this output item. Push unconditionally: an empty
@@ -110,12 +139,12 @@ func data_request_handler(
 	var quest_updates: Array = QuestService.on_craft(resource, output_id, peer_id, instance)
 	WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": quest_updates})
 	# Daily "craft N items" progress — count the items produced this craft.
-	DailyQuestService.on_craft(resource, recipe.output_amount)
+	DailyQuestService.on_craft(resource, output_amount)
 
 	return {
 		"ok": true,
 		"output_id": output_id,
-		"amount": recipe.output_amount,
+		"amount": output_amount,
 		"profession": String(station.profession),
 		"level": int(progress.get("level", level)),
 		"leveled_up": progress.get("leveled_up", false),

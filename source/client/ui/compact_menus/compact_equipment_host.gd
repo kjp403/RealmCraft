@@ -12,12 +12,13 @@ const SLOT_RES_PATHS: Dictionary = {
 	&"ring": "res://source/common/gameplay/items/item_slot/slots/ring.tres",
 	&"relic": "res://source/common/gameplay/items/item_slot/slots/relic.tres",
 	&"boot": "res://source/common/gameplay/items/item_slot/slots/boot.tres",
+	&"ammo": "res://source/common/gameplay/items/item_slot/slots/ammo.tres",
 }
 
 const SLOT_LAYOUT: Array[StringName] = [
 	&"", &"helmet", &"relic",
 	&"weapon", &"torso", &"ring",
-	&"", &"boot", &"",
+	&"ammo", &"boot", &"",
 ]
 
 const SLOT_LABELS: Dictionary = {
@@ -27,6 +28,7 @@ const SLOT_LABELS: Dictionary = {
 	&"torso": "BODY",
 	&"ring": "RING",
 	&"boot": "BOOTS",
+	&"ammo": "AMMO",
 }
 
 @onready var close_button: Button = (

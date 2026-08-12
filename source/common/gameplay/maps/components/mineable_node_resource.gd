@@ -19,7 +19,7 @@ extends Resource
 @export var yield_amount: int = 1
 ## How many job-XP grants happen on each yield. Examples:
 ##   { &"mining": 10 }                          # ore vein
-##   { &"harvesting": 5, &"medicine": 5 }       # herb that teaches both
+##   { &"harvesting": 5, &"herblore": 5 }       # herb that teaches both
 @export var job_xp: Dictionary[StringName, int] = {&"mining": 10}
 ## Minimum level in the node's primary job (first key in [member job_xp]).
 ## 0 / 1 = no meaningful gate for a fresh level-1 character.
@@ -36,6 +36,22 @@ extends Resource
 @export_range(0.0, 1.0, 0.01) var secondary_chance: float = 0.0
 ## Job XP granted when the secondary catch wins. Empty → reuse [member job_xp].
 @export var secondary_job_xp: Dictionary[StringName, int] = {}
+
+@export_group("Byproduct")
+## Optional SECOND item granted alongside [member ore] on a successful yield
+## (trees drop Headless Arrows for Fletching). Unlike [member secondary_ore]
+## this does not replace the primary — the player gets both.
+##
+## Gated behind a perk, not free: the amount is scaled by the harvesting job's
+## [code]&"shaft_yield"[/code] effect, which is 0.0 until the player spends a
+## point. A node with a byproduct set therefore drops nothing extra for a
+## player who hasn't invested in it.
+@export var byproduct_item: Item
+## Full byproduct count, i.e. what a player with the effect maxed receives.
+@export var byproduct_amount: int = 0
+## Job whose perks scale the byproduct. Defaults to Fletching since that is the
+## only consumer today; a future byproduct just points at its own job.
+@export var byproduct_job: StringName = &"fletching"
 
 @export_group("Extraction")
 ## HP the per-player progress drains before one charge is consumed and the

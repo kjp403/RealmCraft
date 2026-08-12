@@ -25,16 +25,17 @@ func data_request_handler(
 	if slot == &"weapon":
 		BattleFormState.cancel_on(player)
 
-	# Gear returns to the bag — need a free square first.
+	# Gear returns to the bag — need a free square first. Ammo stays bag-resident
+	# while slotted, so it never needs a free square on unequip.
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
-	if item is GearItem and not Inventory.can_add(player.player_resource.inventory, item_id, 1):
+	if item is GearItem and item is not AmmoItem and not Inventory.can_add(player.player_resource.inventory, item_id, 1):
 		return {"ok": false, "reason": "inventory_full"}
 
 	player.equipment_component.unequip(slot)
 	# Return it to the bag only if it was bag-OWNED (gear/weapon). Consumables and
 	# materials are REFERENCED while held — they never left the bag, so re-adding
-	# would duplicate them.
-	if item is GearItem:
+	# would duplicate them. Ammo is also reference-slotted (stack stays in the bag).
+	if item is GearItem and item is not AmmoItem:
 		Inventory.try_add_item(player.player_resource.inventory, item_id, 1)
 	player.player_resource.equipment.erase(slot)
 	return {"ok": true}

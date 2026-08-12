@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3]
+[ext_resource type="Script" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/starblossom.tres" id="2_ore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vegetation.png" id="3_tex"]
+[sub_resource type="AtlasTexture" id="Atlas_node"]
+atlas = ExtResource("3_tex")
+region = Rect2(80, 400, 32, 32)
+[resource]
+script = ExtResource("1_script")
+display_name = "Starblossom"
+ore = ExtResource("2_ore")
+yield_amount = 1
+job_xp = Dictionary[StringName, int]({
+&"harvesting": 90
+})
+required_level = 40
+required_tool = &"sickle"
+extraction_hp = 2
+charge_regen_seconds = 10.0
+depleted_recharge_seconds = 50.0
+player_cooldown_seconds = 4.0
+texture = SubResource("Atlas_node")
