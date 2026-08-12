@@ -6,59 +6,163 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_hwrei"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_necromancer.tres" id="5_fe1j1"]
 
-[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="li0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_bar.tres" id="li1"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="li2"]
-[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="li3"]
-[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
-[ext_resource type="Resource" uid="uid://co0528wdfcmaj" path="res://source/common/gameplay/items/gears/relics/relic_netherglass.tres" id="relic_netherglass"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="gold_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="cloth_bandit"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres" id="wg_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres" id="wg_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres" id="ng_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres" id="as_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_astral.item.tres" id="as_book"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="wg_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres" id="wg_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres" id="wg_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_nightglass.tres" id="ng_hide"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/nightglass_leather.tres" id="ng_leather"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/nightglass_gem.tres" id="ng_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/nightglass_cloth.tres" id="ng_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_nightglass.tres" id="ng_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_astral.tres" id="as_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/astral_cloth.tres" id="as_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/astral_gem.tres" id="as_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astral_ore.tres" id="as_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_netherglass.tres" id="relic_nether"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_blue_large.tres" id="chest_blue"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_ew0xl")
-item = ExtResource("li0")
-min_amount = 380
-max_amount = 640
+item = ExtResource("gold")
+min_amount = 3800
+max_amount = 6400
 chance = 1.0
-
-[sub_resource type="Resource" id="Drop_silver_bar"]
+[sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_ew0xl")
-item = ExtResource("li1")
+item = ExtResource("bone")
+chance = 1.0
+[sub_resource type="Resource" id="Drop_gold_bar"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("gold_bar")
 min_amount = 1
 max_amount = 3
 chance = 0.6
-
-[sub_resource type="Resource" id="Drop_bone"]
-script = ExtResource("3_ew0xl")
-item = ExtResource("li2")
-chance = 1.0
-
 [sub_resource type="Resource" id="Drop_cloth_bandit"]
 script = ExtResource("3_ew0xl")
-item = ExtResource("li3")
-min_amount = 3
-max_amount = 6
+item = ExtResource("cloth_bandit")
+min_amount = 30
+max_amount = 150
 chance = 0.5
-
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("3_ew0xl")
-item = ExtResource("drop_dungeon_key_item")
+item = ExtResource("dungeon_key")
 chance = 0.08
-
+[sub_resource type="Resource" id="Drop_wyrmguard_sword"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("wg_sword")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_wyrmguard_hammer"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("wg_hammer")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_nightglass_bow"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_bow")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_astral_wand"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_wand")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_astral_book"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_book")
+chance = 0.02
+[sub_resource type="Resource" id="Drop_wyrmguard_ore"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("wg_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.15
+[sub_resource type="Resource" id="Drop_hide_nightglass"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_hide")
+min_amount = 1
+max_amount = 3
+chance = 0.15
+[sub_resource type="Resource" id="Drop_wyrmguard_gem"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("wg_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_nightglass_gem"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_astral_gem"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+[sub_resource type="Resource" id="Drop_wyrmguard_cloth"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("wg_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+[sub_resource type="Resource" id="Drop_nightglass_leather"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_leather")
+min_amount = 1
+max_amount = 2
+chance = 0.25
+[sub_resource type="Resource" id="Drop_nightglass_cloth"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+[sub_resource type="Resource" id="Drop_fiber_nightglass"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("ng_fiber")
+min_amount = 1
+max_amount = 3
+chance = 0.28
+[sub_resource type="Resource" id="Drop_fiber_astral"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_fiber")
+min_amount = 1
+max_amount = 3
+chance = 0.28
+[sub_resource type="Resource" id="Drop_astral_cloth"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.25
+[sub_resource type="Resource" id="Drop_astral_ore"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("as_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.25
 [sub_resource type="Resource" id="Drop_relic_netherglass"]
 script = ExtResource("3_ew0xl")
-item = ExtResource("relic_netherglass")
+item = ExtResource("relic_nether")
 chance = 0.001
-
 [resource]
 script = ExtResource("4_hwrei")
 enemy_type = &"trpg_necromancer"
 display_name = "Necromancer"
 skin = ExtResource("5_fe1j1")
-combat_level = 32
+combat_level = 369
 visual_scale = 1.7
 is_boss = true
 max_health = 1000.0
-attack_damage = 48.0
+attack_damage = 24.0
 attack_cooldown = 1.8
 armor = 18.0
 mr = 30.0
@@ -67,7 +171,7 @@ attacks = Array[ExtResource("1_aob78")]([])
 move_speed = 46
 distance_to_attack = 22
 max_distance_from_spawn = 420
-leashes = true
+leashes = false
 detection_radius = 200
 chase_on_area = false
 is_lone = true
@@ -77,7 +181,6 @@ wander_pause_max_s = 4.0
 xp_reward = 3200
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_silver_bar"), SubResource("Drop_bone"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key"), SubResource("Drop_relic_netherglass")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
@@ -99,10 +202,12 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
+loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_gold_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_dungeon_key"), SubResource("Drop_wyrmguard_sword"), SubResource("Drop_wyrmguard_hammer"), SubResource("Drop_nightglass_bow"), SubResource("Drop_astral_wand"), SubResource("Drop_astral_book"), SubResource("Drop_wyrmguard_ore"), SubResource("Drop_hide_nightglass"), SubResource("Drop_wyrmguard_gem"), SubResource("Drop_nightglass_gem"), SubResource("Drop_astral_gem"), SubResource("Drop_wyrmguard_cloth"), SubResource("Drop_nightglass_leather"), SubResource("Drop_nightglass_cloth"), SubResource("Drop_fiber_nightglass"), SubResource("Drop_fiber_astral"), SubResource("Drop_astral_cloth"), SubResource("Drop_astral_ore"), SubResource("Drop_relic_netherglass")])
 ornate_chest_top_min = 1
 ornate_chest_top_max = 3
-ornate_chest_second_min = 1
-ornate_chest_second_max = 2
-ornate_chest_consolation_chance = 0.25
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+ornate_chest_item = ExtResource("chest_blue")
 metadata/slug = &"trpg_necromancer"
 metadata/id = 54

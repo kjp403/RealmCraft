@@ -4,22 +4,22 @@
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_inter"]
 [ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="3_shop"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_diag"]
-[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/ascension_shop.tres" id="5_shop"]
+[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/slayer_shop.tres" id="5_shop"]
 [ext_resource type="SpriteFrames" uid="uid://dlopdt61exewy" path="res://source/common/gameplay/characters/sprite_frames/scholar_researcher.tres" id="6_skin"]
 
-[sub_resource type="Resource" id="Shop_ascension"]
+[sub_resource type="Resource" id="Shop_slayer"]
 script = ExtResource("3_shop")
 shop = ExtResource("5_shop")
-label_override = "Browse Ascension wares"
+label_override = "Browse Slayer Shop"
 
-[sub_resource type="Resource" id="Talk_ascension"]
+[sub_resource type="Resource" id="Talk_slayer"]
 script = ExtResource("4_diag")
-lines = Array[String](["Mastery past Dragon is no longer a rumor. Basilisk to Worldbreaker — the ladder is real.", "I sell the ores, leathers, cloths, and gems the anvil and workbench demand. Arms and armor you forge yourself.", "Jewelry of the new covenants sits on that shelf. Rings for the road. Relics for the vow.", "Hard clears and rare drops still beat my prices. I am the patient path."])
-label_override = "Ask about Ascension"
+lines = Array[String](["I take Slayer points, not gold. Finish tasks for Durael — or Turael, if you're just starting — and bring the points here.", "These gems set the Guard, Agile, Focus, and Vital rings. Buy the quality that matches the metal you plan to forge: low for copper, medium for iron, high for silver, pristine for gold.", "Ten bars and one gem at the anvil. No shortcuts, no gold price tags."])
+label_override = "How does this shop work?"
 
 [resource]
 script = ExtResource("1_npc")
-npc_name = "Ascension Broker Vael"
+npc_name = "Slayer Quartermaster Vael"
 skin = ExtResource("6_skin")
-greeting = "Past Dragon, Sirenic, Ancient — the next climb has names. I keep the materials. You keep the scars."
-interactions = Array[ExtResource("2_inter")]([SubResource("Shop_ascension"), SubResource("Talk_ascension")])
+greeting = "Points for gems. Gems for rings. The hunt pays — if you spend wisely."
+interactions = Array[ExtResource("2_inter")]([SubResource("Shop_slayer"), SubResource("Talk_slayer")])

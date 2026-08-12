@@ -73,66 +73,67 @@ const INDEX := "res://source/common/registry/indexes/items_index.tres"
 ## primary stat instead.
 ##
 ## `[slug, name, boss, chance, vendor, mods, description]`
+## vendor is always 0 — relics are boss-only keepsakes, never junk-sold to shops.
 const RELICS: Array = [
 	# --- Lesser charms: one mono-coloured stone, early bosses -------------------
 	[
 		"relic_mossgrown", "Mossgrown Charm",
-		"goblins/goblin_chief", 0.001, 2500,
+		"goblins/goblin_chief", 0.001, 0,
 		[["armor", 14.0], ["health_max", 35.0]],
 		"Green has grown over it so long it stopped being a stone and started being the moss.",
 	],
 	[
 		"relic_sporebloom", "Sporebloom Charm",
-		"fungus/fungal_heart", 0.001, 3000,
+		"fungus/fungal_heart", 0.001, 0,
 		[["mr", 12.0], ["health_max", 45.0]],
 		"Still breathing out spores. The cave grew this one on purpose.",
 	],
 	[
 		"relic_bloodbrand", "Bloodbrand Charm",
-		"bandit_captain", 0.001, 3500,
+		"bandit_captain", 0.001, 0,
 		[["ad", 14.0], ["health_max", 28.0]],
 		"Taken off a captain who took it off someone else. It keeps changing hands the same way.",
 	],
 	[
 		"relic_duskglass", "Duskglass Charm",
-		"skeleton_mage", 0.001, 4000,
+		"skeleton_mage", 0.001, 0,
 		[["ap", 13.0], ["mana_max", 55.0], ["mana_regen", 0.8]],
 		"Cave-dark glass with one cold spark left in it, circling like it is looking for the way out.",
 	],
 	[
 		"relic_emberbrand", "Emberbrand Charm",
-		"orc_leader", 0.001, 4500,
+		"orc_leader", 0.001, 0,
 		[["move_speed", 5.0], ["ability_haste", 6.0], ["health_max", 20.0]],
 		"Warm before you touch it, warmer after. Orc warbands carry them to keep the pace up.",
 	],
 	# --- Greater sigils: a second energy veined through the same stone ----------
 	[
 		"relic_rotmire", "Rotmire Sigil",
-		"bosses/cistern_sovereign", 0.001, 8000,
+		"bosses/cistern_sovereign", 0.001, 0,
 		[["armor", 28.0], ["health_max", 65.0], ["mr", 14.0]],
 		"Cistern water found its way into the moss and set there in a blue seam. Heavier than it looks.",
 	],
 	[
 		"relic_coreblossom", "Coreblossom Sigil",
-		"mecha_stone_golem", 0.001, 10000,
+		"mecha_stone_golem", 0.001, 0,
 		[["mr", 20.0], ["health_max", 80.0], ["mana_regen", 1.8]],
 		"Cut out of a golem's chest, still lit. Whatever the Hollow built it to run on has not run out.",
 	],
 	[
 		"relic_scarabheart", "Scarabheart Sigil",
-		"bosses/sand_king", 0.001, 12000,
+		"bosses/sand_king", 0.001, 0,
 		[["ad", 30.0], ["health_max", 45.0], ["ability_haste", 7.0]],
 		"A green scarab line runs through the red. Ankhemet was buried wearing it and did not stay buried.",
 	],
 	[
 		"relic_netherglass", "Netherglass Sigil",
-		"trpg/trpg_necromancer", 0.001, 14000,
+		"trpg/trpg_necromancer", 0.001, 0,
 		[["ap", 24.0], ["mana_max", 90.0], ["mana_regen", 2.5], ["mr", 10.0]],
 		"The violet thread inside moves when nothing else does. It was doing that before the necromancer found it.",
 	],
 	[
 		"relic_cinderheart", "Cinderheart Sigil",
-		"bosses/cinderborn", 0.001, 18000,
+		"bosses/cinderborn", 0.001, 0,
 		[["ad", 26.0], ["move_speed", 7.0], ["ability_haste", 10.0], ["health_max", 40.0]],
 		"Vurthek's own coal, banked and never gone out. It burns for whoever carries it next.",
 	],

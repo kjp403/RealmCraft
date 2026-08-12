@@ -452,6 +452,10 @@ func _request_open() -> void:
 		return
 	if not result[0].get("ok", false):
 		hide()
+		return
+	# Slayer Points (and any future non-inventory currencies) ride on the open reply.
+	if result[0].has("currency_balance") and Economy.is_slayer_points_id(_currency_id):
+		_set_golds(int(result[0].get("currency_balance", 0)))
 
 
 ## Refresh the player's inventory (gold balance, owned counts, the Sell list).
@@ -461,8 +465,16 @@ func _request_inventory() -> void:
 		return
 	_inventory = result[0]
 	_recompute_owned()
-	# The shop's currency is an item; the balance is its amount in inventory.
-	_set_golds(_owned.get(_currency_id, 0))
+	# Inventory currencies (gold) count bag stacks; Slayer Points live on the player
+	# resource and were stamped by shop.open / shop.buy.item — re-query open for those.
+	if Economy.is_slayer_points_id(_currency_id):
+		var open_result: Array = await Client.request_data_await(
+			&"shop.open", {"shop_key": _shop_key}, InstanceClient.current.name
+		)
+		if open_result[1] == OK and open_result[0].get("ok", false):
+			_set_golds(int(open_result[0].get("currency_balance", 0)))
+	else:
+		_set_golds(_owned.get(_currency_id, 0))
 	if _mode == Mode.SELL:
 		_build_list()
 	_refresh_affordability()
@@ -510,11 +522,17 @@ func _buy() -> void:
 			"no_shop": Toaster.toast("This merchant isn't available right now.")
 			"not_sold_here": Toaster.toast("This item isn't sold here.")
 			"no_currency": Toaster.toast("Shop currency is unavailable. Try again after a server update.")
-			"cant_afford": Toaster.toast("Not enough funds.")
+			"cant_afford":
+				if Economy.is_slayer_points_id(_currency_id):
+					Toaster.toast("Not enough Slayer Points.")
+				else:
+					Toaster.toast("Not enough funds.")
 			"inventory_full": Toaster.toast("Your bag is full. Bank some items first.")
 			_: Toaster.toast("Purchase failed.")
 		_refresh_buy_action()
 		return
+	if result[0].has("currency_balance"):
+		_set_golds(int(result[0].get("currency_balance", 0)))
 	# Gold + counts refresh from the inventory fetch.
 	await _request_inventory()
 	if _selected_slot:

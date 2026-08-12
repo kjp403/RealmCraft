@@ -12,7 +12,6 @@
 [ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_cloth_cave"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
 [ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
-[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
 [ext_resource type="Resource" uid="uid://b6rg0f7dgtrn0" path="res://source/common/gameplay/items/weapons/sword/sword_rustic.item.tres" id="item_sword_rustic"]
 [ext_resource type="Resource" uid="uid://bob6a10f1tu10" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="item_hammer_rustic"]
 [ext_resource type="Resource" uid="uid://c8mlycu302745" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="item_rustic_bow"]
@@ -85,13 +84,6 @@ item = ExtResource("item_mana_potion")
 min_amount = 10
 max_amount = 30
 
-[sub_resource type="Resource" id="Drop_10_wood_silver_small"]
-script = ExtResource("2_loot")
-item = ExtResource("item_wood_silver_small")
-min_amount = 1
-max_amount = 5
-chance = 0.16
-
 [sub_resource type="Resource" id="Drop_11_sword_rustic"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sword_rustic")
@@ -116,5 +108,6 @@ chance = 0.01
 script = ExtResource("1_reward")
 gold_min = 3000
 gold_max = 8000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_iron_bar"), SubResource("Drop_2_steel_bar"), SubResource("Drop_3_iron_ore"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_oak_log"), SubResource("Drop_6_willow_log"), SubResource("Drop_7_cloth_cave"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_10_wood_silver_small"), SubResource("Drop_11_sword_rustic"), SubResource("Drop_12_hammer_rustic"), SubResource("Drop_13_rustic_bow"), SubResource("Drop_14_book_rustic")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_iron_bar"), SubResource("Drop_2_steel_bar"), SubResource("Drop_3_iron_ore"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_oak_log"), SubResource("Drop_6_willow_log"), SubResource("Drop_7_cloth_cave"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_11_sword_rustic"), SubResource("Drop_12_hammer_rustic"), SubResource("Drop_13_rustic_bow"), SubResource("Drop_14_book_rustic")])
+ornate_chest_count = 1
 lockout_hours = 0.0

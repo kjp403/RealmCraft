@@ -20,7 +20,6 @@
 [ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_tuna"]
 [ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_lobster"]
 [ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="item_crab"]
-[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="item_wood_silver_medium"]
 [ext_resource type="Resource" uid="uid://bcyv8agmtbwjt" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="item_sword_sunsteel"]
 [ext_resource type="Resource" uid="uid://dp76go82xd8il" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="item_hammer_sunsteel"]
 [ext_resource type="Resource" uid="uid://odkhbap0vf6s" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="item_wand_sunsteel"]
@@ -150,13 +149,6 @@ min_amount = 4
 max_amount = 12
 chance = 0.4
 
-[sub_resource type="Resource" id="Drop_18_wood_silver_medium"]
-script = ExtResource("2_loot")
-item = ExtResource("item_wood_silver_medium")
-min_amount = 1
-max_amount = 5
-chance = 0.22
-
 [sub_resource type="Resource" id="Drop_19_sword_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sword_sunsteel")
@@ -186,5 +178,6 @@ chance = 0.01
 script = ExtResource("1_reward")
 gold_min = 10000
 gold_max = 20000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_mithril_ore"), SubResource("Drop_8_adamant_ore"), SubResource("Drop_9_runite_ore"), SubResource("Drop_10_shrimp"), SubResource("Drop_11_trout"), SubResource("Drop_12_salmon"), SubResource("Drop_13_cod"), SubResource("Drop_14_herring"), SubResource("Drop_15_tuna"), SubResource("Drop_16_lobster"), SubResource("Drop_17_crab"), SubResource("Drop_18_wood_silver_medium"), SubResource("Drop_19_sword_sunsteel"), SubResource("Drop_20_hammer_sunsteel"), SubResource("Drop_21_wand_sunsteel"), SubResource("Drop_22_sunsteel_bow"), SubResource("Drop_23_book_sunsteel")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_mithril_ore"), SubResource("Drop_8_adamant_ore"), SubResource("Drop_9_runite_ore"), SubResource("Drop_10_shrimp"), SubResource("Drop_11_trout"), SubResource("Drop_12_salmon"), SubResource("Drop_13_cod"), SubResource("Drop_14_herring"), SubResource("Drop_15_tuna"), SubResource("Drop_16_lobster"), SubResource("Drop_17_crab"), SubResource("Drop_19_sword_sunsteel"), SubResource("Drop_20_hammer_sunsteel"), SubResource("Drop_21_wand_sunsteel"), SubResource("Drop_22_sunsteel_bow"), SubResource("Drop_23_book_sunsteel")])
+ornate_chest_count = 2
 lockout_hours = 0.0

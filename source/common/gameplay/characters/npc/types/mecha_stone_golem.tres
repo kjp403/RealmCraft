@@ -19,6 +19,8 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://d1jnlakvmggoj" path="res://source/common/gameplay/items/gears/relics/relic_coreblossom.tres" id="relic_coreblossom"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_pink_large.tres" id="chest_pink"]
+
 [sub_resource type="Resource" id="Lunge_charge"]
 script = ExtResource("91_lunge")
 lunge_range = 180.0
@@ -104,6 +106,7 @@ display_name = "Mecha-stone Golem"
 skin = ExtResource("3_skin")
 visual_scale = 1.9
 is_boss = true
+combat_level = 666
 max_health = 3000.0
 attack_damage = 22.0
 attack_cooldown = 2.2
@@ -142,8 +145,9 @@ add_spread_px = 72.0
 enrage_speed_mult = 1.2
 ornate_chest_top_min = 1
 ornate_chest_top_max = 3
-ornate_chest_second_min = 1
-ornate_chest_second_max = 2
-ornate_chest_consolation_chance = 0.25
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+ornate_chest_item = ExtResource("chest_pink")
 metadata/slug = &"mecha_stone_golem"
 metadata/id = 40

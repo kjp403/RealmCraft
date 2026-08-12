@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://sqmbbfomka6l"]
+
+[ext_resource type="Texture2D" uid="uid://t6ujye7115js" path="res://assets/sprites/environment/chests/gold_pink_masterwork.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"gold_pink_masterwork"
+item_name = &"Masterwork Rose Chest"
+item_icon = ExtResource("1_icon")
+description = "A masterwork chest packed for leatherworkers — Starfall, Eclipse and Skyrender hides. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"gold_pink_masterwork"
+metadata/id = 532

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gem_wyrmguard.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Low Quality Guard Gem"
+item_icon = ExtResource("1_icon")
+description = "A low quality gem for forging Guard rings. Bought with Slayer Points; set into Copper metal at the anvil."
+holdable = false
+can_trade = true
+vendor_value = 0
+stack_limit = 20
+tags = PackedStringArray("slayer_gem", "guard", "low")
+metadata/slug = &"gem_guard_low"
+metadata/id = 534

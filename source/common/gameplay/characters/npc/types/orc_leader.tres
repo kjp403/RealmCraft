@@ -46,6 +46,7 @@ display_name = "Orc Leader"
 skin = ExtResource("3_3a3qb")
 visual_scale = 1.5
 is_boss = true
+leashes = false
 max_health = 500.0
 attack_damage = 35.0
 armor = 10.0

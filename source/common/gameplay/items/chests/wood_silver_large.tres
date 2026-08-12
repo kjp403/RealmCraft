@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://my4wn3plgxbs"]
+
+[ext_resource type="Texture2D" uid="uid://bqst4mkxlt1s" path="res://assets/sprites/environment/chests/wood_silver_large.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"wood_silver_large"
+item_name = &"Wood Chest (Silver, Large)"
+item_icon = ExtResource("1_icon")
+description = "A large silver-trimmed wood chest. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"wood_silver_large"
+metadata/id = 522

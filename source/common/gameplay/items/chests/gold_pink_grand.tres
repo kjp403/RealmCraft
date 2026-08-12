@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://s2um7neruno6"]
+
+[ext_resource type="Texture2D" uid="uid://56g1kjg5buyc" path="res://assets/sprites/environment/chests/gold_pink_grand.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"gold_pink_grand"
+item_name = &"Grand Rose Chest"
+item_icon = ExtResource("1_icon")
+description = "A grand rose chest. Holds Behemoth, Eclipse and Empyrean materials. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"gold_pink_grand"
+metadata/id = 528

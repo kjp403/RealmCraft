@@ -203,6 +203,9 @@ static func _reward_summary(reward: DungeonReward) -> String:
 			parts.append("%s gold" % _fmt_gold(reward.gold_max))
 		else:
 			parts.append("%s–%s gold" % [_fmt_gold(reward.gold_min), _fmt_gold(reward.gold_max)])
+	if reward.ornate_chest_count > 0:
+		var n: int = reward.ornate_chest_count
+		parts.append("%d Ornate Gold Chest%s" % [n, "" if n == 1 else "s"])
 	var named: int = 0
 	for drop: LootDrop in reward.loot:
 		if drop == null or drop.item == null:
@@ -602,6 +605,16 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 			var amount: int = int(hit["amount"])
 			Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
 			items.append({"name": str(drop.item.item_name), "amount": amount})
+
+	# Guaranteed T3 Ornate Gold Chest — fixed count (Hard tables author 2× Normal).
+	# Solo multipliers do not touch this; charges already gate the payout.
+	var ornate_n: int = maxi(0, reward.ornate_chest_count)
+	if ornate_n > 0:
+		var chest_id: int = RewardService.ORNATE_CHEST_IDS[0] if not RewardService.ORNATE_CHEST_IDS.is_empty() else 249
+		var chest_item: Item = ContentRegistryHub.load_by_id(&"items", chest_id) as Item
+		if chest_item != null:
+			Inventory.add_item(resource.inventory, chest_id, ornate_n)
+			items.append({"name": str(chest_item.item_name), "amount": ornate_n})
 
 	return {
 		"gold": gold,

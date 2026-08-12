@@ -13,6 +13,17 @@ const KNOWN: PackedStringArray = [
 	"gold_blue_large",
 	"gold_red_large",
 	"gold_pink_large",
+	"wood_silver_large",
+	"wood_gold_large",
+	"gold_steel_large",
+	"gold_steel_grand",
+	"gold_red_grand",
+	"gold_blue_grand",
+	"gold_pink_grand",
+	"gold_steel_masterwork",
+	"gold_blue_masterwork",
+	"gold_red_masterwork",
+	"gold_pink_masterwork",
 ]
 
 

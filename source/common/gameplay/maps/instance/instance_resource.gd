@@ -41,6 +41,12 @@ enum SpawnOverride {
 ## Warper id inside [member death_return_instance] to land on (0 = default spawn).
 @export var death_return_warper_id: int = 0
 
+@export_group("Zone kill loot")
+## Extra independent loot rolls applied to EVERY hostile kill in this instance.
+## Use for zone-wide rares (e.g. Wood Silver chests in Goblin Woodlands) so new
+## NPCs placed here inherit the drop without editing each enemy type.
+@export var zone_kill_loot: Array[LootDrop] = []
+
 var loading_instances: Array
 var charged_instances: Array[Node]
 

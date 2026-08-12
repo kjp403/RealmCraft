@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3 uid="uid://4sbdcjl8doac"]
+
+[ext_resource type="Texture2D" uid="uid://dy1727coyn3h" path="res://assets/sprites/environment/chests/gold_red_grand.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://clootchestitem01" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"gold_red_grand"
+item_name = &"Grand Crimson Chest"
+item_icon = ExtResource("1_icon")
+description = "A grand crimson chest. Holds Colossus, Tempest and Voidsilk materials. Use to open."
+can_trade = true
+holdable = false
+metadata/slug = &"gold_red_grand"
+metadata/id = 526

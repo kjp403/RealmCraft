@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gem_voidsilk.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"High Quality Focus Gem"
+item_icon = ExtResource("1_icon")
+description = "A high quality gem for forging Focus rings. Bought with Slayer Points; set into Silver metal at the anvil."
+holdable = false
+can_trade = true
+vendor_value = 0
+stack_limit = 20
+tags = PackedStringArray("slayer_gem", "focus", "high")
+metadata/slug = &"gem_focus_high"
+metadata/id = 544

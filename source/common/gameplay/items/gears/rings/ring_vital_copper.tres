@@ -7,6 +7,7 @@
 
 [sub_resource type="Resource" id="Resource_uifqm"]
 script = ExtResource("1_uifqm")
+stat_name = "health_max"
 value = 5.0
 vendor_value = 8
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
@@ -14,6 +15,9 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("5_ikgwr")
 slot = ExtResource("6_ythj5")
+required_level = 0
+required_mastery_categories = Array[StringName]([])
+required_mastery_level = 0
 base_modifiers = Array[ExtResource("1_uifqm")]([SubResource("Resource_uifqm")])
 item_name = &"Copper Vital Ring"
 item_icon = ExtResource("4_mji2t")

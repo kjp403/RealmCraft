@@ -442,7 +442,10 @@ Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / 
 - Armor + matching weapons live under `gears/{metal,leather,cloth}/` and `weapons/{sword,hammer,bow,wand,book}/`.
 - Craft mats: `{set}_ore` / `{set}_gem` / `{set}_cloth` / `{set}_leather` under `materials/`.
 - Anvil crafts metal armor + all five weapon types; workbench crafts leather + cloth sets.
-- Hub NPC **Ascension Broker Vael** sells mats / jewelry (`shops/resources/ascension_shop.tres`).
+- Ascension materials shop (`shops/resources/ascension_shop.tres`) sells **materials only** — finished Ascension gear is never gold-buyable.
+- Slayer Shop (`shops/resources/slayer_shop.tres`, NPC `ascension_broker_vael.tres` → Slayer Quartermaster Vael) sells entry-ring gems for **Slayer Points only** (not gold). Also stocks Wood Gold Small (15 pts) and Wood Gold Medium (30 pts).
+- Zone-wide kill loot: set `zone_kill_loot` on the biome `InstanceResource` (`biomes/woodland.tres`, `biomes/woodland_east.tres`). Every hostile kill in that instance rolls those drops — new NPCs inherit them automatically. Wood Silver Small ≈1.5% in Goblin Woodland; Wood Silver Medium ≈2% in Woodlands East. Do **not** put shared enemy-type loot for zone rares (types are reused across maps).
+- Dungeon clear rewards: set `ornate_chest_count` on `DungeonReward` for guaranteed T3 Ornate Gold Chests (item 249). Normal = 1, Hard = 2. Still gated by the 3 daily charges.
 - Optional dungeon table: `dungeon/ascension_reward.tres` (attach as `hard_reward` on a `DungeonResource`).
 - Regenerator / wire / verify: `tools/generate_ascension_gear.py`, `tools/wire_ascension_gear.gd`, `tools/verify_ascension_gear.gd`.
 

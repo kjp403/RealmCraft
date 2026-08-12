@@ -14,6 +14,12 @@ extends Resource
 @export var gold_max: int = 0
 ## Loot table — each entry rolls independently (chance + amount range).
 @export var loot: Array[LootDrop] = []
+## Optional exclusive pool (e.g. rare jewelry). Each entry rolls independently,
+## but at most [member exclusive_max] hits are kept — so a chest never grants
+## two rings from this pool.
+@export var exclusive_loot: Array[LootDrop] = []
+## Cap on exclusive_loot hits per open. 1 = at most one jewelry piece.
+@export var exclusive_max: int = 1
 
 
 ## Directory of authored chest tables (filename slug → .tres).
@@ -48,6 +54,21 @@ func roll_and_grant(player: Player) -> Dictionary:
 		if drop == null or drop.item == null:
 			continue
 		if randf() <= drop.chance:
+			_grant_drop(resource, drop, items)
+
+	# Exclusive pool: independent rolls, then keep at most exclusive_max hits.
+	if not exclusive_loot.is_empty():
+		var hits: Array = []
+		for drop: LootDrop in exclusive_loot:
+			if drop == null or drop.item == null:
+				continue
+			if randf() <= drop.chance:
+				hits.append(drop)
+		var cap: int = maxi(0, exclusive_max)
+		if hits.size() > cap:
+			hits.shuffle()
+			hits = hits.slice(0, cap)
+		for drop: LootDrop in hits:
 			_grant_drop(resource, drop, items)
 
 	if items.is_empty():

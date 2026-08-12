@@ -14,8 +14,8 @@ const MIN_DAMAGE_FRACTION: float = 0.1
 const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
 ## Ground piles stay reserved to their earner for this long (anti-ninja).
 const LOOT_EXCLUSIVE_MS: int = 60_000
-## T3 Ornate Gold Chest (Pink, item 249). Bosses with ornate_chest_top_max > 0
-## drop these on ranked damage shares.
+## T3 Ornate Gold Chest (item 249). Bosses with ornate_chest_top_max > 0
+## drop these on ranked damage shares. One table covers Sirenic / Dragon / Ancient.
 const ORNATE_CHEST_IDS: Array[int] = [249]
 
 
@@ -73,42 +73,31 @@ static func _has_ranked_ornate_chests(npc: HostileNpc) -> bool:
 	return npc.enemy_data != null and npc.enemy_data.ornate_chest_top_max > 0
 
 
-## Rank 0 = top DPS, 1 = second, else consolation roll. Returns loot entries
-## ready to merge into the participant's personal pile.
+## Rank 0 = top DPS only. Returns loot entries ready to merge into that
+## participant's personal pile. Second/consolation ranks never get ornate chests.
 static func _roll_ranked_ornate_chests(rank: int, npc: HostileNpc) -> Array:
 	var d: EnemyTypeResource = npc.enemy_data
-	if d == null or d.ornate_chest_top_max <= 0:
+	if d == null or d.ornate_chest_top_max <= 0 or rank != 0:
 		return []
-	var count: int = 0
-	match rank:
-		0:
-			count = randi_range(
-				maxi(0, d.ornate_chest_top_min),
-				maxi(0, d.ornate_chest_top_max)
-			)
-		1:
-			count = randi_range(
-				maxi(0, d.ornate_chest_second_min),
-				maxi(0, d.ornate_chest_second_max)
-			)
-		_:
-			if d.ornate_chest_consolation_chance > 0.0 \
-					and randf() <= d.ornate_chest_consolation_chance:
-				count = 1
+	var count: int = randi_range(
+		maxi(0, d.ornate_chest_top_min),
+		maxi(0, d.ornate_chest_top_max)
+	)
 	if count <= 0:
 		return []
-	var out: Array = []
-	for _i: int in count:
-		var chest_id: int = ORNATE_CHEST_IDS[randi() % ORNATE_CHEST_IDS.size()]
-		var chest_item: Item = ContentRegistryHub.load_by_id(&"items", chest_id) as Item
-		if chest_item == null:
-			continue
-		out.append({
-			"id": chest_id,
-			"amount": 1,
-			"name": str(chest_item.item_name),
-		})
-	return out
+	var chest_id: int = 0
+	if d.ornate_chest_item != null:
+		chest_id = int(d.ornate_chest_item.get_meta(&"id", 0))
+	if chest_id <= 0:
+		chest_id = ORNATE_CHEST_IDS[0] if not ORNATE_CHEST_IDS.is_empty() else 249
+	var chest_item: Item = ContentRegistryHub.load_by_id(&"items", chest_id) as Item
+	if chest_item == null:
+		return []
+	return [{
+		"id": chest_id,
+		"amount": count,
+		"name": str(chest_item.item_name),
+	}]
 
 
 ## The live Player for a peer (null if they logged off / left), via its current
@@ -143,6 +132,7 @@ static func _reward(
 	# stat-derived number instead — see EnemyTypeResource.combat_skill_xp_for.
 	var skill_xp: int = EnemyTypeResource.combat_skill_xp_for(npc.max_health, npc.armor)
 	var loot_gained: Array = _roll_loot(npc)
+	_append_zone_kill_loot(player, loot_gained)
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
 			loot_gained.append(entry)
@@ -211,6 +201,36 @@ static func _roll_loot(npc: HostileNpc) -> Array:
 					"name": str(drop.item.item_name),
 				})
 	return out
+
+
+## Zone-wide rares from [member InstanceResource.zone_kill_loot] — any hostile
+## killed in that instance can drop them, including NPCs added later.
+static func _append_zone_kill_loot(player: Player, out: Array) -> void:
+	if player == null or player.player_resource == null or WorldServer.curr == null:
+		return
+	var peer_id: int = int(player.player_resource.current_peer_id)
+	if peer_id <= 0:
+		return
+	var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id)
+	if inst == null or not inst is ServerInstance:
+		return
+	var ires: InstanceResource = (inst as ServerInstance).instance_resource
+	if ires == null or ires.zone_kill_loot == null or ires.zone_kill_loot.is_empty():
+		return
+	for drop: LootDrop in ires.zone_kill_loot:
+		if drop == null or drop.item == null:
+			continue
+		if randf() > drop.chance:
+			continue
+		var amount: int = randi_range(drop.min_amount, drop.max_amount)
+		var item_id: int = int(drop.item.get_meta(&"id", 0))
+		if amount <= 0 or item_id <= 0:
+			continue
+		out.append({
+			"id": item_id,
+			"amount": amount,
+			"name": str(drop.item.item_name),
+		})
 
 
 ## Scatter rolled loot as clickable GroundItems around the corpse. Piles are

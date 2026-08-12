@@ -1,0 +1,122 @@
+[gd_resource type="Resource" script_class="ShopResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
+[ext_resource type="Script" path="res://source/common/gameplay/shops/shop_trade.gd" id="3_trade"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/slayer_points.tres" id="4_pts"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_low.tres" id="5_gem_guard_low"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_medium.tres" id="6_gem_guard_medium"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_high.tres" id="7_gem_guard_high"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_pristine.tres" id="8_gem_guard_pristine"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_low.tres" id="9_gem_agile_low"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_medium.tres" id="10_gem_agile_medium"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_high.tres" id="11_gem_agile_high"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_pristine.tres" id="12_gem_agile_pristine"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_low.tres" id="13_gem_focus_low"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_medium.tres" id="14_gem_focus_medium"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_high.tres" id="15_gem_focus_high"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_pristine.tres" id="16_gem_focus_pristine"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_low.tres" id="17_gem_vital_low"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_medium.tres" id="18_gem_vital_medium"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_high.tres" id="19_gem_vital_high"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_pristine.tres" id="20_gem_vital_pristine"]
+[ext_resource type="Resource" uid="uid://cf7feaf3b28ffd" path="res://source/common/gameplay/items/chests/wood_gold_small.tres" id="21_wood_gold_small"]
+[ext_resource type="Resource" uid="uid://c51242b03c52c7" path="res://source/common/gameplay/items/chests/wood_gold_medium.tres" id="22_wood_gold_medium"]
+
+[sub_resource type="Resource" id="Entry_wood_gold_small"]
+script = ExtResource("1_entry")
+item = ExtResource("21_wood_gold_small")
+price = 15
+
+[sub_resource type="Resource" id="Entry_wood_gold_medium"]
+script = ExtResource("1_entry")
+item = ExtResource("22_wood_gold_medium")
+price = 30
+
+[sub_resource type="Resource" id="Entry_gem_guard_low"]
+script = ExtResource("1_entry")
+item = ExtResource("5_gem_guard_low")
+price = 30
+
+[sub_resource type="Resource" id="Entry_gem_guard_medium"]
+script = ExtResource("1_entry")
+item = ExtResource("6_gem_guard_medium")
+price = 60
+
+[sub_resource type="Resource" id="Entry_gem_guard_high"]
+script = ExtResource("1_entry")
+item = ExtResource("7_gem_guard_high")
+price = 100
+
+[sub_resource type="Resource" id="Entry_gem_guard_pristine"]
+script = ExtResource("1_entry")
+item = ExtResource("8_gem_guard_pristine")
+price = 200
+
+[sub_resource type="Resource" id="Entry_gem_agile_low"]
+script = ExtResource("1_entry")
+item = ExtResource("9_gem_agile_low")
+price = 30
+
+[sub_resource type="Resource" id="Entry_gem_agile_medium"]
+script = ExtResource("1_entry")
+item = ExtResource("10_gem_agile_medium")
+price = 60
+
+[sub_resource type="Resource" id="Entry_gem_agile_high"]
+script = ExtResource("1_entry")
+item = ExtResource("11_gem_agile_high")
+price = 100
+
+[sub_resource type="Resource" id="Entry_gem_agile_pristine"]
+script = ExtResource("1_entry")
+item = ExtResource("12_gem_agile_pristine")
+price = 200
+
+[sub_resource type="Resource" id="Entry_gem_focus_low"]
+script = ExtResource("1_entry")
+item = ExtResource("13_gem_focus_low")
+price = 30
+
+[sub_resource type="Resource" id="Entry_gem_focus_medium"]
+script = ExtResource("1_entry")
+item = ExtResource("14_gem_focus_medium")
+price = 60
+
+[sub_resource type="Resource" id="Entry_gem_focus_high"]
+script = ExtResource("1_entry")
+item = ExtResource("15_gem_focus_high")
+price = 100
+
+[sub_resource type="Resource" id="Entry_gem_focus_pristine"]
+script = ExtResource("1_entry")
+item = ExtResource("16_gem_focus_pristine")
+price = 200
+
+[sub_resource type="Resource" id="Entry_gem_vital_low"]
+script = ExtResource("1_entry")
+item = ExtResource("17_gem_vital_low")
+price = 30
+
+[sub_resource type="Resource" id="Entry_gem_vital_medium"]
+script = ExtResource("1_entry")
+item = ExtResource("18_gem_vital_medium")
+price = 60
+
+[sub_resource type="Resource" id="Entry_gem_vital_high"]
+script = ExtResource("1_entry")
+item = ExtResource("19_gem_vital_high")
+price = 100
+
+[sub_resource type="Resource" id="Entry_gem_vital_pristine"]
+script = ExtResource("1_entry")
+item = ExtResource("20_gem_vital_pristine")
+price = 200
+
+[resource]
+script = ExtResource("2_shop")
+shop_name = "Slayer Shop"
+currency_item = ExtResource("4_pts")
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_wood_gold_small"), SubResource("Entry_wood_gold_medium"), SubResource("Entry_gem_guard_low"), SubResource("Entry_gem_guard_medium"), SubResource("Entry_gem_guard_high"), SubResource("Entry_gem_guard_pristine"), SubResource("Entry_gem_agile_low"), SubResource("Entry_gem_agile_medium"), SubResource("Entry_gem_agile_high"), SubResource("Entry_gem_agile_pristine"), SubResource("Entry_gem_focus_low"), SubResource("Entry_gem_focus_medium"), SubResource("Entry_gem_focus_high"), SubResource("Entry_gem_focus_pristine"), SubResource("Entry_gem_vital_low"), SubResource("Entry_gem_vital_medium"), SubResource("Entry_gem_vital_high"), SubResource("Entry_gem_vital_pristine")])
+buys_vendor_priced = false
+metadata/slug = &"slayer_shop"

@@ -1,0 +1,196 @@
+[gd_resource type="Resource" script_class="ChestResource" format=3 uid="uid://4kcy3x1ydu5d"]
+
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
+[ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
+[ext_resource type="Texture2D" uid="uid://t6ujye7115js" path="res://assets/sprites/environment/chests/gold_pink_masterwork.png" id="3_icon"]
+[ext_resource type="Resource" uid="uid://cd4yooe27ja23" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://dfbcb377cc5d4" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_2"]
+[ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="item_3"]
+[ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="item_4"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_5"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="item_6"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="item_7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/starfall_leather.tres" id="item_8"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_starfall.tres" id="item_9"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/starfall_gem.tres" id="item_10"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/eclipse_leather.tres" id="item_11"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_eclipse.tres" id="item_12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/eclipse_gem.tres" id="item_13"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/skyrender_leather.tres" id="item_14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_skyrender.tres" id="item_15"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/skyrender_gem.tres" id="item_16"]
+
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_oathband.tres" id="item_17"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_wayfarer.tres" id="item_18"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_heartfire.tres" id="item_19"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_starweave.tres" id="item_20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_bulwark.tres" id="item_21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_stormchase.tres" id="item_22"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="item_23"]
+
+[sub_resource type="Resource" id="Drop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("item_0")
+min_amount = 35
+max_amount = 55
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_1"]
+script = ExtResource("1_loot")
+item = ExtResource("item_1")
+min_amount = 35
+max_amount = 55
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_2"]
+script = ExtResource("1_loot")
+item = ExtResource("item_2")
+min_amount = 60
+max_amount = 110
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_3"]
+script = ExtResource("1_loot")
+item = ExtResource("item_3")
+min_amount = 45
+max_amount = 85
+chance = 0.85
+
+[sub_resource type="Resource" id="Drop_4"]
+script = ExtResource("1_loot")
+item = ExtResource("item_4")
+min_amount = 30
+max_amount = 55
+chance = 0.75
+
+[sub_resource type="Resource" id="Drop_5"]
+script = ExtResource("1_loot")
+item = ExtResource("item_5")
+min_amount = 60
+max_amount = 110
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_6"]
+script = ExtResource("1_loot")
+item = ExtResource("item_6")
+min_amount = 25
+max_amount = 50
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_7"]
+script = ExtResource("1_loot")
+item = ExtResource("item_7")
+min_amount = 20
+max_amount = 40
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_8"]
+script = ExtResource("1_loot")
+item = ExtResource("item_8")
+min_amount = 2
+max_amount = 6
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_9"]
+script = ExtResource("1_loot")
+item = ExtResource("item_9")
+min_amount = 2
+max_amount = 6
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_10"]
+script = ExtResource("1_loot")
+item = ExtResource("item_10")
+min_amount = 1
+max_amount = 4
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_11"]
+script = ExtResource("1_loot")
+item = ExtResource("item_11")
+min_amount = 2
+max_amount = 6
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_12"]
+script = ExtResource("1_loot")
+item = ExtResource("item_12")
+min_amount = 2
+max_amount = 6
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_13"]
+script = ExtResource("1_loot")
+item = ExtResource("item_13")
+min_amount = 1
+max_amount = 4
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_14"]
+script = ExtResource("1_loot")
+item = ExtResource("item_14")
+min_amount = 2
+max_amount = 6
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_15"]
+script = ExtResource("1_loot")
+item = ExtResource("item_15")
+min_amount = 2
+max_amount = 6
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_16"]
+script = ExtResource("1_loot")
+item = ExtResource("item_16")
+min_amount = 1
+max_amount = 4
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_ring_oathband"]
+script = ExtResource("1_loot")
+item = ExtResource("item_17")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_wayfarer"]
+script = ExtResource("1_loot")
+item = ExtResource("item_18")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_heartfire"]
+script = ExtResource("1_loot")
+item = ExtResource("item_19")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_starweave"]
+script = ExtResource("1_loot")
+item = ExtResource("item_20")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_bulwark"]
+script = ExtResource("1_loot")
+item = ExtResource("item_21")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_stormchase"]
+script = ExtResource("1_loot")
+item = ExtResource("item_22")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_ring_sovereign"]
+script = ExtResource("1_loot")
+item = ExtResource("item_23")
+chance = 0.02
+
+
+[resource]
+script = ExtResource("2_chest")
+display_name = "Masterwork Rose Chest"
+icon = ExtResource("3_icon")
+tier = 3
+gold_min = 25000
+gold_max = 40000
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
+exclusive_loot = Array[ExtResource("1_loot")]([SubResource("Drop_ring_oathband"), SubResource("Drop_ring_wayfarer"), SubResource("Drop_ring_heartfire"), SubResource("Drop_ring_starweave"), SubResource("Drop_ring_bulwark"), SubResource("Drop_ring_stormchase"), SubResource("Drop_ring_sovereign")])
+exclusive_max = 1
