@@ -64,6 +64,10 @@ func _init() -> void:
 	var perms: String = FileAccess.get_file_as_string(
 		"res://source/server/world/components/chat_command/command_permissions.gd"
 	)
+	if perms.find("role_for_character") < 0:
+		failures.append("command permissions must look up AdminConfig by character, not account")
+	if perms.find("AdminConfig.role_for(player.account_name)") >= 0:
+		failures.append("AdminConfig grants must not apply to every character on a login")
 	if perms.find("is_leaderboard_hidden") < 0:
 		failures.append("is_hidden_from_leaderboard must consult AdminConfig.is_leaderboard_hidden")
 	if perms.find("_db_role_blocked(role)") >= 0 and perms.find("is_hidden_from_leaderboard") >= 0:

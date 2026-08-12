@@ -1,13 +1,13 @@
 extends ChatCommand
-## Remove a persisted server role from an online player and save. Roles granted
-## via the admin config file are live and can't be revoked here — remove the
-## account from the admin config instead.
+## Remove a persisted server role from one online character and save. Roles
+## granted via the admin config file are live and can't be revoked here — remove
+## that character from server_admins.cfg instead.
 
 
 func _init() -> void:
 	command_name = "revoke"
 	command_priority = 100 # senior_admin
-	command_usage = "/revoke <self|@account|#id> <role>"
+	command_usage = "/revoke <self|Name|#id|@account> <role>"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
