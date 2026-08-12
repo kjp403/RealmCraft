@@ -16,6 +16,10 @@
 [ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_herring"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
 [ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="item_wood_silver_small"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_enchanted_gem"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_enchanted_cloth"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_enchanted_ore"]
 
 [sub_resource type="Resource" id="Drop_0_cloth_cave"]
 script = ExtResource("2_loot")
@@ -111,10 +115,40 @@ item = ExtResource("item_mana_potion")
 min_amount = 10
 max_amount = 30
 
+[sub_resource type="Resource" id="Drop_14_wood_silver_small"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_silver_small")
+min_amount = 1
+max_amount = 5
+chance = 0.16
+
+[sub_resource type="Resource" id="Excl_0_enchanted_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+
+[sub_resource type="Resource" id="Excl_1_enchanted_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+
+[sub_resource type="Resource" id="Excl_2_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+
 [resource]
 script = ExtResource("1_reward")
 gold_min = 3000
 gold_max = 8000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_mithril_bar"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_maple_log"), SubResource("Drop_7_shrimp"), SubResource("Drop_8_trout"), SubResource("Drop_9_salmon"), SubResource("Drop_10_cod"), SubResource("Drop_11_herring"), SubResource("Drop_12_health_potion"), SubResource("Drop_13_mana_potion")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_iron_bar"), SubResource("Drop_3_mithril_bar"), SubResource("Drop_4_coal_ore"), SubResource("Drop_5_mithril_ore"), SubResource("Drop_6_maple_log"), SubResource("Drop_7_shrimp"), SubResource("Drop_8_trout"), SubResource("Drop_9_salmon"), SubResource("Drop_10_cod"), SubResource("Drop_11_herring"), SubResource("Drop_12_health_potion"), SubResource("Drop_13_mana_potion"), SubResource("Drop_14_wood_silver_small")])
+exclusive_loot = Array[ExtResource("2_loot")]([SubResource("Excl_0_enchanted_gem"), SubResource("Excl_1_enchanted_cloth"), SubResource("Excl_2_enchanted_ore")])
+exclusive_max = 2
 ornate_chest_count = 1
 lockout_hours = 0.0

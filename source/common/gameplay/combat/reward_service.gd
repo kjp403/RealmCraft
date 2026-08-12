@@ -14,8 +14,8 @@ const MIN_DAMAGE_FRACTION: float = 0.1
 const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
 ## Ground piles stay reserved to their earner for this long (anti-ninja).
 const LOOT_EXCLUSIVE_MS: int = 60_000
-## T3 Ornate Gold Chest (item 249). Bosses with ornate_chest_top_max > 0
-## drop these on ranked damage shares. One table covers Sirenic / Dragon / Ancient.
+## Fallback ornate chest id (pink / 249) when a boss leaves ornate_chest_item empty.
+## Ranked grants use the boss's authored color item when set.
 const ORNATE_CHEST_IDS: Array[int] = [249]
 
 
@@ -73,16 +73,29 @@ static func _has_ranked_ornate_chests(npc: HostileNpc) -> bool:
 	return npc.enemy_data != null and npc.enemy_data.ornate_chest_top_max > 0
 
 
-## Rank 0 = top DPS only. Returns loot entries ready to merge into that
-## participant's personal pile. Second/consolation ranks never get ornate chests.
+## Ranked ornate grants for eligible damage contributors:
+## - Rank 0 (top DPS): [ornate_chest_top_min, ornate_chest_top_max]
+## - Rank 1: [ornate_chest_second_min, ornate_chest_second_max] when second_max > 0
+## - All other ranks (and rank 1 when second is unused): 1 chest at
+##   ornate_chest_consolation_chance. Solo killers are always rank 0.
 static func _roll_ranked_ornate_chests(rank: int, npc: HostileNpc) -> Array:
 	var d: EnemyTypeResource = npc.enemy_data
-	if d == null or d.ornate_chest_top_max <= 0 or rank != 0:
+	if d == null or d.ornate_chest_top_max <= 0:
 		return []
-	var count: int = randi_range(
-		maxi(0, d.ornate_chest_top_min),
-		maxi(0, d.ornate_chest_top_max)
-	)
+	var count: int = 0
+	if rank == 0:
+		count = randi_range(
+			maxi(0, d.ornate_chest_top_min),
+			maxi(0, d.ornate_chest_top_max)
+		)
+	elif rank == 1 and d.ornate_chest_second_max > 0:
+		count = randi_range(
+			maxi(0, d.ornate_chest_second_min),
+			maxi(0, d.ornate_chest_second_max)
+		)
+	elif rank >= 1 and d.ornate_chest_consolation_chance > 0.0:
+		if randf() < d.ornate_chest_consolation_chance:
+			count = 1
 	if count <= 0:
 		return []
 	var chest_id: int = 0

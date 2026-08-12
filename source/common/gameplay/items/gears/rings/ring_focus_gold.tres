@@ -8,14 +8,14 @@
 [sub_resource type="Resource" id="Mod_main"]
 script = ExtResource("1_mod")
 stat_name = "mana_max"
-value = 20.0
+value = 42.0
 vendor_value = 320
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_regen"]
 script = ExtResource("1_mod")
 stat_name = "mana_regen"
-value = 0.2
+value = 0.3
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

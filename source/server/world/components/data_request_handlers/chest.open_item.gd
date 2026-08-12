@@ -37,11 +37,14 @@ func data_request_handler(
 		return {"ok": false, "reason": "missing"}
 
 	var payout: Dictionary = table.roll_and_grant(player)
+	instance.world_server.database.save_player(player.player_resource)
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"chest.opened", {
 			"chest": str(payout.get("chest", chest_item.item_name)),
 			"gold": int(payout.get("gold", 0)),
 			"items": payout.get("items", []),
+			"pending": payout.get("pending", []),
+			"free_slots": int(payout.get("free_slots", 0)),
 		})
 
 	return {
@@ -49,4 +52,6 @@ func data_request_handler(
 		"chest": str(payout.get("chest", "")),
 		"gold": int(payout.get("gold", 0)),
 		"items": payout.get("items", []),
+		"pending": payout.get("pending", []),
+		"free_slots": int(payout.get("free_slots", 0)),
 	}
