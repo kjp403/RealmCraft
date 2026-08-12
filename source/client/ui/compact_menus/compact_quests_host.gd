@@ -2,7 +2,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 262.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 52.0
+const BOTTOM_CLEARANCE := 72.0
 
 @onready var title_label: Label = (
 	$MarginContainer/MainColumn/Header/TitleLabel

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/icons/jewelry_covenant_cross.png" id="2_icon"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/relic.tres" id="4_slot"]
+[ext_resource type="Resource" uid="uid://camuletslotx41k" path="res://source/common/gameplay/items/item_slot/slots/amulet.tres" id="4_slot"]
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")

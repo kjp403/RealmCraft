@@ -4,9 +4,10 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 52.0
+const BOTTOM_CLEARANCE := 72.0
 const GRID_COLUMNS := 2
-const TILE_SIZE := Vector2(112.0, 52.0)
+## Inventory-like skill cells: fixed block per skill (icon + levels).
+const TILE_SIZE := Vector2(112.0, 48.0)
 
 ## Live skills only (slug keys match JobRegistry / save data).
 const SKILL_ORDER: Array[String] = [
@@ -58,6 +59,9 @@ var _back_button: Button
 ## "Current task" section.
 var _slayer_info: Dictionary = {}
 var _slayer_task_box: VBoxContainer
+## slug -> { "button": Button, "cur": Label, "base": Label } — updated in place
+## on gather so the XP tooltip under the mouse is not destroyed/recreated.
+var _skill_tiles: Dictionary = {}
 
 
 func _ready() -> void:
@@ -153,8 +157,8 @@ func _build_layout() -> void:
 
 	_skills_grid = GridContainer.new()
 	_skills_grid.columns = GRID_COLUMNS
-	_skills_grid.add_theme_constant_override(&"h_separation", 4)
-	_skills_grid.add_theme_constant_override(&"v_separation", 4)
+	_skills_grid.add_theme_constant_override(&"h_separation", 5)
+	_skills_grid.add_theme_constant_override(&"v_separation", 5)
 	grid_center.add_child(_skills_grid)
 
 	_total_level_bar = Label.new()
@@ -301,7 +305,8 @@ func _on_skills_received(data: Dictionary) -> void:
 		_rebuild_detail()
 	else:
 		title_label.text = "Skills"
-		_build_skills_grid()
+		# Prefer in-place tile updates so a hover tooltip survives gather XP ticks.
+		_build_skills_grid(false)
 		_total_level_bar.text = "Total level: %d" % total_level
 
 
@@ -320,7 +325,7 @@ func _show_grid() -> void:
 	_grid_root.visible = true
 	_mode = Mode.SKILLS
 	title_label.text = "Skills"
-	_build_skills_grid()
+	_build_skills_grid(true)
 	_total_level_bar.text = "Total level: %d" % _total_unlocked_level()
 
 
@@ -462,22 +467,69 @@ func _rebuild_combat_detail() -> void:
 		list.add_child(_make_source_row(item, req, player_level))
 
 
-func _build_skills_grid() -> void:
+func _skill_info_for(slug: String) -> Dictionary:
+	if _skills.has(slug):
+		return _skills[slug] as Dictionary
+	return {
+		"display_name": JobRegistry.display_name(StringName(slug)),
+		"level": 1,
+		"xp": 0,
+		"xp_to_next": 1,
+	}
+
+
+func _build_skills_grid(force_rebuild: bool = true) -> void:
+	if (
+		not force_rebuild
+		and _skill_tiles.size() == SKILL_ORDER.size()
+		and _skills_grid.get_child_count() == SKILL_ORDER.size()
+	):
+		for slug: String in SKILL_ORDER:
+			_update_skill_tile(slug, _skill_info_for(slug))
+		return
+
 	for child: Node in _skills_grid.get_children():
 		_skills_grid.remove_child(child)
 		child.queue_free()
+	_skill_tiles.clear()
 
 	for slug: String in SKILL_ORDER:
-		if _skills.has(slug):
-			_skills_grid.add_child(_create_skill_tile(slug, _skills[slug]))
-		else:
-			var info: Dictionary = {
-				"display_name": JobRegistry.display_name(StringName(slug)),
-				"level": 1,
-				"xp": 0,
-				"xp_to_next": 1,
-			}
-			_skills_grid.add_child(_create_skill_tile(slug, info))
+		_skills_grid.add_child(_create_skill_tile(slug, _skill_info_for(slug)))
+
+
+func _skill_tooltip(display: String, level: int, xp: int, xp_to_next: int, at_cap: bool, total_xp: int) -> String:
+	if at_cap:
+		return "%s\nLv %d — Max level\nTotal XP: %s\nClick for details" % [
+			display, level, _format_xp(total_xp)
+		]
+	var remaining: int = maxi(0, xp_to_next - xp)
+	return "%s\nLv %d — %s / %s XP\n%s XP to next level\nTotal XP: %s\nClick for details" % [
+		display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+	]
+
+
+func _update_skill_tile(skill_name: String, info: Dictionary) -> void:
+	var entry: Variant = _skill_tiles.get(skill_name, null)
+	if entry == null or not (entry is Dictionary):
+		return
+	var tile_data: Dictionary = entry
+	var tile: Button = tile_data.get("button") as Button
+	var cur: Label = tile_data.get("cur") as Label
+	var base: Label = tile_data.get("base") as Label
+	if tile == null or cur == null or base == null:
+		return
+
+	var level: int = int(info.get("level", 1))
+	var xp: int = int(info.get("xp", 0))
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	var display: String = str(info.get("display_name", skill_name.capitalize()))
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+
+	cur.text = str(level)
+	base.text = str(level)
+	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
 
 
 func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
@@ -487,23 +539,17 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 
 	var tile := Button.new()
 	tile.custom_minimum_size = TILE_SIZE
+	tile.custom_maximum_size = TILE_SIZE
 	tile.size = TILE_SIZE
 	tile.clip_contents = true
 	tile.focus_mode = Control.FOCUS_NONE
-	tile.flat = true
-	if at_cap:
-		tile.tooltip_text = "%s\nLv %d — Max level\nTotal XP: %s\nClick for details" % [
-			display, level, _format_xp(total_xp)
-		]
-	else:
-		tile.tooltip_text = "%s\nLv %d — %s / %s XP\n%s XP to next level\nTotal XP: %s\nClick for details" % [
-			display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
-		]
+	# flat=true skips StyleBox draws — keep false so each skill is a visible block.
+	tile.flat = false
+	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
 	tile.pressed.connect(_show_detail.bind(skill_name))
 	_apply_tile_styles(tile)
 
@@ -514,10 +560,10 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	icon.texture = _get_skill_icon(skill_name)
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	icon.offset_left = 2
-	icon.offset_top = 2
-	icon.offset_right = 50
-	icon.offset_bottom = -2
+	icon.offset_left = 4
+	icon.offset_top = 4
+	icon.offset_right = 48
+	icon.offset_bottom = -4
 	tile.add_child(icon)
 
 	if icon.texture == null:
@@ -576,6 +622,11 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	slash.offset_bottom = 8
 	tile.add_child(slash)
 
+	_skill_tiles[skill_name] = {
+		"button": tile,
+		"cur": cur,
+		"base": base,
+	}
 	return tile
 
 
@@ -973,11 +1024,12 @@ func _apply_tile_styles(tile: Button) -> void:
 
 
 func _make_cell_style() -> StyleBoxFlat:
+	# Match inventory/bank slot blocks: dark inset + warm border.
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
-	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
+	style.bg_color = Color(0.035, 0.03, 0.055, 0.92)
+	style.border_color = Color(0.55, 0.36, 0.20, 0.95)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(2)
+	style.set_corner_radius_all(4)
 	style.content_margin_left = 2
 	style.content_margin_right = 2
 	style.content_margin_top = 2

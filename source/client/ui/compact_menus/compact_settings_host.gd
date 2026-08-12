@@ -2,7 +2,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 340.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 52.0
+const BOTTOM_CLEARANCE := 72.0
 const SECTION := &"general"
 const LOGOUT_RED := Color(0.92, 0.28, 0.28)
 const LOGOUT_RED_HOVER := Color(1.0, 0.42, 0.38)
@@ -456,8 +456,13 @@ func _place_panel() -> void:
 	if hud == null:
 		return
 
-	size = PANEL_SIZE
+	var panel_size: Vector2 = PANEL_SIZE
+	var max_h: float = maxf(180.0, hud.size.y - BOTTOM_CLEARANCE)
+	if panel_size.y > max_h:
+		panel_size.y = max_h
+	custom_minimum_size = panel_size
+	size = panel_size
 	position = Vector2(
-		hud.size.x - PANEL_SIZE.x - RIGHT_MARGIN,
-		hud.size.y - PANEL_SIZE.y - BOTTOM_CLEARANCE
+		hud.size.x - panel_size.x - RIGHT_MARGIN,
+		maxi(0, int(hud.size.y - panel_size.y - BOTTOM_CLEARANCE))
 	)

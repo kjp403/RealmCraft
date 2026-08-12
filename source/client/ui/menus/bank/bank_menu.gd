@@ -11,12 +11,14 @@ const MUTED: Color = Color(0.62, 0.64, 0.7)
 
 var _inventory: Dictionary = {}
 var _bank: Dictionary = {}
+var _bank_slots: int = BankInteraction.STARTING_SLOTS
 var _busy: bool = false
 
 var _bag_grid: GridContainer
 var _bank_grid: GridContainer
 var _bag_count: Label
 var _bank_count: Label
+var _upgrade_button: Button
 var _amount_spin: SpinBox
 var _transfer_button: Button
 var _deposit_all_button: Button
@@ -142,7 +144,32 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	else:
 		_bank_grid = grid
 		_bank_count = count
+		_upgrade_button = Button.new()
+		_upgrade_button.text = "Buy +%d slots (%sG)" % [
+			BankInteraction.UPGRADE_SLOTS,
+			_fmt_gold(BankInteraction.UPGRADE_COST),
+		]
+		_upgrade_button.focus_mode = Control.FOCUS_NONE
+		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
+			BankInteraction.UPGRADE_SLOTS,
+			_fmt_gold(BankInteraction.UPGRADE_COST),
+		]
+		_upgrade_button.pressed.connect(_on_upgrade_pressed)
+		header.add_child(_upgrade_button)
 	return col
+
+
+func _fmt_gold(amount: int) -> String:
+	var s: String = str(amount)
+	var out: String = ""
+	var i: int = s.length()
+	while i > 0:
+		var start: int = maxi(0, i - 3)
+		if not out.is_empty():
+			out = "," + out
+		out = s.substr(start, i - start) + out
+		i = start
+	return out
 
 
 func _build_transfer_row() -> HBoxContainer:
@@ -217,6 +244,7 @@ func _refresh() -> void:
 		return
 	_inventory = payload.get("inventory", {}) as Dictionary
 	_bank = payload.get("bank", {}) as Dictionary
+	_bank_slots = maxi(BankInteraction.STARTING_SLOTS, int(payload.get("bank_slots", _bank_slots)))
 	_clear_selection()
 	_rebuild_grids()
 
@@ -225,10 +253,17 @@ func _rebuild_grids() -> void:
 	_fill_grid(_bag_grid, _inventory, true)
 	_fill_grid(_bank_grid, _bank, false)
 	var bag_stacks: int = _count_stacks(_inventory)
+	var bank_stacks: int = _count_stacks(_bank)
 	_bag_count.text = "%d stacks" % bag_stacks
-	_bank_count.text = "%d stacks · no limit" % _count_stacks(_bank)
+	_bank_count.text = "%d / %d" % [bank_stacks, _bank_slots]
 	if _deposit_all_button != null:
 		_deposit_all_button.disabled = _busy or bag_stacks <= 0
+	if _upgrade_button != null:
+		_upgrade_button.disabled = _busy
+		_upgrade_button.text = "Buy +%d slots (%sG)" % [
+			BankInteraction.UPGRADE_SLOTS,
+			_fmt_gold(BankInteraction.UPGRADE_COST),
+		]
 
 
 func _count_stacks(store: Dictionary) -> int:
@@ -463,12 +498,16 @@ func _transfer_stack(uid: int, from_bag: bool, amount: int) -> void:
 				Toaster.toast("Gold stays in your currency pouch.")
 			"inventory_full":
 				Toaster.toast("Your bag is full. Deposit or drop something first.")
+			"full":
+				Toaster.toast("Your bank is full. Buy more slots or withdraw something.")
 			_:
 				Toaster.toast("That transfer failed.")
 		_rebuild_grids()
 		return
 	_inventory = payload.get("inventory", {}) as Dictionary
 	_bank = payload.get("bank", {}) as Dictionary
+	if payload.has("bank_slots"):
+		_bank_slots = maxi(BankInteraction.STARTING_SLOTS, int(payload.get("bank_slots", _bank_slots)))
 	_clear_selection()
 	_rebuild_grids()
 	ClientState.inventory_changed.emit({"quiet": true})
@@ -497,11 +536,17 @@ func _on_deposit_all_pressed() -> void:
 		return
 	var payload: Dictionary = result[0]
 	if not bool(payload.get("ok", false)):
-		Toaster.toast("Deposit All failed.")
+		match str(payload.get("reason", "")):
+			"full":
+				Toaster.toast("Your bank is full. Buy more slots or withdraw something.")
+			_:
+				Toaster.toast("Deposit All failed.")
 		_rebuild_grids()
 		return
 	_inventory = payload.get("inventory", {}) as Dictionary
 	_bank = payload.get("bank", {}) as Dictionary
+	if payload.has("bank_slots"):
+		_bank_slots = maxi(BankInteraction.STARTING_SLOTS, int(payload.get("bank_slots", _bank_slots)))
 	var stacks: int = int(payload.get("stacks", 0))
 	if stacks <= 0:
 		Toaster.toast("Your bag has nothing to deposit.")
@@ -511,5 +556,42 @@ func _on_deposit_all_pressed() -> void:
 			"" if stacks == 1 else "s",
 		])
 	_clear_selection()
+	_rebuild_grids()
+	ClientState.inventory_changed.emit({"quiet": true})
+
+
+func _on_upgrade_pressed() -> void:
+	if _busy or InstanceClient.current == null:
+		return
+	_busy = true
+	if _upgrade_button != null:
+		_upgrade_button.disabled = true
+	if _deposit_all_button != null:
+		_deposit_all_button.disabled = true
+	var result: Array = await Client.request_data_await(
+		&"bank.upgrade",
+		{},
+		InstanceClient.current.name
+	)
+	_busy = false
+	if not is_instance_valid(self) or not visible:
+		return
+	if result.size() < 2 or result[1] != OK or not (result[0] is Dictionary):
+		Toaster.toast("Could not buy bank slots.")
+		_rebuild_grids()
+		return
+	var payload: Dictionary = result[0]
+	if not bool(payload.get("ok", false)):
+		match str(payload.get("reason", "")):
+			"gold":
+				Toaster.toast("You need %s gold." % _fmt_gold(BankInteraction.UPGRADE_COST))
+			_:
+				Toaster.toast("Could not buy bank slots.")
+		_rebuild_grids()
+		return
+	_inventory = payload.get("inventory", _inventory) as Dictionary
+	_bank = payload.get("bank", _bank) as Dictionary
+	_bank_slots = maxi(BankInteraction.STARTING_SLOTS, int(payload.get("bank_slots", _bank_slots)))
+	Toaster.toast("Bank expanded to %d slots." % _bank_slots)
 	_rebuild_grids()
 	ClientState.inventory_changed.emit({"quiet": true})

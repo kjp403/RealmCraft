@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://c0urierbankrun01"]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/remote_bank_interaction.gd" id="2_remote"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
+[ext_resource type="SpriteFrames" uid="uid://cguofoiw5svvs" path="res://source/common/gameplay/characters/sprite_frames/scholar_cataloguer.tres" id="4_skin"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+
+[sub_resource type="Resource" id="RemoteBank_main"]
+script = ExtResource("2_remote")
+
+[sub_resource type="Resource" id="Dialogue_courier"]
+script = ExtResource("3_dialogue")
+lines = Array[String](["I ferry vault ledgers for Heroes who cannot reach the Banker. Five thousand gold opens your vault from here.", "Your vault still lives with the Banker — I only open the door. Expand your slots with them when you need more room."])
+label_override = "How does remote banking work?"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Courier"
+skin = ExtResource("4_skin")
+greeting = "Need your vault on the road? I can open it for 5,000 gold."
+interactions = Array[ExtResource("1_interaction")]([SubResource("RemoteBank_main"), SubResource("Dialogue_courier")])

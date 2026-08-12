@@ -14,10 +14,12 @@ func data_request_handler(
 		return {"ok": false, "reason": "missing"}
 	if _purge_currency_from_bank(player):
 		instance.world_server.database.save_player(player)
+	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, player.bank_slots)
 	return {
 		"ok": true,
 		"inventory": player.inventory,
 		"bank": player.bank,
+		"bank_slots": capacity,
 	}
 
 

@@ -48,6 +48,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 13:
 		_migration_v13(db)
 		_set_schema_version(db, 13)
+	if version < 14:
+		_migration_v14(db)
+		_set_schema_version(db, 14)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -257,8 +260,8 @@ static func _migration_v10(db: SQLite) -> void:
 	)
 
 
-## v11: personal item bank (unlimited vault). Same JSON shape as inventory_json;
-## ADD COLUMN — no DB wipe.
+## v11: personal item bank vault. Same JSON shape as inventory_json;
+## ADD COLUMN — no DB wipe. Capacity arrived later in v14 (bank_slots).
 static func _migration_v11(db: SQLite) -> void:
 	if not _column_exists(db, "players", "bank_json"):
 		db.query("ALTER TABLE players ADD COLUMN bank_json TEXT NOT NULL DEFAULT '{}';")
@@ -279,6 +282,13 @@ static func _migration_v12(db: SQLite) -> void:
 static func _migration_v13(db: SQLite) -> void:
 	if not _column_exists(db, "players", "pending_chest_loot_json"):
 		db.query("ALTER TABLE players ADD COLUMN pending_chest_loot_json TEXT NOT NULL DEFAULT '[]';")
+
+
+## v14: personal bank capacity. Starts at 50 slots; banker sells +50 for 5,000G
+## with no purchase cap. ADD COLUMN — no DB wipe.
+static func _migration_v14(db: SQLite) -> void:
+	if not _column_exists(db, "players", "bank_slots"):
+		db.query("ALTER TABLE players ADD COLUMN bank_slots INTEGER NOT NULL DEFAULT 50;")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

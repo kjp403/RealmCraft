@@ -101,14 +101,18 @@ static func take_all_to_bag(resource: PlayerResource) -> int:
 	return moved
 
 
-## Move one staged stack into the bank. Returns amount moved.
+## Move one staged stack into the bank (respecting [member PlayerResource.bank_slots]).
+## Returns amount moved. Stacking into existing piles still works when "full".
 static func bank(resource: PlayerResource, item_id: int, amount: int = -1) -> int:
 	if resource == null or item_id <= 0:
 		return 0
 	var have: int = count(resource.pending_chest_loot, item_id)
 	if have <= 0:
 		return 0
-	var move: int = have if amount < 0 else mini(amount, have)
+	var want: int = have if amount < 0 else mini(amount, have)
+	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, resource.bank_slots)
+	var fit: int = Inventory.max_fit(resource.bank, item_id, capacity)
+	var move: int = mini(want, fit)
 	if move <= 0:
 		return 0
 	take(resource.pending_chest_loot, item_id, move)
@@ -116,19 +120,21 @@ static func bank(resource: PlayerResource, item_id: int, amount: int = -1) -> in
 	return move
 
 
-## Dump the entire staging area into the bank. Returns total items moved.
+## Dump as much of the staging area into the bank as capacity allows. Leftovers
+## stay pending (e.g. logout when the vault is full). Returns total items moved.
 static func flush_to_bank(resource: PlayerResource) -> int:
 	if resource == null:
 		return 0
 	var moved: int = 0
-	while not resource.pending_chest_loot.is_empty():
-		var entry: Dictionary = resource.pending_chest_loot[0] as Dictionary
-		var item_id: int = int(entry.get("id", 0))
-		var amount: int = int(entry.get("a", 0))
-		if item_id <= 0 or amount <= 0:
-			resource.pending_chest_loot.remove_at(0)
-			continue
-		moved += bank(resource, item_id, amount)
+	# Snapshot unique ids — bank() mutates pending.
+	var ids: Array[int] = []
+	for entry: Variant in resource.pending_chest_loot:
+		if entry is Dictionary:
+			var item_id: int = int((entry as Dictionary).get("id", 0))
+			if item_id > 0 and not ids.has(item_id):
+				ids.append(item_id)
+	for item_id: int in ids:
+		moved += bank(resource, item_id, -1)
 	return moved
 
 
