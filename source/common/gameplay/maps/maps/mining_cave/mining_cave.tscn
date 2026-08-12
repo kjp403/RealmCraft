@@ -20,6 +20,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres" id="20_bat"]
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 [ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="23_npc_friendly"]
+[ext_resource type="Resource" uid="uid://c0urierbankrun01" path="res://source/common/gameplay/characters/npc/npcs/courier.tres" id="24_courier"]
 
 [node name="mining_cave" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -582,6 +584,11 @@ position = Vector2(368.0, 1200.0)
 [node name="Entrance" parent="." instance=ExtResource("5_warper")]
 position = Vector2(368.0, 1200.0)
 warper_id = 30
+
+[node name="Courier" parent="." instance=ExtResource("23_npc_friendly")]
+position = Vector2(944.0, 592.0)
+collision_mask = 6
+npc_resource = ExtResource("24_courier")
 
 [node name="WoodlandPortal" parent="." instance=ExtResource("6_portal")]
 position = Vector2(272.0, 1264.0)
