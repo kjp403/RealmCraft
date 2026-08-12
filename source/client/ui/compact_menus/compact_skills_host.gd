@@ -17,6 +17,8 @@ const SKILL_ORDER: Array[String] = [
 	"outfitting",
 	"woodcutting",
 	"harvesting",
+	"fletching",
+	"herblore",
 	# Combat skill (category == &"combat"), listed last so the existing
 	# gathering/crafting tiles keep their grid positions.
 	"slayer",
