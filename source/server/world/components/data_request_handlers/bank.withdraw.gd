@@ -74,7 +74,7 @@ func data_request_handler(
 		return {"ok": false, "reason": "missing"}
 
 	if not Inventory.try_add_item(player.player_resource.inventory, item_id, total_removed):
-		Inventory.add_item(bank, item_id, total_removed)
+		Inventory.add_item(bank, item_id, total_removed, true)
 		return {"ok": false, "reason": "inventory_full"}
 	instance.world_server.database.save_player(player.player_resource)
 	return {

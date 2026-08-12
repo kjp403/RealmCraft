@@ -72,6 +72,22 @@ func _init() -> void:
 	if cave_bat_text.find("chase_on_area = false") < 0:
 		failures.append("cave_bat must be passive (chase_on_area=false)")
 
+	var smith_res: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/instance/instance_collection/building/smith_house.tres"
+	)
+	if smith_res.find("maps/smith_house/inside_map.tscn") < 0:
+		failures.append("smith_house map_path must be a res:// scene path (uid:// drops clients)")
+	var client_im: String = FileAccess.get_file_as_string(
+		"res://source/client/network/instance_manager.gd"
+	)
+	if client_im.find("pending_spawn") < 0 or client_im.find("_resolve_map_path") < 0:
+		failures.append("client instance manager must stash spawn and resolve uid map paths")
+	var inv: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/items/inventory.gd"
+	)
+	if inv.find("const BANK_RESOURCE_STACK: int = 50") < 0:
+		failures.append("bank resource stacks must cap at 50")
+
 	if failures.is_empty():
 		print("VERIFY_PASS mining_gate smith_house_stations")
 		quit(0)

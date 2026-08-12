@@ -323,6 +323,11 @@ func spawn_player(player_id: int) -> void:
 		# that first contact doesn't trigger the portal's fade/rev-up. Mirrors the
 		# server's own spawn-time mark_just_teleported.
 		local_player.mark_just_teleported(1200)
+		var dest: Vector2 = Client.instance_manager.pending_spawn
+		if dest != Vector2.ZERO:
+			local_player.position = dest
+			local_player.freeze_movement(0.5)
+			Client.instance_manager.pending_spawn = Vector2.ZERO
 	else:
 		new_player = DUMMY_PLAYER.instantiate()
 	

@@ -88,8 +88,17 @@ func setup_global_commands_and_roles() -> void:
 
 
 @rpc("authority", "call_remote", "reliable", 0)
-func charge_new_instance(_map_path: String, _instance_id: String) -> void:
+func charge_new_instance(
+	_map_path: String,
+	_instance_id: String,
+	_spawn_x: float = 0.0,
+	_spawn_y: float = 0.0
+) -> void:
 	pass
+
+
+func _rpc_charge(peer_id: int, map_path: String, instance_id: String, spawn: Vector2 = Vector2.ZERO) -> void:
+	charge_new_instance.rpc_id(peer_id, map_path, instance_id, spawn.x, spawn.y)
 
 
 ## Resolve a joinable ServerInstance for login spawn. If the map is mid-load,
@@ -115,7 +124,7 @@ func _on_peer_connected(peer_id: int) -> void:
 		if jail_res != null:
 			var jail_inst: ServerInstance = _instance_for_login(jail_res)
 			if jail_inst != null:
-				charge_new_instance.rpc_id(peer_id, jail_res.map_path, jail_inst.name)
+				_rpc_charge(peer_id, jail_res.map_path, jail_inst.name)
 				jail_inst.awaiting_peers[peer_id] = {}
 				return
 
@@ -147,7 +156,7 @@ func _on_peer_connected(peer_id: int) -> void:
 						float(player_resource.lb_stats.get("last_x", 0.0)),
 						float(player_resource.lb_stats.get("last_y", 0.0))
 					)
-					charge_new_instance.rpc_id(peer_id, saved_res.map_path, saved_inst.name)
+					_rpc_charge(peer_id, saved_res.map_path, saved_inst.name, saved_position)
 					saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
 					return
 
@@ -156,7 +165,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	if target_res != null:
 		var target_inst: ServerInstance = _instance_for_login(target_res)
 		if target_inst != null:
-			charge_new_instance.rpc_id(peer_id, target_res.map_path, target_inst.name)
+			_rpc_charge(peer_id, target_res.map_path, target_inst.name)
 			target_inst.awaiting_peers[peer_id] = {} # {} = the map's default spawn point (index 0)
 			return
 
@@ -169,7 +178,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	if fallback_inst == null:
 		push_error("InstanceManagerServer: could not charge default_instance for peer %d" % peer_id)
 		return
-	charge_new_instance.rpc_id(peer_id, default_instance.map_path, fallback_inst.name)
+	_rpc_charge(peer_id, default_instance.map_path, fallback_inst.name)
 	fallback_inst.awaiting_peers[peer_id] = {}
 
 
@@ -254,10 +263,12 @@ func player_switch_instance(
 	# someone not in a run/queue.
 	DungeonService.on_player_left(peer_id, current_instance)
 	SparringService.on_player_left(peer_id, current_instance)
-	charge_new_instance.rpc_id(
+	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
+	_rpc_charge(
 		peer_id,
 		target_instance.instance_resource.map_path,
-		target_instance.name
+		target_instance.name,
+		spawn_pos
 	)
 	target_instance.awaiting_peers[peer_id] = {
 		"player": player,
@@ -426,6 +437,11 @@ func teleport_peer_to(peer_id: int, dest_instance: ServerInstance, dest_position
 		return true
 
 	current_inst.despawn_player(peer_id, false)
-	charge_new_instance.rpc_id(peer_id, dest_instance.instance_resource.map_path, dest_instance.name)
+	_rpc_charge(
+		peer_id,
+		dest_instance.instance_resource.map_path,
+		dest_instance.name,
+		dest_position
+	)
 	dest_instance.awaiting_peers[peer_id] = {"player": player, "target_position": dest_position}
 	return true
