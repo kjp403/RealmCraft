@@ -7,10 +7,16 @@
 [resource]
 script = ExtResource("1_dres")
 display_name = "The Dark Cave"
-description = "A dark cave filled with bones. Clear every room to escape with the loot. Solo doubles drop chances and grants 1.5× amounts."
-recommended_level = 8
+description = "A dark cave filled with bones. Tuned for Runite / Fire kits — bring health and mana potions. Solo doubles drop chances and grants 1.5× amounts."
+recommended_level = 28
 reward = ExtResource("2_reward")
 hard_reward = ExtResource("3_hard")
+normal_health_mult = 2.8
+normal_damage_mult = 4.0
+boss_health_mult = 2.2
+boss_damage_mult = 1.35
+hard_health_mult = 5.0
+hard_damage_mult = 5.5
 instance_name = &"Dungeon"
 map_path = "uid://bvpi2a6j7k8s0"
 metadata/slug = &"dungeon"
