@@ -12,24 +12,13 @@
 [ext_resource type="Resource" uid="uid://dicfbsg4ycah2" path="res://source/common/gameplay/characters/npc/npcs/foreman.tres" id="13_anjaa"]
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="14_banker"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="16_da30u"]
-[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="17_hnnrj"]
-[ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="18_ujyhf"]
 [ext_resource type="PackedScene" uid="uid://dfgyo6udh8k1s" path="res://source/common/gameplay/maps/maps/trade_house/outside_building.tscn" id="18_uvtmx"]
-[ext_resource type="Resource" uid="uid://dw5hj55lha5ld" path="res://source/common/gameplay/shops/resources/rustic_shop.tres" id="19_2sqao"]
 [ext_resource type="PackedScene" uid="uid://bejfk0u1aillb" path="res://source/common/gameplay/maps/maps/smith_house/outside_building.tscn" id="20_2jkb5"]
-[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="20_og50n"]
-[ext_resource type="Resource" uid="uid://djykaddq0rjuw" path="res://source/common/gameplay/quests/resources/smelters_trial.tres" id="21_anjaa"]
 [ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="21_sc04i"]
-[ext_resource type="Resource" uid="uid://pm3j1lgi0vig" path="res://source/common/gameplay/quests/resources/master_of_the_forge.tres" id="22_xjjg4"]
-[ext_resource type="Resource" uid="uid://doy47vraqsb02" path="res://source/common/gameplay/quests/resources/copper_for_the_smith.tres" id="23_sgxfe"]
 [ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="24_2sqao"]
-[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="24_o1ke5"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="25_2opns"]
-[ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="26_8i8tr"]
 [ext_resource type="SpriteFrames" uid="uid://dikmb6ti5t2j6" path="res://source/common/gameplay/characters/sprite_frames/royal_soldier.tres" id="26_t0at5"]
 [ext_resource type="SpriteFrames" uid="uid://bfer1b8yk1buk" path="res://source/common/gameplay/characters/sprite_frames/royal_archer.tres" id="27_eqvv7"]
-[ext_resource type="Resource" uid="uid://byp1hhtmmyi8e" path="res://source/common/gameplay/quests/resources/linen_for_the_tailor.tres" id="27_m6ao3"]
-[ext_resource type="Resource" uid="uid://b3qk27fw0k2ko" path="res://source/common/gameplay/quests/resources/a_tailored_hood.tres" id="28_eghdl"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="29_2sqao"]
 [ext_resource type="Resource" uid="uid://dfeyr0kdescac" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/forest.tres" id="30_og50n"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="35_2opns"]
@@ -62,35 +51,6 @@ metadata/_custom_type_script = "uid://ddps5vwhnf048"
 script = ExtResource("25_2opns")
 npc_name = "Portal Guard"
 skin = ExtResource("26_t0at5")
-metadata/_custom_type_script = "uid://ddps5vwhnf048"
-
-[sub_resource type="Resource" id="Resource_h1lk8"]
-script = ExtResource("18_ujyhf")
-shop = ExtResource("19_2sqao")
-metadata/_custom_type_script = "uid://bpo804060rk5t"
-
-[sub_resource type="Resource" id="Resource_3xv60"]
-script = ExtResource("24_o1ke5")
-quests = Array[ExtResource("20_og50n")]([ExtResource("21_anjaa"), ExtResource("22_xjjg4"), ExtResource("23_sgxfe")])
-metadata/_custom_type_script = "uid://dka1daj2vrhn"
-
-[sub_resource type="Resource" id="Resource_jubm3"]
-script = ExtResource("25_2opns")
-npc_name = "Forge Smith"
-skin = ExtResource("26_8i8tr")
-greeting = "Hello I'am Smith"
-interactions = Array[ExtResource("17_hnnrj")]([SubResource("Resource_h1lk8"), SubResource("Resource_3xv60")])
-metadata/_custom_type_script = "uid://ddps5vwhnf048"
-
-[sub_resource type="Resource" id="Resource_poc8a"]
-script = ExtResource("24_o1ke5")
-quests = Array[ExtResource("20_og50n")]([ExtResource("27_m6ao3"), ExtResource("28_eghdl")])
-metadata/_custom_type_script = "uid://dka1daj2vrhn"
-
-[sub_resource type="Resource" id="Resource_p483h"]
-script = ExtResource("25_2opns")
-npc_name = "the Tailer"
-interactions = Array[ExtResource("17_hnnrj")]([SubResource("Resource_poc8a")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
 
 [node name="Hub" type="Node2D" unique_id=701596431 node_paths=PackedStringArray("replicated_props_container")]
@@ -177,14 +137,6 @@ npc_resource = SubResource("Resource_6h6u4")
 [node name="QuestGiver" parent="NPCs" unique_id=835234409 instance=ExtResource("16_da30u")]
 position = Vector2(-312, -112)
 npc_resource = ExtResource("13_anjaa")
-
-[node name="ForgeSmith" parent="NPCs" unique_id=655889327 instance=ExtResource("16_da30u")]
-position = Vector2(-512, -88)
-npc_resource = SubResource("Resource_jubm3")
-
-[node name="TheTailor" parent="NPCs" unique_id=1048618121 instance=ExtResource("16_da30u")]
-position = Vector2(-592, -88)
-npc_resource = SubResource("Resource_p483h")
 
 [node name="BankerYard" parent="NPCs" unique_id=1048618123 instance=ExtResource("16_da30u")]
 position = Vector2(-392, 40)
