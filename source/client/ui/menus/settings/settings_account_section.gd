@@ -13,9 +13,34 @@ func _ready() -> void:
 	_discord_button.pressed.connect(SettingsAccountActions.open_discord)
 	_logout_button.pressed.connect(_on_logout_pressed)
 	_commands_button.pressed.connect(_on_commands_pressed)
+	_style_logout_button(_logout_button)
 	_build_online_label()
 	visibility_changed.connect(_refresh_online_count)
 	_refresh_online_count()
+
+
+func _style_logout_button(button: Button) -> void:
+	const RED := Color(0.92, 0.28, 0.28)
+	const RED_HOVER := Color(1.0, 0.42, 0.38)
+	const RED_PRESSED := Color(0.72, 0.16, 0.16)
+	button.add_theme_color_override(&"font_color", Color(1.0, 0.92, 0.92))
+	button.add_theme_color_override(&"font_hover_color", Color(1.0, 0.98, 0.98))
+	button.add_theme_color_override(&"font_pressed_color", Color(1.0, 0.85, 0.85))
+	button.add_theme_color_override(&"font_focus_color", Color(1.0, 0.92, 0.92))
+	for state: StringName in [&"normal", &"hover", &"pressed", &"focus"]:
+		var box := StyleBoxFlat.new()
+		box.bg_color = (
+			RED_PRESSED if state == &"pressed"
+			else (RED_HOVER if state == &"hover" else RED)
+		)
+		box.set_border_width_all(1)
+		box.border_color = Color(1.0, 0.55, 0.5)
+		box.set_corner_radius_all(2)
+		box.content_margin_left = 8
+		box.content_margin_right = 8
+		box.content_margin_top = 4
+		box.content_margin_bottom = 4
+		button.add_theme_stylebox_override(state, box)
 
 
 ## Server population, above the account buttons. Built in code (not the scene)

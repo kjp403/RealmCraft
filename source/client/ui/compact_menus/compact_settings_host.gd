@@ -1,9 +1,12 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 380.0)
+const PANEL_SIZE := Vector2(180.0, 340.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 52.0
 const SECTION := &"general"
+const LOGOUT_RED := Color(0.92, 0.28, 0.28)
+const LOGOUT_RED_HOVER := Color(1.0, 0.42, 0.38)
+const LOGOUT_RED_PRESSED := Color(0.72, 0.16, 0.16)
 
 @onready var title_label: Label = (
 	$MarginContainer/MainColumn/Header/TitleLabel
@@ -18,6 +21,8 @@ const SECTION := &"general"
 	$MarginContainer/MainColumn/Content
 )
 
+var _main_view: VBoxContainer
+var _audio_view: VBoxContainer
 var _music_slider: HSlider
 var _sound_slider: HSlider
 var _zoom_slider: HSlider
@@ -51,7 +56,7 @@ func _ready() -> void:
 
 	_build_layout()
 
-	close_button.pressed.connect(hide)
+	close_button.pressed.connect(_on_close_pressed)
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.settings.setting_changed.connect(_on_setting_changed)
 
@@ -60,39 +65,29 @@ func _ready() -> void:
 		hud.resized.connect(_place_panel)
 
 	_sync_controls()
+	_show_main_view()
 	call_deferred(&"_place_panel")
 	hide()
 
 
 func _build_layout() -> void:
-	var main_box := VBoxContainer.new()
-	main_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	main_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	main_box.add_theme_constant_override(&"separation", 5)
-	content.add_child(main_box)
+	_main_view = VBoxContainer.new()
+	_main_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_main_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_main_view.add_theme_constant_override(&"separation", 5)
+	content.add_child(_main_view)
 
-	var music_controls: Dictionary = _add_slider_setting(
-		main_box,
-		"Music",
-		&"music_volume",
-		0.0,
-		1.0,
-		0.05
-	)
-	_music_slider = music_controls["slider"]
-	_music_value = music_controls["value"]
+	_audio_view = VBoxContainer.new()
+	_audio_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_audio_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_audio_view.add_theme_constant_override(&"separation", 5)
+	content.add_child(_audio_view)
 
-	var sound_controls: Dictionary = _add_slider_setting(
-		main_box,
-		"Sound effects",
-		&"sound_volume",
-		0.0,
-		1.0,
-		0.05
-	)
-	_sound_slider = sound_controls["slider"]
-	_sound_value = sound_controls["value"]
+	_build_main_view(_main_view)
+	_build_audio_view(_audio_view)
 
+
+func _build_main_view(main_box: VBoxContainer) -> void:
 	var zoom_controls: Dictionary = _add_slider_setting(
 		main_box,
 		"Camera zoom",
@@ -139,6 +134,14 @@ func _build_layout() -> void:
 
 	main_box.add_child(HSeparator.new())
 
+	var audio_button := Button.new()
+	audio_button.text = "Audio"
+	audio_button.custom_minimum_size = Vector2(0.0, 26.0)
+	audio_button.add_theme_font_size_override(&"font_size", 9)
+	audio_button.tooltip_text = "Music and sound effect volumes."
+	audio_button.pressed.connect(_show_audio_view)
+	main_box.add_child(audio_button)
+
 	var commands_button := Button.new()
 	commands_button.text = "Chat commands"
 	commands_button.custom_minimum_size = Vector2(0.0, 26.0)
@@ -147,8 +150,6 @@ func _build_layout() -> void:
 	commands_button.pressed.connect(_on_commands_pressed)
 	main_box.add_child(commands_button)
 
-	main_box.add_child(HSeparator.new())
-
 	var reset_button := Button.new()
 	reset_button.text = "Reset to defaults"
 	reset_button.custom_minimum_size = Vector2(0.0, 26.0)
@@ -156,8 +157,6 @@ func _build_layout() -> void:
 	reset_button.tooltip_text = "Restore audio, zoom and weather defaults."
 	reset_button.pressed.connect(_on_reset_pressed)
 	main_box.add_child(reset_button)
-
-	main_box.add_child(HSeparator.new())
 
 	var discord_button := Button.new()
 	discord_button.text = "Join Discord"
@@ -172,8 +171,90 @@ func _build_layout() -> void:
 	logout_button.custom_minimum_size = Vector2(0.0, 26.0)
 	logout_button.add_theme_font_size_override(&"font_size", 9)
 	logout_button.tooltip_text = "Disconnect and return to the login screen."
+	_style_logout_button(logout_button)
 	logout_button.pressed.connect(_on_logout_pressed)
 	main_box.add_child(logout_button)
+
+
+func _build_audio_view(audio_box: VBoxContainer) -> void:
+	var back_button := Button.new()
+	back_button.text = "Back"
+	back_button.custom_minimum_size = Vector2(0.0, 26.0)
+	back_button.add_theme_font_size_override(&"font_size", 9)
+	back_button.pressed.connect(_show_main_view)
+	audio_box.add_child(back_button)
+
+	audio_box.add_child(HSeparator.new())
+
+	var music_controls: Dictionary = _add_slider_setting(
+		audio_box,
+		"Music",
+		&"music_volume",
+		0.0,
+		1.0,
+		0.05
+	)
+	_music_slider = music_controls["slider"]
+	_music_value = music_controls["value"]
+
+	var sound_controls: Dictionary = _add_slider_setting(
+		audio_box,
+		"Sound effects",
+		&"sound_volume",
+		0.0,
+		1.0,
+		0.05
+	)
+	_sound_slider = sound_controls["slider"]
+	_sound_value = sound_controls["value"]
+
+
+func _style_logout_button(button: Button) -> void:
+	button.add_theme_color_override(&"font_color", Color(1.0, 0.92, 0.92))
+	button.add_theme_color_override(&"font_hover_color", Color(1.0, 0.98, 0.98))
+	button.add_theme_color_override(&"font_pressed_color", Color(1.0, 0.85, 0.85))
+	button.add_theme_color_override(&"font_focus_color", Color(1.0, 0.92, 0.92))
+	for state: StringName in [
+		&"normal",
+		&"hover",
+		&"pressed",
+		&"focus",
+	]:
+		var box := StyleBoxFlat.new()
+		box.bg_color = (
+			LOGOUT_RED_PRESSED if state == &"pressed"
+			else (LOGOUT_RED_HOVER if state == &"hover" else LOGOUT_RED)
+		)
+		box.set_border_width_all(1)
+		box.border_color = Color(1.0, 0.55, 0.5)
+		box.set_corner_radius_all(2)
+		box.content_margin_left = 6
+		box.content_margin_right = 6
+		box.content_margin_top = 3
+		box.content_margin_bottom = 3
+		button.add_theme_stylebox_override(state, box)
+
+
+func _show_main_view() -> void:
+	if _main_view != null:
+		_main_view.visible = true
+	if _audio_view != null:
+		_audio_view.visible = false
+	title_label.text = "Settings"
+
+
+func _show_audio_view() -> void:
+	if _main_view != null:
+		_main_view.visible = false
+	if _audio_view != null:
+		_audio_view.visible = true
+	title_label.text = "Audio"
+	_sync_controls()
+
+
+func _on_close_pressed() -> void:
+	_show_main_view()
+	hide()
 
 
 func _on_commands_pressed() -> void:
@@ -236,6 +317,7 @@ func _add_slider_setting(
 
 func _on_visibility_changed() -> void:
 	if visible:
+		_show_main_view()
 		_sync_controls()
 		_refresh_online_count()
 
@@ -298,7 +380,7 @@ func _on_setting_changed(
 
 
 func _sync_controls() -> void:
-	if not is_instance_valid(_music_slider):
+	if not is_instance_valid(_music_slider) or not is_instance_valid(_zoom_slider):
 		return
 
 	_syncing = true
