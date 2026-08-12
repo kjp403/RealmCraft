@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786487969
-next_id = 550
+version = 1786502070
+next_id = 566
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -712,36 +712,6 @@ entries = Array[Dictionary]([{
 &"id": 61,
 &"path": "res://source/common/gameplay/items/materials/metals/iron_ore.tres",
 &"slug": &"iron_ore"
-}, {
-&"hash": "mithril_ore_v1",
-&"id": 253,
-&"path": "res://source/common/gameplay/items/materials/metals/mithril_ore.tres",
-&"slug": &"mithril_ore"
-}, {
-&"hash": "adamant_ore_v1",
-&"id": 254,
-&"path": "res://source/common/gameplay/items/materials/metals/adamant_ore.tres",
-&"slug": &"adamant_ore"
-}, {
-&"hash": "runite_ore_v1",
-&"id": 255,
-&"path": "res://source/common/gameplay/items/materials/metals/runite_ore.tres",
-&"slug": &"runite_ore"
-}, {
-&"hash": "mithril_bar_v1",
-&"id": 256,
-&"path": "res://source/common/gameplay/items/materials/metals/mithril_bar.tres",
-&"slug": &"mithril_bar"
-}, {
-&"hash": "adamant_bar_v1",
-&"id": 257,
-&"path": "res://source/common/gameplay/items/materials/metals/adamant_bar.tres",
-&"slug": &"adamant_bar"
-}, {
-&"hash": "runite_bar_v1",
-&"id": 258,
-&"path": "res://source/common/gameplay/items/materials/metals/runite_bar.tres",
-&"slug": &"runite_bar"
 }, {
 &"hash": "3c9b0858fc6a8a6d83ca10541d2b0c4b33c8ae0f0276cf70926146d68a268a80",
 &"id": 220,
@@ -2527,6 +2497,86 @@ entries = Array[Dictionary]([{
 &"id": 549,
 &"path": "res://source/common/gameplay/items/materials/gems/gem_vital_pristine.tres",
 &"slug": &"gem_vital_pristine"
+}, {
+&"hash": "82b7247e21cfd69cf378c4cee25b8f59b7290f02b99a55e5259400c87922148e",
+&"id": 550,
+&"path": "res://source/common/gameplay/items/materials/wood/headless_arrow.tres",
+&"slug": &"headless_arrow"
+}, {
+&"hash": "02ba1d3fd8407442a6d629fdfca149915c46a5cf72e8cdf3601e207eebbbb598",
+&"id": 551,
+&"path": "res://source/common/gameplay/items/ammo/bronze_arrow.tres",
+&"slug": &"bronze_arrow"
+}, {
+&"hash": "82a92c441f02f92a4dc07630d2cd9533d6bd66252ef582db10794ce61a274ff9",
+&"id": 552,
+&"path": "res://source/common/gameplay/items/ammo/iron_arrow.tres",
+&"slug": &"iron_arrow"
+}, {
+&"hash": "4d6834dfae06b9ea7e73c8717e34418536c0fc47bdf67030d6b3f45a3543b495",
+&"id": 553,
+&"path": "res://source/common/gameplay/items/ammo/steel_arrow.tres",
+&"slug": &"steel_arrow"
+}, {
+&"hash": "62aee39254cbeb651c78826ec65379bd34eee8da01f99ea991eddbb41aade6e0",
+&"id": 554,
+&"path": "res://source/common/gameplay/items/ammo/mithril_arrow.tres",
+&"slug": &"mithril_arrow"
+}, {
+&"hash": "83cdc8d6c4084346d760cb20927abb26394e6e16d420e6953f846b393cbd98e7",
+&"id": 555,
+&"path": "res://source/common/gameplay/items/ammo/adamant_arrow.tres",
+&"slug": &"adamant_arrow"
+}, {
+&"hash": "3bb12f8ceee9ef9abe2a9646d7ef39a409d06f1e8c126bd26adc05d094145ccb",
+&"id": 556,
+&"path": "res://source/common/gameplay/items/ammo/runite_arrow.tres",
+&"slug": &"runite_arrow"
+}, {
+&"hash": "ed91c3f619a51c18b0d7ac05f2845cc54816c7361ea44989c673735676fe8243",
+&"id": 557,
+&"path": "res://source/common/gameplay/items/materials/herbs/frostpetal.tres",
+&"slug": &"frostpetal"
+}, {
+&"hash": "f301479be3ea387727ec6b03ada52891aed3b8b25d6b85601d14a6ce0050f01b",
+&"id": 558,
+&"path": "res://source/common/gameplay/items/materials/herbs/sunwort.tres",
+&"slug": &"sunwort"
+}, {
+&"hash": "e070af5371962d2ae096a97ad449c1fdbe548569b00f34b03bd9b61410bc0a9e",
+&"id": 559,
+&"path": "res://source/common/gameplay/items/materials/herbs/moonbloom.tres",
+&"slug": &"moonbloom"
+}, {
+&"hash": "fac044ce72d29ad734f4554c34a0e821e394394e7d97153e6c136b8dc9da12ae",
+&"id": 560,
+&"path": "res://source/common/gameplay/items/materials/herbs/bloodcap.tres",
+&"slug": &"bloodcap"
+}, {
+&"hash": "321b8af20a96ab7813e51d81fc4277ff3180bb00d6b4431d4836b06fce71f035",
+&"id": 561,
+&"path": "res://source/common/gameplay/items/materials/herbs/starblossom.tres",
+&"slug": &"starblossom"
+}, {
+&"hash": "e413868dc30435d4b57793fd04871bfe47990518576d53d6ab763ab0e09f9a93",
+&"id": 562,
+&"path": "res://source/common/gameplay/items/materials/herbs/grimshade.tres",
+&"slug": &"grimshade"
+}, {
+&"hash": "62a90cdd151dc80cca4b79db61fa57b22ad0819f87f9c488520fe0c1f762422c",
+&"id": 563,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_iron.tres",
+&"slug": &"sickle_iron"
+}, {
+&"hash": "164151b295c37ec35c4344ecb6adf25c678d9fb9a0c6ba326a11e5bf4041a31a",
+&"id": 564,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_steel.tres",
+&"slug": &"sickle_steel"
+}, {
+&"hash": "bba42ede9527beb1efddf397ae1ba15bfc68b4dbb6f7067680f6862949125f1d",
+&"id": 565,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_mithril.tres",
+&"slug": &"sickle_mithril"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

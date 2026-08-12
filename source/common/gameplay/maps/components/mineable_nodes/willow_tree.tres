@@ -4,6 +4,7 @@
 [ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="2_log"]
 [ext_resource type="Texture2D" uid="uid://ctreewill0001" path="res://assets/sprites/environment/trees/tree_willow.png" id="3_tree"]
 [ext_resource type="Texture2D" uid="uid://ctreewillstmp1" path="res://assets/sprites/environment/trees/tree_willow_stump.png" id="4_stump"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/headless_arrow.tres" id="9_headless"]
 
 [resource]
 script = ExtResource("1_script")
@@ -13,6 +14,9 @@ yield_amount = 1
 job_xp = Dictionary[StringName, int]({
 &"woodcutting": 67
 })
+byproduct_item = ExtResource("9_headless")
+byproduct_amount = 30
+byproduct_job = &"fletching"
 required_level = 20
 required_tool = &"axe"
 extraction_hp = 4

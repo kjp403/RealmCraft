@@ -489,6 +489,15 @@ func _on_gather_result(data: Dictionary) -> void:
 	var amount: int = int(data.get("amount", 0))
 	if amount > 0:
 		LootFeed.add_item(int(data.get("ore_id", 0)), amount, str(data.get("ore_name", "ore")))
+	# Perk-gated byproduct (trees -> Headless Arrows). Its own feed row so the
+	# player sees both items, not just the log.
+	var byproduct_amount: int = int(data.get("byproduct_amount", 0))
+	if byproduct_amount > 0:
+		LootFeed.add_item(
+			int(data.get("byproduct_id", 0)),
+			byproduct_amount,
+			str(data.get("byproduct_name", "")),
+		)
 	# XP entries — primary job first (verbose), additional grants compact.
 	var grants_v: Variant = data.get("grants", [])
 	if grants_v is Array:

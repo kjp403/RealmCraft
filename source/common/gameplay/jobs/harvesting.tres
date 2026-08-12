@@ -1,10 +1,15 @@
 [gd_resource type="Resource" script_class="JobPerks" format=3 uid="uid://dveu5j2ifx3q8"]
-
-[ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="1_8yfjc"]
-[ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="1_item"]
+[ext_resource type="Script" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
 [ext_resource type="Texture2D" uid="uid://csk236a261024" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Farming.png" id="icon_tex"]
-[ext_resource type="Resource" uid="uid://d2dopgtbgmdii" path="res://source/common/gameplay/items/materials/herbs/healing_herb.tres" id="3_00t3y"]
-
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/healing_herb.tres" id="h0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/frostpetal.tres" id="h1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sunwort.tres" id="h2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/moonbloom.tres" id="h3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="h4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/starblossom.tres" id="h5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/grimshade.tres" id="h6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="flax"]
 [resource]
 script = ExtResource("1_jp")
 icon = ExtResource("icon_tex")
@@ -33,6 +38,6 @@ perks = Array[Dictionary]([{
 "name": "Patient",
 "per_rank": 0.1
 }])
-source_items = Array[ExtResource("1_8yfjc")]([ExtResource("3_00t3y")])
-source_levels = Array[int]([0])
+source_items = Array[ExtResource("1_item")]([ExtResource("h0"), ExtResource("h1"), ExtResource("h2"), ExtResource("h3"), ExtResource("h4"), ExtResource("h5"), ExtResource("h6"), ExtResource("flax")])
+source_levels = Array[int]([1, 5, 10, 20, 30, 40, 50, 1])
 describe_lines = Array[String](["Gather speed +{cooldown}%", "Bonus herb +{bonus_yield}%", "Farming XP +{xp}%"])

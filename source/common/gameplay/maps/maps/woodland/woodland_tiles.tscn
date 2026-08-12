@@ -28,12 +28,22 @@
 [ext_resource type="Resource" uid="uid://bdg1wvajij76o" path="res://source/common/gameplay/characters/npc/npcs/woodland/warden_bren.tres" id="25_bren"]
 [ext_resource type="Resource" uid="uid://m6ronoxklq18" path="res://source/common/gameplay/characters/npc/npcs/woodland/hermit.tres" id="26_hermit"]
 [ext_resource type="Resource" uid="uid://cbeachangler01" path="res://source/common/gameplay/characters/npc/npcs/woodland/beach_angler.tres" id="26_angler"]
+[ext_resource type="Resource" uid="uid://dtojmae8u5g6l" path="res://source/common/gameplay/characters/npc/npcs/mira.tres" id="26_mira"]
 [ext_resource type="Resource" uid="uid://dsvbif0isp6d5" path="res://source/common/gameplay/maps/components/mineable_nodes/flax.tres" id="27_lebv5"]
 [ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
 [ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="28_fungus"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/mining_cave.tres" id="28_mining"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="29_craft"]
+[ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/alchemy_station.tres" id="29_alchemy"]
+[ext_resource type="Texture2D" uid="uid://calchemytable001" path="res://assets/sprites/environment/structures/stations/alchemy/alchemy_table.png" id="29_alchart"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="29_frost"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/sunwort.tres" id="29_sun"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres" id="29_moon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="29_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/starblossom.tres" id="29_star"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/grimshade.tres" id="29_grim"]
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_shore.tscn" id="30_eastshore"]
@@ -1339,6 +1349,18 @@ target = NodePath("../TeleporterEntry")
 position = Vector2(1048, 1368)
 npc_resource = ExtResource("25_bren")
 
+[node name="Mira" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
+position = Vector2(1128, 1320)
+npc_resource = ExtResource("26_mira")
+
+[node name="AlchemyTable" parent="." instance=ExtResource("29_craft")]
+position = Vector2(1184, 1304)
+station = ExtResource("29_alchemy")
+
+[node name="Sprite2D" type="Sprite2D" parent="AlchemyTable"]
+position = Vector2(0, -12)
+texture = ExtResource("29_alchart")
+
 [node name="SlayerHouse" parent="." instance=ExtResource("40_slayer_house")]
 position = Vector2(1489, 1015)
 
@@ -1401,6 +1423,54 @@ data = ExtResource("28_svn3l")
 [node name="SecretHerbNode" parent="MineableNodes" unique_id=548743243 instance=ExtResource("7_jiw8u")]
 position = Vector2(2760, 680)
 data = ExtResource("28_svn3l")
+
+[node name="Frostpetal1" parent="MineableNodes" unique_id=1900000501 instance=ExtResource("7_jiw8u")]
+position = Vector2(400, 720)
+data = ExtResource("29_frost")
+
+[node name="Frostpetal2" parent="MineableNodes" unique_id=1900000502 instance=ExtResource("7_jiw8u")]
+position = Vector2(648, 960)
+data = ExtResource("29_frost")
+
+[node name="Sunwort1" parent="MineableNodes" unique_id=1900000503 instance=ExtResource("7_jiw8u")]
+position = Vector2(880, 1200)
+data = ExtResource("29_sun")
+
+[node name="Sunwort2" parent="MineableNodes" unique_id=1900000504 instance=ExtResource("7_jiw8u")]
+position = Vector2(1288, 1480)
+data = ExtResource("29_sun")
+
+[node name="Moonbloom1" parent="MineableNodes" unique_id=1900000505 instance=ExtResource("7_jiw8u")]
+position = Vector2(1680, 880)
+data = ExtResource("29_moon")
+
+[node name="Moonbloom2" parent="MineableNodes" unique_id=1900000506 instance=ExtResource("7_jiw8u")]
+position = Vector2(1920, 1040)
+data = ExtResource("29_moon")
+
+[node name="Bloodcap1" parent="MineableNodes" unique_id=1900000507 instance=ExtResource("7_jiw8u")]
+position = Vector2(2480, 720)
+data = ExtResource("29_blood")
+
+[node name="Bloodcap2" parent="MineableNodes" unique_id=1900000508 instance=ExtResource("7_jiw8u")]
+position = Vector2(2640, 560)
+data = ExtResource("29_blood")
+
+[node name="Starblossom1" parent="MineableNodes" unique_id=1900000509 instance=ExtResource("7_jiw8u")]
+position = Vector2(4560, 720)
+data = ExtResource("29_star")
+
+[node name="Starblossom2" parent="MineableNodes" unique_id=1900000510 instance=ExtResource("7_jiw8u")]
+position = Vector2(4720, 560)
+data = ExtResource("29_star")
+
+[node name="Grimshade1" parent="MineableNodes" unique_id=1900000511 instance=ExtResource("7_jiw8u")]
+position = Vector2(4880, 640)
+data = ExtResource("29_grim")
+
+[node name="Grimshade2" parent="MineableNodes" unique_id=1900000512 instance=ExtResource("7_jiw8u")]
+position = Vector2(4960, 800)
+data = ExtResource("29_grim")
 
 [node name="Tree1" parent="MineableNodes" unique_id=1900000101 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true

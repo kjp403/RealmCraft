@@ -17,6 +17,9 @@ const ALIASES: Dictionary[StringName, StringName] = {
 	&"cook": &"cooking",
 	&"mine": &"mining",
 	&"smith": &"smithing",
+	&"herb": &"herblore",
+	&"alchemy": &"herblore",
+	&"fletch": &"fletching",
 }
 
 
@@ -56,7 +59,7 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 
 	var skill_name: StringName = _resolve_skill(StringName(token))
 	if skill_name == &"":
-		return "Unknown skill '%s'. Try: mining, smithing, woodcutting, fishing, cooking, farming, crafting, or all." % args[2]
+		return "Unknown skill '%s'. Try: mining, smithing, woodcutting, fishing, cooking, herblore, fletching, farming, crafting, or all." % args[2]
 
 	_set_skill_level(res, skill_name, level)
 	server_instance.world_server.database.save_player(res)

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vegetation.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+[sub_resource type="AtlasTexture" id="Atlas_icon"]
+atlas = ExtResource("1_tex")
+region = Rect2(32, 336, 16, 16)
+[resource]
+script = ExtResource("2_script")
+item_name = &"Bloodcap"
+item_icon = SubResource("Atlas_icon")
+description = "A spotted red mushroom. Potent base for greater healing brews."
+vendor_value = 6
+stack_limit = 10
+metadata/slug = &"bloodcap"
+metadata/id = 560

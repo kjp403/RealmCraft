@@ -27,6 +27,7 @@
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/crafting/visuals/furnace_sprite_frames.tres" id="36_furnace_frames"]
 [ext_resource type="Texture2D" uid="uid://d1o56hk11y82e" path="res://assets/sprites/environment/structures/stations/workbench/workbench.png" id="37_wb_tex"]
 [ext_resource type="Texture2D" uid="uid://cqrq6tvykgy0o" path="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png" id="38_asc_tex"]
+[ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/fletching_bench.tres" id="39_fletch"]
 
 [sub_resource type="Resource" id="Resource_h1lk8"]
 script = ExtResource("14_gl3u8")
@@ -127,3 +128,13 @@ metadata/_edit_group_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="AscendedWorkBenchStation" unique_id=4011193172]
 texture = ExtResource("38_asc_tex")
+
+[node name="FletchingBenchStation" parent="." unique_id=4019232735 instance=ExtResource("30_craft")]
+position = Vector2(64, 232)
+station = ExtResource("39_fletch")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="FletchingBenchStation" unique_id=4011193173]
+texture = ExtResource("37_wb_tex")
+region_enabled = true
+region_rect = Rect2(103, 64, 73, 48)

@@ -4,6 +4,7 @@ extends Item
 # Armor renders in body order, not alphabetically.
 const _SLOT_ORDER: Dictionary = {
 	&"weapon": 0, &"helmet": 1, &"torso": 2, &"boot": 3, &"ring": 4, &"relic": 5,
+	&"ammo": 6,
 }
 
 ## Character-level gate (mostly legacy). Armor sets use mastery instead.

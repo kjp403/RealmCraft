@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vegetation.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+[sub_resource type="AtlasTexture" id="Atlas_icon"]
+atlas = ExtResource("1_tex")
+region = Rect2(96, 368, 16, 16)
+[resource]
+script = ExtResource("2_script")
+item_name = &"Sunwort"
+item_icon = SubResource("Atlas_icon")
+description = "Warm orange florets used in standard health potions."
+vendor_value = 3
+stack_limit = 10
+metadata/slug = &"sunwort"
+metadata/id = 558

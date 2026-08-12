@@ -52,6 +52,20 @@ func data_request_handler(
 		if gear_tier > sync_level:
 			return {"ok": false, "reason": "gear_level", "level": sync_level}
 
+	if item is AmmoItem:
+		# Ammo is slotted BY REFERENCE — the stack stays in the bag (same as a
+		# holdable) because `equipment` is slot -> id with nowhere to store a
+		# quantity. Tapping the equipped stack again unslots it.
+		var ammo_slot: StringName = item.slot.key
+		if int(player.equipment_component.slots.values.get(ammo_slot, 0)) == item_id:
+			player.equipment_component.unequip(ammo_slot)
+			player.player_resource.equipment.erase(ammo_slot)
+			return {"ok": true, "unequipped": true}
+		if not player.equipment_component.equip_item(item_id):
+			return {}
+		player.player_resource.equipment[ammo_slot] = item_id
+		return {"ok": true}
+
 	if item is GearItem:
 		var slot_key: StringName = item.slot.key
 		# Weapons DRAW over a short cast (anti fast-swap + RPG commitment): the real

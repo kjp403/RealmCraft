@@ -1,0 +1,94 @@
+[gd_resource type="Resource" script_class="CraftingStationResource" format=3]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/healing_herb.tres" id="herb_healing_herb"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/frostpetal.tres" id="herb_frostpetal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sunwort.tres" id="herb_sunwort"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/moonbloom.tres" id="herb_moonbloom"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="herb_bloodcap"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/starblossom.tres" id="herb_starblossom"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/grimshade.tres" id="herb_grimshade"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="pot_0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="pot_1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="pot_2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="pot_3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="pot_4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="pot_5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/focus_tonic.tres" id="pot_6"]
+[sub_resource type="Resource" id="I_0"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_healing_herb")
+amount = 2
+[sub_resource type="Resource" id="R_0"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_0")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_0")])
+required_level = 1
+xp_reward = 15
+[sub_resource type="Resource" id="I_1"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_frostpetal")
+amount = 2
+[sub_resource type="Resource" id="R_1"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_1")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_1")])
+required_level = 5
+xp_reward = 25
+[sub_resource type="Resource" id="I_2"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_sunwort")
+amount = 2
+[sub_resource type="Resource" id="R_2"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_2")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_2")])
+required_level = 10
+xp_reward = 40
+[sub_resource type="Resource" id="I_3"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_moonbloom")
+amount = 2
+[sub_resource type="Resource" id="R_3"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_3")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_3")])
+required_level = 20
+xp_reward = 55
+[sub_resource type="Resource" id="I_4"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_bloodcap")
+amount = 3
+[sub_resource type="Resource" id="R_4"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_4")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_4")])
+required_level = 30
+xp_reward = 80
+[sub_resource type="Resource" id="I_5"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_starblossom")
+amount = 3
+[sub_resource type="Resource" id="R_5"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_5")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_5")])
+required_level = 40
+xp_reward = 100
+[sub_resource type="Resource" id="I_6"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_grimshade")
+amount = 3
+[sub_resource type="Resource" id="R_6"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_6")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_6")])
+required_level = 50
+xp_reward = 120
+[resource]
+script = ExtResource("2_station")
+station_name = "Alchemy Table"
+profession = &"herblore"
+craft_fee = 0
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6")])

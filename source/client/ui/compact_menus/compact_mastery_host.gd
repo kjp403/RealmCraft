@@ -25,6 +25,8 @@ const SKILL_ORDER: Array[String] = [
 	"outfitting",
 	"woodcutting",
 	"harvesting",
+	"fletching",
+	"herblore",
 	"slayer",
 ]
 

@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="JobPerks" format=3]
+[ext_resource type="Script" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Texture2D" uid="uid://cherbloreicon01" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Herblore.png" id="icon_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="1_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="p0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="p1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="p2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="p3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="p4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="p5"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/focus_tonic.tres" id="p6"]
+[resource]
+script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
+job_slug = &"herblore"
+display_name = "Herblore"
+category = &"crafting"
+sort_order = 4
+perks = Array[Dictionary]([{
+"effect": "xp",
+"id": "green_thumb",
+"max_rank": 3,
+"name": "Green Thumb",
+"per_rank": 0.1
+}, {
+"effect": "refund",
+"id": "careful_measure",
+"max_rank": 3,
+"name": "Careful Measure",
+"per_rank": 0.05
+}, {
+"effect": "extra_item",
+"id": "extra_dose",
+"max_rank": 3,
+"name": "Extra Dose",
+"per_rank": 0.04
+}])
+recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6")])
+recipe_levels = Array[int]([1, 5, 10, 20, 30, 40, 50])
+describe_lines = Array[String](["Herblore XP +{xp}%", "Material refund: {refund}%", "Extra dose: {extra_item}%"])

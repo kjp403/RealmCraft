@@ -1,0 +1,203 @@
+[gd_resource type="Resource" script_class="CraftingStationResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_recipe.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/crafting_station_resource.gd" id="2_station"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/craft_ingredient.gd" id="3_ingred"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/logs.tres" id="10_logs"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="11_oak"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="12_willow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="13_maple"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="14_yew"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/headless_arrow.tres" id="20_headless"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_arrowheads.tres" id="32_st_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres" id="33_mi_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres" id="34_ad_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres" id="35_ru_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/bronze_arrow.tres" id="40_br_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/iron_arrow.tres" id="41_fe_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/steel_arrow.tres" id="42_st_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/mithril_arrow.tres" id="43_mi_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/adamant_arrow.tres" id="44_ad_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/runite_arrow.tres" id="45_ru_arrow"]
+
+[sub_resource type="Resource" id="I_shaft_logs"]
+script = ExtResource("3_ingred")
+item = ExtResource("10_logs")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_logs"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_logs")])
+required_level = 1
+xp_reward = 12
+
+[sub_resource type="Resource" id="I_shaft_oak"]
+script = ExtResource("3_ingred")
+item = ExtResource("11_oak")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_oak"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 20
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_oak")])
+required_level = 15
+xp_reward = 24
+
+[sub_resource type="Resource" id="I_shaft_willow"]
+script = ExtResource("3_ingred")
+item = ExtResource("12_willow")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_willow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 30
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_willow")])
+required_level = 30
+xp_reward = 36
+
+[sub_resource type="Resource" id="I_shaft_maple"]
+script = ExtResource("3_ingred")
+item = ExtResource("13_maple")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_maple"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 40
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_maple")])
+required_level = 45
+xp_reward = 48
+
+[sub_resource type="Resource" id="I_shaft_yew"]
+script = ExtResource("3_ingred")
+item = ExtResource("14_yew")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_yew"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 50
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_yew")])
+required_level = 60
+xp_reward = 60
+
+[sub_resource type="Resource" id="I_br_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_br_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("30_br_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_br_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("40_br_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_shafts"), SubResource("I_br_heads")])
+required_level = 1
+xp_reward = 65
+
+[sub_resource type="Resource" id="I_fe_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_fe_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("31_fe_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_fe_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("41_fe_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_shafts"), SubResource("I_fe_heads")])
+required_level = 15
+xp_reward = 130
+
+[sub_resource type="Resource" id="I_st_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_st_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("32_st_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_st_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("42_st_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_shafts"), SubResource("I_st_heads")])
+required_level = 30
+xp_reward = 250
+
+[sub_resource type="Resource" id="I_mi_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_mi_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("33_mi_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_mi_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("43_mi_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_shafts"), SubResource("I_mi_heads")])
+required_level = 45
+xp_reward = 470
+
+[sub_resource type="Resource" id="I_ad_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_ad_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("34_ad_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_ad_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("44_ad_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_shafts"), SubResource("I_ad_heads")])
+required_level = 60
+xp_reward = 780
+
+[sub_resource type="Resource" id="I_ru_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_ru_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("35_ru_head")
+amount = 1
+
+[sub_resource type="Resource" id="R_ru_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("45_ru_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_shafts"), SubResource("I_ru_heads")])
+required_level = 75
+xp_reward = 1250
+
+[resource]
+script = ExtResource("2_station")
+station_name = "Fletching Bench"
+profession = &"fletching"
+craft_fee = 0
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_shaft_logs"), SubResource("R_shaft_oak"), SubResource("R_shaft_willow"), SubResource("R_shaft_maple"), SubResource("R_shaft_yew"), SubResource("R_br_arrow"), SubResource("R_fe_arrow"), SubResource("R_st_arrow"), SubResource("R_mi_arrow"), SubResource("R_ad_arrow"), SubResource("R_ru_arrow")])

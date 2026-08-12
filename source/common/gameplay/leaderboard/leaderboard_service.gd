@@ -251,6 +251,8 @@ const TOTAL_LEVEL_SKILLS: Array[StringName] = [
 	&"smithing",
 	&"outfitting",
 	&"cooking",
+	&"herblore",
+	&"fletching",
 	&"slayer",
 ]
 

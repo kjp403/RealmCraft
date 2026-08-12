@@ -108,6 +108,35 @@ func release_ability(entity: Entity, direction: Vector2) -> void:
 		var offset: float = -spread_rad + step * float(i) if shot_count > 1 else 0.0
 		_spawn(entity, Vector2.RIGHT.rotated(base_angle + offset), per_shot_damage, speed, armed)
 
+	_consume_ammo(entity)
+
+
+## One arrow per RELEASE, not per projectile — a Multishot fan costs the same as
+## a plain shot, so the ammo bonus never punishes the abilities built around it.
+##
+## Ammo is optional: an empty slot is the normal, supported state and the bow
+## fires exactly as it did before ammo existed. Server-only — the stack lives in
+## the authoritative inventory, and clients replay this same release for visuals.
+func _consume_ammo(entity: Entity) -> void:
+	if not GameMode.is_any_server():
+		return
+	if entity is not Player:
+		return
+	var player: Player = entity as Player
+	if player.player_resource == null:
+		return
+	var ammo_id: int = int(player.equipment_component.slots.values.get(&"ammo", 0))
+	if ammo_id <= 0:
+		return
+	var inventory: Dictionary = player.player_resource.inventory
+	Inventory.remove_one_by_id(inventory, ammo_id)
+	# The stack is bag-resident, so it can also be traded/banked/dropped away
+	# from under the slot. Either way, an empty stack unslots itself and the
+	# gear modifier is stripped with it.
+	if Inventory.count(inventory, ammo_id) <= 0:
+		player.equipment_component.unequip(&"ammo")
+		player.player_resource.equipment.erase(&"ammo")
+
 
 ## Press-phase gate: can't start a new charge mid-charge; otherwise the normal
 ## cooldown + mana checks. (The LocalPlayer hold-to-attack loop also reads this,

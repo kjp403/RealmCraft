@@ -21,6 +21,7 @@ const SLOT_RES_PATHS: Dictionary = {
 	&"torso": "res://source/common/gameplay/items/item_slot/slots/torso.tres",
 	&"ring": "res://source/common/gameplay/items/item_slot/slots/ring.tres",
 	&"boot": "res://source/common/gameplay/items/item_slot/slots/boot.tres",
+	&"ammo": "res://source/common/gameplay/items/item_slot/slots/ammo.tres",
 }
 
 var _slots: Dictionary[StringName, ItemSlot] = {}
@@ -89,7 +90,7 @@ func _build_layout() -> void:
 	doll_row.add_theme_constant_override(&"separation", 14)
 	doll_center.add_child(doll_row)
 
-	var left_col: VBoxContainer = _make_slot_column([&"weapon", &"ring"])
+	var left_col: VBoxContainer = _make_slot_column([&"weapon", &"ring", &"ammo"])
 	doll_row.add_child(left_col)
 
 	var center_col: VBoxContainer = VBoxContainer.new()

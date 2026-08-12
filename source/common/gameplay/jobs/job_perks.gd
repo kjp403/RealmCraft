@@ -257,6 +257,14 @@ func extra_item_chance(player_perks: Dictionary) -> float:
 	return minf(abs_max_extra_item_chance, sum_effect(player_perks, &"extra_item"))
 
 
+## Fraction of a gathering node's [member MineableNodeResource.byproduct_amount]
+## the player actually receives. 0.0 with no ranks spent — the byproduct is
+## perk-gated, not a free passive (Fletching's Straight Grain is the only user
+## today). Capped at 1.0 so extra ranks can never out-yield the bench recipe.
+func shaft_yield_factor(player_perks: Dictionary) -> float:
+	return minf(1.0, sum_effect(player_perks, &"shaft_yield"))
+
+
 # ---------------------------------------------------------------------------
 # UI
 # ---------------------------------------------------------------------------
@@ -268,6 +276,7 @@ func describe(level: int, player_perks: Dictionary) -> PackedStringArray:
 		"xp": roundi((xp_multiplier(player_perks) - 1.0) * 100.0),
 		"refund": roundi(refund_chance(player_perks) * 100.0),
 		"extra_item": roundi(extra_item_chance(player_perks) * 100.0),
+		"shaft_yield": roundi(shaft_yield_factor(player_perks) * 100.0),
 	}
 	var out: PackedStringArray = PackedStringArray()
 	for line in describe_lines:
@@ -291,6 +300,8 @@ static func describe_perk_effect(effect: String, per_rank: float) -> String:
 			return "+%d%% extra item chance per rank" % pct
 		"skip_discount":
 			return "-%d%% Slayer task reassignment cost per rank" % pct
+		"shaft_yield":
+			return "Chopping also yields %d%% of a log's shafts per rank" % pct
 		_:
 			return "Specializes this skill (+%.0f%% per rank)." % (per_rank * 100.0)
 
