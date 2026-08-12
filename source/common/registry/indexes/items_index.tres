@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1786512484
-next_id = 569
+next_id = 574
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2622,6 +2622,31 @@ entries = Array[Dictionary]([{
 &"id": 568,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle_runite.tres",
 &"slug": &"sickle_runite"
+}, {
+&"hash": "3e6773ff307b24a5f605cc0ce850ce8b04763e71cce45259b61c61f78067cb2d",
+&"id": 569,
+&"path": "res://source/common/gameplay/items/materials/gems/covenant_gem.tres",
+&"slug": &"covenant_gem"
+}, {
+&"hash": "89f7b1f29c2afa0281afe2582651658343a92dc686c41108f7e8535c4babdeee",
+&"id": 570,
+&"path": "res://source/common/gameplay/items/materials/gems/ember_gem.tres",
+&"slug": &"ember_gem"
+}, {
+&"hash": "05ec7917ef5d05364a592cac468f0972325fcccca7ab183fbcfe0dcdb6a21217",
+&"id": 571,
+&"path": "res://source/common/gameplay/items/materials/gems/oath_gem.tres",
+&"slug": &"oath_gem"
+}, {
+&"hash": "5a7ef12e0135cd1b9c9c8f1b1e3e410ae6d24c1ce891c13d2da9e825ea5ec3ae",
+&"id": 572,
+&"path": "res://source/common/gameplay/items/materials/gems/tideglass_gem.tres",
+&"slug": &"tideglass_gem"
+}, {
+&"hash": "be1f460f204cf217182df209fb813330741817b04c07f377842c4564a9747d6b",
+&"id": 573,
+&"path": "res://source/common/gameplay/items/materials/gems/verdance_gem.tres",
+&"slug": &"verdance_gem"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

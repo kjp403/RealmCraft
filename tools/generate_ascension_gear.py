@@ -48,6 +48,7 @@ SLOT = {
     "boot": ("uid://dn7q51odqrqp5", "res://source/common/gameplay/items/item_slot/slots/boot.tres"),
     "weapon": ("uid://qav4p12rsbn3", "res://source/common/gameplay/items/item_slot/slots/weapon.tres"),
     "ring": ("uid://cdrd3x2ugfrev", "res://source/common/gameplay/items/item_slot/slots/ring.tres"),
+    "amulet": ("uid://camuletslotx41k", "res://source/common/gameplay/items/item_slot/slots/amulet.tres"),
     "relic": ("uid://dp67jicqi8ovy", "res://source/common/gameplay/items/item_slot/slots/relic.tres"),
 }
 SCENE = {
@@ -302,17 +303,17 @@ SPECIAL_WEAPONS = [
 ]
 
 JEWELRY = [
-    {"slug": "heart_of_the_wild", "name": "Heart of the Wild", "asset": "necklace 1.png", "slot": "relic",
+    {"slug": "heart_of_the_wild", "name": "Heart of the Wild", "asset": "necklace 1.png", "slot": "amulet",
      "mods": {"health_max": 28, "armor": 8}, "desc": "A living emerald on a hunter's cord. Steadies the breath in the thick of war.", "vendor": 900},
-    {"slug": "ember_locket", "name": "Ember Locket", "asset": "necklace 2.png", "slot": "relic",
+    {"slug": "ember_locket", "name": "Ember Locket", "asset": "necklace 2.png", "slot": "amulet",
      "mods": {"ad": 12, "health_max": 18}, "desc": "A coal-red gem that never cools. Warms the blood of strikers.", "vendor": 900},
-    {"slug": "tideglass_amulet", "name": "Tideglass Amulet", "asset": "necklace 3.png", "slot": "relic",
+    {"slug": "tideglass_amulet", "name": "Tideglass Amulet", "asset": "necklace 3.png", "slot": "amulet",
      "mods": {"ap": 14, "mana_max": 40, "mana_regen": 2.5}, "desc": "Sealed seawater that refracts spellfire. A mage's second heart.", "vendor": 950},
-    {"slug": "oathstone", "name": "Oathstone", "asset": "necklace 4.png", "slot": "relic",
+    {"slug": "oathstone", "name": "Oathstone", "asset": "necklace 4.png", "slot": "amulet",
      "mods": {"armor": 12, "mr": 10, "health_max": 16}, "desc": "A sworn cross of pale metal. Oaths spoken over it tend to hold.", "vendor": 1000},
-    {"slug": "reliquary_of_verdance", "name": "Reliquary of Verdance", "asset": "necklace 5.png", "slot": "relic",
+    {"slug": "reliquary_of_verdance", "name": "Reliquary of Verdance", "asset": "necklace 5.png", "slot": "amulet",
      "mods": {"health_max": 32, "mana_max": 24, "armor": 6}, "desc": "An ancient green focus set in bronze. Relic of the first verdant covenants.", "vendor": 1200},
-    {"slug": "covenant_cross", "name": "Covenant Cross", "asset": "necklace 6.png", "slot": "relic",
+    {"slug": "covenant_cross", "name": "Covenant Cross", "asset": "necklace 6.png", "slot": "amulet",
      "mods": {"ability_haste": 8, "mr": 8, "health_max": 14}, "desc": "A silver covenant mark. Speeds the resolve between strikes and spells.", "vendor": 1100},
 ]
 
@@ -972,7 +973,7 @@ def main() -> None:
             slug=j["slug"],
             icon_res=res,
             icon_uid=uid,
-            slot_key="relic",
+            slot_key="amulet",
             mastery=0,
             mods=j["mods"],
             description=j["desc"],

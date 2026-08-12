@@ -155,37 +155,37 @@ chance = 0.18
 [sub_resource type="Resource" id="Drop_ring_oathband"]
 script = ExtResource("1_loot")
 item = ExtResource("item_20")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_wayfarer"]
 script = ExtResource("1_loot")
 item = ExtResource("item_21")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_heartfire"]
 script = ExtResource("1_loot")
 item = ExtResource("item_22")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_starweave"]
 script = ExtResource("1_loot")
 item = ExtResource("item_23")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_bulwark"]
 script = ExtResource("1_loot")
 item = ExtResource("item_24")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_stormchase"]
 script = ExtResource("1_loot")
 item = ExtResource("item_25")
-chance = 0.004
+chance = 0.0015
 
 [sub_resource type="Resource" id="Drop_ring_sovereign"]
 script = ExtResource("1_loot")
 item = ExtResource("item_26")
-chance = 0.004
+chance = 0.0015
 
 
 [resource]

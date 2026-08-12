@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" uid="uid://182d9883a1d94" path="res://assets/sprites/items/icons/gem_covenant.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Covenant Gem"
+item_icon = ExtResource("1_icon")
+description = "Silver covenant crystal. Set into Covenant Crosses."
+holdable = false
+can_trade = true
+vendor_value = 12
+stack_limit = 10
+tags = PackedStringArray("ascension", "material")
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"covenant_gem"
+metadata/id = 569
