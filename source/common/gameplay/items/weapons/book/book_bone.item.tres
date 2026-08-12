@@ -39,6 +39,6 @@ item_name = &"Bone Tome"
 item_icon = SubResource("AtlasTexture_8colv")
 description = "A starter tome bound in bone. Light on power but quick to cast — the first step into the battlemage's path."
 can_trade = true
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"book_bone.item"
 metadata/id = 95

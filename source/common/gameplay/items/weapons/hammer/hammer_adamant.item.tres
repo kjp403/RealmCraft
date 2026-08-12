@@ -34,6 +34,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A heavy adamant hammer. Hits hard, swings slow."
 can_trade = true
 vendor_value = 150
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"hammer_adamant.item"
 metadata/id = 274

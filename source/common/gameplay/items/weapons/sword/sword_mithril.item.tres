@@ -30,6 +30,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A mithril blade forged at the anvil. Solid work for its tier."
 can_trade = true
 vendor_value = 60
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"sword_mithril.item"
 metadata/id = 283

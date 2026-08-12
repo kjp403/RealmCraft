@@ -11,6 +11,6 @@ description = "Hardened iron tempered with coal. Strong plate metal."
 vendor_value = 16
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
-stack_limit = 10
+stack_limit = 50
 metadata/slug = &"steel_bar"
 metadata/id = 228

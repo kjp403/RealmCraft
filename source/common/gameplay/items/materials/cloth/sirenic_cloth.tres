@@ -10,6 +10,7 @@ item_icon = ExtResource("1_icon")
 description = "Blue weave that matches Sirenic leather and gemstone."
 vendor_value = 12
 can_trade = true
+stack_limit = 50
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"sirenic_cloth"
 metadata/id = 223

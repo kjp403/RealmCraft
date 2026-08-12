@@ -21,5 +21,6 @@ item_name = &"Sickle"
 item_icon = SubResource("AtlasTexture_sickle")
 description = "A curved harvesting sickle. Equip it to cut herbs and plants from the wild."
 vendor_value = 3
+stack_limit = 10
 metadata/slug = &"sickle"
 metadata/id = 66

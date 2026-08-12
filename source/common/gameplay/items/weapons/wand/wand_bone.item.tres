@@ -44,6 +44,6 @@ item_name = &"Bone Wand"
 item_icon = SubResource("Atlas_bone_wand")
 description = "A wand of polished bone. It casts swiftly, though its bolts carry a little less force."
 can_trade = true
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"wand_bone.item"
 metadata/id = 83

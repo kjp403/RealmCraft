@@ -9,6 +9,7 @@ item_name = &"Cave Hide"
 item_icon = ExtResource("1_7ox4d")
 description = "Thick hide from cave dwellers. Cures into Cave Leather."
 vendor_value = 2
+stack_limit = 50
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"hide_cave"
 metadata/id = 107

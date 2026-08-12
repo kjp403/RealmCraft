@@ -34,6 +34,6 @@ item_name = &"Spore Hammer"
 item_icon = SubResource("Atlas_icon")
 description = "A heavy maul crusted with damp cave fungus."
 can_trade = true
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"hammer_spore.item"
 metadata/id = 88

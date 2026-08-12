@@ -11,6 +11,6 @@ description = "A prized bright-blue bar smelted from runite ore."
 vendor_value = 100
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
-stack_limit = 10
+stack_limit = 50
 metadata/slug = &"runite_bar"
 metadata/id = 258

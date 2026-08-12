@@ -18,5 +18,6 @@ item_name = &"Wooden Axe"
 item_icon = SubResource("AtlasTexture_axe")
 description = "A light hatchet. Equip it to chop trees for woodcutting."
 vendor_value = 2
+stack_limit = 10
 metadata/slug = &"axe"
 metadata/id = 172

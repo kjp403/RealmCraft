@@ -10,6 +10,7 @@ script = ExtResource("1_j6m1g")
 stat_name = "mana_max"
 value = 28.0
 vendor_value = 160
+stack_limit = 10
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Resource_c2pit"]

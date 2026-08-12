@@ -9,6 +9,7 @@ item_name = &"Sewer Hide"
 item_icon = ExtResource("1_57ub3")
 description = "Slick scaled hide from sewer vermin. Cures into Sewer Leather."
 vendor_value = 2
+stack_limit = 50
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"hide_sewer"
 metadata/id = 109

@@ -51,6 +51,6 @@ item_name = &"Fire Wand"
 item_icon = SubResource("AtlasTexture_n6ryi")
 description = "FIRE WANDDD"
 can_trade = true
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"fire_wand.item"
 metadata/id = 90

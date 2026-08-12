@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://djuf673m51j8m" path="res://source/common/gameplay/lighting/light_radial.tres" id="5_1crbg"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="6_y53hc"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="7_msvda"]
-[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="8_f6l70"]
+[ext_resource type="Resource" uid="uid://c0m2t2hjlih2p" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres" id="8_woodland"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="9_msvda"]
 [ext_resource type="Resource" uid="uid://ou1wadpim68o" path="res://source/common/gameplay/characters/npc/types/fungus/sporeling.tres" id="10_s14j1"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="11_jbsjy"]
@@ -251,13 +251,13 @@ position = Vector2(-1, -19)
 scale = Vector2(3.559999, 1)
 warper_id = 21
 
-[node name="CastleGardenPortal" parent="." unique_id=375786523 instance=ExtResource("19_pvtw6")]
+[node name="WoodlandPortal" parent="." unique_id=375786523 instance=ExtResource("19_pvtw6")]
 position = Vector2(0, -72)
-portal_color = Color(1.2513996e-06, 0.5407531, 0.6588039, 1)
-destination_label = "Castle Garden"
-target_instance = ExtResource("8_f6l70")
+portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
+destination_label = "Goblin Woodland"
+target_instance = ExtResource("8_woodland")
 warper_id = 20
-target_id = 21
+target_id = 24
 
 
 [node name="FungalKeeper" parent="." unique_id=1888477101 instance=ExtResource("12_y53hc")]

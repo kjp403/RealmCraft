@@ -33,6 +33,6 @@ item_name = &"Sunsteel Bow"
 item_icon = SubResource("Atlas_icon")
 description = "Forged from sun-metal pulled out of the desert tombs. It never cools completely."
 can_trade = true
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"sunsteel_bow.item"
 metadata/id = 162

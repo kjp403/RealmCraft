@@ -12,6 +12,7 @@ holdable = false
 can_trade = true
 vendor_value = 8
 tags = PackedStringArray()
+stack_limit = 10
 metadata/_custom_type_script = "uid://nsr1timk430j"
 metadata/slug = &"dragon_gem"
 metadata/id = 215

@@ -34,6 +34,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A adamant-limbed bow. Draws clean and true."
 can_trade = true
 vendor_value = 100
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"adamant_bow.item"
 metadata/id = 268
