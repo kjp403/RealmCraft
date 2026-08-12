@@ -803,6 +803,31 @@
       "name": "Basilisk Gem"
     },
     {
+      "slug": "ember_gem",
+      "path": "source/common/gameplay/items/materials/gems/ember_gem.tres",
+      "name": "Ember Gem"
+    },
+    {
+      "slug": "tideglass_gem",
+      "path": "source/common/gameplay/items/materials/gems/tideglass_gem.tres",
+      "name": "Tideglass Gem"
+    },
+    {
+      "slug": "oath_gem",
+      "path": "source/common/gameplay/items/materials/gems/oath_gem.tres",
+      "name": "Oath Gem"
+    },
+    {
+      "slug": "verdance_gem",
+      "path": "source/common/gameplay/items/materials/gems/verdance_gem.tres",
+      "name": "Verdance Gem"
+    },
+    {
+      "slug": "covenant_gem",
+      "path": "source/common/gameplay/items/materials/gems/covenant_gem.tres",
+      "name": "Covenant Gem"
+    },
+    {
       "slug": "basilisk_cloth",
       "path": "source/common/gameplay/items/materials/cloth/basilisk_cloth.tres",
       "name": "Basilisk Cloth"

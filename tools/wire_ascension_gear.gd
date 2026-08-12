@@ -137,19 +137,24 @@ func _patch_anvil() -> void:
 			))
 			added += 1
 
-	# Jewelry at anvil (high craft)
-	var jewelry: Array[String] = [
-		"heart_of_the_wild", "ember_locket", "tideglass_amulet",
-		"oathstone", "reliquary_of_verdance", "covenant_cross",
+	# Jewelry at anvil (high craft). Heart of the Wild stays on basilisk gems;
+	# the other five each use a unique jewelry gem.
+	var jewelry_gems: Array[Array] = [
+		["heart_of_the_wild", "basilisk_gem"],
+		["ember_locket", "ember_gem"],
+		["tideglass_amulet", "tideglass_gem"],
+		["oathstone", "oath_gem"],
+		["reliquary_of_verdance", "verdance_gem"],
+		["covenant_cross", "covenant_gem"],
 	]
 	var gold: Item = _load_item("res://source/common/gameplay/items/materials/metals/gold_bar.tres")
-	var basilisk_gem: Item = _load_item("res://source/common/gameplay/items/materials/gems/basilisk_gem.tres")
-	if gold != null and basilisk_gem != null:
-		for slug: String in jewelry:
-			var j: Item = _load_item("res://source/common/gameplay/items/gears/jewelry/%s.tres" % slug)
-			if j == null or _already_has_output(station, j):
+	if gold != null:
+		for pair: Array in jewelry_gems:
+			var j: Item = _load_item("res://source/common/gameplay/items/gears/jewelry/%s.tres" % String(pair[0]))
+			var gem: Item = _load_item("res://source/common/gameplay/items/materials/gems/%s.tres" % String(pair[1]))
+			if j == null or gem == null or _already_has_output(station, j):
 				continue
-			station.recipes.append(_recipe(j, [_ing(gold, 3), _ing(basilisk_gem, 2)], 60, 220))
+			station.recipes.append(_recipe(j, [_ing(gold, 3), _ing(gem, 2)], 60, 220))
 			added += 1
 
 	var err: Error = ResourceSaver.save(station, ANVIL)

@@ -196,6 +196,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/oathstone.tres" id="187_xbvyw"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="188_yuhwn"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/covenant_cross.tres" id="189_q4xl0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/ember_gem.tres" id="gem_ember"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/tideglass_gem.tres" id="gem_tideglass"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/oath_gem.tres" id="gem_oath"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/verdance_gem.tres" id="gem_verdance"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/covenant_gem.tres" id="gem_covenant"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/copper_bar.tres" id="bar_copper"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_low.tres" id="g_guard_low"]
@@ -2161,7 +2166,7 @@ amount = 3
 
 [sub_resource type="Resource" id="Resource_vwsjx"]
 script = ExtResource("3_ingred")
-item = ExtResource("95_338ju")
+item = ExtResource("gem_ember")
 amount = 2
 
 [sub_resource type="Resource" id="Resource_8mlec"]
@@ -2178,7 +2183,7 @@ amount = 3
 
 [sub_resource type="Resource" id="Resource_f7do6"]
 script = ExtResource("3_ingred")
-item = ExtResource("95_338ju")
+item = ExtResource("gem_tideglass")
 amount = 2
 
 [sub_resource type="Resource" id="Resource_if04n"]
@@ -2195,7 +2200,7 @@ amount = 3
 
 [sub_resource type="Resource" id="Resource_l06if"]
 script = ExtResource("3_ingred")
-item = ExtResource("95_338ju")
+item = ExtResource("gem_oath")
 amount = 2
 
 [sub_resource type="Resource" id="Resource_7upco"]
@@ -2212,7 +2217,7 @@ amount = 3
 
 [sub_resource type="Resource" id="Resource_j853n"]
 script = ExtResource("3_ingred")
-item = ExtResource("95_338ju")
+item = ExtResource("gem_verdance")
 amount = 2
 
 [sub_resource type="Resource" id="Resource_fvt4r"]
@@ -2229,7 +2234,7 @@ amount = 3
 
 [sub_resource type="Resource" id="Resource_3l5j6"]
 script = ExtResource("3_ingred")
-item = ExtResource("95_338ju")
+item = ExtResource("gem_covenant")
 amount = 2
 
 [sub_resource type="Resource" id="Resource_2ea3t"]
