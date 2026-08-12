@@ -2442,7 +2442,7 @@ entries = Array[Dictionary]([{
 &"id": 532,
 &"path": "res://source/common/gameplay/items/chests/gold_pink_masterwork.tres",
 &"slug": &"gold_pink_masterwork"
-, {
+}, {
 &"hash": "3da2cb9c87840ab60fff9f83aadbe5647f92fac35cbe5ee89f41ef793e115e40",
 &"id": 533,
 &"path": "res://source/common/gameplay/items/currencies/slayer_points.tres",
