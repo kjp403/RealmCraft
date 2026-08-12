@@ -80,11 +80,19 @@ func start_world_server() -> void:
 
 ## Snapshot a connected player's live location into lb_stats so it persists via
 ## stats_json (no schema change) and login can resume them where they left off.
+## Private dungeon runs dissolve on disconnect — stamp the tavern hub instead so
+## login never charges a shared copy of the dungeon map mid-course.
 func _stamp_location(peer_id: int, player: PlayerResource) -> void:
 	if player == null or instance_manager == null:
 		return
 	var inst: ServerInstance = instance_manager.find_instance_for_peer(peer_id)
 	if inst == null:
+		return
+	if inst.instance_resource is DungeonResource:
+		player.current_instance = InstanceManagerServer.TAVERN_INSTANCE_NAME
+		player.lb_stats["last_instance"] = InstanceManagerServer.TAVERN_INSTANCE_NAME
+		player.lb_stats.erase("last_x")
+		player.lb_stats.erase("last_y")
 		return
 	player.current_instance = inst.instance_resource.instance_name
 	var node: Player = inst.get_player(peer_id)
