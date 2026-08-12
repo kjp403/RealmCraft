@@ -10,6 +10,10 @@ const TILE_SIZE := Vector2(120.0, 40.0)
 @onready var skill_list: VBoxContainer = %SkillList
 
 var _skills: Dictionary = {}
+## slug -> { "button": Button, "cur": Label, "base": Label } — updated in place
+## so a hover tooltip is not destroyed on XP ticks.
+var _skill_tiles: Dictionary = {}
+var _total_label: Label
 
 
 func _ready() -> void:
@@ -42,12 +46,37 @@ func _refresh() -> void:
 
 func _on_skills_received(data: Dictionary) -> void:
 	_skills = data.get("skills", {})
-	_build_skills_grid()
+	if not is_visible_in_tree():
+		return
+	_build_skills_grid(false)
 
 
-func _build_skills_grid() -> void:
+func _skill_info_for(slug: String) -> Dictionary:
+	if _skills.has(slug):
+		return _skills[slug] as Dictionary
+	return {
+		"display_name": JobRegistry.display_name(StringName(slug)),
+		"level": 1,
+		"xp": 0,
+		"xp_to_next": 1,
+	}
+
+
+func _build_skills_grid(force_rebuild: bool = true) -> void:
+	if (
+		not force_rebuild
+		and _skill_tiles.size() == _SkillsHostScript.SKILL_ORDER.size()
+		and is_instance_valid(_total_label)
+	):
+		for slug: String in _SkillsHostScript.SKILL_ORDER:
+			_update_skill_tile(slug, _skill_info_for(slug))
+		_refresh_total_label()
+		return
+
 	for child in skill_list.get_children():
 		child.queue_free()
+	_skill_tiles.clear()
+	_total_label = null
 
 	var outer_row := HBoxContainer.new()
 	outer_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -95,30 +124,60 @@ func _build_skills_grid() -> void:
 	content.add_child(grid)
 
 	for slug: String in _SkillsHostScript.SKILL_ORDER:
-		if _skills.has(slug):
-			grid.add_child(_create_skill_tile(slug, _skills[slug]))
-		else:
-			grid.add_child(
-				_create_skill_tile(
-					slug,
-					{
-						"display_name": JobRegistry.display_name(StringName(slug)),
-						"level": 1,
-						"xp": 0,
-						"xp_to_next": 1,
-					}
-				)
-			)
+		grid.add_child(_create_skill_tile(slug, _skill_info_for(slug)))
 
 	var total_panel := PanelContainer.new()
 	total_panel.add_theme_stylebox_override(&"panel", _make_total_bar_style())
 	var total_label := Label.new()
+	_total_label = total_label
 	total_label.text = "Total level: %d" % total_level
 	total_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	total_label.add_theme_font_size_override(&"font_size", 13)
 	total_label.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	total_panel.add_child(total_label)
 	content.add_child(total_panel)
+
+
+func _skill_tooltip(display: String, level: int, xp: int, xp_to_next: int, at_cap: bool, total_xp: int) -> String:
+	if at_cap:
+		return "%s\nLv %d — Max level\nTotal XP: %s\nClick for sources" % [
+			display, level, _format_xp(total_xp)
+		]
+	var remaining: int = maxi(0, xp_to_next - xp)
+	return "%s\nLv %d — %s / %s XP\n%s XP to next\nTotal XP: %s\nClick for sources" % [
+		display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+	]
+
+
+func _refresh_total_label() -> void:
+	if not is_instance_valid(_total_label):
+		return
+	var total_level := 0
+	for skill_name in _skills:
+		total_level += int((_skills[skill_name] as Dictionary).get("level", 1))
+	_total_label.text = "Total level: %d" % total_level
+
+
+func _update_skill_tile(skill_name: String, info: Dictionary) -> void:
+	var entry: Variant = _skill_tiles.get(skill_name, null)
+	if entry == null or not (entry is Dictionary):
+		return
+	var tile_data: Dictionary = entry
+	var tile: Button = tile_data.get("button") as Button
+	var cur: Label = tile_data.get("cur") as Label
+	var base: Label = tile_data.get("base") as Label
+	if tile == null or cur == null or base == null:
+		return
+	var level: int = int(info.get("level", 1))
+	var xp: int = int(info.get("xp", 0))
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	var display: String = str(info.get("display_name", skill_name.capitalize()))
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	cur.text = str(level)
+	base.text = str(level)
+	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
 
 
 func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
@@ -128,23 +187,15 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var remaining: int = 0 if at_cap else maxi(0, xp_to_next - xp)
 	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 
-	var tile := Button.new()
+	var tile := LiveTooltipButton.new()
 	tile.custom_minimum_size = TILE_SIZE
 	tile.focus_mode = Control.FOCUS_NONE
 	tile.clip_contents = true
 	tile.flat = true
-	if at_cap:
-		tile.tooltip_text = "%s\nLv %d — Max level\nTotal XP: %s\nClick for sources" % [
-			display, level, _format_xp(total_xp)
-		]
-	else:
-		tile.tooltip_text = "%s\nLv %d — %s / %s XP\n%s XP to next\nTotal XP: %s\nClick for sources" % [
-			display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
-		]
-	tile.pressed.connect(_open_skill_detail.bind(skill_name, info))
+	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
+	tile.pressed.connect(_open_skill_detail.bind(skill_name))
 	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
 	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
 	tile.add_theme_stylebox_override(&"pressed", _make_tile_style())
@@ -162,11 +213,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	icon.offset_bottom = -4
 	tile.add_child(icon)
 
-	_add_level_labels(tile, level, Color(1.0, 1.0, 0.0))
-	return tile
-
-
-func _add_level_labels(parent: Control, level: int, color: Color) -> void:
+	var color := Color(1.0, 1.0, 0.0)
 	var cur := Label.new()
 	cur.text = str(level)
 	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -181,7 +228,7 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	cur.offset_top = 2
 	cur.offset_right = -10
 	cur.offset_bottom = 18
-	parent.add_child(cur)
+	tile.add_child(cur)
 
 	var base := Label.new()
 	base.text = str(level)
@@ -197,7 +244,7 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	base.offset_top = -18
 	base.offset_right = -4
 	base.offset_bottom = -2
-	parent.add_child(base)
+	tile.add_child(base)
 
 	var slash := Label.new()
 	slash.text = "/"
@@ -209,10 +256,18 @@ func _add_level_labels(parent: Control, level: int, color: Color) -> void:
 	slash.offset_top = -8
 	slash.offset_right = -16
 	slash.offset_bottom = 8
-	parent.add_child(slash)
+	tile.add_child(slash)
+
+	_skill_tiles[skill_name] = {
+		"button": tile,
+		"cur": cur,
+		"base": base,
+	}
+	return tile
 
 
-func _open_skill_detail(skill_name: String, info: Dictionary) -> void:
+func _open_skill_detail(skill_name: String) -> void:
+	var info: Dictionary = _skill_info_for(skill_name)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var level: int = int(info.get("level", 1))
 	var xp: int = int(info.get("xp", 0))

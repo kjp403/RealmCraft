@@ -617,7 +617,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
 	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
 
-	var tile := Button.new()
+	var tile := LiveTooltipButton.new()
 	tile.custom_minimum_size = TILE_SIZE
 	tile.custom_maximum_size = TILE_SIZE
 	tile.size = TILE_SIZE

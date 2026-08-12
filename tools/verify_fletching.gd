@@ -43,6 +43,42 @@ func _init() -> void:
 					fails.append("ingredient %s has no registry id" % ing.item.item_name)
 			print("  ", r.output_item.item_name, " x", r.output_amount,
 				" lv", r.required_level, " xp", r.xp_reward)
+			if r.output_item is AmmoItem:
+				if r.output_amount != 10:
+					fails.append("%s must output 10 arrows, got %d" % [
+						r.output_item.item_name, r.output_amount
+					])
+				if r.ingredients.size() != 2:
+					fails.append("%s must take shafts + heads" % r.output_item.item_name)
+				for ing: CraftIngredient in r.ingredients:
+					if ing == null or ing.item == null:
+						continue
+					if ing.amount != 10:
+						fails.append("%s must consume 10 %s, got %d" % [
+							r.output_item.item_name, ing.item.item_name, ing.amount
+						])
+
+	var anvil: CraftingStationResource = load(
+		"res://source/common/gameplay/crafting/resources/anvil.tres"
+	)
+	if anvil == null:
+		fails.append("anvil.tres failed to load")
+	else:
+		var head_recipes: int = 0
+		for r: CraftingRecipe in anvil.recipes:
+			if r == null or r.output_item == null:
+				continue
+			var slug: String = str(r.output_item.get_meta(&"slug", ""))
+			if not slug.ends_with("_arrowheads"):
+				continue
+			head_recipes += 1
+			if r.output_amount != 10:
+				fails.append("%s must smith 10 heads, got %d" % [
+					r.output_item.item_name, r.output_amount
+				])
+			print("  anvil ", r.output_item.item_name, " x", r.output_amount)
+		if head_recipes != 6:
+			fails.append("expected 6 anvil arrowhead recipes, got %d" % head_recipes)
 
 	for slug: String in [
 		"headless_arrow", "bronze_arrow", "iron_arrow", "steel_arrow",
