@@ -10,8 +10,8 @@ extends Character
 ## (which drives the shared name label).
 
 const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/components/interactable_marker.tscn")
-## Max distance (px) the local player can be from the NPC and still interact, so
-## you can't talk to or shop with an NPC from across the map.
+## Max distance (px) the local player can be from the NPC and still interact.
+## Out-of-range clicks walk the player in via [method LocalPlayer.start_auto_interact].
 const INTERACT_RANGE: float = 90.0
 
 @export var npc_resource: NPCResource
@@ -123,18 +123,27 @@ func _sprite_size() -> Vector2:
 
 
 func _on_clicked() -> void:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or not is_instance_valid(lp):
+		return
 	if _player_in_range():
 		_face_local_player()
 		_open_interactions()
-	else:
-		# A too-far tap shouldn't be a silent no-op, so nudge the player closer.
-		var who: String = display_name if not display_name.is_empty() else "them"
-		Toaster.toast("Too far from %s." % who)
+		return
+	# Walk into range, then talk — same approach loop crafting stations use.
+	lp.start_auto_interact(self, INTERACT_RANGE, _arrive_and_open)
 
 
-## True when the local player is close enough to interact. Clicks from too far are
-## silently ignored, so you have to walk up to the NPC (this also underpins the
-## "rooted while talking" model). Null-safe before the local player exists.
+func _arrive_and_open() -> void:
+	if not is_instance_valid(self):
+		return
+	_face_local_player()
+	_open_interactions()
+
+
+## True when the local player is close enough to interact. Out-of-range clicks
+## walk the player in via [method LocalPlayer.start_auto_interact] instead of
+## toasting. Null-safe before the local player exists.
 func _player_in_range() -> bool:
 	var lp: LocalPlayer = ClientState.local_player
 	if lp == null or not is_instance_valid(lp):

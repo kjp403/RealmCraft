@@ -1,8 +1,9 @@
 class_name Interactable
 extends Area2D
-## A clickable map station. On a left-click / tap it opens a client menu —
+## A clickable map station. On a left-click / tap the local player walks into
+## [constant INTERACT_RANGE] (if needed) then opens a client menu —
 ## open_menu_requested(menu_name, menu_arg). Centralizes the input-pickable +
-## click-detection boilerplate that every station used to copy.
+## click-detection + approach boilerplate that every station used to copy.
 ##
 ## Two ways to use it:
 ##  • SIMPLE station — just this node, configured in the inspector (menu_name +
@@ -12,6 +13,9 @@ extends Area2D
 ##    super._ready(), and keeps its fields. The click is inherited.
 ##
 ## The server never clicks, so it just disables input; the client wires the handler.
+
+## Max distance (px) before the player must walk closer. Matches [constant NPC.INTERACT_RANGE].
+const INTERACT_RANGE: float = 90.0
 
 ## The client menu to open on click. Empty = inert (a non-clickable decoration).
 @export var menu_name: StringName = &""
@@ -54,7 +58,33 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 		or (event is InputEventScreenTouch and event.pressed)
 	)
 	if clicked and menu_name != &"":
-		ClientState.open_menu_requested.emit(menu_name, _build_menu_arg())
+		_request_interact()
+
+
+## Walk into range (if needed), then open the configured menu. Subclasses that
+## override click handling should call this (or [method _do_interact]) instead of
+## toasting "Too far".
+func _request_interact() -> void:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or not is_instance_valid(lp):
+		return
+	if _player_in_range():
+		_do_interact()
+		return
+	lp.start_auto_interact(self, INTERACT_RANGE, _do_interact)
+
+
+func _do_interact() -> void:
+	if menu_name == &"":
+		return
+	ClientState.open_menu_requested.emit(menu_name, _build_menu_arg())
+
+
+func _player_in_range() -> bool:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or not is_instance_valid(lp):
+		return false
+	return global_position.distance_to(lp.global_position) <= INTERACT_RANGE
 
 
 func _set_interactable_hover(on: bool) -> void:

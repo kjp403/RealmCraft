@@ -165,6 +165,9 @@ func _install_tab_bar() -> void:
 ## Hand the crafting menu the station's catalog directly (rendered client-side)
 ## plus the node name the server resolves the station by.
 func open(arg: Dictionary) -> void:
+	# Re-opening the station UI cancels any in-flight compact craft session.
+	if ClientState.local_player != null:
+		ClientState.local_player.cancel_craft_session()
 	_stop_loop()
 	_station_key = str(arg.get("key", ""))
 	_station = arg.get("station") as CraftingStationResource
@@ -180,6 +183,8 @@ func open(arg: Dictionary) -> void:
 
 func _on_visibility_changed() -> void:
 	if not visible:
+		# Compact CraftController owns the live batch — don't kill it just because
+		# this fullscreen shell closed after Craft was pressed.
 		_stop_loop()
 		return
 	if _station != null:
@@ -790,17 +795,35 @@ func _has_ingredients(recipe: CraftingRecipe) -> bool:
 func _on_craft_pressed() -> void:
 	if _selected < 0 or _station == null:
 		return
+	if ClientState.local_player != null and ClientState.local_player.is_crafting():
+		ClientState.local_player.cancel_craft_session()
+		_render_detail()
+		return
 	if _looping:
 		_stop_loop()
 		_render_detail()
 		return
-	_start_craft_loop()
+	# Close the fullscreen shell and run the batch on the compact HUD chip so the
+	# player can see the world and open Inventory / Skills / Quests while crafting.
+	if ClientState.local_player == null:
+		_start_craft_loop()
+		return
+	var recipe: CraftingRecipe = _station.recipes[_selected]
+	if _profession_level < recipe.required_level or not _has_ingredients(recipe):
+		return
+	if _station.craft_fee > 0 and _golds < _station.craft_fee:
+		return
+	var qty: int = _qty_target()
+	var key: String = _station_key
+	var station: CraftingStationResource = _station
+	var recipe_index: int = _selected
+	hide()
+	ClientState.local_player.start_craft_session(key, station, recipe_index, qty)
 
 
 ## Wait CRAFT_INTERVAL, craft one, repeat until the batch size is reached, the
-## materials run out, the player hits Stop, or the menu closes. Used by every
-## station — smelting, smithing, outfitting and cooking all tick at the same
-## rate. A target of -1 (Make All) is the "until something stops us" case.
+## materials run out, the player hits Stop, or the menu closes. Fallback path when
+## no LocalPlayer is available — normal play uses [method LocalPlayer.start_craft_session].
 func _start_craft_loop() -> void:
 	_looping = true
 	_loop_generation += 1

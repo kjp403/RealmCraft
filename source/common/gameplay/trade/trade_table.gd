@@ -232,10 +232,19 @@ func _find_collision_shape() -> CollisionShape2D:
 
 
 func _on_clicked() -> void:
+	var lp: LocalPlayer = ClientState.local_player
+	if lp == null or not is_instance_valid(lp):
+		return
 	if _player_in_range():
 		ClientState.set_viewed_trade(table_id) # view only; claiming a seat is an explicit button
-	else:
-		Toaster.toast("Too far from the trade table.")
+		return
+	lp.start_auto_interact(self, seat_range, _arrive_and_open)
+
+
+func _arrive_and_open() -> void:
+	if not is_instance_valid(self):
+		return
+	ClientState.set_viewed_trade(table_id)
 
 
 ## True when the local player is within seat_range — the same distance the server uses to keep a
