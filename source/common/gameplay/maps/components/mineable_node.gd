@@ -509,6 +509,8 @@ func _apply_sprite() -> void:
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
 	_sprite.modulate = Color.WHITE
+	var s: float = maxf(0.1, data.visual_scale)
+	_sprite.scale = Vector2(s, s)
 
 
 ## Size the hitbox / labels for short rocks vs tall trees so the trunk base
@@ -516,7 +518,8 @@ func _apply_sprite() -> void:
 func _layout_from_texture() -> void:
 	if data == null or data.texture == null or _sprite == null:
 		return
-	var tex_size: Vector2 = data.texture.get_size()
+	var s: float = maxf(0.1, data.visual_scale)
+	var tex_size: Vector2 = data.texture.get_size() * s
 	if tex_size.y > 48.0:
 		_sprite.position = Vector2(0.0, -tex_size.y * 0.5)
 	else:
@@ -586,7 +589,8 @@ func _spawn_click_area() -> void:
 	var rect: RectangleShape2D = RectangleShape2D.new()
 	var size: Vector2 = Vector2(40, 48)
 	if data != null and data.texture != null:
-		size = data.texture.get_size()
+		var s: float = maxf(0.1, data.visual_scale)
+		size = data.texture.get_size() * s
 	rect.size = size
 	collision.shape = rect
 	collision.position = _sprite.position if _sprite != null else Vector2(0, -16)
