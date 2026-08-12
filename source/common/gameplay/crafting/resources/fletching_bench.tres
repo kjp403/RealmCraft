@@ -95,7 +95,7 @@ amount = 10
 [sub_resource type="Resource" id="I_br_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("30_br_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_br_arrow"]
 script = ExtResource("1_recipe")
@@ -113,7 +113,7 @@ amount = 10
 [sub_resource type="Resource" id="I_fe_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("31_fe_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_fe_arrow"]
 script = ExtResource("1_recipe")
@@ -131,7 +131,7 @@ amount = 10
 [sub_resource type="Resource" id="I_st_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("32_st_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_st_arrow"]
 script = ExtResource("1_recipe")
@@ -149,7 +149,7 @@ amount = 10
 [sub_resource type="Resource" id="I_mi_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("33_mi_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_mi_arrow"]
 script = ExtResource("1_recipe")
@@ -167,7 +167,7 @@ amount = 10
 [sub_resource type="Resource" id="I_ad_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("34_ad_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_ad_arrow"]
 script = ExtResource("1_recipe")
@@ -185,7 +185,7 @@ amount = 10
 [sub_resource type="Resource" id="I_ru_heads"]
 script = ExtResource("3_ingred")
 item = ExtResource("35_ru_head")
-amount = 1
+amount = 10
 
 [sub_resource type="Resource" id="R_ru_arrow"]
 script = ExtResource("1_recipe")
