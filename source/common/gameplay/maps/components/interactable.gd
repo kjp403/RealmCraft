@@ -34,7 +34,11 @@ var _hover_name_label: Label
 
 
 func _ready() -> void:
-	if multiplayer.is_server():
+	# Dedicated servers never pick. Prefer GameMode over multiplayer.is_server() so a
+	# client map that enters the tree before the multiplayer peer is assigned still
+	# becomes clickable (offline peer reports is_server()==true and would leave
+	# stations dead forever if we only checked multiplayer).
+	if not GameMode.is_client():
 		input_pickable = false
 		return
 	# Beat nearby NPC click-areas when stations sit close to vendors.

@@ -19,7 +19,7 @@
 [ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="22_je1gg"]
 
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="30_craft"]
-[ext_resource type="Resource" uid="uid://26gsysjvnvs2" path="res://source/common/gameplay/crafting/resources/anvil.tres" id="31_anvil"]
+[ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/anvil.tres" id="31_anvil"]
 [ext_resource type="Resource" uid="uid://ba6iuomnbqi3s" path="res://source/common/gameplay/crafting/resources/furnace.tres" id="32_furnace"]
 [ext_resource type="Resource" uid="uid://c8e62k6uutlp8" path="res://source/common/gameplay/crafting/resources/workbench.tres" id="33_wb"]
 [ext_resource type="Resource" uid="uid://cascendedwb422e" path="res://source/common/gameplay/crafting/resources/ascended_workbench.tres" id="34_asc"]

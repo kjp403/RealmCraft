@@ -8,10 +8,8 @@ extends Interactable
 ##
 ## Setup: an Area2D with this script, a CollisionShape2D over the station, and a
 ## CraftingStationResource assigned. Place as a direct child of the Map.
-
-## Match [constant Interactable.INTERACT_RANGE] / [constant NPC.INTERACT_RANGE].
-## Kept here so craft.item can resolve it without loading the Interactable script.
-const INTERACT_RANGE: float = 90.0
+## Range uses [constant Interactable.INTERACT_RANGE] (do not redeclare — Godot 4.7
+## treats duplicate const members as a parse error and the station script fails to load).
 
 @export var station: CraftingStationResource
 
