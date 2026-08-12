@@ -6,12 +6,13 @@ class_name CommandTarget
 ##   @account      → the account's currently-online character (account lookup)
 ##   #1042 / 1042  → a character by its permanent player_id
 ##
-## Account names are the stable handle: only one character per account can be
-## online at a time, so an online @account is unambiguous and is what staff will
-## use for most live moderation. A bare or #-prefixed number targets a specific
-## character id, which ALSO resolves offline targets (from the DB) for commands
-## that support them (mute / jail). For an OFFLINE account whose character id you
-## don't know, run /chars <account> to list them, then target by #id.
+## Account names are the stable handle for mute/jail/ban (those hit the login).
+## Staff powers (/grant, AdminConfig, commands, badges) are character-bound: an
+## online @account is the currently-logged-in character only. A bare or #-prefixed
+## number targets a specific character id, which ALSO resolves offline targets
+## (from the DB) for commands that support them (mute / jail). For an OFFLINE
+## account whose character id you don't know, run /chars <account> to list them,
+## then target by #id.
 
 
 ## Outcome of a resolution attempt. Check [member ok] first; on failure

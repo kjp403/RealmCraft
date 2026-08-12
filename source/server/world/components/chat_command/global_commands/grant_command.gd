@@ -1,13 +1,14 @@
 extends ChatCommand
-## Grant a server role to an online player and persist it to the DB. Use this for
-## staff (moderator/admin). owner / senior_admin are config-file only
-## (server_admins.cfg) — never via /grant.
+## Grant a server role to one online character and persist it to that character's
+## DB row. Other characters on the same login are unchanged. Use this for staff
+## (moderator/admin). owner / senior_admin are config-file only
+## (server_admins.cfg, by character name) — never via /grant.
 
 
 func _init() -> void:
 	command_name = "grant"
 	command_priority = 100 # senior_admin
-	command_usage = "/grant <self|@account|#id> <role>"
+	command_usage = "/grant <self|Name|#id|@account> <role>"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:

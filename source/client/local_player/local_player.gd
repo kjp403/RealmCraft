@@ -491,7 +491,7 @@ func process_input() -> void:
 	# Movement lock (drink / hammer slam root) freezes WASD but must NOT cancel
 	# Right-click → Attack — otherwise heavy weapons abort after one hit.
 	var rooted: bool = Time.get_ticks_msec() < _movement_lock_until_ms
-	if _dead or _has_gui_focus() or ClientState.menu_open:
+	if _dead or ClientState.menu_open:
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
@@ -503,6 +503,14 @@ func process_input() -> void:
 			_interact_controller.cancel()
 		input_direction = Vector2.ZERO
 		action_input = false
+		return
+	# Chat compose: block WASD/attack so keys type, but keep follow / click-move
+	# running so you can chat while trailing someone.
+	if _has_gui_focus():
+		action_input = false
+		if _follow_peer_id > 0:
+			_update_follow_navigation()
+		input_direction = _click_navigation.movement_direction()
 		return
 	if rooted:
 		_click_navigation.cancel()

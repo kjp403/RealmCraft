@@ -14,10 +14,14 @@ extends Node
 ## below are fallbacks that mirror the resource defaults — see _load_config).
 
 ## Extra seconds the body stays planted AFTER a slam lands — sells the weight and
-## stops the boss snapping straight back into a chase.
-const SLAM_RECOVER_S: float = 0.25
-const LASER_RECOVER_S: float = 0.2
-const ARM_RECOVER_S: float = 0.15
+## stops the boss snapping straight back into a chase. Long enough that the
+## impact clip can finish before the next telegraph starts.
+const SLAM_RECOVER_S: float = 0.85
+const LASER_RECOVER_S: float = 0.75
+const ARM_RECOVER_S: float = 1.2
+## Idle beat after every mechanic (on top of that move's recover) so telegraphs
+## don't stack back-to-back and skin clips aren't cut off mid-swing.
+const CAST_GAP_S: float = 0.9
 
 ## Enrage when the body drops to this fraction of max HP.
 var enrage_at_health_fraction: float = 0.5
@@ -289,6 +293,16 @@ func _rearm(id: StringName) -> void:
 			return
 
 
+## Keep `_casting` true through recover + a shared idle beat so the skin clip
+## can finish and the next telegraph doesn't start on the impact frame.
+func _finish_cast(id: StringName, recover_s: float) -> void:
+	_rearm(id)
+	var hold: float = recover_s + CAST_GAP_S
+	if hold > 0.0:
+		await get_tree().create_timer(hold).timeout
+	_casting = false
+
+
 ## Every living player in the boss's instance — the damage set for every AoE here.
 func _live_players() -> Array[Player]:
 	var out: Array[Player] = []
@@ -377,8 +391,7 @@ func _slam() -> void:
 			if player != null and not player.is_dead \
 					and center.distance_to(player.global_position) <= slam_radius:
 				player.take_damage(slam_damage, boss)
-	_rearm(&"slam")
-	_casting = false
+	await _finish_cast(&"slam", SLAM_RECOVER_S)
 
 
 ## Locked-aim laser corridor: telegraph a strip toward the target, then blast
@@ -418,8 +431,7 @@ func _laser() -> void:
 				continue
 			if _dist_to_segment(player.global_position, origin, end) <= laser_width:
 				player.take_damage(laser_damage, boss)
-	_rearm(&"laser")
-	_casting = false
+	await _finish_cast(&"laser", LASER_RECOVER_S)
 
 
 ## Slow arm-cannon bolt aimed at the current target — weave sideways to dodge.
@@ -433,11 +445,11 @@ func _arm_shot() -> void:
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
 	boss._face_target()
-	boss.action_root_until_ms = Time.get_ticks_msec() + int(ARM_RECOVER_S * 1000.0)
-	boss.replicate_visual(&"rp_play_skin_anim", [&"attack"])
+	boss.action_root_until_ms = Time.get_ticks_msec() + int((ARM_RECOVER_S + CAST_GAP_S) * 1000.0)
+	# Stretch the swing across the recover so the next move can't cut it off.
+	boss.replicate_visual(&"rp_play_skin_anim", [&"attack", ARM_RECOVER_S])
 	boss.fire_arm_projectile(dir, arm_shot_speed, arm_shot_lifetime_s, arm_shot_damage)
-	_rearm(&"arm")
-	_casting = false
+	await _finish_cast(&"arm", ARM_RECOVER_S)
 
 
 # ---------------------------------------------------------------------------
@@ -464,8 +476,7 @@ func _meteor_rain() -> void:
 	# Hold the cast lock until the LAST meteor has landed, so the next move never
 	# starts under a sky that is still full of falling rock.
 	await get_tree().create_timer(meteor_windup_s).timeout
-	_rearm(&"meteor")
-	_casting = false
+	await _finish_cast(&"meteor", 0.25)
 
 
 ## Where one meteor lands: on a random living player, scattered by up to most of
@@ -492,7 +503,7 @@ func _meteor_spot() -> Vector2:
 func _drop_meteor(at: Vector2) -> void:
 	# One hurl gesture per rock, so the body is animating for the whole volley
 	# rather than throwing once and standing still through the other three.
-	boss.replicate_visual(&"rp_play_skin_anim", [&"attack"])
+	boss.replicate_visual(&"rp_play_skin_anim", [&"attack", meteor_stagger_s])
 	boss.replicate_visual(&"rp_elem_telegraph", [at, meteor_radius, meteor_windup_s, 0, 0])
 	await get_tree().create_timer(maxf(meteor_windup_s - METEOR_FALL_S, 0.0)).timeout
 	if not is_instance_valid(boss) or boss.is_dead:
@@ -557,8 +568,7 @@ func _cinder_lash() -> void:
 		await get_tree().create_timer(SWEEP_TICK_S).timeout
 		if not is_instance_valid(boss) or boss.is_dead:
 			break
-	_rearm(&"sweep")
-	_casting = false
+	await _finish_cast(&"sweep", 0.35)
 
 
 ## KILLING FROST — the inversion. Every other telegraph in this game means "leave
@@ -584,8 +594,7 @@ func _killing_frost() -> void:
 	for player: Player in _live_players():
 		if safe_at.distance_to(player.global_position) > frost_safe_radius:
 			player.take_damage(frost_damage, boss)
-	_rearm(&"frost")
-	_casting = false
+	await _finish_cast(&"frost", 0.45)
 
 
 ## STATIC ARC — jumps from the boss to its mark, then to whoever stands nearest
@@ -631,8 +640,7 @@ func _static_arc() -> void:
 		boss.replicate_visual(&"rp_chain_lightning", [path])
 	for i: int in struck.size():
 		struck[i].take_damage(chain_damage * (1.0 + 0.35 * float(i)), boss)
-	_rearm(&"chain")
-	_casting = false
+	await _finish_cast(&"chain", 0.4)
 
 
 ## Server → clients: a one-line mechanic callout for everyone in the fight. The

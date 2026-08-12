@@ -304,8 +304,26 @@ func get_player_roles(player_id: int) -> Dictionary:
 	return roles_v if roles_v is Dictionary else {}
 
 
+## Character ids + display names on an account. Used so AdminConfig (character-
+## bound) can still protect the login from @account bans.
+func get_account_characters(account_name: String) -> Array:
+	if account_name.is_empty():
+		return []
+	db.query_with_bindings(
+		"SELECT player_id, display_name FROM players WHERE account_name=? COLLATE NOCASE;",
+		[account_name]
+	)
+	var out: Array = []
+	for row: Dictionary in db.query_result:
+		out.append({
+			"player_id": int(row.get("player_id", 0)),
+			"display_name": str(row.get("display_name", "")),
+		})
+	return out
+
+
 ## Highest role priority among every character on an account (DB only — callers
-## still merge AdminConfig). Used for offline staff-protection checks.
+## still merge AdminConfig per character). Used for offline staff-protection checks.
 func get_account_max_role_priority(account_name: String, role_definitions: Dictionary) -> int:
 	if account_name.is_empty():
 		return 0

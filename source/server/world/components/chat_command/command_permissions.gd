@@ -2,20 +2,22 @@ class_name CommandPermissions
 ## Central place that decides whether a player may run a chat command.
 ##
 ## A player's effective priority is the HIGHEST priority among:
-##   - the roles persisted on their PlayerResource (server_roles), and
-##   - the role granted live via the admin config file (AdminConfig), if any.
-## A command runs when its command_priority is <= that effective priority
-## (command_priority <= 0 means "anyone").
+##   - the roles persisted on THIS character (server_roles), and
+##   - the role granted live via the admin config file (AdminConfig) for THIS
+##     character's display name or #player_id.
+## Other characters on the same login stay regular players. A command runs when
+## its command_priority is <= that effective priority (command_priority <= 0
+## means "anyone").
 ##
 ## LIVE hardening: owner / senior_admin can NEVER come from the DB — only from
 ## AdminConfig. That closes the old /selfadmin → autosave → permanent
 ## senior_admin persistence path even if a stale role row somehow remains.
 ##
 ## Rank ladder (priority): owner (1000) > senior_admin (100) > admin (2) > mod (1).
-## Owners (kjp403 / KJP in server_admins.cfg) outrank every other staff tier.
+## Owners (KJP / kjp403 characters in server_admins.cfg) outrank every other staff tier.
 
 
-## The highest role priority this player effectively has.
+## The highest role priority this character effectively has (commands + badge).
 static func effective_priority(player: PlayerResource, instance: ServerInstance) -> int:
 	if player == null:
 		return -1
@@ -26,8 +28,11 @@ static func effective_priority(player: PlayerResource, instance: ServerInstance)
 			continue
 		best = maxi(best, _role_priority(instance, role))
 
-	# Live, non-persisted grant from the owner's admin config file.
-	var config_role: String = AdminConfig.role_for(player.account_name)
+	# Live, non-persisted grant from the owner's admin config file — this
+	# character only, never the whole login account.
+	var config_role: String = AdminConfig.role_for_character(
+		player.display_name, player.player_id
+	)
 	if not config_role.is_empty():
 		best = maxi(best, _role_priority(instance, config_role))
 
@@ -48,7 +53,9 @@ static func effective_role_slug(player: PlayerResource, instance: ServerInstance
 		if p > best_priority:
 			best_priority = p
 			best_role = role
-	var config_role: String = AdminConfig.role_for(player.account_name)
+	var config_role: String = AdminConfig.role_for_character(
+		player.display_name, player.player_id
+	)
 	if not config_role.is_empty():
 		var p: int = _role_priority(instance, config_role)
 		if p > best_priority:
@@ -74,8 +81,9 @@ static func can_run(command: ChatCommand, player: PlayerResource, instance: Serv
 const STAFF_PROTECT_PRIORITY: int = 2 # admin
 
 ## Admin+ (admin / senior_admin / owner) are hidden from player leaderboards so
-## command-boosted accounts don't crowd out regular players. Moderators (priority 1)
-## still appear — they have no leveling commands.
+## command-boosted characters don't crowd out regular players. Moderators (priority 1)
+## still appear — they have no leveling commands. Regular alts on a staff login
+## are not hidden.
 const LEADERBOARD_HIDE_PRIORITY: int = 2 # admin
 
 
@@ -85,8 +93,10 @@ const LEADERBOARD_HIDE_PRIORITY: int = 2 # admin
 ## priority than yours. So:
 ##   - admin cannot punish admin / senior_admin / owner
 ##   - senior_admin cannot punish senior_admin / owner (can punish admin)
-##   - owner (kjp403 / KJP) can punish anyone below them, including malicious
+##   - owner (KJP / kjp403) can punish anyone below them, including malicious
 ##     senior_admins. Fellow owners (equal priority) remain protected.
+## Ban/jail/ipban are account-wide, so a regular alt on a staff login is still
+## protected — otherwise banning the alt would ban the staff character too.
 static func staff_moderation_block_reason(
 	issuer: PlayerResource,
 	target: CommandTarget.Result,
@@ -107,16 +117,16 @@ static func staff_moderation_block_reason(
 	return "You can't moderate another admin (or higher)."
 
 
-## True when this account/roles should be omitted from public leaderboards.
+## True when this character should be omitted from public leaderboards.
 ## Pass either a live PlayerResource or the offline account_name + roles dict.
-## [param display_name] is optional — used so character names listed in
-## server_admins.cfg (or [leaderboard_hide]) still drop off boards even when
-## the login account string differs.
+## Config grants and persisted roles are character-scoped; [leaderboard_hide]
+## still matches display name or an explicit account string.
 static func is_hidden_from_leaderboard(
 	account_name: String,
 	roles: Dictionary,
 	role_definitions: Dictionary,
-	display_name: String = ""
+	display_name: String = "",
+	player_id: int = 0
 ) -> bool:
 	# Count ALL persisted roles for hide — including live-blocked owner /
 	# senior_admin. Those ranks no longer grant commands from the DB on LIVE,
@@ -124,46 +134,68 @@ static func is_hidden_from_leaderboard(
 	var best: int = 0
 	for role: String in roles:
 		best = maxi(best, int(role_definitions.get(role, {}).get("priority", 0)))
-	for key: String in [account_name, display_name]:
-		if key.is_empty():
-			continue
-		if AdminConfig.is_leaderboard_hidden(key):
-			return true
-		var config_role: String = AdminConfig.role_for(key)
-		if not config_role.is_empty():
-			best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
+	if AdminConfig.is_leaderboard_hidden(account_name):
+		return true
+	if AdminConfig.is_leaderboard_hidden(display_name):
+		return true
+	var config_role: String = AdminConfig.role_for_character(display_name, player_id)
+	if not config_role.is_empty():
+		best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
 	return best >= LEADERBOARD_HIDE_PRIORITY
 
 
-## Effective priority for an online or offline CommandTarget (AdminConfig + DB roles).
+## Effective priority for moderating an online or offline CommandTarget.
+## Powers stay character-bound; protection is account-wide because mute/jail/ban
+## hit the login, not just the targeted character.
 static func effective_priority_for_target(
 	target: CommandTarget.Result,
 	instance: ServerInstance
 ) -> int:
 	if target == null or not target.ok:
 		return 0
-	if target.online and target.resource != null:
-		return effective_priority(target.resource, instance)
-
 	var best: int = 0
-	var config_role: String = AdminConfig.role_for(target.account_name)
-	if not config_role.is_empty():
-		best = maxi(best, _role_priority(instance, config_role))
+	if target.online and target.resource != null:
+		best = effective_priority(target.resource, instance)
+	else:
+		var config_role: String = AdminConfig.role_for_character(
+			target.display_name, target.player_id
+		)
+		if not config_role.is_empty():
+			best = maxi(best, _role_priority(instance, config_role))
 
+		var ws: WorldServer = instance.world_server
+		if ws != null and ws.database != null and ws.database.store != null:
+			if target.player_id > 0:
+				best = maxi(best, _priority_from_roles_dict(
+					ws.database.store.get_player_roles(target.player_id),
+					instance
+				))
+
+	if not target.account_name.is_empty():
+		best = maxi(best, _account_protect_priority(target.account_name, instance))
+	return best
+
+
+## Highest staff rank among every character on [param account_name] (DB roles +
+## config grants). Used so you cannot ban a regular alt and take down a staff
+## login with it.
+static func _account_protect_priority(account_name: String, instance: ServerInstance) -> int:
+	if account_name.is_empty() or instance == null:
+		return 0
 	var ws: WorldServer = instance.world_server
 	if ws == null or ws.database == null or ws.database.store == null:
-		return best
-
-	if target.player_id > 0:
-		best = maxi(best, _priority_from_roles_dict(
-			ws.database.store.get_player_roles(target.player_id),
-			instance
-		))
-	elif not target.account_name.is_empty():
-		best = maxi(best, ws.database.store.get_account_max_role_priority(
-			target.account_name,
-			instance.global_role_definitions
-		))
+		return 0
+	var best: int = ws.database.store.get_account_max_role_priority(
+		account_name,
+		instance.global_role_definitions
+	)
+	for ch: Dictionary in ws.database.store.get_account_characters(account_name):
+		var cr: String = AdminConfig.role_for_character(
+			str(ch.get("display_name", "")),
+			int(ch.get("player_id", 0))
+		)
+		if not cr.is_empty():
+			best = maxi(best, _role_priority(instance, cr))
 	return best
 
 

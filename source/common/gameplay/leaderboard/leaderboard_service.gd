@@ -177,8 +177,9 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			roles = roles_parsed if roles_parsed is Dictionary else {}
 
 		# Hide admin / senior_admin / owner from boards (moderators stay).
+		# Character-bound: regular alts on a staff login still appear.
 		if CommandPermissions.is_hidden_from_leaderboard(
-			account_name, roles, role_definitions, display_name
+			account_name, roles, role_definitions, display_name, player_id
 		):
 			continue
 
@@ -317,7 +318,7 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
 		if CommandPermissions.is_hidden_from_leaderboard(
-			account_name, roles, role_definitions, display_name
+			account_name, roles, role_definitions, display_name, player_id
 		):
 			continue
 		var best: Variant = stats.get("dungeon_best", {})

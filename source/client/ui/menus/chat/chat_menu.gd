@@ -47,6 +47,9 @@ const HISTORY_LIMIT: int = 50
 ## How far the chatbox slides in (px from the left) on open, matched to the menu overlay's
 ## slide so both panels animate consistently.
 const FULL_FEED_SLIDE: float = 48.0
+## After the last incoming player message (and once compose/settings aren't holding
+## it), the chatbox slides away on its own so you don't have to Close every time.
+const AUTO_HIDE_SEC: float = 8.0
 
 ## Emitted when the unread-DM state flips. Kept for HUD/listeners; tab captions also show counts.
 signal unread_changed(has_unread: bool)
@@ -91,13 +94,16 @@ var _full_feed_tween: Tween
 ## from a resolved rect) so the open/close slide has a stable base even before
 ## the first layout pass.
 var _full_feed_base_x: float = 0.0
+## One-shot idle timer. Restarted on activity; cancelled while composing,
+## while Options is open, while the cursor is over the box, or on touch.
+var _auto_hide_timer: Timer
 #endregion
 
 
 #region Nodes
 @onready var full_feed: Control = $FullFeed
 ## The chatbox itself. FullFeed is a full-screen click-through Control, so we
-## check this tighter rect for the click-outside-to-close behaviour.
+## check this tighter rect for hover (hold open) and click-outside-while-typing.
 @onready var full_feed_content: Control = $FullFeed/Chatbox
 
 @onready var full_feed_text_display: RichTextLabel = $FullFeed/Chatbox/Root/Feed
@@ -154,6 +160,13 @@ func _ready() -> void:
 
 	_full_feed_base_x = full_feed_content.offset_left
 
+	_auto_hide_timer = Timer.new()
+	_auto_hide_timer.one_shot = true
+	_auto_hide_timer.timeout.connect(_on_auto_hide_timeout)
+	add_child(_auto_hide_timer)
+	full_feed_content.mouse_entered.connect(_stop_auto_hide)
+	full_feed_content.mouse_exited.connect(_arm_auto_hide)
+
 	_tab_label_all = all_chat_button.text
 	_tab_label_system = system_chat_button.text
 	_tab_label_world = world_chat_button.text
@@ -188,10 +201,14 @@ func _ready() -> void:
 
 
 func _on_input_type_changed_for_chat(input_type: InputComponent.InputType) -> void:
-	if input_type == InputComponent.InputType.TOUCH and not full_feed.visible:
-		_show_full_feed()
-		_refresh_full_feed()
-		_update_input_enabled_state()
+	if input_type == InputComponent.InputType.TOUCH:
+		_stop_auto_hide()
+		if not full_feed.visible:
+			_show_full_feed()
+			_refresh_full_feed()
+			_update_input_enabled_state()
+		return
+	_arm_auto_hide()
 
 
 ## Mobile keyboard lift: while composing in the full feed on a touch device, shift the
@@ -244,16 +261,19 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.is_pressed():
 		var mouse_position: Vector2 = event.global_position
+		var was_composing: bool = full_feed_message_edit.has_focus()
 
-		if full_feed_message_edit.has_focus() and not full_feed_message_edit.get_global_rect().has_point(mouse_position):
+		if was_composing and not full_feed_message_edit.get_global_rect().has_point(mouse_position):
 			full_feed_message_edit.release_focus()
 
 		if full_feed.visible and not full_feed_content.get_global_rect().has_point(mouse_position):
-			if ClientState.input_type != InputComponent.InputType.TOUCH:
-				_on_close_button_pressed()
-			else:
-				full_feed_message_edit.release_focus()
+			if ClientState.input_type == InputComponent.InputType.TOUCH:
 				_set_settings_open(false)
+			elif was_composing:
+				# Clicked the world while typing — they're done; dismiss.
+				# Auto-shown (unfocused) chat stays so combat clicks don't eat it;
+				# the idle timer hides it.
+				_on_close_button_pressed()
 
 
 #region Incoming
@@ -337,6 +357,11 @@ func _on_chat_message(message: Dictionary) -> void:
 			i -= 1
 		convo_records[i] = record
 
+	# Live player talk pops the chatbox so the world doesn't feel empty when
+	# the panel was closed. History / system / own sends stay quiet.
+	if not is_history and not is_self and not is_system:
+		_reveal_for_incoming(convo_id)
+
 	var is_viewing: bool = full_feed.visible and _view_shows_conversation(convo_id)
 
 	# Count as unread when we're NOT actually looking at it — is_viewing already folds in
@@ -383,6 +408,7 @@ func _show_full_feed() -> void:
 	_set_settings_open(false)
 	# Already open (e.g. switching tabs) — don't replay the slide.
 	if full_feed.visible:
+		_arm_auto_hide()
 		return
 	if _full_feed_tween != null and _full_feed_tween.is_valid():
 		_full_feed_tween.kill()
@@ -392,16 +418,72 @@ func _show_full_feed() -> void:
 	_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	_full_feed_tween.tween_property(full_feed, ^"modulate:a", 1.0, 0.18)
 	_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x, 0.18)
+	_arm_auto_hide()
 
 
 ## The open effect in reverse: slide back out to the left + fade, THEN hide.
 func _hide_full_feed() -> void:
+	_stop_auto_hide()
 	if _full_feed_tween != null and _full_feed_tween.is_valid():
 		_full_feed_tween.kill()
 	_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
 	_full_feed_tween.tween_property(full_feed, ^"modulate:a", 0.0, 0.16)
 	_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x - FULL_FEED_SLIDE, 0.16)
 	_full_feed_tween.chain().tween_callback(full_feed.hide)
+
+
+## Slide the chatbox in when someone talks, without stealing keyboard focus
+## (combat / movement keep working). If the last-used tab wouldn't show this
+## conversation, land on All so the line is actually visible.
+func _reveal_for_incoming(convo_id: String) -> void:
+	if ClientState.input_type == InputComponent.InputType.TOUCH:
+		return
+	var was_closed: bool = not full_feed.visible
+	if was_closed and not _view_shows_conversation(convo_id):
+		current_channel = CHANNEL_ALL
+		current_conversation_id = ALL_CONVERSATION_ID
+		current_dm_other_id = 0
+		_sync_tab_buttons()
+	if was_closed:
+		_show_full_feed()
+		_refresh_full_feed()
+		_update_input_enabled_state()
+		return
+	_arm_auto_hide()
+
+
+func _can_auto_hide() -> bool:
+	if ClientState.input_type == InputComponent.InputType.TOUCH:
+		return false
+	if not full_feed.visible:
+		return false
+	if full_feed_message_edit.has_focus():
+		return false
+	if settings_panel.visible:
+		return false
+	if full_feed_content.get_global_rect().has_point(full_feed_content.get_global_mouse_position()):
+		return false
+	return true
+
+
+func _arm_auto_hide() -> void:
+	if _auto_hide_timer == null:
+		return
+	if not _can_auto_hide():
+		_stop_auto_hide()
+		return
+	_auto_hide_timer.start(AUTO_HIDE_SEC)
+
+
+func _stop_auto_hide() -> void:
+	if _auto_hide_timer != null:
+		_auto_hide_timer.stop()
+
+
+func _on_auto_hide_timeout() -> void:
+	if not _can_auto_hide():
+		return
+	_hide_full_feed()
 #endregion
 
 
@@ -1152,6 +1234,12 @@ var _typing_state_sent: bool = false
 
 
 func _on_chat_input_focus_changed(now_focused: bool) -> void:
+	# Hold the panel open while composing; start the idle hide once focus drops
+	# (after Send, click-away from the field, etc.).
+	if now_focused:
+		_stop_auto_hide()
+	else:
+		_arm_auto_hide()
 	# A focus signal fires for the leaving control before the entering one,
 	# so check whether the compose field still has focus before declaring stop.
 	var any_focused: bool = full_feed_message_edit.has_focus()
@@ -1409,7 +1497,10 @@ func _set_settings_open(open: bool) -> void:
 	# The DM chips belong to the feed, not to options.
 	_sync_dm_chips()
 	if open:
+		_stop_auto_hide()
 		_refresh_block_list_request()
+	else:
+		_arm_auto_hide()
 
 
 func _refresh_block_list_request() -> void:
