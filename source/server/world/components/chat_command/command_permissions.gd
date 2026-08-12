@@ -189,11 +189,11 @@ static func _account_protect_priority(account_name: String, instance: ServerInst
 		account_name,
 		instance.global_role_definitions
 	)
-	for ch: Dictionary in ws.database.store.get_account_characters(account_name):
-		var cr: String = AdminConfig.role_for_character(
-			str(ch.get("display_name", "")),
-			int(ch.get("player_id", 0))
-		)
+	# Existing API: { player_id: { "name": display_name, ... } }
+	var chars: Dictionary = ws.database.store.get_account_characters(account_name)
+	for pid: int in chars:
+		var info: Dictionary = chars[pid]
+		var cr: String = AdminConfig.role_for_character(str(info.get("name", "")), pid)
 		if not cr.is_empty():
 			best = maxi(best, _role_priority(instance, cr))
 	return best
