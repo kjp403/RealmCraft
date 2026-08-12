@@ -130,10 +130,10 @@ func _init() -> void:
 
 	# --- Region monster defs ------------------------------------------------
 	for path_slug in [
-		["res://source/common/gameplay/characters/npc/types/badger.tres", "26", "150"],
-		["res://source/common/gameplay/characters/npc/types/desert_badger.tres", "34", "250"],
-		["res://source/common/gameplay/characters/npc/types/rabid_wolf.tres", "44", "325"],
-		["res://source/common/gameplay/characters/npc/types/angry_bat.tres", "32", "190"],
+		["res://source/common/gameplay/characters/npc/types/badger.tres", "28", "420"],
+		["res://source/common/gameplay/characters/npc/types/desert_badger.tres", "36", "580"],
+		["res://source/common/gameplay/characters/npc/types/rabid_wolf.tres", "48", "720"],
+		["res://source/common/gameplay/characters/npc/types/angry_bat.tres", "36", "480"],
 	]:
 		var body: String = FileAccess.get_file_as_string(path_slug[0])
 		if body.find("combat_level = %s" % path_slug[1]) < 0:
@@ -145,8 +145,8 @@ func _init() -> void:
 	var woodland_rat: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/characters/npc/types/woodland_rat.tres"
 	)
-	if woodland_rat.find("combat_level = 18") < 0 or woodland_rat.find("max_health = 75") < 0:
-		failures.append("Woodland Badger stats drifted from 18 / 75")
+	if woodland_rat.find("combat_level = 20") < 0 or woodland_rat.find("max_health = 180") < 0:
+		failures.append("Woodland Badger stats drifted from 20 / 180")
 	if woodland_rat.find("hide_forest") < 0:
 		failures.append("Woodland Badger should drop hide_forest")
 
