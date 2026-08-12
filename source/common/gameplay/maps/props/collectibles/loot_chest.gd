@@ -107,7 +107,7 @@ func _prop_id() -> int:
 	return container.child_id_of_node(self)
 
 
-## Server: roll the chest table into [param player]'s bag and despawn.
+## Server: roll the chest table into pending loot staging and despawn.
 func try_open(player: Player) -> Dictionary:
 	if opened or player == null or player.player_resource == null:
 		return {"ok": false, "reason": "missing"}
@@ -132,10 +132,14 @@ func try_open(player: Player) -> Dictionary:
 
 	var peer: int = opener
 	if peer > 0 and WorldServer.curr != null:
+		if WorldServer.curr.database != null:
+			WorldServer.curr.database.save_player(player.player_resource)
 		WorldServer.curr.data_push.rpc_id(peer, &"chest.opened", {
 			"chest": String(chest.display_name),
 			"gold": gold,
 			"items": items,
+			"pending": payout.get("pending", []),
+			"free_slots": int(payout.get("free_slots", 0)),
 		})
 
 	_despawn()
@@ -144,6 +148,8 @@ func try_open(player: Player) -> Dictionary:
 		"chest": String(chest.display_name),
 		"gold": gold,
 		"items": items,
+		"pending": payout.get("pending", []),
+		"free_slots": int(payout.get("free_slots", 0)),
 	}
 
 

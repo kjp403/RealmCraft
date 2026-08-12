@@ -49,6 +49,10 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## Personal bank vault (same slot format as inventory). Unlimited capacity —
 ## stored separately so bag UI stay compact while long-term storage grows.
 @export var bank: Dictionary
+## Chest-open staging: Array of { "id": item_id, "a": amount }. Items land here
+## instead of the bag until the player claims them (Take / Bank). Flushed to the
+## bank on logout. See PendingChestLoot.
+@export var pending_chest_loot: Array = []
 ## Equipped gear: gear-slot key (&"weapon", &"torso", ...) -> item_id. Equipped items
 ## live here, NOT in inventory (they're moved out on equip, back on unequip).
 @export var equipment: Dictionary

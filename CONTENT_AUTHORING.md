@@ -443,9 +443,10 @@ Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / 
 - Craft mats: `{set}_ore` / `{set}_gem` / `{set}_cloth` / `{set}_leather` under `materials/`.
 - Anvil crafts metal armor + all five weapon types; workbench crafts leather + cloth sets.
 - Ascension materials shop (`shops/resources/ascension_shop.tres`) sells **materials only** — finished Ascension gear is never gold-buyable.
-- Slayer Shop (`shops/resources/slayer_shop.tres`, NPC `ascension_broker_vael.tres` → Slayer Quartermaster Vael) sells entry-ring gems for **Slayer Points only** (not gold). Also stocks Wood Gold Small (15 pts) and Wood Gold Medium (30 pts).
+- Slayer Shop (`shops/resources/slayer_shop.tres`, NPC `ascension_broker_vael.tres` → Slayer Quartermaster Vael) sells entry-ring gems for **Slayer Points only** (not gold): Low/Med/High/Pristine = **5 / 10 / 20 / 40** pts. Also stocks Wood Gold Small (15 pts) and Wood Gold Medium (30 pts). Crafted Slayer rings are mid-game deterministic gear — keep them **strictly below** Ornate jewelry (level-50 exclusive pool).
 - Zone-wide kill loot: set `zone_kill_loot` on the biome `InstanceResource` (`biomes/woodland.tres`, `biomes/woodland_east.tres`). Every hostile kill in that instance rolls those drops — new NPCs inherit them automatically. Wood Silver Small ≈1.5% in Goblin Woodland; Wood Silver Medium ≈2% in Woodlands East. Do **not** put shared enemy-type loot for zone rares (types are reused across maps).
 - Dungeon clear rewards: set `ornate_chest_count` on `DungeonReward` for guaranteed T3 Ornate Gold Chests (item 249). Normal = 1, Hard = 2. Still gated by the 3 daily charges.
+- Chest opens (`ChestResource.roll_and_grant`): gold goes to the pouch; items stage in `PlayerResource.pending_chest_loot` and open the **Chest Loot** claim UI (`menus/chest_loot/`). Players Take (bag, 28-slot capped) or Bank stacks; logout auto-banks leftovers. Do not grant chest items with uncapped `Inventory.add_item` into the bag.
 - Optional dungeon table: `dungeon/ascension_reward.tres` (attach as `hard_reward` on a `DungeonResource`).
 - Regenerator / wire / verify: `tools/generate_ascension_gear.py`, `tools/wire_ascension_gear.gd`, `tools/verify_ascension_gear.gd`.
 

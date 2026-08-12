@@ -20,11 +20,20 @@
 [ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_tuna"]
 [ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_lobster"]
 [ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="item_crab"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="item_wood_silver_medium"]
+[ext_resource type="Resource" uid="uid://wp3akqcd3x2h" path="res://source/common/gameplay/items/weapons/sword/sword_fire.item.tres" id="item_sword_fire"]
+[ext_resource type="Resource" uid="uid://dclt4rvqc51ri" path="res://source/common/gameplay/items/weapons/hammer/hammer_fire.item.tres" id="item_hammer_fire"]
+[ext_resource type="Resource" uid="uid://cj5fsxnfh5ji5" path="res://source/common/gameplay/items/weapons/wand/fire_wand.item.tres" id="item_fire_wand"]
+[ext_resource type="Resource" uid="uid://42mfsxxm5msy" path="res://source/common/gameplay/items/weapons/bow/fire_bow.item.tres" id="item_fire_bow"]
+[ext_resource type="Resource" uid="uid://cpbdi3ouhyvte" path="res://source/common/gameplay/items/weapons/book/book_fire.item.tres" id="item_book_fire"]
 [ext_resource type="Resource" uid="uid://bcyv8agmtbwjt" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="item_sword_sunsteel"]
 [ext_resource type="Resource" uid="uid://dp76go82xd8il" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="item_hammer_sunsteel"]
 [ext_resource type="Resource" uid="uid://odkhbap0vf6s" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="item_wand_sunsteel"]
 [ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="item_sunsteel_bow"]
 [ext_resource type="Resource" uid="uid://rmr0ohwx8ooc" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="item_book_sunsteel"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_enchanted_gem"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_enchanted_cloth"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_enchanted_ore"]
 
 [sub_resource type="Resource" id="Drop_0_cloth_cave"]
 script = ExtResource("2_loot")
@@ -149,35 +158,90 @@ min_amount = 4
 max_amount = 12
 chance = 0.4
 
-[sub_resource type="Resource" id="Drop_19_sword_sunsteel"]
+[sub_resource type="Resource" id="Drop_18_wood_silver_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_silver_medium")
+min_amount = 1
+max_amount = 5
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_19_sword_fire"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_fire")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_20_hammer_fire"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_fire")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_21_fire_wand"]
+script = ExtResource("2_loot")
+item = ExtResource("item_fire_wand")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_22_fire_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("item_fire_bow")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_23_book_fire"]
+script = ExtResource("2_loot")
+item = ExtResource("item_book_fire")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_24_sword_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sword_sunsteel")
-chance = 0.01
+chance = 0.02
 
-[sub_resource type="Resource" id="Drop_20_hammer_sunsteel"]
+[sub_resource type="Resource" id="Drop_25_hammer_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_hammer_sunsteel")
-chance = 0.01
+chance = 0.02
 
-[sub_resource type="Resource" id="Drop_21_wand_sunsteel"]
+[sub_resource type="Resource" id="Drop_26_wand_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wand_sunsteel")
-chance = 0.01
+chance = 0.02
 
-[sub_resource type="Resource" id="Drop_22_sunsteel_bow"]
+[sub_resource type="Resource" id="Drop_27_sunsteel_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sunsteel_bow")
-chance = 0.01
+chance = 0.02
 
-[sub_resource type="Resource" id="Drop_23_book_sunsteel"]
+[sub_resource type="Resource" id="Drop_28_book_sunsteel"]
 script = ExtResource("2_loot")
 item = ExtResource("item_book_sunsteel")
-chance = 0.01
+chance = 0.02
+
+[sub_resource type="Resource" id="Excl_0_enchanted_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_gem")
+min_amount = 2
+max_amount = 4
+chance = 0.2
+
+[sub_resource type="Resource" id="Excl_1_enchanted_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_cloth")
+min_amount = 2
+max_amount = 4
+chance = 0.2
+
+[sub_resource type="Resource" id="Excl_2_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_ore")
+min_amount = 2
+max_amount = 4
+chance = 0.2
 
 [resource]
 script = ExtResource("1_reward")
 gold_min = 10000
 gold_max = 20000
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_mithril_ore"), SubResource("Drop_8_adamant_ore"), SubResource("Drop_9_runite_ore"), SubResource("Drop_10_shrimp"), SubResource("Drop_11_trout"), SubResource("Drop_12_salmon"), SubResource("Drop_13_cod"), SubResource("Drop_14_herring"), SubResource("Drop_15_tuna"), SubResource("Drop_16_lobster"), SubResource("Drop_17_crab"), SubResource("Drop_19_sword_sunsteel"), SubResource("Drop_20_hammer_sunsteel"), SubResource("Drop_21_wand_sunsteel"), SubResource("Drop_22_sunsteel_bow"), SubResource("Drop_23_book_sunsteel")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_cloth_cave"), SubResource("Drop_1_hide_cave"), SubResource("Drop_2_adamant_bar"), SubResource("Drop_3_runite_bar"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_coal_ore"), SubResource("Drop_7_mithril_ore"), SubResource("Drop_8_adamant_ore"), SubResource("Drop_9_runite_ore"), SubResource("Drop_10_shrimp"), SubResource("Drop_11_trout"), SubResource("Drop_12_salmon"), SubResource("Drop_13_cod"), SubResource("Drop_14_herring"), SubResource("Drop_15_tuna"), SubResource("Drop_16_lobster"), SubResource("Drop_17_crab"), SubResource("Drop_18_wood_silver_medium"), SubResource("Drop_19_sword_fire"), SubResource("Drop_20_hammer_fire"), SubResource("Drop_21_fire_wand"), SubResource("Drop_22_fire_bow"), SubResource("Drop_23_book_fire"), SubResource("Drop_24_sword_sunsteel"), SubResource("Drop_25_hammer_sunsteel"), SubResource("Drop_26_wand_sunsteel"), SubResource("Drop_27_sunsteel_bow"), SubResource("Drop_28_book_sunsteel")])
+exclusive_loot = Array[ExtResource("2_loot")]([SubResource("Excl_0_enchanted_gem"), SubResource("Excl_1_enchanted_cloth"), SubResource("Excl_2_enchanted_ore")])
+exclusive_max = 2
 ornate_chest_count = 2
 lockout_hours = 0.0

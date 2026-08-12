@@ -36,82 +36,82 @@ price = 30
 [sub_resource type="Resource" id="Entry_gem_guard_low"]
 script = ExtResource("1_entry")
 item = ExtResource("5_gem_guard_low")
-price = 30
+price = 5
 
 [sub_resource type="Resource" id="Entry_gem_guard_medium"]
 script = ExtResource("1_entry")
 item = ExtResource("6_gem_guard_medium")
-price = 60
+price = 10
 
 [sub_resource type="Resource" id="Entry_gem_guard_high"]
 script = ExtResource("1_entry")
 item = ExtResource("7_gem_guard_high")
-price = 100
+price = 20
 
 [sub_resource type="Resource" id="Entry_gem_guard_pristine"]
 script = ExtResource("1_entry")
 item = ExtResource("8_gem_guard_pristine")
-price = 200
+price = 40
 
 [sub_resource type="Resource" id="Entry_gem_agile_low"]
 script = ExtResource("1_entry")
 item = ExtResource("9_gem_agile_low")
-price = 30
+price = 5
 
 [sub_resource type="Resource" id="Entry_gem_agile_medium"]
 script = ExtResource("1_entry")
 item = ExtResource("10_gem_agile_medium")
-price = 60
+price = 10
 
 [sub_resource type="Resource" id="Entry_gem_agile_high"]
 script = ExtResource("1_entry")
 item = ExtResource("11_gem_agile_high")
-price = 100
+price = 20
 
 [sub_resource type="Resource" id="Entry_gem_agile_pristine"]
 script = ExtResource("1_entry")
 item = ExtResource("12_gem_agile_pristine")
-price = 200
+price = 40
 
 [sub_resource type="Resource" id="Entry_gem_focus_low"]
 script = ExtResource("1_entry")
 item = ExtResource("13_gem_focus_low")
-price = 30
+price = 5
 
 [sub_resource type="Resource" id="Entry_gem_focus_medium"]
 script = ExtResource("1_entry")
 item = ExtResource("14_gem_focus_medium")
-price = 60
+price = 10
 
 [sub_resource type="Resource" id="Entry_gem_focus_high"]
 script = ExtResource("1_entry")
 item = ExtResource("15_gem_focus_high")
-price = 100
+price = 20
 
 [sub_resource type="Resource" id="Entry_gem_focus_pristine"]
 script = ExtResource("1_entry")
 item = ExtResource("16_gem_focus_pristine")
-price = 200
+price = 40
 
 [sub_resource type="Resource" id="Entry_gem_vital_low"]
 script = ExtResource("1_entry")
 item = ExtResource("17_gem_vital_low")
-price = 30
+price = 5
 
 [sub_resource type="Resource" id="Entry_gem_vital_medium"]
 script = ExtResource("1_entry")
 item = ExtResource("18_gem_vital_medium")
-price = 60
+price = 10
 
 [sub_resource type="Resource" id="Entry_gem_vital_high"]
 script = ExtResource("1_entry")
 item = ExtResource("19_gem_vital_high")
-price = 100
+price = 20
 
 [sub_resource type="Resource" id="Entry_gem_vital_pristine"]
 script = ExtResource("1_entry")
 item = ExtResource("20_gem_vital_pristine")
-price = 200
+price = 40
 
 [resource]
 script = ExtResource("2_shop")

@@ -148,15 +148,16 @@ extends Resource
 @export var arm_shot_lifetime_s: float = 1.4
 @export var enraged_arm_shot_interval_s: float = 0.0
 ## DPS-ranked ornate chest grants. When ornate_chest_top_max > 0, RewardService
-## awards ONLY the top damage dealer [top_min, top_max] of [member ornate_chest_item]
-## (defaults to T3 Ornate Gold / pink if unset). Second/consolation fields are
-## unused legacy (kept for .tres compatibility) — only top DPS gets chests.
+## awards [member ornate_chest_item] by damage rank among eligible contributors:
+## top DPS gets [top_min, top_max], optional #2 gets [second_min, second_max],
+## everyone else rolls [member ornate_chest_consolation_chance] for 1 chest.
+## Empty [member ornate_chest_item] defaults to T3 Ornate Gold / pink (249).
 @export var ornate_chest_top_min: int = 0
 @export var ornate_chest_top_max: int = 0
 @export var ornate_chest_second_min: int = 0
 @export var ornate_chest_second_max: int = 0
 @export_range(0.0, 1.0, 0.01) var ornate_chest_consolation_chance: float = 0.0
-## Bag chest item granted to top DPS (e.g. Ornate Red / Blue / Gold). Empty = pink (249).
+## Bag chest item for ranked grants (e.g. Ornate Red / Blue / Gold). Empty = pink (249).
 @export var ornate_chest_item: Item
 
 

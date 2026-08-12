@@ -1,7 +1,8 @@
 class_name ChestResource
 extends Resource
 ## Loot table + presentation for a world Loot Chest (boss drops, admin spawns).
-## Opened via [code]chest.open[/code]; grants rolled gold + items straight to the bag.
+## Opened via [code]chest.open[/code]; gold goes to the pouch, items stage in
+## [member PlayerResource.pending_chest_loot] for the claim UI.
 
 ## Display name shown in toasts / hover (e.g. "Wood Chest (Silver)").
 @export var display_name: String = "Loot Chest"
@@ -39,6 +40,8 @@ static func load_by_slug(slug: StringName) -> ChestResource:
 ## Server: roll gold + loot into [param player]'s bag. Returns
 ## [code]{ "chest", "gold", "items" }[/code]. Guarantees ≥1 resource stack when
 ## the table has any valid drops (so T1/T2 never open gold-only).
+## Opened via [code]chest.open[/code]; gold goes to the pouch, items stage in
+## [member PlayerResource.pending_chest_loot] for the claim UI.
 func roll_and_grant(player: Player) -> Dictionary:
 	if player == null or player.player_resource == null:
 		return {}
@@ -83,6 +86,8 @@ func roll_and_grant(player: Player) -> Dictionary:
 		"chest": display_name,
 		"gold": gold,
 		"items": items,
+		"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
+		"free_slots": Inventory.free_slots(resource.inventory),
 	}
 
 
@@ -119,7 +124,7 @@ static func _grant_drop(resource: PlayerResource, drop: LootDrop, items: Array) 
 	var item_id: int = int(grant_item.get_meta(&"id", 0))
 	if item_id <= 0:
 		return
-	Inventory.add_item(resource.inventory, item_id, amount)
+	PendingChestLoot.add(resource.pending_chest_loot, item_id, amount)
 	var display_name: String = str((grant_item as Item).item_name) if grant_item is Item else "Item"
 	items.append({
 		"id": item_id,

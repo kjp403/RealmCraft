@@ -174,6 +174,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	# and InstanceManagerServer._on_peer_connected). Runs before the instance despawn.
 	_stamp_location(peer_id, player)
 
+	# Chest staging leftovers go to the bank so disconnect never voids loot.
+	if not PendingChestLoot.is_empty(player.pending_chest_loot):
+		PendingChestLoot.flush_to_bank(player)
+
 	database.save_player(player)
 
 	player_id_to_peer_id.erase(player.player_id)

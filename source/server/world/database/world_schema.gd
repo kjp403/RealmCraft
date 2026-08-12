@@ -45,6 +45,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 12:
 		_migration_v12(db)
 		_set_schema_version(db, 12)
+	if version < 13:
+		_migration_v13(db)
+		_set_schema_version(db, 13)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -268,6 +271,14 @@ static func _migration_v11(db: SQLite) -> void:
 static func _migration_v12(db: SQLite) -> void:
 	if not _column_exists(db, "players", "slayer_json"):
 		db.query("ALTER TABLE players ADD COLUMN slayer_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v13: chest-open staging loot (PendingChestLoot). JSON array of
+## {id, a} stacks held until the player claims into bag/bank. ADD COLUMN —
+## no DB wipe. Defaults to '[]'.
+static func _migration_v13(db: SQLite) -> void:
+	if not _column_exists(db, "players", "pending_chest_loot_json"):
+		db.query("ALTER TABLE players ADD COLUMN pending_chest_loot_json TEXT NOT NULL DEFAULT '[]';")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

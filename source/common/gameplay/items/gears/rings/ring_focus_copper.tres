@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="Resource_0uaa1"]
 script = ExtResource("1_mwkql")
 stat_name = "mana_max"
-value = 5.0
+value = 10.0
 vendor_value = 8
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 

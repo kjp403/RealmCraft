@@ -189,6 +189,7 @@ func _ready() -> void:
 		active_guild_id = payload.get("active_guild_id", 0))
 	# Friend-green nameplates: pull the list once we have a local player + world.
 	local_player_ready.connect(_hydrate_friend_ids)
+	local_player_ready.connect(_restore_pending_chest_loot)
 	Client.subscribe(&"wardstones.set", func(payload: Dictionary):
 		wardstones = PackedStringArray(payload.get("wardstones", []))
 		wardstones_changed.emit())
@@ -367,7 +368,7 @@ func _on_item_picked_up(data: Dictionary) -> void:
 	inventory_changed.emit(data)
 
 
-## Server-pushed loot chest open: gold + items already in the bag; show LootFeed.
+## Server-pushed loot chest open: gold to pouch, items staged for claim UI.
 func _on_chest_opened(data: Dictionary) -> void:
 	if data.is_empty():
 		return
@@ -383,6 +384,29 @@ func _on_chest_opened(data: Dictionary) -> void:
 	var chest_name: String = str(data.get("chest", "Loot Chest"))
 	Toaster.toast("Opened %s" % chest_name)
 	inventory_changed.emit(data)
+	# Staging claim UI — further opens refresh the same panel.
+	open_menu_requested.emit(&"chest_loot", data)
+
+
+## Reopen the claim UI if the player still has staged chest loot from a prior
+## session that wasn't flushed (logout auto-banks, so this is mainly crash recovery).
+func _restore_pending_chest_loot(_player: LocalPlayer) -> void:
+	await get_tree().process_frame
+	if InstanceClient.current == null:
+		return
+	var result: Array = await Client.request_data_await(
+		&"chest.loot_get", {}, String(InstanceClient.current.name)
+	)
+	if result[1] != OK:
+		return
+	var payload: Dictionary = result[0] as Dictionary
+	if not bool(payload.get("ok", false)):
+		return
+	var pending: Array = payload.get("pending", []) as Array
+	if pending.is_empty():
+		return
+	Toaster.toast("You have unclaimed chest loot.")
+	open_menu_requested.emit(&"chest_loot", payload)
 
 
 func _on_gather_result(data: Dictionary) -> void:

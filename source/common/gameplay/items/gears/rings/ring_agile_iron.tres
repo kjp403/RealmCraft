@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="Resource_tw1yf"]
 script = ExtResource("1_df0pt")
 stat_name = "move_speed"
-value = 2.0
+value = 4.0
 vendor_value = 16
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 

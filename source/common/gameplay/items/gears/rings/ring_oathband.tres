@@ -20,6 +20,7 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
+required_level = 50
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
 item_name = &"Oathband"
 item_icon = ExtResource("2_icon")
