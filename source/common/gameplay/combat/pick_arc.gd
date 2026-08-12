@@ -1,23 +1,23 @@
 class_name PickArc
 extends Area2D
-## Pickaxe / sickle swing hitbox. Hybrid:
-## - bodies (players, NPCs, territory flags) → small "tool as weapon" damage via
-##   CombatHit, using the SAME deterministic shape query as MeleeArc so a swing
-##   lands on still targets (a flag) that enter-events miss.
-## - areas (MineableNode) → register_gather_hit (the actual harvest).
+## Pickaxe / sickle / axe / rod swing hitbox. Harvest-only:
+## - MineableNode areas → register_gather_hit (the actual gather).
+## - Never queries HurtBoxes / flags / combatants — tools are not weapons.
+##   (PickSwingAbility also forces character_damage = 0 as defense in depth.)
 ##
 ## One swing gathers from at most ONE MineableNode (the nearest to the player).
 ## Without that, two veins under the arc both take extraction damage and award
 ## XP in the same swing — unacceptable when nodes sit near each other.
 ##
-## Server-only damage / extraction; clients spawn the same scene for visual
-## feedback but the gates keep effects server-side.
+## Server-only extraction; clients spawn the same scene for visual feedback
+## but the gates keep effects server-side.
 
 
 @export var lifetime: float = 0.2
 
-## Damage dealt to Character bodies + flags. Kept low — a tool is a weak weapon.
-var character_damage: float = 2.0
+## Legacy field — gather tools always leave this at 0. Kept so old call sites
+## that assign it stay compatible; combat path is skipped when <= 0.
+var character_damage: float = 0.0
 ## Extraction damage per swing to MineableNodes (wooden = 1, iron = 2, …).
 var extraction_damage: int = 1
 ## Which tool this swing represents (&"pickaxe", &"sickle", …) — checked against
@@ -27,16 +27,17 @@ var source: Character
 ## Instance ref so register_gather_hit can route the result back to the peer.
 var instance: Node
 
-var _hit_bodies: Array[Node] = []
 var _gather_candidates: Array[MineableNode] = []
 var _gather_applied: bool = false
 var _scanned: bool = false
 
 
 func _ready() -> void:
-	collision_mask = PhysicsLayers.HARVEST_TARGET_MASK
+	# HARVESTABLE only — do NOT widen to combat layers (hurtbox/flag).
+	# Overwriting the scene mask with a combat-inclusive mask was why pickaxe
+	# swings near bats still called take_damage(0) and pulled aggro.
+	collision_mask = PhysicsLayers.HARVESTABLE
 	if GameMode.is_world_server():
-		body_entered.connect(_on_body_entered)
 		area_entered.connect(_on_area_entered)
 	else:
 		set_physics_process(false)
@@ -55,30 +56,12 @@ func _physics_process(_delta: float) -> void:
 		return
 	_scanned = true
 	# Deterministic shape query (same as MeleeArc): enter-events miss targets that
-	# are already overlapping when this hitbox spawns. Route MineableNode areas to
-	# gather; everything else through the weak combat path.
+	# are already overlapping when this hitbox spawns. Harvest mask only returns
+	# MineableNodes — never NPCs.
 	for body: Node2D in CombatHit.overlapping_bodies(self):
 		if body is MineableNode:
 			_queue_gather(body as MineableNode)
-		else:
-			_on_body_entered(body)
 	_apply_nearest_gather()
-
-
-func _on_body_entered(body: Node2D) -> void:
-	if body == source:
-		return
-	if body is MineableNode:
-		# Queue only — resolve after the shape scan so we pick the nearest.
-		_queue_gather(body as MineableNode)
-		if _scanned:
-			_apply_nearest_gather()
-		return
-	if _hit_bodies.has(body):
-		return
-	_hit_bodies.append(body)
-	# Shared target rules (flags, PvP, sparring, guild friendly-fire) via CombatHit.
-	CombatHit.try_damage(source if source is Character else null, body, character_damage)
 
 
 # Backup path when a node walks/enters mid-swing. Primary hits come from the

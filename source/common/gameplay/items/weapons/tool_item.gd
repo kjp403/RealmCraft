@@ -56,7 +56,8 @@ func _apply_swing_stats(character: Character) -> void:
 	for ability: AbilityResource in mounted.abilities:
 		if ability is PickSwingAbility:
 			var swing: PickSwingAbility = ability as PickSwingAbility
-			# Gathering tools never deal combat damage — mining near bats must not aggro.
+			# Gathering tools never deal combat damage — mining/woodcutting near
+			# mobs must not aggro (pickaxe, axe, sickle, fishing rod).
 			swing.character_damage = 0.0
 			if extraction_damage > 0:
 				swing.extraction_damage = extraction_damage

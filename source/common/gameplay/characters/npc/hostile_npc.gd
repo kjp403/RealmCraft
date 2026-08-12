@@ -1368,8 +1368,9 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 	# Engagement triggers — only when the hit actually landed on a living
 	# mob. Even if super killed us in the same call, was_alive captures the
 	# pre-state so allies still get a "your buddy died fighting <attacker>"
-	# notification and aggro the killer.
-	if not was_alive or attacker == null:
+	# notification and aggro the killer. Zero-damage calls (gather-tool arcs
+	# that historically still queried HurtBoxes) must NOT pull aggro.
+	if not was_alive or attacker == null or amount <= 0.0:
 		return
 	# Pack-call: nearby HostileNpcs in detection_area pick this up.
 	was_attacked.emit(attacker)

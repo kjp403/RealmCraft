@@ -73,6 +73,11 @@ static func try_damage(source: Character, body: Node2D, damage: float, damage_ty
 	if deflectable and (body as Character).is_deflecting():
 		return Result.BLOCKED  # caller (the projectile) queue_frees; no damage dealt
 
+	# Zero-damage "hits" must not call take_damage — HostileNPC used to aggro
+	# on amount==0 (gather tools), and Character already no-ops HP for <=0.
+	if damage <= 0.0:
+		return Result.IGNORED
+
 	body.take_damage(damage, source, damage_type)
 	return Result.DAMAGED
 
