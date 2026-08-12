@@ -16,5 +16,6 @@ const INTERACTABLE: int = 1 << 6    ## layer 7 — warpers / masters / stations
 ## A projectile / melee hitbox hits: hurtboxes (damage) + flags (capture) + world (block).
 ## Deliberately NOT character bodies — those are navigation only.
 const COMBAT_TARGET_MASK: int = WORLD | HURTBOX | FLAG
-## Pick / sickle arc additionally gathers mineables.
+## Deprecated for gather arcs — historically PickArc used this and pulled NPC
+## aggro via HurtBoxes. Gather swings must use HARVESTABLE only.
 const HARVEST_TARGET_MASK: int = COMBAT_TARGET_MASK | HARVESTABLE

@@ -1,7 +1,8 @@
 class_name PickSwingAbility
 extends AbilityResource
 ## Gathering-tool swing. Spawns a PickArc that only harvests MineableNodes —
-## never deals combat damage. Tools are separate from weapons: Spacebar / free-aim
+## never deals combat damage. Covers pickaxe (veins), axe (trees), sickle
+## (herbs), and fishing rod. Tools are separate from weapons: Spacebar / free-aim
 ## while holding a ToolItem will not attack NPCs (see LocalPlayer).
 ##
 ## Higher-tier tools use the same ability with a tuned extraction_damage
