@@ -28,6 +28,9 @@
 [ext_resource type="Texture2D" uid="uid://d1o56hk11y82e" path="res://assets/sprites/environment/structures/stations/workbench/workbench.png" id="37_wb_tex"]
 [ext_resource type="Texture2D" uid="uid://cqrq6tvykgy0o" path="res://assets/sprites/environment/structures/stations/workbench/ascended_workbench.png" id="38_asc_tex"]
 [ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/fletching_bench.tres" id="39_fletch"]
+[ext_resource type="Resource" uid="uid://dtojmae8u5g6l" path="res://source/common/gameplay/characters/npc/npcs/mira.tres" id="40_mira"]
+[ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/alchemy_station.tres" id="41_alchemy"]
+[ext_resource type="Texture2D" uid="uid://kjdva1dwytwi" path="res://assets/sprites/environment/structures/stations/alchemy/alchemy_table.png" id="42_alchart"]
 
 [sub_resource type="Resource" id="Resource_h1lk8"]
 script = ExtResource("14_gl3u8")
@@ -138,3 +141,16 @@ metadata/_edit_group_ = true
 texture = ExtResource("37_wb_tex")
 region_enabled = true
 region_rect = Rect2(103, 64, 73, 48)
+
+[node name="Mira" parent="." unique_id=4019232801 instance=ExtResource("14_qwuyn")]
+position = Vector2(-101, 335)
+npc_resource = ExtResource("40_mira")
+
+[node name="AlchemyTable" parent="." unique_id=4019232802 instance=ExtResource("30_craft")]
+position = Vector2(-290, 293)
+station = ExtResource("41_alchemy")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="AlchemyTable" unique_id=4019232803]
+position = Vector2(0, -12)
+texture = ExtResource("42_alchart")

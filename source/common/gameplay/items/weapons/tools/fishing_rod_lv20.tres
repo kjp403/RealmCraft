@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://cfishrodlv2001"]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/tools/fishing_rod.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/tools/fishing_rod_lv20.png" id="1_tex"]
 [ext_resource type="Script" uid="uid://b5hsnu4140fky" path="res://source/common/gameplay/items/weapons/tool_item.gd" id="2_toolitem"]
 [ext_resource type="Resource" uid="uid://qav4p12rsbn3" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="3_slot"]
 [ext_resource type="PackedScene" uid="uid://ca3506b34964c7" path="res://source/common/gameplay/items/weapons/tools/fishing_rod.tscn" id="4_scene"]
