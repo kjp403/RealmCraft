@@ -42,6 +42,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A mithril-bound tome. Pages ring when struck."
 can_trade = true
 vendor_value = 60
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"book_mithril.item"
 metadata/id = 265

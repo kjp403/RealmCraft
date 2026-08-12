@@ -10,6 +10,7 @@ script = ExtResource("1_6abd4")
 stat_name = "armor"
 value = 12.0
 vendor_value = 320
+stack_limit = 10
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

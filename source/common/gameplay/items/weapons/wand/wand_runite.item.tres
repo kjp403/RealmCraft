@@ -42,6 +42,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A runite focus wand, channelled through tempered metal."
 can_trade = true
 vendor_value = 200
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"wand_runite.item"
 metadata/id = 290

@@ -30,6 +30,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A steel blade forged at the anvil. Solid work for its tier."
 can_trade = true
 vendor_value = 32
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"sword_steel.item"
 metadata/id = 285

@@ -18,5 +18,6 @@ item_name = &"Fishing Rod (Lv 10)"
 item_icon = ExtResource("1_tex")
 description = "A sturdier rod with better line. Slightly higher catch rates than a basic rod."
 vendor_value = 18
+stack_limit = 10
 metadata/slug = &"fishing_rod_lv10"
 metadata/id = 250

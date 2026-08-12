@@ -86,7 +86,7 @@ func _init() -> void:
 		# Boss-only keepsakes — never junk-sold (vendor_value 0).
 		if relic.vendor_value != 0:
 			failures.append("%s has vendor_value %d (must be 0 — not vendor-sellable)" % [slug, relic.vendor_value])
-		# GearItem defaults to 5 (smithable armour batches); relics are keepsakes.
+		# GearItem defaults to 10 (smithable armour batches); relics are keepsakes.
 		if relic.stack_limit != 1:
 			failures.append("%s stacks to %d, expected 1" % [slug, relic.stack_limit])
 

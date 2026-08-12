@@ -10,6 +10,7 @@ script = ExtResource("1_uifqm")
 stat_name = "health_max"
 value = 8.0
 vendor_value = 8
+stack_limit = 10
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

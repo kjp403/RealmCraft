@@ -10,6 +10,7 @@ script = ExtResource("1_mod")
 stat_name = "mana_max"
 value = 18.0
 vendor_value = 16
+stack_limit = 10
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

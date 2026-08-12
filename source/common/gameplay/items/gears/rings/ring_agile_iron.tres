@@ -10,6 +10,7 @@ script = ExtResource("1_df0pt")
 stat_name = "move_speed"
 value = 4.0
 vendor_value = 16
+stack_limit = 10
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

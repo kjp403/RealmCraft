@@ -19,6 +19,7 @@ item_name = &"Wooden Pickaxe"
 item_icon = SubResource("AtlasTexture_f5crd")
 description = "Equip it, then left-click an ore vein to auto-mine."
 vendor_value = 2
+stack_limit = 10
 metadata/_custom_type_script = "uid://b5hsnu4140fky"
 metadata/slug = &"pickaxe"
 metadata/id = 52

@@ -20,8 +20,8 @@ const _SLOT_ORDER: Dictionary = {
 ## Main Stats (Base stats)
 @export var base_modifiers: Array[StatModifier]
 func _init() -> void:
-	# Smithable gear stacks (armor / weapons); tools override to 1 in their .tres.
-	stack_limit = 5
+	# Smithable gear / tools / jewelry stack; relics override to 1 in their .tres.
+	stack_limit = 10
 
 
 func inventory_tab() -> InventoryTab:

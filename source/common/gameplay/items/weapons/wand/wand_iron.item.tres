@@ -42,6 +42,6 @@ item_icon = SubResource("Atlas_icon")
 description = "A iron focus wand, channelled through tempered metal."
 can_trade = true
 vendor_value = 16
-stack_limit = 5
+stack_limit = 10
 metadata/slug = &"wand_iron.item"
 metadata/id = 288

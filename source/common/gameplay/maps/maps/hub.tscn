@@ -15,7 +15,6 @@
 [ext_resource type="PackedScene" uid="uid://dfgyo6udh8k1s" path="res://source/common/gameplay/maps/maps/trade_house/outside_building.tscn" id="18_uvtmx"]
 [ext_resource type="PackedScene" uid="uid://bejfk0u1aillb" path="res://source/common/gameplay/maps/maps/smith_house/outside_building.tscn" id="20_2jkb5"]
 [ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="21_sc04i"]
-[ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="24_2sqao"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="25_2opns"]
 [ext_resource type="SpriteFrames" uid="uid://dikmb6ti5t2j6" path="res://source/common/gameplay/characters/sprite_frames/royal_soldier.tres" id="26_t0at5"]
 [ext_resource type="SpriteFrames" uid="uid://bfer1b8yk1buk" path="res://source/common/gameplay/characters/sprite_frames/royal_archer.tres" id="27_eqvv7"]
@@ -209,13 +208,9 @@ warper_id = 28
 position = Vector2(960, 16)
 warper_id = 26
 
-[node name="CavePortal" parent="Warpers" unique_id=396714839 instance=ExtResource("29_2sqao")]
+[node name="CaveLanding" parent="Warpers" unique_id=396714839 instance=ExtResource("7_aris3")]
 position = Vector2(792, -48)
-portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
-destination_label = "Fungus Cave"
-target_instance = ExtResource("24_2sqao")
 warper_id = 21
-target_id = 21
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=1888000001]
 
