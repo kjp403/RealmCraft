@@ -10,11 +10,12 @@ extends BaseMultiplayerEndpoint
 
 ## The full-DB backup (WAL checkpoint TRUNCATE + whole-file copy) is the heaviest
 ## periodic op and its cost grows with DB size, so it runs on a MULTIPLE of the save
-## interval instead of every save. Player saves still flush every 5 min (cheap per
-## player, keeps the data-loss window short); the backup folds in every Nth save. Side
-## benefit: with keep_last=10 the retained history stretches from ~50 min to ~5 h.
+## interval instead of every save. Player saves flush every 60s (cheap per player,
+## keeps the crash/rollback window short); the backup folds in every Nth save.
+## With keep_last=10 the retained history stretches to ~5 h.
 ## See docs/netcode_perf_audit.md.
-const BACKUP_EVERY_N_SAVES: int = 6  # 6 × 5 min = 30 min
+const PERIODIC_SAVE_INTERVAL_SEC: float = 60.0
+const BACKUP_EVERY_N_SAVES: int = 30  # 30 × 60s = 30 min
 var _periodic_save_count: int = 0
 
 var token_list: Dictionary[String, PlayerResource]
@@ -34,7 +35,9 @@ static var curr: WorldServer
 func start_world_server() -> void:
 	world_manager.token_received.connect(
 		func(auth_token: String, _username: String, character_id: int, client_ip: String = ""):
-			var player: PlayerResource = database.get_player_resource(character_id)
+			# Reconnect must never mint a session from a stale DB row while the
+			# live peer still holds newer in-memory progress (XP/loot/etc.).
+			var player: PlayerResource = _takeover_or_load_player(character_id)
 			token_list[auth_token] = player
 			if not client_ip.is_empty():
 				token_client_ips[auth_token] = client_ip
@@ -53,12 +56,11 @@ func start_world_server() -> void:
 	chat_service.setup_with_db(database.db)
 	$InstanceManager.start_instance_manager()
 
-	# Periodic save + backup. 5 minutes balances "low data loss on crash"
-	# against "no churning the disk every second." backup_database keeps the
-	# last 10 snapshots, so we get ~50 minutes of recoverable history.
+	# Periodic save + backup. 60s keeps crash/disconnect rollback short without
+	# writing every combat tick. Full DB backups still run on BACKUP_EVERY_N_SAVES.
 	var save_timer: Timer = Timer.new()
 	save_timer.name = "PeriodicSaveTimer"
-	save_timer.wait_time = 5.0 * 60.0
+	save_timer.wait_time = PERIODIC_SAVE_INTERVAL_SEC
 	save_timer.autostart = true
 	save_timer.timeout.connect(_on_periodic_save)
 	add_child(save_timer)
@@ -91,6 +93,58 @@ func _stamp_location(peer_id: int, player: PlayerResource) -> void:
 	player.lb_stats["last_instance"] = player.current_instance
 	player.lb_stats["last_x"] = player.last_position.x
 	player.lb_stats["last_y"] = player.last_position.y
+
+
+## If [param character_id] is already online, flush that live PlayerResource to
+## disk, detach it from the old peer, and reuse it for the new auth token.
+## Otherwise load a fresh row from the DB. Prevents reconnect from restoring a
+## periodic-save snapshot that is minutes behind the live session.
+func _takeover_or_load_player(character_id: int) -> PlayerResource:
+	var existing_peer: int = int(player_id_to_peer_id.get(character_id, 0))
+	if existing_peer == 0:
+		return database.get_player_resource(character_id)
+
+	var live: PlayerResource = connected_players.get(existing_peer)
+	if live == null:
+		player_id_to_peer_id.erase(character_id)
+		return database.get_player_resource(character_id)
+
+	# Bank session time + stamp location before flush so the takeover save is
+	# as complete as a normal disconnect flush.
+	if live.session_start_ms > 0:
+		@warning_ignore("integer_division")
+		var session_seconds: int = (Time.get_ticks_msec() - live.session_start_ms) / 1000
+		if session_seconds > 0:
+			live.lb_stats["played_seconds"] = int(live.lb_stats.get("played_seconds", 0)) + session_seconds
+		live.session_start_ms = 0
+	live.lb_stats["last_seen_ms"] = int(Time.get_unix_time_from_system() * 1000.0)
+	_stamp_location(existing_peer, live)
+	if not PendingChestLoot.is_empty(live.pending_chest_loot):
+		PendingChestLoot.flush_to_bank(live)
+	database.save_player(live)
+
+	# Detach before kicking so _on_peer_disconnected is a no-op for this peer
+	# (avoids a second save of a half-torn-down session, and avoids clobber).
+	player_id_to_peer_id.erase(character_id)
+	connected_players.erase(existing_peer)
+	peer_client_ips.erase(existing_peer)
+	live.current_peer_id = 0
+	BlockList.clear_player(character_id)
+
+	SparringService.on_peer_disconnected(existing_peer)
+	DungeonService.on_peer_disconnected(existing_peer)
+	RateLimiter.forget(existing_peer)
+	if world_manager != null:
+		world_manager.player_disconnected.rpc_id(1, live.account_name)
+
+	var game_mp: MultiplayerAPI = multiplayer_api
+	if game_mp != null and game_mp.multiplayer_peer != null:
+		game_mp.multiplayer_peer.disconnect_peer(existing_peer)
+
+	ServerLog.info(
+		"Reconnect takeover: flushed + detached player #%d from peer %d." % [character_id, existing_peer]
+	)
+	return live
 
 
 func _on_periodic_save() -> void:
@@ -144,6 +198,16 @@ func _on_peer_connected(peer_id: int) -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	ServerLog.info("Peer %d disconnected." % peer_id)
+	# Resolve the player first. Reconnect takeover may have already detached
+	# this peer — in that case skip save/teardown so we don't clobber the
+	# live resource now owned by the new session.
+	var player: PlayerResource = connected_players.get(peer_id)
+	if player == null:
+		SparringService.on_peer_disconnected(peer_id)
+		DungeonService.on_peer_disconnected(peer_id)
+		RateLimiter.forget(peer_id)
+		return
+
 	# Sparring: if mid-match, end it before we tear down so the survivor gets
 	# the win + teleport instead of being stranded in the arena.
 	SparringService.on_peer_disconnected(peer_id)
@@ -153,10 +217,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	# Drop rate-limit counters so a reconnect starts with a clean window.
 	RateLimiter.forget(peer_id)
 
-	world_manager.player_disconnected.rpc_id(1, connected_players[peer_id].account_name)
-	var player: PlayerResource = connected_players.get(peer_id)
-	if not player:
-		return
+	world_manager.player_disconnected.rpc_id(1, player.account_name)
 
 	# Bank the elapsed session time before persisting. Stored as a flat key on
 	# lb_stats so it rides existing stats_json serialization (no schema change).
