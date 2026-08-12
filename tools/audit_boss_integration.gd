@@ -231,6 +231,18 @@ func _audit_dead_clips() -> void:
 
 
 func _audit_indexes() -> void:
+	# EVERY file in registry/indexes/ must load as a ContentIndex. ContentRegistryHub
+	# iterates that folder and assigns each into a typed ContentIndex var; anything
+	# else throws, and the throw aborts the loop, so every registry alphabetically
+	# after the offender silently never registers. In game that reads as "all my
+	# gear vanished and says it cannot be used". This exact bug shipped once.
+	for f: String in ResourceLoader.list_directory("res://source/common/registry/indexes/"):
+		var r: Resource = ResourceLoader.load("res://source/common/registry/indexes/" + f)
+		if r == null:
+			_f("registry/indexes/%s will not load" % f)
+		elif (r as ContentIndex) == null:
+			_f("registry/indexes/%s is NOT a ContentIndex — it will abort the registry bootstrap and take every later index down with it" % f)
+	print("  all files in registry/indexes/ are ContentIndexes")
 	for path: String in _all_files("res://source/common/registry/indexes", [".tres"]):
 		var idx: ContentIndex = load(path) as ContentIndex
 		if idx == null:
