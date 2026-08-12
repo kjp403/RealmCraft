@@ -238,6 +238,16 @@ func spawn_player(peer_id: int) -> void:
 	connected_peers.append(peer_id)
 	_propagate_spawn(peer_id)
 
+	# A cross-map arrival REUSES the client's LocalPlayer node (InstanceClient
+	# keeps it across instance changes), so it walks into the new map still
+	# holding the coordinates it had in the old one — and re-asserts them at
+	# 20 Hz, because movement is client-authoritative. The spawn state above
+	# therefore races the client's own echo and loses, stranding the player
+	# wherever the previous map put them (the Smith House "spawn into null").
+	# Push the same explicit teleport every same-instance move already uses; it
+	# also freezes input for 500 ms so the arrival can't be run off instantly.
+	WorldServer.curr.data_push.rpc_id(peer_id, &"player.teleport", {"position": spawn_position})
+
 
 func instantiate_player(peer_id: int) -> Player:
 	var player_resource: PlayerResource = world_server.connected_players[peer_id]

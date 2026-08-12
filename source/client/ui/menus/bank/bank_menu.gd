@@ -19,6 +19,7 @@ var _bank_grid: GridContainer
 var _bag_count: Label
 var _bank_count: Label
 var _upgrade_button: Button
+var _sort_button: Button
 var _amount_spin: SpinBox
 var _transfer_button: Button
 var _deposit_all_button: Button
@@ -122,7 +123,7 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	hint.text = (
 		"Qty 1: left-click deposits. Qty 2+: set amount (X/Max). Drag to rearrange. Or Deposit All."
 		if is_bag
-		else "Drag to rearrange. Click a stack, set amount (X/Max), Withdraw."
+		else "Drag to rearrange, or Sort to order A-Z. Click a stack, set amount (X/Max), Withdraw."
 	)
 	hint.add_theme_color_override(&"font_color", MUTED)
 	hint.add_theme_font_size_override(&"font_size", 12)
@@ -144,6 +145,12 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 	else:
 		_bank_grid = grid
 		_bank_count = count
+		_sort_button = Button.new()
+		_sort_button.text = "Sort"
+		_sort_button.focus_mode = Control.FOCUS_NONE
+		_sort_button.tooltip_text = "Arrange the vault alphabetically by item name."
+		_sort_button.pressed.connect(_on_sort_pressed)
+		header.add_child(_sort_button)
 		_upgrade_button = Button.new()
 		_upgrade_button.text = "Buy +%d slots (%sG)" % [
 			BankInteraction.UPGRADE_SLOTS,
@@ -258,6 +265,8 @@ func _rebuild_grids() -> void:
 	_bank_count.text = "%d / %d" % [bank_stacks, _bank_slots]
 	if _deposit_all_button != null:
 		_deposit_all_button.disabled = _busy or bag_stacks <= 0
+	if _sort_button != null:
+		_sort_button.disabled = _busy or bank_stacks <= 1
 	if _upgrade_button != null:
 		_upgrade_button.disabled = _busy
 		_upgrade_button.text = "Buy +%d slots (%sG)" % [
@@ -467,7 +476,44 @@ func _on_max_pressed() -> void:
 func _on_transfer_pressed() -> void:
 	if _selected_uid < 0:
 		return
+	# The spinner only commits typed text on submit/focus-loss, and every button in
+	# this row is FOCUS_NONE — so without apply() a typed "80" is still read as the
+	# previous value.
+	_amount_spin.apply()
 	_transfer_stack(_selected_uid, _selected_from_bag, int(_amount_spin.value))
+
+
+func _on_sort_pressed() -> void:
+	if _busy:
+		return
+	var entries: Array = []
+	for uid: Variant in _bank.keys():
+		var data: Dictionary = _bank[uid]
+		var item_id: int = int(data.get("id", 0))
+		var amount: int = int(data.get("a", 0))
+		if item_id <= 0 or amount <= 0:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if item != null and item.is_currency:
+			continue
+		entries.append({
+			"uid": int(uid),
+			"key": (String(item.item_name) if item != null else "~unknown").to_lower(),
+		})
+	if entries.size() <= 1:
+		return
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var ka: String = String(a.get("key", ""))
+		var kb: String = String(b.get("key", ""))
+		if ka == kb:
+			return int(a.get("uid", 0)) < int(b.get("uid", 0))
+		return ka < kb)
+	var order: Array = []
+	for entry: Dictionary in entries:
+		order.append(int(entry.get("uid", 0)))
+	BankOrder.save_order(order)
+	_rebuild_grids()
+	Toaster.toast("Vault sorted A-Z.")
 
 
 func _transfer_stack(uid: int, from_bag: bool, amount: int) -> void:
