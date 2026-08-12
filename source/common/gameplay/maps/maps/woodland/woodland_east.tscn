@@ -346,7 +346,7 @@ portal_color = Color(0.45, 0.7, 0.35, 1)
 destination_label = "Goblin Woodland"
 target_instance = ExtResource("9_woodland")
 warper_id = 160
-target_id = 60
+target_id = 23
 
 [node name="LabelApproach" type="Label" parent="."]
 offset_left = 504.0

@@ -143,10 +143,23 @@ func _ready() -> void:
 		RenderingServer.set_default_clear_color(map_background_color)
 
 
+## Resolves a warper id to a world position. NEVER answers "not found" with
+## Vector2.ZERO: (0, 0) is the top-left corner of the map, which on the tiled
+## outdoor maps is solid border wall — a warp pointing at an id that does not
+## exist used to drop the player inside it, wedging their client. Falls back to
+## the map's home spawn (id 0), then to any warper at all, and warns so the dead
+## link gets found. Callers that hand the result straight to a teleport (see
+## InstanceManager) therefore cannot strand anyone.
 func get_spawn_position(warper_id: int = 0) -> Vector2:
 	if warpers.has(warper_id):
 		return warpers[warper_id].global_position
-	return Vector2.ZERO
+	if GameMode.is_world_server():
+		ServerLog.warn("Map '%s': no warper '%d' — falling back to the home spawn." % [name, warper_id])
+	if warper_id != 0 and warpers.has(0):
+		return warpers[0].global_position
+	for any_warper: Warper in warpers.values():
+		return any_warper.global_position
+	return global_position
 
 
 ## The shop sold by a merchant in this map, or null. Keyed by the merchant NPC's

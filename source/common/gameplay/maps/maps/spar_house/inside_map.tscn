@@ -46,7 +46,7 @@ target = NodePath("../First_floor_teleporter")
 position = Vector2(328, 738)
 scale = Vector2(3.44, 1)
 target_instance = ExtResource("5_10bed")
-target_id = 3
+target_id = 0
 
 [node name="ArenaEntrance" parent="." unique_id=1539954247 instance=ExtResource("4_nfh6w")]
 position = Vector2(120.17954, 593.70013)

@@ -179,7 +179,7 @@ position = Vector2(-312, -112)
 npc_resource = ExtResource("13_anjaa")
 
 [node name="ForgeSmith" parent="NPCs" unique_id=655889327 instance=ExtResource("16_da30u")]
-position = Vector2(-464, 112)
+position = Vector2(-512, -88)
 npc_resource = SubResource("Resource_jubm3")
 
 [node name="TheTailor" parent="NPCs" unique_id=1048618121 instance=ExtResource("16_da30u")]
@@ -207,8 +207,8 @@ warper_id = 1
 target_id = 2
 
 [node name="SmithHouse" parent="Warpers" unique_id=1093900754 instance=ExtResource("7_aris3")]
-position = Vector2(-528, 120)
-scale = Vector2(1.6, 1)
+position = Vector2(-432, -112)
+scale = Vector2(2, 1)
 target_instance = ExtResource("8_smith")
 warper_id = 4
 target_id = 5
