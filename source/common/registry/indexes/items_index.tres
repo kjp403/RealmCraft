@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786502070
-next_id = 566
+version = 1786512484
+next_id = 569
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2593,20 +2593,35 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/materials/herbs/grimshade.tres",
 &"slug": &"grimshade"
 }, {
-&"hash": "62a90cdd151dc80cca4b79db61fa57b22ad0819f87f9c488520fe0c1f762422c",
+&"hash": "6d8dc95d40ca0c43cc5d8a2bbd48dfce1d30b318ba1c6efd5e9d71fe337258dc",
 &"id": 563,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle_iron.tres",
 &"slug": &"sickle_iron"
 }, {
-&"hash": "164151b295c37ec35c4344ecb6adf25c678d9fb9a0c6ba326a11e5bf4041a31a",
+&"hash": "063cfcc6b8c34042a81c62abdd050e483bd6df8099d6425507c2f5750e6ff037",
 &"id": 564,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle_steel.tres",
 &"slug": &"sickle_steel"
 }, {
-&"hash": "bba42ede9527beb1efddf397ae1ba15bfc68b4dbb6f7067680f6862949125f1d",
+&"hash": "d7931af256b7c35e4fbfaad08605883abaae8a11e01e8349de532fff50a6540a",
 &"id": 565,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle_mithril.tres",
 &"slug": &"sickle_mithril"
+}, {
+&"hash": "e00cb870118c4a93d78786676b75a78c44c6dc88d8dda646e2d911728d605e2d",
+&"id": 566,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_bronze.tres",
+&"slug": &"sickle_bronze"
+}, {
+&"hash": "0b28e6e086086788e033453b81786548d124844ffce56941447996a900854886",
+&"id": 567,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_adamant.tres",
+&"slug": &"sickle_adamant"
+}, {
+&"hash": "7c14fd7c0a08da9d26715bc8fd02e6717d641b48ca8d618a54322aa13d8e862a",
+&"id": 568,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_runite.tres",
+&"slug": &"sickle_runite"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

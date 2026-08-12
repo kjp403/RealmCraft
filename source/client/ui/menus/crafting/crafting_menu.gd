@@ -393,15 +393,21 @@ const _SMITHING_TIERS: Array[StringName] = [
 const _ASCENDED_CRAFT_LEVEL: int = 50
 
 
-## Which tab a recipe belongs to. Smithing Table uses metal-tier + Jewelry +
-## Materials tabs; Workbench / other stations keep cloth / leather / materials.
-## No "all" tab — mixing categories interleaves unrelated rows.
+## Which tab a recipe belongs to. Smithing Table uses metal-tier + Tools +
+## Jewelry + Materials tabs; Workbench / other stations keep cloth / leather /
+## materials. No "all" tab — mixing categories interleaves unrelated rows.
 func _category(recipe: CraftingRecipe) -> StringName:
 	if recipe.output_item is MaterialItem:
 		return &"materials"
 	if _is_jewelry(recipe.output_item):
 		return &"jewelry"
 	if _is_smithing_station():
+		# Gathering tools get their own tab instead of scattering one pickaxe,
+		# axe and sickle across six metal tabs. This has to beat the tier check
+		# below: tools are gated well above _ASCENDED_CRAFT_LEVEL at the top
+		# end, so adamant/runite tools would otherwise land under Ascended.
+		if recipe.output_item is ToolItem:
+			return &"tools"
 		return _smithing_tier(recipe)
 	var path: String = recipe.output_item.resource_path
 	if path.contains("/cloth/"):
@@ -487,7 +493,7 @@ func _build_tabs() -> void:
 	var preferred: Array[StringName] = []
 	if _is_smithing_station():
 		preferred.append_array(_SMITHING_TIERS)
-		preferred.append_array([&"jewelry", &"materials"])
+		preferred.append_array([&"tools", &"jewelry", &"materials"])
 	else:
 		preferred.append_array([&"armor", &"cloth", &"leather", &"jewelry", &"materials"])
 	for cat: StringName in preferred:

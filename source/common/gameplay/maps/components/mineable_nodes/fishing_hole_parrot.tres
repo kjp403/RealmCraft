@@ -17,6 +17,7 @@ required_level = 40
 required_tool = &"fishing_rod"
 extraction_hp = 6
 max_charges = 4
+min_charges = 0
 charge_regen_seconds = 14.0
 depleted_recharge_seconds = 70.0
 player_cooldown_seconds = 5.0
