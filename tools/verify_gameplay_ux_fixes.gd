@@ -43,8 +43,8 @@ func _init() -> void:
 	# Wildlife levels.
 	var badger: Resource = load("res://source/common/gameplay/characters/npc/types/woodland_rat.tres")
 	var wolf: Resource = load("res://source/common/gameplay/characters/npc/types/wolf.tres")
-	if badger == null or int(badger.get("combat_level")) != 18:
-		failures.append("Woodland Badger combat_level != 18")
+	if badger == null or int(badger.get("combat_level")) != 20:
+		failures.append("Woodland Badger combat_level != 20")
 	if wolf == null or int(wolf.get("combat_level")) != 22:
 		failures.append("Wild Wolf combat_level != 22")
 

@@ -37,7 +37,7 @@ func _initialize() -> void:
 
 	var rat: Resource = load("res://source/common/gameplay/characters/npc/types/woodland_rat.tres")
 	var wolf: Resource = load("res://source/common/gameplay/characters/npc/types/wolf.tres")
-	assert(rat != null and float(rat.get("max_health")) < 50.0)
+	assert(rat != null and float(rat.get("max_health")) >= 150.0)
 	assert(float(wolf.get("wander_radius")) > 0.0)
 	assert(float(rat.get("wander_radius")) > 0.0)
 	# Combat skins must be set — missing skin falls back to knight.
