@@ -70,23 +70,34 @@ func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
 		weapon_sprite.texture = icon
 		weapon_sprite.region_enabled = false
 		var sz: Vector2 = icon.get_size()
-		# Ascension / inventory icons are ≈square and drawn on the NE diagonal.
+		# Ascension / inventory icons are ≈square and drawn on a diagonal.
 		# Authored in-hand sheets are tall (16×48) or wide — leave those alone.
 		var roughly_square: bool = sz.y <= sz.x * 1.2 and sz.x <= sz.y * 1.2
 		if roughly_square:
-			# NE diagonal → tip-up. Grip sits near the bottom of the rotated art;
-			# park that on the Hand origin (WeaponSprite child Hand is at 0,0).
-			weapon_sprite.rotation = -PI * 0.25
-			weapon_sprite.centered = true
-			weapon_sprite.offset = Vector2(0.0, 0.0)
-			# 32px inventory art at the type scene's 0.65 scale reads tiny and
-			# leaves a gap to the Hand — bump to ~1.0 so the hilt covers it.
-			weapon_sprite.scale = Vector2(1.0, 1.0)
-			weapon_sprite.position = Vector2(2.0, 2.0) + extra_offset
+			_apply_square_icon_grip(sz, extra_offset)
 		else:
 			weapon_sprite.rotation = base_rot
 			weapon_sprite.offset = base_offset
 			weapon_sprite.position = base_pos + extra_offset
+
+
+## Grip pass for square Ascension inventory icons. Default = melee NE-diagonal
+## (grip bottom-left, tip top-right) → tip-up with the handle on the Hand.
+## Bows override — their icons are mirrored vs the atlas sheet convention.
+func _apply_square_icon_grip(sz: Vector2, extra_offset: Vector2) -> void:
+	# Tip-up like the tall sheet art. Clear the type-scene flip_h — that mirrors
+	# sheet columns, not these inventory diagonals (flipping them puts the grip
+	# on the wrong corner).
+	weapon_sprite.rotation = -PI * 0.25
+	weapon_sprite.centered = true
+	weapon_sprite.offset = Vector2.ZERO
+	weapon_sprite.scale = Vector2.ONE
+	weapon_sprite.flip_h = false
+	# After tip-up, the grip sits near the bottom of the sprite (~half a
+	# diagonal from the texture center). Pull it onto the Hand at (0,0).
+	# The old (2,2) nudge left the hand on the mid-blade / crossguard.
+	var pull: float = maxf(sz.x, sz.y) * 0.48
+	weapon_sprite.position = Vector2(0.0, -pull) + extra_offset
 
 
 ## Drive the in-hand WeaponSprite from [param icon] — the held item's own icon (a

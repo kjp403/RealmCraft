@@ -134,19 +134,22 @@ func _on_peer_connected(peer_id: int) -> void:
 	# persisted into lb_stats on save (rides stats_json — no schema change). Only
 	# restore to an authored, known instance; skip the jail cell (jailed players were
 	# already routed above) and first-time logins (they start in the cell).
+	# Private dungeon runs dissolve on disconnect — never resume into a shared charge
+	# of a DungeonResource map (mid-course spawn, no run bookkeeping / auto-eject).
 	if not is_first_login:
 		var saved_name: String = str(player_resource.lb_stats.get("last_instance", ""))
 		if saved_name != "" and saved_name != JAIL_INSTANCE_NAME and instance_collection.has(saved_name):
 			var saved_res: InstanceResource = instance_collection.get(saved_name)
-			var saved_inst: ServerInstance = _instance_for_login(saved_res)
-			if saved_inst != null:
-				var saved_position := Vector2(
-					float(player_resource.lb_stats.get("last_x", 0.0)),
-					float(player_resource.lb_stats.get("last_y", 0.0))
-				)
-				charge_new_instance.rpc_id(peer_id, saved_res.map_path, saved_inst.name)
-				saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
-				return
+			if saved_res != null and not (saved_res is DungeonResource):
+				var saved_inst: ServerInstance = _instance_for_login(saved_res)
+				if saved_inst != null:
+					var saved_position := Vector2(
+						float(player_resource.lb_stats.get("last_x", 0.0)),
+						float(player_resource.lb_stats.get("last_y", 0.0))
+					)
+					charge_new_instance.rpc_id(peer_id, saved_res.map_path, saved_inst.name)
+					saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
+					return
 
 	var target_name: String = JAIL_INSTANCE_NAME if is_first_login else TAVERN_INSTANCE_NAME
 	var target_res: InstanceResource = instance_collection.get(target_name, null)

@@ -7,17 +7,20 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/campfire.tscn" id="5_jyi32"]
 [ext_resource type="PackedScene" uid="uid://hcfiu2vpqr3u" path="res://source/common/gameplay/maps/props/doors/activable_door/activable_door.tscn" id="5_ox4g4"]
 [ext_resource type="Script" uid="uid://trwnxb3wdk15" path="res://source/common/gameplay/dungeon/room_node.gd" id="6_gji63"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="6_lost"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/dungeon/spawn_marker.tscn" id="9_ij07n"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_ox4g4"]
 [ext_resource type="Resource" uid="uid://ou1wadpim68o" path="res://source/common/gameplay/characters/npc/types/fungus/sporeling.tres" id="10_spore"]
+[ext_resource type="Resource" uid="uid://dcmvccg0con6x" path="res://source/common/gameplay/characters/npc/npcs/lost_soul.tres" id="10_lost"]
 [ext_resource type="Resource" uid="uid://dpdtw2h3td5ip" path="res://source/common/gameplay/characters/npc/types/fungus/puffcap.tres" id="11_puff"]
 [ext_resource type="Resource" uid="uid://cd8rmrp54ds2e" path="res://source/common/gameplay/characters/npc/types/fungus/myconid_brute.tres" id="12_brute"]
 [ext_resource type="Resource" uid="uid://3ne3o1ls5mdj" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="13_heart"]
 [ext_resource type="Resource" uid="uid://btnithna7holw" path="res://source/common/gameplay/characters/npc/types/fungus/spore_swarm.tres" id="14_swarm"]
 
-[node name="FungusDungeon" type="Node2D" unique_id=127073003]
+[node name="FungusDungeon" type="Node2D" unique_id=127073003 node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_qm0ql")
+replicated_props_container = NodePath("ReplicatedPropsContainer")
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Tiles" type="Node2D" parent="." unique_id=867485186]
@@ -86,6 +89,10 @@ position = Vector2(-136, -1574)
 [node name="Warper" parent="." unique_id=1414716116 instance=ExtResource("4_jod3t")]
 position = Vector2(-4, -27)
 
+[node name="LostSoul" parent="." unique_id=1922057614 instance=ExtResource("6_lost")]
+position = Vector2(-80, -40)
+npc_resource = ExtResource("10_lost")
+
 [node name="Room1" type="Area2D" parent="." unique_id=978642219 node_paths=PackedStringArray("doors")]
 position = Vector2(-8, -443)
 script = ExtResource("6_gji63")
@@ -153,6 +160,7 @@ polygon = PackedVector2Array(-121, -100, -177, -39, -184, 16, -124, 79, 107, 74,
 [node name="FungalHeart" parent="FinalRoom" unique_id=1692202314 instance=ExtResource("9_ij07n")]
 position = Vector2(0, 0)
 enemy_type = ExtResource("13_heart")
+boss = true
 
 [node name="SporeSwarm" parent="FinalRoom" unique_id=1692202315 instance=ExtResource("9_ij07n")]
 position = Vector2(-60, 30)
