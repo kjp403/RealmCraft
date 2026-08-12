@@ -94,3 +94,6 @@ extends Resource
 ## Optional look when charges hit 0 (e.g. plain rubble without ore flecks).
 ## Leave empty to keep [member texture] and dim it with a gray modulate instead.
 @export var depleted_texture: Texture2D
+## Uniform sprite scale (1.0 = texture pixel size). Use >1 so higher-tier
+## trees (Oak, etc.) read larger than the shared 64×96 woodcutting art.
+@export var visual_scale: float = 1.0

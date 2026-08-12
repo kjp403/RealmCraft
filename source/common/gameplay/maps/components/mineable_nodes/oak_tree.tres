@@ -25,3 +25,4 @@ depleted_recharge_seconds = 75.0
 player_cooldown_seconds = 5.0
 texture = ExtResource("3_tree")
 depleted_texture = ExtResource("4_stump")
+visual_scale = 1.4

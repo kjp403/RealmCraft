@@ -32,6 +32,10 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="29_uexkn"]
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="30_qncuc"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="31_qncuc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="33_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres" id="33_moon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/sunwort.tres" id="33_sun"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="33_frost"]
 [ext_resource type="Resource" uid="uid://d08wf1j2mhlc5" path="res://source/common/gameplay/maps/components/mineable_nodes/copper_vein.tres" id="32_bvke5"]
 [ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="33_oak"]
 [ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="34_willow"]
@@ -413,6 +417,296 @@ data = ExtResource("32_bvke5")
 [node name="CopperOre4" parent="MineableNodes" unique_id=340649084 instance=ExtResource("29_uexkn")]
 position = Vector2(1653.1404, 2027.0826)
 data = ExtResource("32_bvke5")
+
+[node name="DimHeal1" parent="MineableNodes" unique_id=1930000100 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(900, 1200)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal2" parent="MineableNodes" unique_id=1930000101 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1100, 1450)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal3" parent="MineableNodes" unique_id=1930000102 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1300, 1100)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal4" parent="MineableNodes" unique_id=1930000103 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1500, 1700)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal5" parent="MineableNodes" unique_id=1930000104 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1700, 1250)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal6" parent="MineableNodes" unique_id=1930000105 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1900, 1550)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal7" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2100, 1350)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal8" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2300, 1800)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal9" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1000, 2100)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal10" parent="MineableNodes" unique_id=1930000109 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1400, 2200)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal11" parent="MineableNodes" unique_id=1930000110 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1800, 2100)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal12" parent="MineableNodes" unique_id=1930000111 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2200, 2000)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal13" parent="MineableNodes" unique_id=1930000112 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(800, 1600)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal14" parent="MineableNodes" unique_id=1930000113 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1200, 900)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal15" parent="MineableNodes" unique_id=1930000114 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1600, 1000)
+data = ExtResource("31_qncuc")
+
+[node name="DimHeal16" parent="MineableNodes" unique_id=1930000115 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2000, 900)
+data = ExtResource("31_qncuc")
+
+[node name="DimFrost1" parent="MineableNodes" unique_id=1930000116 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(950, 1400)
+data = ExtResource("33_frost")
+
+[node name="DimFrost2" parent="MineableNodes" unique_id=1930000117 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1150, 1600)
+data = ExtResource("33_frost")
+
+[node name="DimFrost3" parent="MineableNodes" unique_id=1930000118 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1450, 1300)
+data = ExtResource("33_frost")
+
+[node name="DimFrost4" parent="MineableNodes" unique_id=1930000119 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1650, 1800)
+data = ExtResource("33_frost")
+
+[node name="DimFrost5" parent="MineableNodes" unique_id=1930000120 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1850, 1400)
+data = ExtResource("33_frost")
+
+[node name="DimFrost6" parent="MineableNodes" unique_id=1930000121 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2050, 1650)
+data = ExtResource("33_frost")
+
+[node name="DimFrost7" parent="MineableNodes" unique_id=1930000122 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2250, 1450)
+data = ExtResource("33_frost")
+
+[node name="DimFrost8" parent="MineableNodes" unique_id=1930000123 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1050, 1900)
+data = ExtResource("33_frost")
+
+[node name="DimFrost9" parent="MineableNodes" unique_id=1930000124 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1550, 2000)
+data = ExtResource("33_frost")
+
+[node name="DimFrost10" parent="MineableNodes" unique_id=1930000125 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1950, 1900)
+data = ExtResource("33_frost")
+
+[node name="DimFrost11" parent="MineableNodes" unique_id=1930000126 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(850, 1800)
+data = ExtResource("33_frost")
+
+[node name="DimFrost12" parent="MineableNodes" unique_id=1930000127 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2400, 1700)
+data = ExtResource("33_frost")
+
+[node name="DimSun1" parent="MineableNodes" unique_id=1930000128 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1000, 1500)
+data = ExtResource("33_sun")
+
+[node name="DimSun2" parent="MineableNodes" unique_id=1930000129 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1280, 1700)
+data = ExtResource("33_sun")
+
+[node name="DimSun3" parent="MineableNodes" unique_id=1930000130 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1520, 1500)
+data = ExtResource("33_sun")
+
+[node name="DimSun4" parent="MineableNodes" unique_id=1930000131 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1760, 1750)
+data = ExtResource("33_sun")
+
+[node name="DimSun5" parent="MineableNodes" unique_id=1930000132 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2000, 1500)
+data = ExtResource("33_sun")
+
+[node name="DimSun6" parent="MineableNodes" unique_id=1930000133 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2240, 1750)
+data = ExtResource("33_sun")
+
+[node name="DimSun7" parent="MineableNodes" unique_id=1930000134 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1120, 2000)
+data = ExtResource("33_sun")
+
+[node name="DimSun8" parent="MineableNodes" unique_id=1930000135 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1680, 2100)
+data = ExtResource("33_sun")
+
+[node name="DimSun9" parent="MineableNodes" unique_id=1930000136 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2160, 2100)
+data = ExtResource("33_sun")
+
+[node name="DimSun10" parent="MineableNodes" unique_id=1930000137 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1400, 1200)
+data = ExtResource("33_sun")
+
+[node name="DimSun11" parent="MineableNodes" unique_id=1930000138 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1880, 1200)
+data = ExtResource("33_sun")
+
+[node name="DimSun12" parent="MineableNodes" unique_id=1930000139 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2360, 1500)
+data = ExtResource("33_sun")
+
+[node name="DimMoon1" parent="MineableNodes" unique_id=1930000140 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1200, 1800)
+data = ExtResource("33_moon")
+
+[node name="DimMoon2" parent="MineableNodes" unique_id=1930000141 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1480, 1950)
+data = ExtResource("33_moon")
+
+[node name="DimMoon3" parent="MineableNodes" unique_id=1930000142 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1760, 1850)
+data = ExtResource("33_moon")
+
+[node name="DimMoon4" parent="MineableNodes" unique_id=1930000143 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2040, 2000)
+data = ExtResource("33_moon")
+
+[node name="DimMoon5" parent="MineableNodes" unique_id=1930000144 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1320, 2100)
+data = ExtResource("33_moon")
+
+[node name="DimMoon6" parent="MineableNodes" unique_id=1930000145 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1880, 2150)
+data = ExtResource("33_moon")
+
+[node name="DimMoon7" parent="MineableNodes" unique_id=1930000146 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1600, 1600)
+data = ExtResource("33_moon")
+
+[node name="DimMoon8" parent="MineableNodes" unique_id=1930000147 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2080, 1600)
+data = ExtResource("33_moon")
+
+[node name="DimMoon9" parent="MineableNodes" unique_id=1930000148 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2400, 1900)
+data = ExtResource("33_moon")
+
+[node name="DimMoon10" parent="MineableNodes" unique_id=1930000149 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1000, 1750)
+data = ExtResource("33_moon")
+
+[node name="DimBlood1" parent="MineableNodes" unique_id=1930000150 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1500, 2100)
+data = ExtResource("33_blood")
+
+[node name="DimBlood2" parent="MineableNodes" unique_id=1930000151 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1800, 2200)
+data = ExtResource("33_blood")
+
+[node name="DimBlood3" parent="MineableNodes" unique_id=1930000152 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2100, 2150)
+data = ExtResource("33_blood")
+
+[node name="DimBlood4" parent="MineableNodes" unique_id=1930000153 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1650, 2300)
+data = ExtResource("33_blood")
+
+[node name="DimBlood5" parent="MineableNodes" unique_id=1930000154 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1950, 2300)
+data = ExtResource("33_blood")
+
+[node name="DimBlood6" parent="MineableNodes" unique_id=1930000155 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2250, 2200)
+data = ExtResource("33_blood")
+
+[node name="DimBlood7" parent="MineableNodes" unique_id=1930000156 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(1400, 2300)
+data = ExtResource("33_blood")
+
+[node name="DimBlood8" parent="MineableNodes" unique_id=1930000157 instance=ExtResource("29_uexkn")]
+y_sort_enabled = true
+position = Vector2(2300, 2050)
+data = ExtResource("33_blood")
 
 [node name="OakTree1" parent="MineableNodes" unique_id=1888100001 instance=ExtResource("29_uexkn")]
 y_sort_enabled = true
