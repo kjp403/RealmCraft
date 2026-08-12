@@ -17,27 +17,27 @@
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
 item = ExtResource("90_sword")
-chance = 0.2
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_hammer"]
 script = ExtResource("2_loot")
 item = ExtResource("91_hammer")
-chance = 0.2
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_book"]
 script = ExtResource("2_loot")
 item = ExtResource("92_book")
-chance = 0.2
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("93_bow")
-chance = 0.2
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_wand"]
 script = ExtResource("2_loot")
 item = ExtResource("94_wand")
-chance = 0.2
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cherbloreicon01"
-path="res://.godot/imported/Herblore.png-0eaecdc71230d6f441807da49a161676.ctex"
+uid="uid://dv17dip8k70vc"
+path="res://.godot/imported/Herblore.png-b419b58264850bcc913ef02ff4554efd.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Herblore.png"
-dest_files=["res://.godot/imported/Herblore.png-0eaecdc71230d6f441807da49a161676.ctex"]
+dest_files=["res://.godot/imported/Herblore.png-b419b58264850bcc913ef02ff4554efd.ctex"]
 
 [params]
 

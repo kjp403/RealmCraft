@@ -17,6 +17,9 @@ extends CanvasGroup
 const COLOR: Color = Color(1.0, 0.15, 0.15)
 const BASE_ALPHA: float = 0.35
 
+## Fill colour. Defaults to the danger red every melee/lunge preview uses; a boss
+## beam overrides it so its corridor matches the element it is about to fire.
+var color: Color = COLOR
 var radius: float = 20.0
 ## Lifetime of the fade. Default suits a quick melee swing flash; longer-lived
 ## telegraphs (the lunge's dodge zone) set it to windup + travel time.
@@ -52,14 +55,14 @@ class _TelegraphDrawer extends Node2D:
 
 	func _draw() -> void:
 		if telegraph.line_to == Vector2.ZERO:
-			draw_circle(Vector2.ZERO, telegraph.radius, AttackTelegraph.COLOR)
+			draw_circle(Vector2.ZERO, telegraph.radius, telegraph.color)
 			return
 		# Capsule: rectangle along the dash path + a cap on each end. The
 		# landing cap doubles as the "stand here and get hit" marker.
 		var side: Vector2 = telegraph.line_to.normalized().orthogonal() * telegraph.radius
 		draw_colored_polygon(
 			PackedVector2Array([side, telegraph.line_to + side, telegraph.line_to - side, -side]),
-			AttackTelegraph.COLOR
+			telegraph.color
 		)
-		draw_circle(Vector2.ZERO, telegraph.radius, AttackTelegraph.COLOR)
-		draw_circle(telegraph.line_to, telegraph.radius, AttackTelegraph.COLOR)
+		draw_circle(Vector2.ZERO, telegraph.radius, telegraph.color)
+		draw_circle(telegraph.line_to, telegraph.radius, telegraph.color)

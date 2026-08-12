@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmatadamantarrow01"
-path="res://.godot/imported/mat_adamant_arrow.png-1a7729454ba33af1c1ebc08ac5423139.ctex"
+uid="uid://da2y842kk0rfo"
+path="res://.godot/imported/mat_adamant_arrow.png-821351f43933c9bef715b762bb52069d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/mat_adamant_arrow.png"
-dest_files=["res://.godot/imported/mat_adamant_arrow.png-1a7729454ba33af1c1ebc08ac5423139.ctex"]
+dest_files=["res://.godot/imported/mat_adamant_arrow.png-821351f43933c9bef715b762bb52069d.ctex"]
 
 [params]
 
