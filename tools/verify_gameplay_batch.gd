@@ -78,6 +78,25 @@ func _check_bone_item() -> void:
 		return
 	_expect(bone.stack_limit == 100, "bone stack_limit is %d, want 100" % bone.stack_limit)
 	_expect(bone.is_stackable(), "bone must stack")
+	_expect(
+		Inventory.stack_limit_for(bone, false) == 100,
+		"bone bag stack should stay 100"
+	)
+	_expect(
+		Inventory.stack_limit_for(bone, true) == 100,
+		"bone bank stack should stay 100 (already above 50)"
+	)
+	var ore: Item = load("res://source/common/gameplay/items/materials/metals/iron_ore.tres")
+	if _expect(ore != null, "iron_ore.tres failed to load"):
+		_expect(ore.stack_limit == 10, "iron ore bag stack is %d, want 10" % ore.stack_limit)
+		_expect(
+			Inventory.stack_limit_for(ore, false) == 10,
+			"iron ore inventory stack must stay 10"
+		)
+		_expect(
+			Inventory.stack_limit_for(ore, true) == 50,
+			"iron ore bank stack must be 50"
+		)
 	if not _expect(bone.item_icon != null, "bone has no icon"):
 		return
 	# Item.item_icon defaults to a leaf sprite, so an item that never assigns one

@@ -20,6 +20,23 @@ class_name Inventory
 
 ## Hard cap on non-currency bag slots (OSRS-style). Forces bank usage.
 const MAX_SLOTS: int = 28
+## Materials (ores, logs, bars, hides, herbs) stack this high in the bank.
+## The bag still uses [member Item.stack_limit] (10 for most resources).
+const BANK_RESOURCE_STACK: int = 50
+
+
+## Per-slot stack cap for [param item]. Bank materials use
+## [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
+static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
+	var limit: int = 0 if item == null else int(item.stack_limit)
+	if (
+		in_bank
+		and item != null
+		and item.inventory_tab() == Item.InventoryTab.MATERIAL
+		and limit > 0
+	):
+		return maxi(limit, BANK_RESOURCE_STACK)
+	return limit
 
 
 ## Convert raw JSON-loaded data into a clean { int: { "id": int, "a": int } } dict.
@@ -73,7 +90,12 @@ static func free_slots(inventory: Dictionary, capacity: int = MAX_SLOTS) -> int:
 
 ## Largest amount of [param item_id] that still fits (existing stack space + free
 ## slots × stack_limit). Used by bank Max-withdraw and capacity-capped deposits.
-static func max_fit(inventory: Dictionary, item_id: int, capacity: int = MAX_SLOTS) -> int:
+static func max_fit(
+	inventory: Dictionary,
+	item_id: int,
+	capacity: int = MAX_SLOTS,
+	in_bank: bool = false
+) -> int:
 	if item_id <= 0:
 		return 0
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
@@ -83,7 +105,7 @@ static func max_fit(inventory: Dictionary, item_id: int, capacity: int = MAX_SLO
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		return free
-	var limit: int = 0 if item == null else int(item.stack_limit)
+	var limit: int = stack_limit_for(item, in_bank)
 	if limit <= 0:
 		# Pseudo-infinite: one existing stack absorbs any amount; else need 1 free slot.
 		for slot_uid in inventory:
@@ -103,7 +125,12 @@ static func max_fit(inventory: Dictionary, item_id: int, capacity: int = MAX_SLO
 
 ## How many *new* bag slots [param amount] of [param item_id] would open after
 ## filling existing stacks up to [member Item.stack_limit]. Currency always 0.
-static func slots_needed(inventory: Dictionary, item_id: int, amount: int) -> int:
+static func slots_needed(
+	inventory: Dictionary,
+	item_id: int,
+	amount: int,
+	in_bank: bool = false
+) -> int:
 	if item_id <= 0 or amount <= 0:
 		return 0
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
@@ -112,7 +139,7 @@ static func slots_needed(inventory: Dictionary, item_id: int, amount: int) -> in
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		return amount
-	var limit: int = 0 if item == null else int(item.stack_limit)
+	var limit: int = stack_limit_for(item, in_bank)
 	var remaining: int = amount
 	if limit > 0:
 		for slot_uid in inventory:
@@ -141,9 +168,10 @@ static func can_add(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int = 1,
-	capacity: int = MAX_SLOTS
+	capacity: int = MAX_SLOTS,
+	in_bank: bool = false
 ) -> bool:
-	return slots_needed(inventory, item_id, amount) <= free_slots(inventory, capacity)
+	return slots_needed(inventory, item_id, amount, in_bank) <= free_slots(inventory, capacity)
 
 
 ## Add to a capacity-capped store. Returns false without mutating when the full
@@ -153,11 +181,12 @@ static func try_add_item(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int = 1,
-	capacity: int = MAX_SLOTS
+	capacity: int = MAX_SLOTS,
+	in_bank: bool = false
 ) -> bool:
-	if not can_add(inventory, item_id, amount, capacity):
+	if not can_add(inventory, item_id, amount, capacity, in_bank):
 		return false
-	add_item(inventory, item_id, amount)
+	add_item(inventory, item_id, amount, in_bank)
 	return true
 
 
@@ -165,7 +194,12 @@ static func try_add_item(
 ## Respects [member Item.stack_limit]: fill existing stacks up to the cap, then
 ## open new slots for the remainder. No capacity check — use [method try_add_item]
 ## for the player bag or bank.
-static func add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> void:
+static func add_item(
+	inventory: Dictionary,
+	item_id: int,
+	amount: int = 1,
+	in_bank: bool = false
+) -> void:
 	if item_id <= 0 or amount <= 0:
 		return
 
@@ -180,7 +214,7 @@ static func add_item(inventory: Dictionary, item_id: int, amount: int = 1) -> vo
 		return
 
 	# 0 = pseudo-infinite (legacy default); otherwise hard cap per slot.
-	var limit: int = 0 if item == null else int(item.stack_limit)
+	var limit: int = stack_limit_for(item, in_bank)
 	var remaining: int = amount
 	if limit > 0:
 		for slot_uid in inventory:

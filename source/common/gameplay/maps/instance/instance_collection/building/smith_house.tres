@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_6iw2l")
 instance_name = &"SmithHouse"
-map_path = "uid://bhorfmdpw4rq3"
+map_path = "res://source/common/gameplay/maps/maps/smith_house/inside_map.tscn"
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"
 metadata/slug = &"smith_house"
 metadata/id = 8

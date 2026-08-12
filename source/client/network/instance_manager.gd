@@ -7,6 +7,11 @@ signal instance_changed(instance: InstanceClient)
 
 var current_ui: UI
 var current_instance: InstanceClient
+## Warp/login destination, applied when the reused LocalPlayer is parented into
+## the new map. Position is client-authoritative, so a late state-sync cannot
+## place the avatar — without this, arrivals keep the previous map's coordinates
+## and land in empty space (Mining Cave / Smith House "null spawn").
+var pending_spawn: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -31,15 +36,22 @@ func teardown() -> void:
 
 
 @rpc("authority", "call_remote", "reliable", 0)
-func charge_new_instance(map_path: String, instance_id: String) -> void:
+func charge_new_instance(
+	map_path: String,
+	instance_id: String,
+	spawn_x: float = 0.0,
+	spawn_y: float = 0.0
+) -> void:
 	# Positional banners (sealed portal / level warning) are about the map we're
 	# LEAVING — kill them so they never follow the player into the next biome.
 	Announcer.dismiss_positional()
+	pending_spawn = Vector2(spawn_x, spawn_y)
 	var new_instance: InstanceClient = InstanceClient.new()
 	new_instance.name = instance_id
-	
+
+	map_path = _resolve_map_path(map_path)
 	print("Loading new map: %s." % map_path)
-	if not ResourceLoader.exists(map_path):
+	if map_path.is_empty() or not ResourceLoader.exists(map_path):
 		push_error("InstanceManagerClient: map path missing: %s" % map_path)
 		_fail_charge("Couldn't load the area (missing map).")
 		return
@@ -97,4 +109,15 @@ func _fail_charge(message: String) -> void:
 		Client.close_connection()
 	if is_instance_valid(Transition):
 		Transition.show_load_error(message)
+
+
+## Buildings often author map_path as uid://. ResourceLoader.exists() on a uid
+## misses after a reimport; resolve to res:// before loading.
+static func _resolve_map_path(map_path: String) -> String:
+	if not map_path.begins_with("uid://"):
+		return map_path
+	var uid: int = ResourceUID.text_to_id(map_path)
+	if uid == ResourceUID.INVALID_ID or not ResourceUID.has_id(uid):
+		return ""
+	return ResourceUID.get_id_path(uid)
 	

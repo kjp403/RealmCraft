@@ -39,7 +39,7 @@ func data_request_handler(
 	var bank: Dictionary = player.player_resource.bank
 	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, player.player_resource.bank_slots)
 	# Fill existing stacks / free slots only — never open past capacity.
-	var fit: int = Inventory.max_fit(bank, item_id, capacity)
+	var fit: int = Inventory.max_fit(bank, item_id, capacity, true)
 	amount = mini(amount, fit)
 	if amount <= 0:
 		return {
@@ -54,7 +54,7 @@ func data_request_handler(
 	if removed <= 0:
 		return {"ok": false, "reason": "missing"}
 
-	Inventory.add_item(bank, item_id, removed)
+	Inventory.add_item(bank, item_id, removed, true)
 	instance.world_server.database.save_player(player.player_resource)
 	return {
 		"ok": true,

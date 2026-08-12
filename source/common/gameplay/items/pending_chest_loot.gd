@@ -111,12 +111,12 @@ static func bank(resource: PlayerResource, item_id: int, amount: int = -1) -> in
 		return 0
 	var want: int = have if amount < 0 else mini(amount, have)
 	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, resource.bank_slots)
-	var fit: int = Inventory.max_fit(resource.bank, item_id, capacity)
+	var fit: int = Inventory.max_fit(resource.bank, item_id, capacity, true)
 	var move: int = mini(want, fit)
 	if move <= 0:
 		return 0
 	take(resource.pending_chest_loot, item_id, move)
-	Inventory.add_item(resource.bank, item_id, move)
+	Inventory.add_item(resource.bank, item_id, move, true)
 	return move
 
 

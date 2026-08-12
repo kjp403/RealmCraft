@@ -36,7 +36,7 @@ func data_request_handler(
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item != null and item.is_currency:
 			continue
-		var fit: int = Inventory.max_fit(bank, item_id, capacity)
+		var fit: int = Inventory.max_fit(bank, item_id, capacity, true)
 		var amount: int = mini(have, fit)
 		if amount <= 0:
 			skipped_full = true
@@ -44,7 +44,7 @@ func data_request_handler(
 		var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
 		if removed <= 0:
 			continue
-		Inventory.add_item(bank, item_id, removed)
+		Inventory.add_item(bank, item_id, removed, true)
 		stacks += 1
 		units += removed
 		if removed < have:
