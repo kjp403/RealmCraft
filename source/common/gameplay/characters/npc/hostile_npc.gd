@@ -314,6 +314,12 @@ var _next_attack_ms: int
 var _skin_action_playing: bool = false
 ## Bumps each rp_play_skin_anim so a stale watchdog timer can't clear a newer clip.
 var _skin_action_token: int = 0
+## The skin's authored playback rate, captured before a stretched clip changes it
+## so it can always be put back. -1 = not captured yet.
+var _skin_base_speed: float = -1.0
+## Client: the skin this body spawned with, kept so a phase-2 swap can be undone
+## on respawn. A boss that died frozen must come back in its opening form.
+var _skin_base_frames: SpriteFrames = null
 
 
 func _ready() -> void:
@@ -677,16 +683,27 @@ func rp_dash(from_position: Vector2, to_position: Vector2, duration_ms: int, sta
 
 ## Client-visual: the red dodge corridor from this mob to the locked landing
 ## spot — shows WHO is charging and the exact strip of ground to vacate.
-func rp_lunge_telegraph(to_position: Vector2, radius: float, duration: float) -> void:
+## [param from_position] overrides where the corridor starts. Vector2.INF (the
+## default) keeps the body's own position, which is what a lunge wants; a beam
+## fired from the raised fist passes its muzzle so the marked strip is the strip
+## the server actually hit-tests.
+func rp_lunge_telegraph(
+		to_position: Vector2, radius: float, duration: float,
+		from_position: Vector2 = Vector2.INF, element: int = -1
+	) -> void:
 	if multiplayer.is_server():
 		return
 	var telegraph: AttackTelegraph = AttackTelegraph.new()
 	telegraph.radius = radius
 	telegraph.duration = duration
+	if element >= 0:
+		telegraph.color = ElementalTelegraph.PALETTE[clampi(
+			element, 0, ElementalTelegraph.Element.size() - 1)][0]
 	telegraph.top_level = true # pinned to the world, not to the moving wolf
 	add_child(telegraph)
-	telegraph.global_position = global_position
-	telegraph.line_to = to_position - global_position
+	var origin: Vector2 = global_position if from_position == Vector2.INF else from_position
+	telegraph.global_position = origin
+	telegraph.line_to = to_position - origin
 
 
 ## Client-visual: a FILLING danger ring (CastTelegraph) for a telegraphed boss
@@ -723,17 +740,43 @@ func rp_slam_impact(center: Vector2, radius: float) -> void:
 ## Client-visual: play a one-shot SpriteFrames clip (attack / special) on this
 ## mob's skin. Pauses the AnimationTree so the locomotion method-tracks don't
 ## stomp the action mid-play, then resumes idle/run from the synced anim enum.
-func rp_play_skin_anim(anim_name: StringName) -> void:
+## [param fill_s] stretches the clip to occupy that many seconds. A boss cast is
+## usually LONGER than its clip — a 0.5s transform under a 3s Killing Frost
+## channel left the body standing idle for two and a half seconds mid-spell — so
+## the caller passes its wind-up and the clip is slowed to cover it exactly.
+## 0 (default) plays at the authored rate, which is what a swing wants.
+func rp_play_skin_anim(anim_name: StringName, fill_s: float = 0.0) -> void:
 	if multiplayer.is_server() or animated_sprite == null:
 		return
 	var frames: SpriteFrames = animated_sprite.sprite_frames
-	if frames == null or not frames.has_animation(anim_name):
+	if frames == null:
 		return
+	# Fall back to the swing when the requested clip is not on this skin. Bosses
+	# ask for "special" on every cast, but several shipped skins never had one —
+	# so their slams have been playing NOTHING, silently, since the clip lookup
+	# just returned. A skin with neither clip still no-ops; that is missing art,
+	# not a missing code path.
+	if not frames.has_animation(anim_name):
+		if anim_name != &"attack" and frames.has_animation(&"attack"):
+			anim_name = &"attack"
+		else:
+			return
+	if _skin_base_speed < 0.0:
+		_skin_base_speed = maxf(0.01, animated_sprite.speed_scale)
 	_skin_action_playing = true
 	_skin_action_token += 1
 	var token: int = _skin_action_token
 	if animation_tree != null:
 		animation_tree.active = false
+	# Natural length at the authored rate, then the stretch (never a squeeze: a
+	# cast shorter than its clip keeps the clip and just gets cut off).
+	var fps: float = maxf(1.0, frames.get_animation_speed(anim_name) * _skin_base_speed)
+	var clip_s: float = float(frames.get_frame_count(anim_name)) / fps
+	if fill_s > clip_s:
+		animated_sprite.speed_scale = _skin_base_speed * (clip_s / fill_s)
+		clip_s = fill_s
+	else:
+		animated_sprite.speed_scale = _skin_base_speed
 	# Restart even if the same clip just finished (otherwise a second swing can
 	# no-op when the sprite is still sitting on the last attack frame).
 	animated_sprite.play(anim_name)
@@ -743,8 +786,6 @@ func rp_play_skin_anim(anim_name: StringName) -> void:
 	# Watchdog: a same-frame locomotion play() (AnimationTree DEFERRED method
 	# track at an idle/run loop boundary) can swallow animation_finished for this
 	# clip and leave the tree switched off forever — frozen sprite, no death.
-	var fps: float = maxf(1.0, frames.get_animation_speed(anim_name) * maxf(0.01, animated_sprite.speed_scale))
-	var clip_s: float = float(frames.get_frame_count(anim_name)) / fps
 	get_tree().create_timer(clip_s + 0.25).timeout.connect(
 		func() -> void:
 			if _skin_action_playing and _skin_action_token == token:
@@ -756,11 +797,21 @@ func rp_play_skin_anim(anim_name: StringName) -> void:
 func _on_skin_action_finished() -> void:
 	if not _skin_action_playing:
 		return
-	_skin_action_playing = false
-	if animation_tree != null:
-		animation_tree.active = true
+	_cancel_skin_action()
 	# Re-kick locomotion from the current synced anim (IDLE/RUN/DEATH).
 	_set_anim(anim)
+
+
+## Drop out of a one-shot NOW: clear the flag, invalidate any pending watchdog,
+## put the authored playback rate back, and hand the sprite to the AnimationTree.
+## Does not travel — the caller decides what plays next.
+func _cancel_skin_action() -> void:
+	_skin_action_playing = false
+	_skin_action_token += 1
+	if animated_sprite != null and _skin_base_speed >= 0.0:
+		animated_sprite.speed_scale = _skin_base_speed
+	if animation_tree != null:
+		animation_tree.active = true
 
 
 func _set_anim(new_anim: Animations) -> void:
@@ -769,6 +820,12 @@ func _set_anim(new_anim: Animations) -> void:
 	if _skin_action_playing and new_anim != Animations.DEATH:
 		anim = new_anim
 		return
+	# DEATH interrupts a one-shot immediately. It already fell through the guard
+	# above, but travelling while rp_play_skin_anim still has the AnimationTree
+	# switched OFF does nothing: the corpse would hold its cast pose until the
+	# watchdog fired — up to a full stretched cast later. Cancel first, then travel.
+	if _skin_action_playing:
+		_cancel_skin_action()
 	match new_anim:
 		Animations.IDLE:
 			locomotion_state_machine.travel(&"locomotion_idle")
@@ -781,7 +838,9 @@ func _set_anim(new_anim: Animations) -> void:
 
 ## Client-visual: a short laser blast along a world corridor (Mecha Golem). The
 ## server already applied damage; this is the beam VFX on top of the telegraph.
-func rp_laser_beam(from: Vector2, to: Vector2, duration: float) -> void:
+## [param _duration] is kept for the replicated call signature but no longer
+## used — the clip now decides its own lifetime (see below).
+func rp_laser_beam(from: Vector2, to: Vector2, _duration: float) -> void:
 	if multiplayer.is_server():
 		return
 	var laser_frames: SpriteFrames = load(
@@ -792,11 +851,16 @@ func rp_laser_beam(from: Vector2, to: Vector2, duration: float) -> void:
 	var mid: Vector2 = (from + to) * 0.5
 	var beam_len: float = from.distance_to(to)
 	var sc: float = maxf(0.35, beam_len / 300.0)
+	# NO explicit duration. The mecha_laser sheet spends its first ~10 frames
+	# charging and only becomes a beam near the end, so the old
+	# `duration: maxf(0.2, duration)` (0.4s from the controller, against a 0.8s
+	# clip) freed the effect BEFORE the beam frames were ever drawn — the laser
+	# was a charge orb and nothing else. Omitting it lets SpriteEffect free itself
+	# on animation_finished, i.e. after the beam has actually been seen.
 	var fx: SpriteEffect = SpriteEffect.spawn(self, laser_frames, {
 		"scale": Vector2(sc, sc * 0.55),
 		"z_index": 2,
 		"speed_scale": 1.25,
-		"duration": maxf(0.2, duration),
 	})
 	if fx == null:
 		return
@@ -850,6 +914,286 @@ func _spawn_arm_bolt(
 			sprite.scale = Vector2(0.22, 0.22)
 	add_child(bolt)
 	bolt.global_position = global_position + direction.normalized() * 28.0
+
+
+# ---------------------------------------------------------------------------
+# Boss spell VFX (client-only). Each is spawned by BossController via
+# replicate_visual, always as a top_level node so it stays pinned to the WORLD
+# point the server hit-tested instead of sliding with the boss body. The sheets
+# come from source/common/gameplay/combat/vfx/ — loaded lazily rather than
+# preloaded because the server runs this same script and never draws any of it.
+# ---------------------------------------------------------------------------
+
+const _VFX_DIR: String = "res://source/common/gameplay/combat/vfx/"
+
+
+## Cache-free loader — a miss returns null and every caller no-ops rather than
+## crashing a client mid-fight over a cosmetic.
+func _vfx(name: String) -> SpriteFrames:
+	return load(_VFX_DIR + name + ".tres") as SpriteFrames
+
+
+## Where a spell leaves the body: the raised fist.
+##
+## Deliberately NOT the HandOffset/RightHandSpot rig. That rig is authored for
+## mounting weapons on a 1x player and _apply_enemy_data never scales it, so on a
+## 1.4x boss it lands inside the torso. This is measured off the ART instead —
+## the fist sits +16px right of frame centre, and the AnimatedSprite2D is drawn at
+## offset (0, -30) — then scaled by visual_scale, which is what actually moves the
+## drawn fist. Server and client run the identical formula, so a beam is DRAWN
+## from the same point its damage is measured from.
+const MUZZLE_LOCAL: Vector2 = Vector2(16.0, -30.0)
+## The tip of the STAFF in the cast_staff thrust frame (+25, +7 from frame centre,
+## plus the sprite's own -30 offset). A spell fired from a staff has to leave the
+## staff — anchored at the fist it reads as the effect appearing beside him.
+const STAFF_MUZZLE_LOCAL: Vector2 = Vector2(25.0, -23.0)
+
+
+## [param from_staff] picks the staff tip over the fist. The CALLER says which,
+## because it chose the pose; inspecting the current clip here would be a
+## frame-timing race against the animation.
+func muzzle_position(from_staff: bool = false) -> Vector2:
+	var s: float = 1.0
+	if enemy_data != null:
+		s = maxf(0.1, enemy_data.visual_scale)
+	var local: Vector2 = STAFF_MUZZLE_LOCAL if from_staff else MUZZLE_LOCAL
+	var dir: float = -1.0 if flipped else 1.0
+	return global_position + Vector2(local.x * dir, local.y) * s
+
+
+## Client-visual: a charge building in the raised fist through a cast wind-up —
+## the tell that the boss is powering something up rather than just posing.
+## [param element] matches ElementalTelegraph (0 fire / 1 frost / 2 storm).
+func rp_hand_charge(element: int, duration: float, from_staff: bool = false) -> void:
+	if multiplayer.is_server():
+		return
+	# Compact 128x128 sheets only. lash_cast is 128x256 — a tall pillar of flame
+	# designed to rise from the ground — so centring it on a staff head draped the
+	# effect over the whole boss.
+	var sheet: String = "lash_burst"
+	var tint: Color = Color(1.0, 0.72, 0.35)
+	if element == 2:
+		sheet = "static_ring"
+		tint = Color(0.78, 0.62, 1.0)
+	elif element == 1:
+		sheet = "frost_burst"
+		tint = Color(0.7, 0.92, 1.0)
+	var frames: SpriteFrames = _vfx(sheet)
+	if frames == null:
+		return
+	var fx: SpriteEffect = SpriteEffect.spawn(self, frames, {
+		"loop": true,
+		"duration": duration,
+		"scale": Vector2(0.38, 0.38),
+		"z_index": 3,
+		"speed_scale": 1.6,
+		"modulate": tint,
+	})
+	if fx == null:
+		return
+	# NOT top_level: the charge rides the body, so it tracks the boss if it is
+	# shoved or slides during the wind-up.
+	var local: Vector2 = STAFF_MUZZLE_LOCAL if from_staff else MUZZLE_LOCAL
+	fx.position = Vector2(local.x * (-1.0 if flipped else 1.0), local.y) \
+		* (enemy_data.visual_scale if enemy_data != null else 1.0)
+
+
+## Client-visual: the rich wind-up marker for a boss cast. [param element] and
+## [param mode] are ElementalTelegraph's enums as ints (0=fire/1=frost/2=storm,
+## 0=danger/1=safe) — enums cross the wire as plain ints.
+func rp_elem_telegraph(
+		center: Vector2, radius: float, duration: float, element: int, mode: int
+	) -> void:
+	if multiplayer.is_server():
+		return
+	var tele: ElementalTelegraph = ElementalTelegraph.new()
+	tele.radius = radius
+	tele.duration = duration
+	# Assign the ints straight across (an enum IS an int here) and clamp, rather
+	# than `as`-casting: a bad cast would leave the field null and the telegraph
+	# would silently draw nothing while the server still lands the hit.
+	tele.element = clampi(element, 0, ElementalTelegraph.Element.size() - 1)
+	tele.mode = clampi(mode, 0, ElementalTelegraph.Mode.size() - 1)
+	tele.top_level = true
+	add_child(tele)
+	tele.global_position = center
+
+
+## Client-visual: one meteor of the Ember Rain. The comet screams in from
+## above-right and the blast fires the instant it lands, so the explosion is the
+## frame the server's damage window opens on — the fall IS the countdown.
+func rp_meteor_fall(target: Vector2, fall_s: float, blast_radius: float) -> void:
+	if multiplayer.is_server():
+		return
+	var comet: SpriteFrames = _vfx("fireball_comet")
+	if comet == null:
+		_meteor_boom(target, blast_radius)
+		return
+	var fx: SpriteEffect = SpriteEffect.spawn(self, comet, {
+		"loop": true,
+		"duration": fall_s + 0.08,
+		"scale": Vector2(1.1, 1.1),
+		"z_index": 4,
+	})
+	if fx == null:
+		_meteor_boom(target, blast_radius)
+		return
+	fx.top_level = true
+	fx.global_position = target + Vector2(170.0, -250.0)
+	var tween: Tween = fx.create_tween()
+	tween.tween_property(fx, "global_position", target, fall_s)
+	# Fire the blast off a SCENE timer, not off the tween's completion. The tween
+	# lives on the comet, and the comet frees itself on its own lifetime — if that
+	# ever lands first the callback dies with it and a meteor deals damage with no
+	# explosion at all. The timer is owned by the mob and cannot be cancelled by
+	# the comet's lifecycle.
+	get_tree().create_timer(fall_s).timeout.connect(
+		_meteor_boom.bind(target, blast_radius), CONNECT_ONE_SHOT)
+
+
+func _meteor_boom(target: Vector2, blast_radius: float) -> void:
+	var boom: SpriteFrames = _vfx("fire_explosion")
+	if boom != null:
+		var fx: SpriteEffect = SpriteEffect.spawn(self, boom, {
+			"scale": Vector2.ONE * (blast_radius * 2.4 / 128.0),
+			"z_index": 3,
+		})
+		if fx != null:
+			fx.top_level = true
+			fx.global_position = target
+	# Scorch ring under the fireball so the ground reads burnt, not just lit.
+	var impact: SlamImpact = SlamImpact.new()
+	impact.max_radius = blast_radius
+	impact.color = Color(1.0, 0.55, 0.2, 0.9)
+	impact.debris = 6
+	impact.ring_count = 2
+	impact.top_level = true
+	add_child(impact)
+	impact.global_position = target
+
+
+## Client-visual: the phase-2 detonation — a frost burst on the body plus a pale
+## shockwave ring, big enough to sell "the arena just changed".
+func rp_frost_nova(center: Vector2, radius: float) -> void:
+	if multiplayer.is_server():
+		return
+	var burst: SpriteFrames = _vfx("frost_burst")
+	if burst != null:
+		var fx: SpriteEffect = SpriteEffect.spawn(self, burst, {
+			"scale": Vector2.ONE * (radius * 2.3 / 128.0),
+			"z_index": 3,
+		})
+		if fx != null:
+			fx.top_level = true
+			fx.global_position = center
+	var impact: SlamImpact = SlamImpact.new()
+	impact.max_radius = radius
+	impact.color = Color(0.6, 0.9, 1.0, 0.95)
+	impact.debris = 10
+	impact.ring_count = 3
+	impact.top_level = true
+	add_child(impact)
+	impact.global_position = center
+
+
+## Client-visual: Killing Frost landing — spikes erupt in a ring AROUND the safe
+## circle, staggered outward so the freeze visibly sweeps in rather than popping
+## on in one frame. Nothing is drawn inside [param safe_radius]: the clean patch
+## is the mechanic.
+func rp_ice_spikes(center: Vector2, safe_radius: float, count: int) -> void:
+	if multiplayer.is_server():
+		return
+	var spikes: SpriteFrames = _vfx("frost_spikes")
+	if spikes == null:
+		return
+	for ring: int in 2:
+		var r: float = safe_radius + 46.0 + float(ring) * 62.0
+		var n: int = maxi(3, count + ring * 2)
+		for i: int in n:
+			var angle: float = TAU * float(i) / float(n) + float(ring) * 0.4
+			var at: Vector2 = center + Vector2.from_angle(angle) * r
+			var delay: float = float(ring) * 0.12 + randf() * 0.06
+			get_tree().create_timer(delay).timeout.connect(
+				_pop_ice_spike.bind(at, spikes))
+
+
+func _pop_ice_spike(at: Vector2, spikes: SpriteFrames) -> void:
+	var fx: SpriteEffect = SpriteEffect.spawn(self, spikes, {
+		"scale": Vector2(0.55, 0.55),
+		"z_index": 1,
+		"speed_scale": 1.15,
+	})
+	if fx == null:
+		return
+	fx.top_level = true
+	fx.global_position = at
+
+
+## Client-visual: a lightning chain welded from segment sprites. [param points]
+## is the server's resolved arc path (boss → first target → next → …), so what
+## players see is exactly who got hit and in what order.
+func rp_chain_lightning(points: PackedVector2Array) -> void:
+	if multiplayer.is_server() or points.size() < 2:
+		return
+	var bolt: SpriteFrames = _vfx("arc_bolt")
+	var ring: SpriteFrames = _vfx("static_ring")
+	for i: int in points.size() - 1:
+		var a: Vector2 = points[i]
+		var b: Vector2 = points[i + 1]
+		var span: float = a.distance_to(b)
+		if span <= 1.0:
+			continue
+		if bolt != null:
+			# arc_bolt's cell is 256 wide; stretch along the span, keep it thin.
+			var fx: SpriteEffect = SpriteEffect.spawn(self, bolt, {
+				"scale": Vector2(span / 256.0, 0.42),
+				"z_index": 3,
+				"speed_scale": 1.4,
+			})
+			if fx != null:
+				fx.top_level = true
+				fx.global_position = (a + b) * 0.5
+				fx.rotation = (b - a).angle()
+		# A burst on each struck target so the chain has punctuation.
+		if ring != null and i > 0:
+			var hit: SpriteEffect = SpriteEffect.spawn(self, ring, {
+				"scale": Vector2(0.7, 0.7), "z_index": 3, "speed_scale": 1.3,
+			})
+			if hit != null:
+				hit.top_level = true
+				hit.global_position = a
+
+
+## Client-visual: the Cinder Lash — a beam that SWEEPS through an arc instead of
+## firing down one fixed line. Built as a pivot at the boss with the beam parked
+## half a length out along +X, then the pivot is tweened: rotating the sprite
+## about its own centre would spin the beam in place instead of sweeping it.
+func rp_sweep_beam(
+		origin: Vector2, angle_from: float, angle_to: float, length: float, duration: float
+	) -> void:
+	if multiplayer.is_server():
+		return
+	var beam: SpriteFrames = _vfx("lash_beam")
+	if beam == null:
+		return
+	var pivot: Node2D = Node2D.new()
+	pivot.top_level = true
+	add_child(pivot)
+	pivot.global_position = origin
+	pivot.rotation = angle_from
+	var fx: SpriteEffect = SpriteEffect.spawn(pivot, beam, {
+		"loop": true,
+		"duration": duration + 0.12,
+		"scale": Vector2(length / 256.0, 0.7),
+		"z_index": 3,
+		"speed_scale": 1.5,
+		"modulate": Color(1.0, 0.72, 0.35),  # lightning sheet burning as fire
+	})
+	if fx != null:
+		fx.position = Vector2(length * 0.5, 0.0)
+	var tween: Tween = pivot.create_tween()
+	tween.tween_property(pivot, "rotation", angle_to, duration)
+	tween.tween_callback(pivot.queue_free)
 
 
 func _process_animations() -> void:
@@ -1169,6 +1513,44 @@ func rp_spawn_effect() -> void:
 	if multiplayer.is_server():
 		return
 	add_child(SpawnEffect.new())
+	# A body phasing in is always its OPENING form — drop any phase-2 skin swap
+	# left over from the fight it just lost.
+	rp_swap_skin("")
+	# Rise out of the ground if this skin ships an emerge clip (the death collapse
+	# played backwards). Guarded on has_animation rather than letting
+	# rp_play_skin_anim's fallback run: every other mob would swing on spawn.
+	if animated_sprite != null and animated_sprite.sprite_frames != null \
+			and animated_sprite.sprite_frames.has_animation(&"emerge"):
+		rp_play_skin_anim(&"emerge", SPAWN_FREEZE_S)
+
+
+## Client-visual: replace the body's SpriteFrames mid-fight (a boss phase form).
+## An empty [param path] restores the skin it spawned with.
+##
+## Works because the swap keeps every CLIP NAME identical — the locomotion
+## AnimationTree drives idle/run/death by name, so it never learns the art
+## changed and no state machine needs touching.
+func rp_swap_skin(path: String) -> void:
+	if multiplayer.is_server() or animated_sprite == null:
+		return
+	if _skin_base_frames == null:
+		_skin_base_frames = animated_sprite.sprite_frames
+	var next: SpriteFrames = _skin_base_frames
+	if not path.is_empty():
+		next = load(path) as SpriteFrames
+		if next == null:
+			return
+	if next == animated_sprite.sprite_frames:
+		return
+	# Keep the clip and its progress across the swap, or the body visibly resets
+	# to frame 0 of idle in the middle of whatever it was doing.
+	var clip: StringName = animated_sprite.animation
+	var frame_i: int = animated_sprite.frame
+	var progress: float = animated_sprite.frame_progress
+	animated_sprite.sprite_frames = next
+	if next.has_animation(clip):
+		animated_sprite.animation = clip
+		animated_sprite.set_frame_and_progress(mini(frame_i, next.get_frame_count(clip) - 1), progress)
 
 
 
@@ -1184,6 +1566,17 @@ func replicate_visual(method: StringName, args: Array) -> void:
 	if _prop_id < 0:
 		return
 	container.queue_op(_prop_id, method, args)
+
+
+## Weapon-mastery / Slayer XP this body is worth on death.
+##
+## Prefers the authored override on its EnemyTypeResource; otherwise derives from
+## the LIVE stat block rather than the resource's, so a mob whose health was
+## scaled up by apply_difficulty() still pays out for the harder kill.
+func combat_skill_xp() -> int:
+	if enemy_data != null and enemy_data.combat_skill_xp_override > 0:
+		return enemy_data.combat_skill_xp_override
+	return EnemyTypeResource.combat_skill_xp_for(max_health, armor)
 
 
 ## Scale this mob's combat stats for a harder run (dungeon Hard mode): multiply max

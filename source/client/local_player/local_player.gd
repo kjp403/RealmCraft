@@ -177,6 +177,11 @@ func _ready() -> void:
 	Client.subscribe(&"boss.enrage", func(payload: Dictionary) -> void:
 		Announcer.announce("%s enrages!" % str(payload.get("name", "The boss")), "", {"color": PVP_TOAST_COLOR})
 		shake_camera(0.6))
+	# Boss mechanic callout — a named warning as the wind-up starts, so a move
+	# with counterplay (Killing Frost's safe circle) can be LEARNED the first
+	# time instead of just killing people. No shake: it must not read as damage.
+	Client.subscribe(&"boss.callout", func(payload: Dictionary) -> void:
+		Announcer.announce(str(payload.get("text", "")), "", {"color": PVP_TOAST_COLOR}))
 
 
 ## The local player's own over-head HP bar reads as "self" (green), never

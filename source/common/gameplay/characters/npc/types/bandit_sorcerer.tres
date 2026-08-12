@@ -25,7 +25,7 @@ script = ExtResource("92_wpn")
 [sub_resource type="Resource" id="Drop_bandit_wand"]
 script = ExtResource("1_e3utq")
 item = ExtResource("4_bandit_wand")
-chance = 0.06
+chance = 0.05
 
 [sub_resource type="Resource" id="Drop_cloth"]
 script = ExtResource("1_e3utq")

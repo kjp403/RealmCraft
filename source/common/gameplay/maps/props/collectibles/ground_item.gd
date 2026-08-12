@@ -35,6 +35,8 @@ var collected: bool = false
 
 ## Client-only: true while the cursor is over this drop's click area.
 var _interactable_hovered: bool = false
+## Client-only: the pillar of light over a rare drop (null when it did not earn one).
+var _beam: LootBeam = null
 
 
 func _ready() -> void:
@@ -66,6 +68,11 @@ func _refresh_visual() -> void:
 	if amount_label != null:
 		amount_label.visible = amount > 1
 		amount_label.text = str(amount)
+	# Loot beam over a rare drop. Client-only, and resolved from the item we just
+	# loaded — the server sends nothing extra for it. Parented here so it dies
+	# with the pile, on pickup or on the anti-litter expiry.
+	if not multiplayer.is_server() and item != null and _beam == null:
+		_beam = LootBeam.spawn(self, item)
 
 
 func _spawn_click_area() -> void:

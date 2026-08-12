@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="JobPerks" format=3]
 
 [ext_resource type="Script" uid="uid://de3kcsod5da5r" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
-[ext_resource type="Texture2D" uid="uid://cfletchingicon1" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Fletching.png" id="icon_tex"]
+[ext_resource type="Texture2D" uid="uid://ioyy3rx7v5vs" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Fletching.png" id="icon_tex"]
 [ext_resource type="Script" uid="uid://bkat7yo0vssli" path="res://source/common/gameplay/items/item.gd" id="2_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/headless_arrow.tres" id="r_0"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/bronze_arrow.tres" id="r_1"]

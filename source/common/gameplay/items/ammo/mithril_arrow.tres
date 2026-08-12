@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/ammo_item.gd" id="2_ammo"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/ammo.tres" id="3_slot"]
-[ext_resource type="Texture2D" uid="uid://cmatmithrilarrow01" path="res://assets/sprites/items/icons/mat_mithril_arrow.png" id="4_icon"]
+[ext_resource type="Texture2D" uid="uid://dbbdyupl5d4cu" path="res://assets/sprites/items/icons/mat_mithril_arrow.png" id="4_icon"]
 
 [sub_resource type="Resource" id="Mod_ad"]
 script = ExtResource("1_mod")

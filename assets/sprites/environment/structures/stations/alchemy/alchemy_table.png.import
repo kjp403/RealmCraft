@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://calchemytable001"
-path="res://.godot/imported/alchemy_table.png-caa2805d30fb2018c777e44c1d0a2813.ctex"
+uid="uid://kjdva1dwytwi"
+path="res://.godot/imported/alchemy_table.png-3702a670ea7503dad71b764d52e89110.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/environment/structures/stations/alchemy/alchemy_table.png"
-dest_files=["res://.godot/imported/alchemy_table.png-caa2805d30fb2018c777e44c1d0a2813.ctex"]
+dest_files=["res://.godot/imported/alchemy_table.png-3702a670ea7503dad71b764d52e89110.ctex"]
 
 [params]
 
@@ -38,4 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-

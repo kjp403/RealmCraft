@@ -95,15 +95,21 @@ extends Resource
 @export var wander_pause_max_s: float = 4.0
 
 @export_group("Rewards")
-## CHARACTER experience only — the level 1–20 curve (PlayerResource.LEVEL_XP_BASE,
-## ~13,300 XP total to cap). It is correctly scaled for that curve and should stay
-## small: ~900 kills to max level.
+## Lifetime "adventure XP" only. This does NOT level anyone: it is banked by
+## PlayerResource.add_experience, which increments the `experience` counter and
+## returns levels_gained 0 unconditionally. The counter survives for the save
+## column and the progression UI.
 ##
-## It is deliberately NOT the number weapon mastery and Slayer use. Those ride the
-## OSRS SkillXp 1–99 curve — 13,034,431 XP, ~980× the whole character curve — so
-## feeding them xp_reward made 99 effectively unreachable (~870k kills). They use
-## [method combat_skill_xp] instead. Do not "unify" these two: one number cannot
-## serve curves three orders of magnitude apart.
+## Character/combat level is DERIVED from the five weapon masteries
+## (PlayerResource.derived_combat_level: (highest + mean) × 7 / 11, capped at 126),
+## which ride the OSRS SkillXp 1–99 curve at 13,034,431 XP per mastery. The number
+## that actually progresses a character is therefore [method combat_skill_xp], not
+## this one. Do not "unify" the two: one serves a cosmetic counter, the other a
+## curve three orders of magnitude bigger.
+##
+## (An earlier version of this comment described a live 1–20 character curve worth
+## ~13,300 XP. That system was retired when level became mastery-derived; the note
+## outlived it and is corrected here.)
 @export var xp_reward: int = 25
 ## Seconds before respawn after death.
 @export var respawn_delay: float = 5.0
@@ -112,6 +118,20 @@ extends Resource
 ## xp_reward AND no loot grants nothing on death (the natural "shadow" trash).
 @export var respawns: bool = true
 @export var loot: Array[LootDrop]
+## AUTHORED weapon-mastery / Slayer XP for a kill. 0 (the default) keeps the
+## stat-derived number, which is what every ordinary mob should use — see
+## [method combat_skill_xp_for] for why that rule exists.
+##
+## Set it only where the derived value stops being meaningful. A raid boss is the
+## case: skill XP scales with effective HP, so giving one a big health bar
+## silently multiplies its payout (Ossuran at 10,000 HP derives 116,000 XP, nine
+## times Cinderborn, purely from being tanky). An override decouples "how long
+## this takes to kill" from "what it is worth", without touching the curve for
+## anything else.
+##
+## Note this also opts the mob out of difficulty scaling: dungeon Hard mode
+## inflates max_health, which raises DERIVED xp but cannot raise an authored one.
+@export var combat_skill_xp_override: int = 0
 
 
 @export_group("Boss")
@@ -161,6 +181,88 @@ extends Resource
 @export var ornate_chest_item: Item
 
 
+@export_group("Boss Spells")
+## SpriteFrames swapped onto the body when it enrages — a visible phase form,
+## not just a speed buff. Empty = keep the opening skin. The swap keeps every
+## clip NAME, so the locomotion AnimationTree is untouched; only the art changes.
+## Restored automatically on respawn.
+@export_file("*.tres") var phase2_skin: String = ""
+
+## Skin clip played while the boss winds up a cast (slam / laser / sweeping beam).
+## Defaults to "special", which is what every boss used before this was a choice.
+## Set it per boss when "special" is a specific piece of art rather than a generic
+## cast pose — Cleetus's special IS his freeze-over, so playing it under a FIRE
+## spell had him icing up to throw a fireball. Killing Frost and the enrage
+## transform always use "special": for those the freeze is the point.
+@export var cast_anim: StringName = &"special"
+
+## Tint every telegraph this boss draws: 0 = fire, 1 = frost, 2 = storm. It is
+## the boss's colour signature, not a damage type — players learn "orange ring =
+## the big one" long before they learn its name.
+@export_range(0, 2) var telegraph_element: int = 0
+## Element after enrage. -1 = keep [member telegraph_element]. Setting this is
+## how a fight visibly changes hands at phase two.
+@export var enraged_telegraph_element: int = -1
+
+## Every spell below is OFF by default (its "count"/"radius"/"arc" gate at 0), so
+## existing bosses keep the exact slam/laser/arm kit they had. A phase field of
+## 0 = usable in both phases, 1 = phase one only, 2 = only after enrage — that is
+## what lets one boss open with fire and finish with ice.
+
+## EMBER RAIN — a volley of meteors on telegraphed ground, staggered so players
+## have to keep relocating instead of dodging once. 0 = off.
+@export var meteor_count: int = 0
+@export var meteor_radius: float = 56.0
+@export var meteor_damage: float = 60.0
+## Telegraph lead on each meteor (the comet falls during the last of it).
+@export var meteor_windup_s: float = 1.5
+## Gap between successive meteors in one volley.
+@export var meteor_stagger_s: float = 0.45
+## How far from the boss meteors can land.
+@export var meteor_spread_px: float = 190.0
+@export var meteor_interval_s: float = 11.0
+@export var enraged_meteor_interval_s: float = 0.0
+@export_range(0, 2) var meteor_phase: int = 0
+
+## CINDER LASH — a beam that SWEEPS through an arc. Unlike the fixed laser
+## corridor, standing still or sidestepping both fail; you have to move around
+## the boss or get behind the sweep. 0 arc = off.
+@export var sweep_arc_deg: float = 0.0
+@export var sweep_range: float = 300.0
+@export var sweep_width: float = 34.0
+@export var sweep_windup_s: float = 1.2
+## How long the beam takes to travel its arc (also the damage window).
+@export var sweep_duration_s: float = 1.1
+@export var sweep_damage: float = 70.0
+@export var sweep_interval_s: float = 12.0
+@export var enraged_sweep_interval_s: float = 0.0
+@export_range(0, 2) var sweep_phase: int = 0
+
+## KILLING FROST — the arena freezes EXCEPT one marked circle. The telegraph is
+## inverted: players must run INTO the marker, not out of it. 0 radius = off.
+@export var frost_safe_radius: float = 0.0
+@export var frost_windup_s: float = 2.6
+## Damage to everyone caught OUTSIDE the safe circle. Meant to hurt.
+@export var frost_damage: float = 110.0
+## How far from the boss the safe circle is placed — far enough to be a run.
+@export var frost_offset_px: float = 150.0
+@export var frost_interval_s: float = 16.0
+@export var enraged_frost_interval_s: float = 0.0
+@export_range(0, 2) var frost_phase: int = 0
+
+## STATIC ARC — lightning that jumps from the boss to a target and then to
+## whoever is standing near them. The anti-stacking move: spread out or the
+## chain runs the whole raid. 0 targets = off.
+@export var chain_targets: int = 0
+## Jump distance for each subsequent link.
+@export var chain_range: float = 170.0
+@export var chain_damage: float = 45.0
+@export var chain_windup_s: float = 0.9
+@export var chain_interval_s: float = 9.0
+@export var enraged_chain_interval_s: float = 0.0
+@export_range(0, 2) var chain_phase: int = 0
+
+
 # ---------------------------------------------------------------------------
 # Skill XP from a kill (weapon mastery + Slayer) — NOT character xp_reward.
 # ---------------------------------------------------------------------------
@@ -191,8 +293,11 @@ static func combat_skill_xp_for(enemy_max_health: float, enemy_armor: float) -> 
 	return maxi(1, roundi(effective_hp * COMBAT_SKILL_XP_PER_HP))
 
 
-## [method combat_skill_xp_for] for this resource's own stat block.
+## [method combat_skill_xp_for] for this resource's own stat block, unless
+## [member combat_skill_xp_override] authors a value instead.
 func combat_skill_xp() -> int:
+	if combat_skill_xp_override > 0:
+		return combat_skill_xp_override
 	return combat_skill_xp_for(max_health, armor)
 
 

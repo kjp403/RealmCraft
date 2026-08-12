@@ -26,7 +26,11 @@ static var _event_instance: ServerInstance = null
 
 ## Spawn the world boss at [param position] inside [param spawn_container]'s map and
 ## rally the server. Returns an admin-facing feedback string. Server-only.
-static func start_world_boss(instance: ServerInstance, spawn_container: ReplicatedPropsContainer, position: Vector2) -> String:
+##
+## [param slug] overrides the archetype so an in-development boss can be fought
+## anywhere before it is committed to a map — any is_boss enemy type works, it
+## gets the same BossController and the same shared-reward death handling.
+static func start_world_boss(instance: ServerInstance, spawn_container: ReplicatedPropsContainer, position: Vector2, slug: StringName = WORLD_BOSS_SLUG) -> String:
 	if not GameMode.is_world_server():
 		return "World bosses can only be spawned on a world server."
 	if is_instance_valid(_active_boss):
@@ -37,10 +41,10 @@ static func start_world_boss(instance: ServerInstance, spawn_container: Replicat
 	var boss: HostileNpc = spawn_container.spawn_dynamic(
 		ReplicatedPropsContainer.SCENE_HOSTILE_NPC,
 		spawn_container.to_local(position),
-		{"enemy_type_slug": WORLD_BOSS_SLUG}
+		{"enemy_type_slug": slug}
 	) as HostileNpc
 	if boss == null:
-		return "Failed to spawn the world boss (slug '%s', is it registered?)." % WORLD_BOSS_SLUG
+		return "Failed to spawn the world boss (slug '%s', is it registered?)." % slug
 
 	# mecha_stone_golem.tres defines the fight (clips + Boss tuning). Bolt on
 	# the same named BossController RoomNode / Hollow use — the name matters so
@@ -49,6 +53,11 @@ static func start_world_boss(instance: ServerInstance, spawn_container: Replicat
 	brain.name = "BossController"
 	brain.boss = boss
 	boss.add_child(brain)
+
+	# Summon burst + the emerge clip, the same entrance a dungeon spawn gets via
+	# RoomNode. Without it a rallied world boss simply appears, mid-crowd, with no
+	# beat for anyone to react to.
+	boss.replicate_visual(&"rp_spawn_effect", [])
 
 	_active_boss = boss
 	_event_instance = instance

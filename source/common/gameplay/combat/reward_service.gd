@@ -143,7 +143,9 @@ static func _reward(
 	resource.add_experience(npc.xp_reward)
 	# Mastery and Slayer ride the SkillXp 1–99 curve (~980× bigger) and take the
 	# stat-derived number instead — see EnemyTypeResource.combat_skill_xp_for.
-	var skill_xp: int = EnemyTypeResource.combat_skill_xp_for(npc.max_health, npc.armor)
+	# The body answers, so a boss can author a flat value (combat_skill_xp_override)
+	# while every ordinary mob keeps deriving it from its health.
+	var skill_xp: int = npc.combat_skill_xp()
 	var loot_gained: Array = _roll_loot(npc)
 	_append_zone_kill_loot(player, loot_gained)
 	for entry: Variant in bonus_loot:

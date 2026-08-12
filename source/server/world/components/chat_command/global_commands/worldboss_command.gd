@@ -8,7 +8,7 @@ func _init() -> void:
 	command_name = "worldboss"
 	command_alias = PackedStringArray(["wb"])
 	command_priority = 2 # admin+
-	command_usage = "/worldboss [end]"
+	command_usage = "/worldboss [end|<enemy slug>]"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
@@ -24,4 +24,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	var map: Map = me.get_parent() as Map
 	if map == null or map.replicated_props_container == null:
 		return "You can't spawn a world boss here."
-	return EventService.start_world_boss(me_inst, map.replicated_props_container, me.global_position)
+	# /worldboss <slug> — fight an in-development boss anywhere before it has a
+	# home map. Bare /worldboss keeps spawning the usual archetype.
+	var slug: StringName = EventService.WORLD_BOSS_SLUG
+	if args.size() >= 2:
+		slug = StringName(args[1].to_lower())
+	return EventService.start_world_boss(
+		me_inst, map.replicated_props_container, me.global_position, slug
+	)

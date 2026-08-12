@@ -1,0 +1,229 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/loot_beam/loot_beam_cyan.png" id="1_cyan"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/loot_beam/loot_beam_gold.png" id="2_gold"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/loot_beam/loot_beam_purple.png" id="3_purple"]
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_0"]
+atlas = ExtResource("1_cyan")
+region = Rect2(0, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_1"]
+atlas = ExtResource("1_cyan")
+region = Rect2(64, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_2"]
+atlas = ExtResource("1_cyan")
+region = Rect2(128, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_3"]
+atlas = ExtResource("1_cyan")
+region = Rect2(192, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_4"]
+atlas = ExtResource("1_cyan")
+region = Rect2(256, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_5"]
+atlas = ExtResource("1_cyan")
+region = Rect2(320, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_6"]
+atlas = ExtResource("1_cyan")
+region = Rect2(384, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_7"]
+atlas = ExtResource("1_cyan")
+region = Rect2(448, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_8"]
+atlas = ExtResource("1_cyan")
+region = Rect2(512, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_cyan_9"]
+atlas = ExtResource("1_cyan")
+region = Rect2(576, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_0"]
+atlas = ExtResource("2_gold")
+region = Rect2(0, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_1"]
+atlas = ExtResource("2_gold")
+region = Rect2(64, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_2"]
+atlas = ExtResource("2_gold")
+region = Rect2(128, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_3"]
+atlas = ExtResource("2_gold")
+region = Rect2(192, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_4"]
+atlas = ExtResource("2_gold")
+region = Rect2(256, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_5"]
+atlas = ExtResource("2_gold")
+region = Rect2(320, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_6"]
+atlas = ExtResource("2_gold")
+region = Rect2(384, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_7"]
+atlas = ExtResource("2_gold")
+region = Rect2(448, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_8"]
+atlas = ExtResource("2_gold")
+region = Rect2(512, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_gold_9"]
+atlas = ExtResource("2_gold")
+region = Rect2(576, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_0"]
+atlas = ExtResource("3_purple")
+region = Rect2(0, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_1"]
+atlas = ExtResource("3_purple")
+region = Rect2(64, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_2"]
+atlas = ExtResource("3_purple")
+region = Rect2(128, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_3"]
+atlas = ExtResource("3_purple")
+region = Rect2(192, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_4"]
+atlas = ExtResource("3_purple")
+region = Rect2(256, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_5"]
+atlas = ExtResource("3_purple")
+region = Rect2(320, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_6"]
+atlas = ExtResource("3_purple")
+region = Rect2(384, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_7"]
+atlas = ExtResource("3_purple")
+region = Rect2(448, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_8"]
+atlas = ExtResource("3_purple")
+region = Rect2(512, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_purple_9"]
+atlas = ExtResource("3_purple")
+region = Rect2(576, 0, 64, 96)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_8")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_cyan_9")
+}],
+"loop": true,
+"name": &"cyan",
+"speed": 12.0}, {"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_8")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_gold_9")
+}],
+"loop": true,
+"name": &"gold",
+"speed": 12.0}, {"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_8")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_purple_9")
+}],
+"loop": true,
+"name": &"purple",
+"speed": 14.0
+}]

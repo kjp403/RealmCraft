@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cfletchingicon1"
-path="res://.godot/imported/Fletching.png-0eaecdc71230d6f441807da49a161676.ctex"
+uid="uid://ioyy3rx7v5vs"
+path="res://.godot/imported/Fletching.png-e3a27187a898b4481262870452bc963a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Fletching.png"
-dest_files=["res://.godot/imported/Fletching.png-0eaecdc71230d6f441807da49a161676.ctex"]
+dest_files=["res://.godot/imported/Fletching.png-e3a27187a898b4481262870452bc963a.ctex"]
 
 [params]
 

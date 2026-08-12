@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="JobPerks" format=3]
 [ext_resource type="Script" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
-[ext_resource type="Texture2D" uid="uid://cherbloreicon01" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Herblore.png" id="icon_tex"]
+[ext_resource type="Texture2D" uid="uid://dv17dip8k70vc" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Herblore.png" id="icon_tex"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="1_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="p0"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="p1"]

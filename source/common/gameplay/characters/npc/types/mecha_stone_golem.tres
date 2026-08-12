@@ -62,27 +62,27 @@ max_amount = 5
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
 item = ExtResource("9_sword")
-chance = 0.18
+chance = 0.03
 
 [sub_resource type="Resource" id="Drop_hammer"]
 script = ExtResource("2_loot")
 item = ExtResource("10_hammer")
-chance = 0.18
+chance = 0.03
 
 [sub_resource type="Resource" id="Drop_wand"]
 script = ExtResource("2_loot")
 item = ExtResource("11_wand")
-chance = 0.18
+chance = 0.03
 
 [sub_resource type="Resource" id="Drop_book"]
 script = ExtResource("2_loot")
 item = ExtResource("12_book")
-chance = 0.18
+chance = 0.03
 
 [sub_resource type="Resource" id="Drop_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("13_bow")
-chance = 0.18
+chance = 0.03
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")

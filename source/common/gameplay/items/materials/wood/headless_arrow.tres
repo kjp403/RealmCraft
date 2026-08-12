@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="MaterialItem" format=3]
 
 [ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://cmatheadlessarrow01" path="res://assets/sprites/items/icons/mat_headless_arrow.png" id="2_icon"]
+[ext_resource type="Texture2D" uid="uid://dr48e5ao0ycy" path="res://assets/sprites/items/icons/mat_headless_arrow.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_script")

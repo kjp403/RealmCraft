@@ -21,7 +21,7 @@ lunge_cooldown = 10.0
 [sub_resource type="Resource" id="Resource_1jsux"]
 script = ExtResource("1_3a3qb")
 item = ExtResource("4_1jsux")
-chance = 0.2
+chance = 0.05
 metadata/_custom_type_script = "uid://dyw7fn4hr7rbh"
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]

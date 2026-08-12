@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786471623
-next_id = 92
+version = 1786514367
+next_id = 93
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -18,12 +18,12 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/bandit_archer.tres",
 &"slug": &"bandit_archer"
 }, {
-&"hash": "8747e6d84a0398c102b3b74a7436b838fd90fbedddee87096581cd24dac955a6",
+&"hash": "c51724fb498a73e5e1b0fcd8b510f1343ddfe1f5392ffdc82a4180823bb70829",
 &"id": 2,
 &"path": "res://source/common/gameplay/characters/npc/types/bandit_captain.tres",
 &"slug": &"bandit_captain"
 }, {
-&"hash": "6a5e6d3e0accab41f669c5660199b65a09d57acc338aae76866f81585eae7820",
+&"hash": "ae46441b77ac117d978bcce1ce94f29907ad3fb0cdd86609374944823251b2ff",
 &"id": 8,
 &"path": "res://source/common/gameplay/characters/npc/types/bandit_sorcerer.tres",
 &"slug": &"bandit_sorcerer"
@@ -43,7 +43,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/dungeon_boss.tres",
 &"slug": &"dungeon_boss"
 }, {
-&"hash": "5403a03403dc745e699e04ba45d16a6aa879e77eef617b53a732b0808059809d",
+&"hash": "1b9ea37cda99259bb68906bd45ebdd6236b53926bfc6084fc9cccfd5a5f91875",
 &"id": 31,
 &"path": "res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres",
 &"slug": &"fungal_heart"
@@ -68,7 +68,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/fungus/sporeling.tres",
 &"slug": &"sporeling"
 }, {
-&"hash": "178accd63b9c73eee53b063c907a6bd558c21cf5691810a0b6b0cb3dde315c5f",
+&"hash": "c25494fd0c262ee1d32e3d152dc0c3baa4b75d8d442e62520c3bcf6421c58065",
 &"id": 22,
 &"path": "res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres",
 &"slug": &"goblin_chief"
@@ -128,7 +128,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/orc.tres",
 &"slug": &"orc"
 }, {
-&"hash": "b1768ebcd7f5ebc0d6521fe9f6c6706b1bf0b4287abf886dcb5c9addc267ee88",
+&"hash": "5c1ebba783674db30b1a92193b1933cc9734ec4d21d8a5a50c7724b55ec4d4d0",
 &"id": 13,
 &"path": "res://source/common/gameplay/characters/npc/types/orc_leader.tres",
 &"slug": &"orc_leader"
@@ -437,6 +437,11 @@ entries = Array[Dictionary]([{
 &"id": 91,
 &"path": "res://source/common/gameplay/characters/npc/types/rabid_wolf.tres",
 &"slug": &"rabid_wolf"
+}, {
+&"hash": "62c14ecb9ad52e25cbe4d580ac2f7807d65e25c545b761aabe607a03f03df2ea",
+&"id": 92,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
+&"slug": &"ossuran"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")
