@@ -10,4 +10,5 @@ func _init() -> void:
 
 func execute(_args: PackedStringArray, _peer_id: int, _server_instance: ServerInstance) -> String:
 	AdminConfig.reload()
-	return "Admin config reloaded."
+	LeaderboardService.invalidate_champions_cache()
+	return "Admin config reloaded (leaderboard champion cache cleared)."

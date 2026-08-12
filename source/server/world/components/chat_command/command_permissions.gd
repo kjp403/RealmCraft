@@ -109,19 +109,29 @@ static func staff_moderation_block_reason(
 
 ## True when this account/roles should be omitted from public leaderboards.
 ## Pass either a live PlayerResource or the offline account_name + roles dict.
+## [param display_name] is optional — used so character names listed in
+## server_admins.cfg (or [leaderboard_hide]) still drop off boards even when
+## the login account string differs.
 static func is_hidden_from_leaderboard(
 	account_name: String,
 	roles: Dictionary,
-	role_definitions: Dictionary
+	role_definitions: Dictionary,
+	display_name: String = ""
 ) -> bool:
+	# Count ALL persisted roles for hide — including live-blocked owner /
+	# senior_admin. Those ranks no longer grant commands from the DB on LIVE,
+	# but boosted staff chars must still stay off public boards.
 	var best: int = 0
 	for role: String in roles:
-		if _db_role_blocked(role):
-			continue
 		best = maxi(best, int(role_definitions.get(role, {}).get("priority", 0)))
-	var config_role: String = AdminConfig.role_for(account_name)
-	if not config_role.is_empty():
-		best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
+	for key: String in [account_name, display_name]:
+		if key.is_empty():
+			continue
+		if AdminConfig.is_leaderboard_hidden(key):
+			return true
+		var config_role: String = AdminConfig.role_for(key)
+		if not config_role.is_empty():
+			best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
 	return best >= LEADERBOARD_HIDE_PRIORITY
 
 
