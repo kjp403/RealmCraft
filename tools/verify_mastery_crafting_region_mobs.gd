@@ -179,7 +179,7 @@ func _init() -> void:
 	var index: String = FileAccess.get_file_as_string(
 		"res://source/common/registry/indexes/enemy_types_index.tres"
 	)
-	for slug: String in ["badger", "desert_badger", "rabid_wolf", "angry_bat"]:
+	for slug: String in ["badger", "desert_badger", "rabid_wolf", "angry_bat", "cave_bat"]:
 		if index.find("&\"%s\"" % slug) < 0:
 			failures.append("enemy_types_index missing %s" % slug)
 

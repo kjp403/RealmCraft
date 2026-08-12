@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786514367
-next_id = 93
+version = 1786560000
+next_id = 94
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -442,6 +442,11 @@ entries = Array[Dictionary]([{
 &"id": 92,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"ossuran"
+}, {
+&"hash": "912e1a5da482110fb1756a4ab7bac7643575af0a0fc252e4af568223d9eba602",
+&"id": 93,
+&"path": "res://source/common/gameplay/characters/npc/types/cave_bat.tres",
+&"slug": &"cave_bat"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

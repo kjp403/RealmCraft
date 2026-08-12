@@ -584,7 +584,8 @@ func _write_tscn(
 	var cam_r := W * TILE + 16
 	var cam_b := H * TILE + 16
 
-	# Passive bats: passive (chase_on_area=false on trpg_bat), wander the cavern.
+	# Passive bats: cave_bat (chase_on_area=false). Do not use trpg_bat — that
+	# archetype is aggressive combat trash after the biome-burst buff.
 	var bat_world := [
 		Vector2(448, 960), Vector2(704, 576), Vector2(960, 768), Vector2(1216, 448),
 		Vector2(1344, 1024), Vector2(832, 1088), Vector2(576, 704), Vector2(1088, 960),
@@ -620,7 +621,7 @@ func _write_tscn(
 [ext_resource type=\"Resource\" uid=\"uid://crunitevein001\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres\" id=\"17_rune\"]
 [ext_resource type=\"Script\" path=\"res://source/common/gameplay/maps/components/skill_level_gate.gd\" id=\"18_gate\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"res://source/common/gameplay/characters/npc/hostile_npc.tscn\" id=\"19_npc\"]
-[ext_resource type=\"Resource\" path=\"res://source/common/gameplay/characters/npc/types/trpg/trpg_bat.tres\" id=\"20_bat\"]
+[ext_resource type=\"Resource\" path=\"res://source/common/gameplay/characters/npc/types/cave_bat.tres\" id=\"20_bat\"]
 
 [node name=\"mining_cave\" type=\"Node2D\" node_paths=PackedStringArray(\"replicated_props_container\")]
 y_sort_enabled = true

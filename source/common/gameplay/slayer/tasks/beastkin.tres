@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_task")
 display_name = "Beastkin"
-enemy_types = Array[StringName]([&"trpg_bat", &"angry_bat", &"trpg_crag_yeti", &"trpg_snow_yeti", &"trpg_werewolf", &"trpg_werewolf_stalker", &"trpg_werebear", &"trpg_umber_hulk"])
+enemy_types = Array[StringName]([&"trpg_bat", &"cave_bat", &"angry_bat", &"trpg_crag_yeti", &"trpg_snow_yeti", &"trpg_werewolf", &"trpg_werewolf_stalker", &"trpg_werebear", &"trpg_umber_hulk"])
 min_slayer_level = 65
 xp_per_kill = 716
 guide_notes = "Huge health pools and the hardest hits in the bracket, but almost no armour - raw damage lands cleanly here. Yetis and werebears will chase a long way, so pick your ground before the pull."

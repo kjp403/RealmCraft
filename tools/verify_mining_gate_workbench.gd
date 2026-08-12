@@ -61,6 +61,16 @@ func _init() -> void:
 		failures.append("gate missing eject_direction (null-spot fix)")
 	if cave_text.find("eject_direction = Vector2(-1, 0)") < 0:
 		failures.append("DeepVeinGate missing leftward eject_direction")
+	# Skiller-safe wildlife: Mining Cave must not share aggressive trpg_bat.
+	if cave_text.find("trpg/trpg_bat.tres") >= 0:
+		failures.append("mining_cave CaveBats still use aggressive trpg_bat")
+	if cave_text.find("types/cave_bat.tres") < 0:
+		failures.append("mining_cave must use cave_bat.tres (chase_on_area=false)")
+	var cave_bat_text: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/characters/npc/types/cave_bat.tres"
+	)
+	if cave_bat_text.find("chase_on_area = false") < 0:
+		failures.append("cave_bat must be passive (chase_on_area=false)")
 
 	if failures.is_empty():
 		print("VERIFY_PASS mining_gate smith_house_stations")
