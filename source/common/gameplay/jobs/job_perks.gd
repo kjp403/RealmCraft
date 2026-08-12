@@ -91,6 +91,11 @@ extends Resource
 ## Example: "Gather speed +{cooldown}%"
 @export var describe_lines: Array[String] = []
 
+## Cached [method recipe_guide_entries] result — deferred craft paths do file
+## I/O on first open of Skills detail; keep the resolved list for the session.
+var _recipe_guide_cache: Array[Dictionary] = []
+var _recipe_guide_cached: bool = false
+
 
 # ---------------------------------------------------------------------------
 # Recipe guide (eager + deferred)
@@ -106,6 +111,9 @@ func has_recipe_guide() -> bool:
 ## name so metal weapons sit with their bars (not buried after Dragon).
 ## Each entry: `{ "item": Item, "level": int }`. Missing paths are skipped.
 func recipe_guide_entries() -> Array[Dictionary]:
+	if _recipe_guide_cached:
+		return _recipe_guide_cache
+
 	var out: Array[Dictionary] = []
 	for i: int in recipe_items.size():
 		var item: Item = recipe_items[i]
@@ -134,6 +142,8 @@ func recipe_guide_entries() -> Array[Dictionary]:
 		var ib: Item = b["item"] as Item
 		return String(ia.item_name) < String(ib.item_name)
 	)
+	_recipe_guide_cache = out
+	_recipe_guide_cached = true
 	return out
 
 

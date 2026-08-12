@@ -64,9 +64,23 @@ var _slayer_task_box: VBoxContainer
 ## slug -> { "button": Button, "cur": Label, "base": Label } — updated in place
 ## on gather so the XP tooltip under the mouse is not destroyed/recreated.
 var _skill_tiles: Dictionary = {}
+## Coalesce gather-driven skills.get while the dock is open.
+var _skills_refresh_queued: bool = false
+## Detail header widgets updated in place on XP ticks (avoids wiping the
+## sources/recipes list — which can file-I/O deferred craft guides).
+var _detail_level_label: Label
+var _detail_xp_bar: ProgressBar
+var _detail_xp_label: Label
+var _style_tile_normal: StyleBoxFlat
+var _style_tile_hover: StyleBoxFlat
+var _style_tile_pressed: StyleBoxFlat
+var _style_compact_normal: StyleBoxFlat
+var _style_compact_hover: StyleBoxFlat
+var _style_compact_pressed: StyleBoxFlat
 
 
 func _ready() -> void:
+	_ensure_shared_styles()
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	custom_minimum_size = PANEL_SIZE
 	size = PANEL_SIZE
@@ -206,24 +220,37 @@ func _make_mode_tab(label: String, mode: Mode, group: ButtonGroup) -> Button:
 
 
 func _apply_compact_button_style(btn: Button) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.12, 0.11, 0.10, 0.95)
-	normal.border_color = Color(0.48, 0.40, 0.28, 0.9)
-	normal.set_border_width_all(1)
-	normal.set_corner_radius_all(2)
-	normal.content_margin_left = 4
-	normal.content_margin_right = 4
-	normal.content_margin_top = 1
-	normal.content_margin_bottom = 1
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.border_color = Color(0.92, 0.72, 0.28, 1.0)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.20, 0.15, 0.08, 1.0)
-	pressed.border_color = Color(1.0, 0.82, 0.30, 1.0)
-	btn.add_theme_stylebox_override(&"normal", normal)
-	btn.add_theme_stylebox_override(&"hover", hover)
-	btn.add_theme_stylebox_override(&"pressed", pressed)
-	btn.add_theme_stylebox_override(&"focus", normal)
+	_ensure_shared_styles()
+	btn.add_theme_stylebox_override(&"normal", _style_compact_normal)
+	btn.add_theme_stylebox_override(&"hover", _style_compact_hover)
+	btn.add_theme_stylebox_override(&"pressed", _style_compact_pressed)
+	btn.add_theme_stylebox_override(&"focus", _style_compact_normal)
+
+
+func _ensure_shared_styles() -> void:
+	if _style_compact_normal != null:
+		return
+	_style_compact_normal = StyleBoxFlat.new()
+	_style_compact_normal.bg_color = Color(0.12, 0.11, 0.10, 0.95)
+	_style_compact_normal.border_color = Color(0.48, 0.40, 0.28, 0.9)
+	_style_compact_normal.set_border_width_all(1)
+	_style_compact_normal.set_corner_radius_all(2)
+	_style_compact_normal.content_margin_left = 4
+	_style_compact_normal.content_margin_right = 4
+	_style_compact_normal.content_margin_top = 1
+	_style_compact_normal.content_margin_bottom = 1
+	_style_compact_hover = _style_compact_normal.duplicate() as StyleBoxFlat
+	_style_compact_hover.border_color = Color(0.92, 0.72, 0.28, 1.0)
+	_style_compact_pressed = _style_compact_normal.duplicate() as StyleBoxFlat
+	_style_compact_pressed.bg_color = Color(0.20, 0.15, 0.08, 1.0)
+	_style_compact_pressed.border_color = Color(1.0, 0.82, 0.30, 1.0)
+
+	_style_tile_normal = _make_cell_style()
+	_style_tile_hover = _make_cell_style()
+	_style_tile_hover.border_color = Color(0.92, 0.82, 0.28, 1.0)
+	_style_tile_hover.bg_color = Color(0.20, 0.18, 0.14, 0.98)
+	_style_tile_pressed = _make_cell_style()
+	_style_tile_pressed.border_color = Color(1.0, 0.92, 0.35, 1.0)
 
 
 func _set_mode(mode: Mode) -> void:
@@ -276,8 +303,20 @@ func _on_visibility_changed() -> void:
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
-	if visible and _mode == Mode.SKILLS:
-		_refresh()
+	if not visible or _mode != Mode.SKILLS:
+		return
+	_queue_skills_refresh()
+
+
+func _queue_skills_refresh() -> void:
+	if _skills_refresh_queued:
+		return
+	_skills_refresh_queued = true
+	get_tree().create_timer(0.35).timeout.connect(func() -> void:
+		_skills_refresh_queued = false
+		if visible and _mode == Mode.SKILLS:
+			_refresh()
+	, CONNECT_ONE_SHOT)
 
 
 func _refresh() -> void:
@@ -304,12 +343,46 @@ func _on_skills_received(data: Dictionary) -> void:
 				"display_name", _selected_slug.capitalize()
 			)
 		)
-		_rebuild_detail()
+		# Prefer in-place XP/header updates so gather ticks don't rebuild the
+		# full sources/recipes list (deferred craft guides do file I/O).
+		if not _update_detail_header_inplace():
+			_rebuild_detail()
 	else:
 		title_label.text = "Skills"
 		# Prefer in-place tile updates so a hover tooltip survives gather XP ticks.
 		_build_skills_grid(false)
 		_total_level_bar.text = "Total level: %d" % total_level
+
+
+func _update_detail_header_inplace() -> bool:
+	if (
+		_detail_level_label == null
+		or _detail_xp_bar == null
+		or _detail_xp_label == null
+		or not is_instance_valid(_detail_level_label)
+		or not is_instance_valid(_detail_xp_bar)
+		or not is_instance_valid(_detail_xp_label)
+	):
+		return false
+	if _selected_slug.is_empty() or not _skills.has(_selected_slug):
+		return false
+	var info: Dictionary = _skills[_selected_slug]
+	var level: int = int(info.get("level", 1))
+	var xp: int = int(info.get("xp", 0))
+	var raw_next: int = int(info.get("xp_to_next", 1))
+	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
+	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
+	_detail_level_label.text = "Lv %d / %d" % [level, level]
+	_detail_xp_bar.max_value = xp_to_next
+	_detail_xp_bar.value = xp_to_next if at_cap else xp
+	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	_detail_xp_label.text = (
+		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
+		else "%s / %s XP · Total %s" % [
+			_format_xp(xp), _format_xp(xp_to_next), _format_xp(total_xp)
+		]
+	)
+	return true
 
 
 func _total_unlocked_level() -> int:
@@ -637,6 +710,9 @@ func _rebuild_detail() -> void:
 	for child: Node in _detail_root.get_children():
 		_detail_root.remove_child(child)
 		child.queue_free()
+	_detail_level_label = null
+	_detail_xp_bar = null
+	_detail_xp_label = null
 
 	if _selected_slug.is_empty() or not _skills.has(_selected_slug):
 		_show_grid()
@@ -680,6 +756,7 @@ func _rebuild_detail() -> void:
 	header.add_theme_font_size_override(&"font_size", 11)
 	header.add_theme_color_override(&"font_color", Color(1.0, 1.0, 0.0))
 	header_row.add_child(header)
+	_detail_level_label = header
 
 	var bar := ProgressBar.new()
 	bar.min_value = 0
@@ -690,6 +767,7 @@ func _rebuild_detail() -> void:
 	bar.add_theme_stylebox_override(&"background", _make_bar_bg())
 	bar.add_theme_stylebox_override(&"fill", _make_bar_fill())
 	_detail_root.add_child(bar)
+	_detail_xp_bar = bar
 
 	var xp_label := Label.new()
 	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
@@ -704,6 +782,7 @@ func _rebuild_detail() -> void:
 	xp_label.add_theme_font_size_override(&"font_size", 8)
 	xp_label.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.8))
 	_detail_root.add_child(xp_label)
+	_detail_xp_label = xp_label
 
 	# Slayer has no gather/craft table — its "sources" are the MASTERS and the
 	# tasks they hand out, so it renders its own guide (see _build_slayer_guide).
@@ -1096,16 +1175,11 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 
 
 func _apply_tile_styles(tile: Button) -> void:
-	var normal := _make_cell_style()
-	var hover := _make_cell_style()
-	hover.border_color = Color(0.92, 0.82, 0.28, 1.0)
-	hover.bg_color = Color(0.20, 0.18, 0.14, 0.98)
-	var pressed := _make_cell_style()
-	pressed.border_color = Color(1.0, 0.92, 0.35, 1.0)
-	tile.add_theme_stylebox_override(&"normal", normal)
-	tile.add_theme_stylebox_override(&"hover", hover)
-	tile.add_theme_stylebox_override(&"pressed", pressed)
-	tile.add_theme_stylebox_override(&"focus", normal)
+	_ensure_shared_styles()
+	tile.add_theme_stylebox_override(&"normal", _style_tile_normal)
+	tile.add_theme_stylebox_override(&"hover", _style_tile_hover)
+	tile.add_theme_stylebox_override(&"pressed", _style_tile_pressed)
+	tile.add_theme_stylebox_override(&"focus", _style_tile_normal)
 
 
 func _make_cell_style() -> StyleBoxFlat:
