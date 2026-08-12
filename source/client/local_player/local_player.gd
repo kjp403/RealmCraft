@@ -32,6 +32,12 @@ const PICKUP_CONTROLLER_SCRIPT: Script = preload(
 const COMBAT_TARGET_CONTROLLER_SCRIPT: Script = preload(
 	"res://source/client/local_player/combat_target_controller.gd"
 )
+const INTERACT_CONTROLLER_SCRIPT: Script = preload(
+	"res://source/client/local_player/interact_controller.gd"
+)
+const CRAFT_CONTROLLER_SCRIPT: Script = preload(
+	"res://source/client/local_player/craft_controller.gd"
+)
 const FOLLOW_REPATH_MS: int = 300
 const FOLLOW_STOP_DISTANCE: float = 28.0
 ## Auto-retaliate ignores hits after this much idle time (no move/attack/ability).
@@ -71,6 +77,8 @@ var _click_move_marker: ClickMoveMarker
 var _harvest_controller: HarvestController
 var _pickup_controller: PickupController
 var _combat_target_controller: CombatTargetController
+var _interact_controller: InteractController
+var _craft_controller: CraftController
 var _follow_peer_id: int = 0
 var _follow_repath_at_ms: int = 0
 ## Last ticks_msec the local player provided intentional input (movement, attack,
@@ -97,6 +105,12 @@ func _ready() -> void:
 	_combat_target_controller = COMBAT_TARGET_CONTROLLER_SCRIPT.new()
 	add_child(_combat_target_controller)
 	_combat_target_controller.setup(self)
+	_interact_controller = INTERACT_CONTROLLER_SCRIPT.new()
+	add_child(_interact_controller)
+	_interact_controller.setup(self)
+	_craft_controller = CRAFT_CONTROLLER_SCRIPT.new()
+	add_child(_craft_controller)
+	_craft_controller.setup(self)
 	_last_input_ms = Time.get_ticks_msec()
 	ClientState.local_player_ready.emit(self)
 	
@@ -480,6 +494,8 @@ func process_input() -> void:
 			_pickup_controller.cancel()
 		if _combat_target_controller != null:
 			_combat_target_controller.cancel()
+		if _interact_controller != null:
+			_interact_controller.cancel()
 		input_direction = Vector2.ZERO
 		action_input = false
 		return
@@ -489,6 +505,8 @@ func process_input() -> void:
 			_harvest_controller.cancel()
 		if _pickup_controller != null:
 			_pickup_controller.cancel()
+		if _interact_controller != null:
+			_interact_controller.cancel()
 		input_direction = Vector2.ZERO
 		if _combat_target_controller != null and _combat_target_controller.tick():
 			action_input = false
@@ -508,6 +526,8 @@ func process_input() -> void:
 			_pickup_controller.cancel()
 		if _combat_target_controller != null:
 			_combat_target_controller.cancel()
+		if _interact_controller != null:
+			_interact_controller.cancel()
 		input_direction = manual_direction
 	else:
 		_update_follow_navigation()
@@ -575,6 +595,8 @@ func process_input() -> void:
 			_harvest_controller.cancel()
 		if _pickup_controller != null and _pickup_controller.is_active():
 			_pickup_controller.cancel()
+		if _interact_controller != null and _interact_controller.is_active():
+			_interact_controller.cancel()
 
 	# Click-to-gather overrides hold-to-attack while a vein is locked.
 	if _harvest_controller != null and _harvest_controller.is_active():
@@ -585,6 +607,11 @@ func process_input() -> void:
 	# Click-to-loot: walk into range then request item.pickup.
 	if _pickup_controller != null and _pickup_controller.is_active():
 		if _pickup_controller.tick():
+			return
+
+	# Click-to-talk / use station: walk into range then open the interaction.
+	if _interact_controller != null and _interact_controller.is_active():
+		if _interact_controller.tick():
 			return
 
 	# A lock whose target just died must be dropped HERE, not inside tick() — the
@@ -688,6 +715,8 @@ func set_click_move_target(world_target: Vector2) -> void:
 		_pickup_controller.cancel()
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
+	if _interact_controller != null:
+		_interact_controller.cancel()
 	_click_navigation.request_move(world_target)
 	if _click_move_marker != null:
 		_click_move_marker.flash_at(world_target)
@@ -703,6 +732,8 @@ func start_auto_gather(node: MineableNode) -> void:
 		_pickup_controller.cancel()
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
+	if _interact_controller != null:
+		_interact_controller.cancel()
 	_harvest_controller.start(node)
 
 
@@ -717,7 +748,45 @@ func start_auto_pickup(
 		return
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
+	if _interact_controller != null:
+		_interact_controller.cancel()
 	_pickup_controller.start(item, prop_id, request)
+
+
+## Walk to a station / NPC / other interactable, then run [param on_arrived].
+## Shared entry for every talkable NPC and crafting station going forward.
+func start_auto_interact(target: Node2D, interact_range: float, on_arrived: Callable) -> void:
+	if _interact_controller == null or target == null or not is_instance_valid(target):
+		return
+	_note_input_activity()
+	if _harvest_controller != null:
+		_harvest_controller.cancel()
+	if _pickup_controller != null:
+		_pickup_controller.cancel()
+	if _combat_target_controller != null:
+		_combat_target_controller.cancel()
+	_interact_controller.start(target, interact_range, on_arrived)
+
+
+## Close the fullscreen craft UI and run a batch with the compact progress chip.
+func start_craft_session(
+	station_key: String,
+	station: CraftingStationResource,
+	recipe_index: int,
+	qty_target: int
+) -> void:
+	if _craft_controller == null:
+		return
+	_craft_controller.start(station_key, station, recipe_index, qty_target)
+
+
+func cancel_craft_session() -> void:
+	if _craft_controller != null:
+		_craft_controller.cancel()
+
+
+func is_crafting() -> bool:
+	return _craft_controller != null and _craft_controller.is_active()
 
 
 ## Right-click Attack: walk into range and keep using the primary weapon.
@@ -733,6 +802,8 @@ func _begin_hostile_attack(npc: HostileNpc) -> void:
 		_harvest_controller.cancel()
 	if _pickup_controller != null:
 		_pickup_controller.cancel()
+	if _interact_controller != null:
+		_interact_controller.cancel()
 	_combat_target_controller.start(npc)
 
 
@@ -844,6 +915,10 @@ func _on_instance_changed_camera_limits(instance: InstanceClient) -> void:
 		_pickup_controller.cancel()
 	if _combat_target_controller != null:
 		_combat_target_controller.cancel()
+	if _interact_controller != null:
+		_interact_controller.cancel()
+	if _craft_controller != null:
+		_craft_controller.cancel()
 	_apply_camera_limits(instance.instance_map if instance != null else null)
 	if _click_navigation != null:
 		_click_navigation.rebuild_for_map(

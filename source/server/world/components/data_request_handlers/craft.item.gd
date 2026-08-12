@@ -1,7 +1,7 @@
 extends DataRequestHandler
 
 ## Minimum seconds between two crafts by the same player. The client paces its
-## craft loop at CraftingMenu.CRAFT_INTERVAL (2s); this is the authoritative
+## craft loop at CraftController.CRAFT_INTERVAL (2s); this is the authoritative
 ## floor so a hand-rolled client can't spam the request for free xp. Set a hair
 ## under the client interval so network jitter never eats a legitimate craft.
 const MIN_CRAFT_INTERVAL_MS: int = 1500
