@@ -40,6 +40,8 @@ var _container: ReplicatedPropsContainer
 var _hard: bool = false
 var _hp_mult: float = 1.0
 var _dmg_mult: float = 1.0
+var _boss_hp_mult: float = 1.0
+var _boss_dmg_mult: float = 1.0
 
 
 func _ready() -> void:
@@ -104,14 +106,27 @@ func _activate() -> void:
 	_spawn_wave(0)
 
 
-## Hard-mode HP / damage multipliers off the run's DungeonResource (service defaults otherwise),
-## resolved once so every wave scales identically.
+## Mode HP / damage multipliers off the run's DungeonResource, resolved once so
+## every wave scales identically. Normal uses normal_* mults; Hard uses hard_*.
+## Bosses also stack boss_* extras so finales outlast trash without sponging packs.
 func _resolve_difficulty(map: Node) -> void:
 	var instance: Node = map.get_parent() if map != null else null # RoomNode → Map → ServerInstance
 	_hard = DungeonService.is_hard_run(instance)
 	var dres: DungeonResource = instance.instance_resource as DungeonResource if instance != null else null
-	_hp_mult = dres.hard_health_mult if dres != null else DungeonService.HARD_HEALTH_MULT
-	_dmg_mult = dres.hard_damage_mult if dres != null else DungeonService.HARD_DAMAGE_MULT
+	if dres != null:
+		if _hard:
+			_hp_mult = dres.hard_health_mult
+			_dmg_mult = dres.hard_damage_mult
+		else:
+			_hp_mult = dres.normal_health_mult
+			_dmg_mult = dres.normal_damage_mult
+		_boss_hp_mult = dres.boss_health_mult
+		_boss_dmg_mult = dres.boss_damage_mult
+	else:
+		_hp_mult = DungeonService.HARD_HEALTH_MULT if _hard else 1.0
+		_dmg_mult = DungeonService.HARD_DAMAGE_MULT if _hard else 1.0
+		_boss_hp_mult = 1.0
+		_boss_dmg_mult = 1.0
 
 
 ## Group SpawnMarker children into _waves by their `wave` index (0,1,2…); markers without an enemy
@@ -159,15 +174,22 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 	var is_boss: bool = marker.boss \
 			or (npc != null and npc.enemy_data != null and npc.enemy_data.is_boss)
 	make_dungeon_mob(mob, is_boss)
-	if _hard and npc != null:
-		npc.apply_difficulty(_hp_mult, _dmg_mult)
+	if npc != null:
+		var hp_m: float = _hp_mult
+		var dmg_m: float = _dmg_mult
+		if is_boss:
+			hp_m *= _boss_hp_mult
+			dmg_m *= _boss_dmg_mult
+		if not is_equal_approx(hp_m, 1.0) or not is_equal_approx(dmg_m, 1.0):
+			npc.apply_difficulty(hp_m, dmg_m)
 	if is_boss and npc != null:
 		var brain: BossController = BossController.new()
 		brain.name = "BossController"
 		brain.boss = npc
 		npc.add_child(brain) # _ready() loads slam_damage from enemy_data...
-		if _hard:
-			brain.slam_damage *= _dmg_mult # ...so scale it AFTER that load
+		var slam_m: float = _dmg_mult * (_boss_dmg_mult if is_boss else 1.0)
+		if not is_equal_approx(slam_m, 1.0):
+			brain.slam_damage *= slam_m # ...so scale it AFTER that load
 	_alive += 1
 	mob.died.connect(func(_killer: Character) -> void: _on_mob_died())
 	if npc != null:

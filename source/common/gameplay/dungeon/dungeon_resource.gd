@@ -25,8 +25,19 @@ extends InstanceResource
 @export var reward: DungeonReward
 @export var hard_reward: DungeonReward
 
+@export_group("Difficulty")
+## Applied to every mob a Normal run spawns (1.0 = authored EnemyType stats).
+## Use this to target midgame kits (e.g. Runite + Fire) without buffing the
+## same archetypes in the overworld.
+@export var normal_health_mult: float = 1.0
+@export var normal_damage_mult: float = 1.0
+## Extra multipliers stacked on bosses only (Normal and Hard). Lets trash stay
+## snappy while bosses last long enough to force potions.
+@export var boss_health_mult: float = 1.0
+@export var boss_damage_mult: float = 1.0
+
 @export_group("Hard mode")
-## Stat multipliers applied to every mob a Hard run spawns.
+## Absolute multipliers for Hard runs (not stacked on Normal mults).
 @export var hard_health_mult: float = 2.0
 @export var hard_damage_mult: float = 1.5
 
