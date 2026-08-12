@@ -1,5 +1,5 @@
 extends SceneTree
-## Regenerate source/common/registry/indexes/drop_rarity_index.tres — the lookup
+## Regenerate source/common/registry/drop_rarity_index.tres — the lookup
 ## loot beams tier on. Run after changing any enemy loot table:
 ##
 ##   godot --headless --path . -s tools/build_drop_rarity_index.gd
@@ -14,7 +14,7 @@ extends SceneTree
 ## it, which quietly breaks references elsewhere.
 
 const ENEMY_INDEX := "res://source/common/registry/indexes/enemy_types_index.tres"
-const OUT := "res://source/common/registry/indexes/drop_rarity_index.tres"
+const OUT := "res://source/common/registry/drop_rarity_index.tres"
 const SCRIPT_PATH := "res://source/common/registry/drop_rarity_index.gd"
 
 

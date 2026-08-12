@@ -13,7 +13,16 @@ static func _static_init() -> void:
 		return
 	const INDEXES_DIR: String = "res://source/common/registry/indexes/"
 	for index_path: String in ResourceLoader.list_directory(INDEXES_DIR):
-		var content_index: ContentIndex = ResourceLoader.load(INDEXES_DIR + index_path)
+		# Load UNTYPED and check. A typed assignment here throws on anything in
+		# this folder that is not a ContentIndex, and the throw aborts the whole
+		# loop — every registry after it silently never registers, which reads in
+		# game as "all my items vanished". One stray file must not do that.
+		var loaded: Resource = ResourceLoader.load(INDEXES_DIR + index_path)
+		var content_index: ContentIndex = loaded as ContentIndex
+		if content_index == null:
+			push_error("ContentRegistryHub: %s is not a ContentIndex — skipping. Only "
+				% index_path + "content indexes belong in registry/indexes/.")
+			continue
 		register_registry(
 			index_path.trim_suffix("_index.tres"),
 			content_index

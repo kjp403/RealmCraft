@@ -23,7 +23,10 @@ extends Resource
 ## How many enemy loot tables were scanned to build it.
 @export var sources_scanned: int = 0
 
-const PATH: String = "res://source/common/registry/indexes/drop_rarity_index.tres"
+## NOT under registry/indexes/ — ContentRegistryHub loads every file in that
+## folder as a ContentIndex, and a typed-assignment failure there aborts the
+## whole bootstrap loop, taking the item registry down with it.
+const PATH: String = "res://source/common/registry/drop_rarity_index.tres"
 
 static var _cached: DropRarityIndex = null
 
