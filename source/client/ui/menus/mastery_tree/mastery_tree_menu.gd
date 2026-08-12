@@ -34,6 +34,7 @@ var _category: String = ""
 var _state: Dictionary = {}
 var _wielded: Dictionary = {}
 var _selected_node: String = ""
+var _tree_refresh_queued: bool = false
 
 var _points_label: Label
 var _picker_overlay: Control
@@ -132,7 +133,15 @@ func _on_combat_reward(data: Dictionary) -> void:
 		return
 	if data.get("mastery", {}).is_empty():
 		return
-	_refresh()
+	# Debounce kill ticks while the tree is open — full rebuild is expensive.
+	if _tree_refresh_queued:
+		return
+	_tree_refresh_queued = true
+	get_tree().create_timer(0.4).timeout.connect(func() -> void:
+		_tree_refresh_queued = false
+		if is_visible_in_tree():
+			_refresh()
+	, CONNECT_ONE_SHOT)
 
 
 func _refresh() -> void:

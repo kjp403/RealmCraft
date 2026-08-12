@@ -13,6 +13,9 @@ const SKILL_TOOL_TYPES := {
 	&"fishing": &"fishing_rod",
 }
 
+## skill -> Array[Dictionary] of { "item": ToolItem, "level": int }
+static var _tools_cache: Dictionary = {}
+
 
 static func has_tools(skill: StringName) -> bool:
 	return SKILL_TOOL_TYPES.has(skill)
@@ -21,6 +24,9 @@ static func has_tools(skill: StringName) -> bool:
 ## All ToolItems for [param skill], sorted by required_skill_level then name.
 ## Entries are { "item": ToolItem, "level": int }.
 static func tools_for(skill: StringName) -> Array[Dictionary]:
+	if _tools_cache.has(skill):
+		return _tools_cache[skill] as Array[Dictionary]
+
 	var out: Array[Dictionary] = []
 	var want_type: StringName = SKILL_TOOL_TYPES.get(skill, &"")
 	if want_type == &"":
@@ -49,6 +55,7 @@ static func tools_for(skill: StringName) -> Array[Dictionary]:
 			continue
 		out.append({"item": tool, "level": lvl})
 	out.sort_custom(_sort_by_level_then_name)
+	_tools_cache[skill] = out
 	return out
 
 

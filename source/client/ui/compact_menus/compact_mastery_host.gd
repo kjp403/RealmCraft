@@ -76,9 +76,25 @@ var _selected_skill: String = ""
 var _perks_list_root: VBoxContainer
 var _perks_detail_root: VBoxContainer
 var _perks_scroll: ScrollContainer
+## slug -> { "button": Button, "name": Label, "pts": Label } — updated in place
+## so gather refreshes don't wipe/recreate every skill row.
+var _perk_skill_rows: Dictionary = {}
+## Coalesce gather-driven skills.get while the dock is open (avoids hitching
+## on every swing / chop while Perks is visible).
+var _perks_refresh_queued: bool = false
+## Coalesce combat.reward mastery.get while Weapons tab is open.
+var _weapons_refresh_queued: bool = false
+## Shared StyleBoxFlat instances — recreating these per row was a major cost
+## when navigating Perks or refreshing while open.
+var _style_tab_normal: StyleBoxFlat
+var _style_tab_hover: StyleBoxFlat
+var _style_tab_pressed: StyleBoxFlat
+var _style_chip: StyleBoxFlat
+var _style_perk_choice: StyleBoxFlat
 
 
 func _ready() -> void:
+	_ensure_shared_styles()
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	custom_minimum_size = PANEL_SIZE_WEAPONS
 	size = PANEL_SIZE_WEAPONS
@@ -168,29 +184,40 @@ func _make_mode_tab(label: String, pressed: bool) -> Button:
 	return tab
 
 
+func _ensure_shared_styles() -> void:
+	if _style_tab_normal != null:
+		return
+	_style_tab_normal = _make_tab_style(
+		Color(0.035, 0.03, 0.055, 0.88), Color(0.35, 0.25, 0.18, 0.75)
+	)
+	_style_tab_hover = _make_tab_style(
+		Color(0.11, 0.075, 0.07, 0.96), Color(0.86, 0.57, 0.25, 1.0)
+	)
+	_style_tab_pressed = _make_tab_style(
+		Color(0.18, 0.11, 0.055, 1.0), Color(1.0, 0.72, 0.30, 1.0)
+	)
+	for style: StyleBoxFlat in [
+		_style_tab_normal, _style_tab_hover, _style_tab_pressed
+	]:
+		style.content_margin_top = 1
+		style.content_margin_bottom = 1
+		style.content_margin_left = 4
+		style.content_margin_right = 4
+	_style_chip = _make_tab_style(
+		Color(0.035, 0.03, 0.055, 0.88), Color(0.42, 0.28, 0.18, 0.85)
+	)
+	_style_perk_choice = _make_tab_style(
+		Color(0.04, 0.035, 0.06, 0.92), Color(0.40, 0.28, 0.18, 0.80)
+	)
+
+
 func _apply_mode_tab_styles(tab: Button) -> void:
-	tab.add_theme_stylebox_override(
-		&"normal",
-		_make_tab_style(Color(0.035, 0.03, 0.055, 0.88), Color(0.35, 0.25, 0.18, 0.75))
-	)
-	tab.add_theme_stylebox_override(
-		&"hover",
-		_make_tab_style(Color(0.11, 0.075, 0.07, 0.96), Color(0.86, 0.57, 0.25, 1.0))
-	)
-	tab.add_theme_stylebox_override(
-		&"pressed",
-		_make_tab_style(Color(0.18, 0.11, 0.055, 1.0), Color(1.0, 0.72, 0.30, 1.0))
-	)
-	# Compact content margins so Skills/Combat/Perks tabs don't eat list space.
-	for key: StringName in [&"normal", &"hover", &"pressed", &"disabled", &"focus"]:
-		var style: StyleBox = tab.get_theme_stylebox(key)
-		if style is StyleBoxFlat:
-			var flat := style as StyleBoxFlat
-			flat.content_margin_top = 1
-			flat.content_margin_bottom = 1
-			flat.content_margin_left = 4
-			flat.content_margin_right = 4
-			tab.add_theme_stylebox_override(key, flat)
+	_ensure_shared_styles()
+	tab.add_theme_stylebox_override(&"normal", _style_tab_normal)
+	tab.add_theme_stylebox_override(&"hover", _style_tab_hover)
+	tab.add_theme_stylebox_override(&"pressed", _style_tab_pressed)
+	tab.add_theme_stylebox_override(&"disabled", _style_tab_normal)
+	tab.add_theme_stylebox_override(&"focus", _style_tab_normal)
 
 
 func _build_weapons_layout(main_box: VBoxContainer) -> void:
@@ -304,10 +331,8 @@ func _build_perks_layout(main_box: VBoxContainer) -> void:
 func _make_loadout_chip(key_text: String) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(0.0, 36.0)
-	panel.add_theme_stylebox_override(
-		&"panel",
-		_make_tab_style(Color(0.035, 0.03, 0.055, 0.88), Color(0.42, 0.28, 0.18, 0.85))
-	)
+	_ensure_shared_styles()
+	panel.add_theme_stylebox_override(&"panel", _style_chip)
 
 	var box := VBoxContainer.new()
 	box.name = "Content"
@@ -354,14 +379,37 @@ func _on_combat_reward(data: Dictionary) -> void:
 	if _mode == Mode.WEAPONS and data.get("mastery", {}).is_empty():
 		return
 	if _mode == Mode.WEAPONS:
-		_refresh_weapons()
+		_queue_weapons_refresh()
+
+
+func _queue_weapons_refresh() -> void:
+	if _weapons_refresh_queued:
+		return
+	_weapons_refresh_queued = true
+	get_tree().create_timer(0.4).timeout.connect(func() -> void:
+		_weapons_refresh_queued = false
+		if visible and _mode == Mode.WEAPONS:
+			_refresh_weapons()
+	, CONNECT_ONE_SHOT)
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
-	if not visible:
+	if not visible or _mode != Mode.PERKS:
 		return
-	# Refresh perk badge (and detail if open) after skill XP / level-ups.
-	_refresh_perks()
+	# Debounce: gathering while Perks is open used to fire skills.get + full
+	# list rebuild on every extract, which hitch the client.
+	_queue_perks_refresh()
+
+
+func _queue_perks_refresh() -> void:
+	if _perks_refresh_queued:
+		return
+	_perks_refresh_queued = true
+	get_tree().create_timer(0.35).timeout.connect(func() -> void:
+		_perks_refresh_queued = false
+		if visible:
+			_refresh_perks()
+	, CONNECT_ONE_SHOT)
 
 
 func _set_mode(mode: Mode) -> void:
@@ -378,8 +426,11 @@ func _set_mode(mode: Mode) -> void:
 func _refresh() -> void:
 	if not visible:
 		return
-	# Skills fetch keeps the Perks tab badge accurate on either mode.
-	_refresh_perks()
+	# Perks list/badge needs skills.get; Weapons only needs mastery.get.
+	# Still refresh skills when the Perks tab is selected, or once so the
+	# badge is populated if we have never fetched.
+	if _mode == Mode.PERKS or _skills.is_empty():
+		_refresh_perks()
 	if _mode == Mode.WEAPONS:
 		_refresh_weapons()
 
@@ -424,7 +475,7 @@ func _on_skills_received(data: Dictionary) -> void:
 	if _perks_detail_root.visible and not _selected_skill.is_empty():
 		_rebuild_perk_detail()
 	else:
-		_rebuild_perks_list()
+		_rebuild_perks_list(false)
 
 
 func _update_perks_tab_badge() -> void:
@@ -442,27 +493,59 @@ func _update_perks_tab_badge() -> void:
 # ---------------------------------------------------------------------------
 
 func _populate_category_tabs() -> void:
-	for child: Node in _category_tabs.get_children():
-		_category_tabs.remove_child(child)
-		child.queue_free()
-
-	_categories.clear()
-	_tab_buttons.clear()
-
+	var next_categories: Array[StringName] = []
 	for category: StringName in CATEGORY_ORDER:
 		if MasteryService.tree_for(category) != null:
-			_categories.append(category)
-
+			next_categories.append(category)
 	for category: StringName in MasteryService.trees():
-		if not _categories.has(category):
-			_categories.append(category)
+		if not next_categories.has(category):
+			next_categories.append(category)
 
+	# Reuse existing tab buttons when the category set is unchanged — wiping
+	# and recreating them on every mastery.get was hitching the Weapons tab.
+	var same_set: bool = (
+		next_categories.size() == _categories.size()
+		and _tab_buttons.size() == next_categories.size()
+	)
+	if same_set:
+		for i: int in next_categories.size():
+			if next_categories[i] != _categories[i]:
+				same_set = false
+				break
+
+	_categories = next_categories
 	if _categories.is_empty():
 		_selected_category = &""
+		for child: Node in _category_tabs.get_children():
+			_category_tabs.remove_child(child)
+			child.queue_free()
+		_tab_buttons.clear()
 		return
 
 	if _selected_category.is_empty() or not _categories.has(_selected_category):
 		_selected_category = _categories[0]
+
+	if same_set:
+		for category: StringName in _categories:
+			var tree: MasteryTreeResource = MasteryService.tree_for(category)
+			var tab: Button = _tab_buttons.get(category) as Button
+			if tree == null or tab == null:
+				continue
+			var info: Dictionary = _state.get(String(category), {})
+			var level: int = int(info.get("level", 1))
+			var display_name: String = (
+				tree.display_name
+				if not tree.display_name.is_empty()
+				else String(category).capitalize()
+			)
+			tab.tooltip_text = "%s\nLevel %d" % [display_name, level]
+			tab.button_pressed = category == _selected_category
+		return
+
+	for child: Node in _category_tabs.get_children():
+		_category_tabs.remove_child(child)
+		child.queue_free()
+	_tab_buttons.clear()
 
 	for category: StringName in _categories:
 		var tree: MasteryTreeResource = MasteryService.tree_for(category)
@@ -622,7 +705,7 @@ func _show_perks_list() -> void:
 	_perks_detail_root.visible = false
 	_perks_list_root.visible = true
 	title_label.text = "Skill Perks"
-	_rebuild_perks_list()
+	_rebuild_perks_list(false)
 
 
 func _show_perk_detail(slug: String) -> void:
@@ -633,56 +716,107 @@ func _show_perk_detail(slug: String) -> void:
 	call_deferred(&"_place_panel")
 
 
-func _rebuild_perks_list() -> void:
+func _rebuild_perks_list(force_rebuild: bool = true) -> void:
 	var list: VBoxContainer = _perks_scroll.get_node("SkillList") as VBoxContainer
+	var ordered: Array[String] = []
+	for slug: String in SKILL_ORDER:
+		var info: Dictionary = _perk_skill_info(slug)
+		if info.is_empty():
+			continue
+		ordered.append(slug)
+	for job_slug: StringName in JobRegistry.JOBS:
+		var slug: String = String(job_slug)
+		if ordered.has(slug):
+			continue
+		var info: Dictionary = _perk_skill_info(slug)
+		if info.is_empty():
+			continue
+		ordered.append(slug)
+
+	var can_inplace: bool = (
+		not force_rebuild
+		and _perk_skill_rows.size() == ordered.size()
+		and list.get_child_count() == ordered.size()
+	)
+	if can_inplace:
+		for slug: String in ordered:
+			if not _perk_skill_rows.has(slug):
+				can_inplace = false
+				break
+	if can_inplace:
+		for slug: String in ordered:
+			_update_skill_row(slug, _perk_skill_info(slug))
+		_update_perks_intro()
+		return
+
 	for child: Node in list.get_children():
 		list.remove_child(child)
 		child.queue_free()
+	_perk_skill_rows.clear()
 
+	for slug: String in ordered:
+		list.add_child(_make_skill_row(slug, _perk_skill_info(slug)))
+
+	_update_perks_intro()
+
+
+func _perk_skill_info(slug: String) -> Dictionary:
+	var info: Dictionary = _skills.get(slug, {}) as Dictionary
+	if info.is_empty() and JobRegistry.has_job(StringName(slug)):
+		return {
+			"display_name": JobRegistry.display_name(StringName(slug)),
+			"level": 1,
+			"points": 0,
+			"choices": [],
+			"perks": [],
+		}
+	return info
+
+
+func _update_perks_intro() -> void:
 	var total_points: int = 0
-	for slug: String in SKILL_ORDER:
-		var info: Dictionary = _skills.get(slug, {}) as Dictionary
-		if info.is_empty() and JobRegistry.has_job(StringName(slug)):
-			info = {
-				"display_name": JobRegistry.display_name(StringName(slug)),
-				"level": 1,
-				"points": 0,
-				"choices": [],
-				"perks": [],
-			}
-		elif info.is_empty():
-			continue
-		total_points += int(info.get("points", 0))
-		list.add_child(_make_skill_row(slug, info))
-
-	# Also surface any registered jobs not in SKILL_ORDER (future skills).
-	for job_slug: StringName in JobRegistry.JOBS:
-		var slug: String = String(job_slug)
-		if SKILL_ORDER.has(slug):
-			continue
-		var info: Dictionary = _skills.get(slug, {}) as Dictionary
-		if info.is_empty():
-			info = {
-				"display_name": JobRegistry.display_name(job_slug),
-				"level": 1,
-				"points": 0,
-				"choices": [],
-				"perks": [],
-			}
-		total_points += int(info.get("points", 0))
-		list.add_child(_make_skill_row(slug, info))
-
+	for skill_name: Variant in _skills:
+		total_points += int((_skills[skill_name] as Dictionary).get("points", 0))
 	var intro: Label = _perks_list_root.get_node_or_null("Intro") as Label
-	if intro != null:
-		if total_points > 0:
-			intro.text = "%d perk point%s ready to spend. Tap a skill." % [
-				total_points,
-				"" if total_points == 1 else "s",
-			]
-			intro.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.48))
-		else:
-			intro.text = "Level skills to earn perk points (usually every 3 levels). Tap a skill for the full breakdown."
-			intro.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+	if intro == null:
+		return
+	if total_points > 0:
+		intro.text = "%d perk point%s ready to spend. Tap a skill." % [
+			total_points,
+			"" if total_points == 1 else "s",
+		]
+		intro.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.48))
+	else:
+		# Matches JobPerks.perk_every_levels default (10) / Slayer (15).
+		# Weapon mastery is every 3 levels — that is a different system.
+		intro.text = (
+			"Earn 1 perk point every 10 skill levels (15 for Slayer). "
+			+ "Tap a skill for the full breakdown."
+		)
+		intro.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.80))
+
+
+func _update_skill_row(slug: String, info: Dictionary) -> void:
+	if info.is_empty():
+		return
+	var entry: Variant = _perk_skill_rows.get(slug, null)
+	if entry == null or not (entry is Dictionary):
+		return
+	var row_data: Dictionary = entry
+	var name_label: Label = row_data.get("name") as Label
+	var pts: Label = row_data.get("pts") as Label
+	if name_label == null or pts == null:
+		return
+	var display: String = str(info.get("display_name", slug.capitalize()))
+	var level: int = int(info.get("level", 1))
+	var points: int = int(info.get("points", 0))
+	name_label.text = "%s  Lv %d" % [display, level]
+	if points > 0:
+		pts.text = "%d pt%s" % [points, "" if points == 1 else "s"]
+		pts.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.48))
+	else:
+		pts.text = "—"
+		pts.add_theme_color_override(&"font_color", Color(0.55, 0.56, 0.60))
 
 
 func _make_skill_row(slug: String, info: Dictionary) -> Button:
@@ -726,6 +860,11 @@ func _make_skill_row(slug: String, info: Dictionary) -> Button:
 	pts.add_theme_font_size_override(&"font_size", 10)
 	box.add_child(pts)
 
+	_perk_skill_rows[slug] = {
+		"button": row,
+		"name": name_label,
+		"pts": pts,
+	}
 	return row
 
 
@@ -854,10 +993,8 @@ func _make_perk_choice_row(skill_name: String, choice: Dictionary, available_poi
 	var per_rank: float = float(choice.get("per_rank", 0.0))
 
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override(
-		&"panel",
-		_make_tab_style(Color(0.04, 0.035, 0.06, 0.92), Color(0.40, 0.28, 0.18, 0.80))
-	)
+	_ensure_shared_styles()
+	panel.add_theme_stylebox_override(&"panel", _style_perk_choice)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override(&"margin_left", 6)
