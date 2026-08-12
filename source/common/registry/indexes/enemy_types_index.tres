@@ -438,7 +438,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/rabid_wolf.tres",
 &"slug": &"rabid_wolf"
 }, {
-&"hash": "62c14ecb9ad52e25cbe4d580ac2f7807d65e25c545b761aabe607a03f03df2ea",
+&"hash": "091aa0437dfc510e1c81ed19a979af2ab6b95f3026aeb57ce73d5205d94ac9ea",
 &"id": 92,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"ossuran"

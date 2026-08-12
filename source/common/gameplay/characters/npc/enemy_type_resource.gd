@@ -124,8 +124,8 @@ extends Resource
 ##
 ## Set it only where the derived value stops being meaningful. A raid boss is the
 ## case: skill XP scales with effective HP, so giving one a big health bar
-## silently multiplies its payout (Ossuran at 10,000 HP derives 116,000 XP, nine
-## times Cinderborn, purely from being tanky). An override decouples "how long
+## silently multiplies its payout (Ossuran at 30,000 HP would derive far past
+## Cinderborn purely from being tanky). An override decouples "how long
 ## this takes to kill" from "what it is worth", without touching the curve for
 ## anything else.
 ##

@@ -204,6 +204,9 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 ## trash). Server-side overrides applied after the spawn's _ready. NB: replace the
 ## loot array with a fresh one — never clear it in place, it's shared with the
 ## EnemyTypeResource. Shared with BossController (it stamps its summoned adds).
+## Setting max_distance_from_spawn to NO_LEASH_DISTANCE is what makes
+## HostileNpc._is_committed() true — do not rely on flipping enemy_data.leashes
+## (that resource is shared across every spawn of the archetype).
 static func make_dungeon_mob(mob: Node, is_boss: bool) -> void:
 	mob.respawns = false
 	mob.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
