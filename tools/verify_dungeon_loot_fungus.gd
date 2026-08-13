@@ -66,6 +66,10 @@ func _init() -> void:
 	) as DungeonResource
 	if dark == null or dark.reward == null or dark.hard_reward == null:
 		fails.append("Dark Cave dungeon resource incomplete")
+	elif dark.normal_health_mult < 10.0 or dark.normal_damage_mult < 6.0:
+		fails.append("Dark Cave trash multipliers too low for Runite/Fire kits")
+	elif dark.boss_health_mult < 4.0 or dark.boss_damage_mult < 1.8:
+		fails.append("Dark Cave boss multipliers too low")
 	if fungus == null or fungus.reward == null or fungus.hard_reward == null:
 		fails.append("Fungus Domain dungeon resource incomplete")
 	if fungus != null and fungus.display_name != "Fungus Domain":

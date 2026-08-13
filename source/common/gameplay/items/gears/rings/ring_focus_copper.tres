@@ -9,8 +9,7 @@
 script = ExtResource("1_mwkql")
 stat_name = "mana_max"
 value = 10.0
-vendor_value = 8
-stack_limit = 10
+
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -22,6 +21,9 @@ required_mastery_level = 0
 base_modifiers = Array[ExtResource("1_mwkql")]([SubResource("Resource_0uaa1")])
 item_name = &"Copper Focus Ring"
 item_icon = ExtResource("2_3xawj")
+vendor_value = 8
+stack_limit = 10
+can_trade = true
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"ring_focus_copper"
 metadata/id = 149

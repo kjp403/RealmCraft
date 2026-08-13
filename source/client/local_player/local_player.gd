@@ -1083,6 +1083,8 @@ func _apply_camera_limits(map: Map) -> void:
 ## already gates the polling path — this also stops InputComponent from pressing the attack
 ## action in the first place.)
 func set_input_active(active: bool) -> void:
+	if controller == null:
+		return
 	controller.enabled = active
 	if not active:
 		Input.action_release(&"player_shoot")
