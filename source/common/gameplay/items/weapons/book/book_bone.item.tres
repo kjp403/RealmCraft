@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_ap"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 8.0
+value = 20.0
 
 [sub_resource type="Resource" id="Mod_mana_max"]
 script = ExtResource("1_mod")
@@ -37,7 +37,7 @@ required_mastery_level = 2
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ap"), SubResource("Mod_mana_max"), SubResource("Mod_mana_regen")])
 item_name = &"Bone Tome"
 item_icon = SubResource("AtlasTexture_8colv")
-description = "A starter tome bound in bone. Light on power but quick to cast — the first step into the battlemage's path."
+description = "A tome bound in bone. Light in the hand, and it outpaces an adamant-bound book."
 can_trade = true
 stack_limit = 10
 metadata/slug = &"book_bone.item"

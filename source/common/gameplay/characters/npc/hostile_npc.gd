@@ -449,7 +449,7 @@ func _ready() -> void:
 ## server-only types (same reason Character._broadcast_hit_feedback walks by hand).
 ##
 ## Bosses are exempt: a zone knob is for pacing its trash, and a finale is tuned as
-## its own fight (the Bandit Captain's 8k HP is the encounter, not the zone).
+## its own fight (the Bandit Captain's 4k HP is the encounter, not the zone).
 func _zone_health_mult() -> float:
 	if enemy_data != null and enemy_data.is_boss:
 		return 1.0

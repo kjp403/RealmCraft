@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_ad"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 8.0
+value = 22.0
 
 [sub_resource type="Resource" id="Mod_haste"]
 script = ExtResource("1_mod")
@@ -32,7 +32,7 @@ required_mastery_level = 2
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ad"), SubResource("Mod_haste")])
 item_name = &"Bone Hammer"
 item_icon = SubResource("Atlas_bone_hammer")
-description = "Hollow bone keeps it light. Swings come faster and it slows you less, but it lands softer than iron."
+description = "Hollow bone keeps it light. Swings come faster than iron, and it hits harder than adamant."
 can_trade = true
 stack_limit = 10
 metadata/slug = &"hammer_bone.item"
