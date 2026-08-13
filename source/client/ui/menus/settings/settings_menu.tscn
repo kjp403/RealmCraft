@@ -291,6 +291,24 @@ setting_section = &"combat"
 setting_property = &"commit_aim"
 label_override = "Commit aim on attack"
 
+[node name="AimAssist" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"combat"
+setting_property = &"aim_assist"
+label_override = "Aim assist"
+
+[node name="Hitstop" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"combat"
+setting_property = &"hitstop"
+label_override = "Hit impact freeze"
+
+[node name="ScreenShake" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"combat"
+setting_property = &"screen_shake"
+label_override = "Screen shake"
+
 [node name="AppearanceLabel" type="Label" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" unique_id=1115181810]
 layout_mode = 2
 text = "Appearance"

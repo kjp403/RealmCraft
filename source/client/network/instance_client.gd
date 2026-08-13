@@ -403,6 +403,10 @@ func _on_combat_hit(payload: Dictionary) -> void:
 	# real position instead of (0,0).
 	number.set_spawn(pos)
 	instance_map.add_child(number)
+	# Impact juice (hitstop + camera kick). Runs BEFORE the auto-retaliate block —
+	# that path early-returns on player_resource, which is server-only and null here.
+	if not bool(payload.get("heal", false)):
+		HitFeedback.play(instance_map, pos, local_player)
 	# Auto-retaliate when WE were the victim of a hostile hit.
 	if local_player == null or local_player.player_resource == null:
 		return
