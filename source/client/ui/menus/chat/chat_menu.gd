@@ -245,7 +245,10 @@ func toggle_feed() -> void:
 	_update_tab_labels()
 	_refresh_full_feed()
 	_update_input_enabled_state()
-	full_feed_message_edit.grab_focus()
+	if full_feed_message_edit.editable:
+		full_feed_message_edit.grab_focus()
+	else:
+		_open_writable_view()
 
 
 ## Jump straight to private messages (Tab). Lands on the thread you're most
@@ -259,7 +262,24 @@ func open_private_quick_reply() -> void:
 		open_channel(CHANNEL_PRIVATE)
 	else:
 		open_conversation(thread)
-	full_feed_message_edit.grab_focus()
+	# The empty-inbox fallback has nothing to reply to, so it deliberately does
+	# NOT route onward the way Enter does — it just shows you the empty inbox.
+	if full_feed_message_edit.editable:
+		full_feed_message_edit.grab_focus()
+
+
+## Land on a view the player can actually type in, then focus the compose box.
+## The read-only views (merged Private inbox, System, Team) have no compose
+## target, so Enter routes out of one instead of parking focus on a dead field.
+## Prefers the DM you'd be answering when the inbox is what's open.
+func _open_writable_view() -> void:
+	var thread: String = _latest_dm_conversation()
+	if current_conversation_id == PRIVATE_CONVERSATION_ID and not thread.is_empty():
+		open_conversation(thread)
+	else:
+		open_channel(CHANNEL_WORLD)
+	if full_feed_message_edit.editable:
+		full_feed_message_edit.grab_focus()
 
 
 ## The DM conversation a quick reply should land in: unread beats read, newer
@@ -287,21 +307,31 @@ func _latest_dm_conversation() -> String:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"player_chat"):
-		if full_feed_message_edit.has_focus():
+		# Only a box you can TYPE in owns Enter (there it submits). A read-only
+		# view's box is still click-focusable — Godot's LineEdit grabs focus on
+		# click regardless of `editable` — and letting that focus keep Enter is
+		# what left players unable to open chat with the keyboard at all.
+		if full_feed_message_edit.has_focus() and full_feed_message_edit.editable:
 			return
 		get_viewport().set_input_as_handled()
 		accept_event()
 		if not full_feed.visible:
 			toggle_feed()
-		else:
+		elif full_feed_message_edit.editable:
 			full_feed_message_edit.grab_focus()
+		else:
+			_open_writable_view()
 
 	if event.is_action_pressed(&"player_chat_dm"):
 		# Tab keeps its normal focus-walking job wherever a text field is already
 		# focused (compose box, bank search, trade amount) or a blocking menu owns
 		# the screen — only grab it when the player is out in the world.
 		var focused: Control = get_viewport().gui_get_focus_owner()
-		if ClientState.menu_open or focused is LineEdit or focused is TextEdit:
+		var is_typing: bool = (
+			focused is TextEdit
+			or (focused is LineEdit and (focused as LineEdit).editable)
+		)
+		if ClientState.menu_open or is_typing:
 			return
 		get_viewport().set_input_as_handled()
 		accept_event()
