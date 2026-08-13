@@ -452,7 +452,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("33_mi_arr")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_arr")])
-required_level = 40
+required_level = 35
 xp_reward = 175
 
 [sub_resource type="Resource" id="I_ad_arr"]
@@ -464,7 +464,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("34_ad_arr")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_arr")])
-required_level = 55
+required_level = 50
 xp_reward = 238
 
 [sub_resource type="Resource" id="I_ru_arr"]
@@ -789,7 +789,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_mi_sw")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_sword")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_wpn_mithril_hammer"]
@@ -801,7 +801,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_mi_hm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_hammer")])
-required_level = 40
+required_level = 35
 xp_reward = 115
 
 [sub_resource type="Resource" id="I_wpn_mithril_wand"]
@@ -813,7 +813,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_mi_wd")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_wand")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_wpn_mithril_book"]
@@ -825,7 +825,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_mi_tm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_book")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_wpn_mithril_bow"]
@@ -837,7 +837,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_mi_bw")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_mithril_bow")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_wpn_adamant_sword"]
@@ -849,7 +849,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_ad_sw")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_sword")])
-required_level = 55
+required_level = 50
 xp_reward = 120
 
 [sub_resource type="Resource" id="I_wpn_adamant_hammer"]
@@ -861,7 +861,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_ad_hm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_hammer")])
-required_level = 55
+required_level = 50
 xp_reward = 140
 
 [sub_resource type="Resource" id="I_wpn_adamant_wand"]
@@ -873,7 +873,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_ad_wd")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_wand")])
-required_level = 55
+required_level = 50
 xp_reward = 120
 
 [sub_resource type="Resource" id="I_wpn_adamant_book"]
@@ -885,7 +885,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_ad_tm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_book")])
-required_level = 55
+required_level = 50
 xp_reward = 120
 
 [sub_resource type="Resource" id="I_wpn_adamant_bow"]
@@ -897,7 +897,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("70_ad_bw")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wpn_adamant_bow")])
-required_level = 55
+required_level = 50
 xp_reward = 120
 
 [sub_resource type="Resource" id="I_wpn_runite_sword"]
@@ -969,7 +969,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("90_mi_helm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_helm")])
-required_level = 40
+required_level = 35
 xp_reward = 160
 
 [sub_resource type="Resource" id="I_mi_chest"]
@@ -981,7 +981,7 @@ amount = 5
 script = ExtResource("1_recipe")
 output_item = ExtResource("91_mi_chest")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_chest")])
-required_level = 40
+required_level = 35
 xp_reward = 260
 
 [sub_resource type="Resource" id="I_mi_boots"]
@@ -993,7 +993,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("92_mi_boots")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_boots")])
-required_level = 40
+required_level = 35
 xp_reward = 110
 
 [sub_resource type="Resource" id="I_ad_helm"]
@@ -1005,7 +1005,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("93_ad_helm")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_helm")])
-required_level = 55
+required_level = 50
 xp_reward = 210
 
 [sub_resource type="Resource" id="I_ad_chest"]
@@ -1017,7 +1017,7 @@ amount = 5
 script = ExtResource("1_recipe")
 output_item = ExtResource("94_ad_chest")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_chest")])
-required_level = 55
+required_level = 50
 xp_reward = 340
 
 [sub_resource type="Resource" id="I_ad_boots"]
@@ -1029,7 +1029,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("95_ad_boots")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_boots")])
-required_level = 55
+required_level = 50
 xp_reward = 140
 
 [sub_resource type="Resource" id="I_ru_helm"]
@@ -1149,7 +1149,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("106_tool_pi_mi")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_mi")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_tool_axe_mi"]
@@ -1161,7 +1161,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("107_tool_ax_mi")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_mi")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_tool_pick_ad"]
@@ -1173,7 +1173,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("108_tool_pi_ad")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pick_ad")])
-required_level = 55
+required_level = 50
 xp_reward = 130
 
 [sub_resource type="Resource" id="I_tool_axe_ad"]
@@ -1185,7 +1185,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("109_tool_ax_ad")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_ad")])
-required_level = 55
+required_level = 50
 xp_reward = 130
 
 [sub_resource type="Resource" id="I_tool_pick_ru"]
@@ -1257,7 +1257,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("115_tool_si_mi")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_mi")])
-required_level = 40
+required_level = 35
 xp_reward = 95
 
 [sub_resource type="Resource" id="I_tool_sickle_ad"]
@@ -1269,7 +1269,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("116_tool_si_ad")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_ad")])
-required_level = 55
+required_level = 50
 xp_reward = 130
 
 [sub_resource type="Resource" id="I_tool_sickle_ru"]

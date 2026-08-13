@@ -142,9 +142,8 @@ func _initialize() -> void:
 
 func _carve_caverns() -> Dictionary:
 	var mask: Dictionary = {}
-	# Chambers: wide irregular caverns. The NE high-ore vault is a DEAD-END
-	# connected only by a narrow corridor — not an open gallery players can
-	# walk around a floating gate through.
+	# Chambers: wide irregular caverns. The NE high-ore alcove is a DEAD-END
+	# connected only by a narrow corridor — keep that compact ore pocket.
 	var chambers := [
 		{"c": Vector2i(12, 36), "r": 8.0, "w": 0.30, "s": 11},   # entrance hall
 		{"c": Vector2i(17, 31), "r": 5.5, "w": 0.34, "s": 12},
@@ -155,7 +154,7 @@ func _carve_caverns() -> Dictionary:
 		{"c": Vector2i(33, 27), "r": 8.5, "w": 0.28, "s": 17},   # central junction
 		{"c": Vector2i(27, 33), "r": 5.5, "w": 0.34, "s": 18},
 		{"c": Vector2i(43, 12), "r": 3.0, "w": 0.18, "s": 19},   # antechamber before vault
-		{"c": Vector2i(56, 11), "r": 4.4, "w": 0.18, "s": 20},   # Mining-50 dead-end vault
+		{"c": Vector2i(56, 11), "r": 4.4, "w": 0.18, "s": 20},   # compact adamant/runite alcove
 		{"c": Vector2i(52, 30), "r": 8.0, "w": 0.30, "s": 21},   # east gallery (public)
 		{"c": Vector2i(44, 37), "r": 7.0, "w": 0.31, "s": 22},   # south-east hall
 	]
@@ -179,7 +178,7 @@ func _carve_caverns() -> Dictionary:
 		MapKit.tunnel(mask, link[0], link[1], link[2], link[3], int(link[4]), _bounds)
 
 	# Stamp an explicit 3-tall vault throat so smooth / region trim cannot
-	# disconnect the Mining-50 chamber from the antechamber.
+	# disconnect the high-ore alcove from the antechamber.
 	for x: int in range(45, 53):
 		for y: int in range(11, 14):
 			mask[Vector2i(x, y)] = true
@@ -440,7 +439,7 @@ func _build_bridges(
 
 func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 	# Copper/tin stay in the Starting Area — Mining Cave focuses on mid+ ores.
-	# Adamant + runite live ONLY inside the sealed Mining-50 vault (x >= 52).
+	# Adamant + runite live ONLY inside the compact NE alcove (x >= 52).
 	var vault: Dictionary = {}
 	var public_walk: Dictionary = {}
 	for cell: Vector2i in walk.keys():
@@ -448,7 +447,7 @@ func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 			vault[cell] = true
 		else:
 			public_walk[cell] = true
-	assert(vault.size() >= 20, "Mining-50 vault missing from walk (%d cells)" % vault.size())
+	assert(vault.size() >= 20, "adamant/runite alcove missing from walk (%d cells)" % vault.size())
 
 	var edges_public := MapKit.edge_cells(public_walk, blocked)
 	var edges_vault := MapKit.edge_cells(vault, blocked)
@@ -463,7 +462,7 @@ func _place_ores(walk: Dictionary, blocked: Dictionary) -> Array:
 		{"kind": "coal", "c": Vector2i(20, 28), "r": 9, "n": 15, "vault": false},
 		{"kind": "coal", "c": Vector2i(40, 34), "r": 9, "n": 15, "vault": false},
 		# Mithril is the mid-tier public ore — scatter liberally across the
-		# open cave (not the Mining-50 vault). Min scatter spacing 4 tiles so
+		# open cave (not the high-ore alcove). Min scatter spacing 4 tiles so
 		# veins aren't stacked inside one PickArc.
 		{"kind": "mithril", "c": Vector2i(36, 18), "r": 11, "n": 5, "vault": false},
 		{"kind": "mithril", "c": Vector2i(44, 28), "r": 11, "n": 5, "vault": false},
@@ -619,7 +618,6 @@ func _write_tscn(
 [ext_resource type=\"Resource\" uid=\"uid://cmithrilvein01\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/mithril_vein.tres\" id=\"15_mith\"]
 [ext_resource type=\"Resource\" uid=\"uid://cadamantvein01\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres\" id=\"16_adam\"]
 [ext_resource type=\"Resource\" uid=\"uid://crunitevein001\" path=\"res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres\" id=\"17_rune\"]
-[ext_resource type=\"Script\" path=\"res://source/common/gameplay/maps/components/skill_level_gate.gd\" id=\"18_gate\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://v32667qwpj2l\" path=\"res://source/common/gameplay/characters/npc/hostile_npc.tscn\" id=\"19_npc\"]
 [ext_resource type=\"Resource\" path=\"res://source/common/gameplay/characters/npc/types/cave_bat.tres\" id=\"20_bat\"]
 
@@ -675,14 +673,6 @@ node_to_id = {}
 [node name=\"MineableNodes\" type=\"Node2D\" parent=\".\"]
 y_sort_enabled = true
 %s
-
-[node name=\"DeepVeinGate\" type=\"StaticBody2D\" parent=\".\"]
-position = Vector2(1520, 400)
-script = ExtResource(\"18_gate\")
-required_skill = &\"mining\"
-required_level = 50
-gate_size = Vector2(40, 112)
-label_text = \"Mining 50+\"
 
 [node name=\"RespawnPoint\" parent=\".\" instance=ExtResource(\"5_warper\")]
 position = Vector2(%s, %s)

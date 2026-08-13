@@ -55,7 +55,7 @@ var wardstones: PackedStringArray
 var player_level: int = 1
 ## Profession skill levels for the local character (slug → int), mirrored from
 ## skills.get / login push + gather/craft level-ups. Used by client-authoritative
-## world gates (e.g. Mining 50+ vault) — the server still owns progression.
+## skill checks (craft UI, skill gates) — the server still owns progression.
 signal skill_levels_changed
 var skill_levels: Dictionary = {}
 ## Weapon-mastery levels for the local character (category slug → int), mirrored

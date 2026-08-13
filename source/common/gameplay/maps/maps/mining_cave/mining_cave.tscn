@@ -15,7 +15,6 @@
 [ext_resource type="Resource" uid="uid://cmithrilvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/mithril_vein.tres" id="15_mith"]
 [ext_resource type="Resource" uid="uid://cadamantvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres" id="16_adam"]
 [ext_resource type="Resource" uid="uid://crunitevein001" path="res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres" id="17_rune"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/components/skill_level_gate.gd" id="18_gate"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="19_npc"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/cave_bat.tres" id="20_bat"]
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
@@ -567,16 +566,6 @@ y_sort_enabled = true
 position = Vector2(1712.0, 336.0)
 data = ExtResource("17_rune")
 
-
-[node name="DeepVeinGate" type="StaticBody2D" parent="."]
-position = Vector2(1520, 400)
-script = ExtResource("18_gate")
-required_skill = &"mining"
-required_level = 50
-gate_size = Vector2(40, 112)
-label_text = "Mining 50+"
-eject_direction = Vector2(-1, 0)
-eject_distance = 96.0
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(368.0, 1200.0)
