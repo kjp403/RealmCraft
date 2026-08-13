@@ -428,6 +428,7 @@ func _build_desert_terraces() -> void:
 		"bg": "Color(0.11, 0.08, 0.06, 1)",
 		"modulate": "Color(1, 0.94, 0.82, 1)",
 		"music": "res://assets/audio/music/lost_woods.ogg",
+		"playlist": ["res://assets/audio/music/arabian_2.ogg", "res://assets/audio/music/army_of_darkness.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -665,6 +666,7 @@ func _build_desert_tombs() -> void:
 		"bg": "Color(0.05, 0.04, 0.03, 1)",
 		"modulate": "Color(0.62, 0.58, 0.52, 1)",
 		"music": "res://assets/audio/music/shadow_temple.ogg",
+		"playlist": ["res://assets/audio/music/army_of_darkness.ogg", "res://assets/audio/music/arabian_2.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -851,6 +853,7 @@ func _build_sewers_gutterworks() -> void:
 		"bg": "Color(0.02, 0.02, 0.03, 1)",
 		"modulate": "Color(0.68, 0.7, 0.8, 1)",
 		"music": "res://assets/audio/music/fungus.ogg",
+		"playlist": ["res://assets/audio/music/army_of_darkness.ogg", "res://assets/audio/music/alone.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -1079,6 +1082,7 @@ func _build_sewers_cistern() -> void:
 		"bg": "Color(0.012, 0.022, 0.024, 1)",
 		"modulate": "Color(0.6, 0.74, 0.72, 1)",
 		"music": "res://assets/audio/music/shadow_temple.ogg",
+		"playlist": ["res://assets/audio/music/alone.ogg", "res://assets/audio/music/fungus.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -1496,6 +1500,7 @@ func _build_forge_gallery() -> void:
 		"bg": "Color(0.05, 0.022, 0.016, 1)",
 		"modulate": "Color(0.9, 0.8, 0.74, 1)",
 		"music": "res://assets/audio/music/angevin.ogg",
+		"playlist": ["res://assets/audio/music/attack_3.ogg", "res://assets/audio/music/army_of_darkness.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -1696,6 +1701,13 @@ func _build_forge_deeps() -> void:
 		})
 
 	var taken := LevelKit.keepout([entrance, exit_cell], _gap(6))
+	# Malacor holds the shore — the arena this level was already carved around
+	# (see `shore` above: it gets its own floor apron and a prop keepout, and the
+	# build asserts it stays walkable). Trash is pushed further off him than off
+	# the entrances so the arena reads as HIS, and so the pull is a duel until he
+	# summons his own adds on enrage.
+	for cell: Vector2i in LevelKit.keepout([shore], _gap(11)).keys():
+		taken[cell] = true
 	var mob_plan: Array = [
 		["Demon", "trpg/trpg_demon_a", Vector2i(56, 64)],
 		["Demon2", "trpg/trpg_demon_a", _L(44, 62)],
@@ -1733,6 +1745,12 @@ func _build_forge_deeps() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
+	hostiles.append({
+		"name": "Malacor",
+		"type": TYPES + "bosses/sun_eater.tres",
+		"pos": LevelKit.tile_pos(shore),
+	})
+
 	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "deeps spawn blocked")
@@ -1747,6 +1765,7 @@ func _build_forge_deeps() -> void:
 		"bg": "Color(0.06, 0.012, 0.008, 1)",
 		"modulate": "Color(0.78, 0.62, 0.58, 1)",
 		"music": "res://assets/audio/music/middle_boss.ogg",
+		"playlist": ["res://assets/audio/music/attack_2.ogg", "res://assets/audio/music/attack_3.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
