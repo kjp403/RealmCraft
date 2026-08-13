@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"skeleton", &"skeleton_warrior", &"skeleton_ro
 min_slayer_level = 10
 xp_per_kill = 186
 guide_notes = "Mining Cave has the open-world pack — head there first. The Dark Cave dungeon holds the same three, hitting far harder. No poison, no magic to worry about — just steady melee damage. A reliable task to level combat and Slayer side by side."
+location_hint = "Mining Cave · Dark Cave dungeon"

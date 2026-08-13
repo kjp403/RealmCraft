@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"trpg_acid_ooze", &"trpg_slime", &"trpg_carrio
 min_slayer_level = 80
 xp_per_kill = 469
 guide_notes = "The endgame bracket, and the least predictable: oozes and slimes fold quickly while fog giants and blood monsters hit as hard as anything in the game. Check what you have pulled before committing."
+location_hint = "The Sewers, DimWood, Woodland East"

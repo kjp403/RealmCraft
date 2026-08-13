@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"wolf", &"rabid_wolf"])
 min_slayer_level = 1
 xp_per_kill = 235
 guide_notes = "Fast attackers with no ranged threat — a clean melee task. Wild Wolves roam Goblin Woodland trails; Rabid Wolves hunt the east expansion."
+location_hint = "Goblin Woodland, Woodland East"

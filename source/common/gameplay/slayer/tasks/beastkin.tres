@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"trpg_bat", &"cave_bat", &"angry_bat", &"trpg_
 min_slayer_level = 65
 xp_per_kill = 716
 guide_notes = "Huge health pools and the hardest hits in the bracket, but almost no armour - raw damage lands cleanly here. Yetis and werebears will chase a long way, so pick your ground before the pull."
+location_hint = "DimWood, Mining Cave, Woodland East"

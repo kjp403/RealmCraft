@@ -121,6 +121,14 @@ static func status_payload(resource: PlayerResource) -> Dictionary:
 		out["remaining"] = int(resource.current_slayer_task.get("remaining", 0))
 		out["assigned_amount"] = int(resource.current_slayer_task.get("assigned_amount", 0))
 		out["master"] = resource.current_slayer_task.get("master", "")
+		out["location_hint"] = task.location_hint
+		var xp_r: Vector2i = task.xp_per_kill_range()
+		var perks: JobPerks = JobRegistry.perks_for(&"slayer")
+		var xp_mult: float = 1.0
+		if perks != null:
+			xp_mult = perks.xp_multiplier(skill.get("perks", {}))
+		out["xp_per_kill_min"] = maxi(1, roundi(float(xp_r.x) * xp_mult))
+		out["xp_per_kill_max"] = maxi(1, roundi(float(xp_r.y) * xp_mult))
 	return out
 
 

@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"trpg_skeleton", &"trpg_skeleton_archer", &"tr
 min_slayer_level = 60
 xp_per_kill = 762
 guide_notes = "Armoured skeletons with real weight behind them - chip through the armour rather than trading blows. The Necromancer roams this ground too: a genuine T50 test on a four-minute respawn. Expect a long fight and telegraphed death magic — still the largest single Slayer payout on the table if you can take him."
+location_hint = "Desert, The Sunken Tombs"

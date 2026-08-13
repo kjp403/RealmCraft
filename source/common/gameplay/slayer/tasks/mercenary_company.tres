@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"trpg_soldier", &"trpg_swordsman", &"trpg_arch
 min_slayer_level = 75
 xp_per_kill = 497
 guide_notes = "Professional soldiers in real plate - the most armoured task on the list, and slow going without armour penetration. Priests heal their own line, so drop them early. Named to avoid clashing with the existing royal_* guard faction."
+location_hint = "Desert, Fire Forge"
