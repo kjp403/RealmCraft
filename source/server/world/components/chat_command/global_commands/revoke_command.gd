@@ -30,6 +30,17 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		return "%s must be online to revoke a role." % target.label()
 
 	if not target.resource.server_roles.has(role):
+		# A config grant looks identical in game — same commands, same badge — but
+		# it lives in server_admins.cfg, not the DB, so there is no row to erase.
+		var config_role: String = AdminConfig.role_for_character(
+			target.display_name, target.player_id
+		)
+		if config_role.to_lower() == role.to_lower():
+			return (
+				"%s holds '%s' from server_admins.cfg, not the database. "
+				% [target.label(), role]
+				+ "Remove that entry from the config and run /reloadadmins."
+			)
 		return "%s does not have the role '%s'." % [target.label(), role]
 
 	target.resource.server_roles.erase(role)

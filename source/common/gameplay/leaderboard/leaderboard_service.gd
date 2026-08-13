@@ -154,7 +154,6 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 		var display_name: String
 		var experience: int
 		var skills_dict: Dictionary
-		var account_name: String
 		var roles: Dictionary
 		if live != null:
 			stats = live.lb_stats
@@ -162,7 +161,6 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			display_name = live.display_name
 			experience = live.experience
 			skills_dict = live.skills
-			account_name = live.account_name
 			roles = live.server_roles
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
@@ -172,14 +170,13 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			experience = int(row.get("experience", 0))
 			var skills_parsed: Variant = JSON.parse_string(str(row.get("skills_json", "{}")))
 			skills_dict = skills_parsed if skills_parsed is Dictionary else {}
-			account_name = str(row.get("account_name", ""))
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
 
 		# Hide admin / senior_admin / owner from boards (moderators stay).
 		# Character-bound: regular alts on a staff login still appear.
 		if CommandPermissions.is_hidden_from_leaderboard(
-			account_name, roles, role_definitions, display_name, player_id
+			roles, role_definitions, display_name, player_id
 		):
 			continue
 
@@ -303,22 +300,19 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 		var live: PlayerResource = live_by_player_id.get(player_id)
 		var stats: Dictionary
 		var display_name: String
-		var account_name: String
 		var roles: Dictionary
 		if live != null:
 			stats = live.lb_stats
 			display_name = live.display_name
-			account_name = live.account_name
 			roles = live.server_roles
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
 			display_name = str(row.get("display_name", "?"))
-			account_name = str(row.get("account_name", ""))
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
 		if CommandPermissions.is_hidden_from_leaderboard(
-			account_name, roles, role_definitions, display_name, player_id
+			roles, role_definitions, display_name, player_id
 		):
 			continue
 		var best: Variant = stats.get("dungeon_best", {})
