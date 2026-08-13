@@ -1,11 +1,12 @@
 class_name SlayerTracker
 extends PanelContainer
 ## HUD Slayer task readout: current assignment, kills remaining, points, and
-## streak. A compact badge pinned to the top-LEFT corner
-## (HUD._place_slayer_tracker owns the placement). Hidden when the player has no
-## active task, or when they've switched it off — see [constant SETTING_SECTION]
-## / [constant SETTING_PROPERTY], the same client-settings pair the weather layer
-## uses, so the choice persists across sessions.
+## streak. Hover the badge for XP/kill and where to hunt. A compact badge pinned
+## to the top-LEFT corner (HUD._place_slayer_tracker owns the placement). Hidden
+## when the player has no active task, or when they've switched it off — see
+## [constant SETTING_SECTION] / [constant SETTING_PROPERTY], the same
+## client-settings pair the weather layer uses, so the choice persists across
+## sessions.
 ##
 ## Nothing wraps: the panel shrinks to its contents and grows rightward from the
 ## screen edge, so labels stay on one line and the badge stays small. Keep the
@@ -32,7 +33,8 @@ static func set_enabled(enabled: bool) -> void:
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	tooltip_text = ""
 	add_theme_stylebox_override(&"panel", _make_panel_style())
 
 	var margin: MarginContainer = MarginContainer.new()
@@ -91,6 +93,7 @@ func _on_slayer_update(payload: Dictionary) -> void:
 
 func _refresh() -> void:
 	if InstanceClient.current == null:
+		tooltip_text = ""
 		hide()
 		return
 	Client.request_data(&"slayer.info", _on_received, {}, InstanceClient.current.name)
@@ -98,6 +101,7 @@ func _refresh() -> void:
 
 func _on_received(data: Dictionary) -> void:
 	if not bool(data.get("ok", false)):
+		tooltip_text = ""
 		hide()
 		return
 	_cached = data.duplicate(true)
@@ -110,6 +114,7 @@ func _display(data: Dictionary) -> void:
 
 	var has_task: bool = data.has("display_name") and not str(data.get("display_name", "")).is_empty()
 	if not has_task or not is_enabled():
+		tooltip_text = ""
 		hide()
 		return
 
@@ -153,22 +158,36 @@ func _display(data: Dictionary) -> void:
 		int(data.get("points", 0)),
 		int(data.get("streak", 0)),
 	]
-	progress.tooltip_text = "%d killed of %d · %d left · %d points · streak %d" % [
-		killed,
-		assigned,
-		remaining,
-		int(data.get("points", 0)),
-		int(data.get("streak", 0)),
-	]
 	progress.add_theme_color_override(&"font_color", Color(0.92, 0.9, 0.82))
 	_content.add_child(progress)
 
+	tooltip_text = _hover_text(data, killed, assigned, remaining)
 	show()
 
 
 func _on_hide_pressed() -> void:
 	set_enabled(false)
 	Toaster.toast("Slayer tracker hidden — turn it back on in Settings.")
+
+
+func _hover_text(data: Dictionary, killed: int, assigned: int, remaining: int) -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	var where: String = str(data.get("location_hint", "")).strip_edges()
+	if not where.is_empty():
+		lines.append(where)
+	var xp_min: int = int(data.get("xp_per_kill_min", 0))
+	var xp_max: int = int(data.get("xp_per_kill_max", xp_min))
+	if xp_min > 0:
+		if xp_max > xp_min:
+			lines.append("%d–%d XP/kill" % [xp_min, xp_max])
+		else:
+			lines.append("%d XP/kill" % xp_min)
+	lines.append("%d/%d killed · %d left" % [killed, assigned, remaining])
+	lines.append("%d points · streak %d" % [
+		int(data.get("points", 0)),
+		int(data.get("streak", 0)),
+	])
+	return "\n".join(lines)
 
 
 func _make_panel_style() -> StyleBoxFlat:

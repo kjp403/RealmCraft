@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"trpg_orc", &"trpg_armored_orc", &"trpg_elite_
 min_slayer_level = 70
 xp_per_kill = 603
 guide_notes = "A disciplined war-band: heavy armour on the front line, ogre magi and oni casting from behind it. Cut the casters first or the melee never stops coming."
+location_hint = "Woodland East, Desert, Fire Forge"

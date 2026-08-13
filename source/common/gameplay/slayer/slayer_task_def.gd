@@ -36,6 +36,9 @@ extends Resource
 @export var xp_overrides: Dictionary[StringName, int] = {}
 ## Flavor + a one-line strategy tip, shown in the in-game Slayer Guide panel.
 @export_multiline var guide_notes: String = ""
+## Where to hunt this task, in words ("Goblin Woodland", "Mining Cave · Dark Cave").
+## Shown on the HUD tracker tooltip so you don't have to open the guide.
+@export var location_hint: String = ""
 
 
 ## Stable slug used as the persisted task key (PlayerResource.current_slayer_task
@@ -51,3 +54,33 @@ func task_slug() -> StringName:
 ## True if a kill of [param enemy_type] advances this task.
 func matches(enemy_type: StringName) -> bool:
 	return enemy_types.has(enemy_type)
+
+
+## Base Slayer XP/kill across this task's roster (perk multipliers applied by
+## [method SlayerTaskService.status_payload]). Falls back to [member xp_per_kill]
+## when no enemy type loads.
+func xp_per_kill_range() -> Vector2i:
+	var lo: int = 0
+	var hi: int = 0
+	for slug: StringName in enemy_types:
+		var xp: int = 0
+		if xp_overrides.has(slug):
+			xp = int(xp_overrides[slug])
+		else:
+			var enemy: EnemyTypeResource = ContentRegistryHub.load_by_slug(
+				&"enemy_types", slug
+			) as EnemyTypeResource
+			if enemy != null:
+				xp = maxi(1, roundi(float(enemy.combat_skill_xp()) * SlayerTaskService.SLAYER_XP_RATIO))
+		if xp <= 0:
+			continue
+		if lo <= 0:
+			lo = xp
+			hi = xp
+		else:
+			lo = mini(lo, xp)
+			hi = maxi(hi, xp)
+	if lo <= 0:
+		var fallback: int = maxi(1, xp_per_kill)
+		return Vector2i(fallback, fallback)
+	return Vector2i(lo, hi)

@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"goblin_runt", &"goblin_cutter", &"goblin_slin
 min_slayer_level = 1
 xp_per_kill = 93
 guide_notes = "Any goblin in the woodland warren counts — runts fall fastest, shamans and slingers hit at range so close the gap quickly. Avoid pulling the whole camp at once."
+location_hint = "Goblin Woodland"

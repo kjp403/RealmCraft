@@ -134,6 +134,8 @@ func _init() -> void:
 				failures.append("%s still has a PLACEHOLDER guide note (shown to players)" % f)
 			if t.xp_per_kill <= 0:
 				failures.append("%s has xp_per_kill %d" % [f, t.xp_per_kill])
+			if t.location_hint.strip_edges().is_empty():
+				failures.append("%s missing location_hint for the tracker tooltip" % f)
 
 	if failures.is_empty():
 		print("VERIFY_PASS slayer_balance")

@@ -9,3 +9,4 @@ enemy_types = Array[StringName]([&"iron_golem"])
 min_slayer_level = 70
 xp_per_kill = 793
 guide_notes = "Slow but extremely tanky, hitting far harder than anything else in this bracket — the reward is proportional. A small task by design; treat each kill as a mini-milestone, not a grind."
+location_hint = "The Hollow"
