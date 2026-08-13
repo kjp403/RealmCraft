@@ -148,11 +148,11 @@ static func staff_moderation_block_reason(
 
 
 ## True when this character should be omitted from public leaderboards.
-## Pass either a live PlayerResource or the offline account_name + roles dict.
-## Config grants and persisted roles are character-scoped; [leaderboard_hide]
-## still matches display name or an explicit account string.
+## Every input is CHARACTER-scoped: this character's own persisted [param roles],
+## its config grant, and its display name in [leaderboard_hide]. Staff are meant
+## to play regular alts and appear on the boards with them, so nothing here keys
+## off the login — an alt is judged only by what that character itself holds.
 static func is_hidden_from_leaderboard(
-	account_name: String,
 	roles: Dictionary,
 	role_definitions: Dictionary,
 	display_name: String = "",
@@ -164,8 +164,6 @@ static func is_hidden_from_leaderboard(
 	var best: int = 0
 	for role: String in roles:
 		best = maxi(best, int(role_definitions.get(role, {}).get("priority", 0)))
-	if AdminConfig.is_leaderboard_hidden(account_name):
-		return true
 	if AdminConfig.is_leaderboard_hidden(display_name):
 		return true
 	var config_role: String = AdminConfig.role_for_character(display_name, player_id)
