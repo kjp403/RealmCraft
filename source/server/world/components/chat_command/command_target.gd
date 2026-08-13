@@ -7,12 +7,14 @@ class_name CommandTarget
 ##   #1042 / 1042  → a character by its permanent player_id
 ##
 ## Account names are the stable handle for mute/jail/ban (those hit the login).
-## Staff powers (/grant, AdminConfig, commands, badges) are character-bound: an
-## online @account is the currently-logged-in character only. A bare or #-prefixed
-## number targets a specific character id, which ALSO resolves offline targets
-## (from the DB) for commands that support them (mute / jail). For an OFFLINE
-## account whose character id you don't know, run /chars <account> to list them,
-## then target by #id.
+## Staff powers (/grant, AdminConfig, commands, badges) are character-bound, so
+## those commands reject @account outright ([member Result.by_account]) rather
+## than guessing at the login's currently-online character — otherwise a grant
+## meant for one character lands on whichever alt happened to be on. A bare or
+## #-prefixed number targets a specific character id, which ALSO resolves
+## offline targets (from the DB) for commands that support them (mute / jail).
+## For an OFFLINE account whose character id you don't know, run
+## /chars <account> to list them, then target by #id.
 
 
 ## Outcome of a resolution attempt. Check [member ok] first; on failure
@@ -29,6 +31,11 @@ class Result extends RefCounted:
 	var account_name: String = ""
 	var resource: PlayerResource = null
 	var display_name: String = ""
+	## True when the caller typed an @account instead of naming a character.
+	## The resolved character is then just "whoever on that login is online right
+	## now" — correct for account-wide actions (mute / jail / ban), wrong for
+	## character-bound ones (/grant, /revoke), which must refuse it.
+	var by_account: bool = false
 
 	## "Name @account (#id)" for confirmation messages, degrading gracefully when
 	## a piece is unknown (e.g. an offline @account with no character resolved
@@ -71,6 +78,7 @@ static func resolve(token: String, caller_peer_id: int, instance: ServerInstance
 			r.error = "Empty account name. Use @name."
 			return r
 		r.account_name = account
+		r.by_account = true
 		var peer: int = _online_peer_for_account(account, ws)
 		if peer != 0:
 			_fill_online(r, peer, ws.connected_players.get(peer))

@@ -2,12 +2,15 @@ extends ChatCommand
 ## Remove a persisted server role from one online character and save. Roles
 ## granted via the admin config file are live and can't be revoked here — remove
 ## that character from server_admins.cfg instead.
+##
+## Like /grant, the target must name a CHARACTER (exact display name, #id, or
+## self); @account is refused so the revoke can't hit the wrong alt.
 
 
 func _init() -> void:
 	command_name = "revoke"
 	command_priority = 100 # senior_admin
-	command_usage = "/revoke <self|Name|#id|@account> <role>"
+	command_usage = "/revoke <self|Name|#id> <role>"
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
@@ -18,6 +21,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	var target: CommandTarget.Result = CommandTarget.resolve(args[1], peer_id, server_instance)
 	if not target.ok:
 		return target.error
+	if target.by_account:
+		return (
+			"Roles are per character, not per account. Name the character "
+			+ "(or its #id) — run /chars %s to list them." % args[1]
+		)
 	if not target.online:
 		return "%s must be online to revoke a role." % target.label()
 
@@ -32,4 +40,6 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 			^":staff_role",
 			CommandPermissions.effective_role_slug(target.resource, server_instance)
 		)
-	return "Revoked role '%s' from %s." % [role, target.label()]
+	return "Revoked role '%s' from character %s (#%d) on account @%s." % [
+		role, target.display_name, target.player_id, target.account_name
+	]
