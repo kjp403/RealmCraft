@@ -222,12 +222,40 @@ static func _points_for_completion(master: SlayerMasterResource, streak_after: i
 
 
 # ---------------------------------------------------------------------------
+# On-task defence — the "task_ward" perk
+# ---------------------------------------------------------------------------
+
+## Multiplier applied to damage [param resource]'s player is about to take from a
+## monster of [param enemy_type]. 1.0 for everything except the monsters their
+## ACTIVE task targets, which the &"slayer" job's "Task Ward" perk softens by
+## per_rank × rank (capped by JobPerks.abs_max_task_resist). The defensive
+## counterpart to "Focused Hunter": both only ever pay out while on task.
+##
+## Called from Character.take_damage on every hit, so the cheap outs (no task, no
+## ranks spent) come first — the task/pool lookup only runs for a player who has
+## actually bought the perk.
+static func task_damage_factor(resource: PlayerResource, enemy_type: StringName) -> float:
+	if resource == null or enemy_type == &"" or resource.current_slayer_task.is_empty():
+		return 1.0
+	var perks: JobPerks = JobRegistry.perks_for(&"slayer")
+	if perks == null:
+		return 1.0
+	var skill: Dictionary = resource.get_skill(&"slayer")
+	var reduction: float = perks.task_damage_reduction(skill.get("perks", {}))
+	if reduction <= 0.0:
+		return 1.0
+	var task: SlayerTaskDef = current_task_def(resource)
+	if task == null or not task.matches(enemy_type):
+		return 1.0
+	return maxf(0.0, 1.0 - reduction)
+
+
+# ---------------------------------------------------------------------------
 # Skip / reassignment
 # ---------------------------------------------------------------------------
 
 ## Reassigns the current task. Turael-style masters (free_reassign) do this for
-## free; paid masters charge reassign_point_cost (discounted by the &"slayer" job's
-## skip_discount perk).
+## free; paid masters charge reassign_point_cost (see _skip_cost).
 ##
 ## NOTHING here touches the streak. Arkenelle deliberately diverges from OSRS, where
 ## a Turael-style reassign is the one action that zeroes it: here the streak only
@@ -260,6 +288,10 @@ static func skip_task(resource: PlayerResource, master: SlayerMasterResource) ->
 	return result
 
 
+## The master's flat cost, less any &"skip_discount" the player has. No perk grants
+## that effect today (the slot the old "Efficient Reassignment" perk filled now
+## holds "Task Ward"), so this is the full price until something else feeds it —
+## sum_effect returns 0.0 for an effect nothing targets.
 static func _skip_cost(resource: PlayerResource, master: SlayerMasterResource) -> int:
 	var perks: JobPerks = JobRegistry.perks_for(&"slayer")
 	if perks == null:

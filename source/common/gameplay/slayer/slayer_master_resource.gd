@@ -34,8 +34,9 @@ extends Resource
 ## SlayerTaskService.skip_task for why Arkenelle drops OSRS's Turael-reset rule.
 @export var free_reassign: bool = false
 ## Points cost to reassign when [member free_reassign] is false (Durael). Matches
-## OSRS's flat 30-point "Cancel task" cost. A player's skip_discount slayer perk
-## can reduce this at spend time — see JobPerks on the &"slayer" job.
+## OSRS's flat 30-point "Cancel task" cost. Charged in full today: the &"slayer"
+## job has no skip_discount perk any more (SlayerTaskService._skip_cost still
+## honours the effect if something ever grants it again).
 @export var reassign_point_cost: int = 30
 
 @export_group("Task table")

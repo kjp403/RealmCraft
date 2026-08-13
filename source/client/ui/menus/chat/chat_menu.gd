@@ -369,8 +369,10 @@ func _on_chat_message(message: Dictionary) -> void:
 	if not is_history and not is_self and not is_viewing:
 		_inc_unread(convo_id)
 
-	# Overhead chat bubble: only on live WORLD messages (proximity chat).
-	# DMs/guild/system stay UI-only so they don't leak through the world.
+	# Overhead chat bubble: only on live WORLD messages, and only when the sender
+	# is actually here — world chat carries across instances, so the lookup below
+	# comes back null for anyone talking from another map and they simply get no
+	# bubble. DMs/guild/system stay UI-only so they don't leak through the world.
 	var is_world_channel: bool = convo_id == ChatConstants.channel_conversation_id(CHANNEL_WORLD)
 	if not is_history and is_world_channel and sender_peer_id > 0 and InstanceClient.current != null:
 		var sender_player: Player = InstanceClient.current.players_by_peer_id.get(sender_peer_id, null)

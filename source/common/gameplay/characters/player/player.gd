@@ -63,6 +63,16 @@ const RAPID_DEATH_WINDOW_MS: int = 20000
 const RAPID_DEATH_LIMIT: int = 3
 
 
+## Slayer "Task Ward": hits from the monsters our ACTIVE task targets land softer.
+## Server-only path (take_damage is), so player_resource is populated here.
+func incoming_damage_factor(attacker: Character) -> float:
+	if player_resource == null or attacker is not HostileNpc:
+		return 1.0
+	return SlayerTaskService.task_damage_factor(
+		player_resource, (attacker as HostileNpc).enemy_type
+	)
+
+
 ## On death: tell the client (death screen + countdown + where to respawn), wait, then
 ## restore full health and clear the dead flag. Position is client-authoritative, so the
 ## client teleports itself to the spawn (see LocalPlayer); the server only owns HP/state.

@@ -116,9 +116,10 @@ func get_guild_history(guild_id: int, limit: int) -> Array:
 
 
 func _handle_send_world(instance: ServerInstance, player: PlayerResource, text: String) -> Dictionary:
-	# Broadcast to everyone in the same instance/map. World chat is EPHEMERAL and
-	# live-only — never written to SQLite, never replayed on join.
-	return _broadcast_world_to_instance(
+	# Broadcast to everyone on this world, whatever instance/map they're standing in.
+	# World chat is EPHEMERAL and live-only — never written to SQLite, never replayed
+	# on join.
+	return _broadcast_world(
 		instance,
 		player,
 		ChatConstants.CHANNEL_WORLD,
@@ -193,18 +194,23 @@ const RECENT_MAX: int = 100
 var recent_channel_messages: Array = []
 
 ## World (public) + System chat are EPHEMERAL and LIVE-ONLY — never written to SQLite
-## and never replayed on join (zone chat in every MMO starts from when you arrive; a
-## newly-joined player just sees messages from here on). Guild + DM keep their DB
-## history. These monotonic counters mint ids for the unpersisted messages — unique
-## within each conversation, which is how the client keys them.
+## and never replayed on join (a newly-joined player just sees messages from here on).
+## Guild + DM keep their DB history. These monotonic counters mint ids for the
+## unpersisted messages — unique within each conversation, which is how the client
+## keys them.
 var _world_msg_seq: int = 0
 var _system_msg_seq: int = 0
 
 
-## World (public) chat: broadcast LIVE to everyone in the instance — no persistence,
-## no scrollback (live-only, like zone chat in any MMO). Manual peer loop (not
-## propagate_rpc) so we can skip recipients who've blocked the sender.
-func _broadcast_world_to_instance(
+## World (public) chat: broadcast LIVE to every player connected to this world
+## server, across all instances — no persistence, no scrollback (live-only). Manual
+## peer loop (not propagate_rpc, which is instance-scoped) so this reaches every
+## instance AND can skip recipients who've blocked the sender.
+##
+## Scope is one world server = one shard. Separate worlds registered with the master
+## stay separate conversations; crossing them would need a master relay (see
+## WorldManagerServer.tell_all_worlds_to_*), which nothing does today.
+func _broadcast_world(
 	instance: ServerInstance,
 	player: PlayerResource,
 	channel: int,
@@ -243,7 +249,18 @@ func _broadcast_world_to_instance(
 	_record_recent(enriched)
 
 	var ws_broadcast: WorldServer = instance.world_server
-	for peer_id: int in instance.connected_peers:
+
+	# Jail stays a containment tool: a jailed player's world chat reaches only the
+	# peers in the jail instance with them ("chat to others jailed with them", per
+	# jail_command). They still RECEIVE the world channel — it's the outbound reach
+	# that's cut, so being jailed can't be used to spam the whole shard.
+	var recipients: Array = []
+	if JailList.is_jailed(player.account_name):
+		recipients.assign(instance.connected_peers)
+	else:
+		recipients = ws_broadcast.connected_players.keys()
+
+	for peer_id: int in recipients:
 		var recipient: PlayerResource = ws_broadcast.connected_players.get(peer_id)
 		if recipient == null:
 			continue

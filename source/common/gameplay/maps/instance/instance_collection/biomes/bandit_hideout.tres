@@ -10,4 +10,5 @@ zone_title = "Bandit Hideout"
 level_min = 30
 level_max = 40
 show_discovery = true
+enemy_health_mult = 0.5
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"

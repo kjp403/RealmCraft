@@ -402,6 +402,17 @@ func add_experience(amount: int) -> Dictionary:
 	}
 
 
+## Perk ids that were replaced after players could already have spent points in
+## them. Ranks carry over to the successor on load so a content swap never strands
+## a perk point in a perk that no longer exists (JobPerks.spent_points counts every
+## key in the dict, including ones the tree dropped).
+##   efficient_reassignment → task_ward: the Slayer skip-cost perk became the
+##   on-task damage reduction, same 2 ranks.
+const RENAMED_PERKS: Dictionary[StringName, StringName] = {
+	&"efficient_reassignment": &"task_ward",
+}
+
+
 ## Returns the {"level", "xp", "perks"} entry for a skill, creating it at level 1 if
 ## missing. Also backfills "perks" on entries loaded from older saves.
 func get_skill(skill_name: StringName) -> Dictionary:
@@ -410,6 +421,13 @@ func get_skill(skill_name: StringName) -> Dictionary:
 	var skill: Dictionary = skills[skill_name]
 	if not skill.has("perks"):
 		skill["perks"] = {}
+	var perks: Dictionary = skill["perks"]
+	for old_id: StringName in RENAMED_PERKS:
+		if not perks.has(old_id):
+			continue
+		var new_id: StringName = RENAMED_PERKS[old_id]
+		perks[new_id] = int(perks.get(new_id, 0)) + int(perks[old_id])
+		perks.erase(old_id)
 	# Clamp legacy saves that overshot the OSRS 99 cap under the old linear curve.
 	if int(skill.get("level", 1)) > SkillXp.LEVEL_CAP:
 		skill["level"] = SkillXp.LEVEL_CAP

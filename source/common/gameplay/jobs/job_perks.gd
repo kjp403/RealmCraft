@@ -50,6 +50,7 @@ extends Resource
 @export var abs_max_bonus_yield_chance: float = 0.5
 @export var abs_max_refund_chance: float = 0.5
 @export var abs_max_extra_item_chance: float = 0.4
+@export var abs_max_task_resist: float = 0.5
 
 @export_group("Perks tree")
 @export var perks: Array[Dictionary] = []
@@ -88,6 +89,7 @@ extends Resource
 ##   {xp}            (xp_multiplier - 1) * 100
 ##   {refund}        refund_chance * 100
 ##   {extra_item}    extra_item_chance * 100
+##   {task_resist}   task_damage_reduction * 100
 ## Example: "Gather speed +{cooldown}%"
 @export var describe_lines: Array[String] = []
 
@@ -267,6 +269,14 @@ func extra_item_chance(player_perks: Dictionary) -> float:
 	return minf(abs_max_extra_item_chance, sum_effect(player_perks, &"extra_item"))
 
 
+## Fraction of incoming damage ignored while fighting the monsters this job's
+## active assignment targets — Slayer's "Task Ward". 0.0 with no ranks spent;
+## SlayerTaskService.task_damage_factor is the only caller today, and it decides
+## WHICH hits qualify (see there).
+func task_damage_reduction(player_perks: Dictionary) -> float:
+	return minf(abs_max_task_resist, sum_effect(player_perks, &"task_resist"))
+
+
 ## Fraction of a gathering node's [member MineableNodeResource.byproduct_amount]
 ## the player actually receives. 0.0 with no ranks spent — the byproduct is
 ## perk-gated, not a free passive (Fletching's Straight Grain is the only user
@@ -287,6 +297,7 @@ func describe(level: int, player_perks: Dictionary) -> PackedStringArray:
 		"refund": roundi(refund_chance(player_perks) * 100.0),
 		"extra_item": roundi(extra_item_chance(player_perks) * 100.0),
 		"shaft_yield": roundi(shaft_yield_factor(player_perks) * 100.0),
+		"task_resist": roundi(task_damage_reduction(player_perks) * 100.0),
 	}
 	var out: PackedStringArray = PackedStringArray()
 	for line in describe_lines:
@@ -310,6 +321,8 @@ static func describe_perk_effect(effect: String, per_rank: float) -> String:
 			return "+%d%% extra item chance per rank" % pct
 		"skip_discount":
 			return "-%d%% Slayer task reassignment cost per rank" % pct
+		"task_resist":
+			return "-%d%% damage taken from your Slayer task monsters per rank" % pct
 		"shaft_yield":
 			return "Chopping also yields %d%% of a log's shafts per rank" % pct
 		_:
