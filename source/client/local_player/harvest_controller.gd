@@ -79,7 +79,7 @@ func tick() -> bool:
 	# Fully depleted for this player: stop and require a new click after regen.
 	var charges: int = _target.client_charges_left()
 	if charges == 0:
-		Toaster.toast("Resource depleted. Click again when it regenerates.")
+		Toaster.toast(_depleted_toast())
 		cancel()
 		return false
 
@@ -113,8 +113,14 @@ func on_gather_result(data: Dictionary) -> void:
 
 	# Last charge just yielded — stop so the player must re-click after regen.
 	if int(data.get("charges_left", 1)) <= 0:
-		Toaster.toast("Resource depleted. Click again when it regenerates.")
+		Toaster.toast(_depleted_toast())
 		cancel()
+
+
+func _depleted_toast() -> String:
+	if _target != null and _target.harvests_on_right_click():
+		return "Resource depleted. Right-click again when it regenerates."
+	return "Resource depleted. Click again when it regenerates."
 
 
 func _has_correct_tool(node: MineableNode) -> bool:

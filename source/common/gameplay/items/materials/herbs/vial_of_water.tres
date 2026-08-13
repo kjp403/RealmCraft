@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/Icon309.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Vial of Water"
+item_icon = ExtResource("1_icon")
+description = "A clean glass vial filled with water. Mira sells these — brew them with a gathered herb at her alchemy table."
+holdable = false
+stack_limit = 10
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"vial_of_water"
+metadata/id = 574

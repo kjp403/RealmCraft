@@ -41,9 +41,17 @@ func _init() -> void:
 				fails.append("null brew recipe")
 				continue
 			print("  brew ", r.output_item.item_name, " lv", r.required_level, " xp", r.xp_reward)
+			var has_vial := false
 			for ing: CraftIngredient in r.ingredients:
 				if ing == null or ing.item == null:
 					fails.append("null ingredient on %s" % r.output_item.item_name)
+					continue
+				if String(ing.item.get_meta(&"slug", &"")) == "vial_of_water":
+					has_vial = true
+					if ing.amount != 1:
+						fails.append("%s vial amount %d != 1" % [r.output_item.item_name, ing.amount])
+			if not has_vial:
+				fails.append("%s missing 1x vial of water" % r.output_item.item_name)
 
 	var herb_slugs: Array[String] = [
 		"healing_herb", "frostpetal", "sunwort", "moonbloom",
@@ -62,6 +70,7 @@ func _init() -> void:
 			continue
 		if node_res.required_tool != &"sickle":
 			fails.append("%s tool should be sickle" % slug)
+		# Farming herbs harvest on right-click so woodcutting left-clicks pass through.
 		if int(node_res.required_level) != int(expected_levels[slug]):
 			fails.append("%s level %d != %d" % [slug, node_res.required_level, expected_levels[slug]])
 		if not node_res.job_xp.has(&"harvesting"):
@@ -83,6 +92,21 @@ func _init() -> void:
 
 	if not LeaderboardService.TOTAL_LEVEL_SKILLS.has(&"herblore"):
 		fails.append("TOTAL_LEVEL_SKILLS missing herblore")
+
+	var mira_shop: ShopResource = load(
+		"res://source/common/gameplay/shops/resources/miras_apothecary.tres"
+	)
+	if mira_shop == null:
+		fails.append("miras_apothecary.tres failed to load")
+	else:
+		var vial_price := 0
+		for entry: ShopEntry in mira_shop.entries:
+			if entry == null or entry.item == null:
+				continue
+			if String(entry.item.get_meta(&"slug", &"")) == "vial_of_water":
+				vial_price = entry.price
+		if vial_price != 1000:
+			fails.append("Mira should sell vial of water for 1000, got %d" % vial_price)
 
 	if fails.is_empty():
 		print("VERIFY_PASS herblore")

@@ -452,7 +452,16 @@ describe_lines = Array[String](["Herblore XP +{{xp}}%", "Material refund: {{refu
         pot_ids[potion] = eid
         st_parts.append(f'[ext_resource type="Resource" path="{path}" id="{eid}"]')
 
-    subs = []
+    st_parts.append(f'[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="vial_water"]')
+
+    subs = [
+        """
+[sub_resource type="Resource" id="I_vial"]
+script = ExtResource("3_ingred")
+item = ExtResource("vial_water")
+amount = 1
+"""
+    ]
     recipe_refs = []
     for i, (potion, herb, amt, lvl, xp, _path) in enumerate(BREWS):
         subs.append(f"""
@@ -464,7 +473,7 @@ amount = {amt}
 [sub_resource type="Resource" id="R_{i}"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("{pot_ids[potion]}")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_{i}")])
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_{i}")])
 required_level = {lvl}
 xp_reward = {xp}
 """)
