@@ -104,6 +104,20 @@ func _init() -> void:
 	)
 	if inv.find("const BANK_RESOURCE_STACK: int = 50") < 0:
 		failures.append("bank resource stacks must cap at 50")
+	var outfitting_guide: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/jobs/outfitting.tres"
+	)
+	if outfitting_guide.count("gears/cloth/") < 20:
+		failures.append("outfitting.tres skill-guide is missing most cloth recipes")
+	if outfitting_guide.find("cloth_vest.tres") < 0 or outfitting_guide.find("apprentice_robe.tres") < 0:
+		failures.append("outfitting.tres skill-guide missing starter cloth set")
+
+	var cloth_hood: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/items/gears/cloth/cloth_hood.tres"
+	)
+	var hood_res: int = cloth_hood.find("[resource]")
+	if hood_res < 0 or cloth_hood.find("vendor_value = 4", hood_res) < 0:
+		failures.append("cloth_hood vendor_value must sit on the GearItem (not the stat modifier)")
 
 	if failures.is_empty():
 		print("VERIFY_PASS mining_gate smith_house_stations")

@@ -9,8 +9,7 @@
 script = ExtResource("1_mod")
 stat_name = "armor"
 value = 2.0
-vendor_value = 14
-stack_limit = 10
+
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
@@ -34,6 +33,9 @@ required_mastery_level = 5
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Studded Cap"
 item_icon = ExtResource("2_icon")
+vendor_value = 14
+stack_limit = 10
+can_trade = true
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"studded_cap"
 metadata/id = 143

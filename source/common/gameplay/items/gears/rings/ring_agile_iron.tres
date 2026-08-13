@@ -9,8 +9,7 @@
 script = ExtResource("1_df0pt")
 stat_name = "move_speed"
 value = 4.0
-vendor_value = 16
-stack_limit = 10
+
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -22,6 +21,9 @@ required_mastery_level = 0
 base_modifiers = Array[ExtResource("1_df0pt")]([SubResource("Resource_tw1yf")])
 item_name = &"Iron Agile Ring"
 item_icon = ExtResource("2_6tyai")
+vendor_value = 16
+stack_limit = 10
+can_trade = true
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"ring_agile_iron"
 metadata/id = 148

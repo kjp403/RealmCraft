@@ -118,6 +118,10 @@ func tick() -> bool:
 		return true
 
 	_player._click_navigation.cancel()
+	# Don't fire while the player is typing — charge-bow press/release mid-chat
+	# (Enter opening the compose box) was crashing the client.
+	if _player._has_gui_focus():
+		return true
 	_perform_attack()
 	return true
 

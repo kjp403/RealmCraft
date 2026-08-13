@@ -9,8 +9,7 @@
 script = ExtResource("1_uifqm")
 stat_name = "health_max"
 value = 8.0
-vendor_value = 8
-stack_limit = 10
+
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -22,6 +21,9 @@ required_mastery_level = 0
 base_modifiers = Array[ExtResource("1_uifqm")]([SubResource("Resource_uifqm")])
 item_name = &"Copper Vital Ring"
 item_icon = ExtResource("4_mji2t")
+vendor_value = 8
+stack_limit = 10
+can_trade = true
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"ring_vital_copper"
 metadata/id = 153

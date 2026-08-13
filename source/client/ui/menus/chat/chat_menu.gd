@@ -97,6 +97,9 @@ var _full_feed_base_x: float = 0.0
 ## One-shot idle timer. Restarted on activity; cancelled while composing,
 ## while Options is open, while the cursor is over the box, or on touch.
 var _auto_hide_timer: Timer
+## Grab compose focus after Enter is released. Focusing a LineEdit on the same
+## KEY_ENTER press that opened chat can crash the client (and would submit empty).
+var _pending_chat_focus: bool = false
 #endregion
 
 
@@ -245,7 +248,13 @@ func toggle_feed() -> void:
 	_update_tab_labels()
 	_refresh_full_feed()
 	_update_input_enabled_state()
-	if full_feed_message_edit.editable:
+	# Don't grab_focus on the same Enter that opened the panel — Godot can crash
+	# (and would treat that key as submitting an empty line). Focus on release.
+	if Input.is_action_pressed(&"player_chat"):
+		_pending_chat_focus = true
+		if not full_feed_message_edit.editable:
+			_open_writable_view()
+	elif full_feed_message_edit.editable:
 		full_feed_message_edit.grab_focus()
 	else:
 		_open_writable_view()
@@ -279,7 +288,10 @@ func _open_writable_view() -> void:
 	else:
 		open_channel(CHANNEL_WORLD)
 	if full_feed_message_edit.editable:
-		full_feed_message_edit.grab_focus()
+		if Input.is_action_pressed(&"player_chat"):
+			_pending_chat_focus = true
+		else:
+			full_feed_message_edit.grab_focus()
 
 
 ## The DM conversation a quick reply should land in: unread beats read, newer
@@ -306,6 +318,12 @@ func _latest_dm_conversation() -> String:
 
 
 func _input(event: InputEvent) -> void:
+	if event.is_action_released(&"player_chat") and _pending_chat_focus:
+		_pending_chat_focus = false
+		if full_feed.visible and full_feed_message_edit.editable:
+			full_feed_message_edit.grab_focus()
+		return
+
 	if event.is_action_pressed(&"player_chat"):
 		# Only a box you can TYPE in owns Enter (there it submits). A read-only
 		# view's box is still click-focusable — Godot's LineEdit grabs focus on
@@ -318,7 +336,7 @@ func _input(event: InputEvent) -> void:
 		if not full_feed.visible:
 			toggle_feed()
 		elif full_feed_message_edit.editable:
-			full_feed_message_edit.grab_focus()
+			_pending_chat_focus = true
 		else:
 			_open_writable_view()
 
@@ -500,6 +518,7 @@ func _show_full_feed() -> void:
 
 ## The open effect in reverse: slide back out to the left + fade, THEN hide.
 func _hide_full_feed() -> void:
+	_pending_chat_focus = false
 	_stop_auto_hide()
 	if _full_feed_tween != null and _full_feed_tween.is_valid():
 		_full_feed_tween.kill()
@@ -1364,12 +1383,13 @@ func _set_typing_state(should_be_typing: bool) -> void:
 	if actually_typing == _typing_state_sent:
 		return
 	_typing_state_sent = actually_typing
-	Client.request_data(
-		&"chat.typing.set",
-		Callable(),
-		{"typing": actually_typing},
-		InstanceClient.current.name
-	)
+	if InstanceClient.current != null:
+		Client.request_data(
+			&"chat.typing.set",
+			Callable(),
+			{"typing": actually_typing},
+			InstanceClient.current.name
+		)
 	# Server skips the sender when broadcasting chat.typing (no need to
 	# round-trip our own state), so the local player never receives a push
 	# for itself. Drive the bubble locally instead — feels weird to see the

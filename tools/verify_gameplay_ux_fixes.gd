@@ -80,6 +80,17 @@ func _init() -> void:
 	if gate.find("eject_direction") < 0:
 		failures.append("skill_level_gate missing eject_direction")
 
+	var trade: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/hud/trade_panel.gd"
+	)
+	if trade.find("func _open_qty") < 0 or trade.find("_make_picker_gold_button") < 0:
+		failures.append("trade panel missing gold picker / offer-X amount UI")
+	var chat: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/menus/chat/chat_menu.gd"
+	)
+	if chat.find("_pending_chat_focus") < 0:
+		failures.append("chat must defer Enter focus so combat+chat doesn't crash")
+
 	if failures.is_empty():
 		print("VERIFY_PASS gameplay_ux_fixes")
 		quit(0)

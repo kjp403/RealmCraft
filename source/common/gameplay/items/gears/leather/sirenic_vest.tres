@@ -9,7 +9,7 @@
 script = ExtResource("1_mod")
 stat_name = "armor"
 value = 7
-stack_limit = 10
+
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
@@ -35,6 +35,7 @@ item_name = &"Sirenic Vest"
 item_icon = ExtResource("2_icon")
 can_trade = true
 vendor_value = 160
+stack_limit = 10
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
 metadata/slug = &"sirenic_vest"
 metadata/id = 225

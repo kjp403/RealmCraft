@@ -37,6 +37,11 @@ var _them_gold: Label
 var _them_ready: Label
 var _picker_overlay: Control
 var _picker_grid: GridContainer
+var _qty_overlay: Control
+var _qty_title: Label
+var _qty_spin: SpinBox
+var _qty_item_id: int = 0
+var _qty_is_gold: bool = false
 var _countdown_label: Label
 var _accept_button: Button
 var _cancel_button: Button
@@ -55,6 +60,7 @@ func _ready() -> void:
 	_apply_solid_trade_card()
 	_build_body()
 	_build_picker_overlay()
+	_build_qty_overlay()
 	close_requested.connect(_on_leave)
 	hide()
 	ClientState.viewed_trade_changed.connect(_on_viewed_changed)
@@ -147,17 +153,24 @@ func _build_your_column() -> VBoxContainer:
 	col.add_child(_gold_row)
 	var gold_label := Label.new()
 	gold_label.text = "Gold"
-	gold_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gold_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.4))
 	_gold_row.add_child(gold_label)
 	_gold_spin = SpinBox.new()
 	_gold_spin.min_value = 0
 	_gold_spin.step = 1
-	_gold_spin.custom_minimum_size.x = 100
+	_gold_spin.rounded = true
+	_gold_spin.custom_minimum_size = Vector2(110, 32)
 	_gold_spin.value_changed.connect(_on_gold_spin_pending)
 	_gold_row.add_child(_gold_spin)
 	_gold_row.add_child(_make_action("Set", _on_set_gold))
+	var gold_x := _make_action("X", _on_gold_type_amount)
+	gold_x.tooltip_text = "Type how much gold to offer"
+	_gold_row.add_child(gold_x)
+	var gold_all := _make_action("All", _on_gold_all)
+	gold_all.tooltip_text = "Offer all of your gold"
+	_gold_row.add_child(gold_all)
 
-	_add_button = _make_action("Add item", _toggle_picker)
+	_add_button = _make_action("Add gold / items", _toggle_picker)
 	_add_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(_add_button)
 	return col
@@ -171,7 +184,9 @@ func _build_their_column() -> VBoxContainer:
 	_them_grid = _make_grid()
 	col.add_child(_them_grid)
 	_them_gold = Label.new()
-	_them_gold.text = "Gold: 0"
+	_them_gold.text = "Gold offered: 0"
+	_them_gold.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.4))
+	_them_gold.add_theme_font_size_override(&"font_size", 16)
 	col.add_child(_them_gold)
 	return col
 
@@ -208,7 +223,7 @@ func _build_picker_overlay() -> void:
 	var header := HBoxContainer.new()
 	box.add_child(header)
 	var title := Label.new()
-	title.text = "Add tradeable items from your bag"
+	title.text = "Add gold or items from your bag"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.5))
 	header.add_child(title)
@@ -377,7 +392,7 @@ func _render_them(other: Dictionary, seat_index: int) -> void:
 	for item: Dictionary in other.get("items", []):
 		their_items[int(item.get("id", 0))] = int(item.get("amount", 0))
 	_fill_grid(_them_grid, their_items, false)
-	_them_gold.text = "Gold: %d" % int(other.get("gold", 0))
+	_them_gold.text = "Gold offered: %d" % int(other.get("gold", 0))
 	_set_ready_line(_them_ready, bool(other.get("accepted", false)))
 
 
@@ -440,16 +455,32 @@ func _count_badge(amount: int) -> Label:
 	return badge
 
 
-func _add_to_offer(item_id: int) -> void:
+func _add_to_offer(item_id: int, amount: int = 1) -> void:
 	if _locked:
 		return
 	var owned: int = int(_owned.get(item_id, 0))
 	if owned <= 0:
 		return
+	var add: int = clampi(amount, 1, owned)
 	if _my_items.has(item_id):
-		_my_items[item_id] = mini(int(_my_items[item_id]) + 1, owned)
+		_my_items[item_id] = mini(int(_my_items[item_id]) + add, owned)
 	elif _my_items.size() < SLOTS:
-		_my_items[item_id] = 1
+		_my_items[item_id] = add
+	else:
+		Toaster.toast("Your offer is full (%d item types maximum)." % SLOTS)
+		return
+	_send_offer()
+
+
+func _set_offer_amount(item_id: int, amount: int) -> void:
+	if _locked:
+		return
+	var owned: int = int(_owned.get(item_id, 0))
+	amount = clampi(amount, 0, owned)
+	if amount <= 0:
+		_my_items.erase(item_id)
+	elif _my_items.has(item_id) or _my_items.size() < SLOTS:
+		_my_items[item_id] = amount
 	else:
 		Toaster.toast("Your offer is full (%d item types maximum)." % SLOTS)
 		return
@@ -499,6 +530,21 @@ func _on_set_gold() -> void:
 	_send_offer()
 
 
+func _on_gold_all() -> void:
+	if _locked:
+		return
+	_gold_spin.set_value_no_signal(_owned_gold)
+	_my_gold = _owned_gold
+	_gold_pending = false
+	_send_offer()
+
+
+func _on_gold_type_amount() -> void:
+	if _locked or _owned_gold <= 0:
+		return
+	_open_qty(0, true)
+
+
 func _on_gold_spin_pending(_value: float) -> void:
 	_gold_pending = true
 
@@ -522,12 +568,16 @@ func _close_picker() -> void:
 	_picker_open = false
 	if _picker_overlay != null:
 		_picker_overlay.visible = false
+	_close_qty()
 
 
 func _rebuild_picker() -> void:
 	for child: Node in _picker_grid.get_children():
 		child.queue_free()
 	var any: bool = false
+	if _owned_gold > 0:
+		any = true
+		_picker_grid.add_child(_make_picker_gold_button())
 	for item_id: int in _owned:
 		if int(_owned[item_id]) <= 0:
 			continue
@@ -537,20 +587,134 @@ func _rebuild_picker() -> void:
 		button.custom_minimum_size = SLOT_SIZE
 		button.clip_contents = true
 		button.focus_mode = Control.FOCUS_NONE
+		var owned: int = int(_owned[item_id])
 		if item != null:
 			PixelIcon.mount(button, item.item_icon)
-			button.tooltip_text = "%s\n(have %d)" % [
+			button.tooltip_text = "%s\n(have %d — click to offer an amount)" % [
 				ItemTooltip.hover_text(item),
-				int(_owned[item_id]),
+				owned,
 			]
-			button.add_child(_count_badge(int(_owned[item_id])))
-		button.pressed.connect(_add_to_offer.bind(item_id))
+			button.add_child(_count_badge(owned))
+		if owned > 1:
+			button.pressed.connect(_open_qty.bind(item_id, false))
+		else:
+			button.pressed.connect(_add_to_offer.bind(item_id, 1))
 		_picker_grid.add_child(button)
 	if not any:
 		var empty := Label.new()
 		empty.text = "You have no tradeable bag items."
 		empty.add_theme_color_override(&"font_color", MUTED_COLOR)
 		_picker_grid.add_child(empty)
+
+
+func _make_picker_gold_button() -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = SLOT_SIZE
+	button.clip_contents = true
+	button.focus_mode = Control.FOCUS_NONE
+	var gold_item: Item = ContentRegistryHub.load_by_id(&"items", Economy.gold_id()) as Item
+	if gold_item != null:
+		PixelIcon.mount(button, gold_item.item_icon)
+	button.tooltip_text = "Gold\n(have %d — click to offer an amount)" % _owned_gold
+	button.add_child(_count_badge(_owned_gold))
+	button.pressed.connect(_open_qty.bind(0, true))
+	return button
+
+
+func _build_qty_overlay() -> void:
+	_qty_overlay = Control.new()
+	_qty_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_qty_overlay.visible = false
+	_qty_overlay.z_index = 8
+	add_child(_qty_overlay)
+
+	var dim := ColorRect.new()
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.04, 0.05, 0.08, 0.7)
+	dim.gui_input.connect(func(event: InputEvent) -> void:
+		if (event is InputEventMouseButton and event.pressed) \
+				or (event is InputEventScreenTouch and event.pressed):
+			_close_qty())
+	_qty_overlay.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_qty_overlay.add_child(center)
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(280, 0)
+	center.add_child(card)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 12)
+	card.add_child(pad)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 8)
+	pad.add_child(box)
+	_qty_title = Label.new()
+	_qty_title.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.5))
+	box.add_child(_qty_title)
+	_qty_spin = SpinBox.new()
+	_qty_spin.min_value = 1
+	_qty_spin.step = 1
+	_qty_spin.rounded = true
+	_qty_spin.custom_minimum_size = Vector2(120, 32)
+	box.add_child(_qty_spin)
+	var btns := HBoxContainer.new()
+	btns.add_theme_constant_override(&"separation", 6)
+	box.add_child(btns)
+	btns.add_child(_make_action("1", func() -> void: _qty_spin.value = 1))
+	var x_btn := _make_action("X", func() -> void:
+		_qty_spin.get_line_edit().grab_focus()
+		_qty_spin.get_line_edit().select_all())
+	x_btn.tooltip_text = "Type a custom amount"
+	btns.add_child(x_btn)
+	btns.add_child(_make_action("All", func() -> void:
+		_qty_spin.value = _qty_spin.max_value))
+	btns.add_child(_make_action("Offer", _confirm_qty))
+
+
+func _open_qty(item_id: int, is_gold: bool) -> void:
+	if _locked or _qty_overlay == null:
+		return
+	_qty_item_id = item_id
+	_qty_is_gold = is_gold
+	var owned: int = _owned_gold if is_gold else int(_owned.get(item_id, 0))
+	if owned <= 0:
+		return
+	if is_gold:
+		_qty_title.text = "Offer gold (have %d)" % owned
+		_qty_spin.min_value = 0
+	else:
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		var name: String = String(item.item_name) if item != null else "item"
+		_qty_title.text = "Offer %s (have %d)" % [name, owned]
+		_qty_spin.min_value = 1
+	_qty_spin.max_value = owned
+	var current: int = _my_gold if is_gold else int(_my_items.get(item_id, 0))
+	_qty_spin.set_value_no_signal(current if current > 0 else owned)
+	_qty_overlay.visible = true
+	_qty_spin.get_line_edit().grab_focus()
+	_qty_spin.get_line_edit().select_all()
+
+
+func _close_qty() -> void:
+	if _qty_overlay != null:
+		_qty_overlay.visible = false
+	_qty_item_id = 0
+	_qty_is_gold = false
+
+
+func _confirm_qty() -> void:
+	var amount: int = int(_qty_spin.value)
+	if _qty_is_gold:
+		_gold_spin.set_value_no_signal(mini(amount, _owned_gold))
+		_my_gold = mini(amount, _owned_gold)
+		_gold_pending = false
+		_send_offer()
+	else:
+		_set_offer_amount(_qty_item_id, amount)
+	_close_qty()
 
 
 func _on_accept() -> void:
