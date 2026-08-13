@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786560000
-next_id = 95
+version = 1786652596
+next_id = 99
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -452,6 +452,21 @@ entries = Array[Dictionary]([{
 &"id": 93,
 &"path": "res://source/common/gameplay/characters/npc/types/cave_bat.tres",
 &"slug": &"cave_bat"
+}, {
+&"hash": "09260738312f1110caeba4318068f250d3ec6fd1c7394d9f35a1f35caf452b87",
+&"id": 96,
+&"path": "res://source/common/gameplay/characters/npc/types/cave_skeleton.tres",
+&"slug": &"cave_skeleton"
+}, {
+&"hash": "e0f8c4222425018d4b5ea5d9ee6c8ed68dfbb920e255022b86bafe4ec24a969a",
+&"id": 97,
+&"path": "res://source/common/gameplay/characters/npc/types/cave_skeleton_rogue.tres",
+&"slug": &"cave_skeleton_rogue"
+}, {
+&"hash": "bd1ce14b89355891a5fb09be92361c6e59fa75fb01cf16d551f266e6afb4f36c",
+&"id": 98,
+&"path": "res://source/common/gameplay/characters/npc/types/cave_skeleton_warrior.tres",
+&"slug": &"cave_skeleton_warrior"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")
