@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786512484
-next_id = 574
+version = 1786597702
+next_id = 575
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2647,6 +2647,11 @@ entries = Array[Dictionary]([{
 &"id": 573,
 &"path": "res://source/common/gameplay/items/materials/gems/verdance_gem.tres",
 &"slug": &"verdance_gem"
+}, {
+&"hash": "f54c1d9f3df214d10a0828f9f89e0b0dc6ecb445f1318f18d3097ef39fdf5e40",
+&"id": 574,
+&"path": "res://source/common/gameplay/items/materials/herbs/vial_of_water.tres",
+&"slug": &"vial_of_water"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

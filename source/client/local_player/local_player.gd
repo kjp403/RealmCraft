@@ -354,7 +354,8 @@ func freeze_movement(seconds: float) -> void:
 ## click-to-inspect gate uses this: you only open a player's profile while holstered,
 ## so a click in a fight is always a swing/shot, never a profile.
 ## Gathering tools (pickaxe / axe / fishing rod / sickle) are NOT armed for combat —
-## they only swing via HarvestController when you click a resource node.
+## they only swing via HarvestController when you click a resource node
+## (right-click for herb patches so woodcutting left-clicks aren't stolen).
 func is_armed() -> bool:
 	if is_holding_gather_tool():
 		return false

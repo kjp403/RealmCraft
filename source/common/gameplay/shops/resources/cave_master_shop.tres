@@ -10,22 +10,22 @@
 [sub_resource type="Resource" id="Entry_mhp"]
 script = ExtResource("1_entry")
 item = ExtResource("10_mhp")
-price = 150
+price = 500
 
 [sub_resource type="Resource" id="Entry_mmp"]
 script = ExtResource("1_entry")
 item = ExtResource("11_mmp")
-price = 150
+price = 750
 
 [sub_resource type="Resource" id="Entry_hp"]
 script = ExtResource("1_entry")
 item = ExtResource("12_hp")
-price = 350
+price = 1000
 
 [sub_resource type="Resource" id="Entry_mp"]
 script = ExtResource("1_entry")
 item = ExtResource("13_mp")
-price = 350
+price = 1500
 
 [resource]
 script = ExtResource("2_shop")

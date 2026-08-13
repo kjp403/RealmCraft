@@ -596,17 +596,33 @@ func _spawn_click_area() -> void:
 	collision.position = _sprite.position if _sprite != null else Vector2(0, -16)
 	area.add_child(collision)
 	add_child(area)
-	area.clicked.connect(_on_clicked)
+	# Herb patches harvest on right-click so a left-click meant for a nearby
+	# tree (woodcutting) isn't stolen by plants on the forest floor.
+	if harvests_on_right_click():
+		area.capture_left_click = false
+		area.z_index = -1
+		area.right_clicked.connect(_on_clicked)
+		area.clicked.connect(_on_clicked) # touch has no right-click
+	else:
+		area.clicked.connect(_on_clicked)
 	area.mouse_entered.connect(_set_interactable_hover.bind(true))
 	area.mouse_exited.connect(_set_interactable_hover.bind(false))
 	area.tree_exiting.connect(_set_interactable_hover.bind(false))
+
+
+## Farming herb patches — sickle nodes. Left-click must fall through to trees.
+func harvests_on_right_click() -> bool:
+	return data != null and data.required_tool == &"sickle"
 
 
 func _set_interactable_hover(on: bool) -> void:
 	if not GameMode.is_client() or on == _interactable_hovered:
 		return
 	_interactable_hovered = on
-	ClientState.world_interactables_hovered += 1 if on else -1
+	# Herbs still show their name on hover, but must not block left-click
+	# movement / tree clicks the way ore veins and trees do.
+	if not harvests_on_right_click():
+		ClientState.world_interactables_hovered += 1 if on else -1
 	if _name_label != null and data != null and data.ore != null:
 		_name_label.visible = on
 
