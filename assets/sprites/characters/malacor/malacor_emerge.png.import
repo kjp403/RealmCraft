@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2l5qwqkvs4qj"
-path="res://.godot/imported/gem_covenant.png-d3f7b52e0f298a4fba7c7ea37a59d1d3.ctex"
+uid="uid://de44c21llrwaa"
+path="res://.godot/imported/malacor_emerge.png-808a94deff6636c75159bcbd74758966.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/items/icons/gem_covenant.png"
-dest_files=["res://.godot/imported/gem_covenant.png-d3f7b52e0f298a4fba7c7ea37a59d1d3.ctex"]
+source_file="res://assets/sprites/characters/malacor/malacor_emerge.png"
+dest_files=["res://.godot/imported/malacor_emerge.png-808a94deff6636c75159bcbd74758966.ctex"]
 
 [params]
 

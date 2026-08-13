@@ -252,17 +252,23 @@ func _apply_enemy_data() -> void:
 	# area DO grow with the sprite so player swings/projectiles can connect.
 	if enemy_data.visual_scale != 1.0:
 		animated_sprite.scale *= enemy_data.visual_scale
+	# Bar + nameplate placement keys off the DRAWN size, not visual_scale — a
+	# big-framed skin at 1.0x is still a big sprite, and gating this on
+	# visual_scale alone left its bar buried in the art. Identical for every
+	# 64px skin (see body_scale).
+	var drawn: float = body_scale()
+	if drawn != 1.0:
 		# A big sprite swallows the head-bar — lift it clear of the enlarged sprite
 		# and scale it up so a boss reads as a boss. Scale around the bar's own
 		# centre so it stays horizontally centred over the mob.
-		var lift: float = 55.0 * (enemy_data.visual_scale - 1.0)
+		var lift: float = 55.0 * (drawn - 1.0)
 		progress_bar.offset_top -= lift
 		progress_bar.offset_bottom -= lift
 		progress_bar.pivot_offset = Vector2(
 			(progress_bar.offset_right - progress_bar.offset_left) * 0.5,
 			(progress_bar.offset_bottom - progress_bar.offset_top) * 0.5
 		)
-		progress_bar.scale = Vector2.ONE * enemy_data.visual_scale
+		progress_bar.scale = Vector2.ONE * drawn
 		# Keep the nameplate stacked above the lifted bar (DisplayNameLabel parks
 		# near y=0 by default — under a tall boss sprite it disappears into the art).
 		if display_name_label != null:
@@ -297,6 +303,9 @@ var enemy_state: EnemyState = EnemyState.IDLE:
 var possible_targets: Array[Player]
 var targeted_player: Player
 var spawn_position: Vector2
+## Cache for [method body_scale] — measuring it decodes an image, so it is done
+## once per body and never on the hot path.
+var _body_scale: float = -1.0
 
 var _prop_id: int
 var _position_fid: int
@@ -939,6 +948,51 @@ const _VFX_DIR: String = "res://source/common/gameplay/combat/vfx/"
 ## crashing a client mid-fight over a cosmetic.
 func _vfx(name: String) -> SpriteFrames:
 	return load(_VFX_DIR + name + ".tres") as SpriteFrames
+
+
+## Frame size every "how big is this mob" rule is calibrated against. A 64px
+## skin drawn at visual_scale 1.0 is the unit.
+const REFERENCE_FRAME_PX: float = 64.0
+
+
+## How large this body READS, relative to an ordinary 64px mob. This — not
+## [member EnemyTypeResource.visual_scale] — is what a "bosses get a bigger
+## allowance" rule should key off.
+##
+## visual_scale is a multiplier on the ART, so it only doubles as a size proxy
+## while every skin is a 64px frame. Malacor is 144px at 1.0x: drawn the same
+## size as a 64px skin at 2.25x, but every visual_scale test would read him as an
+## ordinary mob — no aim-assist bonus, no melee reach bonus, no bar lift, and a
+## player walking to the ORIGIN of a sprite half a screen wide.
+##
+## Floored at visual_scale so this can never SHRINK an existing allowance: for
+## every shipped skin the drawn art is smaller than 64 * visual_scale (the trpg
+## sheets are 20px of content in a 100px frame), so the floor wins and behaviour
+## is identical. Only a skin drawn BIGGER than its visual_scale implies — the
+## broken case — moves.
+func body_scale() -> float:
+	if _body_scale > 0.0:
+		return _body_scale
+	var vs: float = 1.0
+	if enemy_data != null:
+		vs = maxf(0.1, enemy_data.visual_scale)
+	_body_scale = vs
+	var frames: SpriteFrames = enemy_data.skin if enemy_data != null else null
+	if frames == null or not frames.has_animation(&"idle") \
+			or frames.get_frame_count(&"idle") <= 0:
+		return _body_scale
+	# Measure the DRAWN art, not the frame: a frame is mostly padding on some
+	# sheets, and padding is not size.
+	var tex: AtlasTexture = frames.get_frame_texture(&"idle", 0) as AtlasTexture
+	if tex == null or tex.atlas == null:
+		return _body_scale
+	var img: Image = tex.atlas.get_image()
+	if img == null:
+		return _body_scale
+	var used: Rect2i = img.get_region(Rect2i(tex.region)).get_used_rect()
+	if used.size.y > 0:
+		_body_scale = maxf(vs, float(used.size.y) * vs / REFERENCE_FRAME_PX)
+	return _body_scale
 
 
 ## Where a spell leaves the body: the raised fist.

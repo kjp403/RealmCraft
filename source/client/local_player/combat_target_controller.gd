@@ -165,7 +165,10 @@ func _engage_range() -> float:
 func _target_reach_bonus() -> float:
 	if _target == null or _target.enemy_data == null:
 		return 0.0
-	var vs: float = maxf(1.0, _target.enemy_data.visual_scale)
+	# Drawn size, not visual_scale: a 144px skin at 1.0x is still a body you must
+	# stop short of, and reading visual_scale here walked the player to the
+	# origin of a sprite wider than they are tall.
+	var vs: float = maxf(1.0, _target.body_scale())
 	return maxf(0.0, (vs - 1.0) * 40.0)
 
 

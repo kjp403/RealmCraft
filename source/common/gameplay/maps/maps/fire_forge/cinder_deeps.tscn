@@ -17,11 +17,12 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_blood_monster_a.tres" id="e14"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_elite_orc.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_axeman.tres" id="e16"]
-[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/cinderwright_maro.tres" id="e18"]
-[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e19"]
-[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sun_eater.tres" id="e17"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/cinderwright_maro.tres" id="e19"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e21"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="e22"]
 [ext_resource type="AudioStream" uid="uid://uan1qcfq0s1" path="res://assets/audio/music/attack_2.ogg" id="mus_attack_2"]
 [ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 
@@ -862,7 +863,8 @@ id_to_node = {
 22: NodePath("EliteOrc3"),
 23: NodePath("EliteOrc4"),
 24: NodePath("Axeman"),
-25: NodePath("Axeman2")
+25: NodePath("Axeman2"),
+26: NodePath("Malacor")
 }
 node_to_id = {
 NodePath("Demon"): 0,
@@ -890,7 +892,8 @@ NodePath("EliteOrc2"): 21,
 NodePath("EliteOrc3"): 22,
 NodePath("EliteOrc4"): 23,
 NodePath("Axeman"): 24,
-NodePath("Axeman2"): 25
+NodePath("Axeman2"): 25,
+NodePath("Malacor"): 26
 }
 
 [node name="Demon" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
@@ -936,7 +939,7 @@ enemy_data = ExtResource("e10")
 weapon = null
 
 [node name="Oni3" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
-position = Vector2(4488.0, 4168.0)
+position = Vector2(4488.0, 3960.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e10")
 weapon = null
@@ -1049,24 +1052,30 @@ debug_draw_ranges = false
 enemy_data = ExtResource("e16")
 weapon = null
 
+[node name="Malacor" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
+position = Vector2(4488.0, 4408.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("e17")
+weapon = null
+
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="CinderwrightMaro" parent="NPCs" instance=ExtResource("e17")]
+[node name="CinderwrightMaro" parent="NPCs" instance=ExtResource("e18")]
 position = Vector2(4168.0, 5928.0)
-npc_resource = ExtResource("e18")
+npc_resource = ExtResource("e19")
 
-[node name="RespawnPoint" parent="." instance=ExtResource("e19")]
+[node name="RespawnPoint" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 6088.0)
 
-[node name="Entrance" parent="." instance=ExtResource("e19")]
+[node name="Entrance" parent="." instance=ExtResource("e20")]
 position = Vector2(4488.0, 6088.0)
 warper_id = 45
 
-[node name="AscentPortal" parent="." instance=ExtResource("e20")]
+[node name="AscentPortal" parent="." instance=ExtResource("e21")]
 position = Vector2(4488.0, 6488.0)
 portal_color = Color(0.7, 0.2, 0.05, 1)
 destination_label = "Fire Forge"
-target_instance = ExtResource("e21")
+target_instance = ExtResource("e22")
 warper_id = 145
 target_id = 55

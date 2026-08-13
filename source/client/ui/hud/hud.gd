@@ -368,7 +368,7 @@ func _refresh_hud_for_menus() -> void:
 		if _hidden_for_menu.is_empty():
 			for node: CanvasItem in [
 				$TwinSticks, $Chat, $QuestTracker, $SlayerTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons,
-				$BottomMenuDock,
+				$BottomMenuDock, $BossBar,
 			]:
 				if node.visible:
 					node.hide()

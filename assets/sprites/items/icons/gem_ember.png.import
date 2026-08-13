@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2a3f9d13bf704"
-path="res://.godot/imported/gem_ember.png-3dd404163b1a1873c19407d0372bb7e8.ctex"
+uid="uid://d3m7p1jkv7yhj"
+path="res://.godot/imported/gem_ember.png-1c400d6c2783901b2ecc661b336d7834.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/gem_ember.png"
-dest_files=["res://.godot/imported/gem_ember.png-3dd404163b1a1873c19407d0372bb7e8.ctex"]
+dest_files=["res://.godot/imported/gem_ember.png-1c400d6c2783901b2ecc661b336d7834.ctex"]
 
 [params]
 

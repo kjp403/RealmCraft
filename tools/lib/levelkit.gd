@@ -243,11 +243,17 @@ class ExtTable:
 	var _ids: Dictionary = {}
 	var _n: int = 0
 
-	func get_id(kind: String, path: String, uid: String = "") -> String:
+	## [param fixed_id] names the entry instead of taking the next sequential
+	## slot. Only the music rotation uses it, and only so a level that gains a
+	## playlist does not renumber every OTHER resource in the file — see the note
+	## in write_map.
+	func get_id(kind: String, path: String, uid: String = "", fixed_id: String = "") -> String:
 		if _ids.has(path):
 			return _ids[path]
-		var id := "e%d" % _n
-		_n += 1
+		var id := fixed_id
+		if id == "":
+			id = "e%d" % _n
+			_n += 1
 		_ids[path] = id
 		var uid_part := ("uid=\"%s\" " % uid) if uid != "" else ""
 		lines.append("[ext_resource type=\"%s\" %spath=\"%s\" id=\"%s\"]" % [kind, uid_part, path, id])
@@ -268,6 +274,21 @@ static func write_map(cfg: Dictionary) -> void:
 	var music_line := ""
 	if cfg.get("music", "") != "":
 		music_line = "music = ExtResource(\"%s\")\n" % ext.get_id("AudioStream", cfg["music"])
+		# The rotation Map plays after the base track. Emitted here rather than
+		# hand-added to the generated scene: these six levels HAD playlists that
+		# were patched in post-generation, and the next `build_biome_levels` run
+		# silently deleted all six. Map.music_playlist is only read when `music`
+		# is set, and verify_map_music.gd asserts that pairing, so it stays
+		# nested under the same condition.
+		#
+		# Named `mus_<track>` and left out of the eN sequence deliberately. These
+		# entries are being introduced to files that already exist, and taking
+		# two sequential slots here would shift every later id — renumbering ~250
+		# lines in each of five levels that are otherwise unchanged, and burying
+		# the one real edit. It also reproduces the hand-patched form byte for
+		# byte, so adopting the generator is a no-op on disk.
+		# Allocated after the body below, so the entries land at the END of the
+		# ext_resource block where the hand-patched ones already sit.
 
 	var body := ""
 
@@ -374,6 +395,18 @@ static func write_map(cfg: Dictionary) -> void:
 		body += "target_instance = ExtResource(\"%s\")\n" % inst_id
 		body += "warper_id = %d\n" % int(p["id"])
 		body += "target_id = %d\n" % int(p["target_id"])
+
+	# Last ext_resources allocated, so they append to the end of the block.
+	var playlist: Array = cfg.get("playlist", []) if music_line != "" else []
+	if not playlist.is_empty():
+		var refs: PackedStringArray = PackedStringArray()
+		for track: String in playlist:
+			var track_uid: String = ResourceUID.id_to_text(ResourceLoader.get_resource_uid(track))
+			var id: String = ext.get_id(
+				"AudioStream", track, track_uid, "mus_" + track.get_file().get_basename()
+			)
+			refs.append("ExtResource(\"%s\")" % id)
+		music_line += "music_playlist = Array[AudioStream]([%s])\n" % ", ".join(refs)
 
 	var header := "[gd_scene format=3]\n\n"
 	header += "\n".join(ext.lines) + "\n\n"

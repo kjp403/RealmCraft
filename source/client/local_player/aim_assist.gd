@@ -70,7 +70,7 @@ func _best_target(origin: Vector2, raw: Vector2) -> HostileNpc:
 		# as a smaller error against a boss than against a runt.
 		var scale: float = 1.0
 		if npc.enemy_data != null:
-			scale = maxf(1.0, npc.enemy_data.visual_scale)
+			scale = maxf(1.0, npc.body_scale())
 		var score: float = (deviation / scale) + (dist / MAX_RANGE) * DISTANCE_WEIGHT
 		if npc == _last_target and Time.get_ticks_msec() < _last_target_until_ms:
 			score *= STICKY_BIAS

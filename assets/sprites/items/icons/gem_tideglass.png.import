@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d84b5f9b0ac34"
-path="res://.godot/imported/gem_tideglass.png-c8e7beeba1224bcf443f21d9d3e5d8eb.ctex"
+uid="uid://epgkec2f2hdd"
+path="res://.godot/imported/gem_tideglass.png-8f3128c3b23d3d048748fce36ad45c1f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/gem_tideglass.png"
-dest_files=["res://.godot/imported/gem_tideglass.png-c8e7beeba1224bcf443f21d9d3e5d8eb.ctex"]
+dest_files=["res://.godot/imported/gem_tideglass.png-8f3128c3b23d3d048748fce36ad45c1f.ctex"]
 
 [params]
 
