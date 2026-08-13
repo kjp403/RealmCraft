@@ -97,6 +97,7 @@ func _init() -> void:
 	_check_kit(boss)
 	_check_existing_bosses_untouched()
 	_check_body_scale_is_inert()
+	_check_articulated(skin)
 	_finish()
 
 
@@ -438,6 +439,75 @@ func _check_body_scale_is_inert() -> void:
 	else:
 		_fail("body_scale changed %d pre-existing enemies: %s"
 			% [moved.size(), ", ".join(moved)])
+
+
+## Does the body ARTICULATE, or is it one picture being deformed?
+##
+## This is the check the first version of these clips would have failed. With a
+## single static source pose the tempting synthesis is to lean/squash the whole
+## sprite per frame, which passes every other assertion here — frame counts,
+## baselines, loop flags, borders — while the axe never actually moves relative
+## to the torso. It reads as a wobbling photograph.
+##
+## The test that separates them: track the WEAPON TIP relative to the body's own
+## centre. Under a whole-body deform the axe is carried along with the torso and
+## that offset barely changes; only an articulated arm moves it.
+##
+## Measured on both versions of this very sheet: the whole-body deform moved the
+## axe 1.5px relative to the body across the entire swing, the cutout rig moves
+## it 24.7px. A silhouette-overlap test was tried first and does NOT separate
+## them — the deform's own widen/lean distorts the outline about as much as a
+## real swing does, and both scored ~0.7, so it would have passed the version
+## this check exists to reject.
+##
+## Fraction of frame width the weapon must travel relative to the body.
+const MIN_WEAPON_TRAVEL := 0.05
+
+
+func _check_articulated(skin: SpriteFrames) -> void:
+	var clip := &"attack"
+	if not skin.has_animation(clip) or skin.get_frame_count(clip) < 2:
+		return
+	var lo: float = INF
+	var hi: float = -INF
+	var size: float = 0.0
+	for i: int in skin.get_frame_count(clip):
+		var tex: AtlasTexture = skin.get_frame_texture(clip, i) as AtlasTexture
+		if tex == null or tex.atlas == null:
+			return
+		var img: Image = tex.atlas.get_image()
+		if img == null:
+			return
+		var r: Rect2 = tex.region
+		size = r.size.x
+		var sum_x: float = 0.0
+		var count: int = 0
+		var tip: int = int(r.size.x)
+		var half: int = int(r.size.y) / 2
+		for y: int in int(r.size.y):
+			for x: int in int(r.size.x):
+				if img.get_pixel(int(r.position.x) + x, int(r.position.y) + y).a <= 0.25:
+					continue
+				sum_x += float(x)
+				count += 1
+				# The axe hangs low, so the lower half isolates it from the wings.
+				if y >= half:
+					tip = mini(tip, x)
+		if count == 0:
+			return
+		var rel: float = float(tip) - sum_x / float(count)
+		lo = minf(lo, rel)
+		hi = maxf(hi, rel)
+	var travel: float = hi - lo
+	var need: float = size * MIN_WEAPON_TRAVEL
+	if travel < need:
+		_fail(("'attack' is not articulated — the weapon moves %.1fpx relative to the "
+			+ "body (need %.1f). The whole sprite is being deformed instead of the arm "
+			+ "swinging.") % [travel, need])
+	else:
+		print("anim : 'attack' articulates — weapon travels %.1fpx relative to the body"
+			% travel)
+
 
 
 func _finish() -> void:
