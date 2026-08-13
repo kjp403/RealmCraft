@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dshitaaapbs6x" path="res://source/client/ui/hud/hud.gd" id="1_rchld"]
 [ext_resource type="PackedScene" uid="uid://rncsatpcsbm" path="res://source/client/ui/hud/health_bar/health_bar.tscn" id="2_klco5"]
 [ext_resource type="PackedScene" path="res://source/client/ui/hud/mana_bar/mana_bar.tscn" id="2_manabar"]
+[ext_resource type="PackedScene" path="res://source/client/ui/hud/boss_bar/boss_bar.tscn" id="2_bossbar"]
 [ext_resource type="PackedScene" uid="uid://cmv168mgurrlp" path="res://source/client/ui/menus/chat/chat_menu.tscn" id="2_xs74v"]
 [ext_resource type="Script" uid="uid://pkprr0ll1y44" path="res://source/client/ui/hud/item_slots.gd" id="4_8qpw0"]
 [ext_resource type="Script" uid="uid://brq8mxox5bclj" path="res://source/client/ui/hud/menu_overlay.gd" id="4_cx7qp"]
@@ -43,6 +44,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_rchld")
+
+[node name="BossBar" parent="." instance=ExtResource("2_bossbar")]
+layout_mode = 1
+mouse_filter = 2
 
 [node name="TwinSticks" parent="." unique_id=2047762390 instance=ExtResource("7_popxh")]
 layout_mode = 1
