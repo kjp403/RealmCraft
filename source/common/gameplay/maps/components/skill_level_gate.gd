@@ -17,7 +17,7 @@ extends StaticBody2D
 @export var label_text: String = "Mining 50+"
 ## Safe eject axis for under-leveled players. Must point toward walkable
 ## approach ground — never into walls / void beyond the sealed side.
-## Mining Cave DeepVeinGate uses LEFT (toward the cave entrance).
+## Mining Cave used LEFT (toward the cave entrance) when it had a DeepVeinGate.
 @export var eject_direction: Vector2 = Vector2.LEFT
 ## How far to shove along [member eject_direction] (must clear the approach Area2D).
 @export var eject_distance: float = 96.0

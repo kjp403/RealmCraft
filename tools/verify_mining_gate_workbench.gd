@@ -1,27 +1,11 @@
 extends SceneTree
-## Headless checks for Mining 50+ gate + hub workbench placement.
+## Headless checks for Mining Cave (no skill gate), hub workbench placement,
+## and mithril/adamant/runite mining + smithing level gates.
 ## Run: godot --headless --path . -s tools/verify_mining_gate_workbench.gd
 ## Expect: VERIFY_PASS
 
 func _init() -> void:
 	var failures: PackedStringArray = PackedStringArray()
-
-	# Qualification math: level >= required (same rule the gate uses).
-	if not (50 >= 50):
-		failures.append("50 >= 50 should pass")
-	if 49 >= 50:
-		failures.append("49 >= 50 should fail")
-	if not (99 >= 50):
-		failures.append("99 >= 50 should pass")
-
-	# PlayerResource path the gate reads on the server.
-	var res := PlayerResource.new()
-	res.skills[&"mining"] = {"level": 50, "xp": 0, "perks": {}}
-	if int(res.get_skill(&"mining").get("level", 1)) < 50:
-		failures.append("get_skill mining 50 failed")
-	res.skills[&"mining"] = {"level": 49, "xp": 0, "perks": {}}
-	if int(res.get_skill(&"mining").get("level", 1)) >= 50:
-		failures.append("get_skill mining 49 should be under gate")
 
 	# Crafting stations live inside the smith/tailor house (not outdoors on hub).
 	var hub_text: String = FileAccess.get_file_as_string(
@@ -43,24 +27,15 @@ func _init() -> void:
 	var cave_text: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn"
 	)
-	if cave_text.find("DeepVeinGate") < 0:
-		failures.append("mining_cave missing DeepVeinGate")
-	if cave_text.find("required_level = 50") < 0:
-		failures.append("DeepVeinGate required_level != 50")
-	if cave_text.find("label_text = \"Mining 50+\"") < 0:
-		failures.append("DeepVeinGate label missing Mining 50+")
+	if cave_text.find("DeepVeinGate") >= 0:
+		failures.append("mining_cave still has DeepVeinGate — the alcove must be open")
+	if cave_text.find("skill_level_gate.gd") >= 0:
+		failures.append("mining_cave still references skill_level_gate.gd")
+	if cave_text.find("AdamantVein") < 0:
+		failures.append("mining_cave missing adamant veins")
+	if cave_text.find("RuniteVein") < 0:
+		failures.append("mining_cave missing runite veins")
 
-	var gate_src: String = FileAccess.get_file_as_string(
-		"res://source/common/gameplay/maps/components/skill_level_gate.gd"
-	)
-	if gate_src.find("ClientState.skill_level") < 0:
-		failures.append("gate missing ClientState.skill_level client path")
-	if gate_src.find(">= required_level") < 0:
-		failures.append("gate missing >= required_level check")
-	if gate_src.find("eject_direction") < 0:
-		failures.append("gate missing eject_direction (null-spot fix)")
-	if cave_text.find("eject_direction = Vector2(-1, 0)") < 0:
-		failures.append("DeepVeinGate missing leftward eject_direction")
 	# Skiller-safe wildlife: Mining Cave must not share aggressive trpg_bat.
 	if cave_text.find("trpg/trpg_bat.tres") >= 0:
 		failures.append("mining_cave CaveBats still use aggressive trpg_bat")
@@ -71,6 +46,48 @@ func _init() -> void:
 	)
 	if cave_bat_text.find("chase_on_area = false") < 0:
 		failures.append("cave_bat must be passive (chase_on_area=false)")
+
+	var expect_mine: Dictionary = {"mithril": 35, "adamant": 50, "runite": 60}
+	for metal: String in expect_mine.keys():
+		var vein: String = FileAccess.get_file_as_string(
+			"res://source/common/gameplay/maps/components/mineable_nodes/%s_vein.tres" % metal
+		)
+		if vein.find("required_level = %d" % int(expect_mine[metal])) < 0:
+			failures.append("%s vein required_level != %d" % [metal, int(expect_mine[metal])])
+
+	var mining_guide: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/jobs/mining.tres"
+	)
+	if mining_guide.find("source_levels = Array[int]([0, 0, 5, 15, 20, 35, 40, 50, 60])") < 0:
+		failures.append("mining.tres skill-guide source_levels are stale")
+
+	var furnace: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/crafting/resources/furnace.tres"
+	)
+	if furnace.find("required_level = 35") < 0:
+		failures.append("furnace missing mithril smithing 35")
+	if furnace.find("required_level = 50") < 0:
+		failures.append("furnace missing adamant smithing 50")
+	if furnace.find("required_level = 65") < 0:
+		failures.append("furnace missing runite smithing 65")
+
+	var anvil: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/crafting/resources/anvil.tres"
+	)
+	_expect_recipe_level(failures, anvil, "R_mi_arr", 35, "anvil mithril arrowheads")
+	_expect_recipe_level(failures, anvil, "R_ad_arr", 50, "anvil adamant arrowheads")
+	_expect_recipe_level(failures, anvil, "R_ru_arr", 65, "anvil runite arrowheads")
+	_expect_recipe_level(failures, anvil, "R_wpn_mithril_sword", 35, "anvil mithril sword")
+	_expect_recipe_level(failures, anvil, "R_wpn_adamant_sword", 50, "anvil adamant sword")
+	_expect_recipe_level(failures, anvil, "R_wpn_runite_sword", 65, "anvil runite sword")
+
+	var smithing_guide: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/jobs/smithing.tres"
+	)
+	if smithing_guide.find("recipe_levels = Array[int]([1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 15, 15, 15, 15, 35, 35, 50, 50, 65, 65, 35, 35, 35, 50, 50, 50, 65, 65, 65])") < 0:
+		failures.append("smithing.tres skill-guide recipe_levels are stale")
+	if smithing_guide.find("recipe_deferred_levels = Array[int]([1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 15, 15, 15, 15, 15, 35, 35, 35, 35, 35, 50, 50, 50, 50, 50, 65, 65, 65, 65, 65])") < 0:
+		failures.append("smithing.tres skill-guide recipe_deferred_levels are stale")
 
 	var smith_res: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/instance/instance_collection/building/smith_house.tres"
@@ -96,3 +113,16 @@ func _init() -> void:
 		for line: String in failures:
 			print("  - ", line)
 		quit(1)
+
+
+func _expect_recipe_level(
+	failures: PackedStringArray, body: String, recipe_id: String, level: int, label: String
+) -> void:
+	var needle: String = "id=\"%s\"" % recipe_id
+	var idx: int = body.find(needle)
+	if idx < 0:
+		failures.append("%s missing (%s)" % [label, recipe_id])
+		return
+	var lvl_idx: int = body.find("required_level = %d" % level, idx)
+	if lvl_idx < 0 or lvl_idx > idx + 400:
+		failures.append("%s required_level != %d" % [label, level])
