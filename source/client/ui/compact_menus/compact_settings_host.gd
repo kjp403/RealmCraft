@@ -4,6 +4,9 @@ const PANEL_SIZE := Vector2(180.0, 340.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 72.0
 const SECTION := &"general"
+## Combat feel toggles live in their own settings section, so the rows below read
+## from it explicitly rather than through the [constant SECTION]-scoped helpers.
+const COMBAT_SECTION := &"combat"
 const LOGOUT_RED := Color(0.92, 0.28, 0.28)
 const LOGOUT_RED_HOVER := Color(1.0, 0.42, 0.38)
 const LOGOUT_RED_PRESSED := Color(0.72, 0.16, 0.16)
@@ -28,6 +31,7 @@ var _sound_slider: HSlider
 var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
 var _slayer_tracker_toggle: CheckButton
+var _commit_aim_toggle: CheckButton
 var _music_value: Label
 var _sound_value: Label
 var _zoom_value: Label
@@ -115,6 +119,17 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	)
 	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
 	main_box.add_child(_slayer_tracker_toggle)
+
+	_commit_aim_toggle = CheckButton.new()
+	_commit_aim_toggle.text = "Commit aim"
+	_commit_aim_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_commit_aim_toggle.add_theme_font_size_override(&"font_size", 10)
+	_commit_aim_toggle.tooltip_text = (
+		"Attacks keep the direction they were aimed at instead of following your "
+		"aim through the swing."
+	)
+	_commit_aim_toggle.toggled.connect(_on_commit_aim_toggled)
+	main_box.add_child(_commit_aim_toggle)
 
 	main_box.add_child(HSeparator.new())
 
@@ -362,11 +377,25 @@ func _on_slayer_tracker_toggled(enabled: bool) -> void:
 	SlayerTracker.set_enabled(enabled)
 
 
+func _on_commit_aim_toggled(enabled: bool) -> void:
+	if _syncing:
+		return
+	ClientState.settings.set_value(
+		COMBAT_SECTION,
+		&"commit_aim",
+		enabled
+	)
+
+
 func _on_setting_changed(
 	section: StringName,
 	property: StringName,
 	_value: Variant
 ) -> void:
+	if section == COMBAT_SECTION:
+		if property == &"commit_aim":
+			_sync_controls()
+		return
 	if section != SECTION:
 		return
 	if property in [
@@ -391,6 +420,9 @@ func _sync_controls() -> void:
 		_setting_value(&"weather_effects", true)
 	)
 	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
+	_commit_aim_toggle.button_pressed = bool(
+		_section_value(COMBAT_SECTION, &"commit_aim", true)
+	)
 
 	_update_value_label(
 		&"music_volume",
@@ -411,11 +443,21 @@ func _sync_controls() -> void:
 
 
 func _setting_value(property: StringName, fallback: Variant) -> Variant:
-	var value: Variant = ClientState.settings.get_value(SECTION, property)
+	return _section_value(SECTION, property, fallback)
+
+
+## Stored value, else the shipped default, else [param fallback] — for any section
+## (the compact panel now shows rows from [constant COMBAT_SECTION] too).
+func _section_value(
+	section: StringName,
+	property: StringName,
+	fallback: Variant
+) -> Variant:
+	var value: Variant = ClientState.settings.get_value(section, property)
 	if value != null:
 		return value
 
-	value = ClientState.settings.get_default(SECTION, property)
+	value = ClientState.settings.get_default(section, property)
 	return fallback if value == null else value
 
 
@@ -446,6 +488,17 @@ func _on_reset_pressed() -> void:
 				SECTION,
 				property,
 				default_value
+			)
+	# Combat rows live in their own section, so they need their own reset pass.
+	for property: StringName in [&"commit_aim"]:
+		var combat_default: Variant = (
+			ClientState.settings.get_default(COMBAT_SECTION, property)
+		)
+		if combat_default != null:
+			ClientState.settings.set_value(
+				COMBAT_SECTION,
+				property,
+				combat_default
 			)
 
 	Toaster.toast("Settings restored to defaults.")

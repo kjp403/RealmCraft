@@ -43,6 +43,10 @@ func start(npc: HostileNpc) -> void:
 	_active = true
 	_charge_held = false
 	_player._follow_peer_id = 0
+	# A lock steers facing at its target every frame — that IS aim stability, so it
+	# owns the aim outright. Drop any commit from a free-aim swing a moment earlier
+	# rather than letting it hold the facing stale for the first frames of the lock.
+	_player.clear_aim_commit()
 	Character.combat_target_instance_id = npc.get_instance_id()
 	npc.refresh_nameplate_color()
 
@@ -100,6 +104,11 @@ func tick() -> bool:
 	var to_target: Vector2 = _target.global_position - _player.global_position
 	var dist: float = to_target.length()
 	if to_target != Vector2.ZERO:
+		# The lock steers aim every frame, so it owns it outright — drop any commit a
+		# special cast mid-lock would otherwise leave behind. Without this the sends
+		# below (live look_direction) and the visual facing (committed aim) could
+		# disagree for the length of the window.
+		_player.clear_aim_commit()
 		_player.look_direction = to_target.normalized()
 
 	if dist > _engage_range():

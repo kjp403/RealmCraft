@@ -42,6 +42,13 @@ const FOLLOW_REPATH_MS: int = 300
 const FOLLOW_STOP_DISTANCE: float = 28.0
 ## Auto-retaliate ignores hits after this much idle time (no move/attack/ability).
 const AFK_RETALIATE_MS: int = 5 * 60 * 1000
+## Aim commit: how long a fired attack OWNS the aim vector it went out with.
+## Long enough to cover a basic swing's damage frame, short enough that you can
+## still reorient between swings in a pack. Tunable via [combat] in the settings.
+const COMMIT_AIM_DEFAULT_MS: int = 120
+## Upper bound on the configured window — a commit longer than this stops reading
+## as weight and starts reading as unresponsiveness.
+const COMMIT_AIM_MAX_MS: int = 400
 
 
 ## Fallback move speed until the synced MOVE_SPEED stat arrives. Actual movement
@@ -52,6 +59,16 @@ var hand_pivot_speed: float = 17.5
 var input_direction: Vector2 = Vector2.ZERO
 var look_direction: Vector2 = Vector2.ZERO
 var action_input: bool = false
+
+## Aim snapshot taken when an attack fires, and the deadline it holds until.
+## Read through [method aim_direction] — NEVER by freezing [member look_direction],
+## which [CombatTargetController] and the ground-aim ghost both write every frame.
+## Keeping the commit a read-side overlay is what lets those two keep working.
+var _committed_aim: Vector2 = Vector2.ZERO
+var _commit_until_ms: int = 0
+## [combat] settings mirror — see [method _apply_combat_settings].
+var _commit_aim_enabled: bool = true
+var _commit_aim_ms: int = COMMIT_AIM_DEFAULT_MS
 
 ## While dead, input/movement are locked so the player can't act or drift; the respawn
 ## teleport is applied locally (position is client-authoritative).
@@ -112,6 +129,8 @@ func _ready() -> void:
 	add_child(_craft_controller)
 	_craft_controller.setup(self)
 	_last_input_ms = Time.get_ticks_msec()
+	ClientState.settings.setting_changed.connect(_on_combat_setting_changed)
+	_apply_combat_settings()
 	ClientState.local_player_ready.emit(self)
 	
 	super._ready()
@@ -661,8 +680,9 @@ func process_input() -> void:
 		and not is_holding_gather_tool()
 		and equipment_component.can_use(&"weapon", 0)
 	):
+		commit_aim()
 		Client.request_data(&"action.perform", Callable(),
-		{"d": look_direction, "i": 0}, InstanceClient.current.name)
+		{"d": aim_direction(), "i": 0}, InstanceClient.current.name)
 
 
 func process_animation(delta: float) -> void:
@@ -672,7 +692,10 @@ func process_animation(delta: float) -> void:
 		if anim != Animations.DEATH:
 			anim = Animations.DEATH
 		return
-	flipped = look_direction.x < 0
+	# Facing follows the COMMITTED aim, not the live cursor — that's what stops the
+	# sprite spinning through its own swing when the mouse keeps moving.
+	var aim: Vector2 = aim_direction()
+	flipped = aim.x < 0
 	update_hand_pivot(delta)
 	anim = Animations.RUN if input_direction else Animations.IDLE
 
@@ -683,9 +706,59 @@ func update_hand_pivot(delta: float) -> void:
 	# look wrong). The pose itself is the weapon's set_channeling_pose.
 	if _channeling and not _channel_mobile:
 		return  # rooted channels plant the weapon; a spin keeps tracking aim
+	var aim: Vector2 = aim_direction()
 	var to_flip: int = -1 if flipped else 1
-	var look_angle: float = atan2(look_direction.y, look_direction.x * to_flip)
+	var look_angle: float = atan2(aim.y, aim.x * to_flip)
 	hand_pivot.rotation = lerp_angle(hand_pivot.rotation, look_angle, delta * hand_pivot_speed)
+
+
+## The aim vector every attack send and the swing's visual facing should use: the
+## vector the CURRENT swing was fired with while its commit window holds, else the
+## live [member look_direction]. Falls through to live aim whenever the feature is
+## off, so disabling the setting restores the pre-commit behaviour exactly.
+func aim_direction() -> Vector2:
+	if _committed_aim != Vector2.ZERO and Time.get_ticks_msec() < _commit_until_ms:
+		return _committed_aim
+	return look_direction
+
+
+## Snapshot the live aim for one swing. A no-op while a commit is already running —
+## that's what makes this "capture at swing start" rather than "recapture every
+## frame the attack button is held" (the latter would commit to nothing at all).
+func commit_aim() -> void:
+	if not _commit_aim_enabled or _commit_aim_ms <= 0:
+		return
+	if look_direction == Vector2.ZERO:
+		return
+	if Time.get_ticks_msec() < _commit_until_ms:
+		return # the swing in flight owns the aim — don't re-snapshot mid-commit
+	_committed_aim = look_direction
+	_commit_until_ms = Time.get_ticks_msec() + _commit_aim_ms
+
+
+## Drop any live commit. Used by the flows that own aim DELIBERATELY — a hostile
+## lock (which steers facing at its target every frame) and ground-aim placement —
+## so a swing fired a moment earlier can't hold their facing stale.
+func clear_aim_commit() -> void:
+	_committed_aim = Vector2.ZERO
+	_commit_until_ms = 0
+
+
+func _apply_combat_settings() -> void:
+	var section: Dictionary = ClientState.settings.data.get(&"combat", {})
+	_commit_aim_enabled = bool(section.get(&"commit_aim", true))
+	_commit_aim_ms = clampi(
+		int(section.get(&"commit_aim_ms", COMMIT_AIM_DEFAULT_MS)), 0, COMMIT_AIM_MAX_MS
+	)
+	if not _commit_aim_enabled:
+		clear_aim_commit() # turning it off mid-session must take effect immediately
+
+
+func _on_combat_setting_changed(
+	section: StringName, _property: StringName, _value: Variant
+) -> void:
+	if section == &"combat":
+		_apply_combat_settings()
 
 
 func process_synchronization() -> void:

@@ -444,6 +444,9 @@ func _start_ground_aim(slot: int, ability: AbilityResource, local_player: LocalP
 		_clear_ground_aim()
 	_ground_aim_slot = slot
 	_held[slot] = true
+	# Placement owns the aim from here — a swing fired a moment ago must not hold
+	# the facing stale while the ghost tracks the cursor.
+	local_player.clear_aim_commit()
 	_ensure_ground_aim_marker(ability)
 	_update_ground_aim(local_player)
 
@@ -540,7 +543,16 @@ func _send_action(
 	local_player: LocalPlayer,
 	ground_target: Variant = null
 ) -> void:
-	var args: Dictionary = {"d": local_player.look_direction, "i": slot}
+	# Aim commit: the fired attack keeps the vector it went out with for a beat
+	# instead of tracking the cursor through its own animation. Two exclusions —
+	# a ground-aimed cast's aim IS the placed point, and a charge DRAW must not
+	# commit (only the release that actually fires does, or holding a bow would
+	# freeze your aim for the whole draw).
+	if ground_target is not Vector2:
+		var ability: AbilityResource = abilities[slot] if slot < abilities.size() else null
+		if ability != null and (released or not ability.has_release):
+			local_player.commit_aim()
+	var args: Dictionary = {"d": local_player.aim_direction(), "i": slot}
 	if released:
 		args["r"] = true
 	if ground_target is Vector2:
