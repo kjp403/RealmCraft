@@ -78,11 +78,17 @@ var warpers: Dictionary[int, Warper]
 ## player is actually at, rather than trusting a client-sent key — and it lets an inline
 ## shop (no registry id) resolve by its owning NPC, the way quest_givers do.
 var shops: Dictionary[StringName, ShopResource]
-## node name -> CraftingStationResource, gathered from the CraftingStation nodes placed
+## node name -> CraftingStation node, gathered from the CraftingStation nodes placed
 ## in this map (same pattern as warpers). The server resolves/verifies the station a
 ## player crafts at by node name, rather than trusting a client-sent key — and an inline
 ## station (no registry id) resolves by its node, the way shops resolve by their NPC.
-var crafting_stations: Dictionary[StringName, CraftingStationResource]
+##
+## Holds the NODE, not the resource, so the range check has a world position to
+## measure against: stations nested inside a sub-scene (the beach cooker lives in
+## woodland_beach.tscn, instanced under woodland_tiles) are unreachable by a
+## get_node() path off the Map root. Duck-typed as Object for the same reason
+## [member quest_givers] is — the node's script depends on Map.
+var crafting_stations: Dictionary[StringName, Object]
 ## giver slug -> quest source: a QuestInteraction on an NPC (registered by its
 ## register(), keyed by the NPCResource filename slug). Exposes `quests` +
 ## `giver_name`, read by the quest handlers. The server resolves offered quests.
@@ -168,9 +174,19 @@ func get_shop(shop_key: StringName) -> ShopResource:
 	return shops.get(shop_key)
 
 
-## The crafting station with this node name in this map, or null.
+## The crafting station resource with this node name in this map, or null.
 func get_crafting_station(station_key: StringName) -> CraftingStationResource:
-	return crafting_stations.get(station_key)
+	var node: Object = crafting_stations.get(station_key)
+	if node == null:
+		return null
+	return node.get(&"station") as CraftingStationResource
+
+
+## The CraftingStation NODE with this name in this map, or null. Callers that need
+## a world position (the server's walk-up-range check) use this rather than a
+## get_node() path, which only ever found stations parented straight to the Map.
+func get_crafting_station_node(station_key: StringName) -> Node2D:
+	return crafting_stations.get(station_key) as Node2D
 
 
 ## The quest-giver NPC with this slug in this map, or null.

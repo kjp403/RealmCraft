@@ -20,10 +20,11 @@ func _ready() -> void:
 		# Set before Interactable._ready so the hover NameLabel can be built.
 		hover_name = station.station_name
 		# Self-register with the owning map, keyed by node name (what the client
-		# sends and craft.item resolves).
+		# sends and craft.item resolves). Registers the NODE so the server can
+		# range-check against our world position at any nesting depth.
 		var map: Map = Map.of(self)
 		if map != null:
-			map.register_keyed(map.crafting_stations, StringName(name), station, "crafting station")
+			map.register_keyed(map.crafting_stations, StringName(name), self, "crafting station")
 	super._ready()
 
 
