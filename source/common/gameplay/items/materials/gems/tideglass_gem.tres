@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="MaterialItem" format=3]
 
-[ext_resource type="Texture2D" uid="uid://d84b5f9b0ac34" path="res://assets/sprites/items/icons/gem_tideglass.png" id="1_icon"]
+[ext_resource type="Texture2D" uid="uid://epgkec2f2hdd" path="res://assets/sprites/items/icons/gem_tideglass.png" id="1_icon"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
 
 [resource]

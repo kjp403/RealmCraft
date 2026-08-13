@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://73d6be1897fb4"
-path="res://.godot/imported/gem_verdance.png-f6b1526771a0d60603e7985ecdcf9f7a.ctex"
+uid="uid://b537kxo8rle80"
+path="res://.godot/imported/gem_verdance.png-a6def8d82eac363135afc5cffe0ced63.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/gem_verdance.png"
-dest_files=["res://.godot/imported/gem_verdance.png-f6b1526771a0d60603e7985ecdcf9f7a.ctex"]
+dest_files=["res://.godot/imported/gem_verdance.png-a6def8d82eac363135afc5cffe0ced63.ctex"]
 
 [params]
 

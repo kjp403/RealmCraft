@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2d53bf5a05d14"
-path="res://.godot/imported/gem_oath.png-8788b7c3a57e81015a4d1886f308c168.ctex"
+uid="uid://cby51pi2p8qr"
+path="res://.godot/imported/gem_oath.png-2180ed8ff75c3145dfe83f3e948ad140.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/gem_oath.png"
-dest_files=["res://.godot/imported/gem_oath.png-8788b7c3a57e81015a4d1886f308c168.ctex"]
+dest_files=["res://.godot/imported/gem_oath.png-2180ed8ff75c3145dfe83f3e948ad140.ctex"]
 
 [params]
 
