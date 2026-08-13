@@ -460,13 +460,10 @@ func _on_chat_message(message: Dictionary) -> void:
 	if is_viewing:
 		# Re-render the whole view: collapse + dividers depend on neighbours
 		# and the cheapest correct way to handle out-of-order history + the
-		# ALL aggregate view is to rebuild.
-		_refresh_full_feed()
-		if is_self:
-			# Discord-style: when the local player sends a message, jump the
-			# scroll to the bottom so they always see what they just typed,
-			# even if they had scrolled up to read history.
-			full_feed_text_display.scroll_to_line.call_deferred(full_feed_text_display.get_line_count())
+		# ALL aggregate view is to rebuild. Stick to the latest line when we
+		# sent it; otherwise leave the scroll alone if the player was reading
+		# history.
+		_refresh_full_feed(is_self)
 
 	_update_tab_labels()
 #endregion
@@ -773,7 +770,18 @@ func open_dm(other_id: int) -> void:
 
 
 #region Rendering
-func _refresh_full_feed() -> void:
+## Rebuild the visible log. `stick_to_bottom` jumps to the latest line (tab
+## switches, opening the panel, sending a message). Incoming chatter from
+## other people passes false so a player who scrolled up to read history is
+## not yanked back down — unless they were already at the bottom, in which
+## case we keep following.
+func _refresh_full_feed(stick_to_bottom: bool = true) -> void:
+	var follow: bool = stick_to_bottom or _feed_is_at_bottom()
+	var saved_scroll: float = 0.0
+	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
+	if bar != null:
+		saved_scroll = bar.value
+
 	full_feed_text_display.clear()
 	full_feed_text_display.text = ""
 
@@ -795,6 +803,27 @@ func _refresh_full_feed() -> void:
 			full_feed_text_display.append_text(block)
 			full_feed_text_display.newline()
 		prev = record
+
+	if follow:
+		full_feed_text_display.scroll_to_line.call_deferred(
+			full_feed_text_display.get_line_count()
+		)
+	else:
+		_restore_feed_scroll.call_deferred(saved_scroll)
+
+
+func _feed_is_at_bottom() -> bool:
+	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
+	if bar == null:
+		return true
+	return bar.value >= bar.max_value - bar.page - 12.0
+
+
+func _restore_feed_scroll(value: float) -> void:
+	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
+	if bar == null:
+		return
+	bar.value = value
 
 
 ## Returns the records to draw for the active conversation. The ALL and
@@ -1265,7 +1294,7 @@ func echo_system(text: String) -> void:
 	}
 	(raw_messages_by_conversation[convo_id] as Array).append(record)
 	if full_feed.visible and _view_shows_conversation(convo_id):
-		_refresh_full_feed()
+		_refresh_full_feed(false)
 	_update_tab_labels()
 #endregion
 

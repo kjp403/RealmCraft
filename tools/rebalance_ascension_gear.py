@@ -12,13 +12,15 @@ from pathlib import Path
 
 ROOT = Path("/workspace/source/common/gameplay/items")
 
-# Weapon AD/AP targets (basic swing ≈ 100% AD). Fire Sword is 22 AD at m30.
+# Weapon AD/AP targets (basic swing ≈ 100% AD). Fire Sword is 35 AD at m30.
 # m90 should chew current 3k bosses and leave headroom for harder content.
-SWORD_AD = {40: 62, 50: 98, 60: 145, 70: 205, 80: 280, 90: 370}
-HAMMER_AD = {40: 70, 50: 110, 60: 160, 70: 225, 80: 310, 90: 410}
-BOW_AD = {40: 62, 50: 98, 60: 145, 70: 205, 80: 280, 90: 370}
-WAND_AP = {40: 120, 50: 175, 60: 245, 70: 330, 80: 430, 90: 560}
-BOOK_AP = {40: 62, 50: 98, 60: 145, 70: 205, 80: 280, 90: 370}
+# Bone (boss drop) sits at 19 AD, above adamant 14 / runite 17; every drop
+# past bone is shifted by the same delta so smithable metals never outclass them.
+SWORD_AD = {40: 75, 50: 111, 60: 158, 70: 218, 80: 293, 90: 383}
+HAMMER_AD = {40: 84, 50: 124, 60: 174, 70: 239, 80: 324, 90: 424}
+BOW_AD = {40: 75, 50: 111, 60: 158, 70: 218, 80: 293, 90: 383}
+WAND_AP = {40: 151, 50: 206, 60: 276, 70: 361, 80: 461, 90: 591}
+BOOK_AP = {40: 74, 50: 110, 60: 157, 70: 217, 80: 292, 90: 382}
 
 # Unique identity bonuses kick in hard at m60+
 UNIQUE = {
@@ -65,10 +67,10 @@ BASE_CLOTH = {
 }
 
 SPECIALS = {
-    "sword_dawnbreaker.item.tres": {"ad": 230, "ability_haste": 10},
-    "hammer_riftedge.item.tres": {"ad": 250, "move_speed": -4, "ability_haste": 6},
-    "sword_nightfall.item.tres": {"ad": 310, "ability_haste": 8},
-    "hammer_kingsbane.item.tres": {"ad": 340, "move_speed": -6, "ability_haste": 4},
+    "sword_dawnbreaker.item.tres": {"ad": 243, "ability_haste": 10},
+    "hammer_riftedge.item.tres": {"ad": 264, "move_speed": -4, "ability_haste": 6},
+    "sword_nightfall.item.tres": {"ad": 323, "ability_haste": 8},
+    "hammer_kingsbane.item.tres": {"ad": 354, "move_speed": -6, "ability_haste": 4},
 }
 
 JEWELRY = {

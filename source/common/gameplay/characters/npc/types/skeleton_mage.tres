@@ -18,7 +18,7 @@ lunge_range = 150.0
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("1_4ocig")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.08
+chance = 0.01
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_4ocig")

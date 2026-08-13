@@ -114,13 +114,13 @@ HERBS = [
 
 # potion slug → (herb_slug, herb_amt, herblore_level, xp, potion_path)
 BREWS = [
-    ("minor_health_potion", "healing_herb", 2, 1, 15, "res://source/common/gameplay/items/consumables/minor_health_potion.tres"),
-    ("minor_mana_potion", "frostpetal", 2, 5, 25, "res://source/common/gameplay/items/consumables/minor_mana_potion.tres"),
-    ("health_potion", "sunwort", 2, 10, 40, "res://source/common/gameplay/items/consumables/health_potion.tres"),
-    ("mana_potion", "moonbloom", 2, 20, 55, "res://source/common/gameplay/items/consumables/mana_potion.tres"),
-    ("greater_health_potion", "bloodcap", 3, 30, 80, "res://source/common/gameplay/items/consumables/greater_health_potion.tres"),
-    ("greater_mana_potion", "starblossom", 3, 40, 100, "res://source/common/gameplay/items/consumables/greater_mana_potion.tres"),
-    ("focus_tonic", "grimshade", 3, 50, 120, "res://source/common/gameplay/items/consumables/focus_tonic.tres"),
+    ("minor_health_potion", "healing_herb", 2, 1, 45, "res://source/common/gameplay/items/consumables/minor_health_potion.tres"),
+    ("minor_mana_potion", "frostpetal", 2, 5, 75, "res://source/common/gameplay/items/consumables/minor_mana_potion.tres"),
+    ("health_potion", "sunwort", 2, 10, 120, "res://source/common/gameplay/items/consumables/health_potion.tres"),
+    ("mana_potion", "moonbloom", 2, 20, 165, "res://source/common/gameplay/items/consumables/mana_potion.tres"),
+    ("greater_health_potion", "bloodcap", 3, 30, 240, "res://source/common/gameplay/items/consumables/greater_health_potion.tres"),
+    ("greater_mana_potion", "starblossom", 3, 40, 300, "res://source/common/gameplay/items/consumables/greater_mana_potion.tres"),
+    ("focus_tonic", "grimshade", 3, 50, 360, "res://source/common/gameplay/items/consumables/focus_tonic.tres"),
 ]
 
 SICKLES = [

@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_ad_rustic"]
 script = ExtResource("1_10w3u")
 stat_name = "ad"
-value = 9.0
+value = 22.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ct1ie"]
 atlas = ExtResource("2_10w3u")

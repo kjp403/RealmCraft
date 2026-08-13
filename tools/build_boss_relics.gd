@@ -43,7 +43,7 @@ const INDEX := "res://source/common/registry/indexes/items_index.tres"
 ##
 ## Sized against the WEAPON ladder, not the armour one. Armour is deliberately
 ## tiny here (chest pieces cap around 15 armour / 16 health at every tier) while
-## weapons carry the power curve — swords run 4 -> 370 ad, wands to 560 ap. An
+## weapons carry the power curve — swords run 4 -> 383 ad, wands to 591 ap. An
 ## accessory pinned to the armour envelope is noise by mastery 40, and these are
 ## 1/1000 off the only ten bosses in the game.
 ##
@@ -63,7 +63,7 @@ const INDEX := "res://source/common/registry/indexes/items_index.tres"
 ##
 ## So: lesser charms clearly outclass the craftable Gold Necklace (6 armour / 14
 ## health), and greater sigils stay worth wearing past their own tier — the top
-## one, Cinderheart, beats a Fire Sword's +22 ad and carries into the mastery 40+
+## one, Cinderheart, beats a Fire Sword's +35 ad and carries into the mastery 40+
 ## band, which has no boss content of its own.
 ##
 ## move_speed and ability_haste are the exceptions and stay gentle. Move speed is

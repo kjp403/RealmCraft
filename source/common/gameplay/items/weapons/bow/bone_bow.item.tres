@@ -15,7 +15,7 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [sub_resource type="Resource" id="Mod_ad_bow"]
 script = ExtResource("1_nxbkg")
 stat_name = "ad"
-value = 6.0
+value = 19.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rsxgv"]
@@ -34,7 +34,7 @@ required_mastery_level = 2
 base_modifiers = Array[ExtResource("1_nxbkg")]([SubResource("Resource_ibcoj"), SubResource("Mod_ad_bow")])
 item_name = &"Bone Bow"
 item_icon = SubResource("AtlasTexture_rsxgv")
-description = "A plain wooden bow. Draw to charge, loose to fire."
+description = "A bow of bleached bone. Light on the draw, and it hits harder than adamant."
 can_trade = true
 stack_limit = 10
 metadata/_custom_type_script = "uid://5hk0gl5ng64h"
