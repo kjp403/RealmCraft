@@ -68,13 +68,14 @@ extends Resource
 ## [code][min_charges, max_charges][/code] every time it fills, and skips the
 ## per-charge trickle regen — the vein simply runs until it is mined out, then
 ## respawns after [member depleted_recharge_seconds] with a new roll.
-## 0 = fixed pool of [member max_charges] with trickle regen (fishing holes, which
-## opt out by setting this back to 0 explicitly).
+## 0 = fixed pool of [member max_charges] with trickle regen. Nothing ships on
+## that path today; it exists for a node that should refill while you stand at it.
 ##
 ## The default is the standard gathering pool: every tool-swing node — ore veins,
 ## herb patches, trees — rolls 3-25 yields per player and runs until it is worked
 ## out, then respawns after [member depleted_recharge_seconds] with a new roll.
-## New node types inherit this automatically; only override to opt out.
+## Fishing holes run the same system on their own 5-20 roll. New node types
+## inherit the default automatically; only override to opt out.
 @export var min_charges: int = 3
 ## Continuous regen while at least 1 charge remains for that player: +1 every X sec.
 ## Ignored by nodes with a random pool ([member min_charges] > 0).

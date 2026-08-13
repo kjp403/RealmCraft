@@ -22,8 +22,8 @@ secondary_job_xp = Dictionary[StringName, int]({
 &"fishing": 45
 })
 extraction_hp = 3
-max_charges = 4
-min_charges = 0
+max_charges = 20
+min_charges = 5
 charge_regen_seconds = 14.0
 depleted_recharge_seconds = 70.0
 player_cooldown_seconds = 5.0

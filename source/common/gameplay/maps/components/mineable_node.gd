@@ -12,12 +12,12 @@ extends Area2D
 ## - **Per-player progress**: each player tracks their own swings toward the
 ##   next yield, so two players mining the same vein don't steal swing progress.
 ## - **Random pool size** (data.min_charges > 0, the default for every tool-swing
-##   node — ore veins, herb patches, trees): each fill rolls a new pool in
-##   [min_charges, max_charges], so a node is worth an unpredictable haul instead
-##   of a flat count. Those nodes skip the trickle regen below — they run until
-##   worked out, then respawn with a fresh roll.
+##   node — ore veins, herb patches, trees, fishing holes): each fill rolls a new
+##   pool in [min_charges, max_charges], so a node is worth an unpredictable haul
+##   instead of a flat count. Those nodes skip the trickle regen below — they run
+##   until worked out, then respawn with a fresh roll.
 ## - **Continuous regen while charges > 0**: +1 every charge_regen_seconds
-##   (per player). Fixed-pool nodes only, which today means fishing holes.
+##   (per player). Fixed-pool nodes only — nothing ships on that path today.
 ## - **Snap-refill when fully depleted**: a player's depleted pool waits longer
 ##   (depleted_recharge_seconds), then refills ALL of that player's charges.
 ## - **Job XP routing**: data.job_xp is a dict so a healing herb can grant
