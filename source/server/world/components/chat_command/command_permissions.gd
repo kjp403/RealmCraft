@@ -39,6 +39,36 @@ static func effective_priority(player: PlayerResource, instance: ServerInstance)
 	return best
 
 
+## Instance-free variant of [method effective_priority], for gates that run before a
+## ServerInstance is in hand — notably InstanceResource.can_join_instance, which only
+## receives the Player. Role priorities live in a STATIC table
+## (ServerInstance.global_role_definitions), so the instance was only ever a lookup
+## vehicle: this returns the same number, including the live owner/senior_admin DB
+## block and the AdminConfig grant.
+static func effective_priority_global(player: PlayerResource) -> int:
+	if player == null:
+		return -1
+
+	var best: int = 0
+	for role: String in player.server_roles:
+		if _db_role_blocked(role):
+			continue
+		best = maxi(best, _global_role_priority(role))
+
+	var config_role: String = AdminConfig.role_for_character(
+		player.display_name, player.player_id
+	)
+	if not config_role.is_empty():
+		best = maxi(best, _global_role_priority(config_role))
+
+	return best
+
+
+static func _global_role_priority(role: String) -> int:
+	var role_data: Dictionary = ServerInstance.global_role_definitions.get(role, {})
+	return int(role_data.get("priority", 0))
+
+
 ## Highest-priority role name for badges / chat ("" = regular player).
 ## Maps owner / senior_admin → "admin" so all top staff use the Admin crown badge.
 static func effective_role_slug(player: PlayerResource, instance: ServerInstance) -> String:

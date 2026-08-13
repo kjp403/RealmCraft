@@ -51,6 +51,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 14:
 		_migration_v14(db)
 		_set_schema_version(db, 14)
+	if version < 15:
+		_migration_v15(db)
+		_set_schema_version(db, 15)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -289,6 +292,16 @@ static func _migration_v13(db: SQLite) -> void:
 static func _migration_v14(db: SQLite) -> void:
 	if not _column_exists(db, "players", "bank_slots"):
 		db.query("ALTER TABLE players ADD COLUMN bank_slots INTEGER NOT NULL DEFAULT 50;")
+
+
+## v15: equipped cosmetic VFX (aura / trail / halo / ...). 0 = none, which is what
+## every existing character migrates to. Only the EQUIPPED id is stored — ownership
+## is not persisted because cosmetics are unobtainable for now and staff access is
+## derived live from rank, so a demoted admin simply stops rendering one.
+## ADD COLUMN — no DB wipe.
+static func _migration_v15(db: SQLite) -> void:
+	if not _column_exists(db, "players", "cosmetic_id"):
+		db.query("ALTER TABLE players ADD COLUMN cosmetic_id INTEGER NOT NULL DEFAULT 0;")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

@@ -16,6 +16,17 @@ var hand_type: Hand.Types
 var skin_id: int:
 	set = _set_skin_id
 
+## Equipped cosmetic VFX (aura / trail / halo / ...) from the `cosmetics` registry.
+## 0 = none, which is what every character carries until staff equip one. Synced
+## exactly like [member skin_id], so remote players render each other's cosmetics
+## with no extra RPC. Server-side this is a plain int — the visual is client-only.
+var cosmetic_id: int:
+	set = _set_cosmetic_id
+
+## Lazily built by [method _set_cosmetic_id] on the client, only for characters that
+## actually have a cosmetic equipped.
+var cosmetic_vfx: CosmeticVfx
+
 var display_name: String = "Unknown":
 	set = _set_display_name
 
@@ -492,6 +503,20 @@ func _set_skin_id(id: int) -> void:
 		animated_sprite.sprite_frames = sprite_frames
 
 
+func _set_cosmetic_id(id: int) -> void:
+	cosmetic_id = id
+	# Server holds the value for persistence/sync but renders nothing.
+	if multiplayer.is_server():
+		return
+	if cosmetic_vfx == null:
+		if id == 0:
+			return # never build the node for the overwhelmingly common "none" case
+		cosmetic_vfx = CosmeticVfx.new()
+		add_child(cosmetic_vfx)
+	cosmetic_vfx.apply(id)
+	cosmetic_vfx.set_facing(flipped)
+
+
 func _set_anim(new_anim: Animations) -> void:
 	match new_anim:
 		Animations.IDLE:
@@ -507,6 +532,9 @@ func _set_flip(new_flip: bool) -> void:
 	animated_sprite.flip_h = new_flip
 	hand_offset.scale.x = -1 if new_flip else 1
 	flipped = new_flip
+	# Directional cosmetics (trails) mirror with the body; radial ones must not.
+	if cosmetic_vfx != null:
+		cosmetic_vfx.set_facing(new_flip)
 
 
 func _set_pivot(new_pivot: float) -> void:

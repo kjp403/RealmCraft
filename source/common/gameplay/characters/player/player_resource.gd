@@ -44,6 +44,11 @@ const HEALTH_PER_LEVEL: float = 0.76
 
 @export var display_name: String = "Player"
 @export var skin_id: int = 1 # Default skin
+## Equipped cosmetic VFX id from the `cosmetics` registry (0 = none). Persisted as the
+## players.cosmetic_id column. Ownership is deliberately NOT stored: cosmetics are not
+## obtainable yet, and the only equip path is admin-gated, so eligibility is re-derived
+## from rank on every equip rather than banked on the character.
+@export var cosmetic_id: int = 0
 
 @export var inventory: Dictionary
 ## Personal bank vault (same slot format as inventory). Capacity is

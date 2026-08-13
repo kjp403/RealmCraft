@@ -1,0 +1,115 @@
+[gd_resource type="Resource" script_class="ContentIndex" format=3]
+
+[ext_resource type="Script" path="res://source/common/registry/content_index.gd" id="1_ci"]
+
+[resource]
+script = ExtResource("1_ci")
+content_name = &"cosmetics"
+version = 1786581830
+next_id = 22
+entries = Array[Dictionary]([{
+&"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
+&"id": 1,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_blood.tres",
+&"slug": &"aura_blood"
+}, {
+&"hash": "5c7539355271a096430f867ed68ecdc4719bb6dcdc6264f1f3cafb598b0033e8",
+&"id": 2,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_emberfrost.tres",
+&"slug": &"aura_emberfrost"
+}, {
+&"hash": "fc8f40590c5228a32fd4249dde6d61b87f1e3d8964ab27535b9b2836498417e5",
+&"id": 3,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_galaxy.tres",
+&"slug": &"aura_galaxy"
+}, {
+&"hash": "1881a69d6b98efbfb2010daaed21e80c5ca4138873bd1cf31294d094784fc3a3",
+&"id": 4,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_gold.tres",
+&"slug": &"aura_gold"
+}, {
+&"hash": "38a1c1294ad41622a20c0943c9a8a96ca3fb8849e61e4ae8a4f9804b4431e069",
+&"id": 5,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_rainbow.tres",
+&"slug": &"aura_rainbow"
+}, {
+&"hash": "57755c48fee166e1a1f94f2b6bb5d9723e523d1b0ef755c0ece532fec0cf036d",
+&"id": 6,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_toxic.tres",
+&"slug": &"aura_toxic"
+}, {
+&"hash": "0626a466ff223277bd261f35d2f18d71a79108c82f5d3f5e28158e352a054ba6",
+&"id": 7,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_verdant.tres",
+&"slug": &"aura_verdant"
+}, {
+&"hash": "d1e18273b936653c5a9ace57808c7c21d8494f4d08555e0a0d5e068377babb54",
+&"id": 8,
+&"path": "res://source/common/gameplay/cosmetics/frames/departure_galaxy.tres",
+&"slug": &"departure_galaxy"
+}, {
+&"hash": "de9d2b6f0aed4d9da0c38efcb53077c5d55204d72f82ef28d1141980e21d2faa",
+&"id": 9,
+&"path": "res://source/common/gameplay/cosmetics/frames/departure_gold.tres",
+&"slug": &"departure_gold"
+}, {
+&"hash": "a615b005a00776fdb3150af2d0304b3cc3d6e63b0d8a5d3bc18d39e991bffdd2",
+&"id": 10,
+&"path": "res://source/common/gameplay/cosmetics/frames/flourish_rainbow.tres",
+&"slug": &"flourish_rainbow"
+}, {
+&"hash": "9ed4639e00d759fd56cbcd116b871eda11184382049b972c1ee5f51d7506a242",
+&"id": 11,
+&"path": "res://source/common/gameplay/cosmetics/frames/flourish_void.tres",
+&"slug": &"flourish_void"
+}, {
+&"hash": "c9d4415e6665626f9d4550ad7adeb90d228a9a6240342ae3a9aa9cdcbc7f3e8a",
+&"id": 12,
+&"path": "res://source/common/gameplay/cosmetics/frames/halo_galaxy.tres",
+&"slug": &"halo_galaxy"
+}, {
+&"hash": "30d2cfcc463fa77638f7435d09d9bcff6b798103b7a9436ed4f7f6f7716c1b54",
+&"id": 13,
+&"path": "res://source/common/gameplay/cosmetics/frames/halo_gold.tres",
+&"slug": &"halo_gold"
+}, {
+&"hash": "505d74dca27cd917782409880b9dbbf2e7dd51f32ee31d2820bbc4df81eac33a",
+&"id": 14,
+&"path": "res://source/common/gameplay/cosmetics/frames/halo_rainbow.tres",
+&"slug": &"halo_rainbow"
+}, {
+&"hash": "75783363424bbd1740236b22146cda29abc23448105d9e75aedf4962c486bb40",
+&"id": 15,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_blood.tres",
+&"slug": &"trail_blood"
+}, {
+&"hash": "338159ddbc2205532ce7f3fd3c73fdec8b54ab943c2e606405393731d0193e73",
+&"id": 16,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_chromatic.tres",
+&"slug": &"trail_chromatic"
+}, {
+&"hash": "5befd55a2f0a9f98ec9042379a6f95979c7b8540772707880173f6f7e91352e1",
+&"id": 17,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_galaxy.tres",
+&"slug": &"trail_galaxy"
+}, {
+&"hash": "75ed78cd502ee0b648cecaf3ec589c555cc96664bd62243ab40f0304e33e1079",
+&"id": 18,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_gold.tres",
+&"slug": &"trail_gold"
+}, {
+&"hash": "6566b125046e5a6defc274d4431fb5e73aefaf91186ceb8b88b4b5178d6b28ba",
+&"id": 19,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_rainbow.tres",
+&"slug": &"trail_rainbow"
+}, {
+&"hash": "c2d3b1f558bf9aa249968a0f548aa869467a791af934e787ac02e18cfed62de5",
+&"id": 20,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_storm.tres",
+&"slug": &"trail_storm"
+}, {
+&"hash": "82ff610b8c92f6846eb9fa08d01c2f9cd2f12c9e95eacd5674d47605f2727e89",
+&"id": 21,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_toxic.tres",
+&"slug": &"trail_toxic"
+}])
