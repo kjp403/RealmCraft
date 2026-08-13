@@ -69,6 +69,10 @@ var _commit_until_ms: int = 0
 ## [combat] settings mirror — see [method _apply_combat_settings].
 var _commit_aim_enabled: bool = true
 var _commit_aim_ms: int = COMMIT_AIM_DEFAULT_MS
+var _aim_assist_enabled: bool = true
+var _screen_shake_enabled: bool = true
+## Sticky aim, built lazily so the feature costs nothing while it's switched off.
+var _aim_assist: AimAssist = null
 
 ## While dead, input/movement are locked so the player can't act or drift; the respawn
 ## teleport is applied locally (position is client-authoritative).
@@ -454,6 +458,10 @@ const SHAKE_MAX_OFFSET: float = 9.0 ## pixels at full trauma
 ## visual when its hit lands — e.g. the hammer slam. [param amount] ~0.3 light,
 ## ~0.6 heavy.
 func shake_camera(amount: float) -> void:
+	# One gate for EVERY shake source (hits, boss enrage, hammer slams) — players who
+	# turn it off must not get kicked by whichever caller forgot to check.
+	if not _screen_shake_enabled:
+		return
 	_trauma = clampf(_trauma + amount, 0.0, 1.0)
 
 
@@ -680,9 +688,8 @@ func process_input() -> void:
 		and not is_holding_gather_tool()
 		and equipment_component.can_use(&"weapon", 0)
 	):
-		commit_aim()
 		Client.request_data(&"action.perform", Callable(),
-		{"d": aim_direction(), "i": 0}, InstanceClient.current.name)
+		{"d": resolve_attack_aim(), "i": 0}, InstanceClient.current.name)
 
 
 func process_animation(delta: float) -> void:
@@ -722,17 +729,33 @@ func aim_direction() -> Vector2:
 	return look_direction
 
 
-## Snapshot the live aim for one swing. A no-op while a commit is already running —
+## THE aim funnel for a firing attack: applies sticky aim, commits the result for
+## the swing, and returns the vector to send. Every attack send goes through here
+## so assist and commit can't disagree with each other or with the visual facing.
+## A swing already holding a commit keeps it — see [method commit_aim].
+func resolve_attack_aim() -> Vector2:
+	if _committed_aim != Vector2.ZERO and Time.get_ticks_msec() < _commit_until_ms:
+		return _committed_aim
+	var aim: Vector2 = look_direction
+	if _aim_assist_enabled and aim != Vector2.ZERO:
+		if _aim_assist == null:
+			_aim_assist = AimAssist.new()
+		aim = _aim_assist.resolve(global_position, aim)
+	commit_aim(aim)
+	return aim
+
+
+## Snapshot [param aim] for one swing. A no-op while a commit is already running —
 ## that's what makes this "capture at swing start" rather than "recapture every
 ## frame the attack button is held" (the latter would commit to nothing at all).
-func commit_aim() -> void:
+func commit_aim(aim: Vector2) -> void:
 	if not _commit_aim_enabled or _commit_aim_ms <= 0:
 		return
-	if look_direction == Vector2.ZERO:
+	if aim == Vector2.ZERO:
 		return
 	if Time.get_ticks_msec() < _commit_until_ms:
 		return # the swing in flight owns the aim — don't re-snapshot mid-commit
-	_committed_aim = look_direction
+	_committed_aim = aim
 	_commit_until_ms = Time.get_ticks_msec() + _commit_aim_ms
 
 
@@ -750,8 +773,14 @@ func _apply_combat_settings() -> void:
 	_commit_aim_ms = clampi(
 		int(section.get(&"commit_aim_ms", COMMIT_AIM_DEFAULT_MS)), 0, COMMIT_AIM_MAX_MS
 	)
+	_aim_assist_enabled = bool(section.get(&"aim_assist", true))
+	_screen_shake_enabled = bool(section.get(&"screen_shake", true))
 	if not _commit_aim_enabled:
 		clear_aim_commit() # turning it off mid-session must take effect immediately
+	if not _screen_shake_enabled:
+		_trauma = 0.0
+		if is_instance_valid(camera_2d):
+			camera_2d.offset = Vector2.ZERO # drop any kick still playing
 
 
 func _on_combat_setting_changed(

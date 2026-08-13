@@ -548,11 +548,12 @@ func _send_action(
 	# a ground-aimed cast's aim IS the placed point, and a charge DRAW must not
 	# commit (only the release that actually fires does, or holding a bow would
 	# freeze your aim for the whole draw).
+	var aim: Vector2 = local_player.aim_direction()
 	if ground_target is not Vector2:
 		var ability: AbilityResource = abilities[slot] if slot < abilities.size() else null
 		if ability != null and (released or not ability.has_release):
-			local_player.commit_aim()
-	var args: Dictionary = {"d": local_player.aim_direction(), "i": slot}
+			aim = local_player.resolve_attack_aim()
+	var args: Dictionary = {"d": aim, "i": slot}
 	if released:
 		args["r"] = true
 	if ground_target is Vector2:
