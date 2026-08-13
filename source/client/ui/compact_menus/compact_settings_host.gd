@@ -7,6 +7,30 @@ const SECTION := &"general"
 ## Combat feel toggles live in their own settings section, so the rows below read
 ## from it explicitly rather than through the [constant SECTION]-scoped helpers.
 const COMBAT_SECTION := &"combat"
+## Combat feel toggles, in display order. One entry per row — adding a future one
+## (a stronger assist, a hitstop length) means appending here, nothing else.
+const COMBAT_TOGGLES: Array[Dictionary] = [
+	{
+		&"property": &"commit_aim",
+		&"label": "Commit aim",
+		&"tooltip": "Attacks keep the direction they were aimed at instead of following your aim through the swing.",
+	},
+	{
+		&"property": &"aim_assist",
+		&"label": "Aim assist",
+		&"tooltip": "Nudges attacks onto an enemy already fighting you. Never starts a fight for you.",
+	},
+	{
+		&"property": &"hitstop",
+		&"label": "Hit impact",
+		&"tooltip": "Briefly freezes a struck enemy's animation on impact.",
+	},
+	{
+		&"property": &"screen_shake",
+		&"label": "Screen shake",
+		&"tooltip": "Camera kick on hits and heavy attacks.",
+	},
+]
 const LOGOUT_RED := Color(0.92, 0.28, 0.28)
 const LOGOUT_RED_HOVER := Color(1.0, 0.42, 0.38)
 const LOGOUT_RED_PRESSED := Color(0.72, 0.16, 0.16)
@@ -31,7 +55,7 @@ var _sound_slider: HSlider
 var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
 var _slayer_tracker_toggle: CheckButton
-var _commit_aim_toggle: CheckButton
+var _combat_toggles: Dictionary[StringName, CheckButton] = {}
 var _music_value: Label
 var _sound_value: Label
 var _zoom_value: Label
@@ -120,16 +144,16 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
 	main_box.add_child(_slayer_tracker_toggle)
 
-	_commit_aim_toggle = CheckButton.new()
-	_commit_aim_toggle.text = "Commit aim"
-	_commit_aim_toggle.custom_minimum_size = Vector2(0.0, 26.0)
-	_commit_aim_toggle.add_theme_font_size_override(&"font_size", 10)
-	_commit_aim_toggle.tooltip_text = (
-		"Attacks keep the direction they were aimed at instead of following your "
-		"aim through the swing."
-	)
-	_commit_aim_toggle.toggled.connect(_on_commit_aim_toggled)
-	main_box.add_child(_commit_aim_toggle)
+	for entry: Dictionary in COMBAT_TOGGLES:
+		var property: StringName = entry["property"]
+		var toggle := CheckButton.new()
+		toggle.text = entry["label"]
+		toggle.custom_minimum_size = Vector2(0.0, 26.0)
+		toggle.add_theme_font_size_override(&"font_size", 10)
+		toggle.tooltip_text = entry["tooltip"]
+		toggle.toggled.connect(_on_combat_toggled.bind(property))
+		main_box.add_child(toggle)
+		_combat_toggles[property] = toggle
 
 	main_box.add_child(HSeparator.new())
 
@@ -377,14 +401,10 @@ func _on_slayer_tracker_toggled(enabled: bool) -> void:
 	SlayerTracker.set_enabled(enabled)
 
 
-func _on_commit_aim_toggled(enabled: bool) -> void:
+func _on_combat_toggled(enabled: bool, property: StringName) -> void:
 	if _syncing:
 		return
-	ClientState.settings.set_value(
-		COMBAT_SECTION,
-		&"commit_aim",
-		enabled
-	)
+	ClientState.settings.set_value(COMBAT_SECTION, property, enabled)
 
 
 func _on_setting_changed(
@@ -393,7 +413,7 @@ func _on_setting_changed(
 	_value: Variant
 ) -> void:
 	if section == COMBAT_SECTION:
-		if property == &"commit_aim":
+		if _combat_toggles.has(property):
 			_sync_controls()
 		return
 	if section != SECTION:
@@ -420,9 +440,10 @@ func _sync_controls() -> void:
 		_setting_value(&"weather_effects", true)
 	)
 	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
-	_commit_aim_toggle.button_pressed = bool(
-		_section_value(COMBAT_SECTION, &"commit_aim", true)
-	)
+	for property: StringName in _combat_toggles:
+		_combat_toggles[property].button_pressed = bool(
+			_section_value(COMBAT_SECTION, property, true)
+		)
 
 	_update_value_label(
 		&"music_volume",
@@ -490,7 +511,7 @@ func _on_reset_pressed() -> void:
 				default_value
 			)
 	# Combat rows live in their own section, so they need their own reset pass.
-	for property: StringName in [&"commit_aim"]:
+	for property: StringName in _combat_toggles:
 		var combat_default: Variant = (
 			ClientState.settings.get_default(COMBAT_SECTION, property)
 		)

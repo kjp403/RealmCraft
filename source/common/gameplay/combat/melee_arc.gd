@@ -34,6 +34,10 @@ const LOW_HP_THRESHOLD: float = 0.35
 @export var follow_source: bool = false
 
 var source: Character
+## The direction the swing was aimed in. Set by the spawning ability; used to pick
+## the best-ALIGNED target when [member max_targets] caps the swing (see
+## [method _sorted_by_alignment]). Zero falls back to distance-only ordering.
+var aim_direction: Vector2 = Vector2.ZERO
 var damage: float = 10.0
 ## On-hit slow (Crippling Strike): flat move_speed reduction applied as a
 ## timed negative buff to each Player struck. 0 = no slow. Set by the ability.
@@ -91,9 +95,9 @@ func _physics_process(_delta: float) -> void:
 			return
 	_scanned = true
 	var bodies: Array[Node2D] = CombatHit.overlapping_bodies(self)
-	# Prefer the closest combatant when capped — otherwise pack stacks feel random.
+	# Prefer the best-aimed-at combatant when capped — otherwise pack stacks feel random.
 	if max_targets > 0 and bodies.size() > 1:
-		bodies = _sorted_by_distance(bodies)
+		bodies = _sorted_by_alignment(bodies)
 	for body: Node2D in bodies:
 		_on_body_entered(body)
 		if max_targets > 0 and _targets_damaged >= max_targets:
@@ -129,21 +133,39 @@ func _on_body_entered(body: Node2D) -> void:
 			source.stats_component.set_stat(Stat.MANA, minf(mmax, source.stats_component.get_stat(Stat.MANA) + mana_per_hit))
 
 
-## Closest-to-source first so a single-target swing picks the mob you're on,
-## not whichever collider the physics query happened to return first.
-func _sorted_by_distance(bodies: Array[Node2D]) -> Array[Node2D]:
+## Best-ALIGNED first so a single-target swing picks the mob you actually aimed at,
+## not whichever collider the physics query happened to return first. Distance alone
+## used to decide this, which was fine while the hitbox was too small to hold two
+## bodies — once the arc widens, "closest" starts picking the neighbour standing a
+## few pixels nearer than your target. Angle to the swing direction leads; distance
+## only separates targets at a similar angle.
+func _sorted_by_alignment(bodies: Array[Node2D]) -> Array[Node2D]:
 	var origin: Vector2 = source.global_position if is_instance_valid(source) else global_position
 	var scored: Array = []
 	for body: Node2D in bodies:
 		var node: Node2D = body
 		if body is HurtBox and (body as HurtBox).character is Node2D:
 			node = (body as HurtBox).character as Node2D
-		scored.append({"body": body, "d": origin.distance_squared_to(node.global_position)})
-	scored.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["d"] < b["d"])
+		var offset: Vector2 = node.global_position - origin
+		var deviation: float = 0.0
+		if aim_direction != Vector2.ZERO and offset != Vector2.ZERO:
+			deviation = absf(aim_direction.angle_to(offset))
+		scored.append({"body": body, "a": deviation, "d": offset.length()})
+	scored.sort_custom(_alignment_is_better)
 	var out: Array[Node2D] = []
 	for entry: Dictionary in scored:
 		out.append(entry["body"] as Node2D)
 	return out
+
+
+## Angle first, distance as the tie-break. The tolerance keeps two bodies at
+## near-identical angles from flipping order on floating-point noise — inside it,
+## the closer one wins, which is the old behaviour and the right call for a stack.
+func _alignment_is_better(a: Dictionary, b: Dictionary) -> bool:
+	const ANGLE_TIE_RAD: float = 0.20
+	if absf(float(a["a"]) - float(b["a"])) <= ANGLE_TIE_RAD:
+		return float(a["d"]) < float(b["d"])
+	return float(a["a"]) < float(b["a"])
 
 
 ## Executioner mastery passive: the wielder's DAMAGE_VS_LOW_HP stat (%) amplifies

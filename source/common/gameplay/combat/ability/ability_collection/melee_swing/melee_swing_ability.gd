@@ -100,6 +100,8 @@ func _fire_arc(user: Entity, direction: Vector2) -> void:
 		return
 	var arc: MeleeArc = arc_scene.instantiate()
 	arc.source = user if user is Character else null
+	# Lets a capped swing pick the target you AIMED at rather than the nearest body.
+	arc.aim_direction = direction
 	arc.slow_amount = slow_amount
 	arc.slow_duration_s = slow_duration_s
 	arc.max_targets = max_targets
