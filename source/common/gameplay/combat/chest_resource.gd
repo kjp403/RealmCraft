@@ -13,8 +13,15 @@ extends Resource
 ## Gold paid on open, rolled uniformly in [gold_min, gold_max]. 0 = no gold.
 @export var gold_min: int = 0
 @export var gold_max: int = 0
-## Loot table — each entry rolls independently (chance + amount range).
+## Loot table. An open draws [member rolls_min]..[member rolls_max] distinct
+## entries from this pool — [member LootDrop.chance] is the relative weight of
+## being picked, not an independent roll, so a chest grants a few of the table
+## rather than most of it.
 @export var loot: Array[LootDrop] = []
+## Distinct [member loot] entries granted per open, rolled uniformly in
+## [rolls_min, rolls_max] and clamped to the number of valid entries.
+@export var rolls_min: int = 1
+@export var rolls_max: int = 3
 ## Optional exclusive pool (e.g. rare jewelry). Each entry rolls independently,
 ## but at most [member exclusive_max] hits are kept — so a chest never grants
 ## two rings from this pool.
@@ -38,8 +45,10 @@ static func load_by_slug(slug: StringName) -> ChestResource:
 
 
 ## Server: roll gold + loot into [param player]'s bag. Returns
-## [code]{ "chest", "gold", "items" }[/code]. Guarantees ≥1 resource stack when
-## the table has any valid drops (so T1/T2 never open gold-only).
+## [code]{ "chest", "gold", "items" }[/code]. Draws a weighted sample of the
+## table rather than rolling every entry, so which resources you get varies open
+## to open; still guarantees ≥1 resource stack when the table has any valid
+## drop (so T1/T2 never open gold-only).
 ## Opened via [code]chest.open[/code]; gold goes to the pouch, items stage in
 ## [member PlayerResource.pending_chest_loot] for the claim UI.
 func roll_and_grant(player: Player) -> Dictionary:
@@ -53,11 +62,9 @@ func roll_and_grant(player: Player) -> Dictionary:
 			Inventory.add_item(resource.inventory, Economy.gold_id(), gold)
 
 	var items: Array = []
-	for drop: LootDrop in loot:
-		if drop == null or drop.item == null:
-			continue
-		if randf() <= drop.chance:
-			_grant_drop(resource, drop, items)
+	var draws: int = randi_range(maxi(1, mini(rolls_min, rolls_max)), maxi(1, rolls_max))
+	for drop: LootDrop in _draw_weighted(loot, draws):
+		_grant_drop(resource, drop, items)
 
 	# Exclusive pool: independent rolls, then keep at most exclusive_max hits.
 	if not exclusive_loot.is_empty():
@@ -74,14 +81,6 @@ func roll_and_grant(player: Player) -> Dictionary:
 		for drop: LootDrop in hits:
 			_grant_drop(resource, drop, items)
 
-	if items.is_empty():
-		var candidates: Array[LootDrop] = []
-		for drop: LootDrop in loot:
-			if drop != null and drop.item != null and int(drop.item.get_meta(&"id", 0)) > 0:
-				candidates.append(drop)
-		if not candidates.is_empty():
-			_grant_drop(resource, candidates[randi() % candidates.size()], items)
-
 	return {
 		"chest": display_name,
 		"gold": gold,
@@ -89,6 +88,40 @@ func roll_and_grant(player: Player) -> Dictionary:
 		"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
 		"free_slots": Inventory.free_slots(resource.inventory),
 	}
+
+
+## Pick [param count] distinct entries from [param pool] without replacement,
+## weighted by [member LootDrop.chance]. Entries with no item, no registered id,
+## or a non-positive chance are skipped; the result is capped at how many valid
+## entries exist.
+static func _draw_weighted(pool: Array[LootDrop], count: int) -> Array[LootDrop]:
+	var candidates: Array[LootDrop] = []
+	for drop: LootDrop in pool:
+		if drop == null or drop.item == null or drop.chance <= 0.0:
+			continue
+		if int(drop.item.get_meta(&"id", 0)) <= 0:
+			continue
+		candidates.append(drop)
+
+	var picks: Array[LootDrop] = []
+	var remaining: int = mini(count, candidates.size())
+	while remaining > 0:
+		var total: float = 0.0
+		for drop: LootDrop in candidates:
+			total += drop.chance
+		var roll: float = randf() * total
+		# Float drift can leave roll above the running sum; fall back to the last
+		# candidate so a draw never comes up empty.
+		var index: int = candidates.size() - 1
+		for i: int in candidates.size():
+			roll -= candidates[i].chance
+			if roll <= 0.0:
+				index = i
+				break
+		picks.append(candidates[index])
+		candidates.remove_at(index)
+		remaining -= 1
+	return picks
 
 
 ## Cooked fish granted from a chest would skip Cooking XP — remap to the raw

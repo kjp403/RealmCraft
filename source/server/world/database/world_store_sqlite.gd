@@ -174,12 +174,28 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	Inventory.add_item(player.inventory, Economy.gold_id(), 25)
 	# Starting attribute points so a new character has something to spend.
 	player.available_attributes_points = PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL
-	# Everyone who plays the alpha carries the badge for it.
-	player.titles_unlocked = PackedStringArray(["Alpha tester"])
-	player.display_title = "Alpha tester"
 	# Leave defaults to PlayerResource where possible.
 	save_player(player)
 	return next_id
+
+
+## Titles that were seeded once and are no longer granted. Stripped on load (and
+## re-saved by the next periodic save) so retiring a title doesn't need a manual DB
+## migration or leave players wearing a banner nothing hands out any more.
+## "Alpha tester" went to every character created before it was retired.
+const RETIRED_TITLES: Array[String] = ["Alpha tester"]
+
+
+static func _drop_retired_titles(player: PlayerResource) -> void:
+	for retired: String in RETIRED_TITLES:
+		var at: int = player.titles_unlocked.find(retired)
+		if at >= 0:
+			player.titles_unlocked.remove_at(at)
+		if player.display_title == retired:
+			player.display_title = ""
+		var pinned: int = player.displayed_trophies.find(retired)
+		if pinned >= 0:
+			player.displayed_trophies.remove_at(pinned)
 
 
 func get_account_characters(account_name: String) -> Dictionary:
@@ -362,9 +378,11 @@ func get_player_profile_row(player_id: int) -> Dictionary:
 	)
 
 	if titles_v is Dictionary:
-		row["display_title"] = str(
-			(titles_v as Dictionary).get("display", "")
-		)
+		var shown: String = str((titles_v as Dictionary).get("display", ""))
+		# Offline profiles read titles_json straight off the row, so the load-time
+		# strip in _drop_retired_titles never runs for them — filter here too, or a
+		# retired banner survives on anyone who hasn't logged in since.
+		row["display_title"] = "" if shown in RETIRED_TITLES else shown
 
 	return row
 
@@ -507,6 +525,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		player.display_title = str((titles_v as Dictionary).get("display", ""))
 		var trophies_v: Variant = (titles_v as Dictionary).get("trophies", [])
 		player.displayed_trophies = PackedStringArray(trophies_v if trophies_v is Array else [])
+		_drop_retired_titles(player)
 
 	var dailies_v: Variant = JSON.parse_string(str(row.get("dailies_json", "{}")))
 	if dailies_v is Dictionary:

@@ -48,7 +48,8 @@ func tick() -> bool:
 		cancel()
 		return false
 	# A blocking menu mid-approach means the player opened something else — abort.
-	if ClientState.menu_open or _player._has_gui_focus():
+	# Chat focus doesn't count: typing while walking to an NPC is normal.
+	if ClientState.menu_open:
 		cancel()
 		return false
 

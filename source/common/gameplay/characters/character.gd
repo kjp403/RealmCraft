@@ -399,6 +399,7 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 	var resist_stat: StringName = Stat.MR if damage_type == CombatHit.DAMAGE_MAGIC else Stat.ARMOR
 	var resist: float = stats_component.get_stat(resist_stat)
 	var mitigated: float = amount * (100.0 / (100.0 + maxf(0.0, resist)))
+	mitigated *= incoming_damage_factor(attacker)
 	var new_health: float = maxf(0.0, stats_component.get_stat(Stat.HEALTH) - mitigated)
 	stats_component.set_stat(Stat.HEALTH, new_health)
 
@@ -422,6 +423,13 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 	if new_health <= 0.0:
 		is_dead = true
 		die(attacker)
+
+
+## Extra multiplier on post-resistance damage, keyed off WHO is hitting us —
+## resistances only know the damage type. 1.0 here; Player overrides it for the
+## Slayer "Task Ward" perk (softer hits from the monsters it is hunting).
+func incoming_damage_factor(_attacker: Character) -> float:
+	return 1.0
 
 
 ## Wraps the combat.hit push so child classes (Player / NPC / future

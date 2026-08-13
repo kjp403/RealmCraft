@@ -18,10 +18,10 @@ perks = Array[Dictionary]([{
 "name": "Focused Hunter",
 "per_rank": 0.05
 }, {
-"effect": "skip_discount",
-"id": "efficient_reassignment",
+"effect": "task_resist",
+"id": "task_ward",
 "max_rank": 2,
-"name": "Efficient Reassignment",
-"per_rank": 0.15
+"name": "Task Ward",
+"per_rank": 0.05
 }])
-describe_lines = Array[String](["Slayer XP +{xp}%", "Cheaper task reassignment from Durael"])
+describe_lines = Array[String](["Slayer XP +{xp}%", "Damage taken from task monsters -{task_resist}%"])

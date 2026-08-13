@@ -418,6 +418,12 @@ func _ready() -> void:
 	_health_fid = PathRegistry.ensure_id("StatsComponent:stats:health")
 	_health_max_fid = PathRegistry.ensure_id("StatsComponent:stats:health_max")
 
+	# Zone difficulty: InstanceResource.enemy_health_mult scales every hostile in
+	# the instance. Applied to max_health itself (not just the stat) so the derived
+	# combat_skill_xp follows the real HP — a softened zone pays out in proportion
+	# instead of turning into the cheapest XP in the game.
+	max_health *= _zone_health_mult()
+
 	# Server-authoritative combat stats.
 	stats_component.set_stat(Stat.HEALTH_MAX, max_health)
 	stats_component.set_stat(Stat.HEALTH, max_health)
@@ -435,6 +441,26 @@ func _ready() -> void:
 	# Deferred so dungeon/world-boss spawners can attach first; map-placed bosses
 	# still get a brain if none was provided.
 	call_deferred(&"_ensure_boss_brain")
+
+
+## [member InstanceResource.enemy_health_mult] for the instance we spawned in, or
+## 1.0 outside one. Walks HostileNpc → ReplicatedPropsContainer → Map →
+## ServerInstance and duck-types the last hop: common/ code must not reference
+## server-only types (same reason Character._broadcast_hit_feedback walks by hand).
+##
+## Bosses are exempt: a zone knob is for pacing its trash, and a finale is tuned as
+## its own fight (the Bandit Captain's 8k HP is the encounter, not the zone).
+func _zone_health_mult() -> float:
+	if enemy_data != null and enemy_data.is_boss:
+		return 1.0
+	var maybe_map: Node = container.get_parent() if container != null else null
+	var maybe_instance: Node = maybe_map.get_parent() if maybe_map != null else null
+	if maybe_instance == null:
+		return 1.0
+	var ires: InstanceResource = maybe_instance.get(&"instance_resource") as InstanceResource
+	if ires == null or ires.enemy_health_mult <= 0.0:
+		return 1.0
+	return ires.enemy_health_mult
 
 
 func _ensure_boss_brain() -> void:

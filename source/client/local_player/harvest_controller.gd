@@ -56,7 +56,8 @@ func tick() -> bool:
 	if not is_active():
 		cancel()
 		return false
-	if _player._dead or ClientState.menu_open or _player._has_gui_focus():
+	# Typing in chat doesn't break the gather loop — only death or a menu does.
+	if _player._dead or ClientState.menu_open:
 		cancel()
 		return false
 	if not _has_correct_tool(_target):

@@ -41,6 +41,16 @@ enum SpawnOverride {
 ## Warper id inside [member death_return_instance] to land on (0 = default spawn).
 @export var death_return_warper_id: int = 0
 
+@export_group("Zone difficulty")
+## Multiplies the max health of every NON-BOSS hostile spawned in this instance
+## (1.0 = authored values; [member EnemyTypeResource.is_boss] mobs always keep their
+## authored HP, since a finale is tuned as its own fight). Tune a zone's pacing
+## without touching EnemyTypeResources that other maps share — Bandit Hideout runs its roster at 0.5, but the sorcerer and
+## captain it shares with the Forest keep full health there. Mob XP derives from
+## live HP (EnemyTypeResource.combat_skill_xp_for), so a scaled zone pays out in
+## proportion and can't become an XP-per-kill outlier. Applied in HostileNpc._ready.
+@export var enemy_health_mult: float = 1.0
+
 @export_group("Zone kill loot")
 ## Extra independent loot rolls applied to EVERY hostile kill in this instance.
 ## Use for zone-wide rares (e.g. Wood Silver chests in Goblin Woodlands) so new

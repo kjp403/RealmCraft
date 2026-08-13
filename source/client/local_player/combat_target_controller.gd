@@ -90,7 +90,9 @@ func tick() -> bool:
 	if not is_active():
 		cancel()
 		return false
-	if _player._dead or ClientState.menu_open or _player._has_gui_focus():
+	# Chat focus is NOT a cancel — you can keep swinging while typing (LocalPlayer
+	# suppresses the keys, not the loop). A real menu still aborts.
+	if _player._dead or ClientState.menu_open:
 		cancel()
 		return false
 	if not _player.is_armed():
