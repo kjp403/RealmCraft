@@ -26,6 +26,10 @@ const MATCH_RADIUS: float = 12.0
 ## freezes into a permanent stall — the pack in a boss's phase 2 would otherwise
 ## hold a victim's animation still indefinitely.
 const BUSY_META: StringName = &"_hitstop_until_ms"
+## Minimum quiet time after a freeze before the same sprite may freeze again. Caps
+## how far a heavily-focused target's animation can drift behind real time (at worst
+## HITSTOP_MS out of HITSTOP_MS + this).
+const REFREEZE_COOLDOWN_MS: int = 250
 
 
 ## Play the impact feedback for one [code]combat.hit[/code] payload. The camera kick
@@ -33,33 +37,45 @@ const BUSY_META: StringName = &"_hitstop_until_ms"
 ## node identity rather than the payload's victim_peer, which is derived from the
 ## server-only player_resource and reads null on every client.
 static func play(map: Node, position: Vector2, local_player: Node) -> void:
-	var victim: Node2D = _victim_at(map, position)
-	if victim == null:
+	# combat.hit is broadcast for EVERY hit in the instance, so this runs for other
+	# people's fights too. Decide the local player's own kick by position — O(1) —
+	# and only pay for the node scan when hitstop is actually switched on.
+	var local: Node2D = local_player as Node2D
+	if local != null and local.global_position.distance_to(position) <= MATCH_RADIUS:
+		if local.has_method(&"shake_camera"):
+			local.call(&"shake_camera", SHAKE_PER_HIT)
+	if ClientState.settings.get_value(&"combat", &"hitstop") == false:
 		return
-	if bool(ClientState.settings.get_value(&"combat", &"hitstop") != false):
+	var victim: Node2D = _victim_at(map, position)
+	if victim != null:
 		_hitstop(victim)
-	if victim == local_player and local_player.has_method(&"shake_camera"):
-		local_player.call(&"shake_camera", SHAKE_PER_HIT)
 
 
 ## Pause the struck character's sprite for [constant HITSTOP_MS], then resume it.
-## Non-stacking: a sprite already frozen is left alone rather than re-frozen.
+##
+## Uses pause()/play() and NEVER writes speed_scale. HostileNpc owns that property:
+## it stretches a wind-up clip to fit its real cast duration (see the _skin_base_speed
+## maths in hostile_npc.gd). Capturing and restoring speed_scale around a freeze would
+## write a stale value back if a cast started or ended inside the window, permanently
+## desyncing a boss's telegraph animation from the timer that actually fires the slam.
+## With pause/play the worst case is benign: something else calls play() and the freeze
+## simply ends early.
 static func _hitstop(victim: Node2D) -> void:
 	var sprite: AnimatedSprite2D = _sprite_of(victim)
-	if sprite == null:
+	if sprite == null or not sprite.is_playing():
 		return
 	var now: int = Time.get_ticks_msec()
 	if now < int(sprite.get_meta(BUSY_META, 0)):
 		return
-	sprite.set_meta(BUSY_META, now + HITSTOP_MS)
-	var restore: float = sprite.speed_scale
-	if restore <= 0.0:
-		return # already paused by something else — don't fight it
-	sprite.speed_scale = 0.0
+	# Block re-freezing for well past the freeze itself. A boss under fire from a
+	# whole party takes hits far faster than 45ms apart, and back-to-back freezes
+	# would drag its visible animation behind the server's cast timer.
+	sprite.set_meta(BUSY_META, now + HITSTOP_MS + REFREEZE_COOLDOWN_MS)
+	sprite.pause()
 	var timer: SceneTreeTimer = sprite.get_tree().create_timer(HITSTOP_MS / 1000.0)
 	timer.timeout.connect(func() -> void:
-		if is_instance_valid(sprite):
-			sprite.speed_scale = restore
+		if is_instance_valid(sprite) and not sprite.is_playing():
+			sprite.play()
 	)
 
 
