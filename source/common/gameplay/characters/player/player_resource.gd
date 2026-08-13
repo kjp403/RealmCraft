@@ -49,6 +49,10 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## obtainable yet, and the only equip path is admin-gated, so eligibility is re-derived
 ## from rank on every equip rather than banked on the character.
 @export var cosmetic_id: int = 0
+## Equipped WEAPON cosmetic id (0 = none). Separate slot from [member cosmetic_id]
+## so an aura and a weapon glow can be worn together. Persisted as
+## players.weapon_cosmetic_id; ownership is likewise not stored.
+@export var weapon_cosmetic_id: int = 0
 
 @export var inventory: Dictionary
 ## Personal bank vault (same slot format as inventory). Capacity is

@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1786581830
-next_id = 22
+version = 1786586952
+next_id = 23
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -112,4 +112,9 @@ entries = Array[Dictionary]([{
 &"id": 21,
 &"path": "res://source/common/gameplay/cosmetics/frames/trail_toxic.tres",
 &"slug": &"trail_toxic"
+}, {
+&"hash": "595a657f5bc0b53d5b3de8e1bb0ffebcbc74b2c3f258d70a3aa99eb5172a8601",
+&"id": 22,
+&"path": "res://source/common/gameplay/cosmetics/frames/weapon_ascended_radiance.tres",
+&"slug": &"weapon_ascended_radiance"
 }])

@@ -27,6 +27,12 @@ var cosmetic_id: int:
 ## actually have a cosmetic equipped.
 var cosmetic_vfx: CosmeticVfx
 
+## Equipped WEAPON cosmetic (the Ascended glow). A separate slot from
+## [member cosmetic_id] so a player can wear an aura and a weapon effect at once.
+## Synced identically; the visual is rebuilt on the mounted weapon.
+var weapon_cosmetic_id: int:
+	set = _set_weapon_cosmetic_id
+
 var display_name: String = "Unknown":
 	set = _set_display_name
 
@@ -515,6 +521,26 @@ func _set_cosmetic_id(id: int) -> void:
 		add_child(cosmetic_vfx)
 	cosmetic_vfx.apply(id)
 	cosmetic_vfx.set_facing(flipped)
+
+
+func _set_weapon_cosmetic_id(id: int) -> void:
+	weapon_cosmetic_id = id
+	if multiplayer.is_server():
+		return
+	# Re-skin whatever is already in hand. equip() covers the weapon-swap path; this
+	# covers toggling the cosmetic while holding the same weapon.
+	if equipment_component == null:
+		return
+	var mounted: Node = equipment_component.mounted_nodes.get(&"weapon", null)
+	if mounted == null or not mounted.has_method(&"apply_cosmetic_fx"):
+		return
+	# equipped_items is the component's own record of what is in each slot, kept in
+	# step with the mounted node by _on_slot_changed.
+	var item: Item = equipment_component.equipped_items.get(&"weapon", null)
+	var icon: Texture2D = item.item_icon if item != null else null
+	mounted.apply_cosmetic_fx(
+		Cosmetics.weapon_fx_for(icon) if Cosmetics.is_weapon_slot(id) else null
+	)
 
 
 func _set_anim(new_anim: Animations) -> void:

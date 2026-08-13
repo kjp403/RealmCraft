@@ -1,27 +1,47 @@
 extends MenuShell
-## Cosmetics wardrobe — browse the VFX cosmetics (auras, trails, halos, flourishes,
-## death effects) and equip one. Opened from the Curator in the VFX Vault
-## (CosmeticsInteraction → open_menu_requested(&"cosmetics")).
+## Cosmetics wardrobe — browse and equip VFX cosmetics. Opened from the Curator in
+## the VFX Vault (CosmeticsInteraction → open_menu_requested(&"cosmetics")).
 ##
-## STAFF ONLY for now, and the client is NOT what enforces that: cosmetics.state
-## returns an empty roster to anyone below admin and cosmetics.equip refuses them, so
-## a player who forces this menu open sees "nothing to show" and can change nothing.
-## The empty-state copy below is deliberately incurious for that reason.
+## TABBED BY SLOT. One flat cycler through 20+ effects was unusable, so the roster
+## is split into Auras / Trails / Halos / Flourishes / Departures / Weapon Skins
+## (Cosmetics.SLOTS order). Each tab keeps its own browse position.
 ##
-## Layout mirrors the skin wardrobe: big animated preview, prev/next cycler, and one
-## action button. There is no Buy — nothing here is purchasable yet.
+## Two INDEPENDENT equipped slots: a body effect and a weapon effect, so an aura and
+## an Ascended weapon glow can be worn together. The Weapon Skins tab drives the
+## second one; every other tab drives the first.
+##
+## STAFF ONLY, and the client does not enforce it: cosmetics.state returns an empty
+## roster to non-staff and cosmetics.equip refuses them, so a forced-open menu shows
+## nothing and changes nothing.
 
 const PREVIEW_BOX: float = 200.0
 const PREVIEW_SCALE: float = 1.6
 
-var _cosmetics: Array[int] = []
-var _idx: int = 0
-var _equipped: int = 0
+## Tab labels, keyed by slot. Anything not listed falls back to a capitalized slug.
+const SLOT_LABELS: Dictionary = {
+	&"aura": "Auras",
+	&"trail": "Trails",
+	&"halo": "Halos",
+	&"flourish": "Flourishes",
+	&"departure": "Departures",
+	&"weapon": "Weapon Skins",
+}
+
+## slot -> Array[int] of cosmetic ids in that tab.
+var _by_slot: Dictionary = {}
+## slot -> browse index, so switching tabs returns you where you were.
+var _idx_by_slot: Dictionary = {}
+var _slots: Array[StringName] = []
+var _slot: StringName = &""
+
+var _equipped_body: int = 0
+var _equipped_weapon: int = 0
 var _allowed: bool = false
 
 var _preview: AnimatedSprite2D
+var _tab_bar: HBoxContainer
+var _tab_buttons: Dictionary = {}
 var _name_label: Label
-var _slot_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
@@ -35,7 +55,7 @@ func _ready() -> void:
 			_on_shown())
 	# The HUD instantiates this menu already-visible then calls show() (a no-op), so
 	# visibility_changed does NOT fire on the first open — same quirk the skin
-	# wardrobe documents. Load once here.
+	# wardrobe documents.
 	_on_shown.call_deferred()
 
 
@@ -43,8 +63,16 @@ func _build_layout() -> void:
 	var col: VBoxContainer = VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override(&"separation", 10)
+	col.add_theme_constant_override(&"separation", 8)
 	content.add_child(col)
+
+	# Tab strip. Populated in _rebuild_tabs once the roster arrives — building it
+	# from the response rather than a hardcoded list means an empty slot (or a new
+	# one) needs no change here.
+	_tab_bar = HBoxContainer.new()
+	_tab_bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	_tab_bar.add_theme_constant_override(&"separation", 4)
+	col.add_child(_tab_bar)
 
 	var preview_center: CenterContainer = CenterContainer.new()
 	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -73,7 +101,7 @@ func _build_layout() -> void:
 	nav.add_child(prev)
 
 	_name_label = Label.new()
-	_name_label.custom_minimum_size = Vector2(170, 44)
+	_name_label.custom_minimum_size = Vector2(190, 44)
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_name_label.add_theme_font_size_override(&"font_size", 18)
@@ -85,11 +113,6 @@ func _build_layout() -> void:
 	next.add_theme_font_size_override(&"font_size", 22)
 	next.pressed.connect(_cycle.bind(1))
 	nav.add_child(next)
-
-	_slot_label = Label.new()
-	_slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_slot_label.modulate = Color(1, 1, 1, 0.6)
-	col.add_child(_slot_label)
 
 	_status_label = Label.new()
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -105,7 +128,7 @@ func _build_layout() -> void:
 	_clear_button = Button.new()
 	_clear_button.text = "Take off"
 	_clear_button.custom_minimum_size = Vector2(0, 34)
-	_clear_button.pressed.connect(_equip.bind(0))
+	_clear_button.pressed.connect(_on_clear_pressed)
 	col.add_child(_clear_button)
 
 
@@ -119,91 +142,168 @@ func _on_shown() -> void:
 
 func _on_state(data: Dictionary) -> void:
 	_allowed = bool(data.get("allowed", false))
-	_cosmetics.clear()
-	for id_v: Variant in data.get("cosmetics", []):
-		_cosmetics.append(int(id_v))
-	_equipped = int(data.get("equipped", 0))
+	_equipped_body = int(data.get("equipped", 0))
+	_equipped_weapon = int(data.get("equipped_weapon", 0))
 
-	if _cosmetics.is_empty():
+	_by_slot.clear()
+	_slots.clear()
+	for id_v: Variant in data.get("cosmetics", []):
+		var id: int = int(id_v)
+		var slot: StringName = Cosmetics.slot_of(id)
+		if not _by_slot.has(slot):
+			_by_slot[slot] = []
+		(_by_slot[slot] as Array).append(id)
+
+	# Keep Cosmetics.SLOTS order, skipping slots with no content.
+	for slot: StringName in Cosmetics.SLOTS:
+		if _by_slot.has(slot):
+			_slots.append(slot)
+
+	_rebuild_tabs()
+	if _slots.is_empty():
 		_name_label.text = "—"
-		_slot_label.text = ""
 		_status_label.text = "Nothing to show."
-		_action_button.disabled = true
 		_action_button.text = "Unavailable"
+		_action_button.disabled = true
 		_clear_button.visible = false
 		return
-
 	_clear_button.visible = true
-	var equipped_idx: int = _cosmetics.find(_equipped)
-	_idx = equipped_idx if equipped_idx >= 0 else 0
+	# Open on the tab holding whatever is already equipped, else the first tab.
+	var want: StringName = _slots[0]
+	for slot: StringName in _slots:
+		var ids: Array = _by_slot[slot]
+		if ids.has(_equipped_body) or ids.has(_equipped_weapon):
+			want = slot
+			break
+	_select_slot(want)
+
+
+func _rebuild_tabs() -> void:
+	for child: Node in _tab_bar.get_children():
+		child.queue_free()
+	_tab_buttons.clear()
+	for slot: StringName in _slots:
+		var b: Button = Button.new()
+		b.text = String(SLOT_LABELS.get(slot, String(slot).capitalize()))
+		b.toggle_mode = true
+		b.custom_minimum_size = Vector2(0, 30)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(_select_slot.bind(slot))
+		_tab_bar.add_child(b)
+		_tab_buttons[slot] = b
+
+
+func _select_slot(slot: StringName) -> void:
+	_slot = slot
+	for key: StringName in _tab_buttons:
+		(_tab_buttons[key] as Button).button_pressed = (key == slot)
+	if not _idx_by_slot.has(slot):
+		# First visit: land on the equipped entry for this tab if there is one.
+		var ids: Array = _by_slot.get(slot, [])
+		var equipped: int = _equipped_for(slot)
+		var found: int = ids.find(equipped)
+		_idx_by_slot[slot] = found if found >= 0 else 0
 	_update_preview()
+
+
+## Which equipped id this tab drives — the weapon tab has its own slot.
+func _equipped_for(slot: StringName) -> int:
+	return _equipped_weapon if slot == &"weapon" else _equipped_body
 
 
 # --- Browsing ---
 
+func _current_ids() -> Array:
+	return _by_slot.get(_slot, [])
+
+
+func _current_id() -> int:
+	var ids: Array = _current_ids()
+	var i: int = int(_idx_by_slot.get(_slot, 0))
+	return int(ids[i]) if i >= 0 and i < ids.size() else 0
+
+
 func _cycle(delta: int) -> void:
-	if _cosmetics.is_empty():
+	var ids: Array = _current_ids()
+	if ids.is_empty():
 		return
-	_idx = wrapi(_idx + delta, 0, _cosmetics.size())
+	_idx_by_slot[_slot] = wrapi(int(_idx_by_slot.get(_slot, 0)) + delta, 0, ids.size())
 	_update_preview()
 
 
 func _update_preview() -> void:
-	if _idx < 0 or _idx >= _cosmetics.size():
+	var id: int = _current_id()
+	if id == 0:
 		return
-	var id: int = _cosmetics[_idx]
 	var frames: SpriteFrames = Cosmetics.frames(id)
 	if _preview != null and frames != null:
 		_preview.sprite_frames = frames
 		if frames.has_animation(&"loop"):
 			_preview.play(&"loop")
-	_name_label.text = Cosmetics.display_name(id)
-	_slot_label.text = String(Cosmetics.slot_of(id)).capitalize()
+	var ids: Array = _current_ids()
+	_name_label.text = "%s  (%d/%d)" % [
+		Cosmetics.display_name(id),
+		int(_idx_by_slot.get(_slot, 0)) + 1,
+		ids.size(),
+	]
 	_update_action()
 
 
 func _update_action() -> void:
-	if _idx < 0 or _idx >= _cosmetics.size():
+	var id: int = _current_id()
+	if id == 0:
 		return
-	var id: int = _cosmetics[_idx]
-	if id == _equipped:
+	if id == _equipped_for(_slot):
 		_action_button.text = "Equipped"
 		_action_button.disabled = true
 		_status_label.text = "Currently worn."
 	else:
 		_action_button.text = "Equip"
 		_action_button.disabled = not _allowed
-		_status_label.text = "Unreleased — staff testing only."
+		_status_label.text = (
+			"Lights up any Ascended weapon you hold." if _slot == &"weapon"
+			else "Unreleased — staff testing only."
+		)
 
 
 func _on_action_pressed() -> void:
-	if _idx < 0 or _idx >= _cosmetics.size():
-		return
-	_equip(_cosmetics[_idx])
+	var id: int = _current_id()
+	if id != 0:
+		_equip(id, _slot)
 
 
-func _equip(id: int) -> void:
+## Clearing sends the slot explicitly — id 0 has no slot of its own, so the server
+## cannot infer which one to clear.
+func _on_clear_pressed() -> void:
+	_equip(0, _slot)
+
+
+func _equip(id: int, slot: StringName) -> void:
 	if InstanceClient.current == null:
 		return
 	_action_button.disabled = true
 	Client.request_data(
 		&"cosmetics.equip",
-		_on_equipped.bind(id),
-		{"cosmetic_id": id},
+		_on_equipped.bind(id, slot),
+		{"cosmetic_id": id, "slot": String(slot)},
 		String(InstanceClient.current.name)
 	)
 
 
-func _on_equipped(data: Dictionary, id: int) -> void:
+func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 	if not data.get("ok", false):
 		_status_label.text = _equip_error(str(data.get("reason", "")))
 		_update_action()
 		return
-	_equipped = id
-	# Instant local feedback (Character._set_cosmetic_id); the server syncs
-	# :cosmetic_id to everyone else.
-	if ClientState.local_player != null and is_instance_valid(ClientState.local_player):
-		ClientState.local_player.cosmetic_id = id
+	var lp: Node = ClientState.local_player
+	if slot == &"weapon":
+		_equipped_weapon = id
+		if lp != null and is_instance_valid(lp):
+			lp.weapon_cosmetic_id = id
+	else:
+		_equipped_body = id
+		if lp != null and is_instance_valid(lp):
+			lp.cosmetic_id = id
 	_update_action()
 
 

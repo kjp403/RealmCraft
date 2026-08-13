@@ -260,6 +260,7 @@ func instantiate_player(peer_id: int) -> Player:
 		var syn: StateSynchronizer = new_player.state_synchronizer
 		syn.set_by_path(^":skin_id", new_player.player_resource.skin_id)
 		syn.set_by_path(^":cosmetic_id", new_player.player_resource.cosmetic_id)
+		syn.set_by_path(^":weapon_cosmetic_id", new_player.player_resource.weapon_cosmetic_id)
 		syn.set_by_path(^":display_name", new_player.player_resource.display_name)
 		syn.set_by_path(^":active_guild_id", new_player.player_resource.active_guild_id)
 		syn.set_by_path(^":player_id", int(new_player.player_resource.player_id))
