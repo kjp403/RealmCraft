@@ -281,6 +281,16 @@ setting_section = &"general"
 setting_property = &"slayer_tracker"
 label_override = "Slayer tracker"
 
+[node name="CombatLabel" type="Label" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "Combat"
+
+[node name="CommitAim" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"combat"
+setting_property = &"commit_aim"
+label_override = "Commit aim on attack"
+
 [node name="AppearanceLabel" type="Label" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" unique_id=1115181810]
 layout_mode = 2
 text = "Appearance"
