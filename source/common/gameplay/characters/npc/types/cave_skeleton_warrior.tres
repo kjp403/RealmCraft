@@ -1,0 +1,118 @@
+[gd_resource type="Resource" script_class="EnemyTypeResource" format=3]
+
+[ext_resource type="Script" uid="uid://bhs3kv3tyysi7" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_attack"]
+[ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_behavior"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_drop"]
+[ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_type"]
+[ext_resource type="SpriteFrames" uid="uid://ckldb3p6vdl3b" path="res://source/common/gameplay/characters/sprite_frames/skeleton_warrior.tres" id="5_skin"]
+[ext_resource type="Resource" uid="uid://bqwbdldhjhxcq" path="res://source/common/gameplay/items/weapons/sword/sword_bone.item.tres" id="6_weapon"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("3_drop")
+item = ExtResource("loot_gold")
+min_amount = 3
+max_amount = 8
+chance = 0.9
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_drop")
+item = ExtResource("loot_bone")
+max_amount = 3
+
+[resource]
+script = ExtResource("4_type")
+enemy_type = &"cave_skeleton_warrior"
+display_name = "Skeleton Warrior"
+skin = ExtResource("5_skin")
+visual_scale = 1.0
+is_boss = false
+combat_level = 20
+max_health = 900.0
+attack_damage = 24.0
+attack_cooldown = 2.0
+armor = 22.0
+mr = 8.0
+weapon = ExtResource("6_weapon")
+behaviors = Array[ExtResource("2_behavior")]([])
+attacks = Array[ExtResource("1_attack")]([])
+move_speed = 60
+distance_to_attack = 18
+max_distance_from_spawn = 260
+leashes = true
+detection_radius = 120
+chase_on_area = false
+is_lone = false
+wander_radius = 48.0
+wander_pause_min_s = 1.5
+wander_pause_max_s = 4.0
+xp_reward = 42
+respawn_delay = 14.0
+respawns = true
+loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone")])
+combat_skill_xp_override = 0
+enrage_health_fraction = 0.5
+slam_radius = 110.0
+slam_windup_s = 1.1
+slam_damage = 45.0
+slam_interval_s = 6.0
+enraged_slam_interval_s = 3.5
+add_enemy_slug = &"rat_base"
+add_count = 2
+add_spread_px = 48.0
+enrage_speed_mult = 1.3
+laser_range = 0.0
+laser_width = 28.0
+laser_windup_s = 1.15
+laser_damage = 55.0
+laser_interval_s = 8.0
+enraged_laser_interval_s = 5.0
+arm_shot_interval_s = 0.0
+arm_shot_damage = 40.0
+arm_shot_speed = 220.0
+arm_shot_lifetime_s = 1.4
+enraged_arm_shot_interval_s = 0.0
+ornate_chest_top_min = 0
+ornate_chest_top_max = 0
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+phase2_skin = ""
+cast_anim = &"special"
+telegraph_element = 0
+enraged_telegraph_element = -1
+meteor_count = 0
+meteor_radius = 56.0
+meteor_damage = 60.0
+meteor_windup_s = 1.5
+meteor_stagger_s = 0.45
+meteor_spread_px = 190.0
+meteor_interval_s = 11.0
+enraged_meteor_interval_s = 0.0
+meteor_phase = 0
+sweep_arc_deg = 0.0
+sweep_range = 300.0
+sweep_width = 34.0
+sweep_windup_s = 1.2
+sweep_duration_s = 1.1
+sweep_damage = 70.0
+sweep_interval_s = 12.0
+enraged_sweep_interval_s = 0.0
+sweep_phase = 0
+frost_safe_radius = 0.0
+frost_windup_s = 2.6
+frost_damage = 110.0
+frost_offset_px = 150.0
+frost_interval_s = 16.0
+enraged_frost_interval_s = 0.0
+frost_phase = 0
+chain_targets = 0
+chain_range = 170.0
+chain_damage = 45.0
+chain_windup_s = 0.9
+chain_interval_s = 9.0
+enraged_chain_interval_s = 0.0
+chain_phase = 0
+metadata/slug = &"cave_skeleton_warrior"
+metadata/id = 98
