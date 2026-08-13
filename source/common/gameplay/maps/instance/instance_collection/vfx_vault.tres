@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AdminOnlyInstanceResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/maps/instance/admin_only_instance_resource.gd" id="1_admin_only"]
+
+[resource]
+script = ExtResource("1_admin_only")
+instance_name = &"vfx_vault"
+map_path = "res://source/common/gameplay/maps/maps/vfx_vault/vfx_vault.tscn"
+load_at_startup = false
+zone_title = "The VFX Vault"
+show_discovery = false
