@@ -1672,10 +1672,17 @@ func combat_skill_xp() -> int:
 ## the mob's data has been applied.
 func apply_difficulty(health_mult: float, damage_mult: float) -> void:
 	var max_h: float = stats_component.get_stat(Stat.HEALTH_MAX) * health_mult
-	stats_component.set_stat(Stat.HEALTH_MAX, max_h)
-	stats_component.set_stat(Stat.HEALTH, max_h)
+	apply_max_health(max_h)
 	stats_component.set_stat(Stat.AD, stats_component.get_stat(Stat.AD) * damage_mult)
 	stats_component.set_stat(Stat.AP, stats_component.get_stat(Stat.AP) * damage_mult)
+
+
+## Pin max (and current) health to an absolute value — dungeon finales that
+## party-scale HP instead of stacking multipliers.
+func apply_max_health(hp: float) -> void:
+	max_health = hp
+	stats_component.set_stat(Stat.HEALTH_MAX, hp)
+	stats_component.set_stat(Stat.HEALTH, hp)
 
 
 ## Client-visual: replay the weapon shot so the projectile flies on every client.

@@ -1,9 +1,9 @@
 class_name DungeonReward
 extends Resource
 ## The completion payout for a dungeon run: a gold amount (rolled in a range) plus
-## a roll on a loot table. EVERY clearing player gets their OWN roll (the same
-## participation-reward model as mob kills — co-op, no split). Attach it to the
-## dungeon's DungeonResource; RoomNode hands it to DungeonService on clear.
+## a few rolls on a loot table. EVERY clearing player gets their OWN roll (the
+## same participation-reward model as mob kills — co-op, no split). Attach it to
+## the dungeon's DungeonResource; RoomNode hands it to DungeonService on clear.
 ##
 ## Daily charges (character-wide, see DungeonService): successful clears spend one
 ## charge. After charges are spent you can still run for XP / help / Hard records /
@@ -13,9 +13,15 @@ extends Resource
 ## Gold paid on completion, rolled uniformly in [gold_min, gold_max]. 0 = no gold.
 @export var gold_min: int = 0
 @export var gold_max: int = 0
-## Loot table — each entry rolls independently (its own chance + amount range),
-## exactly like a mob's loot. Curate it richer than trash drops.
+## Loot table. A clear draws [member rolls_min]..[member rolls_max] distinct
+## entries from this pool — [member LootDrop.chance] is the relative weight of
+## being picked, not an independent roll, so a clear grants a few of the table
+## rather than most of it. Same model as [ChestResource].
 @export var loot: Array[LootDrop] = []
+## Distinct [member loot] entries granted per clear, rolled uniformly in
+## [rolls_min, rolls_max] and clamped to the number of valid entries.
+@export var rolls_min: int = 3
+@export var rolls_max: int = 4
 ## Optional capped pool (e.g. enchanted gem/cloth/ore). Each entry rolls
 ## independently, but at most [member exclusive_max] of the hits are kept.
 @export var exclusive_loot: Array[LootDrop] = []

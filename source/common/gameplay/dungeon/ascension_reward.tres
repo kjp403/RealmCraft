@@ -188,4 +188,6 @@ chance = 0.01
 script = ExtResource("29_qcai2")
 gold_min = 2500
 gold_max = 6000
+rolls_min = 3
+rolls_max = 4
 loot = Array[ExtResource("1_ky1fu")]([SubResource("Resource_qj52g"), SubResource("Resource_vir2m"), SubResource("Resource_xna35"), SubResource("Resource_qj0b1"), SubResource("Resource_bbaa8"), SubResource("Resource_i7c5q"), SubResource("Resource_nrh0g"), SubResource("Resource_adtts"), SubResource("Resource_ulks5"), SubResource("Resource_767i6"), SubResource("Resource_f8rnt"), SubResource("Resource_noffe"), SubResource("Resource_wr1e5"), SubResource("Resource_dywvm"), SubResource("Resource_0xlae"), SubResource("Resource_rl0f0"), SubResource("Resource_d24k8"), SubResource("Resource_2wedu"), SubResource("Resource_cspun"), SubResource("Resource_bpxj7"), SubResource("Resource_s6qbj"), SubResource("Resource_shv25"), SubResource("Resource_3elop"), SubResource("Resource_hnnjv"), SubResource("Resource_coojf"), SubResource("Resource_8dy8r"), SubResource("Resource_qskg5")])
