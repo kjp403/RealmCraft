@@ -6,7 +6,7 @@
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
 version = 1786560000
-next_id = 94
+next_id = 95
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -397,6 +397,11 @@ entries = Array[Dictionary]([{
 &"id": 83,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
 &"slug": &"sand_king"
+}, {
+&"hash": "485cee7b7a8e5efa8873e4b69036d2612f33207ae3a1543d756798ba79644994",
+&"id": 94,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/sun_eater.tres",
+&"slug": &"sun_eater"
 }, {
 &"hash": "38f4a3db5af383188fa851323c28428b5f68d78b1b1125cf27d3dec41b0e2704",
 &"id": 84,
