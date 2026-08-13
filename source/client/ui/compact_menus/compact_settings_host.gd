@@ -49,6 +49,9 @@ const LOGOUT_RED_PRESSED := Color(0.72, 0.16, 0.16)
 )
 
 var _main_view: VBoxContainer
+## Every on/off row lives here rather than on the main page: stacked inline they
+## pushed the buttons below them off the bottom of the panel.
+var _toggles_view: VBoxContainer
 var _audio_view: VBoxContainer
 var _music_slider: HSlider
 var _sound_slider: HSlider
@@ -99,20 +102,31 @@ func _ready() -> void:
 
 
 func _build_layout() -> void:
-	_main_view = VBoxContainer.new()
-	_main_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_main_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_main_view.add_theme_constant_override(&"separation", 5)
-	content.add_child(_main_view)
-
-	_audio_view = VBoxContainer.new()
-	_audio_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_audio_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_audio_view.add_theme_constant_override(&"separation", 5)
-	content.add_child(_audio_view)
+	_main_view = _add_view()
+	_toggles_view = _add_view()
+	_audio_view = _add_view()
 
 	_build_main_view(_main_view)
+	_build_toggles_view(_toggles_view)
 	_build_audio_view(_audio_view)
+
+
+## One switchable page, returned as the box its rows go into. Each page gets its
+## own ScrollContainer so a page taller than the panel scrolls instead of running
+## off the bottom of the HUD, and [method _show_view] hides the scroller (not the
+## box) so a hidden page claims no space in the shared Content margin.
+func _add_view() -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content.add_child(scroll)
+
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override(&"separation", 5)
+	scroll.add_child(box)
+	return box
 
 
 func _build_main_view(main_box: VBoxContainer) -> void:
@@ -126,34 +140,6 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	)
 	_zoom_slider = zoom_controls["slider"]
 	_zoom_value = zoom_controls["value"]
-
-	_weather_toggle = CheckButton.new()
-	_weather_toggle.text = "Weather effects"
-	_weather_toggle.custom_minimum_size = Vector2(0.0, 26.0)
-	_weather_toggle.add_theme_font_size_override(&"font_size", 10)
-	_weather_toggle.toggled.connect(_on_weather_toggled)
-	main_box.add_child(_weather_toggle)
-
-	_slayer_tracker_toggle = CheckButton.new()
-	_slayer_tracker_toggle.text = "Slayer tracker"
-	_slayer_tracker_toggle.custom_minimum_size = Vector2(0.0, 26.0)
-	_slayer_tracker_toggle.add_theme_font_size_override(&"font_size", 10)
-	_slayer_tracker_toggle.tooltip_text = (
-		"Show your current Slayer task in the top-right corner."
-	)
-	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
-	main_box.add_child(_slayer_tracker_toggle)
-
-	for entry: Dictionary in COMBAT_TOGGLES:
-		var property: StringName = entry["property"]
-		var toggle := CheckButton.new()
-		toggle.text = entry["label"]
-		toggle.custom_minimum_size = Vector2(0.0, 26.0)
-		toggle.add_theme_font_size_override(&"font_size", 10)
-		toggle.tooltip_text = entry["tooltip"]
-		toggle.toggled.connect(_on_combat_toggled.bind(property))
-		main_box.add_child(toggle)
-		_combat_toggles[property] = toggle
 
 	main_box.add_child(HSeparator.new())
 
@@ -172,6 +158,14 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	main_box.add_child(_online_label)
 
 	main_box.add_child(HSeparator.new())
+
+	var toggles_button := Button.new()
+	toggles_button.text = "Toggles"
+	toggles_button.custom_minimum_size = Vector2(0.0, 26.0)
+	toggles_button.add_theme_font_size_override(&"font_size", 9)
+	toggles_button.tooltip_text = "Weather, Slayer tracker and combat feel switches."
+	toggles_button.pressed.connect(_show_toggles_view)
+	main_box.add_child(toggles_button)
 
 	var audio_button := Button.new()
 	audio_button.text = "Audio"
@@ -213,6 +207,45 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	_style_logout_button(logout_button)
 	logout_button.pressed.connect(_on_logout_pressed)
 	main_box.add_child(logout_button)
+
+
+func _build_toggles_view(toggles_box: VBoxContainer) -> void:
+	var back_button := Button.new()
+	back_button.text = "Back"
+	back_button.custom_minimum_size = Vector2(0.0, 26.0)
+	back_button.add_theme_font_size_override(&"font_size", 9)
+	back_button.pressed.connect(_show_main_view)
+	toggles_box.add_child(back_button)
+
+	toggles_box.add_child(HSeparator.new())
+
+	_weather_toggle = CheckButton.new()
+	_weather_toggle.text = "Weather effects"
+	_weather_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_weather_toggle.add_theme_font_size_override(&"font_size", 10)
+	_weather_toggle.toggled.connect(_on_weather_toggled)
+	toggles_box.add_child(_weather_toggle)
+
+	_slayer_tracker_toggle = CheckButton.new()
+	_slayer_tracker_toggle.text = "Slayer tracker"
+	_slayer_tracker_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_slayer_tracker_toggle.add_theme_font_size_override(&"font_size", 10)
+	_slayer_tracker_toggle.tooltip_text = (
+		"Show your current Slayer task in the top-right corner."
+	)
+	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
+	toggles_box.add_child(_slayer_tracker_toggle)
+
+	for entry: Dictionary in COMBAT_TOGGLES:
+		var property: StringName = entry["property"]
+		var toggle := CheckButton.new()
+		toggle.text = entry["label"]
+		toggle.custom_minimum_size = Vector2(0.0, 26.0)
+		toggle.add_theme_font_size_override(&"font_size", 10)
+		toggle.tooltip_text = entry["tooltip"]
+		toggle.toggled.connect(_on_combat_toggled.bind(property))
+		toggles_box.add_child(toggle)
+		_combat_toggles[property] = toggle
 
 
 func _build_audio_view(audio_box: VBoxContainer) -> void:
@@ -274,20 +307,29 @@ func _style_logout_button(button: Button) -> void:
 		button.add_theme_stylebox_override(state, box)
 
 
+## Show exactly one page and title it. Toggles the page's ScrollContainer, since
+## that (not the inner box) is what occupies room in the Content margin.
+func _show_view(view: VBoxContainer, title: String) -> void:
+	for page: VBoxContainer in [_main_view, _toggles_view, _audio_view]:
+		if page == null:
+			continue
+		var scroll := page.get_parent() as Control
+		if scroll != null:
+			scroll.visible = page == view
+	title_label.text = title
+
+
 func _show_main_view() -> void:
-	if _main_view != null:
-		_main_view.visible = true
-	if _audio_view != null:
-		_audio_view.visible = false
-	title_label.text = "Settings"
+	_show_view(_main_view, "Settings")
+
+
+func _show_toggles_view() -> void:
+	_show_view(_toggles_view, "Toggles")
+	_sync_controls()
 
 
 func _show_audio_view() -> void:
-	if _main_view != null:
-		_main_view.visible = false
-	if _audio_view != null:
-		_audio_view.visible = true
-	title_label.text = "Audio"
+	_show_view(_audio_view, "Audio")
 	_sync_controls()
 
 
