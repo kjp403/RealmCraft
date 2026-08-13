@@ -42,6 +42,9 @@ var _hp_mult: float = 1.0
 var _dmg_mult: float = 1.0
 var _boss_hp_mult: float = 1.0
 var _boss_dmg_mult: float = 1.0
+## Absolute boss HP (0 = multiplier path). Party-scaled at spawn.
+var _boss_solo_health: float = 0.0
+var _boss_hp_per_extra: float = 0.0
 
 
 func _ready() -> void:
@@ -86,6 +89,20 @@ func _whole_party_inside() -> bool:
 	return present > 0
 
 
+## Living players currently in this instance — used to party-scale authored boss HP.
+func _living_player_count() -> int:
+	var instance: Node = get_parent().get_parent() # RoomNode → Map → ServerInstance
+	if instance == null:
+		return 1
+	var n: int = 0
+	for peer_id: int in instance.players_by_peer_id:
+		var player: Player = instance.players_by_peer_id[peer_id]
+		if player == null or player.is_dead:
+			continue
+		n += 1
+	return maxi(1, n)
+
+
 ## Activate the encounter: seal the party in, beat, then spawn the FIRST wave. Mobs come wave by
 ## wave — each must be cleared before the next appears (SpawnMarker.wave groups them; default 0 =
 ## one wave, the classic single pack). The room clears when the LAST wave is down.
@@ -122,11 +139,15 @@ func _resolve_difficulty(map: Node) -> void:
 			_dmg_mult = dres.normal_damage_mult
 		_boss_hp_mult = dres.boss_health_mult
 		_boss_dmg_mult = dres.boss_damage_mult
+		_boss_solo_health = dres.boss_solo_health
+		_boss_hp_per_extra = dres.boss_health_per_extra_player
 	else:
 		_hp_mult = DungeonService.HARD_HEALTH_MULT if _hard else 1.0
 		_dmg_mult = DungeonService.HARD_DAMAGE_MULT if _hard else 1.0
 		_boss_hp_mult = 1.0
 		_boss_dmg_mult = 1.0
+		_boss_solo_health = 0.0
+		_boss_hp_per_extra = 0.0
 
 
 ## Group SpawnMarker children into _waves by their `wave` index (0,1,2…); markers without an enemy
@@ -180,7 +201,13 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		if is_boss:
 			hp_m *= _boss_hp_mult
 			dmg_m *= _boss_dmg_mult
-		if not is_equal_approx(hp_m, 1.0) or not is_equal_approx(dmg_m, 1.0):
+		var use_party_boss_hp: bool = is_boss and _boss_solo_health > 0.0
+		if use_party_boss_hp:
+			if not is_equal_approx(dmg_m, 1.0):
+				npc.apply_difficulty(1.0, dmg_m)
+			var extra: int = maxi(0, _living_player_count() - 1)
+			npc.apply_max_health(_boss_solo_health + _boss_hp_per_extra * float(extra))
+		elif not is_equal_approx(hp_m, 1.0) or not is_equal_approx(dmg_m, 1.0):
 			npc.apply_difficulty(hp_m, dmg_m)
 	if is_boss and npc != null:
 		var brain: BossController = BossController.new()

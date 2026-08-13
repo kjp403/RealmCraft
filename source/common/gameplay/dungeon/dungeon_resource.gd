@@ -32,9 +32,14 @@ extends InstanceResource
 @export var normal_health_mult: float = 1.0
 @export var normal_damage_mult: float = 1.0
 ## Extra multipliers stacked on bosses only (Normal and Hard). Lets trash stay
-## snappy while bosses last long enough to force potions.
+## snappy while bosses last long enough to force potions. Ignored for HP when
+## [member boss_solo_health] is set.
 @export var boss_health_mult: float = 1.0
 @export var boss_damage_mult: float = 1.0
+## Absolute boss HP for a 1-player run. 0 = use health multipliers instead.
+@export var boss_solo_health: float = 0.0
+## Added to [member boss_solo_health] for each extra living player in the instance.
+@export var boss_health_per_extra_player: float = 0.0
 
 @export_group("Hard mode")
 ## Absolute multipliers for Hard runs (not stacked on Normal mults).

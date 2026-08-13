@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_dial"]
 script = ExtResource("4_dial")
-lines = Array[String](["The Domain is a sealed pocket past the seep. Rooms lock behind you until the spawn is dead.", "Three rewarded clears a day per character. Solo pays better — double drop chances, half-again the haul. Groups share the danger, not the bonus.", "Bosses elsewhere drop Dungeon Keys. Use one when you're out of charges. Failed runs don't spend a charge."])
+lines = Array[String](["The Domain is a sealed pocket past the seep. Rooms lock behind you until the spawn is dead.", "Three rewarded clears a day per character. Solo pays better — an extra loot roll, half-again the haul. Groups share the danger, not the bonus.", "Bosses elsewhere drop Dungeon Keys. Use one when you're out of charges. Failed runs don't spend a charge."])
 label_override = "How does this work?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -22,6 +22,6 @@ metadata/_custom_type_script = "uid://b36k3ordtiw1u"
 script = ExtResource("5_npc")
 npc_name = "Fungal Keeper"
 skin = ExtResource("6_skin")
-greeting = "Smell that sweet rot? That's the Domain breathing. Go alone and the loot fattens — chances double, amounts climb by half. Three rewarded clears a day; keys buy more. I keep the seal."
+greeting = "Smell that sweet rot? That's the Domain breathing. Go alone and the loot fattens — an extra roll, amounts climb by half. Three rewarded clears a day; keys buy more. I keep the seal."
 interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_dial"), SubResource("Resource_dint")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

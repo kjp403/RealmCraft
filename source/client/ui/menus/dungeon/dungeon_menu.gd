@@ -137,7 +137,7 @@ func _render_info(info: Dictionary) -> void:
 		).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info_line("Solo Bonus:", Color(1.0, 0.85, 0.5), 13)
 	_info_line(
-		"Run it alone and drops roll at 2× chance for 1.5× the amount. A group splits the fight, not the bonus — parties get standard rates.",
+		"Run it alone and you get an extra loot roll plus 1.5× amounts. A group splits the fight, not the bonus — parties get standard rates.",
 		Color(0.75, 0.82, 0.95),
 		11
 	).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

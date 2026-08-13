@@ -57,6 +57,8 @@ func _init() -> void:
 			fails.append("%s gold_min too low (%d)" % [path, rew.gold_min])
 		if rew.loot.is_empty():
 			fails.append("%s has empty loot" % path)
+		if rew.rolls_min < 3 or rew.rolls_max < 4:
+			fails.append("%s should draw 3–4 loot rolls (got %d–%d)" % [path, rew.rolls_min, rew.rolls_max])
 
 	var dark: DungeonResource = load(
 		"res://source/common/gameplay/maps/instance/instance_collection/dungeons/dungeon.tres"
@@ -68,8 +70,15 @@ func _init() -> void:
 		fails.append("Dark Cave dungeon resource incomplete")
 	elif dark.normal_health_mult < 10.0 or dark.normal_damage_mult < 6.0:
 		fails.append("Dark Cave trash multipliers too low for Runite/Fire kits")
-	elif dark.boss_health_mult < 4.0 or dark.boss_damage_mult < 1.8:
-		fails.append("Dark Cave boss multipliers too low")
+	elif dark.boss_solo_health < 4999.0 or dark.boss_health_per_extra_player < 2499.0:
+		fails.append("Dark Cave boss should be 5k HP solo + 2500 per extra player")
+	var mage: EnemyTypeResource = load(
+		"res://source/common/gameplay/characters/npc/types/skeleton_mage.tres"
+	) as EnemyTypeResource
+	if mage == null:
+		fails.append("skeleton_mage.tres missing")
+	elif mage.slam_damage > 20.0:
+		fails.append("Dark Cave mage slam still one-shots (%s)" % mage.slam_damage)
 	if fungus == null or fungus.reward == null or fungus.hard_reward == null:
 		fails.append("Fungus Domain dungeon resource incomplete")
 	if fungus != null and fungus.display_name != "Fungus Domain":
