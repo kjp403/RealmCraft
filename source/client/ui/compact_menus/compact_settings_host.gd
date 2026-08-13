@@ -126,7 +126,7 @@ func _build_main_view(main_box: VBoxContainer) -> void:
 	_commit_aim_toggle.add_theme_font_size_override(&"font_size", 10)
 	_commit_aim_toggle.tooltip_text = (
 		"Attacks keep the direction they were aimed at instead of following your "
-		"aim through the swing."
+		+ "aim through the swing."
 	)
 	_commit_aim_toggle.toggled.connect(_on_commit_aim_toggled)
 	main_box.add_child(_commit_aim_toggle)
