@@ -248,6 +248,43 @@ func toggle_feed() -> void:
 	full_feed_message_edit.grab_focus()
 
 
+## Jump straight to private messages (Tab). Lands on the thread you're most
+## likely answering — the newest UNREAD DM, else the most recent DM thread — and
+## focuses the compose field, so replying is Tab + type. With no DMs at all it
+## opens the merged Private inbox, which is read-only by design (no single
+## recipient), so it's the fallback rather than the target.
+func open_private_quick_reply() -> void:
+	var thread: String = _latest_dm_conversation()
+	if thread.is_empty():
+		open_channel(CHANNEL_PRIVATE)
+	else:
+		open_conversation(thread)
+	full_feed_message_edit.grab_focus()
+
+
+## The DM conversation a quick reply should land in: unread beats read, newer
+## beats older. Empty when the player has no DM threads this session.
+func _latest_dm_conversation() -> String:
+	var newest_unread: String = ""
+	var newest_unread_ms: int = -1
+	var newest: String = ""
+	var newest_ms: int = -1
+	for convo_id: String in raw_messages_by_conversation:
+		if not convo_id.begins_with("dm:"):
+			continue
+		var records: Array = raw_messages_by_conversation[convo_id]
+		if records.is_empty():
+			continue
+		var last_ms: int = int((records[records.size() - 1] as Dictionary).get("time_ms", 0))
+		if last_ms > newest_ms:
+			newest_ms = last_ms
+			newest = convo_id
+		if int(unread_by_conversation.get(convo_id, 0)) > 0 and last_ms > newest_unread_ms:
+			newest_unread_ms = last_ms
+			newest_unread = convo_id
+	return newest_unread if not newest_unread.is_empty() else newest
+
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"player_chat"):
 		if full_feed_message_edit.has_focus():
@@ -258,6 +295,17 @@ func _input(event: InputEvent) -> void:
 			toggle_feed()
 		else:
 			full_feed_message_edit.grab_focus()
+
+	if event.is_action_pressed(&"player_chat_dm"):
+		# Tab keeps its normal focus-walking job wherever a text field is already
+		# focused (compose box, bank search, trade amount) or a blocking menu owns
+		# the screen — only grab it when the player is out in the world.
+		var focused: Control = get_viewport().gui_get_focus_owner()
+		if ClientState.menu_open or focused is LineEdit or focused is TextEdit:
+			return
+		get_viewport().set_input_as_handled()
+		accept_event()
+		open_private_quick_reply()
 
 	if event is InputEventMouseButton and event.is_pressed():
 		var mouse_position: Vector2 = event.global_position

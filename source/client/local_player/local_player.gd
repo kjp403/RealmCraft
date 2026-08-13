@@ -532,13 +532,31 @@ func process_input() -> void:
 		input_direction = Vector2.ZERO
 		action_input = false
 		return
-	# Chat compose: block WASD/attack so keys type, but keep follow / click-move
-	# running so you can chat while trailing someone.
+	# Chat compose: block WASD/attack so keys type, but DON'T abandon what the
+	# player was already doing — an ongoing fight, harvest, loot walk, or
+	# interaction keeps ticking, same as follow / click-move. Only keyboard-driven
+	# input is suppressed; opening chat is not a cancel. (A real menu still is —
+	# that's the ClientState.menu_open branch above.)
 	if _has_gui_focus():
 		action_input = false
 		if _follow_peer_id > 0:
 			_update_follow_navigation()
 		input_direction = _click_navigation.movement_direction()
+		if _harvest_controller != null and _harvest_controller.is_active():
+			if _harvest_controller.tick():
+				equipment_component.process_input(self)
+				return
+		if _pickup_controller != null and _pickup_controller.is_active():
+			if _pickup_controller.tick():
+				return
+		if _interact_controller != null and _interact_controller.is_active():
+			if _interact_controller.tick():
+				return
+		if _combat_target_controller != null:
+			_combat_target_controller.release_if_target_dead()
+			if _combat_target_controller.is_active() and _combat_target_controller.tick():
+				equipment_component.process_input(self)
+				return
 		return
 	if rooted:
 		_click_navigation.cancel()
