@@ -54,6 +54,10 @@ func equip(character: Character) -> void:
 		# Skin the in-hand sprite from this item's icon, so one type-scene
 		# (sword.tscn) serves every sword skin (fire, rustic, ...).
 		right_hand_weapon.apply_skin(item_icon, sprite_offset)
+		# Ascended cosmetic glow, if this character has it equipped AND this weapon
+		# has an authored effect. Both checks live in one place so a remount can
+		# never leave a stale overlay behind.
+		right_hand_weapon.apply_cosmetic_fx(_cosmetic_fx_for(character))
 	
 	if left_hand_scene:
 		var left_hand_weapon: Weapon = left_hand_scene.instantiate()
@@ -63,6 +67,14 @@ func equip(character: Character) -> void:
 		if character.left_hand_spot.get_child_count():
 			character.left_hand_spot.get_child(0).queue_free()
 			#character.left_hand_spot.remove_child(character.left_hand_spot.get_child(0))
+
+
+## Overlay frames for this item on this character, or null. Null whenever the
+## character has no weapon cosmetic equipped, or this weapon is not Ascended.
+func _cosmetic_fx_for(character: Character) -> SpriteFrames:
+	if character == null or not Cosmetics.is_weapon_slot(character.weapon_cosmetic_id):
+		return null
+	return Cosmetics.weapon_fx_for(item_icon)
 
 
 func unequip(character: Character) -> void:

@@ -116,6 +116,27 @@ func show_held_icon(icon: Texture2D) -> void:
 		weapon_sprite.region_enabled = false
 
 
+## Mount (or clear) the Ascended cosmetic glow on this weapon. Client-only — the
+## server never builds it. The overlay is parented to WeaponSprite so it inherits
+## the grip rotation and the hand pivot for free; see WeaponVfx.
+##
+## [param frames] null removes the overlay, which is what an unequipped cosmetic or
+## a non-Ascended weapon resolves to.
+func apply_cosmetic_fx(frames: SpriteFrames) -> void:
+	if not GameMode.is_client() or weapon_sprite == null:
+		return
+	var existing: WeaponVfx = weapon_sprite.get_node_or_null(^"CosmeticVfx") as WeaponVfx
+	if frames == null:
+		if existing != null:
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = WeaponVfx.new()
+		existing.name = "CosmeticVfx"
+		weapon_sprite.add_child(existing)
+	existing.apply(frames)
+
+
 ## Visual hook for a CHANNELED ability (healing aura, future recall): enter/exit
 ## a "stance" pose while the channel holds. Base does nothing; weapons with a
 ## distinctive channel look (the hammer planted, swollen, floating) override it.

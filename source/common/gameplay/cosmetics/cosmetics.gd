@@ -14,11 +14,11 @@ class_name Cosmetics
 
 
 ## Slot order is display order in the curator menu, and doubles as the valid-slot set.
-const SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"flourish", &"departure"]
+const SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"flourish", &"departure", &"weapon"]
 
 ## Slots that play continuously while equipped. The rest are event effects — the
 ## preview node replays them on a cycle so they can still be inspected.
-const LOOPING_SLOTS: Array[StringName] = [&"aura", &"trail", &"halo"]
+const LOOPING_SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"weapon"]
 
 
 ## All cosmetic ids, sorted ascending. Empty when the registry is missing (dedicated
@@ -82,6 +82,33 @@ static func ids_in_slot(slot: StringName) -> Array[int]:
 		if slot_of(id) == slot:
 			out.append(id)
 	return out
+
+
+## Ascended weapon VFX overlays live OUTSIDE the cosmetics registry: there is one
+## purchasable cosmetic (Ascended Radiance) and these are a lookup keyed by the
+## weapon's own art slug, so a new Ascended weapon inherits an effect for free.
+const WEAPON_FX_DIR: String = "res://source/common/gameplay/cosmetics/weapon_frames/"
+
+
+## Overlay frames for a weapon, resolved from its icon's filename
+## (…/ascension/sword_dawnbreaker.png -> sword_dawnbreaker_fx.tres).
+## Returns null for any weapon without an authored effect — which is every
+## non-Ascended weapon, and is how the effect stays exclusive to that tier.
+static func weapon_fx_for(icon: Texture2D) -> SpriteFrames:
+	if icon == null:
+		return null
+	var path: String = icon.resource_path
+	if path.is_empty():
+		return null   # AtlasTexture regions (older weapon sheets) have no own path
+	var fx_path: String = WEAPON_FX_DIR + path.get_file().get_basename() + "_fx.tres"
+	if not ResourceLoader.exists(fx_path):
+		return null
+	return ResourceLoader.load(fx_path) as SpriteFrames
+
+
+## True when this cosmetic id is the weapon-overlay cosmetic.
+static func is_weapon_slot(cosmetic_id: int) -> bool:
+	return slot_of(cosmetic_id) == &"weapon"
 
 
 ## The SpriteFrames for a cosmetic (null when missing / on a data-only server).

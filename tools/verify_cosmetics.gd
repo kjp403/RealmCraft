@@ -22,7 +22,7 @@ func _check(ok: bool, label: String) -> void:
 func _initialize() -> void:
 	print("-- registry --")
 	var ids: Array[int] = Cosmetics.ids()
-	_check(ids.size() == 21, "21 cosmetics registered (got %d)" % ids.size())
+	_check(ids.size() == 22, "22 cosmetics registered (got %d)" % ids.size())
 
 	var slots: Dictionary = {}
 	var bad_frames: PackedStringArray = []
@@ -43,6 +43,35 @@ func _initialize() -> void:
 	_check(not Cosmetics.is_valid(99999), "unknown id rejected")
 	_check(Cosmetics.is_looping(Cosmetics.ids_in_slot(&"aura")[0]), "auras loop")
 	_check(not Cosmetics.is_looping(Cosmetics.ids_in_slot(&"departure")[0]), "departures do not loop")
+
+	print("-- ascended weapon vfx --")
+	# One purchasable cosmetic in the weapon slot; the per-weapon effects are a
+	# lookup keyed by art slug, NOT registry entries.
+	var weapon_ids: Array[int] = Cosmetics.ids_in_slot(&"weapon")
+	_check(weapon_ids.size() == 1, "exactly one weapon-slot cosmetic (got %d)" % weapon_ids.size())
+	if not weapon_ids.is_empty():
+		_check(Cosmetics.is_weapon_slot(weapon_ids[0]), "it reports the weapon slot")
+	var asc_dir: String = "res://assets/sprites/items/weapons/ascension/"
+	var missing: PackedStringArray = []
+	var covered: int = 0
+	for f: String in ResourceLoader.list_directory(asc_dir):
+		if not f.ends_with(".png"):
+			continue
+		var icon: Texture2D = ResourceLoader.load(asc_dir + f) as Texture2D
+		if icon == null:
+			continue
+		if Cosmetics.weapon_fx_for(icon) == null:
+			missing.append(f)
+		else:
+			covered += 1
+	_check(missing.is_empty(), "every Ascended weapon resolves an effect %s" % str(missing))
+	_check(covered == 34, "34 Ascended weapons covered (got %d)" % covered)
+	# A non-Ascended weapon must NOT light up — that is what keeps this tier-exclusive.
+	var plain: Item = ContentRegistryHub.load_by_id(&"items",
+		ContentRegistryHub.id_from_slug(&"items", &"sword_bronze")) as Item
+	if plain != null:
+		_check(Cosmetics.weapon_fx_for(plain.item_icon) == null,
+			"a non-Ascended weapon resolves no effect")
 
 	print("-- vault --")
 	var vault: Resource = ResourceLoader.load(VAULT_RES)
@@ -131,6 +160,7 @@ func _initialize() -> void:
 		"a roleless player is below the staff floor"
 	)
 	_check(nobody.cosmetic_id == 0, "players default to no cosmetic")
+	_check(nobody.weapon_cosmetic_id == 0, "players default to no weapon cosmetic")
 
 	print("COSMETICS_VERIFY_%s failures=%d" % ["FAIL" if _fail else "PASS", _fail])
 	quit(1 if _fail else 0)

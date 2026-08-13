@@ -34,7 +34,16 @@ func data_request_handler(
 		if not Cosmetics.is_valid(cosmetic_id):
 			return {"ok": false, "reason": "unknown_cosmetic"}
 
-	pr.cosmetic_id = cosmetic_id
-	# Propagate to all clients (including others) so the effect appears live.
-	player.state_synchronizer.set_by_path(^":cosmetic_id", cosmetic_id)
-	return {"ok": true, "cosmetic_id": cosmetic_id}
+	# Route by SLOT so the two cosmetic slots stay independent — equipping a weapon
+	# glow must not silently clear an aura. Clearing (id 0) needs the caller to say
+	# WHICH slot, since 0 has no slot of its own.
+	var slot: StringName = Cosmetics.slot_of(cosmetic_id)
+	if cosmetic_id == 0:
+		slot = StringName(str(args.get("slot", "")))
+	if slot == &"weapon":
+		pr.weapon_cosmetic_id = cosmetic_id
+		player.state_synchronizer.set_by_path(^":weapon_cosmetic_id", cosmetic_id)
+	else:
+		pr.cosmetic_id = cosmetic_id
+		player.state_synchronizer.set_by_path(^":cosmetic_id", cosmetic_id)
+	return {"ok": true, "cosmetic_id": cosmetic_id, "slot": slot}

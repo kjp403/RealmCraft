@@ -54,6 +54,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 15:
 		_migration_v15(db)
 		_set_schema_version(db, 15)
+	if version < 16:
+		_migration_v16(db)
+		_set_schema_version(db, 16)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -302,6 +305,14 @@ static func _migration_v14(db: SQLite) -> void:
 static func _migration_v15(db: SQLite) -> void:
 	if not _column_exists(db, "players", "cosmetic_id"):
 		db.query("ALTER TABLE players ADD COLUMN cosmetic_id INTEGER NOT NULL DEFAULT 0;")
+
+
+## v16: equipped WEAPON cosmetic (the Ascended glow), a second cosmetic slot so a
+## player can wear an aura and a weapon effect at once. 0 = none. ADD COLUMN with a
+## DEFAULT — no wipe, and older code that omits the column still writes fine.
+static func _migration_v16(db: SQLite) -> void:
+	if not _column_exists(db, "players", "weapon_cosmetic_id"):
+		db.query("ALTER TABLE players ADD COLUMN weapon_cosmetic_id INTEGER NOT NULL DEFAULT 0;")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

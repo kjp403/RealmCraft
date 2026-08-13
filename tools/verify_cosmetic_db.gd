@@ -26,6 +26,7 @@ func _initialize() -> void:
 	print("-- fresh create --")
 	WorldSchema.ensure_schema(db)
 	_check(_has_column(db, "cosmetic_id"), "players.cosmetic_id exists after ensure_schema")
+	_check(_has_column(db, "weapon_cosmetic_id"), "players.weapon_cosmetic_id exists after ensure_schema")
 
 	print("-- simulate a live v14 upgrade --")
 	# Seed a COMPLETE row through the real save path first. A hand-written partial
@@ -42,11 +43,14 @@ func _initialize() -> void:
 	# Now rewind that row to what a real v14 database looks like: no cosmetic_id
 	# column, schema_version back to 14.
 	db.query("ALTER TABLE players DROP COLUMN cosmetic_id;")
+	db.query("ALTER TABLE players DROP COLUMN weapon_cosmetic_id;")
 	db.query("UPDATE meta SET value='14' WHERE key='schema_version';")
 	_check(not _has_column(db, "cosmetic_id"), "column removed for the upgrade rehearsal")
+	_check(not _has_column(db, "weapon_cosmetic_id"), "weapon column removed too")
 
 	WorldSchema.ensure_schema(db)
 	_check(_has_column(db, "cosmetic_id"), "migration re-adds cosmetic_id on a v14 DB")
+	_check(_has_column(db, "weapon_cosmetic_id"), "migration re-adds weapon_cosmetic_id")
 	db.query("SELECT player_id, display_name, level, cosmetic_id FROM players WHERE player_id=4242;")
 	var legacy: Dictionary = db.query_result[0] if not db.query_result.is_empty() else {}
 	_check(not legacy.is_empty(), "pre-existing row survived the migration")
@@ -59,6 +63,7 @@ func _initialize() -> void:
 	pr.init(9001, "test_acct", "TestHero", 1)
 	pr.level = 12
 	pr.cosmetic_id = 5 # aura_rainbow
+	pr.weapon_cosmetic_id = 22 # weapon_ascended_radiance
 	pr.owned_skins = PackedInt64Array([1])
 	var saved: bool = store.save_player(pr)
 	_check(saved, "save_player returned true")
@@ -69,6 +74,8 @@ func _initialize() -> void:
 		_check(loaded.display_name == "TestHero", "display_name round-trips")
 		_check(loaded.level == 12, "level round-trips")
 		_check(loaded.cosmetic_id == 5, "cosmetic_id round-trips (got %d)" % loaded.cosmetic_id)
+		_check(loaded.weapon_cosmetic_id == 22,
+			"weapon_cosmetic_id round-trips (got %d)" % loaded.weapon_cosmetic_id)
 
 	# A player saved with no cosmetic must come back as 0, not null/garbage.
 	var plain: PlayerResource = PlayerResource.new()
@@ -76,6 +83,8 @@ func _initialize() -> void:
 	store.save_player(plain)
 	var plain_loaded: PlayerResource = store.get_player(9002)
 	_check(plain_loaded != null and plain_loaded.cosmetic_id == 0, "unset cosmetic loads as 0")
+	_check(plain_loaded != null and plain_loaded.weapon_cosmetic_id == 0,
+		"unset weapon cosmetic loads as 0")
 
 	db.close_db()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

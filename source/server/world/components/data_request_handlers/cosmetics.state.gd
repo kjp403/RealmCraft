@@ -22,11 +22,15 @@ func data_request_handler(
 	var allowed: bool = CommandPermissions.effective_priority(pr, instance) \
 		>= CommandPermissions.STAFF_PROTECT_PRIORITY
 	if not allowed:
-		return {"ok": true, "allowed": false, "cosmetics": [], "equipped": 0}
+		return {"ok": true, "allowed": false, "cosmetics": [],
+			"equipped": 0, "equipped_weapon": 0}
 
+	# Two equipped slots: the body effect (aura/trail/halo/...) and the weapon glow.
+	# The client tabs by Cosmetics.slot_of, so the roster stays one flat list.
 	return {
 		"ok": true,
 		"allowed": true,
 		"cosmetics": Cosmetics.ids(),
 		"equipped": pr.cosmetic_id,
+		"equipped_weapon": pr.weapon_cosmetic_id,
 	}
