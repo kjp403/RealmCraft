@@ -952,7 +952,12 @@ function build() {
           <h1>Arkenelle</h1>
           <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory. Finding your own footing is the point.</p>
           <div class="cta-stack">
-            <a class="btn play" href="${PLAY_WEB}">Play in your browser</a>
+            <div class="play-wrap">
+              <span class="play-sparkle s1" aria-hidden="true"></span>
+              <span class="play-sparkle s2" aria-hidden="true"></span>
+              <span class="play-sparkle s3" aria-hidden="true"></span>
+              <a class="btn play" href="${PLAY_WEB}">Play in your browser</a>
+            </div>
             <p class="cta-note">No download. Opens the live game in Chrome or Firefox.</p>
             <div class="cta-row">
               <a class="btn" href="${ITCH}">Desktop client</a>
