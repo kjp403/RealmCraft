@@ -1,15 +1,27 @@
 :root {
   --bg: #090c11;
   --bg-2: #10161e;
-  --panel: #141b24;
-  --panel-2: #1a2330;
-  --line: #2a3544;
-  --text: #e6edf5;
-  --muted: #8b97a8;
-  --accent: #8ec8f0;
-  --accent-2: #c9a35a;
-  --danger: #d47a6a;
-  --ok: #8fbe7a;
+  --panel: #182230;
+  --panel-2: #1e2a3a;
+  --line: #334155;
+  --text: #f0f4fa;
+  --muted: #b8c3d2;
+  --accent: #9fd4f7;
+  --accent-2: #e8c56a;
+  --danger: #e07070;
+  --ok: #3dcc8a;
+  --cat-start: #e8c56a;
+  --cat-items: #e8a04a;
+  --cat-creatures: #e07070;
+  --cat-locations: #3dcc8a;
+  --cat-npcs: #6b9eef;
+  --cat-skills: #3ecfc0;
+  --cat-slayer: #d45a5a;
+  --cat-quests: #b07ae8;
+  --cat-guilds: #d4b06a;
+  --cat-boards: #5ec8f0;
+  --cat-play: #2ecc7a;
+  --theme: var(--accent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
   --sans: "Figtree", "Segoe UI", sans-serif;
@@ -121,7 +133,7 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   letter-spacing: 0.06em;
 }
 .hero p.lede {
-  color: var(--muted);
+  color: #d5deea;
   font-size: 1.15rem;
   max-width: 38rem;
   margin: 0 auto 1.6rem;
@@ -355,6 +367,119 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   padding: 1rem 1.1rem;
 }
 .card h2, .card h3 { font-family: var(--serif); font-weight: 400; margin: 0 0 0.35rem; }
+.cat-start { --cat: var(--cat-start); }
+.cat-items { --cat: var(--cat-items); }
+.cat-creatures { --cat: var(--cat-creatures); }
+.cat-locations { --cat: var(--cat-locations); }
+.cat-npcs { --cat: var(--cat-npcs); }
+.cat-skills { --cat: var(--cat-skills); }
+.cat-slayer { --cat: var(--cat-slayer); }
+.cat-quests { --cat: var(--cat-quests); }
+.cat-guilds { --cat: var(--cat-guilds); }
+.cat-boards { --cat: var(--cat-boards); }
+.cat-play { --cat: var(--cat-play); }
+a.cat-start { color: var(--cat-start); }
+a.cat-items { color: var(--cat-items); }
+a.cat-creatures { color: var(--cat-creatures); }
+a.cat-locations { color: var(--cat-locations); }
+a.cat-npcs { color: var(--cat-npcs); }
+a.cat-skills { color: var(--cat-skills); }
+a.cat-slayer { color: var(--cat-slayer); }
+a.cat-quests { color: var(--cat-quests); }
+a.cat-guilds { color: var(--cat-guilds); }
+a.cat-boards { color: var(--cat-boards); }
+a.cat-play { color: var(--cat-play); }
+.cat-icon {
+  display: inline-flex;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: 0 0 1.35rem;
+  color: var(--cat, var(--theme));
+}
+.cat-icon svg { width: 100%; height: 100%; display: block; }
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--theme);
+}
+.page-title .cat-icon { width: 2rem; height: 2rem; flex-basis: 2rem; color: var(--theme); }
+.wiki-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  position: relative;
+  padding-left: 1.2rem;
+  color: inherit;
+}
+.wiki-card:hover { text-decoration: none; border-color: color-mix(in srgb, var(--cat) 55%, var(--line)); }
+.wiki-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--cat);
+  border-radius: 10px 0 0 10px;
+}
+.wiki-card .cat-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-basis: 1.7rem;
+  margin-top: 0.12rem;
+  color: var(--cat);
+}
+.wiki-card h2, .wiki-card h3 { color: var(--cat); }
+.wiki-card p { color: var(--muted); margin: 0; }
+.wiki-card p + p { margin-top: 0.55rem; }
+.wiki-card ul { margin: 0.5rem 0 0; padding-left: 1.1rem; color: var(--text); }
+.wiki-card p strong { color: var(--cat); }
+.item-card.cat-start,
+.item-card.cat-items,
+.item-card.cat-creatures,
+.item-card.cat-locations,
+.item-card.cat-npcs,
+.item-card.cat-skills,
+.item-card.cat-slayer,
+.item-card.cat-quests,
+.item-card.cat-guilds,
+.item-card.cat-boards {
+  border-left: 3px solid var(--cat);
+}
+.theme-start { --theme: var(--cat-start); }
+.theme-items { --theme: var(--cat-items); }
+.theme-creatures { --theme: var(--cat-creatures); }
+.theme-locations { --theme: var(--cat-locations); }
+.theme-npcs { --theme: var(--cat-npcs); }
+.theme-skills { --theme: var(--cat-skills); }
+.theme-slayer { --theme: var(--cat-slayer); }
+.theme-quests { --theme: var(--cat-quests); }
+.theme-guilds { --theme: var(--cat-guilds); }
+.theme-boards { --theme: var(--cat-boards); }
+body[class^="theme-"] nav.primary a.active { color: var(--theme); }
+body[class^="theme-"] .filters a.active,
+body[class^="theme-"] .filters button.active,
+body[class^="theme-"] .lb-cats button.active,
+body[class^="theme-"] .lb-boards button.active {
+  color: var(--theme);
+  border-color: var(--theme);
+}
+body[class^="theme-"] article.page {
+  box-shadow: inset 4px 0 0 var(--theme);
+}
+.theme-start .prose h2,
+.theme-guilds .prose h2,
+.theme-slayer h2,
+.theme-creatures article.page > h2,
+.theme-locations article.page > h2,
+.theme-skills article.page > h2,
+.theme-quests article.page > h2,
+.theme-npcs article.page > h2,
+.theme-items article.page > h2 {
+  color: var(--theme);
+}
+.theme-boards .lb-panel { border-top: 3px solid var(--theme); }
 .item-card {
   display: flex;
   align-items: center;
@@ -362,7 +487,7 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   color: var(--text);
   min-height: 72px;
 }
-.item-card:hover { border-color: var(--accent); text-decoration: none; background: var(--panel-2); }
+.item-card:hover { border-color: var(--cat, var(--accent)); text-decoration: none; background: var(--panel-2); }
 .item-card .name { font-weight: 600; display: block; }
 .item-card .kind { color: var(--muted); font-size: 0.8rem; display: block; }
 

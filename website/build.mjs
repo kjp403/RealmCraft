@@ -441,10 +441,38 @@ function copyMedia() {
   }
 }
 
-function shell({ title, active, body, scripts = [] }) {
+function catIcon(id) {
+  const d = {
+    start: `<circle cx="12" cy="12" r="8.5"/><path d="M12 3.8v2.6M12 17.6v2.6M3.8 12h2.6M17.6 12h2.6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 7.2l1.7 4.3H12"/>`,
+    items: `<path d="M7 8.6h10l.9 11.2H6.1L7 8.6z"/><path d="M9 8.6V7.1A3 3 0 0 1 12 4.2 3 3 0 0 1 15 7.1v1.5"/><path d="M9.5 12.2h5"/>`,
+    creatures: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
+    locations: `<path d="M12 21s6.4-6.1 6.4-10.8A6.4 6.4 0 0 0 5.6 10.2C5.6 14.9 12 21 12 21z"/><circle cx="12" cy="10.2" r="2.1"/>`,
+    npcs: `<circle cx="12" cy="8" r="3.1"/><path d="M5.6 19.4c.8-3.3 3.1-4.9 6.4-4.9s5.6 1.6 6.4 4.9"/>`,
+    skills: `<path d="M8.4 14.3l-3.5 3.5 1.6 1.6 3.5-3.5"/><path d="M14.7 4.9l4.3 4.3-8.1 8.1H6.6V13z"/><path d="M16.2 8.3l1.7-1.7a1.5 1.5 0 0 0 0-2.1"/>`,
+    slayer: `<path d="M4.8 19.2l8.8-8.8 2.1.7L19 8.1l-1-3-3 1-2.1 2.8L4.8 19.2z"/><path d="M19.2 19.2l-8.8-8.8-.7 2.1L8.1 5l3-1 2.8 2.1 5.3 13.1z"/>`,
+    quests: `<path d="M7 4.6h10a1 1 0 0 1 1 1V19.6l-6-2.3-6 2.3V5.6a1 1 0 0 1 1-1z"/><path d="M9.2 9.2h5.6M9.2 12.4h5.6"/>`,
+    guilds: `<path d="M6.2 4.6h11.6v3.3c0 2.2-1.4 3.8-3.2 4.7L12 14.2l-2.6-1.6c-1.8-.9-3.2-2.5-3.2-4.7z"/><path d="M12 14.2V20"/>`,
+    boards: `<path d="M7.2 20V10.2h3.2V20H7.2zm6.4 0V6.2h3.2V20h-3.2zM4.4 20h15.2"/><path d="M8.6 7.2 12 4.4l3.4 2.8"/>`,
+    play: `<path d="M8 6.4v11.2L19 12z"/>`,
+  };
+  const inner = d[id];
+  if (!inner) return "";
+  return `<span class="cat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg></span>`;
+}
+
+function pageHeading(cat, title) {
+  return `<h1 class="section-title page-title">${catIcon(cat)}<span>${esc(title)}</span></h1>`;
+}
+
+function wikiCard(cat, href, title, bodyHtml) {
+  return `<a class="card wiki-card cat-${cat}" href="${href}">${catIcon(cat)}<div><h3>${esc(title)}</h3><p>${bodyHtml}</p></div></a>`;
+}
+
+function shell({ title, active, body, scripts = [], theme = "" }) {
   const home = "/";
   const wiki = "/wiki/";
   const extraScripts = scripts.map((src) => `  <script src="${src}"></script>`).join("\n");
+  const bodyClass = theme ? ` class="theme-${theme}"` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -458,7 +486,7 @@ function shell({ title, active, body, scripts = [] }) {
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=${CSS_V}">
 </head>
-<body>
+<body${bodyClass}>
   <header class="site-header">
     <a class="brand" href="${home}"><img src="/media/project_icon/arkenelle_icon.png" alt="">Arkenelle</a>
     <nav class="primary">
@@ -780,7 +808,7 @@ function attachMapInhabitants(zones, npcs, creatures) {
 function foundInHtml(locations) {
   if (!locations || !locations.length) return "";
   return `<h2>Found in</h2><ul>${locations
-    .map((z) => `<li><a href="/wiki/locations/${z.slug}/">${esc(z.name)}</a></li>`)
+    .map((z) => `<li><a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a></li>`)
     .join("")}</ul>`;
 }
 
@@ -896,19 +924,20 @@ function lootList(drops, items) {
   return `<ul class="list-reset">${drops
     .map((d) => {
       const item = itemByPath(items, d.itemPath);
-      const label = item ? `<a href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(d.itemPath).replace(/_/g, " "));
+      const label = item ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(d.itemPath).replace(/_/g, " "));
       return `<li>${label}${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`;
     })
     .join("")}</ul>`;
 }
 
-function listPage(title, intro, cardsHtml, active) {
+function listPage(title, intro, cardsHtml, active, cat) {
   return shell({
     title: `${title} — Arkenelle Wiki`,
     active,
+    theme: cat,
     body: `<main class="wrap">
       ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: title }])}
-      <h1 class="section-title">${esc(title)}</h1>
+      ${pageHeading(cat, title)}
       <p class="muted">${esc(intro)}</p>
       <div class="item-grid">${cardsHtml}</div>
     </main>`,
@@ -986,19 +1015,28 @@ function build() {
       </section>
       <main class="wrap">
         <div class="grid-3">
-          <article class="card">
+          <article class="card wiki-card cat-play">
+            ${catIcon("play")}
+            <div>
             <h2>Play</h2>
-            <p><a href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, <a href="${PLAY_DESKTOP}">download the Windows app</a> (extract the zip, run Arkenelle.exe; it updates itself). itch.io remains an optional backup.</p>
+            <p><a class="cat-play" href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, <a class="cat-play" href="${PLAY_DESKTOP}">download the Windows app</a> (extract the zip, run Arkenelle.exe; it updates itself). itch.io remains an optional backup.</p>
+            </div>
           </article>
-          <article class="card">
+          <article class="card wiki-card cat-start">
+            ${catIcon("start")}
+            <div>
             <h2>Where to start</h2>
             <p>Talk to the Hall Keeper in Castle Garden. That first quest is orientation, not a class lock. Every Hero can train every weapon and every profession.</p>
-            <p><a href="/wiki/getting-started/">Getting started →</a></p>
+            <p><a class="cat-start" href="/wiki/getting-started/">Getting started →</a></p>
+            </div>
           </article>
-          <article class="card">
+          <article class="card wiki-card cat-guilds">
+            ${catIcon("guilds")}
+            <div>
             <h2>Guilds</h2>
-            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild in-game, or the <a href="/leaderboards/">live leaderboards</a>.</p>
-            <p><a href="/wiki/guilds/">Guilds &amp; territory →</a></p>
+            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild in-game, or the <a class="cat-boards" href="/leaderboards/">live leaderboards</a>.</p>
+            <p><a class="cat-guilds" href="/wiki/guilds/">Guilds &amp; territory →</a></p>
+            </div>
           </article>
         </div>
       </main>`,
@@ -1014,16 +1052,16 @@ function build() {
         <h1 class="section-title">Wiki</h1>
         <p class="muted">Generated from the live Godot resources, so names, stats, and drops match the game.</p>
         <div class="card-grid">
-          <a class="card" href="/wiki/getting-started/"><h3>Getting started</h3><p>First steps, install, and how progression works.</p></a>
-          <a class="card" href="/wiki/items/"><h3>Items</h3><p>${items.length} weapons, armor, materials, potions, and more.</p></a>
-          <a class="card" href="/wiki/creatures/"><h3>Creatures</h3><p>${creatures.length} enemies and bosses with authored loot.</p></a>
-          <a class="card" href="/wiki/locations/"><h3>Locations</h3><p>${zones.length} zones and dungeons.</p></a>
-          <a class="card" href="/wiki/npcs/"><h3>NPCs</h3><p>${npcs.length} friendly faces.</p></a>
-          <a class="card" href="/wiki/skills/"><h3>Skills</h3><p>${jobs.length} gathering and crafting professions.</p></a>
-          <a class="card" href="/wiki/slayer/"><h3>Slayer</h3><p>Masters, task pools, and creature assignments.</p></a>
-          <a class="card" href="/wiki/quests/"><h3>Quests</h3><p>${quests.length} authored quests.</p></a>
-          <a class="card" href="/wiki/guilds/"><h3>Guilds</h3><p>Territory, banners, and Glory.</p></a>
-          <a class="card" href="/leaderboards/"><h3>Leaderboards</h3><p>Live ranks from the running world.</p></a>
+          ${wikiCard("start", "/wiki/getting-started/", "Getting started", "First steps, install, and how progression works.")}
+          ${wikiCard("items", "/wiki/items/", "Items", `<strong>${items.length}</strong> weapons, armor, materials, potions, and more.`)}
+          ${wikiCard("creatures", "/wiki/creatures/", "Creatures", `<strong>${creatures.length}</strong> enemies and bosses with authored loot.`)}
+          ${wikiCard("locations", "/wiki/locations/", "Locations", `<strong>${zones.length}</strong> zones and dungeons.`)}
+          ${wikiCard("npcs", "/wiki/npcs/", "NPCs", `<strong>${npcs.length}</strong> friendly faces.`)}
+          ${wikiCard("skills", "/wiki/skills/", "Skills", `<strong>${jobs.length}</strong> gathering and crafting professions.`)}
+          ${wikiCard("slayer", "/wiki/slayer/", "Slayer", "Masters, task pools, and creature assignments.")}
+          ${wikiCard("quests", "/wiki/quests/", "Quests", `<strong>${quests.length}</strong> authored quests.`)}
+          ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
+          ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
         </div>
       </main>`,
     })
@@ -1034,10 +1072,11 @@ function build() {
     shell({
       title: "Leaderboards — Arkenelle",
       active: "boards",
+      theme: "boards",
       scripts: ["/leaderboards.js"],
       body: `<main class="wrap" data-leaderboards>
         <div class="lb-head">
-          <h1 class="section-title">Leaderboards</h1>
+          ${pageHeading("boards", "Leaderboards")}
           <p class="lb-status" data-lb-status>Loading live ranks…</p>
         </div>
         <p class="muted">The same public boards as in-game, refreshed from the live world about every 30 seconds. Staff characters stay hidden.</p>
@@ -1056,10 +1095,11 @@ function build() {
     shell({
       title: "Getting started — Arkenelle Wiki",
       active: "start",
+      theme: "start",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Getting started" }])}
         <article class="page prose">
-          <h1 class="section-title">Getting started</h1>
+          ${pageHeading("start", "Getting started")}
           <h2>Play</h2>
           <ol>
             <li><strong>Browser:</strong> open <a href="${PLAY_WEB}">play.arkenelle.com</a>. First load downloads the whole client; later visits reuse the cache. This is the lighter build (no weather).</li>
@@ -1087,11 +1127,12 @@ function build() {
     shell({
       title: "Guilds — Arkenelle Wiki",
       active: "wiki",
+      theme: "guilds",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Guilds" }])}
         <article class="page prose">
-          <h1 class="section-title">Guilds and territory</h1>
-          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The <a href="/leaderboards/">live leaderboards</a> show seasonal and eternal Glory, and the in-game Guild menu is the rest of the view.</p>
+          ${pageHeading("guilds", "Guilds and territory")}
+          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The <a class="cat-boards" href="/leaderboards/">live leaderboards</a> show seasonal and eternal Glory, and the in-game Guild menu is the rest of the view.</p>
           <p>This is sandbox PvE/PvP infrastructure, not a theme-park campaign. Holding land is the point; the wiki will not tell you which banner to hit first.</p>
         </article>
       </main>`,
@@ -1104,9 +1145,10 @@ function build() {
     shell({
       title: "Items — Arkenelle Wiki",
       active: "items",
+      theme: "items",
       body: `<main class="wrap">
       ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Items" }])}
-      <h1 class="section-title">Items</h1>
+      ${pageHeading("items", "Items")}
       <p class="muted">${items.length} items pulled from game resources.</p>
       <div class="filters" data-filters>
         <button type="button" class="active" data-kind="">All</button>
@@ -1115,7 +1157,7 @@ function build() {
       <div class="item-grid">${items
         .map(
           (it) =>
-            `<a class="item-card" data-kind="${esc(it.kind)}" href="/wiki/items/${it.slug}/"><span class="icon-frame">${iconHtml(it.icon)}</span><span><span class="name">${esc(it.name)}</span><span class="kind">${esc(it.kind)}</span></span></a>`
+            `<a class="item-card cat-items" data-kind="${esc(it.kind)}" href="/wiki/items/${it.slug}/"><span class="icon-frame">${iconHtml(it.icon)}</span><span><span class="name">${esc(it.name)}</span><span class="kind">${esc(it.kind)}</span></span></a>`
         )
         .join("")}</div>
     </main>`,
@@ -1138,6 +1180,7 @@ function build() {
       shell({
         title: `${it.name} — Arkenelle Wiki`,
         active: "items",
+        theme: "items",
         body: `<main class="wrap"><article class="page">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/items/", label: "Items" }, { label: it.name }])}
           <div class="detail-head">
@@ -1162,9 +1205,10 @@ function build() {
       npcs
         .map(
           (n) =>
-            `<a class="item-card" href="/wiki/npcs/${n.slug}/"><span><span class="name">${esc(n.name)}</span><span class="kind">${esc(n.offers.join(" · ") || "Talk")}</span></span></a>`
+            `<a class="item-card cat-npcs" href="/wiki/npcs/${n.slug}/"><span><span class="name">${esc(n.name)}</span><span class="kind">${esc(n.offers.join(" · ") || "Talk")}</span></span></a>`
         )
         .join(""),
+      "npcs",
       "npcs"
     )
   );
@@ -1174,6 +1218,7 @@ function build() {
       shell({
         title: `${n.name} — Arkenelle Wiki`,
         active: "npcs",
+        theme: "npcs",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/npcs/", label: "NPCs" }, { label: n.name }])}
           <h1 class="section-title">${esc(n.name)}</h1>
@@ -1193,9 +1238,10 @@ function build() {
       creatures
         .map(
           (c) =>
-            `<a class="item-card" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${c.boss ? "Boss" : "Enemy"}${c.level ? " · Lv " + c.level : ""}</span></span></a>`
+            `<a class="item-card cat-creatures" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${c.boss ? "Boss" : "Enemy"}${c.level ? " · Lv " + c.level : ""}</span></span></a>`
         )
         .join(""),
+      "creatures",
       "creatures"
     )
   );
@@ -1215,6 +1261,7 @@ function build() {
       shell({
         title: `${c.name} — Arkenelle Wiki`,
         active: "creatures",
+        theme: "creatures",
         body: `<main class="wrap"><article class="page">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/creatures/", label: "Creatures" }, { label: c.name }])}
           <h1 class="section-title">${esc(c.name)}</h1>
@@ -1235,9 +1282,10 @@ function build() {
       zones
         .map(
           (z) =>
-            `<a class="item-card" href="/wiki/locations/${z.slug}/"><span><span class="name">${esc(z.name)}</span><span class="kind">${z.isDungeon ? "Dungeon" : "Zone"}</span></span></a>`
+            `<a class="item-card cat-locations" href="/wiki/locations/${z.slug}/"><span><span class="name">${esc(z.name)}</span><span class="kind">${z.isDungeon ? "Dungeon" : "Zone"}</span></span></a>`
         )
         .join(""),
+      "locations",
       "locations"
     )
   );
@@ -1254,6 +1302,7 @@ function build() {
       shell({
         title: `${z.name} — Arkenelle Wiki`,
         active: "locations",
+        theme: "locations",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/locations/", label: "Locations" }, { label: z.name }])}
           <h1 class="section-title">${esc(z.name)}</h1>
@@ -1266,8 +1315,8 @@ function build() {
                     const kind = (n.offers && n.offers.length ? n.offers.join(" · ") : "") || "NPC";
                     const inner = `<span><span class="name">${esc(n.name)}</span><span class="kind">${esc(kind)}</span>${n.greeting ? `<span class="kind">${esc(n.greeting.length > 140 ? n.greeting.slice(0, 137) + "…" : n.greeting)}</span>` : ""}</span>`;
                     return n.slug
-                      ? `<a class="item-card" href="/wiki/npcs/${n.slug}/">${inner}</a>`
-                      : `<div class="item-card">${inner}</div>`;
+                      ? `<a class="item-card cat-npcs" href="/wiki/npcs/${n.slug}/">${inner}</a>`
+                      : `<div class="item-card cat-npcs">${inner}</div>`;
                   })
                   .join("")}</div>`
               : ""
@@ -1279,7 +1328,7 @@ function build() {
                     const extra = [c.boss ? "Boss" : "", c.level ? "Lv " + c.level : "", count > 1 ? "×" + count : ""]
                       .filter(Boolean)
                       .join(" · ");
-                    return `<a class="item-card" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(extra)}</span></span></a>`;
+                    return `<a class="item-card cat-creatures" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(extra)}</span></span></a>`;
                   })
                   .join("")}</div>`
               : ""
@@ -1297,10 +1346,11 @@ function build() {
       jobs
         .map(
           (j) =>
-            `<a class="item-card" href="/wiki/skills/${j.slug}/"><span class="icon-frame">${iconHtml(j.icon, 32)}</span><span><span class="name">${esc(j.name)}</span><span class="kind">${esc(j.category)}</span></span></a>`
+            `<a class="item-card cat-skills" href="/wiki/skills/${j.slug}/"><span class="icon-frame">${iconHtml(j.icon, 32)}</span><span><span class="name">${esc(j.name)}</span><span class="kind">${esc(j.category)}</span></span></a>`
         )
         .join(""),
-      "wiki"
+      "wiki",
+      "skills"
     )
   );
   for (const j of jobs) {
@@ -1308,7 +1358,7 @@ function build() {
       .map((p, i) => {
         const item = itemByPath(items, p);
         const lv = j.sourceLevels[i];
-        const label = item ? `<a href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(p).replace(/_/g, " "));
+        const label = item ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(p).replace(/_/g, " "));
         return `<li>${label}${lv != null ? ` — level ${lv}` : ""}</li>`;
       })
       .join("");
@@ -1317,6 +1367,7 @@ function build() {
       shell({
         title: `${j.name} — Arkenelle Wiki`,
         active: "wiki",
+        theme: "skills",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/skills/", label: "Skills" }, { label: j.name }])}
           <div class="detail-head">
@@ -1337,14 +1388,15 @@ function build() {
     shell({
       title: "Slayer — Arkenelle Wiki",
       active: "wiki",
+      theme: "slayer",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Slayer" }])}
-        <h1 class="section-title">Slayer</h1>
+        ${pageHeading("slayer", "Slayer")}
         <p class="muted">Masters assign creature tasks. Kill the assigned types to finish the count.</p>
         <h2>Masters</h2>
         <div class="card-grid">${slayer.masters
           .map(
-            (m) => `<article class="card"><h3>${esc(m.name)}</h3>
+            (m) => `<article class="card wiki-card cat-slayer">${catIcon("slayer")}<div><h3>${esc(m.name)}</h3>
             <p class="muted">${esc(m.location)}${m.min ? ` · Slayer ${m.min}+` : ""}</p>
             ${m.greeting ? `<p>${esc(m.greeting)}</p>` : ""}
             <ul>${m.pool
@@ -1352,21 +1404,21 @@ function build() {
                 const t = taskBySlug[p.task];
                 return `<li>${esc(t ? t.name : p.task)} (${p.min}–${p.max})</li>`;
               })
-              .join("")}</ul></article>`
+              .join("")}</ul></div></article>`
           )
           .join("")}</div>
         <h2>Task types</h2>
         <div class="card-grid">${slayer.tasks
           .map(
-            (t) => `<article class="card"><h3>${esc(t.name)}</h3>
+            (t) => `<article class="card wiki-card cat-slayer">${catIcon("slayer")}<div><h3>${esc(t.name)}</h3>
             <p class="muted">${esc(t.location)}${t.min ? ` · Slayer ${t.min}+` : ""} · ${t.xp} XP / kill</p>
             ${t.notes ? `<p>${esc(t.notes)}</p>` : ""}
             <p>${t.enemies
               .map((e) => {
                 const c = creatures.find((x) => x.type === e || x.slug === e);
-                return c ? `<a href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>` : esc(e);
+                return c ? `<a class="cat-creatures" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>` : esc(e);
               })
-              .join(", ")}</p></article>`
+              .join(", ")}</p></div></article>`
           )
           .join("")}</div>
       </main>`,
@@ -1381,10 +1433,11 @@ function build() {
       quests
         .map(
           (q) =>
-            `<a class="item-card" href="/wiki/quests/${q.slug}/"><span><span class="name">${esc(q.name)}</span><span class="kind">${q.xp ? q.xp + " XP" : "Quest"}</span></span></a>`
+            `<a class="item-card cat-quests" href="/wiki/quests/${q.slug}/"><span><span class="name">${esc(q.name)}</span><span class="kind">${q.xp ? q.xp + " XP" : "Quest"}</span></span></a>`
         )
         .join(""),
-      "wiki"
+      "wiki",
+      "quests"
     )
   );
   for (const q of quests) {
@@ -1393,6 +1446,7 @@ function build() {
       shell({
         title: `${q.name} — Arkenelle Wiki`,
         active: "wiki",
+        theme: "quests",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/quests/", label: "Quests" }, { label: q.name }])}
           <h1 class="section-title">${esc(q.name)}</h1>
