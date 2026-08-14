@@ -81,7 +81,7 @@ func _build_shell() -> void:
 	header.add_child(_count_label)
 
 	var close_x: Button = Button.new()
-	close_x.text = "✕"
+	close_x.text = UiGlyphs.close()
 	close_x.focus_mode = Control.FOCUS_NONE
 	close_x.custom_minimum_size = Vector2(34, 34)
 	close_x.tooltip_text = "Close"

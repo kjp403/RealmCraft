@@ -17,6 +17,10 @@ const SETTING_PROPERTY: StringName = &"slayer_tracker"
 
 var _content: VBoxContainer
 var _cached: Dictionary = {}
+## Web-only hover card. Godot tooltip_text popups do not show in the HTML5 export.
+var _hint_panel: PanelContainer
+var _hint_label: Label
+var _hover_copy: String = ""
 
 
 ## Whether the player has the tracker switched on (default true). Static so the
@@ -49,6 +53,11 @@ func _ready() -> void:
 	margin.add_child(_content)
 
 	hide()
+	if UiGlyphs.is_web():
+		_build_web_hint()
+		mouse_entered.connect(_show_web_hint)
+		mouse_exited.connect(_hide_web_hint)
+		gui_input.connect(_on_web_gui_input)
 	Client.subscribe(&"slayer.update", _on_slayer_update)
 	ClientState.local_player_ready.connect(func(_lp: LocalPlayer): refresh())
 	ClientState.settings.setting_changed.connect(_on_setting_changed)
@@ -93,7 +102,9 @@ func _on_slayer_update(payload: Dictionary) -> void:
 
 func _refresh() -> void:
 	if InstanceClient.current == null:
+		_hover_copy = ""
 		tooltip_text = ""
+		_hide_web_hint()
 		hide()
 		return
 	Client.request_data(&"slayer.info", _on_received, {}, InstanceClient.current.name)
@@ -101,7 +112,9 @@ func _refresh() -> void:
 
 func _on_received(data: Dictionary) -> void:
 	if not bool(data.get("ok", false)):
+		_hover_copy = ""
 		tooltip_text = ""
+		_hide_web_hint()
 		hide()
 		return
 	_cached = data.duplicate(true)
@@ -114,7 +127,9 @@ func _display(data: Dictionary) -> void:
 
 	var has_task: bool = data.has("display_name") and not str(data.get("display_name", "")).is_empty()
 	if not has_task or not is_enabled():
+		_hover_copy = ""
 		tooltip_text = ""
+		_hide_web_hint()
 		hide()
 		return
 
@@ -135,14 +150,15 @@ func _display(data: Dictionary) -> void:
 	title_row.add_child(title)
 
 	var hide_button: Button = Button.new()
-	hide_button.text = "✕"
+	hide_button.text = UiGlyphs.close()
 	hide_button.flat = true
 	hide_button.focus_mode = Control.FOCUS_NONE
 	hide_button.custom_minimum_size = Vector2(12, 12)
 	hide_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hide_button.add_theme_font_size_override(&"font_size", 8)
 	hide_button.add_theme_stylebox_override(&"normal", StyleBoxEmpty.new())
-	hide_button.tooltip_text = "Hide the Slayer tracker (turn it back on in Settings)."
+	if not UiGlyphs.is_web():
+		hide_button.tooltip_text = "Hide the Slayer tracker (turn it back on in Settings)."
 	hide_button.pressed.connect(_on_hide_pressed)
 	title_row.add_child(hide_button)
 
@@ -161,13 +177,57 @@ func _display(data: Dictionary) -> void:
 	progress.add_theme_color_override(&"font_color", Color(0.92, 0.9, 0.82))
 	_content.add_child(progress)
 
-	tooltip_text = _hover_text(data, killed, assigned, remaining)
+	_hover_copy = _hover_text(data, killed, assigned, remaining)
+	tooltip_text = "" if UiGlyphs.is_web() else _hover_copy
 	show()
 
 
 func _on_hide_pressed() -> void:
+	_hide_web_hint()
 	set_enabled(false)
 	Toaster.toast("Slayer tracker hidden — turn it back on in Settings.")
+
+
+func _build_web_hint() -> void:
+	_hint_panel = PanelContainer.new()
+	_hint_panel.visible = false
+	_hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hint_panel.z_index = 80
+	_hint_panel.add_theme_stylebox_override(&"panel", _make_panel_style())
+	var pad: MarginContainer = MarginContainer.new()
+	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 6)
+	_hint_label = Label.new()
+	_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hint_label.add_theme_font_size_override(&"font_size", 10)
+	_hint_label.add_theme_color_override(&"font_color", Color(0.92, 0.9, 0.82))
+	pad.add_child(_hint_label)
+	_hint_panel.add_child(pad)
+	add_child(_hint_panel)
+	_hint_panel.set_as_top_level(true)
+
+
+func _show_web_hint() -> void:
+	if _hint_panel == null or _hint_label == null or _hover_copy.is_empty() or not visible:
+		return
+	_hint_label.text = _hover_copy
+	_hint_panel.visible = true
+	_hint_panel.reset_size()
+	_hint_panel.global_position = global_position + Vector2(0.0, size.y + 4.0)
+
+
+func _hide_web_hint() -> void:
+	if _hint_panel != null:
+		_hint_panel.visible = false
+
+
+func _on_web_gui_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch and event.pressed:
+		if _hint_panel != null and _hint_panel.visible:
+			_hide_web_hint()
+		else:
+			_show_web_hint()
 
 
 func _hover_text(data: Dictionary, killed: int, assigned: int, remaining: int) -> String:
@@ -179,7 +239,7 @@ func _hover_text(data: Dictionary, killed: int, assigned: int, remaining: int) -
 	var xp_max: int = int(data.get("xp_per_kill_max", xp_min))
 	if xp_min > 0:
 		if xp_max > xp_min:
-			lines.append("%d–%d XP/kill" % [xp_min, xp_max])
+			lines.append("%d-%d XP/kill" % [xp_min, xp_max])
 		else:
 			lines.append("%d XP/kill" % xp_min)
 	lines.append("%d/%d killed · %d left" % [killed, assigned, remaining])

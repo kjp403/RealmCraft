@@ -270,13 +270,13 @@ func _add_player_row(entry: Dictionary) -> void:
 	row.add_theme_font_size_override(&"font_size", 9)
 
 	if is_online:
-		row.text = "●  " + display_name
+		row.text = UiGlyphs.bullet() + "  " + display_name
 		row.add_theme_color_override(
 			&"font_color",
 			Color(0.58, 0.92, 0.58)
 		)
 	else:
-		row.text = "○  " + display_name
+		row.text = UiGlyphs.hollow_bullet() + "  " + display_name
 		row.add_theme_color_override(
 			&"font_color",
 			Color(0.64, 0.65, 0.70)

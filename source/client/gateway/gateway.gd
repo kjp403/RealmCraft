@@ -136,12 +136,27 @@ func _ready() -> void:
 	await get_tree().create_timer(1.5).timeout
 
 	if ClientUpdater.should_run():
-		_set_connecting_text(tr("CHECKING_UPDATE"))
-		var update_result: Dictionary = await ClientUpdater.apply_if_needed(
-			self, _set_connecting_text
-		)
-		if bool(update_result.get("quit", false)):
-			return
+		while true:
+			_set_connecting_text(tr("CHECKING_UPDATE"))
+			var update_result: Dictionary = await ClientUpdater.apply_if_needed(
+				self, _set_connecting_text
+			)
+			if bool(update_result.get("quit", false)):
+				return
+			if bool(update_result.get("ok", false)):
+				break
+			# latest.json says a newer zip is up — do not silently keep playing
+			# the old EXE. Manifest/network misses still fall through to handshake.
+			if bool(update_result.get("needed", false)):
+				_hide_connecting()
+				await popup_panel.confirm_message(
+					tr("UPDATE_FAILED") % str(update_result.get("error", "")),
+					&"UPDATE_TITLE",
+					&"RETRY"
+				)
+				_show_connecting()
+				continue
+			break
 
 	# Boot gate: confirm the gateway is reachable + our build matches before any menu
 	# shows. Blocks (update) or retries on failure; else resumes or reveals the menu.
@@ -303,6 +318,9 @@ func _block_outdated(detail: String) -> void:
 			)
 			if bool(update_result.get("quit", false)):
 				return
+			var apply_error: String = str(update_result.get("error", "")).strip_edges()
+			if not apply_error.is_empty() and apply_error != "already-latest":
+				message = tr("UPDATE_FAILED") % apply_error
 			continue
 		OS.shell_open(LINK_DOWNLOAD)
 		if attempts > 2:

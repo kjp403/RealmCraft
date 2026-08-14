@@ -27,12 +27,20 @@ func _init() -> void:
 		failures.append("ClientUpdater must spawn apply_update.cmd")
 	if updater.find("skip-update") < 0:
 		failures.append("ClientUpdater must honor --skip-update")
+	if updater.find("\"needed\"") < 0:
+		failures.append("ClientUpdater must report whether an update was needed")
+	if updater.find("accept_gzip = false") < 0:
+		failures.append("ClientUpdater must disable gzip on the zip download")
+	if updater.find("\"/min\"") < 0:
+		failures.append("ClientUpdater must detach apply_update.cmd via start /min")
 
 	var gateway: String = FileAccess.get_file_as_string(
 		"res://source/client/gateway/gateway.gd"
 	)
 	if gateway.find("ClientUpdater.apply_if_needed") < 0:
 		failures.append("gateway boot must call ClientUpdater")
+	if gateway.find("UPDATE_FAILED") < 0:
+		failures.append("gateway must surface updater failures instead of ignoring them")
 	if gateway.find("Distribution.CLIENT_DOWNLOAD_URL") < 0:
 		failures.append("outdated-client fallback must be CLIENT_DOWNLOAD_URL")
 	if gateway.find("ITCH_APP_URL") >= 0:

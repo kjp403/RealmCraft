@@ -608,7 +608,7 @@ func _make_row(index: int, recipe: CraftingRecipe) -> Button:
 		status.add_theme_font_size_override(&"font_size", 12)
 		row.modulate = Color(1, 1, 1, 0.55)
 	else:
-		status.text = "●"
+		status.text = UiGlyphs.bullet()
 		status.add_theme_color_override(&"font_color", COLOR_OK if _has_ingredients(recipe) else COLOR_MUTED)
 	hbox.add_child(status)
 	return row

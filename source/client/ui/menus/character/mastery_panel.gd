@@ -119,7 +119,7 @@ func _rebuild_list() -> void:
 		button.button_pressed = (String(category) == _selected)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.custom_minimum_size = Vector2(0, 42)
-		var badge: String = "   ●%d" % points if points > 0 else ""
+		var badge: String = "   %s%d" % [UiGlyphs.bullet(), points] if points > 0 else ""
 		button.text = ("%s · Lv %d%s" % [display, level, badge]) if level > 0 else ("%s · unpracticed" % display)
 		if points > 0:
 			button.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.5))

@@ -315,10 +315,10 @@ func _make_quest_row(quest: Dictionary) -> Button:
 	row.tooltip_text = quest_name
 
 	if state == "turned_in":
-		row.text = "✓  " + quest_name
+		row.text = UiGlyphs.check() + "  " + quest_name
 	elif state == "active":
 		row.text = (
-			"◆  " + quest_name
+			UiGlyphs.diamond() + "  " + quest_name
 			if ClientState.tracked_quest_id == quest_id
 			else quest_name
 		)

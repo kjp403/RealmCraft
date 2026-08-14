@@ -147,7 +147,7 @@ func _build_interface() -> void:
 	_map_texture.gui_input.connect(_on_map_gui_input)
 	map_frame.add_child(_map_texture)
 
-	_player_marker = _make_marker("◆", Color(0.35, 0.95, 1.0))
+	_player_marker = _make_marker(UiGlyphs.diamond(), Color(0.35, 0.95, 1.0))
 	_player_marker.tooltip_text = "You"
 	map_frame.add_child(_player_marker)
 
@@ -433,17 +433,7 @@ func _set_marker_center(marker: Control, center: Vector2) -> void:
 
 
 func _direction_arrow(direction: Vector2) -> String:
-	if direction == Vector2.ZERO:
-		return "◆"
-	var octant: int = wrapi(
-		roundi(direction.angle() / (PI / 4.0)),
-		0,
-		8
-	)
-	var arrows: PackedStringArray = [
-		"→", "↘", "↓", "↙", "←", "↖", "↑", "↗",
-	]
-	return arrows[octant]
+	return UiGlyphs.compass(direction)
 
 
 func _make_panel_style() -> StyleBoxFlat:

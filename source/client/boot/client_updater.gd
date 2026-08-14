@@ -23,28 +23,30 @@ static func should_run() -> bool:
 	return true
 
 
-## Returns {ok, quit, error}. quit=true means this process is exiting for apply_update.cmd.
+## Returns {ok, quit, error, needed}. needed=true means latest.json is newer than
+## this EXE (or force=true). quit=true means this process is exiting for apply_update.cmd.
 static func apply_if_needed(host: Node, status: Callable = Callable(), force: bool = false) -> Dictionary:
 	if not should_run():
-		return {"ok": true, "quit": false, "error": ""}
+		return _result(true, false, "", false)
 	_status(status, tr("CHECKING_UPDATE"))
 	var manifest: Dictionary = await _fetch_manifest(host)
 	if manifest.is_empty():
-		return {"ok": false, "quit": false, "error": "manifest"}
+		push_warning("ClientUpdater: could not fetch latest.json")
+		return _result(false, false, "manifest", false)
 	var remote_version: String = str(manifest.get("version", "")).strip_edges()
 	var local_version: String = GatewayAPI.game_version()
 	if remote_version.is_empty():
-		return {"ok": false, "quit": false, "error": "manifest"}
+		return _result(false, false, "manifest", false)
 	var cmp: int = GatewayAPI.compare_versions(local_version, remote_version)
 	if cmp >= 0 and not force:
-		return {"ok": true, "quit": false, "error": ""}
+		return _result(true, false, "", false)
 	if cmp >= 0 and force:
-		return {"ok": false, "quit": false, "error": "already-latest"}
+		return _result(false, false, "already-latest", false)
 
 	var zip_url: String = str(manifest.get("url", Distribution.CLIENT_DOWNLOAD_URL)).strip_edges()
 	var expect_sha: String = str(manifest.get("sha256", "")).strip_edges().to_lower()
 	if zip_url.is_empty() or expect_sha.is_empty():
-		return {"ok": false, "quit": false, "error": "manifest"}
+		return _result(false, false, "manifest", true)
 
 	var install_dir: String = OS.get_executable_path().get_base_dir()
 	var zip_path: String = install_dir.path_join(ZIP_NAME)
@@ -53,39 +55,44 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	var dl_ok: bool = await _download_file(host, zip_url, zip_path, status)
 	if not dl_ok:
 		_cleanup_path(zip_path)
-		return {"ok": false, "quit": false, "error": "download"}
+		push_warning("ClientUpdater: download failed")
+		return _result(false, false, "download", true)
 
 	var got_sha: String = _sha256_file(zip_path)
 	if got_sha != expect_sha:
 		push_warning("ClientUpdater: sha256 mismatch (got %s want %s)" % [got_sha, expect_sha])
 		_cleanup_path(zip_path)
-		return {"ok": false, "quit": false, "error": "checksum"}
+		return _result(false, false, "checksum", true)
 
 	_status(status, tr("INSTALLING_UPDATE"))
 	_remove_dir(stage_dir)
 	if not _extract_zip(zip_path, stage_dir):
 		_cleanup_path(zip_path)
 		_remove_dir(stage_dir)
-		return {"ok": false, "quit": false, "error": "extract"}
+		return _result(false, false, "extract", true)
 	_cleanup_path(zip_path)
 
 	if not FileAccess.file_exists(stage_dir.path_join("Arkenelle.exe")) \
 			and not FileAccess.file_exists(stage_dir.path_join(OS.get_executable_path().get_file())):
 		push_warning("ClientUpdater: staged update is missing Arkenelle.exe")
 		_remove_dir(stage_dir)
-		return {"ok": false, "quit": false, "error": "extract"}
+		return _result(false, false, "extract", true)
 
 	var script_path: String = install_dir.path_join(APPLY_SCRIPT_NAME)
 	if not _write_apply_script(script_path):
 		_remove_dir(stage_dir)
-		return {"ok": false, "quit": false, "error": "script"}
+		return _result(false, false, "script", true)
 
 	var exe_name: String = OS.get_executable_path().get_file()
 	var pid: int = OS.get_process_id()
+	# `start ""` detaches apply_update.cmd so it survives this process exiting.
 	var err: int = OS.create_process(
 		"cmd.exe",
 		PackedStringArray([
 			"/c",
+			"start",
+			"",
+			"/min",
 			_win_path(script_path),
 			_win_path(install_dir),
 			_win_path(stage_dir),
@@ -96,9 +103,13 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	if err < 0:
 		push_warning("ClientUpdater: failed to spawn apply_update.cmd")
 		_remove_dir(stage_dir)
-		return {"ok": false, "quit": false, "error": "spawn"}
+		return _result(false, false, "spawn", true)
 	host.get_tree().quit()
-	return {"ok": true, "quit": true, "error": ""}
+	return _result(true, true, "", true)
+
+
+static func _result(ok: bool, quit: bool, error: String, needed: bool) -> Dictionary:
+	return {"ok": ok, "quit": quit, "error": error, "needed": needed}
 
 
 static func _status(status: Callable, text: String) -> void:
@@ -166,6 +177,8 @@ static func _download_file(host: Node, url: String, dest: String, status: Callab
 static func _make_http(host: Node) -> HTTPRequest:
 	var http: HTTPRequest = HTTPRequest.new()
 	http.use_threads = true
+	http.accept_gzip = false
+	http.body_size_limit = -1
 	host.add_child(http)
 	return http
 
@@ -176,8 +189,11 @@ static func _sha256_file(path: String) -> String:
 		return ""
 	var ctx: HashingContext = HashingContext.new()
 	ctx.start(HashingContext.HASH_SHA256)
-	while not f.eof_reached():
-		ctx.update(f.get_buffer(1024 * 1024))
+	var remaining: int = f.get_length()
+	while remaining > 0:
+		var n: int = mini(remaining, 1024 * 1024)
+		ctx.update(f.get_buffer(n))
+		remaining -= n
 	f.close()
 	return ctx.finish().hex_encode()
 
@@ -238,10 +254,11 @@ set "STAGE=%~2"
 set "WAITPID=%~3"
 set "EXENAME=%~4"
 :wait
-timeout /t 1 /nobreak >nul
-tasklist /FI "PID eq %WAITPID%" 2>nul | find /I /C "No tasks" >nul
-if errorlevel 1 goto wait
+ping 127.0.0.1 -n 2 >nul
+tasklist /FI "PID eq %WAITPID%" 2>nul | findstr /I "%WAITPID%" >nul
+if not errorlevel 1 goto wait
 robocopy "%STAGE%" "%INSTALL%" /E /IS /IT /NFL /NDL /NJH /NJS /nc /ns /np
+if errorlevel 8 exit /b 1
 rmdir /S /Q "%STAGE%"
 start "" "%INSTALL%\\%EXENAME%"
 endlocal

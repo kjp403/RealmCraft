@@ -17,6 +17,13 @@ extends Node
 # through silence ("the music starts 10 s late"). -30 dB is a faint-but-audible
 # start that rises smoothly across the whole duration.
 const MUSIC_FADE_IN_FLOOR_DB: float = -30.0
+## Hard floor used when a slider is at 0%. linear_to_db(0) is -inf, which some
+## backends (HTML5 Web Audio, a few WASAPI paths) ignore — the bus then stays
+## at the previous gain and UI cues keep playing.
+const BUS_MUTE_DB: float = -80.0
+## Values that round to "0%" on the settings label. 0.001–0.004 still make sound
+## but display as 0% on the 0.001-step slider.
+const MUTE_LINEAR: float = 0.005
 
 ## Crossfade used when a playlist rotates to its next track.
 const PLAYLIST_FADE_S: float = 3.0
@@ -43,6 +50,8 @@ var _playlist_gen: int = 0
 ## (level-up jingles cut themselves short when another fires mid-play).
 var _replaceable_ui_stream_id: int = -1
 var _replaceable_ui_path: String = ""
+var _music_linear: float = 1.0
+var _sfx_linear: float = 1.0
 
 
 func _ready() -> void:
@@ -61,6 +70,7 @@ func _ready() -> void:
 		AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Master"), true)
 	elif args.has("no-sfx"):
 		AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Sound"), true)
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Ui"), true)
 
 	ui_player.play()
 	ClientState.settings.setting_changed.connect(_on_setting_changed)
@@ -76,8 +86,8 @@ func _on_setting_changed(section: StringName, property: StringName, value: Varia
 
 ## Sets music volume.
 func set_music_volume(volume_linear: float) -> void:
-	var bus_index: int = AudioServer.get_bus_index(&"Music")
-	AudioServer.set_bus_volume_linear(bus_index, clampf(volume_linear, 0.0, 1.0))
+	_music_linear = clampf(volume_linear, 0.0, 1.0)
+	_set_bus_gain(&"Music", _music_linear)
 
 
 ## Load and play music from the given path.
@@ -240,7 +250,11 @@ func play_ui_sound_stream(
 	replace_path: String = "",
 ) -> bool:
 	if not sound: return false
+	if _is_silent(_sfx_linear):
+		return false
 	var playback: AudioStreamPlaybackPolyphonic = ui_player.get_stream_playback()
+	if playback == null:
+		return false
 	if not replace_path.is_empty() and replace_path == _replaceable_ui_path and _replaceable_ui_stream_id >= 0:
 		playback.stop_stream(_replaceable_ui_stream_id)
 		_replaceable_ui_stream_id = -1
@@ -256,8 +270,11 @@ func play_ui_sound_stream(
 
 ## Sets all sound effects volume. UI and spatial sound effects.
 func set_sfx_volume(volume_linear: float) -> void:
-	var bus_index: int = AudioServer.get_bus_index(&"Sound")
-	AudioServer.set_bus_volume_linear(bus_index, clampf(volume_linear, 0.0, 1.0))
+	_sfx_linear = clampf(volume_linear, 0.0, 1.0)
+	# Ui sends through Sound, but mute both: linear 0 → -inf is ignored on some
+	# backends, and UI one-shots (hover, level-up) are the ones that leak.
+	_set_bus_gain(&"Sound", _sfx_linear)
+	_set_bus_gain(&"Ui", _sfx_linear)
 
 
 ## Load and play a spatial sound from the given path.
@@ -265,6 +282,8 @@ func set_sfx_volume(volume_linear: float) -> void:
 ## [position] - The 2D world position that the sound will play from.[br]
 ## [override_max_distance] - Overrides the default max distance. leave at 0.0 to use default distance.
 func play_sfx(sound_path: String, position: Vector2, override_max_distance: int = 0, pitch: float = 1.0) -> bool:
+	if _is_silent(_sfx_linear):
+		return false
 	var sound: AudioStream = _get_sound(sound_path)
 	return sfx_player.play_stream(sound, position, override_max_distance, pitch)
 
@@ -273,11 +292,29 @@ func play_sfx(sound_path: String, position: Vector2, override_max_distance: int 
 ## [position] - The 2D world position that the sound will play from.[br]
 ## [override_max_distance] - Overrides the default max distance. leave at 0.0 to use default distance.
 func play_sfx_stream(sound: AudioStream, position: Vector2, override_max_distance: int = 0, pitch: float = 1.0) -> bool:
+	if _is_silent(_sfx_linear):
+		return false
 	return sfx_player.play_stream(sound, position, override_max_distance, pitch)
 
 #endregion
 
 #region Helpers
+
+func _is_silent(volume_linear: float) -> bool:
+	return volume_linear < MUTE_LINEAR
+
+
+func _set_bus_gain(bus_name: StringName, volume_linear: float) -> void:
+	var bus_index: int = AudioServer.get_bus_index(bus_name)
+	if bus_index < 0:
+		push_warning("AudioManager: missing bus '%s'" % bus_name)
+		return
+	var silent: bool = _is_silent(volume_linear)
+	AudioServer.set_bus_mute(bus_index, silent)
+	if silent:
+		AudioServer.set_bus_volume_db(bus_index, BUS_MUTE_DB)
+	else:
+		AudioServer.set_bus_volume_linear(bus_index, volume_linear)
 
 ## Fade the given [AudioStreamPlayer] volume.
 func fade_volume(player: AudioStreamPlayer, to_volume: float, duration: float = 1.0) -> void:
