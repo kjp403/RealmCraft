@@ -1,0 +1,31 @@
+name: Build website
+
+on:
+  pull_request:
+    paths:
+      - "website/**"
+      - "source/common/gameplay/**"
+      - "assets/sprites/items/**"
+      - "assets/project_icon/**"
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "source/common/gameplay/**"
+      - "assets/sprites/items/**"
+      - "assets/project_icon/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate site
+        run: node website/build.mjs
+      - name: Check output
+        run: test -f website/dist/index.html && test -f website/dist/wiki/index.html

@@ -31,6 +31,9 @@ addons/godot-sqlite/bin/*
 # lock file for excel/libreoffice CSV editting
 .~lock.translations.csv#
 
+# Generated Arkenelle website (Cloudflare Pages output)
+website/dist/
+
 /docs
 /data/config/discord_webhook.cfg
 source/server/master/account_collection.tres
