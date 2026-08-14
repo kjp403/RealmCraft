@@ -441,6 +441,26 @@ function copyMedia() {
   }
 }
 
+const LOC_BG_DIR = path.join(SRC, "location-bgs");
+
+function locationBgUrl(slug) {
+  const jpg = path.join(LOC_BG_DIR, slug + ".jpg");
+  const png = path.join(LOC_BG_DIR, slug + ".png");
+  if (fs.existsSync(jpg)) return `/media/locations/${slug}.jpg`;
+  if (fs.existsSync(png)) return `/media/locations/${slug}.png`;
+  return "";
+}
+
+function copyLocationBgs() {
+  if (!fs.existsSync(LOC_BG_DIR)) return;
+  const dest = path.join(DIST, "media", "locations");
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(LOC_BG_DIR)) {
+    if (!name.endsWith(".png") && !name.endsWith(".jpg")) continue;
+    fs.copyFileSync(path.join(LOC_BG_DIR, name), path.join(dest, name));
+  }
+}
+
 function catIcon(id) {
   const d = {
     start: `<circle cx="12" cy="12" r="8.5"/><path d="M12 3.8v2.6M12 17.6v2.6M3.8 12h2.6M17.6 12h2.6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 7.2l1.7 4.3H12"/>`,
@@ -468,11 +488,12 @@ function wikiCard(cat, href, title, bodyHtml) {
   return `<a class="card wiki-card cat-${cat}" href="${href}">${catIcon(cat)}<div><h3>${esc(title)}</h3><p>${bodyHtml}</p></div></a>`;
 }
 
-function shell({ title, active, body, scripts = [], theme = "" }) {
+function shell({ title, active, body, scripts = [], theme = "", extraClass = "" }) {
   const home = "/";
   const wiki = "/wiki/";
   const extraScripts = scripts.map((src) => `  <script src="${src}"></script>`).join("\n");
-  const bodyClass = theme ? ` class="theme-${theme}"` : "";
+  const classes = [theme ? `theme-${theme}` : "", extraClass].filter(Boolean).join(" ");
+  const bodyClass = classes ? ` class="${classes}"` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -1297,13 +1318,16 @@ function build() {
       z.party ? ["Party size", String(z.party)] : null,
       z.wardstone ? ["Wardstone", z.wardstone] : null,
     ].filter(Boolean);
+    const bg = locationBgUrl(z.slug);
     write(
       `wiki/locations/${z.slug}/index.html`,
       shell({
         title: `${z.name} — Arkenelle Wiki`,
         active: "locations",
         theme: "locations",
-        body: `<main class="wrap"><article class="page prose">
+        extraClass: bg ? "location-scene" : "",
+        body: `${bg ? `<div class="location-scene-bg" style="background-image:url('${bg}')" aria-hidden="true"></div>` : ""}
+        <main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/locations/", label: "Locations" }, { label: z.name }])}
           <h1 class="section-title">${esc(z.name)}</h1>
           ${z.description ? `<p>${esc(z.description)}</p>` : ""}
@@ -1485,6 +1509,7 @@ function build() {
   );
 
   copyMedia();
+  copyLocationBgs();
 
   console.log(
     [
