@@ -12,6 +12,7 @@ const DIST = path.join(ROOT, "website", "dist");
 const SRC = path.join(ROOT, "website", "src");
 
 const ITCH = "https://kjp403.itch.io/arkenelle";
+const PLAY_WEB = "https://play.arkenelle.com/";
 const DISCORD = "https://discord.gg/kSs3hxByV";
 const ITCH_APP = "https://itch.io/app";
 
@@ -461,7 +462,8 @@ function shell({ title, active, body, scripts = [] }) {
       <a href="/wiki/creatures/" class="${active === "creatures" ? "active" : ""}">Creatures</a>
       <a href="/wiki/locations/" class="${active === "locations" ? "active" : ""}">Locations</a>
       <a href="/wiki/npcs/" class="${active === "npcs" ? "active" : ""}">NPCs</a>
-      <a href="${ITCH}">Play</a>
+      <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
+      <a href="${ITCH}">Download</a>
       <a href="${DISCORD}">Discord</a>
     </nav>
     <div class="search-wrap">
@@ -949,19 +951,23 @@ function build() {
           <div class="alpha">Private alpha</div>
           <h1>Arkenelle</h1>
           <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory. Finding your own footing is the point.</p>
-          <div class="cta-row">
-            <a class="btn primary" href="${ITCH}">Get the client</a>
-            <a class="btn" href="${DISCORD}">Discord</a>
-            <a class="btn" href="/wiki/">Open the wiki</a>
-            <a class="btn" href="/leaderboards/">Live leaderboards</a>
+          <div class="cta-stack">
+            <a class="btn play" href="${PLAY_WEB}">Play in your browser</a>
+            <p class="cta-note">No download. Opens the live game in Chrome or Firefox.</p>
+            <div class="cta-row">
+              <a class="btn" href="${ITCH}">Desktop client</a>
+              <a class="btn" href="${DISCORD}">Discord</a>
+              <a class="btn" href="/wiki/">Wiki</a>
+              <a class="btn" href="/leaderboards/">Leaderboards</a>
+            </div>
           </div>
         </div>
       </section>
       <main class="wrap">
         <div class="grid-3">
           <article class="card">
-            <h2>Install once</h2>
-            <p>Install with the <a href="${ITCH_APP}">itch.io app</a> from <a href="${ITCH}">kjp403.itch.io/arkenelle</a>. Later releases update inside the app. Browser downloads will not auto-update.</p>
+            <h2>Play</h2>
+            <p><a href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, install with the <a href="${ITCH_APP}">itch.io app</a> from <a href="${ITCH}">kjp403.itch.io/arkenelle</a>.</p>
           </article>
           <article class="card">
             <h2>Where to start</h2>
@@ -1033,11 +1039,10 @@ function build() {
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Getting started" }])}
         <article class="page prose">
           <h1 class="section-title">Getting started</h1>
-          <h2>Install</h2>
+          <h2>Play</h2>
           <ol>
-            <li>Install the <a href="${ITCH_APP}">itch.io app</a>.</li>
-            <li>Open <a href="${ITCH}">Arkenelle on itch.io</a> <em>inside the app</em> and click Install.</li>
-            <li>Updates arrive in the app after each release. Do not rely on the browser Download button for that.</li>
+            <li><strong>Browser:</strong> open <a href="${PLAY_WEB}">play.arkenelle.com</a>. First load downloads the whole client; later visits reuse the cache. This is the lighter build (no weather).</li>
+            <li><strong>Desktop (recommended):</strong> install the <a href="${ITCH_APP}">itch.io app</a>, open <a href="${ITCH}">Arkenelle on itch.io</a> <em>inside the app</em>, and click Install. Updates arrive in the app after each release.</li>
           </ol>
           <h2>First steps</h2>
           <p>You wake in Castle Garden. The Hall Keeper near your starting cell has your first quest, <strong>Find Your Footing</strong>. It is orientation, not a class choice. Arkenelle does not lock you into a weapon or profession.</p>
