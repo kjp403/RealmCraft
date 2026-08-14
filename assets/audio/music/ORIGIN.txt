@@ -1,6 +1,17 @@
-Arkenelle original soundtrack.
-Synthesized in-repo by tools/compose_arkenelle_music.py.
-No third-party samples, MIDI packs, Epidemic Sound, or catalog tracks.
-Each filename is a zone mood (hub, woodland, desert, forge, cave, ...).
-Loops are drumless cinematic/folk pads so they do not rattle in-game.
-Arkenelle / RealmCraft may use these commercially.
+Arkenelle soundtrack from Kyle's Music.zip (2026-08-14).
+Converted to looping Ogg Vorbis; map filenames stay the same.
+
+  cool_city_bpm124.mp3
+    → village, market, shop; boss_clear is an 11s sting from this track
+  lights_at_night.mp3
+    → arrival, angevin, arabian_2
+  the_path_to_the_nebula.mp3
+    → adventure, lost_woods, al_kharid, arabian
+  the_cyber_subway_to_everywhere_and_nowhere.ogg
+    → alone, army_of_darkness
+  thesecretbehindthemoonlitdoormix.ogg
+    → fungus, shadow_temple, middle_boss
+  streets_after_midnight.flac
+    → attack_2, attack_3
+
+Do not run tools/compose_arkenelle_music.py — that overwrites these with the old synthesized loops.

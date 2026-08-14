@@ -81,10 +81,12 @@ func _build_currency_pouch() -> void:
 	) as Item
 
 	var gold_icon := TextureRect.new()
-	gold_icon.custom_minimum_size = Vector2(14.0, 14.0)
-	gold_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	gold_icon.custom_minimum_size = Vector2(16.0, 16.0)
+	gold_icon.custom_maximum_size = Vector2(16.0, 16.0)
+	gold_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	gold_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	gold_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	gold_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	gold_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if gold_item != null:
