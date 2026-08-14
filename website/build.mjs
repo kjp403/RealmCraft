@@ -962,13 +962,18 @@ function build() {
           <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory. Finding your own footing is the point.</p>
           <div class="cta-stack">
             <div class="cta-pair">
-              <div class="play-wrap">
-                <span class="play-sparkle s1" aria-hidden="true"></span>
-                <span class="play-sparkle s2" aria-hidden="true"></span>
-                <span class="play-sparkle s3" aria-hidden="true"></span>
-                <a class="btn play" href="${PLAY_WEB}"><span class="play-shine" aria-hidden="true"></span>Play in your browser</a>
+              <div class="cta-fx play">
+                <span class="cta-sparkle s1" aria-hidden="true"></span>
+                <span class="cta-sparkle s2" aria-hidden="true"></span>
+                <span class="cta-sparkle s3" aria-hidden="true"></span>
+                <a class="btn play" href="${PLAY_WEB}"><span class="cta-shine" aria-hidden="true"></span>Play in your browser</a>
               </div>
-              <a class="btn" href="${PLAY_DESKTOP}">Desktop client</a>
+              <div class="cta-fx desk">
+                <span class="cta-sparkle s1" aria-hidden="true"></span>
+                <span class="cta-sparkle s2" aria-hidden="true"></span>
+                <span class="cta-sparkle s3" aria-hidden="true"></span>
+                <a class="btn desk" href="${PLAY_DESKTOP}"><span class="cta-shine" aria-hidden="true"></span>Desktop client</a>
+              </div>
             </div>
             <p class="cta-note">No download for the browser client. Desktop zip updates itself.</p>
             <div class="cta-row">
