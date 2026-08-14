@@ -15,7 +15,7 @@
 y_sort_enabled = true
 script = ExtResource("1_map")
 music = ExtResource("7_music")
-music_playlist = Array[AudioStream]([ExtResource("mus_market"), ExtResource("mus_angevin")])
+music_playlist = Array[AudioStream]([ExtResource("mus_market")])
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Ground" type="TileMapLayer" parent="."]

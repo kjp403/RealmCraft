@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="e0"]
 [ext_resource type="TileSet" path="res://source/common/gameplay/maps/tilesets/sewers_tileset.tres" id="e1"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="e2"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/fungus.ogg" id="e3"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="e3"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/campfire.tscn" id="e4"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/props/animated_deco.tscn" id="e5"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/props/sprite_frames/deco_torch.tres" id="e6"]
@@ -30,7 +30,6 @@ script = ExtResource("e0")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.02, 0.02, 0.03, 1)
 music = ExtResource("e3")
-music_playlist = Array[AudioStream]([ExtResource("mus_army_of_darkness"), ExtResource("mus_alone")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 8336

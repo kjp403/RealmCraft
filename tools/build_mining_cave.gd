@@ -605,7 +605,7 @@ func _write_tscn(
 
 [ext_resource type=\"Script\" uid=\"uid://7mbux4mybta0\" path=\"res://source/common/gameplay/maps/map.gd\" id=\"1_map\"]
 [ext_resource type=\"TileSet\" path=\"res://source/common/gameplay/maps/tilesets/rpgw_caves_tileset.tres\" id=\"2_tiles\"]
-[ext_resource type=\"AudioStream\" uid=\"uid://epws31tb1n8o\" path=\"res://assets/audio/music/shadow_temple.ogg\" id=\"3_music\"]
+[ext_resource type=\"AudioStream\" uid=\"uid://lakm3wo2urk3\" path=\"res://assets/audio/music/army_of_darkness.ogg\" id=\"3_music\"]
 [ext_resource type=\"Script\" uid=\"uid://wq8klpndipnu\" path=\"res://source/common/network/sync/replicated_props.gd\" id=\"4_rp\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://b2ckixon7ryh6\" path=\"res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn\" id=\"5_warper\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://0m5eq6iylq26\" path=\"res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn\" id=\"6_portal\"]

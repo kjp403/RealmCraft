@@ -581,7 +581,7 @@ func _write(cfg: Dictionary) -> void:
 
 [ext_resource type=\"Script\" uid=\"uid://7mbux4mybta0\" path=\"%s\" id=\"1_map\"]
 [ext_resource type=\"TileSet\" path=\"%s\" id=\"2_wood\"]
-[ext_resource type=\"AudioStream\" path=\"res://assets/audio/music/fungus.ogg\" id=\"music\"]
+[ext_resource type=\"AudioStream\" path=\"res://assets/audio/music/lost_woods.ogg\" id=\"music\"]
 [ext_resource type=\"Script\" uid=\"uid://wq8klpndipnu\" path=\"%s\" id=\"6_rp\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://b2ckixon7ryh6\" path=\"%s\" id=\"7_warper\"]
 [ext_resource type=\"PackedScene\" uid=\"uid://0m5eq6iylq26\" path=\"%s\" id=\"8_portal\"]

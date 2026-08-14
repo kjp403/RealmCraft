@@ -66,9 +66,9 @@ const SFX_REVEAL: String = "res://assets/audio/sfx/ui/ui_reveal.wav"
 ## Login-screen rotation. Players sit here through character creation and world picking,
 ## so it shuffles rather than looping one theme.
 const MUSIC_GATEWAY: Array[String] = [
-	"res://assets/audio/music/angevin.ogg",
+	"res://assets/audio/music/village.ogg",
 	"res://assets/audio/music/arrival.ogg",
-	"res://assets/audio/music/alone.ogg",
+	"res://assets/audio/music/angevin.ogg",
 ]
 
 # Release-stage tag shown after the build number in the ConnectionInfo line
