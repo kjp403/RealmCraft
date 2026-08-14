@@ -12,7 +12,9 @@
   --ok: #3dcc8a;
   --cat-start: #e8c56a;
   --cat-items: #e8a04a;
-  --cat-creatures: #e07070;
+  --cat-boss: #e8c56a;
+  --cat-enemy: #9eb0c4;
+  --cat-creatures: var(--cat-enemy);
   --cat-locations: #3dcc8a;
   --cat-npcs: #6b9eef;
   --cat-skills: #3ecfc0;
@@ -377,6 +379,8 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 .cat-start { --cat: var(--cat-start); }
 .cat-items { --cat: var(--cat-items); }
 .cat-creatures { --cat: var(--cat-creatures); }
+.cat-boss { --cat: var(--cat-boss); }
+.cat-enemy { --cat: var(--cat-enemy); }
 .cat-locations { --cat: var(--cat-locations); }
 .cat-npcs { --cat: var(--cat-npcs); }
 .cat-skills { --cat: var(--cat-skills); }
@@ -388,6 +392,8 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 a.cat-start { color: var(--cat-start); }
 a.cat-items { color: var(--cat-items); }
 a.cat-creatures { color: var(--cat-creatures); }
+a.cat-boss { color: var(--cat-boss); }
+a.cat-enemy { color: var(--cat-enemy); }
 a.cat-locations { color: var(--cat-locations); }
 a.cat-npcs { color: var(--cat-npcs); }
 a.cat-skills { color: var(--cat-skills); }
@@ -445,6 +451,8 @@ a.cat-play { color: var(--cat-play); }
 .item-card.cat-start,
 .item-card.cat-items,
 .item-card.cat-creatures,
+.item-card.cat-boss,
+.item-card.cat-enemy,
 .item-card.cat-locations,
 .item-card.cat-npcs,
 .item-card.cat-skills,
@@ -457,6 +465,8 @@ a.cat-play { color: var(--cat-play); }
 .theme-start { --theme: var(--cat-start); }
 .theme-items { --theme: var(--cat-items); }
 .theme-creatures { --theme: var(--cat-creatures); }
+.theme-boss { --theme: var(--cat-boss); }
+.theme-enemy { --theme: var(--cat-enemy); }
 .theme-locations { --theme: var(--cat-locations); }
 .theme-npcs { --theme: var(--cat-npcs); }
 .theme-skills { --theme: var(--cat-skills); }
@@ -479,6 +489,8 @@ body[class^="theme-"] article.page {
 .theme-guilds .prose h2,
 .theme-slayer h2,
 .theme-creatures article.page > h2,
+.theme-boss article.page > h2,
+.theme-enemy article.page > h2,
 .theme-locations article.page > h2,
 .theme-skills article.page > h2,
 .theme-quests article.page > h2,
@@ -497,6 +509,61 @@ body[class^="theme-"] article.page {
 .item-card:hover { border-color: var(--cat, var(--accent)); text-decoration: none; background: var(--panel-2); }
 .item-card .name { font-weight: 600; display: block; }
 .item-card .kind { color: var(--muted); font-size: 0.8rem; display: block; }
+.loot-note { color: var(--muted); margin: 0.35rem 0 0.85rem; }
+.loot-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.2rem;
+}
+.loot-table th, .loot-table td {
+  text-align: left;
+  padding: 0.32rem 0.45rem 0.32rem 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.loot-table th {
+  color: var(--muted);
+  font-family: var(--ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.loot-table th:nth-child(2),
+.loot-table th:nth-child(3),
+.loot-table td:nth-child(2),
+.loot-table td:nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+.source-list { list-style: none; padding: 0; margin: 0.4rem 0 1.1rem; }
+.source-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem 1.2rem;
+  flex-wrap: wrap;
+  padding: 0.32rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.source-list .src-note { color: var(--muted); }
+.item-card.cat-boss {
+  background: color-mix(in srgb, var(--cat-boss) 9%, var(--panel));
+}
+.item-card.cat-boss:hover {
+  background: color-mix(in srgb, var(--cat-boss) 16%, var(--panel-2));
+}
+.item-card.cat-boss .kind { color: color-mix(in srgb, var(--cat-boss) 70%, var(--muted)); }
+.role-heading { font-family: var(--serif); font-weight: 400; margin: 1.4rem 0 0.7rem; }
+.role-heading.role-boss { color: var(--cat-boss); }
+.role-heading.role-enemy { color: var(--cat-enemy); }
+.tag-boss {
+  color: var(--cat-boss);
+  border-color: color-mix(in srgb, var(--cat-boss) 55%, var(--line));
+}
+.tag-enemy {
+  color: var(--cat-enemy);
+  border-color: color-mix(in srgb, var(--cat-enemy) 55%, var(--line));
+}
 
 .icon-frame {
   width: 48px;

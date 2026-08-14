@@ -474,6 +474,8 @@ function catIcon(id) {
     guilds: `<path d="M6.2 4.6h11.6v3.3c0 2.2-1.4 3.8-3.2 4.7L12 14.2l-2.6-1.6c-1.8-.9-3.2-2.5-3.2-4.7z"/><path d="M12 14.2V20"/>`,
     boards: `<path d="M7.2 20V10.2h3.2V20H7.2zm6.4 0V6.2h3.2V20h-3.2zM4.4 20h15.2"/><path d="M8.6 7.2 12 4.4l3.4 2.8"/>`,
     play: `<path d="M8 6.4v11.2L19 12z"/>`,
+    boss: `<path d="M4.8 16.6h14.4v2.1H4.8z"/><path d="M5.2 8.1l3.1 2.5L12 5.4l3.7 5.2 3.1-2.5v8.2H5.2z"/>`,
+    enemy: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
   };
   const inner = d[id];
   if (!inner) return "";
@@ -576,6 +578,7 @@ function collectItems() {
       buffDuration: num(doc.resource.buff_duration_s),
       modifiers: modifiersFrom(doc, doc.resource.base_modifiers),
       icon: iconFrom(doc, doc.resource.item_icon),
+      chestSlug: str(doc.resource.chest_slug),
       file,
     });
   }
@@ -650,6 +653,12 @@ function collectCreatures() {
       mr: num(doc.resource.mr),
       xp: num(doc.resource.xp_reward),
       loot: dropsFrom(doc, doc.resource.loot),
+      ornateItem: resolveExt(doc, doc.resource.ornate_chest_item),
+      ornateTopMin: num(doc.resource.ornate_chest_top_min),
+      ornateTopMax: num(doc.resource.ornate_chest_top_max),
+      ornateSecondMin: num(doc.resource.ornate_chest_second_min),
+      ornateSecondMax: num(doc.resource.ornate_chest_second_max),
+      ornateConsolation: num(doc.resource.ornate_chest_consolation_chance),
       file,
     });
   }
@@ -687,6 +696,9 @@ function collectZones() {
       mapPath: str(doc.resource.map_path),
       people: [],
       fauna: [],
+      zoneKillLoot: dropsFrom(doc, doc.resource.zone_kill_loot),
+      rewardPath: resolveExt(doc, doc.resource.reward),
+      hardRewardPath: resolveExt(doc, doc.resource.hard_reward),
       file,
     });
   }
@@ -940,6 +952,20 @@ function itemByPath(items, itemPath) {
     || items.find((it) => it.slug === slugify(base) || it.slug === base);
 }
 
+function creatureRole(c) {
+  return c.boss ? "boss" : "enemy";
+}
+
+function creatureCard(c, extra = []) {
+  const role = creatureRole(c);
+  const kind = [c.boss ? "Boss" : "Enemy", c.level ? "Lv " + c.level : "", ...extra].filter(Boolean).join(" · ");
+  return `<a class="item-card cat-${role}" data-kind="${c.boss ? "Boss" : "Enemy"}" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(kind)}</span></span></a>`;
+}
+
+function creatureLink(c) {
+  return `<a class="cat-${creatureRole(c)}" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`;
+}
+
 function lootList(drops, items) {
   if (!drops.length) return "<p class='muted'>No authored drops.</p>";
   return `<ul class="list-reset">${drops
@@ -949,6 +975,228 @@ function lootList(drops, items) {
       return `<li>${label}${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`;
     })
     .join("")}</ul>`;
+}
+
+function fileKey(p) {
+  return path.basename(String(p || "").replace(/\\/g, "/"));
+}
+
+function fmtGold(n) {
+  return Math.round(n).toLocaleString("en-US");
+}
+
+function fmtAmtCell(min, max) {
+  if (min === max) return String(min);
+  return `${min}–${max}`;
+}
+
+function itemLink(items, itemPath) {
+  const item = itemByPath(items, itemPath);
+  return item
+    ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>`
+    : esc(basenameSlug(itemPath).replace(/_/g, " "));
+}
+
+function withShares(drops) {
+  const total = drops.reduce((s, d) => s + (d.chance || 0), 0) || 1;
+  return drops.map((d) => ({ ...d, share: d.chance / total }));
+}
+
+function lootTableHtml(drops, items, rateMode) {
+  if (!drops.length) return "";
+  const rows = rateMode === "weight" ? withShares(drops) : drops;
+  const rateHead = rateMode === "weight" ? "Pool share" : "Chance";
+  return `<table class="loot-table"><thead><tr><th>Item</th><th>Amount</th><th>${rateHead}</th></tr></thead><tbody>${rows
+    .map((d) => {
+      const rate = rateMode === "weight" ? fmtChance(d.share) : fmtChance(d.chance);
+      return `<tr><td>${itemLink(items, d.itemPath)}</td><td>${esc(fmtAmtCell(d.min, d.max))}</td><td>${esc(rate)}</td></tr>`;
+    })
+    .join("")}</tbody></table>`;
+}
+
+function chestContentsHtml(table, items) {
+  if (!table) return `<p class="muted">No loot table linked.</p>`;
+  const rolls = table.rollsMin === table.rollsMax ? String(table.rollsMin) : `${table.rollsMin}–${table.rollsMax}`;
+  const gold = table.goldMax > 0 ? ` plus ${fmtGold(table.goldMin)}–${fmtGold(table.goldMax)} gold` : "";
+  let html = `<p class="loot-note">Each open grants <strong>${esc(rolls)}</strong> items from this table (weighted picks, no duplicates)${gold}.</p>`;
+  html += lootTableHtml(table.loot, items, "weight");
+  if (table.exclusive.length) {
+    html += `<h2>Rare extras</h2><p class="loot-note">Independent rolls after the main table. At most ${table.exclusiveMax} of these per open.</p>`;
+    html += lootTableHtml(table.exclusive, items, "chance");
+  }
+  return html;
+}
+
+function sourcesHtml(sources) {
+  if (!sources.length) return `<p class="muted">No authored drop sources.</p>`;
+  return `<ul class="source-list">${sources
+    .map((s) => `<li><span>${s.label}</span><span class="src-note">${esc(s.note)}</span></li>`)
+    .join("")}</ul>`;
+}
+
+function ornateNote(c) {
+  const bits = [];
+  if (c.ornateTopMax > 0) {
+    bits.push(c.ornateTopMin === c.ornateTopMax ? `Top DPS ×${c.ornateTopMax}` : `Top DPS ×${c.ornateTopMin}–${c.ornateTopMax}`);
+  }
+  if (c.ornateSecondMax > 0) {
+    bits.push(c.ornateSecondMin === c.ornateSecondMax ? `#2 DPS ×${c.ornateSecondMax}` : `#2 DPS ×${c.ornateSecondMin}–${c.ornateSecondMax}`);
+  }
+  if (c.ornateConsolation > 0) bits.push(`others ${fmtChance(c.ornateConsolation)}`);
+  return bits.join(", ") || "Boss chest grant";
+}
+
+function collectChestTables() {
+  const dir = path.join(ROOT, "source/common/gameplay/combat/chests");
+  const tables = new Map();
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ChestResource") continue;
+    const slug = basenameSlug(file);
+    tables.set(slug, {
+      slug,
+      name: str(doc.resource.display_name) || slug,
+      tier: num(doc.resource.tier, 1),
+      goldMin: num(doc.resource.gold_min),
+      goldMax: num(doc.resource.gold_max),
+      rollsMin: num(doc.resource.rolls_min, 1),
+      rollsMax: num(doc.resource.rolls_max, 3),
+      exclusiveMax: num(doc.resource.exclusive_max, 1),
+      loot: dropsFrom(doc, doc.resource.loot),
+      exclusive: dropsFrom(doc, doc.resource.exclusive_loot),
+    });
+  }
+  return tables;
+}
+
+function collectShops() {
+  const dir = path.join(ROOT, "source/common/gameplay/shops/resources");
+  const rows = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ShopResource") continue;
+    const entries = [];
+    for (const ref of asArray(doc.resource.entries)) {
+      const sub = resolveSub(doc, ref);
+      if (!sub) continue;
+      const itemPath = resolveExt(doc, sub.props.item);
+      if (!itemPath) continue;
+      entries.push({ itemPath, price: num(sub.props.price) });
+    }
+    rows.push({
+      name: str(doc.resource.shop_name) || basenameSlug(file),
+      currencyPath: resolveExt(doc, doc.resource.currency_item),
+      entries,
+    });
+  }
+  return rows;
+}
+
+function parseRewardFile(resPath) {
+  const abs = resToFs(resPath);
+  if (!abs || !fs.existsSync(abs)) return null;
+  let doc;
+  try {
+    doc = parseTres(read(abs));
+  } catch {
+    return null;
+  }
+  return {
+    loot: dropsFrom(doc, doc.resource.loot),
+    exclusive: dropsFrom(doc, doc.resource.exclusive_loot),
+  };
+}
+
+const DEFAULT_ORNATE_CHEST = "res://source/common/gameplay/items/chests/gold_pink_large.tres";
+
+function attachItemWiki(items, creatures, zones, shops, chestTables) {
+  const byKey = new Map();
+  for (const it of items) {
+    if (it.kind === "Chest") it.table = chestTables.get(it.chestSlug || basenameSlug(it.file)) || null;
+    it.sources = [];
+    byKey.set(fileKey(it.file), it);
+  }
+
+  function addSource(itemPath, source) {
+    const it = byKey.get(fileKey(itemPath));
+    if (it) it.sources.push(source);
+  }
+
+  for (const c of creatures) {
+    for (const d of c.loot) {
+      addSource(d.itemPath, {
+        label: creatureLink(c),
+        note: `${fmtChance(d.chance)}${fmtAmt(d.min, d.max)} on kill`,
+      });
+    }
+    if (c.ornateTopMax > 0) {
+      addSource(c.ornateItem || DEFAULT_ORNATE_CHEST, {
+        label: creatureLink(c),
+        note: ornateNote(c),
+      });
+    }
+  }
+
+  for (const z of zones) {
+    for (const d of z.zoneKillLoot || []) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a>`,
+        note: `${fmtChance(d.chance)}${fmtAmt(d.min, d.max)} on any kill in this zone`,
+      });
+    }
+    for (const [diff, resPath] of [
+      ["Normal", z.rewardPath],
+      ["Hard", z.hardRewardPath],
+    ]) {
+      if (!resPath) continue;
+      const reward = parseRewardFile(resPath);
+      if (!reward) continue;
+      for (const d of [...reward.loot, ...reward.exclusive]) {
+        addSource(d.itemPath, {
+          label: `<a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a>`,
+          note: `${diff} completion · ${fmtChance(d.chance)}${fmtAmt(d.min, d.max)}`,
+        });
+      }
+    }
+  }
+
+  for (const shop of shops) {
+    const currency = byKey.get(fileKey(shop.currencyPath));
+    const curName = currency ? currency.name : "Gold";
+    for (const e of shop.entries) {
+      addSource(e.itemPath, {
+        label: esc(shop.name),
+        note: e.price ? `${e.price} ${curName}` : "Sold",
+      });
+    }
+  }
+
+  for (const chest of items) {
+    if (!chest.table) continue;
+    const weighted = withShares(chest.table.loot);
+    for (const d of weighted) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-items" href="/wiki/items/${chest.slug}/">${esc(chest.name)}</a>`,
+        note: `Chest table · ${fmtChance(d.share)}${fmtAmt(d.min, d.max)}`,
+      });
+    }
+    for (const d of chest.table.exclusive) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-items" href="/wiki/items/${chest.slug}/">${esc(chest.name)}</a>`,
+        note: `Chest rare · ${fmtChance(d.chance)}${fmtAmt(d.min, d.max)}`,
+      });
+    }
+  }
 }
 
 function listPage(title, intro, cardsHtml, active, cat) {
@@ -982,6 +1230,7 @@ function build() {
   const jobs = collectJobs();
   const slayer = collectSlayer();
   const quests = collectQuests();
+  attachItemWiki(items, creatures, zones, collectShops(), collectChestTables());
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
@@ -1196,6 +1445,16 @@ function build() {
     else if (it.requiredLevel) stats.push(["Requires level", String(it.requiredLevel)]);
     if (it.vendor) stats.push(["Vendor value", String(it.vendor)]);
     if (it.stack) stats.push(["Stack", it.stack === 1 ? "Not stackable" : String(it.stack)]);
+    if (it.table) {
+      stats.push(["Tier", String(it.table.tier)]);
+      if (it.table.goldMax) stats.push(["Gold", `${fmtGold(it.table.goldMin)}–${fmtGold(it.table.goldMax)}`]);
+      stats.push(["Item rolls", it.table.rollsMin === it.table.rollsMax ? String(it.table.rollsMin) : `${it.table.rollsMin}–${it.table.rollsMax}`]);
+    }
+    const inside = it.kind === "Chest" ? `<h2>Inside</h2>${chestContentsHtml(it.table, items)}` : "";
+    const srcTitle = it.kind === "Chest" ? "Dropped by" : "Sources";
+    const sources = it.kind === "Chest" || (it.sources && it.sources.length)
+      ? `<h2>${srcTitle}</h2>${sourcesHtml(it.sources || [])}`
+      : "";
     write(
       `wiki/items/${it.slug}/index.html`,
       shell({
@@ -1213,6 +1472,8 @@ function build() {
           </div>
           ${it.description ? `<p>${esc(it.description)}</p>` : ""}
           ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>` : ""}
+          ${inside}
+          ${sources}
         </article></main>`,
       })
     );
@@ -1251,25 +1512,39 @@ function build() {
     );
   }
 
+  const bosses = creatures.filter((c) => c.boss);
+  const enemies = creatures.filter((c) => !c.boss);
   write(
     "wiki/creatures/index.html",
-    listPage(
-      "Creatures",
-      "Hostile types. Combat numbers and loot are what the server actually uses.",
-      creatures
-        .map(
-          (c) =>
-            `<a class="item-card cat-creatures" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${c.boss ? "Boss" : "Enemy"}${c.level ? " · Lv " + c.level : ""}</span></span></a>`
-        )
-        .join(""),
-      "creatures",
-      "creatures"
-    )
+    shell({
+      title: "Creatures — Arkenelle Wiki",
+      active: "creatures",
+      theme: "creatures",
+      body: `<main class="wrap">
+      ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Creatures" }])}
+      ${pageHeading("creatures", "Creatures")}
+      <p class="muted">Hostile types. Combat numbers and loot are what the server actually uses.</p>
+      <div class="filters" data-filters>
+        <button type="button" class="active" data-kind="">All</button>
+        <button type="button" data-kind="Boss">Bosses (${bosses.length})</button>
+        <button type="button" data-kind="Enemy">Enemies (${enemies.length})</button>
+      </div>
+      <section data-kind-section="Boss">
+        <h2 class="role-heading role-boss">Bosses</h2>
+        <div class="item-grid">${bosses.map((c) => creatureCard(c)).join("")}</div>
+      </section>
+      <section data-kind-section="Enemy">
+        <h2 class="role-heading role-enemy">Enemies</h2>
+        <div class="item-grid">${enemies.map((c) => creatureCard(c)).join("")}</div>
+      </section>
+    </main>`,
+    })
   );
   for (const c of creatures) {
+    const role = creatureRole(c);
     const stats = [
       ["Type", c.type],
-      c.boss ? ["Role", "Boss"] : null,
+      ["Role", c.boss ? "Boss" : "Enemy"],
       c.level ? ["Combat level", String(c.level)] : null,
       c.hp ? ["Max health", String(c.hp)] : null,
       c.damage ? ["Attack damage", String(c.damage)] : null,
@@ -1282,10 +1557,11 @@ function build() {
       shell({
         title: `${c.name} — Arkenelle Wiki`,
         active: "creatures",
-        theme: "creatures",
+        theme: role,
         body: `<main class="wrap"><article class="page">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/creatures/", label: "Creatures" }, { label: c.name }])}
-          <h1 class="section-title">${esc(c.name)}</h1>
+          ${pageHeading(role, c.name)}
+          <p><span class="tag tag-${role}">${c.boss ? "Boss" : "Enemy"}</span></p>
           <div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>
           ${foundInHtml(c.locations)}
           <h2>Loot</h2>
@@ -1349,10 +1625,7 @@ function build() {
             z.fauna.length
               ? `<h2>Creatures</h2><div class="item-grid">${z.fauna
                   .map(({ creature: c, count }) => {
-                    const extra = [c.boss ? "Boss" : "", c.level ? "Lv " + c.level : "", count > 1 ? "×" + count : ""]
-                      .filter(Boolean)
-                      .join(" · ");
-                    return `<a class="item-card cat-creatures" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(extra)}</span></span></a>`;
+                    return creatureCard(c, [count > 1 ? "×" + count : ""]);
                   })
                   .join("")}</div>`
               : ""
@@ -1440,7 +1713,7 @@ function build() {
             <p>${t.enemies
               .map((e) => {
                 const c = creatures.find((x) => x.type === e || x.slug === e);
-                return c ? `<a class="cat-creatures" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>` : esc(e);
+                return c ? creatureLink(c) : esc(e);
               })
               .join(", ")}</p></div></article>`
           )
@@ -1488,7 +1761,7 @@ function build() {
   const search = [
     ...items.map((x) => ({ title: x.name, kind: "Item · " + x.kind, href: `/wiki/items/${x.slug}/`, haystack: (x.name + " " + x.kind + " " + x.description).toLowerCase() })),
     ...npcs.map((x) => ({ title: x.name, kind: "NPC", href: `/wiki/npcs/${x.slug}/`, haystack: (x.name + " " + x.greeting + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
-    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Creature", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
+    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Enemy", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
     ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
