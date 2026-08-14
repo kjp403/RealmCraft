@@ -134,6 +134,19 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   gap: 0.85rem;
 }
 .cta-note { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.cta-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  width: min(16.5rem, 90vw);
+}
+.cta-pair .play-wrap,
+.cta-pair .btn {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
 .btn {
   display: inline-block;
   padding: 0.7rem 1.15rem;
@@ -152,124 +165,118 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   isolation: isolate;
   z-index: 2;
 }
-.play-halo {
+.play-wrap::before {
+  content: "";
   position: absolute;
   left: 50%;
   top: 50%;
   z-index: 0;
-  width: 36rem;
-  height: 16rem;
+  width: 18rem;
+  height: 6.5rem;
   transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(255, 230, 110, 0.95), rgba(255, 186, 40, 0.45) 40%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(80, 230, 160, 0.55), rgba(16, 140, 80, 0.22) 42%, transparent 72%);
   pointer-events: none;
-  filter: blur(1px);
-  animation: play-halo 1.8s ease-in-out infinite;
+  animation: play-halo 2.4s ease-in-out infinite;
 }
 .btn.play {
   position: relative;
   z-index: 1;
-  overflow: visible;
-  font-size: 1.7rem;
-  padding: 1.25rem 2.8rem;
-  border-radius: 12px;
-  border: 2px solid #fff3b0;
-  color: #1a1204;
-  background: linear-gradient(180deg, #fff6c2 0%, #ffd34a 45%, #f0a818 100%);
-  box-shadow:
-    0 0 0 2px rgba(255, 244, 180, 0.9),
-    0 0 32px 10px rgba(255, 214, 70, 0.9),
-    0 0 90px 28px rgba(255, 186, 40, 0.55),
-    0 16px 32px rgba(0, 0, 0, 0.5);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
-  animation: play-glow 1.8s ease-in-out infinite;
-}
-.play-shine {
-  position: absolute;
-  inset: 0;
   overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-}
-.play-shine::before {
-  content: "";
-  position: absolute;
-  inset: -45% -25%;
-  background: linear-gradient(
-    115deg,
-    transparent 36%,
-    rgba(255, 255, 255, 0.78) 50%,
-    transparent 64%
-  );
-  transform: translateX(-85%);
-  animation: play-shine 2.2s ease-in-out infinite;
+  font-size: inherit;
+  padding: 0.7rem 1.15rem;
+  border-radius: 7px;
+  border: 1px solid #9fffd4;
+  color: #042016;
+  background: linear-gradient(180deg, #8affd0 0%, #2ecc7a 48%, #0e9a55 100%);
+  box-shadow:
+    0 0 0 1px rgba(160, 255, 210, 0.55),
+    0 0 16px 4px rgba(46, 204, 122, 0.45),
+    0 0 36px 10px rgba(14, 154, 85, 0.28),
+    0 10px 22px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+  animation: play-glow 2.4s ease-in-out infinite;
 }
 .btn.play::after {
   content: "";
   position: absolute;
-  inset: 2px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  inset: 1px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  pointer-events: none;
+}
+.play-shine {
+  position: absolute;
+  inset: -40% -20%;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.62) 50%,
+    transparent 64%
+  );
+  transform: translateX(-85%);
+  animation: play-shine 2.8s ease-in-out infinite;
   pointer-events: none;
 }
 .btn.play:hover {
   filter: brightness(1.08);
-  color: #1a1204;
-  border-color: #fff8d0;
+  color: #042016;
+  border-color: #c8ffe8;
   text-decoration: none;
 }
 .play-sparkle {
   position: absolute;
   z-index: 2;
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #fffdf0;
-  box-shadow: 0 0 12px 4px rgba(255, 230, 130, 1);
+  background: #e8fff4;
+  box-shadow: 0 0 8px 2px rgba(120, 255, 190, 0.9);
   pointer-events: none;
-  animation: play-twinkle 1.4s ease-in-out infinite;
+  animation: play-twinkle 1.6s ease-in-out infinite;
 }
-.play-sparkle.s1 { top: -14px; right: 14%; }
-.play-sparkle.s2 { top: 54%; left: -16px; width: 6px; height: 6px; animation-delay: 0.4s; }
-.play-sparkle.s3 { bottom: -12px; right: -12px; width: 7px; height: 7px; animation-delay: 0.85s; }
+.play-sparkle.s1 { top: -8px; right: 16%; }
+.play-sparkle.s2 { top: 58%; left: -10px; width: 4px; height: 4px; animation-delay: 0.45s; }
+.play-sparkle.s3 { bottom: -6px; right: -8px; width: 4px; height: 4px; animation-delay: 0.9s; }
 
 @keyframes play-glow {
   0%, 100% {
     box-shadow:
-      0 0 0 2px rgba(255, 244, 180, 0.7),
-      0 0 22px 8px rgba(255, 214, 70, 0.65),
-      0 0 64px 20px rgba(255, 186, 40, 0.35),
-      0 16px 32px rgba(0, 0, 0, 0.5);
+      0 0 0 1px rgba(160, 255, 210, 0.45),
+      0 0 12px 3px rgba(46, 204, 122, 0.35),
+      0 0 28px 8px rgba(14, 154, 85, 0.2),
+      0 10px 22px rgba(0, 0, 0, 0.4);
   }
   50% {
     box-shadow:
-      0 0 0 3px rgba(255, 252, 220, 1),
-      0 0 40px 16px rgba(255, 230, 90, 1),
-      0 0 110px 36px rgba(255, 200, 50, 0.65),
-      0 16px 32px rgba(0, 0, 0, 0.5);
+      0 0 0 1px rgba(200, 255, 230, 0.9),
+      0 0 20px 7px rgba(80, 230, 160, 0.65),
+      0 0 44px 14px rgba(46, 204, 122, 0.38),
+      0 10px 22px rgba(0, 0, 0, 0.4);
   }
 }
 @keyframes play-halo {
-  0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(0.92); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.96); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 }
 @keyframes play-shine {
   0% { transform: translateX(-85%); }
-  50%, 100% { transform: translateX(85%); }
+  45%, 100% { transform: translateX(85%); }
 }
 @keyframes play-twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.65); }
-  50% { opacity: 1; transform: scale(1.25); }
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.15); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .play-halo,
+  .play-wrap::before,
   .btn.play,
-  .play-shine::before,
+  .play-shine,
   .play-sparkle {
     animation: none;
   }
-  .play-sparkle { opacity: 0.8; }
+  .play-sparkle { opacity: 0.7; }
 }
 
 .wrap { width: min(1100px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
