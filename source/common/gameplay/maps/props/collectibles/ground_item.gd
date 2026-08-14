@@ -20,6 +20,10 @@ const EXCLUSIVE_S: float = 60.0
 ## Client click target size — larger than the old 14px physics circle so drops
 ## are easy to hit.
 const CLICK_SIZE: Vector2 = Vector2(36, 36)
+## Inventory icons are typically 64×64 and the scene sprite is 0.5 — 32 world px.
+## Cap so a 96×96+ icon (or a missing-alpha wallpaper) cannot eat the screen.
+const WORLD_ICON_PX: float = 32.0
+const BASE_ICON_SCALE: float = 0.5
 
 @export var item_id: int = 0
 @export var amount: int = 1
@@ -65,6 +69,7 @@ func _refresh_visual() -> void:
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null and item.item_icon != null and sprite != null:
 		sprite.texture = item.item_icon
+		_fit_icon(item.item_icon)
 	if amount_label != null:
 		amount_label.visible = amount > 1
 		amount_label.text = str(amount)
@@ -73,6 +78,16 @@ func _refresh_visual() -> void:
 	# with the pile, on pickup or on the anti-litter expiry.
 	if not multiplayer.is_server() and item != null and _beam == null:
 		_beam = LootBeam.spawn(self, item)
+
+
+func _fit_icon(tex: Texture2D) -> void:
+	var art: float = float(maxi(tex.get_width(), tex.get_height()))
+	if art <= 0.0:
+		return
+	var s: float = BASE_ICON_SCALE
+	if art * s > WORLD_ICON_PX:
+		s = WORLD_ICON_PX / art
+	sprite.scale = Vector2(s, s)
 
 
 func _spawn_click_area() -> void:
