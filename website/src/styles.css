@@ -134,6 +134,19 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   gap: 0.85rem;
 }
 .cta-note { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.cta-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  width: min(16.5rem, 90vw);
+}
+.cta-pair .play-wrap,
+.cta-pair .btn {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
 .btn {
   display: inline-block;
   padding: 0.7rem 1.15rem;
@@ -149,44 +162,53 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 .play-wrap {
   position: relative;
   display: inline-flex;
-  z-index: 1;
+  isolation: isolate;
+  z-index: 2;
 }
 .play-wrap::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 22rem;
-  height: 9rem;
+  z-index: 0;
+  width: 18rem;
+  height: 6.5rem;
   transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(255, 214, 90, 0.55), rgba(232, 176, 48, 0.18) 42%, transparent 72%);
+  background: radial-gradient(ellipse, rgba(80, 230, 160, 0.55), rgba(16, 140, 80, 0.22) 42%, transparent 72%);
   pointer-events: none;
-  z-index: -1;
   animation: play-halo 2.4s ease-in-out infinite;
 }
 .btn.play {
   position: relative;
-  isolation: isolate;
+  z-index: 1;
   overflow: hidden;
-  font-size: 1.5rem;
-  padding: 1.15rem 2.45rem;
-  border-radius: 12px;
-  border: 1px solid #ffe7a8;
-  color: #1a1204;
-  background: linear-gradient(180deg, #ffe9a0 0%, #f0c44a 46%, #d4941c 100%);
+  font-size: inherit;
+  padding: 0.7rem 1.15rem;
+  border-radius: 7px;
+  border: 1px solid #9fffd4;
+  color: #042016;
+  background: linear-gradient(180deg, #8affd0 0%, #2ecc7a 48%, #0e9a55 100%);
   box-shadow:
-    0 0 0 1px rgba(255, 236, 170, 0.7),
-    0 0 22px 6px rgba(255, 206, 70, 0.55),
-    0 0 56px 18px rgba(232, 176, 48, 0.32),
-    0 14px 28px rgba(0, 0, 0, 0.45);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 0 0 1px rgba(160, 255, 210, 0.55),
+    0 0 16px 4px rgba(46, 204, 122, 0.45),
+    0 0 36px 10px rgba(14, 154, 85, 0.28),
+    0 10px 22px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
   animation: play-glow 2.4s ease-in-out infinite;
 }
-.btn.play::before {
+.btn.play::after {
   content: "";
   position: absolute;
+  inset: 1px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  pointer-events: none;
+}
+.play-shine {
+  position: absolute;
   inset: -40% -20%;
+  border-radius: inherit;
   background: linear-gradient(
     115deg,
     transparent 36%,
@@ -197,48 +219,41 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   animation: play-shine 2.8s ease-in-out infinite;
   pointer-events: none;
 }
-.btn.play::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border-radius: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  pointer-events: none;
-}
 .btn.play:hover {
   filter: brightness(1.08);
-  color: #1a1204;
-  border-color: #fff1c2;
+  color: #042016;
+  border-color: #c8ffe8;
   text-decoration: none;
 }
 .play-sparkle {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  z-index: 2;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #fff6d0;
-  box-shadow: 0 0 10px 3px rgba(255, 220, 110, 0.9);
+  background: #e8fff4;
+  box-shadow: 0 0 8px 2px rgba(120, 255, 190, 0.9);
   pointer-events: none;
   animation: play-twinkle 1.6s ease-in-out infinite;
 }
-.play-sparkle.s1 { top: -10px; right: 16%; }
-.play-sparkle.s2 { top: 58%; left: -14px; width: 4px; height: 4px; animation-delay: 0.45s; }
-.play-sparkle.s3 { bottom: -8px; right: -10px; width: 5px; height: 5px; animation-delay: 0.9s; }
+.play-sparkle.s1 { top: -8px; right: 16%; }
+.play-sparkle.s2 { top: 58%; left: -10px; width: 4px; height: 4px; animation-delay: 0.45s; }
+.play-sparkle.s3 { bottom: -6px; right: -8px; width: 4px; height: 4px; animation-delay: 0.9s; }
 
 @keyframes play-glow {
   0%, 100% {
     box-shadow:
-      0 0 0 1px rgba(255, 236, 170, 0.55),
-      0 0 16px 4px rgba(255, 206, 70, 0.4),
-      0 0 40px 12px rgba(232, 176, 48, 0.22),
-      0 14px 28px rgba(0, 0, 0, 0.45);
+      0 0 0 1px rgba(160, 255, 210, 0.45),
+      0 0 12px 3px rgba(46, 204, 122, 0.35),
+      0 0 28px 8px rgba(14, 154, 85, 0.2),
+      0 10px 22px rgba(0, 0, 0, 0.4);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(255, 248, 210, 0.95),
-      0 0 28px 10px rgba(255, 220, 90, 0.75),
-      0 0 70px 22px rgba(255, 196, 60, 0.42),
-      0 14px 28px rgba(0, 0, 0, 0.45);
+      0 0 0 1px rgba(200, 255, 230, 0.9),
+      0 0 20px 7px rgba(80, 230, 160, 0.65),
+      0 0 44px 14px rgba(46, 204, 122, 0.38),
+      0 10px 22px rgba(0, 0, 0, 0.4);
   }
 }
 @keyframes play-halo {
@@ -257,7 +272,7 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 @media (prefers-reduced-motion: reduce) {
   .play-wrap::before,
   .btn.play,
-  .btn.play::before,
+  .play-shine,
   .play-sparkle {
     animation: none;
   }
