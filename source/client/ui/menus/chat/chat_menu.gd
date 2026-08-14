@@ -1019,7 +1019,10 @@ func _format_header(record: Dictionary, show_channel_prefix: bool) -> String:
 		pieces.append("[color=%s](%s)[/color]" % [SUBTLE_COLOR, guild_name])
 
 	if not title.is_empty():
-		pieces.append("[color=%s]« %s »[/color]" % [TITLE_COLOR, title])
+		var title_color: String = SupporterTitles.color_hex(title)
+		if title_color.is_empty():
+			title_color = TITLE_COLOR
+		pieces.append("[color=%s]« %s »[/color]" % [title_color, title])
 
 	return " ".join(pieces)
 

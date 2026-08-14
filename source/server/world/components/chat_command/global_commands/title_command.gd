@@ -42,6 +42,8 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 		res.display_title = title
 		auto_equipped = true
 
+	server_instance.world_server.database.save_player(res)
+
 	return "Granted title '%s' to %s%s." % [
 		title, target.label(), " (now displayed)" if auto_equipped else ""
 	]
