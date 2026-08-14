@@ -34,6 +34,17 @@ echo "==> Refreshing systemd units (keeps --env=live and other ExecStart flags c
 install -m 0644 "$APP_DIR"/deploy/systemd/arkenelle-*.service /etc/systemd/system/
 systemctl daemon-reload
 
+echo "==> Refreshing Caddy (browser client on play.arkenelle.com GET, world on WS upgrade)"
+install -m 0644 "$APP_DIR/deploy/Caddyfile" /etc/caddy/Caddyfile
+mkdir -p /opt/arkenelle/client-web
+chmod a+rX /opt/arkenelle/client-web
+if [[ ! -f /opt/arkenelle/client-web/index.html ]]; then
+	install -m 0644 "$APP_DIR/deploy/client-web-placeholder/index.html" /opt/arkenelle/client-web/index.html
+	chown arkenelle:arkenelle /opt/arkenelle/client-web/index.html
+fi
+caddy validate --config /etc/caddy/Caddyfile
+systemctl reload caddy
+
 echo "==> Restarting game services"
 systemctl restart arkenelle-master arkenelle-gateway arkenelle-world
 

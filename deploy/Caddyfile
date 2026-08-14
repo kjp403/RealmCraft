@@ -2,7 +2,10 @@
 # certs for both hostnames, so you don't manage certificates yourself).
 #
 # api.arkenelle.com  -> gateway HTTP API (login/accounts/world list) on 127.0.0.1:8088
-# play.arkenelle.com -> world server WebSocket (gameplay) on 127.0.0.1:8087
+# play.arkenelle.com -> browser client (static Godot web export) + world WebSocket
+#                      on 127.0.0.1:8087. GET serves /opt/arkenelle/client-web;
+#                      Upgrade: websocket still goes to the world. Leave this
+#                      hostname DNS-only (grey cloud) in Cloudflare.
 #
 # The game servers stay bound to loopback (127.0.0.1); Caddy is the only thing
 # exposed to the internet. Copy this to /etc/caddy/Caddyfile on the VPS.
@@ -16,6 +19,20 @@ api.arkenelle.com {
 }
 
 play.arkenelle.com {
-	# Caddy forwards WebSocket upgrades transparently — no extra config needed.
-	reverse_proxy 127.0.0.1:8087
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+
+	handle @websocket {
+		reverse_proxy 127.0.0.1:8087
+	}
+
+	handle {
+		root * /opt/arkenelle/client-web
+		encode gzip
+		@pck path *.pck
+		header @pck Content-Type application/octet-stream
+		file_server
+	}
 }

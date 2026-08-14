@@ -3,7 +3,7 @@
 Deploys the three game servers behind Caddy (auto HTTPS) on one VPS.
 
 - `api.arkenelle.com`  → gateway (login / accounts) on `127.0.0.1:8088`
-- `play.arkenelle.com` → world server (gameplay) on `127.0.0.1:8087`
+- `play.arkenelle.com` → browser client (static files in `/opt/arkenelle/client-web`) and world WebSocket on `127.0.0.1:8087`
 - master + dashboard stay internal on loopback (`8062/8064/8080`)
 
 The game servers bind to `127.0.0.1`, so only Caddy (ports 80/443) is public.
@@ -55,6 +55,24 @@ Watch deploys: GitHub → **Actions** → **Deploy VPS**.
 
 ---
 
+## Browser client (play.arkenelle.com)
+
+The Godot **Web** export is the in-browser game. Caddy serves it on GET
+`https://play.arkenelle.com/` and still forwards WebSocket upgrades to the world.
+
+It does **not** ship on Deploy VPS. After merging the Caddy change, run
+**Release clients to itch.io** with `platforms: web` (or `all`). That workflow
+exports Web, butler-pushes the itch `web` channel, and unpacks the files to
+`/opt/arkenelle/client-web` on the VPS.
+
+Keep `play` **DNS only** (grey cloud) in Cloudflare. Orange-clouding it breaks
+WebSockets.
+
+First browser load is the full client (wasm + pck, similar size to the Windows
+zip). Desktop Chrome or Firefox. The web build is the lite client (no weather).
+
+---
+
 ## Client auto-updates (itch.io)
 
 Server deploys do **not** update player EXEs. For Windows/Linux/Web installs that
@@ -95,12 +113,15 @@ sudo bash deploy/setup-vps.sh
 systemctl status arkenelle-master arkenelle-gateway arkenelle-world caddy --no-pager
 # Gateway (any non-empty JSON response means Caddy → :8088 is fine):
 curl -sS https://api.arkenelle.com/ | head
-# World is WebSocket-only — plain GET/HTTP2 often looks like 502 even when healthy.
+# World is WebSocket-only on Upgrade. GET `/` serves the browser client (or a
+# placeholder until the first Web export is published).
 # Expect 101 from an HTTP/1.1 upgrade probe:
 curl --http1.1 -sS -o /dev/null -w '%{http_code}\n' \
   -H 'Connection: Upgrade' -H 'Upgrade: websocket' \
   -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
   https://play.arkenelle.com/
+# Expect HTML from a plain GET after Caddy is updated:
+curl -sS -o /dev/null -w '%{http_code}\n' https://play.arkenelle.com/
 ```
 
 Live logs: `journalctl -u arkenelle-world -f`

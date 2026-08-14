@@ -46,8 +46,8 @@ Manual “Upload files” on the itch edit page fights the butler channel and ma
 ## How to ship a client update
 
 1. Bump `application/config/version` in `project.godot` when the client must change
-2. Merge to `main` (VPS deploys; a `config/version` bump also auto-runs **Release clients** for Windows)
-3. Or manually: GitHub → **Actions** → **Release clients to itch.io** → **Run workflow**  
+2. Merge to `main` (VPS deploys; a `config/version` bump also auto-runs **Release clients** for Windows + Web)
+3. Or manually: GitHub → **Actions** → **Release clients to itch.io** → **Run workflow** → `platforms: web` to publish only the browser client to `https://play.arkenelle.com/`
    (or `git tag vX.Y.Z && git push origin vX.Y.Z`)
 4. Wait for green — butler pushes a **portable folder** (`Arkenelle.exe` + `Arkenelle.pck`) with `--userversion`
 5. Players: itch app → Library → Arkenelle → **Update** (stays in the app)
