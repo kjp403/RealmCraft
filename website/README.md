@@ -24,7 +24,7 @@ The domain is already on Cloudflare. After this folder is on GitHub `main`:
 
 Cloudflare will replace the old OVH placeholder A records for the apex and `www`. Leave `api` and `play` as **DNS only** (grey cloud) pointing at `144.217.91.100`.
 
-The browser game is `https://play.arkenelle.com/` (Godot web export on the VPS). Do not orange-cloud `play`.
+The browser game is `https://play.arkenelle.com/` (Godot web export on the VPS). The Windows zip is `https://play.arkenelle.com/desktop/Arkenelle-windows.zip`. Do not orange-cloud `play`.
 
 Rebuilds happen on every push to `main` that Cloudflare Pages is watching.
 

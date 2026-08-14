@@ -52,10 +52,8 @@ var current_theme: StringName = ThemePalettes.DEFAULT
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
 const LINK_WEBSITE: String = Distribution.WEBSITE_URL
-## Browser marketing page only — never use this for the Update button.
-const LINK_DOWNLOAD: String = Distribution.ITCH_URL
-## Opens Arkenelle's page inside the itch.io desktop app (Install / Update).
-const LINK_ITCH_APP: String = Distribution.ITCH_APP_URL
+## Browser zip for a fresh Windows install (also the outdated-client fallback).
+const LINK_DOWNLOAD: String = Distribution.CLIENT_DOWNLOAD_URL
 const LINK_DISCORD: String = Distribution.DISCORD_URL
 
 # Soft, organic foley placeholders, routed through the shared AudioManager's
@@ -137,6 +135,14 @@ func _ready() -> void:
 
 	await get_tree().create_timer(1.5).timeout
 
+	if ClientUpdater.should_run():
+		_set_connecting_text(tr("CHECKING_UPDATE"))
+		var update_result: Dictionary = await ClientUpdater.apply_if_needed(
+			self, _set_connecting_text
+		)
+		if bool(update_result.get("quit", false)):
+			return
+
 	# Boot gate: confirm the gateway is reachable + our build matches before any menu
 	# shows. Blocks (update) or retries on failure; else resumes or reveals the menu.
 	if not await _boot_handshake():
@@ -207,6 +213,12 @@ func _show_connecting() -> void:
 		_connecting_pulse.tween_property(_connecting_label, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE)
 
 
+func _set_connecting_text(text: String) -> void:
+	_show_connecting()
+	if _connecting_label != null:
+		_connecting_label.text = text
+
+
 ## Drop the connecting label (kills its pulse).
 func _hide_connecting() -> void:
 	if _connecting_pulse and _connecting_pulse.is_valid():
@@ -274,9 +286,9 @@ func _wire_button_audio(button: Button, is_back: bool = false) -> void:
 
 
 ## Hard block for an outdated client: nothing's playable below min_client_version,
-## so loop a non-dismissable "please update". Prefer the itch *app* game page
-## (Install/Update there). After two tries, offer the browser page so a broken
-## itch Library entry cannot soft-lock the player forever.
+## so loop a non-dismissable "please update". Prefer the self-hosted Windows
+## downloader. After two failed applies, offer the zip URL so a bad update cannot
+## soft-lock the player forever.
 func _block_outdated(detail: String) -> void:
 	var message: String = detail if not detail.is_empty() else tr("ERR_OUTDATED")
 	var attempts: int = 0
@@ -284,20 +296,17 @@ func _block_outdated(detail: String) -> void:
 		attempts += 1
 		var button: StringName = &"UPDATE" if attempts <= 2 else &"DOWNLOAD"
 		await popup_panel.confirm_message(message, &"UPDATE_TITLE", button)
-		if attempts <= 2:
-			_open_itch_update()
-		else:
-			# Escape hatch when itch:// shows "No compatible downloads".
-			OS.shell_open(LINK_DOWNLOAD)
-			attempts = 0
-
-
-## Ask the itch.io desktop app to show Arkenelle's page (Install / Update).
-func _open_itch_update() -> void:
-	var err: Error = OS.shell_open(LINK_ITCH_APP)
-	if err != OK:
-		# Protocol handler missing — last resort is the public page.
+		if attempts <= 2 and ClientUpdater.should_run():
+			_set_connecting_text(tr("CHECKING_UPDATE"))
+			var update_result: Dictionary = await ClientUpdater.apply_if_needed(
+				self, _set_connecting_text, true
+			)
+			if bool(update_result.get("quit", false)):
+				return
+			continue
 		OS.shell_open(LINK_DOWNLOAD)
+		if attempts > 2:
+			attempts = 0
 
 
 ## Reveal the main menu (no saved session): show it, focus the first action, then

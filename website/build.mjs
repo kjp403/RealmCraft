@@ -13,6 +13,7 @@ const SRC = path.join(ROOT, "website", "src");
 
 const ITCH = "https://kjp403.itch.io/arkenelle";
 const PLAY_WEB = "https://play.arkenelle.com/";
+const PLAY_DESKTOP = "https://play.arkenelle.com/desktop/Arkenelle-windows.zip";
 const DISCORD = "https://discord.gg/kSs3hxByV";
 const ITCH_APP = "https://itch.io/app";
 
@@ -463,7 +464,7 @@ function shell({ title, active, body, scripts = [] }) {
       <a href="/wiki/locations/" class="${active === "locations" ? "active" : ""}">Locations</a>
       <a href="/wiki/npcs/" class="${active === "npcs" ? "active" : ""}">NPCs</a>
       <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
-      <a href="${ITCH}">Download</a>
+      <a href="${PLAY_DESKTOP}">Download</a>
       <a href="${DISCORD}">Discord</a>
     </nav>
     <div class="search-wrap">
@@ -960,7 +961,7 @@ function build() {
             </div>
             <p class="cta-note">No download. Opens the live game in Chrome or Firefox.</p>
             <div class="cta-row">
-              <a class="btn" href="${ITCH}">Desktop client</a>
+              <a class="btn" href="${PLAY_DESKTOP}">Desktop client</a>
               <a class="btn" href="${DISCORD}">Discord</a>
               <a class="btn" href="/wiki/">Wiki</a>
               <a class="btn" href="/leaderboards/">Leaderboards</a>
@@ -972,7 +973,7 @@ function build() {
         <div class="grid-3">
           <article class="card">
             <h2>Play</h2>
-            <p><a href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, install with the <a href="${ITCH_APP}">itch.io app</a> from <a href="${ITCH}">kjp403.itch.io/arkenelle</a>.</p>
+            <p><a href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, <a href="${PLAY_DESKTOP}">download the Windows app</a> (extract the zip, run Arkenelle.exe; it updates itself). itch.io remains an optional backup.</p>
           </article>
           <article class="card">
             <h2>Where to start</h2>
@@ -1047,7 +1048,7 @@ function build() {
           <h2>Play</h2>
           <ol>
             <li><strong>Browser:</strong> open <a href="${PLAY_WEB}">play.arkenelle.com</a>. First load downloads the whole client; later visits reuse the cache. This is the lighter build (no weather).</li>
-            <li><strong>Desktop (recommended):</strong> install the <a href="${ITCH_APP}">itch.io app</a>, open <a href="${ITCH}">Arkenelle on itch.io</a> <em>inside the app</em>, and click Install. Updates arrive in the app after each release.</li>
+            <li><strong>Desktop (recommended):</strong> <a href="${PLAY_DESKTOP}">download the Windows zip</a>, extract it somewhere stable (not Desktop or OneDrive), and run <code>Arkenelle.exe</code>. Later launches update themselves. The <a href="${ITCH_APP}">itch.io app</a> is an optional backup.</li>
           </ol>
           <h2>First steps</h2>
           <p>You wake in Castle Garden. The Hall Keeper near your starting cell has your first quest, <strong>Find Your Footing</strong>. It is orientation, not a class choice. Arkenelle does not lock you into a weapon or profession.</p>

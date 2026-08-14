@@ -3,7 +3,7 @@
 Deploys the three game servers behind Caddy (auto HTTPS) on one VPS.
 
 - `api.arkenelle.com`  → gateway (login / accounts) on `127.0.0.1:8088`
-- `play.arkenelle.com` → browser client (static files in `/opt/arkenelle/client-web`) and world WebSocket on `127.0.0.1:8087`
+- `play.arkenelle.com` → browser client (`/opt/arkenelle/client-web`), Windows zip (`/opt/arkenelle/client-windows` at `/desktop/`), and world WebSocket on `127.0.0.1:8087`
 - master + dashboard stay internal on loopback (`8062/8064/8080`)
 
 The game servers bind to `127.0.0.1`, so only Caddy (ports 80/443) is public.
@@ -73,17 +73,17 @@ zip). Desktop Chrome or Firefox. The web build is the lite client (no weather).
 
 ---
 
-## Client auto-updates (itch.io)
+## Client auto-updates (self-hosted Windows)
 
-Server deploys do **not** update player EXEs. For Windows/Linux/Web installs that
-update themselves, use the itch.io pipeline:
+Server deploys do **not** update player EXEs. Windows clients check
+`https://play.arkenelle.com/desktop/latest.json` on launch and download
+`Arkenelle-windows.zip` when the version is newer.
 
-→ **[release-clients.md](./release-clients.md)** (butler channel, portable exe+pck, `BUTLER_API_KEY`)
+→ **[release-clients.md](./release-clients.md)** (VPS zip + optional itch butler)
 
-Players must **Install** with the [itch.io app](https://itch.io/app) (not the
-browser **Download** button). Releases push a portable folder so the app can
-patch in-place. Delete any manual Uploads on the itch edit page — they make
-Update open a browser download instead.
+Players download the zip once from the site (or `/desktop/Arkenelle-windows.zip`),
+extract, and run `Arkenelle.exe`. itch.io remains an optional backup if
+`BUTLER_API_KEY` is set.
 
 ---
 

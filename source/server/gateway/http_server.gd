@@ -147,7 +147,7 @@ func _rate_ok(payload: Dictionary, endpoint: StringName, max_calls: int, window_
 
 ## Version gate: accept clients in [min_client_version, server_version].
 ## Exact match still preferred; the min floor stops Deploy-before-Release from
-## locking every itch install out. Returns {} when OK, else ERR_OUTDATED_VERSION.
+## locking every published client out. Returns {} when OK, else ERR_OUTDATED_VERSION.
 ## Shared by login + the boot handshake so the two never drift.
 func _check_version(payload: Dictionary) -> Dictionary:
 	var server_version: String = GatewayAPI.game_version()

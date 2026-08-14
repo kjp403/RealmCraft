@@ -1,10 +1,11 @@
 name: Release clients to itch.io
 
 # Tag a release (e.g. `git tag v0.28.1 && git push origin v0.28.1`) → exports
-# Windows / Linux / Web clients, pushes them to itch.io via butler, and copies
-# the Web export to the VPS at /opt/arkenelle/client-web (play.arkenelle.com).
-# Server deploy is a separate workflow (deploy-vps.yml) — this one never
-# restarts the live world.
+# Windows / Linux / Web clients, pushes them to itch.io via butler (backup),
+# copies the Web export to /opt/arkenelle/client-web, and copies the Windows
+# portable zip + latest.json to /opt/arkenelle/client-windows
+# (https://play.arkenelle.com/desktop/). Server deploy is a separate workflow
+# (deploy-vps.yml) — this one never restarts the live world.
 #
 # Prerequisites (one-time): see deploy/release-clients.md
 #   1. Create itch project https://kjp403.itch.io/arkenelle
@@ -91,15 +92,17 @@ jobs:
           echo "PLATFORMS=${P:-all}" >> "$GITHUB_ENV"
           echo "Target platforms: ${P:-all}"
 
-      - name: Require BUTLER_API_KEY
+      - name: Optional butler (itch backup)
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
           set -euo pipefail
           if [ -z "${BUTLER_API_KEY:-}" ]; then
-            echo "::error::BUTLER_API_KEY secret is missing. Create an itch API key at https://itch.io/user/settings/api-keys and add it as a repo Actions secret. See deploy/release-clients.md"
-            exit 1
+            echo "::notice::BUTLER_API_KEY unset — skipping itch push. Self-hosted Windows/Web still publish to the VPS."
+            echo "HAS_BUTLER=false" >> "$GITHUB_ENV"
+            exit 0
           fi
+          echo "HAS_BUTLER=true" >> "$GITHUB_ENV"
 
       - name: Info - server-class references in client-shipped code
         run: |
@@ -237,6 +240,7 @@ jobs:
           du -sh exports/windows exports/linux exports/web exports/android 2>/dev/null || true
 
       - name: Install butler
+        if: env.HAS_BUTLER == 'true'
         run: |
           set -euo pipefail
           curl -fL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
@@ -276,6 +280,7 @@ jobs:
           fi
 
       - name: Push clients to itch.io
+        if: env.HAS_BUTLER == 'true'
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
@@ -296,6 +301,88 @@ jobs:
             # Arkenelle.apk.idsig that sideloaders don't need.
             ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android" --userversion "${USERVERSION}"
           fi
+
+      - name: Pack Windows client for the VPS
+        if: hashFiles('exports/windows/Arkenelle.exe') != ''
+        env:
+          USERVERSION: ${{ env.USERVERSION }}
+        run: |
+          set -euo pipefail
+          VERSION="${USERVERSION:-$(grep -E '^config/version=' project.godot | head -1 | sed -E 's/.*"([^"]+)".*/\1/')}"
+          export VERSION
+          python3 - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          src = Path("exports/windows")
+          out_dir = Path("dist-win")
+          out_dir.mkdir(exist_ok=True)
+          zip_path = out_dir / "Arkenelle-windows.zip"
+          skip_names = {".itch.toml"}
+          with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_STORED) as zf:
+              for p in src.rglob("*"):
+                  if not p.is_file():
+                      continue
+                  if p.name in skip_names or p.name.endswith("console.exe"):
+                      continue
+                  zf.write(p, p.relative_to(src).as_posix())
+          digest = hashlib.sha256()
+          with zip_path.open("rb") as fh:
+              while True:
+                  chunk = fh.read(1024 * 1024)
+                  if not chunk:
+                      break
+                  digest.update(chunk)
+          sha = digest.hexdigest()
+          payload = {
+              "version": os.environ["VERSION"],
+              "sha256": sha,
+              "size": zip_path.stat().st_size,
+              "url": "https://play.arkenelle.com/desktop/Arkenelle-windows.zip",
+          }
+          (out_dir / "latest.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          print(f"Windows zip {payload['size']} bytes sha256={sha} version={payload['version']}")
+          PY
+          tar -C dist-win -czf arkenelle-windows-client.tar.gz Arkenelle-windows.zip latest.json
+          cat dist-win/latest.json
+
+      - name: Upload Windows client tarball to the VPS
+        if: hashFiles('arkenelle-windows-client.tar.gz') != ''
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          source: arkenelle-windows-client.tar.gz
+          target: /tmp
+          overwrite: true
+
+      - name: Publish Windows client on play.arkenelle.com/desktop
+        if: hashFiles('arkenelle-windows-client.tar.gz') != ''
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            TAR=/tmp/arkenelle-windows-client.tar.gz
+            if [[ -f /opt/arkenelle/deploy/publish-windows-client.sh ]]; then
+              sudo bash /opt/arkenelle/deploy/publish-windows-client.sh "$TAR"
+            else
+              DEST=/opt/arkenelle/client-windows
+              STAGE=${DEST}.new
+              sudo rm -rf "$STAGE"
+              sudo mkdir -p "$STAGE"
+              sudo tar -xzf "$TAR" -C "$STAGE"
+              sudo rm -rf "$DEST"
+              sudo mv "$STAGE" "$DEST"
+              sudo chown -R arkenelle:arkenelle "$DEST"
+              sudo chmod -R a+rX "$DEST"
+              rm -f "$TAR"
+            fi
 
       - name: Pack web client for the VPS
         if: hashFiles('exports/web/index.html') != ''
@@ -341,6 +428,7 @@ jobs:
             fi
 
       - name: Verify itch channel userversions
+        if: env.HAS_BUTLER == 'true'
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |

@@ -68,5 +68,5 @@ jobs:
             sudo -u arkenelle git reset --hard origin/main
             # Never wipe Godot user:// (.local), caches, or the browser-client
             # docroot (root-owned files from publish-web-client.sh).
-            sudo -u arkenelle git clean -fd -e .local -e .cache -e .config -e client-web
+            sudo -u arkenelle git clean -fd -e .local -e .cache -e .config -e client-web -e client-windows
             sudo bash /opt/arkenelle/deploy/update.sh

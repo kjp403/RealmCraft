@@ -37,7 +37,7 @@ static func game_version() -> String:
 
 ## Oldest client build the gateway still accepts. Defaults to [method game_version]
 ## (exact match) when unset. Set application/config/min_client_version when the
-## live server must accept the currently published itch build during a release lag.
+## live server must accept the last published Windows zip during a release lag.
 static func min_client_version() -> String:
 	var configured: String = str(
 		ProjectSettings.get_setting("application/config/min_client_version", "")
