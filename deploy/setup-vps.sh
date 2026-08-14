@@ -55,6 +55,12 @@ sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import || \
 	sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import || true
 
 echo "==> 7/7 Installing Caddy config + systemd services"
+mkdir -p /opt/arkenelle/client-web
+chmod a+rX /opt/arkenelle/client-web
+if [[ ! -f /opt/arkenelle/client-web/index.html ]]; then
+	install -m 0644 "$APP_DIR/deploy/client-web-placeholder/index.html" /opt/arkenelle/client-web/index.html
+	chown "$APP_USER":"$APP_USER" /opt/arkenelle/client-web/index.html
+fi
 install -m 0644 "$APP_DIR/deploy/Caddyfile" /etc/caddy/Caddyfile
 install -m 0644 "$APP_DIR"/deploy/systemd/arkenelle-*.service /etc/systemd/system/
 systemctl daemon-reload

@@ -13,9 +13,9 @@ Before asking Kyle to merge Hollow/golem changes, run these gates and keep artif
 1. Headless: `godot --headless --path . -s tools/verify_hollow_golem.gd` → must print `VERIFY_PASS` (container `node_paths`, baked sync id `0` → `MechaGolem`, GIF anims present, `bad_black_tiles=0`).
 2. Visual: `godot --path . -s tools/render_hollow_preview.gd` → `/opt/cursor/artifacts/screenshots/hollow-golem-preview.png` must show the golem on the lit pad.
 3. In-game (local): enter Hub → **The Hollow** portal → confirm golem on the center pad. Prefer a levelled/admin test char (`/setlevel`, `/heal`); do not use JailRoom.
-4. Live check (must use an HTTP/1.1 WebSocket upgrade — a plain GET always looks like `502` because Godot only speaks WS):
+4. Live check (must use an HTTP/1.1 WebSocket upgrade — GET `/` now serves the browser client HTML, so a `200` is not proof the world is up):
    `curl --http1.1 -sS -o /dev/null -w '%{http_code}\n' -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' https://play.arkenelle.com/`
-   Expect `101`. A plain `curl https://play.arkenelle.com/` returning `502` is **not** proof the world is down. If the WS probe fails, say so explicitly; do not claim live verification.
+   Expect `101`. A plain `curl https://play.arkenelle.com/` returning HTML is the web client (or the placeholder page), not a world health check. If the WS probe fails, say so explicitly; do not claim live verification.
 
 
 Working boss maps (e.g. Fungus Cave) bake `node_paths=PackedStringArray("replicated_props_container")` on the map root **and** `node_paths` for `id_to_node`/`node_to_id` on `ReplicatedPropsContainer`. Hollow must match that pattern; `Map._ready` also resolves a missing container by child name as a safety net.

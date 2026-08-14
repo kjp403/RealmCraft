@@ -22,5 +22,7 @@ const ITCH_APP_URL: String = "itch://games/%d" % ITCH_GAME_ID
 const ITCH_INSTALL_URL: String = "itch://install/?game_id=%d" % ITCH_GAME_ID
 ## Marketing site (community links, landing page — not the auto-updater).
 const WEBSITE_URL: String = "https://arkenelle.com"
+## Public in-browser client (Godot web export on the VPS).
+const PLAY_WEB_URL: String = "https://play.arkenelle.com/"
 ## Public Discord invite (settings, gateway More menu, help, feedback replies).
 const DISCORD_URL: String = "https://discord.gg/kSs3hxByV"

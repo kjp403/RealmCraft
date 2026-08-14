@@ -1,9 +1,10 @@
 name: Release clients to itch.io
 
 # Tag a release (e.g. `git tag v0.28.1 && git push origin v0.28.1`) → exports
-# Windows / Linux / Web clients and pushes them to itch.io via butler.
+# Windows / Linux / Web clients, pushes them to itch.io via butler, and copies
+# the Web export to the VPS at /opt/arkenelle/client-web (play.arkenelle.com).
 # Server deploy is a separate workflow (deploy-vps.yml) — this one never
-# restarts the live server.
+# restarts the live world.
 #
 # Prerequisites (one-time): see deploy/release-clients.md
 #   1. Create itch project https://kjp403.itch.io/arkenelle
@@ -14,8 +15,8 @@ name: Release clients to itch.io
 on:
   push:
     tags: ["v*"]
-    # Auto-ship Windows when application/config/version changes on main so
-    # Deploy VPS cannot get ahead of the itch channel again.
+    # Auto-ship Windows + Web when application/config/version changes on main so
+    # itch Library and play.arkenelle.com cannot lag the live server.
     branches: [main]
     paths: ["project.godot"]
   workflow_dispatch:
@@ -66,8 +67,8 @@ jobs:
           echo "Version before='${prev:-}' after='${curr}'"
           if [ -n "$curr" ] && [ "$curr" != "$prev" ]; then
             echo "should_release=true" >> "$GITHUB_OUTPUT"
-            # Windows first on auto bumps — that's what itch Library Update needs.
-            echo "platforms=windows" >> "$GITHUB_OUTPUT"
+            # Windows (itch Library) + Web (play.arkenelle.com).
+            echo "platforms=windows,web" >> "$GITHUB_OUTPUT"
           else
             echo "config/version unchanged — skipping client release"
             echo "should_release=false" >> "$GITHUB_OUTPUT"
@@ -213,7 +214,7 @@ jobs:
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           set -euo pipefail
-          want() { [ "$PLATFORMS" = "all" ] || [ "$PLATFORMS" = "$1" ]; }
+          want() { case ",${PLATFORMS}," in *,all,*|*,$1,*) return 0 ;; esac; return 1; }
           mkdir -p exports/windows exports/linux exports/web exports/android
           if want windows; then
             ./godot --headless --path . --export-release "Windows" exports/windows/Arkenelle.exe
@@ -279,7 +280,7 @@ jobs:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
           set -euo pipefail
-          want() { [ "$PLATFORMS" = "all" ] || [ "$PLATFORMS" = "$1" ]; }
+          want() { case ",${PLATFORMS}," in *,all,*|*,$1,*) return 0 ;; esac; return 1; }
           # --userversion lets the itch app show 0.28.x and pick the right patch.
           if want windows; then
             ./butler push exports/windows "${ITCH_GAME}:windows" --userversion "${USERVERSION}"
@@ -296,12 +297,55 @@ jobs:
             ./butler push exports/android/Arkenelle.apk "${ITCH_GAME}:android" --userversion "${USERVERSION}"
           fi
 
+      - name: Pack web client for the VPS
+        if: hashFiles('exports/web/index.html') != ''
+        run: tar -C exports/web -czf arkenelle-web-client.tar.gz .
+
+      - name: Upload web client tarball to the VPS
+        if: hashFiles('arkenelle-web-client.tar.gz') != ''
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          source: arkenelle-web-client.tar.gz
+          target: /tmp
+          overwrite: true
+
+      - name: Publish web client on play.arkenelle.com
+        if: hashFiles('arkenelle-web-client.tar.gz') != ''
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+            TAR=/tmp/arkenelle-web-client.tar.gz
+            if [[ -f /opt/arkenelle/deploy/publish-web-client.sh ]]; then
+              sudo bash /opt/arkenelle/deploy/publish-web-client.sh "$TAR"
+            else
+              DEST=/opt/arkenelle/client-web
+              STAGE=${DEST}.new
+              sudo rm -rf "$STAGE"
+              sudo mkdir -p "$STAGE"
+              sudo tar -xzf "$TAR" -C "$STAGE"
+              sudo rm -rf "$DEST"
+              sudo mv "$STAGE" "$DEST"
+              sudo chown -R arkenelle:arkenelle "$DEST"
+              sudo chmod -R a+rX "$DEST"
+              rm -f "$TAR"
+            fi
+
       - name: Verify itch channel userversions
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
           set -euo pipefail
-          want() { [ "$PLATFORMS" = "all" ] || [ "$PLATFORMS" = "$1" ]; }
+          want() { case ",${PLATFORMS}," in *,all,*|*,$1,*) return 0 ;; esac; return 1; }
           # butler finishes "processing" a few seconds after push; poll until the
           # channel reports our --userversion so Library Update can find it.
           wait_channel() {
@@ -328,4 +372,5 @@ jobs:
           }
           if want windows; then wait_channel windows; fi
           if want linux; then wait_channel linux; fi
+          if want web; then wait_channel web; fi
           ./butler status "${ITCH_GAME}"
