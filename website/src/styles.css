@@ -698,6 +698,28 @@ body.location-scene article.page {
 }
 
 .donate-page h2 { margin-top: 1.8rem; }
+.donate-thanks {
+  margin: 1.2rem 0 0.4rem;
+  padding: 0.95rem 1.05rem 1rem;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--cat-donate) 45%, var(--line));
+  border-radius: 10px;
+}
+.donate-thanks h2 { margin-top: 0; }
+.donate-thanks p { margin: 0.45rem 0 0; }
+.donate-title-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.1rem;
+  margin-top: 0.75rem !important;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+.donate-title-samples .c-sapphire { color: #7ec0ff; }
+.donate-title-samples .c-emerald { color: #5ee0a0; }
+.donate-title-samples .c-ruby { color: #f08a8a; }
+.donate-title-samples .c-custom { color: var(--cat-donate); }
+.donate-foot { color: var(--muted); margin-top: 1.4rem; }
 .donate-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
