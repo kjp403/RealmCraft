@@ -160,7 +160,7 @@ func _build_body() -> void:
 	_map_host.add_child(_map_texture)
 
 	_player_marker = Label.new()
-	_player_marker.text = "◆"
+	_player_marker.text = UiGlyphs.diamond()
 	_player_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_player_marker.add_theme_font_size_override(&"font_size", 18)
 	_player_marker.add_theme_color_override(&"font_color", Color(0.35, 0.95, 1.0))

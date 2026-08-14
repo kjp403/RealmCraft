@@ -42,6 +42,8 @@ play.arkenelle.com {
 		encode gzip
 		@pck path *.pck
 		header @pck Content-Type application/octet-stream
+		@nocache path *.pck *.wasm *.js
+		header @nocache Cache-Control "no-cache"
 		file_server
 	}
 }

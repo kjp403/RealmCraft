@@ -894,7 +894,7 @@ func _rebuild_perk_detail() -> void:
 	title_label.text = display
 
 	var back := Button.new()
-	back.text = "← All skills"
+	back.text = UiGlyphs.back() + "All skills"
 	back.focus_mode = Control.FOCUS_NONE
 	back.custom_minimum_size = Vector2(0, 18)
 	back.add_theme_font_size_override(&"font_size", 9)

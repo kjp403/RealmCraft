@@ -470,7 +470,7 @@ func _rebuild_combat_detail() -> void:
 		child.queue_free()
 
 	var back := Button.new()
-	back.text = "← Combat"
+	back.text = UiGlyphs.back() + "Combat"
 	back.focus_mode = Control.FOCUS_NONE
 	back.custom_minimum_size = Vector2(0, 18)
 	back.add_theme_font_size_override(&"font_size", 9)
@@ -728,7 +728,7 @@ func _rebuild_detail() -> void:
 	title_label.text = display
 
 	_back_button = Button.new()
-	_back_button.text = "← All skills"
+	_back_button.text = UiGlyphs.back() + "All skills"
 	_back_button.focus_mode = Control.FOCUS_NONE
 	_back_button.custom_minimum_size = Vector2(0, 18)
 	_back_button.add_theme_font_size_override(&"font_size", 9)

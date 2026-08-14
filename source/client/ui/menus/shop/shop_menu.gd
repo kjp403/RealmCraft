@@ -219,7 +219,7 @@ func _build_trade_rows() -> void:
 			slot.trade_amount = trade.amount
 			slot.trade_payout = trade.payout
 			slot.trade_bundles_available = bundles_available
-			var middle: String = "x%d → %d g" % [trade.amount, trade.payout]
+			var middle: String = "x%d %s %d g" % [trade.amount, UiGlyphs.right_arrow(), trade.payout]
 			_add_row(slot, middle)
 
 	if not _shop.buys_vendor_priced:
@@ -388,9 +388,10 @@ func _update_price_label() -> void:
 		return
 	var bundles: int = int(quantity_spinbox.value)
 	if _mode == Mode.SELL and _selected_slot.is_trade:
-		detail_price_label.text = "Trade: %d %s → %d golds" % [
+		detail_price_label.text = "Trade: %d %s %s %d golds" % [
 			_selected_slot.trade_amount * bundles,
 			_selected_slot.item.item_name,
+			UiGlyphs.right_arrow(),
 			_selected_slot.trade_payout * bundles,
 		]
 		return

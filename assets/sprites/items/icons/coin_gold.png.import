@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgoldcoinkyle01"
-path="res://.godot/imported/coin_gold.png-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ctex"
+uid="uid://dbkxipoiqvbua"
+path="res://.godot/imported/coin_gold.png-10fe9eb7743133e207cb8f47bfdc4177.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/items/icons/coin_gold.png"
-dest_files=["res://.godot/imported/coin_gold.png-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ctex"]
+dest_files=["res://.godot/imported/coin_gold.png-10fe9eb7743133e207cb8f47bfdc4177.ctex"]
 
 [params]
 

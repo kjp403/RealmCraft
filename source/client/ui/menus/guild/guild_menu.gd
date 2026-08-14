@@ -866,7 +866,7 @@ func _view_log(parent: Node) -> void:
 	var box: VBoxContainer = _padded(parent)
 
 	var back: Button = Button.new()
-	back.text = "←  More"
+	back.text = UiGlyphs.back() + " More"
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(func() -> void: _select_section("more"))
 	box.add_child(back)
@@ -943,7 +943,7 @@ func _view_settings(parent: Node) -> void:
 	var box: VBoxContainer = _padded(outer)
 
 	var back: Button = Button.new()
-	back.text = "←  More"
+	back.text = UiGlyphs.back() + " More"
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(func() -> void: _select_section("more"))
 	box.add_child(back)
