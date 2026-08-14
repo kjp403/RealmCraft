@@ -13,6 +13,10 @@ func _init() -> void:
 		failures.append("LeaderboardService missing PUBLIC_BOARDS")
 	if svc.find("static func public_snapshot") < 0:
 		failures.append("LeaderboardService missing public_snapshot")
+	if svc.find("_account_omitted_from_boards") < 0:
+		failures.append("LeaderboardService must omit banned accounts from boards")
+	if svc.find("BanList.is_banned") < 0:
+		failures.append("banned accounts must be dropped from leaderboards")
 	if svc.find('"dungeon:Dungeon"') < 0:
 		failures.append("PUBLIC_BOARDS must include dungeon:Dungeon")
 	if svc.find('"name": str(entry.get("name", ""))') < 0:

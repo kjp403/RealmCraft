@@ -78,6 +78,17 @@ static func top_n(world_server: Node, board: String, limit: int) -> Array:
 	return _top_n_player(world_server, board, limit)
 
 
+## Account bans and last-known IP bans drop every character on that login.
+## Staff hide stays character-scoped in is_hidden_from_leaderboard.
+static func _account_omitted_from_boards(account_name: String) -> bool:
+	if account_name.is_empty():
+		return false
+	if BanList.is_banned(account_name):
+		return true
+	var ip: String = IpBanList.last_ip_for_account(account_name)
+	return not ip.is_empty() and IpBanList.is_banned(ip)
+
+
 ## Boards the public website / HTTP API publishes. Keep in sync with the in-game
 ## Leaderboard menu (source/client/ui/menus/leaderboard/leaderboard_menu.gd DOMAINS).
 const PUBLIC_BOARDS: Array[String] = [
@@ -197,6 +208,7 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 		var experience: int
 		var skills_dict: Dictionary
 		var roles: Dictionary
+		var account_name: String
 		if live != null:
 			stats = live.lb_stats
 			level = live.level
@@ -204,6 +216,7 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			experience = live.experience
 			skills_dict = live.skills
 			roles = live.server_roles
+			account_name = live.account_name
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
@@ -214,12 +227,15 @@ static func _top_n_player(world_server: Node, board: String, limit: int) -> Arra
 			skills_dict = skills_parsed if skills_parsed is Dictionary else {}
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
+			account_name = str(row.get("account_name", ""))
 
 		# Hide admin / senior_admin / owner from boards (moderators stay).
 		# Character-bound: regular alts on a staff login still appear.
 		if CommandPermissions.is_hidden_from_leaderboard(
 			roles, role_definitions, display_name, player_id
 		):
+			continue
+		if _account_omitted_from_boards(account_name):
 			continue
 
 		var score: int = 0
@@ -343,19 +359,24 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 		var stats: Dictionary
 		var display_name: String
 		var roles: Dictionary
+		var account_name: String
 		if live != null:
 			stats = live.lb_stats
 			display_name = live.display_name
 			roles = live.server_roles
+			account_name = live.account_name
 		else:
 			var parsed: Variant = JSON.parse_string(str(row.get("stats_json", "{}")))
 			stats = parsed if parsed is Dictionary else {}
 			display_name = str(row.get("display_name", "?"))
 			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
 			roles = roles_parsed if roles_parsed is Dictionary else {}
+			account_name = str(row.get("account_name", ""))
 		if CommandPermissions.is_hidden_from_leaderboard(
 			roles, role_definitions, display_name, player_id
 		):
+			continue
+		if _account_omitted_from_boards(account_name):
 			continue
 		var best: Variant = stats.get("dungeon_best", {})
 		if best is not Dictionary:
