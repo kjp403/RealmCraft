@@ -90,9 +90,11 @@ func _ready() -> void:
 	ClientState.player_profile_requested.connect(open_player_profile)
 	ClientState.player_profile_by_peer_requested.connect(open_player_profile_by_peer)
 	ClientState.open_menu_requested.connect(_on_menu_requested)
-	# Submenus sit ABOVE the chat (z=1) so the chat panel never floats over an open menu.
+	# HUD chrome (compact docks z=5, button rail z=10, minimap z=80) is a sibling
+	# of Submenu. Menus must sit above all of it so Withdraw / Close stay visible
+	# and clickable — compact inventory used to paint over the bank footer.
 	if sub_menu != null:
-		sub_menu.z_index = 2
+		sub_menu.z_index = 100
 	# The launcher isn't a display_menu submenu, so hook its show/hide into the same HUD-hide path.
 	menu_overlay.visibility_changed.connect(_refresh_hud_for_menus)
 	# The trade panel is a standalone overlay (not a display_menu) — treat it like a menu too: hide
@@ -373,10 +375,11 @@ func _refresh_hud_for_menus() -> void:
 				if node.visible:
 					node.hide()
 					_hidden_for_menu.append(node)
-		# Trade is a standalone overlay (not a display_menu). Keep dock + compact panels from
-		# sitting above / intercepting its footer buttons.
+		# Compact inventory / skills / etc. sit on the HUD and used to cover
+		# bank Withdraw and other footer buttons. Hide them whenever a menu owns
+		# the screen — not only during Secure Trade.
+		_hide_compact_panels()
 		if trade_panel.visible:
-			_hide_compact_panels()
 			trade_panel.z_index = 20
 			trade_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 			trade_panel.move_to_front()
@@ -621,18 +624,13 @@ func _hide_compact_panels() -> void:
 
 
 func _toggle_compact_panel(selected_panel: Control) -> void:
-	# Secure Trade owns the screen — dock icons must not open over / under it.
-	if trade_panel.visible:
+	# Fullscreen menus (bank, shop, trade, …) own the screen. Opening a dock over
+	# them covers footer buttons and used to close the menu — ignore the dock.
+	if trade_panel.visible or _any_submenu_visible():
 		return
 	var should_open: bool = not selected_panel.visible
 	_hide_compact_panels()
 	selected_panel.visible = should_open
-	# Opening a dock while a fullscreen submenu is up recreates the "can't reach
-	# Close" trap (dock covers the profile action bar). Prefer the dock: hide menus.
-	if should_open:
-		for menu: Control in menus.values():
-			if menu.visible:
-				menu.hide()
 
 
 func _on_inventory_dock_button_pressed() -> void:

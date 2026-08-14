@@ -166,6 +166,7 @@ func _build_wallet() -> void:
 	wallet_icon.custom_minimum_size = Vector2(22, 22)
 	wallet_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	wallet_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	wallet_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var gold: Item = ContentRegistryHub.load_by_id(&"items", _gold_id)
 	if gold:
 		wallet_icon.texture = gold.item_icon

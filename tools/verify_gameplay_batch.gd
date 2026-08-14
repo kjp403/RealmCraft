@@ -97,6 +97,23 @@ func _check_bone_item() -> void:
 			Inventory.stack_limit_for(ore, true) == 50,
 			"iron ore bank stack must be 50"
 		)
+	var food: Item = load("res://source/common/gameplay/items/consumables/food/cooked_shrimp.tres")
+	if _expect(food != null, "cooked_shrimp.tres failed to load"):
+		_expect(food.stack_limit == 10, "cooked shrimp bag stack is %d, want 10" % food.stack_limit)
+		_expect(
+			Inventory.stack_limit_for(food, false) == 10,
+			"cooked food inventory stack must stay 10"
+		)
+		_expect(
+			Inventory.stack_limit_for(food, true) == 50,
+			"cooked food bank stack must be 50"
+		)
+	var potion: Item = load("res://source/common/gameplay/items/consumables/health_potion.tres")
+	if _expect(potion != null, "health_potion.tres failed to load"):
+		_expect(
+			Inventory.stack_limit_for(potion, true) == int(potion.stack_limit),
+			"potions must not inherit the cooked-food bank stack of 50"
+		)
 	if not _expect(bone.item_icon != null, "bone has no icon"):
 		return
 	# Item.item_icon defaults to a leaf sprite, so an item that never assigns one

@@ -4,7 +4,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 72.0
+const BOTTOM_CLEARANCE := 48.0
 const GRID_COLUMNS := 2
 ## Inventory-like skill cells: fixed block per skill (icon + levels).
 const TILE_SIZE := Vector2(112.0, 48.0)

@@ -2,7 +2,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 300.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 72.0
+const BOTTOM_CLEARANCE := 48.0
 
 const GRID_COLUMNS := 4
 const GRID_ROWS := 7
@@ -84,6 +84,7 @@ func _build_currency_pouch() -> void:
 	gold_icon.custom_minimum_size = Vector2(14.0, 14.0)
 	gold_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	gold_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	gold_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if gold_item != null:
