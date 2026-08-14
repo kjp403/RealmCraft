@@ -1357,6 +1357,11 @@ function build() {
         <article class="page prose donate-page">
           ${pageHeading("donate", "Support Arkenelle")}
           <p>Donations help pay for servers and keep development going. This is not MTX — a gift does not buy in-game items, gold, or power.</p>
+          <div class="donate-thanks">
+            <h2>A title as thanks</h2>
+            <p>Arkenelle grants a matching title as a thank-you. It shows under your name on your profile and beside your name in chat. After you donate, send your <strong>character name</strong> in <a href="${DISCORD}">Discord</a> and we will put it on.</p>
+            <p class="donate-title-samples" aria-hidden="true"><span class="c-sapphire">— Sapphire VIP —</span><span class="c-emerald">— Emerald Supporter —</span><span class="c-ruby">— Ruby VIP —</span><span class="c-custom">— Arkenelle Supporter —</span></p>
+          </div>
           <h2>Give once</h2>
           <div class="donate-grid">
             ${donateCard({
@@ -1420,6 +1425,7 @@ function build() {
               gem: "ruby",
             })}
           </div>
+          <p class="donate-foot">Choose-your-amount gifts receive the gold <strong>Arkenelle Supporter</strong> title. One-time and VIP gifts use the matching Sapphire, Emerald, or Ruby title.</p>
         </article>
       </main>`,
     })
