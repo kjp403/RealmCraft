@@ -3,6 +3,7 @@
  * Builds the Arkenelle marketing site + wiki from Godot .tres data.
  * Run from anywhere: node website/build.mjs
  */
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +11,11 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "website", "dist");
 const SRC = path.join(ROOT, "website", "src");
+const CSS_V = crypto
+  .createHash("sha1")
+  .update(fs.readFileSync(path.join(SRC, "styles.css")))
+  .digest("hex")
+  .slice(0, 10);
 
 const ITCH = "https://kjp403.itch.io/arkenelle";
 const PLAY_WEB = "https://play.arkenelle.com/";
@@ -449,7 +455,7 @@ function shell({ title, active, body, scripts = [] }) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=${CSS_V}">
 </head>
 <body>
   <header class="site-header">
@@ -934,6 +940,8 @@ function build() {
     `/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+/styles.css
+  Cache-Control: public, max-age=60, must-revalidate
 /media/*
   Cache-Control: public, max-age=604800
 `
@@ -953,10 +961,11 @@ function build() {
           <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory. Finding your own footing is the point.</p>
           <div class="cta-stack">
             <div class="play-wrap">
+              <span class="play-halo" aria-hidden="true"></span>
               <span class="play-sparkle s1" aria-hidden="true"></span>
               <span class="play-sparkle s2" aria-hidden="true"></span>
               <span class="play-sparkle s3" aria-hidden="true"></span>
-              <a class="btn play" href="${PLAY_WEB}">Play in your browser</a>
+              <a class="btn play" href="${PLAY_WEB}"><span class="play-shine" aria-hidden="true"></span>Play in your browser</a>
             </div>
             <p class="cta-note">No download. Opens the live game in Chrome or Firefox.</p>
             <div class="cta-row">
