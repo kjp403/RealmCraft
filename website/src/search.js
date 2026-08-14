@@ -56,14 +56,22 @@
 })();
 
 (function () {
-  const grid = document.querySelector(".item-grid");
   const bar = document.querySelector("[data-filters]");
-  if (!grid || !bar) return;
+  if (!bar) return;
+  const sections = document.querySelectorAll("[data-kind-section]");
+  const grid = document.querySelector(".item-grid");
+  if (!sections.length && !grid) return;
   bar.addEventListener("click", (ev) => {
     const btn = ev.target.closest("[data-kind]");
     if (!btn) return;
     const kind = btn.getAttribute("data-kind");
     bar.querySelectorAll("[data-kind]").forEach((b) => b.classList.toggle("active", b === btn));
+    if (sections.length) {
+      sections.forEach((sec) => {
+        sec.hidden = Boolean(kind) && sec.getAttribute("data-kind-section") !== kind;
+      });
+      return;
+    }
     grid.querySelectorAll(".item-card").forEach((card) => {
       card.style.display = !kind || card.getAttribute("data-kind") === kind ? "" : "none";
     });
