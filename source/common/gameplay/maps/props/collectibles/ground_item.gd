@@ -21,8 +21,9 @@ const EXCLUSIVE_S: float = 60.0
 ## are easy to hit.
 const CLICK_SIZE: Vector2 = Vector2(36, 36)
 ## Inventory icons are typically 64×64 and the scene sprite is 0.5 — 32 world px.
-## Cap so a 96×96+ icon (or a missing-alpha wallpaper) cannot eat the screen.
+## Cap so a huge icon cannot eat the screen. Currency is a coin, not a hide.
 const WORLD_ICON_PX: float = 32.0
+const WORLD_COIN_PX: float = 12.0
 const BASE_ICON_SCALE: float = 0.5
 
 @export var item_id: int = 0
@@ -69,7 +70,7 @@ func _refresh_visual() -> void:
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null and item.item_icon != null and sprite != null:
 		sprite.texture = item.item_icon
-		_fit_icon(item.item_icon)
+		_fit_icon(item.item_icon, item)
 	if amount_label != null:
 		amount_label.visible = amount > 1
 		amount_label.text = str(amount)
@@ -80,13 +81,12 @@ func _refresh_visual() -> void:
 		_beam = LootBeam.spawn(self, item)
 
 
-func _fit_icon(tex: Texture2D) -> void:
+func _fit_icon(tex: Texture2D, item: Item) -> void:
 	var art: float = float(maxi(tex.get_width(), tex.get_height()))
 	if art <= 0.0:
 		return
-	var s: float = BASE_ICON_SCALE
-	if art * s > WORLD_ICON_PX:
-		s = WORLD_ICON_PX / art
+	var target: float = WORLD_COIN_PX if item.is_currency else WORLD_ICON_PX
+	var s: float = minf(BASE_ICON_SCALE, target / art)
 	sprite.scale = Vector2(s, s)
 
 
