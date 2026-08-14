@@ -433,9 +433,10 @@ function copyMedia() {
   }
 }
 
-function shell({ title, active, body }) {
+function shell({ title, active, body, scripts = [] }) {
   const home = "/";
   const wiki = "/wiki/";
+  const extraScripts = scripts.map((src) => `  <script src="${src}"></script>`).join("\n");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -454,6 +455,7 @@ function shell({ title, active, body }) {
     <a class="brand" href="${home}"><img src="/media/project_icon/arkenelle_icon.png" alt="">Arkenelle</a>
     <nav class="primary">
       <a href="${wiki}" class="${active === "wiki" ? "active" : ""}">Wiki</a>
+      <a href="/leaderboards/" class="${active === "boards" ? "active" : ""}">Leaderboards</a>
       <a href="/wiki/getting-started/" class="${active === "start" ? "active" : ""}">Getting started</a>
       <a href="/wiki/items/" class="${active === "items" ? "active" : ""}">Items</a>
       <a href="/wiki/creatures/" class="${active === "creatures" ? "active" : ""}">Creatures</a>
@@ -470,6 +472,7 @@ function shell({ title, active, body }) {
   ${body}
   <footer class="footer">Arkenelle is in alpha. Wiki pages are generated from the game files.</footer>
   <script src="/search.js"></script>
+${extraScripts}
 </body>
 </html>`;
 }
@@ -923,6 +926,7 @@ function build() {
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
+  fs.copyFileSync(path.join(SRC, "leaderboards.js"), path.join(DIST, "leaderboards.js"));
   write(
     "_headers",
     `/*
@@ -949,6 +953,7 @@ function build() {
             <a class="btn primary" href="${ITCH}">Get the client</a>
             <a class="btn" href="${DISCORD}">Discord</a>
             <a class="btn" href="/wiki/">Open the wiki</a>
+            <a class="btn" href="/leaderboards/">Live leaderboards</a>
           </div>
         </div>
       </section>
@@ -965,7 +970,7 @@ function build() {
           </article>
           <article class="card">
             <h2>Guilds</h2>
-            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild and Leaderboard in-game.</p>
+            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild in-game, or the <a href="/leaderboards/">live leaderboards</a>.</p>
             <p><a href="/wiki/guilds/">Guilds &amp; territory →</a></p>
           </article>
         </div>
@@ -991,7 +996,30 @@ function build() {
           <a class="card" href="/wiki/slayer/"><h3>Slayer</h3><p>Masters, task pools, and creature assignments.</p></a>
           <a class="card" href="/wiki/quests/"><h3>Quests</h3><p>${quests.length} authored quests.</p></a>
           <a class="card" href="/wiki/guilds/"><h3>Guilds</h3><p>Territory, banners, and Glory.</p></a>
+          <a class="card" href="/leaderboards/"><h3>Leaderboards</h3><p>Live ranks from the running world.</p></a>
         </div>
+      </main>`,
+    })
+  );
+
+  write(
+    "leaderboards/index.html",
+    shell({
+      title: "Leaderboards — Arkenelle",
+      active: "boards",
+      scripts: ["/leaderboards.js"],
+      body: `<main class="wrap" data-leaderboards>
+        <div class="lb-head">
+          <h1 class="section-title">Leaderboards</h1>
+          <p class="lb-status" data-lb-status>Loading live ranks…</p>
+        </div>
+        <p class="muted">The same public boards as in-game, refreshed from the live world about every 30 seconds. Staff characters stay hidden.</p>
+        <div class="filters lb-cats" data-lb-cats></div>
+        <div class="filters lb-boards" data-lb-boards></div>
+        <section class="lb-panel">
+          <h2 data-lb-title>PvP · All-Time</h2>
+          <div data-lb-table></div>
+        </section>
       </main>`,
     })
   );
@@ -1037,7 +1065,7 @@ function build() {
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Guilds" }])}
         <article class="page prose">
           <h1 class="section-title">Guilds and territory</h1>
-          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The Guild and Leaderboard menus in-game are the live view.</p>
+          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The <a href="/leaderboards/">live leaderboards</a> show seasonal and eternal Glory, and the in-game Guild menu is the rest of the view.</p>
           <p>This is sandbox PvE/PvP infrastructure, not a theme-park campaign. Holding land is the point; the wiki will not tell you which banner to hit first.</p>
         </article>
       </main>`,
@@ -1362,6 +1390,7 @@ function build() {
     ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
+    { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
     { title: "Slayer", kind: "Guide", href: "/wiki/slayer/", haystack: "slayer turael durael tasks" },
   ];
   write("wiki/search.json", JSON.stringify(search));

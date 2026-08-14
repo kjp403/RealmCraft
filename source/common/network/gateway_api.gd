@@ -132,6 +132,12 @@ static func handshake() -> String:
 	return get_endpoint("/v1/handshake")
 
 
+## Public, unauthenticated top-N boards for the website. CORS is already open
+## on the gateway HTTP addon; the handler rate-limits by IP.
+static func leaderboards() -> String:
+	return get_endpoint("/v1/leaderboards")
+
+
 static func account_create() -> String:
 	return get_endpoint("/v1/account/create")
 

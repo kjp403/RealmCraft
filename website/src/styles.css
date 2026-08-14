@@ -234,6 +234,35 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   font-size: 0.85rem;
 }
 .alpha { color: var(--accent-2); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.lb-head { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: baseline; justify-content: space-between; margin-bottom: 0.8rem; }
+.lb-status { color: var(--muted); font-size: 0.9rem; }
+.lb-status[data-kind="ok"] { color: var(--ok); }
+.lb-status[data-kind="wait"] { color: var(--accent-2); }
+.lb-cats, .lb-boards { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.7rem; }
+.lb-cats button, .lb-boards button {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+.lb-cats button.active, .lb-boards button.active, .lb-cats button:hover, .lb-boards button:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.lb-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; }
+.lb-panel h2 { font-family: var(--serif); font-weight: 400; margin: 0 0 0.7rem; }
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th, .lb-table td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); }
+.lb-table th { color: var(--muted); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.lb-rank { width: 2.4rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lb-score { text-align: right !important; color: var(--accent-2); font-variant-numeric: tabular-nums; font-weight: 600; }
+.lb-table thead th:last-child { text-align: right; }
+.lb-table tr.rank-1 .lb-rank, .lb-table tr.rank-1 .lb-name { color: #f0d36a; }
+.lb-table tr.rank-2 .lb-rank, .lb-table tr.rank-2 .lb-name { color: #c9d0dc; }
+.lb-table tr.rank-3 .lb-rank, .lb-table tr.rank-3 .lb-name { color: #d4a06a; }
 .list-reset { list-style: none; padding: 0; margin: 0; }
 .list-reset li { padding: 0.35rem 0; border-bottom: 1px solid var(--line); }
 

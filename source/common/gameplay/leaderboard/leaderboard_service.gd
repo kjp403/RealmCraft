@@ -78,6 +78,48 @@ static func top_n(world_server: Node, board: String, limit: int) -> Array:
 	return _top_n_player(world_server, board, limit)
 
 
+## Boards the public website / HTTP API publishes. Keep in sync with the in-game
+## Leaderboard menu (source/client/ui/menus/leaderboard/leaderboard_menu.gd DOMAINS).
+const PUBLIC_BOARDS: Array[String] = [
+	"pvp_total",
+	"pvp_week",
+	"pve_total",
+	"pve_week",
+	"arena_wins",
+	"glory_seasonal",
+	"glory_eternal",
+	"total_level",
+	"level",
+	"gold",
+	"dungeon:Dungeon",
+]
+const PUBLIC_LIMIT: int = 20
+const PUBLIC_CACHE_TTL_MS: int = 10000
+static var _public_cache: Dictionary = {}
+static var _public_cache_ms: int = 0
+
+
+## Sanitized top-N for every public board: { board_id: [ {name, score}, ... ] }.
+## No player/guild ids — the website only needs display names. Cached so the
+## world's 10s heartbeat does not re-scan the roster every tick.
+static func public_snapshot(world_server: Node) -> Dictionary:
+	var now: int = Time.get_ticks_msec()
+	if not _public_cache.is_empty() and now - _public_cache_ms < PUBLIC_CACHE_TTL_MS:
+		return _public_cache
+	var boards: Dictionary = {}
+	for board: String in PUBLIC_BOARDS:
+		var rows: Array = []
+		for entry: Dictionary in top_n(world_server, board, PUBLIC_LIMIT):
+			rows.append({
+				"name": str(entry.get("name", "")),
+				"score": int(entry.get("score", 0)),
+			})
+		boards[board] = rows
+	_public_cache = boards
+	_public_cache_ms = now
+	return boards
+
+
 # --- internals ---
 
 static func _increment(player: PlayerResource, base_key: String) -> void:
@@ -380,6 +422,8 @@ static var _statue_cache_ms: int = 0
 static func invalidate_champions_cache() -> void:
 	_statue_cache.clear()
 	_statue_cache_ms = 0
+	_public_cache.clear()
+	_public_cache_ms = 0
 
 
 ## Top-N of each statue board, best-first, each entry carrying the player's skin:

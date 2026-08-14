@@ -81,6 +81,12 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request[GatewayAPI.KEY_CHAR_ID],
 				str(request.get("__ip__", "")),
 			)
+		"public_leaderboards":
+			gateway_response.rpc_id(
+				gateway_id,
+				request_id,
+				world_manager.public_leaderboards()
+			)
 
 
 @rpc("authority", "call_remote")

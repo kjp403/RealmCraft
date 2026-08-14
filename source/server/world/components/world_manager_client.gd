@@ -107,6 +107,10 @@ func _build_snapshot() -> Dictionary:
 	if world_server.chat_service != null:
 		recent_chat = world_server.chat_service.recent(20)
 
+	var leaderboards: Dictionary = {}
+	if world_server != null:
+		leaderboards = LeaderboardService.public_snapshot(world_server)
+
 	return {
 		"name": str(world_info.get("name", "world")),
 		"population": world_server.connected_players.size(),
@@ -116,6 +120,7 @@ func _build_snapshot() -> Dictionary:
 		"players": players,
 		"recent_chat": recent_chat,
 		"recent_log": Array(ServerLog.recent(40)),
+		"leaderboards": leaderboards,
 	}
 
 

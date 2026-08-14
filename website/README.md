@@ -25,3 +25,9 @@ The domain is already on Cloudflare. After this folder is on GitHub `main`:
 Cloudflare will replace the old OVH placeholder A records for the apex and `www`. Leave `api` and `play` as **DNS only** (grey cloud) pointing at `144.217.91.100`.
 
 Rebuilds happen on every push to `main` that Cloudflare Pages is watching.
+
+## Live leaderboards
+
+`/leaderboards/` fetches `GET https://api.arkenelle.com/v1/leaderboards` (no auth). The gateway serves names and scores from the world's heartbeat cache. Staff stays hidden, same as the in-game board.
+
+The website page deploys with Pages. The JSON endpoint only answers after the gateway/world/master changes are on the VPS (merge to `main` + Deploy VPS). Until then the page shows that the world is unreachable.

@@ -28,4 +28,4 @@ jobs:
       - name: Generate site
         run: node website/build.mjs
       - name: Check output
-        run: test -f website/dist/index.html && test -f website/dist/wiki/index.html
+        run: test -f website/dist/index.html && test -f website/dist/wiki/index.html && test -f website/dist/leaderboards/index.html && test -f website/dist/leaderboards.js

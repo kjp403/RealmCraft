@@ -6,6 +6,12 @@ const CredentialsUtils: GDScript = preload("res://source/common/utils/credential
 var next_request_id: int
 var sessions: Dictionary[String, Dictionary]
 var pending_requests: Dictionary[int, NetRequest]
+## Last successful public leaderboard payload. Gateway-side so a busy website
+## does not RPC the master on every refresh; the world's heartbeat is already
+## the source of truth (~10s).
+var _lb_cache: Dictionary = {}
+var _lb_cache_ms: int = 0
+const LB_CACHE_TTL_MS: int = 8000
 
 @onready var gateway_manager_client: GatewayManagerClient = $"../GatewayManagerClient"
 
@@ -51,6 +57,11 @@ func _ready() -> void:
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/handshake",
 		handle_handshake
+	)
+	router.register_route(
+		HTTPClient.Method.METHOD_GET,
+		&"/v1/leaderboards",
+		handle_leaderboards
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -170,6 +181,27 @@ func handle_handshake(payload: Dictionary) -> Dictionary:
 	if not gateway_manager_client.master_connected:
 		return {"error": Error.ERR_TIMEOUT, "msg": "gateway not ready"}
 	return {"ok": true}
+
+
+## Public, unauthenticated. Served from the world's heartbeat cache on the master
+## (names + scores only). Rate-limited; gateway-cached a few seconds so a busy
+## website does not RPC the master on every browser refresh.
+func handle_leaderboards(payload: Dictionary) -> Dictionary:
+	if not _rate_ok(payload, &"leaderboards", 60, 60000):
+		return {"ok": false, "error": "rate_limited"}
+	var now: int = Time.get_ticks_msec()
+	if not _lb_cache.is_empty() and now - _lb_cache_ms < LB_CACHE_TTL_MS:
+		return _lb_cache
+	var result: Dictionary = await send_request("public_leaderboards", {}, 4.0)
+	if result.get("ok", false):
+		_lb_cache = result
+		_lb_cache_ms = now
+		return result
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		return {"ok": false, "error": "unavailable", "msg": "Leaderboards are temporarily unavailable."}
+	if result.get("ok") == false:
+		return result
+	return {"ok": false, "error": "unavailable", "msg": "Leaderboards are temporarily unavailable."}
 
 
 func handle_login(payload: Dictionary) -> Dictionary:
