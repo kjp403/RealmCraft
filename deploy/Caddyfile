@@ -3,7 +3,8 @@
 #
 # api.arkenelle.com  -> gateway HTTP API (login/accounts/world list) on 127.0.0.1:8088
 # play.arkenelle.com -> browser client (static Godot web export) + world WebSocket
-#                      on 127.0.0.1:8087. GET serves /opt/arkenelle/client-web;
+#                      on 127.0.0.1:8087. GET / serves /opt/arkenelle/client-web;
+#                      GET /desktop/ serves the Windows zip + latest.json;
 #                      Upgrade: websocket still goes to the world. Leave this
 #                      hostname DNS-only (grey cloud) in Cloudflare.
 #
@@ -26,6 +27,14 @@ play.arkenelle.com {
 
 	handle @websocket {
 		reverse_proxy 127.0.0.1:8087
+	}
+
+	handle_path /desktop/* {
+		root * /opt/arkenelle/client-windows
+		@zip path *.zip
+		header @zip Content-Type application/octet-stream
+		header @zip Content-Disposition "attachment; filename=\"Arkenelle-windows.zip\""
+		file_server
 	}
 
 	handle {

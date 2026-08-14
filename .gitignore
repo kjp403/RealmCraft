@@ -36,12 +36,13 @@ website/dist/
 
 # VPS runtime next to the git checkout. The arkenelle service user's HOME is
 # /opt/arkenelle, so Godot user:// is .local/share/slayhorizon/ (accounts, world
-# DB, ban lists). play.arkenelle.com is served from client-web/. git clean -fd
-# must never touch these.
+# DB, ban lists). play.arkenelle.com is served from client-web/ and
+# client-windows/. git clean -fd must never touch these.
 /.local/
 /.cache/
 /.config/
 /client-web/
+/client-windows/
 
 /docs
 /data/config/discord_webhook.cfg

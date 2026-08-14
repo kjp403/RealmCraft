@@ -7,8 +7,8 @@ extends Control
 
 
 ## Where "Get the full version" sends the player. Opened in a new browser tab on web via
-## OS.shell_open. Prefer the itch page so desktop installs can auto-update via itch.app.
-const DOWNLOAD_URL: String = Distribution.ITCH_URL
+## OS.shell_open. Desktop zip auto-updates on the next launch.
+const DOWNLOAD_URL: String = Distribution.CLIENT_DOWNLOAD_URL
 
 const NOTICE_TEXT: String = """You're playing the browser version, which runs lighter for compatibility. Some effects like weather are turned off and the performance is capped.
 

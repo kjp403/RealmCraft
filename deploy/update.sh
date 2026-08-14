@@ -27,7 +27,7 @@ echo "==> Resetting to origin/${BRANCH}"
 sudo -u "$APP_USER" git -C "$APP_DIR" reset --hard "origin/${BRANCH}"
 # Exclude VPS runtime: Godot user:// under HOME=/opt/arkenelle, plus the
 # play.arkenelle.com docroot which publish-web-client.sh may own as root.
-sudo -u "$APP_USER" git -C "$APP_DIR" clean -fd -e .local -e .cache -e .config -e client-web
+sudo -u "$APP_USER" git -C "$APP_DIR" clean -fd -e .local -e .cache -e .config -e client-web -e client-windows
 
 echo "==> Importing Godot assets"
 sudo -u "$APP_USER" godot --headless --path "$APP_DIR" --import
@@ -38,11 +38,11 @@ systemctl daemon-reload
 
 echo "==> Refreshing Caddy (browser client on play.arkenelle.com GET, world on WS upgrade)"
 install -m 0644 "$APP_DIR/deploy/Caddyfile" /etc/caddy/Caddyfile
-mkdir -p /opt/arkenelle/client-web
+mkdir -p /opt/arkenelle/client-web /opt/arkenelle/client-windows
 # Directory must be owned by arkenelle so a stray git clean can unlink files.
 # Do not chown -R — Caddy is serving this tree.
-chown arkenelle:arkenelle /opt/arkenelle/client-web
-chmod a+rX /opt/arkenelle/client-web
+chown arkenelle:arkenelle /opt/arkenelle/client-web /opt/arkenelle/client-windows
+chmod a+rX /opt/arkenelle/client-web /opt/arkenelle/client-windows
 if [[ ! -f /opt/arkenelle/client-web/index.html ]]; then
 	install -m 0644 "$APP_DIR/deploy/client-web-placeholder/index.html" /opt/arkenelle/client-web/index.html
 	chown arkenelle:arkenelle /opt/arkenelle/client-web/index.html

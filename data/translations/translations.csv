@@ -35,7 +35,7 @@ RETRY,Retry,Tentar novamente,Reintentar
 UPDATE_TITLE,Update required,Atualização necessária,Actualización requerida
 UPDATE,Update,Atualizar,Actualizar
 DOWNLOAD,Open download page,Abrir página de download,Abrir página de descarga
-ERR_OUTDATED,"Your game is out of date. Click Update to open Arkenelle in the itch.io app, then Install/Update and relaunch from your Library. If itch says no compatible downloads, click again for the browser download page.","Seu jogo está desatualizado. Clique em Atualizar para abrir o Arkenelle no app itch.io, use Instalar/Atualizar e abra pela Biblioteca. Se o itch disser que não há downloads compatíveis, clique de novo para a página no navegador.","Tu juego está desactualizado. Pulsa Actualizar para abrir Arkenelle en la app de itch.io, usa Instalar/Actualizar y ábrelo desde tu Biblioteca. Si itch dice que no hay descargas compatibles, pulsa de nuevo para la página del navegador."
+ERR_OUTDATED,"Your game is out of date. Click Update to download the latest client. The game will close and reopen when the update is ready. If that fails, click again to download the zip in your browser.","Seu jogo está desatualizado. Clique em Atualizar para baixar o cliente. O jogo fecha e reabre quando terminar. Se falhar, clique de novo para baixar o zip no navegador.","Tu juego está desactualizado. Pulsa Actualizar para descargar el cliente. El juego se cierra y se reabre al terminar. Si falla, pulsa de nuevo para descargar el zip en el navegador."
 WELCOME_TINY_MMO,Welcome to Arkenelle!,Bem vindo ao Arkenelle!,¡Bienvenido a Arkenelle!
 RECONNECT_POPUP,No world available.\nTrying again in \n%d\n%s,Nenhum mundo disponível.\nTentando novamente em \n%d\n%s,No hay mundos disponibles. Reintentando en \n%d\n%s
 CONTINUE_WORLD_ACC,Continue\n%s - %s,Continue\n%s - %s,Continúa\n%s - %s
@@ -65,3 +65,6 @@ ERR_RATE_LIMITED,Too many attempts. Please wait a moment and try again.,Muitas t
 SHOW_PASSWORD,Show password,Mostrar senha,Mostrar contraseña
 CONNECTED_AS,Connected · %s,Conectado · %s,Conectado · %s
 NAME_LEVEL,%s\nLevel %d,%s\nNível %d,%s\nNivel %d
+CHECKING_UPDATE,Checking for updates…,Procurando atualizações…,Buscando actualizaciones…
+DOWNLOADING_UPDATE,Downloading update…,Baixando atualização…,Descargando actualización…
+INSTALLING_UPDATE,Installing update…,Instalando atualização…,Instalando actualización…
