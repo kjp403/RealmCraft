@@ -23,6 +23,7 @@
   --cat-guilds: #d4b06a;
   --cat-boards: #5ec8f0;
   --cat-play: #2ecc7a;
+  --cat-donate: #e8c56a;
   --theme: var(--accent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   --display: "Jersey 10", "Silkscreen", monospace;
@@ -389,6 +390,7 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 .cat-guilds { --cat: var(--cat-guilds); }
 .cat-boards { --cat: var(--cat-boards); }
 .cat-play { --cat: var(--cat-play); }
+.cat-donate { --cat: var(--cat-donate); }
 a.cat-start { color: var(--cat-start); }
 a.cat-items { color: var(--cat-items); }
 a.cat-creatures { color: var(--cat-creatures); }
@@ -402,6 +404,7 @@ a.cat-quests { color: var(--cat-quests); }
 a.cat-guilds { color: var(--cat-guilds); }
 a.cat-boards { color: var(--cat-boards); }
 a.cat-play { color: var(--cat-play); }
+a.cat-donate { color: var(--cat-donate); }
 .cat-icon {
   display: inline-flex;
   width: 1.35rem;
@@ -474,6 +477,7 @@ a.cat-play { color: var(--cat-play); }
 .theme-quests { --theme: var(--cat-quests); }
 .theme-guilds { --theme: var(--cat-guilds); }
 .theme-boards { --theme: var(--cat-boards); }
+.theme-donate { --theme: var(--cat-donate); }
 body[class^="theme-"] nav.primary a.active { color: var(--theme); }
 body[class^="theme-"] .filters a.active,
 body[class^="theme-"] .filters button.active,
@@ -495,7 +499,8 @@ body[class^="theme-"] article.page {
 .theme-skills article.page > h2,
 .theme-quests article.page > h2,
 .theme-npcs article.page > h2,
-.theme-items article.page > h2 {
+.theme-items article.page > h2,
+.theme-donate .prose h2 {
   color: var(--theme);
 }
 .theme-boards .lb-panel { border-top: 3px solid var(--theme); }
@@ -691,6 +696,55 @@ body.location-scene .footer {
 body.location-scene article.page {
   background: rgba(24, 34, 48, 0.92);
 }
+
+.donate-page h2 { margin-top: 1.8rem; }
+.donate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0 0.4rem;
+}
+.donate-grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.donate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 1.15rem 1rem 1.2rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.donate-card.gem-sapphire { border-color: color-mix(in srgb, #5aa8ff 40%, var(--line)); }
+.donate-card.gem-emerald { border-color: color-mix(in srgb, #2ecc7a 40%, var(--line)); }
+.donate-card.gem-ruby { border-color: color-mix(in srgb, #e07070 40%, var(--line)); }
+.donate-card.gem-custom { border-color: color-mix(in srgb, var(--cat-donate) 50%, var(--line)); }
+.donate-card img {
+  width: 140px;
+  height: 140px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.donate-card h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.35rem;
+  margin: 0.35rem 0 0;
+}
+.donate-card.gem-sapphire h3 { color: #7ec0ff; }
+.donate-card.gem-emerald h3 { color: #5ee0a0; }
+.donate-card.gem-ruby h3 { color: #f08a8a; }
+.donate-card.gem-custom h3 { color: var(--cat-donate); }
+.donate-card .price {
+  font-family: var(--display);
+  font-size: 1.55rem;
+  color: var(--accent-2);
+  margin: 0;
+}
+.donate-card p { color: var(--muted); margin: 0; }
+.donate-card .btn { margin-top: 0.55rem; }
 
 @media (max-width: 720px) {
   .site-header { flex-wrap: wrap; }

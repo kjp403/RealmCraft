@@ -22,6 +22,15 @@ const PLAY_WEB = "https://play.arkenelle.com/";
 const PLAY_DESKTOP = "https://play.arkenelle.com/desktop/Arkenelle-windows.zip";
 const DISCORD = "https://discord.gg/kSs3hxByV";
 const ITCH_APP = "https://itch.io/app";
+const STRIPE = {
+  sapphireVip: "https://buy.stripe.com/28E00k1aF5w81uC8Ho6J207",
+  emeraldVip: "https://buy.stripe.com/dRm7sM6uZbUw6OW3n46J206",
+  rubyVip: "https://buy.stripe.com/3cI7sM06BcYAfls6zg6J205",
+  sapphireOnce: "https://buy.stripe.com/14A3cw5qV2jWc9g1eW6J204",
+  emeraldOnce: "https://buy.stripe.com/7sY4gAbPj1fSeho2j06J201",
+  rubyOnce: "https://buy.stripe.com/3cIdRa4mRe2Ec9g2j06J203",
+  custom: "https://buy.stripe.com/14A00k2eJ6Acb5c8Ho6J208",
+};
 
 const STAT_NAMES = {
   health_max: "Max Health",
@@ -461,6 +470,28 @@ function copyLocationBgs() {
   }
 }
 
+const DONATE_BADGE_DIR = path.join(SRC, "donate-badges");
+
+function copyDonateBadges() {
+  if (!fs.existsSync(DONATE_BADGE_DIR)) return;
+  const dest = path.join(DIST, "media", "donate");
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(DONATE_BADGE_DIR)) {
+    if (!name.endsWith(".png")) continue;
+    fs.copyFileSync(path.join(DONATE_BADGE_DIR, name), path.join(dest, name));
+  }
+}
+
+function donateCard({ img, name, price, blurb, href, gem }) {
+  return `<article class="donate-card gem-${gem}">
+    <img src="/media/donate/${img}" alt="" width="256" height="256">
+    <h3>${esc(name)}</h3>
+    <p class="price">${esc(price)}</p>
+    <p>${esc(blurb)}</p>
+    <a class="btn" href="${href}" target="_blank" rel="noopener noreferrer">Donate</a>
+  </article>`;
+}
+
 function catIcon(id) {
   const d = {
     start: `<circle cx="12" cy="12" r="8.5"/><path d="M12 3.8v2.6M12 17.6v2.6M3.8 12h2.6M17.6 12h2.6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 7.2l1.7 4.3H12"/>`,
@@ -474,6 +505,7 @@ function catIcon(id) {
     guilds: `<path d="M6.2 4.6h11.6v3.3c0 2.2-1.4 3.8-3.2 4.7L12 14.2l-2.6-1.6c-1.8-.9-3.2-2.5-3.2-4.7z"/><path d="M12 14.2V20"/>`,
     boards: `<path d="M7.2 20V10.2h3.2V20H7.2zm6.4 0V6.2h3.2V20h-3.2zM4.4 20h15.2"/><path d="M8.6 7.2 12 4.4l3.4 2.8"/>`,
     play: `<path d="M8 6.4v11.2L19 12z"/>`,
+    donate: `<path d="M12 20.4L4.8 12.2 8.2 5.6h7.6l3.4 6.6z"/><path d="M4.8 12.2h14.4M8.2 5.6 12 12.2 15.8 5.6"/>`,
     boss: `<path d="M4.8 16.6h14.4v2.1H4.8z"/><path d="M5.2 8.1l3.1 2.5L12 5.4l3.7 5.2 3.1-2.5v8.2H5.2z"/>`,
     enemy: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
   };
@@ -522,6 +554,7 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
       <a href="/wiki/npcs/" class="${active === "npcs" ? "active" : ""}">NPCs</a>
       <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
       <a href="${PLAY_DESKTOP}">Download</a>
+      <a href="/donate/" class="${active === "donate" ? "active" : ""}">Donate</a>
       <a href="${DISCORD}">Discord</a>
     </nav>
     <div class="search-wrap">
@@ -1279,6 +1312,7 @@ function build() {
               <a class="btn" href="${DISCORD}">Discord</a>
               <a class="btn" href="/wiki/">Wiki</a>
               <a class="btn" href="/leaderboards/">Leaderboards</a>
+              <a class="btn" href="/donate/">Donate</a>
             </div>
           </div>
         </div>
@@ -1309,6 +1343,84 @@ function build() {
             </div>
           </article>
         </div>
+      </main>`,
+    })
+  );
+
+  write(
+    "donate/index.html",
+    shell({
+      title: "Donate — Arkenelle",
+      active: "donate",
+      theme: "donate",
+      body: `<main class="wrap">
+        <article class="page prose donate-page">
+          ${pageHeading("donate", "Support Arkenelle")}
+          <p>Donations help pay for servers and keep development going. This is not MTX — a gift does not buy in-game items, gold, or power.</p>
+          <h2>Give once</h2>
+          <div class="donate-grid">
+            ${donateCard({
+              img: "onetime-sapphire.png",
+              name: "Sapphire Supporter",
+              price: "$5",
+              blurb: "A one-time donation to help fund Arkenelle. Thank you for backing the project.",
+              href: STRIPE.sapphireOnce,
+              gem: "sapphire",
+            })}
+            ${donateCard({
+              img: "onetime-emerald.png",
+              name: "Emerald Supporter",
+              price: "$10",
+              blurb: "A larger one-time gift for servers and development. Thank you for helping keep Arkenelle independent.",
+              href: STRIPE.emeraldOnce,
+              gem: "emerald",
+            })}
+            ${donateCard({
+              img: "onetime-ruby.png",
+              name: "Ruby Supporter",
+              price: "$25",
+              blurb: "The highest one-time donation. Ruby funds the long stretch of alpha still ahead. Thank you.",
+              href: STRIPE.rubyOnce,
+              gem: "ruby",
+            })}
+            ${donateCard({
+              img: "onetime-custom.png",
+              name: "Choose your amount",
+              price: "Any",
+              blurb: "Pay what you can. This is a one-time donation — you choose the amount.",
+              href: STRIPE.custom,
+              gem: "custom",
+            })}
+          </div>
+          <h2>Monthly VIP</h2>
+          <p class="muted">Billed each month through Stripe. Cancel anytime from the receipt Stripe emails you.</p>
+          <div class="donate-grid donate-grid-3">
+            ${donateCard({
+              img: "vip-sapphire.png",
+              name: "Sapphire VIP",
+              price: "$5 / month",
+              blurb: "Help keep Arkenelle in development. Thank you for a monthly back.",
+              href: STRIPE.sapphireVip,
+              gem: "sapphire",
+            })}
+            ${donateCard({
+              img: "vip-emerald.png",
+              name: "Emerald VIP",
+              price: "$10 / month",
+              blurb: "A stronger monthly gift for servers and the work still ahead.",
+              href: STRIPE.emeraldVip,
+              gem: "emerald",
+            })}
+            ${donateCard({
+              img: "vip-ruby.png",
+              name: "Ruby VIP",
+              price: "$25 / month",
+              blurb: "The highest monthly tier. Ruby funds the long stretch of alpha still ahead.",
+              href: STRIPE.rubyVip,
+              gem: "ruby",
+            })}
+          </div>
+        </article>
       </main>`,
     })
   );
@@ -1765,6 +1877,7 @@ function build() {
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
     ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
+    { title: "Donate", kind: "Support", href: "/donate/", haystack: "donate donation supporter vip sapphire emerald ruby stripe" },
     { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
     { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
@@ -1783,6 +1896,7 @@ function build() {
 
   copyMedia();
   copyLocationBgs();
+  copyDonateBadges();
 
   console.log(
     [
