@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://cfljmwfaxifyj"]
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_eiayv"]
-[ext_resource type="AudioStream" uid="uid://i5okndex8es" path="res://assets/audio/music/village.ogg" id="2_rklgs"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="2_rklgs"]
 [ext_resource type="Script" uid="uid://d1d13k1qevc02" path="res://source/common/gameplay/weather/weather_resource.gd" id="3_0lv0g"]
 [ext_resource type="TileSet" uid="uid://bm6rosvdjjdcd" path="res://source/common/gameplay/maps/tilesets/forest_tileset.tres" id="4_nefly"]
 [ext_resource type="Script" uid="uid://ci85a5o8s0jex" path="res://source/common/gameplay/maps/components/fade_occluder_layer.gd" id="5_0lv0g"]
@@ -93,7 +93,7 @@ aoi_visible_radius_cells = 1
 preview_aoi = false
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_rklgs")
-music_playlist = Array[AudioStream]([ExtResource("mus_adventure"), ExtResource("mus_arrival"), ExtResource("mus_angevin")])
+music_playlist = Array[AudioStream]([ExtResource("mus_arrival")])
 weather = Array[ExtResource("3_0lv0g")]([ExtResource("6_huaqk")])
 camera_limit_left = -16
 metadata/_custom_type_script = "uid://7mbux4mybta0"

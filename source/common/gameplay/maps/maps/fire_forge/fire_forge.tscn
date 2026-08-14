@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://source/common/gameplay/maps/tilesets/fire_forge_tileset.tres" id="2_tiles"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/shadow_temple.ogg" id="music"]
+[ext_resource type="AudioStream" uid="uid://uan1qcfq0s1" path="res://assets/audio/music/attack_2.ogg" id="music"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="4_rp"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="5_warper"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="6_portal"]
@@ -37,7 +37,6 @@ script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.04, 0.015, 0.012, 1)
 music = ExtResource("music")
-music_playlist = Array[AudioStream]([ExtResource("mus_attack_3"), ExtResource("mus_army_of_darkness")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 3600

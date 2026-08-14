@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_68sb6"]
 [ext_resource type="TileSet" uid="uid://c5xmsv8ol2sya" path="res://source/common/gameplay/maps/tilesets/castle.tres" id="2_ooayc"]
+[ext_resource type="AudioStream" uid="uid://i5okndex8es" path="res://assets/audio/music/village.ogg" id="mus_village"]
 [ext_resource type="AudioStream" uid="uid://cm5502pmvcc5j" path="res://assets/audio/music/market.ogg" id="2_xjjg4"]
 [ext_resource type="PackedScene" uid="uid://bihlmci6oa6b8" path="res://source/common/gameplay/maps/maps/guild_house/outside_building.tscn" id="3_0cu5u"]
 [ext_resource type="Script" uid="uid://ddtm11pnrdkyo" path="res://source/common/gameplay/maps/zone_patch_2d.gd" id="6_vf1no"]
@@ -56,8 +57,8 @@ metadata/_custom_type_script = "uid://ddps5vwhnf048"
 y_sort_enabled = true
 script = ExtResource("1_68sb6")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
-music = ExtResource("2_xjjg4")
-music_playlist = Array[AudioStream]([ExtResource("mus_shop"), ExtResource("mus_al_kharid"), ExtResource("mus_adventure")])
+music = ExtResource("mus_village")
+music_playlist = Array[AudioStream]([ExtResource("2_xjjg4"), ExtResource("mus_shop")])
 camera_limit_left = -640
 camera_limit_top = -384
 camera_limit_right = 1088

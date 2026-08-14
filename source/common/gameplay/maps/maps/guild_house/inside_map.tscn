@@ -53,7 +53,7 @@ metadata/_custom_type_script = "uid://ddps5vwhnf048"
 y_sort_enabled = true
 script = ExtResource("1_cguwf")
 music = ExtResource("2_5dvjx")
-music_playlist = Array[AudioStream]([ExtResource("mus_market"), ExtResource("mus_angevin")])
+music_playlist = Array[AudioStream]([ExtResource("mus_market")])
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="Ground" type="TileMapLayer" parent="." unique_id=760974860]

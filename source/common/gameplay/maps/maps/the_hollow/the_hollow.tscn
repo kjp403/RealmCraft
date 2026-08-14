@@ -34,7 +34,6 @@ script = ExtResource("1_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.04, 0.045, 0.04, 1)
 music = ExtResource("3_music")
-music_playlist = Array[AudioStream]([ExtResource("mus_army_of_darkness"), ExtResource("mus_attack_3")])
 camera_limit_left = -16
 camera_limit_top = -16
 camera_limit_right = 976

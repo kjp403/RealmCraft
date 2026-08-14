@@ -36,7 +36,6 @@ script = ExtResource("1_0pyxm")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 map_background_color = Color(0.078431375, 0.08235294, 0.05490196, 1)
 music = ExtResource("2_4ochw")
-music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_shadow_temple")])
 metadata/_custom_type_script = "uid://7mbux4mybta0"
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1011426310]

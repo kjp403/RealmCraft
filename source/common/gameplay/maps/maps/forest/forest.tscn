@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_5atd4"]
 [ext_resource type="TileSet" uid="uid://bm6rosvdjjdcd" path="res://source/common/gameplay/maps/tilesets/forest_tileset.tres" id="2_3pcnk"]
-[ext_resource type="AudioStream" uid="uid://d3x02k8rxue5y" path="res://assets/audio/music/lost_woods.ogg" id="2_7mrv4"]
+[ext_resource type="AudioStream" uid="uid://ccn0gxxwbb1rh" path="res://assets/audio/music/angevin.ogg" id="2_7mrv4"]
 [ext_resource type="PackedScene" uid="uid://us4f0lvc42t5" path="res://source/common/gameplay/maps/maps/misc_buildings/goblin_shaman_house.tscn" id="3_1iruy"]
 [ext_resource type="Resource" path="res://source/common/gameplay/weather/leaves.tres" id="3_pyxru"]
 [ext_resource type="Script" uid="uid://d1d13k1qevc02" path="res://source/common/gameplay/weather/weather_resource.gd" id="3_vs2bv"]
@@ -63,7 +63,6 @@ preview_aoi = false
 aoi_test_point = Vector2(900, 0)
 replicated_props_container = NodePath("ReplicatedPropsContainer")
 music = ExtResource("2_7mrv4")
-music_playlist = Array[AudioStream]([ExtResource("mus_alone"), ExtResource("mus_adventure"), ExtResource("mus_fungus")])
 weather = Array[ExtResource("3_vs2bv")]([ExtResource("3_pyxru"), ExtResource("5_4tbu3"), ExtResource("6_o3pwt")])
 camera_limit_left = 400
 camera_limit_top = 350

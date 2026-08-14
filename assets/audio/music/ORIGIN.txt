@@ -1,0 +1,6 @@
+Arkenelle original soundtrack.
+Synthesized in-repo by tools/compose_arkenelle_music.py.
+No third-party samples, MIDI packs, Epidemic Sound, or catalog tracks.
+Each filename is a zone mood (hub, woodland, desert, forge, cave, ...).
+Loops are drumless cinematic/folk pads so they do not rattle in-game.
+Arkenelle / RealmCraft may use these commercially.
