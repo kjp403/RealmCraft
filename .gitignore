@@ -34,6 +34,15 @@ addons/godot-sqlite/bin/*
 # Generated Arkenelle website (Cloudflare Pages output)
 website/dist/
 
+# VPS runtime next to the git checkout. The arkenelle service user's HOME is
+# /opt/arkenelle, so Godot user:// is .local/share/slayhorizon/ (accounts, world
+# DB, ban lists). play.arkenelle.com is served from client-web/. git clean -fd
+# must never touch these.
+/.local/
+/.cache/
+/.config/
+/client-web/
+
 /docs
 /data/config/discord_webhook.cfg
 source/server/master/account_collection.tres
