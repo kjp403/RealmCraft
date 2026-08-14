@@ -584,6 +584,34 @@ body[class^="theme-"] article.page {
 .list-reset { list-style: none; padding: 0; margin: 0; }
 .list-reset li { padding: 0.35rem 0; border-bottom: 1px solid var(--line); }
 
+.location-scene-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.location-scene-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(9, 12, 17, 0.42) 0%, rgba(9, 12, 17, 0.78) 55%, var(--bg) 100%);
+}
+body.location-scene {
+  background: var(--bg);
+}
+body.location-scene .site-header,
+body.location-scene main,
+body.location-scene .footer {
+  position: relative;
+  z-index: 1;
+}
+body.location-scene article.page {
+  background: rgba(24, 34, 48, 0.92);
+}
+
 @media (max-width: 720px) {
   .site-header { flex-wrap: wrap; }
   .search-wrap { width: 100%; margin-left: 0; }
