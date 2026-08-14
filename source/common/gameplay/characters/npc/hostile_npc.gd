@@ -947,14 +947,19 @@ func _spawn_arm_bolt(
 	bolt.damage_type = CombatHit.DAMAGE_PHYSICAL
 	bolt.source = self
 	bolt.top_level = true
-	var sprite: Sprite2D = bolt.get_node_or_null("Sprite2D") as Sprite2D
-	if sprite != null:
-		var tex: Texture2D = load(
-			"res://assets/sprites/characters/mecha_stone_golem/arm_projectile.png"
-		) as Texture2D
-		if tex != null:
-			sprite.texture = tex
-			sprite.scale = Vector2(0.22, 0.22)
+	# The arm cannon borrows the bolt scene for its FLIGHT, not its look: drop the arcane
+	# body (BoltVisual) and fly the stone arm instead.
+	var body: Node = bolt.get_node_or_null(^"Visual")
+	if body != null:
+		body.queue_free()
+	var tex: Texture2D = load(
+		"res://assets/sprites/characters/mecha_stone_golem/arm_projectile.png"
+	) as Texture2D
+	if tex != null:
+		var sprite: Sprite2D = Sprite2D.new()
+		sprite.texture = tex
+		sprite.scale = Vector2(0.22, 0.22)
+		bolt.add_child(sprite)
 	add_child(bolt)
 	bolt.global_position = global_position + direction.normalized() * 28.0
 
