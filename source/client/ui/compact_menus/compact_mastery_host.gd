@@ -5,7 +5,7 @@ const PANEL_SIZE_WEAPONS := Vector2(180.0, 278.0)
 ## Match Skills dock height so the Perks tab stays on-screen; list/detail scroll.
 const PANEL_SIZE_PERKS := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 72.0
+const BOTTOM_CLEARANCE := 48.0
 const TAB_SIZE := Vector2(29.0, 29.0)
 
 const CATEGORY_ORDER: Array[StringName] = [

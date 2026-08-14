@@ -20,23 +20,27 @@ class_name Inventory
 
 ## Hard cap on non-currency bag slots (OSRS-style). Forces bank usage.
 const MAX_SLOTS: int = 28
-## Materials (ores, logs, bars, hides, herbs) stack this high in the bank.
-## The bag still uses [member Item.stack_limit] (10 for most resources).
+## Materials (ores, logs, bars, hides, herbs) and cooked food stack this high
+## in the bank. The bag still uses [member Item.stack_limit] (10 for most).
 const BANK_RESOURCE_STACK: int = 50
 
 
-## Per-slot stack cap for [param item]. Bank materials use
+## Per-slot stack cap for [param item]. Bank materials and cooked food use
 ## [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
 static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 	var limit: int = 0 if item == null else int(item.stack_limit)
-	if (
-		in_bank
-		and item != null
-		and item.inventory_tab() == Item.InventoryTab.MATERIAL
-		and limit > 0
-	):
+	if in_bank and item != null and limit > 0 and _bank_bulk_item(item):
 		return maxi(limit, BANK_RESOURCE_STACK)
 	return limit
+
+
+## True for items that fill to [constant BANK_RESOURCE_STACK] in the vault.
+## Bag caps stay on [member Item.stack_limit] (10 for food / most resources).
+static func _bank_bulk_item(item: Item) -> bool:
+	if item.inventory_tab() == Item.InventoryTab.MATERIAL:
+		return true
+	var food: ConsumableItem = item as ConsumableItem
+	return food != null and food.cooldown_category == &"food"
 
 
 ## Convert raw JSON-loaded data into a clean { int: { "id": int, "a": int } } dict.

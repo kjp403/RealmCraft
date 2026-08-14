@@ -127,6 +127,7 @@ func _build_gold_display() -> void:
 	gold_icon.custom_minimum_size = Vector2(20, 20)
 	gold_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	gold_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var gold: Item = ContentRegistryHub.load_by_id(&"items", Economy.gold_id())
 	if gold != null:
 		gold_icon.texture = gold.item_icon

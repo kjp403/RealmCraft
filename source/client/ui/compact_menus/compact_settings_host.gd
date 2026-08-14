@@ -2,7 +2,7 @@ extends PanelContainer
 
 const PANEL_SIZE := Vector2(180.0, 340.0)
 const RIGHT_MARGIN := 12.0
-const BOTTOM_CLEARANCE := 72.0
+const BOTTOM_CLEARANCE := 48.0
 const SECTION := &"general"
 ## Combat feel toggles live in their own settings section, so the rows below read
 ## from it explicitly rather than through the [constant SECTION]-scoped helpers.

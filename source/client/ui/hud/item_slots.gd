@@ -14,7 +14,7 @@ const SLOT_ACTIONS: Array[StringName] = [
 	&"player_quickslot_1", &"player_quickslot_2", &"player_quickslot_3",
 ]
 const SETTINGS_SECTION: StringName = &"quick_slots"
-const SLOT_SIZE: Vector2 = Vector2(48, 48)
+const SLOT_SIZE: Vector2 = Vector2(32, 32)
 
 var item_shortcuts: Array[Item]
 ## Per-slot cooldown overlays (sweep + seconds), keyed by index.
@@ -35,11 +35,13 @@ func _ready() -> void:
 		# Corner key hint that survives the icon replacing the button text.
 		var key_label: Label = Label.new()
 		key_label.text = str(i + 1)
-		key_label.add_theme_font_size_override(&"font_size", 9)
+		key_label.add_theme_font_size_override(&"font_size", 8)
 		key_label.add_theme_color_override(&"font_color", Color(0.75, 0.78, 0.85))
-		key_label.position = Vector2(4, 2)
+		key_label.position = Vector2(3, 1)
 		key_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		key_label.z_index = 1
 		button.add_child(key_label)
+		button.set_meta(&"pixel_icon", PixelIcon.mount(button))
 		_cd_overlays[i] = _make_cd_overlay(button)
 
 	ClientState.quick_slots.data_changed.connect(_on_slot_assigned)
@@ -254,10 +256,13 @@ func _on_slot_assigned(index: Variant, item: Variant) -> void:
 		return
 	item_shortcuts[i] = item as Item
 	var button: Button = slot_container.get_child(i) as Button
+	var pixel: TextureRect = button.get_meta(&"pixel_icon", null) as TextureRect
 	if item != null:
-		button.icon = (item as Item).item_icon
-		button.text = "" if button.icon != null else String((item as Item).item_name)
+		PixelIcon.set_art(pixel, (item as Item).item_icon)
+		button.icon = null
+		button.text = ""
 	else:
+		PixelIcon.set_art(pixel, null)
 		button.icon = null
 		button.text = str(i + 1)
 	_persist()

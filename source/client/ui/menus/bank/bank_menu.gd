@@ -24,6 +24,7 @@ var _sort_button: Button
 var _amount_spin: SpinBox
 var _transfer_button: Button
 var _deposit_all_button: Button
+var _search_field: LineEdit
 var _selection_label: Label
 
 var _selected_uid: int = -1
@@ -46,11 +47,15 @@ func _ready() -> void:
 	_build_body()
 	visibility_changed.connect(func() -> void:
 		if visible:
+			if _search_field != null:
+				_search_field.text = ""
 			_refresh())
 	_refresh.call_deferred()
 
 
 func open(_arg: Variant = null) -> void:
+	if _search_field != null:
+		_search_field.text = ""
 	_refresh()
 
 
@@ -152,15 +157,24 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Qty 1 deposits. Qty 2+: set amount. Drag to rearrange."
+		"Left-click a single item to bank it. Qty 2+: set amount. Drag to rearrange."
 		if is_bag
-		else "Click a stack to withdraw. Drag or Sort to rearrange."
+		else "Click a stack, then Withdraw. Drag or Sort to rearrange."
 	)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.add_theme_color_override(&"font_color", MUTED)
 	hint.add_theme_font_size_override(&"font_size", 11)
 	col.add_child(hint)
+
+	if not is_bag:
+		_search_field = LineEdit.new()
+		_search_field.placeholder_text = "Search vault…"
+		_search_field.clear_button_enabled = true
+		_search_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_search_field.caret_blink = true
+		_search_field.text_changed.connect(_on_search_changed)
+		col.add_child(_search_field)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -330,9 +344,20 @@ func _count_stacks(store: Dictionary) -> int:
 	return n
 
 
+func _on_search_changed(_text: String) -> void:
+	_rebuild_grids()
+
+
+func _bank_search_query() -> String:
+	if _search_field == null:
+		return ""
+	return _search_field.text.strip_edges().to_lower()
+
+
 func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 	for child: Node in grid.get_children():
 		child.queue_free()
+	var query: String = "" if is_bag else _bank_search_query()
 	var live_uids: Array = []
 	for uid: Variant in store.keys():
 		var data: Dictionary = store[uid]
@@ -348,7 +373,17 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 	if is_bag:
 		order = BagOrder.sync_with_entries(_bag_entries_for_order(live_uids))
 	else:
+		# Sync against the full vault — never persist a search-filtered list.
 		order = BankOrder.sync_with_uids(live_uids)
+	if not query.is_empty():
+		var matched: Array = []
+		for uid: Variant in live_uids:
+			var data: Dictionary = store[uid]
+			var item: Item = ContentRegistryHub.load_by_id(&"items", int(data.get("id", 0))) as Item
+			var item_name: String = String(item.item_name).to_lower() if item != null else ""
+			if item_name.contains(query):
+				matched.append(int(uid))
+		live_uids = matched
 	live_uids.sort_custom(func(a: Variant, b: Variant) -> bool:
 		var ia: int = BagOrder.index_of(order, int(a)) if is_bag else BankOrder.index_of(order, int(a))
 		var ib: int = BagOrder.index_of(order, int(b)) if is_bag else BankOrder.index_of(order, int(b))
@@ -369,9 +404,9 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 			PixelIcon.mount(button, item.item_icon)
 			var tip: String = ItemTooltip.hover_text(item)
 			if is_bag:
-				tip += "\nLeft-click: deposit" if amount <= 1 else "\nLeft-click: choose amount (X/Max)"
+				tip += "\nLeft-click: bank this item" if amount <= 1 else "\nLeft-click: choose amount (X/Max)"
 			else:
-				tip += "\nLeft-click: choose amount (X/Max)\nDrag: rearrange"
+				tip += "\nLeft-click: choose amount, then Withdraw\nDrag: rearrange"
 			button.tooltip_text = tip
 		else:
 			button.tooltip_text = "Unknown item"
@@ -388,7 +423,7 @@ func _fill_grid(grid: GridContainer, store: Dictionary, is_bag: bool) -> void:
 		grid.add_child(button)
 	if grid.get_child_count() == 0:
 		var empty := Label.new()
-		empty.text = "Empty"
+		empty.text = "No matching items" if not query.is_empty() else "Empty"
 		empty.add_theme_color_override(&"font_color", MUTED)
 		grid.add_child(empty)
 
