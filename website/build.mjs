@@ -623,11 +623,153 @@ function collectZones() {
       levelMax: num(doc.resource.level_max),
       wardstone: str(doc.resource.required_wardstone),
       party: num(doc.resource.party_size, isDungeon ? 4 : 0),
+      mapPath: str(doc.resource.map_path),
+      people: [],
+      fauna: [],
       file,
     });
   }
   rows.sort((a, b) => Number(b.isDungeon) - Number(a.isDungeon) || a.name.localeCompare(b.name));
   return rows;
+}
+
+function buildUidIndex() {
+  const map = new Map();
+  const root = path.join(ROOT, "source");
+  for (const file of walk(root)) {
+    if (!file.endsWith(".tscn") && !file.endsWith(".tres")) continue;
+    let fd;
+    try {
+      fd = fs.openSync(file, "r");
+      const buf = Buffer.alloc(512);
+      const n = fs.readSync(fd, buf, 0, 512, 0);
+      const head = buf.slice(0, n).toString("utf8");
+      const m = head.match(/uid="(uid:\/\/[^"]+)"/);
+      if (m) map.set(m[1], file);
+    } catch {
+      /* skip */
+    } finally {
+      if (fd != null) fs.closeSync(fd);
+    }
+  }
+  return map;
+}
+
+function parseExtResources(text) {
+  const ext = {};
+  for (const m of text.matchAll(/\[ext_resource ([^\]]*)\]/g)) {
+    const id = /(?:^|\s)id="([^"]+)"/.exec(m[1]);
+    const p = /(?:^|\s)path="([^"]+)"/.exec(m[1]);
+    if (id && p) ext[id[1]] = p[1];
+  }
+  return ext;
+}
+
+function subResourceBody(text, id) {
+  const re = new RegExp(`\\[sub_resource[^\\]]*id="${id}"\\]\\r?\\n([\\s\\S]*?)(?=\\n\\[)`);
+  const m = text.match(re);
+  return m ? m[1] : "";
+}
+
+function scanMapScene(absPath, seen = new Set()) {
+  const out = { npcPaths: [], inline: [], enemyPaths: [] };
+  if (!absPath || seen.has(absPath) || !fs.existsSync(absPath)) return out;
+  seen.add(absPath);
+  let text;
+  try {
+    text = read(absPath);
+  } catch {
+    return out;
+  }
+  const ext = parseExtResources(text);
+  for (const m of text.matchAll(/npc_resource = ExtResource\("([^"]+)"\)/g)) {
+    const p = ext[m[1]];
+    if (p && p.includes("/npc/npcs/")) out.npcPaths.push(p);
+  }
+  for (const m of text.matchAll(/npc_resource = SubResource\("([^"]+)"\)/g)) {
+    const body = subResourceBody(text, m[1]);
+    const name = /npc_name = "([^"]+)"/.exec(body);
+    if (!name) continue;
+    const greet = /greeting = "([^"]*)"/.exec(body);
+    out.inline.push({ name: name[1], greeting: greet ? greet[1] : "" });
+  }
+  for (const m of text.matchAll(/\n(?:enemy_data|enemy_type) = ExtResource\("([^"]+)"\)/g)) {
+    const p = ext[m[1]];
+    if (p && p.includes("/npc/types/")) out.enemyPaths.push(p);
+  }
+  for (const p of Object.values(ext)) {
+    if (!p.endsWith(".tscn")) continue;
+    if (!p.includes("/gameplay/maps/")) continue;
+    const child = resToFs(p);
+    if (!child || child === absPath) continue;
+    const nested = scanMapScene(child, seen);
+    out.npcPaths.push(...nested.npcPaths);
+    out.inline.push(...nested.inline);
+    out.enemyPaths.push(...nested.enemyPaths);
+  }
+  return out;
+}
+
+function npcByPath(npcs, resPath) {
+  if (!resPath) return null;
+  const base = path.basename(resPath.replace(/\\/g, "/"));
+  return npcs.find((n) => n.file.replace(/\\/g, "/").endsWith("/" + base));
+}
+
+function creatureByPath(creatures, resPath) {
+  if (!resPath) return null;
+  const base = basenameSlug(resPath);
+  return (
+    creatures.find((c) => c.file.replace(/\\/g, "/").endsWith("/" + path.basename(resPath.replace(/\\/g, "/")))) ||
+    creatures.find((c) => c.type === base || c.slug === slugify(base))
+  );
+}
+
+function attachMapInhabitants(zones, npcs, creatures) {
+  const uids = buildUidIndex();
+  for (const z of zones) {
+    let mapFile = null;
+    if (z.mapPath.startsWith("uid://")) mapFile = uids.get(z.mapPath) || null;
+    else mapFile = resToFs(z.mapPath);
+    const scan = scanMapScene(mapFile);
+    const seenNpc = new Set();
+    for (const p of scan.npcPaths) {
+      const n = npcByPath(npcs, p);
+      if (!n || SKIP_NPCS.has(n.slug) || seenNpc.has(n.slug)) continue;
+      seenNpc.add(n.slug);
+      z.people.push(n);
+      n.locations = n.locations || [];
+      n.locations.push({ slug: z.slug, name: z.name });
+    }
+    const seenInline = new Set();
+    for (const row of scan.inline) {
+      if (seenInline.has(row.name)) continue;
+      seenInline.add(row.name);
+      z.people.push({ slug: "", name: row.name, greeting: row.greeting, offers: [], locations: [] });
+    }
+    const counts = new Map();
+    for (const p of scan.enemyPaths) {
+      const c = creatureByPath(creatures, p);
+      if (!c) continue;
+      counts.set(c.slug, (counts.get(c.slug) || 0) + 1);
+    }
+    for (const [slug, count] of counts) {
+      const c = creatures.find((x) => x.slug === slug);
+      if (!c) continue;
+      z.fauna.push({ creature: c, count });
+      c.locations = c.locations || [];
+      if (!c.locations.some((loc) => loc.slug === z.slug)) c.locations.push({ slug: z.slug, name: z.name });
+    }
+    z.people.sort((a, b) => a.name.localeCompare(b.name));
+    z.fauna.sort((a, b) => Number(b.creature.boss) - Number(a.creature.boss) || a.creature.name.localeCompare(b.creature.name));
+  }
+}
+
+function foundInHtml(locations) {
+  if (!locations || !locations.length) return "";
+  return `<h2>Found in</h2><ul>${locations
+    .map((z) => `<li><a href="/wiki/locations/${z.slug}/">${esc(z.name)}</a></li>`)
+    .join("")}</ul>`;
 }
 
 function collectJobs() {
@@ -774,6 +916,7 @@ function build() {
   const npcs = collectNpcs();
   const creatures = collectCreatures();
   const zones = collectZones();
+  attachMapInhabitants(zones, npcs, creatures);
   const jobs = collectJobs();
   const slayer = collectSlayer();
   const quests = collectQuests();
@@ -982,6 +1125,7 @@ function build() {
           <h1 class="section-title">${esc(n.name)}</h1>
           ${n.offers.map((o) => `<span class="tag">${esc(o)}</span>`).join("")}
           ${n.greeting ? `<p>${esc(n.greeting)}</p>` : ""}
+          ${foundInHtml(n.locations)}
         </article></main>`,
       })
     );
@@ -1021,6 +1165,7 @@ function build() {
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/creatures/", label: "Creatures" }, { label: c.name }])}
           <h1 class="section-title">${esc(c.name)}</h1>
           <div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>
+          ${foundInHtml(c.locations)}
           <h2>Loot</h2>
           ${lootList(c.loot, items)}
         </article></main>`,
@@ -1060,6 +1205,31 @@ function build() {
           <h1 class="section-title">${esc(z.name)}</h1>
           ${z.description ? `<p>${esc(z.description)}</p>` : ""}
           <div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>
+          ${
+            z.people.length
+              ? `<h2>People</h2><div class="item-grid">${z.people
+                  .map((n) => {
+                    const kind = (n.offers && n.offers.length ? n.offers.join(" · ") : "") || "NPC";
+                    const inner = `<span><span class="name">${esc(n.name)}</span><span class="kind">${esc(kind)}</span>${n.greeting ? `<span class="kind">${esc(n.greeting.length > 140 ? n.greeting.slice(0, 137) + "…" : n.greeting)}</span>` : ""}</span>`;
+                    return n.slug
+                      ? `<a class="item-card" href="/wiki/npcs/${n.slug}/">${inner}</a>`
+                      : `<div class="item-card">${inner}</div>`;
+                  })
+                  .join("")}</div>`
+              : ""
+          }
+          ${
+            z.fauna.length
+              ? `<h2>Creatures</h2><div class="item-grid">${z.fauna
+                  .map(({ creature: c, count }) => {
+                    const extra = [c.boss ? "Boss" : "", c.level ? "Lv " + c.level : "", count > 1 ? "×" + count : ""]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return `<a class="item-card" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(extra)}</span></span></a>`;
+                  })
+                  .join("")}</div>`
+              : ""
+          }
         </article></main>`,
       })
     );
@@ -1185,8 +1355,8 @@ function build() {
 
   const search = [
     ...items.map((x) => ({ title: x.name, kind: "Item · " + x.kind, href: `/wiki/items/${x.slug}/`, haystack: (x.name + " " + x.kind + " " + x.description).toLowerCase() })),
-    ...npcs.map((x) => ({ title: x.name, kind: "NPC", href: `/wiki/npcs/${x.slug}/`, haystack: (x.name + " " + x.greeting).toLowerCase() })),
-    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Creature", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type).toLowerCase() })),
+    ...npcs.map((x) => ({ title: x.name, kind: "NPC", href: `/wiki/npcs/${x.slug}/`, haystack: (x.name + " " + x.greeting + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
+    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Creature", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
     ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
@@ -1218,6 +1388,7 @@ function build() {
       `  quests ${quests.length}`,
       `  slayer masters ${slayer.masters.length} / tasks ${slayer.tasks.length}`,
       `  media files ${usedMedia.size}`,
+      `  zone people ${zones.reduce((n, z) => n + z.people.length, 0)} / creatures ${zones.reduce((n, z) => n + z.fauna.length, 0)}`,
     ].join("\n")
   );
 }

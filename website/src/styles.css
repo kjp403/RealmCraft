@@ -170,8 +170,8 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   min-height: 72px;
 }
 .item-card:hover { border-color: var(--accent); text-decoration: none; background: var(--panel-2); }
-.item-card .name { font-weight: 600; }
-.item-card .kind { color: var(--muted); font-size: 0.8rem; }
+.item-card .name { font-weight: 600; display: block; }
+.item-card .kind { color: var(--muted); font-size: 0.8rem; display: block; }
 
 .icon-frame {
   width: 48px;
