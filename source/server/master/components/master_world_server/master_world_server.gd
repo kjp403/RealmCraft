@@ -80,6 +80,39 @@ func world_id_by_name(world_name: String) -> int:
 	return 0
 
 
+## Public website leaderboards: names + scores from the latest world heartbeat.
+## Picks the busiest connected world. Never includes player ids, rosters, chat,
+## or logs — those stay on the dashboard-only heartbeat blob.
+func public_leaderboards() -> Dictionary:
+	var best: Dictionary = {}
+	var best_pop: int = -1
+	for world_id: int in connected_worlds:
+		var world: Dictionary = connected_worlds[world_id]
+		var hb: Dictionary = world.get("heartbeat", {})
+		if hb.is_empty():
+			continue
+		var boards: Dictionary = hb.get("leaderboards", {})
+		if boards.is_empty():
+			continue
+		var pop: int = int(hb.get("population", 0))
+		if pop < best_pop:
+			continue
+		best_pop = pop
+		best = {
+			"ok": true,
+			"world": str(world.get("info", {}).get("name", "")),
+			"updated_at": int(hb.get("ts", 0)),
+			"boards": boards,
+		}
+	if best.is_empty():
+		return {
+			"ok": false,
+			"error": "world_offline",
+			"msg": "No world is reporting leaderboards yet.",
+		}
+	return best
+
+
 ## Periodic snapshot push from each world. Replaces the live numbers on the
 ## fetched info so the dashboard always reflects what the world is reporting.
 @rpc("any_peer")
