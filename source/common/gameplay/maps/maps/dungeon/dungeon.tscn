@@ -106,7 +106,7 @@ position = Vector2(170, -1001)
 [node name="Room1" type="Area2D" parent="." unique_id=2038179091 node_paths=PackedStringArray("doors")]
 position = Vector2(215, -387)
 script = ExtResource("6_phpfy")
-doors = [NodePath(""), NodePath(""), NodePath(""), NodePath("../ReplicatedPropsContainer/Room1Door4"), NodePath("../ReplicatedPropsContainer/Room1Door5"), NodePath("../ReplicatedPropsContainer/Room1Door6"), NodePath("../ReplicatedPropsContainer/Room1Door7"), NodePath("../ReplicatedPropsContainer/Room1Door8")]
+doors = [NodePath("../ReplicatedPropsContainer/Room1Door4"), NodePath("../ReplicatedPropsContainer/Room1Door5"), NodePath("../ReplicatedPropsContainer/Room1Door6"), NodePath("../ReplicatedPropsContainer/Room1Door7"), NodePath("../ReplicatedPropsContainer/Room1Door8")]
 metadata/_custom_type_script = "uid://trwnxb3wdk15"
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Room1" unique_id=1426664823]

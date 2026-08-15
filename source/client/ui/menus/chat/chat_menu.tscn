@@ -148,7 +148,7 @@ theme_override_font_sizes/italics_font_size = 12
 theme_override_font_sizes/bold_italics_font_size = 12
 theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
-scroll_following = false
+scroll_following = true
 scroll_active = true
 
 [node name="SettingsPanel" type="ScrollContainer" parent="FullFeed/Chatbox/Root" unique_id=1812037411]

@@ -29,7 +29,13 @@ extends Area2D
 
 var _activated: bool = false
 var _cleared: bool = false
-var _alive: int = 0
+## Living mobs in the current wave. An integer counter desyncs if two deaths
+## land the same frame, a spawn is despawned without `died`, or `_advance_wave`
+## runs twice — then the room never clears and the exit stays sealed.
+var _living: Array[Node] = []
+## True while waiting on the inter-wave beat so a late `died` / `tree_exited`
+## can't start a second advance (which would reset `_living` mid-spawn).
+var _advancing: bool = false
 ## peer_id -> currently inside the room trigger.
 var _inside: Dictionary[int, bool] = {}
 ## SpawnMarker children grouped by their `wave` (index = wave number); built on activate.
@@ -123,6 +129,8 @@ func _activate() -> void:
 		return
 	_resolve_difficulty(map)
 	_build_waves()
+	if _authored_doors().is_empty():
+		push_warning("RoomNode '%s': no valid ActivableDoor entries — the exit will never open." % name)
 	# Seal the party in FIRST, then a short beat before the first wave — the "doors slam, here it
 	# comes" telegraph reads far better than spawning the instant the trigger fires.
 	_push_seal(true)
@@ -174,18 +182,23 @@ func _build_waves() -> void:
 			_waves[(child as SpawnMarker).wave].append(child)
 
 
-## Spawn every mob in wave [param n] (resetting the alive count for it), or clear the room if there
+## Spawn every mob in wave [param n] (resetting the living list for it), or clear the room if there
 ## are no more waves. An empty wave (a gap in the numbering, or one that spawned nothing) advances
 ## immediately so it can't stall the room.
 func _spawn_wave(n: int) -> void:
 	_current_wave = n
+	_living.clear()
 	if n >= _waves.size() or not is_instance_valid(_container):
 		_clear()
 		return
-	_alive = 0
+	# Block `_on_mob_gone` from advancing while this loop is still spawning —
+	# a spawn that dies instantly (wall crush, 0 HP) would otherwise start the
+	# next wave before the rest of this one exists.
+	_advancing = true
 	for marker: SpawnMarker in _waves[n]:
 		_spawn_marker_mob(marker)
-	if _alive == 0:
+	_advancing = false
+	if _prune_living() == 0:
 		_advance_wave()
 
 
@@ -228,8 +241,7 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 			var slam_m: float = _dmg_mult * (_boss_dmg_mult if is_boss else 1.0)
 			if not is_equal_approx(slam_m, 1.0):
 				brain.slam_damage *= slam_m # ...so scale it AFTER that load
-	_alive += 1
-	mob.died.connect(func(_killer: Character) -> void: _on_mob_died())
+	_track_mob(mob)
 	if npc != null:
 		# Summon burst + brief hold so the mob phases in, not pops + instantly attacks.
 		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
@@ -258,21 +270,48 @@ static func make_dungeon_mob(mob: Node, is_boss: bool) -> void:
 		mob.loot = no_loot
 
 
-func _on_mob_died() -> void:
-	_alive -= 1
-	if _alive <= 0:
+func _track_mob(mob: Node) -> void:
+	_living.append(mob)
+	# `died` is the happy path. `tree_exited` covers despawn without a death
+	# signal (container despawn, instance teardown mid-fight).
+	mob.died.connect(func(_killer: Character) -> void: _on_mob_gone())
+	mob.tree_exited.connect(_on_mob_gone)
+
+
+func _on_mob_gone() -> void:
+	if _cleared or _advancing:
+		return
+	if _prune_living() == 0:
 		_advance_wave()
+
+
+## Drop invalid / already-dead entries. Returns how many are still a threat.
+func _prune_living() -> int:
+	var keep: Array[Node] = []
+	for mob: Node in _living:
+		if not is_instance_valid(mob) or not mob.is_inside_tree():
+			continue
+		if mob is Character and (mob as Character).is_dead:
+			continue
+		keep.append(mob)
+	_living = keep
+	return _living.size()
 
 
 ## The current wave is cleared: spawn the next after a short beat, or clear the room if that was the
 ## last wave. Async (the inter-wave beat) — fine, it's fired from a death callback.
 func _advance_wave() -> void:
+	if _cleared or _advancing:
+		return
+	_advancing = true
 	if _current_wave + 1 < _waves.size():
 		await get_tree().create_timer(wave_delay_s).timeout
-		if not is_instance_valid(self) or not is_inside_tree():
+		_advancing = false
+		if not is_instance_valid(self) or not is_inside_tree() or _cleared:
 			return
 		_spawn_wave(_current_wave + 1)
 	else:
+		_advancing = false
 		_clear()
 
 
@@ -289,22 +328,36 @@ func _clear() -> void:
 			DungeonService.on_dungeon_cleared(instance) # reward read off the run's resource
 
 
-## Tell every client in this instance to seal (or open) this room's doors.
-## Movement is client-authoritative, so the collision change has to happen on each
-## client — we push the door node PATHS (relative to the map; the authored doors
-## already exist on every client) and let the clients toggle them. No prop baking
-## or ids needed.
+## Authored doors that actually resolved. Empty NodePath leftovers in a typed
+## Array[ActivableDoor] can fail the whole property load in Godot 4 — or sit as
+## nulls / the RoomNode itself — so never iterate `doors` raw.
+func _authored_doors() -> Array[ActivableDoor]:
+	var out: Array[ActivableDoor] = []
+	for entry: Variant in doors:
+		if entry is ActivableDoor:
+			out.append(entry)
+	return out
+
+
+## Toggle this room's doors on the server AND every client. Movement is
+## client-authoritative, so clients must flip collision locally — we push the
+## door node PATHS (relative to the map) and let them toggle. Server `set_open`
+## keeps physics consistent if a client misses the push. Empty NodePaths are
+## skipped so leftover inspector slots can't abort the whole seal.
 func _push_seal(sealed: bool) -> void:
-	if doors.is_empty():
+	var valid: Array[ActivableDoor] = _authored_doors()
+	if valid.is_empty():
 		return
+	var is_open: bool = not sealed
 	var map: Node = get_parent()
-	var instance: Node = map.get_parent() if map != null else null
-	if map == null or instance == null or WorldServer.curr == null:
-		return
 	var paths: Array = []
-	for door: ActivableDoor in doors:
-		if door != null:
+	for door: ActivableDoor in valid:
+		door.set_open(is_open)
+		if map != null:
 			paths.append(String(map.get_path_to(door)))
+	var instance: Node = map.get_parent() if map != null else null
+	if instance == null or WorldServer.curr == null or paths.is_empty():
+		return
 	WorldServer.curr.propagate_rpc(
 		WorldServer.curr.data_push.bind(&"dungeon.room", {"doors": paths, "sealed": sealed}),
 		instance.name
