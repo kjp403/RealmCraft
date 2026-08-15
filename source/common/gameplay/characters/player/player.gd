@@ -192,20 +192,6 @@ func _ready() -> void:
 	super._ready()
 	if not multiplayer.is_server():
 		_apply_team_bar_color()
-		_build_paper_doll()
-
-
-## Layered appearance, client-side only. NPCs keep the single-sprite rig.
-func _build_paper_doll() -> void:
-	if paper_doll != null:
-		return
-	paper_doll = PaperDoll.new()
-	paper_doll.name = "PaperDoll"
-	paper_doll.character = self
-	add_child(paper_doll)
-	paper_doll.apply_appearance(appearance)
-	if equipment_component != null:
-		equipment_component.refresh_paper_doll()
 
 
 ## Mana regen lives in ServerInstance's 1 Hz status tick (one timer per instance,
