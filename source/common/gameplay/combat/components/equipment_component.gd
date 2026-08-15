@@ -112,6 +112,7 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 	if item_id == 0:
 		if slot == &"weapon":
 			_mount_unarmed()
+		_paint_paper_doll(slot, null)
 		_clamp_vitals_to_max()
 		equipment_changed.emit(slot, 0)
 		return
@@ -124,6 +125,7 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 	equipped_items[slot] = item
 	item.equip(character)
 	_apply_gear_stats(slot, item)
+	_paint_paper_doll(slot, item)
 	if slot == &"weapon":
 		_apply_special_to_mounted()
 	equipment_changed.emit(slot,  item_id)
@@ -265,3 +267,28 @@ class EquipmentSlots extends RefCounted:
 		values[property] = item_id
 		slot_changed.emit(property, item_id)
 		return true
+
+
+## Draw (or strip) this slot on the layered player sprite. No-op on the server, on
+## NPCs, and for slots with no drawn layer.
+func _paint_paper_doll(slot: StringName, item: Item) -> void:
+	var player: Player = character as Player
+	if player == null or player.paper_doll == null:
+		return
+	# Weapons and armour both expose appearance_item(); anything else (a potion in
+	# hand, say) simply strips the layer.
+	var look: Array = [&"", &""]
+	if item != null and item.has_method(&"appearance_item"):
+		look = item.appearance_item()
+	player.paper_doll.set_gear(slot, look[0], look[1])
+
+
+## Replay every equipped slot onto the paper-doll. Slot state can arrive over the
+## wire BEFORE the doll node exists (spawn ordering is not guaranteed), which would
+## otherwise leave a fully geared player in their underwear.
+func refresh_paper_doll() -> void:
+	var player: Player = character as Player
+	if player == null or player.paper_doll == null:
+		return
+	for slot: StringName in PaperDoll.GEAR_LAYERS:
+		_paint_paper_doll(slot, equipped_items.get(slot, null))

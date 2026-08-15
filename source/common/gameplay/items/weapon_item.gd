@@ -20,6 +20,44 @@ extends GearItem
 @export var sprite_offset: Vector2 = Vector2.ZERO
 
 
+## --- Paper-doll appearance -------------------------------------------------
+##
+## Mana Seed draws the weapon IN the hand on every frame of every direction, which
+## is what finally retires the floating hand rig. It indexes weapons by its own
+## codes, so map our mastery category onto them.
+##
+## `wand` and `book` have no equivalent in the packs. They return &"" and the
+## caller keeps the old hand rig for those, rather than showing nothing.
+const CATEGORY_ITEM: Dictionary = {
+	&"sword": &"sw01",
+	&"hammer": &"mc01",
+	&"bow": &"bo01",
+}
+
+## Material ladder, matching the folders under assets/sprites/items/weapons/.
+## Position picks the colour variant so a weapon upgrade reads as one.
+const MATERIAL_RANK: Array[StringName] = [
+	&"wood", &"rustic", &"bone", &"bronze", &"iron", &"steel", &"mithril",
+	&"adamant", &"runite", &"fire", &"poison", &"fairy", &"sunsteel", &"ascension",
+]
+
+
+## Pack item code + variant for this weapon, or [&"", &""] when the packs have no
+## equivalent (wand/book) and the hand rig should keep drawing it.
+func appearance_item() -> Array:
+	var item: StringName = CATEGORY_ITEM.get(category, &"")
+	if item == &"":
+		return [&"", &""]
+	# Tier comes from the material word in the name ("Mithril Sword" -> mithril).
+	var rank: int = 0
+	var lower: String = String(item_name).to_lower()
+	for i: int in MATERIAL_RANK.size():
+		if lower.contains(String(MATERIAL_RANK[i])):
+			rank = i
+			break
+	return [item, PaperDoll.variant_for(&"6tla", item, rank)]
+
+
 func inventory_tab() -> InventoryTab:
 	return InventoryTab.WEAPON
 
