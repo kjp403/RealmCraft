@@ -396,7 +396,7 @@ func freeze_movement(seconds: float) -> void:
 ## so a click in a fight is always a swing/shot, never a profile.
 ## Gathering tools (pickaxe / axe / fishing rod / sickle) are NOT armed for combat —
 ## they only swing via HarvestController when you click a resource node
-## (right-click for herb patches so woodcutting left-clicks aren't stolen).
+## (right-click for pickaxe / axe / sickle so left-click stays Attack / move).
 func is_armed() -> bool:
 	if is_holding_gather_tool():
 		return false

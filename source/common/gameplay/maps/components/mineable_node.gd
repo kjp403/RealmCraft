@@ -607,8 +607,8 @@ func _spawn_click_area() -> void:
 	collision.position = _sprite.position if _sprite != null else Vector2(0, -16)
 	area.add_child(collision)
 	add_child(area)
-	# Herb patches harvest on right-click so a left-click meant for a nearby
-	# tree (woodcutting) isn't stolen by plants on the forest floor.
+	# Pickaxe / axe / sickle nodes harvest on right-click so left-click stays
+	# free for movement and Attack. Fishing holes keep left-click.
 	if harvests_on_right_click():
 		area.capture_left_click = false
 		area.z_index = -1
@@ -621,17 +621,23 @@ func _spawn_click_area() -> void:
 	area.tree_exiting.connect(_set_interactable_hover.bind(false))
 
 
-## Farming herb patches — sickle nodes. Left-click must fall through to trees.
+## Mining, woodcutting, and farming — left-click must fall through to Attack / move.
 func harvests_on_right_click() -> bool:
-	return data != null and data.required_tool == &"sickle"
+	if data == null:
+		return false
+	match data.required_tool:
+		&"pickaxe", &"axe", &"sickle":
+			return true
+		_:
+			return false
 
 
 func _set_interactable_hover(on: bool) -> void:
 	if not GameMode.is_client() or on == _interactable_hovered:
 		return
 	_interactable_hovered = on
-	# Herbs still show their name on hover, but must not block left-click
-	# movement / tree clicks the way ore veins and trees do.
+	# Right-click harvest nodes still show their name on hover, but must not
+	# block left-click movement / Attack the way fishing holes do.
 	if not harvests_on_right_click():
 		ClientState.world_interactables_hovered += 1 if on else -1
 	if _name_label != null and data != null and data.ore != null:

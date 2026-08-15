@@ -20,6 +20,6 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 [resource]
 script = ExtResource("9_otpy6")
 npc_name = "Foreman"
-greeting = "Buy a pickaxe from my shop, equip it, then walk south into the yard. Copper on the west bank, tin on the east. Left-click a vein once — you'll walk over and keep mining until it empties, then wait for it to come back. Coal and iron wait in the caves — not here."
+greeting = "Buy a pickaxe from my shop, equip it, then walk south into the yard. Copper on the west bank, tin on the east. Right-click a vein once — you'll walk over and keep mining until it empties, then wait for it to come back. Coal and iron wait in the caves — not here."
 interactions = Array[ExtResource("1_8t7eq")]([SubResource("Resource_iqd18"), SubResource("Resource_82tnh")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
