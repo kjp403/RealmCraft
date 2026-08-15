@@ -23,7 +23,7 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	bolt.source = user
 	bolt.heal_amount = _heal_amount(user)
 	bolt.modulate = bolt_modulate
-	bolt.global_position = _spawn_position(user)
+	bolt.global_position = _spawn_position(user, bolt.direction)
 	user.add_child(bolt)
 
 

@@ -14,6 +14,12 @@
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="fx_cloth"]
+[ext_resource type="Resource" uid="uid://b8i2jeggl5x64" path="res://source/common/gameplay/items/materials/leather/leather_cave.tres" id="fx_leather"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="fx_bloodcap"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="fx_potion"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="fx_key"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -25,15 +31,37 @@ lunge_cooldown = 7.0
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
 item = ExtResource("3_gold")
-min_amount = 3
-max_amount = 6
-chance = 0.9
+min_amount = 60
+max_amount = 140
 
 [sub_resource type="Resource" id="Drop_hide"]
 script = ExtResource("2_loot")
 item = ExtResource("3_hide")
-max_amount = 4
-chance = 0.72
+max_amount = 3
+chance = 0.8
+
+[sub_resource type="Resource" id="Drop_leather"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_leather")
+max_amount = 2
+chance = 0.35
+
+[sub_resource type="Resource" id="Drop_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_cloth")
+max_amount = 3
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_bloodcap"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_bloodcap")
+max_amount = 2
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_potion")
+chance = 0.15
 
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
@@ -60,12 +88,20 @@ script = ExtResource("2_loot")
 item = ExtResource("9_book")
 chance = 0.04
 
+[sub_resource type="Resource" id="Drop_key"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_key")
+chance = 0.02
+
+[sub_resource type="Resource" id="Drop_chest"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.015
+
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
-min_amount = 1
 max_amount = 3
-chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -85,6 +121,6 @@ detection_radius = 130
 chase_on_area = true
 xp_reward = 40
 respawn_delay = 20.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_leather"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_key"), SubResource("Drop_chest"), SubResource("Drop_bone")])
 metadata/slug = &"myconid_brute"
 metadata/id = 32

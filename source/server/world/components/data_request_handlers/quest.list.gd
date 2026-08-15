@@ -180,6 +180,7 @@ func _quest_view(
 		),
 		"objectives": objectives,
 		"reward_xp": quest.reward_xp,
+		"reward_mastery_xp": quest.reward_mastery_xp,
 		"reward_gold": quest.reward_gold,
 		"min_level": quest.min_level,
 		"meets_level": resource.level >= quest.min_level,

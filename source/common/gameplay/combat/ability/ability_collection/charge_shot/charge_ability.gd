@@ -210,8 +210,8 @@ func _spawn(entity: Entity, direction: Vector2, damage: float, speed: float, arm
 	projectile.burn_dps = dot_dps
 	projectile.burn_duration_s = dot_duration_s
 	projectile.dot_kind = dot_kind
-	if entity is Character and (entity as Character).right_hand_spot != null:
-		projectile.global_position = (entity as Character).right_hand_spot.global_position
-	else:
-		projectile.global_position = entity.global_position
+	# On the aim ray rather than at the hand node: the socket's rotation is lerped,
+	# quantised and 20 Hz-synced, so spawning there threw shots off-line whenever
+	# the archer was moving or turning. See AbilityResource.muzzle_position.
+	projectile.global_position = AbilityResource.muzzle_position(entity, direction)
 	entity.add_child(projectile)

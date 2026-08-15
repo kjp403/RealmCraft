@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Bonepickers"
+enemy_types = Array[StringName]([&"bonepicker"])
+min_slayer_level = 1
+xp_per_kill = 20
+guide_notes = "Scavenger skeletons picking over the old workings, a long way short of the armoured cave skeletons deeper in. They swing slowly - step in after the miss."
+location_hint = "Mining Cave"

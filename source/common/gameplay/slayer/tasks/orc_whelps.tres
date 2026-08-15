@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Orc Whelps"
+enemy_types = Array[StringName]([&"orc_whelp"])
+min_slayer_level = 1
+xp_per_kill = 27
+guide_notes = "Half-grown orcs pushed out of the warband to fend for themselves, camped in the forest and out east past the goblin warren. The sturdiest thing on this list - bring food."
+location_hint = "Forest, Goblin Woodlands East"

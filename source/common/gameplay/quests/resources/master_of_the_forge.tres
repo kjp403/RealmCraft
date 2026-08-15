@@ -5,6 +5,7 @@
 [ext_resource type="Resource" uid="uid://cb6x01k6mbv2x" path="res://source/common/gameplay/items/gears/metal/iron_chest.tres" id="3_chest"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_eqmk4"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="4_quest"]
+[ext_resource type="Resource" uid="uid://my4wn3plgxbs" path="res://source/common/gameplay/items/chests/wood_silver_large.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Obj_craft_helm"]
 script = ExtResource("1_obj")
@@ -16,6 +17,10 @@ script = ExtResource("1_obj")
 type = 2
 item = ExtResource("3_chest")
 
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("4_eqmk4")
+item = ExtResource("qr_chest")
+
 [resource]
 script = ExtResource("4_quest")
 quest_name = "Master of the Forge"
@@ -23,7 +28,9 @@ description = "Forge an iron helmet and an iron chestpiece. The smith keeps neit
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_craft_helm"), SubResource("Obj_craft_chest")])
 min_level = 16
 reward_xp = 600
-reward_gold = 20
+reward_mastery_xp = 60000
+reward_gold = 2500
+reward_items = Array[ExtResource("4_eqmk4")]([SubResource("Reward_wood_chest")])
 grant_title = "Forgemaster"
 metadata/_custom_type_script = "uid://c5p53get4ikl6"
 metadata/slug = &"master_of_the_forge"

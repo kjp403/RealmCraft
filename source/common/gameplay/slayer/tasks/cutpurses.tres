@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Cutpurses"
+enemy_types = Array[StringName]([&"bandit_cutpurse"])
+min_slayer_level = 1
+xp_per_kill = 23
+guide_notes = "Petty thieves working the forest road and the east woodland trail, not the hideout crew. Tougher than a goblin and slower to fall, but they carry coin."
+location_hint = "Forest, Goblin Woodlands East"

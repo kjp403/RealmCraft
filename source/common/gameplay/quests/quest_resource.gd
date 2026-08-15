@@ -73,7 +73,18 @@ enum RequiresMode { ALL, ANY }
 @export var grant_on_accept: Item
 
 @export_group("Rewards")
+## Lifetime "adventure xp" only (PlayerResource.experience) — it fills the HUD bar
+## and levels NOTHING, because character level is derived from masteries. Use
+## [member reward_mastery_xp] for the reward that actually progresses a character.
 @export var reward_xp: int
+## Weapon-mastery XP paid at turn-in into the category of the weapon in HAND
+## (empty hands fall back to the player's best mastery — see
+## RewardService.grant_mastery_reward). This is the number that moves a character
+## forward, so scale it against KILLS, not against reward_xp: an ordinary mob pays
+## its effective HP × 4 (EnemyTypeResource.combat_skill_xp_for), which puts a
+## woodland goblin near 1,100 and a fungus sporeling near 4,000. A quest worth
+## ~10-20 of its own targets reads as a real chapter reward.
+@export var reward_mastery_xp: int
 @export var reward_gold: int
 @export var reward_items: Array[QuestReward]
 ## Vanity title granted on turn-in. Empty = no title. Added to the player's

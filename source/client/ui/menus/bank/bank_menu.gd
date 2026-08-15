@@ -3,6 +3,12 @@ extends MenuShell
 ## drag-rearranged like inventory. Bag left-click deposits only a single item;
 ## stacks of 2+ select into the amount row (X / Max / Deposit). Gold stays in
 ## the currency pouch — never banked as a stack.
+##
+## The amount row acts on the SELECTED stack, so X and Max stay disabled until there
+## is one. They used to be live and early-return instead, which meant clicking X
+## first sent the digits you then typed to whatever else held focus (the vault
+## search box sits right above), left the spinner reading the full stack, and banked
+## all of it — "Deposit X does nothing" from the outside.
 
 
 const GRID_COLUMNS: int = 6
@@ -22,6 +28,10 @@ var _bank_count: Label
 var _upgrade_button: Button
 var _sort_button: Button
 var _amount_spin: SpinBox
+## X / Max. Their enabled state follows the selection: both act ON the selected
+## stack, and a button that silently no-ops is how "Deposit X does nothing" reads
+## from the player's side — see _build_amount_row.
+var _amount_buttons: Array[Button] = []
 var _transfer_button: Button
 var _deposit_all_button: Button
 var _search_field: LineEdit
@@ -157,9 +167,9 @@ func _build_side(title: String, is_bag: bool) -> VBoxContainer:
 
 	var hint := Label.new()
 	hint.text = (
-		"Left-click a single item to bank it. Qty 2+: set amount. Drag to rearrange."
+		"Left-click a single item to bank it. Qty 2+: click it, then X to type an amount and Enter to bank it."
 		if is_bag
-		else "Click a stack, then Withdraw. Drag or Sort to rearrange."
+		else "Click a stack, then X to type an amount and Enter to withdraw it. Drag or Sort to rearrange."
 	)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -261,20 +271,25 @@ func _build_transfer_row() -> HBoxContainer:
 	_amount_spin.rounded = true
 	_amount_spin.custom_minimum_size = Vector2(84, 0)
 	_amount_spin.editable = false
+	# Whatever gives this field focus — the X button, or a click straight on it —
+	# selects what's there, so the first digit typed REPLACES the amount instead of
+	# appending to it. Appending silently overshot the stack and clamped back to
+	# "all of it", which reads exactly like the typed amount being ignored.
+	_amount_spin.get_line_edit().select_all_on_focus = true
+	# Enter is what people press after typing a number. Commit and send, rather than
+	# only committing and leaving them hunting for the Deposit button.
+	_amount_spin.get_line_edit().text_submitted.connect(func(_text: String) -> void:
+		_on_transfer_pressed())
 	row.add_child(_amount_spin)
 
 	# "X" = custom amount: focus the spinner so the player can type a count.
 	var x_btn := Button.new()
 	x_btn.text = "X"
 	x_btn.focus_mode = Control.FOCUS_NONE
-	x_btn.tooltip_text = "Type a custom amount"
-	x_btn.pressed.connect(func() -> void:
-		if _selected_have <= 0:
-			return
-		_amount_spin.editable = true
-		_amount_spin.get_line_edit().grab_focus()
-		_amount_spin.get_line_edit().select_all())
+	x_btn.tooltip_text = "Type a custom amount, then press Enter"
+	x_btn.pressed.connect(_on_custom_amount_pressed)
 	row.add_child(x_btn)
+	_amount_buttons.append(x_btn)
 
 	var max_btn := Button.new()
 	max_btn.text = "Max"
@@ -282,7 +297,29 @@ func _build_transfer_row() -> HBoxContainer:
 	max_btn.tooltip_text = "Fill your bag with as many as will fit"
 	max_btn.pressed.connect(_on_max_pressed)
 	row.add_child(max_btn)
+	_amount_buttons.append(max_btn)
+	_set_amount_controls_enabled(false)
 	return row
+
+
+## X / Max only mean anything with a stack selected. Disabling them says so up
+## front — the old version early-returned, so clicking X first (before picking a
+## stack) did nothing at all, and the digits then went to whichever field still
+## held focus: the vault search box sitting right above it. The amount stayed at
+## the full stack, Deposit banked everything, and "Deposit X" looked broken.
+func _set_amount_controls_enabled(enabled: bool) -> void:
+	for button: Button in _amount_buttons:
+		if is_instance_valid(button):
+			button.disabled = not enabled
+
+
+func _on_custom_amount_pressed() -> void:
+	if _selected_have <= 0:
+		return
+	_amount_spin.editable = true
+	# grab_focus + select_all_on_focus: the field opens with its value highlighted.
+	_amount_spin.get_line_edit().grab_focus()
+	_amount_spin.get_line_edit().select_all()
 
 
 func _refresh() -> void:
@@ -495,6 +532,7 @@ func _on_stack_selected(uid: int, from_bag: bool, have: int, item: Item) -> void
 	_amount_spin.value = _selected_have
 	_transfer_button.disabled = false
 	_transfer_button.text = "Deposit" if from_bag else "Withdraw"
+	_set_amount_controls_enabled(true)
 	_selection_label.text = "%s  ·  %s" % [
 		_selected_name,
 		"from bag" if from_bag else "from vault",
@@ -529,6 +567,7 @@ func _clear_selection() -> void:
 	_amount_spin.value = 1
 	_transfer_button.disabled = true
 	_transfer_button.text = "Transfer"
+	_set_amount_controls_enabled(false)
 	_selection_label.text = "Select a stack"
 	_selection_label.add_theme_color_override(&"font_color", MUTED)
 
@@ -555,7 +594,21 @@ func _on_transfer_pressed() -> void:
 	# this row is FOCUS_NONE — so without apply() a typed "80" is still read as the
 	# previous value.
 	_amount_spin.apply()
-	_transfer_stack(_selected_uid, _selected_from_bag, int(_amount_spin.value))
+	var requested: int = int(_amount_spin.value)
+	# Deposit is capped by the SELECTED stack; withdraw deliberately isn't, because
+	# bank.withdraw walks every vault pile of the item to satisfy one request (that
+	# is what Max-withdraw relies on). Only the deposit side can over-ask.
+	if _selected_from_bag and requested > _selected_have:
+		# Saying so matters: silently banking the whole stack instead is
+		# indistinguishable from the typed amount having been thrown away.
+		Toaster.toast("You only have %d %s — banking all of them." % [
+			_selected_have, _selected_name
+		])
+		requested = _selected_have
+	# Let go of the field before the request: leaving it focused meant the next
+	# keystroke went on editing a stale amount for a selection that no longer exists.
+	_amount_spin.get_line_edit().release_focus()
+	_transfer_stack(_selected_uid, _selected_from_bag, requested)
 
 
 func _on_sort_pressed() -> void:

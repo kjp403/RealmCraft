@@ -6,7 +6,7 @@
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
 version = 1786652596
-next_id = 99
+next_id = 104
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -467,6 +467,31 @@ entries = Array[Dictionary]([{
 &"id": 98,
 &"path": "res://source/common/gameplay/characters/npc/types/cave_skeleton_warrior.tres",
 &"slug": &"cave_skeleton_warrior"
+}, {
+&"hash": "42483a951474f8af2f29216a71f933ae0d0fe7e76f4693dae03491bc0257de8e",
+&"id": 99,
+&"path": "res://source/common/gameplay/characters/npc/types/skeletons/bonepicker.tres",
+&"slug": &"bonepicker"
+}, {
+&"hash": "b65495be644e5ed299a8780dff5a960585e4b2f40b0b76c0055b7f19dbeadd79",
+&"id": 100,
+&"path": "res://source/common/gameplay/characters/npc/types/beastkin/dusk_bat.tres",
+&"slug": &"dusk_bat"
+}, {
+&"hash": "2acf1d2ea1bdb9dd6c52febef5344263e6fad3c2f951de4d35f00f4e4d8eb118",
+&"id": 101,
+&"path": "res://source/common/gameplay/characters/npc/types/orcs/orc_whelp.tres",
+&"slug": &"orc_whelp"
+}, {
+&"hash": "df1296304779cb31fdb90cf7f41aa2113516357bbc868fab7cad2abb5260e276",
+&"id": 102,
+&"path": "res://source/common/gameplay/characters/npc/types/bandits/bandit_cutpurse.tres",
+&"slug": &"bandit_cutpurse"
+}, {
+&"hash": "cad562a24344293e9d352c7bf2ae1c4bc248c8952daaa30250dc2feecf13eaf8",
+&"id": 103,
+&"path": "res://source/common/gameplay/characters/npc/types/fungus/spore_tick.tres",
+&"slug": &"spore_tick"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

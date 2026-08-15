@@ -36,6 +36,14 @@ const BLOCK_POINT_COST: int = 60
 ## gap slightly past 3×, which is the intended direction.
 const SLAYER_XP_RATIO: float = 1.0 / 3.0
 
+## Multiplier on a BOSS kill's Slayer XP when the boss is on your task (the Goblin
+## Chief for Goblins, the Fungal Heart for Fungus, ...). A boss is a scheduled,
+## respawn-gated fight you cannot grind — without this it pays the same per-kill
+## rate as the trash around it, which made hunting the head of a camp strictly
+## worse than farming its runts. Applied in [method boss_xp_bonus] so the kill hook
+## and the Slayer panel's advertised range agree.
+const BOSS_XP_MULTIPLIER: float = 3.0
+
 
 # ---------------------------------------------------------------------------
 # Assignment
@@ -140,19 +148,25 @@ static func status_payload(resource: PlayerResource) -> Dictionary:
 ## A player killed an enemy of [param enemy_type], worth [param combat_skill_xp]
 ## on the 1–99 skill curve (the same number the kill just paid to weapon mastery).
 ## Advances the active task if it matches, grants Slayer XP for
-## THAT kill, and completes + pays out the task on the final kill. Returns {} if
+## THAT kill (multiplied by [constant BOSS_XP_MULTIPLIER] when [param is_boss]),
+## and completes + pays out the task on the final kill. Returns {} if
 ## there's no active task or it doesn't match this enemy; otherwise
 ## {"advanced": true, "remaining": int, "xp_gained": int, "leveled_up": bool,
 ## "complete": bool, "points_gained": int (only if complete),
 ## "streak": int (only if complete)}.
-static func on_kill(resource: PlayerResource, enemy_type: StringName, combat_skill_xp: int = 0) -> Dictionary:
+static func on_kill(
+	resource: PlayerResource,
+	enemy_type: StringName,
+	combat_skill_xp: int = 0,
+	is_boss: bool = false
+) -> Dictionary:
 	if resource == null or resource.current_slayer_task.is_empty():
 		return {}
 	var task: SlayerTaskDef = current_task_def(resource)
 	if task == null or not task.matches(enemy_type):
 		return {}
 
-	var xp: int = _xp_per_kill(resource, task, enemy_type, combat_skill_xp)
+	var xp: int = _xp_per_kill(resource, task, enemy_type, combat_skill_xp, is_boss)
 	var xp_result: Dictionary = resource.add_skill_xp(&"slayer", xp)
 
 	var remaining: int = int(resource.current_slayer_task.get("remaining", 0)) - 1
@@ -188,13 +202,15 @@ static func on_kill(resource: PlayerResource, enemy_type: StringName, combat_ski
 ##      a 200 HP zombie in the same task pay out proportionally instead of both
 ##      paying the group's flat average
 ##   3. task.xp_per_kill — fallback when the kill reported no combat skill XP
-## then scaled by JobPerks.xp_multiplier, exactly how gathering XP scales (mining's
+## then multiplied by the boss bonus (see [method boss_xp_bonus]) and scaled by
+## JobPerks.xp_multiplier, exactly how gathering XP scales (mining's
 ## "diligent" perk) — the &"slayer" job's "focused" perk is the combat equivalent.
 static func _xp_per_kill(
 	resource: PlayerResource,
 	task: SlayerTaskDef,
 	enemy_type: StringName,
-	combat_skill_xp: int
+	combat_skill_xp: int,
+	is_boss: bool = false
 ) -> int:
 	var base: int = 0
 	if task.xp_overrides.has(enemy_type):
@@ -203,7 +219,7 @@ static func _xp_per_kill(
 		base = roundi(float(combat_skill_xp) * SLAYER_XP_RATIO)
 	else:
 		base = task.xp_per_kill
-	base = maxi(1, base)
+	base = maxi(1, roundi(float(base) * boss_xp_bonus(is_boss)))
 
 	var perks: JobPerks = JobRegistry.perks_for(&"slayer")
 	if perks == null:
@@ -211,6 +227,13 @@ static func _xp_per_kill(
 	var skill: Dictionary = resource.get_skill(&"slayer")
 	var mult: float = perks.xp_multiplier(skill.get("perks", {}))
 	return maxi(1, roundi(float(base) * mult))
+
+
+## Slayer-XP multiplier for one kill: [constant BOSS_XP_MULTIPLIER] for a boss on
+## task, 1.0 for everything else. One function so the kill payout and the range the
+## Slayer panel advertises (SlayerTaskDef.xp_per_kill_range) can never disagree.
+static func boss_xp_bonus(is_boss: bool) -> float:
+	return BOSS_XP_MULTIPLIER if is_boss else 1.0
 
 
 ## base_points_per_task × the OSRS streak-milestone multiplier for THIS completion

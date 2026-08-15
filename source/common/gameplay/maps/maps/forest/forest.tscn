@@ -49,6 +49,8 @@
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 [ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
 [ext_resource type="AudioStream" uid="uid://psn1us7ahvf1" path="res://assets/audio/music/fungus.ogg" id="mus_fungus"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bandits/bandit_cutpurse.tres" id="lv_cutpurse"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/orcs/orc_whelp.tres" id="lv_orcwhelp"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_w1xny"]
 normal = Vector2(-1, 0)
@@ -853,4 +855,64 @@ weapon = null
 position = Vector2(408.0, 2248.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("bk_t5")
+weapon = null
+
+[node name="Cutpurse1" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(1869, 1354)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="Cutpurse2" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(1968, 1264)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="Cutpurse3" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(958, 1274)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="Cutpurse4" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(1301, 1578)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="Cutpurse5" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(1342, 1651)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="Cutpurse6" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(1957, 1386)
+enemy_data = ExtResource("lv_cutpurse")
+weapon = null
+
+[node name="OrcWhelp1" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(471, 1426)
+enemy_data = ExtResource("lv_orcwhelp")
+weapon = null
+
+[node name="OrcWhelp2" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(659, 1503)
+enemy_data = ExtResource("lv_orcwhelp")
+weapon = null
+
+[node name="OrcWhelp3" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(681, 1340)
+enemy_data = ExtResource("lv_orcwhelp")
+weapon = null
+
+[node name="OrcWhelp4" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(631, 1418)
+enemy_data = ExtResource("lv_orcwhelp")
+weapon = null
+
+[node name="OrcWhelp5" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(595, 1471)
+enemy_data = ExtResource("lv_orcwhelp")
+weapon = null
+
+[node name="OrcWhelp6" parent="ReplicatedPropsContainer" instance=ExtResource("5_8w7oy")]
+position = Vector2(657, 1428)
+enemy_data = ExtResource("lv_orcwhelp")
 weapon = null

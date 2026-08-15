@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="3_reward"]
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="4_potion"]
 [ext_resource type="Resource" uid="uid://dicfbsg4ycah2" path="res://source/common/gameplay/characters/npc/npcs/foreman.tres" id="5_foreman"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Objective_visit_foreman"]
 script = ExtResource("1_objective")
@@ -18,6 +19,10 @@ script = ExtResource("3_reward")
 item = ExtResource("4_potion")
 metadata/_custom_type_script = "uid://cdi2gouodhicv"
 
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("3_reward")
+item = ExtResource("qr_chest")
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Find Your Footing"
@@ -26,8 +31,9 @@ objectives = Array[ExtResource("1_objective")]([SubResource("Objective_visit_for
 completion = 0
 auto_complete = true
 reward_xp = 80
-reward_gold = 5
-reward_items = Array[ExtResource("3_reward")]([SubResource("Reward_health_potion")])
+reward_mastery_xp = 2500
+reward_gold = 500
+reward_items = Array[ExtResource("3_reward")]([SubResource("Reward_health_potion"), SubResource("Reward_wood_chest")])
 grant_title = "Newcomer"
 metadata/_custom_type_script = "uid://c5p53get4ikl6"
 metadata/slug = &"welcome"

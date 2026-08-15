@@ -128,6 +128,17 @@ var mr: float = 0.0
 ## (an archer in a melee camp) without touching the shared .tres.
 @export var weapon: WeaponItem
 var xp_reward: int = 25
+## False strips this body's MATERIAL payout — weapon-mastery XP, and with
+## xp_reward/loot already zeroed alongside it, everything a kill hands over.
+## Dungeon trash and boss-summoned adds set it (see RoomNode.make_dungeon_mob):
+## the payoff there is clearing the room, not farming a boss's summons.
+##
+## PROGRESSION credit is deliberately NOT covered by this flag. A goblin is a
+## goblin however it got here, so quest / daily / Slayer counters still tick —
+## Slayer just pays its task's authored fallback rate instead of the derived one
+## (SlayerTaskService._xp_per_kill), which is the reward suppression this flag is
+## for, applied to the one number that would otherwise leak through.
+var grants_skill_xp: bool = true
 ## peer_id -> total damage dealt this life (cleared on respawn). Drives the
 ## participation reward split — see RewardService.
 var _contributors: Dictionary[int, float] = {}

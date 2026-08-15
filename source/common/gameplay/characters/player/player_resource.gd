@@ -149,6 +149,10 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## (first board click generates).
 @export var daily_quests: Array
 @export var dailies_refresh_at_ms: int
+## Board rerolls spent since the last daily refresh. Capped at
+## DailyQuestService.MAX_SKIPS_PER_DAY and zeroed by the same roll that stamps
+## dailies_refresh_at_ms, so it can never need its own expiry check.
+@export var dailies_skips_used: int
 
 ## Slayer: the currently assigned task, or {} for none. Shape:
 ## {"task": String (SlayerTaskDef slug), "master": String (SlayerMasterResource

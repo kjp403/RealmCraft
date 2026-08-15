@@ -33,13 +33,16 @@ extends InstanceResource
 @export var normal_damage_mult: float = 1.0
 ## Extra multipliers stacked on bosses only (Normal and Hard). Lets trash stay
 ## snappy while bosses last long enough to force potions. Ignored for HP when
-## [member boss_solo_health] is set.
+## [member boss_health_by_party] is set.
 @export var boss_health_mult: float = 1.0
 @export var boss_damage_mult: float = 1.0
-## Absolute boss HP for a 1-player run. 0 = use health multipliers instead.
-@export var boss_solo_health: float = 0.0
-## Added to [member boss_solo_health] for each extra living player in the instance.
-@export var boss_health_per_extra_player: float = 0.0
+## Absolute boss HP by living player count (index 0 = solo, 1 = duo, …).
+## Empty = use health multipliers instead.
+@export var boss_health_by_party: PackedFloat32Array = PackedFloat32Array()
+## Absolute slam damage for the dungeon boss. 0 = scale authored slam by the
+## damage multipliers (same as trash). Use this when the archetype's slam is
+## tuned for the overworld and would one-shot after dungeon damage mults.
+@export var boss_slam_damage: float = 0.0
 
 @export_group("Hard mode")
 ## Absolute multipliers for Hard runs (not stacked on Normal mults).
@@ -57,3 +60,12 @@ func display_title() -> String:
 ## Legacy alias — older lobby code calls title(); same value as display_title().
 func title() -> String:
 	return display_title()
+
+
+## Absolute boss HP for [param player_count] living players, or 0 to keep the
+## multiplier path. Counts past the authored table use the last entry.
+func party_boss_health(player_count: int) -> float:
+	if boss_health_by_party.is_empty():
+		return 0.0
+	var i: int = clampi(player_count, 1, boss_health_by_party.size()) - 1
+	return boss_health_by_party[i]

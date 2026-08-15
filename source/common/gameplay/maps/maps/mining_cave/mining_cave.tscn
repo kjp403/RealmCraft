@@ -24,6 +24,8 @@
 [ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="23_npc_friendly"]
 [ext_resource type="Resource" uid="uid://c0urierbankrun01" path="res://source/common/gameplay/characters/npc/npcs/courier.tres" id="24_courier"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/beastkin/dusk_bat.tres" id="lv_duskbat"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/skeletons/bonepicker.tres" id="lv_bonepicker"]
 
 [node name="mining_cave" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -660,3 +662,63 @@ destination_label = "Goblin Woodland"
 target_instance = ExtResource("7_woodland")
 warper_id = 131
 target_id = 130
+
+[node name="DuskBat1" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(376, 904)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat2" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(768, 528)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat3" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(872, 840)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat4" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1272, 528)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat5" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1344, 920)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat6" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(728, 1088)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="Bonepicker1" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(448, 960)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker2" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(848, 696)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker3" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1200, 440)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker4" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(968, 1088)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker5" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(640, 864)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker6" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1632, 704)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null

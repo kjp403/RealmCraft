@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="EnemyTypeResource" format=3]
+
+[ext_resource type="Script" uid="uid://bhs3kv3tyysi7" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_attack"]
+[ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_behavior"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_drop"]
+[ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_type"]
+[ext_resource type="SpriteFrames" uid="uid://5xabqgmgve5p" path="res://source/common/gameplay/characters/sprite_frames/fungus_immature.tres" id="5_skin"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="l0_gold"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="l1_bone"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="l2_cloth_cave"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="l3_bloodcap"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("3_drop")
+item = ExtResource("l0_gold")
+min_amount = 18
+max_amount = 40
+chance = 0.9
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_drop")
+item = ExtResource("l1_bone")
+
+[sub_resource type="Resource" id="Drop_cloth_cave"]
+script = ExtResource("3_drop")
+item = ExtResource("l2_cloth_cave")
+max_amount = 2
+chance = 0.35
+
+[sub_resource type="Resource" id="Drop_bloodcap"]
+script = ExtResource("3_drop")
+item = ExtResource("l3_bloodcap")
+chance = 0.08
+
+[resource]
+script = ExtResource("4_type")
+enemy_type = &"spore_tick"
+display_name = "Spore Tick"
+skin = ExtResource("5_skin")
+visual_scale = 0.6
+is_boss = false
+combat_level = 22
+max_health = 400.0
+attack_damage = 10.0
+attack_cooldown = 1.3
+armor = 6.0
+mr = 8.0
+move_speed = 78
+distance_to_attack = 16
+max_distance_from_spawn = 220
+leashes = true
+detection_radius = 85
+chase_on_area = false
+is_lone = true
+wander_radius = 50.0
+wander_pause_min_s = 1.0
+wander_pause_max_s = 3.0
+xp_reward = 16
+respawn_delay = 9.0
+respawns = true
+behaviors = Array[ExtResource("2_behavior")]([])
+attacks = Array[ExtResource("1_attack")]([])
+loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_cave"), SubResource("Drop_bloodcap")])
+metadata/slug = &"spore_tick"

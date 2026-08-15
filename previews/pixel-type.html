@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Arkenelle pixel type preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #182230;
+      --line: #334155;
+      --text: #f0f4fa;
+      --muted: #b8c3d2;
+      --gold: #e8c56a;
+      --emerald: #2ecc7a;
+      --display: "Jersey 10", "Silkscreen", monospace;
+      --pixel: "Pixelify Sans", "Silkscreen", monospace;
+      --ui: "Silkscreen", monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #07090d; color: var(--text); }
+    .label {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.4rem 1rem 0.4rem;
+      color: var(--gold);
+      font-family: var(--ui);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+    .label span { color: var(--muted); font-weight: 400; }
+    header.site {
+      display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;
+      padding: 0.7rem 1.4rem;
+      background: rgba(9,12,17,0.9);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { color: var(--text); text-decoration: none; font-size: 1.7rem; }
+    nav a { color: var(--muted); text-decoration: none; margin-right: 0.9rem; font-size: 0.95rem; }
+    nav a.active, nav a:hover { color: var(--text); }
+    .hero {
+      position: relative; min-height: 78vh;
+      display: grid; place-items: center; text-align: center;
+      padding: 3.5rem 1.2rem 4.5rem; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: #0b1018 center / cover no-repeat url("pixel-art/castle_garden.png");
+      image-rendering: pixelated;
+      filter: saturate(0.85) contrast(1.05);
+    }
+    .hero-bg::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(9,12,17,0.35) 0%, rgba(9,12,17,0.72) 55%, var(--bg) 100%);
+    }
+    .hero-inner { position: relative; max-width: 720px; }
+    .alpha { color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 0.4rem; }
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(4rem, 12vw, 7rem);
+      font-weight: 400;
+      margin: 0 0 0.25rem;
+      letter-spacing: 0.04em;
+      text-shadow: 3px 3px 0 #000;
+    }
+    .lede { max-width: 38rem; margin: 0 auto 1.5rem; line-height: 1.45; }
+    .cta-pair { display: flex; flex-direction: column; gap: 0.85rem; width: min(17rem, 90vw); margin: 0 auto; }
+    .btn {
+      display: block; text-align: center; text-decoration: none;
+      padding: 0.75rem 1rem; border-radius: 6px; font-weight: 700;
+    }
+    .btn.play {
+      color: #042016; border: 1px solid #9fffd4;
+      background: linear-gradient(180deg, #8affd0, #0e9a55);
+      box-shadow: 0 0 18px rgba(46,204,122,0.45);
+    }
+    .btn.desk {
+      color: #1a1204; border: 1px solid #ffe7a8;
+      background: linear-gradient(180deg, #ffe9a0, #d4941c);
+      box-shadow: 0 0 18px rgba(255,206,70,0.4);
+    }
+    .btn.ghost {
+      color: var(--text); border: 1px solid var(--line); background: var(--panel);
+    }
+    .cta-note { margin: 0.85rem 0; color: var(--muted); }
+    .cta-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .wrap { width: min(1100px, calc(100% - 2rem)); margin: 0 auto; padding: 1.6rem 0 3rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.8rem; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+      padding: 0.9rem 1rem; position: relative; padding-left: 1.15rem;
+    }
+    .card::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 10px 0 0 10px;
+      background: var(--rail, #e8a04a);
+    }
+    .card h3 { margin: 0 0 0.3rem; color: var(--rail, #e8a04a); font-size: 1.35rem; font-weight: 400; }
+    .card p { margin: 0; color: var(--muted); }
+    .c-items { --rail: #e8a04a; }
+    .c-creatures { --rail: #e07070; }
+    .c-locations { --rail: #3dcc8a; }
+    .c-boards { --rail: #5ec8f0; }
+
+    /* A: everything pixel */
+    .all-pixel { font-family: var(--pixel); }
+    .all-pixel .brand, .all-pixel nav a, .all-pixel .alpha, .all-pixel .lede,
+    .all-pixel .cta-note, .all-pixel .btn, .all-pixel .card p { font-family: var(--pixel); }
+    .all-pixel .btn { font-family: var(--ui); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .all-pixel nav a { font-family: var(--display); font-size: 1.15rem; }
+    .all-pixel .brand { font-family: var(--display); }
+    .all-pixel .card h3 { font-family: var(--display); }
+
+    /* B: Aeven mix — pixel chrome, readable body */
+    .aeven-mix { font-family: "Segoe UI", sans-serif; }
+    .aeven-mix .brand, .aeven-mix nav a, .aeven-mix .alpha, .aeven-mix .card h3 { font-family: var(--display); }
+    .aeven-mix .btn { font-family: var(--ui); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .aeven-mix .lede, .aeven-mix .cta-note, .aeven-mix .card p { font-family: "Segoe UI", sans-serif; }
+    .aeven-mix nav a { font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <p class="label">PREVIEW A — all text pixel <span>(Pixelify Sans + Jersey 10 title + Silkscreen buttons, like Aeven’s chrome but body is pixel too)</span></p>
+  <section class="all-pixel">
+    <header class="site">
+      <a class="brand" href="#">Arkenelle</a>
+      <nav>
+        <a href="#" class="active">Wiki</a>
+        <a href="#">Leaderboards</a>
+        <a href="#">Items</a>
+        <a href="#">Creatures</a>
+        <a href="#">Locations</a>
+        <a href="#">Play</a>
+      </nav>
+    </header>
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-inner">
+        <div class="alpha">Private alpha</div>
+        <h1>Arkenelle</h1>
+        <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory.</p>
+        <div class="cta-pair">
+          <a class="btn play" href="#">Play in your browser</a>
+          <a class="btn desk" href="#">Desktop client</a>
+        </div>
+        <p class="cta-note">No download for the browser client. Desktop zip updates itself.</p>
+        <div class="cta-row">
+          <a class="btn ghost" href="#">Discord</a>
+          <a class="btn ghost" href="#">Wiki</a>
+          <a class="btn ghost" href="#">Leaderboards</a>
+        </div>
+      </div>
+    </section>
+    <div class="wrap">
+      <div class="grid">
+        <article class="card c-items"><h3>Items</h3><p>529 weapons, armor, materials, potions, and more.</p></article>
+        <article class="card c-creatures"><h3>Creatures</h3><p>91 enemies and bosses with authored loot.</p></article>
+        <article class="card c-locations"><h3>Locations</h3><p>26 zones and dungeons.</p></article>
+        <article class="card c-boards"><h3>Leaderboards</h3><p>Live ranks from the running world.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <p class="label">PREVIEW B — Aeven mix <span>(pixel title / nav / buttons, normal body text so wiki paragraphs stay easy to read)</span></p>
+  <section class="aeven-mix">
+    <header class="site">
+      <a class="brand" href="#">Arkenelle</a>
+      <nav>
+        <a href="#" class="active">Wiki</a>
+        <a href="#">Leaderboards</a>
+        <a href="#">Items</a>
+        <a href="#">Creatures</a>
+        <a href="#">Locations</a>
+        <a href="#">Play</a>
+      </nav>
+    </header>
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-inner">
+        <div class="alpha">Private alpha</div>
+        <h1>Arkenelle</h1>
+        <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory.</p>
+        <div class="cta-pair">
+          <a class="btn play" href="#">Play in your browser</a>
+          <a class="btn desk" href="#">Desktop client</a>
+        </div>
+        <p class="cta-note">No download for the browser client. Desktop zip updates itself.</p>
+        <div class="cta-row">
+          <a class="btn ghost" href="#">Discord</a>
+          <a class="btn ghost" href="#">Wiki</a>
+          <a class="btn ghost" href="#">Leaderboards</a>
+        </div>
+      </div>
+    </section>
+    <div class="wrap">
+      <div class="grid">
+        <article class="card c-items"><h3>Items</h3><p>529 weapons, armor, materials, potions, and more.</p></article>
+        <article class="card c-creatures"><h3>Creatures</h3><p>91 enemies and bosses with authored loot.</p></article>
+        <article class="card c-locations"><h3>Locations</h3><p>26 zones and dungeons.</p></article>
+        <article class="card c-boards"><h3>Leaderboards</h3><p>Live ranks from the running world.</p></article>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

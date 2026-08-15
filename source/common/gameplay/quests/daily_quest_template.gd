@@ -26,11 +26,26 @@ enum Kind { KILL, COLLECT, SPAR, DUNGEON, CRAFT }
 @export var min_level: int = 0
 @export var max_level: int = 0
 
+## Lifetime "adventure xp" only — it fills the HUD bar and levels NOTHING, since
+## character level is derived from masteries. [member reward_mastery_xp] is the
+## number that actually moves a character forward.
 @export var reward_xp: int = 10
+## Weapon-mastery XP paid on claim into the category of the weapon in HAND (empty
+## hands fall back to the player's best mastery — RewardService.grant_mastery_reward).
+## Scale it against KILLS: an ordinary mob pays its effective HP × 4, so a woodland
+## goblin is worth ~1,100 and a fungus sporeling ~4,000. A daily should read as an
+## afternoon's hunting, not a rounding error.
+@export var reward_mastery_xp: int = 0
 @export var reward_gold: int = 3
 
 ## Friendly text for the UI. Auto-generated from kind/target if empty.
 @export var description: String
+## Where to do this, in words ("Fungus Cave", "Mining Cave · Overworld"). Shown on
+## the board card under the objective. Same idea as SlayerTaskDef.location_hint and
+## for the same reason: a board that says "Defeat 1 Iron Golem" and nothing else is
+## unactionable to a player who has never found one. Empty = no hint line (the
+## generic SPAR / DUNGEON / CRAFT kinds don't need one).
+@export var location_hint: String
 
 
 func describe() -> String:

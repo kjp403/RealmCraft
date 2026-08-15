@@ -87,7 +87,7 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	bolt.impact_vfx = impact_vfx
 	bolt.explode_radius = explode_radius * reach
 	bolt.explode_damage = maxf(0.0, _wielder_ap(user) * explode_ap_ratio)
-	bolt.global_position = _spawn_position(user)
+	bolt.global_position = _spawn_position(user, bolt.direction)
 	user.add_child(bolt)
 
 
@@ -97,7 +97,6 @@ func _wielder_ap(user: Entity) -> float:
 	return 0.0
 
 
-func _spawn_position(user: Entity) -> Vector2:
-	if user is Character and (user as Character).right_hand_spot != null:
-		return (user as Character).right_hand_spot.global_position
-	return user.global_position
+## On the aim ray, NOT at the hand node — see AbilityResource.muzzle_position.
+func _spawn_position(user: Entity, direction: Vector2) -> Vector2:
+	return AbilityResource.muzzle_position(user, direction)

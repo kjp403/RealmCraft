@@ -16,13 +16,26 @@ class_name DailyQuestService
 ##     open board updates live.
 ##   - Player clicks Claim on a complete daily -> quest.board.claim -> reward.
 ##     The claim that finishes the whole set also pays a one-off completion bonus.
+##   - Player clicks Skip on one they can't do -> quest.board.skip -> that slot is
+##     rerolled, spending one of the day's MAX_SKIPS_PER_DAY.
 
 const POOL_PATH: String = "res://source/common/gameplay/quests/resources/daily_pool.tres"
 const DAILY_COUNT: int = 3
 
 ## Paid once when the whole set is claimed (fires on the final claim of the day).
-const BONUS_XP: int = 60
-const BONUS_GOLD: int = 8
+## BONUS_XP is the lifetime adventure counter; BONUS_MASTERY_XP is the one that
+## actually progresses a character (see DailyQuestTemplate.reward_mastery_xp).
+const BONUS_XP: int = 250
+const BONUS_MASTERY_XP: int = 20_000
+const BONUS_GOLD: int = 2_500
+
+## Rerolls a player may spend per day. A daily is rolled from a level band, not
+## from where the player actually is in the world, so a set can legitimately
+## contain something they cannot reach yet ("Defeat 1 Iron Golem" at level 16 with
+## no idea where golems live). Skips are the escape hatch for exactly that; three
+## is enough to replace the whole set once without making the board a slot machine
+## you spin until it says "craft 2 items".
+const MAX_SKIPS_PER_DAY: int = 3
 
 static var _pool_cache: DailyQuestPool
 
@@ -92,6 +105,7 @@ static func claim(player_res: PlayerResource, template_id: int) -> Dictionary:
 		var result: Dictionary = {
 			"ok": true,
 			"xp": template.reward_xp,
+			"mastery_xp": template.reward_mastery_xp,
 			"gold": template.reward_gold,
 		}
 		# The claim that completes the set pays a one-off bonus. A claimed daily
@@ -99,9 +113,72 @@ static func claim(player_res: PlayerResource, template_id: int) -> Dictionary:
 		# no extra flag to persist.
 		if _all_claimed(player_res):
 			result["bonus_xp"] = BONUS_XP
+			result["bonus_mastery_xp"] = BONUS_MASTERY_XP
 			result["bonus_gold"] = BONUS_GOLD
 		return result
 	return {"ok": false, "reason": "not_in_set"}
+
+
+# --- Skip / reroll ---
+
+## Rerolls one unclaimed daily for a different template the player is eligible for,
+## spending one of the day's [constant MAX_SKIPS_PER_DAY]. Returns
+## {"ok": true, "template_id": int (the replacement), "skips_left": int} or
+## {"ok": false, "reason": String}.
+##
+## The replacement is drawn from the templates NOT already in the set, so a skip
+## always changes the board — rerolling "Defeat 1 Iron Golem" into itself would
+## burn a skip for nothing. When the player's level band holds no other template,
+## the skip is refused (and NOT spent) rather than silently no-opping.
+static func skip(player_res: PlayerResource, template_id: int) -> Dictionary:
+	_refresh_if_stale(player_res)
+	if skips_left(player_res) <= 0:
+		return {"ok": false, "reason": "no_skips_left"}
+	var pool: DailyQuestPool = _load_pool()
+	if pool == null:
+		return {"ok": false, "reason": "no_pool"}
+
+	var slot: int = -1
+	var in_set: Dictionary[int, bool] = {}
+	for i: int in player_res.daily_quests.size():
+		var entry: Variant = player_res.daily_quests[i]
+		if entry is not Dictionary:
+			continue
+		var d: Dictionary = entry
+		var id: int = int(d.get("template_id", 0))
+		in_set[id] = true
+		if id == template_id:
+			if bool(d.get("claimed", false)):
+				return {"ok": false, "reason": "already_claimed"}
+			slot = i
+	if slot < 0:
+		return {"ok": false, "reason": "not_in_set"}
+
+	var candidates: Array[DailyQuestTemplate] = []
+	for t: DailyQuestTemplate in pool.eligible_for_level(player_res.level):
+		if not in_set.has(t.template_id):
+			candidates.append(t)
+	if candidates.is_empty():
+		return {"ok": false, "reason": "no_alternative"}
+
+	var replacement: DailyQuestTemplate = candidates[randi() % candidates.size()]
+	player_res.daily_quests[slot] = {
+		"template_id": replacement.template_id,
+		"count_so_far": 0,
+		"claimed": false,
+	}
+	player_res.dailies_skips_used += 1
+	return {
+		"ok": true,
+		"template_id": replacement.template_id,
+		"skips_left": skips_left(player_res),
+	}
+
+
+## Rerolls the player has left today. Clamped both ways so a legacy save carrying a
+## count above the cap reads as 0 rather than a negative.
+static func skips_left(player_res: PlayerResource) -> int:
+	return clampi(MAX_SKIPS_PER_DAY - player_res.dailies_skips_used, 0, MAX_SKIPS_PER_DAY)
 
 
 # --- Board payload (shared by the info handler + the live-progress push) ---
@@ -125,11 +202,13 @@ static func build_board_payload(player_res: PlayerResource) -> Dictionary:
 			"template_id": template.template_id,
 			"kind": template.kind,
 			"description": template.describe(),
+			"location_hint": template.location_hint,
 			"required": template.required_amount,
 			"progress": progress,
 			"complete": progress >= template.required_amount,
 			"claimed": bool(d.get("claimed", false)),
 			"reward_xp": template.reward_xp,
+			"reward_mastery_xp": template.reward_mastery_xp,
 			"reward_gold": template.reward_gold,
 		})
 	return {
@@ -138,7 +217,10 @@ static func build_board_payload(player_res: PlayerResource) -> Dictionary:
 		"refresh_at_ms": player_res.dailies_refresh_at_ms,
 		"all_claimed": not entries.is_empty() and _all_claimed(player_res),
 		"bonus_xp": BONUS_XP,
+		"bonus_mastery_xp": BONUS_MASTERY_XP,
 		"bonus_gold": BONUS_GOLD,
+		"skips_left": skips_left(player_res),
+		"skips_per_day": MAX_SKIPS_PER_DAY,
 	}
 
 
@@ -235,6 +317,9 @@ static func _refresh_if_stale(player_res: PlayerResource) -> void:
 		})
 	player_res.daily_quests = picks
 	player_res.dailies_refresh_at_ms = _next_utc_midnight_ms(now_ms)
+	# Same statement that stamps the next refresh — so the skip budget can never
+	# drift out of sync with the set it belongs to.
+	player_res.dailies_skips_used = 0
 
 
 ## Next 00:00 UTC after the given unix-ms.

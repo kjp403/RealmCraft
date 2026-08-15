@@ -4,10 +4,15 @@
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_xnv0w"]
 [ext_resource type="Resource" uid="uid://xm2pimpk5jg6" path="res://source/common/gameplay/quests/resources/goblin_woodland/break_the_warren_guard.tres" id="3_ivwvu"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_smysb"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Obj_kill_chief"]
 script = ExtResource("1_8vmji")
 enemy_type = &"goblin_chief"
+
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("4_smysb")
+item = ExtResource("qr_chest")
 
 [resource]
 script = ExtResource("2_xnv0w")
@@ -18,7 +23,9 @@ min_level = 4
 unlock_message = "[Warden Bren] The chief is holed up deep in the warren. Come see me when you are ready."
 requires_quests = Array[ExtResource("2_xnv0w")]([ExtResource("3_ivwvu")])
 reward_xp = 160
-reward_gold = 12
+reward_mastery_xp = 20000
+reward_gold = 1500
+reward_items = Array[ExtResource("4_smysb")]([SubResource("Reward_wood_chest")])
 grant_title = "Warrenbreaker"
 grants_wardstone = &"woodland"
 metadata/slug = &"the_goblin_chief"

@@ -22,6 +22,12 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="herb_scene"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="herb_heal"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="herb_frost"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_runt.tres" id="we_runt"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_cutter.tres" id="we_cutter"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_slinger.tres" id="we_slinger"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_shaman.tres" id="we_shaman"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bandits/bandit_cutpurse.tres" id="we_cutpurse"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/orcs/orc_whelp.tres" id="we_whelp"]
 
 [node name="woodland_east" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -582,3 +588,202 @@ theme_override_font_sizes/font_size = 15
 text = "East Shore"
 horizontal_alignment = 1
 
+[node name="EastRunt1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1280, 592)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1420, 708)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1032, 980)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1176, 836)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2504, 1264)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2416, 1360)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt7" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2816, 1628)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt8" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2720, 1452)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt9" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1344, 2000)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastRunt10" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1484, 2116)
+enemy_data = ExtResource("we_runt")
+weapon = null
+
+[node name="EastCutter1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2248, 2324)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2392, 2180)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1680, 832)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1592, 928)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1976, 1184)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1880, 1008)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastCutter7" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2068, 1224)
+enemy_data = ExtResource("we_cutter")
+weapon = null
+
+[node name="EastSlinger1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2208, 1340)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastSlinger2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1496, 1556)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastSlinger3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1640, 1412)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastSlinger4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2400, 912)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastSlinger5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2312, 1008)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastSlinger6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1936, 1884)
+enemy_data = ExtResource("we_slinger")
+weapon = null
+
+[node name="EastShaman1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1840, 1708)
+enemy_data = ExtResource("we_shaman")
+weapon = null
+
+[node name="EastShaman2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1128, 1144)
+enemy_data = ExtResource("we_shaman")
+weapon = null
+
+[node name="EastShaman3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1268, 1260)
+enemy_data = ExtResource("we_shaman")
+weapon = null
+
+[node name="EastShaman4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1936, 1676)
+enemy_data = ExtResource("we_shaman")
+weapon = null
+
+[node name="EastCutpurse1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2080, 1532)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2600, 1112)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2512, 1208)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1756, 2184)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1660, 2008)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2828, 1344)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastCutpurse7" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2968, 1460)
+enemy_data = ExtResource("we_cutpurse")
+weapon = null
+
+[node name="EastWhelp1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2486, 1776)
+enemy_data = ExtResource("we_whelp")
+weapon = null
+
+[node name="EastWhelp2" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2630, 1632)
+enemy_data = ExtResource("we_whelp")
+weapon = null
+
+[node name="EastWhelp3" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2200, 812)
+enemy_data = ExtResource("we_whelp")
+weapon = null
+
+[node name="EastWhelp4" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2112, 908)
+enemy_data = ExtResource("we_whelp")
+weapon = null
+
+[node name="EastWhelp5" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1506, 1834)
+enemy_data = ExtResource("we_whelp")
+weapon = null
+
+[node name="EastWhelp6" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(1410, 1658)
+enemy_data = ExtResource("we_whelp")
+weapon = null

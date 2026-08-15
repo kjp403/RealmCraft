@@ -24,14 +24,20 @@ const ORNATE_CHEST_IDS: Array[int] = [249]
 static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Character) -> void:
 	if not GameMode.is_world_server():
 		return
-	if npc.xp_reward <= 0 and (npc.loot == null or npc.loot.is_empty()) \
-			and not _has_ranked_ornate_chests(npc):
-		return # nothing to give (a shadow mob) — don't even resolve players
 	# is_boss lives on EnemyTypeResource — HostileNPC never copied it, so bare
 	# npc.is_boss crashed distribute() and wiped XP/loot for every kill.
 	var is_boss: bool = (
 		npc.enemy_data != null and bool(npc.enemy_data.is_boss)
 	)
+	# A body worth no XP, no loot and no chest still COUNTS: dungeon trash and the
+	# adds a boss summons are stripped of their payout by RoomNode.make_dungeon_mob,
+	# and returning here used to strip their quest / daily / Slayer credit with it —
+	# which is why the Goblin Chief's runts advanced nothing. Only a body nobody can
+	# earn credit for (no enemy_type to match a task or objective on) is skipped.
+	if npc.enemy_type == &"" and npc.xp_reward <= 0 \
+			and (npc.loot == null or npc.loot.is_empty()) \
+			and not _has_ranked_ornate_chests(npc):
+		return # a true shadow — nothing to give and nothing to advance
 	var frac: float = BOSS_MIN_DAMAGE_FRACTION if is_boss else MIN_DAMAGE_FRACTION
 	var threshold: float = npc.stats_component.get_stat(Stat.HEALTH_MAX) * frac
 	var killer_peer: int = -1
@@ -144,8 +150,10 @@ static func _reward(
 	# Mastery and Slayer ride the SkillXp 1–99 curve (~980× bigger) and take the
 	# stat-derived number instead — see EnemyTypeResource.combat_skill_xp_for.
 	# The body answers, so a boss can author a flat value (combat_skill_xp_override)
-	# while every ordinary mob keeps deriving it from its health.
-	var skill_xp: int = npc.combat_skill_xp()
+	# while every ordinary mob keeps deriving it from its health. A reward-suppressed
+	# body (dungeon trash / boss adds) reports 0, which zeroes mastery and drops Slayer
+	# to its task's authored fallback rate — see HostileNpc.grants_skill_xp.
+	var skill_xp: int = npc.combat_skill_xp() if npc.grants_skill_xp else 0
 	var loot_gained: Array = _roll_loot(npc)
 	_append_zone_kill_loot(player, loot_gained)
 	for entry: Variant in bonus_loot:
@@ -158,17 +166,28 @@ static func _reward(
 	# Weapon mastery: practicing a category = killing with it, on the 1–99 curve.
 	var mastery: Dictionary = {}
 	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
-	if weapon_item != null and not weapon_item.category.is_empty():
+	if skill_xp > 0 and weapon_item != null and not weapon_item.category.is_empty():
 		mastery = resource.add_mastery_xp(weapon_item.category, skill_xp)
 
 	# Slayer rides the same 1–99 curve as mastery, at SLAYER_XP_RATIO of it — so it
-	# takes the same stat-derived number, NOT the character-level xp_reward.
+	# takes the same stat-derived number, NOT the character-level xp_reward. A boss on
+	# task pays SlayerTaskService.BOSS_XP_MULTIPLIER on top, hence the is_boss arg.
 	# Resolved BEFORE the combat.reward push: Slayer can raise the derived character
 	# level too, and that push reports the level, so it has to see the final value.
-	var slayer_result: Dictionary = SlayerTaskService.on_kill(resource, npc.enemy_type, skill_xp)
+	var slayer_result: Dictionary = SlayerTaskService.on_kill(
+		resource,
+		npc.enemy_type,
+		skill_xp,
+		npc.enemy_data != null and bool(npc.enemy_data.is_boss)
+	)
 
 	var peer_id: int = int(resource.current_peer_id)
-	if peer_id > 0:
+	# Only push when there is something to REPORT. A reward-suppressed body (dungeon
+	# trash, boss adds) pays nothing, and the client cards every combat.reward that
+	# names an enemy — so pushing here would spatter a "Defeated a Spore Swarm" toast
+	# with no reward on it across every dungeon room. Progression below still runs;
+	# quest and Slayer pushes carry their own feedback when they actually advance.
+	if peer_id > 0 and (npc.xp_reward > 0 or not loot_gained.is_empty() or not mastery.is_empty()):
 		WorldServer.curr.data_push.rpc_id(peer_id, &"combat.reward", {
 			"enemy_type": npc.enemy_type,
 			"xp": npc.xp_reward,
@@ -199,6 +218,60 @@ static func _reward(
 	if resource.level > level_before:
 		var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
 		LevelMilestoneService.on_levels_gained(resource, level_before, resource.level, inst)
+
+
+
+## Pays [param amount] weapon-mastery XP for a reward that ISN'T a kill — a quest
+## turn-in or a daily claim. Quest/daily XP used to land only in
+## PlayerResource.experience, a lifetime counter that stopped levelling anything
+## when character level became mastery-derived; players quite reasonably asked what
+## the "+90 XP" on a quest card was even for. Routing it here answers that: it goes
+## to the same bar a kill fills.
+##
+## Destination is the weapon in HAND, so the reward trains what you are actually
+## playing. With empty hands it falls back to the player's best-trained mastery
+## rather than evaporating — a reward should never silently pay nothing.
+##
+## Returns the add_mastery_xp payload (empty when there was nothing to pay into),
+## ready to ride a combat.reward push under "mastery" — which is what gives quest
+## and daily XP the same bar, toast and level-up ceremony a kill already has.
+## Takes the peer rather than the node so callers holding only a peer id (the quest
+## turn-in path) don't have to resolve the Player themselves.
+static func grant_mastery_reward(peer_id: int, amount: int) -> Dictionary:
+	if peer_id <= 0 or amount <= 0:
+		return {}
+	var player: Player = _resolve_player(peer_id)
+	if player == null or player.player_resource == null:
+		return {}
+	var resource: PlayerResource = player.player_resource
+	var category: StringName = &""
+	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(
+		&"weapon", null
+	) as WeaponItem
+	if weapon_item != null and not weapon_item.category.is_empty():
+		category = weapon_item.category
+	else:
+		category = _best_mastery_category(resource)
+	if category.is_empty():
+		return {}
+	return resource.add_mastery_xp(category, amount)
+
+
+## The player's highest-level trained weapon mastery, or &"" if they have never
+## practiced one. Ties break on whichever the dictionary yields first — they are
+## the same level, so there is no better answer to pick.
+static func _best_mastery_category(resource: PlayerResource) -> StringName:
+	var best: StringName = &""
+	var best_level: int = 0
+	for key: Variant in resource.masteries:
+		var entry: Variant = resource.masteries[key]
+		if entry is not Dictionary:
+			continue
+		var level: int = int((entry as Dictionary).get("level", 0))
+		if level > best_level:
+			best_level = level
+			best = StringName(String(key))
+	return best
 
 
 ## Rolls each loot entry; returns [{ "id", "amount", "name" }, ...].

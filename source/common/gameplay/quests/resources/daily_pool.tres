@@ -15,6 +15,10 @@ template_id = 1
 enemy_type = &"sporeling"
 required_amount = 3
 max_level = 10
+location_hint = "Fungus Cave"
+reward_xp = 60
+reward_mastery_xp = 6000
+reward_gold = 400
 
 [sub_resource type="Resource" id="T_kill_goblin"]
 script = ExtResource("1_tmpl")
@@ -23,8 +27,10 @@ enemy_type = &"goblin_runt"
 required_amount = 5
 min_level = 2
 max_level = 12
-reward_xp = 38
-reward_gold = 4
+location_hint = "Goblin Woodland"
+reward_xp = 80
+reward_mastery_xp = 8000
+reward_gold = 600
 
 [sub_resource type="Resource" id="T_kill_wolf"]
 script = ExtResource("1_tmpl")
@@ -33,8 +39,10 @@ enemy_type = &"wolf"
 required_amount = 5
 min_level = 4
 max_level = 14
-reward_xp = 50
-reward_gold = 5
+location_hint = "Goblin Woodland · Woodland East"
+reward_xp = 100
+reward_mastery_xp = 11000
+reward_gold = 800
 
 [sub_resource type="Resource" id="T_kill_bandit"]
 script = ExtResource("1_tmpl")
@@ -43,16 +51,20 @@ enemy_type = &"bandit"
 required_amount = 3
 min_level = 10
 max_level = 18
-reward_xp = 75
-reward_gold = 6
+location_hint = "Bandit Hideout"
+reward_xp = 140
+reward_mastery_xp = 20000
+reward_gold = 1400
 
 [sub_resource type="Resource" id="T_kill_iron_golem"]
 script = ExtResource("1_tmpl")
 template_id = 5
 enemy_type = &"iron_golem"
 min_level = 16
-reward_xp = 100
-reward_gold = 8
+location_hint = "The Hollow"
+reward_xp = 200
+reward_mastery_xp = 35000
+reward_gold = 2500
 
 [sub_resource type="Resource" id="T_col_coal"]
 script = ExtResource("1_tmpl")
@@ -61,7 +73,10 @@ kind = 1
 item = ExtResource("3_coal")
 required_amount = 5
 max_level = 10
-reward_xp = 30
+location_hint = "Mining Cave · Forest"
+reward_xp = 60
+reward_mastery_xp = 6000
+reward_gold = 400
 
 [sub_resource type="Resource" id="T_col_copper"]
 script = ExtResource("1_tmpl")
@@ -71,8 +86,10 @@ item = ExtResource("4_cop_ore")
 required_amount = 5
 min_level = 6
 max_level = 14
-reward_xp = 45
-reward_gold = 4
+location_hint = "Forest · Hub"
+reward_xp = 100
+reward_mastery_xp = 11000
+reward_gold = 800
 
 [sub_resource type="Resource" id="T_col_iron"]
 script = ExtResource("1_tmpl")
@@ -81,8 +98,10 @@ kind = 1
 item = ExtResource("5_iron_ore")
 required_amount = 3
 min_level = 14
-reward_xp = 75
-reward_gold = 6
+location_hint = "Mining Cave · Fungus Cave"
+reward_xp = 160
+reward_mastery_xp = 24000
+reward_gold = 1600
 
 [sub_resource type="Resource" id="T_col_linen"]
 script = ExtResource("1_tmpl")
@@ -91,6 +110,10 @@ kind = 1
 item = ExtResource("6_linen")
 required_amount = 5
 max_level = 8
+location_hint = "Forest mobs · Goblin Woodland"
+reward_xp = 60
+reward_mastery_xp = 5000
+reward_gold = 400
 
 [sub_resource type="Resource" id="T_col_hide"]
 script = ExtResource("1_tmpl")
@@ -100,8 +123,10 @@ item = ExtResource("7_hide")
 required_amount = 5
 min_level = 4
 max_level = 12
-reward_xp = 38
-reward_gold = 4
+location_hint = "Forest mobs · Goblin Woodland"
+reward_xp = 80
+reward_mastery_xp = 8000
+reward_gold = 600
 
 [sub_resource type="Resource" id="T_col_herb"]
 script = ExtResource("1_tmpl")
@@ -110,24 +135,31 @@ kind = 1
 item = ExtResource("8_herb")
 required_amount = 5
 max_level = 10
-reward_xp = 30
+location_hint = "Forest · Woodland"
+reward_xp = 60
+reward_mastery_xp = 6000
+reward_gold = 400
 
 [sub_resource type="Resource" id="T_dungeon"]
 script = ExtResource("1_tmpl")
 template_id = 13
 kind = 3
 min_level = 5
-reward_xp = 60
-reward_gold = 6
 description = "Clear a dungeon"
+reward_xp = 180
+reward_mastery_xp = 30000
+reward_gold = 2000
 
 [sub_resource type="Resource" id="T_craft"]
 script = ExtResource("1_tmpl")
 template_id = 14
 kind = 4
 required_amount = 2
-reward_xp = 35
 description = "Craft 2 items"
+reward_xp = 80
+reward_mastery_xp = 8000
+reward_gold = 700
+
 
 [resource]
 script = ExtResource("2_pool")
