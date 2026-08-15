@@ -12,7 +12,7 @@ const COST: int = 25000
 
 func menu_entry(_npc: Node) -> Dictionary:
 	return {
-		"label": _label_or("Respec mastery"),
+		"label": _label_or("Respec mastery points"),
 		"icon": _icon_or(""),
 		"menu": &"mastery_reset",
 		"arg": COST,

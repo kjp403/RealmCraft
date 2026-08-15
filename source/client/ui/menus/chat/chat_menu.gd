@@ -69,7 +69,7 @@ var dm_name_by_player_id: Dictionary[int, String] = {}
 var pending_name_fetch_at_ms: Dictionary[int, int] = {}
 
 var unread_by_conversation: Dictionary[String, int] = {}
-## Last emitted DM-unread state, so unread_changed fires only on a real flip.
+## Last emitted unread state, so unread_changed fires only on a real flip.
 var _last_unread_dm: bool = false
 
 var seen_msg_ids_by_conversation: Dictionary[String, Dictionary] = {}
@@ -141,6 +141,8 @@ func _ready() -> void:
 
 	Client.subscribe(&"chat.message", _on_chat_message)
 	Client.subscribe(&"chat.typing", _on_chat_typing)
+	Client.subscribe(&"party.roster", func(_payload: Dictionary) -> void:
+		_update_input_enabled_state())
 	Client.request_data(&"chat.bootstrap", Callable(), {"limit": BOOTSTRAP_LIMIT}, InstanceClient.current.name)
 	# Hydrate the local block list. Server is authoritative (it already drops
 	# blocked senders before the push), but the client copy lets us catch
@@ -193,10 +195,8 @@ func _ready() -> void:
 	_update_tab_labels()
 
 	full_feed.hide()
-	# Touch has no Enter key and the rail chat bubble is gone — keep the panel
-	# available so mobile players can still read and send.
-	if ClientState.input_type == InputComponent.InputType.TOUCH:
-		_show_full_feed()
+	# Chat opens from the left-rail bubble or Enter — never auto-pops on talk.
+	# Touch uses the same bubble (no Enter key).
 	ClientState.input_changed.connect(_on_input_type_changed_for_chat)
 
 	_refresh_full_feed()
@@ -206,10 +206,6 @@ func _ready() -> void:
 func _on_input_type_changed_for_chat(input_type: InputComponent.InputType) -> void:
 	if input_type == InputComponent.InputType.TOUCH:
 		_stop_auto_hide()
-		if not full_feed.visible:
-			_show_full_feed()
-			_refresh_full_feed()
-			_update_input_enabled_state()
 		return
 	_arm_auto_hide()
 
@@ -363,13 +359,12 @@ func _input(event: InputEvent) -> void:
 			full_feed_message_edit.release_focus()
 
 		if full_feed.visible and not full_feed_content.get_global_rect().has_point(mouse_position):
-			if ClientState.input_type == InputComponent.InputType.TOUCH:
-				_set_settings_open(false)
-			elif was_composing:
-				# Clicked the world while typing — they're done; dismiss.
-				# Auto-shown (unfocused) chat stays so combat clicks don't eat it;
-				# the idle timer hides it.
-				_on_close_button_pressed()
+			# Leave the left-rail bubble (and other HUD buttons) alone — they
+			# toggle this panel. A world click dismisses it.
+			var hovered: Control = get_viewport().gui_get_hovered_control()
+			if hovered is BaseButton:
+				return
+			_on_close_button_pressed()
 
 
 #region Incoming
@@ -453,10 +448,8 @@ func _on_chat_message(message: Dictionary) -> void:
 			i -= 1
 		convo_records[i] = record
 
-	# Live player talk pops the chatbox so the world doesn't feel empty when
-	# the panel was closed. History / system / own sends stay quiet.
-	if not is_history and not is_self and not is_system:
-		_reveal_for_incoming(convo_id)
+	# Incoming talk never auto-opens the panel. Unread badges + the left-rail
+	# bubble (or Enter) are how players open it.
 
 	var is_viewing: bool = full_feed.visible and _view_shows_conversation(convo_id)
 
@@ -488,11 +481,8 @@ func _on_chat_message(message: Dictionary) -> void:
 
 
 func _on_close_button_pressed() -> void:
-	# On touch the panel is the only chat entry point — closing just drops focus.
-	if ClientState.input_type == InputComponent.InputType.TOUCH:
-		full_feed_message_edit.release_focus()
-		_set_settings_open(false)
-		return
+	full_feed_message_edit.release_focus()
+	_set_settings_open(false)
 	_hide_full_feed()
 
 
@@ -627,8 +617,9 @@ func _on_text_submitted(new_text: String, line_edit: LineEdit) -> void:
 		return
 
 	if current_channel == CHANNEL_TEAM:
-		_show_full_notice("Team chat not implemented yet.")
-		return
+		if Character.party_peers.is_empty():
+			_show_full_notice("Join a party to use Team chat.")
+			return
 
 	_send_channel_message(current_channel, new_text)
 
@@ -1223,10 +1214,10 @@ func _set_unread(convo_id: String, v: int) -> void:
 	unread_by_conversation[convo_id] = maxi(v, 0)
 	_update_dm_button_if_needed(convo_id)
 	_update_tab_labels()
-	var has_dm: bool = _has_unread_dm()
-	if has_dm != _last_unread_dm:
-		_last_unread_dm = has_dm
-		unread_changed.emit(has_dm)
+	var has_unread: bool = _unread_total("") > 0
+	if has_unread != _last_unread_dm:
+		_last_unread_dm = has_unread
+		unread_changed.emit(has_unread)
 
 
 func _inc_unread(convo_id: String) -> void:
@@ -1437,7 +1428,9 @@ func _update_input_enabled_state() -> void:
 		writable = false
 		read_only_hint = "Pick a conversation to reply"
 	elif current_channel == CHANNEL_TEAM:
-		writable = false
+		if Character.party_peers.is_empty():
+			writable = false
+			read_only_hint = "Join a party to chat here"
 	elif current_conversation_id.begins_with("guild:") and _get_active_guild_id() <= 0:
 		writable = false
 

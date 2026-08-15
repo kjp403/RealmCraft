@@ -11,7 +11,7 @@ const COST: int = 25000
 
 func menu_entry(_npc: Node) -> Dictionary:
 	return {
-		"label": _label_or("Respec attributes"),
+		"label": _label_or("Respec attribute points"),
 		"icon": _icon_or(""),
 		"menu": &"attribute_reset",
 		"arg": COST,

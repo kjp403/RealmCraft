@@ -31,6 +31,7 @@ var _hidden_for_menu: Array[CanvasItem] = []
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var notification_button: Button = $MenuButtons/ButtonRail/NotificationButton
 @onready var menu_button: Button = $MenuButtons/ButtonRail/MenuButton
+@onready var chat_button: Button = $MenuButtons/ButtonRail/ChatButton
 @onready var chat: ChatMenu = $Chat
 @onready var twin_sticks: Control = $TwinSticks
 @onready var quest_tracker: QuestTracker = $QuestTracker
@@ -54,8 +55,9 @@ const RIGHT_RAIL_GAP: float = 8.0
 const RIGHT_RAIL_WIDTH: float = 224.0
 const RIGHT_RAIL_MARGIN: float = 8.0
 
-## Top-left inset for the compact Slayer badge.
+## Top-left inset for the compact Slayer badge — sits to the right of the chat bubble.
 const SLAYER_BADGE_MARGIN: float = 6.0
+const SLAYER_BESIDE_CHAT_LEFT: float = 58.0
 
 
 func _ready() -> void:
@@ -85,7 +87,11 @@ func _ready() -> void:
 	# whole-pixel centered) — visible in the scene, sharp at runtime.
 	PixelIcon.from_button(menu_button)
 	PixelIcon.from_button(notification_button)
-	# Chat opens with Enter (player_chat); the old rail bubble + actions heart are gone.
+	PixelIcon.from_button(chat_button)
+	chat_button.visible = true
+	chat_button.focus_mode = Control.FOCUS_NONE
+	chat_button.pressed.connect(_on_chat_button_pressed)
+	chat.unread_changed.connect(_on_chat_unread)
 	Client.subscribe(&"notification", _on_notification_received)
 	ClientState.player_profile_requested.connect(open_player_profile)
 	ClientState.player_profile_by_peer_requested.connect(open_player_profile_by_peer)
@@ -422,9 +428,9 @@ func _place_slayer_tracker() -> void:
 	slayer_tracker.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	slayer_tracker.grow_horizontal = Control.GROW_DIRECTION_END
 	slayer_tracker.grow_vertical = Control.GROW_DIRECTION_END
-	slayer_tracker.offset_left = SLAYER_BADGE_MARGIN
+	slayer_tracker.offset_left = SLAYER_BESIDE_CHAT_LEFT
 	slayer_tracker.offset_top = SLAYER_BADGE_MARGIN
-	slayer_tracker.offset_right = SLAYER_BADGE_MARGIN
+	slayer_tracker.offset_right = SLAYER_BESIDE_CHAT_LEFT
 	slayer_tracker.offset_bottom = SLAYER_BADGE_MARGIN
 
 
@@ -478,6 +484,20 @@ func _on_overlay_menu_button_pressed() -> void:
 	menu_overlay.open()
 
 
+func _on_chat_button_pressed() -> void:
+	if chat != null:
+		chat.toggle_feed()
+
+
+func _on_chat_unread(has_unread: bool) -> void:
+	if chat_button == null:
+		return
+	chat_button.tooltip_text = (
+		"Open chat  (Enter) — unread messages" if has_unread else "Open chat  (Enter to type)"
+	)
+	chat_button.modulate = Color(1.18, 1.08, 0.72) if has_unread else Color.WHITE
+
+
 func _on_notification_button_pressed() -> void:
 	# Weird safety case where notification button could be visible
 	if notifications.is_empty():
@@ -505,6 +525,10 @@ func _on_notification_received(payload: Dictionary) -> void:
 			Toaster.toast("%s invited you to %s. Check your notifications." % [
 				str(payload.get("from_name", "Someone")), str(payload.get("guild_name", "a guild"))
 			])
+		"party.invite":
+			Toaster.toast("%s invited you to their party. Check your notifications." % str(
+				payload.get("from_name", "Someone")
+			))
 		_:
 			Toaster.toast("You have a new notification.")
 

@@ -24,7 +24,7 @@ func channel_tick(caster: Character) -> void:
 	if not GameMode.is_world_server() or not is_instance_valid(caster):
 		return
 	# Same ally rule as the healing aura: the channeler always; then living allied
-	# Players in radius (CombatHit.are_allied — spar teammates / guildmates).
+	# Players in radius (CombatHit.are_allied — party / dungeon group / guild).
 	_restore(caster)
 	if caster is not Player:
 		return

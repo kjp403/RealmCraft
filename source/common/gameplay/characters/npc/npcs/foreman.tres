@@ -1,19 +1,10 @@
 [gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://dicfbsg4ycah2"]
 
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_8t7eq"]
-[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_k7rws"]
-[ext_resource type="Resource" uid="uid://b7f4m4sicoieb" path="res://source/common/gameplay/quests/resources/apprentice_miner.tres" id="3_l5mxs"]
-[ext_resource type="Resource" uid="uid://dhvcbtyb5eppi" path="res://source/common/gameplay/quests/resources/the_iron_vein.tres" id="4_okvei"]
-[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="5_xe7rs"]
 [ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="6_jttbe"]
 [ext_resource type="Resource" uid="uid://bi2jj0kxe7md8" path="res://source/common/gameplay/shops/resources/quarry_counter.tres" id="7_1wqnn"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="8_ahdq6"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="9_otpy6"]
-
-[sub_resource type="Resource" id="Resource_x51h1"]
-script = ExtResource("5_xe7rs")
-quests = Array[ExtResource("2_k7rws")]([ExtResource("3_l5mxs"), ExtResource("4_okvei")])
-metadata/_custom_type_script = "uid://dka1daj2vrhn"
 
 [sub_resource type="Resource" id="Resource_iqd18"]
 script = ExtResource("6_jttbe")
@@ -30,5 +21,5 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("9_otpy6")
 npc_name = "Foreman"
 greeting = "Buy a pickaxe from my shop, equip it, then walk south into the yard. Copper on the west bank, tin on the east. Left-click a vein once — you'll walk over and keep mining until it empties, then wait for it to come back. Coal and iron wait in the caves — not here."
-interactions = Array[ExtResource("1_8t7eq")]([SubResource("Resource_x51h1"), SubResource("Resource_iqd18"), SubResource("Resource_82tnh")])
+interactions = Array[ExtResource("1_8t7eq")]([SubResource("Resource_iqd18"), SubResource("Resource_82tnh")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

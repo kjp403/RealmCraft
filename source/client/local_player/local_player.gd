@@ -182,6 +182,11 @@ func _ready() -> void:
 	# Co-op group roster (dungeons): mirror our groupmate peer ids so their health
 	# bars tint as allies. Same pattern as the sparring team push.
 	Client.subscribe(&"group.roster", _on_group_roster)
+	Client.subscribe(&"party.roster", _on_party_roster)
+	Client.subscribe(&"party.notice", func(payload: Dictionary) -> void:
+		var text: String = str(payload.get("text", "")).strip_edges()
+		if not text.is_empty():
+			Toaster.toast(text))
 	# Dungeon cleared (final room down) — show the recap; the server returns the
 	# party to town after a short timer (the recap auto-closes with it).
 	Client.subscribe(&"dungeon.cleared", func(payload: Dictionary) -> void:
@@ -267,6 +272,19 @@ func _on_sparring_match_state(payload: Dictionary) -> void:
 ## the map so their health bars flip to ally immediately (same as spar teams).
 func _on_group_roster(payload: Dictionary) -> void:
 	Character.group_peers = payload.get("members", [])
+	_retint_map_players()
+
+
+func _on_party_roster(payload: Dictionary) -> void:
+	var members: Array = []
+	for m: Variant in payload.get("members", []):
+		members.append(int(m))
+	Character.party_peers = members
+	Character.party_leader_peer = int(payload.get("leader", 0))
+	_retint_map_players()
+
+
+func _retint_map_players() -> void:
 	var map: Node = get_parent()
 	if map != null:
 		for child: Node in map.get_children():

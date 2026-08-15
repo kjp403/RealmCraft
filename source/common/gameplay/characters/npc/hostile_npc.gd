@@ -139,8 +139,8 @@ var xp_reward: int = 25
 ## (SlayerTaskService._xp_per_kill), which is the reward suppression this flag is
 ## for, applied to the one number that would otherwise leak through.
 var grants_skill_xp: bool = true
-## peer_id -> total damage dealt this life (cleared on respawn). Drives the
-## participation reward split — see RewardService.
+## player_id -> total damage dealt this life (cleared on respawn). Persistent id
+## so a reconnect still shares the kill. Drives RewardService.
 var _contributors: Dictionary[int, float] = {}
 ## Whether this mob respawns after death (driven by enemy_data.respawns). False =
 ## single-life: the body is removed, no return (dungeon mobs, one-off bosses).
@@ -1842,10 +1842,11 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 
 	# Participation: tally each player's damage BEFORE applying it, so a killing
 	# blow is already counted when super → die() distributes the reward.
+	# Keyed by persistent player_id (not peer) so a reconnect still shares the kill.
 	if not is_dead and amount > 0.0 and attacker is Player and (attacker as Player).player_resource != null:
-		var contributor_peer: int = int((attacker as Player).player_resource.current_peer_id)
-		if contributor_peer > 0:
-			_contributors[contributor_peer] = _contributors.get(contributor_peer, 0.0) + amount
+		var contributor_id: int = int((attacker as Player).player_resource.player_id)
+		if contributor_id > 0:
+			_contributors[contributor_id] = _contributors.get(contributor_id, 0.0) + amount
 
 	var was_alive: bool = not is_dead
 	var pre_h: float = 0.0

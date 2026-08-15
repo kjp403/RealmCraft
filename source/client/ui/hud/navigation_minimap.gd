@@ -10,6 +10,9 @@ const MAP_ZOOM: float = 0.12
 const EDGE_PADDING: float = 9.0
 const VISIT_PREFIX: String = "Speak with "
 const TARGET_FIX_VERSION: String = "2026-08-07-c"
+const PLAYER_DIAMOND_COLOR := Color(0.35, 0.55, 1.0)
+const FRIEND_DIAMOND_COLOR := Color(0.28, 0.92, 0.42)
+const SELF_DIAMOND_COLOR := Color(0.35, 0.95, 1.0)
 
 var _sub_viewport: SubViewport
 var _map_camera: Camera2D
@@ -17,6 +20,8 @@ var _map_texture: TextureRect
 var _area_label: Label
 var _target_label: Label
 var _player_marker: Label
+var _other_player_markers: Array[Label] = []
+var _map_frame: Control
 var _target_marker: Label
 var _click_marker: Label
 
@@ -116,11 +121,12 @@ func _build_interface() -> void:
 	)
 	header.add_child(_target_label)
 
-	var map_frame := Control.new()
-	map_frame.custom_minimum_size = Vector2(VIEW_SIZE)
-	map_frame.clip_contents = true
-	map_frame.mouse_filter = Control.MOUSE_FILTER_STOP
-	main_column.add_child(map_frame)
+	_map_frame = Control.new()
+	_map_frame.custom_minimum_size = Vector2(VIEW_SIZE)
+	_map_frame.clip_contents = true
+	_map_frame.mouse_filter = Control.MOUSE_FILTER_STOP
+	main_column.add_child(_map_frame)
+	var map_frame: Control = _map_frame
 
 	_sub_viewport = SubViewport.new()
 	_sub_viewport.name = "MapViewport"
@@ -147,7 +153,7 @@ func _build_interface() -> void:
 	_map_texture.gui_input.connect(_on_map_gui_input)
 	map_frame.add_child(_map_texture)
 
-	_player_marker = _make_marker(UiGlyphs.diamond(), Color(0.35, 0.95, 1.0))
+	_player_marker = _make_marker(UiGlyphs.diamond(), SELF_DIAMOND_COLOR)
 	_player_marker.tooltip_text = "You"
 	map_frame.add_child(_player_marker)
 
@@ -346,6 +352,7 @@ func _clear_quest_target() -> void:
 func _update_markers(player: LocalPlayer) -> void:
 	var center: Vector2 = Vector2(VIEW_SIZE) * 0.5
 	_set_marker_center(_player_marker, center)
+	_update_other_player_markers(player, center)
 
 	if not is_instance_valid(_quest_target):
 		_target_marker.hide()
@@ -373,6 +380,61 @@ func _update_markers(player: LocalPlayer) -> void:
 		_direction_arrow(relative),
 		_quest_target_name,
 	]
+
+
+func _update_other_player_markers(player: LocalPlayer, center: Vector2) -> void:
+	var others: Array[Player] = []
+	if InstanceClient.current != null:
+		for peer_id: int in InstanceClient.current.players_by_peer_id:
+			var other: Player = InstanceClient.current.players_by_peer_id[peer_id]
+			if other == null or other == player or not is_instance_valid(other):
+				continue
+			others.append(other)
+
+	while _other_player_markers.size() < others.size():
+		var marker: Label = _make_marker(UiGlyphs.diamond(), PLAYER_DIAMOND_COLOR)
+		if _map_frame != null:
+			_map_frame.add_child(marker)
+		_other_player_markers.append(marker)
+
+	var safe_rect := Rect2(
+		Vector2.ONE * EDGE_PADDING,
+		Vector2(VIEW_SIZE) - Vector2.ONE * EDGE_PADDING * 2.0
+	)
+	for i: int in _other_player_markers.size():
+		var marker: Label = _other_player_markers[i]
+		if i >= others.size():
+			marker.hide()
+			continue
+		var other: Player = others[i]
+		var is_friend: bool = (
+			other.player_id > 0
+			and Character.local_friend_ids.has(other.player_id)
+		)
+		marker.add_theme_color_override(
+			&"font_color",
+			FRIEND_DIAMOND_COLOR if is_friend else PLAYER_DIAMOND_COLOR
+		)
+		marker.tooltip_text = (
+			"%s (friend)" % other.display_name if is_friend else other.display_name
+		)
+		var relative: Vector2 = (
+			other.global_position - player.global_position
+		) * MAP_ZOOM
+		var raw_position: Vector2 = center + relative
+		var marker_position: Vector2 = Vector2(
+			clampf(raw_position.x, safe_rect.position.x, safe_rect.end.x),
+			clampf(raw_position.y, safe_rect.position.y, safe_rect.end.y)
+		)
+		_set_marker_center(marker, marker_position)
+		marker.show()
+
+	if _player_marker != null:
+		_player_marker.move_to_front()
+	if _target_marker != null:
+		_target_marker.move_to_front()
+	if _click_marker != null:
+		_click_marker.move_to_front()
 
 
 func _on_map_gui_input(event: InputEvent) -> void:

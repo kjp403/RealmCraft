@@ -117,10 +117,9 @@ static func overlapping_bodies(hitbox: Area2D, max_results: int = 48) -> Array[N
 
 ## THE single allegiance check: are these two players ALLIES? Resolved by context,
 ## highest priority first — a live spar match (teammates only; opponents are NOT
-## allies), [future: a shared co-op instance group], otherwise guild. Open-world
-## allegiance is purely guild, which is what keeps basing/PvP free of the
-## party-vs-guild paradox. Used for healing (HealBolt, HealingAuraAbility) AND,
-## inverted, by the damage gate (can_damage), so the rule can never drift apart.
+## allies), a dungeon group, an overworld party, otherwise guild. Used for healing
+## (HealBolt, HealingAuraAbility) AND, inverted, by the damage gate (can_damage),
+## so the rule can never drift apart.
 ##
 ## Server-side: reads player_resource (null client-side for remotes → not allied).
 ## The client health-bar TINT is a parallel peer-id mirror in
@@ -136,6 +135,9 @@ static func are_allied(a: Player, b: Player) -> bool:
 		return SparringService.are_spar_teammates(a, b)
 	# Co-op group (dungeon) — groupmates are allies regardless of guild.
 	if GroupService.are_grouped(int(a.player_resource.current_peer_id), int(b.player_resource.current_peer_id)):
+		return true
+	# Overworld party — same allegiance as a dungeon group, independent of it.
+	if PartyService.are_partied(int(a.player_resource.current_peer_id), int(b.player_resource.current_peer_id)):
 		return true
 	var guild: int = a.player_resource.active_guild_id
 	return guild > 0 and guild == b.player_resource.active_guild_id

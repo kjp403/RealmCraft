@@ -16,15 +16,61 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 		(user as Character).play_action_animation(cast_animation)
 	if projectile_scene == null or user == null:
 		return
+	var aim: Vector2 = _steer_to_party(user, direction)
 	var bolt: HealBolt = projectile_scene.instantiate()
 	bolt.top_level = true
-	bolt.direction = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
+	bolt.direction = aim.normalized() if aim != Vector2.ZERO else Vector2.RIGHT
 	bolt.speed = speed
 	bolt.source = user
 	bolt.heal_amount = _heal_amount(user)
 	bolt.modulate = bolt_modulate
 	bolt.global_position = _spawn_position(user, bolt.direction)
 	user.add_child(bolt)
+
+
+## Prefer a wounded party member in radius over raw cursor aim so heals land on
+## the party without having to click them. Falls back to the original aim.
+func _steer_to_party(user: Entity, direction: Vector2) -> Vector2:
+	if user is not Player:
+		return direction
+	var caster: Player = user as Player
+	var target: Player = null
+	if GameMode.is_world_server():
+		target = PartyService.most_wounded_nearby(caster, PartyService.HEAL_STEER_RADIUS)
+	else:
+		target = _client_most_wounded_party(caster)
+	if target == null:
+		return direction
+	var to_target: Vector2 = target.global_position - caster.global_position
+	if to_target == Vector2.ZERO:
+		return direction
+	return to_target
+
+
+func _client_most_wounded_party(caster: Player) -> Player:
+	if Character.party_peers.is_empty():
+		return null
+	var best: Player = null
+	var best_missing: float = 0.0
+	var container: Node = caster.get_parent()
+	if container == null:
+		return null
+	for node: Node in container.get_children():
+		if node == caster or node is not Player:
+			continue
+		var other: Player = node as Player
+		if other.is_dead or not Character.party_peers.has(other.name.to_int()):
+			continue
+		if caster.global_position.distance_to(other.global_position) > PartyService.HEAL_STEER_RADIUS:
+			continue
+		var sc: StatsComponent = other.stats_component
+		if sc == null:
+			continue
+		var missing: float = sc.get_stat(Stat.HEALTH_MAX) - sc.get_stat(Stat.HEALTH)
+		if missing > best_missing:
+			best_missing = missing
+			best = other
+	return best
 
 
 func _heal_amount(user: Entity) -> float:

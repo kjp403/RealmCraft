@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
-[ext_resource type="Resource" uid="uid://dyclnj6rv8bnh" path="res://source/common/gameplay/quests/resources/welcome.tres" id="3_welcome"]
 [ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="4_quest_interaction"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="5_dialogue"]
 [ext_resource type="SpriteFrames" uid="uid://b1gu2vklfnvb5" path="res://source/common/gameplay/characters/sprite_frames/scholar_director.tres" id="6_skin"]
@@ -16,7 +15,7 @@
 
 [sub_resource type="Resource" id="QuestInteraction_welcome"]
 script = ExtResource("4_quest_interaction")
-quests = Array[ExtResource("2_quest")]([ExtResource("8_blood"), ExtResource("9_hole"), ExtResource("3_welcome"), ExtResource("10_sewers"), ExtResource("11_reader"), ExtResource("12_foundry"), ExtResource("13_hollow")])
+quests = Array[ExtResource("2_quest")]([ExtResource("8_blood"), ExtResource("9_hole"), ExtResource("10_sewers"), ExtResource("11_reader"), ExtResource("12_foundry"), ExtResource("13_hollow")])
 metadata/_custom_type_script = "uid://dka1daj2vrhn"
 
 [sub_resource type="Resource" id="Dialogue_progression"]
@@ -39,7 +38,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_first_steps"]
 script = ExtResource("5_dialogue")
-lines = Array[String](["Begin with Blood in the Meadow in my Quests list. Equip a weapon from your kit, open Mastery, and put down twenty goblin runts in Goblin Woodland.", "Then find Warden Bren at the woodland gate. The Goblin Chief is required. Bone from that kill is your first real weapon — smithing will not match it. After the Chief, I send you to Scout Calder at the hole.", "Smithing and gathering are how you make armour. Each Charter boss after the Chief hands the next blade. Find Your Footing is an optional errand to the Foreman. The Daily Quest Board is extra work, never a path decision."])
+lines = Array[String](["Begin with Blood in the Meadow in my Quests list. Equip a weapon from your kit, open Mastery, and put down twenty goblin runts in Goblin Woodland. Kills drop loot on the ground — stand near it and press F to Area Loot.", "Then find Warden Bren at the woodland gate. The Goblin Chief is required. Bone from that kill is your first real weapon — smithing will not match it. After the Chief, I send you to Scout Calder at the hole.", "Smithing and gathering are how you make armour. Each Charter boss after the Chief hands the next blade. The Daily Quest Board is extra work, never a path decision."])
 label_override = "What should I do first?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

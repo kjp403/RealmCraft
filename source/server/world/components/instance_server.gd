@@ -247,6 +247,7 @@ func spawn_player(peer_id: int) -> void:
 	# Push the same explicit teleport every same-instance move already uses; it
 	# also freezes input for 500 ms so the arrival can't be run off instantly.
 	WorldServer.curr.data_push.rpc_id(peer_id, &"player.teleport", {"position": spawn_position})
+	PartyService.on_spawn(peer_id)
 
 
 func instantiate_player(peer_id: int) -> Player:
