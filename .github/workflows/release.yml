@@ -210,6 +210,15 @@ jobs:
           # can segfault (Godot 4 CLI quirk).
           ./godot --headless --path . --import || true
 
+      - name: Verify Windows self-updater
+        run: |
+          set -euo pipefail
+          # The updater is all static funcs; a stray tr() is a parse error that drops
+          # the class, so the client boots fine but never self-updates. That shipped
+          # once already — block the release instead of finding out from players.
+          ./godot --headless --path . -s tools/verify_client_updater.gd | tee verify.log
+          grep -q VERIFY_PASS verify.log
+
       - name: Export clients
         env:
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ runner.temp }}/release.keystore

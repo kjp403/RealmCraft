@@ -16,9 +16,24 @@ func _init() -> void:
 	if dist.find("play.arkenelle.com/desktop/") < 0:
 		failures.append("desktop URLs must live on play.arkenelle.com/desktop/")
 
-	var updater: String = FileAccess.get_file_as_string(
-		"res://source/client/boot/client_updater.gd"
-	)
+	# The updater is 100% static, so a `tr()` (an Object method) anywhere inside it
+	# is a parse error that drops the whole class from the build. The client still
+	# boots, the boot-time check silently no-ops, and players hand-download the zip
+	# forever. String checks alone never caught that — actually load the script.
+	var updater_path: String = "res://source/client/boot/client_updater.gd"
+	if load(updater_path) == null:
+		failures.append("client_updater.gd does not compile (see parse errors above)")
+	var updater: String = FileAccess.get_file_as_string(updater_path)
+	for i: int in updater.split("
+").size():
+		var line: String = updater.split("
+")[i]
+		if line.strip_edges().begins_with("#"):
+			continue
+		if line.contains(" tr(") or line.contains("	tr(") or line.contains("(tr("):
+			failures.append(
+				"client_updater.gd:%d calls tr() — static-only class, use _t()" % (i + 1)
+			)
 	if updater.find("class_name ClientUpdater") < 0:
 		failures.append("ClientUpdater class missing")
 	if updater.find("apply_if_needed") < 0:
