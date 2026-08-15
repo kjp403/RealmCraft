@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/proof_of_the_hammer.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_yku2k"]
+
+[sub_resource type="Resource" id="Obj_visit_lira"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"lira_voss"
+target_giver_name = "Lira Voss"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Through the Hole"
+description = "Calder's partner Lira went through the hole in the wall. Enter Fungus Cave and find her. He thinks the fungus has her."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_lira")])
+auto_complete = true
+unlock_message = "[Scout Calder] Through the hole. Find Lira. If the glow has her, do not pull the roots yourself."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 70
+reward_mastery_xp = 4000
+reward_gold = 350
+metadata/slug = &"through_the_hole"
+metadata/id = 66

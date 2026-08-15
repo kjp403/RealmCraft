@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/clear_the_roots.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_vmel5"]
+
+[sub_resource type="Resource" id="Obj_visit_wren"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"cave_scribe_wren"
+target_giver_name = "Wren"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Someone Still Stands"
+description = "Lira cannot be pulled free. Find Wren, the cave-scribe deeper in Fungus Cave. She has been watching the glow."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_wren")])
+auto_complete = true
+unlock_message = "[Lira Voss] Wren is still in here. Deeper. She writes about the seep. Find her."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 70
+reward_mastery_xp = 4000
+reward_gold = 300
+metadata/slug = &"someone_still_stands"
+metadata/id = 56

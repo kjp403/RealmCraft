@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/where_i_lost_it.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_bronze.item.tres" id="4_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_bronze.item.tres" id="5_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/bronze_bow.item.tres" id="6_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_bronze.item.tres" id="7_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_bronze.item.tres" id="8_book"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="9_xw1is"]
+
+[sub_resource type="Resource" id="Obj_sword"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("4_sword")
+
+[sub_resource type="Resource" id="Obj_hammer"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("5_hammer")
+
+[sub_resource type="Resource" id="Obj_bow"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("6_bow")
+
+[sub_resource type="Resource" id="Obj_wand"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("7_wand")
+
+[sub_resource type="Resource" id="Obj_book"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("8_book")
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Proof of the Hammer"
+description = "Calder's steel is scrap. Mine copper and tin in the castle yard, smelt a bronze bar, and forge one bronze weapon of your discipline at the anvil. Keep it. Then go through the hole and find Lira."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_sword"), SubResource("Obj_hammer"), SubResource("Obj_bow"), SubResource("Obj_wand"), SubResource("Obj_book")])
+completion = 1
+unlock_message = "[Scout Calder] That blade is done. Forge bronze in your own style and keep it. The hole is worse than goblins."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 110
+reward_mastery_xp = 8000
+reward_gold = 700
+metadata/slug = &"proof_of_the_hammer"
+metadata/id = 54

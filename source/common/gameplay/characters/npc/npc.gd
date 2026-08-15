@@ -15,10 +15,17 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 const INTERACT_RANGE: float = 90.0
 
 @export var npc_resource: NPCResource
+## Show this NPC only after the local player has this story flag. Empty = always
+## eligible (still respects [member hidden_if_flag]).
+@export var visible_if_flag: StringName = &""
+## Hide this NPC after the local player has this story flag. Used with a twin
+## instance (Lira bound vs freed) so the swap is per-player on a shared map.
+@export var hidden_if_flag: StringName = &""
 
 ## Client-only: true while the cursor is over this NPC's click-area, so we contribute
 ## exactly once to ClientState.world_interactables_hovered (and can undo it on free).
 var _interactable_hovered: bool = false
+var _client_visuals_ready: bool = false
 
 
 func _ready() -> void:
@@ -32,7 +39,8 @@ func _ready() -> void:
 
 	if multiplayer.is_server():
 		# Server: register each capability so its data-request handler resolves it.
-		# No client visuals server-side.
+		# No client visuals server-side. Both bound/freed twins stay registered;
+		# quest gates decide which interactions matter.
 		var map: Map = Map.of(self)
 		if map != null:
 			for interaction: NPCInteraction in npc_resource.interactions:
@@ -42,6 +50,17 @@ func _ready() -> void:
 		return
 
 	# --- Client only past here ---
+	ClientState.character_flags_changed.connect(_apply_flag_visibility)
+	_apply_flag_visibility()
+	if not visible:
+		return
+	_setup_client_visuals()
+
+
+func _setup_client_visuals() -> void:
+	if _client_visuals_ready:
+		return
+	_client_visuals_ready = true
 	# Idle the (static) NPC so it breathes instead of freezing on frame 0.
 	if animation_tree != null:
 		animation_tree.active = true
@@ -50,9 +69,24 @@ func _ready() -> void:
 	# An interactive NPC needs a click target + a floating "talk" glyph — spawn
 	# both dynamically so the scene stays clean and the server carries no useless
 	# nodes.
-	if not npc_resource.interactions.is_empty():
+	if npc_resource != null and not npc_resource.interactions.is_empty():
 		_spawn_click_area()
 		_spawn_marker()
+
+
+func _apply_flag_visibility() -> void:
+	if GameMode.is_world_server():
+		return
+	var show: bool = true
+	if not visible_if_flag.is_empty() and not ClientState.has_character_flag(visible_if_flag):
+		show = false
+	if not hidden_if_flag.is_empty() and ClientState.has_character_flag(hidden_if_flag):
+		show = false
+	visible = show
+	if show:
+		_setup_client_visuals()
+	elif _interactable_hovered:
+		_set_interactable_hover(false)
 
 
 ## Friendly NPCs: yellow nameplates.
@@ -161,7 +195,7 @@ func _face_local_player() -> void:
 
 
 func _open_interactions() -> void:
-	if npc_resource == null:
+	if npc_resource == null or not visible:
 		return
 	# Talking to a quest-giver NPC counts as "visiting" it — advance any
 	# "talk to NPC X" objective server-side (fire-and-forget; the server pushes

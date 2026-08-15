@@ -28,6 +28,9 @@
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 [ext_resource type="AudioStream" uid="uid://epws31tb1n8o" path="res://assets/audio/music/shadow_temple.ogg" id="mus_shadow_temple"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/fungus/spore_tick.tres" id="lv_sporetick"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/lira_voss.tres" id="28_lira"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/lira_voss_freed.tres" id="29_liraf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/cave_scribe_wren.tres" id="30_wren"]
 
 
 
@@ -267,6 +270,20 @@ npc_resource = ExtResource("27_fungk")
 [node name="Maela" parent="." unique_id=1893723557 instance=ExtResource("12_y53hc")]
 position = Vector2(72, -128)
 npc_resource = ExtResource("24_dxrxi")
+
+[node name="LiraVoss" parent="." unique_id=1900000501 instance=ExtResource("12_y53hc")]
+position = Vector2(-340, -1140)
+npc_resource = ExtResource("28_lira")
+hidden_if_flag = &"lira_freed"
+
+[node name="CaveScribeWren" parent="." unique_id=1900000502 instance=ExtResource("12_y53hc")]
+position = Vector2(-200, -1100)
+npc_resource = ExtResource("30_wren")
+
+[node name="LiraVossFreed" parent="." unique_id=1900000503 instance=ExtResource("12_y53hc")]
+position = Vector2(48, -100)
+npc_resource = ExtResource("29_liraf")
+visible_if_flag = &"lira_freed"
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=202359622]
 

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://z557f7ew0utyd" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vegetation.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[sub_resource type="AtlasTexture" id="Atlas_icon"]
+atlas = ExtResource("1_tex")
+region = Rect2(64, 192, 16, 16)
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Pale Sporecap"
+item_icon = SubResource("Atlas_icon")
+description = "A washed-out cap picked near the Fungal Heart. Wren thinks it will break the seep. It looks almost right."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"pale_sporecap"
+metadata/id = 579

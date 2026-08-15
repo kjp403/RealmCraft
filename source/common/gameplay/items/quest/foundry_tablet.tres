@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://n2ac0s9nwmfza" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/relic_coreblossom.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Foundry Tablet"
+item_icon = ExtResource("1_icon")
+description = "A burial inscription naming the last furnace that fed the Hollow: Fire Forge. Asha said to leave the crown."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"foundry_tablet"
+metadata/id = 577

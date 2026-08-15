@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/break_the_cage.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_5ewfy"]
+
+[sub_resource type="Resource" id="Obj_visit_keeper"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"hall_keeper"
+target_giver_name = "the Hall Keeper"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "What They Were Carrying"
+description = "Rook saw the crates: vein-ore that hums, run through the city grates. Report to the Hall Keeper. The keep's underside is the smuggling route."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_keeper")])
+auto_complete = true
+unlock_message = "[Rook Hale] They were not just thieves. They were moving humming ore through the grates. Tell the Hall Keeper."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+turn_in_giver_slug = &"hall_keeper"
+reward_xp = 120
+reward_mastery_xp = 8000
+reward_gold = 600
+metadata/slug = &"what_they_were_carrying"
+metadata/id = 69

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://1r7ywiz99kkp3" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_bone.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Hollow-scarred Bone"
+item_icon = ExtResource("1_icon")
+description = "Bone marked with the same seep-vein as the Coreblossom Shard. The Bonecarver asked for a match."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"hollow_scarred_bone"
+metadata/id = 578

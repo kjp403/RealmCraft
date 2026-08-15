@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="3_guw25"]
+
+[sub_resource type="Resource" id="Obj_visit_keeper"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"hall_keeper"
+target_giver_name = "the Hall Keeper"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Charter Seal"
+description = "Your papers are sealed. Take the exit from Intake and speak with the Hall Keeper in the chamber beyond. Leave the Daily Quest Board alone until that introduction is done."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_keeper")])
+auto_complete = true
+reward_xp = 40
+reward_mastery_xp = 1500
+reward_gold = 200
+metadata/slug = &"the_charter_seal"
+metadata/id = 58

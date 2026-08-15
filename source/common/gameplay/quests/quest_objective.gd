@@ -16,10 +16,18 @@ enum Type { KILL, COLLECT, CRAFT, VISIT }
 ## VISIT only: the NPC to talk to (drag in its NPCResource). The objective advances
 ## when the player opens the quest menu at this NPC.
 @export var target_giver: NPCResource
+## VISIT only: NPCResource filename slug (e.g. &"hall_keeper") used when
+## [member target_giver] is empty. Prefer this over dragging an NPCResource when
+## that NPC also lists this quest — ExtResource cycles fail to load in Godot.
+@export var target_giver_key: StringName = &""
 ## VISIT only: human-readable target name used in the objective description
 ## (e.g. "Mira the Herbalist"). Lets the quest read cleanly without a runtime
 ## lookup of the giver's name.
 @export var target_giver_name: String
+## Optional item granted once, the moment this objective's required count is
+## met (KILL / VISIT / CRAFT). Used for quest-gated boss drops and hand-offs
+## ("the Heart yields the true root", "the Courier found Calder's blade").
+@export var grant_item: Item
 
 
 ## The key this objective tracks. Used to match incoming kill/craft/visit
@@ -29,7 +37,9 @@ func target_key() -> Variant:
 		Type.KILL:
 			return enemy_type
 		Type.VISIT:
-			return target_giver.giver_key() if target_giver else &""
+			if target_giver:
+				return target_giver.giver_key()
+			return target_giver_key
 		_:
 			return int(item.get_meta(&"id", 0)) if item else 0
 

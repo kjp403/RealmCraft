@@ -225,10 +225,9 @@ var applied_mastery_passives: Array[Dictionary] = []
 ## Per-node gather cooldowns (node_id -> next-ready time in ms). Runtime only, not persisted.
 var gather_cooldowns: Dictionary
 
-## Character story/progress flags (flag StringName -> true) — the slot quest
-## prerequisites (QuestResource.requires_flag) and the v1 wardstone key-gate
-## read. RUNTIME-ONLY for now: nothing sets flags yet; when the wardstone
-## system ships, persist via a new _migration_vN JSON column (mirrors friends).
+## Character story/progress flags (flag StringName -> true). Persisted as
+## character_flags_json. QuestResource.requires_flag / grants_flag and NPC
+## visible_if_flag / hidden_if_flag read this.
 var character_flags: Dictionary
 
 

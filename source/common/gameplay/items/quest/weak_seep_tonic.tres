@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://0boengfvu6uz8" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/Icon302.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Weak Seep Tonic"
+item_icon = ExtResource("1_icon")
+description = "A small green flask. Untradeable. Wren's first draught against the fungus roots."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"weak_seep_tonic"
+metadata/id = 584

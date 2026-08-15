@@ -10,4 +10,5 @@ zone_title = "The Drowned Cistern"
 level_min = 18
 level_max = 22
 show_discovery = true
+required_wardstone = &"bandit_hideout"
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"

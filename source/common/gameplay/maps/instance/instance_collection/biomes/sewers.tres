@@ -10,4 +10,5 @@ zone_title = "The Sewers"
 level_min = 15
 level_max = 20
 show_discovery = true
+required_wardstone = &"bandit_hideout"
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"

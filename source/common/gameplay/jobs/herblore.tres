@@ -9,6 +9,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="p4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="p5"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/focus_tonic.tres" id="p6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/weak_seep_tonic.tres" id="p_seep_tonic"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/seepbreakers_draught.tres" id="p_seep_draught"]
 [resource]
 script = ExtResource("1_jp")
 icon = ExtResource("icon_tex")
@@ -35,6 +37,6 @@ perks = Array[Dictionary]([{
 "name": "Extra Dose",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6")])
-recipe_levels = Array[int]([1, 5, 10, 20, 30, 40, 50])
+recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6"), ExtResource("p_seep_tonic"), ExtResource("p_seep_draught")])
+recipe_levels = Array[int]([1, 5, 10, 20, 30, 40, 50, 1, 1])
 describe_lines = Array[String](["Herblore XP +{xp}%", "Material refund: {refund}%", "Extra dose: {extra_item}%"])

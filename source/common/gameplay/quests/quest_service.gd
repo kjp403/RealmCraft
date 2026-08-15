@@ -57,6 +57,7 @@ static func _advance_matching(
 			if resource.quest_progress(quest_id, i) >= objective.required_amount:
 				continue # already done
 			resource.advance_quest(quest_id, i, 1)
+			_grant_objective_item(resource, objective, peer_id)
 			# Progress ticks are STRUCTURED entries (events stay plain strings):
 			# the client routes them tracker-first (docs/notifications.md) —
 			# tracked quest = tracker pulse, no card; untracked = one
@@ -145,6 +146,9 @@ static func apply_turn_in(
 	var quest_id: int = int(quest.get_meta(&"id", 0))
 	resource.set_quest_turned_in(quest_id)
 
+	if not quest.grants_flag.is_empty():
+		grant_flag_if_due(resource, quest, peer_id)
+
 	# Safety net: normally granted at the objective crossing (see
 	# _advance_matching); idempotent, so this only catches odd shapes like
 	# no-objective quests that never cross.
@@ -208,6 +212,50 @@ static func grant_wardstone_if_due(
 		_announce_to_guild(resource, "%s reclaimed the %s Wardstone." % [
 			resource.display_name, stone.capitalize()
 		])
+
+
+## Persist a story flag on turn-in and mirror it to the earning client so
+## flag-gated NPCs (Lira bound/freed) can swap immediately.
+static func grant_flag_if_due(
+	resource: PlayerResource, quest: QuestResource, peer_id: int
+) -> void:
+	var flag: StringName = quest.grants_flag
+	if flag.is_empty() or resource.has_character_flag(flag):
+		return
+	resource.set_character_flag(flag)
+	push_character_flags(resource, peer_id)
+
+
+## Mirror the player's story flags to their client (login + live grants).
+static func push_character_flags(resource: PlayerResource, peer_id: int) -> void:
+	if peer_id <= 0 or WorldServer.curr == null:
+		return
+	var flags: Array = []
+	for key: Variant in resource.character_flags:
+		if resource.character_flags[key]:
+			flags.append(str(key))
+	WorldServer.curr.data_push.rpc_id(peer_id, &"character_flags.set", {"flags": flags})
+
+
+## Grant [member QuestObjective.grant_item] once, when the objective just
+## crossed its required count. Quiet bag update so the tracker still owns
+## the moment.
+static func _grant_objective_item(
+	resource: PlayerResource, objective: QuestObjective, peer_id: int
+) -> void:
+	if objective.grant_item == null:
+		return
+	var item_id: int = int(objective.grant_item.get_meta(&"id", 0))
+	if item_id <= 0:
+		return
+	Inventory.add_item(resource.inventory, item_id, 1)
+	if peer_id > 0 and WorldServer.curr != null:
+		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
+			"id": item_id,
+			"amount": 1,
+			"name": str(objective.grant_item.item_name),
+			"quiet": true,
+		})
 
 
 ## System chat line to every ONLINE member of the player's active guild

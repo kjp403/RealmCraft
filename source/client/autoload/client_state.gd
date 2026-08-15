@@ -49,6 +49,13 @@ signal wardstones_changed
 ## Earned wardstone slugs, mirrored from the server (wardstones.set push at login
 ## + on every grant) — lets sealed portals render/explain with no round trip.
 var wardstones: PackedStringArray
+signal character_flags_changed
+## Story flags mirrored from the server (character_flags.set at login + on grant).
+var character_flags: Dictionary = {}
+
+
+func has_character_flag(flag: StringName) -> bool:
+	return bool(character_flags.get(flag, false))
 ## The local character's level, mirrored from progression data (progression.get on
 ## spawn/map change + combat.reward pushes — see HUD._apply_progression). Client-side
 ## cosmetic checks only (e.g. a gated Portal suppressing its fade); the server enforces.
@@ -193,6 +200,11 @@ func _ready() -> void:
 	Client.subscribe(&"wardstones.set", func(payload: Dictionary):
 		wardstones = PackedStringArray(payload.get("wardstones", []))
 		wardstones_changed.emit())
+	Client.subscribe(&"character_flags.set", func(payload: Dictionary):
+		character_flags.clear()
+		for flag: Variant in payload.get("flags", []):
+			character_flags[StringName(str(flag))] = true
+		character_flags_changed.emit())
 	# Profession levels for client-side skill gates (Mining vault, etc.).
 	# skills.get is also pushed at login and after /skill admin sets.
 	Client.subscribe(&"skills.get", func(payload: Dictionary):

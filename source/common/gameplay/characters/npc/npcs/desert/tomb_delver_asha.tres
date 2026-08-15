@@ -1,9 +1,16 @@
-[gd_resource type="Resource" script_class="NPCResource" format=3]
+[gd_resource type="Resource" script_class="NPCResource" uid="uid://1xo0mz6wooyfk" format=3]
 
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/rogue.tres" id="6_skin"]
+[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="7_quest"]
+[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="8_questres"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/leave_the_crown.tres" id="9_q1"]
+
+[sub_resource type="Resource" id="QuestInteraction_asha"]
+script = ExtResource("7_quest")
+quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_asha"]
 script = ExtResource("4_dialogue")
@@ -20,4 +27,4 @@ script = ExtResource("1_npcres")
 npc_name = "Tomb Delver Asha"
 skin = ExtResource("6_skin")
 greeting = "Another one down the stair. Sit a moment — I would rather you learned this from me than from him."
-interactions = Array[ExtResource("2_npcint")]([SubResource("Dialogue_asha"), SubResource("Dialogue_king")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_asha"), SubResource("Dialogue_asha"), SubResource("Dialogue_king")])

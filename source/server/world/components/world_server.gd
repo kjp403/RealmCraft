@@ -316,6 +316,7 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 				(connected_players[peer_id].skills[skill_name] as Dictionary).get("level", 1)
 			)
 		data_push.rpc_id.call_deferred(peer_id, &"skills.levels", {"levels": skill_levels})
+		QuestService.push_character_flags(connected_players[peer_id], peer_id)
 	else:
 		peer.disconnect_peer(peer_id)
 

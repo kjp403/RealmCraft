@@ -7,10 +7,16 @@
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="5_dialogue"]
 [ext_resource type="SpriteFrames" uid="uid://b1gu2vklfnvb5" path="res://source/common/gameplay/characters/sprite_frames/scholar_director.tres" id="6_skin"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="7_npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/blood_in_the_meadow.tres" id="8_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_hole_in_the_wall.tres" id="9_hole"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/under_the_charter.tres" id="10_sewers"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_reader_of_wars.tres" id="11_reader"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_last_foundry.tres" id="12_foundry"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_thing_it_was_built_to_run.tres" id="13_hollow"]
 
 [sub_resource type="Resource" id="QuestInteraction_welcome"]
 script = ExtResource("4_quest_interaction")
-quests = Array[ExtResource("2_quest")]([ExtResource("3_welcome")])
+quests = Array[ExtResource("2_quest")]([ExtResource("8_blood"), ExtResource("9_hole"), ExtResource("3_welcome"), ExtResource("10_sewers"), ExtResource("11_reader"), ExtResource("12_foundry"), ExtResource("13_hollow")])
 metadata/_custom_type_script = "uid://dka1daj2vrhn"
 
 [sub_resource type="Resource" id="Dialogue_progression"]
@@ -33,7 +39,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_first_steps"]
 script = ExtResource("5_dialogue")
-lines = Array[String](["Begin with Find Your Footing in my Quests list. It is an orientation assignment, not a choice of class or profession.", "Track it from your Quests panel, then take the main exit into the overworld. You will be free to pursue combat, gathering, crafting, or any mixture of them.", "The Daily Quest Board offers optional rotating work. It is extra progression, never a permanent path decision."])
+lines = Array[String](["Begin with Blood in the Meadow in my Quests list. Equip a weapon from your kit, open Mastery, and put down twenty goblin runts in Goblin Woodland.", "Warden Bren holds extra warren work if you want it. It is not required. After the meadow, I will send you to a wounded scout at the hole in the wall.", "Find Your Footing is an optional orientation errand to the Foreman once you have bloodied the meadow. The Daily Quest Board is extra work, never a path decision."])
 label_override = "What should I do first?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

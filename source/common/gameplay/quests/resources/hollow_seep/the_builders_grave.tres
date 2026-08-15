@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/bone_and_shard.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_8i4xe"]
+
+[sub_resource type="Resource" id="Obj_visit_ilka"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"dune_scout_ilka"
+target_giver_name = "Dune Scout Ilka"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Builders' Grave"
+description = "The Bonecarver names the desert tombs as the builders' grave, and the Hollow as a bound engine that never ran down. Find Dune Scout Ilka south of the city."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_ilka")])
+auto_complete = true
+min_level = 25
+unlock_message = "[Bonecarver] The desert buried the builders. The Hollow never ran down. Point your feet south."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 140
+reward_mastery_xp = 12000
+reward_gold = 700
+metadata/slug = &"the_builders_grave"
+metadata/id = 57

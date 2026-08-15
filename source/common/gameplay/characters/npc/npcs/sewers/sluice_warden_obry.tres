@@ -1,15 +1,22 @@
-[gd_resource type="Resource" script_class="NPCResource" format=3]
+[gd_resource type="Resource" script_class="NPCResource" uid="uid://lpr0e3gf9yw6w" format=3]
 
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="1_npcres"]
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="2_npcint"]
 [ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="3_shop"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
-[ext_resource type="Resource" path="res://source/common/gameplay/shops/resources/poison_shop.tres" id="5_shop"]
+[ext_resource type="Resource" uid="uid://bhrk4rp18pcwd" path="res://source/common/gameplay/shops/resources/poison_shop.tres" id="5_shop"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/royal_soldier.tres" id="6_skin"]
+[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="7_quest"]
+[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="8_questres"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/grate_cargo.tres" id="9_q1"]
 
 [sub_resource type="Resource" id="Shop_obry"]
 script = ExtResource("3_shop")
 shop = ExtResource("5_shop")
+
+[sub_resource type="Resource" id="QuestInteraction_obry"]
+script = ExtResource("7_quest")
+quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_obry"]
 script = ExtResource("4_dialogue")
@@ -21,4 +28,4 @@ script = ExtResource("1_npcres")
 npc_name = "Sluice Warden Obry"
 skin = ExtResource("6_skin")
 greeting = "Mind the grates. I have lost two lanterns and one apprentice to them this season."
-interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_obry"), SubResource("Dialogue_obry")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_obry"), SubResource("QuestInteraction_obry"), SubResource("Dialogue_obry")])

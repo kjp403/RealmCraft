@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_hole_in_the_wall.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/cloth/cloth_hood.tres" id="4_hood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/cloth/cloth_vest.tres" id="5_vest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/cloth/cloth_shoes.tres" id="6_shoes"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="7_7ttwf"]
+
+[sub_resource type="Resource" id="Obj_hood"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("4_hood")
+
+[sub_resource type="Resource" id="Obj_vest"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("5_vest")
+
+[sub_resource type="Resource" id="Obj_shoes"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("6_shoes")
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Rags and Needles"
+description = "Calder's cloth is shredded. Goblins drop Forest Cloth. Craft a Cloth Hood, Cloth Vest, and Cloth Shoes at the Smith House workbench. Keep the set — he cannot wear yours, but you will need it through the hole."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_hood"), SubResource("Obj_vest"), SubResource("Obj_shoes")])
+unlock_message = "[Scout Calder] I cannot walk in these rags. Craft a full cloth set at the workbench. Keep it. Mine is done."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 90
+reward_mastery_xp = 5000
+reward_gold = 500
+metadata/slug = &"rags_and_needles"
+metadata/id = 55

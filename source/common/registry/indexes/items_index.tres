@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786597702
-next_id = 575
+version = 1786769153
+next_id = 585
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2652,6 +2652,56 @@ entries = Array[Dictionary]([{
 &"id": 574,
 &"path": "res://source/common/gameplay/items/materials/herbs/vial_of_water.tres",
 &"slug": &"vial_of_water"
+}, {
+&"hash": "2d8718706c25cddeb1927c438c00f4ff74f8056e7767b3eed6a7274d9959b7d3",
+&"id": 575,
+&"path": "res://source/common/gameplay/items/quest/calders_bent_sword.tres",
+&"slug": &"calders_bent_sword"
+}, {
+&"hash": "ea6720ce558fb7d4bc8017324734f7a94bf41501e75ca4644e6127c7c0f924a1",
+&"id": 576,
+&"path": "res://source/common/gameplay/items/quest/coreblossom_shard.tres",
+&"slug": &"coreblossom_shard"
+}, {
+&"hash": "1f26882af04381c4c5fe607d128262916f9baed4f5752572d7b4f9d2ad10ac67",
+&"id": 577,
+&"path": "res://source/common/gameplay/items/quest/foundry_tablet.tres",
+&"slug": &"foundry_tablet"
+}, {
+&"hash": "8783566ebda11fd57641109b094a8121ff3163943dd2712022ff63408547256f",
+&"id": 578,
+&"path": "res://source/common/gameplay/items/quest/hollow_scarred_bone.tres",
+&"slug": &"hollow_scarred_bone"
+}, {
+&"hash": "9771937992f310298f388e2565403edf13b331fe9ae995203f286a684c97afa0",
+&"id": 579,
+&"path": "res://source/common/gameplay/items/quest/pale_sporecap.tres",
+&"slug": &"pale_sporecap"
+}, {
+&"hash": "6a6c4f8c1a2baa62abe2fbed4d67e52d6937b547623c4c2bd9f1331948852f6f",
+&"id": 580,
+&"path": "res://source/common/gameplay/items/quest/quench_seal.tres",
+&"slug": &"quench_seal"
+}, {
+&"hash": "98cae44627a24b929d1fe9847122520c2b0b7b57a5aaca593f01c331a726f744",
+&"id": 581,
+&"path": "res://source/common/gameplay/items/quest/sealed_smuggling_crate.tres",
+&"slug": &"sealed_smuggling_crate"
+}, {
+&"hash": "56fba590ede109b3bfc2921657f6f858e1ed2d61cd5606ff4387f68d30267d2c",
+&"id": 582,
+&"path": "res://source/common/gameplay/items/quest/seepbreakers_draught.tres",
+&"slug": &"seepbreakers_draught"
+}, {
+&"hash": "7019371142675f90e6b685e777eb345785266573a70673d2839f2ec8133ee817",
+&"id": 583,
+&"path": "res://source/common/gameplay/items/quest/true_seep_root.tres",
+&"slug": &"true_seep_root"
+}, {
+&"hash": "72b854f1a015de6658acfd8a1b056770a7e08187c9664459929189ca785e086b",
+&"id": 584,
+&"path": "res://source/common/gameplay/items/quest/weak_seep_tonic.tres",
+&"slug": &"weak_seep_tonic"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

@@ -3,6 +3,13 @@
 [ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_dialogue"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="3_npc"]
+[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="4_quest"]
+[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="5_questres"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_charter_seal.tres" id="6_seal"]
+
+[sub_resource type="Resource" id="QuestInteraction_clerk"]
+script = ExtResource("4_quest")
+quests = Array[ExtResource("5_questres")]([ExtResource("6_seal")])
 
 [sub_resource type="Resource" id="Dialogue_register"]
 script = ExtResource("2_dialogue")
@@ -26,5 +33,5 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("3_npc")
 npc_name = "Charter Clerk"
 greeting = "Approach the desk. Every new arrival must be entered into the Charter before leaving the Intake."
-interactions = Array[ExtResource("1_interaction")]([SubResource("Dialogue_register"), SubResource("Dialogue_menus"), SubResource("Dialogue_next")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_clerk"), SubResource("Dialogue_register"), SubResource("Dialogue_menus"), SubResource("Dialogue_next")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_charter_seal.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_e2v51"]
+
+[sub_resource type="Resource" id="Obj_kill_runts"]
+script = ExtResource("1_obj")
+enemy_type = &"goblin_runt"
+required_amount = 20
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Blood in the Meadow"
+description = "Equip a weapon from your kit — any discipline. The Mastery panel tracks the one in your hand. Then clear 20 goblin runts from Goblin Woodland and return. Warden Bren holds extra warren work if you want it; it is not required."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_runts")])
+unlock_message = "[Hall Keeper] The woodland is loud. Equip a weapon, open Mastery, and put down twenty runts. Come back when the meadow is quieter."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 120
+reward_mastery_xp = 22000
+reward_gold = 800
+metadata/slug = &"blood_in_the_meadow"
+metadata/id = 44
