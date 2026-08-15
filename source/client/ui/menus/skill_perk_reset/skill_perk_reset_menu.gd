@@ -38,14 +38,14 @@ func open(arg: Variant) -> void:
 	pad.add_child(box)
 
 	var title: Label = Label.new()
-	title.text = "Respec skill perks"
+	title.text = "Respec skill points"
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
 	title.add_theme_font_size_override(&"font_size", 20)
 	box.add_child(title)
 
 	var body: Label = Label.new()
 	body.text = (
-		"Refund all spent skill perk points (Mining, Smithing, etc.) so you can "
+		"Refund spent skill points (Mining, Smithing, and other job perks) so you can "
 		+ "rebuild?\nThis costs %d gold."
 	) % cost
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -80,13 +80,13 @@ func _on_confirm() -> void:
 	var data: Dictionary = result[0]
 	if data.get("ok", false):
 		Toaster.toast(
-			"Skill perks reset. Points available again in the Mastery → Perks tab."
+			"Skill points reset. Spend them again in the Mastery → Perks tab."
 		)
 		return
 	match str(data.get("reason", "")):
 		"gold":
 			Toaster.toast("Not enough gold to respec perks.")
 		"nothing":
-			Toaster.toast("You haven't spent any skill perk points yet.")
+			Toaster.toast("You haven't spent any skill points yet.")
 		_:
 			Toaster.toast("Couldn't respec perks right now.")

@@ -239,6 +239,10 @@ func _apply_team_bar_color() -> void:
 		set_health_bar_fill(BAR_COLOR_ALLY)
 		refresh_nameplate_color()
 		return
+	if Character.party_peers.has(peer):
+		set_health_bar_fill(BAR_COLOR_ALLY)
+		refresh_nameplate_color()
+		return
 	var same_guild: bool = active_guild_id > 0 and active_guild_id == Character.local_viewer_guild_id
 	set_health_bar_fill(BAR_COLOR_ALLY if same_guild else BAR_COLOR_HOSTILE)
 	refresh_nameplate_color()

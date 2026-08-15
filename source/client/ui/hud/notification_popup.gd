@@ -21,11 +21,22 @@ func pop_notification(topic: StringName, payload: Dictionary) -> void:
 				friend_request()
 			&"guild.invite":
 				guild_invite()
+			&"party.invite":
+				party_invite()
 
 	show()
 
 
 func _on_cancel_button_pressed() -> void:
+	if current_notification_topic == &"party.invite" and InstanceClient.current != null:
+		Client.request_data(
+			&"party.respond", Callable(),
+			{
+				"invite": current_notification_payload.get("invite", 0),
+				"accepted": false,
+			},
+			InstanceClient.current.name
+		)
 	hide()
 
 
@@ -40,6 +51,15 @@ func _on_confirm_button_pressed() -> void:
 			Client.request_data(
 				&"guild.invite.accept", Callable(),
 				{"guild_id": current_notification_payload.get("guild_id", 0)}
+			)
+		&"party.invite":
+			Client.request_data(
+				&"party.respond", Callable(),
+				{
+					"invite": current_notification_payload.get("invite", 0),
+					"accepted": true,
+				},
+				InstanceClient.current.name if InstanceClient.current != null else ""
 			)
 	hide()
 
@@ -58,6 +78,14 @@ func guild_invite() -> void:
 			current_notification_payload.get("from_name", "Someone"),
 			current_notification_payload.get("guild_name", ""),
 		]
+	)
+	cancel_button.text = "Refuse"
+	confirm_button.text = "Accept"
+
+
+func party_invite() -> void:
+	rich_text_label.append_text(
+		"%s invited you to join their party." % current_notification_payload.get("from_name", "Someone")
 	)
 	cancel_button.text = "Refuse"
 	confirm_button.text = "Accept"

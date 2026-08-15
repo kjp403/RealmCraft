@@ -25,12 +25,16 @@ const MAX_SLOTS: int = 28
 const BANK_RESOURCE_STACK: int = 50
 
 
-## Per-slot stack cap for [param item]. Bank materials and cooked food use
-## [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
+## Per-slot stack cap for [param item]. 0 = unlimited. Bank materials and cooked
+## food use [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
+## Bones are unlimited in the bank (bag stays at [member Item.stack_limit]).
 static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 	var limit: int = 0 if item == null else int(item.stack_limit)
-	if in_bank and item != null and limit > 0 and _bank_bulk_item(item):
-		return maxi(limit, BANK_RESOURCE_STACK)
+	if in_bank and item != null:
+		if _is_bone(item):
+			return 0
+		if limit > 0 and _bank_bulk_item(item):
+			return maxi(limit, BANK_RESOURCE_STACK)
 	return limit
 
 
@@ -41,6 +45,10 @@ static func _bank_bulk_item(item: Item) -> bool:
 		return true
 	var food: ConsumableItem = item as ConsumableItem
 	return food != null and food.cooldown_category == &"food"
+
+
+static func _is_bone(item: Item) -> bool:
+	return item != null and StringName(item.get_meta(&"slug", &"")) == &"bone"
 
 
 ## Convert raw JSON-loaded data into a clean { int: { "id": int, "a": int } } dict.

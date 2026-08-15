@@ -21,6 +21,9 @@ extends Resource
 ## (gatherable junk-sell). Specialty [member accepted_trades] still take priority for
 ## matching item ids. Default on so general merchants accept materials.
 @export var buys_vendor_priced: bool = true
+## Gold shops pay this fraction of their listed buy price when the player sells
+## that same item back (health / mana potions). Fallback is [member Item.vendor_value].
+const BUYBACK_RATE: float = 0.75
 
 
 ## Capabilities are DERIVED from the data (no parallel enum to contradict it —
@@ -31,15 +34,64 @@ func allows_buying() -> bool:
 
 ## True if this vendor takes anything from the player (drives the Sell tab).
 ## Defensive against shops authored before the accepted_trades field existed
-## (where it can deserialize as null).
+## (where it can deserialize as null). Gold-stocked buybacks (potions at a
+## dungeon shop that otherwise refuses junk) also count.
 func has_trades() -> bool:
 	var has_specialty: bool = accepted_trades != null and not accepted_trades.is_empty()
-	return has_specialty or buys_vendor_priced
+	if has_specialty or buys_vendor_priced:
+		return true
+	if entries == null:
+		return false
+	for entry: ShopEntry in entries:
+		if entry != null and can_vendor_buy(entry.item):
+			return true
+	return false
+
+
+## Gold paid per unit when this vendor buys [param item]. Health / mana potions
+## sell for 75% of this shop's gold buy price when stocked, else their
+## [member Item.vendor_value]. Other goods stay on vendor_value.
+func buyback_gold(item: Item) -> int:
+	if item == null or item.is_currency:
+		return 0
+	var item_id: int = int(item.get_meta(&"id", 0))
+	if item_id <= 0:
+		return 0
+	if _is_potion_buyback(item):
+		var stock: Dictionary = entry_for(item_id)
+		if not stock.is_empty() and int(stock.get("currency_id", 0)) == Economy.gold_id():
+			return maxi(1, roundi(float(stock["price"]) * BUYBACK_RATE))
+	return maxi(0, item.vendor_value)
+
+
+## True when the Sell tab / shop.sell.item may take [param item] for gold.
+## General merchants buy any vendor-priced junk; specialty shops still buy
+## back health / mana potions they stock for gold (Cave Master).
+func can_vendor_buy(item: Item) -> bool:
+	if buyback_gold(item) <= 0:
+		return false
+	if buys_vendor_priced:
+		return true
+	if not _is_potion_buyback(item):
+		return false
+	var item_id: int = int(item.get_meta(&"id", 0))
+	var stock: Dictionary = entry_for(item_id)
+	return not stock.is_empty() and int(stock.get("currency_id", 0)) == Economy.gold_id()
+
+
+static func _is_potion_buyback(item: Item) -> bool:
+	var potion: ConsumableItem = item as ConsumableItem
+	if potion == null:
+		return false
+	return potion.cooldown_category == &"health_potion" \
+			or potion.cooldown_category == &"mana_potion"
 
 
 ## { "price": int, "currency_id": int } for one item, or {} if not sold here.
 ## currency_id resolves entry → shop → gold (first non-null wins).
 func entry_for(item_id: int) -> Dictionary:
+	if entries == null:
+		return {}
 	for entry: ShopEntry in entries:
 		if entry and entry.item and int(entry.item.get_meta(&"id", 0)) == item_id:
 			return {"price": entry.price, "currency_id": _resolve_currency_id(entry.currency_item)}

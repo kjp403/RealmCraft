@@ -241,7 +241,6 @@ offset_bottom = 146.0
 theme_override_constants/separation = 8
 
 [node name="ChatButton" type="Button" parent="MenuButtons/ButtonRail" unique_id=777000111]
-visible = false
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 0
@@ -249,6 +248,7 @@ size_flags_vertical = 0
 tooltip_text = "Open chat  (Enter to type)"
 icon = ExtResource("14_chaticon")
 icon_alignment = 1
+focus_mode = 0
 metadata/_edit_lock_ = true
 
 [node name="MenuButton" type="Button" parent="MenuButtons/ButtonRail" unique_id=948283629]

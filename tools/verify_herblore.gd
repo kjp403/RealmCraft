@@ -108,6 +108,24 @@ func _init() -> void:
 		if vial_price != 1000:
 			fails.append("Mira should sell vial of water for 1000, got %d" % vial_price)
 
+	var potion_buybacks: Dictionary = {
+		"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 375,
+		"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 563,
+		"res://source/common/gameplay/items/consumables/health_potion.tres": 750,
+		"res://source/common/gameplay/items/consumables/mana_potion.tres": 1125,
+		"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 1125,
+		"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 1500,
+	}
+	for path: String in potion_buybacks.keys():
+		var potion: Item = load(path)
+		var want: int = int(potion_buybacks[path])
+		if potion == null:
+			fails.append("%s failed to load" % path.get_file())
+		elif potion.vendor_value != want:
+			fails.append("%s vendor_value %d, want %d (75%% buyback)" % [
+				path.get_file(), potion.vendor_value, want
+			])
+
 	if fails.is_empty():
 		print("VERIFY_PASS herblore")
 		quit(0)

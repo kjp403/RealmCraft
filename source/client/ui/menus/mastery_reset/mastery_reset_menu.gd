@@ -38,15 +38,15 @@ func open(arg: Variant) -> void:
 	pad.add_child(box)
 
 	var title: Label = Label.new()
-	title.text = "Respec mastery"
+	title.text = "Respec mastery points"
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
 	title.add_theme_font_size_override(&"font_size", 20)
 	box.add_child(title)
 
 	var body: Label = Label.new()
 	body.text = (
-		"Refund all spent weapon mastery points (Sword, Wand, Bow, …) so you can "
-		+ "rebuild?\nThis costs %d gold."
+		"Refund spent mastery points (Sword, Wand, Bow, …) so you can "
+		+ "rebuild those trees?\nThis costs %d gold."
 	) % cost
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_color_override(&"font_color", Color(0.85, 0.86, 0.92))
@@ -79,7 +79,7 @@ func _on_confirm() -> void:
 		return
 	var data: Dictionary = result[0]
 	if data.get("ok", false):
-		Toaster.toast("Mastery trees reset. Points available again in Character → Mastery.")
+		Toaster.toast("Mastery points reset. Spend them again in Character → Mastery.")
 		return
 	match str(data.get("reason", "")):
 		"gold":

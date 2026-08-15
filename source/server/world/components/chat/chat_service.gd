@@ -129,10 +129,34 @@ func _handle_send_world(instance: ServerInstance, player: PlayerResource, text: 
 
 
 func _handle_send_team(instance: ServerInstance, player: PlayerResource, text: String) -> Dictionary:
-	# Placeholder: until we have a team/party system.
-	# "team:<team_id>" later.
-	# For now: either reject or treat as instance-local.
-	return {"error": 30, "ok": false, "message": "Team chat not implemented yet."}
+	var party_id: int = PartyService.party_of_player(player.player_id)
+	if party_id == 0:
+		return {"error": 30, "ok": false, "message": "You are not in a party."}
+	var now_ms: int = int(Time.get_unix_time_from_system() * 1000.0)
+	var convo_id: String = ChatConstants.channel_conversation_id(ChatConstants.CHANNEL_TEAM)
+	var pushed: Dictionary = {
+		"conversation_id": convo_id,
+		"text": text,
+		"channel": ChatConstants.CHANNEL_TEAM,
+		"name": player.display_name,
+		"id": player.player_id,
+		"peer_id": player.current_peer_id,
+		"title": player.display_title,
+		"staff_role": CommandPermissions.effective_role_slug(player, instance),
+		"time_ms": now_ms,
+	}
+	var ws: WorldServer = instance.world_server
+	for member_id: int in PartyService.members_of(party_id):
+		var peer_id: int = int(ws.player_id_to_peer_id.get(member_id, 0))
+		if peer_id <= 0:
+			continue
+		var recipient: PlayerResource = ws.connected_players.get(peer_id)
+		if recipient == null:
+			continue
+		if BlockList.is_blocked(recipient.player_id, player.player_id):
+			continue
+		WorldServer.curr.data_push.rpc_id(peer_id, &"chat.message", pushed)
+	return {}
 
 
 func _handle_send_guild(instance: ServerInstance, player: PlayerResource, text: String) -> Dictionary:

@@ -182,6 +182,11 @@ func _ready() -> void:
 	# Co-op group roster (dungeons): mirror our groupmate peer ids so their health
 	# bars tint as allies. Same pattern as the sparring team push.
 	Client.subscribe(&"group.roster", _on_group_roster)
+	Client.subscribe(&"party.roster", _on_party_roster)
+	Client.subscribe(&"party.notice", func(payload: Dictionary) -> void:
+		var text: String = str(payload.get("text", "")).strip_edges()
+		if not text.is_empty():
+			Toaster.toast(text))
 	# Dungeon cleared (final room down) — show the recap; the server returns the
 	# party to town after a short timer (the recap auto-closes with it).
 	Client.subscribe(&"dungeon.cleared", func(payload: Dictionary) -> void:
@@ -267,6 +272,19 @@ func _on_sparring_match_state(payload: Dictionary) -> void:
 ## the map so their health bars flip to ally immediately (same as spar teams).
 func _on_group_roster(payload: Dictionary) -> void:
 	Character.group_peers = payload.get("members", [])
+	_retint_map_players()
+
+
+func _on_party_roster(payload: Dictionary) -> void:
+	var members: Array = []
+	for m: Variant in payload.get("members", []):
+		members.append(int(m))
+	Character.party_peers = members
+	Character.party_leader_peer = int(payload.get("leader", 0))
+	_retint_map_players()
+
+
+func _retint_map_players() -> void:
 	var map: Node = get_parent()
 	if map != null:
 		for child: Node in map.get_children():
@@ -378,7 +396,7 @@ func freeze_movement(seconds: float) -> void:
 ## so a click in a fight is always a swing/shot, never a profile.
 ## Gathering tools (pickaxe / axe / fishing rod / sickle) are NOT armed for combat —
 ## they only swing via HarvestController when you click a resource node
-## (right-click for herb patches so woodcutting left-clicks aren't stolen).
+## (right-click for pickaxe / axe / sickle so left-click stays Attack / move).
 func is_armed() -> bool:
 	if is_holding_gather_tool():
 		return false
@@ -923,7 +941,7 @@ func is_crafting() -> bool:
 	return _craft_controller != null and _craft_controller.is_active()
 
 
-## Right-click Attack: walk into range and keep using the primary weapon.
+## Left-click / right-click Attack: walk into range and keep using the primary weapon.
 func start_hostile_attack(npc: HostileNpc) -> void:
 	_note_input_activity()
 	_begin_hostile_attack(npc)
@@ -1032,6 +1050,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		or ClientState.menu_open
 		or _has_gui_focus()
 		or ClientState.world_interactables_hovered > 0
+		or ClientState.world_hostiles_hovered > 0
 	):
 		return
 	var hovered: Control = get_viewport().gui_get_hovered_control()

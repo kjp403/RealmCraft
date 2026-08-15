@@ -8,6 +8,8 @@ const MORE_ITEM_EDIT: int = 0
 const MORE_ITEM_REPORT: int = 1
 const MORE_ITEM_BLOCK: int = 2
 const MORE_ITEM_SHOW_GUILD: int = 3
+const MORE_ITEM_PARTY_INVITE: int = 4
+const MORE_ITEM_PARTY_LEAVE: int = 5
 const PROFILE_MAX_SIZE := Vector2(720.0, 440.0)
 const PROFILE_MIN_MARGIN := 16
 
@@ -693,7 +695,10 @@ func _show_more_popup() -> void:
 	var is_self: bool = _current_profile.get("self", false)
 	if is_self:
 		more_popup.add_item("Edit profile", MORE_ITEM_EDIT)
+		if not Character.party_peers.is_empty():
+			more_popup.add_item("Leave party", MORE_ITEM_PARTY_LEAVE)
 	else:
+		more_popup.add_item("Invite to party", MORE_ITEM_PARTY_INVITE)
 		more_popup.add_item("Report player", MORE_ITEM_REPORT)
 		# Authoritative state comes from the profile payload (server checks
 		# BlockList) but ClientState.blocked_ids may have updated since this
@@ -722,6 +727,10 @@ func _on_more_item_pressed(id: int) -> void:
 			_open_edit_panel()
 		MORE_ITEM_BLOCK:
 			_on_block_toggle_pressed()
+		MORE_ITEM_PARTY_INVITE:
+			_on_party_invite_pressed()
+		MORE_ITEM_PARTY_LEAVE:
+			_on_party_leave_pressed()
 		MORE_ITEM_SHOW_GUILD:
 			# Route to the guild panel via the same open_menu_requested signal
 			# the rest of the world uses. Guild id isn't currently shipped on
@@ -809,6 +818,39 @@ func _on_invite_guild_button_pressed(player_id: int) -> void:
 	Client.request_data(&"guild.invite", Callable(), {"id": player_id})
 	invite_guild_button.disabled = true
 	invite_guild_button.text = "Invited"
+
+
+func _on_party_invite_pressed() -> void:
+	var player_id: int = int(_current_profile.get("id", 0))
+	if player_id <= 0 or InstanceClient.current == null:
+		return
+	var result: Array = await Client.request_data_await(
+		&"party.invite",
+		{"id": player_id},
+		InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK or not bool(result[0].get("ok", false)):
+		var reason: String = str(result[0].get("reason", "")) if result.size() > 0 else ""
+		match reason:
+			"offline": Toaster.toast("That player is not online.")
+			"in_party": Toaster.toast("They are already in a party.")
+			"full": Toaster.toast("Your party is full (4).")
+			"not_leader": Toaster.toast("Only the party leader can invite.")
+			_: Toaster.toast("Could not send a party invite.")
+		return
+	Toaster.toast("Party invite sent.")
+
+
+func _on_party_leave_pressed() -> void:
+	if InstanceClient.current == null:
+		return
+	var result: Array = await Client.request_data_await(
+		&"party.leave", {}, InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK or not bool(result[0].get("ok", false)):
+		Toaster.toast("Could not leave the party.")
+		return
+	Toaster.toast("You left the party.")
 
 
 func _on_message_button_pressed(target_id: int) -> void:

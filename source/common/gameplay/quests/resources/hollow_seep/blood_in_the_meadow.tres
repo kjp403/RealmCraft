@@ -13,9 +13,9 @@ required_amount = 20
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Blood in the Meadow"
-description = "Equip a weapon from your kit — any discipline. The Mastery panel tracks the one in your hand. Then clear 20 goblin runts from Goblin Woodland and return. After that, Warden Bren at the woodland gate puts you on the Goblin Chief. That kill is the first real weapon — bone. Smithing will not match it."
+description = "Equip a weapon from your kit — any discipline. The Mastery panel tracks the one in your hand. Then clear 20 goblin runts from Goblin Woodland and return. Kills drop loot on the ground: stand near the piles and press F for Area Loot. After that, Warden Bren at the woodland gate puts you on the Goblin Chief. That kill is the first real weapon — bone. Smithing will not match it."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_runts")])
-unlock_message = "[Hall Keeper] The woodland is loud. Equip a weapon, open Mastery, and put down twenty runts. Then find Warden Bren. The Chief in the warren carries bone. That is how Heroes step off wood."
+unlock_message = "[Hall Keeper] The woodland is loud. Equip a weapon, open Mastery, and put down twenty runts. Drops land at your feet — press F to Area Loot. Then find Warden Bren. The Chief in the warren carries bone. That is how Heroes step off wood."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 120
 reward_mastery_xp = 22000

@@ -13,7 +13,7 @@ const COST: int = 25000
 
 func menu_entry(_npc: Node) -> Dictionary:
 	return {
-		"label": _label_or("Respec skill perks"),
+		"label": _label_or("Respec skill points"),
 		"icon": _icon_or(""),
 		"menu": &"skill_perk_reset",
 		"arg": COST,

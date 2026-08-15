@@ -9,6 +9,9 @@ const ACTION_TRADE: int = 2
 const ACTION_KICK: int = 3
 const ACTION_BAN: int = 4
 const ACTION_IP_BAN: int = 5
+const ACTION_PARTY_INVITE: int = 6
+const ACTION_PARTY_KICK: int = 7
+const ACTION_PARTY_LEAVE: int = 8
 const TARGET_HEADING_ID: int = 100
 
 var _menu: PopupMenu
@@ -46,6 +49,7 @@ func _ready() -> void:
 	Client.subscribe(&"trade.invite", _on_trade_invite)
 	Client.subscribe(&"trade.open", _on_trade_open)
 	Client.subscribe(&"trade.invite_result", _on_invite_result)
+	Client.subscribe(&"party.invite_result", _on_party_invite_result)
 
 
 func _open_for_peer(peer_id: int) -> void:
@@ -64,6 +68,7 @@ func _open_for_peer(peer_id: int) -> void:
 	_menu.add_item("Examine", ACTION_EXAMINE)
 	_menu.add_item("Follow", ACTION_FOLLOW)
 	_menu.add_item("Trade", ACTION_TRADE)
+	_add_party_items(peer_id)
 	# Admin+ only (synced staff_role; owner/senior_admin are mapped to "admin").
 	# Menu is shown even on other staff — owners need to right-click-ban a rogue
 	# senior_admin. Server enforces rank (admin cannot punish admin+).
@@ -87,6 +92,12 @@ func _on_action(action_id: int) -> void:
 				Toaster.toast("Following %s. Move manually to stop." % _target_name)
 		ACTION_TRADE:
 			_request_trade()
+		ACTION_PARTY_INVITE:
+			_request_party_invite()
+		ACTION_PARTY_KICK:
+			_request_party_kick()
+		ACTION_PARTY_LEAVE:
+			_request_party_leave()
 		ACTION_KICK, ACTION_BAN, ACTION_IP_BAN:
 			_ask_mod_action(action_id)
 
@@ -249,3 +260,86 @@ func _on_invite_result(payload: Dictionary) -> void:
 		"declined": Toaster.toast("%s declined the trade request." % str(payload.get("name", "Player")))
 		"expired": Toaster.toast("The trade request expired.")
 		_: Toaster.toast("The trade request could not be completed.")
+
+
+func _add_party_items(target_peer: int) -> void:
+	_menu.add_separator()
+	var in_party_with_target: bool = Character.party_peers.has(target_peer)
+	var self_in_party: bool = not Character.party_peers.is_empty()
+	if in_party_with_target:
+		var me: Player = ClientState.local_player
+		var my_peer: int = me.name.to_int() if me != null else 0
+		if Character.party_leader_peer == my_peer:
+			_menu.add_item("Kick from party", ACTION_PARTY_KICK)
+		_menu.add_item("Leave party", ACTION_PARTY_LEAVE)
+	else:
+		var me: Player = ClientState.local_player
+		var my_peer: int = me.name.to_int() if me != null else 0
+		var can_invite: bool = (
+			Character.party_peers.is_empty()
+			or Character.party_leader_peer == my_peer
+		)
+		if can_invite:
+			_menu.add_item("Invite to party", ACTION_PARTY_INVITE)
+		if self_in_party:
+			_menu.add_item("Leave party", ACTION_PARTY_LEAVE)
+
+
+func _request_party_invite() -> void:
+	if InstanceClient.current == null or _target_peer_id <= 0:
+		return
+	var result: Array = await Client.request_data_await(
+		&"party.invite",
+		{"peer_id": _target_peer_id, "id": _target_player_id},
+		InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("Party invite failed.")
+		return
+	var payload: Dictionary = result[0]
+	if bool(payload.get("ok", false)):
+		Toaster.toast("Party invite sent to %s." % _target_name)
+		return
+	match str(payload.get("reason", "")):
+		"offline": Toaster.toast("That player is not online.")
+		"in_party": Toaster.toast("%s is already in a party." % _target_name)
+		"full": Toaster.toast("Your party is full (4).")
+		"not_leader": Toaster.toast("Only the party leader can invite.")
+		"rate_limited": Toaster.toast("Please wait before sending another invite.")
+		_: Toaster.toast("Could not invite %s to the party." % _target_name)
+
+
+func _request_party_kick() -> void:
+	if InstanceClient.current == null or _target_player_id <= 0:
+		return
+	var result: Array = await Client.request_data_await(
+		&"party.kick",
+		{"id": _target_player_id},
+		InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK or not bool(result[0].get("ok", false)):
+		Toaster.toast("Could not remove %s from the party." % _target_name)
+		return
+	Toaster.toast("Removed %s from the party." % _target_name)
+
+
+func _request_party_leave() -> void:
+	if InstanceClient.current == null:
+		return
+	var result: Array = await Client.request_data_await(
+		&"party.leave", {}, InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK or not bool(result[0].get("ok", false)):
+		Toaster.toast("Could not leave the party.")
+		return
+	Toaster.toast("You left the party.")
+
+
+func _on_party_invite_result(payload: Dictionary) -> void:
+	if bool(payload.get("accepted", false)):
+		return
+	match str(payload.get("reason", "")):
+		"declined":
+			Toaster.toast("%s declined the party invite." % str(payload.get("name", "Player")))
+		_:
+			Toaster.toast("The party invite could not be completed.")

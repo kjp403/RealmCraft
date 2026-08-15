@@ -132,6 +132,10 @@ static var spar_opponent_peers: Array = []
 ## the dungeon allegiance, mirrored client-side from the group.roster push, same
 ## pattern as spar peers. Groupmates read as allies regardless of guild.
 static var group_peers: Array = []
+## Overworld party roster (peer ids), mirrored from party.roster. Independent of
+## dungeon group_peers so a run does not wipe the party tint.
+static var party_peers: Array = []
+static var party_leader_peer: int = 0
 
 
 func _ready() -> void:

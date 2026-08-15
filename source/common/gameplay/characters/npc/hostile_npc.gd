@@ -139,8 +139,8 @@ var xp_reward: int = 25
 ## (SlayerTaskService._xp_per_kill), which is the reward suppression this flag is
 ## for, applied to the one number that would otherwise leak through.
 var grants_skill_xp: bool = true
-## peer_id -> total damage dealt this life (cleared on respawn). Drives the
-## participation reward split — see RewardService.
+## player_id -> total damage dealt this life (cleared on respawn). Persistent id
+## so a reconnect still shares the kill. Drives RewardService.
 var _contributors: Dictionary[int, float] = {}
 ## Whether this mob respawns after death (driven by enemy_data.respawns). False =
 ## single-life: the body is removed, no return (dungeon mobs, one-off bosses).
@@ -310,6 +310,9 @@ var enemy_state: EnemyState = EnemyState.IDLE:
 		if (value == EnemyState.DEAD or value == EnemyState.REVIVING) \
 				and _net_smoother != null and not multiplayer.is_server():
 			_net_smoother.cancel_motion()
+		if (value == EnemyState.DEAD or value == EnemyState.REVIVING) \
+				and not multiplayer.is_server():
+			_set_hostile_hover(false)
 
 var possible_targets: Array[Player]
 var targeted_player: Player
@@ -340,6 +343,8 @@ var _skin_base_speed: float = -1.0
 ## Client: the skin this body spawned with, kept so a phase-2 swap can be undone
 ## on respawn. A boss that died frozen must come back in its opening form.
 var _skin_base_frames: SpriteFrames = null
+## Client: cursor is over this mob's click-box (blocks click-to-move, not combat).
+var _hostile_hovered: bool = false
 
 
 func _ready() -> void:
@@ -1842,10 +1847,11 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 
 	# Participation: tally each player's damage BEFORE applying it, so a killing
 	# blow is already counted when super → die() distributes the reward.
+	# Keyed by persistent player_id (not peer) so a reconnect still shares the kill.
 	if not is_dead and amount > 0.0 and attacker is Player and (attacker as Player).player_resource != null:
-		var contributor_peer: int = int((attacker as Player).player_resource.current_peer_id)
-		if contributor_peer > 0:
-			_contributors[contributor_peer] = _contributors.get(contributor_peer, 0.0) + amount
+		var contributor_id: int = int((attacker as Player).player_resource.player_id)
+		if contributor_id > 0:
+			_contributors[contributor_id] = _contributors.get(contributor_id, 0.0) + amount
 
 	var was_alive: bool = not is_dead
 	var pre_h: float = 0.0
@@ -2012,7 +2018,8 @@ func _process_death() -> void:
 		])
 
 
-## Client-only right-click target for the Attack context menu.
+## Client-only click target for Attack (left-click / tap) and the context menu
+## (right-click).
 func _build_client_click_area() -> void:
 	if has_node(^"ClickArea"):
 		return
@@ -2026,7 +2033,11 @@ func _build_client_click_area() -> void:
 	collision.position = Vector2(0.0, -volume.y * 0.5)
 	area.add_child(collision)
 	add_child(area)
+	area.clicked.connect(_on_client_clicked)
 	area.right_clicked.connect(_on_client_right_clicked)
+	area.mouse_entered.connect(_set_hostile_hover.bind(true))
+	area.mouse_exited.connect(_set_hostile_hover.bind(false))
+	area.tree_exiting.connect(_set_hostile_hover.bind(false))
 
 
 ## Grow the shared HurtBox to match the (optionally enlarged) sprite. Nav body
@@ -2063,6 +2074,25 @@ func _combat_volume_size() -> Vector2:
 	# Cover most of the drawn sprite — Mecha Golem (~65×64 @ 2.2×) → ~120×127.
 	var sized: Vector2 = Vector2(frame.x * vs * 0.85, frame.y * vs * 0.9)
 	return Vector2(maxf(36.0, sized.x), maxf(48.0, sized.y))
+
+
+func _on_client_clicked() -> void:
+	if is_dead or enemy_state == EnemyState.DEAD or enemy_state == EnemyState.REVIVING:
+		return
+	if not is_instance_valid(ClientState) or ClientState.local_player == null:
+		return
+	ClientState.local_player.start_hostile_attack(self)
+	get_viewport().set_input_as_handled()
+
+
+func _set_hostile_hover(on: bool) -> void:
+	if not GameMode.is_client() or on == _hostile_hovered:
+		return
+	if on and (is_dead or enemy_state == EnemyState.DEAD or enemy_state == EnemyState.REVIVING):
+		return
+	_hostile_hovered = on
+	if is_instance_valid(ClientState):
+		ClientState.world_hostiles_hovered += 1 if on else -1
 
 
 func _on_client_right_clicked() -> void:

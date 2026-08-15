@@ -31,6 +31,14 @@ extends Area2D
 ## Assign a `.tres` from `source/common/gameplay/maps/components/mineable_nodes/`.
 @export var data: MineableNodeResource
 
+## Flat gathering XP rate on mining / woodcutting / fishing yields. Perk
+## multipliers (Diligent, etc.) still stack on top.
+const GATHER_XP_RATE: Dictionary[StringName, float] = {
+	&"mining": 1.2,
+	&"woodcutting": 1.2,
+	&"fishing": 1.2,
+}
+
 # --- Cached refs ------------------------------------------------------------
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _name_label: Label = $NameLabel
@@ -271,11 +279,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	for job_name: StringName in xp_table:
 		var raw: int = int(xp_table[job_name])
 		var xp_gain: int = raw
+		var rate: float = GATHER_XP_RATE.get(job_name, 1.0)
 		var jp: JobPerks = JobRegistry.perks_for(job_name)
 		if jp != null:
 			var skill_entry: Dictionary = player.player_resource.skills.get(job_name, {})
 			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
-			xp_gain = roundi(raw * jp.xp_multiplier(job_perks_dict))
+			rate *= jp.xp_multiplier(job_perks_dict)
+		if rate != 1.0:
+			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
 		grants.append({"job": String(job_name), "xp": xp_gain, "progress": prog})
 
@@ -596,8 +607,8 @@ func _spawn_click_area() -> void:
 	collision.position = _sprite.position if _sprite != null else Vector2(0, -16)
 	area.add_child(collision)
 	add_child(area)
-	# Herb patches harvest on right-click so a left-click meant for a nearby
-	# tree (woodcutting) isn't stolen by plants on the forest floor.
+	# Pickaxe / axe / sickle nodes harvest on right-click so left-click stays
+	# free for movement and Attack. Fishing holes keep left-click.
 	if harvests_on_right_click():
 		area.capture_left_click = false
 		area.z_index = -1
@@ -610,17 +621,23 @@ func _spawn_click_area() -> void:
 	area.tree_exiting.connect(_set_interactable_hover.bind(false))
 
 
-## Farming herb patches — sickle nodes. Left-click must fall through to trees.
+## Mining, woodcutting, and farming — left-click must fall through to Attack / move.
 func harvests_on_right_click() -> bool:
-	return data != null and data.required_tool == &"sickle"
+	if data == null:
+		return false
+	match data.required_tool:
+		&"pickaxe", &"axe", &"sickle":
+			return true
+		_:
+			return false
 
 
 func _set_interactable_hover(on: bool) -> void:
 	if not GameMode.is_client() or on == _interactable_hovered:
 		return
 	_interactable_hovered = on
-	# Herbs still show their name on hover, but must not block left-click
-	# movement / tree clicks the way ore veins and trees do.
+	# Right-click harvest nodes still show their name on hover, but must not
+	# block left-click movement / Attack the way fishing holes do.
 	if not harvests_on_right_click():
 		ClientState.world_interactables_hovered += 1 if on else -1
 	if _name_label != null and data != null and data.ore != null:

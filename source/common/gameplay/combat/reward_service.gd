@@ -9,9 +9,10 @@ class_name RewardService
 
 ## A player must have dealt at least this fraction of the mob's max HP to share in
 ## the kill (anti-leech). The killer is always included regardless. Bosses use a
-## lower bar so anyone who meaningfully poked them still gets a roll.
+## zero bar so anyone who tagged them still gets a drop-table roll — a last-hit
+## steal cannot wipe the people who actually fought the boss.
 const MIN_DAMAGE_FRACTION: float = 0.1
-const BOSS_MIN_DAMAGE_FRACTION: float = 0.01
+const BOSS_MIN_DAMAGE_FRACTION: float = 0.0
 ## Ground piles stay reserved to their earner for this long (anti-ninja).
 const LOOT_EXCLUSIVE_MS: int = 60_000
 ## Fallback ornate chest id (pink / 249) when a boss leaves ornate_chest_item empty.
@@ -19,8 +20,8 @@ const LOOT_EXCLUSIVE_MS: int = 60_000
 const ORNATE_CHEST_IDS: Array[int] = [249]
 
 
-## [param contributors] = peer_id -> total damage dealt this life (HostileNpc
-## tracks it). Server-only.
+## [param contributors] = player_id -> total damage dealt this life (HostileNpc
+## tracks it by persistent id so a reconnect still pays). Server-only.
 static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Character) -> void:
 	if not GameMode.is_world_server():
 		return
@@ -40,39 +41,97 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 		return # a true shadow — nothing to give and nothing to advance
 	var frac: float = BOSS_MIN_DAMAGE_FRACTION if is_boss else MIN_DAMAGE_FRACTION
 	var threshold: float = npc.stats_component.get_stat(Stat.HEALTH_MAX) * frac
-	var killer_peer: int = -1
+	var killer_id: int = -1
 	if killer is Player and (killer as Player).player_resource != null:
-		killer_peer = int((killer as Player).player_resource.current_peer_id)
+		killer_id = int((killer as Player).player_resource.player_id)
 
 	# Build the eligible set, then sort by damage so DPS-ranked chest grants
 	# (Mecha Golem ornate chests) know #1 / #2 / everyone else.
 	var ranked: Array[Dictionary] = []
 	var seen: Dictionary[int, bool] = {}
-	for peer_id: int in contributors:
-		if peer_id != killer_peer and float(contributors[peer_id]) < threshold:
+	for player_id: int in contributors:
+		if player_id != killer_id and float(contributors[player_id]) < threshold:
 			continue
 		ranked.append({
-			"peer": peer_id,
-			"dmg": float(contributors[peer_id]),
+			"player_id": player_id,
+			"dmg": float(contributors[player_id]),
 		})
-		seen[peer_id] = true
-	if killer_peer > 0 and not seen.has(killer_peer):
+		seen[player_id] = true
+	if killer_id > 0 and not seen.has(killer_id):
 		ranked.append({
-			"peer": killer_peer,
-			"dmg": float(contributors.get(killer_peer, 0.0)),
+			"player_id": killer_id,
+			"dmg": float(contributors.get(killer_id, 0.0)),
 		})
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a["dmg"]) > float(b["dmg"])
 	)
 
 	for rank: int in ranked.size():
-		var peer_id: int = int(ranked[rank]["peer"])
-		var player: Player = _resolve_player(peer_id)
+		var player_id: int = int(ranked[rank]["player_id"])
+		var player: Player = _resolve_player_by_id(player_id)
 		if player != null:
 			# Each contributor gets their own loot roll, reserved to THEM for 60s
 			# so nearby players can't ninja-loot (top damager included). Ranked
 			# ornate chests (if authored) append on top of the table roll.
-			_reward(player, npc, peer_id, _roll_ranked_ornate_chests(rank, npc))
+			var reserved_peer: int = int(player.player_resource.current_peer_id)
+			_reward(player, npc, reserved_peer, _roll_ranked_ornate_chests(rank, npc))
+			seen[player_id] = true
+
+	_share_party_xp(npc, seen)
+
+
+## Party members standing near a contributor share character + mastery XP (not
+## loot / quest / Slayer — those still need a tag). Radius is PartyService.
+static func _share_party_xp(npc: HostileNpc, already: Dictionary) -> void:
+	if npc == null or npc.xp_reward <= 0:
+		return
+	var extra: Dictionary[int, Player] = {}
+	for player_id: Variant in already:
+		var player: Player = _resolve_player_by_id(int(player_id))
+		if player == null:
+			continue
+		for mate: Player in PartyService.nearby_members(player, PartyService.XP_SHARE_RADIUS):
+			if mate.player_resource == null:
+				continue
+			var mate_id: int = int(mate.player_resource.player_id)
+			if already.has(mate_id) or extra.has(mate_id):
+				continue
+			extra[mate_id] = mate
+	for mate_id: int in extra:
+		_reward_shared_xp(extra[mate_id], npc)
+
+
+## XP-only payout for a nearby party member who did not tag the kill.
+static func _reward_shared_xp(player: Player, npc: HostileNpc) -> void:
+	var resource: PlayerResource = player.player_resource
+	if resource == null:
+		return
+	var level_before: int = resource.level
+	resource.add_experience(npc.xp_reward)
+	var skill_xp: int = npc.combat_skill_xp() if npc.grants_skill_xp else 0
+	var mastery: Dictionary = {}
+	var weapon_item: WeaponItem = player.equipment_component.equipped_items.get(&"weapon", null) as WeaponItem
+	if skill_xp > 0 and weapon_item != null and not weapon_item.category.is_empty():
+		mastery = resource.add_mastery_xp(weapon_item.category, skill_xp)
+	var peer_id: int = int(resource.current_peer_id)
+	if peer_id > 0 and (npc.xp_reward > 0 or not mastery.is_empty()):
+		WorldServer.curr.data_push.rpc_id(peer_id, &"combat.reward", {
+			"enemy_type": npc.enemy_type,
+			"xp": npc.xp_reward,
+			"level": resource.level,
+			"levels_gained": resource.level - level_before,
+			"points_gained": PlayerResource.attribute_points_at_level(resource.level)
+				- PlayerResource.attribute_points_at_level(level_before),
+			"experience": resource.experience,
+			"xp_to_next": resource.level_xp_to_next(),
+			"loot": [],
+			"ground": true,
+			"mastery": mastery,
+			"shared": true,
+		})
+	if resource.level > level_before:
+		var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
+		LevelMilestoneService.on_levels_gained(resource, level_before, resource.level, inst)
 
 
 static func _has_ranked_ornate_chests(npc: HostileNpc) -> bool:
@@ -128,6 +187,22 @@ static func _resolve_player(peer_id: int) -> Player:
 	if inst == null:
 		return null
 	return inst.get_player(peer_id) as Player
+
+
+## The live Player for a persistent player_id (null if they logged off).
+static func _resolve_player_by_id(player_id: int) -> Player:
+	if player_id <= 0 or WorldServer.curr == null:
+		return null
+	for ires: InstanceResource in WorldServer.curr.instance_manager.instance_collection.values():
+		for inst: Node in ires.charged_instances:
+			if inst == null or not inst is ServerInstance:
+				continue
+			for peer_id: int in (inst as ServerInstance).players_by_peer_id:
+				var player: Player = (inst as ServerInstance).players_by_peer_id[peer_id]
+				if player != null and player.player_resource != null \
+						and int(player.player_resource.player_id) == player_id:
+					return player
+	return null
 
 
 ## All of one participant's reward, and the combat.reward push to their client.
@@ -323,6 +398,8 @@ static func _append_zone_kill_loot(player: Player, out: Array) -> void:
 
 ## Scatter rolled loot as clickable GroundItems around the corpse. Piles are
 ## reserved to [param reserved_peer] (that participant) for 60s, then free-for-all.
+## Always spawned on the NPC's map so a recall / instance switch cannot dump
+## the roll in town while the corpse is still in the woodland.
 static func _spawn_ground_loot(
 	player: Player,
 	npc: HostileNpc,
@@ -332,10 +409,7 @@ static func _spawn_ground_loot(
 	if loot_gained.is_empty():
 		return
 	var peer_id: int = int(player.player_resource.current_peer_id) if player.player_resource != null else 0
-	var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
-	if inst == null or not inst is ServerInstance:
-		return
-	var map: Map = (inst as ServerInstance).instance_map
+	var map: Map = _map_of_npc(npc)
 	if map == null or map.replicated_props_container == null:
 		return
 	var container: ReplicatedPropsContainer = map.replicated_props_container
@@ -365,3 +439,12 @@ static func _spawn_ground_loot(
 			}
 		)
 		i += 1
+
+
+static func _map_of_npc(npc: HostileNpc) -> Map:
+	var n: Node = npc
+	while n != null:
+		if n is Map:
+			return n as Map
+		n = n.get_parent()
+	return null

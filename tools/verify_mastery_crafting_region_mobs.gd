@@ -154,7 +154,7 @@ func _init() -> void:
 	var east: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
 	)
-	for name: String in ["EastBadger1", "RabidWolf1", "AngryBat1"]:
+	for name: String in ["EastWolf1", "RabidWolf1", "AngryBat1"]:
 		if east.find(name) < 0:
 			failures.append("woodland_east missing %s" % name)
 

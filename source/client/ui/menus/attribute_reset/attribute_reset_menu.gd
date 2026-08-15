@@ -41,13 +41,16 @@ func open(arg: Variant) -> void:
 	pad.add_child(box)
 
 	var title: Label = Label.new()
-	title.text = "Respec attributes"
+	title.text = "Respec attribute points"
 	title.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
 	title.add_theme_font_size_override(&"font_size", 20)
 	box.add_child(title)
 
 	var body: Label = Label.new()
-	body.text = "Refund all your spent attribute points so you can rebuild?\nThis costs %d gold." % cost
+	body.text = (
+		"Refund spent attribute points (Strength, Intelligence, … in Character) "
+		+ "so you can rebuild?\nThis costs %d gold."
+	) % cost
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_color_override(&"font_color", Color(0.85, 0.86, 0.92))
 	box.add_child(body)
@@ -79,7 +82,10 @@ func _on_confirm() -> void:
 		return
 	var data: Dictionary = result[0]
 	if data.get("ok", false):
-		Toaster.toast("Attributes reset. %d points to spend (Character menu)." % int(data.get("points", 0)))
+		Toaster.toast(
+			"Attribute points reset. %d points to spend (Character menu)."
+			% int(data.get("points", 0))
+		)
 		return
 	match str(data.get("reason", "")):
 		"gold":

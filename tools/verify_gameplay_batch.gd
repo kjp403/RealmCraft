@@ -83,8 +83,8 @@ func _check_bone_item() -> void:
 		"bone bag stack should stay 100"
 	)
 	_expect(
-		Inventory.stack_limit_for(bone, true) == 100,
-		"bone bank stack should stay 100 (already above 50)"
+		Inventory.stack_limit_for(bone, true) == 0,
+		"bone bank stack should be unlimited (0)"
 	)
 	var ore: Item = load("res://source/common/gameplay/items/materials/metals/iron_ore.tres")
 	if _expect(ore != null, "iron_ore.tres failed to load"):

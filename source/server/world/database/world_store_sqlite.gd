@@ -244,6 +244,12 @@ static func _grant_starting_quest(player: PlayerResource) -> void:
 ## migration or leave players wearing a banner nothing hands out any more.
 ## "Alpha tester" went to every character created before it was retired.
 const RETIRED_TITLES: Array[String] = ["Alpha tester"]
+## Pre-rework quest ids lived in 1–27. Existing characters still hold those as
+## active entries, which pins the tracker and blocks the Hollow Seep chain
+## (Blood in the Meadow needs The Charter Seal turned in). Dropped on load.
+## 20 (the_bandit_captain) was rewritten in place as the hideout finale — keep it.
+const RETIRED_QUEST_ID_MAX: int = 27
+const KEPT_PRE_REWORK_QUEST_ID: int = 20
 
 
 static func _drop_retired_titles(player: PlayerResource) -> void:
@@ -256,6 +262,29 @@ static func _drop_retired_titles(player: PlayerResource) -> void:
 		var pinned: int = player.displayed_trophies.find(retired)
 		if pinned >= 0:
 			player.displayed_trophies.remove_at(pinned)
+
+
+## Wipe pre-rework quest log entries and, if any were present, complete The
+## Charter Seal so Blood in the Meadow is acceptable. New characters never
+## hold retired ids, so they keep the starting accept from _grant_starting_quest.
+static func _drop_retired_quests(player: PlayerResource) -> void:
+	var stripped: bool = false
+	var to_erase: Array[int] = []
+	for quest_id: Variant in player.quests.keys():
+		var qid: int = int(quest_id)
+		if qid <= RETIRED_QUEST_ID_MAX and qid != KEPT_PRE_REWORK_QUEST_ID:
+			to_erase.append(qid)
+	for qid: int in to_erase:
+		player.quests.erase(qid)
+		stripped = true
+	if not stripped:
+		return
+	var seal_id: int = ContentRegistryHub.id_from_slug(&"quests", &"the_charter_seal")
+	if seal_id <= 0:
+		return
+	if player.quest_state(seal_id) == &"turned_in":
+		return
+	player.quests[seal_id] = {"state": &"turned_in", "progress": {}}
 
 
 func get_account_characters(account_name: String) -> Dictionary:
@@ -553,6 +582,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 			"state": StringName(str(quest_entry.get("state", "active"))),
 			"progress": progress,
 		}
+	_drop_retired_quests(player)
 
 	var friends_v: Variant = JSON.parse_string(str(row.get("friends_json", "[]")))
 	player.friends = PackedInt64Array(friends_v if friends_v is Array else [])

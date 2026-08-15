@@ -11,5 +11,6 @@ mana_amount = 40
 item_name = &"Minor Mana Potion"
 item_icon = ExtResource("1_icon")
 description = "A sip of blue. Enough to cast again."
+vendor_value = 563
 metadata/slug = &"minor_mana_potion"
 metadata/id = 204
