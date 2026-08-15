@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SlayerTaskDef" format=3]
+
+[ext_resource type="Script" uid="uid://cdwa4d0ga0hyr" path="res://source/common/gameplay/slayer/slayer_task_def.gd" id="1_task"]
+
+[resource]
+script = ExtResource("1_task")
+display_name = "Spore Ticks"
+enemy_types = Array[StringName]([&"spore_tick"])
+min_slayer_level = 1
+xp_per_kill = 17
+guide_notes = "The gallery's smallest growths, near the entrance. Good practice before the sporelings deeper in, and they shed bloodcap now and then."
+location_hint = "Fungus Cave"

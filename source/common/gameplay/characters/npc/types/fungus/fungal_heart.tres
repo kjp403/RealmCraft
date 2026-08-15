@@ -15,55 +15,81 @@
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://bye53p5l8x8or" path="res://source/common/gameplay/items/gears/relics/relic_sporebloom.tres" id="relic_sporebloom"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="fx_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="fx_bloodcap"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
 item = ExtResource("3_gold")
-min_amount = 15
-max_amount = 25
+min_amount = 450
+max_amount = 900
 
 [sub_resource type="Resource" id="Drop_hide"]
 script = ExtResource("2_loot")
 item = ExtResource("3_hide")
-min_amount = 3
+min_amount = 4
+max_amount = 8
+
+[sub_resource type="Resource" id="Drop_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_cloth")
+min_amount = 4
+max_amount = 8
+
+[sub_resource type="Resource" id="Drop_bloodcap"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_bloodcap")
+min_amount = 2
 max_amount = 4
+chance = 0.75
 
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
 item = ExtResource("5_sword")
-chance = 0.05
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_hammer"]
 script = ExtResource("2_loot")
 item = ExtResource("6_hammer")
-chance = 0.05
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_wand"]
 script = ExtResource("2_loot")
 item = ExtResource("7_wand")
-chance = 0.05
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("8_bow")
-chance = 0.05
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_book"]
 script = ExtResource("2_loot")
 item = ExtResource("9_book")
-chance = 0.05
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.02
+chance = 0.15
+
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
-min_amount = 1
-max_amount = 3
-chance = 1.0
+min_amount = 2
+max_amount = 5
 
 [sub_resource type="Resource" id="Drop_relic_sporebloom"]
 script = ExtResource("2_loot")
@@ -92,7 +118,7 @@ xp_reward = 700
 combat_skill_xp_override = 5500
 respawns = true
 respawn_delay = 90.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_sporebloom")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_sporebloom")])
 slam_radius = 125.0
 slam_windup_s = 1.2
 slam_damage = 120.0

@@ -4,10 +4,15 @@
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
 [ext_resource type="Resource" uid="uid://bk7jbs0f2yj6y" path="res://source/common/gameplay/quests/resources/bandit_hideout/break_the_camp_guard.tres" id="3_q4"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_rpcp3"]
+[ext_resource type="Resource" uid="uid://my4wn3plgxbs" path="res://source/common/gameplay/items/chests/wood_silver_large.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Obj_kill_captain"]
 script = ExtResource("1_obj")
 enemy_type = &"bandit_captain"
+
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("4_rpcp3")
+item = ExtResource("qr_chest")
 
 [resource]
 script = ExtResource("2_quest")
@@ -18,7 +23,9 @@ min_level = 14
 unlock_message = "[Watch Sergeant] Only the captain is left. He is no toll collector, he will fight like a cornered wolf. Come see me when you are ready."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q4")])
 reward_xp = 600
-reward_gold = 25
+reward_mastery_xp = 70000
+reward_gold = 2500
+reward_items = Array[ExtResource("4_rpcp3")]([SubResource("Reward_wood_chest")])
 grant_title = "Bandit Breaker"
 grants_wardstone = &"bandit_hideout"
 metadata/slug = &"the_bandit_captain"

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pixel location backgrounds — from the game art</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: rgba(24, 34, 48, 0.88);
+      --line: #334155;
+      --text: #f0f4fa;
+      --muted: #b8c3d2;
+      --gold: #e8c56a;
+      --loc: #3dcc8a;
+      --serif: "Georgia", serif;
+      --sans: "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--text); }
+    header.bar {
+      position: sticky; top: 0; z-index: 5;
+      padding: 0.7rem 1.4rem;
+      background: rgba(9,12,17,0.92);
+      border-bottom: 1px solid var(--line);
+    }
+    header.bar strong { font-family: var(--serif); font-size: 1.2rem; }
+    .intro { width: min(1100px, calc(100% - 2rem)); margin: 1.4rem auto 1.2rem; color: var(--muted); }
+    .loc {
+      position: relative;
+      min-height: 78vh;
+      padding: 2.2rem 0 3.5rem;
+      overflow: hidden;
+    }
+    .loc-bg {
+      position: absolute; inset: 0;
+      background: center / cover no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      filter: saturate(0.9) contrast(1.05);
+    }
+    .loc-bg::after {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(9,12,17,0.35) 0%, rgba(9,12,17,0.72) 55%, #090c11 100%),
+        radial-gradient(ellipse at 50% 30%, rgba(0,0,0,0.15), transparent 55%);
+    }
+    .wrap { position: relative; width: min(1100px, calc(100% - 2rem)); margin: 0 auto; }
+    .crumb { color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem; }
+    .page {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem 1.4rem;
+      box-shadow: inset 4px 0 0 var(--loc);
+      backdrop-filter: blur(2px);
+    }
+    h1 { font-family: var(--serif); font-weight: 400; font-size: 2.1rem; margin: 0 0 0.7rem; }
+    .stats { display: grid; gap: 0.25rem; max-width: 22rem; }
+    .stats div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 0.28rem 0; }
+    .stats span:last-child { color: var(--gold); }
+    h2 { color: var(--loc); font-size: 1.15rem; margin: 1.2rem 0 0.5rem; }
+    p.note { color: var(--muted); margin: 0 0 0.8rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.6rem; }
+    .card {
+      border: 1px solid #e07070;
+      border-left: 3px solid #e07070;
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+      color: #e07070;
+      background: rgba(12,16,22,0.55);
+      font-size: 0.9rem;
+    }
+    .card small { display: block; color: #c98a8a; }
+    .pack {
+      width: min(1100px, calc(100% - 2rem));
+      margin: 0 auto 3rem;
+    }
+    .pack h2 { color: var(--gold); }
+    .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
+    .thumbs figure { margin: 0; }
+    .thumbs img {
+      width: 100%; height: 140px; object-fit: cover;
+      image-rendering: pixelated;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: #10161e;
+    }
+    .thumbs figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 0.35rem; }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Arkenelle</strong> &nbsp; pixel location preview — game art only</header>
+  <p class="intro">Composed pixel scenes only — the same kind of painting as the homepage garden. No tileset sheets, no map screenshots.</p>
+
+  <section class="loc">
+    <div class="loc-bg" style="background-image:url('pixel-art/fireforge.png')"></div>
+    <div class="wrap">
+      <div class="crumb">Wiki / Locations / Fire Forge</div>
+      <article class="page">
+        <h1>Fire Forge</h1>
+        <p class="note">Existing pixel scene for this biome.</p>
+        <div class="stats">
+          <div><span>Type</span><span>Zone</span></div>
+          <div><span>Level band</span><span>30–35</span></div>
+        </div>
+        <h2>Creatures</h2>
+        <div class="grid">
+          <div class="card">Vurthek, the Cinderborn<small>Boss · Lv 560</small></div>
+          <div class="card">Armored Orc<small>Lv 72 · ×6</small></div>
+          <div class="card">Cinder Imp<small>Lv 31</small></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="loc">
+    <div class="loc-bg" style="background-image:url('pixel-art/castle_garden.png')"></div>
+    <div class="wrap">
+      <div class="crumb">Wiki / Locations / Castle Garden</div>
+      <article class="page">
+        <h1>Castle Garden</h1>
+        <p class="note">Same art as the homepage hero.</p>
+        <div class="stats">
+          <div><span>Type</span><span>Zone</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="loc">
+    <div class="loc-bg" style="background-image:url('pixel-art/desert.png')"></div>
+    <div class="wrap">
+      <div class="crumb">Wiki / Locations / Desert</div>
+      <article class="page">
+        <h1>Desert</h1>
+        <p class="note">Existing pixel scene for this biome.</p>
+        <div class="stats">
+          <div><span>Type</span><span>Zone</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="loc">
+    <div class="loc-bg" style="background-image:url('pixel-art/fairy_forest.png')"></div>
+    <div class="wrap">
+      <div class="crumb">Wiki / Locations / DimWood</div>
+      <article class="page">
+        <h1>DimWood</h1>
+        <p class="note">Same art as the homepage hero.</p>
+        <div class="stats">
+          <div><span>Type</span><span>Zone</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="pack">
+    <h2>These four are the right kind of art</h2>
+    <p class="note">Fungus Domain, Sewers, The Hollow, and the rest do not have a scene painting yet. Those pages would stay the current dark wiki until we have a composed pixel room like Fire Forge — not a repeating sprite sheet.</p>
+    <div class="thumbs">
+      <figure>
+        <img src="pixel-art/fireforge.png" alt="Fire Forge">
+        <figcaption>Fire Forge / Cinder Deeps / Bellows</figcaption>
+      </figure>
+      <figure>
+        <img src="pixel-art/castle_garden.png" alt="Castle Garden">
+        <figcaption>Castle Garden</figcaption>
+      </figure>
+      <figure>
+        <img src="pixel-art/desert.png" alt="Desert">
+        <figcaption>Desert / Sunspire</figcaption>
+      </figure>
+      <figure>
+        <img src="pixel-art/fairy_forest.png" alt="Forest">
+        <figcaption>DimWood / Goblin woods</figcaption>
+      </figure>
+    </div>
+  </div>
+</body>
+</html>

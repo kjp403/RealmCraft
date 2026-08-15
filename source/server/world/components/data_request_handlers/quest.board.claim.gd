@@ -1,7 +1,8 @@
 extends DataRequestHandler
 ## Claim the reward for one complete daily. Validates server-side that the
 ## entry actually exists in the player's current set + isn't already claimed
-## + objective is met. On success, grants XP and gold, marks claimed.
+## + objective is met. On success, grants adventure XP, weapon-mastery XP and
+## gold, and marks claimed.
 
 
 func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictionary) -> Dictionary:
@@ -25,6 +26,9 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	var bonus_gold: int = int(result.get("bonus_gold", 0))
 	var xp: int = int(result.get("xp", 0)) + bonus_xp
 	var gold: int = int(result.get("gold", 0)) + bonus_gold
+	var mastery_xp: int = (
+		int(result.get("mastery_xp", 0)) + int(result.get("bonus_mastery_xp", 0))
+	)
 	var inventory: Dictionary = resource.inventory
 	var loot: Array = []
 	if gold > 0:
@@ -33,6 +37,11 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 
 	var level_before: int = resource.level
 	var progress: Dictionary = resource.add_experience(xp)
+	# Weapon-mastery XP is the half of the reward that actually progresses a
+	# character — see DailyQuestTemplate.reward_mastery_xp. Riding it out on the
+	# same combat.reward key a kill uses gives the claim the same bar and level-up
+	# ceremony, so the player can see where the XP went.
+	var mastery: Dictionary = RewardService.grant_mastery_reward(peer_id, mastery_xp)
 
 	WorldServer.curr.data_push.rpc_id(peer_id, &"combat.reward", {
 		"xp": xp,
@@ -42,6 +51,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		"experience": resource.experience,
 		"xp_to_next": resource.level_xp_to_next(),
 		"loot": loot,
+		"mastery": mastery,
 	})
 	var claim_msg: String = "All dailies complete! Bonus reward earned." if (bonus_xp > 0 or bonus_gold > 0) else "Daily reward claimed."
 	WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": [claim_msg]})

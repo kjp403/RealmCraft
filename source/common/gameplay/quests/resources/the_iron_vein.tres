@@ -4,6 +4,7 @@
 [ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="2_coal"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="3_quest"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="3_qxqit"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Obj_coal_10"]
 script = ExtResource("1_obj")
@@ -11,6 +12,10 @@ type = 1
 item = ExtResource("2_coal")
 required_amount = 10
 label_override = "Coal"
+
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("3_qxqit")
+item = ExtResource("qr_chest")
 
 [resource]
 script = ExtResource("3_quest")
@@ -20,7 +25,9 @@ objectives = Array[ExtResource("1_obj")]([SubResource("Obj_coal_10")])
 min_skill = &"mining"
 min_skill_level = 14
 reward_xp = 360
-reward_gold = 100
+reward_mastery_xp = 45000
+reward_gold = 2200
+reward_items = Array[ExtResource("3_qxqit")]([SubResource("Reward_wood_chest")])
 metadata/_custom_type_script = "uid://c5p53get4ikl6"
 metadata/slug = &"the_iron_vein"
 metadata/id = 21

@@ -42,9 +42,9 @@ var _hp_mult: float = 1.0
 var _dmg_mult: float = 1.0
 var _boss_hp_mult: float = 1.0
 var _boss_dmg_mult: float = 1.0
-## Absolute boss HP (0 = multiplier path). Party-scaled at spawn.
-var _boss_solo_health: float = 0.0
-var _boss_hp_per_extra: float = 0.0
+## Absolute boss HP by party size (empty = multiplier path).
+var _boss_health_by_party: PackedFloat32Array = PackedFloat32Array()
+var _boss_slam_damage: float = 0.0
 
 
 func _ready() -> void:
@@ -103,6 +103,15 @@ func _living_player_count() -> int:
 	return maxi(1, n)
 
 
+## Absolute boss HP for the living party, or 0 to keep the multiplier path.
+func _party_boss_health() -> float:
+	if _boss_health_by_party.is_empty():
+		return 0.0
+	var n: int = _living_player_count()
+	var i: int = clampi(n, 1, _boss_health_by_party.size()) - 1
+	return _boss_health_by_party[i]
+
+
 ## Activate the encounter: seal the party in, beat, then spawn the FIRST wave. Mobs come wave by
 ## wave — each must be cleared before the next appears (SpawnMarker.wave groups them; default 0 =
 ## one wave, the classic single pack). The room clears when the LAST wave is down.
@@ -139,15 +148,15 @@ func _resolve_difficulty(map: Node) -> void:
 			_dmg_mult = dres.normal_damage_mult
 		_boss_hp_mult = dres.boss_health_mult
 		_boss_dmg_mult = dres.boss_damage_mult
-		_boss_solo_health = dres.boss_solo_health
-		_boss_hp_per_extra = dres.boss_health_per_extra_player
+		_boss_health_by_party = dres.boss_health_by_party
+		_boss_slam_damage = dres.boss_slam_damage
 	else:
 		_hp_mult = DungeonService.HARD_HEALTH_MULT if _hard else 1.0
 		_dmg_mult = DungeonService.HARD_DAMAGE_MULT if _hard else 1.0
 		_boss_hp_mult = 1.0
 		_boss_dmg_mult = 1.0
-		_boss_solo_health = 0.0
-		_boss_hp_per_extra = 0.0
+		_boss_health_by_party = PackedFloat32Array()
+		_boss_slam_damage = 0.0
 
 
 ## Group SpawnMarker children into _waves by their `wave` index (0,1,2…); markers without an enemy
@@ -201,12 +210,11 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		if is_boss:
 			hp_m *= _boss_hp_mult
 			dmg_m *= _boss_dmg_mult
-		var use_party_boss_hp: bool = is_boss and _boss_solo_health > 0.0
-		if use_party_boss_hp:
+		var party_hp: float = _party_boss_health()
+		if is_boss and party_hp > 0.0:
 			if not is_equal_approx(dmg_m, 1.0):
 				npc.apply_difficulty(1.0, dmg_m)
-			var extra: int = maxi(0, _living_player_count() - 1)
-			npc.apply_max_health(_boss_solo_health + _boss_hp_per_extra * float(extra))
+			npc.apply_max_health(party_hp)
 		elif not is_equal_approx(hp_m, 1.0) or not is_equal_approx(dmg_m, 1.0):
 			npc.apply_difficulty(hp_m, dmg_m)
 	if is_boss and npc != null:
@@ -214,9 +222,12 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		brain.name = "BossController"
 		brain.boss = npc
 		npc.add_child(brain) # _ready() loads slam_damage from enemy_data...
-		var slam_m: float = _dmg_mult * (_boss_dmg_mult if is_boss else 1.0)
-		if not is_equal_approx(slam_m, 1.0):
-			brain.slam_damage *= slam_m # ...so scale it AFTER that load
+		if _boss_slam_damage > 0.0:
+			brain.slam_damage = _boss_slam_damage
+		else:
+			var slam_m: float = _dmg_mult * (_boss_dmg_mult if is_boss else 1.0)
+			if not is_equal_approx(slam_m, 1.0):
+				brain.slam_damage *= slam_m # ...so scale it AFTER that load
 	_alive += 1
 	mob.died.connect(func(_killer: Character) -> void: _on_mob_died())
 	if npc != null:
@@ -227,8 +238,11 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 
 ## Force DUNGEON behavior on a freshly-spawned mob regardless of its enemy type:
 ## never respawn (single-life), never leash (commit to the fight), and — unless
-## it's the boss — drop nothing (the payoff is completing the dungeon, not farming
-## trash). Server-side overrides applied after the spawn's _ready. NB: replace the
+## it's the boss — pay nothing (the payoff is completing the dungeon, not farming
+## trash): no loot, no character XP, no mastery XP. Quest / daily / Slayer counters
+## still tick, because a kill is a kill however the body got spawned; see
+## HostileNpc.grants_skill_xp. Server-side overrides applied after the spawn's
+## _ready. NB: replace the
 ## loot array with a fresh one — never clear it in place, it's shared with the
 ## EnemyTypeResource. Shared with BossController (it stamps its summoned adds).
 ## Setting max_distance_from_spawn to NO_LEASH_DISTANCE is what makes
@@ -239,6 +253,7 @@ static func make_dungeon_mob(mob: Node, is_boss: bool) -> void:
 	mob.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
 	if not is_boss:
 		mob.xp_reward = 0
+		mob.grants_skill_xp = false
 		var no_loot: Array[LootDrop] = []
 		mob.loot = no_loot
 

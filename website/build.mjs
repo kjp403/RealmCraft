@@ -876,11 +876,151 @@ function collectQuests() {
       name,
       description: str(doc.resource.description),
       xp: num(doc.resource.reward_xp),
+      masteryXp: num(doc.resource.reward_mastery_xp),
       gold: num(doc.resource.reward_gold),
       title: str(doc.resource.grant_title),
+      minLevel: num(doc.resource.min_level),
+      rewardItems: asArray(doc.resource.reward_items)
+        .map((ref) => {
+          const sub = resolveSub(doc, ref);
+          if (!sub) return null;
+          return {
+            itemPath: resolveExt(doc, sub.props.item),
+            amount: num(sub.props.amount, 1) || 1,
+          };
+        })
+        .filter((r) => r && r.itemPath),
     });
   }
   rows.sort((a, b) => a.name.localeCompare(b.name));
+  return rows;
+}
+
+/**
+ * Every shop in the game, with the NPC that runs it. The wiki listed items with
+ * their stats and never said where a single one came from, which left the whole
+ * gear ladder invisible — this is half of the answer ("buy it"), and
+ * collectStations / the creature loot tables are the rest.
+ */
+function collectShops() {
+  const shopDir = path.join(ROOT, "source/common/gameplay/shops/resources");
+  const rows = [];
+  if (!fs.existsSync(shopDir)) return rows;
+  for (const file of walk(shopDir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ShopResource") continue;
+    const entries = asArray(doc.resource.entries)
+      .map((ref) => {
+        const sub = resolveSub(doc, ref);
+        if (!sub) return null;
+        return {
+          itemPath: resolveExt(doc, sub.props.item),
+          price: num(sub.props.price),
+          currencyPath:
+            resolveExt(doc, sub.props.currency_item) || resolveExt(doc, doc.resource.currency_item),
+        };
+      })
+      .filter((e) => e && e.itemPath);
+    if (!entries.length) continue;
+    rows.push({
+      name: str(doc.resource.shop_name) || basenameSlug(file).replace(/_/g, " "),
+      file: file.replace(/\\/g, "/"),
+      entries,
+      vendors: [],
+    });
+  }
+  // Which NPC stands behind each counter. Shops are referenced by path from the
+  // NPC's ShopInteraction, so a plain ext_resource scan resolves the pairing.
+  const npcDir = path.join(ROOT, "source/common/gameplay/characters/npc/npcs");
+  if (fs.existsSync(npcDir)) {
+    for (const file of walk(npcDir).filter((f) => f.endsWith(".tres"))) {
+      let doc;
+      try {
+        doc = parseTres(read(file));
+      } catch {
+        continue;
+      }
+      const npcName = str(doc.resource.npc_name);
+      if (!npcName) continue;
+      for (const rec of Object.values(doc.ext)) {
+        const shopPath = resToFs(String(rec.path || ""));
+        if (!shopPath) continue;
+        const match = rows.find((r) => r.file === shopPath.replace(/\\/g, "/"));
+        if (match && !match.vendors.includes(npcName)) match.vendors.push(npcName);
+      }
+    }
+  }
+  return rows;
+}
+
+/** Every crafting station and what its recipes produce. */
+function collectStations() {
+  const dir = path.join(ROOT, "source/common/gameplay/crafting/resources");
+  const rows = [];
+  if (!fs.existsSync(dir)) return rows;
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "CraftingStationResource") continue;
+    const recipes = asArray(doc.resource.recipes)
+      .map((ref) => {
+        const sub = resolveSub(doc, ref);
+        if (!sub) return null;
+        return {
+          itemPath: resolveExt(doc, sub.props.output_item),
+          amount: num(sub.props.output_amount, 1) || 1,
+          level: num(sub.props.required_level),
+          ingredients: asArray(sub.props.ingredients)
+            .map((iref) => {
+              const ing = resolveSub(doc, iref);
+              if (!ing) return null;
+              return { itemPath: resolveExt(doc, ing.props.item), amount: num(ing.props.amount, 1) || 1 };
+            })
+            .filter((i) => i && i.itemPath),
+        };
+      })
+      .filter((r) => r && r.itemPath);
+    if (!recipes.length) continue;
+    rows.push({
+      name: str(doc.resource.station_name) || basenameSlug(file).replace(/_/g, " "),
+      // CraftingStationResource.profession defaults to &"smithing" in GDScript, so
+      // a station that never writes the field still trains it.
+      profession: str(doc.resource.profession) || "smithing",
+      recipes,
+    });
+  }
+  return rows;
+}
+
+/** Loot-chest tables, so "comes out of a chest" is a findable answer too. */
+function collectChests() {
+  const dir = path.join(ROOT, "source/common/gameplay/combat/chests");
+  const rows = [];
+  if (!fs.existsSync(dir)) return rows;
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ChestResource") continue;
+    rows.push({
+      name: str(doc.resource.display_name) || basenameSlug(file).replace(/_/g, " "),
+      tier: num(doc.resource.tier, 1) || 1,
+      drops: [...dropsFrom(doc, doc.resource.loot), ...dropsFrom(doc, doc.resource.exclusive_loot)],
+    });
+  }
+  rows.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
   return rows;
 }
 
@@ -900,6 +1040,232 @@ function lootList(drops, items) {
       return `<li>${label}${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`;
     })
     .join("")}</ul>`;
+}
+
+/**
+ * Builds "where does this come from" for every item, from the data that already
+ * describes it: creature loot tables, shop catalogs, crafting recipes, chest
+ * tables and quest rewards. Returns Map<itemSlug, {drops, shops, crafts, chests,
+ * quests}>.
+ *
+ * Without this the wiki could tell you a Steel Chestplate has 34 armor and not one
+ * word about how to end up wearing one, which is the whole reason the gear ladder
+ * read as invisible.
+ */
+function buildItemSources(items, creatures, shops, stations, chests, quests) {
+  const map = new Map();
+  const bucket = (itemPath) => {
+    const item = itemByPath(items, itemPath);
+    if (!item) return null;
+    if (!map.has(item.slug)) {
+      map.set(item.slug, { drops: [], shops: [], crafts: [], chests: [], quests: [] });
+    }
+    return map.get(item.slug);
+  };
+
+  for (const c of creatures) {
+    for (const d of c.loot) {
+      const b = bucket(d.itemPath);
+      if (b) b.drops.push({ creature: c, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const shop of shops) {
+    for (const e of shop.entries) {
+      const b = bucket(e.itemPath);
+      if (b) b.shops.push({ shop, price: e.price, currencyPath: e.currencyPath });
+    }
+  }
+  for (const st of stations) {
+    for (const r of st.recipes) {
+      const b = bucket(r.itemPath);
+      if (b) b.crafts.push({ station: st, recipe: r });
+    }
+  }
+  for (const chest of chests) {
+    for (const d of chest.drops) {
+      const b = bucket(d.itemPath);
+      if (b) b.chests.push({ chest, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const q of quests) {
+    for (const r of q.rewardItems || []) {
+      const b = bucket(r.itemPath);
+      if (b) b.quests.push({ quest: q, amount: r.amount });
+    }
+  }
+  // Best sources first: a 60% drop is the answer, a 0.1% one is trivia.
+  for (const v of map.values()) {
+    v.drops.sort((a, b) => b.chance - a.chance);
+    v.shops.sort((a, b) => a.price - b.price);
+    v.chests.sort((a, b) => a.chest.tier - b.chest.tier);
+  }
+  return map;
+}
+
+/** The "How to get it" block on an item page. Empty string when nothing knows. */
+function sourcesHtml(src, items) {
+  if (!src) {
+    return `<h2>How to get it</h2><p class="muted">No authored source yet — this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
+  }
+  const parts = [];
+  const itemLink = (p) => {
+    const it = itemByPath(items, p);
+    return it ? `<a href="/wiki/items/${it.slug}/">${esc(it.name)}</a>` : esc(basenameSlug(p || "").replace(/_/g, " "));
+  };
+
+  if (src.shops.length) {
+    parts.push(
+      `<h3>Bought from</h3><ul class="list-reset">${src.shops
+        .map((e) => {
+          const who = e.shop.vendors.length ? ` (${esc(e.shop.vendors.join(", "))})` : "";
+          const cur = e.currencyPath ? itemLink(e.currencyPath) : "gold";
+          return `<li>${esc(e.shop.name)}${who} — ${esc(String(e.price))} ${cur}</li>`;
+        })
+        .join("")}</ul>`
+    );
+  }
+  if (src.crafts.length) {
+    parts.push(
+      `<h3>Crafted at</h3><ul class="list-reset">${src.crafts
+        .map((c) => {
+          const lvl = c.recipe.level ? ` — needs ${esc(c.station.profession || "crafting")} ${c.recipe.level}` : "";
+          const ing = c.recipe.ingredients
+            .map((i) => `${itemLink(i.itemPath)}${i.amount > 1 ? " ×" + i.amount : ""}`)
+            .join(", ");
+          return `<li><strong>${esc(c.station.name)}</strong>${lvl}${ing ? `<br><span class="muted">${ing}</span>` : ""}</li>`;
+        })
+        .join("")}</ul>`
+    );
+  }
+  if (src.drops.length) {
+    parts.push(
+      `<h3>Dropped by</h3><ul class="list-reset">${src.drops
+        .slice(0, 12)
+        .map(
+          (d) =>
+            `<li><a href="/wiki/creatures/${d.creature.slug}/">${esc(d.creature.name)}</a>${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`
+        )
+        .join("")}</ul>`
+    );
+  }
+  if (src.chests.length) {
+    parts.push(
+      `<h3>Found in chests</h3><ul class="list-reset">${src.chests
+        .map((c) => `<li>${esc(c.chest.name)}${esc(fmtAmt(c.min, c.max))}</li>`)
+        .join("")}</ul>`
+    );
+  }
+  if (src.quests.length) {
+    parts.push(
+      `<h3>Quest reward</h3><ul class="list-reset">${src.quests
+        .map((q) => `<li><a href="/wiki/quests/">${esc(q.quest.name)}</a>${q.amount > 1 ? ` ×${q.amount}` : ""}</li>`)
+        .join("")}</ul>`
+    );
+  }
+  if (!parts.length) {
+    return `<h2>How to get it</h2><p class="muted">No authored source yet — this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
+  }
+  return `<h2>How to get it</h2>${parts.join("")}`;
+}
+
+/**
+ * One-line answer to "and where do I get this?", for the gear-path tables.
+ * Deliberately terse — the item page carries the full breakdown.
+ */
+function sourceSummary(src) {
+  if (!src) return "—";
+  const bits = [];
+  if (src.crafts.length) {
+    const best = src.crafts.reduce((a, b) => (a.recipe.level <= b.recipe.level ? a : b));
+    bits.push(
+      best.recipe.level
+        ? `Craft (${esc(best.station.profession)} ${best.recipe.level})`
+        : `Craft (${esc(best.station.name)})`
+    );
+  }
+  if (src.shops.length) bits.push(`Buy (${esc(String(src.shops[0].price))}g)`);
+  if (src.drops.length) bits.push(`Drop (${esc(src.drops[0].creature.name)})`);
+  if (src.chests.length) bits.push("Chest");
+  if (src.quests.length) bits.push("Quest");
+  return bits.join(" · ") || "—";
+}
+
+/**
+ * The gear ladder, grouped by the mastery level that unlocks each piece.
+ *
+ * Generated rather than written: a hand-authored tier list goes stale the first
+ * time someone re-tunes a required_mastery_level, and a stale ladder is worse
+ * than none. Weapons group by their own mastery category; armour is gated on
+ * &"any", meaning your BEST mastery, so it gets its own table.
+ */
+function gearPathPage(items, itemSources) {
+  const wearable = items.filter(
+    (it) => (it.kind === "Weapon" || it.kind === "Armor") && (it.requiredMastery || 0) >= 0
+  );
+  const tierOf = (it) => it.requiredMastery || 0;
+  const bands = [
+    [0, 1, "Mastery 1 — what you start in"],
+    [2, 9, "Mastery 2–9 — the first upgrade"],
+    [10, 19, "Mastery 10–19 — mid game"],
+    [20, 39, "Mastery 20–39 — late game"],
+    [40, 999, "Mastery 40+ — endgame"],
+  ];
+
+  const table = (rows) =>
+    rows.length
+      ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>How to get it</th></tr></thead><tbody>${rows
+          .map(
+            (it) =>
+              `<tr><td><a href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+                String(tierOf(it) || 1)
+              )}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
+          )
+          .join("")}</tbody></table>`
+      : `<p class="muted">Nothing in this band yet.</p>`;
+
+  const sections = bands
+    .map(([lo, hi, label]) => {
+      const inBand = wearable
+        .filter((it) => tierOf(it) >= lo && tierOf(it) <= hi)
+        .sort((a, b) => tierOf(a) - tierOf(b) || a.name.localeCompare(b.name));
+      if (!inBand.length) return "";
+      const weapons = inBand.filter((it) => it.kind === "Weapon");
+      const armour = inBand.filter((it) => it.kind === "Armor");
+      return `<h2>${esc(label)}</h2>
+        ${weapons.length ? `<h3>Weapons</h3>${table(weapons)}` : ""}
+        ${armour.length ? `<h3>Armour</h3>${table(armour)}` : ""}`;
+    })
+    .join("");
+
+  return shell({
+    title: "Gear path — Arkenelle Wiki",
+    active: "start",
+    body: `<main class="wrap">
+      ${crumb([
+        { href: "/wiki/", label: "Wiki" },
+        { href: "/wiki/getting-started/", label: "Getting started" },
+        { label: "Gear path" },
+      ])}
+      <article class="page prose">
+        <h1 class="section-title">Gear path</h1>
+        <p>Every weapon and armour piece in Arkenelle is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class, so the way to unlock the next tier of sword is to keep swinging a sword.</p>
+        <ul>
+          <li><strong>Weapons</strong> require mastery in their own class — a Bone Sword wants Swordsmanship, a spore wand wants Arcanist.</li>
+          <li><strong>Armour</strong> requires <em>any</em> mastery at that level, so your best-trained weapon carries what you can wear.</li>
+          <li><strong>Character level</strong> is derived from your five weapon masteries. It is a readout of your training, not a separate gate.</li>
+        </ul>
+        <h2>The four ways gear reaches you</h2>
+        <ol>
+          <li><strong>Bought.</strong> Wood tier comes from the Starter Merchant; each biome has a merchant selling its own tier. Item pages name the shop and the price.</li>
+          <li><strong>Crafted.</strong> Ore → bar at a Furnace, bar → gear at the Smithing Table. This is the main ladder from Bronze to Runite, and it needs the matching Smithing level.</li>
+          <li><strong>Dropped.</strong> Themed sets (bone, spore, bandit, and the rest) come off the monsters of that biome. Item pages list which creature and at what rate.</li>
+          <li><strong>Rewarded.</strong> Quest chains hand over gear and wood chests; chests roll materials and gold.</li>
+        </ol>
+        <p class="muted">Everything below is generated from the game files, so it matches the live build. Click any item for its full source list.</p>
+        ${sections}
+      </article>
+    </main>`,
+  });
 }
 
 function listPage(title, intro, cardsHtml, active) {
@@ -932,6 +1298,10 @@ function build() {
   const jobs = collectJobs();
   const slayer = collectSlayer();
   const quests = collectQuests();
+  const shops = collectShops();
+  const stations = collectStations();
+  const chests = collectChests();
+  const itemSources = buildItemSources(items, creatures, shops, stations, chests, quests);
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
@@ -1010,6 +1380,7 @@ function build() {
         <p class="muted">Generated from the live Godot resources, so names, stats, and drops match the game.</p>
         <div class="card-grid">
           <a class="card" href="/wiki/getting-started/"><h3>Getting started</h3><p>First steps, install, and how progression works.</p></a>
+          <a class="card" href="/wiki/getting-started/gear/"><h3>Gear path</h3><p>Every weapon and armour tier, what unlocks it, and where each piece comes from.</p></a>
           <a class="card" href="/wiki/items/"><h3>Items</h3><p>${items.length} weapons, armor, materials, potions, and more.</p></a>
           <a class="card" href="/wiki/creatures/"><h3>Creatures</h3><p>${creatures.length} enemies and bosses with authored loot.</p></a>
           <a class="card" href="/wiki/locations/"><h3>Locations</h3><p>${zones.length} zones and dungeons.</p></a>
@@ -1070,12 +1441,17 @@ function build() {
             <li>Professions (Mining, Woodcutting, Smithing, and the rest) each have their own 1–99 track.</li>
             <li>Training one path never closes another.</li>
           </ul>
+          <h2>Weapons and armour</h2>
+          <p>Gear is gated by <strong>Weapon Mastery</strong>, not character level, and it reaches you four ways: bought from a merchant, smithed from ore you mined, dropped by the monsters of a biome, or handed over as a quest reward.</p>
+          <p><a href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — every tier, what unlocks it, and where each piece comes from.</p>
           <h2>While it is alpha</h2>
           <p>Expect rough edges. Patch notes land in your Mailbox. Type <code>/players</code> to see who is online, and <code>/feedback</code> to send a bug or idea. <a href="${DISCORD}">Discord</a> is the other door.</p>
         </article>
       </main>`,
     })
   );
+
+  write("wiki/getting-started/gear/index.html", gearPathPage(items, itemSources));
 
   write(
     "wiki/guilds/index.html",
@@ -1102,7 +1478,8 @@ function build() {
       body: `<main class="wrap">
       ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Items" }])}
       <h1 class="section-title">Items</h1>
-      <p class="muted">${items.length} items pulled from game resources.</p>
+      <p class="muted">${items.length} items pulled from game resources. Every item page lists where it comes from — bought, crafted, dropped, or given.</p>
+      <p><a href="/wiki/getting-started/gear/">Read the gear path first</a> if you are not sure what to wear next.</p>
       <div class="filters" data-filters>
         <button type="button" class="active" data-kind="">All</button>
         ${kinds.map((k) => `<button type="button" data-kind="${esc(k)}">${esc(k)}</button>`).join("")}
@@ -1144,6 +1521,7 @@ function build() {
           </div>
           ${it.description ? `<p>${esc(it.description)}</p>` : ""}
           ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>` : ""}
+          <div class="prose">${sourcesHtml(itemSources.get(it.slug), items)}</div>
         </article></main>`,
       })
     );
@@ -1410,6 +1788,7 @@ function build() {
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
     ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper" },
+    { title: "Gear path", kind: "Guide", href: "/wiki/getting-started/gear/", haystack: "gear path weapon armor armour progression tier mastery upgrade where to get how to get bronze iron steel mithril adamant runite" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
     { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
     { title: "Slayer", kind: "Guide", href: "/wiki/slayer/", haystack: "slayer turael durael tasks" },

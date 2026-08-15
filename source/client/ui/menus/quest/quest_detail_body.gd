@@ -89,17 +89,33 @@ func _make_or_separator() -> Label:
 	return label
 
 
-## "Rewards: 160 XP, 12 gold, Bone Maul ×1" — omits zero parts; empty string
-## when the quest grants nothing (the line is skipped entirely).
+## "Rewards: 20,000 mastery XP, 1,500 gold, Wood Chest (Silver, Small) ×1" — omits
+## zero parts; empty string when the quest grants nothing (the line is skipped).
+##
+## Mastery XP is named, not just numbered: it goes to the weapon in your hands and
+## it is what character level is built from, so "20,000 XP" alone would leave the
+## player guessing which of the game's several XP pools just moved.
 func _reward_line(quest: Dictionary) -> String:
 	var parts: Array[String] = []
-	var xp: int = int(quest.get("reward_xp", 0))
+	var mastery_xp: int = int(quest.get("reward_mastery_xp", 0))
 	var gold: int = int(quest.get("reward_gold", 0))
-	if xp > 0:
-		parts.append("%d XP" % xp)
+	if mastery_xp > 0:
+		parts.append("%s mastery XP" % _fmt_amount(mastery_xp))
 	if gold > 0:
-		parts.append("%d gold" % gold)
+		parts.append("%s gold" % _fmt_amount(gold))
 	for item: Variant in quest.get("reward_items", []):
 		var entry: Dictionary = item
 		parts.append("%s ×%d" % [str(entry.get("name", "?")), int(entry.get("amount", 1))])
 	return "Rewards: %s" % ", ".join(parts) if not parts.is_empty() else ""
+
+
+## 20000 -> "20,000". Reward numbers reach five figures; unseparated they read as
+## noise and a misplaced digit is invisible.
+func _fmt_amount(value: int) -> String:
+	var digits: String = str(absi(value))
+	var out: String = ""
+	for i: int in digits.length():
+		if i > 0 and (digits.length() - i) % 3 == 0:
+			out += ","
+		out += digits[i]
+	return out

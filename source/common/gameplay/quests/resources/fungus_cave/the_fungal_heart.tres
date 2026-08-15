@@ -4,10 +4,15 @@
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
 [ext_resource type="Resource" uid="uid://0wt22r5mbmd" path="res://source/common/gameplay/quests/resources/fungus_cave/break_the_myconid_line.tres" id="3_q4"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_xqj7y"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="qr_chest"]
 
 [sub_resource type="Resource" id="Obj_kill_heart"]
 script = ExtResource("1_obj")
 enemy_type = &"fungal_heart"
+
+[sub_resource type="Resource" id="Reward_wood_chest"]
+script = ExtResource("4_xqj7y")
+item = ExtResource("qr_chest")
 
 [resource]
 script = ExtResource("2_quest")
@@ -18,7 +23,9 @@ min_level = 9
 unlock_message = "[Forager Maela] The Heart is what feeds all this. When you are ready, go end it."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q4")])
 reward_xp = 350
-reward_gold = 15
+reward_mastery_xp = 50000
+reward_gold = 2000
+reward_items = Array[ExtResource("4_xqj7y")]([SubResource("Reward_wood_chest")])
 grant_title = "Sporebane"
 grants_wardstone = &"fungus_cave"
 metadata/slug = &"the_fungal_heart"

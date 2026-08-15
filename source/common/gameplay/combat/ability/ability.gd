@@ -63,11 +63,42 @@ var has_aim_point: bool = false
 
 var last_action_time: float = -INF
 
+## Where a fired projectile leaves the body, as an offset from [member
+## Node2D.global_position]: up to hand height, then forward along the AIM RAY.
+##
+## These two numbers reproduce Character's hand rig — HandOffset sits at y = -10
+## and RightHandSpot at x = +15 — on purpose. When the hand pivot has settled on
+## the cursor, RightHandSpot IS `body + (0, -10) + aim * 15`, so a shot spawned
+## from here leaves the drawn weapon exactly as before.
+##
+## What changes is everything ELSE about that node. hand_pivot.rotation lerps
+## toward the cursor at 17.5/s, is snapped to 0.05 rad, and reaches the server over
+## a 20 Hz sync — so mid-turn it points somewhere the aim vector does not, and the
+## server's copy points somewhere the CLIENT's does not. Reading the muzzle off it
+## meant a shot could leave from up to 30 px (the socket's full diameter) off the
+## line the player aimed down, which is why moving and shooting missed: the origin
+## was smoothed, the direction was instantaneous, and the two disagreed. Deriving
+## the muzzle from the aim vector instead makes origin and direction a single
+## consistent piece of geometry on every peer.
+const MUZZLE_HEIGHT_PX: float = -10.0
+const MUZZLE_FORWARD_PX: float = 15.0
+
 
 ## Max cursor distance from the caster for ground-aimed abilities. Subclasses
 ## with a cast_range (Meteor) override; default keeps a sensible clamp.
 func get_ground_aim_range() -> float:
 	return 140.0
+
+
+## The world point a projectile fired by [param user] along [param direction]
+## should spawn at — see [constant MUZZLE_FORWARD_PX] for why this is computed
+## rather than read off the hand node. Shared by every projectile ability so they
+## cannot drift apart.
+static func muzzle_position(user: Entity, direction: Vector2) -> Vector2:
+	if user == null:
+		return Vector2.ZERO
+	var aim: Vector2 = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
+	return user.global_position + Vector2(0.0, MUZZLE_HEIGHT_PX) + aim * MUZZLE_FORWARD_PX
 
 
 func use_ability(_entity: Entity, _direction: Vector2) -> void:

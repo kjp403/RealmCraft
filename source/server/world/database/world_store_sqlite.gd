@@ -56,6 +56,7 @@ func save_player(player: PlayerResource) -> bool:
 	var dailies_json: String = JSON.stringify({
 		"quests": player.daily_quests,
 		"refresh_at_ms": player.dailies_refresh_at_ms,
+		"skips_used": player.dailies_skips_used,
 	})
 	var dungeon_lockouts_json: String = JSON.stringify(player.dungeon_lockouts)
 	var redeemed_codes_json: String = JSON.stringify(player.redeemed_codes)
@@ -163,20 +164,64 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	)
 	player.owned_skins = PackedInt64Array([starter_skin])
 
-	# Starting kit: ONE potion + gold, no weapon — a fresh character's first
-	# decision is choosing a weapon at the starter shop (sword / bow / wand /
-	# hammer, 6-8g), which seeds build identity and teaches the economy. 25g
-	# covers a weapon + a potion or a cheap armor piece.
 	player.inventory = {}
 	player.bank = {}
 	player.pending_chest_loot = []
-	Inventory.add_item(player.inventory, 1, 1) # health_potion
-	Inventory.add_item(player.inventory, Economy.gold_id(), 25)
+	_grant_starting_kit(player)
 	# Starting attribute points so a new character has something to spend.
 	player.available_attributes_points = PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL
 	# Leave defaults to PlayerResource where possible.
 	save_player(player)
 	return next_id
+
+
+## The one-time kit every new character starts with.
+##
+## This used to be 25 gold and a single potion, on the theory that a fresh
+## character's first decision should be picking a weapon at the Starter Merchant.
+## In practice players walked straight past the merchant, never learned the
+## weapons existed, and met their first goblin bare-handed. So the kit now HANDS
+## OVER one of each wood weapon and tool: the choice is still theirs, it just
+## happens in the inventory screen where they can see all five options at once
+## instead of behind an NPC they have to notice.
+##
+## The gold is 1,000 rather than 25 because prices moved and the old number never
+## did — a Minor Health Potion is 500g at that same merchant, so 25g bought
+## nothing at all.
+##
+## Slugs, not raw ids: a re-Generate of the item registry renumbers ids, and a kit
+## silently granting the wrong item is the kind of bug nobody notices for weeks.
+## Anything that fails to resolve is skipped, so a renamed item costs one line of
+## the kit rather than the whole character creation.
+const STARTING_KIT: Array[Array] = [
+	# Consumables to survive the first fight.
+	[&"health_potion", 5],
+	[&"minor_health_potion", 5],
+	# One of each wood weapon — the five mastery lines, all openable from turn one.
+	[&"sword.item", 1],
+	[&"wooden_bow.item", 1],
+	[&"wand.item", 1],
+	[&"hammer.item", 1],
+	[&"book_wood.item", 1],
+	# One of each wood gathering tool, so every profession is reachable too.
+	[&"axe", 1],
+	[&"pickaxe", 1],
+	[&"sickle", 1],
+	[&"fishing_rod", 1],
+]
+const STARTING_GOLD: int = 1000
+
+
+static func _grant_starting_kit(player: PlayerResource) -> void:
+	for entry: Array in STARTING_KIT:
+		var item_id: int = ContentRegistryHub.id_from_slug(&"items", entry[0] as StringName)
+		if item_id <= 0:
+			push_warning("Starting kit: no item registered for slug '%s' — skipped." % entry[0])
+			continue
+		Inventory.add_item(player.inventory, item_id, int(entry[1]))
+	var gold_id: int = Economy.gold_id()
+	if gold_id > 0:
+		Inventory.add_item(player.inventory, gold_id, STARTING_GOLD)
 
 
 ## Titles that were seeded once and are no longer granted. Stripped on load (and
@@ -532,6 +577,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		var quests_v: Variant = (dailies_v as Dictionary).get("quests", [])
 		player.daily_quests = quests_v if quests_v is Array else []
 		player.dailies_refresh_at_ms = int((dailies_v as Dictionary).get("refresh_at_ms", 0))
+		player.dailies_skips_used = int((dailies_v as Dictionary).get("skips_used", 0))
 
 	var lockouts_v: Variant = JSON.parse_string(str(row.get("dungeon_lockouts_json", "{}")))
 	player.dungeon_lockouts = lockouts_v if lockouts_v is Dictionary else {}

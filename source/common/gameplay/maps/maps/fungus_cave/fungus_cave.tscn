@@ -27,6 +27,7 @@
 [ext_resource type="Resource" uid="uid://cfungalkeeper01" path="res://source/common/gameplay/characters/npc/npcs/fungal_keeper.tres" id="27_fungk"]
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 [ext_resource type="AudioStream" uid="uid://epws31tb1n8o" path="res://assets/audio/music/shadow_temple.ogg" id="mus_shadow_temple"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/fungus/spore_tick.tres" id="lv_sporetick"]
 
 
 
@@ -303,3 +304,33 @@ offset_top = -1328.0
 offset_right = 589.0
 offset_bottom = -1305.0
 text = "In construction"
+
+[node name="SporeTick1" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(-584, -184)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null
+
+[node name="SporeTick2" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(-352, -344)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null
+
+[node name="SporeTick3" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(-16, -936)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null
+
+[node name="SporeTick4" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(192, -832)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null
+
+[node name="SporeTick5" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(-600, -240)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null
+
+[node name="SporeTick6" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
+position = Vector2(-408, -200)
+enemy_data = ExtResource("lv_sporetick")
+weapon = null

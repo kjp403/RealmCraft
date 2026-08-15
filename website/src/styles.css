@@ -411,3 +411,12 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
   .search-wrap input { width: 100%; }
   .hero { min-height: 58vh; }
 }
+
+/* Gear path tables — the generated tier ladder under /wiki/getting-started/gear/.
+   Scrolls inside itself so a three-column table never widens the page on mobile. */
+.gear-table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1.4rem; font-size: 0.92rem; }
+.gear-table th, .gear-table td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.gear-table th { color: var(--muted); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.gear-table td:nth-child(2) { width: 6rem; color: var(--muted); }
+.gear-table td:nth-child(3) { color: var(--muted); }
+.prose h3 { margin: 1.1rem 0 0.2rem; font-size: 1rem; }

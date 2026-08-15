@@ -8,23 +8,42 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="3_gold"]
 [ext_resource type="SpriteFrames" uid="uid://5xabqgmgve5p" path="res://source/common/gameplay/characters/sprite_frames/fungus_immature.tres" id="4_skin"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="fx_hide"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="fx_bloodcap"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="fx_potion"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
 item = ExtResource("3_gold")
-min_amount = 1
-max_amount = 2
-chance = 0.8
+min_amount = 25
+max_amount = 60
+chance = 0.95
 
 [sub_resource type="Resource" id="Drop_cloth"]
 script = ExtResource("2_loot")
 item = ExtResource("3_cloth")
-chance = 0.15
+max_amount = 2
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_hide"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_hide")
+max_amount = 2
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_bloodcap"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_bloodcap")
+chance = 0.12
+
+[sub_resource type="Resource" id="Drop_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_potion")
+chance = 0.08
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
-chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -44,6 +63,6 @@ detection_radius = 110
 chase_on_area = true
 xp_reward = 22
 respawn_delay = 12.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_bone")])
 metadata/slug = &"sporeling"
 metadata/id = 35

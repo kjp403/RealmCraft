@@ -1,0 +1,58 @@
+[gd_resource type="Resource" script_class="EnemyTypeResource" format=3]
+
+[ext_resource type="Script" uid="uid://bhs3kv3tyysi7" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_attack"]
+[ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_behavior"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_drop"]
+[ext_resource type="Script" uid="uid://swk8b8q32qv2" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_type"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_bat.tres" id="5_skin"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="l0_gold"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="l1_bone"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="l2_hide_cave"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("3_drop")
+item = ExtResource("l0_gold")
+min_amount = 15
+max_amount = 35
+chance = 0.9
+
+[sub_resource type="Resource" id="Drop_bone"]
+script = ExtResource("3_drop")
+item = ExtResource("l1_bone")
+
+[sub_resource type="Resource" id="Drop_hide_cave"]
+script = ExtResource("3_drop")
+item = ExtResource("l2_hide_cave")
+max_amount = 2
+chance = 0.35
+
+[resource]
+script = ExtResource("4_type")
+enemy_type = &"dusk_bat"
+display_name = "Dusk Bat"
+skin = ExtResource("5_skin")
+visual_scale = 0.7
+is_boss = false
+combat_level = 17
+max_health = 340.0
+attack_damage = 9.0
+attack_cooldown = 1.1
+armor = 4.0
+mr = 6.0
+move_speed = 100
+distance_to_attack = 16
+max_distance_from_spawn = 260
+leashes = true
+detection_radius = 80
+chase_on_area = false
+is_lone = true
+wander_radius = 70.0
+wander_pause_min_s = 0.8
+wander_pause_max_s = 2.4
+xp_reward = 14
+respawn_delay = 9.0
+respawns = true
+behaviors = Array[ExtResource("2_behavior")]([])
+attacks = Array[ExtResource("1_attack")]([])
+loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_hide_cave")])
+metadata/slug = &"dusk_bat"

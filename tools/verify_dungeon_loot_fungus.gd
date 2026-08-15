@@ -70,8 +70,17 @@ func _init() -> void:
 		fails.append("Dark Cave dungeon resource incomplete")
 	elif dark.normal_health_mult < 10.0 or dark.normal_damage_mult < 6.0:
 		fails.append("Dark Cave trash multipliers too low for Runite/Fire kits")
-	elif dark.boss_solo_health < 4999.0 or dark.boss_health_per_extra_player < 2499.0:
-		fails.append("Dark Cave boss should be 5k HP solo + 2500 per extra player")
+	elif dark.party_boss_health(1) < 4999.0 or dark.party_boss_health(2) < 9999.0 \
+			or dark.party_boss_health(3) < 17499.0 or dark.party_boss_health(4) < 24999.0:
+		fails.append("Dark Cave boss HP should be 5k/10k/17.5k/25k by party size")
+	if fungus == null or fungus.reward == null or fungus.hard_reward == null:
+		fails.append("Fungus Domain dungeon resource incomplete")
+	elif fungus.normal_health_mult < 3.0 or fungus.normal_damage_mult < 5.0:
+		fails.append("Fungus Domain trash multipliers too low vs Dark Cave")
+	elif fungus.party_boss_health(1) < 6499.0 or fungus.party_boss_health(4) < 31999.0:
+		fails.append("Fungus Domain boss HP should scale above Dark Cave (6.5k solo / 32k four)")
+	elif fungus.boss_slam_damage < 150.0 or fungus.boss_slam_damage > 250.0:
+		fails.append("Fungus Domain slam should be a dodgeable chunk, not a one-shot")
 	var mage: EnemyTypeResource = load(
 		"res://source/common/gameplay/characters/npc/types/skeleton_mage.tres"
 	) as EnemyTypeResource
@@ -79,8 +88,6 @@ func _init() -> void:
 		fails.append("skeleton_mage.tres missing")
 	elif mage.slam_damage > 20.0:
 		fails.append("Dark Cave mage slam still one-shots (%s)" % mage.slam_damage)
-	if fungus == null or fungus.reward == null or fungus.hard_reward == null:
-		fails.append("Fungus Domain dungeon resource incomplete")
 	if fungus != null and fungus.display_name != "Fungus Domain":
 		fails.append("Fungus Domain display_name wrong")
 

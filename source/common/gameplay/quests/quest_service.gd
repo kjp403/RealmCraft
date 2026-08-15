@@ -98,8 +98,9 @@ static func objective_count(
 	return mini(resource.quest_progress(quest_id, objective_index), objective.required_amount)
 
 
-## Applies a turn-in: consumes COLLECT items + the delivery item, grants XP /
-## gold / item rewards, marks the quest turned_in, unlocks any title, pushes
+## Applies a turn-in: consumes COLLECT items + the delivery item, grants adventure
+## XP / weapon-mastery XP / gold / item rewards, marks the quest turned_in,
+## unlocks any title, pushes
 ## the combat.reward + quest.update feedback, and fires milestone unlocks.
 ## Shared between the manual turn-in handler and the auto_complete path that
 ## fires from inside _advance_matching the moment a self-completing quest
@@ -137,6 +138,10 @@ static func apply_turn_in(
 
 	var level_before: int = resource.level
 	var progress: Dictionary = resource.add_experience(quest.reward_xp)
+	# The reward that actually progresses a character: weapon-mastery XP into the
+	# category in hand. reward_xp alone only moved the lifetime adventure counter,
+	# which levels nothing since character level became mastery-derived.
+	var mastery: Dictionary = RewardService.grant_mastery_reward(peer_id, quest.reward_mastery_xp)
 	var quest_id: int = int(quest.get_meta(&"id", 0))
 	resource.set_quest_turned_in(quest_id)
 
@@ -162,6 +167,9 @@ static func apply_turn_in(
 			"experience": resource.experience,
 			"xp_to_next": resource.level_xp_to_next(),
 			"loot": loot,
+			# Rides the same key a kill uses, so the mastery bar, toast and
+			# level-up ceremony all fire for a turn-in with no client changes.
+			"mastery": mastery,
 		})
 		WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": quest_messages})
 

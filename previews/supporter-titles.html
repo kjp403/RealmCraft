@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Supporter titles — in-game look</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0d12;
+      color: #ece8e0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      padding: 1.4rem 1.2rem 2.4rem;
+    }
+    h1 { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.35rem; color: #d4a06a; }
+    p.note { color: #8a8a92; font-size: 0.85rem; margin: 0 0 1.3rem; }
+    h2 { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8a92; margin: 1.6rem 0 0.7rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; }
+    .card {
+      background: #14161c;
+      border: 1px solid #c47a3a;
+      border-radius: 2px;
+      padding: 1.1rem 0.9rem 1rem;
+      text-align: center;
+    }
+    .tabs { color: #d4a06a; font-size: 0.78rem; margin-bottom: 0.85rem; }
+    .tabs span { color: #6e6e76; margin-left: 0.7rem; }
+    .sprite {
+      width: 56px; height: 72px; margin: 0 auto 0.55rem;
+      background: linear-gradient(180deg, #3a5a8a, #1e334f);
+      border: 1px solid #2a3344;
+    }
+    .name { font-size: 1.15rem; font-weight: 600; }
+    .title { margin: 0.15rem 0 0; font-size: 0.92rem; }
+    .handle { color: #9a9aa3; font-size: 0.82rem; margin-top: 0.1rem; }
+    .chips { display: flex; justify-content: center; gap: 0.35rem; margin-top: 0.7rem; flex-wrap: wrap; }
+    .chip {
+      border: 1px solid #3a3a44;
+      background: #1c1e26;
+      padding: 0.12rem 0.45rem;
+      font-size: 0.72rem;
+      color: #b8b8c0;
+    }
+    .chat {
+      background: #12141a;
+      border: 1px solid #2a2a32;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .chat .row { margin: 0.15rem 0; }
+    .chan { color: #66d9ff; }
+    .who { color: #7ec8ff; }
+    .guild { color: #7a7a7a; }
+    .msg { color: #d8d8de; }
+    .c-sapphire { color: #7ec0ff; }
+    .c-emerald { color: #5ee0a0; }
+    .c-ruby { color: #f08a8a; }
+    .c-custom { color: #e8c56a; }
+    .c-gold { color: #c8b977; }
+  </style>
+</head>
+<body>
+  <h1>Supporter titles in-game</h1>
+  <p class="note">Profile shows <strong>— Title —</strong> under the name. Chat shows <strong>« Title »</strong> on the name line. Same gem colors in both places.</p>
+
+  <h2>Profile Overview</h2>
+  <div class="grid">
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-sapphire">— Sapphire VIP —</div>
+      <div class="handle">@tomatoface</div>
+      <div class="chips"><span class="chip c-sapphire">Sapphire VIP</span></div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-emerald">— Emerald Supporter —</div>
+      <div class="handle">@tomatoface</div>
+      <div class="chips"><span class="chip c-emerald">Emerald Supporter</span></div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-ruby">— Ruby VIP —</div>
+      <div class="handle">@tomatoface</div>
+      <div class="chips"><span class="chip c-ruby">Ruby VIP</span></div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-custom">— Arkenelle Supporter —</div>
+      <div class="handle">@tomatoface</div>
+      <div class="chips"><span class="chip c-custom">Arkenelle Supporter</span></div>
+    </article>
+  </div>
+
+  <h2>Chatbox name line</h2>
+  <div class="chat">
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-sapphire">« Sapphire VIP »</span></div>
+    <div class="row msg">anyone doing hollow</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-emerald">« Emerald Supporter »</span></div>
+    <div class="row msg">gg</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-ruby">« Ruby VIP »</span></div>
+    <div class="row msg">thanks for the run</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-custom">« Arkenelle Supporter »</span></div>
+    <div class="row msg">keep arkenelle going</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-gold">« Iron Warden »</span></div>
+    <div class="row msg">quest title stays the old gold</div>
+  </div>
+</body>
+</html>

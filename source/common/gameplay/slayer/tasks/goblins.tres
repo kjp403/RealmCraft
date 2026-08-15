@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_task")
 display_name = "Goblins"
-enemy_types = Array[StringName]([&"goblin_runt", &"goblin_cutter", &"goblin_slinger", &"goblin_shaman"])
+enemy_types = Array[StringName]([&"goblin_runt", &"goblin_cutter", &"goblin_slinger", &"goblin_shaman", &"goblin_chief"])
 min_slayer_level = 1
 xp_per_kill = 93
-guide_notes = "Any goblin in the woodland warren counts — runts fall fastest, shamans and slingers hit at range so close the gap quickly. Avoid pulling the whole camp at once."
+guide_notes = "Any goblin in the woodland warren counts — runts fall fastest, shamans and slingers hit at range so close the gap quickly. The Goblin Chief counts too, and pays a boss bonus on top; the runts he summons are goblins like any other. Avoid pulling the whole camp at once."
 location_hint = "Goblin Woodland"

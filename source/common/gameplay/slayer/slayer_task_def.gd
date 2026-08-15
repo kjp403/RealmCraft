@@ -56,8 +56,10 @@ func matches(enemy_type: StringName) -> bool:
 	return enemy_types.has(enemy_type)
 
 
-## Base Slayer XP/kill across this task's roster (perk multipliers applied by
-## [method SlayerTaskService.status_payload]). Falls back to [member xp_per_kill]
+## Base Slayer XP/kill across this task's roster, boss bonus included (perk
+## multipliers applied by [method SlayerTaskService.status_payload]). A roster with
+## a boss in it therefore advertises a wide range — which is the honest read: the
+## Goblin Chief really is worth many runts. Falls back to [member xp_per_kill]
 ## when no enemy type loads.
 func xp_per_kill_range() -> Vector2i:
 	var lo: int = 0
@@ -71,7 +73,11 @@ func xp_per_kill_range() -> Vector2i:
 				&"enemy_types", slug
 			) as EnemyTypeResource
 			if enemy != null:
-				xp = maxi(1, roundi(float(enemy.combat_skill_xp()) * SlayerTaskService.SLAYER_XP_RATIO))
+				xp = maxi(1, roundi(
+					float(enemy.combat_skill_xp())
+					* SlayerTaskService.SLAYER_XP_RATIO
+					* SlayerTaskService.boss_xp_bonus(enemy.is_boss)
+				))
 		if xp <= 0:
 			continue
 		if lo <= 0:

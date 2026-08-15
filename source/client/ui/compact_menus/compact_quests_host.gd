@@ -485,17 +485,30 @@ func _make_objective_label(objective: Dictionary) -> Label:
 	return label
 
 
+## 20000 -> "20,000", so five-figure rewards stay readable at a glance.
+func _fmt_amount(value: int) -> String:
+	var digits: String = str(absi(value))
+	var out: String = ""
+	for i: int in digits.length():
+		if i > 0 and (digits.length() - i) % 3 == 0:
+			out += ","
+		out += digits[i]
+	return out
+
+
 func _reward_text(quest: Dictionary) -> String:
 	var rewards := PackedStringArray()
 
-	var reward_xp: int = int(quest.get("reward_xp", 0))
+	# Mastery XP, not the vestigial adventure counter: it is the number that moves
+	# a character forward, and naming it says which pool the reward lands in.
+	var reward_mastery_xp: int = int(quest.get("reward_mastery_xp", 0))
 	var reward_gold: int = int(quest.get("reward_gold", 0))
 
-	if reward_xp > 0:
-		rewards.append("%d XP" % reward_xp)
+	if reward_mastery_xp > 0:
+		rewards.append("%s Mastery XP" % _fmt_amount(reward_mastery_xp))
 
 	if reward_gold > 0:
-		rewards.append("%d Gold" % reward_gold)
+		rewards.append("%s Gold" % _fmt_amount(reward_gold))
 
 	for reward: Dictionary in quest.get("reward_items", []):
 		var reward_name: String = str(
