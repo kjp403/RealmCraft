@@ -1,0 +1,203 @@
+function collectQuests() {
+  const dir = path.join(ROOT, "source/common/gameplay/quests/resources");
+  const rows = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    const doc = parseTres(read(file));
+    if (doc.header.script_class !== "QuestResource") continue;
+    const name = str(doc.resource.quest_name);
+    if (!name) continue;
+    const campaign = campaignOf(file);
+    rows.push({
+      key: fileKey(file),
+      slug: slugify(str(doc.resource["metadata/slug"]) || basenameSlug(file)),
+      name,
+      description: str(doc.resource.description),
+      xp: num(doc.resource.reward_xp),
+      masteryXp: num(doc.resource.reward_mastery_xp),
+      gold: num(doc.resource.reward_gold),
+      title: str(doc.resource.grant_title),
+      wardstone: str(doc.resource.grants_wardstone),
+      minLevel: num(doc.resource.min_level),
+      minSkill: str(doc.resource.min_skill),
+      minSkillLevel: num(doc.resource.min_skill_level),
+      autoComplete: Boolean(doc.resource.auto_complete),
+      completionAny: num(doc.resource.completion) === 1,
+      requiresAny: num(doc.resource.requires_mode) === 1,
+      campaign,
+      campaignMeta: CAMPAIGN[campaign],
+      file,
+      prereqKeys: asArray(doc.resource.requires_quests)
+        .map((ref) => fileKey(resolveExt(doc, ref)))
+        .filter(Boolean),
+      rewardItems: asArray(doc.resource.reward_items)
+        .map((ref) => {
+          const sub = resolveSub(doc, ref);
+          if (!sub) return null;
+          return {
+            itemPath: resolveExt(doc, sub.props.item),
+            amount: num(sub.props.amount, 1) || 1,
+          };
+        })
+        .filter((r) => r && r.itemPath),
+      styleWeapons: asArray(doc.resource.reward_style_weapons)
+        .map((ref) => resolveExt(doc, ref))
+        .filter(Boolean),
+      grantOnAccept: resolveExt(doc, doc.resource.grant_on_accept),
+      objectives: asArray(doc.resource.objectives)
+        .map((ref) => {
+          const sub = resolveSub(doc, ref);
+          if (!sub) return null;
+          return {
+            type: num(sub.props.type, OBJ_KILL),
+            enemy: str(sub.props.enemy_type),
+            itemPath: resolveExt(doc, sub.props.item),
+            amount: num(sub.props.required_amount, 1) || 1,
+            visitName: str(sub.props.target_giver_name),
+            visitKey: str(sub.props.target_giver_key),
+            label: str(sub.props.label_override),
+            grantItemPath: resolveExt(doc, sub.props.grant_item),
+          };
+        })
+        .filter(Boolean),
+      givers: [],
+      prereqs: [],
+      unlocks: [],
+      depth: 0,
+    });
+  }
+  return rows;
+}
+
+function attachQuestGraph(quests, npcs) {
+  const byKey = new Map(quests.map((q) => [q.key, q]));
+  for (const n of npcs) {
+    n.quests = [];
+    for (const key of n.questKeys || []) {
+      const q = byKey.get(key);
+      if (!q) continue;
+      if (!q.givers.some((g) => g.slug === n.slug)) q.givers.push(n);
+      if (!n.quests.some((x) => x.slug === q.slug)) n.quests.push(q);
+    }
+  }
+  for (const q of quests) {
+    q.prereqs = q.prereqKeys.map((k) => byKey.get(k)).filter(Boolean);
+    q.unlocks = [];
+  }
+  for (const q of quests) {
+    for (const pre of q.prereqs) pre.unlocks.push(q);
+  }
+  const seen = new Set();
+  const visiting = new Set();
+  const walkDepth = (q) => {
+    if (seen.has(q.slug)) return q.depth;
+    if (visiting.has(q.slug)) return 0;
+    visiting.add(q.slug);
+    q.depth = q.prereqs.reduce((d, pre) => Math.max(d, walkDepth(pre) + 1), 0);
+    visiting.delete(q.slug);
+    seen.add(q.slug);
+    return q.depth;
+  };
+  for (const q of quests) walkDepth(q);
+  quests.sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  return byKey;
+}
+
+function questHref(q) {
+  return `/wiki/quests/${q.slug}/`;
+}
+
+function campaignHref(id) {
+  return `/wiki/quests/${CAMPAIGN[id]?.slug || id}/`;
+}
+
+function itemHrefLabel(items, itemPath) {
+  const it = itemByPath(items, itemPath);
+  if (it) return `<a href="/wiki/items/${it.slug}/">${esc(it.name)}</a>`;
+  return esc(fileKey(itemPath).replace(/_/g, " "));
+}
+
+function describeObjective(obj, items, creatures, npcs) {
+  const amt = obj.amount > 1 ? `${obj.amount} ` : "";
+  let core = "";
+  if (obj.type === OBJ_VISIT) {
+    const who = obj.visitName || obj.visitKey.replace(/_/g, " ") || "the indicated person";
+    const npc = npcs.find((n) => n.slug === obj.visitKey || fileKey(n.file) === obj.visitKey);
+    const label = npc ? `<a href="/wiki/npcs/${npc.slug}/">${esc(who)}</a>` : esc(who);
+    core = `Speak with ${label}`;
+  } else if (obj.type === OBJ_CRAFT) {
+    core = `Craft ${amt}${obj.label ? esc(obj.label) : itemHrefLabel(items, obj.itemPath)}`;
+  } else if (obj.type === OBJ_COLLECT) {
+    core = `Bring ${amt}${obj.label ? esc(obj.label) : itemHrefLabel(items, obj.itemPath)}`;
+  } else {
+    const c = creatures.find((x) => x.type === obj.enemy || x.slug === obj.enemy);
+    const foe = c
+      ? `<a href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`
+      : esc((obj.enemy || "enemy").replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase()));
+    core = `Defeat ${amt}${foe}`;
+  }
+  if (obj.grantItemPath) core += ` <span class="muted">(yields ${itemHrefLabel(items, obj.grantItemPath)})</span>`;
+  return core;
+}
+
+/**
+ * Every shop in the game, with the NPC that runs it. The wiki listed items with
+ * their stats and never said where a single one came from, which left the whole
+ * gear ladder invisible ??? this is half of the answer ("buy it"), and
+ * collectStations / the creature loot tables are the rest.
+ */
+function collectShops() {
+  const shopDir = path.join(ROOT, "source/common/gameplay/shops/resources");
+  const rows = [];
+  if (!fs.existsSync(shopDir)) return rows;
+  for (const file of walk(shopDir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ShopResource") continue;
+    const entries = asArray(doc.resource.entries)
+      .map((ref) => {
+        const sub = resolveSub(doc, ref);
+        if (!sub) return null;
+        return {
+          itemPath: resolveExt(doc, sub.props.item),
+          price: num(sub.props.price),
+          currencyPath:
+            resolveExt(doc, sub.props.currency_item) || resolveExt(doc, doc.resource.currency_item),
+        };
+      })
+      .filter((e) => e && e.itemPath);
+    if (!entries.length) continue;
+    rows.push({
+      name: str(doc.resource.shop_name) || basenameSlug(file).replace(/_/g, " "),
+      file: file.replace(/\\/g, "/"),
+      entries,
+      vendors: [],
+    });
+  }
+  // Which NPC stands behind each counter. Shops are referenced by path from the
+  // NPC's ShopInteraction, so a plain ext_resource scan resolves the pairing.
+  const npcDir = path.join(ROOT, "source/common/gameplay/characters/npc/npcs");
+  if (fs.existsSync(npcDir)) {
+    for (const file of walk(npcDir).filter((f) => f.endsWith(".tres"))) {
+      let doc;
+      try {
+        doc = parseTres(read(file));
+      } catch {
+        continue;
+      }
+      const npcName = str(doc.resource.npc_name);
+      if (!npcName) continue;
+      for (const rec of Object.values(doc.ext)) {
+        const shopPath = resToFs(String(rec.path || ""));
+        if (!shopPath) continue;
+        const match = rows.find((r) => r.file === shopPath.replace(/\\/g, "/"));
+        if (match && !match.vendors.includes(npcName)) match.vendors.push(npcName);
+      }
+    }
+  }
+  return rows;
+}
+
