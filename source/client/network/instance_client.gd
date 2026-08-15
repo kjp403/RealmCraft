@@ -242,6 +242,8 @@ static func _on_dungeon_room(payload: Dictionary) -> void:
 		return
 	var is_open: bool = not bool(payload.get("sealed", false))
 	for door_path: String in payload.get("doors", []):
+		if door_path.is_empty():
+			continue
 		var door: Node = current.instance_map.get_node_or_null(NodePath(door_path))
 		if door != null and door.has_method(&"set_open"):
 			door.set_open(is_open)

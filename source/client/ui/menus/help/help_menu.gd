@@ -10,7 +10,7 @@ A hard, sandbox MMORPG. No forced path and no hand-holding. Explore, fight, buil
 Talk to NPCs. The Hall Keeper near your starting cell has a first quest. NPCs offering quests are the main thread to pull when you want a direction. Combat drops land on the ground — press F to Area Loot nearby piles that belong to you.
 
 [b]Chat[/b]
-Open chat with Enter, or the bubble button on the left. It does not pop open when other players talk.
+Open chat with Enter, or the bubble button on the left. It does not pop open when other players talk — a red count on the bubble marks unread messages.
 
 [b]Guilds and territory[/b]
 Join or found a guild, then take a territory by capturing its banner, and earn Glory for as long as your guild holds it. See the Guild and Leaderboard menus.

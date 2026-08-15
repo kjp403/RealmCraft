@@ -51,8 +51,9 @@ const FULL_FEED_SLIDE: float = 48.0
 ## it), the chatbox slides away on its own so you don't have to Close every time.
 const AUTO_HIDE_SEC: float = 8.0
 
-## Emitted when the unread-DM state flips. Kept for HUD/listeners; tab captions also show counts.
-signal unread_changed(has_unread: bool)
+## Emitted when the HUD-facing unread count changes (player talk: world / guild /
+## team / DM). System lines stay on their tab caption and do not drive this.
+signal unread_changed(unread_count: int)
 #endregion
 
 
@@ -69,8 +70,8 @@ var dm_name_by_player_id: Dictionary[int, String] = {}
 var pending_name_fetch_at_ms: Dictionary[int, int] = {}
 
 var unread_by_conversation: Dictionary[String, int] = {}
-## Last emitted unread state, so unread_changed fires only on a real flip.
-var _last_unread_dm: bool = false
+## Last emitted HUD unread count, so unread_changed fires only when the number changes.
+var _last_unread_count: int = 0
 
 var seen_msg_ids_by_conversation: Dictionary[String, Dictionary] = {}
 var history_requested_by_conversation: Dictionary[String, bool] = {}
@@ -492,17 +493,17 @@ func _show_full_feed() -> void:
 	# Navigating to any channel/DM always lands on the feed, never a stale Chat-options view.
 	_set_settings_open(false)
 	# Already open (e.g. switching tabs) — don't replay the slide.
-	if full_feed.visible:
-		_arm_auto_hide()
-		return
-	if _full_feed_tween != null and _full_feed_tween.is_valid():
-		_full_feed_tween.kill()
-	full_feed.visible = true
-	full_feed.modulate.a = 0.0
-	full_feed_content.position.x = _full_feed_base_x - FULL_FEED_SLIDE
-	_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
-	_full_feed_tween.tween_property(full_feed, ^"modulate:a", 1.0, 0.18)
-	_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x, 0.18)
+	if not full_feed.visible:
+		if _full_feed_tween != null and _full_feed_tween.is_valid():
+			_full_feed_tween.kill()
+		full_feed.visible = true
+		full_feed.modulate.a = 0.0
+		full_feed_content.position.x = _full_feed_base_x - FULL_FEED_SLIDE
+		_full_feed_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		_full_feed_tween.tween_property(full_feed, ^"modulate:a", 1.0, 0.18)
+		_full_feed_tween.tween_property(full_feed_content, ^"position:x", _full_feed_base_x, 0.18)
+	# Visible first so incoming lines during the open are treated as "on screen".
+	_mark_current_view_read()
 	_arm_auto_hide()
 
 
@@ -710,15 +711,6 @@ func open_channel(channel: int) -> void:
 	else:
 		current_conversation_id = ChatConstants.channel_conversation_id(CHANNEL_WORLD)
 
-	_clear_unread(current_conversation_id)
-	# An aggregate tab puts its whole membership on screen at once, so the
-	# per-conversation badges it covers are read too.
-	if channel == CHANNEL_ALL or channel == CHANNEL_PRIVATE:
-		var dm_only: bool = channel == CHANNEL_PRIVATE
-		for convo_id: String in unread_by_conversation.keys():
-			if not dm_only or convo_id.begins_with("dm:"):
-				_clear_unread(convo_id)
-
 	_show_full_feed()
 
 	_ensure_conversation_exists(current_conversation_id)
@@ -732,7 +724,6 @@ func open_channel(channel: int) -> void:
 
 func open_conversation(conversation_id: String) -> void:
 	current_conversation_id = conversation_id
-	_clear_unread(current_conversation_id)
 
 	if conversation_id.begins_with("dm:"):
 		current_dm_other_id = _dm_other_id_from_conversation(conversation_id, int(ClientState.player_id))
@@ -755,7 +746,6 @@ func open_dm(other_id: int) -> void:
 
 	var self_id: int = int(ClientState.player_id)
 	current_conversation_id = ChatConstants.dm_conversation_id(self_id, other_id)
-	_clear_unread(current_conversation_id)
 
 	_ensure_conversation_exists(current_conversation_id)
 	_ensure_dm_button(current_conversation_id, other_id)
@@ -792,6 +782,7 @@ func _refresh_full_feed(stick_to_bottom: bool = true) -> void:
 	if bar != null:
 		saved_scroll = bar.value
 
+	full_feed_text_display.scroll_following = follow
 	full_feed_text_display.clear()
 	full_feed_text_display.text = ""
 
@@ -804,6 +795,8 @@ func _refresh_full_feed(stick_to_bottom: bool = true) -> void:
 			"[center][color=%s]No private messages yet.\nOpen a player's profile to start one.[/color][/center]"
 			% SUBTLE_COLOR
 		)
+		if follow:
+			_scroll_feed_to_bottom()
 		return
 
 	var prev: Dictionary = {}
@@ -815,9 +808,7 @@ func _refresh_full_feed(stick_to_bottom: bool = true) -> void:
 		prev = record
 
 	if follow:
-		full_feed_text_display.scroll_to_line.call_deferred(
-			full_feed_text_display.get_line_count()
-		)
+		_scroll_feed_to_bottom()
 	else:
 		_restore_feed_scroll.call_deferred(saved_scroll)
 
@@ -826,7 +817,33 @@ func _feed_is_at_bottom() -> bool:
 	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
 	if bar == null:
 		return true
-	return bar.value >= bar.max_value - bar.page - 12.0
+	if bar.max_value <= 0.0:
+		return true
+	# Godot 4 Range: at bottom, value ≈ max_value. Some scrollbars still use the
+	# older "value maxes at max-page" convention — treat either as following.
+	var gap: float = bar.max_value - bar.value
+	if gap <= 32.0:
+		return true
+	return bar.page > 0.0 and absf(gap - bar.page) <= 32.0
+
+
+func _scroll_feed_to_bottom() -> void:
+	# BBCode layout updates the scrollbar's max on a later frame. Pin now and
+	# again after layout — scroll_to_line() puts a line at the TOP of the view
+	# and get_line_count() is often one past the last line, so it was a no-op
+	# and left players staring at old messages.
+	_pin_feed_to_bottom()
+	_pin_feed_to_bottom.call_deferred()
+	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
+	if bar != null and not bar.changed.is_connected(_pin_feed_to_bottom):
+		bar.changed.connect(_pin_feed_to_bottom, CONNECT_ONE_SHOT)
+
+
+func _pin_feed_to_bottom() -> void:
+	var bar: VScrollBar = full_feed_text_display.get_v_scroll_bar()
+	if bar == null:
+		return
+	bar.value = bar.max_value
 
 
 func _restore_feed_scroll(value: float) -> void:
@@ -1214,10 +1231,33 @@ func _set_unread(convo_id: String, v: int) -> void:
 	unread_by_conversation[convo_id] = maxi(v, 0)
 	_update_dm_button_if_needed(convo_id)
 	_update_tab_labels()
-	var has_unread: bool = _unread_total("") > 0
-	if has_unread != _last_unread_dm:
-		_last_unread_dm = has_unread
-		unread_changed.emit(has_unread)
+	var count: int = _unread_notify_count()
+	if count != _last_unread_count:
+		_last_unread_count = count
+		unread_changed.emit(count)
+
+
+## Unread player talk for the left-rail badge. Skips system so level-ups / server
+## notes don't light the bubble — those stay on the System tab caption.
+func _unread_notify_count() -> int:
+	var total: int = 0
+	for convo_id: String in unread_by_conversation:
+		if _is_system_conversation(convo_id):
+			continue
+		total += int(unread_by_conversation[convo_id])
+	return total
+
+
+## Drop badges for whatever is currently on screen. Aggregate tabs (All / Private)
+## cover their whole membership, so those conversations are read too.
+func _mark_current_view_read() -> void:
+	_clear_unread(current_conversation_id)
+	if current_conversation_id != ALL_CONVERSATION_ID and current_conversation_id != PRIVATE_CONVERSATION_ID:
+		return
+	var dm_only: bool = current_conversation_id == PRIVATE_CONVERSATION_ID
+	for convo_id: String in unread_by_conversation.keys():
+		if not dm_only or convo_id.begins_with("dm:"):
+			_clear_unread(convo_id)
 
 
 func _inc_unread(convo_id: String) -> void:

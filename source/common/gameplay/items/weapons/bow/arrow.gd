@@ -65,9 +65,11 @@ var _spent: bool = false
 
 
 func _ready() -> void:
-	# What a hit can land on: hurtboxes (damage) + flags (capture) + world (block). NOT character
-	# navigation bodies — attacks hit the body-sized HurtBox area instead. See docs/combat_layers.md.
-	collision_mask = CombatHit.TARGET_MASK
+	# Damage targets only. Walls are detected with a RAY along the flight path
+	# (see _physics_process) so a fat 16px hitbox hugging a tree / rock / tile
+	# doesn't BLOCK the shot before it reaches a mob. Hurtboxes + flags stay
+	# on the shape query so point-blank still lands.
+	collision_mask = PhysicsLayers.HURTBOX | PhysicsLayers.FLAG
 	if not multiplayer.is_server():
 		var vosn: VisibleOnScreenNotifier2D = VisibleOnScreenNotifier2D.new()
 		vosn.screen_exited.connect(queue_free)
@@ -96,15 +98,32 @@ func _physics_process(delta: float) -> void:
 	# (or a frame-time spike under load) can't jump PAST a point-blank target between two checks. The
 	# per-frame shape query alone is STATIC — that's what let fast bolts (380) and charged arrows (400)
 	# skip close targets while slow taps (200) landed. Runs on both peers: the server applies damage,
-	# the client stops its own visual (take_damage is gated). collide_with_areas catches HurtBoxes;
-	# bodies catch walls/flags.
+	# the client stops its own visual (take_damage is gated). Shape query catches HurtBoxes / flags;
+	# a WORLD ray along the step catches walls you actually fly into (not scenery you graze).
 	var move: Vector2 = speed * direction * delta
 	var steps: int = maxi(1, ceili(move.length() / MAX_STEP_PX))
 	var step: Vector2 = move / float(steps)
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	for _i: int in steps:
+		var from: Vector2 = global_position
 		position += step
 		for collider: Node2D in CombatHit.overlapping_bodies(self):
 			_handle_collision(collider)
+			if _spent or not is_instance_valid(self):
+				return
+		if space == null:
+			continue
+		var ray := PhysicsRayQueryParameters2D.create(from, global_position, PhysicsLayers.WORLD)
+		ray.collide_with_areas = false
+		ray.collide_with_bodies = true
+		ray.hit_from_inside = false
+		var wall: Dictionary = space.intersect_ray(ray)
+		if wall.is_empty():
+			continue
+		var wall_body: Variant = wall.get("collider")
+		if wall_body is Node2D:
+			global_position = wall.get("position", global_position)
+			_handle_collision(wall_body as Node2D)
 			if _spent or not is_instance_valid(self):
 				return
 

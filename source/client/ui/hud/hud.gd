@@ -27,6 +27,10 @@ var _death_gen: int = 0
 ## their own visibility gating (touch-only sticks, tracked-only quest tracker) that were already
 ## hidden don't get force-shown.
 var _hidden_for_menu: Array[CanvasItem] = []
+## Red unread count on the chat bubble. Created in `_ready` so the scene stays a
+## static 40×40 button.
+var _chat_unread_badge: PanelContainer
+var _chat_unread_label: Label
 
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var notification_button: Button = $MenuButtons/ButtonRail/NotificationButton
@@ -90,7 +94,17 @@ func _ready() -> void:
 	PixelIcon.from_button(chat_button)
 	chat_button.visible = true
 	chat_button.focus_mode = Control.FOCUS_NONE
+	chat_button.clip_contents = false
+	var button_rail: Control = chat_button.get_parent() as Control
+	if button_rail != null:
+		button_rail.clip_contents = false
+		var rail_host: Control = button_rail.get_parent() as Control
+		if rail_host != null:
+			rail_host.clip_contents = false
 	chat_button.pressed.connect(_on_chat_button_pressed)
+	_chat_unread_badge = _make_chat_unread_badge()
+	chat_button.add_child(_chat_unread_badge)
+	_chat_unread_label = _chat_unread_badge.get_node("Count") as Label
 	chat.unread_changed.connect(_on_chat_unread)
 	Client.subscribe(&"notification", _on_notification_received)
 	ClientState.player_profile_requested.connect(open_player_profile)
@@ -489,13 +503,64 @@ func _on_chat_button_pressed() -> void:
 		chat.toggle_feed()
 
 
-func _on_chat_unread(has_unread: bool) -> void:
-	if chat_button == null:
+func _on_chat_unread(unread_count: int) -> void:
+	if chat_button == null or _chat_unread_badge == null or _chat_unread_label == null:
 		return
+	var has_unread: bool = unread_count > 0
 	chat_button.tooltip_text = (
 		"Open chat  (Enter) — unread messages" if has_unread else "Open chat  (Enter to type)"
 	)
-	chat_button.modulate = Color(1.18, 1.08, 0.72) if has_unread else Color.WHITE
+	if not has_unread:
+		_chat_unread_badge.hide()
+		return
+	_chat_unread_label.text = "99+" if unread_count > 99 else str(unread_count)
+	_chat_unread_badge.show()
+	_pin_chat_unread_badge()
+
+
+func _make_chat_unread_badge() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "UnreadBadge"
+	panel.visible = false
+	panel.z_index = 20
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.custom_minimum_size = Vector2(14, 14)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.84, 0.16, 0.14)
+	bg.set_corner_radius_all(8)
+	bg.set_border_width_all(1)
+	bg.border_color = Color(0.12, 0.04, 0.04, 0.9)
+	bg.content_margin_left = 4
+	bg.content_margin_right = 4
+	bg.content_margin_top = 1
+	bg.content_margin_bottom = 1
+	panel.add_theme_stylebox_override(&"panel", bg)
+	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	panel.grow_vertical = Control.GROW_DIRECTION_END
+	var count := Label.new()
+	count.name = "Count"
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	count.add_theme_font_size_override(&"font_size", 10)
+	count.add_theme_color_override(&"font_color", Color.WHITE)
+	panel.add_child(count)
+	return panel
+
+
+func _pin_chat_unread_badge() -> void:
+	if _chat_unread_badge == null:
+		return
+	_chat_unread_badge.reset_size()
+	var s: Vector2 = _chat_unread_badge.get_combined_minimum_size()
+	s.x = maxf(s.x, 14.0)
+	s.y = maxf(s.y, 14.0)
+	# Hang off the top-right corner of the 40×40 bubble without covering the icon.
+	_chat_unread_badge.offset_right = 5.0
+	_chat_unread_badge.offset_top = -5.0
+	_chat_unread_badge.offset_left = 5.0 - s.x
+	_chat_unread_badge.offset_bottom = -5.0 + s.y
 
 
 func _on_notification_button_pressed() -> void:
