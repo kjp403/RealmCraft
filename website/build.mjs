@@ -22,6 +22,15 @@ const PLAY_WEB = "https://play.arkenelle.com/";
 const PLAY_DESKTOP = "https://play.arkenelle.com/desktop/Arkenelle-windows.zip";
 const DISCORD = "https://discord.gg/kSs3hxByV";
 const ITCH_APP = "https://itch.io/app";
+const STRIPE = {
+  sapphireVip: "https://buy.stripe.com/28E00k1aF5w81uC8Ho6J207",
+  emeraldVip: "https://buy.stripe.com/dRm7sM6uZbUw6OW3n46J206",
+  rubyVip: "https://buy.stripe.com/3cI7sM06BcYAfls6zg6J205",
+  sapphireOnce: "https://buy.stripe.com/14A3cw5qV2jWc9g1eW6J204",
+  emeraldOnce: "https://buy.stripe.com/7sY4gAbPj1fSeho2j06J201",
+  rubyOnce: "https://buy.stripe.com/3cIdRa4mRe2Ec9g2j06J203",
+  custom: "https://buy.stripe.com/14A00k2eJ6Acb5c8Ho6J208",
+};
 
 const STAT_NAMES = {
   health_max: "Max Health",
@@ -121,31 +130,6 @@ function slugify(s) {
 
 function basenameSlug(file) {
   return path.basename(file, path.extname(file)).replace(/\.item$/, "");
-}
-
-/** Filename stem of a .tres path, used to join quests, NPCs, and ExtResource refs. */
-function fileKey(p) {
-  return path.basename(String(p || "").replace(/\\/g, "/")).replace(/\.tres$/i, "").replace(/\.item$/, "");
-}
-
-function campaignOf(file) {
-  const p = String(file || "").replace(/\\/g, "/");
-  const m = p.match(/quests\/resources\/([^/]+)\//);
-  const folder = m?.[1];
-  // Bren's warren is the woodland chapter of the Charter spine.
-  if (folder === "goblin_woodland") return "hollow_seep";
-  return CAMPAIGN[folder] ? folder : "side";
-}
-
-function skillLabel(slug, level) {
-  if (!slug) return "";
-  const name = String(slug).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  return level ? `${name} ${level}` : name;
-}
-
-function modVal(item, stat) {
-  const m = (item?.modifiers || []).find((x) => x.stat === stat);
-  return m ? m.value : 0;
 }
 
 function resToFs(resPath) {
@@ -494,10 +478,84 @@ function copyMedia() {
   }
 }
 
-function shell({ title, active, body, scripts = [] }) {
+const LOC_BG_DIR = path.join(SRC, "location-bgs");
+
+function locationBgUrl(slug) {
+  const jpg = path.join(LOC_BG_DIR, slug + ".jpg");
+  const png = path.join(LOC_BG_DIR, slug + ".png");
+  if (fs.existsSync(jpg)) return `/media/locations/${slug}.jpg`;
+  if (fs.existsSync(png)) return `/media/locations/${slug}.png`;
+  return "";
+}
+
+function copyLocationBgs() {
+  if (!fs.existsSync(LOC_BG_DIR)) return;
+  const dest = path.join(DIST, "media", "locations");
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(LOC_BG_DIR)) {
+    if (!name.endsWith(".png") && !name.endsWith(".jpg")) continue;
+    fs.copyFileSync(path.join(LOC_BG_DIR, name), path.join(dest, name));
+  }
+}
+
+const DONATE_BADGE_DIR = path.join(SRC, "donate-badges");
+
+function copyDonateBadges() {
+  if (!fs.existsSync(DONATE_BADGE_DIR)) return;
+  const dest = path.join(DIST, "media", "donate");
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(DONATE_BADGE_DIR)) {
+    if (!name.endsWith(".png")) continue;
+    fs.copyFileSync(path.join(DONATE_BADGE_DIR, name), path.join(dest, name));
+  }
+}
+
+function donateCard({ img, name, price, blurb, href, gem }) {
+  return `<article class="donate-card gem-${gem}">
+    <img src="/media/donate/${img}" alt="" width="256" height="256">
+    <h3>${esc(name)}</h3>
+    <p class="price">${esc(price)}</p>
+    <p>${esc(blurb)}</p>
+    <a class="btn" href="${href}" target="_blank" rel="noopener noreferrer">Donate</a>
+  </article>`;
+}
+
+function catIcon(id) {
+  const d = {
+    start: `<circle cx="12" cy="12" r="8.5"/><path d="M12 3.8v2.6M12 17.6v2.6M3.8 12h2.6M17.6 12h2.6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 7.2l1.7 4.3H12"/>`,
+    items: `<path d="M7 8.6h10l.9 11.2H6.1L7 8.6z"/><path d="M9 8.6V7.1A3 3 0 0 1 12 4.2 3 3 0 0 1 15 7.1v1.5"/><path d="M9.5 12.2h5"/>`,
+    creatures: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
+    locations: `<path d="M12 21s6.4-6.1 6.4-10.8A6.4 6.4 0 0 0 5.6 10.2C5.6 14.9 12 21 12 21z"/><circle cx="12" cy="10.2" r="2.1"/>`,
+    npcs: `<circle cx="12" cy="8" r="3.1"/><path d="M5.6 19.4c.8-3.3 3.1-4.9 6.4-4.9s5.6 1.6 6.4 4.9"/>`,
+    skills: `<path d="M8.4 14.3l-3.5 3.5 1.6 1.6 3.5-3.5"/><path d="M14.7 4.9l4.3 4.3-8.1 8.1H6.6V13z"/><path d="M16.2 8.3l1.7-1.7a1.5 1.5 0 0 0 0-2.1"/>`,
+    slayer: `<path d="M4.8 19.2l8.8-8.8 2.1.7L19 8.1l-1-3-3 1-2.1 2.8L4.8 19.2z"/><path d="M19.2 19.2l-8.8-8.8-.7 2.1L8.1 5l3-1 2.8 2.1 5.3 13.1z"/>`,
+    quests: `<path d="M7 4.6h10a1 1 0 0 1 1 1V19.6l-6-2.3-6 2.3V5.6a1 1 0 0 1 1-1z"/><path d="M9.2 9.2h5.6M9.2 12.4h5.6"/>`,
+    guilds: `<path d="M6.2 4.6h11.6v3.3c0 2.2-1.4 3.8-3.2 4.7L12 14.2l-2.6-1.6c-1.8-.9-3.2-2.5-3.2-4.7z"/><path d="M12 14.2V20"/>`,
+    boards: `<path d="M7.2 20V10.2h3.2V20H7.2zm6.4 0V6.2h3.2V20h-3.2zM4.4 20h15.2"/><path d="M8.6 7.2 12 4.4l3.4 2.8"/>`,
+    play: `<path d="M8 6.4v11.2L19 12z"/>`,
+    donate: `<path d="M12 20.4L4.8 12.2 8.2 5.6h7.6l3.4 6.6z"/><path d="M4.8 12.2h14.4M8.2 5.6 12 12.2 15.8 5.6"/>`,
+    boss: `<path d="M4.8 16.6h14.4v2.1H4.8z"/><path d="M5.2 8.1l3.1 2.5L12 5.4l3.7 5.2 3.1-2.5v8.2H5.2z"/>`,
+    enemy: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
+  };
+  const inner = d[id];
+  if (!inner) return "";
+  return `<span class="cat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg></span>`;
+}
+
+function pageHeading(cat, title) {
+  return `<h1 class="section-title page-title">${catIcon(cat)}<span>${esc(title)}</span></h1>`;
+}
+
+function wikiCard(cat, href, title, bodyHtml) {
+  return `<a class="card wiki-card cat-${cat}" href="${href}">${catIcon(cat)}<div><h3>${esc(title)}</h3><p>${bodyHtml}</p></div></a>`;
+}
+
+function shell({ title, active, body, scripts = [], theme = "", extraClass = "" }) {
   const home = "/";
   const wiki = "/wiki/";
   const extraScripts = scripts.map((src) => `  <script src="${src}"></script>`).join("\n");
+  const classes = [theme ? `theme-${theme}` : "", extraClass].filter(Boolean).join(" ");
+  const bodyClass = classes ? ` class="${classes}"` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -508,10 +566,10 @@ function shell({ title, active, body, scripts = [] }) {
   <link rel="icon" href="/media/project_icon/arkenelle_icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=${CSS_V}">
 </head>
-<body>
+<body${bodyClass}>
   <header class="site-header">
     <a class="brand" href="${home}"><img src="/media/project_icon/arkenelle_icon.png" alt="">Arkenelle</a>
     <nav class="primary">
@@ -524,6 +582,7 @@ function shell({ title, active, body, scripts = [] }) {
       <a href="/wiki/npcs/" class="${active === "npcs" ? "active" : ""}">NPCs</a>
       <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
       <a href="${PLAY_DESKTOP}">Download</a>
+      <a href="/donate/" class="${active === "donate" ? "active" : ""}">Donate</a>
       <a href="${DISCORD}">Discord</a>
     </nav>
     <div class="search-wrap">
@@ -580,6 +639,7 @@ function collectItems() {
       buffDuration: num(doc.resource.buff_duration_s),
       modifiers: modifiersFrom(doc, doc.resource.base_modifiers),
       icon: iconFrom(doc, doc.resource.item_icon),
+      chestSlug: str(doc.resource.chest_slug),
       file,
     });
   }
@@ -663,6 +723,12 @@ function collectCreatures() {
       mr: num(doc.resource.mr),
       xp: num(doc.resource.xp_reward),
       loot: dropsFrom(doc, doc.resource.loot),
+      ornateItem: resolveExt(doc, doc.resource.ornate_chest_item),
+      ornateTopMin: num(doc.resource.ornate_chest_top_min),
+      ornateTopMax: num(doc.resource.ornate_chest_top_max),
+      ornateSecondMin: num(doc.resource.ornate_chest_second_min),
+      ornateSecondMax: num(doc.resource.ornate_chest_second_max),
+      ornateConsolation: num(doc.resource.ornate_chest_consolation_chance),
       file,
     });
   }
@@ -700,6 +766,9 @@ function collectZones() {
       mapPath: str(doc.resource.map_path),
       people: [],
       fauna: [],
+      zoneKillLoot: dropsFrom(doc, doc.resource.zone_kill_loot),
+      rewardPath: resolveExt(doc, doc.resource.reward),
+      hardRewardPath: resolveExt(doc, doc.resource.hard_reward),
       file,
     });
   }
@@ -842,7 +911,7 @@ function attachMapInhabitants(zones, npcs, creatures) {
 function foundInHtml(locations) {
   if (!locations || !locations.length) return "";
   return `<h2>Found in</h2><ul>${locations
-    .map((z) => `<li><a href="/wiki/locations/${z.slug}/">${esc(z.name)}</a></li>`)
+    .map((z) => `<li><a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a></li>`)
     .join("")}</ul>`;
 }
 
@@ -923,6 +992,26 @@ function collectSlayer() {
     });
   }
   return { masters, tasks };
+}
+
+function campaignOf(file) {
+  const p = String(file || "").replace(/\\/g, "/");
+  const m = p.match(/quests\/resources\/([^/]+)\//);
+  const folder = m?.[1];
+  // Bren's warren is the woodland chapter of the Charter spine.
+  if (folder === "goblin_woodland") return "hollow_seep";
+  return CAMPAIGN[folder] ? folder : "side";
+}
+
+function skillLabel(slug, level) {
+  if (!slug) return "";
+  const name = String(slug).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return level ? `${name} ${level}` : name;
+}
+
+function modVal(item, stat) {
+  const m = (item?.modifiers || []).find((x) => x.stat === stat);
+  return m ? m.value : 0;
 }
 
 function collectQuests() {
@@ -1039,7 +1128,7 @@ function campaignHref(id) {
 
 function itemHrefLabel(items, itemPath) {
   const it = itemByPath(items, itemPath);
-  if (it) return `<a href="/wiki/items/${it.slug}/">${esc(it.name)}</a>`;
+  if (it) return `<a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a>`;
   return esc(fileKey(itemPath).replace(/_/g, " "));
 }
 
@@ -1049,7 +1138,7 @@ function describeObjective(obj, items, creatures, npcs) {
   if (obj.type === OBJ_VISIT) {
     const who = obj.visitName || obj.visitKey.replace(/_/g, " ") || "the indicated person";
     const npc = npcs.find((n) => n.slug === obj.visitKey || fileKey(n.file) === obj.visitKey);
-    const label = npc ? `<a href="/wiki/npcs/${npc.slug}/">${esc(who)}</a>` : esc(who);
+    const label = npc ? `<a class="cat-npcs" href="/wiki/npcs/${npc.slug}/">${esc(who)}</a>` : esc(who);
     core = `Speak with ${label}`;
   } else if (obj.type === OBJ_CRAFT) {
     core = `Craft ${amt}${obj.label ? esc(obj.label) : itemHrefLabel(items, obj.itemPath)}`;
@@ -1058,74 +1147,12 @@ function describeObjective(obj, items, creatures, npcs) {
   } else {
     const c = creatures.find((x) => x.type === obj.enemy || x.slug === obj.enemy);
     const foe = c
-      ? `<a href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`
+      ? `<a class="cat-creatures" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`
       : esc((obj.enemy || "enemy").replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase()));
     core = `Defeat ${amt}${foe}`;
   }
   if (obj.grantItemPath) core += ` <span class="muted">(yields ${itemHrefLabel(items, obj.grantItemPath)})</span>`;
   return core;
-}
-
-/**
- * Every shop in the game, with the NPC that runs it. The wiki listed items with
- * their stats and never said where a single one came from, which left the whole
- * gear ladder invisible — this is half of the answer ("buy it"), and
- * collectStations / the creature loot tables are the rest.
- */
-function collectShops() {
-  const shopDir = path.join(ROOT, "source/common/gameplay/shops/resources");
-  const rows = [];
-  if (!fs.existsSync(shopDir)) return rows;
-  for (const file of walk(shopDir).filter((f) => f.endsWith(".tres"))) {
-    let doc;
-    try {
-      doc = parseTres(read(file));
-    } catch {
-      continue;
-    }
-    if (doc.header.script_class && doc.header.script_class !== "ShopResource") continue;
-    const entries = asArray(doc.resource.entries)
-      .map((ref) => {
-        const sub = resolveSub(doc, ref);
-        if (!sub) return null;
-        return {
-          itemPath: resolveExt(doc, sub.props.item),
-          price: num(sub.props.price),
-          currencyPath:
-            resolveExt(doc, sub.props.currency_item) || resolveExt(doc, doc.resource.currency_item),
-        };
-      })
-      .filter((e) => e && e.itemPath);
-    if (!entries.length) continue;
-    rows.push({
-      name: str(doc.resource.shop_name) || basenameSlug(file).replace(/_/g, " "),
-      file: file.replace(/\\/g, "/"),
-      entries,
-      vendors: [],
-    });
-  }
-  // Which NPC stands behind each counter. Shops are referenced by path from the
-  // NPC's ShopInteraction, so a plain ext_resource scan resolves the pairing.
-  const npcDir = path.join(ROOT, "source/common/gameplay/characters/npc/npcs");
-  if (fs.existsSync(npcDir)) {
-    for (const file of walk(npcDir).filter((f) => f.endsWith(".tres"))) {
-      let doc;
-      try {
-        doc = parseTres(read(file));
-      } catch {
-        continue;
-      }
-      const npcName = str(doc.resource.npc_name);
-      if (!npcName) continue;
-      for (const rec of Object.values(doc.ext)) {
-        const shopPath = resToFs(String(rec.path || ""));
-        if (!shopPath) continue;
-        const match = rows.find((r) => r.file === shopPath.replace(/\\/g, "/"));
-        if (match && !match.vendors.includes(npcName)) match.vendors.push(npcName);
-      }
-    }
-  }
-  return rows;
 }
 
 /** Every crafting station and what its recipes produce. */
@@ -1171,57 +1198,6 @@ function collectStations() {
   return rows;
 }
 
-/** Loot-chest tables, so "comes out of a chest" is a findable answer too. */
-function collectChests() {
-  const dir = path.join(ROOT, "source/common/gameplay/combat/chests");
-  const rows = [];
-  if (!fs.existsSync(dir)) return rows;
-  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
-    let doc;
-    try {
-      doc = parseTres(read(file));
-    } catch {
-      continue;
-    }
-    if (doc.header.script_class && doc.header.script_class !== "ChestResource") continue;
-    rows.push({
-      name: str(doc.resource.display_name) || basenameSlug(file).replace(/_/g, " "),
-      tier: num(doc.resource.tier, 1) || 1,
-      drops: [...dropsFrom(doc, doc.resource.loot), ...dropsFrom(doc, doc.resource.exclusive_loot)],
-    });
-  }
-  rows.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
-  return rows;
-}
-
-function itemByPath(items, itemPath) {
-  if (!itemPath) return null;
-  const base = basenameSlug(itemPath);
-  return items.find((it) => it.file.replace(/\\/g, "/").endsWith("/" + path.basename(itemPath.replace(/\\/g, "/"))))
-    || items.find((it) => it.slug === slugify(base) || it.slug === base);
-}
-
-function lootList(drops, items) {
-  if (!drops.length) return "<p class='muted'>No authored drops.</p>";
-  return `<ul class="list-reset">${drops
-    .map((d) => {
-      const item = itemByPath(items, d.itemPath);
-      const label = item ? `<a href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(d.itemPath).replace(/_/g, " "));
-      return `<li>${label}${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`;
-    })
-    .join("")}</ul>`;
-}
-
-/**
- * Builds "where does this come from" for every item, from the data that already
- * describes it: creature loot tables, shop catalogs, crafting recipes, chest
- * tables and quest rewards. Returns Map<itemSlug, {drops, shops, crafts, chests,
- * quests}>.
- *
- * Without this the wiki could tell you a Steel Chestplate has 34 armor and not one
- * word about how to end up wearing one, which is the whole reason the gear ladder
- * read as invisible.
- */
 function buildItemSources(items, creatures, shops, stations, chests, quests) {
   const map = new Map();
   const bucket = (itemPath) => {
@@ -1276,83 +1252,6 @@ function buildItemSources(items, creatures, shops, stations, chests, quests) {
   return map;
 }
 
-/** The "How to get it" block on an item page. Empty string when nothing knows. */
-function sourcesHtml(src, items) {
-  if (!src) {
-    return `<h2>How to get it</h2><p class="muted">No authored source yet — this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
-  }
-  const parts = [];
-  const itemLink = (p) => {
-    const it = itemByPath(items, p);
-    return it ? `<a href="/wiki/items/${it.slug}/">${esc(it.name)}</a>` : esc(basenameSlug(p || "").replace(/_/g, " "));
-  };
-
-  if (src.shops.length) {
-    parts.push(
-      `<h3>Bought from</h3><ul class="list-reset">${src.shops
-        .map((e) => {
-          const who = e.shop.vendors.length ? ` (${esc(e.shop.vendors.join(", "))})` : "";
-          const cur = e.currencyPath ? itemLink(e.currencyPath) : "gold";
-          return `<li>${esc(e.shop.name)}${who} — ${esc(String(e.price))} ${cur}</li>`;
-        })
-        .join("")}</ul>`
-    );
-  }
-  if (src.crafts.length) {
-    parts.push(
-      `<h3>Crafted at</h3><ul class="list-reset">${src.crafts
-        .map((c) => {
-          const lvl = c.recipe.level ? ` — needs ${esc(c.station.profession || "crafting")} ${c.recipe.level}` : "";
-          const ing = c.recipe.ingredients
-            .map((i) => `${itemLink(i.itemPath)}${i.amount > 1 ? " ×" + i.amount : ""}`)
-            .join(", ");
-          return `<li><strong>${esc(c.station.name)}</strong>${lvl}${ing ? `<br><span class="muted">${ing}</span>` : ""}</li>`;
-        })
-        .join("")}</ul>`
-    );
-  }
-  if (src.drops.length) {
-    parts.push(
-      `<h3>Dropped by</h3><ul class="list-reset">${src.drops
-        .slice(0, 12)
-        .map(
-          (d) =>
-            `<li><a href="/wiki/creatures/${d.creature.slug}/">${esc(d.creature.name)}</a>${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`
-        )
-        .join("")}</ul>`
-    );
-  }
-  if (src.chests.length) {
-    parts.push(
-      `<h3>Found in chests</h3><ul class="list-reset">${src.chests
-        .map((c) => `<li>${esc(c.chest.name)}${esc(fmtAmt(c.min, c.max))}</li>`)
-        .join("")}</ul>`
-    );
-  }
-  if (src.quests.length) {
-    parts.push(
-      `<h3>Quest reward</h3><ul class="list-reset">${src.quests
-        .map((q) => {
-          const extra = q.stylePick
-            ? " — unique of your equipped style"
-            : q.amount > 1
-              ? ` ×${q.amount}`
-              : "";
-          return `<li><a href="${questHref(q.quest)}">${esc(q.quest.name)}</a>${extra}</li>`;
-        })
-        .join("")}</ul>`
-    );
-  }
-  if (!parts.length) {
-    return `<h2>How to get it</h2><p class="muted">No authored source yet — this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
-  }
-  return `<h2>How to get it</h2>${parts.join("")}`;
-}
-
-/**
- * One-line answer to "and where do I get this?", for the gear-path tables.
- * Deliberately terse — the item page carries the full breakdown.
- */
 function sourceSummary(src) {
   if (!src) return "—";
   const bits = [];
@@ -1417,7 +1316,7 @@ function gearPathPage(items, itemSources, quests) {
       ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>AD / AP</th><th>How to get it</th></tr></thead><tbody>${rows
           .map(
             (it) =>
-              `<tr><td><a href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+              `<tr><td><a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
                 String(tierOf(it) || 1)
               )}</td><td>${weaponPower(it)}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
           )
@@ -1429,7 +1328,7 @@ function gearPathPage(items, itemSources, quests) {
       ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>Armor</th><th>HP</th><th>How to get it</th></tr></thead><tbody>${rows
           .map(
             (it) =>
-              `<tr><td><a href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+              `<tr><td><a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
                 String(tierOf(it) || 1)
               )}</td><td>${modVal(it, "armor") || "—"}</td><td>${modVal(it, "health_max") || "—"}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
           )
@@ -1492,6 +1391,7 @@ function gearPathPage(items, itemSources, quests) {
   return shell({
     title: "Gear path — Arkenelle Wiki",
     active: "start",
+    theme: "start",
     body: `<main class="wrap">
       ${crumb([
         { href: "/wiki/", label: "Wiki" },
@@ -1499,7 +1399,7 @@ function gearPathPage(items, itemSources, quests) {
         { label: "Gear path" },
       ])}
       <article class="page prose">
-        <h1 class="section-title">Gear path</h1>
+        ${pageHeading("start", "Gear path")}
         <p>Every weapon and armour piece is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class.</p>
         <ul>
           <li><strong>Unique weapons</strong> come from Charter climaxes. Turn-in grants one matching the style in your hand. Farm the same boss for the other styles, armour mats, and relics — the kill is not one-and-done.</li>
@@ -1523,7 +1423,7 @@ function questCard(q) {
   if (q.masteryXp) bits.push(`${q.masteryXp.toLocaleString()} mastery XP`);
   else if (q.xp) bits.push(`${q.xp} XP`);
   if (q.givers.length) bits.push(q.givers.map((g) => g.name).join(", "));
-  return `<a class="item-card" href="${questHref(q)}"><span><span class="name">${esc(q.name)}</span><span class="kind">${esc(bits.join(" · ") || "Quest")}</span></span></a>`;
+  return `<a class="item-card cat-quests" href="${questHref(q)}"><span><span class="name">${esc(q.name)}</span><span class="kind">${esc(bits.join(" · ") || "Quest")}</span></span></a>`;
 }
 
 function questListHtml(list) {
@@ -1532,7 +1432,7 @@ function questListHtml(list) {
 
 function questPageHtml(q, items, creatures, npcs) {
   const stats = [
-    q.givers.length ? ["Offered by", q.givers.map((g) => `<a href="/wiki/npcs/${g.slug}/">${esc(g.name)}</a>`).join(", ")] : null,
+    q.givers.length ? ["Offered by", q.givers.map((g) => `<a class="cat-npcs" href="/wiki/npcs/${g.slug}/">${esc(g.name)}</a>`).join(", ")] : null,
     q.campaignMeta ? ["Campaign", `<a href="${campaignHref(q.campaign)}">${esc(q.campaignMeta.name)}</a>`] : null,
     q.minLevel ? ["Requires level", String(q.minLevel)] : null,
     q.minSkill ? ["Requires skill", esc(skillLabel(q.minSkill, q.minSkillLevel))] : null,
@@ -1604,6 +1504,7 @@ function campaignPageHtml(id, quests, items) {
   return shell({
     title: `${meta.name} — Arkenelle Wiki`,
     active: "wiki",
+    theme: "quests",
     body: `<main class="wrap">
       ${crumb([
         { href: "/wiki/", label: "Wiki" },
@@ -1611,7 +1512,7 @@ function campaignPageHtml(id, quests, items) {
         { label: meta.name },
       ])}
       <article class="page prose">
-        <h1 class="section-title">${esc(meta.name)}</h1>
+        ${pageHeading("quests", meta.name)}
         <p>${esc(meta.blurb)}</p>
         ${
           climaxes.length
@@ -1632,13 +1533,291 @@ function campaignPageHtml(id, quests, items) {
   });
 }
 
-function listPage(title, intro, cardsHtml, active) {
+function itemByPath(items, itemPath) {
+  if (!itemPath) return null;
+  const base = basenameSlug(itemPath);
+  return items.find((it) => it.file.replace(/\\/g, "/").endsWith("/" + path.basename(itemPath.replace(/\\/g, "/"))))
+    || items.find((it) => it.slug === slugify(base) || it.slug === base);
+}
+
+function creatureRole(c) {
+  return c.boss ? "boss" : "enemy";
+}
+
+function creatureCard(c, extra = []) {
+  const role = creatureRole(c);
+  const kind = [c.boss ? "Boss" : "Enemy", c.level ? "Lv " + c.level : "", ...extra].filter(Boolean).join(" · ");
+  return `<a class="item-card cat-${role}" data-kind="${c.boss ? "Boss" : "Enemy"}" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(kind)}</span></span></a>`;
+}
+
+function creatureLink(c) {
+  return `<a class="cat-${creatureRole(c)}" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`;
+}
+
+function lootList(drops, items) {
+  if (!drops.length) return "<p class='muted'>No authored drops.</p>";
+  return `<ul class="list-reset">${drops
+    .map((d) => {
+      const item = itemByPath(items, d.itemPath);
+      const label = item ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(d.itemPath).replace(/_/g, " "));
+      return `<li>${label}${esc(fmtAmt(d.min, d.max))} — ${esc(fmtChance(d.chance))}</li>`;
+    })
+    .join("")}</ul>`;
+}
+
+function fileKey(p) {
+  return path.basename(String(p || "").replace(/\\/g, "/")).replace(/\.tres$/i, "").replace(/\.item$/, "");
+}
+
+function fmtGold(n) {
+  return Math.round(n).toLocaleString("en-US");
+}
+
+function fmtAmtCell(min, max) {
+  if (min === max) return String(min);
+  return `${min}–${max}`;
+}
+
+function itemLink(items, itemPath) {
+  const item = itemByPath(items, itemPath);
+  return item
+    ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>`
+    : esc(basenameSlug(itemPath).replace(/_/g, " "));
+}
+
+function withShares(drops) {
+  const total = drops.reduce((s, d) => s + (d.chance || 0), 0) || 1;
+  return drops.map((d) => ({ ...d, share: d.chance / total }));
+}
+
+function lootTableHtml(drops, items, rateMode) {
+  if (!drops.length) return "";
+  const rows = rateMode === "weight" ? withShares(drops) : drops;
+  const rateHead = rateMode === "weight" ? "Pool share" : "Chance";
+  return `<table class="loot-table"><thead><tr><th>Item</th><th>Amount</th><th>${rateHead}</th></tr></thead><tbody>${rows
+    .map((d) => {
+      const rate = rateMode === "weight" ? fmtChance(d.share) : fmtChance(d.chance);
+      return `<tr><td>${itemLink(items, d.itemPath)}</td><td>${esc(fmtAmtCell(d.min, d.max))}</td><td>${esc(rate)}</td></tr>`;
+    })
+    .join("")}</tbody></table>`;
+}
+
+function chestContentsHtml(table, items) {
+  if (!table) return `<p class="muted">No loot table linked.</p>`;
+  const rolls = table.rollsMin === table.rollsMax ? String(table.rollsMin) : `${table.rollsMin}–${table.rollsMax}`;
+  const gold = table.goldMax > 0 ? ` plus ${fmtGold(table.goldMin)}–${fmtGold(table.goldMax)} gold` : "";
+  let html = `<p class="loot-note">Each open grants <strong>${esc(rolls)}</strong> items from this table (weighted picks, no duplicates)${gold}.</p>`;
+  html += lootTableHtml(table.loot, items, "weight");
+  if (table.exclusive.length) {
+    html += `<h2>Rare extras</h2><p class="loot-note">Independent rolls after the main table. At most ${table.exclusiveMax} of these per open.</p>`;
+    html += lootTableHtml(table.exclusive, items, "chance");
+  }
+  return html;
+}
+
+function sourcesHtml(sources) {
+  if (!sources.length) return `<p class="muted">No authored drop sources.</p>`;
+  return `<ul class="source-list">${sources
+    .map((s) => `<li><span>${s.label}</span><span class="src-note">${esc(s.note)}</span></li>`)
+    .join("")}</ul>`;
+}
+
+function ornateNote(c) {
+  const bits = [];
+  if (c.ornateTopMax > 0) {
+    bits.push(c.ornateTopMin === c.ornateTopMax ? `Top DPS ×${c.ornateTopMax}` : `Top DPS ×${c.ornateTopMin}–${c.ornateTopMax}`);
+  }
+  if (c.ornateSecondMax > 0) {
+    bits.push(c.ornateSecondMin === c.ornateSecondMax ? `#2 DPS ×${c.ornateSecondMax}` : `#2 DPS ×${c.ornateSecondMin}–${c.ornateSecondMax}`);
+  }
+  if (c.ornateConsolation > 0) bits.push(`others ${fmtChance(c.ornateConsolation)}`);
+  return bits.join(", ") || "Boss chest grant";
+}
+
+function collectChestTables() {
+  const dir = path.join(ROOT, "source/common/gameplay/combat/chests");
+  const tables = new Map();
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ChestResource") continue;
+    const slug = basenameSlug(file);
+    tables.set(slug, {
+      slug,
+      name: str(doc.resource.display_name) || slug,
+      tier: num(doc.resource.tier, 1),
+      goldMin: num(doc.resource.gold_min),
+      goldMax: num(doc.resource.gold_max),
+      rollsMin: num(doc.resource.rolls_min, 1),
+      rollsMax: num(doc.resource.rolls_max, 3),
+      exclusiveMax: num(doc.resource.exclusive_max, 1),
+      loot: dropsFrom(doc, doc.resource.loot),
+      exclusive: dropsFrom(doc, doc.resource.exclusive_loot),
+    });
+  }
+  return tables;
+}
+
+function collectShops() {
+  const dir = path.join(ROOT, "source/common/gameplay/shops/resources");
+  const rows = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "ShopResource") continue;
+    const entries = [];
+    for (const ref of asArray(doc.resource.entries)) {
+      const sub = resolveSub(doc, ref);
+      if (!sub) continue;
+      const itemPath = resolveExt(doc, sub.props.item);
+      if (!itemPath) continue;
+      entries.push({ itemPath, price: num(sub.props.price) });
+    }
+    rows.push({
+      name: str(doc.resource.shop_name) || basenameSlug(file),
+      currencyPath: resolveExt(doc, doc.resource.currency_item),
+      entries,
+    });
+  }
+  return rows;
+}
+
+function parseRewardFile(resPath) {
+  const abs = resToFs(resPath);
+  if (!abs || !fs.existsSync(abs)) return null;
+  let doc;
+  try {
+    doc = parseTres(read(abs));
+  } catch {
+    return null;
+  }
+  return {
+    loot: dropsFrom(doc, doc.resource.loot),
+    exclusive: dropsFrom(doc, doc.resource.exclusive_loot),
+  };
+}
+
+const DEFAULT_ORNATE_CHEST = "res://source/common/gameplay/items/chests/gold_pink_large.tres";
+
+function attachItemWiki(items, creatures, zones, shops, chestTables, stations, quests) {
+  const byKey = new Map();
+  for (const it of items) {
+    if (it.kind === "Chest") it.table = chestTables.get(it.chestSlug || basenameSlug(it.file)) || null;
+    it.sources = [];
+    byKey.set(fileKey(it.file), it);
+  }
+
+  function addSource(itemPath, source) {
+    const it = byKey.get(fileKey(itemPath));
+    if (it) it.sources.push(source);
+  }
+
+  for (const c of creatures) {
+    for (const d of c.loot) {
+      addSource(d.itemPath, {
+        label: creatureLink(c),
+        note: `${fmtChance(d.chance)}${fmtAmt(d.min, d.max)} on kill`,
+      });
+    }
+    if (c.ornateTopMax > 0) {
+      addSource(c.ornateItem || DEFAULT_ORNATE_CHEST, {
+        label: creatureLink(c),
+        note: ornateNote(c),
+      });
+    }
+  }
+
+  for (const z of zones) {
+    for (const d of z.zoneKillLoot || []) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a>`,
+        note: `${fmtChance(d.chance)}${fmtAmt(d.min, d.max)} on any kill in this zone`,
+      });
+    }
+    for (const [diff, resPath] of [
+      ["Normal", z.rewardPath],
+      ["Hard", z.hardRewardPath],
+    ]) {
+      if (!resPath) continue;
+      const reward = parseRewardFile(resPath);
+      if (!reward) continue;
+      for (const d of [...reward.loot, ...reward.exclusive]) {
+        addSource(d.itemPath, {
+          label: `<a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a>`,
+          note: `${diff} completion · ${fmtChance(d.chance)}${fmtAmt(d.min, d.max)}`,
+        });
+      }
+    }
+  }
+
+  for (const shop of shops) {
+    const currency = byKey.get(fileKey(shop.currencyPath));
+    const curName = currency ? currency.name : "Gold";
+    for (const e of shop.entries) {
+      addSource(e.itemPath, {
+        label: esc(shop.name),
+        note: e.price ? `${e.price} ${curName}` : "Sold",
+      });
+    }
+  }
+
+  for (const chest of items) {
+    if (!chest.table) continue;
+    const weighted = withShares(chest.table.loot);
+    for (const d of weighted) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-items" href="/wiki/items/${chest.slug}/">${esc(chest.name)}</a>`,
+        note: `Chest table · ${fmtChance(d.share)}${fmtAmt(d.min, d.max)}`,
+      });
+    }
+    for (const d of chest.table.exclusive) {
+      addSource(d.itemPath, {
+        label: `<a class="cat-items" href="/wiki/items/${chest.slug}/">${esc(chest.name)}</a>`,
+        note: `Chest rare · ${fmtChance(d.chance)}${fmtAmt(d.min, d.max)}`,
+      });
+    }
+  }
+
+  for (const st of stations || []) {
+    for (const r of st.recipes) {
+      addSource(r.itemPath, {
+        label: esc(st.name),
+        note: r.level ? `Craft · ${st.profession} ${r.level}` : "Crafted",
+      });
+    }
+  }
+  for (const q of quests || []) {
+    for (const r of q.rewardItems || []) {
+      addSource(r.itemPath, {
+        label: `<a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>`,
+        note: r.amount > 1 ? `Quest reward ×${r.amount}` : "Quest reward",
+      });
+    }
+    for (const itemPath of q.styleWeapons || []) {
+      addSource(itemPath, {
+        label: `<a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>`,
+        note: "Unique of your equipped style",
+      });
+    }
+  }
+}
+
+function listPage(title, intro, cardsHtml, active, cat) {
   return shell({
     title: `${title} — Arkenelle Wiki`,
     active,
+    theme: cat,
     body: `<main class="wrap">
       ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: title }])}
-      <h1 class="section-title">${esc(title)}</h1>
+      ${pageHeading(cat, title)}
       <p class="muted">${esc(intro)}</p>
       <div class="item-grid">${cardsHtml}</div>
     </main>`,
@@ -1665,8 +1844,20 @@ function build() {
   attachQuestGraph(quests, npcs);
   const shops = collectShops();
   const stations = collectStations();
-  const chests = collectChests();
-  const itemSources = buildItemSources(items, creatures, shops, stations, chests, quests);
+  const chestTables = collectChestTables();
+  attachItemWiki(items, creatures, zones, shops, chestTables, stations, quests);
+  const itemSources = buildItemSources(
+    items,
+    creatures,
+    shops,
+    stations,
+    [...chestTables.values()].map((t) => ({
+      name: t.name,
+      tier: t.tier,
+      drops: [...t.loot, ...t.exclusive],
+    })),
+    quests
+  );
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
@@ -1697,40 +1888,139 @@ function build() {
           <p class="lede">A hard sandbox MMORPG. No forced path and no hand-holding. Explore, fight, build a guild, take territory. Finding your own footing is the point.</p>
           <div class="cta-stack">
             <div class="cta-pair">
-              <div class="play-wrap">
-                <span class="play-sparkle s1" aria-hidden="true"></span>
-                <span class="play-sparkle s2" aria-hidden="true"></span>
-                <span class="play-sparkle s3" aria-hidden="true"></span>
-                <a class="btn play" href="${PLAY_WEB}"><span class="play-shine" aria-hidden="true"></span>Play in your browser</a>
+              <div class="cta-fx play">
+                <span class="cta-sparkle s1" aria-hidden="true"></span>
+                <span class="cta-sparkle s2" aria-hidden="true"></span>
+                <span class="cta-sparkle s3" aria-hidden="true"></span>
+                <a class="btn play" href="${PLAY_WEB}"><span class="cta-shine" aria-hidden="true"></span>Play in your browser</a>
               </div>
-              <a class="btn" href="${PLAY_DESKTOP}">Desktop client</a>
+              <div class="cta-fx desk">
+                <span class="cta-sparkle s1" aria-hidden="true"></span>
+                <span class="cta-sparkle s2" aria-hidden="true"></span>
+                <span class="cta-sparkle s3" aria-hidden="true"></span>
+                <a class="btn desk" href="${PLAY_DESKTOP}"><span class="cta-shine" aria-hidden="true"></span>Desktop client</a>
+              </div>
             </div>
             <p class="cta-note">No download for the browser client. Desktop zip updates itself.</p>
             <div class="cta-row">
               <a class="btn" href="${DISCORD}">Discord</a>
               <a class="btn" href="/wiki/">Wiki</a>
               <a class="btn" href="/leaderboards/">Leaderboards</a>
+              <a class="btn" href="/donate/">Donate</a>
             </div>
           </div>
         </div>
       </section>
       <main class="wrap">
         <div class="grid-3">
-          <article class="card">
+          <article class="card wiki-card cat-play">
+            ${catIcon("play")}
+            <div>
             <h2>Play</h2>
-            <p><a href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, <a href="${PLAY_DESKTOP}">download the Windows app</a> (extract the zip, run Arkenelle.exe; it updates itself). itch.io remains an optional backup.</p>
+            <p><a class="cat-play" href="${PLAY_WEB}">Play in the browser</a> at play.arkenelle.com — first load is a large download. For weather and a smoother client, <a class="cat-play" href="${PLAY_DESKTOP}">download the Windows app</a> (extract the zip, run Arkenelle.exe; it updates itself). itch.io remains an optional backup.</p>
+            </div>
           </article>
-          <article class="card">
+          <article class="card wiki-card cat-start">
+            ${catIcon("start")}
+            <div>
             <h2>Where to start</h2>
             <p>The Charter Clerk seals your papers. Then the Hall Keeper in Castle Garden starts <strong>Blood in the Meadow</strong> — orientation, not a class lock. Every Hero can train every weapon and every profession.</p>
-            <p><a href="/wiki/getting-started/">Getting started →</a></p>
+            <p><a class="cat-start" href="/wiki/getting-started/">Getting started →</a></p>
+            </div>
           </article>
-          <article class="card">
+          <article class="card wiki-card cat-guilds">
+            ${catIcon("guilds")}
+            <div>
             <h2>Guilds</h2>
-            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild in-game, or the <a href="/leaderboards/">live leaderboards</a>.</p>
-            <p><a href="/wiki/guilds/">Guilds &amp; territory →</a></p>
+            <p>Join or found a guild, capture a territory banner, and earn Glory for as long as you hold it. See Guild in-game, or the <a class="cat-boards" href="/leaderboards/">live leaderboards</a>.</p>
+            <p><a class="cat-guilds" href="/wiki/guilds/">Guilds &amp; territory →</a></p>
+            </div>
           </article>
         </div>
+      </main>`,
+    })
+  );
+
+  write(
+    "donate/index.html",
+    shell({
+      title: "Donate — Arkenelle",
+      active: "donate",
+      theme: "donate",
+      body: `<main class="wrap">
+        <article class="page prose donate-page">
+          ${pageHeading("donate", "Support Arkenelle")}
+          <p>Donations help pay for servers and keep development going. This is not MTX — a gift does not buy in-game items, gold, or power.</p>
+          <div class="donate-thanks">
+            <h2>A title as thanks</h2>
+            <p>Arkenelle grants a matching title as a thank-you. It shows under your name on your profile and beside your name in chat. After you donate, send your <strong>character name</strong> in <a href="${DISCORD}">Discord</a> and we will put it on.</p>
+            <p class="donate-title-samples" aria-hidden="true"><span class="c-sapphire">— Sapphire VIP —</span><span class="c-emerald">— Emerald Supporter —</span><span class="c-ruby">— Ruby VIP —</span><span class="c-custom">— Arkenelle Supporter —</span></p>
+          </div>
+          <h2>Give once</h2>
+          <div class="donate-grid">
+            ${donateCard({
+              img: "onetime-sapphire.png",
+              name: "Sapphire Supporter",
+              price: "$5",
+              blurb: "A one-time donation to help fund Arkenelle. Thank you for backing the project.",
+              href: STRIPE.sapphireOnce,
+              gem: "sapphire",
+            })}
+            ${donateCard({
+              img: "onetime-emerald.png",
+              name: "Emerald Supporter",
+              price: "$10",
+              blurb: "A larger one-time gift for servers and development. Thank you for helping keep Arkenelle independent.",
+              href: STRIPE.emeraldOnce,
+              gem: "emerald",
+            })}
+            ${donateCard({
+              img: "onetime-ruby.png",
+              name: "Ruby Supporter",
+              price: "$25",
+              blurb: "The highest one-time donation. Ruby funds the long stretch of alpha still ahead. Thank you.",
+              href: STRIPE.rubyOnce,
+              gem: "ruby",
+            })}
+            ${donateCard({
+              img: "onetime-custom.png",
+              name: "Choose your amount",
+              price: "Any",
+              blurb: "Pay what you can. This is a one-time donation — you choose the amount.",
+              href: STRIPE.custom,
+              gem: "custom",
+            })}
+          </div>
+          <h2>Monthly VIP</h2>
+          <p class="muted">Billed each month through Stripe. Cancel anytime from the receipt Stripe emails you.</p>
+          <div class="donate-grid donate-grid-3">
+            ${donateCard({
+              img: "vip-sapphire.png",
+              name: "Sapphire VIP",
+              price: "$5 / month",
+              blurb: "Help keep Arkenelle in development. Thank you for a monthly back.",
+              href: STRIPE.sapphireVip,
+              gem: "sapphire",
+            })}
+            ${donateCard({
+              img: "vip-emerald.png",
+              name: "Emerald VIP",
+              price: "$10 / month",
+              blurb: "A stronger monthly gift for servers and the work still ahead.",
+              href: STRIPE.emeraldVip,
+              gem: "emerald",
+            })}
+            ${donateCard({
+              img: "vip-ruby.png",
+              name: "Ruby VIP",
+              price: "$25 / month",
+              blurb: "The highest monthly tier. Ruby funds the long stretch of alpha still ahead.",
+              href: STRIPE.rubyVip,
+              gem: "ruby",
+            })}
+          </div>
+          <p class="donate-foot">Choose-your-amount gifts receive the gold <strong>Arkenelle Supporter</strong> title. One-time and VIP gifts use the matching Sapphire, Emerald, or Ruby title.</p>
+        </article>
       </main>`,
     })
   );
@@ -1744,18 +2034,18 @@ function build() {
         <h1 class="section-title">Wiki</h1>
         <p class="muted">Generated from the live Godot resources, so names, stats, and drops match the game.</p>
         <div class="card-grid">
-          <a class="card" href="/wiki/getting-started/"><h3>Getting started</h3><p>Charter Seal, Blood in the Meadow, and how progression actually works.</p></a>
-          <a class="card" href="/wiki/quests/hollow-seep/"><h3>The Hollow Seep</h3><p>The Charter campaign in order, with unique weapons at each climax.</p></a>
-          <a class="card" href="/wiki/getting-started/gear/"><h3>Gear path</h3><p>Charter unique weapons, armour set totals, and where every piece comes from.</p></a>
-          <a class="card" href="/wiki/items/"><h3>Items</h3><p>${items.length} weapons, armor, materials, potions, and more.</p></a>
-          <a class="card" href="/wiki/creatures/"><h3>Creatures</h3><p>${creatures.length} enemies and bosses with authored loot.</p></a>
-          <a class="card" href="/wiki/locations/"><h3>Locations</h3><p>${zones.length} zones and dungeons.</p></a>
-          <a class="card" href="/wiki/npcs/"><h3>NPCs</h3><p>${npcs.length} friendly faces.</p></a>
-          <a class="card" href="/wiki/skills/"><h3>Skills</h3><p>${jobs.length} gathering and crafting professions.</p></a>
-          <a class="card" href="/wiki/slayer/"><h3>Slayer</h3><p>Masters, task pools, and creature assignments.</p></a>
-          <a class="card" href="/wiki/quests/"><h3>Quests</h3><p>The Hollow Seep campaign and ${quests.length} authored quests, with rewards and requirements.</p></a>
-          <a class="card" href="/wiki/guilds/"><h3>Guilds</h3><p>Territory, banners, and Glory.</p></a>
-          <a class="card" href="/leaderboards/"><h3>Leaderboards</h3><p>Live ranks from the running world.</p></a>
+          ${wikiCard("start", "/wiki/getting-started/", "Getting started", "Charter Seal, Blood in the Meadow, and how progression actually works.")}
+          ${wikiCard("quests", "/wiki/quests/hollow-seep/", "The Hollow Seep", "The Charter campaign in order, with unique weapons at each climax.")}
+          ${wikiCard("start", "/wiki/getting-started/gear/", "Gear path", "Charter unique weapons, armour set totals, and where every piece comes from.")}
+          ${wikiCard("items", "/wiki/items/", "Items", `<strong>${items.length}</strong> weapons, armor, materials, potions, and more.`)}
+          ${wikiCard("creatures", "/wiki/creatures/", "Creatures", `<strong>${creatures.length}</strong> enemies and bosses with authored loot.`)}
+          ${wikiCard("locations", "/wiki/locations/", "Locations", `<strong>${zones.length}</strong> zones and dungeons.`)}
+          ${wikiCard("npcs", "/wiki/npcs/", "NPCs", `<strong>${npcs.length}</strong> friendly faces.`)}
+          ${wikiCard("skills", "/wiki/skills/", "Skills", `<strong>${jobs.length}</strong> gathering and crafting professions.`)}
+          ${wikiCard("slayer", "/wiki/slayer/", "Slayer", "Masters, task pools, and creature assignments.")}
+          ${wikiCard("quests", "/wiki/quests/", "Quests", `The Hollow Seep campaign and <strong>${quests.length}</strong> authored quests.`)}
+          ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
+          ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
         </div>
       </main>`,
     })
@@ -1766,10 +2056,11 @@ function build() {
     shell({
       title: "Leaderboards — Arkenelle",
       active: "boards",
+      theme: "boards",
       scripts: ["/leaderboards.js"],
       body: `<main class="wrap" data-leaderboards>
         <div class="lb-head">
-          <h1 class="section-title">Leaderboards</h1>
+          ${pageHeading("boards", "Leaderboards")}
           <p class="lb-status" data-lb-status>Loading live ranks…</p>
         </div>
         <p class="muted">The same public boards as in-game, refreshed from the live world about every 30 seconds. Staff characters stay hidden.</p>
@@ -1788,10 +2079,11 @@ function build() {
     shell({
       title: "Getting started — Arkenelle Wiki",
       active: "start",
+      theme: "start",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Getting started" }])}
         <article class="page prose">
-          <h1 class="section-title">Getting started</h1>
+          ${pageHeading("start", "Getting started")}
           <h2>Play</h2>
           <ol>
             <li><strong>Browser:</strong> open <a href="${PLAY_WEB}">play.arkenelle.com</a>. First load downloads the whole client; later visits reuse the cache. This is the lighter build (no weather).</li>
@@ -1810,8 +2102,8 @@ function build() {
           </ul>
           <h2>Weapons and armour</h2>
           <p>Each Charter climax grants a unique weapon of the style in your hand. Farm the same boss for the other styles, armour mats, and relics. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
-          <p><a href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — unique ladder, armour set totals, and every piece.</p>
-          <p><a href="/wiki/quests/hollow-seep/"><strong>The Hollow Seep →</strong></a> — the Charter campaign in order.</p>
+          <p><a class="cat-start" href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — unique ladder, armour set totals, and every piece.</p>
+          <p><a class="cat-quests" href="/wiki/quests/hollow-seep/"><strong>The Hollow Seep →</strong></a> — the Charter campaign in order.</p>
           <h2>While it is alpha</h2>
           <p>Expect rough edges. Patch notes land in your Mailbox. Type <code>/players</code> to see who is online, and <code>/feedback</code> to send a bug or idea. <a href="${DISCORD}">Discord</a> is the other door.</p>
         </article>
@@ -1826,11 +2118,12 @@ function build() {
     shell({
       title: "Guilds — Arkenelle Wiki",
       active: "wiki",
+      theme: "guilds",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Guilds" }])}
         <article class="page prose">
-          <h1 class="section-title">Guilds and territory</h1>
-          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The <a href="/leaderboards/">live leaderboards</a> show seasonal and eternal Glory, and the in-game Guild menu is the rest of the view.</p>
+          ${pageHeading("guilds", "Guilds and territory")}
+          <p>Join or found a guild, then take a territory by capturing its banner. Your guild earns Glory for as long as it holds that ground. The <a class="cat-boards" href="/leaderboards/">live leaderboards</a> show seasonal and eternal Glory, and the in-game Guild menu is the rest of the view.</p>
           <p>This is sandbox PvE/PvP infrastructure, not a theme-park campaign. Holding land is the point; the wiki will not tell you which banner to hit first.</p>
         </article>
       </main>`,
@@ -1843,11 +2136,11 @@ function build() {
     shell({
       title: "Items — Arkenelle Wiki",
       active: "items",
+      theme: "items",
       body: `<main class="wrap">
       ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Items" }])}
-      <h1 class="section-title">Items</h1>
-      <p class="muted">${items.length} items pulled from game resources. Every item page lists where it comes from — bought, crafted, dropped, quested, or given as a unique of your style.</p>
-      <p><a href="/wiki/getting-started/gear/">Read the gear path first</a> if you are not sure what to wear next.</p>
+      ${pageHeading("items", "Items")}
+      <p class="muted">${items.length} items pulled from game resources.</p>
       <div class="filters" data-filters>
         <button type="button" class="active" data-kind="">All</button>
         ${kinds.map((k) => `<button type="button" data-kind="${esc(k)}">${esc(k)}</button>`).join("")}
@@ -1855,7 +2148,7 @@ function build() {
       <div class="item-grid">${items
         .map(
           (it) =>
-            `<a class="item-card" data-kind="${esc(it.kind)}" href="/wiki/items/${it.slug}/"><span class="icon-frame">${iconHtml(it.icon)}</span><span><span class="name">${esc(it.name)}</span><span class="kind">${esc(it.kind)}</span></span></a>`
+            `<a class="item-card cat-items" data-kind="${esc(it.kind)}" href="/wiki/items/${it.slug}/"><span class="icon-frame">${iconHtml(it.icon)}</span><span><span class="name">${esc(it.name)}</span><span class="kind">${esc(it.kind)}</span></span></a>`
         )
         .join("")}</div>
     </main>`,
@@ -1873,11 +2166,22 @@ function build() {
     else if (it.requiredLevel) stats.push(["Requires level", String(it.requiredLevel)]);
     if (it.vendor) stats.push(["Vendor value", String(it.vendor)]);
     if (it.stack) stats.push(["Stack", it.stack === 1 ? "Not stackable" : String(it.stack)]);
+    if (it.table) {
+      stats.push(["Tier", String(it.table.tier)]);
+      if (it.table.goldMax) stats.push(["Gold", `${fmtGold(it.table.goldMin)}–${fmtGold(it.table.goldMax)}`]);
+      stats.push(["Item rolls", it.table.rollsMin === it.table.rollsMax ? String(it.table.rollsMin) : `${it.table.rollsMin}–${it.table.rollsMax}`]);
+    }
+    const inside = it.kind === "Chest" ? `<h2>Inside</h2>${chestContentsHtml(it.table, items)}` : "";
+    const srcTitle = it.kind === "Chest" ? "Dropped by" : "Sources";
+    const sources = it.kind === "Chest" || (it.sources && it.sources.length)
+      ? `<h2>${srcTitle}</h2>${sourcesHtml(it.sources || [])}`
+      : "";
     write(
       `wiki/items/${it.slug}/index.html`,
       shell({
         title: `${it.name} — Arkenelle Wiki`,
         active: "items",
+        theme: "items",
         body: `<main class="wrap"><article class="page">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/items/", label: "Items" }, { label: it.name }])}
           <div class="detail-head">
@@ -1889,7 +2193,8 @@ function build() {
           </div>
           ${it.description ? `<p>${esc(it.description)}</p>` : ""}
           ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>` : ""}
-          <div class="prose">${sourcesHtml(itemSources.get(it.slug), items)}</div>
+          ${inside}
+          ${sources}
         </article></main>`,
       })
     );
@@ -1903,9 +2208,10 @@ function build() {
       npcs
         .map(
           (n) =>
-            `<a class="item-card" href="/wiki/npcs/${n.slug}/"><span><span class="name">${esc(n.name)}</span><span class="kind">${esc(n.offers.join(" · ") || "Talk")}</span></span></a>`
+            `<a class="item-card cat-npcs" href="/wiki/npcs/${n.slug}/"><span><span class="name">${esc(n.name)}</span><span class="kind">${esc(n.offers.join(" · ") || "Talk")}</span></span></a>`
         )
         .join(""),
+      "npcs",
       "npcs"
     )
   );
@@ -1915,6 +2221,7 @@ function build() {
       shell({
         title: `${n.name} — Arkenelle Wiki`,
         active: "npcs",
+        theme: "npcs",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/npcs/", label: "NPCs" }, { label: n.name }])}
           <h1 class="section-title">${esc(n.name)}</h1>
@@ -1925,7 +2232,7 @@ function build() {
             n.quests.length
               ? `<h2>Quests</h2><ul>${n.quests
                   .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name))
-                  .map((q) => `<li><a href="${questHref(q)}">${esc(q.name)}</a>${q.styleWeapons.length ? " — unique weapon" : ""}</li>`)
+                  .map((q) => `<li><a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>${q.styleWeapons.length ? " — unique weapon" : ""}</li>`)
                   .join("")}</ul>`
               : ""
           }
@@ -1934,24 +2241,39 @@ function build() {
     );
   }
 
+  const bosses = creatures.filter((c) => c.boss);
+  const enemies = creatures.filter((c) => !c.boss);
   write(
     "wiki/creatures/index.html",
-    listPage(
-      "Creatures",
-      "Hostile types. Combat numbers and loot are what the server actually uses.",
-      creatures
-        .map(
-          (c) =>
-            `<a class="item-card" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${c.boss ? "Boss" : "Enemy"}${c.level ? " · Lv " + c.level : ""}</span></span></a>`
-        )
-        .join(""),
-      "creatures"
-    )
+    shell({
+      title: "Creatures — Arkenelle Wiki",
+      active: "creatures",
+      theme: "creatures",
+      body: `<main class="wrap">
+      ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Creatures" }])}
+      ${pageHeading("creatures", "Creatures")}
+      <p class="muted">Hostile types. Combat numbers and loot are what the server actually uses.</p>
+      <div class="filters" data-filters>
+        <button type="button" class="active" data-kind="">All</button>
+        <button type="button" data-kind="Boss">Bosses (${bosses.length})</button>
+        <button type="button" data-kind="Enemy">Enemies (${enemies.length})</button>
+      </div>
+      <section data-kind-section="Boss">
+        <h2 class="role-heading role-boss">Bosses</h2>
+        <div class="item-grid">${bosses.map((c) => creatureCard(c)).join("")}</div>
+      </section>
+      <section data-kind-section="Enemy">
+        <h2 class="role-heading role-enemy">Enemies</h2>
+        <div class="item-grid">${enemies.map((c) => creatureCard(c)).join("")}</div>
+      </section>
+    </main>`,
+    })
   );
   for (const c of creatures) {
+    const role = creatureRole(c);
     const stats = [
       ["Type", c.type],
-      c.boss ? ["Role", "Boss"] : null,
+      ["Role", c.boss ? "Boss" : "Enemy"],
       c.level ? ["Combat level", String(c.level)] : null,
       c.hp ? ["Max health", String(c.hp)] : null,
       c.damage ? ["Attack damage", String(c.damage)] : null,
@@ -1964,9 +2286,11 @@ function build() {
       shell({
         title: `${c.name} — Arkenelle Wiki`,
         active: "creatures",
+        theme: role,
         body: `<main class="wrap"><article class="page">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/creatures/", label: "Creatures" }, { label: c.name }])}
-          <h1 class="section-title">${esc(c.name)}</h1>
+          ${pageHeading(role, c.name)}
+          <p><span class="tag tag-${role}">${c.boss ? "Boss" : "Enemy"}</span></p>
           <div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>
           ${foundInHtml(c.locations)}
           <h2>Loot</h2>
@@ -1984,9 +2308,10 @@ function build() {
       zones
         .map(
           (z) =>
-            `<a class="item-card" href="/wiki/locations/${z.slug}/"><span><span class="name">${esc(z.name)}</span><span class="kind">${z.isDungeon ? "Dungeon" : "Zone"}</span></span></a>`
+            `<a class="item-card cat-locations" href="/wiki/locations/${z.slug}/"><span><span class="name">${esc(z.name)}</span><span class="kind">${z.isDungeon ? "Dungeon" : "Zone"}</span></span></a>`
         )
         .join(""),
+      "locations",
       "locations"
     )
   );
@@ -1998,12 +2323,16 @@ function build() {
       z.party ? ["Party size", String(z.party)] : null,
       z.wardstone ? ["Wardstone", z.wardstone] : null,
     ].filter(Boolean);
+    const bg = locationBgUrl(z.slug);
     write(
       `wiki/locations/${z.slug}/index.html`,
       shell({
         title: `${z.name} — Arkenelle Wiki`,
         active: "locations",
-        body: `<main class="wrap"><article class="page prose">
+        theme: "locations",
+        extraClass: bg ? "location-scene" : "",
+        body: `${bg ? `<div class="location-scene-bg" style="background-image:url('${bg}')" aria-hidden="true"></div>` : ""}
+        <main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/locations/", label: "Locations" }, { label: z.name }])}
           <h1 class="section-title">${esc(z.name)}</h1>
           ${z.description ? `<p>${esc(z.description)}</p>` : ""}
@@ -2015,8 +2344,8 @@ function build() {
                     const kind = (n.offers && n.offers.length ? n.offers.join(" · ") : "") || "NPC";
                     const inner = `<span><span class="name">${esc(n.name)}</span><span class="kind">${esc(kind)}</span>${n.greeting ? `<span class="kind">${esc(n.greeting.length > 140 ? n.greeting.slice(0, 137) + "…" : n.greeting)}</span>` : ""}</span>`;
                     return n.slug
-                      ? `<a class="item-card" href="/wiki/npcs/${n.slug}/">${inner}</a>`
-                      : `<div class="item-card">${inner}</div>`;
+                      ? `<a class="item-card cat-npcs" href="/wiki/npcs/${n.slug}/">${inner}</a>`
+                      : `<div class="item-card cat-npcs">${inner}</div>`;
                   })
                   .join("")}</div>`
               : ""
@@ -2025,10 +2354,7 @@ function build() {
             z.fauna.length
               ? `<h2>Creatures</h2><div class="item-grid">${z.fauna
                   .map(({ creature: c, count }) => {
-                    const extra = [c.boss ? "Boss" : "", c.level ? "Lv " + c.level : "", count > 1 ? "×" + count : ""]
-                      .filter(Boolean)
-                      .join(" · ");
-                    return `<a class="item-card" href="/wiki/creatures/${c.slug}/"><span><span class="name">${esc(c.name)}</span><span class="kind">${esc(extra)}</span></span></a>`;
+                    return creatureCard(c, [count > 1 ? "×" + count : ""]);
                   })
                   .join("")}</div>`
               : ""
@@ -2046,10 +2372,11 @@ function build() {
       jobs
         .map(
           (j) =>
-            `<a class="item-card" href="/wiki/skills/${j.slug}/"><span class="icon-frame">${iconHtml(j.icon, 32)}</span><span><span class="name">${esc(j.name)}</span><span class="kind">${esc(j.category)}</span></span></a>`
+            `<a class="item-card cat-skills" href="/wiki/skills/${j.slug}/"><span class="icon-frame">${iconHtml(j.icon, 32)}</span><span><span class="name">${esc(j.name)}</span><span class="kind">${esc(j.category)}</span></span></a>`
         )
         .join(""),
-      "wiki"
+      "wiki",
+      "skills"
     )
   );
   for (const j of jobs) {
@@ -2057,7 +2384,7 @@ function build() {
       .map((p, i) => {
         const item = itemByPath(items, p);
         const lv = j.sourceLevels[i];
-        const label = item ? `<a href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(p).replace(/_/g, " "));
+        const label = item ? `<a class="cat-items" href="/wiki/items/${item.slug}/">${esc(item.name)}</a>` : esc(basenameSlug(p).replace(/_/g, " "));
         return `<li>${label}${lv != null ? ` — level ${lv}` : ""}</li>`;
       })
       .join("");
@@ -2066,6 +2393,7 @@ function build() {
       shell({
         title: `${j.name} — Arkenelle Wiki`,
         active: "wiki",
+        theme: "skills",
         body: `<main class="wrap"><article class="page prose">
           ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/skills/", label: "Skills" }, { label: j.name }])}
           <div class="detail-head">
@@ -2086,14 +2414,15 @@ function build() {
     shell({
       title: "Slayer — Arkenelle Wiki",
       active: "wiki",
+      theme: "slayer",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Slayer" }])}
-        <h1 class="section-title">Slayer</h1>
+        ${pageHeading("slayer", "Slayer")}
         <p class="muted">Masters assign creature tasks. Kill the assigned types to finish the count.</p>
         <h2>Masters</h2>
         <div class="card-grid">${slayer.masters
           .map(
-            (m) => `<article class="card"><h3>${esc(m.name)}</h3>
+            (m) => `<article class="card wiki-card cat-slayer">${catIcon("slayer")}<div><h3>${esc(m.name)}</h3>
             <p class="muted">${esc(m.location)}${m.min ? ` · Slayer ${m.min}+` : ""}</p>
             ${m.greeting ? `<p>${esc(m.greeting)}</p>` : ""}
             <ul>${m.pool
@@ -2101,21 +2430,21 @@ function build() {
                 const t = taskBySlug[p.task];
                 return `<li>${esc(t ? t.name : p.task)} (${p.min}–${p.max})</li>`;
               })
-              .join("")}</ul></article>`
+              .join("")}</ul></div></article>`
           )
           .join("")}</div>
         <h2>Task types</h2>
         <div class="card-grid">${slayer.tasks
           .map(
-            (t) => `<article class="card"><h3>${esc(t.name)}</h3>
+            (t) => `<article class="card wiki-card cat-slayer">${catIcon("slayer")}<div><h3>${esc(t.name)}</h3>
             <p class="muted">${esc(t.location)}${t.min ? ` · Slayer ${t.min}+` : ""} · ${t.xp} XP / kill</p>
             ${t.notes ? `<p>${esc(t.notes)}</p>` : ""}
             <p>${t.enemies
               .map((e) => {
                 const c = creatures.find((x) => x.type === e || x.slug === e);
-                return c ? `<a href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>` : esc(e);
+                return c ? creatureLink(c) : esc(e);
               })
-              .join(", ")}</p></article>`
+              .join(", ")}</p></div></article>`
           )
           .join("")}</div>
       </main>`,
@@ -2128,7 +2457,7 @@ function build() {
       const meta = CAMPAIGN[id];
       const list = quests.filter((q) => q.campaign === id);
       if (!list.length) return "";
-      return `<h2><a href="${campaignHref(id)}">${esc(meta.name)}</a></h2><p class="muted">${esc(meta.blurb)}</p>${questListHtml(list)}`;
+      return `<h2><a class="cat-quests" href="${campaignHref(id)}">${esc(meta.name)}</a></h2><p class="muted">${esc(meta.blurb)}</p>${questListHtml(list)}`;
     })
     .join("");
   write(
@@ -2136,10 +2465,11 @@ function build() {
     shell({
       title: "Quests — Arkenelle Wiki",
       active: "wiki",
+      theme: "quests",
       body: `<main class="wrap">
         ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Quests" }])}
         <article class="page prose">
-          <h1 class="section-title">Quests</h1>
+          ${pageHeading("quests", "Quests")}
           <p>Authored quests (not the rotating daily board). Charter climaxes grant a unique weapon of the style in your hand. Requirements, objectives, and rewards are generated from the game files.</p>
           ${questIndexSections}
         </article>
@@ -2157,6 +2487,7 @@ function build() {
       shell({
         title: `${q.name} — Arkenelle Wiki`,
         active: "wiki",
+        theme: "quests",
         body: questPageHtml(q, items, creatures, npcs),
       })
     );
@@ -2165,7 +2496,7 @@ function build() {
   const search = [
     ...items.map((x) => ({ title: x.name, kind: "Item · " + x.kind, href: `/wiki/items/${x.slug}/`, haystack: (x.name + " " + x.kind + " " + x.description).toLowerCase() })),
     ...npcs.map((x) => ({ title: x.name, kind: "NPC", href: `/wiki/npcs/${x.slug}/`, haystack: (x.name + " " + x.greeting + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
-    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Creature", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
+    ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Enemy", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
     ...quests.map((x) => ({
@@ -2188,6 +2519,7 @@ function build() {
       href: `/wiki/quests/${meta.slug}/`,
       haystack: (meta.name + " " + meta.blurb).toLowerCase(),
     })),
+    { title: "Donate", kind: "Support", href: "/donate/", haystack: "donate donation supporter vip sapphire emerald ruby stripe" },
     { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper charter clerk blood in the meadow goblin chief bone" },
     { title: "Gear path", kind: "Guide", href: "/wiki/getting-started/gear/", haystack: "gear path weapon armor armour progression tier mastery unique bone spore sunsteel basilisk bronze iron steel mithril adamant runite how to get" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
@@ -2206,6 +2538,8 @@ function build() {
   );
 
   copyMedia();
+  copyLocationBgs();
+  copyDonateBadges();
 
   console.log(
     [
