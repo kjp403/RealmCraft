@@ -67,6 +67,34 @@ const SKIP_NPCS = new Set(["dev_all_merchant", "vfx_curator"]);
 const SKIP_ZONES = new Set(["jail", "vfx_vault", "dungeon_entrance"]);
 const SKIP_ENEMIES = new Set(["training_dummy"]);
 
+const CAMPAIGN = {
+  hollow_seep: {
+    slug: "hollow-seep",
+    name: "The Hollow Seep",
+    blurb: "The Charter spine. The Clerk seals your papers, the Hall Keeper sends you into the woodland, and each climax hands a unique weapon of the style in your hand. Smithing makes armour. Bosses make the next blade.",
+  },
+  fungus_cave: {
+    slug: "fungus-cave",
+    name: "Fungus Cave",
+    blurb: "Work in the caps. The Heart's unique is granted on the Charter climax Cut the Heart, not these side jobs.",
+  },
+  bandit_hideout: {
+    slug: "bandit-hideout",
+    name: "Bandit Hideout",
+    blurb: "The Watch's camp jobs. The Captain's unique is the Charter climax Break the Cage.",
+  },
+  side: {
+    slug: "side",
+    name: "Castle and professions",
+    blurb: "Gathering, smithing, and introductions around the Hall. Find Your Footing is an optional errand after Blood in the Meadow.",
+  },
+};
+
+const OBJ_KILL = 0;
+const OBJ_COLLECT = 1;
+const OBJ_CRAFT = 2;
+const OBJ_VISIT = 3;
+
 const usedMedia = new Set();
 const pngSizeCache = new Map();
 
@@ -647,11 +675,20 @@ function collectNpcs() {
       if (p.endsWith("name_change_interaction.gd")) offers.add("Name change");
       if (p.endsWith("attribute_reset_interaction.gd")) offers.add("Attribute reset");
     }
+    const questKeys = [];
+    for (const sub of Object.values(doc.sub)) {
+      for (const ref of asArray(sub.props?.quests)) {
+        const qPath = resolveExt(doc, ref);
+        if (qPath) questKeys.push(fileKey(qPath));
+      }
+    }
     npcs.push({
       slug: uniqueSlug(slug0, used),
       name,
       greeting: str(doc.resource.greeting),
       offers: [...offers],
+      questKeys: [...new Set(questKeys)],
+      quests: [],
       file,
     });
   }
@@ -957,6 +994,26 @@ function collectSlayer() {
   return { masters, tasks };
 }
 
+function campaignOf(file) {
+  const p = String(file || "").replace(/\\/g, "/");
+  const m = p.match(/quests\/resources\/([^/]+)\//);
+  const folder = m?.[1];
+  // Bren's warren is the woodland chapter of the Charter spine.
+  if (folder === "goblin_woodland") return "hollow_seep";
+  return CAMPAIGN[folder] ? folder : "side";
+}
+
+function skillLabel(slug, level) {
+  if (!slug) return "";
+  const name = String(slug).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return level ? `${name} ${level}` : name;
+}
+
+function modVal(item, stat) {
+  const m = (item?.modifiers || []).find((x) => x.stat === stat);
+  return m ? m.value : 0;
+}
+
 function collectQuests() {
   const dir = path.join(ROOT, "source/common/gameplay/quests/resources");
   const rows = [];
@@ -965,17 +1022,515 @@ function collectQuests() {
     if (doc.header.script_class !== "QuestResource") continue;
     const name = str(doc.resource.quest_name);
     if (!name) continue;
+    const campaign = campaignOf(file);
     rows.push({
+      key: fileKey(file),
       slug: slugify(str(doc.resource["metadata/slug"]) || basenameSlug(file)),
       name,
       description: str(doc.resource.description),
       xp: num(doc.resource.reward_xp),
+      masteryXp: num(doc.resource.reward_mastery_xp),
       gold: num(doc.resource.reward_gold),
       title: str(doc.resource.grant_title),
+      wardstone: str(doc.resource.grants_wardstone),
+      minLevel: num(doc.resource.min_level),
+      minSkill: str(doc.resource.min_skill),
+      minSkillLevel: num(doc.resource.min_skill_level),
+      autoComplete: Boolean(doc.resource.auto_complete),
+      completionAny: num(doc.resource.completion) === 1,
+      requiresAny: num(doc.resource.requires_mode) === 1,
+      campaign,
+      campaignMeta: CAMPAIGN[campaign],
+      file,
+      prereqKeys: asArray(doc.resource.requires_quests)
+        .map((ref) => fileKey(resolveExt(doc, ref)))
+        .filter(Boolean),
+      rewardItems: asArray(doc.resource.reward_items)
+        .map((ref) => {
+          const sub = resolveSub(doc, ref);
+          if (!sub) return null;
+          return {
+            itemPath: resolveExt(doc, sub.props.item),
+            amount: num(sub.props.amount, 1) || 1,
+          };
+        })
+        .filter((r) => r && r.itemPath),
+      styleWeapons: asArray(doc.resource.reward_style_weapons)
+        .map((ref) => resolveExt(doc, ref))
+        .filter(Boolean),
+      grantOnAccept: resolveExt(doc, doc.resource.grant_on_accept),
+      objectives: asArray(doc.resource.objectives)
+        .map((ref) => {
+          const sub = resolveSub(doc, ref);
+          if (!sub) return null;
+          return {
+            type: num(sub.props.type, OBJ_KILL),
+            enemy: str(sub.props.enemy_type),
+            itemPath: resolveExt(doc, sub.props.item),
+            amount: num(sub.props.required_amount, 1) || 1,
+            visitName: str(sub.props.target_giver_name),
+            visitKey: str(sub.props.target_giver_key),
+            label: str(sub.props.label_override),
+            grantItemPath: resolveExt(doc, sub.props.grant_item),
+          };
+        })
+        .filter(Boolean),
+      givers: [],
+      prereqs: [],
+      unlocks: [],
+      depth: 0,
     });
   }
-  rows.sort((a, b) => a.name.localeCompare(b.name));
   return rows;
+}
+
+function attachQuestGraph(quests, npcs) {
+  const byKey = new Map(quests.map((q) => [q.key, q]));
+  for (const n of npcs) {
+    n.quests = [];
+    for (const key of n.questKeys || []) {
+      const q = byKey.get(key);
+      if (!q) continue;
+      if (!q.givers.some((g) => g.slug === n.slug)) q.givers.push(n);
+      if (!n.quests.some((x) => x.slug === q.slug)) n.quests.push(q);
+    }
+  }
+  for (const q of quests) {
+    q.prereqs = q.prereqKeys.map((k) => byKey.get(k)).filter(Boolean);
+    q.unlocks = [];
+  }
+  for (const q of quests) {
+    for (const pre of q.prereqs) pre.unlocks.push(q);
+  }
+  const seen = new Set();
+  const visiting = new Set();
+  const walkDepth = (q) => {
+    if (seen.has(q.slug)) return q.depth;
+    if (visiting.has(q.slug)) return 0;
+    visiting.add(q.slug);
+    q.depth = q.prereqs.reduce((d, pre) => Math.max(d, walkDepth(pre) + 1), 0);
+    visiting.delete(q.slug);
+    seen.add(q.slug);
+    return q.depth;
+  };
+  for (const q of quests) walkDepth(q);
+  quests.sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  return byKey;
+}
+
+function questHref(q) {
+  return `/wiki/quests/${q.slug}/`;
+}
+
+function campaignHref(id) {
+  return `/wiki/quests/${CAMPAIGN[id]?.slug || id}/`;
+}
+
+function itemHrefLabel(items, itemPath) {
+  const it = itemByPath(items, itemPath);
+  if (it) return `<a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a>`;
+  return esc(fileKey(itemPath).replace(/_/g, " "));
+}
+
+function describeObjective(obj, items, creatures, npcs) {
+  const amt = obj.amount > 1 ? `${obj.amount} ` : "";
+  let core = "";
+  if (obj.type === OBJ_VISIT) {
+    const who = obj.visitName || obj.visitKey.replace(/_/g, " ") || "the indicated person";
+    const npc = npcs.find((n) => n.slug === obj.visitKey || fileKey(n.file) === obj.visitKey);
+    const label = npc ? `<a class="cat-npcs" href="/wiki/npcs/${npc.slug}/">${esc(who)}</a>` : esc(who);
+    core = `Speak with ${label}`;
+  } else if (obj.type === OBJ_CRAFT) {
+    core = `Craft ${amt}${obj.label ? esc(obj.label) : itemHrefLabel(items, obj.itemPath)}`;
+  } else if (obj.type === OBJ_COLLECT) {
+    core = `Bring ${amt}${obj.label ? esc(obj.label) : itemHrefLabel(items, obj.itemPath)}`;
+  } else {
+    const c = creatures.find((x) => x.type === obj.enemy || x.slug === obj.enemy);
+    const foe = c
+      ? `<a class="cat-creatures" href="/wiki/creatures/${c.slug}/">${esc(c.name)}</a>`
+      : esc((obj.enemy || "enemy").replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase()));
+    core = `Defeat ${amt}${foe}`;
+  }
+  if (obj.grantItemPath) core += ` <span class="muted">(yields ${itemHrefLabel(items, obj.grantItemPath)})</span>`;
+  return core;
+}
+
+/** Every crafting station and what its recipes produce. */
+function collectStations() {
+  const dir = path.join(ROOT, "source/common/gameplay/crafting/resources");
+  const rows = [];
+  if (!fs.existsSync(dir)) return rows;
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "CraftingStationResource") continue;
+    const recipes = asArray(doc.resource.recipes)
+      .map((ref) => {
+        const sub = resolveSub(doc, ref);
+        if (!sub) return null;
+        return {
+          itemPath: resolveExt(doc, sub.props.output_item),
+          amount: num(sub.props.output_amount, 1) || 1,
+          level: num(sub.props.required_level),
+          ingredients: asArray(sub.props.ingredients)
+            .map((iref) => {
+              const ing = resolveSub(doc, iref);
+              if (!ing) return null;
+              return { itemPath: resolveExt(doc, ing.props.item), amount: num(ing.props.amount, 1) || 1 };
+            })
+            .filter((i) => i && i.itemPath),
+        };
+      })
+      .filter((r) => r && r.itemPath);
+    if (!recipes.length) continue;
+    rows.push({
+      name: str(doc.resource.station_name) || basenameSlug(file).replace(/_/g, " "),
+      // CraftingStationResource.profession defaults to &"smithing" in GDScript, so
+      // a station that never writes the field still trains it.
+      profession: str(doc.resource.profession) || "smithing",
+      recipes,
+    });
+  }
+  return rows;
+}
+
+function buildItemSources(items, creatures, shops, stations, chests, quests) {
+  const map = new Map();
+  const bucket = (itemPath) => {
+    const item = itemByPath(items, itemPath);
+    if (!item) return null;
+    if (!map.has(item.slug)) {
+      map.set(item.slug, { drops: [], shops: [], crafts: [], chests: [], quests: [] });
+    }
+    return map.get(item.slug);
+  };
+
+  for (const c of creatures) {
+    for (const d of c.loot) {
+      const b = bucket(d.itemPath);
+      if (b) b.drops.push({ creature: c, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const shop of shops) {
+    for (const e of shop.entries) {
+      const b = bucket(e.itemPath);
+      if (b) b.shops.push({ shop, price: e.price, currencyPath: e.currencyPath });
+    }
+  }
+  for (const st of stations) {
+    for (const r of st.recipes) {
+      const b = bucket(r.itemPath);
+      if (b) b.crafts.push({ station: st, recipe: r });
+    }
+  }
+  for (const chest of chests) {
+    for (const d of chest.drops) {
+      const b = bucket(d.itemPath);
+      if (b) b.chests.push({ chest, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const q of quests) {
+    for (const r of q.rewardItems || []) {
+      const b = bucket(r.itemPath);
+      if (b) b.quests.push({ quest: q, amount: r.amount });
+    }
+    for (const itemPath of q.styleWeapons || []) {
+      const b = bucket(itemPath);
+      if (b) b.quests.push({ quest: q, amount: 1, stylePick: true });
+    }
+  }
+  // Best sources first: a 60% drop is the answer, a 0.1% one is trivia.
+  for (const v of map.values()) {
+    v.drops.sort((a, b) => b.chance - a.chance);
+    v.shops.sort((a, b) => a.price - b.price);
+    v.chests.sort((a, b) => a.chest.tier - b.chest.tier);
+  }
+  return map;
+}
+
+function sourceSummary(src) {
+  if (!src) return "—";
+  const bits = [];
+  if (src.quests.length) {
+    bits.push(src.quests.some((q) => q.stylePick) ? "Quest (your style)" : "Quest");
+  }
+  if (src.drops.length) bits.push(`Drop (${esc(src.drops[0].creature.name)})`);
+  if (src.crafts.length) {
+    const best = src.crafts.reduce((a, b) => (a.recipe.level <= b.recipe.level ? a : b));
+    bits.push(
+      best.recipe.level
+        ? `Craft (${esc(best.station.profession)} ${best.recipe.level})`
+        : `Craft (${esc(best.station.name)})`
+    );
+  }
+  if (src.shops.length) bits.push(`Buy (${esc(String(src.shops[0].price))}g)`);
+  if (src.chests.length) bits.push("Chest");
+  return bits.join(" · ") || "—";
+}
+
+function armourSetName(name) {
+  return String(name)
+    .replace(
+      /\s+(Helmet|Helm|Hood|Hat|Crown|Mask|Chestplate|Chest|Platebody|Tunic|Robe|Boots|Shoes|Sandals|Greaves|Gloves|Gauntlets|Vambraces|Legs|Leggings|Skirt|Cape|Cloak|Shield|Kite|Pauldrons|Shoulders)$/i,
+      ""
+    )
+    .trim();
+}
+
+function weaponPower(it) {
+  const ad = modVal(it, "ad");
+  const ap = modVal(it, "ap");
+  if (ad && ap) return `${ad} AD / ${ap} AP`;
+  if (ap) return `${ap} AP`;
+  if (ad) return String(ad);
+  return "—";
+}
+
+/**
+ * The gear ladder, grouped by the mastery level that unlocks each piece.
+ *
+ * Generated rather than written: a hand-authored tier list goes stale the first
+ * time someone re-tunes a required_mastery_level, and a stale ladder is worse
+ * than none. Weapons group by their own mastery category; armour is gated on
+ * &"any", meaning your BEST mastery, so it gets its own table.
+ */
+function gearPathPage(items, itemSources, quests) {
+  const wearable = items.filter(
+    (it) => (it.kind === "Weapon" || it.kind === "Armor") && (it.requiredMastery || 0) >= 0
+  );
+  const tierOf = (it) => it.requiredMastery || 0;
+  const bands = [
+    [0, 1, "Mastery 1 — what you start in"],
+    [2, 9, "Mastery 2–9 — the first upgrade"],
+    [10, 19, "Mastery 10–19 — mid game"],
+    [20, 39, "Mastery 20–39 — late game"],
+    [40, 999, "Mastery 40+ — endgame"],
+  ];
+
+  const weaponTable = (rows) =>
+    rows.length
+      ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>AD / AP</th><th>How to get it</th></tr></thead><tbody>${rows
+          .map(
+            (it) =>
+              `<tr><td><a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+                String(tierOf(it) || 1)
+              )}</td><td>${weaponPower(it)}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
+          )
+          .join("")}</tbody></table>`
+      : `<p class="muted">Nothing in this band yet.</p>`;
+
+  const armourTable = (rows) =>
+    rows.length
+      ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>Armor</th><th>HP</th><th>How to get it</th></tr></thead><tbody>${rows
+          .map(
+            (it) =>
+              `<tr><td><a class="cat-items" href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+                String(tierOf(it) || 1)
+              )}</td><td>${modVal(it, "armor") || "—"}</td><td>${modVal(it, "health_max") || "—"}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
+          )
+          .join("")}</tbody></table>`
+      : `<p class="muted">Nothing in this band yet.</p>`;
+
+  const climaxes = (quests || [])
+    .filter((q) => q.styleWeapons.length)
+    .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  const uniqueLadder = climaxes.length
+    ? `<table class="gear-table"><thead><tr><th>Climax</th><th>Unique of your style</th></tr></thead><tbody>${climaxes
+        .map((q) => {
+          const links = q.styleWeapons
+            .map((p) => itemHrefLabel(items, p))
+            .join(", ");
+          return `<tr><td><a href="${questHref(q)}">${esc(q.name)}</a></td><td>${links}</td></tr>`;
+        })
+        .join("")}</tbody></table>`
+    : "";
+
+  const sets = new Map();
+  for (const it of wearable.filter((x) => x.kind === "Armor")) {
+    const set = armourSetName(it.name);
+    if (!set || set === it.name) continue;
+    if (!sets.has(set)) sets.set(set, []);
+    sets.get(set).push(it);
+  }
+  const setRows = [...sets.entries()]
+    .filter(([, pieces]) => pieces.length >= 2)
+    .sort((a, b) => {
+      const ta = Math.min(...a[1].map(tierOf));
+      const tb = Math.min(...b[1].map(tierOf));
+      return ta - tb || a[0].localeCompare(b[0]);
+    });
+  const setTable = setRows.length
+    ? `<table class="gear-table"><thead><tr><th>Set</th><th>Unlocks at</th><th>Armor</th><th>HP</th><th>MR</th><th>How to get it</th></tr></thead><tbody>${setRows
+        .map(([name, pieces]) => {
+          const src = pieces
+            .map((p) => sourceSummary(itemSources.get(p.slug)))
+            .find((s) => s && s !== "—") || "—";
+          return `<tr><td>${esc(name)}</td><td>${Math.min(...pieces.map(tierOf))}</td><td>${pieces.reduce((s, p) => s + modVal(p, "armor"), 0)}</td><td>${pieces.reduce((s, p) => s + modVal(p, "health_max"), 0)}</td><td>${pieces.reduce((s, p) => s + modVal(p, "mr"), 0)}</td><td>${src}</td></tr>`;
+        })
+        .join("")}</tbody></table>`
+    : "";
+
+  const sections = bands
+    .map(([lo, hi, label]) => {
+      const inBand = wearable
+        .filter((it) => tierOf(it) >= lo && tierOf(it) <= hi)
+        .sort((a, b) => tierOf(a) - tierOf(b) || a.name.localeCompare(b.name));
+      if (!inBand.length) return "";
+      const weapons = inBand.filter((it) => it.kind === "Weapon");
+      const armour = inBand.filter((it) => it.kind === "Armor");
+      return `<h2>${esc(label)}</h2>
+        ${weapons.length ? `<h3>Weapons</h3>${weaponTable(weapons)}` : ""}
+        ${armour.length ? `<h3>Armour</h3>${armourTable(armour)}` : ""}`;
+    })
+    .join("");
+
+  return shell({
+    title: "Gear path — Arkenelle Wiki",
+    active: "start",
+    theme: "start",
+    body: `<main class="wrap">
+      ${crumb([
+        { href: "/wiki/", label: "Wiki" },
+        { href: "/wiki/getting-started/", label: "Getting started" },
+        { label: "Gear path" },
+      ])}
+      <article class="page prose">
+        ${pageHeading("start", "Gear path")}
+        <p>Every weapon and armour piece is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class.</p>
+        <ul>
+          <li><strong>Unique weapons</strong> come from Charter climaxes. Turn-in grants one matching the style in your hand. Farm the same boss for the other styles, armour mats, and relics — the kill is not one-and-done.</li>
+          <li><strong>Armour</strong> is smithing and later bossing. Bronze through Runite are forged. Plate is meant to cover a missed mechanic or two, not ten. Mitigation is <code>damage × 100 / (100 + armour)</code>.</li>
+          <li><strong>Smithable metal weapons</strong> exist on the anvil, but they lose to the unique of that chapter. Proof of the Hammer is a bronze armour craft, not a bronze blade.</li>
+          <li><strong>Armour</strong> requires <em>any</em> mastery at that level, so your best-trained weapon carries what you can wear. Weapons require mastery in their own class.</li>
+        </ul>
+        ${uniqueLadder ? `<h2>Charter unique weapons</h2><p>You never fight a boss with the weapon it grants. The blade lands on turn-in; you take it into the next fight.</p>${uniqueLadder}` : ""}
+        ${setTable ? `<h2>Armour sets</h2><p>Totals are helm + chest + boots (and any other pieces in the set). Naked Heroes start around 15 armour.</p>${setTable}` : ""}
+        <h2>Every piece</h2>
+        <p class="muted">Generated from the game files, so stats and sources match the live build. Click any item for the full source list.</p>
+        ${sections}
+      </article>
+    </main>`,
+  });
+}
+
+function questCard(q) {
+  const bits = [];
+  if (q.styleWeapons.length) bits.push("Unique weapon");
+  if (q.masteryXp) bits.push(`${q.masteryXp.toLocaleString()} mastery XP`);
+  else if (q.xp) bits.push(`${q.xp} XP`);
+  if (q.givers.length) bits.push(q.givers.map((g) => g.name).join(", "));
+  return `<a class="item-card cat-quests" href="${questHref(q)}"><span><span class="name">${esc(q.name)}</span><span class="kind">${esc(bits.join(" · ") || "Quest")}</span></span></a>`;
+}
+
+function questListHtml(list) {
+  return `<div class="item-grid">${list.map(questCard).join("")}</div>`;
+}
+
+function questPageHtml(q, items, creatures, npcs) {
+  const stats = [
+    q.givers.length ? ["Offered by", q.givers.map((g) => `<a class="cat-npcs" href="/wiki/npcs/${g.slug}/">${esc(g.name)}</a>`).join(", ")] : null,
+    q.campaignMeta ? ["Campaign", `<a href="${campaignHref(q.campaign)}">${esc(q.campaignMeta.name)}</a>`] : null,
+    q.minLevel ? ["Requires level", String(q.minLevel)] : null,
+    q.minSkill ? ["Requires skill", esc(skillLabel(q.minSkill, q.minSkillLevel))] : null,
+    q.prereqs.length
+      ? [
+          q.requiresAny ? "Requires any of" : "Requires",
+          q.prereqs.map((p) => `<a href="${questHref(p)}">${esc(p.name)}</a>`).join(", "),
+        ]
+      : null,
+    q.masteryXp ? ["Mastery XP", q.masteryXp.toLocaleString()] : null,
+    q.xp ? ["Adventure XP", String(q.xp)] : null,
+    q.gold ? ["Gold", String(q.gold)] : null,
+    q.title ? ["Title", esc(q.title)] : null,
+    q.wardstone ? ["Wardstone", esc(q.wardstone.replace(/_/g, " "))] : null,
+    q.autoComplete ? ["Turn-in", "Completes when the last objective is met"] : null,
+  ].filter(Boolean);
+
+  const objHead = q.completionAny ? "Complete any one" : "Objectives";
+  const objectives = q.objectives.length
+    ? `<h2>${objHead}</h2><ul>${q.objectives.map((o) => `<li>${describeObjective(o, items, creatures, npcs)}</li>`).join("")}</ul>`
+    : "";
+
+  const rewardLis = [];
+  if (q.styleWeapons.length) {
+    rewardLis.push(
+      `<li><strong>One unique of your equipped style:</strong> ${q.styleWeapons.map((p) => itemHrefLabel(items, p)).join(", ")}</li>`
+    );
+  }
+  for (const r of q.rewardItems) {
+    rewardLis.push(`<li>${itemHrefLabel(items, r.itemPath)}${r.amount > 1 ? ` ×${r.amount}` : ""}</li>`);
+  }
+  if (q.grantOnAccept) {
+    rewardLis.push(`<li>${itemHrefLabel(items, q.grantOnAccept)} <span class="muted">(on accept)</span></li>`);
+  }
+  const rewards = rewardLis.length ? `<h2>Rewards</h2><ul>${rewardLis.join("")}</ul>` : "";
+
+  const next = q.unlocks.length
+    ? `<h2>Unlocks</h2><ul>${q.unlocks
+        .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name))
+        .map((n) => `<li><a href="${questHref(n)}">${esc(n.name)}</a></li>`)
+        .join("")}</ul>`
+    : "";
+
+  return `<main class="wrap"><article class="page prose">
+          ${crumb([
+            { href: "/wiki/", label: "Wiki" },
+            { href: "/wiki/quests/", label: "Quests" },
+            ...(q.campaignMeta
+              ? [{ href: campaignHref(q.campaign), label: q.campaignMeta.name }]
+              : []),
+            { label: q.name },
+          ])}
+          <h1 class="section-title">${esc(q.name)}</h1>
+          ${q.styleWeapons.length ? `<span class="tag">Unique weapon</span>` : ""}
+          ${q.description ? `<p>${esc(q.description)}</p>` : ""}
+          ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${v}</span></div>`).join("")}</div>` : ""}
+          ${objectives}
+          ${rewards}
+          ${next}
+        </article></main>`;
+}
+
+function campaignPageHtml(id, quests, items) {
+  const meta = CAMPAIGN[id];
+  const list = quests
+    .filter((q) => q.campaign === id)
+    .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  const climaxes = list.filter((q) => q.styleWeapons.length);
+  return shell({
+    title: `${meta.name} — Arkenelle Wiki`,
+    active: "wiki",
+    theme: "quests",
+    body: `<main class="wrap">
+      ${crumb([
+        { href: "/wiki/", label: "Wiki" },
+        { href: "/wiki/quests/", label: "Quests" },
+        { label: meta.name },
+      ])}
+      <article class="page prose">
+        ${pageHeading("quests", meta.name)}
+        <p>${esc(meta.blurb)}</p>
+        ${
+          climaxes.length
+            ? `<h2>Unique weapons</h2><ul>${climaxes
+                .map(
+                  (q) =>
+                    `<li><a href="${questHref(q)}">${esc(q.name)}</a> — ${q.styleWeapons
+                      .map((p) => itemHrefLabel(items, p))
+                      .join(", ")}</li>`
+                )
+                .join("")}</ul>`
+            : ""
+        }
+        <h2>In order</h2>
+        ${questListHtml(list)}
+      </article>
+    </main>`,
+  });
 }
 
 function itemByPath(items, itemPath) {
@@ -1011,7 +1566,7 @@ function lootList(drops, items) {
 }
 
 function fileKey(p) {
-  return path.basename(String(p || "").replace(/\\/g, "/"));
+  return path.basename(String(p || "").replace(/\\/g, "/")).replace(/\.tres$/i, "").replace(/\.item$/, "");
 }
 
 function fmtGold(n) {
@@ -1152,7 +1707,7 @@ function parseRewardFile(resPath) {
 
 const DEFAULT_ORNATE_CHEST = "res://source/common/gameplay/items/chests/gold_pink_large.tres";
 
-function attachItemWiki(items, creatures, zones, shops, chestTables) {
+function attachItemWiki(items, creatures, zones, shops, chestTables, stations, quests) {
   const byKey = new Map();
   for (const it of items) {
     if (it.kind === "Chest") it.table = chestTables.get(it.chestSlug || basenameSlug(it.file)) || null;
@@ -1230,6 +1785,29 @@ function attachItemWiki(items, creatures, zones, shops, chestTables) {
       });
     }
   }
+
+  for (const st of stations || []) {
+    for (const r of st.recipes) {
+      addSource(r.itemPath, {
+        label: esc(st.name),
+        note: r.level ? `Craft · ${st.profession} ${r.level}` : "Crafted",
+      });
+    }
+  }
+  for (const q of quests || []) {
+    for (const r of q.rewardItems || []) {
+      addSource(r.itemPath, {
+        label: `<a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>`,
+        note: r.amount > 1 ? `Quest reward ×${r.amount}` : "Quest reward",
+      });
+    }
+    for (const itemPath of q.styleWeapons || []) {
+      addSource(itemPath, {
+        label: `<a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>`,
+        note: "Unique of your equipped style",
+      });
+    }
+  }
 }
 
 function listPage(title, intro, cardsHtml, active, cat) {
@@ -1263,7 +1841,23 @@ function build() {
   const jobs = collectJobs();
   const slayer = collectSlayer();
   const quests = collectQuests();
-  attachItemWiki(items, creatures, zones, collectShops(), collectChestTables());
+  attachQuestGraph(quests, npcs);
+  const shops = collectShops();
+  const stations = collectStations();
+  const chestTables = collectChestTables();
+  attachItemWiki(items, creatures, zones, shops, chestTables, stations, quests);
+  const itemSources = buildItemSources(
+    items,
+    creatures,
+    shops,
+    stations,
+    [...chestTables.values()].map((t) => ({
+      name: t.name,
+      tier: t.tier,
+      drops: [...t.loot, ...t.exclusive],
+    })),
+    quests
+  );
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
@@ -1330,7 +1924,7 @@ function build() {
             ${catIcon("start")}
             <div>
             <h2>Where to start</h2>
-            <p>Talk to the Hall Keeper in Castle Garden. That first quest is orientation, not a class lock. Every Hero can train every weapon and every profession.</p>
+            <p>The Charter Clerk seals your papers. Then the Hall Keeper in Castle Garden starts <strong>Blood in the Meadow</strong> — orientation, not a class lock. Every Hero can train every weapon and every profession.</p>
             <p><a class="cat-start" href="/wiki/getting-started/">Getting started →</a></p>
             </div>
           </article>
@@ -1440,14 +2034,16 @@ function build() {
         <h1 class="section-title">Wiki</h1>
         <p class="muted">Generated from the live Godot resources, so names, stats, and drops match the game.</p>
         <div class="card-grid">
-          ${wikiCard("start", "/wiki/getting-started/", "Getting started", "First steps, install, and how progression works.")}
+          ${wikiCard("start", "/wiki/getting-started/", "Getting started", "Charter Seal, Blood in the Meadow, and how progression actually works.")}
+          ${wikiCard("quests", "/wiki/quests/hollow-seep/", "The Hollow Seep", "The Charter campaign in order, with unique weapons at each climax.")}
+          ${wikiCard("start", "/wiki/getting-started/gear/", "Gear path", "Charter unique weapons, armour set totals, and where every piece comes from.")}
           ${wikiCard("items", "/wiki/items/", "Items", `<strong>${items.length}</strong> weapons, armor, materials, potions, and more.`)}
           ${wikiCard("creatures", "/wiki/creatures/", "Creatures", `<strong>${creatures.length}</strong> enemies and bosses with authored loot.`)}
           ${wikiCard("locations", "/wiki/locations/", "Locations", `<strong>${zones.length}</strong> zones and dungeons.`)}
           ${wikiCard("npcs", "/wiki/npcs/", "NPCs", `<strong>${npcs.length}</strong> friendly faces.`)}
           ${wikiCard("skills", "/wiki/skills/", "Skills", `<strong>${jobs.length}</strong> gathering and crafting professions.`)}
           ${wikiCard("slayer", "/wiki/slayer/", "Slayer", "Masters, task pools, and creature assignments.")}
-          ${wikiCard("quests", "/wiki/quests/", "Quests", `<strong>${quests.length}</strong> authored quests.`)}
+          ${wikiCard("quests", "/wiki/quests/", "Quests", `The Hollow Seep campaign and <strong>${quests.length}</strong> authored quests.`)}
           ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
           ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
         </div>
@@ -1494,21 +2090,28 @@ function build() {
             <li><strong>Desktop (recommended):</strong> <a href="${PLAY_DESKTOP}">download the Windows zip</a>, extract it somewhere stable (not Desktop or OneDrive), and run <code>Arkenelle.exe</code>. Later launches update themselves. The <a href="${ITCH_APP}">itch.io app</a> is an optional backup.</li>
           </ol>
           <h2>First steps</h2>
-          <p>You wake in Castle Garden. The Hall Keeper near your starting cell has your first quest, <strong>Find Your Footing</strong>. It is orientation, not a class choice. Arkenelle does not lock you into a weapon or profession.</p>
-          <p>Talk to NPCs when you want a thread to pull. Quest givers are the main way the world points you somewhere. After the Hall, take the main exit into the overworld and find the Foreman.</p>
+          <p>You wake at Charter Intake. The <strong>Charter Clerk</strong> has <strong>The Charter Seal</strong> — speak with the Hall Keeper in the chamber beyond. Leave the Daily Quest Board alone until that introduction is done.</p>
+          <p>The Hall Keeper starts <strong>Blood in the Meadow</strong>: equip a weapon from your kit, open Mastery, and clear twenty goblin runts. Then find <strong>Warden Bren</strong> at the woodland gate. The Goblin Chief is required. Bone from that kill is your first real weapon — smithing will not match it.</p>
+          <p><strong>Find Your Footing</strong> is an optional errand to the Foreman after Blood in the Meadow. It is not the start of the campaign. Arkenelle does not lock you into a weapon or profession.</p>
           <h2>Progression</h2>
           <ul>
-            <li>Character level is overall growth from quests and kills.</li>
-            <li>Weapon Mastery is separate. The weapon you wield gains its own experience.</li>
-            <li>Professions (Mining, Woodcutting, Smithing, and the rest) each have their own 1–99 track.</li>
+            <li>Character level is derived from your five weapon masteries. Quest XP fills a bar; mastery XP is what actually moves you.</li>
+            <li>The weapon you wield gains its own Mastery experience.</li>
+            <li>Professions (Mining, Woodcutting, Smithing, and the rest) each have their own 1–99 track. Smithing makes armour.</li>
             <li>Training one path never closes another.</li>
           </ul>
+          <h2>Weapons and armour</h2>
+          <p>Each Charter climax grants a unique weapon of the style in your hand. Farm the same boss for the other styles, armour mats, and relics. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
+          <p><a class="cat-start" href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — unique ladder, armour set totals, and every piece.</p>
+          <p><a class="cat-quests" href="/wiki/quests/hollow-seep/"><strong>The Hollow Seep →</strong></a> — the Charter campaign in order.</p>
           <h2>While it is alpha</h2>
           <p>Expect rough edges. Patch notes land in your Mailbox. Type <code>/players</code> to see who is online, and <code>/feedback</code> to send a bug or idea. <a href="${DISCORD}">Discord</a> is the other door.</p>
         </article>
       </main>`,
     })
   );
+
+  write("wiki/getting-started/gear/index.html", gearPathPage(items, itemSources, quests));
 
   write(
     "wiki/guilds/index.html",
@@ -1625,6 +2228,14 @@ function build() {
           ${n.offers.map((o) => `<span class="tag">${esc(o)}</span>`).join("")}
           ${n.greeting ? `<p>${esc(n.greeting)}</p>` : ""}
           ${foundInHtml(n.locations)}
+          ${
+            n.quests.length
+              ? `<h2>Quests</h2><ul>${n.quests
+                  .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name))
+                  .map((q) => `<li><a class="cat-quests" href="${questHref(q)}">${esc(q.name)}</a>${q.styleWeapons.length ? " — unique weapon" : ""}</li>`)
+                  .join("")}</ul>`
+              : ""
+          }
         </article></main>`,
       })
     );
@@ -1840,21 +2451,36 @@ function build() {
     })
   );
 
+  const campaignOrder = ["hollow_seep", "fungus_cave", "bandit_hideout", "side"];
+  const questIndexSections = campaignOrder
+    .map((id) => {
+      const meta = CAMPAIGN[id];
+      const list = quests.filter((q) => q.campaign === id);
+      if (!list.length) return "";
+      return `<h2><a class="cat-quests" href="${campaignHref(id)}">${esc(meta.name)}</a></h2><p class="muted">${esc(meta.blurb)}</p>${questListHtml(list)}`;
+    })
+    .join("");
   write(
     "wiki/quests/index.html",
-    listPage(
-      "Quests",
-      "Authored quests (not the rotating daily board).",
-      quests
-        .map(
-          (q) =>
-            `<a class="item-card cat-quests" href="/wiki/quests/${q.slug}/"><span><span class="name">${esc(q.name)}</span><span class="kind">${q.xp ? q.xp + " XP" : "Quest"}</span></span></a>`
-        )
-        .join(""),
-      "wiki",
-      "quests"
-    )
+    shell({
+      title: "Quests — Arkenelle Wiki",
+      active: "wiki",
+      theme: "quests",
+      body: `<main class="wrap">
+        ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: "Quests" }])}
+        <article class="page prose">
+          ${pageHeading("quests", "Quests")}
+          <p>Authored quests (not the rotating daily board). Charter climaxes grant a unique weapon of the style in your hand. Requirements, objectives, and rewards are generated from the game files.</p>
+          ${questIndexSections}
+        </article>
+      </main>`,
+    })
   );
+  for (const id of campaignOrder) {
+    if (quests.some((q) => q.campaign === id)) {
+      write(`wiki/quests/${CAMPAIGN[id].slug}/index.html`, campaignPageHtml(id, quests, items));
+    }
+  }
   for (const q of quests) {
     write(
       `wiki/quests/${q.slug}/index.html`,
@@ -1862,16 +2488,7 @@ function build() {
         title: `${q.name} — Arkenelle Wiki`,
         active: "wiki",
         theme: "quests",
-        body: `<main class="wrap"><article class="page prose">
-          ${crumb([{ href: "/wiki/", label: "Wiki" }, { href: "/wiki/quests/", label: "Quests" }, { label: q.name }])}
-          <h1 class="section-title">${esc(q.name)}</h1>
-          ${q.description ? `<p>${esc(q.description)}</p>` : ""}
-          <div class="stats">
-            ${q.xp ? `<div><span>XP</span><span>${q.xp}</span></div>` : ""}
-            ${q.gold ? `<div><span>Gold</span><span>${q.gold}</span></div>` : ""}
-            ${q.title ? `<div><span>Title</span><span>${esc(q.title)}</span></div>` : ""}
-          </div>
-        </article></main>`,
+        body: questPageHtml(q, items, creatures, npcs),
       })
     );
   }
@@ -1882,9 +2499,29 @@ function build() {
     ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Enemy", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
     ...jobs.map((x) => ({ title: x.name, kind: "Skill", href: `/wiki/skills/${x.slug}/`, haystack: x.name.toLowerCase() })),
-    ...quests.map((x) => ({ title: x.name, kind: "Quest", href: `/wiki/quests/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),
+    ...quests.map((x) => ({
+      title: x.name,
+      kind: "Quest",
+      href: questHref(x),
+      haystack: (
+        x.name +
+        " " +
+        x.description +
+        " " +
+        (x.campaignMeta?.name || "") +
+        " " +
+        x.givers.map((g) => g.name).join(" ")
+      ).toLowerCase(),
+    })),
+    ...Object.entries(CAMPAIGN).map(([, meta]) => ({
+      title: meta.name,
+      kind: "Campaign",
+      href: `/wiki/quests/${meta.slug}/`,
+      haystack: (meta.name + " " + meta.blurb).toLowerCase(),
+    })),
     { title: "Donate", kind: "Support", href: "/donate/", haystack: "donate donation supporter vip sapphire emerald ruby stripe" },
-    { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper" },
+    { title: "Getting started", kind: "Guide", href: "/wiki/getting-started/", haystack: "getting started install hall keeper charter clerk blood in the meadow goblin chief bone" },
+    { title: "Gear path", kind: "Guide", href: "/wiki/getting-started/gear/", haystack: "gear path weapon armor armour progression tier mastery unique bone spore sunsteel basilisk bronze iron steel mithril adamant runite how to get" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
     { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
     { title: "Slayer", kind: "Guide", href: "/wiki/slayer/", haystack: "slayer turael durael tasks" },
