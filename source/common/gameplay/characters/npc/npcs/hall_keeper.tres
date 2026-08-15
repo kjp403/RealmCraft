@@ -33,13 +33,13 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_professions"]
 script = ExtResource("5_dialogue")
-lines = Array[String](["Mining, Farming, and Woodcutting are gathering professions. Interacting with suitable resource nodes grants materials and experience for the profession tied to that resource.", "Smithing and Crafting are crafting professions. Use the appropriate crafting station and complete recipes to earn experience in that profession.", "Each profession has its own level and progression, capped at 99. You can train all of them, and the Skills panel shows their current levels.", "Some resources and recipes require higher profession levels. Start with ordinary trees and copper in the castle gathering yard, then seek oak, willow, maple, and yew farther afield as your Woodcutting rises."])
+lines = Array[String](["Mining, Farming, and Woodcutting are gathering professions. Interacting with suitable resource nodes grants materials and experience for the profession tied to that resource.", "Smithing and Crafting are crafting professions. Use the appropriate crafting station and complete recipes to earn experience in that profession. Smithing is how you make armour. The next weapon comes from Charter bosses, starting with bone from the Goblin Chief.", "Each profession has its own level and progression, capped at 99. You can train all of them, and the Skills panel shows their current levels.", "Some resources and recipes require higher profession levels. Start with ordinary trees and copper in the castle gathering yard, then seek oak, willow, maple, and yew farther afield as your Woodcutting rises."])
 label_override = "How do I train professions?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_first_steps"]
 script = ExtResource("5_dialogue")
-lines = Array[String](["Begin with Blood in the Meadow in my Quests list. Equip a weapon from your kit, open Mastery, and put down twenty goblin runts in Goblin Woodland.", "Warden Bren holds extra warren work if you want it. It is not required. After the meadow, I will send you to a wounded scout at the hole in the wall.", "Find Your Footing is an optional orientation errand to the Foreman once you have bloodied the meadow. The Daily Quest Board is extra work, never a path decision."])
+lines = Array[String](["Begin with Blood in the Meadow in my Quests list. Equip a weapon from your kit, open Mastery, and put down twenty goblin runts in Goblin Woodland.", "Then find Warden Bren at the woodland gate. The Goblin Chief is required. Bone from that kill is your first real weapon — smithing will not match it. After the Chief, I send you to Scout Calder at the hole.", "Smithing and gathering are how you make armour. Each Charter boss after the Chief hands the next blade. Find Your Footing is an optional errand to the Foreman. The Daily Quest Board is extra work, never a path decision."])
 label_override = "What should I do first?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

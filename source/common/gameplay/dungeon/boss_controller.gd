@@ -29,6 +29,7 @@ var enrage_at_health_fraction: float = 0.5
 var slam_radius: float = 110.0
 var slam_windup_s: float = 1.1
 var slam_damage: float = 45.0
+var slam_on_target: bool = true
 ## Seconds between slams — phase 1, then the faster enraged cadence.
 var slam_interval_s: float = 6.0
 var enraged_slam_interval_s: float = 3.5
@@ -174,6 +175,7 @@ func _load_config() -> void:
 	slam_radius = d.slam_radius
 	slam_windup_s = d.slam_windup_s
 	slam_damage = d.slam_damage
+	slam_on_target = d.slam_on_target
 	slam_interval_s = d.slam_interval_s
 	enraged_slam_interval_s = d.enraged_slam_interval_s
 	laser_range = d.laser_range
@@ -363,13 +365,17 @@ func _health_fraction() -> float:
 	return boss.stats_component.get_stat(Stat.HEALTH) / max_h
 
 
-## Telegraph a danger ring at the boss, give players the windup to step out, then
-## hit everyone still inside it. Reuses rp_lunge_telegraph — with the target point
-## AT the boss, its AttackTelegraph draws a CIRCLE (line_to == 0), world-pinned.
+## Telegraph a danger ring, give players the windup to step out, then hit
+## everyone still inside it. Default drops the ring on the primary target's
+## feet (slam_on_target) so kiting slowly away from the boss is not a dodge.
 func _slam() -> void:
 	_casting = true
-	var center: Vector2 = boss.global_position
 	boss._face_target()
+	var center: Vector2 = boss.global_position
+	if slam_on_target:
+		var mark: Player = boss.targeted_player
+		if mark != null and is_instance_valid(mark) and not mark.is_dead:
+			center = mark.global_position
 	# Commit the body: hold position through the wind-up + a short recovery so it
 	# doesn't stroll out of its own danger ring while the slam resolves.
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((slam_windup_s + SLAM_RECOVER_S) * 1000.0)

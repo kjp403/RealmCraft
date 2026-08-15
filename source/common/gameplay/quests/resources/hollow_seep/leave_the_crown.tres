@@ -6,6 +6,15 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/foundry_tablet.tres" id="4_tablet"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_i3ak6"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="kit_pot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="kit_w0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="kit_w1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="kit_w2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="kit_w3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="kit_w4"]
+
 [sub_resource type="Resource" id="Obj_kill_king"]
 script = ExtResource("1_obj")
 enemy_type = &"sand_king"
@@ -17,16 +26,23 @@ type = 1
 item = ExtResource("4_tablet")
 label_override = "Foundry Tablet"
 
+[sub_resource type="Resource" id="Reward_kit_potion"]
+script = ExtResource("kit_reward")
+item = ExtResource("kit_pot")
+amount = 10
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Leave the Crown"
-description = "Kill Ankhemet, the Sand King, at the end of the long hall. Leave the crown. Take the Foundry Tablet that names the last furnace that fed the Hollow — Fire Forge."
+description = "Kill Ankhemet, the Sand King, at the end of the long hall. Leave the crown. Take the Foundry Tablet that names the last furnace that fed the Hollow — Fire Forge. A sunsteel weapon of your discipline is the next blade after fairy."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_king"), SubResource("Obj_collect_tablet")])
 min_level = 28
 unlock_message = "[Tomb Delver Asha] He is crowned, armoured, and awake. Leave the crown. Take the tablet if you find one."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 650
 reward_mastery_xp = 110000
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 3000
 grants_wardstone = &"desert"
 metadata/slug = &"leave_the_crown"

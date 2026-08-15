@@ -13,6 +13,15 @@
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://c32kds1rn3xt5" path="res://source/common/gameplay/items/gears/relics/relic_bloodbrand.tres" id="relic_bloodbrand"]
+[ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+
+[sub_resource type="Resource" id="Lunge_captain"]
+script = ExtResource("91_lunge")
+lunge_range = 170.0
+lunge_radius = 26.0
+lunge_windup_s = 0.55
+lunge_speed_multiplier = 5.0
+lunge_cooldown = 6.5
 
 [sub_resource type="Resource" id="Drop_sword"]
 script = ExtResource("2_loot")
@@ -70,19 +79,26 @@ armor = 50.0
 mr = 34.0
 move_speed = 68
 distance_to_attack = 24
+behaviors = Array[ExtResource("2_qpp0m")]([SubResource("Lunge_captain")])
 detection_radius = 210
 chase_on_area = true
 xp_reward = 1200
 combat_skill_xp_override = 9000
 respawn_delay = 120.0
 loot = Array[ExtResource("2_loot")]([SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_bloodbrand")])
-slam_radius = 135.0
-slam_windup_s = 1.15
+slam_radius = 120.0
+slam_windup_s = 0.85
 slam_damage = 165.0
-slam_interval_s = 6.5
-enraged_slam_interval_s = 3.8
+slam_interval_s = 7.0
+enraged_slam_interval_s = 4.2
 add_enemy_slug = &"bandit_fighter"
 add_count = 4
 enrage_speed_mult = 1.35
+chain_targets = 4
+chain_range = 160.0
+chain_damage = 70.0
+chain_windup_s = 0.85
+chain_interval_s = 8.5
+enraged_chain_interval_s = 5.5
 metadata/slug = &"bandit_captain"
 metadata/id = 2

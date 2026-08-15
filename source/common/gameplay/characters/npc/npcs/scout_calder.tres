@@ -18,12 +18,12 @@ quests = Array[ExtResource("4_questres")]([ExtResource("7_q1"), ExtResource("8_q
 
 [sub_resource type="Resource" id="Dialogue_wound"]
 script = ExtResource("2_dialogue")
-lines = Array[String](["The Goblin Chief put a blade through the cloth and through me. I crawled here. The rest of my party went through the hole.", "Warden Bren holds the meadow. I was surveying why the raids got worse. The hole is why.", "I cannot walk. If you can sew, brew, and swing a hammer, I can still point you."])
+lines = Array[String](["The Goblin Chief put a blade through the cloth and through me. I crawled here. The rest of my party went through the hole.", "You should already have bone from that kill. Keep it. The anvil is for armour — bronze plate, not a better blade. Smithing will not match what bosses drop.", "I cannot walk. If you can sew, brew, and forge a piece of plate, I can still point you through the hole. The Heart in there holds the next weapon."])
 label_override = "What happened to you?"
 
 [resource]
 script = ExtResource("6_npc")
 npc_name = "Scout Calder"
 skin = ExtResource("5_skin")
-greeting = "Hero. Good. I am not dying today, but I am not standing either. The Chief cut me open and drove my people through that hole."
+greeting = "Hero. Good. Bone in hand? Keep it. I am not dying today, but I am not standing either. The Chief cut me open. The anvil will make your plate. The hole will make the next blade."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_calder"), SubResource("Dialogue_wound")])

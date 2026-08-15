@@ -26,7 +26,7 @@ item = ExtResource("6_shoes")
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Rags and Needles"
-description = "Calder's cloth is shredded. Goblins drop Forest Cloth. Craft a Cloth Hood, Cloth Vest, and Cloth Shoes at the Smith House workbench. Keep the set — he cannot wear yours, but you will need it through the hole."
+description = "Calder's cloth is shredded. Goblins drop Forest Cloth. Craft a Cloth Hood, Cloth Vest, and Cloth Shoes at the Smith House workbench. Keep the set — armour is what you make. The bone from the Chief stays in your hand."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_hood"), SubResource("Obj_vest"), SubResource("Obj_shoes")])
 unlock_message = "[Scout Calder] I cannot walk in these rags. Craft a full cloth set at the workbench. Keep it. Mine is done."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])

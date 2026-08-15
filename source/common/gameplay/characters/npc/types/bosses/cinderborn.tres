@@ -14,6 +14,11 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://bv86s6u55kjnm" path="res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres" id="relic_cinderheart"]
 [ext_resource type="Resource" uid="uid://c4c886325d9cb9" path="res://source/common/gameplay/items/chests/gold_blue_large.tres" id="chest_blue"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_fire.item.tres" id="fire_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_fire.item.tres" id="fire_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/fire_bow.item.tres" id="fire_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/fire_wand.item.tres" id="fire_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_fire.item.tres" id="fire_book"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -58,6 +63,31 @@ script = ExtResource("3_loot")
 item = ExtResource("relic_cinderheart")
 chance = 0.001
 
+[sub_resource type="Resource" id="Drop_fire_sword"]
+script = ExtResource("3_loot")
+item = ExtResource("fire_sword")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_fire_hammer"]
+script = ExtResource("3_loot")
+item = ExtResource("fire_hammer")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_fire_bow"]
+script = ExtResource("3_loot")
+item = ExtResource("fire_bow")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_fire_wand"]
+script = ExtResource("3_loot")
+item = ExtResource("fire_wand")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_fire_book"]
+script = ExtResource("3_loot")
+item = ExtResource("fire_book")
+chance = 0.03
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cinderborn"
@@ -87,13 +117,13 @@ xp_reward = 22000
 combat_skill_xp_override = 24000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book")])
 enrage_health_fraction = 0.4
-slam_radius = 160.0
-slam_windup_s = 1.55
+slam_radius = 125.0
+slam_windup_s = 1.0
 slam_damage = 450.0
-slam_interval_s = 8.0
-enraged_slam_interval_s = 5.2
+slam_interval_s = 8.5
+enraged_slam_interval_s = 5.5
 add_enemy_slug = &"trpg_demon_a"
 add_count = 4
 add_spread_px = 96.0
@@ -109,6 +139,14 @@ arm_shot_damage = 270.0
 arm_shot_speed = 185.0
 arm_shot_lifetime_s = 1.85
 enraged_arm_shot_interval_s = 4.4
+sweep_arc_deg = 165.0
+sweep_range = 340.0
+sweep_width = 38.0
+sweep_windup_s = 1.2
+sweep_duration_s = 1.25
+sweep_damage = 280.0
+sweep_interval_s = 10.0
+enraged_sweep_interval_s = 6.5
 ornate_chest_top_min = 1
 ornate_chest_top_max = 2
 ornate_chest_second_min = 0
