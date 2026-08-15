@@ -1,8 +1,8 @@
 class_name CombatTargetController
 extends Node
-## Right-click / Spacebar Attack: walk into range of a hostile and keep swinging
-## the primary weapon until the target dies, you cancel (WASD / ground click), or
-## you open a menu. Mirrors [HarvestController]'s click-to-act loop.
+## Left-click / right-click / Spacebar Attack: walk into range of a hostile and
+## keep swinging the primary weapon until the target dies, you cancel (WASD /
+## ground click), or you open a menu. Mirrors [HarvestController]'s click-to-act loop.
 ##
 ## Spacebar acquires a lock (remembered target after a move cancel, else nearest).
 ## Bows (and other [ChargeAbility] primaries) need an explicit release phase —

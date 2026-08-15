@@ -1,6 +1,7 @@
 class_name HostileContextMenu
 extends Node
 ## Right-click menu on hostiles — Attack walks in and keeps swinging.
+## Left-click on the mob does the same without opening this menu.
 
 
 const ACTION_ATTACK: int = 0

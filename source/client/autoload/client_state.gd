@@ -84,6 +84,10 @@ var menu_open: bool = false
 ## to talk doesn't ALSO fire your weapon — the world-space mirror of the GUI gate.
 ## Counter, so overlapping NPCs balance; each NPC clears its own contribution on free.
 var world_interactables_hovered: int = 0
+## How many hostile click-boxes the cursor is over. Blocks click-to-move so a
+## left-click Attack isn't cancelled by ground-move, but does NOT suppress
+## combat (Space / hold-to-attack still work while the cursor is on a mob).
+var world_hostiles_hovered: int = 0
 ## Fired when the local player's tagged guild changes (login / tag / create /
 ## join / leave). Ally-aware visuals (e.g. guild guard health bars) listen so
 ## they re-evaluate without a relog.

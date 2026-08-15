@@ -941,7 +941,7 @@ func is_crafting() -> bool:
 	return _craft_controller != null and _craft_controller.is_active()
 
 
-## Right-click Attack: walk into range and keep using the primary weapon.
+## Left-click / right-click Attack: walk into range and keep using the primary weapon.
 func start_hostile_attack(npc: HostileNpc) -> void:
 	_note_input_activity()
 	_begin_hostile_attack(npc)
@@ -1050,6 +1050,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		or ClientState.menu_open
 		or _has_gui_focus()
 		or ClientState.world_interactables_hovered > 0
+		or ClientState.world_hostiles_hovered > 0
 	):
 		return
 	var hovered: Control = get_viewport().gui_get_hovered_control()

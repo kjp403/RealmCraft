@@ -194,9 +194,9 @@ func _build_buy_rows() -> void:
 		_add_row(slot, STOCK_INFINITE_TEXT)
 
 
-## Sell side: specialty accepted_trades first, then owned items with vendor_value
-## (when the shop buys vendor-priced junk — gatherable ores/logs/fish/etc. and
-## craftables). Equipped gear is included so smithing products can be sold while worn.
+## Sell side: specialty accepted_trades first, then owned items this vendor
+## will buy (vendor_value junk, plus health/mana potions at 75% of buy price).
+## Equipped gear is included so smithing products can be sold while worn.
 func _build_trade_rows() -> void:
 	var specialty_ids: Dictionary = {} # item_id -> true
 	if _shop.accepted_trades != null:
@@ -222,8 +222,6 @@ func _build_trade_rows() -> void:
 			var middle: String = "x%d %s %d g" % [trade.amount, UiGlyphs.right_arrow(), trade.payout]
 			_add_row(slot, middle)
 
-	if not _shop.buys_vendor_priced:
-		return
 	var sellables: Array[Dictionary] = []
 	# Merge bag counts with equipped copies so worn steel/iron gear shows up.
 	var sell_counts: Dictionary = _owned.duplicate()
@@ -239,7 +237,10 @@ func _build_trade_rows() -> void:
 		if owned <= 0:
 			continue
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
-		if item == null or item.is_currency or item.vendor_value <= 0:
+		if item == null or item.is_currency or not _shop.can_vendor_buy(item):
+			continue
+		var price: int = _shop.buyback_gold(item)
+		if price <= 0:
 			continue
 		var middle: String = "owned %d" % owned
 		if item_id in _equipped_ids and int(_owned.get(item_id, 0)) < owned:
@@ -248,7 +249,7 @@ func _build_trade_rows() -> void:
 			"item": item,
 			"id": item_id,
 			"owned": owned,
-			"price": item.vendor_value,
+			"price": price,
 			"middle": middle,
 		})
 	sellables.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -565,7 +566,7 @@ func _trade() -> void:
 	_clear_detail()
 
 
-## Flat junk-sell: amount * item.vendor_value gold.
+## Flat junk-sell / potion buyback: amount * shop.buyback_gold gold.
 func _sell() -> void:
 	var item_id: int = _selected_slot.item_id
 	var amount: int = int(quantity_spinbox.value)

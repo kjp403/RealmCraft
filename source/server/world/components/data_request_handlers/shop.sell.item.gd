@@ -1,10 +1,9 @@
 extends DataRequestHandler
-## Generic vendor sell: remove `amount` of an owned item with vendor_value > 0
-## and pay `amount * item.vendor_value` gold. Specialty ShopTrade rates still
-## go through shop.trade.item — this is the junk-sell path for gatherables /
-## craftables. Equipped gear counts as owned: we strip matching equipment
-## slots first (without requiring a free bag square) so smithing products can
-## be sold while worn.
+## Generic vendor sell: pay [method ShopResource.buyback_gold] per unit (junk
+## vendor_value, or 75% of a gold shop's potion buy price). Specialty ShopTrade
+## rates still go through shop.trade.item. Equipped gear counts as owned: we
+## strip matching equipment slots first (without requiring a free bag square)
+## so smithing products can be sold while worn.
 
 
 func data_request_handler(
@@ -18,7 +17,7 @@ func data_request_handler(
 
 	var shop_key: StringName = StringName(str(args.get("shop_key", "")))
 	var shop: ShopResource = instance.instance_map.get_shop(shop_key)
-	if shop == null or not shop.buys_vendor_priced:
+	if shop == null:
 		return {"ok": false, "reason": "no_shop"}
 
 	var item_id: int = int(args.get("id", 0))
@@ -27,7 +26,10 @@ func data_request_handler(
 		return {"ok": false}
 
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
-	if item == null or item.is_currency or item.vendor_value <= 0:
+	if item == null or not shop.can_vendor_buy(item):
+		return {"ok": false, "reason": "not_sellable"}
+	var unit_price: int = shop.buyback_gold(item)
+	if unit_price <= 0:
 		return {"ok": false, "reason": "not_sellable"}
 
 	# Prefer specialty trades when this shop lists the item — client shouldn't
@@ -55,8 +57,8 @@ func data_request_handler(
 		if stripped < remaining:
 			return {"ok": false, "reason": "not_enough"}
 
-	Inventory.add_item(inventory, Economy.gold_id(), item.vendor_value * amount)
-	return {"ok": true, "amount": amount, "paid": item.vendor_value * amount}
+	Inventory.add_item(inventory, Economy.gold_id(), unit_price * amount)
+	return {"ok": true, "amount": amount, "paid": unit_price * amount}
 
 
 ## How many copies of [param item_id] are currently worn.
