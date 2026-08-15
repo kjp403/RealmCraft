@@ -28,7 +28,7 @@ static func should_run() -> bool:
 static func apply_if_needed(host: Node, status: Callable = Callable(), force: bool = false) -> Dictionary:
 	if not should_run():
 		return _result(true, false, "", false)
-	_status(status, tr("CHECKING_UPDATE"))
+	_status(status, _t(&"CHECKING_UPDATE"))
 	var manifest: Dictionary = await _fetch_manifest(host)
 	if manifest.is_empty():
 		push_warning("ClientUpdater: could not fetch latest.json")
@@ -51,7 +51,7 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	var install_dir: String = OS.get_executable_path().get_base_dir()
 	var zip_path: String = install_dir.path_join(ZIP_NAME)
 	var stage_dir: String = install_dir.path_join(STAGE_DIR_NAME)
-	_status(status, tr("DOWNLOADING_UPDATE"))
+	_status(status, _t(&"DOWNLOADING_UPDATE"))
 	var dl_ok: bool = await _download_file(host, zip_url, zip_path, status)
 	if not dl_ok:
 		_cleanup_path(zip_path)
@@ -64,7 +64,7 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 		_cleanup_path(zip_path)
 		return _result(false, false, "checksum", true)
 
-	_status(status, tr("INSTALLING_UPDATE"))
+	_status(status, _t(&"INSTALLING_UPDATE"))
 	_remove_dir(stage_dir)
 	if not _extract_zip(zip_path, stage_dir):
 		_cleanup_path(zip_path)
@@ -110,6 +110,14 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 
 static func _result(ok: bool, quit: bool, error: String, needed: bool) -> Dictionary:
 	return {"ok": ok, "quit": quit, "error": error, "needed": needed}
+
+
+## Localized text for a static context. `tr()` is an Object method, so calling it
+## from a `static func` is a parse error that takes this entire class out of the
+## build — the boot update check then silently no-ops and players keep hand-
+## downloading the zip. Everything here is static, so always translate via this.
+static func _t(key: StringName) -> String:
+	return String(TranslationServer.translate(key))
 
 
 static func _status(status: Callable, text: String) -> void:
@@ -167,7 +175,7 @@ static func _download_file(host: Node, url: String, dest: String, status: Callab
 		var total: int = http.get_body_size()
 		if total > 0:
 			var pct: int = clampi(int((float(got) / float(total)) * 100.0), 0, 99)
-			_status(status, tr("DOWNLOADING_UPDATE") + " %d%%" % pct)
+			_status(status, _t(&"DOWNLOADING_UPDATE") + " %d%%" % pct)
 		await host.get_tree().process_frame
 	http.queue_free()
 	var outcome: int = int(done[1])
