@@ -4,18 +4,6 @@ extends Character
 
 var player_resource: PlayerResource
 
-## Layered look (body, outfit, hair, armour). Client-side only; null on the server
-## and until _ready has run.
-var paper_doll: PaperDoll
-
-## Character-creator choices packed into ONE synced int, byte per field:
-##   0-7 body variant | 8-15 hair style | 16-23 hair colour | 24-31 outfit
-## Packed rather than four properties because this syncs to every peer that can see
-## the player. Indices are into the PaperDollData rosters, which the Mana Seed
-## importer generates from the sheets actually on disk.
-var appearance: int = 0:
-	set = _set_appearance
-
 signal staff_role_changed(role: String)
 
 ## Synced guild tag — drives the blue ally health-bar tint guildmates see on each
@@ -208,55 +196,6 @@ func _ready() -> void:
 
 ## Mana regen lives in ServerInstance's 1 Hz status tick (one timer per instance,
 ## not a per-frame poll on every player node) — see instance_server.gd.
-
-
-func _set_appearance(value: int) -> void:
-	appearance = value
-	# Server stores the int for persistence and renders nothing. On the client the
-	# node may not exist yet - _build_paper_doll replays the value when it does.
-	if multiplayer != null and multiplayer.is_server():
-		return
-	if paper_doll != null:
-		paper_doll.apply_appearance(value)
-
-
-## Pack creator choices into the synced [member appearance] int.
-static func pack_appearance(body: int, hair_style: int, hair_color: int, outfit: int) -> int:
-	return (
-		(body & 0xFF)
-		| ((hair_style & 0xFF) << 8)
-		| ((hair_color & 0xFF) << 16)
-		| ((outfit & 0xFF) << 24)
-	)
-
-
-## Inverse of [method pack_appearance]: [body, hair_style, hair_colour, outfit].
-static func unpack_appearance(packed: int) -> Array[int]:
-	return [
-		packed & 0xFF,
-		(packed >> 8) & 0xFF,
-		(packed >> 16) & 0xFF,
-		(packed >> 24) & 0xFF,
-	]
-
-
-## Clamp a client-supplied appearance to real roster entries.
-##
-## Server-side anti-cheat: an out-of-range index would persist and then resolve to
-## nothing on every OTHER player's client, so one crafted packet could make a
-## character invisible to everyone but themselves.
-static func sanitize_appearance(packed: int) -> int:
-	var parts: Array[int] = unpack_appearance(packed)
-	var rosters: Array = [
-		PaperDollData.BODY_VARIANTS,
-		PaperDollData.HAIR_STYLES,
-		PaperDollData.HAIR_COLORS,
-		PaperDollData.OUTFITS,
-	]
-	for i: int in 4:
-		var size: int = (rosters[i] as Array).size()
-		parts[i] = clampi(parts[i], 0, maxi(0, size - 1))
-	return pack_appearance(parts[0], parts[1], parts[2], parts[3])
 
 
 func _set_active_guild_id(value: int) -> void:
