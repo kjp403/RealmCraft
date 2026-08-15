@@ -8,11 +8,11 @@
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="6_bar"]
 [ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="7_coal"]
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="8_steel"]
-[ext_resource type="Resource" uid="uid://bcyv8agmtbwjt" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="9_sword"]
-[ext_resource type="Resource" uid="uid://dp76go82xd8il" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="10_hammer"]
-[ext_resource type="Resource" uid="uid://odkhbap0vf6s" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="11_wand"]
-[ext_resource type="Resource" uid="uid://rmr0ohwx8ooc" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="12_book"]
-[ext_resource type="Resource" uid="uid://dmbuxj41541im" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="13_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="9_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_basilisk.item.tres" id="10_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres" id="11_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_runewoven.item.tres" id="12_book"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres" id="13_bow"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
@@ -32,8 +32,8 @@ lunge_cooldown = 10.0
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
 item = ExtResource("4_gold")
-min_amount = 120
-max_amount = 220
+min_amount = 2800
+max_amount = 4800
 
 [sub_resource type="Resource" id="Drop_iron"]
 script = ExtResource("2_loot")
@@ -125,21 +125,21 @@ respawn_delay = 300.0
 loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_coreblossom")])
 enrage_health_fraction = 0.4
 slam_radius = 140.0
-slam_windup_s = 2.0
+slam_windup_s = 0.95
 slam_damage = 280.0
-slam_interval_s = 11.0
-enraged_slam_interval_s = 7.5
+slam_interval_s = 9.0
+enraged_slam_interval_s = 6.0
 laser_range = 280.0
 laser_width = 26.0
-laser_windup_s = 2.2
+laser_windup_s = 1.15
 laser_damage = 250.0
-laser_interval_s = 11.0
-enraged_laser_interval_s = 7.5
-arm_shot_interval_s = 7.5
+laser_interval_s = 9.0
+enraged_laser_interval_s = 6.0
+arm_shot_interval_s = 6.5
 arm_shot_damage = 150.0
 arm_shot_speed = 200.0
 arm_shot_lifetime_s = 1.6
-enraged_arm_shot_interval_s = 5.2
+enraged_arm_shot_interval_s = 4.5
 add_enemy_slug = &"iron_golem"
 add_count = 2
 add_spread_px = 72.0

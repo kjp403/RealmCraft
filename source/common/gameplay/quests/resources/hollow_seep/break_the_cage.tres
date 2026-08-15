@@ -5,19 +5,35 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres" id="3_prereq"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_qkcuj"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="kit_pot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_rustic.item.tres" id="kit_w0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="kit_w1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="kit_w2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_bandit.item.tres" id="kit_w3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_rustic.item.tres" id="kit_w4"]
+
 [sub_resource type="Resource" id="Obj_kill_captain"]
 script = ExtResource("1_obj")
 enemy_type = &"bandit_captain"
 
+[sub_resource type="Resource" id="Reward_kit_potion"]
+script = ExtResource("kit_reward")
+item = ExtResource("kit_pot")
+amount = 10
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Break the Cage"
-description = "The Bandit Captain holds the key to Rook's cage. Kill him. The Watch Sergeant may want the same head — that does not make it optional."
+description = "The Bandit Captain holds the key to Rook's cage. Kill him. The Watch Sergeant may want the same head — that does not make it optional. The Captain's rustic weapon of your discipline is the next blade after spore."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_captain")])
 unlock_message = "[Rook Hale] Do not look like you are rescuing me until the Captain is down. Then the cage opens."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 400
 reward_mastery_xp = 70000
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 2000
 grants_wardstone = &"bandit_hideout"
 metadata/slug = &"break_the_cage"

@@ -97,8 +97,8 @@ respawns = true
 loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow")])
 
 enrage_health_fraction = 0.6
-slam_radius = 170.0
-slam_windup_s = 1.7
+slam_radius = 130.0
+slam_windup_s = 1.05
 slam_damage = 175.0
 slam_interval_s = 8.5
 enraged_slam_interval_s = 5.5

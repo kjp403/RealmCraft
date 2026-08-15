@@ -144,6 +144,10 @@ extends Resource
 @export var slam_radius: float = 110.0
 @export var slam_windup_s: float = 1.1
 @export var slam_damage: float = 45.0
+## True (default): the ring drops on the primary target's feet at telegraph
+## start, so slowly backing away from the boss does not dodge. False: classic
+## ring around the boss (only used if a fight specifically wants that).
+@export var slam_on_target: bool = true
 ## Seconds between slams — phase 1, then the faster enraged cadence.
 @export var slam_interval_s: float = 6.0
 @export var enraged_slam_interval_s: float = 3.5

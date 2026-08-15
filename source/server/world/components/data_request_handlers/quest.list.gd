@@ -195,11 +195,11 @@ func _quest_view(
 		),
 		"prereq_names": _unmet_prereq_names(resource, quest),
 		"prereq_mode": int(quest.requires_mode),
-		"reward_items": _reward_item_views(quest),
+		"reward_items": _reward_item_views(quest, resource),
 	}
 
 
-func _reward_item_views(quest: QuestResource) -> Array:
+func _reward_item_views(quest: QuestResource, resource: PlayerResource) -> Array:
 	var out: Array = []
 	for reward: QuestReward in quest.reward_items:
 		if reward and reward.item:
@@ -207,6 +207,12 @@ func _reward_item_views(quest: QuestResource) -> Array:
 				"name": str(reward.item.item_name),
 				"amount": reward.amount,
 			})
+	var style_weapon: Item = quest.pick_style_weapon_for(resource)
+	if style_weapon:
+		out.append({
+			"name": str(style_weapon.item_name),
+			"amount": 1,
+		})
 	return out
 
 

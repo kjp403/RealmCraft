@@ -14,11 +14,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="hide_sewer"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_fire.item.tres" id="fire_sword"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_fire.item.tres" id="fire_hammer"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/fire_bow.item.tres" id="fire_bow"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/fire_wand.item.tres" id="fire_wand"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_fire.item.tres" id="fire_book"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_poison.item.tres" id="fire_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_poison.item.tres" id="fire_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/poison_bow.item.tres" id="fire_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_poison.item.tres" id="fire_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_poison.item.tres" id="fire_book"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="dragon_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="dragon_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="dragon_cloth"]
@@ -184,15 +184,22 @@ combat_skill_xp_override = 12000
 respawn_delay = 240.0
 respawns = true
 enrage_health_fraction = 0.45
-slam_radius = 145.0
-slam_windup_s = 1.2
+slam_radius = 120.0
+slam_windup_s = 0.9
 slam_damage = 210.0
-slam_interval_s = 7.0
-enraged_slam_interval_s = 4.0
+slam_interval_s = 7.5
+enraged_slam_interval_s = 4.5
 add_enemy_slug = &"trpg_slime"
 add_count = 5
 add_spread_px = 80.0
 enrage_speed_mult = 1.35
+telegraph_element = 1
+frost_safe_radius = 88.0
+frost_windup_s = 2.3
+frost_damage = 250.0
+frost_offset_px = 140.0
+frost_interval_s = 12.0
+enraged_frost_interval_s = 8.0
 laser_range = 0.0
 laser_width = 28.0
 laser_windup_s = 1.15

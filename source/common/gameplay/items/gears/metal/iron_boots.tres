@@ -8,18 +8,25 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 3.0
+value = 7.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-value = 3.0
+stat_name = "health_max"
+value = 14.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
+stat_name = "mr"
 value = 1.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_3"]
+script = ExtResource("1_mod")
+stat_name = "move_speed"
+value = 2.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -28,7 +35,7 @@ slot = ExtResource("4_slot")
 required_level = 0
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 5
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3")])
 item_name = &"Iron Boots"
 item_icon = ExtResource("2_icon")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"

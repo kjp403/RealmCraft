@@ -6,6 +6,15 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/coreblossom_shard.tres" id="4_shard"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_0yvqw"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="kit_pot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_poison.item.tres" id="kit_w0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_poison.item.tres" id="kit_w1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/poison_bow.item.tres" id="kit_w2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_poison.item.tres" id="kit_w3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_poison.item.tres" id="kit_w4"]
+
 [sub_resource type="Resource" id="Obj_kill_sovereign"]
 script = ExtResource("1_obj")
 enemy_type = &"cistern_sovereign"
@@ -17,10 +26,15 @@ type = 1
 item = ExtResource("4_shard")
 label_override = "Coreblossom Shard"
 
+[sub_resource type="Resource" id="Reward_kit_potion"]
+script = ExtResource("kit_reward")
+item = ExtResource("kit_pot")
+amount = 8
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Sovereign Below"
-description = "Kill the Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper."
+description = "Kill the Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper. A poison weapon of your discipline is the next blade after rustic."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_sovereign"), SubResource("Obj_collect_shard")])
 min_level = 18
 unlock_message = "[Drowned Keeper Vess] It has no name anyone wrote down. Kill it. Bring what it was keeping to the Hall."
@@ -28,6 +42,8 @@ requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 turn_in_giver_slug = &"hall_keeper"
 reward_xp = 500
 reward_mastery_xp = 90000
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 2500
 grants_wardstone = &"sewers"
 metadata/slug = &"the_sovereign_below"

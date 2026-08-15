@@ -3,45 +3,32 @@
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/where_i_lost_it.tres" id="3_prereq"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_bronze.item.tres" id="4_sword"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_bronze.item.tres" id="5_hammer"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/bronze_bow.item.tres" id="6_bow"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_bronze.item.tres" id="7_wand"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_bronze.item.tres" id="8_book"]
-[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="9_xw1is"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_helmet.tres" id="4_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_chest.tres" id="5_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/bronze_boots.tres" id="6_boots"]
 
-[sub_resource type="Resource" id="Obj_sword"]
+[sub_resource type="Resource" id="Obj_helm"]
 script = ExtResource("1_obj")
 type = 2
-item = ExtResource("4_sword")
+item = ExtResource("4_helm")
 
-[sub_resource type="Resource" id="Obj_hammer"]
+[sub_resource type="Resource" id="Obj_chest"]
 script = ExtResource("1_obj")
 type = 2
-item = ExtResource("5_hammer")
+item = ExtResource("5_chest")
 
-[sub_resource type="Resource" id="Obj_bow"]
+[sub_resource type="Resource" id="Obj_boots"]
 script = ExtResource("1_obj")
 type = 2
-item = ExtResource("6_bow")
-
-[sub_resource type="Resource" id="Obj_wand"]
-script = ExtResource("1_obj")
-type = 2
-item = ExtResource("7_wand")
-
-[sub_resource type="Resource" id="Obj_book"]
-script = ExtResource("1_obj")
-type = 2
-item = ExtResource("8_book")
+item = ExtResource("6_boots")
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Proof of the Hammer"
-description = "Calder's steel is scrap. Mine copper and tin in the castle yard, smelt a bronze bar, and forge one bronze weapon of your discipline at the anvil. Keep it. Then go through the hole and find Lira."
-objectives = Array[ExtResource("1_obj")]([SubResource("Obj_sword"), SubResource("Obj_hammer"), SubResource("Obj_bow"), SubResource("Obj_wand"), SubResource("Obj_book")])
+description = "You already have a real weapon from the Chief. Armor is the anvil's job. Mine copper and tin in the castle yard, smelt a bronze bar, and forge one bronze armour piece — helm, chest, or boots. Keep it. Then go through the hole and find Lira."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_helm"), SubResource("Obj_chest"), SubResource("Obj_boots")])
 completion = 1
-unlock_message = "[Scout Calder] That blade is done. Forge bronze in your own style and keep it. The hole is worse than goblins."
+unlock_message = "[Scout Calder] Bone cuts. Bronze wears. Forge a piece of plate at the anvil and keep it. The hole is worse than goblins."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 110
 reward_mastery_xp = 8000

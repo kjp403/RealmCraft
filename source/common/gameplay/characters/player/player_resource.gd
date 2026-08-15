@@ -516,6 +516,27 @@ func mastery_level_of(category: StringName) -> int:
 	return 1
 
 
+## Weapon category currently in the weapon slot, or the player's best-trained
+## combat style when empty-handed. Used by quest turn-ins that grant a matching
+## next-tier weapon instead of dumping all five styles into the bag.
+func equipped_weapon_category() -> StringName:
+	var weapon_id: int = int(equipment.get(&"weapon", 0))
+	if weapon_id > 0:
+		var equipped: Item = ContentRegistryHub.load_by_id(&"items", weapon_id) as Item
+		if equipped is WeaponItem:
+			var category: StringName = (equipped as WeaponItem).category
+			if not category.is_empty():
+				return category
+	var best: StringName = COMBAT_STYLE_CATEGORIES[0]
+	var best_level: int = 0
+	for category: StringName in COMBAT_STYLE_CATEGORIES:
+		var level: int = mastery_level_of(category)
+		if level > best_level:
+			best_level = level
+			best = category
+	return best
+
+
 ## XP needed to advance from [param mastery_level] → next. Same table as skills.
 func mastery_xp_to_next(mastery_level: int) -> int:
 	return SkillXp.xp_to_next(mastery_level)

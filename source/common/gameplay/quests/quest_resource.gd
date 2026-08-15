@@ -90,6 +90,10 @@ enum RequiresMode { ALL, ANY }
 @export var reward_mastery_xp: int
 @export var reward_gold: int
 @export var reward_items: Array[QuestReward]
+## One weapon is granted on turn-in, matching the weapon currently in hand
+## (empty hands / no match fall back to the first entry). Use this for campaign
+## "your next-tier weapon" rewards so a wand user is not handed a sword.
+@export var reward_style_weapons: Array[Item]
 ## Vanity title granted on turn-in. Empty = no title. Added to the player's
 ## titles_unlocked list; auto-equipped if no other title is active.
 @export var grant_title: String
@@ -118,6 +122,23 @@ func turn_in_giver_key() -> StringName:
 	if turn_in_giver:
 		return turn_in_giver.giver_key()
 	return turn_in_giver_slug
+
+
+## The weapon from [member reward_style_weapons] matching [param player]'s
+## equipped combat style. First entry if nothing matches.
+func pick_style_weapon_for(player: PlayerResource) -> Item:
+	if reward_style_weapons.is_empty():
+		return null
+	var category: StringName = player.equipped_weapon_category() if player else &""
+	var fallback: Item = null
+	for item: Item in reward_style_weapons:
+		if item == null:
+			continue
+		if fallback == null:
+			fallback = item
+		if item is WeaponItem and (item as WeaponItem).category == category:
+			return item
+	return fallback
 
 
 ## True when [param player] meets the profession-skill gate (or the quest sets

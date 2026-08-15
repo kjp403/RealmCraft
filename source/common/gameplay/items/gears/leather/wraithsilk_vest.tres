@@ -8,19 +8,31 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 11.0
+value = 35.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 8.0
+stat_name = "health_max"
+value = 68.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
+stat_name = "mr"
+value = 22.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_3"]
+script = ExtResource("1_mod")
 stat_name = "ad"
-value = 12.0
+value = 25.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_4"]
+script = ExtResource("1_mod")
+stat_name = "move_speed"
+value = 7.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -28,7 +40,7 @@ script = ExtResource("3_gear")
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 40
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4")])
 item_name = &"Wraithsilk Vest"
 item_icon = ExtResource("2_icon")
 description = "Silk that drinks moonlight and returns it as silence."

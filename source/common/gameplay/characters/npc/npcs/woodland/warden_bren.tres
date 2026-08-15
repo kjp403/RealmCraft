@@ -18,12 +18,12 @@ quests = Array[ExtResource("5_questres")]([ExtResource("3_bq5pt"), ExtResource("
 
 [sub_resource type="Resource" id="Dialogue_road_ahead"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["The woodland is my post, and it ends at the warren.", "Past the hub there is a portal down into the fungus cave. The Hollow touched that place, and it glows where it should not.", "Finish your business with the goblins first. Then take a torch and go see for yourself."])
+lines = Array[String](["The woodland is my post, and it ends at the warren. The Chief keeps a bone weapon. That is how Heroes step off wood — the anvil will not match it.", "Past the hub there is a portal down into the fungus cave. The Hollow touched that place, and it glows where it should not.", "Kill the Chief. Take the bone. Then the Hall will send you to the hole, and the next blade is in there."])
 label_override = "Ask about the road ahead"
 
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Warden Bren"
 skin = ExtResource("11_skin")
-greeting = "Hold there. The meadow past this gate is crawling with goblins. If you can swing that thing on your back, I have work for you."
+greeting = "Hold there. The meadow is crawling, and the Chief in the warren keeps bone. If you can swing that thing on your back, that kill is your first real weapon."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_bren"), SubResource("Dialogue_road_ahead")])

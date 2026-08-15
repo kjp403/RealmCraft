@@ -14,7 +14,7 @@ target_giver_name = "Lira Voss"
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Through the Hole"
-description = "Calder's partner Lira went through the hole in the wall. Enter Fungus Cave and find her. He thinks the fungus has her."
+description = "Calder's partner Lira went through the hole in the wall. Enter Fungus Cave and find her. Keep the bone. The Heart in there holds the next blade."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_lira")])
 auto_complete = true
 unlock_message = "[Scout Calder] Through the hole. Find Lira. If the glow has her, do not pull the roots yourself."

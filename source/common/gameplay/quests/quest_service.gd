@@ -126,8 +126,13 @@ static func apply_turn_in(
 			Inventory.remove_amount_by_id(inventory, grant_id, 1)
 
 	# Pay rewards. Loot list is shared with the combat.reward push so the client
-	# gets the same toasts + XP-bar handling a kill gives.
+	# gets the same toasts + XP-bar handling a kill gives. Mastery XP is applied
+	# first so a campaign kit that gates on the new mastery can be equipped
+	# immediately after the turn-in.
 	var loot: Array = []
+	var level_before: int = resource.level
+	var progress: Dictionary = resource.add_experience(quest.reward_xp)
+	var mastery: Dictionary = RewardService.grant_mastery_reward(peer_id, quest.reward_mastery_xp)
 	if quest.reward_gold > 0:
 		Inventory.add_item(inventory, Economy.gold_id(), quest.reward_gold)
 		loot.append({"id": Economy.gold_id(), "amount": quest.reward_gold, "name": "Gold"})
@@ -136,13 +141,12 @@ static func apply_turn_in(
 			var reward_id: int = int(reward.item.get_meta(&"id", 0))
 			Inventory.add_item(inventory, reward_id, reward.amount)
 			loot.append({"id": reward_id, "amount": reward.amount, "name": str(reward.item.item_name)})
-
-	var level_before: int = resource.level
-	var progress: Dictionary = resource.add_experience(quest.reward_xp)
-	# The reward that actually progresses a character: weapon-mastery XP into the
-	# category in hand. reward_xp alone only moved the lifetime adventure counter,
-	# which levels nothing since character level became mastery-derived.
-	var mastery: Dictionary = RewardService.grant_mastery_reward(peer_id, quest.reward_mastery_xp)
+	var style_weapon: Item = quest.pick_style_weapon_for(resource)
+	if style_weapon:
+		var style_id: int = int(style_weapon.get_meta(&"id", 0))
+		if style_id > 0:
+			Inventory.add_item(inventory, style_id, 1)
+			loot.append({"id": style_id, "amount": 1, "name": str(style_weapon.item_name)})
 	var quest_id: int = int(quest.get_meta(&"id", 0))
 	resource.set_quest_turned_in(quest_id)
 
