@@ -69,6 +69,11 @@ func save_player(player: PlayerResource) -> bool:
 		"blocked": player.slayer_blocked_tasks,
 	})
 	var pending_chest_loot_json: String = JSON.stringify(player.pending_chest_loot)
+	var flags_out: Dictionary = {}
+	for flag_key: Variant in player.character_flags:
+		if player.character_flags[flag_key]:
+			flags_out[str(flag_key)] = true
+	var character_flags_json: String = JSON.stringify(flags_out)
 
 	var joined_guild_ids_json: String = JSON.stringify(player.joined_guild_ids)
 
@@ -76,9 +81,9 @@ func save_player(player: PlayerResource) -> bool:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, "
+		+ "attributes_json, inventory_json, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, character_flags_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -113,6 +118,7 @@ func save_player(player: PlayerResource) -> bool:
 			wardstones_json,
 			slayer_json,
 			pending_chest_loot_json,
+			character_flags_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -168,6 +174,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	player.bank = {}
 	player.pending_chest_loot = []
 	_grant_starting_kit(player)
+	_grant_starting_quest(player)
 	# Starting attribute points so a new character has something to spend.
 	player.available_attributes_points = PlayerResource.ATTRIBUTE_POINTS_PER_LEVEL
 	# Leave defaults to PlayerResource where possible.
@@ -222,6 +229,14 @@ static func _grant_starting_kit(player: PlayerResource) -> void:
 	var gold_id: int = Economy.gold_id()
 	if gold_id > 0:
 		Inventory.add_item(player.inventory, gold_id, STARTING_GOLD)
+
+
+static func _grant_starting_quest(player: PlayerResource) -> void:
+	var quest_id: int = ContentRegistryHub.id_from_slug(&"quests", &"the_charter_seal")
+	if quest_id <= 0:
+		push_warning("Starting quest: no quest registered for slug 'the_charter_seal' — skipped.")
+		return
+	player.accept_quest(quest_id)
 
 
 ## Titles that were seeded once and are no longer granted. Stripped on load (and
@@ -598,6 +613,13 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.joined_guild_ids = PackedInt64Array(joined_v if joined_v is Array else [])
 
 	player.led_guild_id = int(row.get("led_guild_id", 0))
+
+	var flags_v: Variant = JSON.parse_string(str(row.get("character_flags_json", "{}")))
+	player.character_flags = {}
+	if flags_v is Dictionary:
+		for flag_key: Variant in flags_v:
+			if bool((flags_v as Dictionary)[flag_key]):
+				player.character_flags[StringName(str(flag_key))] = true
 
 	# Character level is DERIVED from masteries + Slayer, so the stored column is a
 	# cache. Recompute it here, AFTER skills/masteries have loaded, so a save from

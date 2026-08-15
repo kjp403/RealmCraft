@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://o3jn1o69s71gj" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/Icon306.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Seepbreaker\'s Draught"
+item_icon = ExtResource("1_icon")
+description = "A large green bottle. Untradeable. Pour it on the roots that hold Lira."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"seepbreakers_draught"
+metadata/id = 582

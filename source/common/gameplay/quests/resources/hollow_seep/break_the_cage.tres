@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_qkcuj"]
+
+[sub_resource type="Resource" id="Obj_kill_captain"]
+script = ExtResource("1_obj")
+enemy_type = &"bandit_captain"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Break the Cage"
+description = "The Bandit Captain holds the key to Rook's cage. Kill him. The Watch Sergeant may want the same head — that does not make it optional."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_captain")])
+unlock_message = "[Rook Hale] Do not look like you are rescuing me until the Captain is down. Then the cage opens."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 400
+reward_mastery_xp = 70000
+reward_gold = 2000
+grants_wardstone = &"bandit_hideout"
+metadata/slug = &"break_the_cage"
+metadata/id = 46

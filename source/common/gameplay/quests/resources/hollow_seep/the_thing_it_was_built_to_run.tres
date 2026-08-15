@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_fuel_lock.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_a00nb"]
+
+[sub_resource type="Resource" id="Obj_kill_golem"]
+script = ExtResource("1_obj")
+enemy_type = &"mecha_stone_golem"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Thing It Was Built to Run"
+description = "As long as the Mecha-stone Golem still runs, the Hollow will drink. Enter The Hollow and kill it. Return to the Hall when the seep is cut."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_golem")])
+min_level = 35
+unlock_message = "[Hall Keeper] The last letter. The Hollow was built to run that machine-heart. End it, then come home."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 1200
+reward_mastery_xp = 200000
+reward_gold = 6000
+grant_title = "Hollow-Sworn"
+grants_wardstone = &"hollow"
+metadata/slug = &"the_thing_it_was_built_to_run"
+metadata/id = 65

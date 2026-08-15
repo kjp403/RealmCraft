@@ -57,6 +57,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 16:
 		_migration_v16(db)
 		_set_schema_version(db, 16)
+	if version < 17:
+		_migration_v17(db)
+		_set_schema_version(db, 17)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -313,6 +316,13 @@ static func _migration_v15(db: SQLite) -> void:
 static func _migration_v16(db: SQLite) -> void:
 	if not _column_exists(db, "players", "weapon_cosmetic_id"):
 		db.query("ALTER TABLE players ADD COLUMN weapon_cosmetic_id INTEGER NOT NULL DEFAULT 0;")
+
+
+## v17: story flags for the Hollow Seep campaign (and any later quest-gated
+## NPC visibility). JSON object of flag slug -> true. ADD COLUMN — no DB wipe.
+static func _migration_v17(db: SQLite) -> void:
+	if not _column_exists(db, "players", "character_flags_json"):
+		db.query("ALTER TABLE players ADD COLUMN character_flags_json TEXT NOT NULL DEFAULT '{}';")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

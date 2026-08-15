@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/cut_the_heart.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/seepbreakers_draught.tres" id="4_draught"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_ks3rd"]
+
+[sub_resource type="Resource" id="Obj_craft_draught"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("4_draught")
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Real Draught"
+description = "Take the True Seep Root to the alchemy table. Craft Seepbreaker's Draught — a vial of water and the root. This one is meant to break the lock."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_craft_draught")])
+unlock_message = "[Wren] The Heart hid the true root. Brew the large draught. Do not spill it."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 120
+reward_mastery_xp = 8000
+reward_gold = 500
+metadata/slug = &"the_real_draught"
+metadata/id = 62

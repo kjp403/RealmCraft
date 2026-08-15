@@ -67,6 +67,9 @@ enum RequiresMode { ALL, ANY }
 ## quests: NPC A offers it, NPC B accepts the turn-in. Leave EMPTY (default) when the
 ## same NPC that offers it also turns it in (the runtime resolves to the offerer).
 @export var turn_in_giver: NPCResource
+## Filename slug of the turn-in NPC (e.g. &"hall_keeper") used when
+## [member turn_in_giver] is empty. Same cycle-avoidance as QuestObjective.target_giver_key.
+@export var turn_in_giver_slug: StringName = &""
 ## Optional item granted to the player when they accept the quest (a sealed
 ## letter, a parcel, etc.). The item is consumed on turn-in. Use sparingly:
 ## quest items have no vendor utility and just clutter the bag.
@@ -95,6 +98,10 @@ enum RequiresMode { ALL, ANY }
 ## (docs/wardstones.md). Empty = none. Only a biome chain's finale quest sets
 ## this; the slug is the biome's (e.g. &"woodland").
 @export var grants_wardstone: StringName = &""
+## Character flag set on turn-in (PlayerResource.character_flags). Used to
+## swap story NPCs (e.g. Lira bound → freed) and gate later quests via
+## [member requires_flag]. Empty = none.
+@export var grants_flag: StringName = &""
 @export_group("")
 
 
@@ -108,7 +115,9 @@ static func load_quest(quest_id: int) -> QuestResource:
 ## The slug of the NPC this quest turns in to, or &"" when it turns in at whoever
 ## offered it (turn_in_giver left empty). The turn-in handlers compare against this.
 func turn_in_giver_key() -> StringName:
-	return turn_in_giver.giver_key() if turn_in_giver else &""
+	if turn_in_giver:
+		return turn_in_giver.giver_key()
+	return turn_in_giver_slug
 
 
 ## True when [param player] meets the profession-skill gate (or the quest sets

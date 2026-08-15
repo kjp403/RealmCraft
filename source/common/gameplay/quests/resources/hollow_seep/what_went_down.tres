@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/grate_cargo.tres" id="3_prereq"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_ch6qi"]
+
+[sub_resource type="Resource" id="Obj_visit_vess"]
+script = ExtResource("1_obj")
+type = 3
+target_giver_key = &"drowned_keeper_vess"
+target_giver_name = "Drowned Keeper Vess"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "What Went Down"
+description = "Pell says the crate is Hollow-touched. Whatever hummed inside went down to the cistern. Find Drowned Keeper Vess at the standing water."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_vess")])
+auto_complete = true
+min_level = 15
+unlock_message = "[Ratcatcher Pell] Hollow-touched. Empty. The rest went to the water that does not move. Vess is still down there."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 110
+reward_mastery_xp = 8000
+reward_gold = 500
+metadata/slug = &"what_went_down"
+metadata/id = 70

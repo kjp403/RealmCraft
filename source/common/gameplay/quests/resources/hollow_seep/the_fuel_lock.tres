@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/crews_that_do_not_answer.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/quench_seal.tres" id="4_seal"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_awtdh"]
+
+[sub_resource type="Resource" id="Obj_kill_vurthek"]
+script = ExtResource("1_obj")
+enemy_type = &"cinderborn"
+grant_item = ExtResource("4_seal")
+
+[sub_resource type="Resource" id="Obj_collect_seal"]
+script = ExtResource("1_obj")
+type = 1
+item = ExtResource("4_seal")
+label_override = "Quench-Seal"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Fuel Lock"
+description = "Kill Vurthek the Cinderborn in the Cinder Deeps. Recover the Quench-Seal — the fuel lock — and take it to Helka."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_vurthek"), SubResource("Obj_collect_seal")])
+min_level = 33
+unlock_message = "[Cinderwright Maro] Vurthek was here before the foundry. Take the quench-lock if you live. Helka will know what it means."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+turn_in_giver_slug = &"forgemaster_helka"
+reward_xp = 800
+reward_mastery_xp = 140000
+reward_gold = 4000
+grants_wardstone = &"fire_forge"
+metadata/slug = &"the_fuel_lock"
+metadata/id = 59

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/rags_and_needles.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="4_potion"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_bdxv1"]
+
+[sub_resource type="Resource" id="Obj_potions"]
+script = ExtResource("1_obj")
+type = 1
+item = ExtResource("4_potion")
+required_amount = 3
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "One Small Favor"
+description = "Calder is still bleeding. Bring him 3 Minor Health Potions. Mira at the Smith House sells herbs and keeps the alchemy table. Healing Herb plus a vial of water is Herblore 1."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_potions")])
+unlock_message = "[Scout Calder] One small favor. I am still leaking. Three minor potions. Mira knows the table."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 80
+reward_mastery_xp = 4000
+reward_gold = 400
+metadata/slug = &"one_small_favor"
+metadata/id = 53

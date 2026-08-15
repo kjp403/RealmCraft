@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="ContentIndex" format=3 uid="uid://bidhdjjqde5nn"]
+[gd_resource type="Resource" script_class="ContentIndex" format=3]
 
-[ext_resource type="Script" uid="uid://0wmtcxri41vp" path="res://source/common/registry/content_index.gd" id="1_7gygy"]
+[ext_resource type="Script" path="res://source/common/registry/content_index.gd" id="1_7gygy"]
 
 [resource]
 script = ExtResource("1_7gygy")
 content_name = &"quests"
-version = 1783762918
-next_id = 42
+version = 1786769155
+next_id = 72
 entries = Array[Dictionary]([{
 &"hash": "4a44a478c7d7cc48d1505b2b9a58825ab9f456554790eb88d9a427d70d4f95e6",
 &"id": 4,
@@ -157,6 +157,156 @@ entries = Array[Dictionary]([{
 &"id": 27,
 &"path": "res://source/common/gameplay/quests/resources/welcome.tres",
 &"slug": &"welcome"
+}, {
+&"hash": "9b51788fe1a5db871785acb3673fa38ac36cdc52bc75d7e3f18cfbfc81e7d7e5",
+&"id": 42,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/a_green_lie.tres",
+&"slug": &"a_green_lie"
+}, {
+&"hash": "ddd20d2fdfb8d7fa953ae3e718ba04f59961b87ccb04a8c69449615cdb48cd7f",
+&"id": 43,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/a_reader_of_wars.tres",
+&"slug": &"a_reader_of_wars"
+}, {
+&"hash": "f5fec10ad814e563e42c6e482f7a80763044a22f12a3ba683ea7766b27c0a101",
+&"id": 44,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/blood_in_the_meadow.tres",
+&"slug": &"blood_in_the_meadow"
+}, {
+&"hash": "afeab43d7befa3f6c97db0c792211651b0d8cb8744ba977ab3d20edf55083098",
+&"id": 45,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/bone_and_shard.tres",
+&"slug": &"bone_and_shard"
+}, {
+&"hash": "5afdf9d394fd14fcfda4aad494f4d6ee3e4000081c20b5098d969ff1f28d3fbc",
+&"id": 46,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/break_the_cage.tres",
+&"slug": &"break_the_cage"
+}, {
+&"hash": "ec7b7739d56923d9c45d00ef06000d38f4a96bb9074833d5414eda2d360beb39",
+&"id": 47,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/clear_the_roots.tres",
+&"slug": &"clear_the_roots"
+}, {
+&"hash": "ff989a541e5e0735da1055f262dc0b63938f9b70936058c8eb5567427fb87e27",
+&"id": 48,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/crews_that_do_not_answer.tres",
+&"slug": &"crews_that_do_not_answer"
+}, {
+&"hash": "21b7feab9975122676839f4124d897eb1e969739d051ff82e1fc26cc4ebdbba6",
+&"id": 49,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/cut_the_heart.tres",
+&"slug": &"cut_the_heart"
+}, {
+&"hash": "192cb30f20399eaa15762b0807088d669d18bbcb24a24f1fc76eb467fa3986ac",
+&"id": 50,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres",
+&"slug": &"dragged_into_the_trees"
+}, {
+&"hash": "dfaaa730329da4c924e686526b5a7d11f80eb1cc2d4dfbb81bfd02ceee15d686",
+&"id": 51,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/grate_cargo.tres",
+&"slug": &"grate_cargo"
+}, {
+&"hash": "515d8aae078a77284f9f7e11c88c0ec807082513d790b4bfee2de5ab3c8828fc",
+&"id": 52,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/leave_the_crown.tres",
+&"slug": &"leave_the_crown"
+}, {
+&"hash": "dbe731753f7246447664b3b871b7d0a892ff0ad1d3d1cd740c588117f1e25b52",
+&"id": 53,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/one_small_favor.tres",
+&"slug": &"one_small_favor"
+}, {
+&"hash": "0372aac0c2ad94d454716e51f214e16b38d01e434261a4ea2af447d133c60152",
+&"id": 54,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/proof_of_the_hammer.tres",
+&"slug": &"proof_of_the_hammer"
+}, {
+&"hash": "5fe8b2efc6d17667d58eba821395654837b0cca87ae17c7ea28f6e1e3a8ceec6",
+&"id": 55,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/rags_and_needles.tres",
+&"slug": &"rags_and_needles"
+}, {
+&"hash": "70c1860788187e83090ce7e7352956664492b1263e1a72e45b6e669fabae7eda",
+&"id": 56,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/someone_still_stands.tres",
+&"slug": &"someone_still_stands"
+}, {
+&"hash": "63de3b23d4dfbc88bf26190e049cf4ae36f880f91b020d56ac9ee17e12bc6b1c",
+&"id": 57,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_builders_grave.tres",
+&"slug": &"the_builders_grave"
+}, {
+&"hash": "fc3fecd08f87e1987ee707dc6e9cb42326f29b2b9ad16962789e561c29cadf86",
+&"id": 58,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_charter_seal.tres",
+&"slug": &"the_charter_seal"
+}, {
+&"hash": "024c9fa7dacba298bcdf0d95002519adb9f5bcfc81d6109e6ccfc627d8f5d50c",
+&"id": 59,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_fuel_lock.tres",
+&"slug": &"the_fuel_lock"
+}, {
+&"hash": "22948e1ded942427fd232d02fa7b50f6d7f03aa6132b300e2e9a3e61910a2567",
+&"id": 60,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_hole_in_the_wall.tres",
+&"slug": &"the_hole_in_the_wall"
+}, {
+&"hash": "4f9c2bfb3009893749ac77a0e12e56d6b0bbd5fcc3990fcd212f7fe89f447ff8",
+&"id": 61,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_last_foundry.tres",
+&"slug": &"the_last_foundry"
+}, {
+&"hash": "8e07818e3a11423c135505e3bd0c306672adf6e85de0c30b5b785ea8daa6b87c",
+&"id": 62,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_real_draught.tres",
+&"slug": &"the_real_draught"
+}, {
+&"hash": "1f18526fba8586c39971eec7aeb201dbf1f5c5e389cc5f21115b7dc7d8e659f3",
+&"id": 63,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_shaft_below.tres",
+&"slug": &"the_shaft_below"
+}, {
+&"hash": "efe14a9cf2b57779d4e9ab20ed4be8504910808f69409666cfff3d843b3f3e35",
+&"id": 64,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_sovereign_below.tres",
+&"slug": &"the_sovereign_below"
+}, {
+&"hash": "b8a2465f5417ff4efdb67f8ee73fa7a56a961ab1da9ba88f1d9fa934d964b279",
+&"id": 65,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_thing_it_was_built_to_run.tres",
+&"slug": &"the_thing_it_was_built_to_run"
+}, {
+&"hash": "87a499f6d46b6d2345532d877d834dbfcfebfbace93556489c450535c206a8cf",
+&"id": 66,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/through_the_hole.tres",
+&"slug": &"through_the_hole"
+}, {
+&"hash": "ab8e31e5b464ee0ffedb212af4c201a604acd3aeaed1e800671fdeb413d3964c",
+&"id": 67,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/under_the_charter.tres",
+&"slug": &"under_the_charter"
+}, {
+&"hash": "302d2842dd7f41806b798b0a5f6e742e6e285752fdd07be14099d858da8b23aa",
+&"id": 68,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/unrooted.tres",
+&"slug": &"unrooted"
+}, {
+&"hash": "4c271e3ffaa664079fc52ee782d3e08bed4bd73be48e31432c01c62f8d042764",
+&"id": 69,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/what_they_were_carrying.tres",
+&"slug": &"what_they_were_carrying"
+}, {
+&"hash": "76c14721e56d6471cc65a251da0926894836e69bf073ec1b2aaf5ad017cb9270",
+&"id": 70,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/what_went_down.tres",
+&"slug": &"what_went_down"
+}, {
+&"hash": "5a7bd0c4b2bfbc7e9f2198921d414425086d8ac306433e25c7228ff702990039",
+&"id": 71,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/where_i_lost_it.tres",
+&"slug": &"where_i_lost_it"
 }])
 scan_path = "res://source/common/gameplay/quests/resources"
 filters = PackedStringArray("*.tres", "*.tscn")

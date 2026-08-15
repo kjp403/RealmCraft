@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://7v3r2hrm890rg" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/relic_coreblossom.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Quench-Seal"
+item_icon = ExtResource("1_icon")
+description = "The fuel lock taken from Vurthek. As long as the Mecha-stone Golem still runs, the Hollow will drink."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"quench_seal"
+metadata/id = 580

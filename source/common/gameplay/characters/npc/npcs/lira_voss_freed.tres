@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="NPCResource" uid="uid://dmzrbsqvutelz" format=3]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_dialogue"]
+[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="3_quest"]
+[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="4_questres"]
+[ext_resource type="SpriteFrames" uid="uid://dkeeft051qhl3" path="res://source/common/gameplay/characters/sprite_frames/rogue.tres" id="5_skin"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="6_npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres" id="7_q1"]
+
+[sub_resource type="Resource" id="QuestInteraction_lira_freed"]
+script = ExtResource("3_quest")
+quests = Array[ExtResource("4_questres")]([ExtResource("7_q1")])
+
+[sub_resource type="Resource" id="Dialogue_free"]
+script = ExtResource("2_dialogue")
+lines = Array[String](["The roots let go. I can walk. I will not forget the smell.", "Rook was with us when the Chief drove us through. Bandits took him toward their camp while I was being eaten.", "Calder is still at the hole. Tell him I am out when you can. After Rook."])
+label_override = "What now?"
+
+[resource]
+script = ExtResource("6_npc")
+npc_name = "Lira Voss"
+skin = ExtResource("5_skin")
+greeting = "I am out. The cave still wants me. Rook does not have that luxury — the bandits dragged him."
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_lira_freed"), SubResource("Dialogue_free")])

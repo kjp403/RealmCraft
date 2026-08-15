@@ -14,12 +14,8 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	if npc_key.is_empty():
 		return {"ok": false}
 
-	# Only count it as a visit if this NPC is actually a quest giver here.
-	if instance.instance_map.get_quest_giver(npc_key) == null:
-		return {"ok": true}
-
-	# Mirrors quest.list's giver branch: on_visit advances VISIT objectives (and
-	# auto-completes/­toasts as needed); push quest.update so the HUD reflects it.
+	# Talking to any named NPC counts as "visiting" it — advance VISIT
+	# objectives even when the NPC is not a quest giver (Courier hand-off).
 	var visit_updates: Array = QuestService.on_visit(player.player_resource, npc_key, peer_id, instance)
 	if not visit_updates.is_empty():
 		WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": visit_updates})

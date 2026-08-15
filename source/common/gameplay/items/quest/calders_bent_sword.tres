@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="QuestItem" uid="uid://nazzblfm4z7vj" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/steel/steel.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/quest_item.gd" id="2_script"]
+
+[sub_resource type="AtlasTexture" id="Atlas_icon"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 0, 16, 48)
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Calder\'s Bent Sword"
+item_icon = SubResource("Atlas_icon")
+description = "A steel blade folded nearly in half. Calder lost it in the Mining Cave. Too ruined to swing."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"calders_bent_sword"
+metadata/id = 575

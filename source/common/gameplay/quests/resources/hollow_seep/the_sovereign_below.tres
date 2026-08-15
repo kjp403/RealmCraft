@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/what_went_down.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/coreblossom_shard.tres" id="4_shard"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_0yvqw"]
+
+[sub_resource type="Resource" id="Obj_kill_sovereign"]
+script = ExtResource("1_obj")
+enemy_type = &"cistern_sovereign"
+grant_item = ExtResource("4_shard")
+
+[sub_resource type="Resource" id="Obj_collect_shard"]
+script = ExtResource("1_obj")
+type = 1
+item = ExtResource("4_shard")
+label_override = "Coreblossom Shard"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "The Sovereign Below"
+description = "Kill the Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_sovereign"), SubResource("Obj_collect_shard")])
+min_level = 18
+unlock_message = "[Drowned Keeper Vess] It has no name anyone wrote down. Kill it. Bring what it was keeping to the Hall."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+turn_in_giver_slug = &"hall_keeper"
+reward_xp = 500
+reward_mastery_xp = 90000
+reward_gold = 2500
+grants_wardstone = &"sewers"
+metadata/slug = &"the_sovereign_below"
+metadata/id = 64

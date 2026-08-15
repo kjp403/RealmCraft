@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_green_lie.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/true_seep_root.tres" id="4_root"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_6bnk0"]
+
+[sub_resource type="Resource" id="Obj_kill_heart"]
+script = ExtResource("1_obj")
+enemy_type = &"fungal_heart"
+grant_item = ExtResource("4_root")
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Cut the Heart"
+description = "The tonic did not take. The Heart is feeding the roots that hold Lira — the pale cap was a decoy. Kill the Fungal Heart. It yields the True Seep Root."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_heart")])
+unlock_message = "[Lira Voss] It doesn't take. The Heart is feeding these roots. Cut it. The cap was a lie."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 350
+reward_mastery_xp = 50000
+reward_gold = 2000
+grants_wardstone = &"fungus_cave"
+metadata/slug = &"cut_the_heart"
+metadata/id = 49

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="NPCResource" uid="uid://kaifywbwewgfz" format=3]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_dialogue"]
+[ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="3_quest"]
+[ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="4_questres"]
+[ext_resource type="SpriteFrames" uid="uid://bp5625khvdl8r" path="res://source/common/gameplay/characters/sprite_frames/scholar_censor.tres" id="5_skin"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="6_npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_green_lie.tres" id="7_q1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_real_draught.tres" id="8_q2"]
+
+[sub_resource type="Resource" id="QuestInteraction_wren"]
+script = ExtResource("3_quest")
+quests = Array[ExtResource("4_questres")]([ExtResource("7_q1"), ExtResource("8_q2")])
+
+[sub_resource type="Resource" id="Dialogue_seep"]
+script = ExtResource("2_dialogue")
+lines = Array[String](["This cave used to be a clean dig. Then a seep reached it and the fungus learned to walk.", "The Heart feeds the roots. Pale caps grow at its feet. They look like medicine. Sometimes they are not.", "Maela cuts what she can see. I write what the glow does when no one is looking."])
+label_override = "Ask about the seep"
+
+[resource]
+script = ExtResource("6_npc")
+npc_name = "Wren"
+skin = ExtResource("5_skin")
+greeting = "Keep your voice down. The glow listens. You are here for Lira? Then we brew, and we hope the first bottle is the true one."
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_wren"), SubResource("Dialogue_seep")])

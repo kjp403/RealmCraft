@@ -10,6 +10,7 @@
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="15_nga3o"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="17_rp"]
 [ext_resource type="Resource" uid="uid://dam33uymrh4ne" path="res://source/common/gameplay/characters/npc/npcs/watch_sergeant.tres" id="25_sergeant"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/rook_hale.tres" id="26_rook"]
 [ext_resource type="Resource" uid="uid://dx3hpkd0nosaw" path="res://source/common/gameplay/characters/npc/types/bandits/bandit_fighter.tres" id="30_fighter"]
 [ext_resource type="Resource" uid="uid://cvw5mgv8rtjq" path="res://source/common/gameplay/characters/npc/types/bandit_archer.tres" id="31_archer"]
 [ext_resource type="Resource" uid="uid://chnd4xgamxt8q" path="res://source/common/gameplay/characters/npc/types/bandits/bandit_brute.tres" id="32_brute"]
@@ -349,6 +350,10 @@ position = Vector2(600, 672)
 [node name="WatchSergeant" parent="NPCs" unique_id=336924567 instance=ExtResource("6_npcscene")]
 position = Vector2(472, 712)
 npc_resource = ExtResource("25_sergeant")
+
+[node name="RookHale" parent="NPCs" unique_id=1900000601 instance=ExtResource("6_npcscene")]
+position = Vector2(560, 160)
+npc_resource = ExtResource("26_rook")
 
 [node name="Portal" parent="." unique_id=375786523 instance=ExtResource("14_27tev")]
 position = Vector2(528, 728)

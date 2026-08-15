@@ -6,6 +6,7 @@
 [ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="4_potion"]
 [ext_resource type="Resource" uid="uid://dicfbsg4ycah2" path="res://source/common/gameplay/characters/npc/npcs/foreman.tres" id="5_foreman"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="qr_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/blood_in_the_meadow.tres" id="6_blood"]
 
 [sub_resource type="Resource" id="Objective_visit_foreman"]
 script = ExtResource("1_objective")
@@ -30,6 +31,7 @@ description = "This is an orientation errand, not a permanent path choice. Leave
 objectives = Array[ExtResource("1_objective")]([SubResource("Objective_visit_foreman")])
 completion = 0
 auto_complete = true
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("6_blood")])
 reward_xp = 80
 reward_mastery_xp = 2500
 reward_gold = 500

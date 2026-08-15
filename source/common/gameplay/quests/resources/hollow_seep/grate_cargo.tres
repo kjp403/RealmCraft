@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/under_the_charter.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/sealed_smuggling_crate.tres" id="4_crate"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_crcb0"]
+
+[sub_resource type="Resource" id="Obj_kill_skeletons"]
+script = ExtResource("1_obj")
+enemy_type = &"trpg_sewer_skeleton"
+required_amount = 8
+grant_item = ExtResource("4_crate")
+
+[sub_resource type="Resource" id="Obj_collect_crate"]
+script = ExtResource("1_obj")
+type = 1
+item = ExtResource("4_crate")
+label_override = "Sealed Smuggling Crate"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Grate Cargo"
+description = "Obry wants a Sealed Smuggling Crate recovered from the sewer hostiles. Clear eight sewer skeletons; one of them is still carrying a sealed crate. After you bring it in, find Ratcatcher Pell further down — he will know where the rest went."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_skeletons"), SubResource("Obj_collect_crate")])
+min_level = 15
+unlock_message = "[Sluice Warden Obry] Crews stopped coming down. Their crates did not. Bring me one that is still sealed."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+reward_xp = 220
+reward_mastery_xp = 40000
+reward_gold = 1200
+metadata/slug = &"grate_cargo"
+metadata/id = 51

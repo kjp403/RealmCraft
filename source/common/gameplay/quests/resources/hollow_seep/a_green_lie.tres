@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/someone_still_stands.tres" id="3_prereq"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/pale_sporecap.tres" id="4_cap"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/quest/weak_seep_tonic.tres" id="5_tonic"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="6_rkqkv"]
+
+[sub_resource type="Resource" id="Obj_kill_puffcap"]
+script = ExtResource("1_obj")
+enemy_type = &"puffcap"
+grant_item = ExtResource("4_cap")
+
+[sub_resource type="Resource" id="Obj_craft_tonic"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("5_tonic")
+
+[sub_resource type="Resource" id="Obj_bring_tonic"]
+script = ExtResource("1_obj")
+type = 1
+item = ExtResource("5_tonic")
+label_override = "Weak Seep Tonic"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "A Green Lie"
+description = "Wren's first draught needs a Pale Sporecap from a puffcap near the Heart, then a Weak Seep Tonic at the alchemy table (vial of water plus the cap). Take the flask to Lira."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_puffcap"), SubResource("Obj_craft_tonic"), SubResource("Obj_bring_tonic")])
+unlock_message = "[Wren] Pale caps at the Heart's feet. Brew a weak tonic. Pour it on Lira. I hope it is the true one."
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+turn_in_giver_slug = &"lira_voss"
+reward_xp = 160
+reward_mastery_xp = 12000
+reward_gold = 700
+metadata/slug = &"a_green_lie"
+metadata/id = 42
