@@ -31,6 +31,14 @@ extends Area2D
 ## Assign a `.tres` from `source/common/gameplay/maps/components/mineable_nodes/`.
 @export var data: MineableNodeResource
 
+## Flat gathering XP rate on mining / woodcutting / fishing yields. Perk
+## multipliers (Diligent, etc.) still stack on top.
+const GATHER_XP_RATE: Dictionary[StringName, float] = {
+	&"mining": 1.2,
+	&"woodcutting": 1.2,
+	&"fishing": 1.2,
+}
+
 # --- Cached refs ------------------------------------------------------------
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _name_label: Label = $NameLabel
@@ -271,11 +279,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	for job_name: StringName in xp_table:
 		var raw: int = int(xp_table[job_name])
 		var xp_gain: int = raw
+		var rate: float = GATHER_XP_RATE.get(job_name, 1.0)
 		var jp: JobPerks = JobRegistry.perks_for(job_name)
 		if jp != null:
 			var skill_entry: Dictionary = player.player_resource.skills.get(job_name, {})
 			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
-			xp_gain = roundi(raw * jp.xp_multiplier(job_perks_dict))
+			rate *= jp.xp_multiplier(job_perks_dict)
+		if rate != 1.0:
+			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
 		grants.append({"job": String(job_name), "xp": xp_gain, "progress": prog})
 
