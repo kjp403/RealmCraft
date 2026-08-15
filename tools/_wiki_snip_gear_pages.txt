@@ -1,0 +1,421 @@
+function buildItemSources(items, creatures, shops, stations, chests, quests) {
+  const map = new Map();
+  const bucket = (itemPath) => {
+    const item = itemByPath(items, itemPath);
+    if (!item) return null;
+    if (!map.has(item.slug)) {
+      map.set(item.slug, { drops: [], shops: [], crafts: [], chests: [], quests: [] });
+    }
+    return map.get(item.slug);
+  };
+
+  for (const c of creatures) {
+    for (const d of c.loot) {
+      const b = bucket(d.itemPath);
+      if (b) b.drops.push({ creature: c, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const shop of shops) {
+    for (const e of shop.entries) {
+      const b = bucket(e.itemPath);
+      if (b) b.shops.push({ shop, price: e.price, currencyPath: e.currencyPath });
+    }
+  }
+  for (const st of stations) {
+    for (const r of st.recipes) {
+      const b = bucket(r.itemPath);
+      if (b) b.crafts.push({ station: st, recipe: r });
+    }
+  }
+  for (const chest of chests) {
+    for (const d of chest.drops) {
+      const b = bucket(d.itemPath);
+      if (b) b.chests.push({ chest, chance: d.chance, min: d.min, max: d.max });
+    }
+  }
+  for (const q of quests) {
+    for (const r of q.rewardItems || []) {
+      const b = bucket(r.itemPath);
+      if (b) b.quests.push({ quest: q, amount: r.amount });
+    }
+    for (const itemPath of q.styleWeapons || []) {
+      const b = bucket(itemPath);
+      if (b) b.quests.push({ quest: q, amount: 1, stylePick: true });
+    }
+  }
+  // Best sources first: a 60% drop is the answer, a 0.1% one is trivia.
+  for (const v of map.values()) {
+    v.drops.sort((a, b) => b.chance - a.chance);
+    v.shops.sort((a, b) => a.price - b.price);
+    v.chests.sort((a, b) => a.chest.tier - b.chest.tier);
+  }
+  return map;
+}
+
+/** The "How to get it" block on an item page. Empty string when nothing knows. */
+function sourcesHtml(src, items) {
+  if (!src) {
+    return `<h2>How to get it</h2><p class="muted">No authored source yet ??? this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
+  }
+  const parts = [];
+  const itemLink = (p) => {
+    const it = itemByPath(items, p);
+    return it ? `<a href="/wiki/items/${it.slug}/">${esc(it.name)}</a>` : esc(basenameSlug(p || "").replace(/_/g, " "));
+  };
+
+  if (src.shops.length) {
+    parts.push(
+      `<h3>Bought from</h3><ul class="list-reset">${src.shops
+        .map((e) => {
+          const who = e.shop.vendors.length ? ` (${esc(e.shop.vendors.join(", "))})` : "";
+          const cur = e.currencyPath ? itemLink(e.currencyPath) : "gold";
+          return `<li>${esc(e.shop.name)}${who} ??? ${esc(String(e.price))} ${cur}</li>`;
+        })
+        .join("")}</ul>`
+    );
+  }
+  if (src.crafts.length) {
+    parts.push(
+      `<h3>Crafted at</h3><ul class="list-reset">${src.crafts
+        .map((c) => {
+          const lvl = c.recipe.level ? ` ??? needs ${esc(c.station.profession || "crafting")} ${c.recipe.level}` : "";
+          const ing = c.recipe.ingredients
+            .map((i) => `${itemLink(i.itemPath)}${i.amount > 1 ? " ??" + i.amount : ""}`)
+            .join(", ");
+          return `<li><strong>${esc(c.station.name)}</strong>${lvl}${ing ? `<br><span class="muted">${ing}</span>` : ""}</li>`;
+        })
+        .join("")}</ul>`
+    );
+  }
+  if (src.drops.length) {
+    parts.push(
+      `<h3>Dropped by</h3><ul class="list-reset">${src.drops
+        .slice(0, 12)
+        .map(
+          (d) =>
+            `<li><a href="/wiki/creatures/${d.creature.slug}/">${esc(d.creature.name)}</a>${esc(fmtAmt(d.min, d.max))} ??? ${esc(fmtChance(d.chance))}</li>`
+        )
+        .join("")}</ul>`
+    );
+  }
+  if (src.chests.length) {
+    parts.push(
+      `<h3>Found in chests</h3><ul class="list-reset">${src.chests
+        .map((c) => `<li>${esc(c.chest.name)}${esc(fmtAmt(c.min, c.max))}</li>`)
+        .join("")}</ul>`
+    );
+  }
+  if (src.quests.length) {
+    parts.push(
+      `<h3>Quest reward</h3><ul class="list-reset">${src.quests
+        .map((q) => {
+          const extra = q.stylePick
+            ? " ??? unique of your equipped style"
+            : q.amount > 1
+              ? ` ??${q.amount}`
+              : "";
+          return `<li><a href="${questHref(q.quest)}">${esc(q.quest.name)}</a>${extra}</li>`;
+        })
+        .join("")}</ul>`
+    );
+  }
+  if (!parts.length) {
+    return `<h2>How to get it</h2><p class="muted">No authored source yet ??? this item is not currently sold, dropped, crafted, or given as a reward.</p>`;
+  }
+  return `<h2>How to get it</h2>${parts.join("")}`;
+}
+
+/**
+ * One-line answer to "and where do I get this?", for the gear-path tables.
+ * Deliberately terse ??? the item page carries the full breakdown.
+ */
+function sourceSummary(src) {
+  if (!src) return "???";
+  const bits = [];
+  if (src.quests.length) {
+    bits.push(src.quests.some((q) => q.stylePick) ? "Quest (your style)" : "Quest");
+  }
+  if (src.drops.length) bits.push(`Drop (${esc(src.drops[0].creature.name)})`);
+  if (src.crafts.length) {
+    const best = src.crafts.reduce((a, b) => (a.recipe.level <= b.recipe.level ? a : b));
+    bits.push(
+      best.recipe.level
+        ? `Craft (${esc(best.station.profession)} ${best.recipe.level})`
+        : `Craft (${esc(best.station.name)})`
+    );
+  }
+  if (src.shops.length) bits.push(`Buy (${esc(String(src.shops[0].price))}g)`);
+  if (src.chests.length) bits.push("Chest");
+  return bits.join(" ?? ") || "???";
+}
+
+function armourSetName(name) {
+  return String(name)
+    .replace(
+      /\s+(Helmet|Helm|Hood|Hat|Crown|Mask|Chestplate|Chest|Platebody|Tunic|Robe|Boots|Shoes|Sandals|Greaves|Gloves|Gauntlets|Vambraces|Legs|Leggings|Skirt|Cape|Cloak|Shield|Kite|Pauldrons|Shoulders)$/i,
+      ""
+    )
+    .trim();
+}
+
+function weaponPower(it) {
+  const ad = modVal(it, "ad");
+  const ap = modVal(it, "ap");
+  if (ad && ap) return `${ad} AD / ${ap} AP`;
+  if (ap) return `${ap} AP`;
+  if (ad) return String(ad);
+  return "???";
+}
+
+/**
+ * The gear ladder, grouped by the mastery level that unlocks each piece.
+ *
+ * Generated rather than written: a hand-authored tier list goes stale the first
+ * time someone re-tunes a required_mastery_level, and a stale ladder is worse
+ * than none. Weapons group by their own mastery category; armour is gated on
+ * &"any", meaning your BEST mastery, so it gets its own table.
+ */
+function gearPathPage(items, itemSources, quests) {
+  const wearable = items.filter(
+    (it) => (it.kind === "Weapon" || it.kind === "Armor") && (it.requiredMastery || 0) >= 0
+  );
+  const tierOf = (it) => it.requiredMastery || 0;
+  const bands = [
+    [0, 1, "Mastery 1 ??? what you start in"],
+    [2, 9, "Mastery 2???9 ??? the first upgrade"],
+    [10, 19, "Mastery 10???19 ??? mid game"],
+    [20, 39, "Mastery 20???39 ??? late game"],
+    [40, 999, "Mastery 40+ ??? endgame"],
+  ];
+
+  const weaponTable = (rows) =>
+    rows.length
+      ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>AD / AP</th><th>How to get it</th></tr></thead><tbody>${rows
+          .map(
+            (it) =>
+              `<tr><td><a href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+                String(tierOf(it) || 1)
+              )}</td><td>${weaponPower(it)}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
+          )
+          .join("")}</tbody></table>`
+      : `<p class="muted">Nothing in this band yet.</p>`;
+
+  const armourTable = (rows) =>
+    rows.length
+      ? `<table class="gear-table"><thead><tr><th>Item</th><th>Unlocks at</th><th>Armor</th><th>HP</th><th>How to get it</th></tr></thead><tbody>${rows
+          .map(
+            (it) =>
+              `<tr><td><a href="/wiki/items/${it.slug}/">${esc(it.name)}</a></td><td>${esc(
+                String(tierOf(it) || 1)
+              )}</td><td>${modVal(it, "armor") || "???"}</td><td>${modVal(it, "health_max") || "???"}</td><td>${sourceSummary(itemSources.get(it.slug))}</td></tr>`
+          )
+          .join("")}</tbody></table>`
+      : `<p class="muted">Nothing in this band yet.</p>`;
+
+  const climaxes = (quests || [])
+    .filter((q) => q.styleWeapons.length)
+    .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  const uniqueLadder = climaxes.length
+    ? `<table class="gear-table"><thead><tr><th>Climax</th><th>Unique of your style</th></tr></thead><tbody>${climaxes
+        .map((q) => {
+          const links = q.styleWeapons
+            .map((p) => itemHrefLabel(items, p))
+            .join(", ");
+          return `<tr><td><a href="${questHref(q)}">${esc(q.name)}</a></td><td>${links}</td></tr>`;
+        })
+        .join("")}</tbody></table>`
+    : "";
+
+  const sets = new Map();
+  for (const it of wearable.filter((x) => x.kind === "Armor")) {
+    const set = armourSetName(it.name);
+    if (!set || set === it.name) continue;
+    if (!sets.has(set)) sets.set(set, []);
+    sets.get(set).push(it);
+  }
+  const setRows = [...sets.entries()]
+    .filter(([, pieces]) => pieces.length >= 2)
+    .sort((a, b) => {
+      const ta = Math.min(...a[1].map(tierOf));
+      const tb = Math.min(...b[1].map(tierOf));
+      return ta - tb || a[0].localeCompare(b[0]);
+    });
+  const setTable = setRows.length
+    ? `<table class="gear-table"><thead><tr><th>Set</th><th>Unlocks at</th><th>Armor</th><th>HP</th><th>MR</th><th>How to get it</th></tr></thead><tbody>${setRows
+        .map(([name, pieces]) => {
+          const src = pieces
+            .map((p) => sourceSummary(itemSources.get(p.slug)))
+            .find((s) => s && s !== "???") || "???";
+          return `<tr><td>${esc(name)}</td><td>${Math.min(...pieces.map(tierOf))}</td><td>${pieces.reduce((s, p) => s + modVal(p, "armor"), 0)}</td><td>${pieces.reduce((s, p) => s + modVal(p, "health_max"), 0)}</td><td>${pieces.reduce((s, p) => s + modVal(p, "mr"), 0)}</td><td>${src}</td></tr>`;
+        })
+        .join("")}</tbody></table>`
+    : "";
+
+  const sections = bands
+    .map(([lo, hi, label]) => {
+      const inBand = wearable
+        .filter((it) => tierOf(it) >= lo && tierOf(it) <= hi)
+        .sort((a, b) => tierOf(a) - tierOf(b) || a.name.localeCompare(b.name));
+      if (!inBand.length) return "";
+      const weapons = inBand.filter((it) => it.kind === "Weapon");
+      const armour = inBand.filter((it) => it.kind === "Armor");
+      return `<h2>${esc(label)}</h2>
+        ${weapons.length ? `<h3>Weapons</h3>${weaponTable(weapons)}` : ""}
+        ${armour.length ? `<h3>Armour</h3>${armourTable(armour)}` : ""}`;
+    })
+    .join("");
+
+  return shell({
+    title: "Gear path ??? Arkenelle Wiki",
+    active: "start",
+    body: `<main class="wrap">
+      ${crumb([
+        { href: "/wiki/", label: "Wiki" },
+        { href: "/wiki/getting-started/", label: "Getting started" },
+        { label: "Gear path" },
+      ])}
+      <article class="page prose">
+        <h1 class="section-title">Gear path</h1>
+        <p>Every weapon and armour piece is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class.</p>
+        <ul>
+          <li><strong>Unique weapons</strong> come from Charter climaxes. Turn-in grants one matching the style in your hand. Farm the same boss for the other styles, armour mats, and relics ??? the kill is not one-and-done.</li>
+          <li><strong>Armour</strong> is smithing and later bossing. Bronze through Runite are forged. Plate is meant to cover a missed mechanic or two, not ten. Mitigation is <code>damage ?? 100 / (100 + armour)</code>.</li>
+          <li><strong>Smithable metal weapons</strong> exist on the anvil, but they lose to the unique of that chapter. Proof of the Hammer is a bronze armour craft, not a bronze blade.</li>
+          <li><strong>Armour</strong> requires <em>any</em> mastery at that level, so your best-trained weapon carries what you can wear. Weapons require mastery in their own class.</li>
+        </ul>
+        ${uniqueLadder ? `<h2>Charter unique weapons</h2><p>You never fight a boss with the weapon it grants. The blade lands on turn-in; you take it into the next fight.</p>${uniqueLadder}` : ""}
+        ${setTable ? `<h2>Armour sets</h2><p>Totals are helm + chest + boots (and any other pieces in the set). Naked Heroes start around 15 armour.</p>${setTable}` : ""}
+        <h2>Every piece</h2>
+        <p class="muted">Generated from the game files, so stats and sources match the live build. Click any item for the full source list.</p>
+        ${sections}
+      </article>
+    </main>`,
+  });
+}
+
+function questCard(q) {
+  const bits = [];
+  if (q.styleWeapons.length) bits.push("Unique weapon");
+  if (q.masteryXp) bits.push(`${q.masteryXp.toLocaleString()} mastery XP`);
+  else if (q.xp) bits.push(`${q.xp} XP`);
+  if (q.givers.length) bits.push(q.givers.map((g) => g.name).join(", "));
+  return `<a class="item-card" href="${questHref(q)}"><span><span class="name">${esc(q.name)}</span><span class="kind">${esc(bits.join(" ?? ") || "Quest")}</span></span></a>`;
+}
+
+function questListHtml(list) {
+  return `<div class="item-grid">${list.map(questCard).join("")}</div>`;
+}
+
+function questPageHtml(q, items, creatures, npcs) {
+  const stats = [
+    q.givers.length ? ["Offered by", q.givers.map((g) => `<a href="/wiki/npcs/${g.slug}/">${esc(g.name)}</a>`).join(", ")] : null,
+    q.campaignMeta ? ["Campaign", `<a href="${campaignHref(q.campaign)}">${esc(q.campaignMeta.name)}</a>`] : null,
+    q.minLevel ? ["Requires level", String(q.minLevel)] : null,
+    q.minSkill ? ["Requires skill", esc(skillLabel(q.minSkill, q.minSkillLevel))] : null,
+    q.prereqs.length
+      ? [
+          q.requiresAny ? "Requires any of" : "Requires",
+          q.prereqs.map((p) => `<a href="${questHref(p)}">${esc(p.name)}</a>`).join(", "),
+        ]
+      : null,
+    q.masteryXp ? ["Mastery XP", q.masteryXp.toLocaleString()] : null,
+    q.xp ? ["Adventure XP", String(q.xp)] : null,
+    q.gold ? ["Gold", String(q.gold)] : null,
+    q.title ? ["Title", esc(q.title)] : null,
+    q.wardstone ? ["Wardstone", esc(q.wardstone.replace(/_/g, " "))] : null,
+    q.autoComplete ? ["Turn-in", "Completes when the last objective is met"] : null,
+  ].filter(Boolean);
+
+  const objHead = q.completionAny ? "Complete any one" : "Objectives";
+  const objectives = q.objectives.length
+    ? `<h2>${objHead}</h2><ul>${q.objectives.map((o) => `<li>${describeObjective(o, items, creatures, npcs)}</li>`).join("")}</ul>`
+    : "";
+
+  const rewardLis = [];
+  if (q.styleWeapons.length) {
+    rewardLis.push(
+      `<li><strong>One unique of your equipped style:</strong> ${q.styleWeapons.map((p) => itemHrefLabel(items, p)).join(", ")}</li>`
+    );
+  }
+  for (const r of q.rewardItems) {
+    rewardLis.push(`<li>${itemHrefLabel(items, r.itemPath)}${r.amount > 1 ? ` ??${r.amount}` : ""}</li>`);
+  }
+  if (q.grantOnAccept) {
+    rewardLis.push(`<li>${itemHrefLabel(items, q.grantOnAccept)} <span class="muted">(on accept)</span></li>`);
+  }
+  const rewards = rewardLis.length ? `<h2>Rewards</h2><ul>${rewardLis.join("")}</ul>` : "";
+
+  const next = q.unlocks.length
+    ? `<h2>Unlocks</h2><ul>${q.unlocks
+        .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name))
+        .map((n) => `<li><a href="${questHref(n)}">${esc(n.name)}</a></li>`)
+        .join("")}</ul>`
+    : "";
+
+  return `<main class="wrap"><article class="page prose">
+          ${crumb([
+            { href: "/wiki/", label: "Wiki" },
+            { href: "/wiki/quests/", label: "Quests" },
+            ...(q.campaignMeta
+              ? [{ href: campaignHref(q.campaign), label: q.campaignMeta.name }]
+              : []),
+            { label: q.name },
+          ])}
+          <h1 class="section-title">${esc(q.name)}</h1>
+          ${q.styleWeapons.length ? `<span class="tag">Unique weapon</span>` : ""}
+          ${q.description ? `<p>${esc(q.description)}</p>` : ""}
+          ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${v}</span></div>`).join("")}</div>` : ""}
+          ${objectives}
+          ${rewards}
+          ${next}
+        </article></main>`;
+}
+
+function campaignPageHtml(id, quests, items) {
+  const meta = CAMPAIGN[id];
+  const list = quests
+    .filter((q) => q.campaign === id)
+    .sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+  const climaxes = list.filter((q) => q.styleWeapons.length);
+  return shell({
+    title: `${meta.name} ??? Arkenelle Wiki`,
+    active: "wiki",
+    body: `<main class="wrap">
+      ${crumb([
+        { href: "/wiki/", label: "Wiki" },
+        { href: "/wiki/quests/", label: "Quests" },
+        { label: meta.name },
+      ])}
+      <article class="page prose">
+        <h1 class="section-title">${esc(meta.name)}</h1>
+        <p>${esc(meta.blurb)}</p>
+        ${
+          climaxes.length
+            ? `<h2>Unique weapons</h2><ul>${climaxes
+                .map(
+                  (q) =>
+                    `<li><a href="${questHref(q)}">${esc(q.name)}</a> ??? ${q.styleWeapons
+                      .map((p) => itemHrefLabel(items, p))
+                      .join(", ")}</li>`
+                )
+                .join("")}</ul>`
+            : ""
+        }
+        <h2>In order</h2>
+        ${questListHtml(list)}
+      </article>
+    </main>`,
+  });
+}
+
+function listPage(title, intro, cardsHtml, active) {
+  return shell({
+    title: `${title} ??? Arkenelle Wiki`,
+    active,
+    body: `<main class="wrap">
+      ${crumb([{ href: "/wiki/", label: "Wiki" }, { label: title }])}
+      <h1 class="section-title">${esc(title)}</h1>
+      <p class="muted">${esc(intro)}</p>
+      <div class="item-grid">${cardsHtml}</div>
+    </main>`,
+  });

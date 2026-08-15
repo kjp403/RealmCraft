@@ -1,0 +1,91 @@
+function collectNpcs() {
+  const dir = path.join(ROOT, "source/common/gameplay/characters/npc/npcs");
+  const used = new Set();
+  const npcs = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    const slug0 = basenameSlug(file);
+    if (SKIP_NPCS.has(slug0)) continue;
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "NPCResource") continue;
+    const name = str(doc.resource.npc_name);
+    if (!name) continue;
+    const offers = new Set();
+    for (const rec of Object.values(doc.ext)) {
+      const p = String(rec.path || "");
+      if (p.endsWith("shop_interaction.gd")) offers.add("Shop");
+      if (p.endsWith("quest_interaction.gd")) offers.add("Quests");
+      if (p.endsWith("dialogue_interaction.gd")) offers.add("Talk");
+      if (p.endsWith("slayer_interaction.gd")) offers.add("Slayer");
+      if (p.endsWith("dungeon_interaction.gd")) offers.add("Dungeon");
+      if (p.endsWith("wardrobe_interaction.gd")) offers.add("Wardrobe");
+      if (p.endsWith("name_change_interaction.gd")) offers.add("Name change");
+      if (p.endsWith("attribute_reset_interaction.gd")) offers.add("Attribute reset");
+    }
+    const questKeys = [];
+    for (const sub of Object.values(doc.sub)) {
+      for (const ref of asArray(sub.props?.quests)) {
+        const qPath = resolveExt(doc, ref);
+        if (qPath) questKeys.push(fileKey(qPath));
+      }
+    }
+    npcs.push({
+      slug: uniqueSlug(slug0, used),
+      name,
+      greeting: str(doc.resource.greeting),
+      offers: [...offers],
+      questKeys: [...new Set(questKeys)],
+      quests: [],
+      file,
+    });
+  }
+  npcs.sort((a, b) => a.name.localeCompare(b.name));
+  return npcs;
+}
+
+function collectCreatures() {
+  const dir = path.join(ROOT, "source/common/gameplay/characters/npc/types");
+  const used = new Set();
+  const rows = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    const slug0 = basenameSlug(file);
+    if (SKIP_ENEMIES.has(slug0)) continue;
+    let doc;
+    try {
+      doc = parseTres(read(file));
+    } catch {
+      continue;
+    }
+    if (doc.header.script_class && doc.header.script_class !== "EnemyTypeResource") continue;
+    const name = str(doc.resource.display_name) || str(doc.resource.enemy_type) || slug0;
+    rows.push({
+      slug: uniqueSlug(str(doc.resource.enemy_type) || slug0, used),
+      name,
+      type: str(doc.resource.enemy_type) || slug0,
+      boss: Boolean(doc.resource.is_boss),
+      level: num(doc.resource.combat_level),
+      hp: num(doc.resource.max_health),
+      damage: num(doc.resource.attack_damage),
+      armor: num(doc.resource.armor),
+      mr: num(doc.resource.mr),
+      xp: num(doc.resource.xp_reward),
+      loot: dropsFrom(doc, doc.resource.loot),
+      file,
+    });
+  }
+  rows.sort((a, b) => Number(b.boss) - Number(a.boss) || a.name.localeCompare(b.name));
+  return rows;
+}
+
+function collectZones() {
+  const dir = path.join(ROOT, "source/common/gameplay/maps/instance/instance_collection");
+  const used = new Set();
+  const rows = [];
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    let doc;
+    try {
+      doc = parseTres(read(file));
