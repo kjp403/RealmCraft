@@ -1,8 +1,13 @@
 extends DataRequestHandler
-## Move a bag stack (or part of it) into the personal bank. Capacity is
-## [member PlayerResource.bank_slots]; stacking into an existing bank pile is
-## allowed when full, but opening a new stack is rejected with reason "full".
-## Currency (gold) is rejected — it stays in the currency pouch.
+## Move bag stacks of an item into the personal bank. Starts from the selected
+## bag slot, then continues draining other bag slots of the same item_id until
+## [code]amount[/code] is satisfied or the vault can't hold more — the mirror of
+## [code]bank.withdraw[/code], so Deposit All/Max sweeps every pile of an item
+## instead of only the one that was clicked.
+##
+## Capacity is [member PlayerResource.bank_slots]; stacking into an existing bank
+## pile is allowed when full, but opening a new stack is rejected with reason
+## "full". Currency (gold) is rejected — it stays in the currency pouch.
 
 
 func data_request_handler(
@@ -31,13 +36,16 @@ func data_request_handler(
 	if item != null and item.is_currency:
 		return {"ok": false, "reason": "currency"}
 
-	var amount: int = int(args.get("amount", have))
-	if amount <= 0:
-		amount = have
-	amount = mini(amount, have)
-
 	var bank: Dictionary = player.player_resource.bank
 	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, player.player_resource.bank_slots)
+
+	# Total held across every bag pile — Deposit All on a split stack (3 + 7 ore)
+	# has to mean 10, the same way Withdraw All spans every vault pile.
+	var held_total: int = Inventory.count(inventory, item_id)
+	var amount: int = int(args.get("amount", have))
+	if amount <= 0:
+		amount = held_total
+	amount = mini(amount, held_total)
 	# Fill existing stacks / free slots only — never open past capacity.
 	var fit: int = Inventory.max_fit(bank, item_id, capacity, true)
 	amount = mini(amount, fit)
@@ -50,14 +58,34 @@ func data_request_handler(
 			"bank_slots": capacity,
 		}
 
-	var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
-	if removed <= 0:
+	var remaining: int = amount
+	var total_removed: int = 0
+	# Prefer the selected slot first, then any other pile of the same item.
+	var order: Array[int] = [slot_uid]
+	for other_uid: Variant in inventory.keys():
+		var ouid: int = int(other_uid)
+		if ouid == slot_uid:
+			continue
+		if int(inventory[ouid].get("id", 0)) == item_id:
+			order.append(ouid)
+	for uid: int in order:
+		if remaining <= 0:
+			break
+		if not inventory.has(uid):
+			continue
+		var removed: int = Inventory.remove_from_slot(inventory, uid, remaining)
+		remaining -= removed
+		total_removed += removed
+
+	if total_removed <= 0:
 		return {"ok": false, "reason": "missing"}
 
-	Inventory.add_item(bank, item_id, removed, true)
+	Inventory.add_item(bank, item_id, total_removed, true)
 	instance.world_server.database.save_player(player.player_resource)
 	return {
 		"ok": true,
+		"moved": total_removed,
+		"item_id": item_id,
 		"inventory": player.player_resource.inventory,
 		"bank": player.player_resource.bank,
 		"bank_slots": capacity,

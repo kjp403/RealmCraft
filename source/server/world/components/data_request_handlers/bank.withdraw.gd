@@ -79,6 +79,8 @@ func data_request_handler(
 	instance.world_server.database.save_player(player.player_resource)
 	return {
 		"ok": true,
+		"moved": total_removed,
+		"item_id": item_id,
 		"inventory": player.player_resource.inventory,
 		"bank": player.player_resource.bank,
 	}
