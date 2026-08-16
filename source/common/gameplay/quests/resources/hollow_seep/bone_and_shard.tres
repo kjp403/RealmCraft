@@ -35,10 +35,10 @@ amount = 8
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Bone and Shard"
-description = "The Bonecarver will match the shard to Hollow-scarred bone. Kill six bonepickers in DimWood; one carries a marked bone. A fairy weapon of your discipline is the next blade after poison."
+description = "The Bonecarver will match the shard to Hollow-scarred bone. Kill six bonepickers in the Mining Cave — the portal is in Goblin Woodland. One carries a marked bone. A fairy weapon of your discipline is the next blade after poison."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_bonepickers"), SubResource("Obj_collect_bone")])
 min_level = 20
-unlock_message = "[Bonecarver] The shard is a machine-heart's chip. Bring me bone that wears the same vein. Bonepickers keep such things."
+unlock_message = "[Bonecarver] The shard is a machine-heart's chip. Bring me bone that wears the same vein. Bonepickers pick the old mine, not these trees. Portal off Goblin Woodland."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 280
 reward_mastery_xp = 50000

@@ -19,7 +19,6 @@ objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_rook")])
 auto_complete = true
 unlock_message = "[Lira Voss] Rook. The bandits took him toward their camp. Find him. I will be at the cave mouth."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
-requires_flag = &"lira_freed"
 reward_xp = 90
 reward_mastery_xp = 6000
 reward_gold = 400

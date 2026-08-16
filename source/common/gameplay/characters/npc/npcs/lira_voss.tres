@@ -10,10 +10,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/someone_still_stands.tres" id="8_q2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/cut_the_heart.tres" id="9_q3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/unrooted.tres" id="10_q4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres" id="11_q5"]
 
 [sub_resource type="Resource" id="QuestInteraction_lira"]
 script = ExtResource("3_quest")
-quests = Array[ExtResource("4_questres")]([ExtResource("7_q1"), ExtResource("8_q2"), ExtResource("9_q3"), ExtResource("10_q4")])
+quests = Array[ExtResource("4_questres")]([ExtResource("7_q1"), ExtResource("8_q2"), ExtResource("9_q3"), ExtResource("10_q4"), ExtResource("11_q5")])
 
 [sub_resource type="Resource" id="Dialogue_roots"]
 script = ExtResource("2_dialogue")
