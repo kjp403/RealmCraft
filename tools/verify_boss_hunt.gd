@@ -1,7 +1,12 @@
 @tool
-extends SceneTree
+extends Node
 ## Headless gate for the Boss Hunt feature. Run with:
-##   godot --headless --path . -s tools/verify_boss_hunt.gd
+##   godot --headless --path . tools/verify_boss_hunt.tscn
+##
+## SCENE mode, not `-s`: the catalog scan loads enemy types, which pull in the
+## weapon scripts, which reference the Client / ClientState autoloads. A `-s`
+## script runs with no autoloads registered, so the whole scan dies on
+## "Identifier not found: Client" before a single check reports.
 ## Prints VERIFY_PASS only when every piece loads and agrees:
 ##   - the contract catalog scans, every target resolves an enemy type,
 ##   - the arena scene instantiates with a Map root, a ReplicatedPropsContainer,
@@ -22,7 +27,7 @@ const GUILD_HALL: String = "res://source/common/gameplay/maps/maps/guild_house/i
 var _failures: PackedStringArray = PackedStringArray()
 
 
-func _init() -> void:
+func _ready() -> void:
 	_check_catalog()
 	_check_arena_scene()
 	_check_arena_resource()
@@ -36,7 +41,7 @@ func _init() -> void:
 		for line: String in _failures:
 			printerr("FAIL: %s" % line)
 		printerr("VERIFY_FAIL (%d)" % _failures.size())
-	quit(0 if _failures.is_empty() else 1)
+	get_tree().quit(0 if _failures.is_empty() else 1)
 
 
 func _fail(message: String) -> void:
