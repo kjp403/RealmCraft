@@ -69,6 +69,7 @@ func save_player(player: PlayerResource) -> bool:
 		"blocked": player.slayer_blocked_tasks,
 	})
 	var pending_chest_loot_json: String = JSON.stringify(player.pending_chest_loot)
+	var hunt_chest_json: String = JSON.stringify(player.hunt_chest)
 	var flags_out: Dictionary = {}
 	for flag_key: Variant in player.character_flags:
 		if player.character_flags[flag_key]:
@@ -81,9 +82,9 @@ func save_player(player: PlayerResource) -> bool:
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
-		+ "attributes_json, inventory_json, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, character_flags_json, "
+		+ "attributes_json, inventory_json, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -119,6 +120,7 @@ func save_player(player: PlayerResource) -> bool:
 			wardstones_json,
 			slayer_json,
 			pending_chest_loot_json,
+			hunt_chest_json,
 			character_flags_json,
 
 			player.active_guild_id,
@@ -174,6 +176,7 @@ func create_player_character(account_name: String, character_data: Dictionary) -
 	player.inventory = {}
 	player.bank = {}
 	player.pending_chest_loot = []
+	player.hunt_chest = []
 	_grant_starting_kit(player)
 	_grant_starting_quest(player)
 	# Starting attribute points so a new character has something to spend.
@@ -499,6 +502,9 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.inventory = Inventory.normalize(JSON.parse_string(str(row.get("inventory_json", "{}"))) as Dictionary)
 	player.bank = Inventory.normalize(JSON.parse_string(str(row.get("bank_json", "{}"))) as Dictionary)
 	player.bank_slots = maxi(BankInteraction.STARTING_SLOTS, int(row.get("bank_slots", BankInteraction.STARTING_SLOTS)))
+	player.hunt_chest = PendingChestLoot.normalize(
+		JSON.parse_string(str(row.get("hunt_chest_json", "[]")))
+	)
 	player.pending_chest_loot = PendingChestLoot.normalize(
 		JSON.parse_string(str(row.get("pending_chest_loot_json", "[]")))
 	)

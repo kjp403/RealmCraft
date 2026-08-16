@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BossHuntTarget" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_script")
+slug = &"sand_king"
+display_name = "Ankhemet, the Sand King"
+description = "The Sunken Tombs' crowned dead. Long fight, heavy armour, and a slam that will end a careless solo run outright."
+enemy_type = ExtResource("2_enemy")
+cost = 30000
+recommended_level = 28
+health_mult = 1.0
+health_per_extra_player = 0.6
+damage_mult = 1.0
+slam_damage = 0.0
+respawn_delay_s = 14.0
+xp_mult = 0.5

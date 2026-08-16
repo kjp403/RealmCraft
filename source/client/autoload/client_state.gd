@@ -297,18 +297,25 @@ func _on_combat_reward(data: Dictionary) -> void:
 	var title: String = "Defeated %s" % _readable_enemy_name(enemy_type) if not enemy_type.is_empty() else "Reward"
 
 	# Loot: inventory kills use the compact ICON feed; ground drops just name
-	# what landed so players know to click-pick it up.
+	# what landed so players know to click-pick it up. Boss Hunt kills bank
+	# straight into the Hunt Chest, so they say so — otherwise a farm session
+	# reads as "went to my bag" and the player never goes to collect.
 	var lines: PackedStringArray = PackedStringArray()
 	var ground_loot: bool = bool(data.get("ground", false))
+	var chest_loot: bool = bool(data.get("hunt_chest", false))
 	for entry: Dictionary in data.get("loot", []):
 		var loot_id: int = int(entry.get("id", 0))
 		var loot_amount: int = int(entry.get("amount", 1))
 		var loot_name: String = str(entry.get("name", "item"))
+		var stack_text: String = "%s ×%d" % [loot_name, loot_amount] if loot_amount > 1 else loot_name
 		if ground_loot:
-			if loot_amount > 1:
-				lines.append("Dropped %s ×%d" % [loot_name, loot_amount])
+			lines.append("Dropped %s" % stack_text)
+		elif chest_loot:
+			# banked=false means the chest hit its stack cap and refused a new id.
+			if entry.get("banked", true):
+				LootFeed.add_item(loot_id, loot_amount, loot_name)
 			else:
-				lines.append("Dropped %s" % loot_name)
+				lines.append("Hunt Chest full — lost %s" % stack_text)
 		else:
 			LootFeed.add_item(loot_id, loot_amount, loot_name)
 	# Character level-up ceremony (fireworks + jingle + banner) rides the

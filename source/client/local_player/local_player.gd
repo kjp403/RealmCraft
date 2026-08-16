@@ -200,6 +200,26 @@ func _ready() -> void:
 			str(payload.get("dungeon", "The dungeon")),
 			"Clear each room. Defeat the boss to escape.",
 			{"delay": 0.6}))
+	# Boss Hunt entered — a center banner naming the target and the clock. The
+	# countdown itself lives in BossHuntHud; this is the "doors just locked" beat.
+	Client.subscribe(&"boss_hunt.entered", func(payload: Dictionary) -> void:
+		Announcer.announce(
+			str(payload.get("boss", "The hunt")),
+			"%d minutes. It respawns until the clock runs out." % int(payload.get("minutes", 30)),
+			{"delay": 0.6}))
+	# Contract expired — what you walked away with, then the server sends the
+	# party back to the Guild Hall a few seconds later.
+	Client.subscribe(&"boss_hunt.complete", func(payload: Dictionary) -> void:
+		var kills: int = int(payload.get("kills", 0))
+		Announcer.announce(
+			"Contract complete",
+			"%d × %s. Loot is in your Hunt Chest." % [kills, str(payload.get("boss", "boss"))],
+			{}))
+	# Countdown warnings (10 / 5 / 1 minutes left) and the early-leave notice.
+	Client.subscribe(&"boss_hunt.warn", func(payload: Dictionary) -> void:
+		Toaster.toast(str(payload.get("message", ""))))
+	Client.subscribe(&"boss_hunt.left", func(_payload: Dictionary) -> void:
+		Toaster.toast("Left the hunt. Your chest keeps what you earned."))
 	# Boss enrage (dungeon phase 2): a red center banner + camera shake so the
 	# escalation reads — see BossController._announce_enrage.
 	Client.subscribe(&"boss.enrage", func(payload: Dictionary) -> void:

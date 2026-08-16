@@ -146,6 +146,8 @@ func _ready() -> void:
 
 	# Dungeon run HUD (live clock + revive pool) — self-contained; shows itself on dungeon.hud pushes.
 	add_child(DungeonHud.new())
+	# Boss Hunt HUD (contract countdown + kill tally) — same deal on boss_hunt.hud.
+	add_child(BossHuntHud.new())
 
 	# Dock icons must never take keyboard focus — Space is the attack bind, and Godot's default
 	# Button FOCUS_ALL would let ui_accept / focused-button activation toggle inventory on Space.

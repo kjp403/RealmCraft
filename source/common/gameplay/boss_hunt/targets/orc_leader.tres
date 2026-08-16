@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BossHuntTarget" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/orc_leader.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_script")
+slug = &"orc_leader"
+display_name = "Orc Leader"
+description = "A warband captain with a slam that closes distance faster than it looks. Punishes a party that spreads thin."
+enemy_type = ExtResource("2_enemy")
+cost = 15000
+recommended_level = 22
+health_mult = 1.0
+health_per_extra_player = 0.6
+damage_mult = 1.0
+slam_damage = 0.0
+respawn_delay_s = 10.0
+xp_mult = 0.5
