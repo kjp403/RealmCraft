@@ -357,15 +357,16 @@ func apply_profile(profile: Dictionary) -> void:
 	account_label.text = "@%s" % account_name if not account_name.is_empty() else ""
 	account_label.visible = not account_name.is_empty()
 
-	# Sprite + idle anim.
-	var visual_id: int = int(profile.get("vault_skin_id", 0))
-	if visual_id <= 0:
-		visual_id = int(profile.get("skin_id", 1))
+	# Sprite + idle anim. Packed vault ids are not sprite registry ids.
+	var vault_id: int = int(profile.get("vault_skin_id", 0))
+	var visual_id: int = int(profile.get("skin_id", 1))
+	if vault_id > 0 and VaultSkins.is_valid(vault_id):
+		visual_id = VaultSkins.base_skin_id(vault_id)
 	set_player_character(
 		visual_id,
 		str(profile.get("animation", "idle"))
 	)
-	VaultSkinVfx.apply_to_sprite(player_character, int(profile.get("vault_skin_id", 0)))
+	VaultSkinVfx.apply_to_sprite(player_character, vault_id)
 
 	# Bio panel. RichTextLabel so authors can BBCode if we want later.
 	var description: String = str(profile.get("description", ""))
@@ -639,6 +640,7 @@ func _title_chip(text: String) -> Button:
 		chip.add_theme_color_override("font_pressed_color", tint)
 		chip.add_theme_color_override("font_outline_color", tint.darkened(0.2))
 		chip.add_theme_constant_override("outline_size", 6 if TitleCatalog.is_vip(text) else 3)
+	TitleVfx.apply_to_button(chip, text)
 	return chip
 
 

@@ -13,6 +13,7 @@ const BADGE_Y_NUDGE := -2.0
 
 
 var _badge: TextureRect
+var _title_label: Label
 
 
 func _ready() -> void:
@@ -28,7 +29,9 @@ func _ready() -> void:
 	if parent_node is Player:
 		var player: Player = parent_node as Player
 		player.staff_role_changed.connect(_on_staff_role_changed)
+		player.display_title_changed.connect(_on_display_title_changed)
 		_apply_badge(player.staff_role)
+		_apply_title(player.display_title)
 	# Seed text if the sync already landed before this label was ready.
 	if parent_node.get("display_name") != null:
 		text = str(parent_node.get("display_name"))
@@ -50,6 +53,34 @@ func _on_display_name_changed(new_name: String) -> void:
 func _on_staff_role_changed(role: String) -> void:
 	_apply_badge(role)
 	_recenter()
+
+
+func _on_display_title_changed(title: String) -> void:
+	_apply_title(title)
+	_recenter()
+
+
+func _apply_title(title: String) -> void:
+	var shown: String = title.strip_edges()
+	if shown.is_empty():
+		if _title_label != null:
+			TitleVfx.apply_to_label(_title_label, "")
+			_title_label.visible = false
+		return
+	if _title_label == null:
+		_title_label = Label.new()
+		_title_label.name = "TitleVfxLabel"
+		_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_title_label.add_theme_font_size_override(&"font_size", 28)
+		_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_title_label.scale = scale
+		var host: Node = get_parent()
+		if host != null:
+			host.add_child(_title_label)
+	_title_label.text = "« %s »" % shown
+	_title_label.visible = true
+	TitleVfx.apply_to_label(_title_label, shown)
 
 
 func _apply_badge(role: String) -> void:
@@ -93,3 +124,10 @@ func _recenter() -> void:
 	# group_right = position.x + size.x * scale.x
 	# center at 0 → position.x = -(size.x - left_extent) * scale.x / 2
 	position.x = -(size.x - left_extent) * scale.x * 0.5
+	if _title_label != null and _title_label.visible:
+		_title_label.reset_size()
+		_title_label.scale = scale
+		_title_label.position = Vector2(
+			-_title_label.size.x * scale.x * 0.5,
+			position.y - _title_label.size.y * scale.y - 1.0
+		)

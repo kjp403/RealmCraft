@@ -1,10 +1,11 @@
 class_name VaultSkins
-## Prestige recolors of every wearable sprite. These are NOT in Horizon and are
-## NOT new `sprites` registry ids — each entry reuses a real skin_id and applies
-## a client shader (hue / tint / pulse). Staff equip them from the VFX Vault
-## Skins tab; everyone else cannot buy, browse, or keep one.
+## Prestige palette-swaps of every Horizon wardrobe skin. Packed id is
+## `style * STRIDE + skin_id` so every wardrobe body has every dye, and Wear
+## can persist which dye you picked. Faces / leather / outlines stay; armor
+## and cloth take the ramp. Staff-only Vault Skins tab. Never sold at Horizon.
 
-## style: 1 gold, 2 ember, 3 void, 4 star, 5 moon, 6 aether, 7 toxic
+const STRIDE := 10000
+
 const STYLE_GOLD := 1
 const STYLE_EMBER := 2
 const STYLE_VOID := 3
@@ -12,111 +13,200 @@ const STYLE_STAR := 4
 const STYLE_MOON := 5
 const STYLE_AETHER := 6
 const STYLE_TOXIC := 7
+const STYLE_CRIMSON := 8
+const STYLE_FROST := 9
+const STYLE_VERDANT := 10
+const STYLE_SAPPHIRE := 11
+const STYLE_ROSE := 12
+const STYLE_OBSIDIAN := 13
+const STYLE_COPPER := 14
+const STYLE_GHOST := 15
+const STYLE_AMBER := 16
+
+const STYLE_ORDER: PackedInt32Array = [
+	STYLE_GOLD, STYLE_EMBER, STYLE_VOID, STYLE_STAR,
+	STYLE_MOON, STYLE_AETHER, STYLE_TOXIC, STYLE_CRIMSON,
+	STYLE_FROST, STYLE_VERDANT, STYLE_SAPPHIRE, STYLE_ROSE,
+	STYLE_OBSIDIAN, STYLE_COPPER, STYLE_GHOST, STYLE_AMBER,
+]
 
 const STYLE_META: Dictionary = {
-	STYLE_GOLD: {"label": "Gilded", "tint": "#e8c050"},
-	STYLE_EMBER: {"label": "Ember", "tint": "#e07040"},
-	STYLE_VOID: {"label": "Void", "tint": "#8a78b0"},
-	STYLE_STAR: {"label": "Starforged", "tint": "#e8d090"},
-	STYLE_MOON: {"label": "Moonlit", "tint": "#c8d4e8"},
-	STYLE_AETHER: {"label": "Aether", "tint": "#88d0d8"},
-	STYLE_TOXIC: {"label": "Toxic", "tint": "#7ed080"},
+	STYLE_GOLD: {
+		"label": "Gilded", "tint": "#f0c84a",
+		"blurb": "Gold plate. Leather, visor, and face stay.",
+	},
+	STYLE_EMBER: {
+		"label": "Ember", "tint": "#ff6a28",
+		"blurb": "Ash and coals. Tusks and leather stay put.",
+	},
+	STYLE_VOID: {
+		"label": "Void", "tint": "#9a78ff",
+		"blurb": "Night-violet cloth. Bone and eyes don't get painted.",
+	},
+	STYLE_STAR: {
+		"label": "Starforged", "tint": "#ffe89a",
+		"blurb": "Navy in the shadows, gold in the lights.",
+	},
+	STYLE_MOON: {
+		"label": "Moonlit", "tint": "#c8dcff",
+		"blurb": "Night-blue cloth. Collar and eyes keep their color.",
+	},
+	STYLE_AETHER: {
+		"label": "Aether", "tint": "#5ce8f0",
+		"blurb": "Teal robes. Beard and face stay readable.",
+	},
+	STYLE_TOXIC: {
+		"label": "Toxic", "tint": "#6cff6a",
+		"blurb": "Sick-green. Cloth and bone keep their own palette.",
+	},
+	STYLE_CRIMSON: {
+		"label": "Crimson", "tint": "#e03040",
+		"blurb": "Blood-red cloth. Not lava — a banner dye.",
+	},
+	STYLE_FROST: {
+		"label": "Frost", "tint": "#d8f4ff",
+		"blurb": "Ice-white plate. Colder and brighter than Moonlit.",
+	},
+	STYLE_VERDANT: {
+		"label": "Verdant", "tint": "#3cb86a",
+		"blurb": "Forest green cloth. Leather stays brown.",
+	},
+	STYLE_SAPPHIRE: {
+		"label": "Sapphire", "tint": "#3a78ff",
+		"blurb": "Royal blue. Saturated, not the night-grey Moonlit.",
+	},
+	STYLE_ROSE: {
+		"label": "Rose", "tint": "#ff7ab0",
+		"blurb": "Pink silk. Face and leather stay.",
+	},
+	STYLE_OBSIDIAN: {
+		"label": "Obsidian", "tint": "#6a6a78",
+		"blurb": "Near-black cloth, silver in the lights.",
+	},
+	STYLE_COPPER: {
+		"label": "Copper", "tint": "#d07838",
+		"blurb": "Warm copper plate. Distinct from Gilded gold.",
+	},
+	STYLE_GHOST: {
+		"label": "Ghost", "tint": "#d0d4dc",
+		"blurb": "Washed pale grey. Eyes and outlines stay.",
+	},
+	STYLE_AMBER: {
+		"label": "Amber", "tint": "#ffb040",
+		"blurb": "Sunset orange. Warmer than Copper, not Ember coals.",
+	},
 }
 
-const GROUP_WARDROBE := &"wardrobe"
-const GROUP_ARCHIVES := &"archives"
+
+static func pack(skin_id: int, style: int) -> int:
+	if skin_id <= 0 or not _is_style(style):
+		return 0
+	return style * STRIDE + skin_id
 
 
-static func is_valid(skin_id: int) -> bool:
-	return skin_id > 0 and PlayerSkins.is_valid(skin_id)
+static func base_skin_id(vault_id: int) -> int:
+	if vault_id <= 0:
+		return 0
+	if vault_id < STRIDE:
+		return vault_id
+	return vault_id % STRIDE
 
 
-static func group_of(skin_id: int) -> StringName:
-	var slug: String = _slug(skin_id)
-	if slug.begins_with("trpg_"):
-		return GROUP_ARCHIVES
-	return GROUP_WARDROBE
-
-
-static func style_of(skin_id: int) -> int:
-	var slug: String = _slug(skin_id)
-	if slug.begins_with("royal") or slug == "knight" or slug.begins_with("scholar"):
+static func style_of(vault_id: int) -> int:
+	if vault_id <= 0:
+		return 0
+	if vault_id < STRIDE:
 		return STYLE_GOLD
-	if slug.begins_with("stone"):
-		return STYLE_EMBER if slug.contains("lava") else STYLE_STAR
-	if slug.begins_with("fungus"):
-		return STYLE_TOXIC
-	if slug.begins_with("skeleton") or slug.begins_with("rat"):
-		return STYLE_VOID
-	if slug.begins_with("orc") or slug == "goblin":
-		return STYLE_EMBER
-	if slug.begins_with("bandit") or slug == "rogue":
-		return STYLE_MOON
-	if slug == "wizard":
-		return STYLE_AETHER
-	if slug.contains("demon") or slug.contains("blood") or slug.contains("fire"):
-		return STYLE_EMBER
-	if slug.contains("were") or slug.contains("bat") or slug.contains("night"):
-		return STYLE_MOON
-	if slug.contains("slime") or slug.contains("ooze") or slug.contains("poison"):
-		return STYLE_TOXIC
-	if slug.contains("wizard") or slug.contains("mage") or slug.contains("priest"):
-		return STYLE_AETHER
-	if slug.contains("skeleton") or slug.contains("void") or slug.contains("necro"):
-		return STYLE_VOID
-	if slug.contains("knight") or slug.contains("gold"):
-		return STYLE_GOLD
-	return (absi(skin_id) % 7) + 1
+	var style: int = vault_id / STRIDE
+	return style if _is_style(style) else 0
 
 
-static func tint_hex(skin_id: int) -> String:
-	var meta: Dictionary = STYLE_META.get(style_of(skin_id), {})
-	return str(meta.get("tint", "#e8c050"))
+static func is_valid(vault_id: int) -> bool:
+	if vault_id <= 0:
+		return false
+	var skin_id: int = base_skin_id(vault_id)
+	var style: int = style_of(vault_id)
+	if not PlayerSkins.is_horizon_listed(skin_id):
+		return false
+	if vault_id < STRIDE:
+		return true
+	return _is_style(style)
 
 
-static func display_name(skin_id: int) -> String:
-	var meta: Dictionary = STYLE_META.get(style_of(skin_id), {})
+static func tint_hex(vault_id: int) -> String:
+	var meta: Dictionary = STYLE_META.get(style_of(vault_id), {})
+	return str(meta.get("tint", "#f0c84a"))
+
+
+static func display_name(vault_id: int) -> String:
+	var meta: Dictionary = STYLE_META.get(style_of(vault_id), {})
 	var palette: String = str(meta.get("label", "Prestige"))
-	var base: String = PlayerSkins.display_name(skin_id)
+	var base: String = PlayerSkins.display_name(base_skin_id(vault_id))
 	if base.is_empty():
 		return palette
 	return "%s %s" % [palette, base]
 
 
-static func blurb(skin_id: int) -> String:
-	match style_of(skin_id):
-		STYLE_GOLD:
-			return "Warm gold wash and a slow shine through the pixels."
-		STYLE_EMBER:
-			return "Copper-ember recolor. Looks like it walked out of a forge."
-		STYLE_VOID:
-			return "Violet shadow. The silhouette reads first, then the color."
-		STYLE_STAR:
-			return "Pale gold sparkle across the sprite — still the same cut."
-		STYLE_MOON:
-			return "Cool silver. Quiet on purpose."
-		STYLE_AETHER:
-			return "Teal arcane shift. Not a gem-supporter clone."
-		STYLE_TOXIC:
-			return "Sickly green pulse. Fungus and venom wear it well."
-		_:
-			return "Vault-only prestige recolor. Horizon cannot sell this."
+static func keeps_flesh(vault_id: int) -> bool:
+	var slug: String = _slug(base_skin_id(vault_id))
+	if slug.begins_with("goblin") or slug.begins_with("orc"):
+		return false
+	if slug.begins_with("skeleton") or slug.begins_with("rat"):
+		return false
+	if slug.begins_with("fungus") or slug.begins_with("stone"):
+		return false
+	return PlayerSkins.is_horizon_listed(base_skin_id(vault_id))
 
 
-static func roster(group: StringName = &"") -> Array:
+static func blurb(vault_id: int) -> String:
+	var meta: Dictionary = STYLE_META.get(style_of(vault_id), {})
+	return str(meta.get("blurb", "Vault palette-swap."))
+
+
+static func dye_roster() -> Array:
+	var out: Array = []
+	for style: int in STYLE_ORDER:
+		var meta: Dictionary = STYLE_META[style]
+		out.append({
+			"style": style,
+			"label": str(meta.get("label", "")),
+			"tint": str(meta.get("tint", "")),
+			"blurb": str(meta.get("blurb", "")),
+		})
+	return out
+
+
+static func base_roster() -> Array:
 	var out: Array = []
 	for id: int in PlayerSkins.ids():
-		if group != &"" and group_of(id) != group:
+		if not PlayerSkins.is_horizon_listed(id):
 			continue
 		out.append({
 			"id": id,
-			"name": display_name(id),
-			"style": style_of(id),
-			"tint": tint_hex(id),
-			"group": String(group_of(id)),
-			"blurb": blurb(id),
+			"name": PlayerSkins.display_name(id),
 		})
 	return out
+
+
+static func roster(_group: StringName = &"") -> Array:
+	var out: Array = []
+	for base: Dictionary in base_roster():
+		var skin_id: int = int(base.get("id", 0))
+		for style: int in STYLE_ORDER:
+			var vault_id: int = pack(skin_id, style)
+			out.append({
+				"id": vault_id,
+				"skin_id": skin_id,
+				"style": style,
+				"name": display_name(vault_id),
+				"tint": tint_hex(vault_id),
+				"blurb": blurb(vault_id),
+			})
+	return out
+
+
+static func _is_style(style: int) -> bool:
+	return STYLE_META.has(style)
 
 
 static func _slug(skin_id: int) -> String:

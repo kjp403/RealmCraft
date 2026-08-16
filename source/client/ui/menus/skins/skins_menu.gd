@@ -1,28 +1,28 @@
 extends MenuShell
-## Staff Skins shelf — prestige recolor + body-sprite VFX for every wearable
-## sprite. Opened as the Skins tab of the Vault menu. Horizon cannot sell these.
+## Staff Skins shelf — every wardrobe body × every vault dye. Opened as the
+## Skins tab of the Vault. Horizon cannot sell these.
 
 
 const PREVIEW_BOX: float = 200.0
 const PREVIEW_SCALE: float = 3.0
 const ANIMS: Array[StringName] = [&"idle", &"run", &"death"]
 
-var _wardrobe: Array = []
-var _archives: Array = []
-var _roster: Array = []
-var _idx: int = 0
+var _bases: Array = []
+var _dyes: Array = []
+var _base_idx: int = 0
+var _dye_idx: int = 0
 var _equipped: int = 0
 var _allowed: bool = false
-var _group: StringName = VaultSkins.GROUP_WARDROBE
 var _anim: StringName = &"idle"
 
 var _preview: AnimatedSprite2D
-var _name_label: Label
+var _skin_label: Label
+var _dye_label: Label
+var _dye_swatch: ColorRect
 var _blurb_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
-var _group_buttons: Dictionary = {}
 var _anim_buttons: Dictionary = {}
 
 
@@ -51,19 +51,12 @@ func _build_layout() -> void:
 	_host().add_child(col)
 
 	var hint: Label = Label.new()
-	hint.text = "Recolor + sprite VFX. Not in Horizon. Wear one, leave the Vault."
+	hint.text = "Pick a wardrobe skin, then a dye. Faces, leather, and outlines stay."
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.modulate = Color(1, 1, 1, 0.65)
 	hint.add_theme_font_size_override(&"font_size", 12)
 	col.add_child(hint)
-
-	var groups: HBoxContainer = HBoxContainer.new()
-	groups.alignment = BoxContainer.ALIGNMENT_CENTER
-	groups.add_theme_constant_override(&"separation", 4)
-	col.add_child(groups)
-	_add_group_tab(groups, VaultSkins.GROUP_WARDROBE, "Wardrobe")
-	_add_group_tab(groups, VaultSkins.GROUP_ARCHIVES, "Archives")
 
 	var preview_center: CenterContainer = CenterContainer.new()
 	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -79,31 +72,16 @@ func _build_layout() -> void:
 	_preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	preview_box.add_child(_preview)
 
-	var nav: HBoxContainer = HBoxContainer.new()
-	nav.alignment = BoxContainer.ALIGNMENT_CENTER
-	nav.add_theme_constant_override(&"separation", 10)
-	col.add_child(nav)
+	col.add_child(_nav_row("Skin", _cycle_base, "_skin_label"))
+	_skin_label = col.get_child(-1).get_child(1) as Label
 
-	var prev: Button = Button.new()
-	prev.text = "<"
-	prev.custom_minimum_size = Vector2(44, 44)
-	prev.add_theme_font_size_override(&"font_size", 22)
-	prev.pressed.connect(_cycle.bind(-1))
-	nav.add_child(prev)
-
-	_name_label = Label.new()
-	_name_label.custom_minimum_size = Vector2(220, 44)
-	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_name_label.add_theme_font_size_override(&"font_size", 16)
-	nav.add_child(_name_label)
-
-	var next: Button = Button.new()
-	next.text = ">"
-	next.custom_minimum_size = Vector2(44, 44)
-	next.add_theme_font_size_override(&"font_size", 22)
-	next.pressed.connect(_cycle.bind(1))
-	nav.add_child(next)
+	var dye_row: HBoxContainer = _nav_row("Dye", _cycle_dye, "_dye_label")
+	_dye_swatch = ColorRect.new()
+	_dye_swatch.custom_minimum_size = Vector2(18, 18)
+	_dye_swatch.color = Color(0.94, 0.78, 0.29)
+	dye_row.add_child(_dye_swatch)
+	col.add_child(dye_row)
+	_dye_label = dye_row.get_child(1) as Label
 
 	var anim_row: HBoxContainer = HBoxContainer.new()
 	anim_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -145,16 +123,30 @@ func _build_layout() -> void:
 	col.add_child(_clear_button)
 
 
-func _add_group_tab(row: HBoxContainer, group: StringName, label: String) -> void:
-	var b: Button = Button.new()
-	b.text = label
-	b.toggle_mode = true
-	b.custom_minimum_size = Vector2(0, 30)
-	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.button_pressed = (group == _group)
-	b.pressed.connect(_select_group.bind(group))
-	row.add_child(b)
-	_group_buttons[group] = b
+func _nav_row(kind: String, cycler: Callable, _unused: String) -> HBoxContainer:
+	var nav: HBoxContainer = HBoxContainer.new()
+	nav.alignment = BoxContainer.ALIGNMENT_CENTER
+	nav.add_theme_constant_override(&"separation", 10)
+	var prev: Button = Button.new()
+	prev.text = "<"
+	prev.custom_minimum_size = Vector2(44, 44)
+	prev.add_theme_font_size_override(&"font_size", 22)
+	prev.pressed.connect(cycler.bind(-1))
+	nav.add_child(prev)
+	var label: Label = Label.new()
+	label.custom_minimum_size = Vector2(220, 44)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override(&"font_size", 16)
+	label.set_meta(&"kind", kind)
+	nav.add_child(label)
+	var next: Button = Button.new()
+	next.text = ">"
+	next.custom_minimum_size = Vector2(44, 44)
+	next.add_theme_font_size_override(&"font_size", 22)
+	next.pressed.connect(cycler.bind(1))
+	nav.add_child(next)
+	return nav
 
 
 func _on_shown() -> void:
@@ -166,41 +158,74 @@ func _on_shown() -> void:
 func _on_state(data: Dictionary) -> void:
 	_allowed = bool(data.get("allowed", false))
 	_equipped = int(data.get("equipped", 0))
-	_wardrobe = data.get("skins", [])
-	_archives = data.get("archives", [])
-	if _equipped > 0 and VaultSkins.group_of(_equipped) == VaultSkins.GROUP_ARCHIVES:
-		_group = VaultSkins.GROUP_ARCHIVES
-	_apply_group()
-
-
-func _select_group(group: StringName) -> void:
-	_group = group
-	_apply_group()
-
-
-func _apply_group() -> void:
-	for key: StringName in _group_buttons:
-		(_group_buttons[key] as Button).button_pressed = (key == _group)
-	_roster = _archives if _group == VaultSkins.GROUP_ARCHIVES else _wardrobe
-	var found: int = -1
-	for i: int in _roster.size():
-		if int((_roster[i] as Dictionary).get("id", 0)) == _equipped:
-			found = i
-			break
-	_idx = found if found >= 0 else 0
+	_bases = data.get("bases", [])
+	_dyes = data.get("dyes", [])
+	if _bases.is_empty() or _dyes.is_empty():
+		_rebuild_from_flat(data.get("skins", []))
+	_select_equipped()
 	_update_preview()
 
 
-func _current() -> Dictionary:
-	if _idx < 0 or _idx >= _roster.size():
-		return {}
-	return _roster[_idx]
+func _rebuild_from_flat(skins: Array) -> void:
+	_bases = []
+	_dyes = []
+	var seen_skins: Dictionary = {}
+	var seen_dyes: Dictionary = {}
+	for row_any: Variant in skins:
+		var row: Dictionary = row_any as Dictionary
+		var skin_id: int = int(row.get("skin_id", row.get("id", 0)))
+		if skin_id >= VaultSkins.STRIDE:
+			skin_id = VaultSkins.base_skin_id(int(row.get("id", 0)))
+		if skin_id > 0 and not seen_skins.has(skin_id):
+			seen_skins[skin_id] = true
+			_bases.append({"id": skin_id, "name": PlayerSkins.display_name(skin_id)})
+		var style: int = int(row.get("style", VaultSkins.style_of(int(row.get("id", 0)))))
+		if style > 0 and not seen_dyes.has(style):
+			seen_dyes[style] = true
+			_dyes.append({
+				"style": style,
+				"label": str(row.get("name", "")).get_slice(" ", 0),
+				"tint": str(row.get("tint", "")),
+				"blurb": str(row.get("blurb", "")),
+			})
 
 
-func _cycle(delta: int) -> void:
-	if _roster.is_empty():
+func _select_equipped() -> void:
+	_base_idx = 0
+	_dye_idx = 0
+	if _equipped <= 0:
 		return
-	_idx = wrapi(_idx + delta, 0, _roster.size())
+	var skin_id: int = VaultSkins.base_skin_id(_equipped)
+	var style: int = VaultSkins.style_of(_equipped)
+	for i: int in _bases.size():
+		if int((_bases[i] as Dictionary).get("id", 0)) == skin_id:
+			_base_idx = i
+			break
+	for i: int in _dyes.size():
+		if int((_dyes[i] as Dictionary).get("style", 0)) == style:
+			_dye_idx = i
+			break
+
+
+func _packed() -> int:
+	if _bases.is_empty() or _dyes.is_empty():
+		return 0
+	var skin_id: int = int((_bases[_base_idx] as Dictionary).get("id", 0))
+	var style: int = int((_dyes[_dye_idx] as Dictionary).get("style", 0))
+	return VaultSkins.pack(skin_id, style)
+
+
+func _cycle_base(delta: int) -> void:
+	if _bases.is_empty():
+		return
+	_base_idx = wrapi(_base_idx + delta, 0, _bases.size())
+	_update_preview()
+
+
+func _cycle_dye(delta: int) -> void:
+	if _dyes.is_empty():
+		return
+	_dye_idx = wrapi(_dye_idx + delta, 0, _dyes.size())
 	_update_preview()
 
 
@@ -228,61 +253,79 @@ func _play_anim() -> void:
 
 
 func _update_preview() -> void:
-	if _roster.is_empty():
+	if _bases.is_empty() or _dyes.is_empty():
 		if _preview != null:
 			VaultSkinVfx.apply_to_sprite(_preview, 0)
-		_name_label.text = "—"
+		if _skin_label != null:
+			_skin_label.text = "—"
+		if _dye_label != null:
+			_dye_label.text = "—"
 		_blurb_label.text = ""
 		_status_label.text = "Nothing to show."
 		_action_button.disabled = true
 		_clear_button.visible = false
 		return
 	_clear_button.visible = true
-	var entry: Dictionary = _current()
-	var id: int = int(entry.get("id", 0))
-	var frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", id) as SpriteFrames
+	var vault_id: int = _packed()
+	var skin_id: int = VaultSkins.base_skin_id(vault_id)
+	var dye: Dictionary = _dyes[_dye_idx] as Dictionary
+	var frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", skin_id) as SpriteFrames
 	if _preview != null and frames != null:
 		_preview.sprite_frames = frames
-		VaultSkinVfx.apply_to_sprite(_preview, id)
+		VaultSkinVfx.apply_to_sprite(_preview, vault_id)
 		_play_anim()
-	_name_label.text = "%s  (%d/%d)" % [str(entry.get("name", "")), _idx + 1, _roster.size()]
-	_blurb_label.text = str(entry.get("blurb", ""))
-	if id == _equipped:
+	if _skin_label != null:
+		_skin_label.text = "%s  (%d/%d)" % [
+			str((_bases[_base_idx] as Dictionary).get("name", "")),
+			_base_idx + 1,
+			_bases.size(),
+		]
+	if _dye_label != null:
+		_dye_label.text = "%s  (%d/%d)" % [
+			str(dye.get("label", "")),
+			_dye_idx + 1,
+			_dyes.size(),
+		]
+	var hex: String = str(dye.get("tint", ""))
+	if _dye_swatch != null and not hex.is_empty():
+		_dye_swatch.color = Color(hex)
+	_blurb_label.text = str(dye.get("blurb", ""))
+	if vault_id == _equipped and vault_id > 0:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
-		_status_label.text = "Shown on your sprite in the live world."
+		_status_label.text = "On your sprite in the live world. Leave the Vault — it stays."
 	else:
 		_action_button.text = "Wear"
 		_action_button.disabled = not _allowed
-		_status_label.text = "Staff testing — persists when you leave the Vault."
+		_status_label.text = "Staff testing — Wear writes it to your character."
 
 
 func _on_action_pressed() -> void:
-	_equip(int(_current().get("id", 0)))
+	_equip(_packed())
 
 
 func _on_clear_pressed() -> void:
 	_equip(0)
 
 
-func _equip(skin_id: int) -> void:
+func _equip(vault_id: int) -> void:
 	if InstanceClient.current == null:
 		return
 	_action_button.disabled = true
 	Client.request_data(
 		&"vault_skins.equip",
-		_on_equipped.bind(skin_id),
-		{"skin_id": skin_id},
+		_on_equipped.bind(vault_id),
+		{"vault_skin_id": vault_id, "skin_id": vault_id},
 		String(InstanceClient.current.name)
 	)
 
 
-func _on_equipped(data: Dictionary, skin_id: int) -> void:
+func _on_equipped(data: Dictionary, vault_id: int) -> void:
 	if not data.get("ok", false):
-		_status_label.text = "Couldn't wear that."
+		_status_label.text = "Couldn't wear that (%s)." % str(data.get("reason", "error"))
 		_update_preview()
 		return
-	_equipped = int(data.get("skin_id", skin_id))
+	_equipped = int(data.get("vault_skin_id", data.get("skin_id", vault_id)))
 	var lp: Node = ClientState.local_player
 	if lp != null and is_instance_valid(lp):
 		lp.vault_skin_id = _equipped

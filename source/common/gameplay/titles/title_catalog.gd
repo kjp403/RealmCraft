@@ -136,6 +136,18 @@ static func premium_roster() -> Array:
 	return out
 
 
+## Donator titles first (the ones that must have VFX), then premium shop candidates.
+static func vault_roster() -> Array:
+	var out: Array = []
+	for slug: String in SupporterTitles.ORDER:
+		var entry: Dictionary = SupporterTitles.BY_SLUG[slug]
+		var row: Dictionary = entry.duplicate()
+		row["slug"] = slug
+		out.append(row)
+	out.append_array(premium_roster())
+	return out
+
+
 ## Supporter first, then premium. Empty = no title VFX.
 static func spec(title: String) -> Dictionary:
 	var from_supporter: Dictionary = SupporterTitles.spec(title)

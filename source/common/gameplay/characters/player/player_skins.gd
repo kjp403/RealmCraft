@@ -103,7 +103,7 @@ static func is_for_sale(skin_id: int) -> bool:
 
 
 ## True when Horizon's wardrobe should list this skin (starter or priced).
-## Prestige recolors are the same ids with a vault shader — they are NOT extra
-## roster entries, and trpg archives stay in the Vault Skins tab only.
+## Prestige recolors reuse these same ids with a vault shader — they are not
+## extra roster entries, and monster sprites are not wardrobe skins.
 static func is_horizon_listed(skin_id: int) -> bool:
 	return skin_id == starter_skin_id() or is_for_sale(skin_id)

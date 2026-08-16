@@ -17,5 +17,6 @@ static func apply_to_sprite(sprite: CanvasItem, vault_skin_id: int) -> void:
 	mat.shader = SHADER
 	mat.set_shader_parameter(&"tint", tint)
 	mat.set_shader_parameter(&"style", float(VaultSkins.style_of(vault_skin_id)))
-	mat.set_shader_parameter(&"strength", 0.55)
+	mat.set_shader_parameter(&"strength", 1.0)
+	mat.set_shader_parameter(&"keep_flesh", 1.0 if VaultSkins.keeps_flesh(vault_skin_id) else 0.0)
 	sprite.material = mat

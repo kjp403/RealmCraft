@@ -23,9 +23,8 @@ var skin_id: int:
 var cosmetic_id: int:
 	set = _set_cosmetic_id
 
-## Prestige vault recolor (a real skin_id wearing the vault shader). 0 = none,
-## which is what every character carries until staff equip one from the Vault
-## Skins tab. Synced like [member skin_id]. Never sold at Horizon.
+## Prestige vault recolor packed id (`style * 10000 + skin_id`). 0 = none.
+## Staff equip from the Vault Skins tab. Synced like [member skin_id].
 var vault_skin_id: int:
 	set = _set_vault_skin_id
 
@@ -528,15 +527,17 @@ func _set_vault_skin_id(id: int) -> void:
 	_refresh_body_visual()
 
 
-## Prestige vault skins reuse a real sprite id plus a shader. When one is on,
-## it wins over [member skin_id] so Take-off restores the Horizon look.
+## Prestige vault skins pack a wardrobe sprite + a dye. The sprite id is
+## unpacked so Take-off restores the Horizon look.
 func _refresh_body_visual() -> void:
 	# Avoid unnecessary load on server
 	if not is_inside_tree() or multiplayer.is_server():
 		return
 	if animated_sprite == null:
 		return
-	var visual_id: int = vault_skin_id if vault_skin_id > 0 else skin_id
+	var visual_id: int = skin_id
+	if vault_skin_id > 0 and VaultSkins.is_valid(vault_skin_id):
+		visual_id = VaultSkins.base_skin_id(vault_skin_id)
 	var sprite_frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", visual_id) as SpriteFrames
 	if sprite_frames:
 		animated_sprite.sprite_frames = sprite_frames

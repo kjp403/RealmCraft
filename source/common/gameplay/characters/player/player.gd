@@ -5,6 +5,7 @@ extends Character
 var player_resource: PlayerResource
 
 signal staff_role_changed(role: String)
+signal display_title_changed(title: String)
 
 ## Synced guild tag — drives the blue ally health-bar tint guildmates see on each
 ## other. Synced like display_name (set_by_path → baseline + live dirty).
@@ -20,6 +21,11 @@ var player_id: int = 0:
 ## Drives the nameplate icon + chat rank glyph.
 var staff_role: String = "":
 	set = _set_staff_role
+
+## Equipped vanity title (donator / vault). Synced so every client can paint
+## the nameplate VFX, not just the profile panel.
+var display_title: String = "":
+	set = _set_display_title
 
 var zone_flags: int = 0
 
@@ -247,6 +253,12 @@ func _set_staff_role(value: String) -> void:
 	staff_role = value
 	if not multiplayer.is_server():
 		staff_role_changed.emit(value)
+
+
+func _set_display_title(value: String) -> void:
+	display_title = value
+	if not multiplayer.is_server():
+		display_title_changed.emit(value)
 
 
 ## Client-only: color this (remote) player's HP bar — blue for a guildmate, neutral

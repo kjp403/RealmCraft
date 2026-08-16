@@ -11,8 +11,7 @@ void fragment() {
 	vec4 tex = COLOR;
 	if (tex.a < 0.04) {
 		COLOR = tex;
-		return;
-	}
+	} else {
 	float pulse_amt = mix(0.07, 0.16, vip);
 	float pulse_spd = mix(2.0, 3.2, vip);
 	float sweep_spd = mix(0.16, 0.30, vip);
@@ -56,4 +55,5 @@ void fragment() {
 	vec3 lit = tex.rgb * pulse + shine_col * band * shine_amt;
 	lit = mix(lit, glow_color.rgb, 0.06 + 0.06 * vip);
 	COLOR = vec4(lit, tex.a);
+	}
 }

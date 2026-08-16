@@ -8,16 +8,37 @@ const COLOR_EMERALD := "#5ee0a0"
 const COLOR_RUBY := "#f08a8a"
 const COLOR_CUSTOM := "#e8c56a"
 
-## slug → { name, color, vip }. Slugs are what /supporter accepts.
-## vip = stronger title-text VFX (shine + pulse). Never a character aura/halo.
+## slug → { name, color, vip, style }. Slugs are what /supporter accepts.
+## style 0 = gem shimmer, 1 = gold. vip = stronger pulse. Never a character aura.
 const BY_SLUG: Dictionary = {
-	"sapphire": {"name": "Sapphire Supporter", "color": COLOR_SAPPHIRE, "vip": false},
-	"emerald": {"name": "Emerald Supporter", "color": COLOR_EMERALD, "vip": false},
-	"ruby": {"name": "Ruby Supporter", "color": COLOR_RUBY, "vip": false},
-	"sapphire-vip": {"name": "Sapphire VIP", "color": COLOR_SAPPHIRE, "vip": true},
-	"emerald-vip": {"name": "Emerald VIP", "color": COLOR_EMERALD, "vip": true},
-	"ruby-vip": {"name": "Ruby VIP", "color": COLOR_RUBY, "vip": true},
-	"custom": {"name": "Arkenelle Supporter", "color": COLOR_CUSTOM, "vip": false},
+	"sapphire": {
+		"name": "Sapphire Supporter", "color": COLOR_SAPPHIRE, "vip": false, "style": 0,
+		"blurb": "Ice-blue gem shimmer through the letters.",
+	},
+	"emerald": {
+		"name": "Emerald Supporter", "color": COLOR_EMERALD, "vip": false, "style": 0,
+		"blurb": "Green gem pulse. Quiet, but you can see it from across the hall.",
+	},
+	"ruby": {
+		"name": "Ruby Supporter", "color": COLOR_RUBY, "vip": false, "style": 0,
+		"blurb": "Warm ruby flash on the title — not an aura.",
+	},
+	"sapphire-vip": {
+		"name": "Sapphire VIP", "color": COLOR_SAPPHIRE, "vip": true, "style": 0,
+		"blurb": "Same gem, louder. The letters actually move.",
+	},
+	"emerald-vip": {
+		"name": "Emerald VIP", "color": COLOR_EMERALD, "vip": true, "style": 0,
+		"blurb": "VIP green. Brighter pulse, thicker outline.",
+	},
+	"ruby-vip": {
+		"name": "Ruby VIP", "color": COLOR_RUBY, "vip": true, "style": 0,
+		"blurb": "VIP ruby. The shine band is hard to miss.",
+	},
+	"custom": {
+		"name": "Arkenelle Supporter", "color": COLOR_CUSTOM, "vip": false, "style": 1,
+		"blurb": "Gold-leaf title for a custom donation.",
+	},
 }
 
 const ALIASES: Dictionary = {

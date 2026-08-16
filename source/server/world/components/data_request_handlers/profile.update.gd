@@ -72,6 +72,10 @@ func data_request_handler(
 	# All validated — commit.
 	if new_title != null:
 		player.display_title = new_title
+		var pnode: Player = instance.players_by_peer_id.get(peer_id, null)
+		if pnode != null:
+			pnode.display_title = str(new_title)
+			pnode.state_synchronizer.set_by_path(^":display_title", str(new_title))
 	if new_status != null:
 		player.profile_status = new_status
 	if new_animation != null:

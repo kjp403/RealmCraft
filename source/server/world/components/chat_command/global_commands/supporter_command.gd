@@ -34,13 +34,17 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	if not already:
 		res.titles_unlocked.append(title)
 	res.display_title = title
+	var pnode: Player = server_instance.players_by_peer_id.get(target.peer_id, null)
+	if pnode != null:
+		pnode.display_title = title
+		pnode.state_synchronizer.set_by_path(^":display_title", title)
 	server_instance.world_server.database.save_player(res)
 
 	var ws: WorldServer = server_instance.world_server
 	ws.chat_service.push_system_to_player(
 		server_instance,
 		target.player_id,
-		"You were granted the title %s. It's shown on your profile." % title
+		"You were granted the title %s. It shows over your name, on your profile, and in chat." % title
 	)
 
 	var extra: String = " (already unlocked)" if already else ""
