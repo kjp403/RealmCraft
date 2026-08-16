@@ -46,21 +46,6 @@ func charge_new_instance(
 	# LEAVING — kill them so they never follow the player into the next biome.
 	Announcer.dismiss_positional()
 	pending_spawn = Vector2(spawn_x, spawn_y)
-
-	# Free the live map BEFORE loading the next one. DimWood's tilemap is huge;
-	# queue_free left the old copy alive, so a second enter held two Forests
-	# and froze the client. Detach the reused LocalPlayer first so free() is safe.
-	var local: LocalPlayer = InstanceClient.local_player
-	if current_instance != null and is_instance_valid(current_instance):
-		if local != null and is_instance_valid(local) and local.get_parent() != null:
-			local.get_parent().remove_child(local)
-		var old: InstanceClient = current_instance
-		current_instance = null
-		InstanceClient.current = null
-		if old.get_parent() == self:
-			remove_child(old)
-		old.free()
-
 	var new_instance: InstanceClient = InstanceClient.new()
 	new_instance.name = instance_id
 
@@ -81,16 +66,6 @@ func charge_new_instance(
 		_fail_charge("Couldn't load the area.")
 		return
 	new_instance.instance_map = map
-
-	# Seat the reused avatar on the destination spawn before the map enters the
-	# tree. Movement is client-authoritative; without this, DimWood keeps the
-	# Castle Garden portal coordinates and the camera looks at empty tiles.
-	if local != null and is_instance_valid(local):
-		if local.get_parent() != null:
-			local.get_parent().remove_child(local)
-		map.add_child(local)
-		local.position = pending_spawn
-		local.freeze_movement(1.0)
 	
 	map.ready.connect(
 		new_instance.ready_to_enter_instance.rpc_id.bind(1),
@@ -105,7 +80,12 @@ func charge_new_instance(
 		ZoneDiscovery.on_map_loaded.bind(map_path),
 		CONNECT_ONE_SHOT
 	)
-
+	
+	if current_instance:
+		if current_instance.local_player:
+			current_instance.instance_map.remove_child(current_instance.local_player)
+			#current_instance.local_player.reparent(new_instance, false)
+		current_instance.queue_free()
 	current_instance = new_instance
 
 	new_instance.add_child(map, true)

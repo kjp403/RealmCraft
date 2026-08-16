@@ -10,16 +10,15 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"sluice_warden_obry"
 target_giver_name = "Sluice Warden Obry"
-waypoint_labels = PackedStringArray("The Sewers", "The Gutterworks")
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Under the Charter"
-description = "The Hall Keeper names the Sewers as the smuggling route. In Goblin Woodland, talk to the Swamp Hermit on the east side and travel to the Sewers. From the south entrance, take the west stair into The Gutterworks. Sluice Warden Obry keeps the arrival grate."
+description = "The Hall Keeper names the Sewers as the smuggling route. Find Sluice Warden Obry at the grates and ask what has been coming up — and going down."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_obry")])
 auto_complete = true
 min_level = 15
-unlock_message = "[Hall Keeper] Humming ore ran the city grates. The Swamp Hermit in the woodland opens one. In the Sewers, take the west stair — The Gutterworks. Obry is on the pad."
+unlock_message = "[Hall Keeper] The keep's underside. Obry keeps the grates. Ask him about humming ore."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 100
 reward_mastery_xp = 8000

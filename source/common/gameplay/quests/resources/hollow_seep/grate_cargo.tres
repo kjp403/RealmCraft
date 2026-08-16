@@ -11,8 +11,6 @@ script = ExtResource("1_obj")
 enemy_type = &"trpg_sewer_skeleton"
 required_amount = 8
 grant_item = ExtResource("4_crate")
-label_override = "Sewer Skeletons"
-waypoint_labels = PackedStringArray("The Sewers", "The Gutterworks")
 
 [sub_resource type="Resource" id="Obj_collect_crate"]
 script = ExtResource("1_obj")
@@ -23,7 +21,7 @@ label_override = "Sealed Smuggling Crate"
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Grate Cargo"
-description = "Sewer skeletons patrol north of Obry's grate on this Gutterworks floor — they respawn. Kill eight; one still carries a Sealed Smuggling Crate. Bring the crate back to Obry. Ratcatcher Pell stands at the same grate when you are done."
+description = "Obry wants a Sealed Smuggling Crate recovered from the sewer hostiles. Clear eight sewer skeletons; one of them is still carrying a sealed crate. After you bring it in, find Ratcatcher Pell further down — he will know where the rest went."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_skeletons"), SubResource("Obj_collect_crate")])
 min_level = 15
 unlock_message = "[Sluice Warden Obry] Crews stopped coming down. Their crates did not. Bring me one that is still sealed."

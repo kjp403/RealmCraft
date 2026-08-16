@@ -10,16 +10,15 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"cinderwright_maro"
 target_giver_name = "Cinderwright Maro"
-waypoint_labels = PackedStringArray("Fire Forge", "The Cinder Deeps")
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Crews That Do Not Answer"
-description = "Helka's crews wear forge marks and do not answer. Return to the Fire Forge and take the east stair into The Cinder Deeps. Cinderwright Maro is at the landing. He knows Vurthek the Cinderborn."
+description = "Helka's crews wear forge marks and do not answer. Find Cinderwright Maro on the descent. He knows Vurthek the Cinderborn."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_maro")])
 auto_complete = true
 min_level = 30
-unlock_message = "[Forgemaster Helka] The crews that hold this floor are not mine. Back on the forge floor, take the east stair — The Cinder Deeps. Maro is on the ledges. Ask him about the lake."
+unlock_message = "[Forgemaster Helka] The crews that hold this floor are not mine. Maro is still on the ledges. Ask him about the lake."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 160
 reward_mastery_xp = 14000

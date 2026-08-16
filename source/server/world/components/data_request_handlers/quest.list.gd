@@ -97,7 +97,6 @@ func data_request_handler(
 	# turn-in-able via a passive COLLECT/CRAFT fill (inventory changes fire no
 	# advance event). Latches so it only toasts once.
 	QuestService.replenish_seep_root_if_needed(resource, peer_id)
-	QuestService.purge_orphaned_quest_items(resource, peer_id)
 	QuestService.notify_passive_ready(resource, peer_id)
 	return {
 		"giver": String(giver_key),
@@ -151,21 +150,14 @@ func _quest_view(
 		)
 		var visit_target_key: String = ""
 		var visit_target_name: String = ""
-		if objective.type == QuestObjective.Type.VISIT:
-			if objective.target_giver != null:
-				visit_target_key = String(objective.target_giver.giver_key())
-				visit_target_name = objective.target_giver_name
-				if visit_target_name.is_empty():
-					visit_target_name = objective.target_giver.npc_name
-			else:
-				# Slug-only visits (cycle-safe authoring) still need a minimap key.
-				visit_target_key = String(objective.target_giver_key)
-				visit_target_name = objective.target_giver_name
-		var kill_enemy: String = ""
-		if objective.type == QuestObjective.Type.KILL:
-			kill_enemy = String(objective.enemy_type)
+		if (
+			objective.type == QuestObjective.Type.VISIT
+			and objective.target_giver != null
+		):
+			visit_target_key = String(objective.target_giver.giver_key())
+			visit_target_name = objective.target_giver_name
 			if visit_target_name.is_empty():
-				visit_target_name = objective.kill_label()
+				visit_target_name = objective.target_giver.npc_name
 
 		objectives.append({
 			"desc": objective.describe(),
@@ -177,8 +169,6 @@ func _quest_view(
 			# matching NPC in whichever map is currently active.
 			"target_giver": visit_target_key,
 			"target_name": visit_target_name,
-			"target_enemy": kill_enemy,
-			"waypoints": Array(objective.waypoint_labels),
 		})
 
 	return {
@@ -208,8 +198,6 @@ func _quest_view(
 		"prereq_names": _unmet_prereq_names(resource, quest),
 		"prereq_mode": int(quest.requires_mode),
 		"reward_items": _reward_item_views(quest, resource),
-		"turn_in_giver": String(quest.turn_in_giver_key()),
-		"turn_in_name": quest.turn_in_label(),
 	}
 
 

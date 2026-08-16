@@ -165,15 +165,11 @@ func _display(quest: Dictionary) -> void:
 		_content.add_child(objective_label)
 		any_shown = true
 
-	# Ready-to-turn-in nudge. Name the NPC — "the quest giver" is whoever offered
-	# it, which is the wrong person on delivery quests (Sovereign → Hall Keeper).
+	# Ready-to-turn-in nudge. Same line every game uses, instantly readable.
 	if complete:
 		var ready_label: Label = Label.new()
 		ready_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var turn_in_name: String = str(quest.get("turn_in_name", "")).strip_edges()
-		if turn_in_name.is_empty():
-			turn_in_name = "the quest giver"
-		ready_label.text = "↩ Return to %s" % turn_in_name
+		ready_label.text = "↩ Return to the quest giver"
 		ready_label.add_theme_color_override(&"font_color", Color(0.55, 0.9, 0.55))
 		_content.add_child(ready_label)
 
