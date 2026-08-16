@@ -18,14 +18,16 @@ func data_request_handler(
 		return {
 			"ok": true,
 			"allowed": false,
+			"bases": [],
+			"dyes": [],
 			"skins": [],
-			"archives": [],
 			"equipped": 0,
 		}
 	return {
 		"ok": true,
 		"allowed": true,
-		"skins": VaultSkins.roster(VaultSkins.GROUP_WARDROBE),
-		"archives": VaultSkins.roster(VaultSkins.GROUP_ARCHIVES),
+		"bases": VaultSkins.base_roster(),
+		"dyes": VaultSkins.dye_roster(),
+		"skins": VaultSkins.roster(),
 		"equipped": pr.vault_skin_id,
 	}

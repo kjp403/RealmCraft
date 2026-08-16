@@ -150,9 +150,13 @@ func _initialize() -> void:
 	_check(TitleCatalog.premium_slugs().size() == 13, "13 premium titles in the vault roster")
 	_check(TitleCatalog.has_vfx("Sovereign"), "Sovereign has title-text VFX")
 	_check(TitleCatalog.has_vfx("Sapphire Supporter"), "donator titles still resolve")
+	_check(TitleCatalog.has_vfx("Sapphire VIP"), "VIP donator titles still resolve")
 	_check(not TitleCatalog.has_vfx("Iron Warden"), "quest titles stay flat")
 	_check(TitleCatalog.is_premium_name("Ashen Crown"), "multi-word premium names resolve")
 	_check(not TitleCatalog.is_premium_name("Sapphire Supporter"), "donator titles are not the shop set")
+	var vault_titles: Array = TitleCatalog.vault_roster()
+	_check(vault_titles.size() >= 20, "vault roster includes donator + premium titles")
+	_check(str(vault_titles[0].get("name", "")).contains("Sapphire"), "donator titles lead the vault roster")
 	_check(
 		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/titles.state.gd"),
 		"titles.state handler exists"
@@ -163,13 +167,25 @@ func _initialize() -> void:
 	)
 
 	print("-- vault skins --")
-	var wardrobe_n: int = VaultSkins.roster(VaultSkins.GROUP_WARDROBE).size()
-	var archive_n: int = VaultSkins.roster(VaultSkins.GROUP_ARCHIVES).size()
-	_check(wardrobe_n > 0, "wardrobe prestige roster is non-empty (got %d)" % wardrobe_n)
-	_check(archive_n > 0, "archive prestige roster is non-empty (got %d)" % archive_n)
-	_check(wardrobe_n + archive_n == PlayerSkins.ids().size(), "every indexed skin has a prestige recolor")
-	_check(VaultSkins.is_valid(PlayerSkins.starter_skin_id()), "starter Knight has a prestige recolor")
+	var listed_n: int = 0
+	for id: int in PlayerSkins.ids():
+		if PlayerSkins.is_horizon_listed(id):
+			listed_n += 1
+	var dye_n: int = VaultSkins.STYLE_ORDER.size()
+	var roster_n: int = VaultSkins.roster().size()
+	_check(listed_n > 0, "wardrobe roster is non-empty (got %d)" % listed_n)
+	_check(dye_n == 16, "16 vault dyes (got %d)" % dye_n)
+	_check(roster_n == listed_n * dye_n, "every wardrobe skin has every dye (got %d)" % roster_n)
+	var packed_knight: int = VaultSkins.pack(PlayerSkins.starter_skin_id(), VaultSkins.STYLE_GOLD)
+	_check(VaultSkins.is_valid(packed_knight), "packed Gilded Knight is valid")
+	_check(
+		VaultSkins.base_skin_id(packed_knight) == PlayerSkins.starter_skin_id(),
+		"packed id unpacks to the Knight sprite"
+	)
+	_check(VaultSkins.style_of(packed_knight) == VaultSkins.STYLE_GOLD, "packed id unpacks to Gilded")
+	_check(VaultSkins.is_valid(PlayerSkins.starter_skin_id()), "legacy raw Knight id still resolves")
 	_check(not VaultSkins.is_valid(0), "id 0 is not a prestige skin")
+	_check(not VaultSkins.is_valid(99 * VaultSkins.STRIDE + 1), "unknown dye is rejected")
 	_check(
 		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/vault_skins.state.gd"),
 		"vault_skins.state handler exists"

@@ -19,6 +19,6 @@ func data_request_handler(
 	return {
 		"ok": true,
 		"allowed": true,
-		"titles": TitleCatalog.premium_roster(),
+		"titles": TitleCatalog.vault_roster(),
 		"equipped": pr.display_title,
 	}

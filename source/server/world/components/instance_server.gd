@@ -266,6 +266,7 @@ func instantiate_player(peer_id: int) -> Player:
 		syn.set_by_path(^":weapon_cosmetic_id", new_player.player_resource.weapon_cosmetic_id)
 		syn.set_by_path(^":vault_skin_id", new_player.player_resource.vault_skin_id)
 		syn.set_by_path(^":display_name", new_player.player_resource.display_name)
+		syn.set_by_path(^":display_title", new_player.player_resource.display_title)
 		syn.set_by_path(^":active_guild_id", new_player.player_resource.active_guild_id)
 		syn.set_by_path(^":player_id", int(new_player.player_resource.player_id))
 		syn.set_by_path(

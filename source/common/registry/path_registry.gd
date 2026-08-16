@@ -46,6 +46,8 @@ static func _static_init() -> void:
 
 	register_field("StatsComponent:stats:%s" % Stat.MANA,  Wire.Type.F32)
 	register_field("StatsComponent:stats:%s" % Stat.MANA_MAX,  Wire.Type.F32)
+	register_field(":display_title", Wire.Type.VARIANT)
+	register_field(":vault_skin_id", Wire.Type.U32)
 
 
 static func reset() -> void:

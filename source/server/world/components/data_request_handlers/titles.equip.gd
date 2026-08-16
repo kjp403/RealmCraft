@@ -19,7 +19,7 @@ func data_request_handler(
 		if CommandPermissions.effective_priority(pr, instance) \
 				< CommandPermissions.STAFF_PROTECT_PRIORITY:
 			return {"ok": false, "reason": "not_allowed"}
-		if not TitleCatalog.is_premium_name(title):
+		if not TitleCatalog.has_vfx(title):
 			return {"ok": false, "reason": "unknown_title"}
 		title = TitleCatalog.canonical_name(title)
 		var unlocked: PackedStringArray = pr.titles_unlocked.duplicate()
@@ -30,5 +30,7 @@ func data_request_handler(
 	else:
 		pr.display_title = ""
 
+	player.display_title = pr.display_title
+	player.state_synchronizer.set_by_path(^":display_title", pr.display_title)
 	instance.world_server.database.save_player(pr)
 	return {"ok": true, "title": pr.display_title}
