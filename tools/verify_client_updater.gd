@@ -50,6 +50,15 @@ func _init() -> void:
 		failures.append("ClientUpdater must detach apply_update.cmd via start /min")
 	if updater.find("get_temp_dir") < 0:
 		failures.append("ClientUpdater must stage the zip in OS.get_temp_dir() (not OneDrive)")
+	# quit() hands the only live process to apply_update.cmd. If robocopy gives up
+	# without relaunching, the player is left with no window and no error, and the
+	# next launch re-stages and quits again — the "opens then closes" loop.
+	if updater.count('start "" "%INSTALL%') < 2:
+		failures.append("apply_update.cmd must relaunch the client when robocopy gives up")
+	if updater.find("MAX_APPLY_TRIES") < 0:
+		failures.append("ClientUpdater must bound apply retries instead of looping forever")
+	if updater.find("_stage_matches") < 0:
+		failures.append("ClientUpdater must check a resumed stage against the manifest sha")
 	if updater.find("taskkill") < 0:
 		failures.append("apply_update.cmd must taskkill a relaunched EXE before robocopy")
 	if updater.find("apply_update.log") < 0:
