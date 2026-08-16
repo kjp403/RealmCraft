@@ -48,6 +48,14 @@ func _init() -> void:
 		failures.append("ClientUpdater must disable gzip on the zip download")
 	if updater.find("\"/min\"") < 0:
 		failures.append("ClientUpdater must detach apply_update.cmd via start /min")
+	if updater.find("get_temp_dir") < 0:
+		failures.append("ClientUpdater must stage the zip in OS.get_temp_dir() (not OneDrive)")
+	if updater.find("taskkill") < 0:
+		failures.append("apply_update.cmd must taskkill a relaunched EXE before robocopy")
+	if updater.find("apply_update.log") < 0:
+		failures.append("apply_update.cmd must write apply_update.log on failure")
+	if updater.find("_existing_stage") < 0:
+		failures.append("ClientUpdater must resume a staged extract instead of re-downloading")
 
 	var gateway: String = FileAccess.get_file_as_string(
 		"res://source/client/gateway/gateway.gd"

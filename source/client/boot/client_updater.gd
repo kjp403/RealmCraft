@@ -2,6 +2,10 @@ class_name ClientUpdater
 ## Windows desktop self-update. Exported clients GET latest.json, download the
 ## portable zip when the remote version is newer, then spawn a cmd that replaces
 ## files after this process exits. Editor / web / Linux skip this path.
+##
+## The zip is extracted to %TEMP% — never next to the EXE — so OneDrive/Dropbox
+## cannot lock the staged files mid-copy. apply_update.cmd retries robocopy and
+## kills a relaunched EXE (quit() looks like a crash; people click the icon again).
 
 const MANIFEST_TIMEOUT_SEC: float = 15.0
 const DOWNLOAD_TIMEOUT_SEC: float = 0.0  # disabled — zip can be ~100MB on a slow link
@@ -29,6 +33,7 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	if not should_run():
 		return _result(true, false, "", false)
 	_status(status, _t(&"CHECKING_UPDATE"))
+	var install_dir: String = OS.get_executable_path().get_base_dir()
 	var manifest: Dictionary = await _fetch_manifest(host)
 	if manifest.is_empty():
 		push_warning("ClientUpdater: could not fetch latest.json")
@@ -48,48 +53,55 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 				"ClientUpdater: local %s == remote %s — skip (bump config/version to ship)"
 				% [local_version, remote_version]
 			)
+		_cleanup_install_leftovers(install_dir)
 		return _result(true, false, "", false)
 	if cmp >= 0 and force:
 		return _result(false, false, "already-latest", false)
 
-	var zip_url: String = str(manifest.get("url", Distribution.CLIENT_DOWNLOAD_URL)).strip_edges()
-	var expect_sha: String = str(manifest.get("sha256", "")).strip_edges().to_lower()
-	if zip_url.is_empty() or expect_sha.is_empty():
-		return _result(false, false, "manifest", true)
+	# Finish a previous extract instead of downloading again and quit()-looping.
+	var stage_dir: String = _existing_stage(install_dir)
+	if stage_dir.is_empty():
+		var zip_url: String = str(manifest.get("url", Distribution.CLIENT_DOWNLOAD_URL)).strip_edges()
+		var expect_sha: String = str(manifest.get("sha256", "")).strip_edges().to_lower()
+		if zip_url.is_empty() or expect_sha.is_empty():
+			return _result(false, false, "manifest", true)
 
-	var install_dir: String = OS.get_executable_path().get_base_dir()
-	var zip_path: String = install_dir.path_join(ZIP_NAME)
-	var stage_dir: String = install_dir.path_join(STAGE_DIR_NAME)
-	_status(status, _t(&"DOWNLOADING_UPDATE"))
-	var dl_ok: bool = await _download_file(host, zip_url, zip_path, status)
-	if not dl_ok:
-		_cleanup_path(zip_path)
-		push_warning("ClientUpdater: download failed")
-		return _result(false, false, "download", true)
+		var zip_path: String = _temp_zip_path()
+		stage_dir = _temp_stage_dir()
+		_status(status, _t(&"DOWNLOADING_UPDATE"))
+		var dl_ok: bool = await _download_file(host, zip_url, zip_path, status)
+		if not dl_ok:
+			_cleanup_path(zip_path)
+			push_warning("ClientUpdater: download failed")
+			return _result(false, false, "download", true)
 
-	var got_sha: String = _sha256_file(zip_path)
-	if got_sha != expect_sha:
-		push_warning("ClientUpdater: sha256 mismatch (got %s want %s)" % [got_sha, expect_sha])
-		_cleanup_path(zip_path)
-		return _result(false, false, "checksum", true)
+		var got_sha: String = _sha256_file(zip_path)
+		if got_sha != expect_sha:
+			push_warning("ClientUpdater: sha256 mismatch (got %s want %s)" % [got_sha, expect_sha])
+			_cleanup_path(zip_path)
+			return _result(false, false, "checksum", true)
 
-	_status(status, _t(&"INSTALLING_UPDATE"))
-	_remove_dir(stage_dir)
-	if not _extract_zip(zip_path, stage_dir):
-		_cleanup_path(zip_path)
+		_status(status, _t(&"INSTALLING_UPDATE"))
 		_remove_dir(stage_dir)
-		return _result(false, false, "extract", true)
-	_cleanup_path(zip_path)
+		if not _extract_zip(zip_path, stage_dir):
+			_cleanup_path(zip_path)
+			_remove_dir(stage_dir)
+			return _result(false, false, "extract", true)
+		_cleanup_path(zip_path)
 
-	if not FileAccess.file_exists(stage_dir.path_join("Arkenelle.exe")) \
-			and not FileAccess.file_exists(stage_dir.path_join(OS.get_executable_path().get_file())):
-		push_warning("ClientUpdater: staged update is missing Arkenelle.exe")
-		_remove_dir(stage_dir)
-		return _result(false, false, "extract", true)
+		if not _stage_has_exe(stage_dir):
+			push_warning("ClientUpdater: staged update is missing Arkenelle.exe")
+			_remove_dir(stage_dir)
+			return _result(false, false, "extract", true)
+	else:
+		_status(status, _t(&"INSTALLING_UPDATE"))
 
+	return _spawn_apply(host, install_dir, stage_dir)
+
+
+static func _spawn_apply(host: Node, install_dir: String, stage_dir: String) -> Dictionary:
 	var script_path: String = install_dir.path_join(APPLY_SCRIPT_NAME)
 	if not _write_apply_script(script_path):
-		_remove_dir(stage_dir)
 		return _result(false, false, "script", true)
 
 	var exe_name: String = OS.get_executable_path().get_file()
@@ -111,7 +123,6 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	)
 	if err < 0:
 		push_warning("ClientUpdater: failed to spawn apply_update.cmd")
-		_remove_dir(stage_dir)
 		return _result(false, false, "spawn", true)
 	host.get_tree().quit()
 	return _result(true, true, "", true)
@@ -119,6 +130,41 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 
 static func _result(ok: bool, quit: bool, error: String, needed: bool) -> Dictionary:
 	return {"ok": ok, "quit": quit, "error": error, "needed": needed}
+
+
+static func _temp_root() -> String:
+	return OS.get_temp_dir().rstrip("/\\")
+
+
+static func _temp_stage_dir() -> String:
+	return _temp_root().path_join("arkenelle_update")
+
+
+static func _temp_zip_path() -> String:
+	return _temp_root().path_join("arkenelle_update.zip")
+
+
+static func _stage_has_exe(stage_dir: String) -> bool:
+	if FileAccess.file_exists(stage_dir.path_join("Arkenelle.exe")):
+		return true
+	var exe_name: String = OS.get_executable_path().get_file()
+	return not exe_name.is_empty() and FileAccess.file_exists(stage_dir.path_join(exe_name))
+
+
+static func _existing_stage(install_dir: String) -> String:
+	var legacy: String = install_dir.path_join(STAGE_DIR_NAME)
+	if _stage_has_exe(legacy):
+		return legacy
+	var temp_stage: String = _temp_stage_dir()
+	if _stage_has_exe(temp_stage):
+		return temp_stage
+	return ""
+
+
+static func _cleanup_install_leftovers(install_dir: String) -> void:
+	_cleanup_path(install_dir.path_join(APPLY_SCRIPT_NAME))
+	_cleanup_path(install_dir.path_join(ZIP_NAME))
+	_remove_dir(install_dir.path_join(STAGE_DIR_NAME))
 
 
 ## Localized text for a static context. `tr()` is an Object method, so calling it
@@ -270,13 +316,35 @@ set "INSTALL=%~1"
 set "STAGE=%~2"
 set "WAITPID=%~3"
 set "EXENAME=%~4"
+set "LOG=%INSTALL%\\apply_update.log"
+echo %DATE% %TIME% start pid=%WAITPID% > "%LOG%"
+echo install=%INSTALL%>> "%LOG%"
+echo stage=%STAGE%>> "%LOG%"
 :wait
 ping 127.0.0.1 -n 2 >nul
 tasklist /FI "PID eq %WAITPID%" 2>nul | findstr /I "%WAITPID%" >nul
 if not errorlevel 1 goto wait
-robocopy "%STAGE%" "%INSTALL%" /E /IS /IT /NFL /NDL /NJH /NJS /nc /ns /np
-if errorlevel 8 exit /b 1
+echo %TIME% pid gone>> "%LOG%"
+rem quit() looks like a crash; a relaunch locks Arkenelle.exe and robocopy fails.
+taskkill /F /IM "%EXENAME%" >nul 2>&1
+ping 127.0.0.1 -n 3 >nul
+set /a TRIES=0
+:retry
+set /a TRIES+=1
+echo %TIME% robocopy try %TRIES%>> "%LOG%"
+robocopy "%STAGE%" "%INSTALL%" /E /IS /IT /R:8 /W:2 /NFL /NDL /NJH /NJS /nc /ns /np
+set "RC=%ERRORLEVEL%"
+echo %TIME% robocopy exit %RC%>> "%LOG%"
+if %RC% GEQ 8 (
+  if %TRIES% LSS 10 (
+    ping 127.0.0.1 -n 4 >nul
+    goto retry
+  )
+  echo FAIL>> "%LOG%"
+  exit /b 1
+)
 rmdir /S /Q "%STAGE%"
+echo %TIME% launching>> "%LOG%"
 start "" "%INSTALL%\\%EXENAME%"
 endlocal
 del "%~f0"
