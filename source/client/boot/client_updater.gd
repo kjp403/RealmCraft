@@ -38,7 +38,16 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	if remote_version.is_empty():
 		return _result(false, false, "manifest", false)
 	var cmp: int = GatewayAPI.compare_versions(local_version, remote_version)
+	# Windows only downloads when latest.json's version is *strictly newer*.
+	# Rebuilding the zip at the same config/version (workflow_dispatch without a
+	# bump) leaves existing EXEs on the old .pck forever — the browser still
+	# picks up new WASM because it is not version-gated this way.
 	if cmp >= 0 and not force:
+		if cmp == 0:
+			push_warning(
+				"ClientUpdater: local %s == remote %s — skip (bump config/version to ship)"
+				% [local_version, remote_version]
+			)
 		return _result(true, false, "", false)
 	if cmp >= 0 and force:
 		return _result(false, false, "already-latest", false)

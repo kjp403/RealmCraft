@@ -1,6 +1,6 @@
 extends DataRequestHandler
-## Roster for the Vault Skins tab. Staff-only; empty roster for everyone else
-## so prestige recolors never leak. vault_skins.equip re-checks independently.
+## Staff-only. Catalog lives on the client (VaultSkins). This just answers
+## whether Wear is allowed and which packed id is equipped.
 
 
 func data_request_handler(
@@ -18,16 +18,10 @@ func data_request_handler(
 		return {
 			"ok": true,
 			"allowed": false,
-			"bases": [],
-			"dyes": [],
-			"skins": [],
 			"equipped": 0,
 		}
 	return {
 		"ok": true,
 		"allowed": true,
-		"bases": VaultSkins.base_roster(),
-		"dyes": VaultSkins.dye_roster(),
-		"skins": VaultSkins.roster(),
 		"equipped": pr.vault_skin_id,
 	}
