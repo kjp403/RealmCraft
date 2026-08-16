@@ -20,7 +20,7 @@ quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_obry"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["City above, culverts below, and me in the middle keeping the grates shut. Mostly shut.", "The crews stopped coming down a year back. Their stock is still in the crates if you can reach it.", "Anything that comes up through a grate is my problem. Anything that goes down is yours."])
+lines = Array[String](["City above, culverts below, and me in the middle keeping the grates shut. Mostly shut.", "Sewer skeletons patrol north of this grate. One of them still has a sealed crate.", "Anything that comes up through a grate is my problem. Anything that goes down is yours."])
 label_override = "Ask about the works"
 
 [resource]

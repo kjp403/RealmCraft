@@ -9,7 +9,7 @@ const VIEW_SIZE: Vector2i = Vector2i(140, 82)
 const MAP_ZOOM: float = 0.12
 const EDGE_PADDING: float = 9.0
 const VISIT_PREFIX: String = "Speak with "
-const TARGET_FIX_VERSION: String = "2026-08-07-c"
+const TARGET_FIX_VERSION: String = "2026-08-16-sewers"
 const PLAYER_DIAMOND_COLOR := Color(0.35, 0.55, 1.0)
 const FRIEND_DIAMOND_COLOR := Color(0.28, 0.92, 0.42)
 const SELF_DIAMOND_COLOR := Color(0.35, 0.95, 1.0)
@@ -27,6 +27,8 @@ var _click_marker: Label
 
 var _quest_target_key: StringName = &""
 var _quest_target_name: String = ""
+var _quest_target_enemy: StringName = &""
+var _quest_waypoints: PackedStringArray = PackedStringArray()
 var _quest_target: Node2D
 var _resolved_map: Node
 var _refresh_retry: float = 0.0
@@ -82,6 +84,8 @@ func _process(delta: float) -> void:
 		if _refresh_retry <= 0.0:
 			_refresh_retry = 0.5
 			_resolve_quest_target()
+	elif _quest_target is HostileNpc and (_quest_target as HostileNpc).is_dead:
+		_resolve_quest_target()
 
 	_update_markers(player)
 
@@ -232,13 +236,27 @@ func _on_quest_list_received(data: Dictionary) -> void:
 
 	if tracked.is_empty():
 		tracked = first_active
-	if tracked.is_empty() or bool(tracked.get("complete", false)):
+	if tracked.is_empty():
 		_clear_quest_target()
+		return
+	if bool(tracked.get("complete", false)):
+		_quest_target_key = StringName(str(tracked.get("turn_in_giver", "")))
+		_quest_target_name = str(tracked.get("turn_in_name", "")).strip_edges()
+		_quest_target_enemy = &""
+		_quest_waypoints = PackedStringArray()
+		if _quest_target_key == &"hall_keeper":
+			_quest_waypoints = PackedStringArray(["Castle Garden"])
+		if _quest_target_key.is_empty() and _quest_target_name.is_empty():
+			_clear_quest_target()
+			return
+		_resolve_quest_target()
 		return
 
 	_clear_quest_target()
 	var first_target_key: StringName = &""
 	var first_target_name: String = ""
+	var first_target_enemy: StringName = &""
+	var first_waypoints := PackedStringArray()
 	var current_map: Node = (
 		InstanceClient.current.instance_map
 		if InstanceClient.current != null
@@ -254,9 +272,13 @@ func _on_quest_list_received(data: Dictionary) -> void:
 		var target_key := StringName(
 			str(objective.get("target_giver", ""))
 		)
+		var target_enemy := StringName(
+			str(objective.get("target_enemy", ""))
+		)
 		var target_name: String = str(
 			objective.get("target_name", "")
 		).strip_edges()
+		var waypoints: PackedStringArray = _waypoints_from(objective)
 		if target_name.is_empty():
 			var description: String = str(
 				objective.get("desc", "")
@@ -266,18 +288,30 @@ func _on_quest_list_received(data: Dictionary) -> void:
 					VISIT_PREFIX.length()
 				).strip_edges()
 
-		if target_key.is_empty() and target_name.is_empty():
+		if (
+			target_key.is_empty()
+			and target_name.is_empty()
+			and target_enemy.is_empty()
+			and waypoints.is_empty()
+		):
 			continue
 
-		if first_target_key.is_empty() and first_target_name.is_empty():
+		if (
+			first_target_key.is_empty()
+			and first_target_name.is_empty()
+			and first_target_enemy.is_empty()
+		):
 			first_target_key = target_key
 			first_target_name = target_name
+			first_target_enemy = target_enemy
+			first_waypoints = waypoints
 
-		# Prefer an unfinished objective whose NPC is physically present in the
-		# current map. This prevents an absent first alternative from hiding a
-		# valid Foreman marker later in the same ANY-objective quest.
+		# Prefer an unfinished objective whose target is physically present in
+		# the current map (visit NPC, kill enemy, or a named stair / travel NPC).
 		_quest_target_key = target_key
 		_quest_target_name = target_name
+		_quest_target_enemy = target_enemy
+		_quest_waypoints = waypoints
 		if current_map != null:
 			var present_target: Node2D = _find_target(current_map)
 			if present_target != null:
@@ -288,13 +322,20 @@ func _on_quest_list_received(data: Dictionary) -> void:
 	# the player enters its map, the refresh above resolves the live NPC.
 	_quest_target_key = first_target_key
 	_quest_target_name = first_target_name
+	_quest_target_enemy = first_target_enemy
+	_quest_waypoints = first_waypoints
 	_resolve_quest_target()
 
 
 func _resolve_quest_target() -> void:
 	_quest_target = null
 	_refresh_retry = 0.5
-	if _quest_target_key.is_empty() and _quest_target_name.is_empty():
+	if (
+		_quest_target_key.is_empty()
+		and _quest_target_name.is_empty()
+		and _quest_target_enemy.is_empty()
+		and _quest_waypoints.is_empty()
+	):
 		return
 	if InstanceClient.current == null:
 		return
@@ -305,6 +346,26 @@ func _resolve_quest_target() -> void:
 
 
 func _find_target(root: Node) -> Node2D:
+	var matches: Array[Node2D] = []
+	_collect_targets(root, matches)
+	if matches.is_empty():
+		_collect_waypoints(root, matches)
+	if matches.is_empty():
+		return null
+	var player: LocalPlayer = ClientState.local_player
+	if not is_instance_valid(player) or matches.size() == 1:
+		return matches[0]
+	var best: Node2D = matches[0]
+	var best_d: float = player.global_position.distance_squared_to(best.global_position)
+	for node: Node2D in matches:
+		var dist: float = player.global_position.distance_squared_to(node.global_position)
+		if dist < best_d:
+			best_d = dist
+			best = node
+	return best
+
+
+func _collect_targets(root: Node, matches: Array[Node2D]) -> void:
 	if root is NPC:
 		var npc := root as NPC
 		var key_matches: bool = (
@@ -324,13 +385,58 @@ func _find_target(root: Node) -> Node2D:
 				== expected_name
 			)
 		if key_matches or node_matches or resource_matches:
-			return npc
+			matches.append(npc)
+	elif root is HostileNpc and not _quest_target_enemy.is_empty():
+		var hostile := root as HostileNpc
+		if hostile.enemy_type == _quest_target_enemy and not hostile.is_dead:
+			matches.append(hostile)
 
 	for child: Node in root.get_children():
-		var found: Node2D = _find_target(child)
-		if found != null:
-			return found
-	return null
+		_collect_targets(child, matches)
+
+
+func _collect_waypoints(root: Node, matches: Array[Node2D]) -> void:
+	if _quest_waypoints.is_empty():
+		return
+	if root is Portal:
+		var portal := root as Portal
+		if _waypoint_matches(portal.destination_label):
+			matches.append(portal)
+	elif root is NPC:
+		var npc := root as NPC
+		if npc.npc_resource != null:
+			for interaction: NPCInteraction in npc.npc_resource.interactions:
+				var warp := interaction as WarpInteraction
+				if warp == null:
+					continue
+				var label: String = warp.destination_label
+				if label.is_empty() and warp.target_instance != null:
+					label = warp.target_instance.display_title()
+				if _waypoint_matches(label):
+					matches.append(npc)
+					break
+
+	for child: Node in root.get_children():
+		_collect_waypoints(child, matches)
+
+
+func _waypoint_matches(label: String) -> bool:
+	var needle: String = _normalize_name(label)
+	if needle.is_empty():
+		return false
+	for waypoint: String in _quest_waypoints:
+		if _normalize_name(waypoint) == needle:
+			return true
+	return false
+
+
+func _waypoints_from(objective: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for item: Variant in objective.get("waypoints", []):
+		var label: String = str(item).strip_edges()
+		if not label.is_empty():
+			out.append(label)
+	return out
 
 
 func _normalize_name(raw_name: String) -> String:
@@ -343,6 +449,8 @@ func _normalize_name(raw_name: String) -> String:
 func _clear_quest_target() -> void:
 	_quest_target_key = &""
 	_quest_target_name = ""
+	_quest_target_enemy = &""
+	_quest_waypoints = PackedStringArray()
 	_quest_target = null
 	_target_label.text = ""
 	if _target_marker != null:

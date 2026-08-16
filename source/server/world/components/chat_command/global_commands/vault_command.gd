@@ -47,10 +47,7 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 
 	# The Vault is not load_at_startup — charge it on first entry, like recall does.
 	if res.charged_instances.is_empty():
-		ws.instance_manager.queue_charge_instance(
-			res,
-			ws.instance_manager.player_switch_instance.bind(0, player, current_inst)
-		)
+		ws.instance_manager.queue_switch_to(res, 0, player, current_inst)
 	else:
 		ws.instance_manager.player_switch_instance(res.get_instance(), 0, player, current_inst)
 	return "Entering the VFX Vault."
