@@ -16,11 +16,13 @@ const TARGET_HEADING_ID: int = 100
 
 var _menu: PopupMenu
 var _invite_dialog: ConfirmationDialog
+var _party_dialog: ConfirmationDialog
 var _mod_dialog: ConfirmationDialog
 var _target_peer_id: int = 0
 var _target_name: String = ""
 var _target_player_id: int = 0
 var _invite_id: int = 0
+var _party_invite_id: int = 0
 var _pending_mod_action: int = -1
 
 
@@ -37,6 +39,14 @@ func _ready() -> void:
 	_invite_dialog.canceled.connect(_respond_to_invite.bind(false))
 	add_child(_invite_dialog)
 
+	_party_dialog = ConfirmationDialog.new()
+	_party_dialog.title = "Party invite"
+	_party_dialog.ok_button_text = "Accept"
+	_party_dialog.cancel_button_text = "Decline"
+	_party_dialog.confirmed.connect(_respond_to_party_invite.bind(true))
+	_party_dialog.canceled.connect(_respond_to_party_invite.bind(false))
+	add_child(_party_dialog)
+
 	_mod_dialog = ConfirmationDialog.new()
 	_mod_dialog.title = "Confirm"
 	_mod_dialog.ok_button_text = "Confirm"
@@ -49,6 +59,7 @@ func _ready() -> void:
 	Client.subscribe(&"trade.invite", _on_trade_invite)
 	Client.subscribe(&"trade.open", _on_trade_open)
 	Client.subscribe(&"trade.invite_result", _on_invite_result)
+	Client.subscribe(&"party.invite", _on_party_invite)
 	Client.subscribe(&"party.invite_result", _on_party_invite_result)
 
 
@@ -215,6 +226,45 @@ func _on_trade_invite(payload: Dictionary) -> void:
 	_invite_dialog.grab_focus()
 
 
+func _on_party_invite(payload: Dictionary) -> void:
+	_party_invite_id = int(payload.get("invite", 0))
+	if _party_invite_id <= 0:
+		return
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
+	_party_dialog.dialog_text = "%s invited you to join their party." % str(
+		payload.get("from_name", "Another player")
+	)
+	_party_dialog.popup_centered(Vector2i(380, 150))
+	_party_dialog.grab_focus()
+
+
+func _respond_to_party_invite(accepted: bool) -> void:
+	if _party_invite_id <= 0 or InstanceClient.current == null:
+		return
+	var invite_id: int = _party_invite_id
+	_party_invite_id = 0
+	var focused: Control = get_viewport().gui_get_focus_owner() as Control
+	if focused != null:
+		focused.release_focus()
+	var result: Array = await Client.request_data_await(
+		&"party.respond",
+		{"invite": invite_id, "accepted": accepted},
+		InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("Could not answer the party invite.")
+		return
+	var payload: Dictionary = result[0]
+	if accepted and not bool(payload.get("ok", false)):
+		match str(payload.get("reason", "")):
+			"expired": Toaster.toast("That party invite expired.")
+			"full": Toaster.toast("That party is full.")
+			"in_party": Toaster.toast("You are already in a party.")
+			_: Toaster.toast("That party invite is no longer available.")
+
+
 func _respond_to_invite(accepted: bool) -> void:
 	if _invite_id <= 0 or InstanceClient.current == null:
 		return
@@ -336,6 +386,10 @@ func _request_party_leave() -> void:
 
 
 func _on_party_invite_result(payload: Dictionary) -> void:
+	if bool(payload.get("incoming", false)) \
+			and int(payload.get("invite", 0)) == _party_invite_id:
+		_party_invite_id = 0
+		_party_dialog.hide()
 	if bool(payload.get("accepted", false)):
 		return
 	match str(payload.get("reason", "")):

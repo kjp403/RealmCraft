@@ -53,6 +53,9 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## so an aura and a weapon glow can be worn together. Persisted as
 ## players.weapon_cosmetic_id; ownership is likewise not stored.
 @export var weapon_cosmetic_id: int = 0
+## Prestige vault skin (a `sprites` id wearing the vault recolor shader). 0 = none.
+## Not owned, not sold — staff equip only, stripped on spawn if rank drops.
+@export var vault_skin_id: int = 0
 
 @export var inventory: Dictionary
 ## Personal bank vault (same slot format as inventory). Capacity is

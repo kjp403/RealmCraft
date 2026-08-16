@@ -252,7 +252,10 @@ func _apply_team_bar_color() -> void:
 func refresh_nameplate_color() -> void:
 	if multiplayer.is_server() or display_name_label == null:
 		return
-	if player_id > 0 and Character.local_friend_ids.has(player_id):
+	var peer: int = name.to_int()
+	if Character.party_peers.has(peer):
+		set_nameplate_color(NAME_COLOR_FRIEND)
+	elif player_id > 0 and Character.local_friend_ids.has(player_id):
 		set_nameplate_color(NAME_COLOR_FRIEND)
 	else:
 		set_nameplate_color(NAME_COLOR_PLAYER)

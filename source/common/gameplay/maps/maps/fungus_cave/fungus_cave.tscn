@@ -272,12 +272,12 @@ position = Vector2(72, -128)
 npc_resource = ExtResource("24_dxrxi")
 
 [node name="LiraVoss" parent="." unique_id=1900000501 instance=ExtResource("12_y53hc")]
-position = Vector2(-340, -1140)
+position = Vector2(792, 82)
 npc_resource = ExtResource("28_lira")
 hidden_if_flag = &"lira_freed"
 
 [node name="CaveScribeWren" parent="." unique_id=1900000502 instance=ExtResource("12_y53hc")]
-position = Vector2(-200, -1100)
+position = Vector2(889, 163)
 npc_resource = ExtResource("30_wren")
 
 [node name="LiraVossFreed" parent="." unique_id=1900000503 instance=ExtResource("12_y53hc")]

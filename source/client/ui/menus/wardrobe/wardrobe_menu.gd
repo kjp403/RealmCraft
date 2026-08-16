@@ -28,7 +28,7 @@ var _anim_buttons: Dictionary[StringName, Button] = {}
 func _ready() -> void:
 	build_shell("Wardrobe", null, true)
 	_build_gold_display()
-	_skins = PlayerSkins.ids()
+	_skins = []
 	_build_layout()
 	visibility_changed.connect(func() -> void:
 		if visible:
@@ -163,6 +163,10 @@ func _on_state(data: Dictionary) -> void:
 	for id_v: Variant in data.get("owned", []):
 		_owned[int(id_v)] = true
 	_set_gold(int(data.get("gold", 0)))
+	_skins.clear()
+	for id: int in PlayerSkins.ids():
+		if PlayerSkins.is_horizon_listed(id) or _owned.get(id, false):
+			_skins.append(id)
 	# Open on the skin you're currently wearing.
 	var equipped_idx: int = _skins.find(_equipped_id())
 	_idx = equipped_idx if equipped_idx >= 0 else 0
@@ -271,6 +275,8 @@ func _on_bought(data: Dictionary, skin_id: int) -> void:
 func _on_equipped(data: Dictionary, skin_id: int) -> void:
 	if data.get("ok", false) and ClientState.local_player != null and is_instance_valid(ClientState.local_player):
 		# Instant local swap (Character._set_skin_id); the server syncs :skin_id to others.
+		# Horizon also drops any prestige vault recolor.
+		ClientState.local_player.vault_skin_id = 0
 		ClientState.local_player.skin_id = skin_id
 	_update_action()
 

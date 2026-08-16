@@ -8,15 +8,16 @@ const COLOR_EMERALD := "#5ee0a0"
 const COLOR_RUBY := "#f08a8a"
 const COLOR_CUSTOM := "#e8c56a"
 
-## slug → { name, color }. Slugs are what /supporter accepts.
+## slug → { name, color, vip }. Slugs are what /supporter accepts.
+## vip = stronger title-text VFX (shine + pulse). Never a character aura/halo.
 const BY_SLUG: Dictionary = {
-	"sapphire": {"name": "Sapphire Supporter", "color": COLOR_SAPPHIRE},
-	"emerald": {"name": "Emerald Supporter", "color": COLOR_EMERALD},
-	"ruby": {"name": "Ruby Supporter", "color": COLOR_RUBY},
-	"sapphire-vip": {"name": "Sapphire VIP", "color": COLOR_SAPPHIRE},
-	"emerald-vip": {"name": "Emerald VIP", "color": COLOR_EMERALD},
-	"ruby-vip": {"name": "Ruby VIP", "color": COLOR_RUBY},
-	"custom": {"name": "Arkenelle Supporter", "color": COLOR_CUSTOM},
+	"sapphire": {"name": "Sapphire Supporter", "color": COLOR_SAPPHIRE, "vip": false},
+	"emerald": {"name": "Emerald Supporter", "color": COLOR_EMERALD, "vip": false},
+	"ruby": {"name": "Ruby Supporter", "color": COLOR_RUBY, "vip": false},
+	"sapphire-vip": {"name": "Sapphire VIP", "color": COLOR_SAPPHIRE, "vip": true},
+	"emerald-vip": {"name": "Emerald VIP", "color": COLOR_EMERALD, "vip": true},
+	"ruby-vip": {"name": "Ruby VIP", "color": COLOR_RUBY, "vip": true},
+	"custom": {"name": "Arkenelle Supporter", "color": COLOR_CUSTOM, "vip": false},
 }
 
 const ALIASES: Dictionary = {
@@ -72,15 +73,20 @@ static func display_name(token: String) -> String:
 	return str(resolve(token).get("name", ""))
 
 
+static func spec(title: String) -> Dictionary:
+	return resolve(title)
+
+
 static func color_hex(title: String) -> String:
-	var needle: String = title.strip_edges().to_lower()
-	if needle.is_empty():
-		return ""
-	for slug: String in BY_SLUG:
-		var entry: Dictionary = BY_SLUG[slug]
-		if str(entry.get("name", "")).to_lower() == needle:
-			return str(entry.get("color", ""))
-	return ""
+	return str(spec(title).get("color", ""))
+
+
+static func is_vip(title: String) -> bool:
+	return bool(spec(title).get("vip", false))
+
+
+static func has_vfx(title: String) -> bool:
+	return not spec(title).is_empty()
 
 
 static func usage_tiers() -> String:

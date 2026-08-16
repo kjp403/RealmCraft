@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Supporter titles — in-game look</title>
+  <title>Supporter titles — VFX</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -15,7 +15,7 @@
     h1 { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.35rem; color: #d4a06a; }
     p.note { color: #8a8a92; font-size: 0.85rem; margin: 0 0 1.3rem; }
     h2 { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8a92; margin: 1.6rem 0 0.7rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem; }
     .card {
       background: #14161c;
       border: 1px solid #c47a3a;
@@ -27,20 +27,12 @@
     .tabs span { color: #6e6e76; margin-left: 0.7rem; }
     .sprite {
       width: 56px; height: 72px; margin: 0 auto 0.55rem;
-      background: linear-gradient(180deg, #3a5a8a, #1e334f);
+      background: #1e334f;
       border: 1px solid #2a3344;
     }
     .name { font-size: 1.15rem; font-weight: 600; }
     .title { margin: 0.15rem 0 0; font-size: 0.92rem; }
     .handle { color: #9a9aa3; font-size: 0.82rem; margin-top: 0.1rem; }
-    .chips { display: flex; justify-content: center; gap: 0.35rem; margin-top: 0.7rem; flex-wrap: wrap; }
-    .chip {
-      border: 1px solid #3a3a44;
-      background: #1c1e26;
-      padding: 0.12rem 0.45rem;
-      font-size: 0.72rem;
-      color: #b8b8c0;
-    }
     .chat {
       background: #12141a;
       border: 1px solid #2a2a32;
@@ -53,65 +45,209 @@
     .who { color: #7ec8ff; }
     .guild { color: #7a7a7a; }
     .msg { color: #d8d8de; }
+    .c-gold { color: #c8b977; }
+
+    @keyframes pulse-gem {
+      0%, 100% { filter: brightness(0.92) drop-shadow(0 0 4px currentColor); }
+      50% { filter: brightness(1.18) drop-shadow(0 0 10px currentColor); }
+    }
+    @keyframes pulse-vip {
+      0%, 100% { filter: brightness(0.95) drop-shadow(0 0 6px currentColor); }
+      50% { filter: brightness(1.35) drop-shadow(0 0 16px currentColor); }
+    }
+    @keyframes shine {
+      0% { background-position: -120% 0; }
+      100% { background-position: 220% 0; }
+    }
+    .fx {
+      display: inline-block;
+      background-image: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+      background-size: 220% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: pulse-gem 2.4s ease-in-out infinite, shine 3.6s linear infinite;
+    }
+    .fx-vip {
+      animation: pulse-vip 1.8s ease-in-out infinite, shine 2.4s linear infinite;
+    }
     .c-sapphire { color: #7ec0ff; }
     .c-emerald { color: #5ee0a0; }
     .c-ruby { color: #f08a8a; }
     .c-custom { color: #e8c56a; }
-    .c-gold { color: #c8b977; }
+    .c-gilded { color: #d4b45a; }
+    .c-moonlit { color: #c8d4e8; }
+    .c-oath { color: #b8c0c8; }
+    .c-dawn { color: #efe6c8; }
+    .c-bloom { color: #b090d0; }
+    .c-ashen { color: #d09060; }
+    .c-star { color: #e8d090; }
+    .c-cinder { color: #e07040; }
+    .c-aether { color: #88d0d8; }
+    .c-sov { color: #e8c050; }
+    .c-void { color: #8a78b0; }
+    .c-ecl { color: #9aa4b0; }
+    .c-wyrm { color: #c05048; }
+    .fx-ember {
+      animation: pulse-gem 3.2s ease-in-out infinite, shine 5.2s linear infinite;
+    }
+    .fx-void {
+      animation: pulse-gem 3.6s ease-in-out infinite, shine 6s linear infinite;
+    }
+    .fx-moon {
+      animation: pulse-gem 3.8s ease-in-out infinite, shine 5.6s linear infinite;
+    }
+    .tier { color: #6e6e76; font-size: 0.72rem; margin-top: 0.35rem; letter-spacing: 0.08em; text-transform: uppercase; }
   </style>
 </head>
 <body>
-  <h1>Supporter titles in-game</h1>
-  <p class="note">Profile shows <strong>— Title —</strong> under the name. Chat shows <strong>« Title »</strong> on the name line. Same gem colors in both places.</p>
+  <h1>Donator title VFX</h1>
+  <p class="note">Glow and shine live on the <strong>title text only</strong> — profile <strong>— Title —</strong> and chat <strong>« Title »</strong>. No character auras or vault cosmetics. VIP is brighter and faster. Quest titles (Iron Warden) stay flat gold.</p>
 
   <h2>Profile Overview</h2>
   <div class="grid">
     <article class="card">
-      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="tabs">Overview <span>Equipment</span></div>
       <div class="sprite"></div>
       <div class="name">sMiguel</div>
-      <div class="title c-sapphire">— Sapphire VIP —</div>
-      <div class="handle">@tomatoface</div>
-      <div class="chips"><span class="chip c-sapphire">Sapphire VIP</span></div>
+      <div class="title c-sapphire fx">— Sapphire Supporter —</div>
+      <div class="handle">@account</div>
     </article>
     <article class="card">
-      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="tabs">Overview <span>Equipment</span></div>
       <div class="sprite"></div>
       <div class="name">sMiguel</div>
-      <div class="title c-emerald">— Emerald Supporter —</div>
-      <div class="handle">@tomatoface</div>
-      <div class="chips"><span class="chip c-emerald">Emerald Supporter</span></div>
+      <div class="title c-emerald fx">— Emerald Supporter —</div>
+      <div class="handle">@account</div>
     </article>
     <article class="card">
-      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="tabs">Overview <span>Equipment</span></div>
       <div class="sprite"></div>
       <div class="name">sMiguel</div>
-      <div class="title c-ruby">— Ruby VIP —</div>
-      <div class="handle">@tomatoface</div>
-      <div class="chips"><span class="chip c-ruby">Ruby VIP</span></div>
+      <div class="title c-ruby fx">— Ruby Supporter —</div>
+      <div class="handle">@account</div>
     </article>
     <article class="card">
-      <div class="tabs">Overview <span>Equipment</span> <span>Skills</span></div>
+      <div class="tabs">Overview <span>Equipment</span></div>
       <div class="sprite"></div>
       <div class="name">sMiguel</div>
-      <div class="title c-custom">— Arkenelle Supporter —</div>
-      <div class="handle">@tomatoface</div>
-      <div class="chips"><span class="chip c-custom">Arkenelle Supporter</span></div>
+      <div class="title c-custom fx">— Arkenelle Supporter —</div>
+      <div class="handle">@account</div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-sapphire fx fx-vip">— Sapphire VIP —</div>
+      <div class="handle">@account</div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-emerald fx fx-vip">— Emerald VIP —</div>
+      <div class="handle">@account</div>
+    </article>
+    <article class="card">
+      <div class="tabs">Overview <span>Equipment</span></div>
+      <div class="sprite"></div>
+      <div class="name">sMiguel</div>
+      <div class="title c-ruby fx fx-vip">— Ruby VIP —</div>
+      <div class="handle">@account</div>
     </article>
   </div>
 
   <h2>Chatbox name line</h2>
   <div class="chat">
-    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-sapphire">« Sapphire VIP »</span></div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-sapphire fx">« Sapphire Supporter »</span></div>
     <div class="row msg">anyone doing hollow</div>
-    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-emerald">« Emerald Supporter »</span></div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-emerald fx fx-vip">« Emerald VIP »</span></div>
     <div class="row msg">gg</div>
-    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-ruby">« Ruby VIP »</span></div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-ruby fx fx-vip">« Ruby VIP »</span></div>
     <div class="row msg">thanks for the run</div>
-    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-custom">« Arkenelle Supporter »</span></div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-custom fx">« Arkenelle Supporter »</span></div>
     <div class="row msg">keep arkenelle going</div>
     <div class="row"><span class="chan">[World]</span> <span class="who">sMiguel</span> <span class="guild">(Heralds)</span> <span class="c-gold">« Iron Warden »</span></div>
-    <div class="row msg">quest title stays the old gold</div>
+    <div class="row msg">quest title stays still — no VFX</div>
+  </div>
+
+  <h2>Shop candidates — Vault Titles shelf</h2>
+  <p class="note">Staff-only for now. Text VFX only. Wear one in the Vault, <code>/vault out</code>, walk live. Cosmetics wardrobe is unchanged.</p>
+  <div class="grid">
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-gilded fx">— Gilded —</div>
+      <div class="tier">Quiet · gold</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-moonlit fx fx-moon">— Moonlit —</div>
+      <div class="tier">Quiet · silver</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-oath fx fx-moon">— Oathbound —</div>
+      <div class="tier">Quiet · steel</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-dawn fx">— First Light —</div>
+      <div class="tier">Quiet · dawn</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-bloom fx fx-void">— Nightbloom —</div>
+      <div class="tier">Distinct · violet</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-ashen fx fx-ember">— Ashen Crown —</div>
+      <div class="tier">Distinct · copper</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-star fx fx-vip">— Starforged —</div>
+      <div class="tier">Distinct · star-gold</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-cinder fx fx-ember">— Cinderborn —</div>
+      <div class="tier">Distinct · ember</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-aether fx">— Aetherbound —</div>
+      <div class="tier">Distinct · teal</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-sov fx fx-vip">— Sovereign —</div>
+      <div class="tier">Flex · rich gold</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-void fx fx-vip fx-void">— Voidtouched —</div>
+      <div class="tier">Flex · void</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-ecl fx fx-vip fx-moon">— Eclipse —</div>
+      <div class="tier">Flex · dark silver</div>
+    </article>
+    <article class="card">
+      <div class="name">KJP</div>
+      <div class="title c-wyrm fx fx-vip fx-ember">— Wyrmblood —</div>
+      <div class="tier">Flex · crimson</div>
+    </article>
+  </div>
+
+  <h2>Chat — wearing a shop title</h2>
+  <div class="chat">
+    <div class="row"><span class="chan">[World]</span> <span class="who">KJP</span> <span class="c-sov fx fx-vip">« Sovereign »</span></div>
+    <div class="row msg">hollow?</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">KJP</span> <span class="c-void fx fx-vip">« Voidtouched »</span></div>
+    <div class="row msg">on my way</div>
+    <div class="row"><span class="chan">[World]</span> <span class="who">KJP</span> <span class="c-moonlit fx fx-moon">« Moonlit »</span></div>
+    <div class="row msg">the quiet one</div>
   </div>
 </body>
 </html>

@@ -1,10 +1,20 @@
-[gd_resource type="Resource" script_class="NPCResource" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="NPCResource" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/cosmetics_interaction.gd" id="2_cosmetics"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/scholar_director.tres" id="4_skin"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/titles_interaction.gd" id="6_titles"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/skins_interaction.gd" id="7_skins"]
+
+[sub_resource type="Resource" id="TitlesInteraction_main"]
+script = ExtResource("6_titles")
+label_override = "Titles (staff)"
+
+[sub_resource type="Resource" id="SkinsInteraction_main"]
+script = ExtResource("7_skins")
+label_override = "Skins (staff)"
 
 [sub_resource type="Resource" id="CosmeticsInteraction_main"]
 script = ExtResource("2_cosmetics")
@@ -19,5 +29,5 @@ label_override = "What is this place?"
 script = ExtResource("5_npc")
 npc_name = "The Curator"
 skin = ExtResource("4_skin")
-greeting = "The Vault is yours, staff. Try anything — none of it is real until we say so."
-interactions = Array[ExtResource("1_interaction")]([SubResource("CosmeticsInteraction_main"), SubResource("Dialogue_curator")])
+greeting = "Titles, skins, and cosmetics — each on its own tab. None of it is real until we say so."
+interactions = Array[ExtResource("1_interaction")]([SubResource("TitlesInteraction_main"), SubResource("SkinsInteraction_main"), SubResource("CosmeticsInteraction_main"), SubResource("Dialogue_curator")])

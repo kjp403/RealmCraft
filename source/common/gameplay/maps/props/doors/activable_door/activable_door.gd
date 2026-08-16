@@ -25,6 +25,9 @@ func _ready() -> void:
 ## physics (a door closing as the fight starts).
 func set_open(is_open: bool, animate: bool = true) -> void:
 	door_collision.set_deferred(&"disabled", is_open)
+	# Click-move samples layer 2. Zero the layer as well as disabling the
+	# shape so a missed deferred disable can't keep the doorway solid.
+	collision_layer = 0 if is_open else 2
 	if animate:
 		door_anim.play(&"opening" if is_open else &"closing")
 	else:

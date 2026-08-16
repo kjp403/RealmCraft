@@ -93,8 +93,10 @@ func data_request_handler(
 			)
 		)
 
-	# Toast any quest that just became turn-in-able via a passive COLLECT fill
-	# (inventory changes fire no advance event). Latches so it only toasts once.
+	# Unique Heart-drop recovery, then toast any quest that just became
+	# turn-in-able via a passive COLLECT/CRAFT fill (inventory changes fire no
+	# advance event). Latches so it only toasts once.
+	QuestService.replenish_seep_root_if_needed(resource, peer_id)
 	QuestService.notify_passive_ready(resource, peer_id)
 	return {
 		"giver": String(giver_key),

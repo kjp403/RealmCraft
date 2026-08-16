@@ -19,6 +19,11 @@ func data_request_handler(
 		return {"ok": false, "reason": "not_owned"}
 
 	pr.skin_id = skin_id
+	# Horizon look drops any prestige vault recolor — those live only on the
+	# Vault Skins tab, never as a wardrobe unlock.
+	if pr.vault_skin_id != 0:
+		pr.vault_skin_id = 0
+		player.state_synchronizer.set_by_path(^":vault_skin_id", 0)
 	# Propagate to all clients (including others) so the sprite swaps live.
 	player.state_synchronizer.set_by_path(^":skin_id", skin_id)
 	return {"ok": true, "skin_id": skin_id}

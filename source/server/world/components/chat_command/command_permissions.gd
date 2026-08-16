@@ -247,3 +247,47 @@ static func _db_role_blocked(role: String) -> bool:
 static func _role_priority(instance: ServerInstance, role: String) -> int:
 	var role_data: Dictionary = instance.global_role_definitions.get(role, {})
 	return int(role_data.get("priority", 0))
+
+
+## Drop unreleased vault VFX from a non-staff character (prestige skin, auras,
+## premium titles). Called on spawn so a demoted admin cannot walk the live
+## world still wearing them. Returns true when anything was cleared.
+static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstance) -> bool:
+	if player == null:
+		return false
+	if effective_priority(player, instance) >= STAFF_PROTECT_PRIORITY:
+		return false
+	var changed: bool = false
+	if player.vault_skin_id != 0:
+		player.vault_skin_id = 0
+		changed = true
+	if player.cosmetic_id != 0:
+		player.cosmetic_id = 0
+		changed = true
+	if player.weapon_cosmetic_id != 0:
+		player.weapon_cosmetic_id = 0
+		changed = true
+	if TitleCatalog.is_premium_name(player.display_title):
+		player.display_title = ""
+		changed = true
+	var kept_titles: PackedStringArray = PackedStringArray()
+	var dropped_premium: bool = false
+	for t: String in player.titles_unlocked:
+		if TitleCatalog.is_premium_name(t):
+			dropped_premium = true
+			continue
+		kept_titles.append(t)
+	if dropped_premium:
+		player.titles_unlocked = kept_titles
+		changed = true
+	var kept_trophies: PackedStringArray = PackedStringArray()
+	var dropped_trophy: bool = false
+	for t: String in player.displayed_trophies:
+		if TitleCatalog.is_premium_name(t):
+			dropped_trophy = true
+			continue
+		kept_trophies.append(t)
+	if dropped_trophy:
+		player.displayed_trophies = kept_trophies
+		changed = true
+	return changed

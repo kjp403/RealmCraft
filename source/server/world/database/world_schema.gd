@@ -60,6 +60,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 17:
 		_migration_v17(db)
 		_set_schema_version(db, 17)
+	if version < 18:
+		_migration_v18(db)
+		_set_schema_version(db, 18)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -323,6 +326,13 @@ static func _migration_v16(db: SQLite) -> void:
 static func _migration_v17(db: SQLite) -> void:
 	if not _column_exists(db, "players", "character_flags_json"):
 		db.query("ALTER TABLE players ADD COLUMN character_flags_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v18: equipped prestige vault skin (recolor + body-sprite VFX). 0 = none.
+## Staff-only; stripped on spawn if the wearer is no longer admin+. ADD COLUMN.
+static func _migration_v18(db: SQLite) -> void:
+	if not _column_exists(db, "players", "vault_skin_id"):
+		db.query("ALTER TABLE players ADD COLUMN vault_skin_id INTEGER NOT NULL DEFAULT 0;")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

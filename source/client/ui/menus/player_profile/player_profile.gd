@@ -349,7 +349,7 @@ func apply_profile(profile: Dictionary) -> void:
 	var title: String = str(profile.get("title", ""))
 	title_label.text = "— %s —" % title if not title.is_empty() else ""
 	title_label.visible = not title.is_empty()
-	_tint_title_label(title)
+	TitleVfx.apply_to_label(title_label, title)
 
 	# Account handle stays as the dim line under the title — it's secondary
 	# identity info ("oh, that's their main account").
@@ -358,10 +358,14 @@ func apply_profile(profile: Dictionary) -> void:
 	account_label.visible = not account_name.is_empty()
 
 	# Sprite + idle anim.
+	var visual_id: int = int(profile.get("vault_skin_id", 0))
+	if visual_id <= 0:
+		visual_id = int(profile.get("skin_id", 1))
 	set_player_character(
-		int(profile.get("skin_id", 1)),
+		visual_id,
 		str(profile.get("animation", "idle"))
 	)
+	VaultSkinVfx.apply_to_sprite(player_character, int(profile.get("vault_skin_id", 0)))
 
 	# Bio panel. RichTextLabel so authors can BBCode if we want later.
 	var description: String = str(profile.get("description", ""))
@@ -626,22 +630,16 @@ func _title_chip(text: String) -> Button:
 	chip.disabled = true
 	chip.focus_mode = Control.FOCUS_NONE
 	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var hex: String = SupporterTitles.color_hex(text)
+	var hex: String = TitleCatalog.color_hex(text)
 	if not hex.is_empty():
 		var tint: Color = Color(hex)
 		chip.add_theme_color_override("font_color", tint)
 		chip.add_theme_color_override("font_disabled_color", tint)
 		chip.add_theme_color_override("font_hover_color", tint)
 		chip.add_theme_color_override("font_pressed_color", tint)
+		chip.add_theme_color_override("font_outline_color", tint.darkened(0.2))
+		chip.add_theme_constant_override("outline_size", 6 if TitleCatalog.is_vip(text) else 3)
 	return chip
-
-
-const _DEFAULT_TITLE_COLOR := Color(1, 0.85, 0.45, 1)
-
-
-func _tint_title_label(title: String) -> void:
-	var hex: String = SupporterTitles.color_hex(title)
-	title_label.self_modulate = Color(hex) if not hex.is_empty() else _DEFAULT_TITLE_COLOR
 
 
 # ---------------------------------------------------------------------------

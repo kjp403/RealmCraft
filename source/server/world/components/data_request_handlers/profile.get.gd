@@ -44,6 +44,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		profile_row["display_name"] = target_player.display_name
 		profile_row["account_name"] = target_player.account_name
 		profile_row["skin_id"] = target_player.skin_id
+		profile_row["vault_skin_id"] = target_player.vault_skin_id
 		profile_row["level"] = target_player.level
 		profile_row["profile_status"] = target_player.profile_status
 		profile_row["profile_animation"] = target_player.profile_animation
@@ -91,6 +92,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		"title": str(profile_row.get("display_title", "")),
 		"account_name": str(profile_row.get("account_name", "")),
 		"skin_id": int(profile_row.get("skin_id", 1)),
+		"vault_skin_id": int(profile_row.get("vault_skin_id", 0)),
 		"equipment": public_equipment,
 		"skills": public_skills,
 		"stats": {

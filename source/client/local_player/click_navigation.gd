@@ -37,6 +37,14 @@ var _path: PackedVector2Array = PackedVector2Array()
 var _path_index: int = 0
 var _pending_target: Vector2
 var _has_pending_target: bool = false
+## Last click destination, kept after the path is built so a door opening can
+## repath through a gate the first route treated as a wall.
+var _has_destination: bool = false
+## Door/obstacle rects to re-query after the grid is ready (or after a physics
+## frame so CollisionShape2D.set_deferred has landed). Dungeon doors start
+## closed; without this, click-move keeps treating an opened gate as a wall.
+var _pending_refresh_rects: Array[Rect2] = []
+var _refresh_queued: bool = false
 
 
 func setup(player: LocalPlayer) -> void:
@@ -52,6 +60,8 @@ func rebuild_for_map(map: Map) -> void:
 	_build_generation += 1
 	_grid_ready = false
 	_grid = null
+	if map != _map:
+		_pending_refresh_rects.clear()
 	_map = map
 	cancel()
 	if map != null:
@@ -61,14 +71,32 @@ func rebuild_for_map(map: Map) -> void:
 func request_move(world_target: Vector2) -> void:
 	_pending_target = world_target
 	_has_pending_target = true
+	_has_destination = true
 	if _grid_ready:
 		_build_path(world_target)
+
+
+## Re-sample walkability in [param rects] after colliders change (dungeon doors
+## opening/sealing). Cheap compared to a full map rebuild — only the overlapping
+## cells are queried. Safe to call before the grid is ready; the rects wait.
+func refresh_world_rects(rects: Array[Rect2]) -> void:
+	if rects.is_empty():
+		return
+	for rect: Rect2 in rects:
+		_pending_refresh_rects.append(rect)
+	if not _grid_ready:
+		return
+	if _refresh_queued:
+		return
+	_refresh_queued = true
+	_flush_refresh_rects.call_deferred()
 
 
 func cancel() -> void:
 	_path = PackedVector2Array()
 	_path_index = 0
 	_has_pending_target = false
+	_has_destination = false
 
 
 func movement_direction() -> Vector2:
@@ -171,7 +199,10 @@ func _build_grid(generation: int, map: Map) -> void:
 		return
 	_grid = grid
 	_grid_ready = true
+	_apply_refresh_rects()
 	if _has_pending_target:
+		_build_path(_pending_target)
+	elif _has_destination:
 		_build_path(_pending_target)
 
 
@@ -289,3 +320,52 @@ func _build_is_current(generation: int, map: Map) -> bool:
 		and is_instance_valid(map)
 		and map == _map
 	)
+
+
+func _flush_refresh_rects() -> void:
+	var scene_tree := Engine.get_main_loop() as SceneTree
+	if scene_tree != null:
+		await scene_tree.physics_frame
+	_refresh_queued = false
+	_apply_refresh_rects()
+	if _has_destination and _grid_ready:
+		_build_path(_pending_target)
+
+
+func _apply_refresh_rects() -> void:
+	if _pending_refresh_rects.is_empty() or not _grid_ready or _grid == null:
+		_pending_refresh_rects.clear()
+		return
+	if _player == null or not _player.is_inside_tree():
+		return
+	var space: PhysicsDirectSpaceState2D = _player.get_world_2d().direct_space_state
+	if space == null:
+		return
+	var shape := RectangleShape2D.new()
+	shape.size = PLAYER_CLEARANCE
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	query.collision_mask = COLLISION_MASK
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+	var seen: Dictionary[Vector2i, bool] = {}
+	for rect: Rect2 in _pending_refresh_rects:
+		var expanded: Rect2 = rect.grow(maxi(PLAYER_CLEARANCE.x, PLAYER_CLEARANCE.y))
+		var min_id := Vector2i(
+			floori(expanded.position.x / CELL_SIZE),
+			floori(expanded.position.y / CELL_SIZE)
+		)
+		var max_id := Vector2i(
+			ceili(expanded.end.x / CELL_SIZE),
+			ceili(expanded.end.y / CELL_SIZE)
+		)
+		for y: int in range(min_id.y, max_id.y + 1):
+			for x: int in range(min_id.x, max_id.x + 1):
+				var point_id := Vector2i(x, y)
+				if seen.has(point_id) or not _grid.is_in_boundsv(point_id):
+					continue
+				seen[point_id] = true
+				var point: Vector2 = _grid.get_point_position(point_id)
+				query.transform = Transform2D(0.0, point + PLAYER_SHAPE_OFFSET)
+				_grid.set_point_solid(point_id, not space.intersect_shape(query, 1).is_empty())
+	_pending_refresh_rects.clear()

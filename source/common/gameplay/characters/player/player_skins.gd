@@ -100,3 +100,10 @@ static func price(skin_id: int) -> int:
 ## True when Horizon will sell this skin for gold.
 static func is_for_sale(skin_id: int) -> bool:
 	return price(skin_id) > 0
+
+
+## True when Horizon's wardrobe should list this skin (starter or priced).
+## Prestige recolors are the same ids with a vault shader — they are NOT extra
+## roster entries, and trpg archives stay in the Vault Skins tab only.
+static func is_horizon_listed(skin_id: int) -> bool:
+	return skin_id == starter_skin_id() or is_for_sale(skin_id)

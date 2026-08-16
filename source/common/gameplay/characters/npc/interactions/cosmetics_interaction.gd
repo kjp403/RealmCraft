@@ -13,6 +13,6 @@ func menu_entry(_npc: Node) -> Dictionary:
 	return {
 		"label": _label_or("Cosmetics"),
 		"icon": _icon_or(""),
-		"menu": &"cosmetics",
-		"arg": null,
+		"menu": &"vault",
+		"arg": "cosmetics",
 	}
