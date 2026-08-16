@@ -273,11 +273,10 @@ func player_switch_instance(
 		current_instance.despawn_player(peer_id, false)
 	else:
 		return
-	# Leaving an instance: drop the peer from a dungeon run or a boss hunt (each
-	# dissolves its group when empty) and from any spar queue. All three no-op for
-	# an ordinary warp by someone not in a run/hunt/queue.
+	# Leaving an instance: drop the peer from a dungeon run (dissolves the group
+	# when empty) and from any spar queue. Both no-op for an ordinary warp by
+	# someone not in a run/queue.
 	DungeonService.on_player_left(peer_id, current_instance)
-	BossHuntService.on_player_left(peer_id, current_instance)
 	SparringService.on_player_left(peer_id, current_instance)
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
