@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_bank.gd" id="1_verifybank"]
+
+[node name="VerifyBank" type="Node"]
+script = ExtResource("1_verifybank")
