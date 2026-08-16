@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_dial"]
 script = ExtResource("2_d")
-lines = Array[String](["I've crossed those dunes more times than I've shed fur. Take the west stair — Sunspire Terraces. Ilka waits at that fire.", "Recommended around levels 25–30. Pack water. Pack patience."])
+lines = Array[String](["I've crossed those dunes more times than I've shed fur. Heat, tombs, and sand that bites.", "Recommended around levels 25–30. Pack water. Pack patience."])
 label_override = "What's out there?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

@@ -203,8 +203,9 @@ func _on_player_entered_warper(player: Player, current_instance: ServerInstance,
 		if target_instance:
 			player_switch_instance(target_instance, warper.target_id, player, current_instance)
 		else:
-			queue_switch_to(
-				instance_resource, warper.target_id, player, current_instance
+			queue_charge_instance(
+				instance_resource,
+				player_switch_instance.bind(warper.target_id, player, current_instance)
 			)
 	else:
 		return
@@ -230,7 +231,7 @@ func recall_player(peer_id: int) -> void:
 		teleport_peer_to(peer_id, current_inst, current_inst.instance_map.get_spawn_position(0))
 		return
 	if res.charged_instances.is_empty():
-		queue_switch_to(res, 0, player, current_inst)
+		queue_charge_instance(res, player_switch_instance.bind(0, player, current_inst))
 	else:
 		player_switch_instance(res.get_instance(), 0, player, current_inst)
 
@@ -244,22 +245,6 @@ func queue_charge_instance(instance_resource: InstanceResource, callback: Callab
 	var new_instance: ServerInstance = prepare_instance(instance_resource)
 	new_instance.ready.connect(callback.bind(new_instance), CONNECT_ONE_SHOT)
 	add_child(new_instance, true)
-
-
-## Charge [param instance_resource] then switch. The instance is the LAST bind
-## argument (queue_charge_instance appends it); wrapping here keeps
-## [method player_switch_instance]'s (instance, warper, player, from) order.
-func queue_switch_to(
-	instance_resource: InstanceResource,
-	warper_target_id: int,
-	player: Player,
-	current_instance: ServerInstance
-) -> void:
-	queue_charge_instance(
-		instance_resource,
-		func(inst: ServerInstance) -> void:
-			player_switch_instance(inst, warper_target_id, player, current_instance)
-	)
 
 
 func player_switch_instance(
@@ -387,7 +372,10 @@ func send_player_death_return(peer_id: int) -> bool:
 		teleport_peer_to(peer_id, current_inst, current_inst.instance_map.get_spawn_position(warper_id))
 		return true
 	if dest.charged_instances.is_empty():
-		queue_switch_to(dest, warper_id, player, current_inst)
+		queue_charge_instance(
+			dest,
+			player_switch_instance.bind(warper_id, player, current_inst)
+		)
 	else:
 		player_switch_instance(dest.get_instance(), warper_id, player, current_inst)
 	return true
@@ -415,7 +403,10 @@ func send_player_to_jail(peer_id: int) -> bool:
 		return false
 
 	if jail_res.charged_instances.is_empty():
-		queue_switch_to(jail_res, 0, player, current_inst)
+		queue_charge_instance(
+			jail_res,
+			player_switch_instance.bind(0, player, current_inst)
+		)
 	else:
 		player_switch_instance(jail_res.get_instance(), 0, player, current_inst)
 	return true

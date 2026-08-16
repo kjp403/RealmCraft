@@ -14,7 +14,7 @@ target_giver_name = "the Hall Keeper"
 [resource]
 script = ExtResource("2_quest")
 quest_name = "What They Were Carrying"
-description = "Rook saw the crates: vein-ore that hums, run through the city grates. Report to the Hall Keeper. The Sewers are the smuggling route — the Swamp Hermit in Goblin Woodland opens the grate."
+description = "Rook saw the crates: vein-ore that hums, run through the city grates. Report to the Hall Keeper. The keep's underside is the smuggling route."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_keeper")])
 auto_complete = true
 unlock_message = "[Rook Hale] They were not just thieves. They were moving humming ore through the grates. Tell the Hall Keeper."

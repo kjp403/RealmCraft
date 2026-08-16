@@ -19,8 +19,6 @@
 script = ExtResource("1_obj")
 enemy_type = &"cistern_sovereign"
 grant_item = ExtResource("4_shard")
-label_override = "the Bloated Sovereign"
-waypoint_labels = PackedStringArray("The Sewers")
 
 [sub_resource type="Resource" id="Obj_collect_shard"]
 script = ExtResource("1_obj")
@@ -36,10 +34,10 @@ amount = 8
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Sovereign Below"
-description = "The Bloated Sovereign is not in the Drowned Cistern. Leave the cistern, return to The Sewers, and walk north from the arrival grate to the standing water. Kill the Bloated Sovereign there. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper in the Guild Hall."
+description = "Kill the Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper. A poison weapon of your discipline is the next blade after rustic."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_sovereign"), SubResource("Obj_collect_shard")])
 min_level = 18
-unlock_message = "[Drowned Keeper Vess] Not here. Back up to The Sewers. Walk north from the arrival grate — standing water. Kill the Bloated Sovereign. Take the shard to the Hall Keeper in the Guild Hall."
+unlock_message = "[Drowned Keeper Vess] It has no name anyone wrote down. Kill it. Bring what it was keeping to the Hall."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 turn_in_giver_slug = &"hall_keeper"
 reward_xp = 500

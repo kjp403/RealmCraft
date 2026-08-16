@@ -10,16 +10,15 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"forgemaster_helka"
 target_giver_name = "Forgemaster Helka"
-waypoint_labels = PackedStringArray("Fire Forge", "The Bellows Gallery")
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Last Foundry"
-description = "The tablet names Fire Forge as the last furnace that fed the Hollow. In Goblin Woodland, talk to the Forge Golem on the east side and travel to the Fire Forge. Take the west stair into The Bellows Gallery. Forgemaster Helka is at the landing fire."
+description = "The tablet names Fire Forge as the last furnace that fed the Hollow. Find Forgemaster Helka on the working floor."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_helka")])
 auto_complete = true
 min_level = 30
-unlock_message = "[Hall Keeper] The tablet names a furnace. Ask the Forge Golem in the woodland. In the Fire Forge, take the west stair — The Bellows Gallery. Helka is at the fire."
+unlock_message = "[Hall Keeper] The tablet names a furnace. Helka still keeps a floor that is not hers anymore. Go."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 160
 reward_mastery_xp = 14000

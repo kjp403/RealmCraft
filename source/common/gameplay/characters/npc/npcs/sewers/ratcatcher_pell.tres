@@ -19,7 +19,7 @@ label_override = "Ask about the junctions"
 
 [sub_resource type="Resource" id="Dialogue_deep"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Back in The Sewers, take the east stair — The Drowned Cistern. Vess is on the landing.", "The thing itself is not down there. Vess will tell you where."])
+lines = Array[String](["Down past the culverts there is water that does not move. That is the cistern.", "Something in it grew fat on everything the city threw away. Take that how you like."])
 label_override = "Ask what is below"
 
 [resource]

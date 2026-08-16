@@ -10,16 +10,15 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"drowned_keeper_vess"
 target_giver_name = "Drowned Keeper Vess"
-waypoint_labels = PackedStringArray("The Sewers", "The Drowned Cistern")
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "What Went Down"
-description = "Pell says the crate is Hollow-touched. Return to the Sewers and take the east stair into The Drowned Cistern. Drowned Keeper Vess is at the landing."
+description = "Pell says the crate is Hollow-touched. Whatever hummed inside went down to the cistern. Find Drowned Keeper Vess at the standing water."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_vess")])
 auto_complete = true
 min_level = 15
-unlock_message = "[Ratcatcher Pell] Hollow-touched. Empty. The rest went to the water that does not move. Back in the Sewers, take the east stair — The Drowned Cistern. Vess is still down there."
+unlock_message = "[Ratcatcher Pell] Hollow-touched. Empty. The rest went to the water that does not move. Vess is still down there."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 110
 reward_mastery_xp = 8000

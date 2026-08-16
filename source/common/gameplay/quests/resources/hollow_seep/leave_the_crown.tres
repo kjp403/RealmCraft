@@ -19,7 +19,6 @@
 script = ExtResource("1_obj")
 enemy_type = &"sand_king"
 grant_item = ExtResource("4_tablet")
-waypoint_labels = PackedStringArray("Desert")
 
 [sub_resource type="Resource" id="Obj_collect_tablet"]
 script = ExtResource("1_obj")
@@ -35,12 +34,11 @@ amount = 10
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Leave the Crown"
-description = "Kill Ankhemet, the Sand King, north of the Desert grate. Leave the crown. Take the Foundry Tablet that names the last furnace that fed the Hollow — Fire Forge. A sunsteel weapon of your discipline is the next blade after fairy."
+description = "Kill Ankhemet, the Sand King, at the end of the long hall. Leave the crown. Take the Foundry Tablet that names the last furnace that fed the Hollow — Fire Forge. A sunsteel weapon of your discipline is the next blade after fairy."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_king"), SubResource("Obj_collect_tablet")])
 min_level = 28
 unlock_message = "[Tomb Delver Asha] He is crowned, armoured, and awake. Leave the crown. Take the tablet if you find one."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
-turn_in_giver_slug = &"tomb_delver_asha"
 reward_xp = 650
 reward_mastery_xp = 110000
 reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
