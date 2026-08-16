@@ -124,6 +124,17 @@ func turn_in_giver_key() -> StringName:
 	return turn_in_giver_slug
 
 
+## Player-facing turn-in target for the tracker / toast. Delivery quests must
+## name the NPC ("the Hall Keeper"), not "the quest giver" — that reads as the
+## NPC who offered it, which is often the wrong person.
+func turn_in_label() -> String:
+	if turn_in_giver != null and not turn_in_giver.npc_name.is_empty():
+		return turn_in_giver.npc_name
+	if not turn_in_giver_slug.is_empty():
+		return String(turn_in_giver_slug).replace("_", " ").capitalize()
+	return "the quest giver"
+
+
 ## The weapon from [member reward_style_weapons] matching [param player]'s
 ## equipped combat style. First entry if nothing matches.
 func pick_style_weapon_for(player: PlayerResource) -> Item:

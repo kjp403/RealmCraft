@@ -57,7 +57,11 @@ static func _advance_matching(
 			if resource.quest_progress(quest_id, i) >= objective.required_amount:
 				continue # already done
 			resource.advance_quest(quest_id, i, 1)
-			_grant_objective_item(resource, objective, peer_id)
+			# grant_item is a one-shot at the required count, not a drop per kill.
+			# Grate Cargo needs 8 skeletons — granting on every tick stuffed
+			# undroppable Sealed Smuggling Crates into the bag.
+			if resource.quest_progress(quest_id, i) >= objective.required_amount:
+				_grant_objective_item(resource, objective, peer_id)
 			# Progress ticks are STRUCTURED entries (events stay plain strings):
 			# the client routes them tracker-first (docs/notifications.md) —
 			# tracked quest = tracker pulse, no card; untracked = one
@@ -81,7 +85,9 @@ static func _advance_matching(
 				# shows the ready state (green + "Return to..."), so the client only
 				# cards this for UNTRACKED quests.
 				updates.append({"q": quest_id, "ready": true,
-					"t": "✓ %s ready to turn in. Return to the quest giver." % quest.quest_name})
+					"t": "✓ %s ready to turn in. Return to %s." % [
+						quest.quest_name, quest.turn_in_label()
+					]})
 	for quest: QuestResource in pending_auto_complete:
 		apply_turn_in(resource, quest, peer_id, instance)
 	return updates
@@ -121,16 +127,20 @@ static func apply_turn_in(
 ) -> void:
 	var inventory: Dictionary = resource.inventory
 
-	# Consume COLLECT items + grant_on_accept (delivery item served its narrative).
+	# Consume COLLECT items (all held copies — leftover grant_item stacks from
+	# the old per-kill grant) + grant_on_accept (delivery item served its narrative).
 	for objective: QuestObjective in quest.objectives:
 		if objective.type == QuestObjective.Type.COLLECT and objective.item:
-			Inventory.remove_amount_by_id(
-				inventory, int(objective.item.get_meta(&"id", 0)), objective.required_amount
-			)
+			var collect_id: int = int(objective.item.get_meta(&"id", 0))
+			var held: int = Inventory.count(inventory, collect_id)
+			if held > 0:
+				Inventory.remove_amount_by_id(inventory, collect_id, held)
 	if quest.grant_on_accept:
 		var grant_id: int = int(quest.grant_on_accept.get_meta(&"id", 0))
 		if grant_id > 0:
-			Inventory.remove_amount_by_id(inventory, grant_id, 1)
+			var held_grant: int = Inventory.count(inventory, grant_id)
+			if held_grant > 0:
+				Inventory.remove_amount_by_id(inventory, grant_id, held_grant)
 
 	# Pay rewards. Loot list is shared with the combat.reward push so the client
 	# gets the same toasts + XP-bar handling a kill gives. Mastery XP is applied
@@ -259,12 +269,69 @@ static func _grant_objective_item(
 	var item_id: int = int(objective.grant_item.get_meta(&"id", 0))
 	if item_id <= 0:
 		return
+	if Inventory.count(resource.inventory, item_id) > 0:
+		return
 	Inventory.add_item(resource.inventory, item_id, 1)
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
 			"id": item_id,
 			"amount": 1,
 			"name": str(objective.grant_item.item_name),
+			"quiet": true,
+		})
+
+
+## Strip quest items that no active quest still needs. Grate Cargo used to
+## grant a crate on every skeleton kill; leftovers cannot be dropped.
+static func purge_orphaned_quest_items(resource: PlayerResource, peer_id: int = 0) -> void:
+	var needed: Dictionary = {}
+	for quest_id: int in resource.quests:
+		if resource.quest_state(quest_id) != &"active":
+			continue
+		var quest: QuestResource = QuestResource.load_quest(quest_id)
+		if quest == null:
+			continue
+		if quest.grant_on_accept != null:
+			var accept_id: int = int(quest.grant_on_accept.get_meta(&"id", 0))
+			if accept_id > 0:
+				needed[accept_id] = maxi(int(needed.get(accept_id, 0)), 1)
+		for objective: QuestObjective in quest.objectives:
+			if objective == null:
+				continue
+			if objective.grant_item != null:
+				var grant_id: int = int(objective.grant_item.get_meta(&"id", 0))
+				if grant_id > 0:
+					needed[grant_id] = maxi(int(needed.get(grant_id, 0)), 1)
+			if (
+				objective.type == QuestObjective.Type.COLLECT
+				or objective.type == QuestObjective.Type.CRAFT
+			) and objective.item != null:
+				var item_id: int = int(objective.item.get_meta(&"id", 0))
+				if item_id > 0:
+					needed[item_id] = maxi(
+						int(needed.get(item_id, 0)),
+						objective.required_amount
+					)
+	var removed: bool = false
+	var seen: Dictionary = {}
+	for slot_uid: Variant in resource.inventory.keys():
+		var item_id: int = int(resource.inventory[slot_uid].get("id", 0))
+		if item_id <= 0 or seen.has(item_id):
+			continue
+		seen[item_id] = true
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if not (item is QuestItem):
+			continue
+		var keep: int = int(needed.get(item_id, 0))
+		var held: int = Inventory.count(resource.inventory, item_id)
+		if held > keep:
+			Inventory.remove_amount_by_id(resource.inventory, item_id, held - keep)
+			removed = true
+	if removed and peer_id > 0 and WorldServer.curr != null:
+		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
+			"id": 0,
+			"amount": 0,
+			"name": "",
 			"quiet": true,
 		})
 
@@ -375,7 +442,9 @@ static func notify_passive_ready(resource: PlayerResource, peer_id: int) -> void
 			grant_wardstone_if_due(resource, quest, peer_id) # COLLECT-path crossing
 			WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {
 				"messages": [{"q": quest_id, "ready": true,
-					"t": "✓ %s ready to turn in. Return to the quest giver." % quest.quest_name}]
+					"t": "✓ %s ready to turn in. Return to %s." % [
+						quest.quest_name, quest.turn_in_label()
+					]}]
 			})
 		elif not complete and notified:
 			resource.set_quest_ready_notified(quest_id, false)

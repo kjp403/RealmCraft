@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_dial"]
 script = ExtResource("2_d")
-lines = Array[String](["Beneath the stones, the water remembers every secret. Rats. Rust. Worse things with names.", "Levels 15–20 suit most. Watch your footing — and your nose."])
+lines = Array[String](["Beneath the stones, the water remembers every secret. Take the west stair in the Sewers — The Gutterworks. Obry keeps that grate.", "Levels 15–20 suit most. Watch your footing — and your nose."])
 label_override = "What's down there?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

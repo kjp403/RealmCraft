@@ -51,10 +51,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	if target_instance:
 		manager.player_switch_instance(target_instance, warp.target_id, player, instance)
 	else:
-		manager.queue_charge_instance(
-			target_res,
-			manager.player_switch_instance.bind(warp.target_id, player, instance)
-		)
+		manager.queue_switch_to(target_res, warp.target_id, player, instance)
 	return {"ok": true}
 
 

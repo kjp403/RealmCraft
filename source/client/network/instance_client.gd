@@ -301,6 +301,9 @@ func _ready() -> void:
 	synchronizer_manager = StateSynchronizerManagerClient.new()
 	synchronizer_manager.name = "StateSynchronizerManager"
 
+	if local_player != null and is_instance_valid(local_player):
+		local_player.synchronizer_manager = synchronizer_manager
+
 	if instance_map.replicated_props_container:
 		synchronizer_manager.add_container(1_000_000, instance_map.replicated_props_container)
 

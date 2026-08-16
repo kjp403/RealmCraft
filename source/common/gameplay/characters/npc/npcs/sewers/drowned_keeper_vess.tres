@@ -14,12 +14,12 @@ quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_vess"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["This was a reservoir before it was a grave. The mosaic on the floor was meant to be admired from a balcony.", "The balcony is gone. The mosaic is not. Neither is what stands on it.", "Wade the shallows if you must — they only come up to the knee. It is what wades with you."])
-label_override = "Ask about the reservoir"
+lines = Array[String](["This cistern is a grave. The Bloated Sovereign does not live down here.", "Go back up. In The Sewers, walk north from the grate you landed on. Standing water. Kill it. Then take what it was keeping to the Hall Keeper in the Guild Hall."])
+label_override = "Where is it?"
 
 [sub_resource type="Resource" id="Dialogue_sovereign"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["It has no name that anyone wrote down, so the crews called it the Sovereign and stopped coming.", "It splits when it is hurt. Kill the small ones fast or you will be fighting a crowd."])
+lines = Array[String](["It has no name that anyone wrote down, so the crews called it the Bloated Sovereign and stopped coming.", "It stands in the water north of the Sewers grate — not in this cistern. It splits when hurt. Kill the small ones fast or you will be fighting a crowd. The shard goes to the Hall Keeper."])
 label_override = "Ask about the Sovereign"
 
 [resource]

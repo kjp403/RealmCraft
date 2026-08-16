@@ -19,6 +19,7 @@
 script = ExtResource("1_obj")
 enemy_type = &"cinderborn"
 grant_item = ExtResource("4_seal")
+waypoint_labels = PackedStringArray("Fire Forge")
 
 [sub_resource type="Resource" id="Obj_collect_seal"]
 script = ExtResource("1_obj")
@@ -34,7 +35,7 @@ amount = 10
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Fuel Lock"
-description = "Kill Vurthek the Cinderborn in the Cinder Deeps. Recover the Quench-Seal — the fuel lock — and take it to Helka. A fire weapon of your discipline is the next blade after sunsteel."
+description = "Kill Vurthek the Cinderborn north of the Fire Forge grate. Recover the Quench-Seal — the fuel lock — and take it to Helka. A fire weapon of your discipline is the next blade after sunsteel."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_vurthek"), SubResource("Obj_collect_seal")])
 min_level = 33
 unlock_message = "[Cinderwright Maro] Vurthek was here before the foundry. Take the quench-lock if you live. Helka will know what it means."
