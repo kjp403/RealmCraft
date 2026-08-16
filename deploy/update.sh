@@ -48,7 +48,13 @@ if [[ ! -f /opt/arkenelle/client-web/index.html ]]; then
 	chown arkenelle:arkenelle /opt/arkenelle/client-web/index.html
 fi
 caddy validate --config /etc/caddy/Caddyfile
-systemctl reload caddy
+# systemd `reload caddy` has hung ~90s then failed, aborting the whole deploy
+# before game services restart. Use Caddy's admin API with a short timeout so
+# a sticky proxy cannot keep the world on the previous version.
+if ! timeout 15 caddy reload --config /etc/caddy/Caddyfile; then
+	echo "WARN: caddy reload failed or timed out — trying restart"
+	timeout 20 systemctl restart caddy || echo "WARN: caddy still down; continuing so the world can come up"
+fi
 
 echo "==> Restarting game services"
 systemctl restart arkenelle-master arkenelle-gateway arkenelle-world

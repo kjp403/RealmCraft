@@ -57,6 +57,9 @@ func data_request_handler(
 		if item_id > 0:
 			Inventory.add_item(resource.inventory, item_id, 1)
 
+	QuestService.replenish_seep_root_if_needed(resource, peer_id)
+	QuestService.notify_passive_ready(resource, peer_id)
+
 	return {"ok": true}
 
 

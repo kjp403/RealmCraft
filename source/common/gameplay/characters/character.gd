@@ -23,6 +23,12 @@ var skin_id: int:
 var cosmetic_id: int:
 	set = _set_cosmetic_id
 
+## Prestige vault recolor (a real skin_id wearing the vault shader). 0 = none,
+## which is what every character carries until staff equip one from the Vault
+## Skins tab. Synced like [member skin_id]. Never sold at Horizon.
+var vault_skin_id: int:
+	set = _set_vault_skin_id
+
 ## Lazily built by [method _set_cosmetic_id] on the client, only for characters that
 ## actually have a cosmetic equipped.
 var cosmetic_vfx: CosmeticVfx
@@ -148,6 +154,7 @@ func _ready() -> void:
 	refresh_nameplate_color()
 	if health_bar_auto_hide:
 		progress_bar.hide() # surfaces only on HP change (see _flash_health_bar)
+	_refresh_body_visual()
 
 
 ## Client: paint the over-head name by relationship. Subclasses override.
@@ -513,12 +520,27 @@ func update_weapon_animation(state: String) -> void:
 
 func _set_skin_id(id: int) -> void:
 	skin_id = id
-	# Avoid uncessary load on server
-	if multiplayer.is_server():
+	_refresh_body_visual()
+
+
+func _set_vault_skin_id(id: int) -> void:
+	vault_skin_id = id
+	_refresh_body_visual()
+
+
+## Prestige vault skins reuse a real sprite id plus a shader. When one is on,
+## it wins over [member skin_id] so Take-off restores the Horizon look.
+func _refresh_body_visual() -> void:
+	# Avoid unnecessary load on server
+	if not is_inside_tree() or multiplayer.is_server():
 		return
-	var sprite_frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", id) as SpriteFrames
+	if animated_sprite == null:
+		return
+	var visual_id: int = vault_skin_id if vault_skin_id > 0 else skin_id
+	var sprite_frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", visual_id) as SpriteFrames
 	if sprite_frames:
 		animated_sprite.sprite_frames = sprite_frames
+	VaultSkinVfx.apply_to_sprite(animated_sprite, vault_skin_id)
 
 
 func _set_cosmetic_id(id: int) -> void:

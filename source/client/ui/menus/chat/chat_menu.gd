@@ -32,7 +32,6 @@ const SELF_NAME_COLOR: String = "#bdbdbd"
 const SYSTEM_NAME_COLOR: String = "#ff6b6b"
 ## Subtle grey used for the (Guild) / « Title » suffixes and timestamps.
 const SUBTLE_COLOR: String = "#7a7a7a"
-const TITLE_COLOR: String = "#c8b977"
 
 ## If the previous message in the same conversation is from the same sender
 ## and within this window, suppress the duplicated name header (Discord-style).
@@ -72,6 +71,8 @@ var pending_name_fetch_at_ms: Dictionary[int, int] = {}
 var unread_by_conversation: Dictionary[String, int] = {}
 ## Last emitted HUD unread count, so unread_changed fires only when the number changes.
 var _last_unread_count: int = 0
+## Keep the title RichTextEffect alive — install_effect does not own the ref.
+var _title_fx: TitleFxEffect
 
 var seen_msg_ids_by_conversation: Dictionary[String, Dictionary] = {}
 var history_requested_by_conversation: Dictionary[String, bool] = {}
@@ -152,6 +153,8 @@ func _ready() -> void:
 	Client.request_data(&"social.block.list", _on_block_list_received, {}, InstanceClient.current.name)
 
 	full_feed_message_edit.text_submitted.connect(_on_text_submitted.bind(full_feed_message_edit))
+
+	_title_fx = TitleVfx.install_on(full_feed_text_display)
 
 	# Typing indicator: notify the server when the local user starts/stops
 	# composing. Idempotent server-side; we also de-dupe locally via
@@ -1027,10 +1030,7 @@ func _format_header(record: Dictionary, show_channel_prefix: bool) -> String:
 		pieces.append("[color=%s](%s)[/color]" % [SUBTLE_COLOR, guild_name])
 
 	if not title.is_empty():
-		var title_color: String = SupporterTitles.color_hex(title)
-		if title_color.is_empty():
-			title_color = TITLE_COLOR
-		pieces.append("[color=%s]« %s »[/color]" % [title_color, title])
+		pieces.append(TitleVfx.chat_bbcode(title))
 
 	return " ".join(pieces)
 

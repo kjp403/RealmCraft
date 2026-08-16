@@ -127,8 +127,7 @@ static func invite(from_peer: int, target_player_id: int) -> Dictionary:
 		"to": target_player_id,
 		"expires_ms": Time.get_ticks_msec() + INVITE_TTL_MS,
 	}
-	WorldServer.curr.data_push.rpc_id(target_peer, &"notification", {
-		"topic": "party.invite",
+	WorldServer.curr.data_push.rpc_id(target_peer, &"party.invite", {
 		"invite": invite_id,
 		"from_name": from.display_name,
 		"from_id": from.player_id,

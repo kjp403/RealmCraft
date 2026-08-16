@@ -352,7 +352,7 @@ position = Vector2(472, 712)
 npc_resource = ExtResource("25_sergeant")
 
 [node name="RookHale" parent="NPCs" unique_id=1900000601 instance=ExtResource("6_npcscene")]
-position = Vector2(560, 160)
+position = Vector2(567, 709)
 npc_resource = ExtResource("26_rook")
 
 [node name="Portal" parent="." unique_id=375786523 instance=ExtResource("14_27tev")]

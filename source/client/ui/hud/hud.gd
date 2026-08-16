@@ -31,6 +31,7 @@ var _hidden_for_menu: Array[CanvasItem] = []
 ## static 40×40 button.
 var _chat_unread_badge: PanelContainer
 var _chat_unread_label: Label
+var _party_hud: PartyHud
 
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var notification_button: Button = $MenuButtons/ButtonRail/NotificationButton
@@ -84,6 +85,9 @@ func _ready() -> void:
 	quest_tracker.resized.connect(_place_right_rail)
 	quest_tracker.visibility_changed.connect(_place_right_rail)
 	call_deferred(&"_place_right_rail")
+
+	_party_hud = PartyHud.new()
+	add_child(_party_hud)
 
 	notification_button.visible = false
 	notification_button.disabled = true
@@ -388,11 +392,14 @@ func _refresh_hud_for_menus() -> void:
 		# was hidden by its OWN logic (TwinSticks is touch-only; QuestTracker shows only while a
 		# quest is tracked). Re-entrancy from stacked menus is a no-op (list already populated).
 		if _hidden_for_menu.is_empty():
-			for node: CanvasItem in [
+			var hud_nodes: Array[CanvasItem] = [
 				$TwinSticks, $Chat, $QuestTracker, $SlayerTracker, $ItemSlots, $StatusBar, $AbilityBar, $Resources, $MenuButtons,
 				$BottomMenuDock, $BossBar,
-			]:
-				if node.visible:
+			]
+			if _party_hud != null:
+				hud_nodes.append(_party_hud)
+			for node: CanvasItem in hud_nodes:
+				if node != null and node.visible:
 					node.hide()
 					_hidden_for_menu.append(node)
 		# Compact inventory / skills / etc. sit on the HUD and used to cover
@@ -590,10 +597,6 @@ func _on_notification_received(payload: Dictionary) -> void:
 			Toaster.toast("%s invited you to %s. Check your notifications." % [
 				str(payload.get("from_name", "Someone")), str(payload.get("guild_name", "a guild"))
 			])
-		"party.invite":
-			Toaster.toast("%s invited you to their party. Check your notifications." % str(
-				payload.get("from_name", "Someone")
-			))
 		_:
 			Toaster.toast("You have a new notification.")
 

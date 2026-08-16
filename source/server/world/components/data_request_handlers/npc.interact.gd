@@ -19,4 +19,6 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	var visit_updates: Array = QuestService.on_visit(player.player_resource, npc_key, peer_id, instance)
 	if not visit_updates.is_empty():
 		WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": visit_updates})
+	# Drop nearby aggro so Heart slams / trash can't cancel quest UI.
+	player.begin_npc_dialogue()
 	return {"ok": true}

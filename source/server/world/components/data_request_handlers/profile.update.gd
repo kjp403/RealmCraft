@@ -28,6 +28,10 @@ func data_request_handler(
 		var requested_title: String = str(args["display_title"])
 		if not requested_title.is_empty() and not player.titles_unlocked.has(requested_title):
 			return {"ok": false, "reason": "title_locked"}
+		if not requested_title.is_empty() and TitleCatalog.is_premium_name(requested_title):
+			if CommandPermissions.effective_priority(player, instance) \
+					< CommandPermissions.STAFF_PROTECT_PRIORITY:
+				return {"ok": false, "reason": "title_locked"}
 		new_title = requested_title
 
 	var new_status: Variant = null

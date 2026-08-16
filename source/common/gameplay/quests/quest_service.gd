@@ -88,14 +88,21 @@ static func _advance_matching(
 
 
 ## Current progress for one objective: stored counter for KILL/CRAFT, live inventory
-## count for COLLECT (capped at required for display sanity).
+## count for COLLECT (capped at required for display sanity). CRAFT also credits
+## the bag: brewing a unique quest output before the CRAFT step is accepted
+## (True Seep Root → Seepbreaker's Draught) must not soft-lock the chain.
 static func objective_count(
 	resource: PlayerResource, quest_id: int, objective_index: int,
 	objective: QuestObjective, inventory: Dictionary
 ) -> int:
 	if objective.type == QuestObjective.Type.COLLECT:
-		var item_id: int = int(objective.item.get_meta(&"id", 0)) if objective.item else 0
-		return mini(Inventory.count(inventory, item_id), objective.required_amount)
+		var collect_id: int = int(objective.item.get_meta(&"id", 0)) if objective.item else 0
+		return mini(Inventory.count(inventory, collect_id), objective.required_amount)
+	if objective.type == QuestObjective.Type.CRAFT and objective.item:
+		var craft_id: int = int(objective.item.get_meta(&"id", 0))
+		var held: int = Inventory.count(inventory, craft_id) if craft_id > 0 else 0
+		var crafted: int = resource.quest_progress(quest_id, objective_index)
+		return mini(maxi(held, crafted), objective.required_amount)
 	return mini(resource.quest_progress(quest_id, objective_index), objective.required_amount)
 
 
@@ -310,11 +317,48 @@ static func is_complete(resource: PlayerResource, quest_id: int, inventory: Dict
 	return any_met
 
 
+## Re-grant True Seep Root when The Real Draught or Unrooted is active and the
+## player has neither the root nor Seepbreaker's Draught (bag or bank). The root
+## is a unique Heart drop; brewing it before accepting the CRAFT step consumes it
+## with no recraft path.
+static func replenish_seep_root_if_needed(resource: PlayerResource, peer_id: int) -> void:
+	var needs_root := false
+	for slug: StringName in [&"the_real_draught", &"unrooted"]:
+		var quest_id: int = ContentRegistryHub.id_from_slug(&"quests", slug)
+		if quest_id > 0 and resource.quest_state(quest_id) == &"active":
+			needs_root = true
+			break
+	if not needs_root:
+		return
+	var draught_id: int = ContentRegistryHub.id_from_slug(&"items", &"seepbreakers_draught")
+	var root_id: int = ContentRegistryHub.id_from_slug(&"items", &"true_seep_root")
+	if draught_id <= 0 or root_id <= 0:
+		return
+	if Inventory.count(resource.inventory, draught_id) > 0:
+		return
+	if Inventory.count(resource.bank, draught_id) > 0:
+		return
+	if Inventory.count(resource.inventory, root_id) > 0:
+		return
+	if Inventory.count(resource.bank, root_id) > 0:
+		return
+	Inventory.add_item(resource.inventory, root_id, 1)
+	var root: Item = ContentRegistryHub.load_by_id(&"items", root_id) as Item
+	if peer_id > 0 and WorldServer.curr != null:
+		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
+			"id": root_id,
+			"amount": 1,
+			"name": str(root.item_name) if root else "True Seep Root",
+			"quiet": false,
+		})
+
+
 ## Pushes the "ready to turn in" toast for any active quest that became complete
-## via a passive path (COLLECT items now in the bag) that fires no advance event.
+## via a passive path (COLLECT items now in the bag, or a CRAFT output already
+## held) that fires no advance event.
 ## Latches per quest so a tracker refresh doesn't re-toast, and clears the latch
 ## if the quest drops back below complete (items sold/lost). KILL/CRAFT/VISIT
-## completions are already latched by _advance_matching, so they're skipped here.
+## event completions are already latched by _advance_matching.
 static func notify_passive_ready(resource: PlayerResource, peer_id: int) -> void:
 	if peer_id <= 0:
 		return

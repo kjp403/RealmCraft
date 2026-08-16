@@ -874,6 +874,13 @@ func set_click_move_target(world_target: Vector2) -> void:
 		_click_move_marker.flash_at(world_target)
 
 
+## Click-move bakes a walkability grid at map load. Dungeon doors start closed,
+## so opening them must re-sample those cells or click/minimap routes stay walled.
+func refresh_click_navigation_rects(rects: Array[Rect2]) -> void:
+	if _click_navigation != null:
+		_click_navigation.refresh_world_rects(rects)
+
+
 ## Begin commercial-style auto-gather on [param node] (walk in, swing until
 ## this player's charge pool is depleted, then stop — re-click to resume after
 ## regen). Cancel with WASD or a ground click.

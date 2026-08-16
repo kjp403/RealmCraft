@@ -241,12 +241,18 @@ static func _on_dungeon_room(payload: Dictionary) -> void:
 	if current == null or current.instance_map == null:
 		return
 	var is_open: bool = not bool(payload.get("sealed", false))
+	var door_rects: Array[Rect2] = []
 	for door_path: String in payload.get("doors", []):
 		if door_path.is_empty():
 			continue
 		var door: Node = current.instance_map.get_node_or_null(NodePath(door_path))
 		if door != null and door.has_method(&"set_open"):
 			door.set_open(is_open)
+			var door2d: Node2D = door as Node2D
+			if door2d != null:
+				door_rects.append(Rect2(door2d.global_position - Vector2(16, 16), Vector2(32, 32)))
+	if local_player != null:
+		local_player.refresh_click_navigation_rects(door_rects)
 
 
 ## Left a dungeon run (exit NPC or recall) — confirm it. Subscribed statically so

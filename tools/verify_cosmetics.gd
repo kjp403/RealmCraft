@@ -117,14 +117,71 @@ func _initialize() -> void:
 	_check(curator != null, "curator resource loads")
 	if curator != null:
 		var has_cosmetics: bool = false
+		var has_titles: bool = false
+		var has_skins: bool = false
 		for i: NPCInteraction in curator.get("interactions"):
 			if i is CosmeticsInteraction:
 				has_cosmetics = true
+			if i is TitlesInteraction:
+				has_titles = true
+			if i is SkinsInteraction:
+				has_skins = true
 		_check(has_cosmetics, "curator carries CosmeticsInteraction")
+		_check(has_titles, "curator carries TitlesInteraction")
+		_check(has_skins, "curator carries SkinsInteraction")
 		_check(curator.get("skin") != null, "curator has a skin")
 
 	print("-- client menu --")
 	_check(ResourceLoader.exists(MENU), "cosmetics menu scene exists at the convention path")
+	_check(
+		ResourceLoader.exists("res://source/client/ui/menus/titles/titles_menu.tscn"),
+		"titles menu scene exists at the convention path"
+	)
+	_check(
+		ResourceLoader.exists("res://source/client/ui/menus/skins/skins_menu.tscn"),
+		"skins menu scene exists at the convention path"
+	)
+	_check(
+		ResourceLoader.exists("res://source/client/ui/menus/vault/vault_menu.tscn"),
+		"vault menu scene exists at the convention path"
+	)
+
+	print("-- titles --")
+	_check(TitleCatalog.premium_slugs().size() == 13, "13 premium titles in the vault roster")
+	_check(TitleCatalog.has_vfx("Sovereign"), "Sovereign has title-text VFX")
+	_check(TitleCatalog.has_vfx("Sapphire Supporter"), "donator titles still resolve")
+	_check(not TitleCatalog.has_vfx("Iron Warden"), "quest titles stay flat")
+	_check(TitleCatalog.is_premium_name("Ashen Crown"), "multi-word premium names resolve")
+	_check(not TitleCatalog.is_premium_name("Sapphire Supporter"), "donator titles are not the shop set")
+	_check(
+		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/titles.state.gd"),
+		"titles.state handler exists"
+	)
+	_check(
+		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/titles.equip.gd"),
+		"titles.equip handler exists"
+	)
+
+	print("-- vault skins --")
+	var wardrobe_n: int = VaultSkins.roster(VaultSkins.GROUP_WARDROBE).size()
+	var archive_n: int = VaultSkins.roster(VaultSkins.GROUP_ARCHIVES).size()
+	_check(wardrobe_n > 0, "wardrobe prestige roster is non-empty (got %d)" % wardrobe_n)
+	_check(archive_n > 0, "archive prestige roster is non-empty (got %d)" % archive_n)
+	_check(wardrobe_n + archive_n == PlayerSkins.ids().size(), "every indexed skin has a prestige recolor")
+	_check(VaultSkins.is_valid(PlayerSkins.starter_skin_id()), "starter Knight has a prestige recolor")
+	_check(not VaultSkins.is_valid(0), "id 0 is not a prestige skin")
+	_check(
+		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/vault_skins.state.gd"),
+		"vault_skins.state handler exists"
+	)
+	_check(
+		ResourceLoader.exists("res://source/server/world/components/data_request_handlers/vault_skins.equip.gd"),
+		"vault_skins.equip handler exists"
+	)
+	_check(
+		ResourceLoader.exists("res://source/common/gameplay/characters/player/vault_skin.gdshader"),
+		"prestige skin shader exists"
+	)
 
 	print("-- gate --")
 	_check(CommandPermissions.STAFF_PROTECT_PRIORITY == 2, "staff floor is admin (2)")
@@ -161,6 +218,7 @@ func _initialize() -> void:
 	)
 	_check(nobody.cosmetic_id == 0, "players default to no cosmetic")
 	_check(nobody.weapon_cosmetic_id == 0, "players default to no weapon cosmetic")
+	_check(nobody.vault_skin_id == 0, "players default to no prestige skin")
 
 	print("COSMETICS_VERIFY_%s failures=%d" % ["FAIL" if _fail else "PASS", _fail])
 	quit(1 if _fail else 0)

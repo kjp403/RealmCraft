@@ -79,11 +79,11 @@ func save_player(player: PlayerResource) -> bool:
 
 	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
-		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, level, experience, available_attributes_points, "
+		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, character_flags_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -91,6 +91,7 @@ func save_player(player: PlayerResource) -> bool:
 			player.skin_id,
 			player.cosmetic_id,
 			player.weapon_cosmetic_id,
+			player.vault_skin_id,
 			player.level,
 			player.experience,
 			player.available_attributes_points,
@@ -451,7 +452,7 @@ func get_player_row_by_display_name(display_name: String) -> Dictionary:
 
 func get_player_profile_row(player_id: int) -> Dictionary:
 	db.query_with_bindings(
-		"SELECT player_id, account_name, display_name, skin_id, cosmetic_id, level, "
+		"SELECT player_id, account_name, display_name, skin_id, cosmetic_id, vault_skin_id, level, "
 		+ "profile_status, profile_animation, active_guild_id, "
 		+ "equipment_json, skills_json, titles_json, stats_json "
 		+ "FROM players WHERE player_id=?;",
@@ -486,6 +487,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.skin_id = int(row.get("skin_id", 1))
 	player.cosmetic_id = int(row.get("cosmetic_id", 0))
 	player.weapon_cosmetic_id = int(row.get("weapon_cosmetic_id", 0))
+	player.vault_skin_id = int(row.get("vault_skin_id", 0))
 
 	player.level = int(row.get("level", 1))
 	player.experience = int(row.get("experience", 0))

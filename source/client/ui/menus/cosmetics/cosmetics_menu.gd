@@ -48,7 +48,9 @@ var _clear_button: Button
 
 
 func _ready() -> void:
-	build_shell("Cosmetics", null, true)
+	var embedded: bool = bool(get_meta(&"embedded", false))
+	if not embedded:
+		build_shell("Cosmetics", null, true)
 	_build_layout()
 	visibility_changed.connect(func() -> void:
 		if visible:
@@ -59,12 +61,18 @@ func _ready() -> void:
 	_on_shown.call_deferred()
 
 
+func _host() -> Control:
+	return content if content != null else self
+
+
 func _build_layout() -> void:
 	var col: VBoxContainer = VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_theme_constant_override(&"separation", 8)
-	content.add_child(col)
+	if content == null:
+		col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_host().add_child(col)
 
 	# Tab strip. Populated in _rebuild_tabs once the roster arrives — building it
 	# from the response rather than a hardcoded list means an empty slot (or a new

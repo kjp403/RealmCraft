@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://bet5gn3f3egqg"]
 
-[ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_0pyxm"]
+[ext_resource type="Script" path="res://source/common/gameplay/maps/maps/fungus_cave/fungus_cave.gd" id="1_0pyxm"]
 [ext_resource type="AudioStream" uid="uid://psn1us7ahvf1" path="res://assets/audio/music/fungus.ogg" id="2_4ochw"]
 [ext_resource type="TileSet" uid="uid://hrdxga40fogr" path="res://source/common/gameplay/maps/tilesets/mining_cave_tileset.tres" id="2_544ym"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/firefly.tscn" id="3_4ochw"]
@@ -272,12 +272,12 @@ position = Vector2(72, -128)
 npc_resource = ExtResource("24_dxrxi")
 
 [node name="LiraVoss" parent="." unique_id=1900000501 instance=ExtResource("12_y53hc")]
-position = Vector2(-340, -1140)
+position = Vector2(792, 82)
 npc_resource = ExtResource("28_lira")
 hidden_if_flag = &"lira_freed"
 
 [node name="CaveScribeWren" parent="." unique_id=1900000502 instance=ExtResource("12_y53hc")]
-position = Vector2(-200, -1100)
+position = Vector2(889, 163)
 npc_resource = ExtResource("30_wren")
 
 [node name="LiraVossFreed" parent="." unique_id=1900000503 instance=ExtResource("12_y53hc")]
