@@ -63,9 +63,44 @@ const RAPID_DEATH_WINDOW_MS: int = 20000
 const RAPID_DEATH_LIMIT: int = 3
 
 
+## Talking to an NPC (quest / shop / greeting) — hostiles drop aggro and deal
+## no damage until the player walks away or this window expires. Stops Heart
+## slams from cancelling quest dialogue while the player is rooted in the UI.
+const NPC_DIALOGUE_MS: int = 90000
+const NPC_DIALOGUE_BREAK_PX: float = 90.0
+var npc_dialogue_until_ms: int = 0
+var _npc_dialogue_anchor: Vector2 = Vector2.ZERO
+
+
+func begin_npc_dialogue() -> void:
+	npc_dialogue_until_ms = Time.get_ticks_msec() + NPC_DIALOGUE_MS
+	_npc_dialogue_anchor = global_position
+	var map: Map = get_parent() as Map
+	if map == null or map.replicated_props_container == null:
+		return
+	for child: Node in map.replicated_props_container.get_children():
+		var mob: HostileNpc = child as HostileNpc
+		if mob != null and mob.targeted_player == self:
+			mob.abandon_current_target()
+
+
+func is_in_npc_dialogue() -> bool:
+	if npc_dialogue_until_ms <= 0:
+		return false
+	if Time.get_ticks_msec() >= npc_dialogue_until_ms:
+		npc_dialogue_until_ms = 0
+		return false
+	if global_position.distance_to(_npc_dialogue_anchor) > NPC_DIALOGUE_BREAK_PX:
+		npc_dialogue_until_ms = 0
+		return false
+	return true
+
+
 ## Slayer "Task Ward": hits from the monsters our ACTIVE task targets land softer.
 ## Server-only path (take_damage is), so player_resource is populated here.
 func incoming_damage_factor(attacker: Character) -> float:
+	if attacker is HostileNpc and is_in_npc_dialogue():
+		return 0.0
 	if player_resource == null or attacker is not HostileNpc:
 		return 1.0
 	return SlayerTaskService.task_damage_factor(

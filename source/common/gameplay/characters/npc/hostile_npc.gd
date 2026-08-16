@@ -602,7 +602,8 @@ func _on_body_entered(body: Node) -> void:
 	# the same DEAD guard — this one was just missing.
 	if DEBUG_NPC and enemy_state == EnemyState.DEAD and chase_on_area:
 		printerr("[SRV NPC %s] body_entered while DEAD — guard prevented zombie" % enemy_type)
-	if chase_on_area and not targeted_player and enemy_state != EnemyState.DEAD:
+	if chase_on_area and not targeted_player and enemy_state != EnemyState.DEAD \
+			and _is_target_valid(body as Player):
 		targeted_player = body
 		enemy_state = EnemyState.CHASE
 		if DEBUG_NPC:
@@ -694,7 +695,12 @@ func _is_hostile_to(player: Player) -> bool:
 ## chasing into the void.
 func _is_target_valid(player: Player) -> bool:
 	return is_instance_valid(player) and player.is_inside_tree() \
-			and not player.is_dead and player.get_viewport() == get_viewport()
+			and not player.is_dead and player.get_viewport() == get_viewport() \
+			and not player.is_in_npc_dialogue()
+
+
+func abandon_current_target() -> void:
+	_abandon_target()
 
 
 ## A player can't MOVE more than a couple of px per physics tick — a bigger jump

@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://bet5gn3f3egqg"]
 
-[ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_0pyxm"]
+[ext_resource type="Script" path="res://source/common/gameplay/maps/maps/fungus_cave/fungus_cave.gd" id="1_0pyxm"]
 [ext_resource type="AudioStream" uid="uid://psn1us7ahvf1" path="res://assets/audio/music/fungus.ogg" id="2_4ochw"]
 [ext_resource type="TileSet" uid="uid://hrdxga40fogr" path="res://source/common/gameplay/maps/tilesets/mining_cave_tileset.tres" id="2_544ym"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/firefly.tscn" id="3_4ochw"]
