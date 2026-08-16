@@ -6,12 +6,24 @@ class_name ClientUpdater
 ## The zip is extracted to %TEMP% — never next to the EXE — so OneDrive/Dropbox
 ## cannot lock the staged files mid-copy. apply_update.cmd retries robocopy and
 ## kills a relaunched EXE (quit() looks like a crash; people click the icon again).
+##
+## Every failure path must end with a client running. quit() hands the only live
+## process to apply_update.cmd, so a copy that gives up without relaunching leaves
+## the player staring at nothing — and the next launch re-stages and quits again,
+## which reads as "the game opens for a second and closes" forever.
 
 const MANIFEST_TIMEOUT_SEC: float = 15.0
 const DOWNLOAD_TIMEOUT_SEC: float = 0.0  # disabled — zip can be ~100MB on a slow link
 const STAGE_DIR_NAME: String = "_update"
 const ZIP_NAME: String = "_update_download.zip"
 const APPLY_SCRIPT_NAME: String = "apply_update.cmd"
+## Written next to the EXE before quit(), cleared once a boot sees the new build.
+## Finding it on startup means the copy lost, so it doubles as the retry counter.
+const APPLY_MARKER_NAME: String = "update_pending.json"
+## Stamped into a stage dir so a later run can tell which build it holds.
+const STAGE_META_NAME: String = "arkenelle_stage.json"
+## Applies to attempt before giving up and showing the player a real error.
+const MAX_APPLY_TRIES: int = 3
 
 
 static func should_run() -> bool:
@@ -58,14 +70,27 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 	if cmp >= 0 and force:
 		return _result(false, false, "already-latest", false)
 
-	# Finish a previous extract instead of downloading again and quit()-looping.
-	var stage_dir: String = _existing_stage(install_dir)
-	if stage_dir.is_empty():
-		var zip_url: String = str(manifest.get("url", Distribution.CLIENT_DOWNLOAD_URL)).strip_edges()
-		var expect_sha: String = str(manifest.get("sha256", "")).strip_edges().to_lower()
-		if zip_url.is_empty() or expect_sha.is_empty():
-			return _result(false, false, "manifest", true)
+	var zip_url: String = str(manifest.get("url", Distribution.CLIENT_DOWNLOAD_URL)).strip_edges()
+	var expect_sha: String = str(manifest.get("sha256", "")).strip_edges().to_lower()
+	if zip_url.is_empty() or expect_sha.is_empty():
+		return _result(false, false, "manifest", true)
 
+	# The marker survived, so a previous apply_update.cmd ran and we booted the
+	# OLD build anyway — robocopy lost. Re-staging would just quit() again, so
+	# bound it and hand the player a popup with the manual download instead.
+	var tries: int = _apply_tries(install_dir)
+	if tries >= MAX_APPLY_TRIES:
+		push_warning("ClientUpdater: apply failed %d times — surfacing to the player" % tries)
+		_clear_apply_marker(install_dir)
+		_discard_stages(install_dir)
+		return _result(false, false, "apply", true)
+
+	# Finish a previous extract instead of downloading again and quit()-looping —
+	# but only when the stage carries THIS manifest's build. A stage left from an
+	# earlier release would otherwise install unverified (the sha256 check only
+	# covers a fresh download), and a same-version republish pins them there.
+	var stage_dir: String = _existing_stage(install_dir, remote_version, expect_sha)
+	if stage_dir.is_empty():
 		var zip_path: String = _temp_zip_path()
 		stage_dir = _temp_stage_dir()
 		_status(status, _t(&"DOWNLOADING_UPDATE"))
@@ -93,16 +118,22 @@ static func apply_if_needed(host: Node, status: Callable = Callable(), force: bo
 			push_warning("ClientUpdater: staged update is missing Arkenelle.exe")
 			_remove_dir(stage_dir)
 			return _result(false, false, "extract", true)
+		_write_stage_meta(stage_dir, remote_version, expect_sha)
 	else:
 		_status(status, _t(&"INSTALLING_UPDATE"))
 
-	return _spawn_apply(host, install_dir, stage_dir)
+	return _spawn_apply(host, install_dir, stage_dir, tries + 1)
 
 
-static func _spawn_apply(host: Node, install_dir: String, stage_dir: String) -> Dictionary:
+static func _spawn_apply(
+	host: Node, install_dir: String, stage_dir: String, tries: int
+) -> Dictionary:
 	var script_path: String = install_dir.path_join(APPLY_SCRIPT_NAME)
 	if not _write_apply_script(script_path):
 		return _result(false, false, "script", true)
+	# Must be on disk before quit(): once this process is gone the marker is the
+	# only way the next boot can tell a failed apply from a first attempt.
+	_write_apply_marker(install_dir, tries)
 
 	var exe_name: String = OS.get_executable_path().get_file()
 	var pid: int = OS.get_process_id()
@@ -123,6 +154,7 @@ static func _spawn_apply(host: Node, install_dir: String, stage_dir: String) -> 
 	)
 	if err < 0:
 		push_warning("ClientUpdater: failed to spawn apply_update.cmd")
+		_clear_apply_marker(install_dir)
 		return _result(false, false, "spawn", true)
 	host.get_tree().quit()
 	return _result(true, true, "", true)
@@ -151,20 +183,75 @@ static func _stage_has_exe(stage_dir: String) -> bool:
 	return not exe_name.is_empty() and FileAccess.file_exists(stage_dir.path_join(exe_name))
 
 
-static func _existing_stage(install_dir: String) -> String:
-	var legacy: String = install_dir.path_join(STAGE_DIR_NAME)
-	if _stage_has_exe(legacy):
-		return legacy
-	var temp_stage: String = _temp_stage_dir()
-	if _stage_has_exe(temp_stage):
-		return temp_stage
+static func _write_stage_meta(stage_dir: String, version: String, sha: String) -> void:
+	var file: FileAccess = FileAccess.open(stage_dir.path_join(STAGE_META_NAME), FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({"version": version, "sha256": sha}))
+	file.close()
+
+
+## A stage is only reusable when it was extracted from the zip this manifest is
+## advertising. Without the stamp there is nothing to compare — the sha256 check
+## happens on the downloaded zip, which is deleted right after extraction.
+static func _stage_matches(stage_dir: String, version: String, sha: String) -> bool:
+	var meta_path: String = stage_dir.path_join(STAGE_META_NAME)
+	if not FileAccess.file_exists(meta_path):
+		return false
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+	if not (parsed is Dictionary):
+		return false
+	var meta: Dictionary = parsed as Dictionary
+	if str(meta.get("version", "")).strip_edges() != version:
+		return false
+	return str(meta.get("sha256", "")).strip_edges().to_lower() == sha
+
+
+static func _existing_stage(install_dir: String, version: String, sha: String) -> String:
+	for candidate: String in [install_dir.path_join(STAGE_DIR_NAME), _temp_stage_dir()]:
+		if not _stage_has_exe(candidate):
+			continue
+		if _stage_matches(candidate, version, sha):
+			return candidate
+		# Wrong build (or a pre-stamp stage from an older client) — drop it so the
+		# next pass downloads and checksums a fresh zip instead of installing this.
+		_remove_dir(candidate)
 	return ""
+
+
+static func _discard_stages(install_dir: String) -> void:
+	_remove_dir(install_dir.path_join(STAGE_DIR_NAME))
+	_remove_dir(_temp_stage_dir())
+
+
+static func _apply_tries(install_dir: String) -> int:
+	var marker_path: String = install_dir.path_join(APPLY_MARKER_NAME)
+	if not FileAccess.file_exists(marker_path):
+		return 0
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(marker_path))
+	if parsed is Dictionary:
+		return int((parsed as Dictionary).get("tries", 0))
+	return 0
+
+
+static func _write_apply_marker(install_dir: String, tries: int) -> void:
+	var file: FileAccess = FileAccess.open(install_dir.path_join(APPLY_MARKER_NAME), FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({"tries": tries}))
+	file.close()
+
+
+static func _clear_apply_marker(install_dir: String) -> void:
+	_cleanup_path(install_dir.path_join(APPLY_MARKER_NAME))
 
 
 static func _cleanup_install_leftovers(install_dir: String) -> void:
 	_cleanup_path(install_dir.path_join(APPLY_SCRIPT_NAME))
 	_cleanup_path(install_dir.path_join(ZIP_NAME))
-	_remove_dir(install_dir.path_join(STAGE_DIR_NAME))
+	# Reaching here means this boot IS the advertised build, so the apply worked.
+	_clear_apply_marker(install_dir)
+	_discard_stages(install_dir)
 
 
 ## Localized text for a static context. `tr()` is an Object method, so calling it
@@ -341,6 +428,10 @@ if %RC% GEQ 8 (
     goto retry
   )
   echo FAIL>> "%LOG%"
+  rem Never leave the player with no game. The old build boots, finds its
+  rem update_pending.json marker still there, and reports the failure.
+  start "" "%INSTALL%\\%EXENAME%"
+  endlocal
   exit /b 1
 )
 rmdir /S /Q "%STAGE%"
