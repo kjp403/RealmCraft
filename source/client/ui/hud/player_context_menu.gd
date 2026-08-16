@@ -227,6 +227,15 @@ func _on_trade_invite(payload: Dictionary) -> void:
 
 
 func _on_party_invite(payload: Dictionary) -> void:
+	# Client._data_response echoes every request reply back through data_push on
+	# the same topic, and "party.invite" is both a request (inviter -> server)
+	# and a push (server -> invitee). Without this guard the inviter's own
+	# {"ok": true, "invite": id} reply re-entered here and popped an "Another
+	# player invited you to join their party" dialog on the person who sent it.
+	# The real push always carries the sender; a request reply never does.
+	var from_id: int = int(payload.get("from_id", 0))
+	if from_id <= 0 or from_id == ClientState.player_id:
+		return
 	_party_invite_id = int(payload.get("invite", 0))
 	if _party_invite_id <= 0:
 		return

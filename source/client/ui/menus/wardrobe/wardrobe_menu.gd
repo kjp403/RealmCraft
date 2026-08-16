@@ -149,10 +149,13 @@ func _set_gold(value: int) -> void:
 
 # --- Data ---
 
+## Always ask the server for ownership + gold. This used to bail early while
+## _skins was empty — but _skins is ONLY ever filled by _on_state, which only
+## runs off this request, and _ready() starts it empty. So the very first open
+## short-circuited to "No skins available." and never asked, and every reopen hit
+## the same dead guard: the wardrobe could never list anything. The empty-roster
+## message belongs after the response, not in front of the request.
 func _on_shown() -> void:
-	if _skins.is_empty():
-		_status_label.text = "No skins available."
-		return
 	if InstanceClient.current == null:
 		return
 	Client.request_data(&"wardrobe.state", _on_state, {}, String(InstanceClient.current.name))
@@ -164,9 +167,18 @@ func _on_state(data: Dictionary) -> void:
 		_owned[int(id_v)] = true
 	_set_gold(int(data.get("gold", 0)))
 	_skins.clear()
+	# Iterating PlayerSkins.ids() (the `sprites` registry) is what keeps prestige
+	# VAULT recolors out of Horizon: their ids are style * VaultSkins.STRIDE +
+	# skin_id, which are not registry entries, so they cannot appear here even if
+	# the owned set carries them. Vault dyes stay on their own staff-only tab.
 	for id: int in PlayerSkins.ids():
 		if PlayerSkins.is_horizon_listed(id) or _owned.get(id, false):
 			_skins.append(id)
+	if _skins.is_empty():
+		_status_label.text = "No skins available."
+		_action_button.text = "Unavailable"
+		_action_button.disabled = true
+		return
 	# Open on the skin you're currently wearing.
 	var equipped_idx: int = _skins.find(_equipped_id())
 	_idx = equipped_idx if equipped_idx >= 0 else 0
