@@ -874,7 +874,7 @@ weapon = null
 
 
 [node name="GoblinWarlord" parent="ReplicatedPropsContainer" unique_id=608139458 instance=ExtResource("3_2hhap")]
-position = Vector2(1240, 200)
+position = Vector2(472, 232)
 debug_draw_ranges = false
 enemy_data = ExtResource("22_warlord")
 weapon = null
