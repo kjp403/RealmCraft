@@ -8,31 +8,37 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 35.0
+value = 40.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-stat_name = "mr"
-value = 22.0
+stat_name = "health_max"
+value = 74.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 20.0
+stat_name = "mr"
+value = 27.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 30.0
+value = 79.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
+stat_name = "move_speed"
+value = 14.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_5"]
+script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 4.0
+value = 9.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -40,7 +46,7 @@ script = ExtResource("3_gear")
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 70
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5")])
 item_name = &"Skyrender Hood"
 item_icon = ExtResource("2_icon")
 description = "Sky-split feathers woven into lethal hunting kit."

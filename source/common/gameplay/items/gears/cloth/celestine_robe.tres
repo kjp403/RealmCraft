@@ -8,37 +8,37 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 28.0
+value = 33.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-stat_name = "mr"
-value = 83.0
+stat_name = "health_max"
+value = 85.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
-stat_name = "mana_max"
-value = 55.0
+stat_name = "mr"
+value = 96.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 22.0
+value = 97.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
-stat_name = "health_max"
-value = 75.0
+stat_name = "mana_max"
+value = 192.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_5"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 5.0
+value = 13.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

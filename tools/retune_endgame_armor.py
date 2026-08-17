@@ -41,10 +41,12 @@ PIECE = {
     "chest": (0.45, 0.45),
     "boots": (0.23, 0.25),
 }
+# Survivability only. Offensive AP/AD/mana/haste/speed for cloth + leather
+# lives in rebalance_armor_curve.py so mages/archers beat plate for their style.
 FAMILY = {
     "metal": {"armor": 1.00, "hp": 1.00, "mr": 0.15},
-    "leather": {"armor": 0.55, "hp": 0.70, "mr": 0.35},
-    "cloth": {"armor": 0.32, "hp": 0.55, "mr": 0.95},
+    "leather": {"armor": 0.62, "hp": 0.78, "mr": 0.42},
+    "cloth": {"armor": 0.38, "hp": 0.62, "mr": 1.10},
 }
 
 STAT_RE = re.compile(r'stat_name = "(armor|health_max|mr)"\nvalue = (-?[0-9.]+)')

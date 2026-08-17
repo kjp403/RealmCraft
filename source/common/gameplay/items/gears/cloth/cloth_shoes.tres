@@ -20,31 +20,31 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mr"
-value = 5.0
+value = 6.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "ap"
-value = 1.0
+value = 5.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
 stat_name = "mana_max"
-value = 8.0
+value = 12.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_5"]
 script = ExtResource("1_mod")
 stat_name = "move_speed"
-value = 3.0
+value = 4.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_6"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 3.0
+value = 2.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
