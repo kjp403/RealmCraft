@@ -5,9 +5,9 @@ extends AbilityResource
 ## the magic mirror of AD: base AP is 0, so the weapon itself grants AP via a
 ## StatModifier (and the Intelligence attribute feeds it once magic unlocks).
 ##
-## Cooldown-gated (no mana cost yet — the mana pool is still a placeholder; wire a
-## cost here when that system ships). Spawns on every peer like arrows: the server
-## bolt deals damage (CombatHit), client bolts are the visual.
+## Spawns on every peer like arrows: the server bolt deals damage (CombatHit),
+## client bolts are the visual. Basic attacks (Arc Strike, Magic Bolt) should
+## keep mana_cost at 0 so left-click is not gated on the mana pool.
 
 ## The bolt scene (root must be a Projectile).
 @export var projectile_scene: PackedScene
@@ -89,6 +89,12 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	bolt.explode_damage = maxf(0.0, _wielder_ap(user) * explode_ap_ratio)
 	bolt.global_position = _spawn_position(user, bolt.direction)
 	user.add_child(bolt)
+
+
+func extra_stat_lines() -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("%d%% AP" % int(round(ap_ratio * 100.0)))
+	return lines
 
 
 func _wielder_ap(user: Entity) -> float:
