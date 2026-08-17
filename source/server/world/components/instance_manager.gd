@@ -263,6 +263,13 @@ func player_switch_instance(
 	# someone not in a run/queue.
 	DungeonService.on_player_left(peer_id, current_instance)
 	SparringService.on_player_left(peer_id, current_instance)
+	# Boss Hunt was written with this hook but never wired in here, so ONLY the
+	# exit station's boss_hunt.leave cleaned up. Leaving an arena any other way —
+	# recall, a teleport, jail — left the contract alive: the HUD kept counting
+	# down in the Guild Hall, and GroupService still held the player, so
+	# handle_lobby_request refused the next contract with "in_run". That soft-
+	# locked the mode until relog. No-op for a switch out of any non-hunt map.
+	BossHuntService.on_player_left(peer_id, current_instance)
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
 		peer_id,
