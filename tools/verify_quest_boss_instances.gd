@@ -51,8 +51,8 @@ const MAPS: Array[Dictionary] = [
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/the_hollow/the_hollow.tscn",
-		"gone": ["MechaGolem"],
-		"keep": [],
+		"gone": [],
+		"keep": ["MechaGolem"],
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/forest/forest.tscn",

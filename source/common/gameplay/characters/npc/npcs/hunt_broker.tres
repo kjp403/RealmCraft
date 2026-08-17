@@ -27,7 +27,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
 [sub_resource type="Resource" id="Dialogue_warning"]
 script = ExtResource("2_dialogue")
-lines = Array[String](["The fee buys the room, not a good time in it. Some of the names on that board will kill you the whole thirty minutes and leave you with nothing.", "Die in there and you get up again at the door — I am not cruel, only expensive. The clock does not stop for you.", "Malacor is on the board because someone insisted. I would not take that one alone."])
+lines = Array[String](["The fee buys the room, not a good time in it. Some of the names on that board will kill you the whole thirty minutes and leave you with nothing.", "Die in there and you get up again at the door — I am not cruel, only expensive. The clock does not stop for you.", "The Necromancer is on the board because someone insisted. I would not take that one alone."])
 label_override = "Any advice?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
