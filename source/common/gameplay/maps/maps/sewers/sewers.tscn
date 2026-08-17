@@ -515,7 +515,7 @@ weapon = null
 
 
 [node name="UnboundSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(2392.0, 648.0)
+position = Vector2(1800.0, 520.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et10")
 weapon = null

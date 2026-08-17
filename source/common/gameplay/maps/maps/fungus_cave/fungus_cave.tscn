@@ -229,7 +229,7 @@ weapon = null
 
 
 [node name="UnboundHeart" parent="ReplicatedPropsContainer" unique_id=225589283 instance=ExtResource("9_msvda")]
-position = Vector2(240, -160)
+position = Vector2(-292.74463, -1169.4962)
 debug_draw_ranges = false
 enemy_data = ExtResource("14_heartw")
 weapon = null

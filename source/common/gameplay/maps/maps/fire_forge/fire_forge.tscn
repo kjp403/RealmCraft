@@ -584,7 +584,7 @@ weapon = null
 
 
 [node name="UnboundCinderborn" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(2488.0, 712.0)
+position = Vector2(1800.0, 584.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et13")
 weapon = null

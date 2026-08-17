@@ -233,7 +233,7 @@ weapon = null
 
 
 [node name="BanditWarlord" parent="ReplicatedPropsContainer" unique_id=1918988394 instance=ExtResource("3_npc")]
-position = Vector2(720, 560)
+position = Vector2(520, 136)
 debug_draw_ranges = false
 enemy_data = ExtResource("35_warlord")
 weapon = null

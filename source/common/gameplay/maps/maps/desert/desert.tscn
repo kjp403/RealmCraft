@@ -654,7 +654,7 @@ enemy_data = ExtResource("et_dbadger")
 weapon = null
 
 [node name="UnboundSandKing" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(2568.0, 824.0)
+position = Vector2(1672.0, 520.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et15")
 weapon = null
