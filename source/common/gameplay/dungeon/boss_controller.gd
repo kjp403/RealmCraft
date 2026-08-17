@@ -666,14 +666,19 @@ func _static_arc() -> void:
 	if not is_instance_valid(boss) or boss.is_dead:
 		_casting = false
 		return
+	if not is_instance_valid(first) or first.is_dead:
+		_casting = false
+		return
 	var pool: Array[Player] = _live_players()
+	# Always start on the mark. `pool.has(first)` used to drop the whole arc
+	# (VFX + damage) when the instance roster missed that Player reference —
+	# the storm telegraph still played, so it read as lightning that did nothing.
+	pool.erase(first)
 	var path: PackedVector2Array = PackedVector2Array([boss.muzzle_position(pose == &"cast_staff")])
-	var struck: Array[Player] = []
-	var current: Player = first if pool.has(first) else null
-	while current != null and struck.size() < chain_targets:
-		struck.append(current)
-		pool.erase(current)
-		path.append(current.global_position)
+	var struck: Array[Player] = [first]
+	path.append(first.global_position)
+	var current: Player = first
+	while struck.size() < chain_targets:
 		var nearest: Player = null
 		var best: float = chain_range
 		for other: Player in pool:
@@ -681,11 +686,19 @@ func _static_arc() -> void:
 			if d <= best:
 				best = d
 				nearest = other
+		if nearest == null:
+			break
+		pool.erase(nearest)
+		struck.append(nearest)
+		path.append(nearest.global_position)
 		current = nearest
-	if path.size() >= 2:
-		boss.replicate_visual(&"rp_chain_lightning", [path])
+	boss.replicate_visual(&"rp_chain_lightning", [path])
 	for i: int in struck.size():
-		struck[i].take_damage(chain_damage * (1.0 + 0.35 * float(i)), boss)
+		var victim: Player = struck[i]
+		if is_instance_valid(victim) and not victim.is_dead:
+			victim.take_damage(
+				chain_damage * (1.0 + 0.35 * float(i)), boss, CombatHit.DAMAGE_MAGIC
+			)
 	await _finish_cast(&"chain", 0.4)
 
 
