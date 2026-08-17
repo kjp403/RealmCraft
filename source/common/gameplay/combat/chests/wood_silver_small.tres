@@ -3,70 +3,70 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
 [ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
 [ext_resource type="Texture2D" uid="uid://cohfyp84lfa01" path="res://assets/sprites/environment/chests/wood_silver_small.png" id="3_icon"]
-[ext_resource type="Resource" uid="uid://vhgsmnbqslo6" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="item_0"]
-[ext_resource type="Resource" uid="uid://2aygya3q5pvo" path="res://source/common/gameplay/items/materials/leather/hide_forest.tres" id="item_1"]
-[ext_resource type="Resource" uid="uid://cl38hgxqwxftu" path="res://source/common/gameplay/items/materials/leather/leather_forest.tres" id="item_2"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://dtb5bin7denb7" path="res://source/common/gameplay/items/materials/leather/leather_bandit.tres" id="item_2"]
 [ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_3"]
-[ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="item_4"]
-[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_5"]
-[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="item_6"]
-[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="item_7"]
+[ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="item_4"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="item_5"]
+[ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_6"]
+[ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_7"]
 
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
-min_amount = 5
-max_amount = 15
+min_amount = 8
+max_amount = 20
 chance = 0.85
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
-min_amount = 5
-max_amount = 15
+min_amount = 8
+max_amount = 20
 chance = 0.7
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 5
-max_amount = 15
+min_amount = 6
+max_amount = 16
 chance = 0.55
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
-min_amount = 5
-max_amount = 15
-chance = 0.45
+min_amount = 6
+max_amount = 16
+chance = 0.5
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
-min_amount = 5
-max_amount = 15
-chance = 0.8
+min_amount = 6
+max_amount = 16
+chance = 0.45
 
 [sub_resource type="Resource" id="Drop_5"]
 script = ExtResource("1_loot")
 item = ExtResource("item_5")
-min_amount = 5
-max_amount = 15
-chance = 0.65
+min_amount = 8
+max_amount = 20
+chance = 0.7
 
 [sub_resource type="Resource" id="Drop_6"]
 script = ExtResource("1_loot")
 item = ExtResource("item_6")
-min_amount = 5
-max_amount = 15
-chance = 0.5
+min_amount = 6
+max_amount = 16
+chance = 0.55
 
 [sub_resource type="Resource" id="Drop_7"]
 script = ExtResource("1_loot")
 item = ExtResource("item_7")
-min_amount = 5
-max_amount = 15
-chance = 0.35
+min_amount = 4
+max_amount = 12
+chance = 0.4
 
 [resource]
 script = ExtResource("2_chest")

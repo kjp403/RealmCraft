@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
 [ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
 [ext_resource type="Texture2D" uid="uid://icxiqljrkq1m" path="res://assets/sprites/environment/chests/wood_gold_large.png" id="3_icon"]
-[ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_0"]
 [ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="item_1"]
 [ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_2"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_3"]

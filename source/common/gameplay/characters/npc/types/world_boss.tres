@@ -8,12 +8,60 @@
 [ext_resource type="Resource" uid="uid://bkwfaojguoklp" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="4_bar"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold_item"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="coal_ore"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="mithril_ore"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="adamant_ore"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
+[ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_loot")
+item = ExtResource("gold_item")
+min_amount = 180
+max_amount = 320
 
 [sub_resource type="Resource" id="Drop_iron"]
 script = ExtResource("2_loot")
 item = ExtResource("4_bar")
 min_amount = 4
+max_amount = 10
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_coal"]
+script = ExtResource("2_loot")
+item = ExtResource("coal_ore")
+min_amount = 6
+max_amount = 14
+chance = 0.7
+
+[sub_resource type="Resource" id="Drop_mithril"]
+script = ExtResource("2_loot")
+item = ExtResource("mithril_ore")
+min_amount = 3
 max_amount = 8
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_adamant"]
+script = ExtResource("2_loot")
+item = ExtResource("adamant_ore")
+min_amount = 2
+max_amount = 5
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_steel"]
+script = ExtResource("2_loot")
+item = ExtResource("steel_bar")
+min_amount = 2
+max_amount = 5
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_mithril_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("mithril_bar")
+min_amount = 1
+max_amount = 3
+chance = 0.3
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
@@ -44,7 +92,7 @@ chase_on_area = true
 xp_reward = 1000
 respawn_delay = 600.0
 respawns = false
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_iron"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_coal"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_steel"), SubResource("Drop_mithril_bar"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
 slam_radius = 150.0
 slam_windup_s = 2.2
 slam_damage = 55.0
