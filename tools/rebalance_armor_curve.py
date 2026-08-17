@@ -67,8 +67,10 @@ PIECE = {
     "boots": (0.23, 0.25),
 }
 
-# Folder identity: metal tanks physical, leather is speed/AD, cloth tanks magic
+# Folder identity: metal tanks physical, leather is speed/RAD, cloth tanks magic
 # and carries AP. Leather/cloth survivability stays below plate on purpose.
+# Off-style penalties (negative AD/AP/RAD) are applied in target_mods so wearing
+# the wrong kit actually hurts the other two styles.
 FAMILY = {
     "metal": {"armor": 1.00, "hp": 1.00, "mr": 0.15, "ad": 1.00, "ap": 0.00, "speed": 1.00},
     "leather": {"armor": 0.62, "hp": 0.78, "mr": 0.42, "ad": 2.20, "ap": 0.00, "speed": 2.40},
@@ -94,19 +96,19 @@ UNIQUE_EXTRAS: dict[str, dict[str, dict[str, float]]] = {
         "boots": {"ability_haste": 5, "move_speed": 6},
     },
     "Skyrender": {
-        "helmet": {"ad": 6, "ability_haste": 4},
-        "chest": {"ad": 10, "ability_haste": 6},
-        "boots": {"ad": 6, "move_speed": 5},
+        "helmet": {"rad": 6, "ability_haste": 4},
+        "chest": {"rad": 10, "ability_haste": 6},
+        "boots": {"rad": 6, "move_speed": 5},
     },
     "Eclipse": {
         "helmet": {"mr": 6, "ability_haste": 5},
-        "chest": {"mr": 8, "ad": 8, "ability_haste": 6},
+        "chest": {"mr": 8, "rad": 8, "ability_haste": 6},
         "boots": {"mr": 5, "move_speed": 5},
     },
     "Starfall": {
-        "helmet": {"ad": 10, "ability_haste": 6},
-        "chest": {"ad": 14, "ability_haste": 8},
-        "boots": {"ad": 8, "move_speed": 8, "ability_haste": 5},
+        "helmet": {"rad": 10, "ability_haste": 6},
+        "chest": {"rad": 14, "ability_haste": 8},
+        "boots": {"rad": 8, "move_speed": 8, "ability_haste": 5},
     },
     "Voidsilk": {
         "helmet": {"mana_regen": 2.5, "ability_haste": 4},
@@ -129,14 +131,14 @@ UNIQUE_EXTRAS: dict[str, dict[str, dict[str, float]]] = {
         "boots": {"ap": 8, "ability_haste": 6, "mana_regen": 2.5},
     },
     "Phantom": {
-        "helmet": {"move_speed": 3, "ad": 3},
-        "chest": {"move_speed": 4, "ad": 4},
-        "boots": {"move_speed": 5, "ad": 3},
+        "helmet": {"move_speed": 3, "rad": 3},
+        "chest": {"move_speed": 4, "rad": 4},
+        "boots": {"move_speed": 5, "rad": 3},
     },
-    "Duskfeather": {"chest": {"ad": 10, "move_speed": 6, "ability_haste": 4}},
-    "Ghostweave": {"chest": {"ad": 8, "move_speed": 4, "ability_haste": 3}},
-    "Soulbrand": {"chest": {"ad": 12, "move_speed": 6, "ability_haste": 6}},
-    "Silentwing": {"boots": {"move_speed": 8, "ad": 6}},
+    "Duskfeather": {"chest": {"rad": 10, "move_speed": 6, "ability_haste": 4}},
+    "Ghostweave": {"chest": {"rad": 8, "move_speed": 4, "ability_haste": 3}},
+    "Soulbrand": {"chest": {"rad": 12, "move_speed": 6, "ability_haste": 6}},
+    "Silentwing": {"boots": {"move_speed": 8, "rad": 6}},
     "Eldritch": {"chest": {"ap": 10, "mana_max": 15, "ability_haste": 4}},
     "Celestine": {"chest": {"ap": 12, "mana_max": 18, "ability_haste": 5}},
     "Firstlight": {"chest": {"ap": 16, "mana_max": 24, "ability_haste": 8}},
@@ -203,11 +205,11 @@ def merge_mods(base: dict[str, float], extra: dict[str, float]) -> dict[str, flo
 
 
 def offensive(mastery: int, piece: str, family: str) -> dict[str, float]:
-    """AD / AP / speed that should be visible, not flavor text.
+    """AD / RAD / AP / speed that should be visible, not flavor text.
 
-    Metal keeps a little AD so melee plate is not a pure EHP dump. Leather AD
+    Metal keeps a little AD so melee plate is not a pure EHP dump. Leather RAD
     and cloth AP are ~2x that metal AD so archery / magic actually want their
-    own sets. Spells scale with AP (often 80–200%); bows scale with AD.
+    own sets. Spells scale with AP; bows scale with RAD (not melee AD).
     """
     m = max(1, mastery)
     if family == "metal":
@@ -218,14 +220,14 @@ def offensive(mastery: int, piece: str, family: str) -> dict[str, float]:
             return {"ad": ad}
         return {"move_speed": 2 + m * 0.06}
     if family == "leather":
-        ad = 7 + m * 1.20
+        rad = 7 + m * 1.20
         spd = 5 + m * 0.22
         haste = 2 + m * 0.08
         if piece == "helmet":
-            return {"ad": ad * 0.8, "move_speed": spd * 0.7, "ability_haste": haste * 0.7}
+            return {"rad": rad * 0.8, "move_speed": spd * 0.7, "ability_haste": haste * 0.7}
         if piece == "chest":
-            return {"ad": ad, "move_speed": spd * 0.85, "ability_haste": haste}
-        return {"ad": ad * 0.7, "move_speed": spd, "ability_haste": haste * 0.8}
+            return {"rad": rad, "move_speed": spd * 0.85, "ability_haste": haste}
+        return {"rad": rad * 0.7, "move_speed": spd, "ability_haste": haste * 0.8}
     ap = 7 + m * 1.20
     mana = 18 + m * 2.4
     haste = 2 + m * 0.10
@@ -239,6 +241,39 @@ def offensive(mastery: int, piece: str, family: str) -> dict[str, float]:
         "move_speed": 4 + m * 0.10,
         "ability_haste": haste,
     }
+
+
+OFFSTYLE_PENALTY = 0.32
+PRIMARY_STAT = {"metal": "ad", "leather": "rad", "cloth": "ap"}
+
+
+def primary_offense_value(family: str, mastery: int, piece: str) -> float:
+    key = PRIMARY_STAT[family]
+    off = offensive(mastery, piece, family)
+    val = float(off.get(key, 0))
+    if val > 0:
+        return val
+    chest = offensive(mastery, "chest", family)
+    base = float(chest.get(key, 0))
+    return base * (PIECE[piece][0] / PIECE["chest"][0])
+
+
+def add_offstyle_penalties(mods: dict[str, float], family: str, mastery: int, piece: str) -> None:
+    if family == "metal":
+        mods["ap"] = -max(1, round(primary_offense_value("cloth", mastery, piece) * OFFSTYLE_PENALTY))
+        mods["rad"] = -max(1, round(primary_offense_value("leather", mastery, piece) * OFFSTYLE_PENALTY))
+    elif family == "leather":
+        mods["ad"] = -max(1, round(primary_offense_value("metal", mastery, piece) * OFFSTYLE_PENALTY))
+        mods["ap"] = -max(1, round(primary_offense_value("cloth", mastery, piece) * OFFSTYLE_PENALTY))
+    else:
+        mods["ad"] = -max(1, round(primary_offense_value("metal", mastery, piece) * OFFSTYLE_PENALTY))
+        mods["rad"] = -max(1, round(primary_offense_value("leather", mastery, piece) * OFFSTYLE_PENALTY))
+
+
+def quantize_mod(stat: str, val: float) -> float:
+    if stat == "mana_regen":
+        return round(float(val), 2)
+    return int(round(val))
 
 
 def target_mods(family: str, mastery: int, piece: str, item_name: str) -> dict[str, float]:
@@ -256,17 +291,27 @@ def target_mods(family: str, mastery: int, piece: str, item_name: str) -> dict[s
         mods["mr"] = max(1, round(mr))
     for stat, val in offensive(mastery, piece, family).items():
         scaled = val * mult
+        q = quantize_mod(stat, scaled)
+        if q == 0:
+            continue
         if stat in ("mana_regen",):
-            mods[stat] = round(scaled, 2)
+            mods[stat] = q
+        elif q < 0:
+            mods[stat] = q
         else:
-            mods[stat] = max(1, round(scaled))
+            mods[stat] = max(1, q)
+    add_offstyle_penalties(mods, family, mastery, piece)
     extra = UNIQUE_EXTRAS.get(unique_key(item_name), {}).get(piece, {})
     if extra:
         mods = merge_mods(mods, extra)
         for stat, val in list(mods.items()):
-            if stat == "mana_regen":
-                continue
-            mods[stat] = max(1, round(val)) if not isinstance(val, float) or float(val).is_integer() else val
+            q = quantize_mod(stat, val)
+            if q == 0:
+                del mods[stat]
+            elif stat == "mana_regen" or (isinstance(q, float) and not float(q).is_integer()):
+                mods[stat] = q
+            else:
+                mods[stat] = q
     return mods
 
 
@@ -336,7 +381,9 @@ def rewrite(path: Path, mods: dict[str, float]) -> str:
         count=1,
     )
     if text2 == text:
-        raise RuntimeError(f"failed to rewrite {path}")
+        old_s = ", ".join(f"{a}={b}" for a, b in old)
+        new_s = ", ".join(f"{k}={v}" for k, v in mods.items())
+        return f"{name}: unchanged [{new_s}]"
     path.write_text(text2, encoding="utf-8")
     old_s = ", ".join(f"{a}={b}" for a, b in old)
     new_s = ", ".join(f"{k}={v}" for k, v in mods.items())
@@ -347,7 +394,7 @@ def fmt_piece(rel: str) -> str:
     path = ROOT / rel
     stats = parse_stats(path.read_text(encoding="utf-8"))
     bits = []
-    for key in ("armor", "health_max", "mr", "ad", "ap", "mana_max", "move_speed", "ability_haste", "mana_regen"):
+    for key in ("armor", "health_max", "mr", "ad", "rad", "ap", "mana_max", "move_speed", "ability_haste", "mana_regen"):
         if key in stats:
             val = stats[key]
             bits.append(f"{key}={int(val) if float(val).is_integer() else val}")
@@ -360,6 +407,11 @@ def main() -> None:
         "--families",
         default="leather,cloth",
         help="Comma-separated folders to rewrite (default: leather,cloth).",
+    )
+    parser.add_argument(
+        "--penalties-only",
+        action="store_true",
+        help="Keep current stats and only add/replace off-style AD/AP/RAD penalties.",
     )
     args = parser.parse_args()
     families = [part.strip() for part in args.families.split(",") if part.strip()]
@@ -379,7 +431,17 @@ def main() -> None:
             if mastery <= 0:
                 mastery = 8 if "silver" in name.lower() else 1
             piece = piece_key(text, name)
-            mods = target_mods(family, mastery, piece, name)
+            if args.penalties_only:
+                mods = parse_stats(text)
+                add_offstyle_penalties(mods, family, mastery, piece)
+                cleaned: dict[str, float] = {}
+                for stat, val in mods.items():
+                    q = quantize_mod(stat, val)
+                    if q != 0:
+                        cleaned[stat] = q
+                mods = cleaned
+            else:
+                mods = target_mods(family, mastery, piece, name)
             report.append(f"m{mastery:>2} {rewrite(path, mods)}")
 
     print("\n".join(report))

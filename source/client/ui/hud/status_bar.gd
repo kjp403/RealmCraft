@@ -29,6 +29,7 @@ const STAT_LABELS: Dictionary = {
 	&"mana_regen": "Mana Regen",
 	&"move_speed": "Move Speed",
 	&"ad": "Attack Damage",
+	&"rad": "Ranged Damage",
 	&"ap": "Ability Power",
 	&"armor": "Armor",
 	&"mr": "Magic Resist",

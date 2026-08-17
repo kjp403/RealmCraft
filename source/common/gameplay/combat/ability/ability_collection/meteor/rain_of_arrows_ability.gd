@@ -61,7 +61,7 @@ func _client_boom(map: Node, target: Vector2) -> void:
 	zone.global_position = target
 
 
-## AD-scaled impact (the bow is an AD class, unlike the Meteor's AP) + plant the slow field.
+## RAD-scaled impact (bows use ranged damage, unlike Meteor's AP) + plant the slow field.
 func _impact(caster: Character, target: Vector2) -> void:
 	if not GameMode.is_world_server() or not is_instance_valid(caster) or caster.is_dead:
 		return
@@ -75,7 +75,7 @@ func _impact(caster: Character, target: Vector2) -> void:
 		var circle: CircleShape2D = shape_node.shape.duplicate()
 		circle.radius = blast_radius
 		shape_node.shape = circle
-	arc.damage = caster.stats_component.get_stat(Stat.AD) * ap_ratio
+	arc.damage = caster.stats_component.get_stat(Stat.RAD) * ap_ratio
 	map.add_child(arc)
 	arc.global_position = target
 	# The stuck arrows' slow zone, planted at the point (not riding the archer).

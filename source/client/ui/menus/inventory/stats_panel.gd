@@ -9,6 +9,7 @@ const _ROWS: Array = [
 	["Health", Color("#3de600"), Stat.HEALTH, Stat.HEALTH_MAX],
 	["Mana", Color("#33b5e5"), Stat.MANA_MAX, null],
 	["Attack", Color("#fc7f03"), Stat.AD, null],
+	["Ranged", Color("#7ecf6a"), Stat.RAD, null],
 	["Armor", Color("#d8a657"), Stat.ARMOR, null],
 	["Magic", Color("#a67ffb"), Stat.AP, null],
 	["Magic Res", Color("#a67ffb"), Stat.MR, null],

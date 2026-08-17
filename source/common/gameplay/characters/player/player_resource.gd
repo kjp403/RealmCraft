@@ -17,6 +17,7 @@ const BASE_STATS: Dictionary[StringName, float] = {
 	# a fresh level-1 is meant to feel weak. See AttributeMap / the weapon items.
 	# (Was 10 — with a +4 wood sword that printed 14s on 0-armor goblins at L1.)
 	Stat.AD: 3.0,
+	Stat.RAD: 3.0,
 	Stat.ARMOR: 15.0,
 	Stat.MR: 15.0,
 	# Mana gates SPECIAL abilities only (mana_cost on the AbilityResource);

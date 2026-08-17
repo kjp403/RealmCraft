@@ -21,8 +21,10 @@ const VITALITY: Dictionary[StringName, float] = {
 const STRENGHT: Dictionary[StringName, float] = {
 	# Steep on purpose: with a low base AD (10), Strength is the main driver of
 	# damage growth. 60 pts ≈ +36 AD, so a maxed STR build hits ~3-4× a fresh
-	# level-1 — a strong, earned progression curve.
+	# level-1 — a strong, earned progression curve. RAD rides along so existing
+	# STR archers keep their bow scaling after the AD/RAD split.
 	Stat.AD: 0.6,
+	Stat.RAD: 0.6,
 }
 
 const AGILITY: Dictionary[StringName, float] = {

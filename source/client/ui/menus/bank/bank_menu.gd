@@ -977,7 +977,11 @@ func _wire_slot_drag(button: Button, uid: int, is_bag: bool, item: Item) -> void
 				button,
 				BagOrder.make_drag_preview(item.item_icon, Vector2(52, 52))
 			)
-			return {"bank_uid": uid, "from_bag": is_bag},
+			return {
+				"bank_uid": uid,
+				"from_bag": is_bag,
+				"item_id": int(item.get_meta(&"id", 0)),
+			},
 		func(_at: Vector2, data: Variant) -> bool:
 			if data is not Dictionary:
 				return false
@@ -992,6 +996,13 @@ func _wire_slot_drag(button: Button, uid: int, is_bag: bool, item: Item) -> void
 			var from_uid: int = int((data as Dictionary).get("bank_uid", -1))
 			if from_uid < 0 or from_uid == uid:
 				return
+			var from_id: int = int((data as Dictionary).get("item_id", 0))
+			var to_id: int = int(item.get_meta(&"id", 0))
+			if from_id > 0 and from_id == to_id:
+				var moved: int = await StackMerge.try_merge(from_uid, uid, not is_bag)
+				if moved > 0:
+					_refresh()
+					return
 			if is_bag:
 				BagOrder.move_before(BagOrder.load_order(), from_uid, uid)
 			else:

@@ -85,6 +85,23 @@ func _go() -> void:
 			"a full vault refuses to open a new stack"
 		)
 
+	print("-- partial stack merge --")
+	if iron > 0:
+		var split: Dictionary = {1: {"id": iron, "a": 9}, 2: {"id": iron, "a": 1}}
+		_check(Inventory.merge_slots(split, 2, 1, false) == 1, "9+1 iron merges the 1")
+		_check(int(split[1].get("a", 0)) == 10, "destination becomes a full stack of 10")
+		_check(not split.has(2), "empty source pile is erased")
+
+		var overflow: Dictionary = {1: {"id": iron, "a": 10}, 2: {"id": iron, "a": 5}}
+		_check(Inventory.merge_slots(overflow, 2, 1, false) == 0, "full dest refuses a merge")
+		_check(int(overflow[1].get("a", 0)) == 10, "full dest stays 10")
+		_check(int(overflow[2].get("a", 0)) == 5, "source stays 5 when dest is full")
+
+		var partial: Dictionary = {1: {"id": iron, "a": 8}, 2: {"id": iron, "a": 5}}
+		_check(Inventory.merge_slots(partial, 2, 1, false) == 2, "8+5 moves 2 into the dest")
+		_check(int(partial[1].get("a", 0)) == 10, "dest fills to 10")
+		_check(int(partial[2].get("a", 0)) == 3, "source keeps the leftover 3")
+
 	print("-- withdraw cap --")
 	if iron > 0:
 		# Withdraw All is capped by BAG fit, not by the vault total — the reason

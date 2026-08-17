@@ -12,6 +12,7 @@ const STAT_LABELS: Dictionary = {
 	&"health_max": "Max HP",
 	&"health": "HP",
 	&"ad": "Attack",
+	&"rad": "Ranged",
 	&"ap": "Magic",
 	&"armor": "Armor",
 	&"mr": "Magic Res",

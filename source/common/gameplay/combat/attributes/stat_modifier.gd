@@ -9,6 +9,7 @@ extends Resource
 	Stat.ARMOR,
 	Stat.MR,
 	Stat.AD,
+	Stat.RAD,
 	Stat.AP,
 	Stat.ABILITY_HASTE,
 	Stat.MOVE_SPEED

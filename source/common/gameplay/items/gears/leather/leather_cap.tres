@@ -25,7 +25,7 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
-stat_name = "ad"
+stat_name = "rad"
 value = 7.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
@@ -41,13 +41,25 @@ stat_name = "ability_haste"
 value = 1.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
+[sub_resource type="Resource" id="Mod_6"]
+script = ExtResource("1_mod")
+stat_name = "ad"
+value = -1.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_7"]
+script = ExtResource("1_mod")
+stat_name = "ap"
+value = -2.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
 required_level = 0
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 1
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5"), SubResource("Mod_6"), SubResource("Mod_7")])
 item_name = &"Leather Cap"
 item_icon = ExtResource("2_icon")
 vendor_value = 8
