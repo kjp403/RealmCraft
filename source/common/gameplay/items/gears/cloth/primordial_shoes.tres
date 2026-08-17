@@ -8,40 +8,46 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 17.0
+value = 21.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-stat_name = "mr"
-value = 51.0
+stat_name = "health_max"
+value = 58.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
-stat_name = "mana_max"
-value = 54.0
+stat_name = "mr"
+value = 59.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 20.0
+stat_name = "ap"
+value = 71.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
-stat_name = "ability_haste"
-value = 33.0
+stat_name = "mana_max"
+value = 140.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_5"]
 script = ExtResource("1_mod")
-stat_name = "ap"
-value = 8.0
+stat_name = "move_speed"
+value = 13.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_6"]
+script = ExtResource("1_mod")
+stat_name = "ability_haste"
+value = 17.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_7"]
 script = ExtResource("1_mod")
 stat_name = "mana_regen"
 value = 2.5
@@ -52,7 +58,7 @@ script = ExtResource("3_gear")
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 90
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5"), SubResource("Mod_6")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5"), SubResource("Mod_6"), SubResource("Mod_7")])
 item_name = &"Primordial Shoes"
 item_icon = ExtResource("2_icon")
 description = "First-pattern cloth. Magic remembers how to begin here."

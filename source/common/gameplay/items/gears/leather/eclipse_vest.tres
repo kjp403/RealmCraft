@@ -8,31 +8,37 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 54.0
+value = 61.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 26.0
+stat_name = "health_max"
+value = 123.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
-stat_name = "ad"
+stat_name = "mr"
 value = 50.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
-stat_name = "mr"
-value = 35.0
+stat_name = "ad"
+value = 111.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
+stat_name = "move_speed"
+value = 19.0
+metadata/_custom_type_script = "uid://cvggwjkht4km4"
+
+[sub_resource type="Resource" id="Mod_5"]
+script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 6.0
+value = 14.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
@@ -40,7 +46,7 @@ script = ExtResource("3_gear")
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 80
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5")])
 item_name = &"Eclipse Vest"
 item_icon = ExtResource("2_icon")
 description = "Armor for the hour when the sun forgets its name."
