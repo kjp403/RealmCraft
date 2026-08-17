@@ -20,6 +20,11 @@ metadata/_custom_type_script = "uid://bpo804060rk5t"
 script = ExtResource("6_quest")
 quests = Array[ExtResource("7_questres")]([ExtResource("8_q1"), ExtResource("9_q2")])
 
+[sub_resource type="Resource" id="Dialogue_bonepickers"]
+script = ExtResource("4_50xk0")
+lines = Array[String](["Not in DimWood. They pick the old workings — Mining Cave, through the portal in Goblin Woodland.", "Six of them. One wears a vein that matches your shard. Bring me that bone."])
+label_override = "Where are the bonepickers?"
+
 [sub_resource type="Resource" id="Resource_nf104"]
 script = ExtResource("4_50xk0")
 lines = Array[String](["I had a name once. A number after... like you'll have. Now, mostly, I have inventory", "hey promise the fresh ones they'll go free when the war's won. I've outlasted three wars. Do the arithmetic.", "Buy, or don't. The dead aren't in a hurry."])
@@ -31,5 +36,5 @@ script = ExtResource("4_gsvox")
 npc_name = "Bonecarver"
 skin = ExtResource("5_rdenb")
 greeting = "Don't flinch. You'll wear this face too, you keep dying like you mean it or like [i]they[/i] mean it. I went out past counting and came back… economical. Bone's honest, at least. Buy something."
-interactions = Array[ExtResource("1_k0xw0")]([SubResource("Resource_twffw"), SubResource("QuestInteraction_bone"), SubResource("Resource_nf104")])
+interactions = Array[ExtResource("1_k0xw0")]([SubResource("Resource_twffw"), SubResource("QuestInteraction_bone"), SubResource("Dialogue_bonepickers"), SubResource("Resource_nf104")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

@@ -245,7 +245,9 @@ static func push_character_flags(resource: PlayerResource, peer_id: int) -> void
 	for key: Variant in resource.character_flags:
 		if resource.character_flags[key]:
 			flags.append(str(key))
-	WorldServer.curr.data_push.rpc_id(peer_id, &"character_flags.set", {"flags": flags})
+	# Deferred: login runs this in the same frame as complete_auth, and an
+	# immediate rpc_id can land before the client is subscribed.
+	WorldServer.curr.data_push.rpc_id.call_deferred(peer_id, &"character_flags.set", {"flags": flags})
 
 
 ## Grant [member QuestObjective.grant_item] once, when the objective just
@@ -297,6 +299,18 @@ static func backfill_wardstones(resource: PlayerResource) -> void:
 			grant_wardstone_if_due(resource, quest, 0)
 
 
+## Login backfill: story flags from turned-in quests (e.g. Unrooted → lira_freed).
+## Same shape as wardstones — a completion from before grants_flag shipped never
+## re-fires apply_turn_in, so the NPC swap would stay stuck without this.
+static func backfill_character_flags(resource: PlayerResource) -> void:
+	for quest_id: int in resource.quests:
+		if resource.quest_state(quest_id) != &"turned_in":
+			continue
+		var quest: QuestResource = QuestResource.load_quest(quest_id)
+		if quest != null:
+			grant_flag_if_due(resource, quest, 0)
+
+
 ## True when the quest's completion rule is satisfied. ALL = every objective met
 ## (classic AND); ANY = at least one objective met (for "pick a path" quests).
 static func is_complete(resource: PlayerResource, quest_id: int, inventory: Dictionary) -> bool:
@@ -317,19 +331,11 @@ static func is_complete(resource: PlayerResource, quest_id: int, inventory: Dict
 	return any_met
 
 
-## Re-grant True Seep Root when The Real Draught or Unrooted is active and the
-## player has neither the root nor Seepbreaker's Draught (bag or bank). The root
-## is a unique Heart drop; brewing it before accepting the CRAFT step consumes it
-## with no recraft path.
+## Recover the unique Heart drop / bottle when the player brewed (or poured)
+## before the matching quest was accepted. The Real Draught needs the root so
+## CRAFT can fire; Unrooted needs the bottle itself (COLLECT), so don't send
+## them back to the table.
 static func replenish_seep_root_if_needed(resource: PlayerResource, peer_id: int) -> void:
-	var needs_root := false
-	for slug: StringName in [&"the_real_draught", &"unrooted"]:
-		var quest_id: int = ContentRegistryHub.id_from_slug(&"quests", slug)
-		if quest_id > 0 and resource.quest_state(quest_id) == &"active":
-			needs_root = true
-			break
-	if not needs_root:
-		return
 	var draught_id: int = ContentRegistryHub.id_from_slug(&"items", &"seepbreakers_draught")
 	var root_id: int = ContentRegistryHub.id_from_slug(&"items", &"true_seep_root")
 	if draught_id <= 0 or root_id <= 0:
@@ -338,17 +344,37 @@ static func replenish_seep_root_if_needed(resource: PlayerResource, peer_id: int
 		return
 	if Inventory.count(resource.bank, draught_id) > 0:
 		return
-	if Inventory.count(resource.inventory, root_id) > 0:
+	var draught_quest_id: int = ContentRegistryHub.id_from_slug(&"quests", &"the_real_draught")
+	var unrooted_id: int = ContentRegistryHub.id_from_slug(&"quests", &"unrooted")
+	var draught_active: bool = (
+		draught_quest_id > 0 and resource.quest_state(draught_quest_id) == &"active"
+	)
+	var unrooted_active: bool = (
+		unrooted_id > 0 and resource.quest_state(unrooted_id) == &"active"
+	)
+	if draught_active:
+		if Inventory.count(resource.inventory, root_id) > 0:
+			return
+		if Inventory.count(resource.bank, root_id) > 0:
+			return
+		_grant_seep_recovery_item(resource, peer_id, root_id, "True Seep Root")
 		return
-	if Inventory.count(resource.bank, root_id) > 0:
-		return
-	Inventory.add_item(resource.inventory, root_id, 1)
-	var root: Item = ContentRegistryHub.load_by_id(&"items", root_id) as Item
+	if unrooted_active:
+		_grant_seep_recovery_item(
+			resource, peer_id, draught_id, "Seepbreaker's Draught"
+		)
+
+
+static func _grant_seep_recovery_item(
+	resource: PlayerResource, peer_id: int, item_id: int, fallback_name: String
+) -> void:
+	Inventory.add_item(resource.inventory, item_id, 1)
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
-			"id": root_id,
+			"id": item_id,
 			"amount": 1,
-			"name": str(root.item_name) if root else "True Seep Root",
+			"name": str(item.item_name) if item else fallback_name,
 			"quiet": false,
 		})
 

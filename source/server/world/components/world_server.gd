@@ -315,6 +315,7 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		# round trips (docs/wardstones.md). Re-pushed on every grant. Backfill
 		# first: finales turned in before the system shipped still owe their stone.
 		QuestService.backfill_wardstones(connected_players[peer_id])
+		QuestService.backfill_character_flags(connected_players[peer_id])
 		data_push.rpc_id.call_deferred(peer_id, &"wardstones.set", {"wardstones": connected_players[peer_id].wardstones})
 		# Profession levels for client-side skill checks (craft UI, skill gates).
 		# Full skills.get shape is heavier; gates only need levels at login.
