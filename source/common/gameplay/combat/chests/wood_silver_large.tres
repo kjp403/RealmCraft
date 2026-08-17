@@ -3,126 +3,126 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
 [ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
 [ext_resource type="Texture2D" uid="uid://bqst4mkxlt1s" path="res://assets/sprites/environment/chests/wood_silver_large.png" id="3_icon"]
-[ext_resource type="Resource" uid="uid://clogmat000001" path="res://source/common/gameplay/items/materials/wood/logs.tres" id="item_0"]
-[ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="item_1"]
-[ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="item_2"]
-[ext_resource type="Resource" uid="uid://3vo07t5fjdwo" path="res://source/common/gameplay/items/materials/metals/copper_ore.tres" id="item_3"]
-[ext_resource type="Resource" uid="uid://ctinoremat001" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="item_4"]
-[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_5"]
-[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_6"]
-[ext_resource type="Resource" uid="uid://vhgsmnbqslo6" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="item_7"]
-[ext_resource type="Resource" uid="uid://2aygya3q5pvo" path="res://source/common/gameplay/items/materials/leather/hide_forest.tres" id="item_8"]
-[ext_resource type="Resource" uid="uid://cl38hgxqwxftu" path="res://source/common/gameplay/items/materials/leather/leather_forest.tres" id="item_9"]
-[ext_resource type="Resource" uid="uid://c8d37afd08bd61" path="res://source/common/gameplay/items/materials/fish/shrimp.tres" id="item_10"]
-[ext_resource type="Resource" uid="uid://cb3f6b2846d300" path="res://source/common/gameplay/items/materials/fish/herring.tres" id="item_11"]
-[ext_resource type="Resource" uid="uid://c7051a88b0c7ea" path="res://source/common/gameplay/items/materials/fish/cod.tres" id="item_12"]
-[ext_resource type="Resource" uid="uid://c47a1242e14c71" path="res://source/common/gameplay/items/materials/fish/trout.tres" id="item_13"]
-[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="item_14"]
+[ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="item_0"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_1"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_2"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_3"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_4"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="item_5"]
+[ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="item_6"]
+[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="item_7"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="item_8"]
+[ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="item_9"]
+[ext_resource type="Resource" uid="uid://dtb5bin7denb7" path="res://source/common/gameplay/items/materials/leather/leather_bandit.tres" id="item_10"]
+[ext_resource type="Resource" uid="uid://c3cca9a7b00ef1" path="res://source/common/gameplay/items/materials/fish/salmon.tres" id="item_11"]
+[ext_resource type="Resource" uid="uid://c635956c9ae52b" path="res://source/common/gameplay/items/materials/fish/tuna.tres" id="item_12"]
+[ext_resource type="Resource" uid="uid://cb21da4ad3a1bd" path="res://source/common/gameplay/items/materials/fish/lobster.tres" id="item_13"]
+[ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="item_14"]
 
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
 min_amount = 15
 max_amount = 35
-chance = 0.9
+chance = 0.7
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
 min_amount = 15
 max_amount = 35
-chance = 0.8
+chance = 0.75
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 15
-max_amount = 35
-chance = 0.6
+min_amount = 10
+max_amount = 24
+chance = 0.5
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
 min_amount = 15
 max_amount = 35
-chance = 0.85
+chance = 0.75
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
 min_amount = 15
 max_amount = 35
-chance = 0.75
+chance = 0.7
 
 [sub_resource type="Resource" id="Drop_5"]
 script = ExtResource("1_loot")
 item = ExtResource("item_5")
-min_amount = 15
-max_amount = 35
-chance = 0.7
+min_amount = 8
+max_amount = 20
+chance = 0.5
 
 [sub_resource type="Resource" id="Drop_6"]
 script = ExtResource("1_loot")
 item = ExtResource("item_6")
-min_amount = 15
-max_amount = 35
-chance = 0.5
+min_amount = 5
+max_amount = 14
+chance = 0.35
 
 [sub_resource type="Resource" id="Drop_7"]
 script = ExtResource("1_loot")
 item = ExtResource("item_7")
-min_amount = 15
-max_amount = 35
-chance = 0.7
+min_amount = 8
+max_amount = 18
+chance = 0.4
 
 [sub_resource type="Resource" id="Drop_8"]
 script = ExtResource("1_loot")
 item = ExtResource("item_8")
-min_amount = 15
-max_amount = 35
-chance = 0.6
+min_amount = 12
+max_amount = 30
+chance = 0.65
 
 [sub_resource type="Resource" id="Drop_9"]
 script = ExtResource("1_loot")
 item = ExtResource("item_9")
-min_amount = 15
-max_amount = 35
-chance = 0.45
+min_amount = 12
+max_amount = 30
+chance = 0.55
 
 [sub_resource type="Resource" id="Drop_10"]
 script = ExtResource("1_loot")
 item = ExtResource("item_10")
-min_amount = 15
-max_amount = 35
-chance = 0.7
+min_amount = 10
+max_amount = 24
+chance = 0.45
 
 [sub_resource type="Resource" id="Drop_11"]
 script = ExtResource("1_loot")
 item = ExtResource("item_11")
-min_amount = 15
-max_amount = 35
+min_amount = 12
+max_amount = 28
 chance = 0.6
 
 [sub_resource type="Resource" id="Drop_12"]
 script = ExtResource("1_loot")
 item = ExtResource("item_12")
-min_amount = 15
-max_amount = 35
+min_amount = 10
+max_amount = 24
 chance = 0.5
 
 [sub_resource type="Resource" id="Drop_13"]
 script = ExtResource("1_loot")
 item = ExtResource("item_13")
-min_amount = 15
-max_amount = 35
+min_amount = 8
+max_amount = 18
 chance = 0.4
 
 [sub_resource type="Resource" id="Drop_14"]
 script = ExtResource("1_loot")
 item = ExtResource("item_14")
-min_amount = 5
-max_amount = 15
-chance = 0.25
+min_amount = 8
+max_amount = 18
+chance = 0.35
 
 [resource]
 script = ExtResource("2_chest")

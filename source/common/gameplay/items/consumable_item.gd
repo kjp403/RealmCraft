@@ -27,6 +27,14 @@ extends Item
 @export var default_charges: int = 1
 
 
+func _init() -> void:
+	# Cooked food and potions are player-tradeable. Same pattern as
+	# MaterialItem: Item.can_trade defaults false, so anything that omits the
+	# field in its .tres (every current food/potion) would otherwise be stuck
+	# untradeable. Quest draughts are QuestItem and stay locked.
+	can_trade = true
+
+
 func inventory_tab() -> InventoryTab:
 	return InventoryTab.CONSUMABLE
 

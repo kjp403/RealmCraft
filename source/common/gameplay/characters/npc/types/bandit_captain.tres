@@ -14,6 +14,14 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" uid="uid://c32kds1rn3xt5" path="res://source/common/gameplay/items/gears/relics/relic_bloodbrand.tres" id="relic_bloodbrand"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold_item"]
+[ext_resource type="Resource" uid="uid://cif36huc5qgcj" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="cloth_bandit"]
+[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="hide_bandit"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="coal_ore"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="iron_ore"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
+[ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="willow_log"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
 
 [sub_resource type="Resource" id="Lunge_captain"]
 script = ExtResource("91_lunge")
@@ -63,6 +71,61 @@ script = ExtResource("2_loot")
 item = ExtResource("relic_bloodbrand")
 chance = 0.001
 
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_loot")
+item = ExtResource("gold_item")
+min_amount = 90
+max_amount = 180
+
+[sub_resource type="Resource" id="Drop_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("cloth_bandit")
+min_amount = 4
+max_amount = 10
+chance = 0.75
+
+[sub_resource type="Resource" id="Drop_hide"]
+script = ExtResource("2_loot")
+item = ExtResource("hide_bandit")
+min_amount = 3
+max_amount = 8
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_coal"]
+script = ExtResource("2_loot")
+item = ExtResource("coal_ore")
+min_amount = 4
+max_amount = 10
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_iron"]
+script = ExtResource("2_loot")
+item = ExtResource("iron_ore")
+min_amount = 3
+max_amount = 8
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_steel"]
+script = ExtResource("2_loot")
+item = ExtResource("steel_bar")
+min_amount = 1
+max_amount = 3
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_willow"]
+script = ExtResource("2_loot")
+item = ExtResource("willow_log")
+min_amount = 3
+max_amount = 8
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_maple"]
+script = ExtResource("2_loot")
+item = ExtResource("maple_log")
+min_amount = 3
+max_amount = 7
+chance = 0.4
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_captain"
@@ -85,7 +148,7 @@ chase_on_area = true
 xp_reward = 1200
 combat_skill_xp_override = 9000
 respawn_delay = 120.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_bloodbrand")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_bloodbrand")])
 slam_radius = 120.0
 slam_windup_s = 0.85
 slam_damage = 165.0
