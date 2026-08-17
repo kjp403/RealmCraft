@@ -18,8 +18,8 @@ func _init() -> void:
 		fails.append("FAIL pre_add replicated_props_container null (missing node_paths?)")
 	var golem: Node = hollow.get_node_or_null("ReplicatedPropsContainer/MechaGolem")
 	print("golem=", golem, " pos=", golem.position if golem else null)
-	if golem != null:
-		fails.append("FAIL MechaGolem still on shared Hollow (story fight is via Hall Keeper)")
+	if golem == null:
+		fails.append("FAIL MechaGolem missing from Hollow pad")
 
 	root.add_child(hollow)
 	rpc = hollow.get("replicated_props_container")
@@ -31,6 +31,14 @@ func _init() -> void:
 		fails.append("FAIL post_add ReplicatedPropsContainer missing")
 	else:
 		print("OK hollow container present, children=", cont.get_child_count())
+		var id_to_node: Variant = cont.get("id_to_node")
+		var baked: Variant = id_to_node.get(0) if id_to_node is Dictionary else null
+		print("baked_sync_0=", baked)
+		var baked_ok: bool = baked != null and (
+			baked == golem or str(baked).contains("MechaGolem")
+		)
+		if not baked_ok:
+			fails.append("FAIL baked sync id 0 is %s, expected MechaGolem" % str(baked))
 
 	var ground: TileMapLayer = hollow.get_node("Tiles/Ground") as TileMapLayer
 	var bad: Dictionary = {

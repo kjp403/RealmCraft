@@ -75,7 +75,7 @@ const ZONE_BLURBS = {
   desert:
     "The Sunken Tombs basin. Unbound Sand King holds the north. The Necromancer is no longer here — he moved to The Ossuary under the Sewers.",
   the_hollow:
-    "The Charter spine's last chamber. The Mecha-stone Golem is not on the shared pad: the Hall Keeper sends you into a private story fight.",
+    "The Charter spine's last chamber. Unleashed Golem holds the center pad. The Hall Keeper sends you into a private story fight when that Charter quest is active.",
   woodland:
     "Goblin Woodland. The Goblin Chief still holds the camp. Warden Bren sends you into a private room for the story kill when that Charter quest is active.",
   FungusArea1:
@@ -1457,7 +1457,7 @@ function gearPathPage(items, itemSources, quests) {
         ${pageHeading("start", "Gear path")}
         <p>Every weapon and armour piece is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class.</p>
         <ul>
-          <li><strong>Unique weapons</strong> come from Charter climaxes. The quest giver sends you into a private fight; turn-in grants one unique matching the style in your hand. Later Unbound pads (Sand King, Cinderborn) and the Ossuary Necromancer are the farm for other styles, armour mats, and relics.</li>
+          <li><strong>Unique weapons</strong> come from Charter climaxes. The quest giver sends you into a private fight; turn-in grants one unique matching the style in your hand. Later Unbound pads (Sand King, Cinderborn), Unleashed Golem, and the Ossuary Necromancer are the farm for other styles, armour mats, and relics.</li>
           <li><strong>Armour</strong> is smithing and later bossing. Bronze through Runite are forged. Plate is meant to cover a missed mechanic or two, not ten. Mitigation is <code>damage × 100 / (100 + armour)</code>.</li>
           <li><strong>Smithable metal weapons</strong> exist on the anvil, but they lose to the unique of that chapter. Proof of the Hammer is a bronze armour craft, not a bronze blade.</li>
           <li><strong>Armour</strong> requires <em>any</em> mastery at that level, so your best-trained weapon carries what you can wear. Weapons require mastery in their own class.</li>
@@ -2157,7 +2157,7 @@ function build() {
             <li>Training one path never closes another.</li>
           </ul>
           <h2>Weapons and armour</h2>
-          <p>Each Charter climax grants a unique weapon of the style in your hand, on turn-in. The quest giver sends you into a private fight. Early biome pads (Chief, Heart, Captain, Sovereign) are the original fights; Unbound Sand King / Cinderborn and the Ossuary Necromancer are the farm. The Necromancer holds <a class="cat-locations" href="/wiki/locations/ossuary/">The Ossuary</a> off the Sewers — Wyrmguard, Astral, and Nightglass drop there. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
+          <p>Each Charter climax grants a unique weapon of the style in your hand, on turn-in. The quest giver sends you into a private fight. Early biome pads (Chief, Heart, Captain, Sovereign) are the original fights; Unbound Sand King / Cinderborn, Unleashed Golem, and the Ossuary Necromancer are the farm. The Necromancer holds <a class="cat-locations" href="/wiki/locations/ossuary/">The Ossuary</a> off the Sewers — Wyrmguard, Astral, and Nightglass drop there. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
           <p><a class="cat-start" href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — unique ladder, armour set totals, and every piece.</p>
           <p><a class="cat-quests" href="/wiki/quests/hollow-seep/"><strong>The Hollow Seep →</strong></a> — the Charter campaign in order.</p>
           <h2>While it is alpha</h2>

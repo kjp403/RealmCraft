@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="BossHuntTarget" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sun_eater.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="2_enemy"]
 
 [resource]
 script = ExtResource("1_script")
-slug = &"sun_eater"
-display_name = "Malacor, the Sun-Eater"
-description = "The broker's last contract — Malacor, not the Ossuary Necromancer. Mastery-90 weapons. Full party. Full stock of potions."
+slug = &"trpg_necromancer"
+display_name = "Necromancer"
+description = "The broker's last contract — the Ossuary Necromancer, not Malacor. Chain lightning, eight armored skeletons, death magic. Wyrmguard / Astral / Nightglass if you can finish him. Full party. Full stock of potions."
 enemy_type = ExtResource("2_enemy")
 cost = 100000
 recommended_level = 99

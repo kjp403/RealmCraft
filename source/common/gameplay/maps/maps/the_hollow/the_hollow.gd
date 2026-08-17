@@ -1,8 +1,7 @@
 class_name TheHollowMap
 extends Map
-## The Hollow is a quiet foundry floor. The story Mecha-stone Golem is fought
-## in a private arena from the Hall Keeper — not on this shared map. World
-## versions live on Boss Hunt / world-boss events.
+## The Hollow is a quiet foundry floor. Unleashed Golem holds the center pad.
+## The Hall Keeper still sends the story kill into a private arena.
 
 
 func _ready() -> void:
