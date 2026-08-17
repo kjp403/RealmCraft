@@ -10,6 +10,7 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"sluice_warden_obry"
 target_giver_name = "Sluice Warden Obry"
+location_hint = "The Sewers · The Gutterworks"
 
 [resource]
 script = ExtResource("2_quest")

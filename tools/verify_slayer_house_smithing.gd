@@ -63,11 +63,12 @@ func _init() -> void:
 		if load(path) == null:
 			failures.append("handler missing: %s" % path)
 
-	# Bosses still grant ornate (T3 pink = 249).
+	# Ornate chests stay on the hard shared-world bosses, including the Ossuary
+	# Necromancer (current ceiling). T3 pink = 249.
 	for boss_path: String in [
-		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres",
-		"res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
-		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
 		"res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres",
 	]:
 		var boss: Resource = load(boss_path)

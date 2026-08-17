@@ -374,14 +374,16 @@ func _build_sewers() -> void:
 	# Bloated Sovereign holds the north cistern, the chamber furthest from the
 	# hub portal, with a wide keepout so it never leashes into a trash pack.
 	var boss_cell := _place(walk, {}, _sc(56, 16), 0)
+	var world_cell := _place(walk, {}, _sc(88, 22), 0)
 	var taken: Dictionary = {}
 	for spot in [entrance, portal]:
 		for oy in range(-_sn(6), _sn(6) + 1):
 			for ox in range(-_sn(6), _sn(6) + 1):
 				taken[spot + Vector2i(ox, oy)] = true
-	for oy in range(-_sn(9), _sn(9) + 1):
-		for ox in range(-_sn(9), _sn(9) + 1):
-			taken[boss_cell + Vector2i(ox, oy)] = true
+	for spot in [boss_cell, world_cell]:
+		for oy in range(-_sn(9), _sn(9) + 1):
+			for ox in range(-_sn(9), _sn(9) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
 	var hostiles := _mobs(walk, taken, [
 		["Slime", "trpg/trpg_slime", _sc(48, 62), 3],
 		["SlimeE", "trpg/trpg_slime", _sc(64, 62), 3],
@@ -400,9 +402,9 @@ func _build_sewers() -> void:
 		["CisternHulk", "trpg/trpg_cistern_hulk", _sc(56, 24), 2],
 	], _sn(5))
 	hostiles.append({
-		"name": "BloatedSovereign",
-		"type": TYPES + "bosses/cistern_sovereign.tres",
-		"pos": _tile_pos(boss_cell),
+		"name": "UnboundSovereign",
+		"type": TYPES + "bosses/cistern_sovereign_world.tres",
+		"pos": _tile_pos(world_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "sewers spawn blocked")
@@ -660,14 +662,16 @@ func _build_fire_forge() -> void:
 	# Banded to the instance's 30-35 gate. Vurthek holds the north foundry, the
 	# chamber furthest from the hub portal.
 	var boss_cell := _place(walk, {}, _sc(56, 18), 0)
+	var world_cell := _place(walk, {}, _sc(88, 24), 0)
 	var taken: Dictionary = {}
 	for spot in [entrance, portal]:
 		for oy in range(-_sn(6), _sn(6) + 1):
 			for ox in range(-_sn(6), _sn(6) + 1):
 				taken[spot + Vector2i(ox, oy)] = true
-	for oy in range(-_sn(9), _sn(9) + 1):
-		for ox in range(-_sn(9), _sn(9) + 1):
-			taken[boss_cell + Vector2i(ox, oy)] = true
+	for spot in [boss_cell, world_cell]:
+		for oy in range(-_sn(9), _sn(9) + 1):
+			for ox in range(-_sn(9), _sn(9) + 1):
+				taken[spot + Vector2i(ox, oy)] = true
 	var hostiles := _mobs(walk, taken, [
 		["ArmoredAxeman", "trpg/trpg_armored_axeman", _sc(56, 60), 3],
 		["Swordsman", "trpg/trpg_swordsman", _sc(44, 58), 2],
@@ -688,9 +692,9 @@ func _build_fire_forge() -> void:
 		["CinderFomorian", "trpg/trpg_cinder_fomorian", _sc(56, 30), 2],
 	], _sn(5))
 	hostiles.append({
-		"name": "Cinderborn",
-		"type": TYPES + "bosses/cinderborn.tres",
-		"pos": _tile_pos(boss_cell),
+		"name": "UnboundCinderborn",
+		"type": TYPES + "bosses/cinderborn_world.tres",
+		"pos": _tile_pos(world_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "forge spawn blocked")
@@ -734,6 +738,8 @@ func _build_fire_forge() -> void:
 # --- Desert -----------------------------------------------------------------
 # Open sand basin ringed by mesa cliffs, with rock outcrops standing in the
 # middle. The cliff art hangs two rows below its cell, so face_rows = 2.
+# Dune Scout Ilka is hand-placed at the entrance in desert.tscn (greeter for
+# The Builders' Grave). Rebuilds of this map must keep her next to the campfire.
 
 func _build_desert() -> void:
 	_set_size(_sn(104), _sn(76))
@@ -882,17 +888,16 @@ func _build_desert() -> void:
 
 	# --- Population ----------------------------------------------------------
 	# Ankhemet holds the north basin, the chamber furthest from the hub portal.
-	# The Necromancer is a second, smaller boss in the west skeleton wing — its
-	# own trash family already spawns there, and it is far enough from Ankhemet
-	# that the two never pull together.
+	# The Necromancer used to share this map; he now lives in The Ossuary off
+	# the Sewers. Unbound Sand King is the desert's style-weapon pad.
 	var boss_cell := _place(walk, {}, _sc(52, 16), 0)
-	var necro_cell := _place(walk, {}, _sc(24, 20), 0)
+	var world_cell := _place(walk, {}, _sc(80, 20), 0)
 	var taken: Dictionary = {}
 	for spot in [entrance, portal]:
 		for oy in range(-_sn(6), _sn(6) + 1):
 			for ox in range(-_sn(6), _sn(6) + 1):
 				taken[spot + Vector2i(ox, oy)] = true
-	for spot in [boss_cell, necro_cell]:
+	for spot in [boss_cell, world_cell]:
 		for oy in range(-_sn(9), _sn(9) + 1):
 			for ox in range(-_sn(9), _sn(9) + 1):
 				taken[spot + Vector2i(ox, oy)] = true
@@ -917,14 +922,9 @@ func _build_desert() -> void:
 		["Priest", "trpg/trpg_priest", _sc(52, 42), 2],
 	], _sn(5))
 	hostiles.append({
-		"name": "SandKing",
-		"type": TYPES + "bosses/sand_king.tres",
-		"pos": _tile_pos(boss_cell),
-	})
-	hostiles.append({
-		"name": "Necromancer",
-		"type": TYPES + "trpg/trpg_necromancer.tres",
-		"pos": _tile_pos(necro_cell),
+		"name": "UnboundSandKing",
+		"type": TYPES + "bosses/sand_king_world.tres",
+		"pos": _tile_pos(world_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "desert spawn blocked")

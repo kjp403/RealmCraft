@@ -43,7 +43,6 @@ id_to_node = {
 8: NodePath("GoblinSlinger"),
 9: NodePath("GoblinSlinger3"),
 10: NodePath("GoblinSlinger2"),
-11: NodePath("GoblinChief")
 }
 node_to_id = {
 NodePath("GoblinRunt"): 0,
@@ -57,7 +56,6 @@ NodePath("GoblinShaman2"): 7,
 NodePath("GoblinSlinger"): 8,
 NodePath("GoblinSlinger3"): 9,
 NodePath("GoblinSlinger2"): 10,
-NodePath("GoblinChief"): 11
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -127,11 +125,6 @@ debug_draw_ranges = false
 enemy_data = ExtResource("8_btr84")
 weapon = null
 
-[node name="GoblinChief" parent="ReplicatedPropsContainer" unique_id=1670088964 instance=ExtResource("4_dmrxm")]
-position = Vector2(-248, -800)
-debug_draw_ranges = false
-enemy_data = ExtResource("9_10irk")
-weapon = null
 
 [node name="SpawnPoint" parent="." unique_id=1414716116 instance=ExtResource("10_tn0hs")]
 position = Vector2(112, -48)

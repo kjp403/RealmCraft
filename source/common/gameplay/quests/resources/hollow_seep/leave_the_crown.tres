@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_shaft_below.tres" id="3_prereq"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/foundry_tablet.tres" id="4_tablet"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_i3ak6"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
@@ -31,17 +32,22 @@ script = ExtResource("kit_reward")
 item = ExtResource("kit_pot")
 amount = 10
 
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("kit_reward")
+item = ExtResource("dungeon_key")
+amount = 2
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Leave the Crown"
-description = "Kill Ankhemet, the Sand King, at the end of the long hall. Leave the crown. Take the Foundry Tablet that names the last furnace that fed the Hollow — Fire Forge. A sunsteel weapon of your discipline is the next blade after fairy."
+description = "Kill Ankhemet, the Sand King, at the end of the long hall. Leave the crown. Take the Foundry Tablet and bring it back to Asha here in the tombs. After that, the Hall Keeper in Castle Garden — Charter Hall — sends you to Fire Forge. A sunsteel weapon of your discipline is the next blade after fairy."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_king"), SubResource("Obj_collect_tablet")])
 min_level = 28
-unlock_message = "[Tomb Delver Asha] He is crowned, armoured, and awake. Leave the crown. Take the tablet if you find one."
+unlock_message = "[Tomb Delver Asha] He is crowned, armoured, and awake. Leave the crown. Take the tablet if you find one, and bring it back to me. The Hall Keeper will want it next."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 650
 reward_mastery_xp = 110000
-reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion"), SubResource("Reward_dungeon_key")])
 reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 3000
 grants_wardstone = &"desert"

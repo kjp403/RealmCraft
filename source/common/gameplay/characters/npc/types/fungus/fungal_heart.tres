@@ -14,7 +14,6 @@
 [ext_resource type="Resource" uid="uid://cikrefs0c7r42" path="res://source/common/gameplay/items/weapons/book/book_spore.item.tres" id="9_book"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
-[ext_resource type="Resource" uid="uid://bye53p5l8x8or" path="res://source/common/gameplay/items/gears/relics/relic_sporebloom.tres" id="relic_sporebloom"]
 [ext_resource type="Resource" uid="uid://bw238ey5rg6bx" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="fx_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="fx_bloodcap"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
@@ -73,7 +72,7 @@ chance = 0.12
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.15
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_chest_small"]
 script = ExtResource("2_loot")
@@ -90,11 +89,6 @@ script = ExtResource("2_loot")
 item = ExtResource("bone_item")
 min_amount = 2
 max_amount = 5
-
-[sub_resource type="Resource" id="Drop_relic_sporebloom"]
-script = ExtResource("2_loot")
-item = ExtResource("relic_sporebloom")
-chance = 0.001
 
 [resource]
 script = ExtResource("1_script")
@@ -118,7 +112,7 @@ xp_reward = 700
 combat_skill_xp_override = 5500
 respawns = true
 respawn_delay = 90.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_sporebloom")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_bone")])
 slam_radius = 125.0
 slam_windup_s = 0.9
 slam_damage = 120.0

@@ -17,9 +17,6 @@
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
-[ext_resource type="Resource" uid="uid://d1jnlakvmggoj" path="res://source/common/gameplay/items/gears/relics/relic_coreblossom.tres" id="relic_coreblossom"]
-
-[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_pink_large.tres" id="chest_pink"]
 [ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="mithril_ore"]
 [ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="adamant_ore"]
 [ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="runite_ore"]
@@ -91,17 +88,14 @@ chance = 0.03
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.02
+min_amount = 1
+max_amount = 2
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
 chance = 1.0
-
-[sub_resource type="Resource" id="Drop_relic_coreblossom"]
-script = ExtResource("2_loot")
-item = ExtResource("relic_coreblossom")
-chance = 0.001
 
 [sub_resource type="Resource" id="Drop_mithril"]
 script = ExtResource("2_loot")
@@ -139,48 +133,51 @@ skin = ExtResource("3_skin")
 visual_scale = 1.9
 is_boss = true
 combat_level = 666
-max_health = 20000.0
-attack_damage = 98.0
-attack_cooldown = 1.85
-armor = 88.0
-mr = 72.0
+max_health = 35000.0
+attack_damage = 175.0
+attack_cooldown = 1.25
+armor = 155.0
+mr = 145.0
 behaviors = Array[ExtResource("90_mobb")]([SubResource("Lunge_charge")])
-move_speed = 72
+move_speed = 80
 distance_to_attack = 56
 leashes = false
-detection_radius = 280
+detection_radius = 300
 chase_on_area = true
-xp_reward = 4500
-combat_skill_xp_override = 16000
+xp_reward = 28000
+combat_skill_xp_override = 30000
 respawns = true
 respawn_delay = 300.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_runite"), SubResource("Drop_mithril_bar"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_coreblossom")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_bone")])
 enrage_health_fraction = 0.4
-slam_radius = 140.0
-slam_windup_s = 0.95
-slam_damage = 280.0
-slam_interval_s = 9.0
-enraged_slam_interval_s = 6.0
-laser_range = 280.0
-laser_width = 26.0
-laser_windup_s = 1.15
-laser_damage = 250.0
-laser_interval_s = 9.0
-enraged_laser_interval_s = 6.0
-arm_shot_interval_s = 6.5
-arm_shot_damage = 150.0
-arm_shot_speed = 200.0
-arm_shot_lifetime_s = 1.6
-enraged_arm_shot_interval_s = 4.5
+slam_radius = 150.0
+slam_windup_s = 0.9
+slam_damage = 540.0
+slam_interval_s = 8.0
+enraged_slam_interval_s = 5.2
+laser_range = 320.0
+laser_width = 28.0
+laser_windup_s = 1.05
+laser_damage = 440.0
+laser_interval_s = 8.0
+enraged_laser_interval_s = 5.2
+arm_shot_interval_s = 5.8
+arm_shot_damage = 320.0
+arm_shot_speed = 220.0
+arm_shot_lifetime_s = 1.7
+enraged_arm_shot_interval_s = 3.9
 add_enemy_slug = &"iron_golem"
-add_count = 2
-add_spread_px = 72.0
-enrage_speed_mult = 1.35
-ornate_chest_top_min = 1
-ornate_chest_top_max = 2
-ornate_chest_second_min = 0
-ornate_chest_second_max = 0
-ornate_chest_consolation_chance = 0.4
-ornate_chest_item = ExtResource("chest_pink")
+add_count = 3
+add_spread_px = 80.0
+enrage_speed_mult = 1.5
+sweep_arc_deg = 170.0
+sweep_range = 320.0
+sweep_width = 40.0
+sweep_windup_s = 1.1
+sweep_duration_s = 1.2
+sweep_damage = 340.0
+sweep_interval_s = 9.5
+enraged_sweep_interval_s = 6.0
+slam_followup_lunge = true
 metadata/slug = &"mecha_stone_golem"
 metadata/id = 40

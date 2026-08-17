@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="7_quest"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="8_questres"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_fuel_lock.tres" id="9_q1"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_maro"]
 script = ExtResource("7_quest")
@@ -22,9 +23,14 @@ script = ExtResource("4_dialogue")
 lines = Array[String](["Vurthek was here before the foundry. The foundry was built around it and called that a victory.", "It throws a line of fire the length of the shore. When it does, put rock between you and it.", "Below half strength it stops pacing and starts hunting. That is the fight, really."])
 label_override = "Ask about the Cinderborn"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"cinderborn"
+
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Cinderwright Maro"
+location_hint = "Fire Forge · The Cinder Deeps"
 skin = ExtResource("6_skin")
 greeting = "You have come a long way down for something that will almost certainly kill you. Let me at least make it interesting."
-interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_maro"), SubResource("Dialogue_maro"), SubResource("Dialogue_vurthek")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_maro"), SubResource("Dialogue_maro"), SubResource("Dialogue_vurthek"), SubResource("QuestBoss_fight")])

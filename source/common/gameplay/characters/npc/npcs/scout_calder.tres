@@ -24,6 +24,7 @@ label_override = "What happened to you?"
 [resource]
 script = ExtResource("6_npc")
 npc_name = "Scout Calder"
+location_hint = "Goblin Woodland, by the Fungus Cave hole"
 skin = ExtResource("5_skin")
 greeting = "Hero. Good. Bone in hand? Keep it. I am not dying today, but I am not standing either. The Chief cut me open. The anvil will make your plate. The hole will make the next blade."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_calder"), SubResource("Dialogue_wound")])

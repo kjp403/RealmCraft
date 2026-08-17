@@ -158,6 +158,8 @@ const NO_LEASH_DISTANCE: int = 1_000_000
 var respawn_delay: float = 5.0
 var loot: Array[LootDrop]
 var move_speed: int = 20
+## Outgoing damage multiplier (soft enrage). 1.0 = authored. Applied in Character.take_damage.
+var damage_dealt_mult: float = 1.0
 ## Distance to the player at which the NPC switches from CHASE to ATTACK.
 var distance_to_attack: int = 20
 ## If the NPC strays this far from its spawn, it disengages and returns.
@@ -222,6 +224,7 @@ func _apply_enemy_data() -> void:
 	respawn_delay = enemy_data.respawn_delay
 	loot = enemy_data.loot
 	move_speed = enemy_data.move_speed
+	damage_dealt_mult = 1.0
 	distance_to_attack = enemy_data.distance_to_attack
 	max_distance_from_spawn = enemy_data.max_distance_from_spawn
 	respawns = enemy_data.respawns
@@ -1841,6 +1844,25 @@ func die(killer: Character) -> void:
 	_respawn_at_ms = Time.get_ticks_msec() + int(respawn_delay * 1000.0)
 	RewardService.distribute(self, _contributors, killer)
 	died.emit(killer)
+
+
+## Style wards (world bosses): Physical Ward wants sword/hammer/bow, Arcane Ward
+## wants wand/book. Wrong category is reduced, not zero.
+func incoming_damage_factor(attacker: Character) -> float:
+	var factor: float = super.incoming_damage_factor(attacker)
+	if attacker is not Player:
+		return factor
+	var brain: BossController = _boss_brain()
+	if brain == null:
+		return factor
+	return factor * brain.style_ward_factor(attacker as Player)
+
+
+func _boss_brain() -> BossController:
+	for child: Node in get_children():
+		if child is BossController:
+			return child as BossController
+	return null
 
 
 ## Server-side override that:

@@ -34,6 +34,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 [resource]
 script = ExtResource("4_gsvox")
 npc_name = "Bonecarver"
+location_hint = "DimWood"
 skin = ExtResource("5_rdenb")
 greeting = "Don't flinch. You'll wear this face too, you keep dying like you mean it or like [i]they[/i] mean it. I went out past counting and came back… economical. Bone's honest, at least. Buy something."
 interactions = Array[ExtResource("1_k0xw0")]([SubResource("Resource_twffw"), SubResource("QuestInteraction_bone"), SubResource("Dialogue_bonepickers"), SubResource("Resource_nf104")])

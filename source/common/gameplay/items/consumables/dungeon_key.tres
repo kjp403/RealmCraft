@@ -7,7 +7,7 @@
 script = ExtResource("1_script")
 item_name = &"Dungeon Key"
 item_icon = ExtResource("2_icon")
-description = "A glowing key forged from dungeon light. Use it to restore one daily dungeon reward charge. Dropped rarely by bosses."
+description = "A glowing key forged from dungeon light. Use it to restore one daily dungeon reward charge. Story quests grant them on turn-in; world bosses drop them rarely."
 vendor_value = 250
 metadata/slug = &"dungeon_key"
 metadata/id = 313

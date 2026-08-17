@@ -32,6 +32,7 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 [resource]
 script = ExtResource("3_npc")
 npc_name = "Charter Clerk"
+location_hint = "Castle Garden, Intake"
 greeting = "Approach the desk. Every new arrival must be entered into the Charter before leaving the Intake."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_clerk"), SubResource("Dialogue_register"), SubResource("Dialogue_menus"), SubResource("Dialogue_next")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

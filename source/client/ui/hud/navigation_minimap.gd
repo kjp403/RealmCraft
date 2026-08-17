@@ -265,6 +265,9 @@ func _on_quest_list_received(data: Dictionary) -> void:
 				target_name = description.substr(
 					VISIT_PREFIX.length()
 				).strip_edges()
+				var loc_sep: int = target_name.find(" · ")
+				if loc_sep >= 0:
+					target_name = target_name.substr(0, loc_sep).strip_edges()
 
 		if target_key.is_empty() and target_name.is_empty():
 			continue

@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://0wt22r5mbmd" path="res://source/common/gameplay/quests/resources/fungus_cave/break_the_myconid_line.tres" id="9_q4"]
 [ext_resource type="Resource" uid="uid://b500o70a6rn7w" path="res://source/common/gameplay/quests/resources/fungus_cave/the_fungal_heart.tres" id="10_q5"]
 [ext_resource type="SpriteFrames" uid="uid://dkeeft051qhl3" path="res://source/common/gameplay/characters/sprite_frames/rogue.tres" id="11_skin"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_maela"]
 script = ExtResource("3_quest")
@@ -21,9 +22,14 @@ script = ExtResource("4_dialogue")
 lines = Array[String](["The glow is pretty until you learn what it eats.", "This cave used to be a clean dig. Then the seep reached it and the fungus learned to walk.", "Keep to the lit galleries. What waits in the deep passage is worse than mushrooms."])
 label_override = "Ask about the glow"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"fungal_heart"
+
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Forager Maela"
+location_hint = "Fungus Cave"
 skin = ExtResource("11_skin")
 greeting = "Watch your step, the caps burst when you crowd them. You here to clear the galleries? Good. I mark what needs cutting, you cut it."
-interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_maela"), SubResource("Dialogue_glow")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_maela"), SubResource("Dialogue_glow"), SubResource("QuestBoss_fight")])

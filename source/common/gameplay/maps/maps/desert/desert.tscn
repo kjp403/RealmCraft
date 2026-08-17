@@ -30,9 +30,10 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_wretched_fomorian.tres" id="et10"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_soldier.tres" id="et11"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_priest.tres" id="et12"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres" id="et13"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres" id="et14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres" id="et15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/desert_badger.tres" id="et_dbadger"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/dune_scout_ilka.tres" id="ilka"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunspire_terraces.tres" id="stair_sunspire_terraces"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
@@ -302,8 +303,6 @@ id_to_node = {
 37: NodePath("Soldier2"),
 38: NodePath("Priest"),
 39: NodePath("Priest2"),
-40: NodePath("SandKing"),
-41: NodePath("Necromancer"),
 42: NodePath("DesertBadger1"),
 43: NodePath("DesertBadger2"),
 44: NodePath("DesertBadger3"),
@@ -312,6 +311,7 @@ id_to_node = {
 47: NodePath("DesertBadger6"),
 48: NodePath("DesertBadger7"),
 49: NodePath("DesertBadger8"),
+50: NodePath("UnboundSandKing"),
 }
 node_to_id = {
 NodePath("Archer"): 0,
@@ -354,8 +354,6 @@ NodePath("Soldier"): 36,
 NodePath("Soldier2"): 37,
 NodePath("Priest"): 38,
 NodePath("Priest2"): 39,
-NodePath("SandKing"): 40,
-NodePath("Necromancer"): 41,
 NodePath("DesertBadger1"): 42,
 NodePath("DesertBadger2"): 43,
 NodePath("DesertBadger3"): 44,
@@ -364,6 +362,7 @@ NodePath("DesertBadger5"): 46,
 NodePath("DesertBadger6"): 47,
 NodePath("DesertBadger7"): 48,
 NodePath("DesertBadger8"): 49,
+NodePath("UnboundSandKing"): 50,
 }
 
 [node name="Archer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -606,18 +605,6 @@ debug_draw_ranges = false
 enemy_data = ExtResource("et12")
 weapon = null
 
-[node name="SandKing" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1672.0, 520.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("et13")
-weapon = null
-
-[node name="Necromancer" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(776.0, 648.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("et14")
-weapon = null
-
 [node name="DesertBadger1" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
 position = Vector2(980.0, 1200.0)
 debug_draw_ranges = false
@@ -665,6 +652,19 @@ position = Vector2(1750.0, 1000.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("et_dbadger")
 weapon = null
+
+[node name="UnboundSandKing" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2568.0, 824.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("et15")
+weapon = null
+
+[node name="NPCs" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="DuneScoutIlka" parent="NPCs" instance=ExtResource("npc")]
+position = Vector2(1608.0, 1992.0)
+npc_resource = ExtResource("ilka")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(1672.0, 2056.0)

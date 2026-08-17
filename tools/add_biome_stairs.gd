@@ -49,6 +49,9 @@ const STAIRS: Array[Dictionary] = [
 				"color": "Color(0.2, 0.5, 0.55, 1)", "portal_id": 153, "landing_id": 53,
 				"target_id": 43, "side": 1,
 			},
+			# OssuaryStair is hand-placed by the sewers hub (warper 156 / landing 56)
+			# so players see it on the top floor. Do not add it here — _pick_far
+			# would yank it to a distant wing on the next re-run.
 		],
 	},
 	{

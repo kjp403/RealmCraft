@@ -10,15 +10,16 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"dune_scout_ilka"
 target_giver_name = "Dune Scout Ilka"
+location_hint = "Desert, at the entrance"
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Builders' Grave"
-description = "The Bonecarver names the desert tombs as the builders' grave, and the Hollow as a bound engine that never ran down. Find Dune Scout Ilka south of the city."
+description = "The Bonecarver names the desert tombs as the builders' grave, and the Hollow as a bound engine that never ran down. Ride the Desert Camel in Goblin Woodland. Dune Scout Ilka waits at the entrance fire the moment you arrive."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_ilka")])
 auto_complete = true
 min_level = 25
-unlock_message = "[Bonecarver] The desert buried the builders. The Hollow never ran down. Point your feet south."
+unlock_message = "[Bonecarver] The desert buried the builders. The Hollow never ran down. Goblin Woodland — the camel by the east dunes. Ilka is at the fire the moment you step through."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 140
 reward_mastery_xp = 12000

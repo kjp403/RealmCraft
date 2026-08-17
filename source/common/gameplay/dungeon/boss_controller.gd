@@ -96,6 +96,21 @@ var chain_windup_s: float = 0.9
 var chain_interval_s: float = 9.0
 var enraged_chain_interval_s: float = 0.0
 var chain_phase: int = 0
+var slam_followup_lunge: bool = false
+var sear_wound_duration_s: float = 0.0
+var sear_wound_damage: float = 80.0
+var sear_wound_radius: float = 72.0
+var sear_wound_interval_s: float = 14.0
+var enraged_sear_wound_interval_s: float = 0.0
+var sear_wound_windup_s: float = 0.9
+var style_ward_interval_s: float = 0.0
+var style_ward_wrong_mult: float = 0.25
+var soft_enrage_s: float = 0.0
+var soft_enrage_ramp: float = 0.25
+## 0 = off, 1 = physical, 2 = arcane.
+var _style_ward: int = 0
+var _next_ward_ms: int = 0
+var _pull_ms: int = 0
 
 ## How long a meteor visually falls before it lands (the tail of its wind-up).
 const METEOR_FALL_S: float = 0.42
@@ -160,8 +175,11 @@ func _on_boss_died_music(_killer: Character) -> void:
 	_enraged = false
 	_engaged = false
 	_casting = false
+	_style_ward = 0
+	_pull_ms = 0
 	if is_instance_valid(boss) and boss.enemy_data != null:
 		boss.move_speed = boss.enemy_data.move_speed
+		boss.damage_dealt_mult = 1.0
 
 
 ## Pull tuning from the body's EnemyTypeResource so each boss is configured in
@@ -232,6 +250,17 @@ func _load_config() -> void:
 	chain_interval_s = d.chain_interval_s
 	enraged_chain_interval_s = d.enraged_chain_interval_s
 	chain_phase = d.chain_phase
+	slam_followup_lunge = d.slam_followup_lunge
+	sear_wound_duration_s = d.sear_wound_duration_s
+	sear_wound_damage = d.sear_wound_damage
+	sear_wound_radius = d.sear_wound_radius
+	sear_wound_interval_s = d.sear_wound_interval_s
+	enraged_sear_wound_interval_s = d.enraged_sear_wound_interval_s
+	sear_wound_windup_s = d.sear_wound_windup_s
+	style_ward_interval_s = d.style_ward_interval_s
+	style_ward_wrong_mult = d.style_ward_wrong_mult
+	soft_enrage_s = d.soft_enrage_s
+	soft_enrage_ramp = d.soft_enrage_ramp
 	_build_moves()
 
 
@@ -257,6 +286,9 @@ func _build_moves() -> void:
 	if chain_targets > 0:
 		_add_move(&"chain", _static_arc, chain_interval_s, enraged_chain_interval_s,
 			chain_phase, 5.0)
+	if sear_wound_duration_s > 0.0:
+		_add_move(&"wound", _sear_wound, sear_wound_interval_s, enraged_sear_wound_interval_s,
+			0, 7.5)
 
 
 func _add_move(
@@ -330,7 +362,12 @@ func _physics_process(_delta: float) -> void:
 	if not _engaged:
 		_engaged = true
 		_arm_pull_grace()
+		_pull_ms = Time.get_ticks_msec()
+		if style_ward_interval_s > 0.0:
+			_set_style_ward(1)
 		push_boss_music(_instance(), "fight")
+	_tick_soft_enrage()
+	_tick_style_ward()
 	if _casting:
 		return
 	if _moves.is_empty():
@@ -397,6 +434,9 @@ func _slam() -> void:
 			if player != null and not player.is_dead \
 					and center.distance_to(player.global_position) <= slam_radius:
 				player.take_damage(slam_damage, boss)
+	if slam_followup_lunge:
+		boss.action_root_until_ms = 0
+		_force_lunge()
 	await _finish_cast(&"slam", SLAM_RECOVER_S)
 
 
@@ -647,6 +687,90 @@ func _static_arc() -> void:
 	for i: int in struck.size():
 		struck[i].take_damage(chain_damage * (1.0 + 0.35 * float(i)), boss)
 	await _finish_cast(&"chain", 0.4)
+
+
+func _force_lunge() -> void:
+	if not is_instance_valid(boss):
+		return
+	for behavior: MobBehavior in boss.behaviors:
+		if behavior is LungeBehavior:
+			(behavior as LungeBehavior).force_begin(boss)
+			return
+
+
+func _sear_wound() -> void:
+	_casting = true
+	var target: Player = boss.targeted_player
+	if target == null or not is_instance_valid(target) or target.is_dead:
+		_casting = false
+		return
+	_callout("Searing Wound")
+	boss._face_target()
+	boss.action_root_until_ms = Time.get_ticks_msec() + int((sear_wound_windup_s + 0.4) * 1000.0)
+	boss.replicate_visual(&"rp_play_skin_anim", [cast_anim, sear_wound_windup_s])
+	boss.replicate_visual(&"rp_elem_telegraph",
+		[target.global_position, sear_wound_radius, sear_wound_windup_s, _element(), 0])
+	await get_tree().create_timer(sear_wound_windup_s).timeout
+	if not is_instance_valid(boss) or boss.is_dead:
+		_casting = false
+		return
+	for player: Player in _live_players():
+		player.apply_sear_wound(sear_wound_duration_s, sear_wound_damage, sear_wound_radius, boss)
+	await _finish_cast(&"wound", 0.35)
+
+
+func style_ward_factor(attacker: Player) -> float:
+	if _style_ward == 0:
+		return 1.0
+	var cat: StringName = &""
+	if attacker.player_resource != null:
+		cat = attacker.player_resource.equipped_weapon_category()
+	var physical: bool = cat == &"sword" or cat == &"hammer" or cat == &"bow"
+	var arcane: bool = cat == &"wand" or cat == &"book"
+	if _style_ward == 1 and physical:
+		return 1.0
+	if _style_ward == 2 and arcane:
+		return 1.0
+	return style_ward_wrong_mult
+
+
+func _set_style_ward(ward: int) -> void:
+	_style_ward = ward
+	_next_ward_ms = Time.get_ticks_msec() + int(style_ward_interval_s * 1000.0)
+	if ward == 1:
+		_callout("Physical Ward — melee and bows")
+	elif ward == 2:
+		_callout("Arcane Ward — wand and book")
+	var instance: Node = _instance()
+	if instance == null or WorldServer.curr == null:
+		return
+	for peer_id: int in instance.players_by_peer_id:
+		WorldServer.curr.data_push.rpc_id(peer_id, &"boss.ward", {
+			"ward": "physical" if ward == 1 else "arcane",
+			"name": boss.display_name if is_instance_valid(boss) else "",
+		})
+
+
+func _tick_style_ward() -> void:
+	if style_ward_interval_s <= 0.0:
+		return
+	if _style_ward == 0:
+		_set_style_ward(1)
+		return
+	if Time.get_ticks_msec() >= _next_ward_ms:
+		_set_style_ward(2 if _style_ward == 1 else 1)
+
+
+func _tick_soft_enrage() -> void:
+	if soft_enrage_s <= 0.0 or _pull_ms <= 0 or not is_instance_valid(boss):
+		return
+	var elapsed_s: float = float(Time.get_ticks_msec() - _pull_ms) / 1000.0
+	var over: float = elapsed_s - soft_enrage_s
+	if over <= 0.0:
+		boss.damage_dealt_mult = 1.0
+		return
+	var steps: float = over / 30.0
+	boss.damage_dealt_mult = minf(3.0, 1.0 + soft_enrage_ramp * steps)
 
 
 ## Server → clients: a one-line mechanic callout for everyone in the fight. The

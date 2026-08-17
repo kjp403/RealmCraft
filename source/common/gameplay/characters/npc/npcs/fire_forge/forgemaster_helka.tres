@@ -20,12 +20,13 @@ quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_helka"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Two halls, four bridges, six quench wells. I know this floor better than my own hands.", "The crews that hold it now are not mine. They wear our marks and they do not answer to them.", "Stay on the walkways. What is under the grates is still hot."])
-label_override = "Ask about the gallery"
+lines = Array[String](["I wait at this fire so you do not have to hunt the halls for a forgemaster. This basin is still mine, whatever walks it.", "The Bellows Gallery is the west stair — Torv holds the bridges. The east stair drops into the Cinder Deeps, where Maro still answers.", "Stay on the walkways. What is under the grates is still hot."])
+label_override = "Ask about the forge"
 
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Forgemaster Helka"
+location_hint = "Fire Forge, at the entrance"
 skin = ExtResource("6_skin")
-greeting = "Mind the heat and mind your manners. This is still a working floor, whatever has moved into it."
+greeting = "Mind the heat and mind your manners. I will tell you which floor is still worth walking."
 interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_helka"), SubResource("QuestInteraction_helka"), SubResource("Dialogue_helka")])

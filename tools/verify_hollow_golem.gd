@@ -18,22 +18,8 @@ func _init() -> void:
 		fails.append("FAIL pre_add replicated_props_container null (missing node_paths?)")
 	var golem: Node = hollow.get_node_or_null("ReplicatedPropsContainer/MechaGolem")
 	print("golem=", golem, " pos=", golem.position if golem else null)
-	if golem == null:
-		fails.append("FAIL MechaGolem missing")
-	# enemy_data may not deserialize if HostileNPC script graph fails under -s;
-	# still assert the ExtResource path exists in the packed scene state.
-	var state: SceneState = ps.get_state()
-	var found_enemy_data := false
-	for i: int in state.get_node_count():
-		if state.get_node_name(i) != &"MechaGolem":
-			continue
-		for p: int in state.get_node_property_count(i):
-			if state.get_node_property_name(i, p) == &"enemy_data":
-				var v: Variant = state.get_node_property_value(i, p)
-				print("scene_enemy_data=", v)
-				found_enemy_data = v != null
-	if not found_enemy_data:
-		fails.append("FAIL MechaGolem.enemy_data not baked in scene")
+	if golem != null:
+		fails.append("FAIL MechaGolem still on shared Hollow (story fight is via Hall Keeper)")
 
 	root.add_child(hollow)
 	rpc = hollow.get("replicated_props_container")
@@ -41,12 +27,10 @@ func _init() -> void:
 	if rpc == null:
 		fails.append("FAIL post_add container null")
 	var cont: Node = hollow.get_node_or_null("ReplicatedPropsContainer")
-	var idm: Variant = cont.get("id_to_node") if cont else null
-	print("post_add id_to_node=", idm)
-	if idm == null or idm.is_empty() or not (idm[0] is Node):
-		fails.append("FAIL post_add id_to_node not resolved to Node")
+	if cont == null:
+		fails.append("FAIL post_add ReplicatedPropsContainer missing")
 	else:
-		print("OK synced id0=", idm[0].name)
+		print("OK hollow container present, children=", cont.get_child_count())
 
 	var ground: TileMapLayer = hollow.get_node("Tiles/Ground") as TileMapLayer
 	var bad: Dictionary = {

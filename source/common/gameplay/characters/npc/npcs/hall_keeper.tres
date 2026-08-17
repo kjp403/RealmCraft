@@ -12,6 +12,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_reader_of_wars.tres" id="11_reader"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_last_foundry.tres" id="12_foundry"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_thing_it_was_built_to_run.tres" id="13_hollow"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_welcome"]
 script = ExtResource("4_quest_interaction")
@@ -48,10 +49,15 @@ lines = Array[String](["I kept a gate once. Then a wall. Now I keep this hall an
 label_override = "Tell me about yourself"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"mecha_stone_golem"
+
 [resource]
 script = ExtResource("7_npc")
 npc_name = "Hall Keeper"
+location_hint = "Castle Garden, Charter Hall"
 skin = ExtResource("6_skin")
 greeting = "Registration complete? Good. Before you leave this hall, remember one thing: Arkenelle does not lock you into a class, weapon, or profession. Every Hero may train every path. I can explain the systems, then give you your first assignment."
-interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_welcome"), SubResource("Dialogue_progression"), SubResource("Dialogue_combat"), SubResource("Dialogue_professions"), SubResource("Dialogue_first_steps"), SubResource("Dialogue_keeper")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_welcome"), SubResource("Dialogue_progression"), SubResource("Dialogue_combat"), SubResource("Dialogue_professions"), SubResource("Dialogue_first_steps"), SubResource("Dialogue_keeper"), SubResource("QuestBoss_fight")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

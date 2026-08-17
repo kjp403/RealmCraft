@@ -11,8 +11,6 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/lighting/firefly.tscn" id="9_fly"]
 [ext_resource type="Texture2D" path="res://source/common/gameplay/lighting/light_radial.tres" id="10_glow"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fx/fog.png" id="11_fog"]
-[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="12_hostile"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres" id="13_golem"]
 [ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
 [ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 
@@ -142,17 +140,11 @@ texture_scale = 2.4
 y_sort_enabled = true
 script = ExtResource("4_rp")
 id_to_node = {
-0: NodePath("MechaGolem")
 }
 node_to_id = {
-NodePath("MechaGolem"): 0
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
-[node name="MechaGolem" parent="ReplicatedPropsContainer" instance=ExtResource("12_hostile")]
-position = Vector2(472, 296)
-enemy_data = ExtResource("13_golem")
-weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(472, 624)

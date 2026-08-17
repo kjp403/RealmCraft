@@ -25,6 +25,7 @@ label_override = "Ask what is below"
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Ratcatcher Pell"
+location_hint = "The Sewers · The Gutterworks"
 skin = ExtResource("6_skin")
 greeting = "Careful where you put your boots. Half of what is on this floor used to be moving."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_pell"), SubResource("Dialogue_pell"), SubResource("Dialogue_deep")])

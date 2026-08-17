@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="BossHuntTarget" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres" id="2_enemy"]
 
 [resource]
 script = ExtResource("1_script")
 slug = &"cinderborn"
-display_name = "Vurthek, the Cinderborn"
-description = "Four hundred and fifty damage a slam, every fifteen seconds, for half an hour. Not a solo contract."
+display_name = "Vurthek Unbound"
+description = "The foundry's own coal, unbanked. Laser, sweep, slam follow-up, Searing Wound, and style wards — not a solo contract."
 enemy_type = ExtResource("2_enemy")
 cost = 70000
-recommended_level = 36
+recommended_level = 88
 health_mult = 1.0
 health_per_extra_player = 0.6
 damage_mult = 1.0

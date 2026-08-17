@@ -8,5 +8,5 @@ display_name = "The Undead Legion"
 enemy_types = Array[StringName]([&"trpg_skeleton", &"trpg_skeleton_archer", &"trpg_armored_skeleton", &"trpg_greatsword_skeleton", &"trpg_zombie_giant", &"trpg_necromancer"])
 min_slayer_level = 60
 xp_per_kill = 762
-guide_notes = "Armoured skeletons with real weight behind them - chip through the armour rather than trading blows. The Necromancer roams this ground too: a genuine T50 test on a four-minute respawn. Expect a long fight and telegraphed death magic — still the largest single Slayer payout on the table if you can take him."
-location_hint = "Desert, The Sunken Tombs"
+guide_notes = "Armoured skeletons with real weight behind them - chip through the armour rather than trading blows. The Necromancer no longer walks the desert: he holds The Ossuary, a sealed chapel off the main Sewers. That fight is the current ceiling — expect a long pull, eight skeleton adds, and death magic. Wyrmguard / Astral / Nightglass drop there if you can finish him."
+location_hint = "Desert tombs for the legion; The Ossuary (Sewers stair) for the Necromancer"

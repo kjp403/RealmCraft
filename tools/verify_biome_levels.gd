@@ -9,9 +9,9 @@ extends SceneTree
 ##      find its arrival id on the destination, and the destination's exit must
 ##      find its landing id back on the surface map.
 ##   3. Each surface map is populated and ends on that biome's boss, with every
-##      hostile baked into both id maps. The bosses live on the surface now; the
-##      sub-levels keep their trash until they are reworked into instanced
-##      encounters, so none of them assert a boss.
+##      hostile baked into both id maps. Surface maps still end on that biome's
+##      world pad. The Ossuary is the exception: the Necromancer is a dedicated
+##      sub-level, asserted via `bosses`.
 ##
 ##   godot --headless --path . -s tools/verify_biome_levels.gd
 
@@ -22,7 +22,7 @@ const LEVELS: Array[Dictionary] = [
 		"path": MAPS + "desert/sunspire_terraces.tscn", "root": "sunspire_terraces",
 		"entrance": 40, "exit": 140, "exit_target": 50,
 		"parent": MAPS + "desert/desert.tscn", "stair": 150,
-		"bosses": [], "min_mobs": 8, "min_npcs": 2,
+		"bosses": [], "min_mobs": 8, "min_npcs": 1,
 	},
 	{
 		"path": MAPS + "desert/sunken_tombs.tscn", "root": "sunken_tombs",
@@ -43,10 +43,16 @@ const LEVELS: Array[Dictionary] = [
 		"bosses": [], "min_mobs": 13, "min_npcs": 1,
 	},
 	{
+		"path": MAPS + "sewers/ossuary.tscn", "root": "ossuary",
+		"entrance": 46, "exit": 146, "exit_target": 56,
+		"parent": MAPS + "sewers/sewers.tscn", "stair": 156,
+		"bosses": ["Necromancer"], "min_mobs": 10, "min_npcs": 0,
+	},
+	{
 		"path": MAPS + "fire_forge/bellows_gallery.tscn", "root": "bellows_gallery",
 		"entrance": 44, "exit": 144, "exit_target": 54,
 		"parent": MAPS + "fire_forge/fire_forge.tscn", "stair": 154,
-		"bosses": [], "min_mobs": 10, "min_npcs": 2,
+		"bosses": [], "min_mobs": 10, "min_npcs": 1,
 	},
 	{
 		"path": MAPS + "fire_forge/cinder_deeps.tscn", "root": "cinder_deeps",
@@ -129,6 +135,31 @@ func _check_surface_populated(path: String) -> void:
 		_fail("%s has no boss" % name)
 	else:
 		print("OK   ", name, " mobs=", mobs, " bosses=", bosses, " sync ids baked")
+	if name == "desert.tscn":
+		var npcs: Node = map.get_node_or_null("NPCs")
+		var ilka: Node = null if npcs == null else npcs.get_node_or_null("DuneScoutIlka")
+		var entrance: Node = map.get_node_or_null("Entrance")
+		if ilka == null:
+			_fail("desert.tscn is missing Dune Scout Ilka at the entrance")
+		elif entrance != null and ilka.position.distance_to(entrance.position) > 256.0:
+			_fail("Ilka is too far from the Desert entrance (%.0f px)" % ilka.position.distance_to(entrance.position))
+		else:
+			print("OK   desert.tscn Ilka at entrance")
+	if name == "fire_forge.tscn":
+		var forge_npcs: Node = map.get_node_or_null("NPCs")
+		var helka_npc: Node = (
+			null if forge_npcs == null else forge_npcs.get_node_or_null("ForgemasterHelka")
+		)
+		var forge_entrance: Node = map.get_node_or_null("Entrance")
+		if helka_npc == null:
+			_fail("fire_forge.tscn is missing Forgemaster Helka at the entrance")
+		elif (
+			forge_entrance != null
+			and helka_npc.position.distance_to(forge_entrance.position) > 256.0
+		):
+			_fail("Helka is too far from the Fire Forge entrance (%.0f px)" % helka_npc.position.distance_to(forge_entrance.position))
+		else:
+			print("OK   fire_forge.tscn Helka at entrance")
 	map.free()
 
 
@@ -207,6 +238,10 @@ func _check_level(cfg: Dictionary) -> void:
 		for npc in npc_root.get_children():
 			if npc.get("npc_resource") == null:
 				_fail("%s NPC %s has no npc_resource" % [name, npc.name])
+			if name == "sunspire_terraces.tscn" and String(npc.name) == "DuneScoutIlka":
+				_fail("Ilka belongs at the Desert entrance, not on Sunspire Terraces")
+			if name == "bellows_gallery.tscn" and String(npc.name) == "ForgemasterHelka":
+				_fail("Helka belongs at the Fire Forge entrance, not on Bellows Gallery")
 
 	# --- Warper round trip ---
 	var ids := _warper_ids(map)

@@ -58,12 +58,24 @@ func _gap(n: int) -> int:
 
 
 func _initialize() -> void:
-	_build_desert_terraces()
-	_build_desert_tombs()
-	_build_sewers_gutterworks()
-	_build_sewers_cistern()
-	_build_forge_gallery()
-	_build_forge_deeps()
+	var only := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--only="):
+			only = arg.substr("--only=".length())
+	if only.is_empty():
+		_build_desert_terraces()
+		_build_desert_tombs()
+		_build_sewers_gutterworks()
+		_build_sewers_cistern()
+		_build_sewers_ossuary()
+		_build_forge_gallery()
+		_build_forge_deeps()
+	elif only == "ossuary":
+		_build_sewers_ossuary()
+	else:
+		push_error("unknown --only=%s" % only)
+		quit(1)
+		return
 	for line in _report:
 		print(line)
 	print("BIOME_LEVELS_PASS")
@@ -415,7 +427,7 @@ func _build_desert_terraces() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
-	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2), entrance + _L(4, -2)], _gap(2))
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "terraces spawn blocked")
 	assert(walk.size() > 35000, "terraces too small: %d" % walk.size())
@@ -442,10 +454,9 @@ func _build_desert_terraces() -> void:
 		"critters": critters,
 		"hostiles": hostiles,
 		"npcs": [
+			# Ilka greets at the Desert surface entrance (desert.tscn), not here.
 			{"name": "CaravanMasterSefu", "resource": NPCS + "desert/caravan_master_sefu.tres",
 				"pos": LevelKit.tile_pos(npc_cells[0])},
-			{"name": "DuneScoutIlka", "resource": NPCS + "desert/dune_scout_ilka.tres",
-				"pos": LevelKit.tile_pos(npc_cells[1])},
 		],
 		"spawn": LevelKit.tile_pos(entrance),
 		"warpers": [{"name": "Entrance", "pos": LevelKit.tile_pos(entrance), "id": 40}],
@@ -1109,6 +1120,170 @@ func _build_sewers_cistern() -> void:
 	})
 
 
+# --- The Ossuary -------------------------------------------------------------
+# A sealed bone chapel off the main sewers, not the desert. Processional hall
+# north into a throne chamber. The Necromancer is the current hardest world
+# pad and lives only here.
+
+func _build_sewers_ossuary() -> void:
+	_set_size(_N(80), _N(62))
+	var ts: TileSet = load(SEWERS_TS)
+	var ground := _new_layer(ts)
+	var walls := _new_layer(ts)
+	var props := _new_layer(ts)
+	var overlay := _new_layer(ts)
+
+	var arrival := _L(40, 54)
+	var hall := _L(40, 36)
+	var throne := _L(40, 18)
+	var chambers: Array = [
+		[arrival, _R(8.0), 0.24, 801],
+		[hall, _R(7.5), 0.22, 802],
+		[throne, _R(16.0), 0.16, 803],
+		[_L(22, 36), _R(7.0), 0.26, 804],
+		[_L(58, 36), _R(7.0), 0.26, 805],
+		[_L(24, 18), _R(6.5), 0.24, 806],
+		[_L(56, 18), _R(6.5), 0.24, 807],
+	]
+	var links: Array = [
+		[arrival, hall, _R(3.2), _R(1.8), 810],
+		[hall, throne, _R(3.4), _R(1.6), 811],
+		[hall, _L(22, 36), _R(2.4), _R(2.0), 812],
+		[hall, _L(58, 36), _R(2.4), _R(2.0), 813],
+		[throne, _L(24, 18), _R(2.2), _R(2.0), 814],
+		[throne, _L(56, 18), _R(2.2), _R(2.0), 815],
+	]
+	var floor_mask := _carve(chambers, links, _N(4), arrival)
+
+	var dg_floor := [
+		Vector2i(5, 13), Vector2i(6, 13), Vector2i(7, 13),
+		Vector2i(8, 13), Vector2i(9, 13), Vector2i(10, 13),
+	]
+	for cell: Vector2i in floor_mask.keys():
+		ground.set_cell(cell, 3, MapKit._pick(dg_floor, cell, 821))
+
+	var void_mask := LevelKit.void_of(floor_mask, W, H)
+	for cell: Vector2i in void_mask.keys():
+		ground.set_cell(cell, 0, Vector2i(7, 0))
+	var blocked: Dictionary = {}
+	MapKit.paint_rim(walls, void_mask, _sewers_rim(), _bounds, blocked)
+	_restyle_deep(walls, void_mask, 3, [
+		Vector2i(5, 9), Vector2i(6, 9), Vector2i(5, 10), Vector2i(6, 10),
+	], 822)
+
+	var walk := LevelKit.walkable(floor_mask, blocked)
+	var entrance := LevelKit.pick_open(walk, arrival)
+	walk = MapKit.largest_region(walk, entrance)
+	var exit_cell := LevelKit.pick_open(walk, entrance + _L(0, 5))
+	var dais := LevelKit.pick_open(walk, throne)
+
+	var plate_origin := dais - Vector2i(2, 3)
+	for oy in 7:
+		for ox in 5:
+			var cell := plate_origin + Vector2i(ox, oy)
+			if walk.has(cell):
+				ground.set_cell(cell, 3, Vector2i(21 + ox, 0 + oy))
+
+	var no_build := LevelKit.keepout([entrance, exit_cell, dais], _gap(5))
+	var free: Dictionary = {}
+	for cell: Vector2i in walk.keys():
+		if not no_build.has(cell):
+			free[cell] = true
+	var solid: Dictionary = {}
+	var edges := MapKit.edge_cells(walk, blocked)
+	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
+
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.12), _N(4), 831, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _dense(0.04), _N(6), 832, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [4, 7, 1, 1]], _dense(0.04), _N(6), 833, free, solid)
+	for cell: Vector2i in solid.keys():
+		walk.erase(cell)
+	walk = MapKit.largest_region(walk, entrance)
+
+	LevelKit.scatter_flat(overlay, 0, inner, [
+		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
+	], _dense(0.05), _N(3), 834, {})
+	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _dense(0.04), _N(5), 835, solid)
+
+	var decos: Array = []
+	var ti := 0
+	for spot in [
+		Vector2i(40, 54), Vector2i(40, 44), Vector2i(40, 36),
+		Vector2i(22, 36), Vector2i(58, 36), Vector2i(40, 18),
+		Vector2i(24, 18), Vector2i(56, 18), Vector2i(32, 26), Vector2i(48, 26),
+	]:
+		ti += 1
+		decos.append({
+			"name": "OssuaryLamp%d" % ti,
+			"frames": "deco_candle_a" if ti % 2 == 0 else "deco_torch",
+			"pos": LevelKit.tile_pos(LevelKit.pick_open(walk, spot)),
+			"scale": 1.4,
+			"light": 0.9,
+			"color": "Color(0.62, 0.42, 0.95, 1)" if ti % 2 == 0 else "Color(0.55, 0.85, 0.7, 1)",
+		})
+
+	var taken := LevelKit.keepout([entrance, exit_cell, dais], _gap(7))
+	var mob_plan: Array = [
+		["SewerSkeleton", "trpg/trpg_sewer_skeleton", _L(40, 46)],
+		["SewerSkeleton2", "trpg/trpg_sewer_skeleton", _L(34, 46)],
+		["SewerSkeleton3", "trpg/trpg_sewer_skeleton", _L(46, 46)],
+		["ArmoredSkeleton", "trpg/trpg_armored_skeleton", _L(22, 36)],
+		["ArmoredSkeleton2", "trpg/trpg_armored_skeleton", _L(58, 36)],
+		["Greatsword", "trpg/trpg_greatsword_skeleton", _L(34, 36)],
+		["Greatsword2", "trpg/trpg_greatsword_skeleton", _L(46, 36)],
+		["Archer", "trpg/trpg_skeleton_archer", _L(24, 26)],
+		["Archer2", "trpg/trpg_skeleton_archer", _L(56, 26)],
+		["Zombie", "trpg/trpg_zombie_giant", _L(32, 28)],
+		["Zombie2", "trpg/trpg_zombie_giant", _L(48, 28)],
+	]
+	var mob_cells := _populate(walk, taken, mob_plan.map(func(m: Array) -> Vector2i: return m[2]), _gap(4))
+	var hostiles: Array = []
+	for i in mob_plan.size():
+		hostiles.append({
+			"name": mob_plan[i][0],
+			"type": TYPES + mob_plan[i][1] + ".tres",
+			"pos": LevelKit.tile_pos(mob_cells[i]),
+		})
+	hostiles.append({
+		"name": "Necromancer",
+		"type": TYPES + "trpg/trpg_necromancer.tres",
+		"pos": LevelKit.tile_pos(dais),
+	})
+
+	assert(walk.has(entrance) and walk.has(exit_cell), "ossuary spawn blocked")
+	assert(walk.has(dais), "ossuary dais blocked")
+	assert(walk.size() > 12000, "ossuary too small: %d" % walk.size())
+	_log("ossuary", walk, walls, props, hostiles)
+
+	LevelKit.write_map({
+		"root": "ossuary",
+		"out": OUT + "sewers/ossuary.tscn",
+		"tileset": SEWERS_TS,
+		"bg": "Color(0.02, 0.012, 0.03, 1)",
+		"modulate": "Color(0.62, 0.58, 0.78, 1)",
+		"music": "res://assets/audio/music/shadow_temple.ogg",
+		"playlist": ["res://assets/audio/music/army_of_darkness.ogg"],
+		"layers": {
+			"Ground": LevelKit.b64(ground),
+			"Walls": LevelKit.b64(walls),
+			"Props": LevelKit.b64(props),
+			"Overlay": LevelKit.b64(overlay),
+		},
+		"cam_right": W * 16 + 16,
+		"cam_bottom": H * 16 + 16,
+		"camps": [{"name": "LandingFire", "pos": LevelKit.tile_pos(entrance + _L(3, -3))}],
+		"decos": decos,
+		"hostiles": hostiles,
+		"spawn": LevelKit.tile_pos(entrance),
+		"warpers": [{"name": "Entrance", "pos": LevelKit.tile_pos(entrance), "id": 46}],
+		"portals": [{
+			"name": "AscentPortal", "pos": LevelKit.tile_pos(exit_cell),
+			"id": 146, "target_id": 56, "instance": INST + "sewers.tres",
+			"label": "The Sewers", "color": "Color(0.45, 0.28, 0.7, 1)",
+		}],
+	})
+
+
 # =============================================================================
 # FIRE FORGE — The Bellows Gallery (up) and The Cinder Deeps (down)
 # =============================================================================
@@ -1485,7 +1660,7 @@ func _build_forge_gallery() -> void:
 			"pos": LevelKit.tile_pos(mob_cells[i]),
 		})
 
-	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2), entrance + _L(4, -2)], _gap(2))
+	var npc_cells := _populate(walk, taken, [entrance + _L(-4, -2)], _gap(2))
 
 	assert(walk.has(entrance) and walk.has(exit_cell), "gallery spawn blocked")
 	assert(walk.size() > 30000, "gallery too small: %d" % walk.size())
@@ -1514,10 +1689,9 @@ func _build_forge_gallery() -> void:
 		"lights": lights,
 		"hostiles": hostiles,
 		"npcs": [
-			{"name": "ForgemasterHelka", "resource": NPCS + "fire_forge/forgemaster_helka.tres",
-				"pos": LevelKit.tile_pos(npc_cells[0])},
+			# Helka greets at the Fire Forge surface entrance (fire_forge.tscn), not here.
 			{"name": "BellowsHandTorv", "resource": NPCS + "fire_forge/bellows_hand_torv.tres",
-				"pos": LevelKit.tile_pos(npc_cells[1])},
+				"pos": LevelKit.tile_pos(npc_cells[0])},
 		],
 		"spawn": LevelKit.tile_pos(entrance),
 		"warpers": [{"name": "Entrance", "pos": LevelKit.tile_pos(entrance), "id": 44}],

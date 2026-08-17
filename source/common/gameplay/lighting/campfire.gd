@@ -104,33 +104,13 @@ func _heal_tick() -> void:
 ## silently (there's no blue-number convention).
 func _heal_one(player: Player) -> void:
 	var sc: StatsComponent = player.stats_component
-	var hp_gained: float = 0.0
 	if heal_hp_per_tick > 0.0:
-		var hp: float = sc.get_stat(Stat.HEALTH)
-		var hp_max: float = sc.get_stat(Stat.HEALTH_MAX)
-		if hp < hp_max:
-			var new_hp: float = minf(hp_max, hp + heal_hp_per_tick)
-			sc.set_stat(Stat.HEALTH, new_hp)
-			hp_gained = new_hp - hp
+		player.apply_heal(heal_hp_per_tick, null, false)
 	if heal_mana_per_tick > 0.0:
 		var mana: float = sc.get_stat(Stat.MANA)
 		var mana_max: float = sc.get_stat(Stat.MANA_MAX)
 		if mana < mana_max:
 			sc.set_stat(Stat.MANA, minf(mana_max, mana + heal_mana_per_tick))
-
-	if hp_gained < 1.0 or WorldServer.curr == null:
-		return
-	var map: Node = player.get_parent()
-	if map == null or map.get_parent() == null:
-		return
-	WorldServer.curr.propagate_rpc(
-		WorldServer.curr.data_push.bind(&"combat.hit", {
-			"amount": int(round(hp_gained)),
-			"position": player.global_position,
-			"heal": true,
-		}),
-		map.get_parent().name
-	)
 
 
 # --- Client: the heal glow ---------------------------------------------------

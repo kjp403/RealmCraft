@@ -36,8 +36,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres" id="rw_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/runewoven_gem.tres" id="rw_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runewoven_ore.tres" id="rw_ore"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_scarabheart.tres" id="relic_scarab"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_red_large.tres" id="chest_red"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -112,7 +110,9 @@ chance = 0.5
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("3_loot")
 item = ExtResource("dungeon_key")
-chance = 0.02
+min_amount = 1
+max_amount = 2
+chance = 1.0
 [sub_resource type="Resource" id="Drop_basilisk_sword"]
 script = ExtResource("3_loot")
 item = ExtResource("bas_sword")
@@ -205,10 +205,6 @@ item = ExtResource("rw_fiber")
 min_amount = 1
 max_amount = 3
 chance = 0.28
-[sub_resource type="Resource" id="Drop_relic_scarabheart"]
-script = ExtResource("3_loot")
-item = ExtResource("relic_scarab")
-chance = 0.001
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sand_king"
@@ -276,12 +272,6 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_sunsteel_bow"), SubResource("Drop_sunsteel_wand"), SubResource("Drop_sunsteel_book"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_relic_scarabheart")])
-ornate_chest_top_min = 1
-ornate_chest_top_max = 2
-ornate_chest_second_min = 0
-ornate_chest_second_max = 0
-ornate_chest_consolation_chance = 0.4
-ornate_chest_item = ExtResource("chest_red")
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish")])
 metadata/slug = &"sand_king"
 metadata/id = 83

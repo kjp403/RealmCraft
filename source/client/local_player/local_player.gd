@@ -170,6 +170,14 @@ func _ready() -> void:
 	# swallows attacks, and the server refuses our actions regardless.
 	Client.subscribe(&"player.stunned", func(payload: Dictionary) -> void:
 		freeze_movement(float(payload.get("ms", 1000)) / 1000.0))
+	Client.subscribe(&"player.rooted", func(payload: Dictionary) -> void:
+		freeze_movement(float(payload.get("ms", 700)) / 1000.0))
+	Client.subscribe(&"player.sear_wound", func(payload: Dictionary) -> void:
+		Announcer.announce(
+			"Searing Wound",
+			"The next heal detonates (%d)." % int(payload.get("damage", 0)),
+			{"color": PVP_TOAST_COLOR}
+		))
 	# Channeling (healing aura, future recall): when OUR channel starts we root in
 	# place; pressing a move key cancels it. Other players' channels only show
 	# their aura (handled in InstanceClient) — these handlers ignore them.
@@ -207,6 +215,18 @@ func _ready() -> void:
 			str(payload.get("boss", "The hunt")),
 			"%d minutes. It respawns until the clock runs out." % int(payload.get("minutes", 30)),
 			{"delay": 0.6}))
+	Client.subscribe(&"quest_boss.entered", func(payload: Dictionary) -> void:
+		Announcer.announce(
+			str(payload.get("boss", "The fight")),
+			"One life. Defeat it, then return to the giver.",
+			{"delay": 0.6}))
+	Client.subscribe(&"quest_boss.cleared", func(payload: Dictionary) -> void:
+		Announcer.announce(
+			"%s falls" % str(payload.get("boss", "The boss")),
+			"Returning to the quest giver.",
+			{}))
+	Client.subscribe(&"quest_boss.left", func(_payload: Dictionary) -> void:
+		Toaster.toast("Left the fight."))
 	# Contract expired — what you walked away with, then the server sends the
 	# party back to the Guild Hall a few seconds later.
 	Client.subscribe(&"boss_hunt.complete", func(payload: Dictionary) -> void:

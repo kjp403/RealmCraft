@@ -357,6 +357,12 @@ var stunned_until_ms: int = 0
 ## so stuns can never be re-applied back-to-back (PvP sanity).
 var _stun_immune_until_ms: int = 0
 const STUN_IMMUNITY_MS: int = 3000
+## Searing Wound: the next combat heal detonates this much damage in a radius.
+## 0 remaining time = no mark. Applied by BossController; consumed in apply_heal.
+var sear_wound_until_ms: int = 0
+var sear_wound_damage: float = 0.0
+var sear_wound_radius: float = 72.0
+var sear_wound_source: Character = null
 
 
 ## Server-side: stun this character for [param duration_s] (no-op if stun-immune).
@@ -386,6 +392,63 @@ func is_deflecting() -> bool:
 	return Time.get_ticks_msec() < deflect_until_ms
 
 
+## Server-only. Restores [param amount] HP (clamped to max) and returns what
+## actually landed. Combat heals (food, potions, Mending Bolt, Berserk lifesteal,
+## hammer aura) pass [param counts_as_combat_heal] true so a live Searing Wound
+## detonates; campfire / idle regen pass false.
+func apply_heal(amount: float, source: Character = null, counts_as_combat_heal: bool = true) -> float:
+	if not multiplayer.is_server() or is_dead or amount <= 0.0:
+		return 0.0
+	var hp: float = stats_component.get_stat(Stat.HEALTH)
+	var hp_max: float = stats_component.get_stat(Stat.HEALTH_MAX)
+	var healed: float = minf(hp_max, hp + amount) - hp
+	if healed > 0.0:
+		stats_component.set_stat(Stat.HEALTH, hp + healed)
+		_broadcast_heal_feedback(healed)
+	if counts_as_combat_heal:
+		_detonate_sear_wound(source)
+	return healed
+
+
+func apply_sear_wound(duration_s: float, damage: float, radius: float, source: Character) -> void:
+	if not multiplayer.is_server() or is_dead or duration_s <= 0.0 or damage <= 0.0:
+		return
+	sear_wound_until_ms = Time.get_ticks_msec() + int(duration_s * 1000.0)
+	sear_wound_damage = damage
+	sear_wound_radius = radius
+	sear_wound_source = source
+	if self is Player and (self as Player).player_resource != null and WorldServer.curr != null:
+		WorldServer.curr.data_push.rpc_id(
+			int((self as Player).player_resource.current_peer_id),
+			&"player.sear_wound",
+			{"ms": int(duration_s * 1000.0), "damage": damage}
+		)
+
+
+func _detonate_sear_wound(_heal_source: Character) -> void:
+	if Time.get_ticks_msec() >= sear_wound_until_ms or sear_wound_damage <= 0.0:
+		return
+	var dmg: float = sear_wound_damage
+	var radius: float = sear_wound_radius
+	var src: Character = sear_wound_source
+	sear_wound_until_ms = 0
+	sear_wound_damage = 0.0
+	sear_wound_source = null
+	var origin: Vector2 = global_position
+	take_damage(dmg, src)
+	var container: Node = get_parent()
+	if container == null:
+		return
+	for node: Node in container.get_children():
+		if node == self or node is not Player:
+			continue
+		var other: Player = node as Player
+		if other.is_dead:
+			continue
+		if origin.distance_to(other.global_position) <= radius:
+			other.take_damage(dmg * 0.5, src)
+
+
 ## Server-only. Applies [param amount] raw damage from [param attacker], mitigated by
 ## the matching resistance — ARMOR for physical, MR for magic (see CombatHit's
 ## damage-type constants) — then triggers death at zero health. Every attack
@@ -394,6 +457,8 @@ func is_deflecting() -> bool:
 func take_damage(amount: float, attacker: Character = null, damage_type: StringName = CombatHit.DAMAGE_PHYSICAL) -> void:
 	if not multiplayer.is_server() or is_dead or amount <= 0.0:
 		return
+	if attacker is HostileNpc:
+		amount *= (attacker as HostileNpc).damage_dealt_mult
 	# Any landed hit puts BOTH sides in combat (locks gear swaps for a few
 	# seconds): the victim here, and the attacker so they can't tag-and-swap.
 	var now: int = Time.get_ticks_msec()
@@ -419,10 +484,7 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 	if attacker != null and attacker != self and not attacker.is_dead:
 		var lifesteal: float = attacker.stats_component.get_stat(Stat.LIFESTEAL)
 		if lifesteal > 0.0:
-			var healed: float = mitigated * lifesteal / 100.0
-			var att_max: float = attacker.stats_component.get_stat(Stat.HEALTH_MAX)
-			var att_hp: float = attacker.stats_component.get_stat(Stat.HEALTH)
-			attacker.stats_component.set_stat(Stat.HEALTH, minf(att_max, att_hp + healed))
+			attacker.apply_heal(mitigated * lifesteal / 100.0, attacker, true)
 
 	# Broadcast a hit event so clients can render damage numbers, screen
 	# shake, hit pause, sound — anything game-feel piggybacks off the same
@@ -475,6 +537,25 @@ func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 				payload["attacker_prop_id"] = mob.container.child_id_of_node(mob)
 	WorldServer.curr.propagate_rpc(
 		WorldServer.curr.data_push.bind(&"combat.hit", payload),
+		maybe_instance.name
+	)
+
+
+func _broadcast_heal_feedback(healed: float) -> void:
+	if healed <= 0.0 or WorldServer.curr == null:
+		return
+	var maybe_map: Node = get_parent()
+	if maybe_map == null:
+		return
+	var maybe_instance: Node = maybe_map.get_parent()
+	if maybe_instance == null:
+		return
+	WorldServer.curr.propagate_rpc(
+		WorldServer.curr.data_push.bind(&"combat.hit", {
+			"amount": int(round(healed)),
+			"position": global_position,
+			"heal": true,
+		}),
 		maybe_instance.name
 	)
 

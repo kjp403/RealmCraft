@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="BossHuntTarget" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/mecha_stone_golem_world.tres" id="2_enemy"]
 
 [resource]
 script = ExtResource("1_script")
 slug = &"mecha_stone_golem"
-display_name = "Mecha-stone Golem"
-description = "The Hollow's engine on a leash. Predictable pattern, brutal numbers — the cleanest DPS check on the board."
+display_name = "Unleashed Golem"
+description = "The Hollow's engine without the leash. Harder than Unbound Cinderborn — laser, sweep, slam follow-up, Searing Wound, and style wards."
 enemy_type = ExtResource("2_enemy")
-cost = 50000
-recommended_level = 36
+cost = 80000
+recommended_level = 92
 health_mult = 1.0
 health_per_extra_player = 0.6
 damage_mult = 1.0

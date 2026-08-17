@@ -10,6 +10,7 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"drowned_keeper_vess"
 target_giver_name = "Drowned Keeper Vess"
+location_hint = "The Drowned Cistern"
 
 [resource]
 script = ExtResource("2_quest")

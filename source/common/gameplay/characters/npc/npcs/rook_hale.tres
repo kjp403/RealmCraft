@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="6_npc"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/break_the_cage.tres" id="7_q1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/what_they_were_carrying.tres" id="8_q2"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_rook"]
 script = ExtResource("3_quest")
@@ -18,9 +19,14 @@ script = ExtResource("2_dialogue")
 lines = Array[String](["They took me because I saw the crates. Vein-ore that hums. They run it through the city grates.", "The Captain keeps the key. The Watch cannot come in. You can.", "If Lira is alive, tell her I still have both hands. For now."])
 label_override = "Why did they take you?"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"bandit_captain"
+
 [resource]
 script = ExtResource("6_npc")
 npc_name = "Rook Hale"
+location_hint = "Bandit Hideout"
 skin = ExtResource("5_skin")
 greeting = "Hero. Do not look like you are rescuing me until the Captain is down. They will cut a throat for less."
-interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_rook"), SubResource("Dialogue_cage")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_rook"), SubResource("Dialogue_cage"), SubResource("QuestBoss_fight")])

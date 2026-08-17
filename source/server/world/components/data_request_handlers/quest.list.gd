@@ -150,13 +150,13 @@ func _quest_view(
 		)
 		var visit_target_key: String = ""
 		var visit_target_name: String = ""
-		if (
-			objective.type == QuestObjective.Type.VISIT
-			and objective.target_giver != null
-		):
-			visit_target_key = String(objective.target_giver.giver_key())
+		if objective.type == QuestObjective.Type.VISIT:
+			if objective.target_giver != null:
+				visit_target_key = String(objective.target_giver.giver_key())
+			elif not objective.target_giver_key.is_empty():
+				visit_target_key = String(objective.target_giver_key)
 			visit_target_name = objective.target_giver_name
-			if visit_target_name.is_empty():
+			if visit_target_name.is_empty() and objective.target_giver != null:
 				visit_target_name = objective.target_giver.npc_name
 
 		objectives.append({
@@ -198,6 +198,7 @@ func _quest_view(
 		"prereq_names": _unmet_prereq_names(resource, quest),
 		"prereq_mode": int(quest.requires_mode),
 		"reward_items": _reward_item_views(quest, resource),
+		"return_prompt": quest.return_prompt(),
 	}
 
 

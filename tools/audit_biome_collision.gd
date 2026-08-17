@@ -18,6 +18,7 @@ const MAPS := [
 	{"path": "res://source/common/gameplay/maps/maps/desert/sunken_tombs.tscn", "min": 1200},
 	{"path": "res://source/common/gameplay/maps/maps/sewers/gutterworks.tscn", "min": 1200},
 	{"path": "res://source/common/gameplay/maps/maps/sewers/drowned_cistern.tscn", "min": 1200},
+	{"path": "res://source/common/gameplay/maps/maps/sewers/ossuary.tscn", "min": 800},
 	{"path": "res://source/common/gameplay/maps/maps/fire_forge/bellows_gallery.tscn", "min": 1200},
 	{"path": "res://source/common/gameplay/maps/maps/fire_forge/cinder_deeps.tscn", "min": 1200},
 ]

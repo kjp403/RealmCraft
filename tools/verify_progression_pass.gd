@@ -31,6 +31,7 @@ func _init() -> void:
 	_crafting_xp()
 	_fungus_loot()
 	_quest_rewards()
+	_quest_locations()
 	_dailies()
 	_starter_kit()
 	_muzzle()
@@ -298,6 +299,45 @@ func _quest_rewards() -> void:
 	))
 	_check(top_gold >= 2500, "the hardest quests pay 2,500g (top = %d)" % top_gold)
 	_check(chests >= 5, "T1 wood chests are handed out by %d quests" % chests)
+
+
+func _quest_locations() -> void:
+	print("[quest locations]")
+	var missing_visit: PackedStringArray = PackedStringArray()
+	var missing_return: PackedStringArray = PackedStringArray()
+	for path: String in _tres_under(QUESTS_DIR):
+		if path.ends_with("daily_pool.tres"):
+			continue
+		var quest: QuestResource = load(path) as QuestResource
+		if quest == null:
+			continue
+		for objective: QuestObjective in quest.objectives:
+			if objective == null or objective.type != QuestObjective.Type.VISIT:
+				continue
+			if not objective.describe().contains(" · "):
+				missing_visit.append("%s (%s)" % [path.get_file(), objective.describe()])
+		if quest.auto_complete:
+			continue
+		if quest.return_prompt().contains("the quest giver"):
+			missing_return.append(path.get_file())
+	_check(missing_visit.is_empty(), "VISIT objectives name a place%s" % (
+		"" if missing_visit.is_empty() else " — " + ", ".join(missing_visit)
+	))
+	_check(missing_return.is_empty(), "turn-in quests name the NPC%s" % (
+		"" if missing_return.is_empty() else " — " + ", ".join(missing_return)
+	))
+	var ilka: QuestResource = load(QUESTS_DIR + "hollow_seep/the_builders_grave.tres") as QuestResource
+	_check(ilka != null and ilka.objectives.size() == 1, "The Builders' Grave loads")
+	if ilka != null and not ilka.objectives.is_empty() and ilka.objectives[0] != null:
+		var line: String = ilka.objectives[0].describe()
+		_check(line.contains("Dune Scout Ilka"), "Builders' Grave names Ilka (%s)" % line)
+		_check(line.contains("Desert"), "Builders' Grave says Desert (%s)" % line)
+	var helka: QuestResource = load(QUESTS_DIR + "hollow_seep/the_last_foundry.tres") as QuestResource
+	_check(helka != null and helka.objectives.size() == 1, "The Last Foundry loads")
+	if helka != null and not helka.objectives.is_empty() and helka.objectives[0] != null:
+		var foundry: String = helka.objectives[0].describe()
+		_check(foundry.contains("Forgemaster Helka"), "Last Foundry names Helka (%s)" % foundry)
+		_check(foundry.contains("entrance"), "Last Foundry says entrance (%s)" % foundry)
 
 
 # --- Daily board: buffed, location-hinted, skippable --------------------------

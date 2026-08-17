@@ -10,6 +10,7 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"cave_scribe_wren"
 target_giver_name = "Wren"
+location_hint = "Fungus Cave, deeper in"
 
 [resource]
 script = ExtResource("2_quest")

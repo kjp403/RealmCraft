@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_fuel_lock.tres" id="3_prereq"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_a00nb"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
@@ -23,6 +24,11 @@ script = ExtResource("kit_reward")
 item = ExtResource("kit_pot")
 amount = 12
 
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("kit_reward")
+item = ExtResource("dungeon_key")
+amount = 2
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Thing It Was Built to Run"
@@ -33,7 +39,7 @@ unlock_message = "[Hall Keeper] The last letter. The Hollow was built to run tha
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 1200
 reward_mastery_xp = 200000
-reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion"), SubResource("Reward_dungeon_key")])
 reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 6000
 grant_title = "Hollow-Sworn"

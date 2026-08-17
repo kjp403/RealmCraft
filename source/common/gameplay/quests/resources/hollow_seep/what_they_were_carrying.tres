@@ -10,6 +10,7 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"hall_keeper"
 target_giver_name = "the Hall Keeper"
+location_hint = "Castle Garden, Charter Hall"
 
 [resource]
 script = ExtResource("2_quest")

@@ -17,6 +17,7 @@ label_override = "How does remote banking work?"
 [resource]
 script = ExtResource("5_npc")
 npc_name = "Courier"
+location_hint = "Mining Cave"
 skin = ExtResource("4_skin")
 greeting = "Need your vault on the road? I can open it for 5,000 gold."
 interactions = Array[ExtResource("1_interaction")]([SubResource("RemoteBank_main"), SubResource("Dialogue_courier")])

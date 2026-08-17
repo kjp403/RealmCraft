@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_instance"]
+
+[resource]
+script = ExtResource("1_instance")
+instance_name = &"quest_boss_arena"
+map_path = "res://source/common/gameplay/maps/maps/quest_boss/quest_boss_arena.tscn"
+load_at_startup = false
+zone_title = "The Challenge"
+show_discovery = true
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"
+metadata/slug = &"quest_boss_arena"

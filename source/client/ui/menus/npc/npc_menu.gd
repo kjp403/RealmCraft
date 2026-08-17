@@ -246,6 +246,10 @@ func _on_entry(entry: Dictionary) -> void:
 				Toaster.toast("Too far.")
 			elif reason == "wardstone":
 				pass # server already pushed a system line
+			elif reason == "no_quest" or reason == "in_run" or reason == "jailed":
+				pass # server already pushed a system line
+			elif reason == "already_done":
+				pass # kill is complete — button is a no-op
 			elif reason == "gold":
 				var cost: int = int(data.get("cost", 0))
 				if cost > 0:

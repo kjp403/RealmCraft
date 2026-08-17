@@ -26,6 +26,7 @@ label_override = "Ask about the works"
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Sluice Warden Obry"
+location_hint = "The Sewers · The Gutterworks"
 skin = ExtResource("6_skin")
 greeting = "Mind the grates. I have lost two lanterns and one apprentice to them this season."
 interactions = Array[ExtResource("2_npcint")]([SubResource("Shop_obry"), SubResource("QuestInteraction_obry"), SubResource("Dialogue_obry")])

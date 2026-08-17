@@ -21,7 +21,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_orc.tres" id="e18"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e19"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/caravan_master_sefu.tres" id="e20"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/desert/dune_scout_ilka.tres" id="e21"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e22"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e23"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="e24"]
@@ -415,10 +414,6 @@ y_sort_enabled = true
 [node name="CaravanMasterSefu" parent="NPCs" instance=ExtResource("e19")]
 position = Vector2(3688.0, 4968.0)
 npc_resource = ExtResource("e20")
-
-[node name="DuneScoutIlka" parent="NPCs" instance=ExtResource("e19")]
-position = Vector2(4328.0, 4968.0)
-npc_resource = ExtResource("e21")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("e22")]
 position = Vector2(4008.0, 5128.0)

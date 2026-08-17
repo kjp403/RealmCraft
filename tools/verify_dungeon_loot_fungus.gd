@@ -127,14 +127,52 @@ func _init() -> void:
 		if not has_dungeon_inter:
 			fails.append("FungalKeeper missing DungeonInteraction")
 
-	# --- Boss key drops ---
-	var bosses_with_key: int = 0
-	var dir := DirAccess.open("res://source/common/gameplay/characters/npc/types")
-	_count_boss_keys("res://source/common/gameplay/characters/npc/types", bosses_with_key)
-	# recount properly
-	bosses_with_key = _count_boss_keys_recursive("res://source/common/gameplay/characters/npc/types")
+	# --- Boss key drops (world / farm bosses; story keys are quest turn-in) ---
+	var bosses_with_key: int = _count_boss_keys_recursive("res://source/common/gameplay/characters/npc/types")
 	if bosses_with_key < 12:
 		fails.append("expected >=12 bosses with dungeon_key drop, got %d" % bosses_with_key)
+
+	var story_quests: Array[Dictionary] = [
+		{"path": "res://source/common/gameplay/quests/resources/goblin_woodland/the_goblin_chief.tres", "min": 1},
+		{"path": "res://source/common/gameplay/quests/resources/bandit_hideout/the_bandit_captain.tres", "min": 1},
+		{"path": "res://source/common/gameplay/quests/resources/fungus_cave/the_fungal_heart.tres", "min": 1},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/break_the_cage.tres", "min": 1},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/cut_the_heart.tres", "min": 1},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_sovereign_below.tres", "min": 2},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/leave_the_crown.tres", "min": 2},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_fuel_lock.tres", "min": 2},
+		{"path": "res://source/common/gameplay/quests/resources/hollow_seep/the_thing_it_was_built_to_run.tres", "min": 2},
+	]
+	for entry: Dictionary in story_quests:
+		var quest: QuestResource = load(str(entry["path"])) as QuestResource
+		if quest == null:
+			fails.append("missing story quest %s" % entry["path"])
+			continue
+		var keys: int = 0
+		for reward: QuestReward in quest.reward_items:
+			if reward != null and reward.item != null and str(reward.item.item_name) == "Dungeon Key":
+				keys += reward.amount
+		if keys < int(entry["min"]):
+			fails.append("%s should grant >=%d dungeon keys on turn-in, got %d" % [
+				quest.quest_name, int(entry["min"]), keys
+			])
+
+	for path: String in [
+		"res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres",
+		"res://source/common/gameplay/characters/npc/types/bandit_captain.tres",
+		"res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres",
+		"res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres",
+	]:
+		var et: EnemyTypeResource = load(path) as EnemyTypeResource
+		if et == null:
+			fails.append("missing quest boss %s" % path)
+			continue
+		for drop: LootDrop in et.loot:
+			if drop != null and drop.item != null and str(drop.item.item_name) == "Dungeon Key":
+				fails.append("%s quest boss still drops dungeon keys" % et.display_name)
 
 	if fails.is_empty():
 		print("VERIFY_PASS dungeon_loot_fungus")
@@ -144,10 +182,6 @@ func _init() -> void:
 			push_error("VERIFY_FAIL: " + f)
 			print("VERIFY_FAIL: ", f)
 		quit(1)
-
-
-func _count_boss_keys(_path: String, _out: int) -> void:
-	pass
 
 
 func _count_boss_keys_recursive(path: String) -> int:

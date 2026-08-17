@@ -25,7 +25,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_conjuring_oni.tres" id="et9"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_umber_hulk.tres" id="et10"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cinder_fomorian.tres" id="et11"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres" id="et12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres" id="et13"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="npc"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/forgemaster_helka.tres" id="helka"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/bellows_gallery.tres" id="stair_bellows_gallery"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/cinder_deeps.tres" id="stair_cinder_deeps"]
@@ -308,7 +310,7 @@ id_to_node = {
 35: NodePath("UmberHulk2"),
 36: NodePath("CinderFomorian"),
 37: NodePath("CinderFomorian2"),
-38: NodePath("Cinderborn")
+39: NodePath("UnboundCinderborn")
 }
 node_to_id = {
 NodePath("ArmoredAxeman"): 0,
@@ -349,7 +351,7 @@ NodePath("UmberHulk"): 34,
 NodePath("UmberHulk2"): 35,
 NodePath("CinderFomorian"): 36,
 NodePath("CinderFomorian2"): 37,
-NodePath("Cinderborn"): 38
+NodePath("UnboundCinderborn"): 39
 }
 
 [node name="ArmoredAxeman" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -580,11 +582,19 @@ debug_draw_ranges = false
 enemy_data = ExtResource("et11")
 weapon = null
 
-[node name="Cinderborn" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1800.0, 584.0)
+
+[node name="UnboundCinderborn" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2488.0, 712.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("et12")
+enemy_data = ExtResource("et13")
 weapon = null
+
+[node name="NPCs" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="ForgemasterHelka" parent="NPCs" instance=ExtResource("npc")]
+position = Vector2(1736.0, 2248.0)
+npc_resource = ExtResource("helka")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(1800.0, 2312.0)

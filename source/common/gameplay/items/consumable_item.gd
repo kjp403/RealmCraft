@@ -85,14 +85,10 @@ func can_use(character: Character) -> bool:
 ## Applies the consumable's effect. Returns true if something actually happened
 ## (so the caller knows whether to spend a charge / remove it from the bag).
 func on_use(character: Character) -> void:
-	var stats_component: StatsComponent = character.stats_component
 	if heal_amount > 0:
-		var healed: float = minf(
-			stats_component.get_stat(Stat.HEALTH) + heal_amount,
-			stats_component.get_stat(Stat.HEALTH_MAX)
-		)
-		stats_component.set_stat(Stat.HEALTH, healed)
+		character.apply_heal(float(heal_amount), character, true)
 	if mana_amount > 0:
+		var stats_component: StatsComponent = character.stats_component
 		var refilled: float = minf(
 			stats_component.get_stat(Stat.MANA) + mana_amount,
 			stats_component.get_stat(Stat.MANA_MAX)

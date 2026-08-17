@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="7_quest"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="8_questres"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/leave_the_crown.tres" id="9_q1"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_asha"]
 script = ExtResource("7_quest")
@@ -22,9 +23,14 @@ script = ExtResource("4_dialogue")
 lines = Array[String](["Ankhemet. They buried him with his guard still breathing, which tells you the mood at the funeral.", "When his health breaks he calls the hall up around him. Do not fight him in the open floor.", "If you kill him, leave the crown. Please. I am asking nicely."])
 label_override = "Ask about the Sand King"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"sand_king"
+
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Tomb Delver Asha"
+location_hint = "The Sunken Tombs"
 skin = ExtResource("6_skin")
 greeting = "Another one down the stair. Sit a moment — I would rather you learned this from me than from him."
-interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_asha"), SubResource("Dialogue_asha"), SubResource("Dialogue_king")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_asha"), SubResource("Dialogue_asha"), SubResource("Dialogue_king"), SubResource("QuestBoss_fight")])

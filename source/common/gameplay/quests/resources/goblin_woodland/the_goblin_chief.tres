@@ -5,6 +5,7 @@
 [ext_resource type="Resource" uid="uid://xm2pimpk5jg6" path="res://source/common/gameplay/quests/resources/goblin_woodland/break_the_warren_guard.tres" id="3_ivwvu"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_smysb"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="qr_chest"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
@@ -28,6 +29,10 @@ script = ExtResource("kit_reward")
 item = ExtResource("kit_pot")
 amount = 8
 
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("4_smysb")
+item = ExtResource("dungeon_key")
+
 [resource]
 script = ExtResource("2_xnv0w")
 quest_name = "The Goblin Chief"
@@ -39,7 +44,7 @@ requires_quests = Array[ExtResource("2_xnv0w")]([ExtResource("3_ivwvu")])
 reward_xp = 160
 reward_mastery_xp = 20000
 reward_gold = 1500
-reward_items = Array[ExtResource("4_smysb")]([SubResource("Reward_wood_chest"), SubResource("Reward_kit_potion")])
+reward_items = Array[ExtResource("4_smysb")]([SubResource("Reward_wood_chest"), SubResource("Reward_kit_potion"), SubResource("Reward_dungeon_key")])
 reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 grant_title = "Warrenbreaker"
 grants_wardstone = &"woodland"

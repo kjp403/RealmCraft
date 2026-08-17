@@ -21,6 +21,7 @@ label_override = "Ask about the seep"
 [resource]
 script = ExtResource("6_npc")
 npc_name = "Wren"
+location_hint = "Fungus Cave, deeper in"
 skin = ExtResource("5_skin")
 greeting = "Keep your voice down. The glow listens. You are here for Lira? Then we brew, and we hope the first bottle is the true one."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_wren"), SubResource("Dialogue_seep")])

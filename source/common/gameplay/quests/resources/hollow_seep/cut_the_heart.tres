@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_green_lie.tres" id="3_prereq"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/true_seep_root.tres" id="4_root"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="5_6bnk0"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
@@ -25,6 +26,10 @@ script = ExtResource("kit_reward")
 item = ExtResource("kit_pot")
 amount = 10
 
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("kit_reward")
+item = ExtResource("dungeon_key")
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Cut the Heart"
@@ -34,7 +39,7 @@ unlock_message = "[Lira Voss] It doesn't take. The Heart is feeding these roots.
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 350
 reward_mastery_xp = 50000
-reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion"), SubResource("Reward_dungeon_key")])
 reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 2000
 grants_wardstone = &"fungus_cave"
