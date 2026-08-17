@@ -11,6 +11,8 @@ const STARTING_SLOTS: int = 50
 const UPGRADE_SLOTS: int = 50
 ## Gold fee per upgrade. Single source of truth for UI + server handler.
 const UPGRADE_COST: int = 5000
+## Cap on one [code]bank.upgrade[/code] purchase (count * UPGRADE_SLOTS slots).
+const MAX_UPGRADE_COUNT: int = 99
 
 
 func menu_entry(_npc: Node) -> Dictionary:

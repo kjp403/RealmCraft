@@ -78,6 +78,8 @@ var _capacity_bar: ProgressBar
 var _capacity_label: Label
 var _gold_label: Label
 var _upgrade_button: Button
+var _upgrade_count_spin: SpinBox
+var _upgrade_x_button: Button
 var _sort_picker: OptionButton
 var _deposit_all_button: Button
 var _search_field: LineEdit
@@ -319,6 +321,35 @@ func _build_vault_pane() -> PanelContainer:
 	header.add_child(_pane_title("BANK VAULT"))
 	_vault_count = _count_label()
 	header.add_child(_vault_count)
+	var header_spacer := Control.new()
+	header_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(header_spacer)
+	_upgrade_count_spin = SpinBox.new()
+	_upgrade_count_spin.min_value = 1
+	_upgrade_count_spin.max_value = BankInteraction.MAX_UPGRADE_COUNT
+	_upgrade_count_spin.value = 1
+	_upgrade_count_spin.rounded = true
+	_upgrade_count_spin.custom_minimum_size = Vector2(72, 28)
+	_upgrade_count_spin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_upgrade_count_spin.tooltip_text = "How many slot packs to buy at once"
+	var upgrade_spin_edit: LineEdit = _upgrade_count_spin.get_line_edit()
+	upgrade_spin_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	upgrade_spin_edit.select_all_on_focus = true
+	upgrade_spin_edit.text_submitted.connect(func(_text: String) -> void:
+		_on_upgrade_pressed())
+	_upgrade_count_spin.value_changed.connect(func(_v: float) -> void:
+		_sync_upgrade_controls())
+	header.add_child(_upgrade_count_spin)
+	_upgrade_x_button = Button.new()
+	_upgrade_x_button.text = "X"
+	_upgrade_x_button.focus_mode = Control.FOCUS_NONE
+	_upgrade_x_button.custom_minimum_size = Vector2(34, 28)
+	_upgrade_x_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_upgrade_x_button.add_theme_font_size_override(&"font_size", 13)
+	_upgrade_x_button.tooltip_text = "Type how many packs to buy, then press Enter"
+	_style_chip_button(_upgrade_x_button)
+	_upgrade_x_button.pressed.connect(_on_upgrade_custom_amount_pressed)
+	header.add_child(_upgrade_x_button)
 	_upgrade_button = Button.new()
 	_upgrade_button.text = "Buy +%d" % BankInteraction.UPGRADE_SLOTS
 	_upgrade_button.focus_mode = Control.FOCUS_NONE
@@ -834,12 +865,7 @@ func _rebuild_grids() -> void:
 		_capacity_label.text = "%d free" % maxi(0, _bank_slots - vault_used)
 	if _deposit_all_button != null:
 		_deposit_all_button.disabled = _busy or bag_used <= 0
-	if _upgrade_button != null:
-		_upgrade_button.disabled = _busy
-		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
-			BankInteraction.UPGRADE_SLOTS,
-			_fmt_gold(BankInteraction.UPGRADE_COST),
-		]
+	_sync_upgrade_controls()
 	_sync_selection_highlights()
 
 
@@ -1269,6 +1295,10 @@ func _set_busy_chrome(busy: bool) -> void:
 		_deposit_all_button.disabled = busy
 	if _upgrade_button != null:
 		_upgrade_button.disabled = busy
+	if _upgrade_count_spin != null:
+		_upgrade_count_spin.editable = not busy
+	if _upgrade_x_button != null:
+		_upgrade_x_button.disabled = busy
 	if _transfer_button != null and busy:
 		_transfer_button.disabled = true
 
@@ -1316,14 +1346,48 @@ func _on_deposit_all_pressed() -> void:
 	ClientState.inventory_changed.emit({"quiet": true})
 
 
+func _upgrade_count() -> int:
+	if _upgrade_count_spin == null:
+		return 1
+	return clampi(int(_upgrade_count_spin.value), 1, BankInteraction.MAX_UPGRADE_COUNT)
+
+
+func _sync_upgrade_controls() -> void:
+	var count: int = _upgrade_count()
+	var slots: int = BankInteraction.UPGRADE_SLOTS * count
+	var cost: int = BankInteraction.UPGRADE_COST * count
+	if _upgrade_button != null:
+		_upgrade_button.disabled = _busy
+		_upgrade_button.text = "Buy +%d" % slots
+		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
+			slots,
+			_fmt_gold(cost),
+		]
+	if _upgrade_count_spin != null:
+		_upgrade_count_spin.editable = not _busy
+	if _upgrade_x_button != null:
+		_upgrade_x_button.disabled = _busy
+
+
+func _on_upgrade_custom_amount_pressed() -> void:
+	if _busy or _upgrade_count_spin == null:
+		return
+	_upgrade_count_spin.editable = true
+	_upgrade_count_spin.get_line_edit().grab_focus()
+	_upgrade_count_spin.get_line_edit().select_all()
+
+
 func _on_upgrade_pressed() -> void:
 	if _busy or InstanceClient.current == null:
 		return
+	if _upgrade_count_spin != null:
+		_upgrade_count_spin.apply()
+	var count: int = _upgrade_count()
 	_busy = true
 	_set_busy_chrome(true)
 	var result: Array = await Client.request_data_await(
 		&"bank.upgrade",
-		{},
+		{"count": count},
 		InstanceClient.current.name
 	)
 	_busy = false
@@ -1338,7 +1402,8 @@ func _on_upgrade_pressed() -> void:
 	_apply_payload(payload)
 	if not bool(payload.get("ok", false)):
 		if str(payload.get("reason", "")) == "gold":
-			Toaster.toast("You need %s gold." % _fmt_gold(BankInteraction.UPGRADE_COST))
+			var needed: int = int(payload.get("cost", BankInteraction.UPGRADE_COST * count))
+			Toaster.toast("You need %s gold." % _fmt_gold(needed))
 		else:
 			Toaster.toast("Could not buy bank slots.")
 	else:
