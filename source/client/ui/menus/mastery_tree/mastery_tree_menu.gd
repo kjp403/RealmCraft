@@ -595,7 +595,13 @@ func _open_slot_picker(node_id: String) -> void:
 		var occ_id: String = str(picks[i])
 		var occupant: String = "empty"
 		if not occ_id.is_empty():
-			occupant = "%s (Power %d)" % [_node_display_name(occ_id), _node_power(occ_id)]
+			if _node_exists(occ_id):
+				occupant = "%s (Power %d)" % [_node_display_name(occ_id), _node_power(occ_id)]
+			else:
+				# A trimmed top rank still sitting in the saved loadout. It channels
+				# nothing, so call it empty rather than printing the raw node id —
+				# placing anything here clears it server-side.
+				occupant = "empty (removed ability)"
 		entries.append("Slot %d (%s)  ·  %s" % [i + 1, SLOT_KEYS[i], occupant])
 	var title: String = "Place %s on which slot?" % _node_display_name(node_id)
 	_picker_overlay = SlotPickerOverlay.open(
@@ -639,6 +645,12 @@ func _on_loadout_result(data: Dictionary) -> void:
 			Toaster.toast("You can't swap abilities during a match.")
 		"same_chain":
 			Toaster.toast("That's the same move as another slot. Only one tier of it at a time.")
+		_:
+			# Any OTHER rejection used to fail silently — the tree just redrew
+			# unchanged and the player had no idea the server said no. Always say
+			# something, so a rejected equip is never mistaken for a dead button.
+			if not bool(data.get("ok", false)):
+				Toaster.toast("Couldn't change that slot. Try again.")
 	_refresh()
 
 
@@ -668,6 +680,13 @@ func _node_display_name(node_id: String) -> String:
 		if node != null:
 			return node.display_name()
 	return node_id
+
+
+## False for an id the tree no longer defines — a removed node still parked in
+## the player's saved loadout (see the mastery.loadout handler).
+func _node_exists(node_id: String) -> bool:
+	var tree: MasteryTreeResource = MasteryService.tree_for(StringName(_category))
+	return tree != null and tree.get_node_by_id(StringName(node_id)) != null
 
 
 func _node_power(node_id: String) -> int:

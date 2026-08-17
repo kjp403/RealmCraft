@@ -49,7 +49,16 @@ func data_request_handler(
 		if validated.has(node_id):
 			return {"ok": false, "reason": "duplicate"}
 		var node: MasteryNode = tree.get_node_by_id(StringName(node_id))
-		if node == null or node.ability == null:
+		if node == null:
+			# REMOVED CONTENT (a trimmed top rank), not a bad request: the player
+			# still carries the dead id in their stored loadout and the client
+			# resends it with every edit. Rejecting the whole array froze those
+			# players out of equipping anything at all — drop it to an empty
+			# slot instead, which also self-heals the stored loadout on write.
+			# Same policy as MasteryService.spent_cost (gone = costs nothing).
+			validated.append("")
+			continue
+		if node.ability == null:
 			return {"ok": false, "reason": "unknown_node"}
 		if not spent.has(node_id):
 			return {"ok": false, "reason": "not_owned"}

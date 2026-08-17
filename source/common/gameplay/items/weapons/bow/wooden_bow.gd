@@ -22,16 +22,19 @@ const BOW_CHARGE_FRAMES: Array[Rect2] = [
 var _charge_tween: Tween
 
 
-## Ascension bow icons are drawn opposite the atlas sheet (sheet: limbs left /
-## string right; icons: string toward the lower-left). Flip to match in-hand
-## atlas bows. Riser is near the texture center, so centered is correct — do
+## Ascension bow icons share the atlas sheet's convention, NOT the melee one:
+## string on the near side, limbs bulging toward the shot. The sheet draws that
+## axis flat (string left / limbs right), the icons draw it on the NE diagonal —
+## so the icons need a 45 degree turn to line the limbs up with the aim, and must
+## NOT be mirrored (flip_h swaps string and limbs, which is the bow held
+## backwards). Riser is near the texture center, so centered is correct — do
 ## not use the melee tip-up pull (that slides the bow off the hand).
 func _apply_square_icon_grip(_sz: Vector2, extra_offset: Vector2) -> void:
-	weapon_sprite.rotation = 0.0
+	weapon_sprite.rotation = PI * 0.25
 	weapon_sprite.centered = true
 	weapon_sprite.offset = Vector2.ZERO
-	weapon_sprite.scale = Vector2.ONE
-	weapon_sprite.flip_h = true
+	weapon_sprite.scale = Vector2.ONE * square_icon_scale
+	weapon_sprite.flip_h = false
 	weapon_sprite.position = Vector2(-2.0, -1.0) + extra_offset
 
 
