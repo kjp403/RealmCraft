@@ -5,7 +5,7 @@ extends Projectile
 ## (ally = spar teammate while a match runs, else guildmate / groupmate — the
 ## same definition the team-colored health bars use), a MOB's bolt considers
 ## mobs (ally = same owner — see CombatHit.are_allied_npcs, THE faction seam).
-## Characters on the other side it flies straight through; walls stop it.
+## Characters on the other side it flies straight through; only walls stop it.
 ##
 ## Only overrides the per-hit RESPONSE — the Projectile base owns all detection,
 ## walls and piercing. Server-authoritative: only the server bolt applies the
@@ -15,13 +15,51 @@ extends Projectile
 var heal_amount: float = 0.0
 
 
+## CLIENT-side mirror of CombatHit.are_allied for a REMOTE player, reading the same
+## peer-id sets the team health-bar tint uses (see Player._apply_team_bar_color).
+## player_resource is server-only, so are_allied answers "not allied" for every
+## remote player on a client — this is the only allegiance answer a client has.
+static func client_is_ally(other: Player) -> bool:
+	if other == null:
+		return false
+	var peer: int = other.name.to_int()
+	if Character.spar_opponent_peers.has(peer):
+		return false
+	if Character.spar_ally_peers.has(peer):
+		return true
+	if Character.group_peers.has(peer):
+		return true
+	if Character.party_peers.has(peer):
+		return true
+	if other.active_guild_id <= 0:
+		return false
+	return other.active_guild_id == Character.local_viewer_guild_id
+
+
+## A heal carries no damage, so an Arcane Wall has nothing to absorb — pass through
+## it instead of dying on a shield the caster's own team put down.
+func _absorbed_by_barrier() -> bool:
+	return false
+
+
 func _resolve_hit(node: Node2D) -> CombatHit.Result:
 	var target: Node2D = node
 	if node is HurtBox:
 		target = (node as HurtBox).character
-	# Walls / doors / flags stop the bolt; a non-character collider isn't a heal target.
 	if target == null or target is not Character:
-		return CombatHit.Result.BLOCKED
+		# Only SOLID WORLD geometry (walls, doors) stops a heal. Every other
+		# non-character collider the mask can return used to fall into BLOCKED and
+		# eat the bolt before it reached the ally it was aimed at: a TerritoryFlag
+		# (FLAG layer) and a Deflect bubble (DeflectBubble sits on the HURTBOX
+		# layer precisely so it reads as a tiny wall to damage shots) both did.
+		# CombatHit.try_damage special-cases flags ahead of its own "not a
+		# Character -> BLOCKED" rule for the same reason; the heal path never got
+		# that treatment. Layer test, not a type list, so anything new landing on
+		# an attackable layer passes a heal through by default.
+		var collider: CollisionObject2D = node as CollisionObject2D
+		if collider != null and (collider.collision_layer & PhysicsLayers.WORLD) != 0:
+			return CombatHit.Result.BLOCKED
+		return CombatHit.Result.IGNORED
 	if source is HostileNpc:
 		return _resolve_mob_heal(target)
 	return _resolve_player_heal(target)

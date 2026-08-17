@@ -39,12 +39,21 @@ func _ready() -> void:
 	_build_plaque()
 	_spawn_click_area()
 	ClientState.local_player_ready.connect(func(_lp: LocalPlayer) -> void: _refresh())
-	if ClientState.local_player != null:
-		_refresh()
+	# DEFERRED, not immediate. Godot readies children before parents, so when this
+	# statue runs _ready the enclosing InstanceClient has NOT run its own yet and
+	# InstanceClient.current is still null (InstanceManagerClient clears it during
+	# the swap and only reassigns it in InstanceClient._ready). An immediate call
+	# bailed on that null check — and on a map change local_player_ready never
+	# fires again, because the avatar node is reused across maps and _ready runs
+	# once per node. So walking into the Guild Hall left every statue on the
+	# plaque's built-in empty text: no name, no score, ever. Deferring to the end
+	# of the frame lets InstanceClient._ready land first. Same fix TerritoryFlag
+	# uses for the same ordering (see its _request_state.call_deferred).
+	_refresh.call_deferred()
 
 
 ## Pull the cached champions once and apply this statue's (category, rank). The _fetching guard
-## collapses the _ready immediate-call + the local_player_ready signal into a single request.
+## collapses the deferred _ready call + the local_player_ready signal into a single request.
 func _refresh() -> void:
 	if InstanceClient.current == null or _fetching:
 		return
@@ -107,6 +116,9 @@ func _build_plaque() -> void:
 	_plaque.add_theme_constant_override(&"outline_size", 6)
 	_plaque.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.9))
 	_plaque.add_theme_color_override(&"font_color", Color(1.0, 0.92, 0.7))
+	# Seed the rank line so a statue is never a blank pedestal: if the champions
+	# fetch is slow, times out, or errors, the plaque still reads "#1 Level".
+	_plaque.text = _rank_label()
 	add_child(_plaque)
 
 

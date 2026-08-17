@@ -148,6 +148,8 @@ func _handle_collision(node: Node2D) -> void:
 	# Arcane Wall: a damage-pool shield. Eats up to its remaining HP; the OVERFLOW punches through
 	# (a big nuke is reduced, not fully negated). Deterministic across peers (same synced damage).
 	if node is Barrier:
+		if not _absorbed_by_barrier():
+			return # a shield doesn't stop a friendly projectile — keep flying
 		var overflow: float = (node as Barrier).absorb(damage)
 		if overflow <= 0.0:
 			queue_free() # fully absorbed
@@ -182,6 +184,15 @@ func _handle_collision(node: Node2D) -> void:
 				queue_free()
 			else:
 				pierce_left -= 1
+
+
+## Whether an Arcane Wall absorbs this projectile. True for anything that deals
+## damage, so a shield behaves as a damage pool. HealBolt overrides to false: it
+## carries no damage (the base default of 5.0 is never set by HealBoltAbility), so
+## absorbing it both destroyed the heal and drained 5 HP off a friendly barrier for
+## nothing — a shield dropped on the party ate every heal aimed through it.
+func _absorbed_by_barrier() -> bool:
+	return true
 
 
 ## What this projectile DOES to [param node], returning how the base reacts: IGNORED = pass through,

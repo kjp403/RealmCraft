@@ -16,7 +16,7 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 		(user as Character).play_action_animation(cast_animation)
 	if projectile_scene == null or user == null:
 		return
-	var aim: Vector2 = _steer_to_party(user, direction)
+	var aim: Vector2 = _steer_to_ally(user, direction)
 	var bolt: HealBolt = projectile_scene.instantiate()
 	bolt.top_level = true
 	bolt.direction = aim.normalized() if aim != Vector2.ZERO else Vector2.RIGHT
@@ -28,17 +28,21 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	user.add_child(bolt)
 
 
-## Prefer a wounded party member in radius over raw cursor aim so heals land on
-## the party without having to click them. Falls back to the original aim.
-func _steer_to_party(user: Entity, direction: Vector2) -> Vector2:
+## Prefer a wounded ALLY in radius over raw cursor aim so heals land on your team
+## without having to click them. Falls back to the original aim.
+##
+## "Ally" is the FULL CombatHit.are_allied set (spar teammate, dungeon group,
+## overworld party, else guildmate) — the same rule HealBolt uses to decide who
+## the heal may land on. It used to be the overworld PARTY only, so healing a
+## guildmate never steered and fell back to raw aim — and raw aim is wherever the
+## caster is facing, which with a combat lock running is pinned to the monster
+## being fought (CombatTargetController.tick drives look_direction every frame).
+## That is how heals ended up flying into mobs and scenery instead of allies.
+func _steer_to_ally(user: Entity, direction: Vector2) -> Vector2:
 	if user is not Player:
 		return direction
 	var caster: Player = user as Player
-	var target: Player = null
-	if GameMode.is_world_server():
-		target = PartyService.most_wounded_nearby(caster, PartyService.HEAL_STEER_RADIUS)
-	else:
-		target = _client_most_wounded_party(caster)
+	var target: Player = _most_wounded_ally(caster)
 	if target == null:
 		return direction
 	var to_target: Vector2 = target.global_position - caster.global_position
@@ -47,19 +51,27 @@ func _steer_to_party(user: Entity, direction: Vector2) -> Vector2:
 	return to_target
 
 
-func _client_most_wounded_party(caster: Player) -> Player:
-	if Character.party_peers.is_empty():
-		return null
-	var best: Player = null
-	var best_missing: float = 0.0
+## Most-wounded living ally within HEAL_STEER_RADIUS, or null when there is none.
+## The server resolves allegiance authoritatively through CombatHit.are_allied;
+## the client mirrors it via HealBolt.client_is_ally, because player_resource is
+## server-only and are_allied would answer "not allied" for every remote player.
+func _most_wounded_ally(caster: Player) -> Player:
 	var container: Node = caster.get_parent()
 	if container == null:
 		return null
+	var on_server: bool = GameMode.is_world_server()
+	var best: Player = null
+	var best_missing: float = 0.0
 	for node: Node in container.get_children():
 		if node == caster or node is not Player:
 			continue
 		var other: Player = node as Player
-		if other.is_dead or not Character.party_peers.has(other.name.to_int()):
+		if other.is_dead:
+			continue
+		if on_server:
+			if not CombatHit.are_allied(caster, other):
+				continue
+		elif not HealBolt.client_is_ally(other):
 			continue
 		if caster.global_position.distance_to(other.global_position) > PartyService.HEAL_STEER_RADIUS:
 			continue
