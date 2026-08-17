@@ -15,7 +15,7 @@
 [ext_resource type="Resource" uid="uid://cvw5mgv8rtjq" path="res://source/common/gameplay/characters/npc/types/bandit_archer.tres" id="31_archer"]
 [ext_resource type="Resource" uid="uid://chnd4xgamxt8q" path="res://source/common/gameplay/characters/npc/types/bandits/bandit_brute.tres" id="32_brute"]
 [ext_resource type="Resource" uid="uid://dlgfcyxce1v1y" path="res://source/common/gameplay/characters/npc/types/bandit_sorcerer.tres" id="33_sorc"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bandit_captain_world.tres" id="35_warlord"]
+[ext_resource type="Resource" uid="uid://jo7v7jfc54kp" path="res://source/common/gameplay/characters/npc/types/bandit_captain.tres" id="34_captain"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="herb_scene"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres" id="herb_moon"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="herb_blood"]
@@ -147,7 +147,7 @@ id_to_node = {
 8: NodePath("BanditSorcerer1"),
 9: NodePath("BanditBrute2"),
 10: NodePath("BanditSorcerer2"),
-12: NodePath("BanditWarlord")
+11: NodePath("BanditCaptain")
 }
 node_to_id = {
 NodePath("BanditFighter1"): 0,
@@ -161,7 +161,7 @@ NodePath("BanditBrute1"): 7,
 NodePath("BanditSorcerer1"): 8,
 NodePath("BanditBrute2"): 9,
 NodePath("BanditSorcerer2"): 10,
-NodePath("BanditWarlord"): 12
+NodePath("BanditCaptain"): 11
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -232,10 +232,10 @@ enemy_data = ExtResource("33_sorc")
 weapon = null
 
 
-[node name="BanditWarlord" parent="ReplicatedPropsContainer" unique_id=1918988394 instance=ExtResource("3_npc")]
+[node name="BanditCaptain" parent="ReplicatedPropsContainer" unique_id=1918988393 instance=ExtResource("3_npc")]
 position = Vector2(520, 136)
 debug_draw_ranges = false
-enemy_data = ExtResource("35_warlord")
+enemy_data = ExtResource("34_captain")
 weapon = null
 
 [node name="MineableNodes" type="Node2D" parent="."]

@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="BossHuntTarget" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bandit_captain_world.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bandit_captain.tres" id="2_enemy"]
 
 [resource]
 script = ExtResource("1_script")
 slug = &"bandit_captain"
-display_name = "Bandit Warlord"
-description = "The hideout's captain at full strength. Chain lightning, slam follow-up, Searing Wound, and style wards."
+display_name = "Bandit Captain"
+description = "The hideout captain, dragged into the pit. A mid-Charter fight to learn wards and adds without the Unbound kits."
 enemy_type = ExtResource("2_enemy")
 cost = 25000
-recommended_level = 55
+recommended_level = 18
 health_mult = 1.0
 health_per_extra_player = 0.6
 damage_mult = 1.0

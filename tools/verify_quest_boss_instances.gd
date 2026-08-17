@@ -21,23 +21,23 @@ const NPCS: Array[Dictionary] = [
 const MAPS: Array[Dictionary] = [
 	{
 		"path": "res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn",
-		"gone": ["GoblinChief"],
-		"keep": ["GoblinWarlord"],
+		"gone": [],
+		"keep": ["GoblinChief"],
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/bandit_hideout/bandit_hideout.tscn",
-		"gone": ["BanditCaptain"],
-		"keep": ["BanditWarlord"],
+		"gone": [],
+		"keep": ["BanditCaptain"],
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/fungus_cave/fungus_cave.tscn",
-		"gone": ["FungalHeart"],
-		"keep": ["UnboundHeart"],
+		"gone": [],
+		"keep": ["FungalHeart"],
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/sewers/sewers.tscn",
-		"gone": ["BloatedSovereign"],
-		"keep": ["UnboundSovereign"],
+		"gone": [],
+		"keep": ["BloatedSovereign"],
 	},
 	{
 		"path": "res://source/common/gameplay/maps/maps/desert/desert.tscn",
