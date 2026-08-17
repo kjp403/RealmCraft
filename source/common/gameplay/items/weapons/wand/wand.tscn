@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bogvbnwhxp5ej" path="res://assets/sprites/items/weapons/wood/wood.png" id="5_tex"]
 
 [node name="Weapon" unique_id=772204932 instance=ExtResource("1_base")]
+square_icon_scale = 0.7
 abilities = Array[ExtResource("2_ability")]([ExtResource("3_bolt")])
 
 [node name="WeaponSprite" parent="." index="0" unique_id=2118713155]

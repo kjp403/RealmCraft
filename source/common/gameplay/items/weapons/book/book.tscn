@@ -5,6 +5,7 @@
 [ext_resource type="Resource" uid="uid://bkpaev6m1otd2" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/arc_strike.tres" id="3_arc"]
 
 [node name="Book" unique_id=1498533445 instance=ExtResource("1_rra25")]
+square_icon_scale = 0.5
 abilities = Array[ExtResource("2_ability")]([ExtResource("3_arc")])
 
 [node name="WeaponSprite" parent="." index="0" unique_id=2118713155]

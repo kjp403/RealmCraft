@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_mastery_stale_loadout.gd" id="1_vmsl"]
+
+[node name="VerifyMasteryStaleLoadout" type="Node"]
+script = ExtResource("1_vmsl")

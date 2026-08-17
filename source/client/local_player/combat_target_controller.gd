@@ -235,6 +235,16 @@ func _tick_charge_attack(ability: AbilityResource) -> void:
 	if not _player.equipment_component.can_use(&"weapon", 0, true):
 		return
 	ability.predict_release()
+	# Stamp the cooldown NOW, predictively. Without it the very next frame sees
+	# charging=false AND an unstamped cooldown (the real stamp rides the server
+	# echo, a round-trip away), so this loop starts a fresh draw immediately. The
+	# server rejects that press — still on cooldown — and therefore never echoes
+	# it, which strands the client charging a draw the server knows nothing about:
+	# the bow visibly draws and fires nothing, over and over. Charge weapons are
+	# the only two-phase primary, which is why archery alone showed it.
+	var weapon: Weapon = _player.equipment_component.mounted_nodes.get(&"weapon", null) as Weapon
+	if weapon != null:
+		weapon.stamp_predicted_cooldown(0)
 	_charge_held = false
 	Client.request_data(
 		&"action.perform",

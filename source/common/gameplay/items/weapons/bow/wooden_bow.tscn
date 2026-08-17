@@ -6,6 +6,7 @@
 [ext_resource type="Resource" uid="uid://jpic865idg0x" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/bow_shot.tres" id="4_shot"]
 
 [node name="WoodenBow" unique_id=504140017 instance=ExtResource("1_01c3m")]
+square_icon_scale = 0.8
 script = ExtResource("2_75guj")
 abilities = Array[ExtResource("3_ability")]([ExtResource("4_shot")])
 

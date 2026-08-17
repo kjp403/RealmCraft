@@ -12,6 +12,15 @@ extends Node2D
 @export var abilities: Array[AbilityResource]
 @export var animation_libraries: Dictionary[StringName, AnimationLibrary]
 
+## In-hand size for SQUARE Ascension inventory icons, which are all authored
+## 32x32 no matter the weapon — while the authored in-hand sheets are sized per
+## type (a 16x48 blade at 0.65, a 16x16 tome). Drawn at 1.0 an Ascension icon
+## towers over the atlas weapon it replaces, so each TYPE scene sets the number
+## that matches its own art. Heavies (hammer) deliberately keep 1.0 — a big
+## head is the point. Only [method _apply_square_icon_grip] reads it; authored
+## sheet art keeps the scene's own scale.
+@export_range(0.2, 1.5, 0.01) var square_icon_scale: float = 0.7
+
 var character: Character
 
 ## Charge-input prediction: slot -> true while the local player holds a charge
@@ -91,12 +100,14 @@ func _apply_square_icon_grip(sz: Vector2, extra_offset: Vector2) -> void:
 	weapon_sprite.rotation = -PI * 0.25
 	weapon_sprite.centered = true
 	weapon_sprite.offset = Vector2.ZERO
-	weapon_sprite.scale = Vector2.ONE
+	weapon_sprite.scale = Vector2.ONE * square_icon_scale
 	weapon_sprite.flip_h = false
 	# After tip-up, the grip sits near the bottom of the sprite (~half a
 	# diagonal from the texture center). Pull it onto the Hand at (0,0).
 	# The old (2,2) nudge left the hand on the mid-blade / crossguard.
-	var pull: float = maxf(sz.x, sz.y) * 0.48
+	# Scaled with the sprite: position is in the PARENT's space, so an unscaled
+	# pull would slide a shrunk weapon off the hand it was measured against.
+	var pull: float = maxf(sz.x, sz.y) * 0.48 * square_icon_scale
 	weapon_sprite.position = Vector2(0.0, -pull) + extra_offset
 
 
@@ -240,6 +251,16 @@ func stamp_armed_override(override_name: String) -> void:
 			_stamp_cooldown(ability)
 			_consume_mana(ability)
 			return
+
+
+## Predictive cooldown stamp for a driver OUTSIDE the input path — the click /
+## Spacebar attack loop, which fires a charge weapon on a timer rather than on a
+## button release. Same bookkeeping as the internal press/release stamp; the
+## server echo re-stamps authoritatively a round-trip later.
+func stamp_predicted_cooldown(slot: int) -> void:
+	if slot < 0 or slot >= abilities.size() or abilities[slot] == null:
+		return
+	_stamp_cooldown(abilities[slot])
 
 
 ## Rotate [param direction] by a random angle inside the slot ability's spread cone (a

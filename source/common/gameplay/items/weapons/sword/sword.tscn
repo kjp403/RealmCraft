@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bogvbnwhxp5ej" path="res://assets/sprites/items/weapons/wood/wood.png" id="6_w7nnk"]
 
 [node name="Sword" unique_id=924782394 instance=ExtResource("1_6bj2e")]
+square_icon_scale = 0.68
 position = Vector2(-8, 0)
 script = ExtResource("2_gih3n")
 abilities = Array[ExtResource("5_ability")]([ExtResource("4_swing")])
