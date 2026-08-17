@@ -54,6 +54,7 @@
 [ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="43_golem"]
 [ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="44_hermit"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/scout_calder.tres" id="45_calder"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="46_banker"]
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
 1:10/0 = 0
@@ -1179,6 +1180,14 @@ npc_resource = ExtResource("44_hermit")
 position = Vector2(4823, 245)
 npc_resource = ExtResource("43_golem")
 
+[node name="WingBanker" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
+position = Vector2(4184, 696)
+npc_resource = ExtResource("46_banker")
+
+[node name="BeachBanker" parent="NPCs" unique_id=1900000402 instance=ExtResource("6_mn6pe")]
+position = Vector2(1048, 1560)
+npc_resource = ExtResource("46_banker")
+
 [node name="MineableNodes" type="Node2D" parent="." unique_id=59547489]
 
 [node name="WoodStand1" parent="MineableNodes" unique_id=1930000000 instance=ExtResource("7_jiw8u")]
@@ -1646,6 +1655,26 @@ data = ExtResource("37_ytree")
 [node name="WingYew5" parent="MineableNodes" unique_id=1930000104 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1192)
+data = ExtResource("37_ytree")
+
+[node name="WingYewCamp1" parent="MineableNodes" unique_id=1930000105 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(4008, 584)
+data = ExtResource("37_ytree")
+
+[node name="WingYewCamp2" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(4104, 648)
+data = ExtResource("37_ytree")
+
+[node name="WingYewCamp3" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(3944, 680)
+data = ExtResource("37_ytree")
+
+[node name="WingYewCamp4" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("7_jiw8u")]
+y_sort_enabled = true
+position = Vector2(3896, 552)
 data = ExtResource("37_ytree")
 
 [node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]

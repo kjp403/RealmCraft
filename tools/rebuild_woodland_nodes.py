@@ -80,6 +80,9 @@ PATCHES = [
          note='Frostpetal on the cold Stone Shelves'),
     dict(name='WingYew', kind='yew_tree', at=(4740, 1350), r=195, n=5, spacing=115,
          note='Yew Hollow (lv45) at East Shore -- the deepest point of the zone'),
+    dict(name='WingYewCamp', kind='yew_tree', at=(4008, 584), r=170, n=4, spacing=115,
+         note='Second yew stand beside the wing banker -- East Shore stays the '
+              'big hollow, this is the cut-and-bank camp on the north route'),
 ]
 
 # --- Wildlife nests ---------------------------------------------------------
