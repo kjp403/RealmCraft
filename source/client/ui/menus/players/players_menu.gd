@@ -249,6 +249,7 @@ func _pretty_zone(raw: String) -> String:
 		"sunken_tombs": "The Sunken Tombs",
 		"gutterworks": "The Gutterworks",
 		"drowned_cistern": "The Drowned Cistern",
+		"ossuary": "The Ossuary",
 		"bellows_gallery": "The Bellows Gallery",
 		"cinder_deeps": "The Cinder Deeps",
 	}

@@ -78,12 +78,7 @@ func _resolve_player_heal(target: Node2D) -> CombatHit.Result:
 	var ally: Player = target as Player
 	if not CombatHit.are_allied(source as Player, ally):
 		return CombatHit.Result.IGNORED # fly past non-allies, keep looking for a friend
-	var sc: StatsComponent = ally.stats_component
-	var hp: float = sc.get_stat(Stat.HEALTH)
-	var healed: float = minf(hp + heal_amount, sc.get_stat(Stat.HEALTH_MAX)) - hp
-	if healed > 0.0:
-		sc.set_stat(Stat.HEALTH, hp + healed)
-		_broadcast_heal(ally, healed)
+	ally.apply_heal(heal_amount, source as Character, true)
 	return CombatHit.Result.DAMAGED # consumed
 
 
@@ -106,10 +101,7 @@ func _resolve_mob_heal(target: Node2D) -> CombatHit.Result:
 		return CombatHit.Result.IGNORED # topped off — don't waste the bolt
 	if not multiplayer.is_server():
 		return CombatHit.Result.DAMAGED # visual stop; the heal is the server's call
-	var healed: float = minf(hp + heal_amount, hp_max) - hp
-	if healed > 0.0:
-		sc.set_stat(Stat.HEALTH, hp + healed)
-		_broadcast_heal(ally, healed)
+	ally.apply_heal(heal_amount, source as Character, false)
 	return CombatHit.Result.DAMAGED # consumed
 
 

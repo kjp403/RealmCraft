@@ -23,10 +23,11 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_sewer_gorgon.tres" id="et6"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_intellect_devourer.tres" id="et7"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_cistern_hulk.tres" id="et8"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="et9"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres" id="et10"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/gutterworks.tres" id="stair_gutterworks"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/drowned_cistern.tres" id="stair_drowned_cistern"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/ossuary.tres" id="stair_ossuary"]
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 [ext_resource type="AudioStream" uid="uid://epws31tb1n8o" path="res://assets/audio/music/shadow_temple.ogg" id="mus_shadow_temple"]
 [node name="sewers" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
@@ -261,7 +262,7 @@ id_to_node = {
 32: NodePath("Devourer2"),
 33: NodePath("CisternHulk"),
 34: NodePath("CisternHulk2"),
-35: NodePath("BloatedSovereign")
+36: NodePath("UnboundSovereign")
 }
 node_to_id = {
 NodePath("Slime"): 0,
@@ -299,7 +300,7 @@ NodePath("Devourer"): 31,
 NodePath("Devourer2"): 32,
 NodePath("CisternHulk"): 33,
 NodePath("CisternHulk2"): 34,
-NodePath("BloatedSovereign"): 35
+NodePath("UnboundSovereign"): 36
 }
 
 [node name="Slime" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
@@ -512,10 +513,11 @@ debug_draw_ranges = false
 enemy_data = ExtResource("et8")
 weapon = null
 
-[node name="BloatedSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
-position = Vector2(1800.0, 520.0)
+
+[node name="UnboundSovereign" parent="ReplicatedPropsContainer" instance=ExtResource("hostile")]
+position = Vector2(2392.0, 648.0)
 debug_draw_ranges = false
-enemy_data = ExtResource("et9")
+enemy_data = ExtResource("et10")
 weapon = null
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
@@ -556,3 +558,15 @@ destination_label = "The Drowned Cistern"
 target_instance = ExtResource("stair_drowned_cistern")
 warper_id = 153
 target_id = 43
+
+[node name="OssuaryLanding" parent="." instance=ExtResource("5_warper")]
+position = Vector2(1720.0, 2232.0)
+warper_id = 56
+
+[node name="OssuaryStair" parent="." instance=ExtResource("6_portal")]
+position = Vector2(1720.0, 2312.0)
+portal_color = Color(0.45, 0.28, 0.7, 1)
+destination_label = "The Ossuary"
+target_instance = ExtResource("stair_ossuary")
+warper_id = 156
+target_id = 46

@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786652596
-next_id = 104
+version = 1786994166
+next_id = 112
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -492,6 +492,46 @@ entries = Array[Dictionary]([{
 &"id": 103,
 &"path": "res://source/common/gameplay/characters/npc/types/fungus/spore_tick.tres",
 &"slug": &"spore_tick"
+}, {
+&"hash": "5c907a945e4e1ba79a5d5584c886bd9f182d8a7bbb395f4ea3699396a25f19d6",
+&"id": 104,
+&"path": "res://source/common/gameplay/characters/npc/types/bandit_captain_world.tres",
+&"slug": &"bandit_captain_world"
+}, {
+&"hash": "d8e1e3b9b4f2297de7fd002c95678a10bdd4c4282e0c916b66ba2ea195c46d17",
+&"id": 105,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres",
+&"slug": &"cinderborn_world"
+}, {
+&"hash": "076629c38282d2c8bbc71c2bddb6d754a8301a4a1803e9f284b5b657fcb2b8b0",
+&"id": 106,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
+&"slug": &"cistern_sovereign_world"
+}, {
+&"hash": "28c4ea2bd3fe71cb3b2f51eedeb44ce803b86b6c4a219c7edba68163692e9032",
+&"id": 107,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
+&"slug": &"cleetus"
+}, {
+&"hash": "8dec70de80a30f4a9166120a57fd3ee6dbe4b695cf7a53dd3315b498d3aa3026",
+&"id": 108,
+&"path": "res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres",
+&"slug": &"sand_king_world"
+}, {
+&"hash": "f9f61649374d6b8e56f16f0e949c1b4b0c3ae3492259f87afb74c30d3df276f2",
+&"id": 109,
+&"path": "res://source/common/gameplay/characters/npc/types/fungus/fungal_heart_world.tres",
+&"slug": &"fungal_heart_world"
+}, {
+&"hash": "e953d35c66064a311f6e29c327d5c7234e78758c0a89c1af2e4888c91b9081a9",
+&"id": 110,
+&"path": "res://source/common/gameplay/characters/npc/types/goblins/goblin_chief_world.tres",
+&"slug": &"goblin_chief_world"
+}, {
+&"hash": "f86c5811fb9ffd1414f795edf1e26c2c5d6035e33a1be2cf21dbcb05ca26c839",
+&"id": 111,
+&"path": "res://source/common/gameplay/characters/npc/types/mecha_stone_golem_world.tres",
+&"slug": &"mecha_stone_golem_world"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

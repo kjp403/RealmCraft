@@ -12,10 +12,9 @@ class_name EventService
 ## this is the seed of a broader admin event system: new event types can reuse the
 ## same spawn / announce / cleanup shape. Server-only; one event at a time.
 
-## World-boss archetype — mecha_stone_golem (attack/special clips + laser/arm
-## timing). world_boss.tres is a stone_golem reskin with no cast anims and
-## zeroed laser/arm intervals, so it looked like a frozen statue in fights.
-const WORLD_BOSS_SLUG: StringName = &"mecha_stone_golem"
+## World-boss archetype — Unleashed Golem (`mecha_stone_golem_world`). The
+## quest golem stays on the Hollow pad; Hunt and admin events use this kit.
+const WORLD_BOSS_SLUG: StringName = &"mecha_stone_golem_world"
 
 ## The live world boss + the instance it was rallied from (used for announces).
 ## Only one world boss at a time. Static — the trigger command and the death

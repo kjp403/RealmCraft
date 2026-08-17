@@ -216,6 +216,9 @@ func _on_player_entered_warper(player: Player, current_instance: ServerInstance,
 ## current instance authoritatively, charge the hub if it isn't live yet, then
 ## switch. Rolling our own current-instance lookup is what crashed recall before.
 func recall_player(peer_id: int) -> void:
+	# Story-boss arenas dump you back at the giver, not Guild Hall.
+	if QuestBossService.redirect_recall(peer_id):
+		return
 	var res: InstanceResource = instance_collection.get(RECALL_INSTANCE_NAME, null)
 	if res == null:
 		return
@@ -270,6 +273,7 @@ func player_switch_instance(
 	# handle_lobby_request refused the next contract with "in_run". That soft-
 	# locked the mode until relog. No-op for a switch out of any non-hunt map.
 	BossHuntService.on_player_left(peer_id, current_instance)
+	QuestBossService.on_player_left(peer_id, current_instance)
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
 		peer_id,

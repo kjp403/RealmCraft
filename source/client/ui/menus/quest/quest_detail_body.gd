@@ -48,6 +48,16 @@ func render(quest: Dictionary) -> void:
 				add_child(_make_or_separator())
 			add_child(_make_objective_row(objectives[i]))
 
+	if (
+		str(quest.get("state", "")) == "active"
+		and bool(quest.get("complete", false))
+	):
+		var return_label: Label = Label.new()
+		return_label.text = "↩ " + str(quest.get("return_prompt", "Return to the quest giver"))
+		return_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		return_label.add_theme_color_override(&"font_color", COLOR_OBJ_MET)
+		add_child(return_label)
+
 	var reward_text: String = _reward_line(quest)
 	if not reward_text.is_empty():
 		add_child(HSeparator.new())

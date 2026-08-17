@@ -142,6 +142,7 @@ func _takeover_or_load_player(character_id: int) -> PlayerResource:
 	SparringService.on_peer_disconnected(existing_peer)
 	DungeonService.on_peer_disconnected(existing_peer)
 	BossHuntService.on_peer_disconnected(existing_peer)
+	QuestBossService.on_peer_disconnected(existing_peer)
 	PartyService.on_peer_disconnected(existing_peer)
 	RateLimiter.forget(existing_peer)
 	if world_manager != null:
@@ -216,6 +217,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		SparringService.on_peer_disconnected(peer_id)
 		DungeonService.on_peer_disconnected(peer_id)
 		BossHuntService.on_peer_disconnected(peer_id)
+		QuestBossService.on_peer_disconnected(peer_id)
 		PartyService.on_peer_disconnected(peer_id)
 		RateLimiter.forget(peer_id)
 		return
@@ -229,6 +231,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	# Boss Hunt: same sweep — out of the contract board queue and out of any live
 	# arena, so the paid instance can free once the last member is gone.
 	BossHuntService.on_peer_disconnected(peer_id)
+	QuestBossService.on_peer_disconnected(peer_id)
 	PartyService.on_peer_disconnected(peer_id)
 	# Drop rate-limit counters so a reconnect starts with a clean window.
 	RateLimiter.forget(peer_id)

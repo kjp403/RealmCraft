@@ -20,6 +20,7 @@ label_override = "What now?"
 [resource]
 script = ExtResource("6_npc")
 npc_name = "Lira Voss"
+location_hint = "Fungus Cave, cave mouth"
 skin = ExtResource("5_skin")
 greeting = "I am out. The cave still wants me. Rook does not have that luxury — the bandits dragged him."
 interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_lira_freed"), SubResource("Dialogue_free")])

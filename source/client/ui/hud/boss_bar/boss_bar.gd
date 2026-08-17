@@ -47,12 +47,14 @@ var _enraged: bool = false
 ## The over-head bar we suppressed while showing this boss up here, so two bars
 ## do not compete. Restored on unbind — never left hidden on a body we let go of.
 var _hid_overhead: bool = false
+var _ward_label: String = ""
 
 
 func _ready() -> void:
 	modulate.a = 0.0
 	hide()
 	set_process(true)
+	Client.subscribe(&"boss.ward", _on_ward)
 
 
 func _process(delta: float) -> void:
@@ -93,12 +95,10 @@ func _bind(npc: HostileNpc) -> void:
 	_boss = npc
 	_linger_left = LINGER_S
 	_enraged = false
+	_ward_label = ""
 
 	var data: EnemyTypeResource = npc.enemy_data
-	name_label.text = "%s   (Lv %d)" % [
-		data.display_name if not data.display_name.is_empty() else str(npc.enemy_type),
-		data.resolved_combat_level(),
-	]
+	_refresh_name()
 	_set_fill(ELEMENT_FILL[clampi(data.telegraph_element, 0, ELEMENT_FILL.size() - 1)])
 
 	var stats: Object = npc.stats_component.stats
@@ -201,3 +201,22 @@ func _set_fill(color: Color) -> void:
 
 func _update_label(value: float) -> void:
 	hp_label.text = "%d / %d" % [maxi(0, int(ceil(value))), int(main_bar.max_value)]
+
+
+func _on_ward(payload: Dictionary) -> void:
+	var ward: String = str(payload.get("ward", "")).strip_edges()
+	if ward.is_empty():
+		return
+	_ward_label = "Physical Ward" if ward == "physical" else "Arcane Ward"
+	_refresh_name()
+
+
+func _refresh_name() -> void:
+	if _boss == null or not is_instance_valid(_boss) or _boss.enemy_data == null:
+		return
+	var data: EnemyTypeResource = _boss.enemy_data
+	var base: String = data.display_name if not data.display_name.is_empty() else str(_boss.enemy_type)
+	if _ward_label.is_empty():
+		name_label.text = "%s   (Lv %d)" % [base, data.resolved_combat_level()]
+	else:
+		name_label.text = "%s   (Lv %d)  ·  %s" % [base, data.resolved_combat_level(), _ward_label]

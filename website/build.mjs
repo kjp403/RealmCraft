@@ -64,14 +64,35 @@ const ITEM_KIND = {
 };
 
 const SKIP_NPCS = new Set(["dev_all_merchant", "vfx_curator"]);
-const SKIP_ZONES = new Set(["jail", "vfx_vault", "dungeon_entrance"]);
+const SKIP_ZONES = new Set(["jail", "vfx_vault", "dungeon_entrance", "quest_boss_arena", "boss_hunt_arena"]);
 const SKIP_ENEMIES = new Set(["training_dummy"]);
+
+const ZONE_BLURBS = {
+  ossuary:
+    "A sealed bone chapel off the main Sewers. The purple stair by the sewer entrance is the door. The Necromancer holds this floor — current hardest world pad, and the open-world source of Wyrmguard, Astral, and Nightglass.",
+  sewers:
+    "The culverts under the Capital. Stairs lead to The Gutterworks and The Drowned Cistern. A purple stair next to the entrance opens The Ossuary, where the Necromancer waits.",
+  desert:
+    "The Sunken Tombs basin. Unbound Sand King holds the north. The Necromancer is no longer here — he moved to The Ossuary under the Sewers.",
+  the_hollow:
+    "The Charter spine's last chamber. The Mecha-stone Golem is not on the shared pad: the Hall Keeper sends you into a private story fight.",
+  woodland:
+    "Goblin Woodland. The Goblin Warlord still roams. Warden Bren sends you into a private room for the Chief when that Charter kill is active.",
+  FungusArea1:
+    "The Unbound Heart still holds the cave. Forager Maela and Lira Voss send you into a private room for the story Heart.",
+  bandit_hideout:
+    "The Bandit Warlord still holds the camp. The Watch Sergeant and Rook Hale send you into a private room for the Captain.",
+  fire_forge:
+    "Vurthek Unbound still holds the foundry. Cinderwright Maro sends you into a private room for the story Cinderborn.",
+  drowned_cistern:
+    "Drowned Keeper Vess sends you into a private room for the story Sovereign. Unbound Sovereign remains on the main Sewers floor.",
+};
 
 const CAMPAIGN = {
   hollow_seep: {
     slug: "hollow-seep",
     name: "The Hollow Seep",
-    blurb: "The Charter spine. The Clerk seals your papers, the Hall Keeper sends you into the woodland, and each climax hands a unique weapon of the style in your hand. Smithing makes armour. Bosses make the next blade.",
+    blurb: "The Charter spine. The Clerk seals your papers, the Hall Keeper sends you into the woodland, and each climax's giver opens a private fight. Unique weapons land on turn-in. Smithing makes armour.",
   },
   fungus_cave: {
     slug: "fungus-cave",
@@ -674,13 +695,17 @@ function collectNpcs() {
       if (p.endsWith("wardrobe_interaction.gd")) offers.add("Wardrobe");
       if (p.endsWith("name_change_interaction.gd")) offers.add("Name change");
       if (p.endsWith("attribute_reset_interaction.gd")) offers.add("Attribute reset");
+      if (p.endsWith("quest_boss_interaction.gd")) offers.add("Story fight");
     }
     const questKeys = [];
+    let storyEnemy = "";
     for (const sub of Object.values(doc.sub)) {
       for (const ref of asArray(sub.props?.quests)) {
         const qPath = resolveExt(doc, ref);
         if (qPath) questKeys.push(fileKey(qPath));
       }
+      const et = str(sub.props?.enemy_type);
+      if (et) storyEnemy = et;
     }
     npcs.push({
       slug: uniqueSlug(slug0, used),
@@ -689,6 +714,7 @@ function collectNpcs() {
       offers: [...offers],
       questKeys: [...new Set(questKeys)],
       quests: [],
+      storyEnemy,
       file,
     });
   }
@@ -757,7 +783,7 @@ function collectZones() {
       name: str(doc.resource.display_name) || str(doc.resource.zone_title) || inst.replace(/_/g, " "),
       instance: inst,
       isDungeon,
-      description: str(doc.resource.description),
+      description: str(doc.resource.description) || ZONE_BLURBS[inst] || "",
       recommended: num(doc.resource.recommended_level),
       levelMin: num(doc.resource.level_min),
       levelMax: num(doc.resource.level_max),
@@ -906,6 +932,35 @@ function attachMapInhabitants(zones, npcs, creatures) {
     z.people.sort((a, b) => a.name.localeCompare(b.name));
     z.fauna.sort((a, b) => Number(b.creature.boss) - Number(a.creature.boss) || a.creature.name.localeCompare(b.creature.name));
   }
+}
+
+function questBodyCreature(creatures, enemyType) {
+  const matches = creatures.filter((c) => c.type === enemyType);
+  const quest = matches.find((c) => !c.file.replace(/\\/g, "/").includes("_world."));
+  return quest || matches[0] || null;
+}
+
+function attachStoryBosses(npcs, creatures) {
+  for (const n of npcs) {
+    if (!n.storyEnemy) continue;
+    const c = questBodyCreature(creatures, n.storyEnemy);
+    if (!c) continue;
+    c.storyGivers = c.storyGivers || [];
+    if (!c.storyGivers.some((g) => g.slug === n.slug)) c.storyGivers.push(n);
+  }
+}
+
+function storyFightHtml(c) {
+  if (!c.storyGivers || !c.storyGivers.length) return "";
+  const lis = c.storyGivers
+    .map((n) => {
+      const where = (n.locations || [])
+        .map((z) => `<a class="cat-locations" href="/wiki/locations/${z.slug}/">${esc(z.name)}</a>`)
+        .join(", ");
+      return `<li><a class="cat-npcs" href="/wiki/npcs/${n.slug}/">${esc(n.name)}</a>${where ? ` (${where})` : ""} — Send me to the fight</li>`;
+    })
+    .join("");
+  return `<h2>Story fight</h2><p>Private solo room. The quest giver sends you in while that Charter kill is active. World pads below (if any) are the farm — keys and unique weapons land on turn-in, not on the story kill.</p><ul>${lis}</ul>`;
 }
 
 function foundInHtml(locations) {
@@ -1402,12 +1457,12 @@ function gearPathPage(items, itemSources, quests) {
         ${pageHeading("start", "Gear path")}
         <p>Every weapon and armour piece is gated by <strong>Weapon Mastery</strong>, not by character level. Mastery is earned by killing things with a weapon of that class.</p>
         <ul>
-          <li><strong>Unique weapons</strong> come from Charter climaxes. Turn-in grants one matching the style in your hand. Farm the same boss for the other styles, armour mats, and relics — the kill is not one-and-done.</li>
+          <li><strong>Unique weapons</strong> come from Charter climaxes. The quest giver sends you into a private fight; turn-in grants one unique matching the style in your hand. Farm the Unbound world pad for the other styles, armour mats, and relics.</li>
           <li><strong>Armour</strong> is smithing and later bossing. Bronze through Runite are forged. Plate is meant to cover a missed mechanic or two, not ten. Mitigation is <code>damage × 100 / (100 + armour)</code>.</li>
           <li><strong>Smithable metal weapons</strong> exist on the anvil, but they lose to the unique of that chapter. Proof of the Hammer is a bronze armour craft, not a bronze blade.</li>
           <li><strong>Armour</strong> requires <em>any</em> mastery at that level, so your best-trained weapon carries what you can wear. Weapons require mastery in their own class.</li>
         </ul>
-        ${uniqueLadder ? `<h2>Charter unique weapons</h2><p>You never fight a boss with the weapon it grants. The blade lands on turn-in; you take it into the next fight.</p>${uniqueLadder}` : ""}
+        ${uniqueLadder ? `<h2>Charter unique weapons</h2><p>You never fight a boss with the weapon it grants. The blade lands on turn-in; you take it into the next fight. Story fights are private rooms from the quest giver — the shared Unbound pad is the farm.</p>${uniqueLadder}` : ""}
         ${setTable ? `<h2>Armour sets</h2><p>Totals are helm + chest + boots (and any other pieces in the set). Naked Heroes start around 15 armour.</p>${setTable}` : ""}
         <h2>Every piece</h2>
         <p class="muted">Generated from the game files, so stats and sources match the live build. Click any item for the full source list.</p>
@@ -1838,6 +1893,7 @@ function build() {
   const creatures = collectCreatures();
   const zones = collectZones();
   attachMapInhabitants(zones, npcs, creatures);
+  attachStoryBosses(npcs, creatures);
   const jobs = collectJobs();
   const slayer = collectSlayer();
   const quests = collectQuests();
@@ -2091,7 +2147,7 @@ function build() {
           </ol>
           <h2>First steps</h2>
           <p>You wake at Charter Intake. The <strong>Charter Clerk</strong> has <strong>The Charter Seal</strong> — speak with the Hall Keeper in the chamber beyond. Leave the Daily Quest Board alone until that introduction is done.</p>
-          <p>The Hall Keeper starts <strong>Blood in the Meadow</strong>: equip a weapon from your kit, open Mastery, and clear twenty goblin runts. Then find <strong>Warden Bren</strong> at the woodland gate. The Goblin Chief is required. Bone from that kill is your first real weapon — smithing will not match it.</p>
+          <p>The Hall Keeper starts <strong>Blood in the Meadow</strong>: equip a weapon from your kit, open Mastery, and clear twenty goblin runts. Then find <strong>Warden Bren</strong> at the woodland gate. When the Chief kill is active, Bren has <strong>Send me to the fight</strong> — a private solo room, not the shared warren pad. Bone from that kill is your first real weapon — smithing will not match it.</p>
           <p><strong>Find Your Footing</strong> is an optional errand to the Foreman after Blood in the Meadow. It is not the start of the campaign. Arkenelle does not lock you into a weapon or profession.</p>
           <h2>Progression</h2>
           <ul>
@@ -2101,7 +2157,7 @@ function build() {
             <li>Training one path never closes another.</li>
           </ul>
           <h2>Weapons and armour</h2>
-          <p>Each Charter climax grants a unique weapon of the style in your hand. Farm the same boss for the other styles, armour mats, and relics. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
+          <p>Each Charter climax grants a unique weapon of the style in your hand, on turn-in. The quest giver sends you into a private fight; Unbound pads on the biomes are the farm. The Necromancer holds <a class="cat-locations" href="/wiki/locations/ossuary/">The Ossuary</a> off the Sewers — Wyrmguard, Astral, and Nightglass drop there. Plate is forged — bronze through runite on the anvil, later kits from bossing — and it is meant to cover a missed mechanic or two, not trivialise a fight.</p>
           <p><a class="cat-start" href="/wiki/getting-started/gear/"><strong>Read the gear path →</strong></a> — unique ladder, armour set totals, and every piece.</p>
           <p><a class="cat-quests" href="/wiki/quests/hollow-seep/"><strong>The Hollow Seep →</strong></a> — the Charter campaign in order.</p>
           <h2>While it is alpha</h2>
@@ -2292,6 +2348,7 @@ function build() {
           ${pageHeading(role, c.name)}
           <p><span class="tag tag-${role}">${c.boss ? "Boss" : "Enemy"}</span></p>
           <div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>
+          ${storyFightHtml(c)}
           ${foundInHtml(c.locations)}
           <h2>Loot</h2>
           ${lootList(c.loot, items)}

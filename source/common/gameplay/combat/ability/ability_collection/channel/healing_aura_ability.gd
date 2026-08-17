@@ -48,23 +48,4 @@ func channel_tick(caster: Character) -> void:
 ## Restore heal_per_tick, clamped to max HP, and pop a green heal number (reusing
 ## the combat.hit heal path) for the HP actually gained.
 func _heal(target: Character) -> void:
-	var current: float = target.stats_component.get_stat(Stat.HEALTH)
-	var maximum: float = target.stats_component.get_stat(Stat.HEALTH_MAX)
-	if current >= maximum:
-		return
-	var healed: float = minf(current + heal_per_tick, maximum)
-	target.stats_component.set_stat(Stat.HEALTH, healed)
-	var gained: int = int(round(healed - current))
-	if gained <= 0 or WorldServer.curr == null:
-		return
-	var container: Node = target.get_parent()
-	if container == null or container.get_parent() == null:
-		return
-	WorldServer.curr.propagate_rpc(
-		WorldServer.curr.data_push.bind(&"combat.hit", {
-			"amount": gained,
-			"position": target.global_position,
-			"heal": true,
-		}),
-		container.get_parent().name
-	)
+	target.apply_heal(heal_per_tick, null, true)

@@ -129,6 +129,7 @@ func _display(quest: Dictionary) -> void:
 		&"font_color",
 		Color(0.5, 0.95, 0.5) if complete else _accent_color()
 	)
+	_fit_line(name_label)
 	_content.add_child(name_label)
 
 	var objectives: Array = quest.get("objectives", [])
@@ -152,6 +153,7 @@ func _display(quest: Dictionary) -> void:
 			or_label.text = "OR"
 			or_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			or_label.add_theme_color_override(&"font_color", Color(0.65, 0.75, 0.9))
+			_fit_line(or_label)
 			_content.add_child(or_label)
 		var objective_label: Label = Label.new()
 		objective_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -162,6 +164,7 @@ func _display(quest: Dictionary) -> void:
 			objective_label.text = "• %s%s" % [str(objective.get("desc", "")), "  ✓" if met else ""]
 		if met:
 			objective_label.add_theme_color_override(&"font_color", Color(0.5, 0.9, 0.5))
+		_fit_line(objective_label)
 		_content.add_child(objective_label)
 		any_shown = true
 
@@ -169,9 +172,17 @@ func _display(quest: Dictionary) -> void:
 	if complete:
 		var ready_label: Label = Label.new()
 		ready_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ready_label.text = "↩ Return to the quest giver"
+		ready_label.text = "↩ " + str(quest.get("return_prompt", "Return to the quest giver"))
 		ready_label.add_theme_color_override(&"font_color", Color(0.55, 0.9, 0.55))
+		_fit_line(ready_label)
 		_content.add_child(ready_label)
+
+
+## HUD rail is 224px; without wrap, "Speak with Forgemaster Helka · Fire Forge,
+## at the entrance" clips to "Speak with Forgemaster" and the location is lost.
+func _fit_line(label: Label) -> void:
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x = 196.0
 
 
 ## The active palette's accent (the same hue the gateway + menus focus-tint with), read live from

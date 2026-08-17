@@ -78,19 +78,19 @@ const RELICS: Array = [
 	# --- Lesser charms: one mono-coloured stone, early bosses -------------------
 	[
 		"relic_mossgrown", "Mossgrown Charm",
-		"goblins/goblin_chief", 0.001, 0,
+		"goblins/goblin_chief_world", 0.001, 0,
 		[["armor", 14.0], ["health_max", 35.0]],
 		"Green has grown over it so long it stopped being a stone and started being the moss.",
 	],
 	[
 		"relic_sporebloom", "Sporebloom Charm",
-		"fungus/fungal_heart", 0.001, 0,
+		"fungus/fungal_heart_world", 0.001, 0,
 		[["mr", 12.0], ["health_max", 45.0]],
 		"Still breathing out spores. The cave grew this one on purpose.",
 	],
 	[
 		"relic_bloodbrand", "Bloodbrand Charm",
-		"bandit_captain", 0.001, 0,
+		"bandit_captain_world", 0.001, 0,
 		[["ad", 14.0], ["health_max", 28.0]],
 		"Taken off a captain who took it off someone else. It keeps changing hands the same way.",
 	],
@@ -109,19 +109,19 @@ const RELICS: Array = [
 	# --- Greater sigils: a second energy veined through the same stone ----------
 	[
 		"relic_rotmire", "Rotmire Sigil",
-		"bosses/cistern_sovereign", 0.001, 0,
+		"bosses/cistern_sovereign_world", 0.001, 0,
 		[["armor", 28.0], ["health_max", 65.0], ["mr", 14.0]],
 		"Cistern water found its way into the moss and set there in a blue seam. Heavier than it looks.",
 	],
 	[
 		"relic_coreblossom", "Coreblossom Sigil",
-		"mecha_stone_golem", 0.001, 0,
+		"mecha_stone_golem_world", 0.001, 0,
 		[["mr", 20.0], ["health_max", 80.0], ["mana_regen", 1.8]],
 		"Cut out of a golem's chest, still lit. Whatever the Hollow built it to run on has not run out.",
 	],
 	[
 		"relic_scarabheart", "Scarabheart Sigil",
-		"bosses/sand_king", 0.001, 0,
+		"bosses/sand_king_world", 0.001, 0,
 		[["ad", 30.0], ["health_max", 45.0], ["ability_haste", 7.0]],
 		"A green scarab line runs through the red. Ankhemet was buried wearing it and did not stay buried.",
 	],
@@ -133,7 +133,7 @@ const RELICS: Array = [
 	],
 	[
 		"relic_cinderheart", "Cinderheart Sigil",
-		"bosses/cinderborn", 0.001, 0,
+		"bosses/cinderborn_world", 0.001, 0,
 		[["ad", 26.0], ["move_speed", 7.0], ["ability_haste", 10.0], ["health_max", 40.0]],
 		"Vurthek's own coal, banked and never gone out. It burns for whoever carries it next.",
 	],

@@ -7,7 +7,7 @@
 
 [sub_resource type="Resource" id="Dialogue_torv"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Forty years on the bellows. My hearing is gone and my arms are excellent.", "Helka says hold the halls. I say hold the bridges. Bridges are where they have to come to you.", "You want the west hall first. East hall has the templars and they do not tire."])
+lines = Array[String](["Forty years on the bellows. My hearing is gone and my arms are excellent.", "Helka holds the entrance fire on the surface. I hold the bridges. Bridges are where they have to come to you.", "You want the west hall first. East hall has the templars and they do not tire."])
 label_override = "Ask where to start"
 
 [sub_resource type="Resource" id="Dialogue_down"]

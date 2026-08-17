@@ -28,6 +28,18 @@ func try_start(npc, distance_to_target: float, now: int) -> bool:
 	return true
 
 
+## BossController slam follow-up: skip the pounce-window check and charge the
+## current target's feet. Sidestep still dodges; backing up in a line does not.
+func force_begin(npc) -> bool:
+	if lunge_range <= 0.0:
+		return false
+	if npc.targeted_player == null or not npc._is_target_valid(npc.targeted_player):
+		return false
+	var scratch: Dictionary = runtime_state(npc)
+	_begin(npc, scratch)
+	return true
+
+
 func process_state(npc) -> void:
 	match npc.enemy_state:
 		HostileNpc.EnemyState.LUNGE_WINDUP:

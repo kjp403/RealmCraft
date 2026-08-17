@@ -14,17 +14,18 @@ quests = Array[ExtResource("8_questres")]([ExtResource("9_q1")])
 
 [sub_resource type="Resource" id="Dialogue_ilka"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Count the obelisks on your way round. There should be five. Some days I count six.", "Riders come over the north rim at dusk. Do not be standing in the open at dusk.", "If the sand starts running uphill, that is not wind. Get to stone."])
+lines = Array[String](["I wait at this fire so you do not have to hunt the dunes for a scout. The basin is the Desert.", "Sunspire Terraces is the west stair — Sefu keeps the caravan up there. The east stair drops into the tombs.", "If the sand starts running uphill, that is not wind. Get to stone."])
 label_override = "Ask what she watches for"
 
 [sub_resource type="Resource" id="Dialogue_below"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["There is a shaft under the basin. Sefu pretends it is not there.", "The delvers who went down came back with gold and a stutter. Draw your own conclusions."])
+lines = Array[String](["There is a shaft under the basin. Take the east tomb stair. Sefu pretends it is not there.", "The delvers who went down came back with gold and a stutter. Draw your own conclusions."])
 label_override = "Ask about the shaft"
 
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Dune Scout Ilka"
+location_hint = "Desert, at the entrance"
 skin = ExtResource("6_skin")
 greeting = "Keep low and keep moving. I will tell you what is worth looking at."
 interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_ilka"), SubResource("Dialogue_ilka"), SubResource("Dialogue_below")])

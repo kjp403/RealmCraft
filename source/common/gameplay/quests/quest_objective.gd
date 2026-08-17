@@ -24,6 +24,10 @@ enum Type { KILL, COLLECT, CRAFT, VISIT }
 ## (e.g. "Mira the Herbalist"). Lets the quest read cleanly without a runtime
 ## lookup of the giver's name.
 @export var target_giver_name: String
+## Where to do this, in words ("Desert, at the entrance", "Mining Cave").
+## Appended to [method describe] as " · where". For VISIT, falls back to the
+## target NPC's [member NPCResource.location_hint] when empty.
+@export var location_hint: String = ""
 ## Optional item granted once, the moment this objective's required count is
 ## met (KILL / VISIT / CRAFT). Used for quest-gated boss drops and hand-offs
 ## ("the Heart yields the true root", "the Courier found Calder's blade").
@@ -45,20 +49,28 @@ func target_key() -> Variant:
 
 
 func describe() -> String:
+	var base: String = ""
 	match type:
 		Type.KILL:
-			return "Defeat %s" % String(enemy_type).capitalize()
+			base = "Defeat %s" % String(enemy_type).capitalize()
 		Type.COLLECT:
 			# "Bring", not "Collect": COLLECT items are consumed and handed to the
 			# giver on turn-in (see QuestService.apply_turn_in), so it's a delivery,
 			# not a gather. (Daily COLLECT is NOT consumed — it keeps "Collect".)
-			return "Bring %s" % _item_label()
+			base = "Bring %s" % _item_label()
 		Type.CRAFT:
-			return "Craft %s" % _item_label()
+			base = "Craft %s" % _item_label()
 		Type.VISIT:
 			var who: String = target_giver_name if not target_giver_name.is_empty() else "the indicated person"
-			return "Speak with %s" % who
-	return ""
+			base = "Speak with %s" % who
+		_:
+			return ""
+	var where: String = location_hint.strip_edges()
+	if where.is_empty() and type == Type.VISIT:
+		where = QuestGiverCatalog.location_for(target_key())
+	if where.is_empty():
+		return base
+	return "%s · %s" % [base, where]
 
 
 func _item_label() -> String:

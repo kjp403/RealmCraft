@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="7_quest"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="8_questres"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_sovereign_below.tres" id="9_q1"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quest_boss_interaction.gd" id="qboss"]
 
 [sub_resource type="Resource" id="QuestInteraction_vess"]
 script = ExtResource("7_quest")
@@ -22,9 +23,14 @@ script = ExtResource("4_dialogue")
 lines = Array[String](["It has no name that anyone wrote down, so the crews called it the Sovereign and stopped coming.", "It splits when it is hurt. Kill the small ones fast or you will be fighting a crowd."])
 label_override = "Ask about the Sovereign"
 
+[sub_resource type="Resource" id="QuestBoss_fight"]
+script = ExtResource("qboss")
+enemy_type = &"cistern_sovereign"
+
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Drowned Keeper Vess"
+location_hint = "The Drowned Cistern"
 skin = ExtResource("6_skin")
 greeting = "Quietly, now. Sound carries strangely over standing water, and it is listening."
-interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_vess"), SubResource("Dialogue_vess"), SubResource("Dialogue_sovereign")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("QuestInteraction_vess"), SubResource("Dialogue_vess"), SubResource("Dialogue_sovereign"), SubResource("QuestBoss_fight")])

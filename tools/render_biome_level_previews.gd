@@ -15,6 +15,7 @@ const SHOTS: Array[Dictionary] = [
 	{"name": "sunken-tombs", "path": MAPS + "desert/sunken_tombs.tscn", "size": Vector2i(540, 420)},
 	{"name": "gutterworks", "path": MAPS + "sewers/gutterworks.tscn", "size": Vector2i(520, 390)},
 	{"name": "drowned-cistern", "path": MAPS + "sewers/drowned_cistern.tscn", "size": Vector2i(560, 430)},
+	{"name": "ossuary", "path": MAPS + "sewers/ossuary.tscn", "size": Vector2i(480, 380)},
 	{"name": "bellows-gallery", "path": MAPS + "fire_forge/bellows_gallery.tscn", "size": Vector2i(520, 390)},
 	{"name": "cinder-deeps", "path": MAPS + "fire_forge/cinder_deeps.tscn", "size": Vector2i(560, 430)},
 ]

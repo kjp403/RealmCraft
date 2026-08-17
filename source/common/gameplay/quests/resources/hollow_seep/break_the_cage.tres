@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/dragged_into_the_trees.tres" id="3_prereq"]
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_qkcuj"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [ext_resource type="Script" path="res://source/common/gameplay/quests/quest_reward.gd" id="kit_reward"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="kit_item"]
@@ -23,6 +24,10 @@ script = ExtResource("kit_reward")
 item = ExtResource("kit_pot")
 amount = 10
 
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("kit_reward")
+item = ExtResource("dungeon_key")
+
 [resource]
 script = ExtResource("2_quest")
 quest_name = "Break the Cage"
@@ -32,7 +37,7 @@ unlock_message = "[Rook Hale] Do not look like you are rescuing me until the Cap
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 400
 reward_mastery_xp = 70000
-reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion")])
+reward_items = Array[ExtResource("kit_reward")]([SubResource("Reward_kit_potion"), SubResource("Reward_dungeon_key")])
 reward_style_weapons = Array[ExtResource("kit_item")]([ExtResource("kit_w0"), ExtResource("kit_w1"), ExtResource("kit_w2"), ExtResource("kit_w3"), ExtResource("kit_w4")])
 reward_gold = 2000
 grants_wardstone = &"bandit_hideout"

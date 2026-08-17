@@ -7,6 +7,10 @@ extends Resource
 
 ## Display name — shown as the greeting-dialogue title.
 @export var npc_name: String = "Villager"
+## Where this NPC stands, in words ("Desert, at the entrance", "DimWood").
+## Quests use this so "Speak with X" and "Return to X" name the place, not just
+## the person. Empty = no location line (hub fillers, warp animals, etc.).
+@export var location_hint: String = ""
 ## Appearance — same kind of resource EnemyTypeResource.skin uses.
 @export var skin: SpriteFrames
 ## Line shown above the options when greeted (Beedle/WoW-gossip style).

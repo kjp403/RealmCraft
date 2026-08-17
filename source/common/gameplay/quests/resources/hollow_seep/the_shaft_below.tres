@@ -10,15 +10,16 @@ script = ExtResource("1_obj")
 type = 3
 target_giver_key = &"tomb_delver_asha"
 target_giver_name = "Tomb Delver Asha"
+location_hint = "The Sunken Tombs"
 
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Shaft Below"
-description = "Ilka watches the terraces. Asha is down the tomb shaft. Find her before you meet Ankhemet awake."
+description = "Ilka camps at the Desert entrance. The tomb stair is on the east rim of the basin. Asha is already down it — sit with her before you sit with Ankhemet."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_visit_asha")])
 auto_complete = true
 min_level = 25
-unlock_message = "[Dune Scout Ilka] There is a shaft under the basin. Asha is already down it. Sit with her before you sit with him."
+unlock_message = "[Dune Scout Ilka] East stair, down the shaft. Asha is already there. Sit with her before you sit with him."
 requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
 reward_xp = 140
 reward_mastery_xp = 12000

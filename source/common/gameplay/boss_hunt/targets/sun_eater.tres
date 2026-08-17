@@ -7,10 +7,10 @@
 script = ExtResource("1_script")
 slug = &"sun_eater"
 display_name = "Malacor, the Sun-Eater"
-description = "The most expensive contract the broker will write, and the only one he warns you about. Full party. Full stock of potions."
+description = "The broker's last contract — Malacor, not the Ossuary Necromancer. Mastery-90 weapons. Full party. Full stock of potions."
 enemy_type = ExtResource("2_enemy")
 cost = 100000
-recommended_level = 40
+recommended_level = 99
 health_mult = 1.0
 health_per_extra_player = 0.6
 damage_mult = 1.0

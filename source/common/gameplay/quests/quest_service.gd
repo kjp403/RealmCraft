@@ -81,7 +81,7 @@ static func _advance_matching(
 				# shows the ready state (green + "Return to..."), so the client only
 				# cards this for UNTRACKED quests.
 				updates.append({"q": quest_id, "ready": true,
-					"t": "✓ %s ready to turn in. Return to the quest giver." % quest.quest_name})
+					"t": "✓ %s ready to turn in. %s." % [quest.quest_name, quest.return_prompt()]})
 	for quest: QuestResource in pending_auto_complete:
 		apply_turn_in(resource, quest, peer_id, instance)
 	return updates
@@ -311,6 +311,36 @@ static func backfill_character_flags(resource: PlayerResource) -> void:
 			grant_flag_if_due(resource, quest, 0)
 
 
+## True when [param resource] has an active quest with an unfinished KILL for
+## [param enemy_type]. Used to gate the giver's "send me to the fight" button.
+static func has_unfinished_kill(resource: PlayerResource, enemy_type: StringName) -> bool:
+	return kill_gate(resource, enemy_type) == &"ok"
+
+
+## &"ok" = send them in; &"already_done" = that kill is complete (button is a
+## no-op); &"no_quest" = they have not accepted a matching KILL.
+static func kill_gate(resource: PlayerResource, enemy_type: StringName) -> StringName:
+	if resource == null or enemy_type == &"":
+		return &"no_quest"
+	var saw_done: bool = false
+	for quest_id: int in resource.quests:
+		var state: StringName = resource.quest_state(quest_id)
+		if state != &"active" and state != &"turned_in":
+			continue
+		var quest: QuestResource = QuestResource.load_quest(quest_id)
+		if quest == null:
+			continue
+		for i: int in quest.objectives.size():
+			var objective: QuestObjective = quest.objectives[i]
+			if objective.type != QuestObjective.Type.KILL or objective.enemy_type != enemy_type:
+				continue
+			if state == &"turned_in" or resource.quest_progress(quest_id, i) >= objective.required_amount:
+				saw_done = true
+			else:
+				return &"ok"
+	return &"already_done" if saw_done else &"no_quest"
+
+
 ## True when the quest's completion rule is satisfied. ALL = every objective met
 ## (classic AND); ANY = at least one objective met (for "pick a path" quests).
 static func is_complete(resource: PlayerResource, quest_id: int, inventory: Dictionary) -> bool:
@@ -401,7 +431,7 @@ static func notify_passive_ready(resource: PlayerResource, peer_id: int) -> void
 			grant_wardstone_if_due(resource, quest, peer_id) # COLLECT-path crossing
 			WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {
 				"messages": [{"q": quest_id, "ready": true,
-					"t": "✓ %s ready to turn in. Return to the quest giver." % quest.quest_name}]
+					"t": "✓ %s ready to turn in. %s." % [quest.quest_name, quest.return_prompt()]}]
 			})
 		elif not complete and notified:
 			resource.set_quest_ready_notified(quest_id, false)

@@ -124,6 +124,19 @@ func turn_in_giver_key() -> StringName:
 	return turn_in_giver_slug
 
 
+## Tracker / toast line naming who to walk back to, and where. Falls back to
+## "Return to the quest giver" only when the offerer cannot be resolved.
+func return_prompt() -> String:
+	var info: Dictionary = QuestGiverCatalog.turn_in_info(self)
+	var who: String = str(info.get("name", "")).strip_edges()
+	var where: String = str(info.get("location", "")).strip_edges()
+	if who.is_empty():
+		return "Return to the quest giver"
+	if where.is_empty():
+		return "Return to %s" % who
+	return "Return to %s · %s" % [who, where]
+
+
 ## The weapon from [member reward_style_weapons] matching [param player]'s
 ## equipped combat style. First entry if nothing matches.
 func pick_style_weapon_for(player: PlayerResource) -> Item:

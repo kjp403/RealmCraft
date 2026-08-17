@@ -18,7 +18,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_soldier.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_swordsman.tres" id="e16"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e17"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/forgemaster_helka.tres" id="e18"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/bellows_hand_torv.tres" id="e19"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e21"]
@@ -456,10 +455,6 @@ weapon = null
 
 [node name="NPCs" type="Node2D" parent="."]
 y_sort_enabled = true
-
-[node name="ForgemasterHelka" parent="NPCs" instance=ExtResource("e17")]
-position = Vector2(3848.0, 5288.0)
-npc_resource = ExtResource("e18")
 
 [node name="BellowsHandTorv" parent="NPCs" instance=ExtResource("e17")]
 position = Vector2(4488.0, 5288.0)

@@ -17,16 +17,16 @@ const LOOT_SCRIPT := "res://source/common/gameplay/combat/loot_drop.gd"
 
 ## `[slug, boss, chance]` — mirrors the build tool's table.
 const EXPECTED: Array = [
-	["relic_mossgrown", "goblins/goblin_chief", 0.001],
-	["relic_sporebloom", "fungus/fungal_heart", 0.001],
-	["relic_bloodbrand", "bandit_captain", 0.001],
+	["relic_mossgrown", "goblins/goblin_chief_world", 0.001],
+	["relic_sporebloom", "fungus/fungal_heart_world", 0.001],
+	["relic_bloodbrand", "bandit_captain_world", 0.001],
 	["relic_duskglass", "skeleton_mage", 0.001],
 	["relic_emberbrand", "orc_leader", 0.001],
-	["relic_rotmire", "bosses/cistern_sovereign", 0.001],
-	["relic_coreblossom", "mecha_stone_golem", 0.001],
-	["relic_scarabheart", "bosses/sand_king", 0.001],
+	["relic_rotmire", "bosses/cistern_sovereign_world", 0.001],
+	["relic_coreblossom", "mecha_stone_golem_world", 0.001],
+	["relic_scarabheart", "bosses/sand_king_world", 0.001],
 	["relic_netherglass", "trpg/trpg_necromancer", 0.001],
-	["relic_cinderheart", "bosses/cinderborn", 0.001],
+	["relic_cinderheart", "bosses/cinderborn_world", 0.001],
 ]
 
 ## Lesser charm -> greater sigil, by colour family.

@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_dial"]
 script = ExtResource("2_d")
-lines = Array[String](["The Forge never cools. Hammers ring. Ore screams. Stone remembers heat.", "Aim for levels 30–35. Bring fire resistance — or thick skin."])
+lines = Array[String](["The Forge never cools. Hammers ring. Ore screams. Stone remembers heat.", "Forgemaster Helka camps at the entrance fire. You will see her the moment we arrive.", "Aim for levels 30–35. Bring fire resistance — or thick skin."])
 label_override = "What's the Fire Forge?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

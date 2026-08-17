@@ -266,6 +266,26 @@ extends Resource
 @export var enraged_chain_interval_s: float = 0.0
 @export_range(0, 2) var chain_phase: int = 0
 
+@export_group("Boss Challenge")
+## After a slam lands, force a lunge at the target's feet (anti-kite). Requires
+## a LungeBehavior on the archetype.
+@export var slam_followup_lunge: bool = false
+## Searing Wound: 0 duration = off. The next combat heal detonates.
+@export var sear_wound_duration_s: float = 0.0
+@export var sear_wound_damage: float = 80.0
+@export var sear_wound_radius: float = 72.0
+@export var sear_wound_interval_s: float = 14.0
+@export var enraged_sear_wound_interval_s: float = 0.0
+@export var sear_wound_windup_s: float = 0.9
+## Style wards: 0 interval = off. Cycles Physical ↔ Arcane. Wrong weapon
+## category deals [member style_ward_wrong_mult] damage.
+@export var style_ward_interval_s: float = 0.0
+@export var style_ward_wrong_mult: float = 0.25
+## Soft enrage: 0 = off. Seconds after pull before outgoing damage starts climbing.
+@export var soft_enrage_s: float = 0.0
+## Extra outgoing damage per 30s past [member soft_enrage_s] (0.25 = +25%).
+@export var soft_enrage_ramp: float = 0.25
+
 
 # ---------------------------------------------------------------------------
 # Skill XP from a kill (weapon mastery + Slayer) — NOT character xp_reward.

@@ -59,4 +59,11 @@ func data_request_handler(
 		consume_ability.last_action_time
 	)
 
+	# Bag drinks skip the held ConsumeAbility client freeze. Push the authored
+	# root so hotbar chug cannot be done while strafing.
+	if consumable.use_freeze_ms > 0 and WorldServer.curr != null:
+		WorldServer.curr.data_push.rpc_id(
+			peer_id, &"player.rooted", {"ms": consumable.use_freeze_ms}
+		)
+
 	return {"ok": true}

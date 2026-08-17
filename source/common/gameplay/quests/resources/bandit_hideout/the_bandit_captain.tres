@@ -5,6 +5,7 @@
 [ext_resource type="Resource" uid="uid://bk7jbs0f2yj6y" path="res://source/common/gameplay/quests/resources/bandit_hideout/break_the_camp_guard.tres" id="3_q4"]
 [ext_resource type="Script" uid="uid://cdi2gouodhicv" path="res://source/common/gameplay/quests/quest_reward.gd" id="4_rpcp3"]
 [ext_resource type="Resource" uid="uid://my4wn3plgxbs" path="res://source/common/gameplay/items/chests/wood_silver_large.tres" id="qr_chest"]
+[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
 
 [sub_resource type="Resource" id="Obj_kill_captain"]
 script = ExtResource("1_obj")
@@ -13,6 +14,10 @@ enemy_type = &"bandit_captain"
 [sub_resource type="Resource" id="Reward_wood_chest"]
 script = ExtResource("4_rpcp3")
 item = ExtResource("qr_chest")
+
+[sub_resource type="Resource" id="Reward_dungeon_key"]
+script = ExtResource("4_rpcp3")
+item = ExtResource("dungeon_key")
 
 [resource]
 script = ExtResource("2_quest")
@@ -25,7 +30,7 @@ requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_q4")])
 reward_xp = 600
 reward_mastery_xp = 70000
 reward_gold = 2500
-reward_items = Array[ExtResource("4_rpcp3")]([SubResource("Reward_wood_chest")])
+reward_items = Array[ExtResource("4_rpcp3")]([SubResource("Reward_wood_chest"), SubResource("Reward_dungeon_key")])
 grant_title = "Bandit Breaker"
 grants_wardstone = &"bandit_hideout"
 metadata/slug = &"the_bandit_captain"
