@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BossHuntTarget" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_script")
+slug = &"cistern_sovereign"
+display_name = "The Bloated Sovereign"
+description = "Dragged up from the standing water north of the Sewers grate. Slow, enormous, and generous to anyone who can hold a line."
+enemy_type = ExtResource("2_enemy")
+cost = 18000
+recommended_level = 20
+health_mult = 1.0
+health_per_extra_player = 0.6
+damage_mult = 1.0
+slam_damage = 0.0
+respawn_delay_s = 12.0
+xp_mult = 0.5

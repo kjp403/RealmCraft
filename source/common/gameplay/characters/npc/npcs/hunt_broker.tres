@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_dialogue"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="3_npc"]
+[ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="4_skin"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/boss_hunt_interaction.gd" id="5_hunt"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/hunt_chest_interaction.gd" id="6_chest"]
+
+[sub_resource type="Resource" id="BossHunt_board"]
+script = ExtResource("5_hunt")
+
+[sub_resource type="Resource" id="HuntChest_stash"]
+script = ExtResource("6_chest")
+
+[sub_resource type="Resource" id="Dialogue_how"]
+script = ExtResource("2_dialogue")
+lines = Array[String](["Pick a name off the board and pay the fee. I open a room, put that thing in it, and lock the door behind you for thirty minutes.", "It dies, I put another one in. It dies again, I put another one in. That is the whole arrangement. Kill it as many times as your potions hold out.", "Bring up to three friends. Whoever pays, pays for everyone — I do not split invoices.", "Mind that the thing gets bigger the more of you walk in. Four bodies, four times the trouble. Nobody gets a discount for coming alone either — alone, you fight it exactly as it is out there.", "When the clock runs out the room closes and you come straight back here. No packing up, no scramble."])
+label_override = "How does a contract work?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[sub_resource type="Resource" id="Dialogue_loot"]
+script = ExtResource("2_dialogue")
+lines = Array[String](["Nothing hits the floor in my rooms. Every drop goes straight into your Hunt Chest — yours, not the party's.", "It keeps. Farm today, farm next week, empty it when you feel like it. I have no use for your bones.", "Coin is the exception. That goes in your purse where it belongs.", "One more thing, and I will not pretend otherwise: my rooms pay half the experience. A copy is a copy. If you want to LEARN from a boss, go kill the real one where it lives. Come here when you want its pockets emptied, fast, over and over."])
+label_override = "Where does the loot go?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[sub_resource type="Resource" id="Dialogue_warning"]
+script = ExtResource("2_dialogue")
+lines = Array[String](["The fee buys the room, not a good time in it. Some of the names on that board will kill you the whole thirty minutes and leave you with nothing.", "Die in there and you get up again at the door — I am not cruel, only expensive. The clock does not stop for you.", "Malacor is on the board because someone insisted. I would not take that one alone."])
+label_override = "Any advice?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[resource]
+script = ExtResource("3_npc")
+npc_name = "Hunt Broker"
+skin = ExtResource("4_skin")
+greeting = "You want something big to die repeatedly, and you want it somewhere the Charter can't see. That's my whole trade. Pick a name off the board, pay the fee, and I'll keep feeding it to you for half an hour."
+interactions = Array[ExtResource("1_interaction")]([SubResource("BossHunt_board"), SubResource("HuntChest_stash"), SubResource("Dialogue_how"), SubResource("Dialogue_loot"), SubResource("Dialogue_warning")])

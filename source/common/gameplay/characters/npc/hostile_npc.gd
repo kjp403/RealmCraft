@@ -1683,12 +1683,23 @@ func replicate_visual(method: StringName, args: Array) -> void:
 	container.queue_op(_prop_id, method, args)
 
 
+## Per-SPAWN skill-XP override (0 = fall through to the archetype). Set by a
+## spawner that inflates max_health for difficulty but must NOT let the payout
+## inflate with it — a party-scaled Boss Hunt boss pays its AUTHORED rate, so a
+## four-player run can't farm 3x the mastery/slayer XP a solo run does.
+## Deliberately a per-instance field: writing enemy_data.combat_skill_xp_override
+## would rewrite the shared EnemyTypeResource for every spawn of the archetype.
+var skill_xp_override: int = 0
+
+
 ## Weapon-mastery / Slayer XP this body is worth on death.
 ##
 ## Prefers the authored override on its EnemyTypeResource; otherwise derives from
 ## the LIVE stat block rather than the resource's, so a mob whose health was
 ## scaled up by apply_difficulty() still pays out for the harder kill.
 func combat_skill_xp() -> int:
+	if skill_xp_override > 0:
+		return skill_xp_override
 	if enemy_data != null and enemy_data.combat_skill_xp_override > 0:
 		return enemy_data.combat_skill_xp_override
 	return EnemyTypeResource.combat_skill_xp_for(max_health, armor)

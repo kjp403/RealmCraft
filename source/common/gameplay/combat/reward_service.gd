@@ -234,9 +234,16 @@ static func _reward(
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
 			loot_gained.append(entry)
-	# Drops land on the ground for click-pickup — not auto-bagged. Each peer's
-	# piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
-	_spawn_ground_loot(player, npc, loot_gained, reserved_peer)
+	# Ordinary drops land on the ground for click-pickup — not auto-bagged. Each
+	# peer's piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
+	# A Boss Hunt boss banks straight into each participant's Hunt Chest instead:
+	# a 30-minute farm would otherwise end under a carpet of piles, half of them
+	# already expired, and collecting in the Guild Hall is the point of the mode.
+	var hunt_kill: bool = npc.has_meta(BossHuntArena.HUNT_LOOT_META)
+	if hunt_kill:
+		_bank_hunt_loot(player, loot_gained)
+	else:
+		_spawn_ground_loot(player, npc, loot_gained, reserved_peer)
 
 	# Weapon mastery: practicing a category = killing with it, on the 1–99 curve.
 	var mastery: Dictionary = {}
@@ -273,7 +280,10 @@ static func _reward(
 			"experience": resource.experience,
 			"xp_to_next": resource.level_xp_to_next(),
 			"loot": loot_gained,
-			"ground": true,
+			# Boss Hunt loot is banked, not scattered — the client's reward card
+			# reads "sent to your Hunt Chest" instead of "on the ground".
+			"ground": not hunt_kill,
+			"hunt_chest": hunt_kill,
 			"mastery": mastery,
 		})
 
@@ -394,6 +404,28 @@ static func _append_zone_kill_loot(player: Player, out: Array) -> void:
 			"amount": amount,
 			"name": str(drop.item.item_name),
 		})
+
+
+## Bank a Boss Hunt roll into [param player]'s Hunt Chest. Currency skips the
+## chest and goes straight to the pouch, matching how chest-opens already handle
+## gold. A chest at its stack cap rejects NEW item ids — the drop is reported to
+## the client as unbanked rather than silently vanishing, so the player knows to
+## go empty it.
+static func _bank_hunt_loot(player: Player, loot_gained: Array) -> void:
+	var resource: PlayerResource = player.player_resource
+	if resource == null or loot_gained.is_empty():
+		return
+	for entry: Dictionary in loot_gained:
+		var item_id: int = int(entry.get("id", 0))
+		var amount: int = int(entry.get("amount", 0))
+		if item_id <= 0 or amount <= 0:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if item != null and item.is_currency:
+			Inventory.add_item(resource.inventory, item_id, amount)
+			entry["banked"] = true
+			continue
+		entry["banked"] = HuntChest.deposit(resource, item_id, amount) > 0
 
 
 ## Scatter rolled loot as clickable GroundItems around the corpse. Piles are

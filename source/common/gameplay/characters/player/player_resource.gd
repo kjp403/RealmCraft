@@ -68,6 +68,11 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## instead of the bag until the player claims them (Take / Bank). Flushed to the
 ## bank on logout (what fits). See PendingChestLoot.
 @export var pending_chest_loot: Array = []
+## Hunt Chest: the persistent Guild Hall stash Boss Hunt loot is banked into.
+## Same { "id", "a" } shape as [member pending_chest_loot], but PERMANENT — it
+## accumulates across sessions and is only emptied by the player at the chest.
+## See HuntChest.
+@export var hunt_chest: Array = []
 ## Equipped gear: gear-slot key (&"weapon", &"torso", ...) -> item_id. Equipped items
 ## live here, NOT in inventory (they're moved out on equip, back on unequip).
 @export var equipment: Dictionary

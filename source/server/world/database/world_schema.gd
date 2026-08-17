@@ -63,6 +63,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 18:
 		_migration_v18(db)
 		_set_schema_version(db, 18)
+	if version < 19:
+		_migration_v19(db)
+		_set_schema_version(db, 19)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -333,6 +336,14 @@ static func _migration_v17(db: SQLite) -> void:
 static func _migration_v18(db: SQLite) -> void:
 	if not _column_exists(db, "players", "vault_skin_id"):
 		db.query("ALTER TABLE players ADD COLUMN vault_skin_id INTEGER NOT NULL DEFAULT 0;")
+
+
+## v19: the Hunt Chest (HuntChest) — the persistent Guild Hall stash Boss Hunt
+## loot is banked into. JSON array of {id, a} stacks, same shape as
+## pending_chest_loot but never auto-flushed. ADD COLUMN — no DB wipe.
+static func _migration_v19(db: SQLite) -> void:
+	if not _column_exists(db, "players", "hunt_chest_json"):
+		db.query("ALTER TABLE players ADD COLUMN hunt_chest_json TEXT NOT NULL DEFAULT '[]';")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

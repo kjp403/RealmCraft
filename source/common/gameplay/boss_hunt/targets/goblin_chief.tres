@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BossHuntTarget" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_script")
+slug = &"goblin_chief"
+display_name = "Goblin Chief"
+description = "The Woodland warlord, dragged into the pit for practice. Cheap, fast, and forgiving — the contract to learn the loop on."
+enemy_type = ExtResource("2_enemy")
+cost = 2500
+recommended_level = 8
+health_mult = 1.0
+health_per_extra_player = 0.6
+damage_mult = 1.0
+slam_damage = 0.0
+respawn_delay_s = 8.0
+xp_mult = 0.5
