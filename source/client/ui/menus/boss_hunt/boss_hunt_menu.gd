@@ -118,9 +118,9 @@ func _render_board() -> void:
 	var blurb: Label = Label.new()
 	blurb.text = (
 		"Pay the fee, get a private room with one boss in it for %d minutes. "
-		"It respawns every time you kill it and every drop goes into your Hunt Chest.\n"
-		"Loot rates are full, but XP is cut — killing a boss out in the world is "
-		"still worth more. This is the faster farm, not the better one."
+		+ "It respawns every time you kill it and every drop goes into your Hunt Chest.\n"
+		+ "Loot rates are full, but XP is cut — killing a boss out in the world is "
+		+ "still worth more. This is the faster farm, not the better one."
 	) % int(_duration_s / 60.0)
 	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	blurb.add_theme_font_size_override(&"font_size", 12)
