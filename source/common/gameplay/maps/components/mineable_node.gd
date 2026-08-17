@@ -33,9 +33,14 @@ extends Area2D
 
 ## Flat gathering XP rate on mining / woodcutting / fishing yields. Perk
 ## multipliers (Diligent, etc.) still stack on top.
+##
+## Mining and woodcutting carry a further 25% over the 1.2 pass (1.2 -> 1.5):
+## they are the deepest swing-per-XP grinds in the game and both feed other
+## skills (bars, shafts) rather than paying out on their own. Fishing stays at
+## 1.2 -- it was raised alongside them last time but is not part of this pass.
 const GATHER_XP_RATE: Dictionary[StringName, float] = {
-	&"mining": 1.2,
-	&"woodcutting": 1.2,
+	&"mining": 1.5,
+	&"woodcutting": 1.5,
 	&"fishing": 1.2,
 }
 

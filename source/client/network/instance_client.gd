@@ -343,8 +343,20 @@ func spawn_player(player_id: int) -> void:
 	
 	players_by_peer_id[player_id] = new_player
 	
-	if not new_player.is_inside_tree():
+	# NOT "is it in the tree" — the reused local player waits out the map load
+	# PARKED on the instance manager (InstanceManagerClient._park_local_player), so
+	# in-tree no longer implies in-THIS-map. Ask about the parent instead, or the
+	# arriving player is left sitting on the manager, invisible and frozen.
+	if new_player.get_parent() != instance_map:
+		var previous: Node = new_player.get_parent()
+		if previous != null:
+			previous.remove_child(new_player)
 		instance_map.add_child(new_player)
+		# Undo the park. No-ops for a freshly instantiated player (these are its
+		# defaults), so both arrival paths land in the same state.
+		new_player.process_mode = Node.PROCESS_MODE_INHERIT
+		if new_player is CanvasItem:
+			(new_player as CanvasItem).show()
 		# Click-to-inspect: the player scene carries a ClickableArea (ProfileClickArea).
 		# Wire its `clicked` to open the profile — the GATE (holster-mode) lives in the
 		# handler, in CLIENT code, because Player.gd must not reference ClientState (cycle).

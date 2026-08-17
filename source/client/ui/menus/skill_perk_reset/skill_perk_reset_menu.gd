@@ -1,6 +1,17 @@
 extends Control
-## Confirm dialog for a skill-perk re-spec — reached from Horizon's
-## SkillPerkResetInteraction. Same compact card as attribute reset.
+## Skill-perk re-spec picker — reached from Horizon's SkillPerkResetInteraction.
+## Lists one button per job the player has actually spent perk points in, plus
+## an Everything option, so a bad Mining pick no longer costs you Smithing too.
+## Same compact card as attribute reset; the reset itself is server-authoritative
+## (skill.perk.reset), which re-checks the scope and the fee.
+
+
+const TITLE_COLOR: Color = Color(1.0, 0.95, 0.8)
+const BODY_COLOR: Color = Color(0.85, 0.86, 0.92)
+const ALL_COLOR: Color = Color(1.0, 0.72, 0.6)
+
+var _cost: int = 0
+var _list: VBoxContainer
 
 
 func _ready() -> void:
@@ -10,7 +21,7 @@ func _ready() -> void:
 func open(arg: Variant) -> void:
 	for child: Node in get_children():
 		child.queue_free()
-	var cost: int = int(arg) if arg != null else 0
+	_cost = int(arg) if arg != null else 0
 
 	var backdrop: ColorRect = ColorRect.new()
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -39,40 +50,110 @@ func open(arg: Variant) -> void:
 
 	var title: Label = Label.new()
 	title.text = "Respec skill points"
-	title.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
+	title.add_theme_color_override(&"font_color", TITLE_COLOR)
 	title.add_theme_font_size_override(&"font_size", 20)
 	box.add_child(title)
 
 	var body: Label = Label.new()
 	body.text = (
-		"Refund spent skill points (Mining, Smithing, and other job perks) so you can "
-		+ "rebuild?\nThis costs %d gold."
-	) % cost
+		"Pick a job to refund its perk points, or refund every job at once.\n"
+		+ "Either way costs %d gold."
+	) % _cost
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body.add_theme_color_override(&"font_color", Color(0.85, 0.86, 0.92))
+	body.add_theme_color_override(&"font_color", BODY_COLOR)
 	box.add_child(body)
 
-	var buttons: HBoxContainer = HBoxContainer.new()
-	buttons.add_theme_constant_override(&"separation", 10)
-	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_child(buttons)
+	_list = VBoxContainer.new()
+	_list.add_theme_constant_override(&"separation", 6)
+	box.add_child(_list)
 
-	var confirm: Button = Button.new()
-	confirm.text = "Respec (%d g)" % cost
-	confirm.custom_minimum_size = Vector2(150, 40)
-	confirm.pressed.connect(_on_confirm)
-	buttons.add_child(confirm)
+	var loading: Label = Label.new()
+	loading.text = "Loading your jobs…"
+	loading.add_theme_color_override(&"font_color", BODY_COLOR)
+	_list.add_child(loading)
 
 	var cancel: Button = Button.new()
 	cancel.text = "Cancel"
-	cancel.custom_minimum_size = Vector2(110, 40)
+	cancel.custom_minimum_size = Vector2(110, 36)
 	cancel.pressed.connect(hide)
-	buttons.add_child(cancel)
+	box.add_child(cancel)
+
+	_fill_options()
 
 
-func _on_confirm() -> void:
+## One button per job with spent ranks, then Everything. Built from skills.get
+## so the list only ever offers scopes that would actually refund something —
+## the server rejects the rest with "nothing", and a button that always fails
+## is worse than no button.
+func _fill_options() -> void:
 	var result: Array = await Client.request_data_await(
-		&"skill.perk.reset", {}, InstanceClient.current.name
+		&"skills.get", {}, InstanceClient.current.name
+	)
+	if not is_inside_tree():
+		return # menu closed while the fetch was in flight
+	for child: Node in _list.get_children():
+		child.queue_free()
+	if result.size() < 2 or result[1] != OK:
+		_show_note("Couldn't read your jobs right now.")
+		return
+
+	var skills: Dictionary = (result[0] as Dictionary).get("skills", {})
+	var total: int = 0
+	var rows: Array[Dictionary] = []
+	for slug: Variant in skills:
+		var info: Dictionary = skills[slug]
+		var spent: int = 0
+		for choice: Variant in info.get("choices", []):
+			spent += int((choice as Dictionary).get("rank", 0))
+		if spent <= 0:
+			continue
+		total += spent
+		rows.append({
+			"slug": String(slug),
+			"name": str(info.get("display_name", String(slug).capitalize())),
+			"spent": spent,
+		})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.name < b.name)
+
+	if rows.is_empty():
+		_show_note("You haven't spent any skill points yet.")
+		return
+
+	for row: Dictionary in rows:
+		_add_option(
+			"%s — %d %s" % [row.name, row.spent, "point" if row.spent == 1 else "points"],
+			row.slug,
+			BODY_COLOR
+		)
+	# Only worth offering once more than one job is in play.
+	if rows.size() > 1:
+		_add_option("Everything — %d points" % total, "", ALL_COLOR)
+
+
+func _add_option(label: String, skill_slug: String, color: Color) -> void:
+	var button: Button = Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(300, 36)
+	button.add_theme_color_override(&"font_color", color)
+	button.pressed.connect(_on_pick.bind(skill_slug))
+	_list.add_child(button)
+
+
+func _show_note(text: String) -> void:
+	var note: Label = Label.new()
+	note.text = text
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override(&"font_color", BODY_COLOR)
+	_list.add_child(note)
+
+
+## [param skill_slug] empty = every job (the server's all-scope).
+func _on_pick(skill_slug: String) -> void:
+	var args: Dictionary = {}
+	if not skill_slug.is_empty():
+		args["skill"] = skill_slug
+	var result: Array = await Client.request_data_await(
+		&"skill.perk.reset", args, InstanceClient.current.name
 	)
 	hide()
 	if result[1] != OK:
@@ -80,13 +161,16 @@ func _on_confirm() -> void:
 	var data: Dictionary = result[0]
 	if data.get("ok", false):
 		Toaster.toast(
-			"Skill points reset. Spend them again in the Mastery → Perks tab."
+			"%d skill points refunded. Spend them again in the Mastery → Perks tab."
+			% int(data.get("refunded", 0))
 		)
 		return
 	match str(data.get("reason", "")):
 		"gold":
 			Toaster.toast("Not enough gold to respec perks.")
 		"nothing":
-			Toaster.toast("You haven't spent any skill points yet.")
+			Toaster.toast("You haven't spent any skill points there yet.")
+		"unknown_skill":
+			Toaster.toast("That job doesn't exist.")
 		_:
 			Toaster.toast("Couldn't respec perks right now.")
