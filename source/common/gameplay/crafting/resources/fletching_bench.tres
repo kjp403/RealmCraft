@@ -103,7 +103,7 @@ output_item = ExtResource("40_br_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_shafts"), SubResource("I_br_heads")])
 required_level = 1
-xp_reward = 138
+xp_reward = 23
 
 [sub_resource type="Resource" id="I_fe_shafts"]
 script = ExtResource("3_ingred")
@@ -121,7 +121,7 @@ output_item = ExtResource("41_fe_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_shafts"), SubResource("I_fe_heads")])
 required_level = 15
-xp_reward = 273
+xp_reward = 46
 
 [sub_resource type="Resource" id="I_st_shafts"]
 script = ExtResource("3_ingred")
@@ -139,7 +139,7 @@ output_item = ExtResource("42_st_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_shafts"), SubResource("I_st_heads")])
 required_level = 30
-xp_reward = 525
+xp_reward = 88
 
 [sub_resource type="Resource" id="I_mi_shafts"]
 script = ExtResource("3_ingred")
@@ -157,7 +157,7 @@ output_item = ExtResource("43_mi_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mi_shafts"), SubResource("I_mi_heads")])
 required_level = 45
-xp_reward = 987
+xp_reward = 164
 
 [sub_resource type="Resource" id="I_ad_shafts"]
 script = ExtResource("3_ingred")
@@ -175,7 +175,7 @@ output_item = ExtResource("44_ad_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ad_shafts"), SubResource("I_ad_heads")])
 required_level = 60
-xp_reward = 1638
+xp_reward = 273
 
 [sub_resource type="Resource" id="I_ru_shafts"]
 script = ExtResource("3_ingred")
@@ -193,7 +193,7 @@ output_item = ExtResource("45_ru_arrow")
 output_amount = 10
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_shafts"), SubResource("I_ru_heads")])
 required_level = 75
-xp_reward = 2625
+xp_reward = 438
 
 [resource]
 script = ExtResource("2_station")
