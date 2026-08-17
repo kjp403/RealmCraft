@@ -72,9 +72,7 @@ chance = 0.5
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("3_loot")
 item = ExtResource("dungeon_key")
-min_amount = 1
-max_amount = 2
-chance = 1.0
+chance = 0.04
 [sub_resource type="Resource" id="Drop_fire_sword"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_sword")
@@ -207,6 +205,6 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth")])
 metadata/slug = &"cistern_sovereign"
 metadata/id = 82
