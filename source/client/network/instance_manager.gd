@@ -30,9 +30,44 @@ func teardown() -> void:
 	if current_ui and is_instance_valid(current_ui):
 		current_ui.queue_free()
 	current_ui = null
+	# A local player PARKED for a map load (see _park_local_player) sits on this
+	# manager, not in the instance we just freed — so nothing else takes it down.
+	# Free it here or it survives the teardown and follows the user to the login
+	# screen. (The old orphaning had the same leak, with no parent at all.)
+	var parked: Node = InstanceClient.local_player
+	if parked != null and is_instance_valid(parked) and parked.get_parent() == self:
+		parked.queue_free()
 	InstanceClient.current = null
 	InstanceClient.local_player = null
 	ClientState.local_player = null
+
+
+## Hold the reused local player somewhere ALIVE AND IN-TREE while the next map
+## loads, instead of leaving it parentless.
+##
+## A node outside the tree has a NULL get_tree() AND a null multiplayer — but the
+## local player keeps receiving network pushes and UI signals for the whole load
+## window (death/respawn, channel start/end, equip cast, the chat typing gate).
+## Every one of those dereferenced the null and took the client down, which is
+## why players crashed teleporting — and dying, which teleports you to your spawn
+## point. Clicking the chat box on the load screen was a one-click repro.
+## Character._sync_overhead already carried a hand-rolled is_inside_tree() guard
+## against this; parking fixes the cause instead of one symptom.
+##
+## Processing is OFF while parked so nothing ticks against the map we just freed,
+## and it stays hidden so the avatar doesn't render over the empty world — which
+## is what being orphaned gave us for free. [method InstanceClient.spawn_player]
+## reverses both when it moves the player into the new map.
+func _park_local_player(player: Node) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	var previous: Node = player.get_parent()
+	if previous != null:
+		previous.remove_child(player)
+	player.process_mode = Node.PROCESS_MODE_DISABLED
+	if player is CanvasItem:
+		(player as CanvasItem).hide()
+	add_child(player)
 
 
 @rpc("authority", "call_remote", "reliable", 0)
@@ -82,9 +117,7 @@ func charge_new_instance(
 	)
 	
 	if current_instance:
-		if current_instance.local_player:
-			current_instance.instance_map.remove_child(current_instance.local_player)
-			#current_instance.local_player.reparent(new_instance, false)
+		_park_local_player(current_instance.local_player)
 		current_instance.queue_free()
 	current_instance = new_instance
 

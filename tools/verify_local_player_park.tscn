@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_local_player_park.gd" id="1_vlpp"]
+
+[node name="VerifyLocalPlayerPark" type="Node"]
+script = ExtResource("1_vlpp")
