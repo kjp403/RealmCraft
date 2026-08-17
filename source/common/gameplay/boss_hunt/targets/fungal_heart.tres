@@ -1,16 +1,16 @@
 [gd_resource type="Resource" script_class="BossHuntTarget" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/boss_hunt/boss_hunt_target.gd" id="1_script"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart_world.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="2_enemy"]
 
 [resource]
 script = ExtResource("1_script")
 slug = &"fungal_heart"
-display_name = "Unbound Heart"
-description = "The cave's pulse at full strength. Meteors, slam follow-up, Searing Wound, and style wards — eat through a mark and the next heal detonates."
+display_name = "The Fungal Heart"
+description = "A spore-choked pulse torn out of the Fungus Domain. Hits soft, soaks hard, and buries the floor in clouds between deaths."
 enemy_type = ExtResource("2_enemy")
 cost = 50000
-recommended_level = 58
+recommended_level = 26
 health_mult = 1.0
 health_per_extra_player = 0.6
 damage_mult = 1.0

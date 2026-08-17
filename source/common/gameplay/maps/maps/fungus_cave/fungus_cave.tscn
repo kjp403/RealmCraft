@@ -17,7 +17,7 @@
 [ext_resource type="Resource" uid="uid://cd8rmrp54ds2e" path="res://source/common/gameplay/characters/npc/types/fungus/myconid_brute.tres" id="12_n7hu4"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="12_y53hc"]
 [ext_resource type="Resource" uid="uid://btnithna7holw" path="res://source/common/gameplay/characters/npc/types/fungus/spore_swarm.tres" id="13_n7hu4"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart_world.tres" id="14_heartw"]
+[ext_resource type="Resource" uid="uid://3ne3o1ls5mdj" path="res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres" id="14_dysl4"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="19_pvtw6"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="23_n7hu4"]
 [ext_resource type="Resource" uid="uid://bd8w3ab76gouv" path="res://source/common/gameplay/characters/npc/npcs/forager_maela.tres" id="24_dxrxi"]
@@ -143,7 +143,7 @@ id_to_node = {
 8: NodePath("SporeSwarm2"),
 9: NodePath("SporeSwarm3"),
 10: NodePath("SporeSwarm4"),
-12: NodePath("UnboundHeart")
+11: NodePath("FungalHeart")
 }
 node_to_id = {
 NodePath("Sporeling"): 0,
@@ -157,7 +157,7 @@ NodePath("SporeSwarm"): 7,
 NodePath("SporeSwarm2"): 8,
 NodePath("SporeSwarm3"): 9,
 NodePath("SporeSwarm4"): 10,
-NodePath("UnboundHeart"): 12
+NodePath("FungalHeart"): 11
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -228,10 +228,10 @@ enemy_data = ExtResource("13_n7hu4")
 weapon = null
 
 
-[node name="UnboundHeart" parent="ReplicatedPropsContainer" unique_id=225589283 instance=ExtResource("9_msvda")]
+[node name="FungalHeart" parent="ReplicatedPropsContainer" unique_id=225589282 instance=ExtResource("9_msvda")]
 position = Vector2(-292.74463, -1169.4962)
 debug_draw_ranges = false
-enemy_data = ExtResource("14_heartw")
+enemy_data = ExtResource("14_dysl4")
 weapon = null
 
 [node name="BarTeleporter" parent="." unique_id=1534252068 node_paths=PackedStringArray("target") instance=ExtResource("11_jbsjy")]

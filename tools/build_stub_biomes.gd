@@ -402,9 +402,9 @@ func _build_sewers() -> void:
 		["CisternHulk", "trpg/trpg_cistern_hulk", _sc(56, 24), 2],
 	], _sn(5))
 	hostiles.append({
-		"name": "UnboundSovereign",
-		"type": TYPES + "bosses/cistern_sovereign_world.tres",
-		"pos": _tile_pos(world_cell),
+		"name": "BloatedSovereign",
+		"type": TYPES + "bosses/cistern_sovereign.tres",
+		"pos": _tile_pos(boss_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "sewers spawn blocked")
@@ -694,7 +694,7 @@ func _build_fire_forge() -> void:
 	hostiles.append({
 		"name": "UnboundCinderborn",
 		"type": TYPES + "bosses/cinderborn_world.tres",
-		"pos": _tile_pos(world_cell),
+		"pos": _tile_pos(boss_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "forge spawn blocked")
@@ -924,7 +924,7 @@ func _build_desert() -> void:
 	hostiles.append({
 		"name": "UnboundSandKing",
 		"type": TYPES + "bosses/sand_king_world.tres",
-		"pos": _tile_pos(world_cell),
+		"pos": _tile_pos(boss_cell),
 	})
 
 	assert(walk.has(entrance) and walk.has(portal), "desert spawn blocked")

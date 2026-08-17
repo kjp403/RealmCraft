@@ -22,7 +22,7 @@
 [ext_resource type="Resource" uid="uid://c43oawxmbygiq" path="res://source/common/gameplay/characters/npc/types/wolf.tres" id="35_wolf"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/desert_badger.tres" id="et_dbadger"]
 [ext_resource type="Resource" uid="uid://bq8woodlandrat01" path="res://source/common/gameplay/characters/npc/types/woodland_rat.tres" id="36_wrat"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief_world.tres" id="22_warlord"]
+[ext_resource type="Resource" uid="uid://deo2ei3h78ouy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres" id="22_chief"]
 [ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
 [ext_resource type="Texture2D" uid="uid://cyxm7wgu1engl" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
 [ext_resource type="Resource" uid="uid://bdg1wvajij76o" path="res://source/common/gameplay/characters/npc/npcs/woodland/warden_bren.tres" id="25_bren"]
@@ -622,6 +622,7 @@ id_to_node = {
 20: NodePath("ShamanEscortCutter"),
 21: NodePath("Shaman2"),
 22: NodePath("ChiefGuardRunt1"),
+23: NodePath("GoblinChief"),
 24: NodePath("ChiefGuardRunt2"),
 25: NodePath("WildWolf1"),
 26: NodePath("WildWolf2"),
@@ -662,8 +663,7 @@ id_to_node = {
 61: NodePath("CamelDesertBadger1"),
 62: NodePath("CamelDesertBadger2"),
 63: NodePath("CamelDesertBadger3"),
-64: NodePath("CamelDesertBadger4"),
-65: NodePath("GoblinWarlord")
+64: NodePath("CamelDesertBadger4")
 }
 node_to_id = {
 NodePath("GateRunt1"): 0,
@@ -689,6 +689,7 @@ NodePath("Shaman1"): 19,
 NodePath("ShamanEscortCutter"): 20,
 NodePath("Shaman2"): 21,
 NodePath("ChiefGuardRunt1"): 22,
+NodePath("GoblinChief"): 23,
 NodePath("ChiefGuardRunt2"): 24,
 NodePath("WildWolf1"): 25,
 NodePath("WildWolf2"): 26,
@@ -729,8 +730,7 @@ NodePath("WoodlandRat28"): 60,
 NodePath("CamelDesertBadger1"): 61,
 NodePath("CamelDesertBadger2"): 62,
 NodePath("CamelDesertBadger3"): 63,
-NodePath("CamelDesertBadger4"): 64,
-NodePath("GoblinWarlord"): 65
+NodePath("CamelDesertBadger4"): 64
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -873,10 +873,10 @@ enemy_data = ExtResource("18_runt")
 weapon = null
 
 
-[node name="GoblinWarlord" parent="ReplicatedPropsContainer" unique_id=608139458 instance=ExtResource("3_2hhap")]
+[node name="GoblinChief" parent="ReplicatedPropsContainer" unique_id=608139457 instance=ExtResource("3_2hhap")]
 position = Vector2(472, 232)
 debug_draw_ranges = false
-enemy_data = ExtResource("22_warlord")
+enemy_data = ExtResource("22_chief")
 weapon = null
 
 [node name="ChiefGuardRunt2" parent="ReplicatedPropsContainer" unique_id=1611268690 instance=ExtResource("3_2hhap")]
