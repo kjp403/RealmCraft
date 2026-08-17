@@ -29,6 +29,21 @@ var instance_resource: InstanceResource
 var synchronizer_manager: StateSynchronizerManagerServer
 
 
+## True when this equipment slot holds its item BY REFERENCE — the id is in
+## `equipment` while the stack itself stays a normal bag stack. Ammo is the only
+## one today (see AmmoItem: `equipment` is slot -> id with nowhere to put a
+## quantity), and `item.unequip.gd` makes the same carve-out.
+##
+## It matters wherever code "returns" a failed / removed equip to the bag: that
+## is right for a helmet, which physically left, and wrong here — it hands the
+## player a free arrow every time.
+##
+## Checked by SLOT as well as by type because the usual reason a re-equip fails
+## is an id that no longer resolves, and then there is no type left to test.
+static func is_reference_slotted(slot_key: StringName, item: Item) -> bool:
+	return slot_key == &"ammo" or item is AmmoItem
+
+
 func _ready() -> void:
 	world_server.multiplayer_api.peer_disconnected.connect(
 		func(peer_id: int):
@@ -331,8 +346,10 @@ func instantiate_player(peer_id: int) -> Player:
 				if equipped and equipped.slot:
 					actual_slot = equipped.slot.key
 				player_resource.equipment[actual_slot] = equip_id
-			else:
+			elif not is_reference_slotted(slot_key, ContentRegistryHub.load_by_id(&"items", equip_id)):
 				# Rule changed (level/slot) -> return it to inventory rather than lose it.
+				# Reference-slotted gear is excluded: it never left the bag, so
+				# "returning" it mints a free one (see is_reference_slotted).
 				Inventory.add_item(player_resource.inventory, equip_id, 1)
 
 		# Stats were rebuilt from base + attributes + gear above — put any live
