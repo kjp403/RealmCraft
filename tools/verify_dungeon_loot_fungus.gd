@@ -81,6 +81,27 @@ func _init() -> void:
 		fails.append("Fungus Domain boss HP should scale above Dark Cave (6.5k solo / 32k four)")
 	elif fungus.boss_slam_damage < 150.0 or fungus.boss_slam_damage > 250.0:
 		fails.append("Fungus Domain slam should be a dodgeable chunk, not a one-shot")
+	if dark != null:
+		if dark.hard_health_mult < dark.normal_health_mult * 2.0 \
+				or dark.hard_damage_mult < dark.normal_damage_mult * 2.0:
+			fails.append("Dark Cave Hard trash should be ~2× Normal")
+		if dark.hard_boss_health_mult < 2.0:
+			fails.append("Dark Cave Hard boss HP multiplier too low")
+	if fungus != null:
+		if fungus.hard_health_mult < fungus.normal_health_mult * 2.0 \
+				or fungus.hard_damage_mult < fungus.normal_damage_mult * 2.0:
+			fails.append("Fungus Domain Hard trash should be ~2× Normal")
+		if fungus.hard_boss_health_mult < 2.0:
+			fails.append("Fungus Domain Hard boss HP multiplier too low")
+	var svc: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/dungeon/dungeon_service.gd"
+	)
+	if svc.find("belongs to a different station") >= 0:
+		fails.append("Hard rooms still reject joiners from another keeper/instance")
+	if svc.find("func _lookup_room_code") < 0 or svc.find("pad_zeros") < 0:
+		fails.append("join-by-code must pad short numeric codes")
+	if svc.find("wrong_dungeon") < 0:
+		fails.append("join-by-code must match dungeon type, not world instance")
 	var mage: EnemyTypeResource = load(
 		"res://source/common/gameplay/characters/npc/types/skeleton_mage.tres"
 	) as EnemyTypeResource

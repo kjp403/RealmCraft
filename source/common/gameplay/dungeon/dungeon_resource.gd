@@ -48,6 +48,10 @@ extends InstanceResource
 ## Absolute multipliers for Hard runs (not stacked on Normal mults).
 @export var hard_health_mult: float = 2.0
 @export var hard_damage_mult: float = 1.5
+## Applied to [member boss_health_by_party] (and slam) on Hard. 1.0 = same boss
+## HP as Normal — Hard used to skip the party table entirely, which made finales
+## feel identical.
+@export var hard_boss_health_mult: float = 2.5
 
 
 ## Pretty name everywhere (lobby title, entered/left banners, recap): prefers

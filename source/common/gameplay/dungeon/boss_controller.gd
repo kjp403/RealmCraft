@@ -864,7 +864,12 @@ func _summon_adds() -> void:
 		# World trash archetypes (yeti, demon adds, …) ship chase_on_area=false so
 		# they don't jump skillers. Enrage summons must fight immediately — stamp
 		# aggro + a spawn burst, and beef them a touch so they aren't free food.
-		npc.apply_difficulty(1.75, 1.35)
+		var add_hp: float = 1.75
+		var add_dmg: float = 1.35
+		if DungeonService.is_hard_run(_instance()):
+			add_hp *= 2.0
+			add_dmg *= 1.6
+		npc.apply_difficulty(add_hp, add_dmg)
 		npc._process_synchronization()
 		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
 		npc.replicate_visual(&"rp_spawn_effect", [])

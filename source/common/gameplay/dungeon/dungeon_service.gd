@@ -48,8 +48,8 @@ const FAIL_EJECT_DELAY_S: float = 6.0
 ## Revives a SOLO hardcore run gets. A party run gets one per member instead (see start_run).
 const SOLO_REVIVES: int = 4
 ## Hard-mode stat multipliers, applied to every mob a Hard run spawns.
-const HARD_HEALTH_MULT: float = 2.0
-const HARD_DAMAGE_MULT: float = 1.5
+const HARD_HEALTH_MULT: float = 2.5
+const HARD_DAMAGE_MULT: float = 2.0
 
 ## Character-wide daily free rewarded clears (Normal + Hard share the pool).
 const DAILY_FREE_CHARGES: int = 3
@@ -238,13 +238,24 @@ static func _broadcast_lobby(instance: Node, station: String, dungeon: DungeonRe
 		WorldServer.curr.data_push.rpc_id(peer, &"dungeon.lobby.update", payload)
 
 
-static func _names(instance: Node, peers: Array) -> Array:
+static func _names(_instance: Node, peers: Array) -> Array:
 	var out: Array = []
 	for peer: int in peers:
-		var player: Player = instance.get_player(peer)
+		var player: Player = _find_player(peer)
 		if player != null and player.player_resource != null:
 			out.append(player.player_resource.display_name)
 	return out
+
+
+## Resolve a peer's Player even when they aren't on [param hint]'s instance
+## (Hard rooms are joined by code from any keeper of that dungeon).
+static func _find_player(peer_id: int) -> Player:
+	if WorldServer.curr == null:
+		return null
+	var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id)
+	if inst == null:
+		return null
+	return inst.get_player(peer_id) as Player
 
 
 static func _lobby_key(instance_name: String, station: String) -> String:
@@ -286,7 +297,9 @@ static func handle_room_request(instance: Node, peer_id: int, station: String, a
 			_leave_public_queue(instance, peer_id, station) # one lobby at a time
 			return {"ok": true, "room": _room_snapshot(instance, room_id, peer_id)}
 		"join_code":
-			return _join_room(instance, peer_id, _code_to_room.get(str(args.get("code", "")).strip_edges().to_upper(), 0), station)
+			if player.global_position.distance_to(node.global_position) > QUEUE_RANGE:
+				return {"ok": false, "reason": "too_far"}
+			return _join_room(instance, peer_id, _lookup_room_code(str(args.get("code", ""))), station, dungeon)
 		"leave":
 			_leave_room(peer_id)
 			return {"ok": true, "left": true}
@@ -296,16 +309,19 @@ static func handle_room_request(instance: Node, peer_id: int, station: String, a
 			return {"ok": false, "reason": "bad_action"}
 
 
-static func _join_room(instance: Node, peer_id: int, room_id: int, station: String) -> Dictionary:
+static func _join_room(instance: Node, peer_id: int, room_id: int, station: String, dungeon: DungeonResource) -> Dictionary:
 	if not _rooms.has(room_id):
 		return {"ok": false, "reason": "no_room"}
 	if GroupService.group_of(peer_id) != 0:
 		return {"ok": false, "reason": "in_run"}
 	var room: Dictionary = _rooms[room_id]
-	if str(room.get("station", "")) != station or str(room.get("instance_name", "")) != str(instance.name):
-		return {"ok": false, "reason": "no_room"} # belongs to a different station
+	var room_dungeon: DungeonResource = room.get("dungeon") as DungeonResource
+	# Codes are global — don't require the same world-instance or keeper node.
+	# Only the dungeon type has to match (Dark Cave code at the Fungal Keeper = no).
+	if room_dungeon == null or dungeon == null or room_dungeon.instance_name != dungeon.instance_name:
+		return {"ok": false, "reason": "wrong_dungeon"}
 	var members: Array = room["members"]
-	if members.size() >= (room["dungeon"] as DungeonResource).party_size:
+	if members.size() >= room_dungeon.party_size:
 		return {"ok": false, "reason": "full"}
 	if not members.has(peer_id):
 		_leave_room(peer_id)
@@ -367,12 +383,8 @@ static func _start_room(peer_id: int) -> Dictionary:
 static func _broadcast_room(room_id: int) -> void:
 	if not _rooms.has(room_id) or WorldServer.curr == null:
 		return
-	var room: Dictionary = _rooms[room_id]
-	var instance: Node = WorldServer.curr.instance_manager.get_instance_server_by_id(str(room.get("instance_name", "")))
-	if instance == null:
-		return
-	for peer: int in (room["members"] as Array):
-		WorldServer.curr.data_push.rpc_id(peer, &"dungeon.room.update", _room_snapshot(instance, room_id, peer))
+	for peer: int in (_rooms[room_id]["members"] as Array):
+		WorldServer.curr.data_push.rpc_id(peer, &"dungeon.room.update", _room_snapshot(null, room_id, peer))
 
 
 ## Drop a peer from this station's public queue (called when they enter a private
@@ -414,6 +426,17 @@ static func _gen_room_code() -> String:
 	return "R%d" % _next_room_id # fallback, effectively never hit
 
 
+static func _normalize_room_code(raw: String) -> String:
+	var code: String = raw.strip_edges().to_upper()
+	if code.is_valid_int() and code.length() < ROOM_CODE_LEN:
+		code = code.pad_zeros(ROOM_CODE_LEN)
+	return code
+
+
+static func _lookup_room_code(raw: String) -> int:
+	return _code_to_room.get(_normalize_room_code(raw), 0)
+
+
 ## Begin a run for [param peers] (solo = one peer; the lobby passes a full group).
 ## Charges a FRESH private instance of [param dungeon_name] — NOT the shared
 ## charged copy — and moves the group in once it's loaded. Server-only.
@@ -439,9 +462,15 @@ static func start_run(peers: Array, dungeon: DungeonResource, hard: bool = false
 	# unload_unused_instances reclaims it once the group has all left.
 	var instance: Node = instance_manager.prepare_instance(dungeon)
 	_runs[group_id] = instance
-	_instance_to_group[str(instance.name)] = group_id
-	instance.ready.connect(func() -> void: _enter_run(group_id, members), CONNECT_ONE_SHOT)
+	instance.ready.connect(func() -> void:
+		if is_instance_valid(instance):
+			_instance_to_group[str(instance.name)] = group_id
+		_enter_run(group_id, members)
+	, CONNECT_ONE_SHOT)
 	instance_manager.add_child(instance, true)
+	# Re-key after add_child — force_readable_name can suffix the node if a sibling
+	# already claimed prepare_instance's id string.
+	_instance_to_group[str(instance.name)] = group_id
 
 
 ## Once the private instance is loaded, switch every group member in (from

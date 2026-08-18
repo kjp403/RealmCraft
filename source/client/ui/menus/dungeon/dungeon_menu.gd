@@ -212,7 +212,7 @@ func _build_private_panel() -> void:
 	var vbox: VBoxContainer = _panel_body()
 	if _room.is_empty():
 		var blurb: Label = Label.new()
-		blurb.text = "Make a private room and share its code, or join one by code."
+		blurb.text = "Make a private room and share its code. Friends join from any keeper for this dungeon — type 7 for 07."
 		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		blurb.modulate = Color(1, 1, 1, 0.7)
 		vbox.add_child(blurb)
@@ -338,6 +338,7 @@ func _on_room_response(response: Dictionary) -> void:
 		Toaster.toast({
 			"full": "Room is full.",
 			"no_room": "No room with that code.",
+			"wrong_dungeon": "That code is for a different dungeon.",
 			"in_run": "You're already in a dungeon.",
 			"too_far": "You're too far from the dungeon.",
 			"not_leader": "Only the leader can start.",
