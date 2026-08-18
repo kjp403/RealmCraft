@@ -141,13 +141,11 @@ func die(killer: Character) -> void:
 		_last_pvp_death_ms = now_ms
 		exile_after_respawn = _pvp_death_streak >= RAPID_DEATH_LIMIT
 
-	# Hardcore dungeon: a death spends a shared revive. If the pool's empty the whole run fails —
-	# DungeonService revives + ejects the party to town, so skip the normal respawn here.
-	# If the fail path missed this body (second death while already ejecting), still stand them up.
-	if DungeonService.register_dungeon_death(self):
-		if stats_component.get_stat(Stat.HEALTH) <= 0.0:
-			revive()
-		return
+	# Hardcore dungeon: a death spends a shared revive. If the pool's empty the
+	# whole run fails — DungeonService revives + ejects the party to town. Do NOT
+	# return here: that skipped player.died (no death screen) and left them
+	# standing on the corpse until eject (or forever if eject missed).
+	DungeonService.register_dungeon_death(self)
 
 	# Default: Guild Hall (Hall Keeper). Sparring keeps the duel-master pad.
 	var spawn_position: Vector2 = Vector2.ZERO
@@ -175,8 +173,8 @@ func die(killer: Character) -> void:
 	# not the local map pad. Sparring and boss hunts stay in-arena.
 	var return_home: bool = not sparring_death and not hunt_death
 
-	var peer_id: int = int(player_resource.current_peer_id)
-	if peer_id > 0:
+	var peer_id: int = _death_peer_id()
+	if peer_id > 0 and WorldServer.curr != null:
 		# Death-screen attribution. Every Character carries a display_name (the
 		# player's character name, or the enemy's EnemyTypeResource name); empty
 		# means an unattributed death (environment, or the source already freed).
@@ -192,22 +190,7 @@ func die(killer: Character) -> void:
 	if not is_instance_valid(self):
 		return # left the game while down
 
-	revive()
-	# The respawn lands on the map spawn point, which may sit on a warper — lock warper traversal
-	# briefly so stepping off doesn't immediately warp the player (their idea; mirrors spawn_player).
-	mark_just_teleported(RESPAWN_WARP_GRACE_MS)
-
-	# Too many quick PvP deaths: relocate the victim to the far, safe jail_room spawn
-	# (a one-way move, NOT a jail sentence — warpers still let them walk back). Removes
-	# the target so a spawn-camp / feed loop ends. Streak already reset just above.
-	if exile_after_respawn and peer_id > 0:
-		_pvp_death_streak = 0
-		_last_pvp_death_ms = 0
-		WorldServer.curr.instance_manager.send_player_to_jail(peer_id)
-		return
-
-	if return_home and peer_id > 0:
-		WorldServer.curr.instance_manager.recall_player(peer_id)
+	_finish_respawn(return_home, exile_after_respawn)
 
 
 ## Top HP and mana back to full (does NOT touch the dead flag). The dungeon enter/exit refill uses it
@@ -229,7 +212,8 @@ func revive() -> void:
 
 
 ## If the respawn coroutine never finished (dungeon fail no-op, node swap), stand
-## this body up. Called from the instance 1 Hz tick. Safe to call on the living.
+## this body up and send them home — never leave a full-HP corpse on the death
+## tile. Called from the instance 1 Hz tick. Safe to call on the living.
 func maybe_unstick_death() -> void:
 	if not is_dead:
 		return
@@ -242,7 +226,44 @@ func maybe_unstick_death() -> void:
 		return
 	if Time.get_ticks_msec() - _died_at_ms < 5000:
 		return
+	_finish_respawn(_should_return_home(), false)
+
+
+## Peer id for death RPCs / recall. Node name is the peer id at spawn; use it if
+## current_peer_id was never stamped (that used to skip player.died AND recall).
+func _death_peer_id() -> int:
+	if player_resource != null:
+		var pid: int = int(player_resource.current_peer_id)
+		if pid > 0:
+			return pid
+	if str(name).is_valid_int():
+		return int(str(name))
+	return 0
+
+
+func _should_return_home() -> bool:
+	if player_resource != null and player_resource.in_match:
+		return false
+	var map: Map = get_parent() as Map
+	return not BossHuntService.is_hunt_instance(map.get_parent() if map else null)
+
+
+## Revive, then Guild Hall (or jail) unless this death stays in-arena.
+func _finish_respawn(return_home: bool, exile_after_respawn: bool) -> void:
 	revive()
+	# The respawn lands on the map spawn point, which may sit on a warper — lock warper traversal
+	# briefly so stepping off doesn't immediately warp the player (their idea; mirrors spawn_player).
+	mark_just_teleported(RESPAWN_WARP_GRACE_MS)
+	var peer_id: int = _death_peer_id()
+	if peer_id <= 0 or WorldServer.curr == null:
+		return
+	if exile_after_respawn:
+		_pvp_death_streak = 0
+		_last_pvp_death_ms = 0
+		WorldServer.curr.instance_manager.send_player_to_jail(peer_id)
+		return
+	if return_home:
+		WorldServer.curr.instance_manager.recall_player(peer_id)
 
 
 ## True while post-respawn spawn protection is active — set in revive(), cleared
