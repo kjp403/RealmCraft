@@ -64,9 +64,23 @@ static func effective_priority_global(player: PlayerResource) -> int:
 	return best
 
 
+## Hard floor so a missing/empty role table cannot turn owner into priority 0
+## ("Command not found" for every staff command). Table values still win if higher.
+const ROLE_PRIORITY_FALLBACK: Dictionary = {
+	"owner": 1000,
+	"senior_admin": 100,
+	"admin": 2,
+	"moderator": 1,
+}
+
+
+static func _priority_of(role: String, table: Dictionary) -> int:
+	var from_table: int = int(table.get(role, {}).get("priority", 0))
+	return maxi(from_table, int(ROLE_PRIORITY_FALLBACK.get(role, 0)))
+
+
 static func _global_role_priority(role: String) -> int:
-	var role_data: Dictionary = ServerInstance.global_role_definitions.get(role, {})
-	return int(role_data.get("priority", 0))
+	return _priority_of(role, ServerInstance.global_role_definitions)
 
 
 ## Highest-priority role name for badges / chat ("" = regular player).
@@ -163,12 +177,12 @@ static func is_hidden_from_leaderboard(
 	# but boosted staff chars must still stay off public boards.
 	var best: int = 0
 	for role: String in roles:
-		best = maxi(best, int(role_definitions.get(role, {}).get("priority", 0)))
+		best = maxi(best, _priority_of(role, role_definitions))
 	if AdminConfig.is_leaderboard_hidden(display_name):
 		return true
 	var config_role: String = AdminConfig.role_for_character(display_name, player_id)
 	if not config_role.is_empty():
-		best = maxi(best, int(role_definitions.get(config_role, {}).get("priority", 0)))
+		best = maxi(best, _priority_of(config_role, role_definitions))
 	return best >= LEADERBOARD_HIDE_PRIORITY
 
 
@@ -245,8 +259,9 @@ static func _db_role_blocked(role: String) -> bool:
 
 
 static func _role_priority(instance: ServerInstance, role: String) -> int:
-	var role_data: Dictionary = instance.global_role_definitions.get(role, {})
-	return int(role_data.get("priority", 0))
+	if instance == null:
+		return int(ROLE_PRIORITY_FALLBACK.get(role, 0))
+	return _priority_of(role, instance.global_role_definitions)
 
 
 ## Drop unreleased vault VFX from a non-staff character (prestige skin, auras,
