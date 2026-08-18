@@ -243,6 +243,8 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		brain.name = "BossController"
 		brain.boss = npc
 		npc.add_child(brain) # _ready() loads slam_damage from enemy_data...
+		brain.add_health_mult = _hp_mult
+		brain.add_damage_mult = _dmg_mult
 		if _boss_slam_damage > 0.0:
 			brain.slam_damage = _boss_slam_damage
 			if _hard and _normal_dmg_mult > 0.0:

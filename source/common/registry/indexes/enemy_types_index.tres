@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1786994166
-next_id = 112
+version = 1787009606
+next_id = 121
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -532,6 +532,51 @@ entries = Array[Dictionary]([{
 &"id": 111,
 &"path": "res://source/common/gameplay/characters/npc/types/mecha_stone_golem_world.tres",
 &"slug": &"mecha_stone_golem_world"
+}, {
+&"hash": "3f43b7a2a47c3ae6ad7cad48365ad7a284bc676cc4a0d63cb08359e930fcb250",
+&"id": 112,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_bloated.tres",
+&"slug": &"hell_bloated"
+}, {
+&"hash": "f38727684fe978cbe750bfcf10bb846c3585b14a23df3e9e2ba802299d85cbfd",
+&"id": 113,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_burning.tres",
+&"slug": &"hell_burning"
+}, {
+&"hash": "1163b27e0ae6b8a28333d8de89feb0cb927002213a5505c52f2618c249f02f49",
+&"id": 114,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_damned.tres",
+&"slug": &"hell_damned"
+}, {
+&"hash": "3ddf7ae37edd3b10de24a2067757b2bfc0b5b7bf207dffd749f9e11be3265383",
+&"id": 115,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_eye.tres",
+&"slug": &"hell_eye"
+}, {
+&"hash": "880b09c23822944107f5ba340bbdb384768118a25632c10116243cca99bd5602",
+&"id": 116,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_giant.tres",
+&"slug": &"hell_giant"
+}, {
+&"hash": "71a317751d0f3b4239b935794846c98a59ae609cb93c99cda2dba2a99cf6703f",
+&"id": 117,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_imp.tres",
+&"slug": &"hell_imp"
+}, {
+&"hash": "378cb3bf773dab17e6292dbd1368b162c579ee2e2bf6f62c226b705fe826de11",
+&"id": 118,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_skull_wisp.tres",
+&"slug": &"hell_skull_wisp"
+}, {
+&"hash": "74112d072ba4bfa547d3c5f295bbcad183c40c91d057c09b313a86e4e3256b43",
+&"id": 119,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_twisted.tres",
+&"slug": &"hell_twisted"
+}, {
+&"hash": "35f2a7e1d696cc7c72d4df0e0e18d5f68151b7aebe30c89c2d5da95e0a53a3bc",
+&"id": 120,
+&"path": "res://source/common/gameplay/characters/npc/types/hell/hell_vault_queen.tres",
+&"slug": &"hell_vault_queen"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

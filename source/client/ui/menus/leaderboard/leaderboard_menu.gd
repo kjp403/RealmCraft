@@ -54,6 +54,7 @@ const DOMAINS: Array = [
 	# scores are SECONDS shown as m:ss (lower is better). One entry per ranked dungeon.
 	{"id": "dungeon_main", "label": "The Dark Cave (Hard)", "category": "dungeon", "board_id": "dungeon:Dungeon", "periods": []},
 	{"id": "dungeon_fungus", "label": "Fungus Domain (Hard)", "category": "dungeon", "board_id": "dungeon:fungus_dungeon", "periods": []},
+	{"id": "dungeon_hell", "label": "Fire and Flames (Hard)", "category": "dungeon", "board_id": "dungeon:hell_dungeon", "periods": []},
 ]
 
 const RANK_COLORS: Dictionary = {

@@ -4,12 +4,9 @@
 [ext_resource type="TileSet" uid="uid://cp3aq00j7d6as" path="res://source/common/gameplay/maps/tilesets/buildings_inside_tileset.tres" id="2_khpmq"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="3_dr2jr"]
 [ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="4_alrfp"]
-[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="13_v74iv"]
-[ext_resource type="Script" uid="uid://bpo804060rk5t" path="res://source/common/gameplay/characters/npc/interactions/shop_interaction.gd" id="14_gl3u8"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="14_qwuyn"]
-[ext_resource type="Resource" uid="uid://dw5hj55lha5ld" path="res://source/common/gameplay/shops/resources/rustic_shop.tres" id="15_56e5m"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="21_0vs1f"]
-[ext_resource type="SpriteFrames" uid="uid://bqcsne8jhbmi8" path="res://source/common/gameplay/characters/sprite_frames/knight.tres" id="22_je1gg"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="43_banker"]
 
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="30_craft"]
 [ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/anvil.tres" id="31_anvil"]
@@ -24,19 +21,6 @@
 [ext_resource type="Resource" uid="uid://dtojmae8u5g6l" path="res://source/common/gameplay/characters/npc/npcs/mira.tres" id="40_mira"]
 [ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/alchemy_station.tres" id="41_alchemy"]
 [ext_resource type="Texture2D" uid="uid://kjdva1dwytwi" path="res://assets/sprites/environment/structures/stations/alchemy/alchemy_table.png" id="42_alchart"]
-
-[sub_resource type="Resource" id="Resource_h1lk8"]
-script = ExtResource("14_gl3u8")
-shop = ExtResource("15_56e5m")
-metadata/_custom_type_script = "uid://bpo804060rk5t"
-
-[sub_resource type="Resource" id="Resource_nbood"]
-script = ExtResource("21_0vs1f")
-npc_name = "Forge Smith"
-skin = ExtResource("22_je1gg")
-greeting = "Hello I'am Smith"
-interactions = Array[ExtResource("13_v74iv")]([SubResource("Resource_h1lk8")])
-metadata/_custom_type_script = "uid://ddps5vwhnf048"
 
 [sub_resource type="Resource" id="Resource_s648a"]
 script = ExtResource("21_0vs1f")
@@ -71,9 +55,9 @@ target_instance = ExtResource("4_alrfp")
 warper_id = 5
 target_id = 4
 
-[node name="ForgeSmith" parent="." unique_id=1922057613 instance=ExtResource("14_qwuyn")]
+[node name="Banker" parent="." unique_id=1922057613 instance=ExtResource("14_qwuyn")]
 position = Vector2(-184, 336)
-npc_resource = SubResource("Resource_nbood")
+npc_resource = ExtResource("43_banker")
 
 [node name="TheTailor" parent="." unique_id=254689907 instance=ExtResource("14_qwuyn")]
 position = Vector2(200, 336)

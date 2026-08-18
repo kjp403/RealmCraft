@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ccyyb")
 content_name = &"sprites"
-version = 1786335323
-next_id = 78
+version = 1787009604
+next_id = 88
 entries = Array[Dictionary]([{
 &"hash": "a713957cf45109970dd71e6452edebdcc4b11cad4c3c8326d19d8086dbdf657e",
 &"id": 6,
@@ -382,6 +382,56 @@ entries = Array[Dictionary]([{
 &"id": 77,
 &"path": "res://source/common/gameplay/characters/sprite_frames/trpg_zombie_giant.tres",
 &"slug": &"trpg_zombie_giant"
+}, {
+&"hash": "baa4c7b86f05e48a98d21e1af55a1b04eed359e1c0280cc67b4445925498b0f8",
+&"id": 78,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_bloated.tres",
+&"slug": &"hell_bloated"
+}, {
+&"hash": "a889ee97500b427b6378f625f23a33061c7fd84b660a2b153da587c847fe5127",
+&"id": 79,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_burning.tres",
+&"slug": &"hell_burning"
+}, {
+&"hash": "22c39f455401ed40e4004d033448fcb2e0a2e94ca3345f01efb8e1b38bb201e7",
+&"id": 80,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_damned.tres",
+&"slug": &"hell_damned"
+}, {
+&"hash": "294dd72fe259db1ae720fe8eb43c8d29d0e9122eb4a1127a70aa545630f8327b",
+&"id": 81,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_eye.tres",
+&"slug": &"hell_eye"
+}, {
+&"hash": "1a9ac5de394c68739faf95c943929062816474a886627b100badfaa3131b5e16",
+&"id": 82,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_giant.tres",
+&"slug": &"hell_giant"
+}, {
+&"hash": "1c178553a34e567f3781f6ea358f21c3f85930d4b97b652f5984c5b3384c0b4d",
+&"id": 83,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_imp.tres",
+&"slug": &"hell_imp"
+}, {
+&"hash": "49b6f61afa6db87ab998d458c259d30455172ebf115db0f169021a9d567a64ac",
+&"id": 84,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_old_demon.tres",
+&"slug": &"hell_old_demon"
+}, {
+&"hash": "7c581bdb16f0e807a25a450467acf374c608209b24cc56ec89616f78efcc23e1",
+&"id": 85,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_skull_wisp.tres",
+&"slug": &"hell_skull_wisp"
+}, {
+&"hash": "3bad37751e1f7c7cd099a5b51ccb0ebaf9639745704732b5a9e17d18679a339c",
+&"id": 86,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_twisted.tres",
+&"slug": &"hell_twisted"
+}, {
+&"hash": "74a712aafb5817b4d006468cc527f2908388910f65a2e32489ad069d623294fa",
+&"id": 87,
+&"path": "res://source/common/gameplay/characters/sprite_frames/hell_vault_queen.tres",
+&"slug": &"hell_vault_queen"
 }])
 scan_path = "res://source/common/gameplay/characters/sprite_frames"
 filters = PackedStringArray("*.tres", "*.tscn")

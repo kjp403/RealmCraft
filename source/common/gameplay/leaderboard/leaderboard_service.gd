@@ -123,6 +123,7 @@ const PUBLIC_BOARDS: Array[String] = [
 	"gold",
 	"dungeon:Dungeon",
 	"dungeon:fungus_dungeon",
+	"dungeon:hell_dungeon",
 ]
 const PUBLIC_LIMIT: int = 20
 const PUBLIC_CACHE_TTL_MS: int = 10000

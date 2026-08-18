@@ -30,6 +30,10 @@ func _init() -> void:
 		failures.append("FungalKeeper is not at (-201, -320)")
 	if hall.find("[node name=\"DungeonMaster\"") < 0:
 		failures.append("DungeonMaster (Dark Cave) went missing from the Guild Hall")
+	if hall.find("npcs/brimstone_keeper.tres") < 0:
+		failures.append("Guild Hall does not reference brimstone_keeper.tres")
+	if hall.find("[node name=\"BrimstoneKeeper\"") < 0:
+		failures.append("BrimstoneKeeper node missing from the Guild Hall")
 
 	# The keeper must actually open the Fungus Domain, not just stand there.
 	var keeper_res: NPCResource = load(

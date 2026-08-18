@@ -53,6 +53,7 @@ source/server/master/account_collection.tres
 assets/_import/**
 !assets/_import/
 !assets/_import/.gdignore
+assets/sprites/environment/hell_pack/
 
 # Python tool bytecode
 __pycache__/

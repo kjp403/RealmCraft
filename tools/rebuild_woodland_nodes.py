@@ -41,6 +41,12 @@ NEW_DATA = {
                 'res://source/common/gameplay/maps/components/mineable_nodes/sunwort.tres'),
     'moonbloom': ('39_moonb', None,
                   'res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres'),
+    'bloodcap': ('47_blood', None,
+                 'res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres'),
+    'starblossom': ('48_star', None,
+                    'res://source/common/gameplay/maps/components/mineable_nodes/starblossom.tres'),
+    'grimshade': ('49_grim', None,
+                  'res://source/common/gameplay/maps/components/mineable_nodes/grimshade.tres'),
 }
 TREES = {'normal_tree', 'oak_tree', 'willow_tree', 'maple_tree', 'yew_tree'}
 
@@ -83,6 +89,12 @@ PATCHES = [
     dict(name='WingYewCamp', kind='yew_tree', at=(4008, 584), r=170, n=4, spacing=115,
          note='Second yew stand beside the wing banker -- East Shore stays the '
               'big hollow, this is the cut-and-bank camp on the north route'),
+    dict(name='WingStarblossom', kind='starblossom', at=(4000, 240), r=160, n=8, spacing=64,
+         note='Starblossom (lv40) in the east Sunlit Meadow, past the sunwort'),
+    dict(name='WingBloodcap', kind='bloodcap', at=(5080, 480), r=200, n=8, spacing=64,
+         note='Bloodcap (lv30) ringing the quiet north-east Murkwood pool'),
+    dict(name='WingGrimshade', kind='grimshade', at=(3440, 1152), r=140, n=8, spacing=64,
+         note='Grimshade (lv50) in the shaded west Stone Shelves, off the frost hollow'),
 ]
 
 # --- Wildlife nests ---------------------------------------------------------
