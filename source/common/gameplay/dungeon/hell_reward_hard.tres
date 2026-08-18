@@ -1,0 +1,229 @@
+[gd_resource type="Resource" script_class="DungeonReward" format=3 uid="uid://chellrewarh01"]
+
+[ext_resource type="Script" uid="uid://dm6elylcxek00" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="1_reward"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="2_loot"]
+[ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="item_bone"]
+[ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="item_adamant_bar"]
+[ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="item_runite_bar"]
+[ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_coal_ore"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="item_maple_log"]
+[ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_yew_log"]
+[ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="item_dragon_ore"]
+[ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="item_dragon_cloth"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="item_health_potion"]
+[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="item_mana_potion"]
+[ext_resource type="Resource" uid="uid://jl8cuy0nrpdv" path="res://source/common/gameplay/items/chests/wood_gold_large.tres" id="item_wood_gold_large"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="item_wyrmguard_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres" id="item_wyrmguard_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/godsteel_ore.tres" id="item_godsteel_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/godsteel_cloth.tres" id="item_godsteel_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_nightglass.tres" id="item_hide_nightglass"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/astral_cloth.tres" id="item_astral_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres" id="item_sword_wyrmguard"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres" id="item_hammer_wyrmguard"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres" id="item_nightglass_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres" id="item_wand_astral"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_astral.item.tres" id="item_book_astral"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres" id="item_sword_godsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres" id="item_hammer_godsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_helmet.tres" id="item_godsteel_helmet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_chest.tres" id="item_godsteel_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/godsteel_boots.tres" id="item_godsteel_boots"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_enchanted_gem"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_enchanted_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="item_godsteel_gem"]
+
+[sub_resource type="Resource" id="Drop_0_bone"]
+script = ExtResource("2_loot")
+item = ExtResource("item_bone")
+min_amount = 120
+max_amount = 120
+
+[sub_resource type="Resource" id="Drop_1_adamant_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_adamant_bar")
+min_amount = 50
+max_amount = 110
+
+[sub_resource type="Resource" id="Drop_2_runite_bar"]
+script = ExtResource("2_loot")
+item = ExtResource("item_runite_bar")
+min_amount = 40
+max_amount = 90
+
+[sub_resource type="Resource" id="Drop_3_coal_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_coal_ore")
+min_amount = 35
+max_amount = 70
+chance = 0.75
+
+[sub_resource type="Resource" id="Drop_4_maple_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_maple_log")
+min_amount = 25
+max_amount = 55
+chance = 0.65
+
+[sub_resource type="Resource" id="Drop_5_yew_log"]
+script = ExtResource("2_loot")
+item = ExtResource("item_yew_log")
+min_amount = 20
+max_amount = 45
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_6_dragon_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_dragon_ore")
+min_amount = 14
+max_amount = 28
+
+[sub_resource type="Resource" id="Drop_7_dragon_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_dragon_cloth")
+min_amount = 16
+max_amount = 32
+
+[sub_resource type="Resource" id="Drop_8_health_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("item_health_potion")
+min_amount = 20
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_9_mana_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("item_mana_potion")
+min_amount = 20
+max_amount = 50
+
+[sub_resource type="Resource" id="Drop_10_wood_gold_large"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wood_gold_large")
+min_amount = 1
+max_amount = 2
+chance = 0.35
+
+[sub_resource type="Resource" id="Drop_11_wyrmguard_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wyrmguard_ore")
+min_amount = 10
+max_amount = 20
+chance = 0.6
+
+[sub_resource type="Resource" id="Drop_12_wyrmguard_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wyrmguard_cloth")
+min_amount = 8
+max_amount = 16
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_13_godsteel_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_ore")
+min_amount = 3
+max_amount = 8
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_14_godsteel_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_cloth")
+min_amount = 3
+max_amount = 8
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_15_hide_nightglass"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hide_nightglass")
+min_amount = 8
+max_amount = 16
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_16_astral_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_astral_cloth")
+min_amount = 8
+max_amount = 16
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_17_sword_wyrmguard"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_wyrmguard")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_18_hammer_wyrmguard"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_wyrmguard")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_19_nightglass_bow"]
+script = ExtResource("2_loot")
+item = ExtResource("item_nightglass_bow")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_20_wand_astral"]
+script = ExtResource("2_loot")
+item = ExtResource("item_wand_astral")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_21_book_astral"]
+script = ExtResource("2_loot")
+item = ExtResource("item_book_astral")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_22_sword_godsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_sword_godsteel")
+chance = 0.04
+
+[sub_resource type="Resource" id="Drop_23_hammer_godsteel"]
+script = ExtResource("2_loot")
+item = ExtResource("item_hammer_godsteel")
+chance = 0.04
+
+[sub_resource type="Resource" id="Drop_24_godsteel_helmet"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_helmet")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_25_godsteel_chest"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_chest")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_26_godsteel_boots"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_boots")
+chance = 0.03
+
+[sub_resource type="Resource" id="Excl_0_enchanted_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_gem")
+min_amount = 3
+max_amount = 6
+chance = 0.22
+
+[sub_resource type="Resource" id="Excl_1_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("item_enchanted_ore")
+min_amount = 3
+max_amount = 6
+chance = 0.22
+
+[sub_resource type="Resource" id="Excl_2_godsteel_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_gem")
+min_amount = 1
+max_amount = 3
+chance = 0.18
+
+[resource]
+script = ExtResource("1_reward")
+gold_min = 20000
+gold_max = 36000
+rolls_min = 4
+rolls_max = 5
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_adamant_bar"), SubResource("Drop_2_runite_bar"), SubResource("Drop_3_coal_ore"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_dragon_ore"), SubResource("Drop_7_dragon_cloth"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_10_wood_gold_large"), SubResource("Drop_11_wyrmguard_ore"), SubResource("Drop_12_wyrmguard_cloth"), SubResource("Drop_13_godsteel_ore"), SubResource("Drop_14_godsteel_cloth"), SubResource("Drop_15_hide_nightglass"), SubResource("Drop_16_astral_cloth"), SubResource("Drop_17_sword_wyrmguard"), SubResource("Drop_18_hammer_wyrmguard"), SubResource("Drop_19_nightglass_bow"), SubResource("Drop_20_wand_astral"), SubResource("Drop_21_book_astral"), SubResource("Drop_22_sword_godsteel"), SubResource("Drop_23_hammer_godsteel"), SubResource("Drop_24_godsteel_helmet"), SubResource("Drop_25_godsteel_chest"), SubResource("Drop_26_godsteel_boots")])
+exclusive_loot = Array[ExtResource("2_loot")]([SubResource("Excl_0_enchanted_gem"), SubResource("Excl_1_enchanted_ore"), SubResource("Excl_2_godsteel_gem")])
+exclusive_max = 2
+ornate_chest_count = 3
+lockout_hours = 0.0

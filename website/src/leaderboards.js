@@ -20,6 +20,7 @@
     { id: "glory_seasonal", label: "Glory · Seasonal", category: "guild", format: "count" },
     { id: "glory_eternal", label: "Glory · Eternal", category: "guild", format: "count" },
     { id: "dungeon:Dungeon", label: "Fastest Clear (Hard)", category: "dungeon", format: "time" },
+    { id: "dungeon:hell_dungeon", label: "Fire and Flames (Hard)", category: "dungeon", format: "time" },
   ];
   const REFRESH_MS = 30000;
 
