@@ -59,9 +59,14 @@ static func migrate_file_if_needed(user_path: String, legacy_res_path: String) -
 	return true
 
 
-## Also migrate SQLite WAL/SHM sidecars when present next to a legacy .db.
+## Copy a legacy res:// .db into user:// once. NEVER copy -wal/-shm onto an
+## existing live DB: a leftover res:// WAL applied on top of user://classic.db
+## rewrites the live world (35-player restore collapsed to 13).
 static func migrate_sqlite_if_needed(user_db_path: String, legacy_res_db_path: String) -> void:
+	var user_db_already_there: bool = FileAccess.file_exists(user_db_path)
 	migrate_file_if_needed(user_db_path, legacy_res_db_path)
+	if user_db_already_there:
+		return
 	for suffix: String in ["-wal", "-shm"]:
 		migrate_file_if_needed(user_db_path + suffix, legacy_res_db_path + suffix)
 
