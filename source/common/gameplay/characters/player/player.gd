@@ -39,6 +39,9 @@ var pvp_immune_until_ms: int = 0
 ## Anti-camp PvP death streak + last-PvP-death stamp (runtime, not persisted).
 var _pvp_death_streak: int = 0
 var _last_pvp_death_ms: int = 0
+## Server clock when this body last died. 0 = alive. Used to stand up anyone
+## left at 0 HP if the respawn coroutine never finished.
+var _died_at_ms: int = 0
 
 ## --- Weapon equip-cast (server-authoritative draw) ---
 ## A weapon "draws" over WEAPON_DRAW_MS before it actually equips: abilities are
@@ -120,6 +123,7 @@ func incoming_damage_factor(attacker: Character) -> float:
 ## Staying dead during the delay also makes nearby enemies drop aggro (they ignore dead
 ## targets) instead of trailing the corpse.
 func die(killer: Character) -> void:
+	_died_at_ms = Time.get_ticks_msec()
 	# Leaderboard: credit the killer for real open-world PvP only — never
 	# sparring/duels (those are tallied as arena wins/losses). in_match is still
 	# true here (on_player_died_in_match clears it below). NPC killers are
@@ -139,7 +143,10 @@ func die(killer: Character) -> void:
 
 	# Hardcore dungeon: a death spends a shared revive. If the pool's empty the whole run fails —
 	# DungeonService revives + ejects the party to town, so skip the normal respawn here.
+	# If the fail path missed this body (second death while already ejecting), still stand them up.
 	if DungeonService.register_dungeon_death(self):
+		if stats_component.get_stat(Stat.HEALTH) <= 0.0:
+			revive()
 		return
 
 	# Default: Guild Hall (Hall Keeper). Sparring keeps the duel-master pad.
@@ -215,9 +222,27 @@ func restore_full() -> void:
 func revive() -> void:
 	restore_full()
 	is_dead = false
+	_died_at_ms = 0
 	# Spawn protection: a brief window where other players can't damage us, so a
 	# camper can't AoE the respawn point. Ends early the moment WE attack.
 	pvp_immune_until_ms = Time.get_ticks_msec() + RESPAWN_PVP_IMMUNITY_MS
+
+
+## If the respawn coroutine never finished (dungeon fail no-op, node swap), stand
+## this body up. Called from the instance 1 Hz tick. Safe to call on the living.
+func maybe_unstick_death() -> void:
+	if not is_dead:
+		return
+	if stats_component.get_stat(Stat.HEALTH) > 0.0:
+		is_dead = false
+		_died_at_ms = 0
+		return
+	if _died_at_ms <= 0:
+		_died_at_ms = Time.get_ticks_msec()
+		return
+	if Time.get_ticks_msec() - _died_at_ms < 5000:
+		return
+	revive()
 
 
 ## True while post-respawn spawn protection is active — set in revive(), cleared
