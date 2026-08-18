@@ -49,18 +49,6 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_7"]
 script = ExtResource("1_mod")
-stat_name = "ad"
-value = -4.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_8"]
-script = ExtResource("1_mod")
-stat_name = "rad"
-value = -18.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_9"]
-script = ExtResource("1_mod")
 stat_name = "mana_regen"
 value = 2.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
@@ -70,7 +58,7 @@ script = ExtResource("3_gear")
 required_mastery_categories = Array[StringName]([&"any"])
 required_mastery_level = 60
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5"), SubResource("Mod_6"), SubResource("Mod_7"), SubResource("Mod_8"), SubResource("Mod_9")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5"), SubResource("Mod_6"), SubResource("Mod_7")])
 item_name = &"Voidsilk Shoes"
 item_icon = ExtResource("2_icon")
 description = "Silk pulled from the edge of nothing — and tailored carefully."

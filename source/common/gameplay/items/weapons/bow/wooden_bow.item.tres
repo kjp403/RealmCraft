@@ -15,7 +15,7 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_ad_bow"]
 script = ExtResource("3_10omy")
-stat_name = "rad"
+stat_name = "ad"
 value = 4.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 

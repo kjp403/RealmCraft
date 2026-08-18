@@ -16,7 +16,7 @@ extends AbilityResource
 @export var projectile_scene: PackedScene
 ## Seconds of holding for a full-power shot.
 @export var charge_time_s: float = 0.9
-## Damage as a fraction of the wielder's ranged damage: tap = min, full hold = max.
+## Damage as a fraction of the wielder's AD: tap = min, full hold = max.
 @export var min_ad_ratio: float = 0.3
 @export var max_ad_ratio: float = 1.0
 ## Projectile speed also scales with charge.
@@ -66,7 +66,7 @@ func release_ability(entity: Entity, direction: Vector2) -> void:
 
 	var ad: float = 0.0
 	if entity is Character and (entity as Character).stats_component != null:
-		ad = (entity as Character).stats_component.get_stat(Stat.RAD)
+		ad = (entity as Character).stats_component.get_stat(Stat.AD)
 	var per_shot_damage: float = maxf(0.0, ad * lerpf(min_ad_ratio, max_ad_ratio, t) * damage_factor)
 	var speed: float = lerpf(min_speed, max_speed, t)
 

@@ -21,9 +21,6 @@ const MR: StringName = &"mr"
 
 ## Attack Damage
 const AD: StringName = &"ad"
-## Ranged / archery damage (bows). Separate from AD so plate and leather
-## can penalize the off-style without sharing one physical pool.
-const RAD: StringName = &"rad"
 ## Ability Power
 const AP: StringName = &"ap"
 
@@ -56,7 +53,6 @@ const DISPLAY_NAMES: Dictionary = {
 	ARMOR: "Armor",
 	MR: "Magic Resist",
 	AD: "Attack Damage",
-	RAD: "Ranged Damage",
 	AP: "Ability Power",
 	ATTACK_SPEED: "Attack Speed",
 	ATTACK_RANGE: "Attack Range",

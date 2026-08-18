@@ -14,7 +14,7 @@ const ROLE_COLOR: Dictionary = {
 	&"utility": "6fb0e0",
 }
 const STAT_ROLE: Dictionary = {
-	&"ad": &"offense", &"rad": &"offense", &"ap": &"offense", &"ability_haste": &"offense",
+	&"ad": &"offense", &"ap": &"offense", &"ability_haste": &"offense",
 	&"attack_speed": &"offense", &"attack_range": &"offense",
 	&"crit_chance": &"offense", &"crit_damage": &"offense",
 	&"health_max": &"defense", &"armor": &"defense", &"mr": &"defense",
