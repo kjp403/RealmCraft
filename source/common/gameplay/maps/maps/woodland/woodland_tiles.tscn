@@ -44,6 +44,9 @@
 [ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/slayer_house.tres" id="41_slayer_inst"]
 [ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="47_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/starblossom.tres" id="48_star"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/grimshade.tres" id="49_grim"]
 [ext_resource type="Resource" uid="uid://cyewtree001xxx" path="res://source/common/gameplay/maps/components/mineable_nodes/yew_tree.tres" id="37_ytree"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/sunwort.tres" id="38_sunwrt"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres" id="39_moonb"]
@@ -1665,18 +1668,114 @@ data = ExtResource("37_ytree")
 
 [node name="WingYewCamp2" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
-position = Vector2(4104, 648)
+position = Vector2(3944, 680)
 data = ExtResource("37_ytree")
 
 [node name="WingYewCamp3" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
-position = Vector2(3944, 680)
+position = Vector2(3896, 552)
 data = ExtResource("37_ytree")
 
 [node name="WingYewCamp4" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
-position = Vector2(3896, 552)
+position = Vector2(4136, 584)
 data = ExtResource("37_ytree")
+
+[node name="WingStarblossom1" parent="MineableNodes" unique_id=1930000109 instance=ExtResource("7_jiw8u")]
+position = Vector2(3992, 232)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom2" parent="MineableNodes" unique_id=1930000110 instance=ExtResource("7_jiw8u")]
+position = Vector2(3992, 296)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom3" parent="MineableNodes" unique_id=1930000111 instance=ExtResource("7_jiw8u")]
+position = Vector2(3928, 248)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom4" parent="MineableNodes" unique_id=1930000112 instance=ExtResource("7_jiw8u")]
+position = Vector2(4008, 168)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom5" parent="MineableNodes" unique_id=1930000113 instance=ExtResource("7_jiw8u")]
+position = Vector2(3944, 184)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom6" parent="MineableNodes" unique_id=1930000114 instance=ExtResource("7_jiw8u")]
+position = Vector2(4056, 296)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom7" parent="MineableNodes" unique_id=1930000115 instance=ExtResource("7_jiw8u")]
+position = Vector2(3928, 312)
+data = ExtResource("48_star")
+
+[node name="WingStarblossom8" parent="MineableNodes" unique_id=1930000116 instance=ExtResource("7_jiw8u")]
+position = Vector2(4072, 152)
+data = ExtResource("48_star")
+
+[node name="WingBloodcap1" parent="MineableNodes" unique_id=1930000117 instance=ExtResource("7_jiw8u")]
+position = Vector2(5112, 440)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap2" parent="MineableNodes" unique_id=1930000118 instance=ExtResource("7_jiw8u")]
+position = Vector2(5144, 504)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap3" parent="MineableNodes" unique_id=1930000119 instance=ExtResource("7_jiw8u")]
+position = Vector2(5048, 408)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap4" parent="MineableNodes" unique_id=1930000120 instance=ExtResource("7_jiw8u")]
+position = Vector2(5128, 568)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap5" parent="MineableNodes" unique_id=1930000121 instance=ExtResource("7_jiw8u")]
+position = Vector2(5208, 456)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap6" parent="MineableNodes" unique_id=1930000122 instance=ExtResource("7_jiw8u")]
+position = Vector2(5208, 520)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap7" parent="MineableNodes" unique_id=1930000123 instance=ExtResource("7_jiw8u")]
+position = Vector2(5144, 344)
+data = ExtResource("47_blood")
+
+[node name="WingBloodcap8" parent="MineableNodes" unique_id=1930000124 instance=ExtResource("7_jiw8u")]
+position = Vector2(5192, 584)
+data = ExtResource("47_blood")
+
+[node name="WingGrimshade1" parent="MineableNodes" unique_id=1930000125 instance=ExtResource("7_jiw8u")]
+position = Vector2(3480, 1176)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade2" parent="MineableNodes" unique_id=1930000126 instance=ExtResource("7_jiw8u")]
+position = Vector2(3416, 1208)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade3" parent="MineableNodes" unique_id=1930000127 instance=ExtResource("7_jiw8u")]
+position = Vector2(3352, 1176)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade4" parent="MineableNodes" unique_id=1930000128 instance=ExtResource("7_jiw8u")]
+position = Vector2(3352, 1112)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade5" parent="MineableNodes" unique_id=1930000129 instance=ExtResource("7_jiw8u")]
+position = Vector2(3496, 1240)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade6" parent="MineableNodes" unique_id=1930000130 instance=ExtResource("7_jiw8u")]
+position = Vector2(3560, 1144)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade7" parent="MineableNodes" unique_id=1930000131 instance=ExtResource("7_jiw8u")]
+position = Vector2(3352, 1240)
+data = ExtResource("49_grim")
+
+[node name="WingGrimshade8" parent="MineableNodes" unique_id=1930000132 instance=ExtResource("7_jiw8u")]
+position = Vector2(3352, 1048)
+data = ExtResource("49_grim")
 
 [node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
 position = Vector2(900, 1520)

@@ -138,10 +138,6 @@ npc_resource = SubResource("Resource_6h6u4")
 position = Vector2(-312, -112)
 npc_resource = ExtResource("13_anjaa")
 
-[node name="BankerYard" parent="NPCs" unique_id=1048618123 instance=ExtResource("16_da30u")]
-position = Vector2(-392, 40)
-npc_resource = ExtResource("14_banker")
-
 [node name="Banker" parent="NPCs" unique_id=1048618122 instance=ExtResource("16_da30u")]
 position = Vector2(328, -100)
 npc_resource = ExtResource("14_banker")

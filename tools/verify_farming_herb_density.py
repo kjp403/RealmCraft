@@ -8,9 +8,12 @@ CHECKS = {
     "woodland_tiles": (
         ROOT / "source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn",
         {
-            "healing": r'\[node name="(?:HerbNode\d+|SecretHerbNode)"',
-            "frost": r'\[node name="Frostpetal\d+"',
-            "forbidden": r'\[node name="(?:Sunwort|Moonbloom|Bloodcap|Starblossom|Grimshade)',
+            "healing": r'\[node name="(?:HerbMeadow\d+|PondHerb\d+|WingHerb\d+)"',
+            "frost": r'\[node name="(?:FrostHollow\d+|WingFrost\d+)"',
+            "starblossom": r'\[node name="WingStarblossom\d+"',
+            "bloodcap": r'\[node name="WingBloodcap\d+"',
+            "grimshade": r'\[node name="WingGrimshade\d+"',
+            "forbidden": r'\[node name="(?:Sunwort|Moonbloom|Bloodcap|Starblossom|Grimshade)\d+"',
         },
     ),
     "woodland_east": (
@@ -18,7 +21,7 @@ CHECKS = {
         {
             "healing": r'\[node name="EastHerb\d+"',
             "frost": r'\[node name="EastFrost\d+"',
-            "forbidden": r'\[node name="(?:Sunwort|Moonbloom|Bloodcap|Starblossom|Grimshade|Dim)',
+            "forbidden": r'\[node name="(?:EastBlood|EastStar|EastGrim|Sunwort|Moonbloom|Bloodcap|Starblossom|Grimshade|Dim)',
         },
     ),
     "dimwood": (
