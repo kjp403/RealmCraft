@@ -1,0 +1,121 @@
+[gd_resource type="Resource" script_class="EnemyTypeResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_attack.gd" id="1_5lijc"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="2_shrfp"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_n45ca"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="4_23y6b"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/hell_twisted.tres" id="5_nr83q"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="6_lunge"]
+
+[sub_resource type="Resource" id="Lunge_twisted"]
+script = ExtResource("6_lunge")
+lunge_range = 150.0
+lunge_radius = 24.0
+lunge_cooldown = 6.0
+
+[resource]
+script = ExtResource("4_23y6b")
+enemy_type = &"hell_twisted"
+display_name = "Twisted Damned"
+skin = ExtResource("5_nr83q")
+visual_scale = 1.1
+is_boss = false
+combat_level = 56
+max_health = 165.0
+attack_damage = 24.0
+attack_cooldown = 1.45
+armor = 40.0
+mr = 8.0
+behaviors = Array[ExtResource("2_shrfp")]([SubResource("Lunge_twisted")])
+attacks = Array[ExtResource("1_5lijc")]([])
+move_speed = 50
+distance_to_attack = 24
+max_distance_from_spawn = 420
+leashes = false
+detection_radius = 160
+chase_on_area = true
+is_lone = false
+wander_radius = 28.0
+wander_pause_min_s = 1.5
+wander_pause_max_s = 4.0
+xp_reward = 0
+respawn_delay = 5.0
+respawns = false
+loot = Array[ExtResource("3_n45ca")]([])
+combat_skill_xp_override = 0
+enrage_health_fraction = 0.5
+slam_radius = 110.0
+slam_windup_s = 1.1
+slam_damage = 45.0
+slam_on_target = true
+slam_interval_s = 6.0
+enraged_slam_interval_s = 3.5
+add_enemy_slug = &"rat_base"
+add_count = 2
+add_spread_px = 48.0
+enrage_speed_mult = 1.3
+laser_range = 0.0
+laser_width = 28.0
+laser_windup_s = 1.15
+laser_damage = 55.0
+laser_interval_s = 8.0
+enraged_laser_interval_s = 5.0
+arm_shot_interval_s = 0.0
+arm_shot_damage = 40.0
+arm_shot_speed = 220.0
+arm_shot_lifetime_s = 1.4
+enraged_arm_shot_interval_s = 0.0
+ornate_chest_top_min = 0
+ornate_chest_top_max = 0
+ornate_chest_second_min = 0
+ornate_chest_second_max = 0
+ornate_chest_consolation_chance = 0.0
+phase2_skin = ""
+cast_anim = &"special"
+telegraph_element = 0
+enraged_telegraph_element = -1
+meteor_count = 0
+meteor_radius = 56.0
+meteor_damage = 60.0
+meteor_windup_s = 1.5
+meteor_stagger_s = 0.45
+meteor_spread_px = 190.0
+meteor_interval_s = 11.0
+enraged_meteor_interval_s = 0.0
+meteor_phase = 0
+sweep_arc_deg = 0.0
+sweep_range = 300.0
+sweep_width = 34.0
+sweep_windup_s = 1.2
+sweep_duration_s = 1.1
+sweep_damage = 70.0
+sweep_interval_s = 12.0
+enraged_sweep_interval_s = 0.0
+sweep_phase = 0
+frost_safe_radius = 0.0
+frost_windup_s = 2.6
+frost_damage = 110.0
+frost_offset_px = 150.0
+frost_interval_s = 16.0
+enraged_frost_interval_s = 0.0
+frost_phase = 0
+chain_targets = 0
+chain_range = 170.0
+chain_damage = 45.0
+chain_windup_s = 0.9
+chain_interval_s = 9.0
+enraged_chain_interval_s = 0.0
+chain_phase = 0
+slam_followup_lunge = false
+sear_wound_duration_s = 0.0
+sear_wound_damage = 80.0
+sear_wound_radius = 72.0
+sear_wound_interval_s = 14.0
+enraged_sear_wound_interval_s = 0.0
+sear_wound_windup_s = 0.9
+style_ward_interval_s = 0.0
+style_ward_wrong_mult = 0.25
+soft_enrage_s = 0.0
+soft_enrage_ramp = 0.25
+metadata/slug = &"hell_twisted"
+metadata/id = 119

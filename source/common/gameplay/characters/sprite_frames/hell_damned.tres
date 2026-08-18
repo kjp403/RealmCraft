@@ -1,0 +1,239 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/hell/male_damned.png" id="1_juafr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qmak1"]
+atlas = ExtResource("1_juafr")
+region = Rect2(0, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5e08b"]
+atlas = ExtResource("1_juafr")
+region = Rect2(64, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jf57e"]
+atlas = ExtResource("1_juafr")
+region = Rect2(128, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c5luf"]
+atlas = ExtResource("1_juafr")
+region = Rect2(192, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_elq2o"]
+atlas = ExtResource("1_juafr")
+region = Rect2(256, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_532lp"]
+atlas = ExtResource("1_juafr")
+region = Rect2(320, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6x8xq"]
+atlas = ExtResource("1_juafr")
+region = Rect2(0, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3ia5a"]
+atlas = ExtResource("1_juafr")
+region = Rect2(64, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nupij"]
+atlas = ExtResource("1_juafr")
+region = Rect2(128, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v0lm3"]
+atlas = ExtResource("1_juafr")
+region = Rect2(192, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2bdpn"]
+atlas = ExtResource("1_juafr")
+region = Rect2(256, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nyak0"]
+atlas = ExtResource("1_juafr")
+region = Rect2(320, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hcg4d"]
+atlas = ExtResource("1_juafr")
+region = Rect2(384, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_niwtw"]
+atlas = ExtResource("1_juafr")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_24lon"]
+atlas = ExtResource("1_juafr")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dq5ji"]
+atlas = ExtResource("1_juafr")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5f3c2"]
+atlas = ExtResource("1_juafr")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qycth"]
+atlas = ExtResource("1_juafr")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ge2u"]
+atlas = ExtResource("1_juafr")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r7dnq"]
+atlas = ExtResource("1_juafr")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wf8w3"]
+atlas = ExtResource("1_juafr")
+region = Rect2(128, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4sl6"]
+atlas = ExtResource("1_juafr")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ekks7"]
+atlas = ExtResource("1_juafr")
+region = Rect2(256, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sxbbr"]
+atlas = ExtResource("1_juafr")
+region = Rect2(320, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jip50"]
+atlas = ExtResource("1_juafr")
+region = Rect2(384, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4i7q"]
+atlas = ExtResource("1_juafr")
+region = Rect2(448, 64, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qmak1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5e08b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jf57e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c5luf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_elq2o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_532lp")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6x8xq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3ia5a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nupij")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v0lm3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2bdpn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nyak0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hcg4d")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_niwtw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_24lon")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dq5ji")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5f3c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qycth")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ge2u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r7dnq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wf8w3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4sl6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ekks7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sxbbr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jip50")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4i7q")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ge2u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r7dnq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wf8w3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4sl6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ekks7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sxbbr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jip50")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4i7q")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+metadata/slug = &"hell_damned"
+metadata/id = 80

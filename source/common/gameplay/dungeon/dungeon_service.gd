@@ -519,9 +519,13 @@ static func on_dungeon_cleared(instance: Node) -> void:
 	var start_ms: int = _run_start_ms.get(group_id, Time.get_ticks_msec())
 	var seconds: int = int((Time.get_ticks_msec() - start_ms) / 1000.0)
 	var hard: bool = _run_hard.get(group_id, false)
-	var dungeon_name: String = "Dungeon"
+	var dungeon_title: String = "Dungeon"
+	var board_key: String = "Dungeon"
 	if instance.instance_resource != null:
-		dungeon_name = instance.instance_resource.display_title()
+		dungeon_title = instance.instance_resource.display_title()
+		var inst_name: String = str(instance.instance_resource.instance_name)
+		if not inst_name.is_empty():
+			board_key = inst_name
 	# The completion reward lives on the dungeon's DungeonResource; pick Normal vs
 	# Hard here (Hard falls back to the normal reward if none authored).
 	var dres: DungeonResource = instance.instance_resource as DungeonResource
@@ -529,7 +533,7 @@ static func on_dungeon_cleared(instance: Node) -> void:
 	if dres != null:
 		reward = dres.hard_reward if (hard and dres.hard_reward != null) else dres.reward
 	# Tagged recap label. Normal + Hard share the character's daily charge pool.
-	var label: String = dungeon_name + (" (Hard)" if hard else "")
+	var label: String = dungeon_title + (" (Hard)" if hard else "")
 	var party_size: int = GroupService.members_of(group_id).size()
 	var solo: bool = party_size <= 1
 	for peer: int in GroupService.members_of(group_id):
@@ -538,7 +542,7 @@ static func on_dungeon_cleared(instance: Node) -> void:
 		# race (Normal will go procedural later). Records still count when reward
 		# charges are spent (help runs / hard-record farming).
 		if hard and player != null:
-			LeaderboardService.record_dungeon_clear(player, dungeon_name, seconds)
+			LeaderboardService.record_dungeon_clear(player, board_key, seconds)
 		if player != null:
 			DailyQuestService.on_dungeon_clear(player.player_resource)
 		WorldServer.curr.data_push.rpc_id(peer, &"dungeon.cleared", {

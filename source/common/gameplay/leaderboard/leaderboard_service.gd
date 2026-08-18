@@ -10,6 +10,13 @@ class_name LeaderboardService
 ## roster grows large enough to matter, swap in indexed columns or a cached
 ## ZSET-style structure.
 
+## Fastest-clear keys must match instance_name (what the UI queries). Older
+## clears were stored under display titles; those aliases still rank until the
+## next record rewrite.
+const DUNGEON_KEY_ALIASES: Dictionary = {
+	"Dungeon": PackedStringArray(["The Dark Cave"]),
+	"fungus_dungeon": PackedStringArray(["Fungus Domain"]),
+}
 const DAY_MS: int = 24 * 60 * 60 * 1000
 const WEEK_MS: int = 7 * DAY_MS
 
@@ -50,9 +57,21 @@ static func record_dungeon_clear(player: Player, dungeon_name: String, seconds: 
 	var stats: Dictionary = player.player_resource.lb_stats
 	var best: Dictionary = stats.get("dungeon_best", {})
 	var prev: int = int(best.get(dungeon_name, 0))
+	var aliases: PackedStringArray = DUNGEON_KEY_ALIASES.get(
+		dungeon_name, PackedStringArray()
+	)
+	for alias: String in aliases:
+		if not best.has(alias):
+			continue
+		var alt: int = int(best[alias])
+		if alt > 0 and (prev <= 0 or alt < prev):
+			prev = alt
+		best.erase(alias)
 	if prev == 0 or seconds < prev:
 		best[dungeon_name] = seconds
-		stats["dungeon_best"] = best
+	elif prev > 0:
+		best[dungeon_name] = prev
+	stats["dungeon_best"] = best
 
 
 # --- Server-side: top-N ---
@@ -103,6 +122,8 @@ const PUBLIC_BOARDS: Array[String] = [
 	"level",
 	"gold",
 	"dungeon:Dungeon",
+	"dungeon:fungus_dungeon",
+	"dungeon:hell_dungeon",
 ]
 const PUBLIC_LIMIT: int = 20
 const PUBLIC_CACHE_TTL_MS: int = 10000
@@ -381,12 +402,24 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 		var best: Variant = stats.get("dungeon_best", {})
 		if best is not Dictionary:
 			continue
-		var seconds: int = int((best as Dictionary).get(dungeon_name, 0))
+		var seconds: int = _best_dungeon_seconds(best as Dictionary, dungeon_name)
 		if seconds <= 0:
 			continue
 		scored.append({"id": player_id, "name": display_name, "score": seconds, "sub": 0})
 	scored.sort_custom(func(a, b): return a["score"] < b["score"]) # fastest first
 	return scored.slice(0, limit)
+
+
+static func _best_dungeon_seconds(best: Dictionary, dungeon_name: String) -> int:
+	var seconds: int = int(best.get(dungeon_name, 0))
+	var aliases: PackedStringArray = DUNGEON_KEY_ALIASES.get(
+		dungeon_name, PackedStringArray()
+	)
+	for alias: String in aliases:
+		var alt: int = int(best.get(alias, 0))
+		if alt > 0 and (seconds <= 0 or alt < seconds):
+			seconds = alt
+	return seconds
 
 
 static func _top_n_guild(world_server: Node, board: String, limit: int) -> Array:

@@ -160,7 +160,10 @@ func _build_your_column() -> VBoxContainer:
 	_gold_spin.step = 1
 	_gold_spin.rounded = true
 	_gold_spin.custom_minimum_size = Vector2(110, 32)
+	_gold_spin.select_all_on_focus = true
 	_gold_spin.value_changed.connect(_on_gold_spin_pending)
+	_gold_spin.get_line_edit().text_submitted.connect(func(_text: String) -> void:
+		_on_set_gold())
 	_gold_row.add_child(_gold_spin)
 	_gold_row.add_child(_make_action("Set", _on_set_gold))
 	var gold_x := _make_action("X", _on_gold_type_amount)
@@ -524,8 +527,9 @@ func _on_offer_result(payload: Dictionary) -> void:
 func _on_set_gold() -> void:
 	if _locked:
 		return
-	_gold_spin.get_line_edit().release_focus()
+	_gold_spin.apply()
 	_my_gold = mini(int(_gold_spin.value), _owned_gold)
+	_gold_spin.get_line_edit().release_focus()
 	_gold_pending = false
 	_send_offer()
 
@@ -658,7 +662,10 @@ func _build_qty_overlay() -> void:
 	_qty_spin.min_value = 1
 	_qty_spin.step = 1
 	_qty_spin.rounded = true
+	_qty_spin.select_all_on_focus = true
 	_qty_spin.custom_minimum_size = Vector2(120, 32)
+	_qty_spin.get_line_edit().text_submitted.connect(func(_text: String) -> void:
+		_confirm_qty())
 	box.add_child(_qty_spin)
 	var btns := HBoxContainer.new()
 	btns.add_theme_constant_override(&"separation", 6)
@@ -692,7 +699,9 @@ func _open_qty(item_id: int, is_gold: bool) -> void:
 		_qty_spin.min_value = 1
 	_qty_spin.max_value = owned
 	var current: int = _my_gold if is_gold else int(_my_items.get(item_id, 0))
-	_qty_spin.set_value_no_signal(current if current > 0 else owned)
+	# Default to 1 (or the current offer), never the full stack. Typing into a
+	# FOCUS_NONE overlay used to leave this at "all owned" when Offer was clicked.
+	_qty_spin.set_value_no_signal(current if current > 0 else 1)
 	_qty_overlay.visible = true
 	_qty_spin.get_line_edit().grab_focus()
 	_qty_spin.get_line_edit().select_all()
@@ -706,6 +715,7 @@ func _close_qty() -> void:
 
 
 func _confirm_qty() -> void:
+	_qty_spin.apply()
 	var amount: int = int(_qty_spin.value)
 	if _qty_is_gold:
 		_gold_spin.set_value_no_signal(mini(amount, _owned_gold))

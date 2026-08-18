@@ -1,0 +1,239 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/hell/burning_damned.png" id="1_1h0il"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pc5q2"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(0, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ajovb"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(64, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_48an8"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(128, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7yr7k"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(192, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbfc3"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(256, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rgli8"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(320, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_np7uf"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(0, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h52ld"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(64, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_emh0c"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(128, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a0q3u"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(192, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kibmq"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(256, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ogvf"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(320, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4fvl7"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(384, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5nier"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5oejg"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_68gl5"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7bfn3"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kdb4v"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k2x7a"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7lu68"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kvfgf"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(128, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h3v5h"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8f5sd"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(256, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05yqp"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(320, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7dst"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(384, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yfq78"]
+atlas = ExtResource("1_1h0il")
+region = Rect2(448, 64, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pc5q2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ajovb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_48an8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7yr7k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbfc3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rgli8")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_np7uf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h52ld")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_emh0c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a0q3u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kibmq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ogvf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4fvl7")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5nier")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5oejg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_68gl5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bfn3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kdb4v")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k2x7a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7lu68")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kvfgf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h3v5h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8f5sd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05yqp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7dst")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yfq78")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k2x7a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7lu68")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kvfgf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h3v5h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8f5sd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05yqp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7dst")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yfq78")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 11.0
+}]
+metadata/slug = &"hell_burning"
+metadata/id = 79
