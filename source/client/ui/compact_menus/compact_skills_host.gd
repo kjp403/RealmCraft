@@ -515,32 +515,53 @@ func _rebuild_combat_detail() -> void:
 		list.add_child(empty)
 		return
 
-	for entry: Dictionary in entries:
-		var item: Item = entry.get("item", null) as Item
-		if item == null:
-			continue
-		var req: int = int(entry.get("level", 0))
-		# Read progression from ClientState's mirrors — player_resource is
-		# server-only and always null here, which pinned this to 0 and rendered
-		# every row locked.
-		var player_level: int = 0
-		if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
-			# Armor may gate on character level or any mastery — use character
-			# level so "locked" rows match can_equip's level check.
-			player_level = ClientState.player_level
-			var gear := item as GearItem
-			if gear != null and gear.required_mastery_level > 0:
-				if gear.required_mastery_categories.has(&"any"):
-					player_level = ClientState.best_mastery_level()
-				else:
-					player_level = 0
-					for cat: StringName in gear.required_mastery_categories:
-						player_level = maxi(
-							player_level, ClientState.mastery_level(cat)
-						)
-		else:
-			player_level = ClientState.mastery_level(_selected_combat_category)
-		list.add_child(_make_source_row(item, req, player_level))
+	if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
+		var grouped: Dictionary = {}
+		for entry: Dictionary in entries:
+			var style := StringName(str(entry.get("style", "")))
+			var bucket: Array = grouped.get(style, [])
+			bucket.append(entry)
+			grouped[style] = bucket
+		for style: StringName in MasteryEquipmentGuide.ARMOR_STYLE_ORDER:
+			var group: Array = grouped.get(style, [])
+			if group.is_empty():
+				continue
+			list.add_child(_slayer_section_label(
+				MasteryEquipmentGuide.armor_style_name(style)
+			))
+			for entry: Dictionary in group:
+				_add_combat_gear_row(list, entry)
+	else:
+		for entry: Dictionary in entries:
+			_add_combat_gear_row(list, entry)
+
+
+func _add_combat_gear_row(list: VBoxContainer, entry: Dictionary) -> void:
+	var item: Item = entry.get("item", null) as Item
+	if item == null:
+		return
+	var req: int = int(entry.get("level", 0))
+	# Read progression from ClientState's mirrors — player_resource is
+	# server-only and always null here, which pinned this to 0 and rendered
+	# every row locked.
+	var player_level: int = 0
+	if _selected_combat_category == MasteryEquipmentGuide.ARMOR_CATEGORY:
+		# Armor may gate on character level or any mastery — use character
+		# level so "locked" rows match can_equip's level check.
+		player_level = ClientState.player_level
+		var gear := item as GearItem
+		if gear != null and gear.required_mastery_level > 0:
+			if gear.required_mastery_categories.has(&"any"):
+				player_level = ClientState.best_mastery_level()
+			else:
+				player_level = 0
+				for cat: StringName in gear.required_mastery_categories:
+					player_level = maxi(
+						player_level, ClientState.mastery_level(cat)
+					)
+	else:
+		player_level = ClientState.mastery_level(_selected_combat_category)
+	list.add_child(_make_source_row(item, req, player_level))
 
 
 func _skill_info_for(slug: String) -> Dictionary:

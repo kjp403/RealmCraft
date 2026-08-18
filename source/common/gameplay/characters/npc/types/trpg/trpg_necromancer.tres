@@ -30,6 +30,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astral_ore.tres" id="as_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_netherglass.tres" id="relic_nether"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_blue_large.tres" id="chest_blue"]
+[ext_resource type="Resource" uid="uid://0epju752htr8" path="res://source/common/gameplay/items/chests/gold_steel_grand.tres" id="chest_steel_grand"]
 [ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="mithril_ore"]
 [ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="adamant_ore"]
 [ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="runite_ore"]
@@ -135,6 +136,10 @@ chance = 0.02
 script = ExtResource("3_ew0xl")
 item = ExtResource("relic_nether")
 chance = 0.001
+[sub_resource type="Resource" id="Drop_grand_steel"]
+script = ExtResource("3_ew0xl")
+item = ExtResource("chest_steel_grand")
+chance = 0.1
 [sub_resource type="Resource" id="Drop_mithril_ore"]
 script = ExtResource("3_ew0xl")
 item = ExtResource("mithril_ore")
@@ -227,7 +232,7 @@ chain_damage = 180.0
 chain_windup_s = 0.9
 chain_interval_s = 7.5
 enraged_chain_interval_s = 4.8
-loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_gold_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_mithril_ore"), SubResource("Drop_adamant_ore"), SubResource("Drop_runite_ore"), SubResource("Drop_coal"), SubResource("Drop_maple"), SubResource("Drop_yew"), SubResource("Drop_dungeon_key"), SubResource("Drop_wyrmguard_sword"), SubResource("Drop_wyrmguard_hammer"), SubResource("Drop_nightglass_bow"), SubResource("Drop_astral_wand"), SubResource("Drop_astral_book"), SubResource("Drop_wyrmguard_ore"), SubResource("Drop_hide_nightglass"), SubResource("Drop_wyrmguard_gem"), SubResource("Drop_nightglass_gem"), SubResource("Drop_astral_gem"), SubResource("Drop_wyrmguard_cloth"), SubResource("Drop_nightglass_leather"), SubResource("Drop_nightglass_cloth"), SubResource("Drop_fiber_nightglass"), SubResource("Drop_fiber_astral"), SubResource("Drop_astral_cloth"), SubResource("Drop_astral_ore"), SubResource("Drop_relic_netherglass")])
+loot = Array[ExtResource("3_ew0xl")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_gold_bar"), SubResource("Drop_cloth_bandit"), SubResource("Drop_mithril_ore"), SubResource("Drop_adamant_ore"), SubResource("Drop_runite_ore"), SubResource("Drop_coal"), SubResource("Drop_maple"), SubResource("Drop_yew"), SubResource("Drop_dungeon_key"), SubResource("Drop_wyrmguard_sword"), SubResource("Drop_wyrmguard_hammer"), SubResource("Drop_nightglass_bow"), SubResource("Drop_astral_wand"), SubResource("Drop_astral_book"), SubResource("Drop_wyrmguard_ore"), SubResource("Drop_hide_nightglass"), SubResource("Drop_wyrmguard_gem"), SubResource("Drop_nightglass_gem"), SubResource("Drop_astral_gem"), SubResource("Drop_wyrmguard_cloth"), SubResource("Drop_nightglass_leather"), SubResource("Drop_nightglass_cloth"), SubResource("Drop_fiber_nightglass"), SubResource("Drop_fiber_astral"), SubResource("Drop_astral_cloth"), SubResource("Drop_astral_ore"), SubResource("Drop_relic_netherglass"), SubResource("Drop_grand_steel")])
 ornate_chest_top_min = 1
 ornate_chest_top_max = 2
 ornate_chest_second_min = 0

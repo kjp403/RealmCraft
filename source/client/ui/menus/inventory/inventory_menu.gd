@@ -557,6 +557,13 @@ func _make_bag_button(entry: Dictionary) -> Button:
 				var to_uid: int = int(entry.uid)
 				if from_uid < 0 or to_uid < 0 or from_uid == to_uid:
 					return
+				var from_id: int = int((data as Dictionary).get("item_id", 0))
+				var to_id: int = int((entry.item as Item).get_meta(&"id", 0))
+				if from_id > 0 and from_id == to_id:
+					var moved: int = await StackMerge.try_merge(from_uid, to_uid, false)
+					if moved > 0:
+						fill_inventory()
+						return
 				BagOrder.move_before(BagOrder.load_order(), from_uid, to_uid)
 				fill_inventory()
 		)
