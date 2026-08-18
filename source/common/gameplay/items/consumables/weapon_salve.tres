@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_weapon_salve.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+coating_kind = &"heal"
+coating_potency = 3.0
+coating_duration_s = 300.0
+shared_cooldown_ms = 3000
+cooldown_category = &"weapon_coating"
+item_name = &"Weapon Salve"
+item_icon = ExtResource("1_tex")
+description = "Fae residue worked into a balm. The blade takes a little back for you every time it lands."
+vendor_value = 2200
+metadata/slug = &"weapon_salve"
+metadata/id = 590

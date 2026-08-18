@@ -17,6 +17,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="pot_5"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/focus_tonic.tres" id="pot_6"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="vial_water"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/blightspore.tres" id="herb_blightspore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/weapon_poison.tres" id="pot_poison"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/fairy_dust.tres" id="herb_fairy_dust"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/weapon_salve.tres" id="pot_salve"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/ember_ash.tres" id="herb_ember_ash"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/weapon_ember.tres" id="pot_ember"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/venom_sac.tres" id="herb_venom_sac"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/weapon_poison_plus.tres" id="pot_poison_plus"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/pale_sporecap.tres" id="quest_cap"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/weak_seep_tonic.tres" id="quest_tonic"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/true_seep_root.tres" id="quest_root"]
@@ -95,6 +103,46 @@ output_item = ExtResource("pot_6")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_6")])
 required_level = 50
 xp_reward = 1080
+[sub_resource type="Resource" id="I_poison"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_blightspore")
+amount = 3
+[sub_resource type="Resource" id="R_poison"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_poison")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_poison")])
+required_level = 35
+xp_reward = 800
+[sub_resource type="Resource" id="I_salve"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_fairy_dust")
+amount = 3
+[sub_resource type="Resource" id="R_salve"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_salve")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_salve")])
+required_level = 45
+xp_reward = 950
+[sub_resource type="Resource" id="I_ember"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_ember_ash")
+amount = 3
+[sub_resource type="Resource" id="R_ember"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_ember")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_ember")])
+required_level = 55
+xp_reward = 1100
+[sub_resource type="Resource" id="I_poison_plus"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_venom_sac")
+amount = 3
+[sub_resource type="Resource" id="R_poison_plus"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_poison_plus")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_poison_plus")])
+required_level = 65
+xp_reward = 1400
 [sub_resource type="Resource" id="I_seep_cap"]
 script = ExtResource("3_ingred")
 item = ExtResource("quest_cap")
@@ -120,4 +168,4 @@ script = ExtResource("2_station")
 station_name = "Alchemy Table"
 profession = &"herblore"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_seep_tonic"), SubResource("R_seep_draught")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_seep_tonic"), SubResource("R_seep_draught")])

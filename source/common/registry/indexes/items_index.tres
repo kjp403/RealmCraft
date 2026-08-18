@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1786769153
-next_id = 585
+version = 1787088640
+next_id = 593
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2702,6 +2702,46 @@ entries = Array[Dictionary]([{
 &"id": 584,
 &"path": "res://source/common/gameplay/items/quest/weak_seep_tonic.tres",
 &"slug": &"weak_seep_tonic"
+}, {
+&"hash": "caef58b92b7fac5b17b06f8a6351c66fb9a48f2c412106146271cb24ac54e2c7",
+&"id": 585,
+&"path": "res://source/common/gameplay/items/materials/herbs/blightspore.tres",
+&"slug": &"blightspore"
+}, {
+&"hash": "28d1fb4342f257491a008b3f09c828dbbba8b379ef19fd28808374789c59275d",
+&"id": 586,
+&"path": "res://source/common/gameplay/items/consumables/weapon_poison.tres",
+&"slug": &"weapon_poison"
+}, {
+&"hash": "4500be4f2d429d18e0d4f50f298af6be6a157759d2e7c84db9e3ba6763770dfc",
+&"id": 587,
+&"path": "res://source/common/gameplay/items/materials/herbs/ember_ash.tres",
+&"slug": &"ember_ash"
+}, {
+&"hash": "8d4572a2b87b492deb8584a530acced73438cd243375e578215d97dbbe079c28",
+&"id": 588,
+&"path": "res://source/common/gameplay/items/materials/herbs/fairy_dust.tres",
+&"slug": &"fairy_dust"
+}, {
+&"hash": "9cd08120f6a46a728bba40b0ab0befba64361c6758f49ca4b1c47fb540758427",
+&"id": 589,
+&"path": "res://source/common/gameplay/items/materials/herbs/venom_sac.tres",
+&"slug": &"venom_sac"
+}, {
+&"hash": "82477bbba251bfc7995b888631929f1da7316d9de48792f2d79ad420bf0f8902",
+&"id": 590,
+&"path": "res://source/common/gameplay/items/consumables/weapon_salve.tres",
+&"slug": &"weapon_salve"
+}, {
+&"hash": "0be01ad7599ea0ffc68ddf8bd8e7e2ad404524157df5bfd09c761d67af4a5892",
+&"id": 591,
+&"path": "res://source/common/gameplay/items/consumables/weapon_ember.tres",
+&"slug": &"weapon_ember"
+}, {
+&"hash": "6ba32f5be7c6cc7a3044c2da8cb990d8af41252043ef57e0fbe215a4f17eeba1",
+&"id": 592,
+&"path": "res://source/common/gameplay/items/consumables/weapon_poison_plus.tres",
+&"slug": &"weapon_poison_plus"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

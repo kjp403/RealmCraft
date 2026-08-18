@@ -201,6 +201,8 @@ func _on_item_action_result(result: Dictionary) -> void:
 			Toaster.toast("That's still on cooldown.")
 		"no_effect":
 			Toaster.toast("You do not currently need that potion.")
+		"coating_active":
+			Toaster.toast("You already have an active potion.")
 		"level":
 			Toaster.toast("Requires level %d to equip." % int(result.get("level", 0)))
 		"mastery":

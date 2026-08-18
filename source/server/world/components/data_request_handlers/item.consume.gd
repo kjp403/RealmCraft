@@ -27,6 +27,17 @@ func data_request_handler(
 	if consumable == null:
 		return {"ok": false, "reason": "not_consumable"}
 
+	# One weapon coating at a time. Checked ahead of can_use (which also refuses,
+	# so the hotbar and the held sip agree) purely so the refusal can be NAMED —
+	# "no_effect" would read as "this potion is broken".
+	if consumable.is_coating() and CoatingService.is_active(player):
+		return {
+			"ok": false,
+			"reason": "coating_active",
+			"active_kind": String(CoatingService.active_kind(player)),
+			"remaining": CoatingService.remaining_seconds(player),
+		}
+
 	if not consumable.can_use(player):
 		return {"ok": false, "reason": "no_effect"}
 

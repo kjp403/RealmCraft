@@ -91,6 +91,10 @@ func _on_status_tick() -> void:
 			continue
 		# Expire finished buffs FIRST so this tick's regen uses the post-buff rate.
 		BuffService.tick(player)
+		# Drop a weapon coating the moment it runs out, so the strip and the
+		# stored field agree, and the next vial is drinkable the second the icon
+		# clears rather than on the next swing.
+		CoatingService.tick(player)
 		# Status HUD snapshot (buffs / DoTs / in-combat) — after the expiry pass
 		# so dropped buffs vanish from the strip the same second they end.
 		StatusService.sync(player)

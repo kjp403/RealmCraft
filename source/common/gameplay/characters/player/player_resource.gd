@@ -226,6 +226,11 @@ var stats: Dictionary
 ## only on purpose: survives instance changes within a session, gone on logout.
 var active_buffs: Array[Dictionary] = []
 
+## Live weapon coating ({kind, potency, hit_duration_s, expires_ms} — see
+## CoatingService), empty when the weapon is clean. Not a stat buff, so it
+## cannot live in active_buffs; runtime only for the same reason those are.
+var weapon_coating: Dictionary = {}
+
 ## Mastery passive modifiers currently applied to live stats ({stat, value}).
 ## Runtime only — rebuilt by MasteryService.refresh on spawn and weapon swaps.
 var applied_mastery_passives: Array[Dictionary] = []
