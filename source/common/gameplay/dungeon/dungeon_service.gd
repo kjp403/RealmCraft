@@ -774,11 +774,20 @@ static func register_dungeon_death(player: Node) -> bool:
 ## The revive pool is spent and someone died: the run FAILS. Revive everyone (so they arrive home
 ## alive), tell them, then eject to town after a short beat. No reward. Server-only.
 static func _fail_run(group_id: int) -> void:
-	if WorldServer.curr == null or _ejecting.get(group_id, false):
+	if WorldServer.curr == null:
+		return
+	var instance: Node = _runs.get(group_id, null)
+	# Always stand up anyone still at 0 HP — a second death while ejecting used
+	# to return here without revive() and leave the body stuck dead in the dungeon.
+	if instance != null:
+		for peer: int in GroupService.members_of(group_id):
+			var down: Player = instance.get_player(peer) as Player
+			if down != null and down.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+				down.revive()
+	if _ejecting.get(group_id, false):
 		return
 	_ejecting[group_id] = true # mark the eject non-voluntary (no "Left X" toast in on_player_left)
 	_hide_hud(group_id) # stop the run clock immediately, ahead of the eject delay
-	var instance: Node = _runs.get(group_id, null)
 	var dungeon_name: String = "the dungeon"
 	if instance != null and instance.instance_resource != null:
 		dungeon_name = instance.instance_resource.display_title()

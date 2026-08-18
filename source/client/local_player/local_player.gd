@@ -275,10 +275,25 @@ func _on_player_died(data: Dictionary) -> void:
 	await get_tree().create_timer(float(data.get("respawn_in", 3.0))).timeout
 	if not is_instance_valid(self):
 		return
-	_dead = false
+	# Do not unlock while HP is still 0 — the server owns revive. Clearing _dead
+	# here used to let you walk and input a corpse until (or unless) HP came back.
+	if stats_component.get_stat(Stat.HEALTH) > 0.0:
+		_dead = false
 	if return_home:
 		return
-	global_position = _respawn_position
+	if not _dead:
+		global_position = _respawn_position
+
+
+## Stay locked while HEALTH is 0 even if player.died never arrived (hard-dungeon
+## fail) or the 3s unlock raced the server revive. Unlock the moment HP returns.
+func _sync_dead_lock() -> void:
+	if stats_component == null:
+		return
+	if stats_component.get_stat(Stat.HEALTH) <= 0.0:
+		_dead = true
+	elif _dead:
+		_dead = false
 
 
 ## Server-driven teleport for the start/end of a sparring match. Pushes carry
@@ -555,6 +570,7 @@ func _notify_zone_transition() -> void:
 
 
 func process_movement() -> void:
+	_sync_dead_lock()
 	# A ROOTED channel (heal aura) freezes you; a MOBILE channel (spin) lets you
 	# walk, slowed (handled below). Death / menu / movement-lock always freeze.
 	if _dead or ClientState.menu_open or Time.get_ticks_msec() < _movement_lock_until_ms \
@@ -574,6 +590,7 @@ func process_movement() -> void:
 
 
 func process_input() -> void:
+	_sync_dead_lock()
 	# Movement lock (drink / hammer slam root) freezes WASD but must NOT cancel
 	# Right-click → Attack — otherwise heavy weapons abort after one hit.
 	var rooted: bool = Time.get_ticks_msec() < _movement_lock_until_ms
@@ -769,6 +786,7 @@ func process_input() -> void:
 
 
 func process_animation(delta: float) -> void:
+	_sync_dead_lock()
 	if _dead:
 		# Play (and hold) the death pose instead of input-driven locomotion. Synced to
 		# other clients via the :anim field like any other animation.

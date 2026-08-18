@@ -84,7 +84,10 @@ var _hp_regen_tick: Dictionary = {}
 func _on_status_tick() -> void:
 	for peer_id: int in players_by_peer_id:
 		var player: Player = players_by_peer_id[peer_id]
-		if player == null or player.is_dead:
+		if player == null:
+			continue
+		if player.is_dead:
+			player.maybe_unstick_death()
 			continue
 		# Expire finished buffs FIRST so this tick's regen uses the post-buff rate.
 		BuffService.tick(player)
