@@ -22,9 +22,6 @@
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="herb_scene"]
 [ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="herb_heal"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="herb_frost"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="herb_blood"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/starblossom.tres" id="herb_star"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/grimshade.tres" id="herb_grim"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_runt.tres" id="we_runt"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_cutter.tres" id="we_cutter"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_slinger.tres" id="we_slinger"]
@@ -335,78 +332,6 @@ data = ExtResource("herb_frost")
 [node name="EastFrost22" parent="MineableNodes" unique_id=1920000151 instance=ExtResource("herb_scene")]
 position = Vector2(2400, 2000)
 data = ExtResource("herb_frost")
-[node name="EastBlood1" parent="MineableNodes" unique_id=1920000152 instance=ExtResource("herb_scene")]
-position = Vector2(240, 960)
-data = ExtResource("herb_blood")
-[node name="EastBlood2" parent="MineableNodes" unique_id=1920000153 instance=ExtResource("herb_scene")]
-position = Vector2(640, 1280)
-data = ExtResource("herb_blood")
-[node name="EastBlood3" parent="MineableNodes" unique_id=1920000154 instance=ExtResource("herb_scene")]
-position = Vector2(1040, 800)
-data = ExtResource("herb_blood")
-[node name="EastBlood4" parent="MineableNodes" unique_id=1920000155 instance=ExtResource("herb_scene")]
-position = Vector2(1520, 1440)
-data = ExtResource("herb_blood")
-[node name="EastBlood5" parent="MineableNodes" unique_id=1920000156 instance=ExtResource("herb_scene")]
-position = Vector2(1920, 480)
-data = ExtResource("herb_blood")
-[node name="EastBlood6" parent="MineableNodes" unique_id=1920000157 instance=ExtResource("herb_scene")]
-position = Vector2(2320, 1680)
-data = ExtResource("herb_blood")
-[node name="EastBlood7" parent="MineableNodes" unique_id=1920000158 instance=ExtResource("herb_scene")]
-position = Vector2(720, 2080)
-data = ExtResource("herb_blood")
-[node name="EastBlood8" parent="MineableNodes" unique_id=1920000159 instance=ExtResource("herb_scene")]
-position = Vector2(2720, 720)
-data = ExtResource("herb_blood")
-[node name="EastStar1" parent="MineableNodes" unique_id=1920000160 instance=ExtResource("herb_scene")]
-position = Vector2(320, 1520)
-data = ExtResource("herb_star")
-[node name="EastStar2" parent="MineableNodes" unique_id=1920000161 instance=ExtResource("herb_scene")]
-position = Vector2(880, 640)
-data = ExtResource("herb_star")
-[node name="EastStar3" parent="MineableNodes" unique_id=1920000162 instance=ExtResource("herb_scene")]
-position = Vector2(1280, 1840)
-data = ExtResource("herb_star")
-[node name="EastStar4" parent="MineableNodes" unique_id=1920000163 instance=ExtResource("herb_scene")]
-position = Vector2(1760, 880)
-data = ExtResource("herb_star")
-[node name="EastStar5" parent="MineableNodes" unique_id=1920000164 instance=ExtResource("herb_scene")]
-position = Vector2(2080, 2080)
-data = ExtResource("herb_star")
-[node name="EastStar6" parent="MineableNodes" unique_id=1920000165 instance=ExtResource("herb_scene")]
-position = Vector2(2480, 400)
-data = ExtResource("herb_star")
-[node name="EastStar7" parent="MineableNodes" unique_id=1920000166 instance=ExtResource("herb_scene")]
-position = Vector2(2880, 1520)
-data = ExtResource("herb_star")
-[node name="EastStar8" parent="MineableNodes" unique_id=1920000167 instance=ExtResource("herb_scene")]
-position = Vector2(480, 2160)
-data = ExtResource("herb_star")
-[node name="EastGrim1" parent="MineableNodes" unique_id=1920000168 instance=ExtResource("herb_scene")]
-position = Vector2(400, 720)
-data = ExtResource("herb_grim")
-[node name="EastGrim2" parent="MineableNodes" unique_id=1920000169 instance=ExtResource("herb_scene")]
-position = Vector2(1120, 1280)
-data = ExtResource("herb_grim")
-[node name="EastGrim3" parent="MineableNodes" unique_id=1920000170 instance=ExtResource("herb_scene")]
-position = Vector2(1600, 480)
-data = ExtResource("herb_grim")
-[node name="EastGrim4" parent="MineableNodes" unique_id=1920000171 instance=ExtResource("herb_scene")]
-position = Vector2(2000, 1360)
-data = ExtResource("herb_grim")
-[node name="EastGrim5" parent="MineableNodes" unique_id=1920000172 instance=ExtResource("herb_scene")]
-position = Vector2(2560, 800)
-data = ExtResource("herb_grim")
-[node name="EastGrim6" parent="MineableNodes" unique_id=1920000173 instance=ExtResource("herb_scene")]
-position = Vector2(2960, 1840)
-data = ExtResource("herb_grim")
-[node name="EastGrim7" parent="MineableNodes" unique_id=1920000174 instance=ExtResource("herb_scene")]
-position = Vector2(880, 1760)
-data = ExtResource("herb_grim")
-[node name="EastGrim8" parent="MineableNodes" unique_id=1920000175 instance=ExtResource("herb_scene")]
-position = Vector2(2240, 2160)
-data = ExtResource("herb_grim")
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." node_paths=PackedStringArray("id_to_node", "node_to_id")]
 y_sort_enabled = true

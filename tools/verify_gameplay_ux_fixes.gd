@@ -105,12 +105,12 @@ func _init() -> void:
 	if smith_inside.find("npcs/banker.tres") < 0 or smith_inside.find("npcs/mira.tres") < 0:
 		failures.append("smith house inside must have banker beside Mira")
 	var east: String = FileAccess.get_file_as_string(
-		"res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
+		"res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn"
 	)
-	if east.find("mineable_nodes/bloodcap.tres") < 0 \
-			or east.find("mineable_nodes/starblossom.tres") < 0 \
-			or east.find("mineable_nodes/grimshade.tres") < 0:
-		failures.append("woodland east missing bloodcap/starblossom/grimshade nodes")
+	if east.find("[node name=\"WingBloodcap") < 0 \
+			or east.find("[node name=\"WingStarblossom") < 0 \
+			or east.find("[node name=\"WingGrimshade") < 0:
+		failures.append("east wing missing grouped bloodcap/starblossom/grimshade patches")
 	var slayer_shop: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/shops/resources/slayer_shop.tres"
 	)
