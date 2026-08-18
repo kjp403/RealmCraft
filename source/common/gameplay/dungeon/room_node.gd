@@ -46,6 +46,8 @@ var _container: ReplicatedPropsContainer
 var _hard: bool = false
 var _hp_mult: float = 1.0
 var _dmg_mult: float = 1.0
+var _normal_hp_mult: float = 1.0
+var _normal_dmg_mult: float = 1.0
 var _boss_hp_mult: float = 1.0
 var _boss_dmg_mult: float = 1.0
 ## Absolute boss HP by party size (empty = multiplier path).
@@ -149,6 +151,8 @@ func _resolve_difficulty(map: Node) -> void:
 	_hard = DungeonService.is_hard_run(instance)
 	var dres: DungeonResource = instance.instance_resource as DungeonResource if instance != null else null
 	if dres != null:
+		_normal_hp_mult = dres.normal_health_mult
+		_normal_dmg_mult = dres.normal_damage_mult
 		if _hard:
 			_hp_mult = dres.hard_health_mult
 			_dmg_mult = dres.hard_damage_mult
@@ -161,6 +165,8 @@ func _resolve_difficulty(map: Node) -> void:
 		_boss_slam_damage = dres.boss_slam_damage
 		_hard_boss_hp_mult = dres.hard_boss_health_mult if _hard else 1.0
 	else:
+		_normal_hp_mult = 1.0
+		_normal_dmg_mult = 1.0
 		_hp_mult = DungeonService.HARD_HEALTH_MULT if _hard else 1.0
 		_dmg_mult = DungeonService.HARD_DAMAGE_MULT if _hard else 1.0
 		_boss_hp_mult = 1.0
@@ -240,6 +246,8 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		brain.name = "BossController"
 		brain.boss = npc
 		npc.add_child(brain) # _ready() loads slam_damage from enemy_data...
+		brain.add_health_mult = _hp_mult
+		brain.add_damage_mult = _dmg_mult
 		if _boss_slam_damage > 0.0:
 			var slam: float = _boss_slam_damage
 			if _hard:

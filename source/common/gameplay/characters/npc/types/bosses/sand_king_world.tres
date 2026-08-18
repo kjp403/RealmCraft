@@ -17,6 +17,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_red_large.tres" id="chest_red"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_bandit.tres" id="cloth_bandit"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="gold_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
@@ -130,6 +132,16 @@ chance = 0.5
 script = ExtResource("3_loot")
 item = ExtResource("dungeon_key")
 chance = 0.02
+
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.18
 
 [sub_resource type="Resource" id="Drop_basilisk_sword"]
 script = ExtResource("3_loot")
@@ -261,7 +273,7 @@ wander_pause_max_s = 4.0
 xp_reward = 11000
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_sunsteel_bow"), SubResource("Drop_sunsteel_wand"), SubResource("Drop_sunsteel_book"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_relic_scarabheart")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_sunsteel_bow"), SubResource("Drop_sunsteel_wand"), SubResource("Drop_sunsteel_book"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_relic_scarabheart")])
 combat_skill_xp_override = 28000
 enrage_health_fraction = 0.4
 slam_radius = 135.0

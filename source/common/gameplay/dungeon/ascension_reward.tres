@@ -1,193 +1,257 @@
 [gd_resource type="Resource" script_class="DungeonReward" format=3]
 
-[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_ky1fu"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/basilisk_ore.tres" id="2_h7ytm"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres" id="3_321f0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres" id="4_372qi"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres" id="5_10eyt"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres" id="6_8neae"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/basilisk_gem.tres" id="7_41fpd"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="8_8f7ay"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_tempest.tres" id="9_2vy2i"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres" id="10_enxti"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="11_ic5j0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres" id="12_p1tky"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="13_ss7an"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres" id="14_nrj87"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_starfall.tres" id="15_0iosv"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres" id="16_nudd7"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/starfall_leather.tres" id="17_idyc1"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/primordial_cloth.tres" id="18_n57bf"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres" id="19_iid6b"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres" id="20_shtv6"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres" id="21_hlwn2"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres" id="22_60tiv"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres" id="23_h5vkw"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_nightfall.item.tres" id="24_htj86"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_kingsbane.item.tres" id="25_n7r0v"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres" id="26_p2iqy"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="27_5r8l5"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="28_kemte"]
-[ext_resource type="Script" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="29_qcai2"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres" id="2_wg_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres" id="3_wg_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres" id="4_wg_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_nightglass.tres" id="5_ng_hide"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/nightglass_leather.tres" id="6_ng_leather"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/nightglass_gem.tres" id="7_ng_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_nightglass.tres" id="8_ng_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/nightglass_cloth.tres" id="9_ng_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astral_ore.tres" id="10_as_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/astral_gem.tres" id="11_as_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_astral.tres" id="12_as_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/astral_cloth.tres" id="13_as_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="14_co_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/colossus_gem.tres" id="15_co_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/colossus_cloth.tres" id="16_co_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_tempest.tres" id="17_te_hide"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="18_te_leather"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/tempest_gem.tres" id="19_te_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_tempest.tres" id="20_te_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/tempest_cloth.tres" id="21_te_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/voidsilk_ore.tres" id="22_vs_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/voidsilk_gem.tres" id="23_vs_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres" id="24_vs_fiber"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres" id="25_vs_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres" id="26_wg_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres" id="27_wg_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres" id="28_ng_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres" id="29_as_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_astral.item.tres" id="30_as_book"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_colossus.item.tres" id="31_co_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres" id="32_co_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/tempest_bow.item.tres" id="33_te_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres" id="34_vs_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_voidsilk.item.tres" id="35_vs_book"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres" id="36_reliquary"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="37_ring"]
+[ext_resource type="Script" path="res://source/common/gameplay/dungeon/dungeon_reward.gd" id="38_reward"]
 
-[sub_resource type="Resource" id="Resource_qj52g"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("2_h7ytm")
+[sub_resource type="Resource" id="Drop_wg_ore"]
+script = ExtResource("1_loot")
+item = ExtResource("2_wg_ore")
 min_amount = 2
 max_amount = 6
 chance = 0.55
 
-[sub_resource type="Resource" id="Resource_vir2m"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("3_321f0")
+[sub_resource type="Resource" id="Drop_wg_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("3_wg_gem")
+max_amount = 2
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_wg_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("4_wg_cloth")
+max_amount = 4
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_ng_hide"]
+script = ExtResource("1_loot")
+item = ExtResource("5_ng_hide")
 min_amount = 2
 max_amount = 5
 chance = 0.5
 
-[sub_resource type="Resource" id="Resource_xna35"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("4_372qi")
+[sub_resource type="Resource" id="Drop_ng_leather"]
+script = ExtResource("1_loot")
+item = ExtResource("6_ng_leather")
+max_amount = 4
+chance = 0.45
+
+[sub_resource type="Resource" id="Drop_ng_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("7_ng_gem")
+max_amount = 2
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_ng_fiber"]
+script = ExtResource("1_loot")
+item = ExtResource("8_ng_fiber")
 min_amount = 2
 max_amount = 5
 chance = 0.5
 
-[sub_resource type="Resource" id="Resource_qj0b1"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("5_10eyt")
+[sub_resource type="Resource" id="Drop_ng_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("9_ng_cloth")
 max_amount = 4
 chance = 0.45
 
-[sub_resource type="Resource" id="Resource_bbaa8"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("6_8neae")
+[sub_resource type="Resource" id="Drop_as_ore"]
+script = ExtResource("1_loot")
+item = ExtResource("10_as_ore")
+min_amount = 2
+max_amount = 6
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_as_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("11_as_gem")
+max_amount = 2
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_as_fiber"]
+script = ExtResource("1_loot")
+item = ExtResource("12_as_fiber")
+min_amount = 2
+max_amount = 5
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_as_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("13_as_cloth")
 max_amount = 4
 chance = 0.45
 
-[sub_resource type="Resource" id="Resource_i7c5q"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("7_41fpd")
+[sub_resource type="Resource" id="Drop_co_ore"]
+script = ExtResource("1_loot")
+item = ExtResource("14_co_ore")
+max_amount = 4
+chance = 0.32
+
+[sub_resource type="Resource" id="Drop_co_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("15_co_gem")
 max_amount = 2
-chance = 0.35
-
-[sub_resource type="Resource" id="Resource_nrh0g"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("8_8f7ay")
-max_amount = 3
-chance = 0.25
-
-[sub_resource type="Resource" id="Resource_adtts"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("9_2vy2i")
-max_amount = 4
-chance = 0.28
-
-[sub_resource type="Resource" id="Resource_ulks5"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("10_enxti")
-max_amount = 4
-chance = 0.28
-
-[sub_resource type="Resource" id="Resource_767i6"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("11_ic5j0")
-max_amount = 3
 chance = 0.22
 
-[sub_resource type="Resource" id="Resource_f8rnt"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("12_p1tky")
+[sub_resource type="Resource" id="Drop_co_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("16_co_cloth")
 max_amount = 3
+chance = 0.28
+
+[sub_resource type="Resource" id="Drop_te_hide"]
+script = ExtResource("1_loot")
+item = ExtResource("17_te_hide")
+max_amount = 4
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_te_leather"]
+script = ExtResource("1_loot")
+item = ExtResource("18_te_leather")
+max_amount = 3
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_te_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("19_te_gem")
+max_amount = 2
 chance = 0.22
 
-[sub_resource type="Resource" id="Resource_noffe"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("13_ss7an")
-chance = 0.12
+[sub_resource type="Resource" id="Drop_te_fiber"]
+script = ExtResource("1_loot")
+item = ExtResource("20_te_fiber")
+max_amount = 4
+chance = 0.3
 
-[sub_resource type="Resource" id="Resource_wr1e5"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("14_nrj87")
+[sub_resource type="Resource" id="Drop_te_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("21_te_cloth")
+max_amount = 3
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_vs_ore"]
+script = ExtResource("1_loot")
+item = ExtResource("22_vs_ore")
+max_amount = 4
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_vs_gem"]
+script = ExtResource("1_loot")
+item = ExtResource("23_vs_gem")
 max_amount = 2
+chance = 0.22
+
+[sub_resource type="Resource" id="Drop_vs_fiber"]
+script = ExtResource("1_loot")
+item = ExtResource("24_vs_fiber")
+max_amount = 4
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_vs_cloth"]
+script = ExtResource("1_loot")
+item = ExtResource("25_vs_cloth")
+max_amount = 3
+chance = 0.26
+
+[sub_resource type="Resource" id="Drop_wg_sword"]
+script = ExtResource("1_loot")
+item = ExtResource("26_wg_sword")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_wg_hammer"]
+script = ExtResource("1_loot")
+item = ExtResource("27_wg_hammer")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_ng_bow"]
+script = ExtResource("1_loot")
+item = ExtResource("28_ng_bow")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_as_wand"]
+script = ExtResource("1_loot")
+item = ExtResource("29_as_wand")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_as_book"]
+script = ExtResource("1_loot")
+item = ExtResource("30_as_book")
+chance = 0.1
+
+[sub_resource type="Resource" id="Drop_co_sword"]
+script = ExtResource("1_loot")
+item = ExtResource("31_co_sword")
 chance = 0.06
 
-[sub_resource type="Resource" id="Resource_dywvm"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("15_0iosv")
-max_amount = 3
-chance = 0.08
+[sub_resource type="Resource" id="Drop_co_hammer"]
+script = ExtResource("1_loot")
+item = ExtResource("32_co_hammer")
+chance = 0.06
 
-[sub_resource type="Resource" id="Resource_0xlae"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("16_nudd7")
-max_amount = 3
-chance = 0.08
+[sub_resource type="Resource" id="Drop_te_bow"]
+script = ExtResource("1_loot")
+item = ExtResource("33_te_bow")
+chance = 0.06
 
-[sub_resource type="Resource" id="Resource_rl0f0"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("17_idyc1")
-max_amount = 2
-chance = 0.05
+[sub_resource type="Resource" id="Drop_vs_wand"]
+script = ExtResource("1_loot")
+item = ExtResource("34_vs_wand")
+chance = 0.06
 
-[sub_resource type="Resource" id="Resource_d24k8"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("18_n57bf")
-max_amount = 2
-chance = 0.05
+[sub_resource type="Resource" id="Drop_vs_book"]
+script = ExtResource("1_loot")
+item = ExtResource("35_vs_book")
+chance = 0.06
 
-[sub_resource type="Resource" id="Resource_2wedu"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("19_iid6b")
-chance = 0.03
-
-[sub_resource type="Resource" id="Resource_cspun"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("20_shtv6")
-chance = 0.03
-
-[sub_resource type="Resource" id="Resource_bpxj7"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("21_hlwn2")
-chance = 0.03
-
-[sub_resource type="Resource" id="Resource_s6qbj"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("22_60tiv")
-chance = 0.015
-
-[sub_resource type="Resource" id="Resource_shv25"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("23_h5vkw")
-chance = 0.015
-
-[sub_resource type="Resource" id="Resource_3elop"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("24_htj86")
-chance = 0.008
-
-[sub_resource type="Resource" id="Resource_hnnjv"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("25_n7r0v")
-chance = 0.008
-
-[sub_resource type="Resource" id="Resource_coojf"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("26_p2iqy")
-chance = 0.004
-
-[sub_resource type="Resource" id="Resource_8dy8r"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("27_5r8l5")
+[sub_resource type="Resource" id="Drop_reliquary"]
+script = ExtResource("1_loot")
+item = ExtResource("36_reliquary")
 chance = 0.01
 
-[sub_resource type="Resource" id="Resource_qskg5"]
-script = ExtResource("1_ky1fu")
-item = ExtResource("28_kemte")
+[sub_resource type="Resource" id="Drop_ring"]
+script = ExtResource("1_loot")
+item = ExtResource("37_ring")
 chance = 0.01
 
 [resource]
-script = ExtResource("29_qcai2")
+script = ExtResource("38_reward")
 gold_min = 2500
 gold_max = 6000
 rolls_min = 3
 rolls_max = 4
-loot = Array[ExtResource("1_ky1fu")]([SubResource("Resource_qj52g"), SubResource("Resource_vir2m"), SubResource("Resource_xna35"), SubResource("Resource_qj0b1"), SubResource("Resource_bbaa8"), SubResource("Resource_i7c5q"), SubResource("Resource_nrh0g"), SubResource("Resource_adtts"), SubResource("Resource_ulks5"), SubResource("Resource_767i6"), SubResource("Resource_f8rnt"), SubResource("Resource_noffe"), SubResource("Resource_wr1e5"), SubResource("Resource_dywvm"), SubResource("Resource_0xlae"), SubResource("Resource_rl0f0"), SubResource("Resource_d24k8"), SubResource("Resource_2wedu"), SubResource("Resource_cspun"), SubResource("Resource_bpxj7"), SubResource("Resource_s6qbj"), SubResource("Resource_shv25"), SubResource("Resource_3elop"), SubResource("Resource_hnnjv"), SubResource("Resource_coojf"), SubResource("Resource_8dy8r"), SubResource("Resource_qskg5")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_wg_ore"), SubResource("Drop_wg_gem"), SubResource("Drop_wg_cloth"), SubResource("Drop_ng_hide"), SubResource("Drop_ng_leather"), SubResource("Drop_ng_gem"), SubResource("Drop_ng_fiber"), SubResource("Drop_ng_cloth"), SubResource("Drop_as_ore"), SubResource("Drop_as_gem"), SubResource("Drop_as_fiber"), SubResource("Drop_as_cloth"), SubResource("Drop_co_ore"), SubResource("Drop_co_gem"), SubResource("Drop_co_cloth"), SubResource("Drop_te_hide"), SubResource("Drop_te_leather"), SubResource("Drop_te_gem"), SubResource("Drop_te_fiber"), SubResource("Drop_te_cloth"), SubResource("Drop_vs_ore"), SubResource("Drop_vs_gem"), SubResource("Drop_vs_fiber"), SubResource("Drop_vs_cloth"), SubResource("Drop_wg_sword"), SubResource("Drop_wg_hammer"), SubResource("Drop_ng_bow"), SubResource("Drop_as_wand"), SubResource("Drop_as_book"), SubResource("Drop_co_sword"), SubResource("Drop_co_hammer"), SubResource("Drop_te_bow"), SubResource("Drop_vs_wand"), SubResource("Drop_vs_book"), SubResource("Drop_reliquary"), SubResource("Drop_ring")])

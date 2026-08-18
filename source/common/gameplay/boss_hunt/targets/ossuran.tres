@@ -7,7 +7,7 @@
 script = ExtResource("1_script")
 slug = &"ossuran"
 display_name = "Ossuran, Kindled and Cold"
-description = "Bound out of the Cinder Deeps and made to repeat itself. Seventy armour means bring a real weapon or bring four people."
+description = "Bound out of the Cinder Deeps and made to repeat itself. Heavy armour and a hard hit — bring a real weapon or bring four people."
 enemy_type = ExtResource("2_enemy")
 cost = 40000
 recommended_level = 33

@@ -308,25 +308,33 @@ func _build_reward() -> void:
 	reward.gold_min = 2500
 	reward.gold_max = 6000
 	var loot: Array[LootDrop] = []
-	# Materials common
+	# Third dungeon: Lv.50 baseline + Lv.60 at a lower (but not tiny) rate.
+	# No godsteel / 70+ — that band is not this table.
 	for path_chance: Array in [
-		["res://source/common/gameplay/items/materials/metals/basilisk_ore.tres", 0.55, 2, 6],
-		["res://source/common/gameplay/items/materials/leather/hide_wraithsilk.tres", 0.5, 2, 5],
-		["res://source/common/gameplay/items/materials/cloth/fiber_runewoven.tres", 0.5, 2, 5],
-		["res://source/common/gameplay/items/materials/leather/wraithsilk_leather.tres", 0.45, 1, 4],
-		["res://source/common/gameplay/items/materials/cloth/runewoven_cloth.tres", 0.45, 1, 4],
-		["res://source/common/gameplay/items/materials/gems/basilisk_gem.tres", 0.35, 1, 2],
-		["res://source/common/gameplay/items/materials/metals/colossus_ore.tres", 0.25, 1, 3],
-		["res://source/common/gameplay/items/materials/leather/hide_tempest.tres", 0.28, 1, 4],
-		["res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres", 0.28, 1, 4],
-		["res://source/common/gameplay/items/materials/leather/tempest_leather.tres", 0.22, 1, 3],
-		["res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres", 0.22, 1, 3],
-		["res://source/common/gameplay/items/materials/gems/godsteel_gem.tres", 0.12, 1, 1],
-		["res://source/common/gameplay/items/materials/metals/worldbreaker_ore.tres", 0.06, 1, 2],
-		["res://source/common/gameplay/items/materials/leather/hide_starfall.tres", 0.08, 1, 3],
-		["res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres", 0.08, 1, 3],
-		["res://source/common/gameplay/items/materials/leather/starfall_leather.tres", 0.05, 1, 2],
-		["res://source/common/gameplay/items/materials/cloth/primordial_cloth.tres", 0.05, 1, 2],
+		["res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres", 0.55, 2, 6],
+		["res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres", 0.4, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/wyrmguard_cloth.tres", 0.45, 1, 4],
+		["res://source/common/gameplay/items/materials/leather/hide_nightglass.tres", 0.5, 2, 5],
+		["res://source/common/gameplay/items/materials/leather/nightglass_leather.tres", 0.45, 1, 4],
+		["res://source/common/gameplay/items/materials/gems/nightglass_gem.tres", 0.4, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/fiber_nightglass.tres", 0.5, 2, 5],
+		["res://source/common/gameplay/items/materials/cloth/nightglass_cloth.tres", 0.45, 1, 4],
+		["res://source/common/gameplay/items/materials/metals/astral_ore.tres", 0.5, 2, 6],
+		["res://source/common/gameplay/items/materials/gems/astral_gem.tres", 0.4, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/fiber_astral.tres", 0.5, 2, 5],
+		["res://source/common/gameplay/items/materials/cloth/astral_cloth.tres", 0.45, 1, 4],
+		["res://source/common/gameplay/items/materials/metals/colossus_ore.tres", 0.32, 1, 4],
+		["res://source/common/gameplay/items/materials/gems/colossus_gem.tres", 0.22, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/colossus_cloth.tres", 0.28, 1, 3],
+		["res://source/common/gameplay/items/materials/leather/hide_tempest.tres", 0.3, 1, 4],
+		["res://source/common/gameplay/items/materials/leather/tempest_leather.tres", 0.26, 1, 3],
+		["res://source/common/gameplay/items/materials/gems/tempest_gem.tres", 0.22, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/fiber_tempest.tres", 0.3, 1, 4],
+		["res://source/common/gameplay/items/materials/cloth/tempest_cloth.tres", 0.26, 1, 3],
+		["res://source/common/gameplay/items/materials/metals/voidsilk_ore.tres", 0.3, 1, 4],
+		["res://source/common/gameplay/items/materials/gems/voidsilk_gem.tres", 0.22, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/fiber_voidsilk.tres", 0.3, 1, 4],
+		["res://source/common/gameplay/items/materials/cloth/voidsilk_cloth.tres", 0.26, 1, 3],
 	]:
 		var it: Item = _load_item(String(path_chance[0]))
 		if it == null:
@@ -338,16 +346,18 @@ func _build_reward() -> void:
 		d.max_amount = int(path_chance[3])
 		loot.append(d)
 
-	# Rare finished weapons
+	# Finished weapons: Lv.50 common-uncommon, Lv.60 lower but still realistic.
 	for path_c: Array in [
-		["res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres", 0.03],
-		["res://source/common/gameplay/items/weapons/bow/wraithsilk_bow.item.tres", 0.03],
-		["res://source/common/gameplay/items/weapons/wand/wand_runewoven.item.tres", 0.03],
-		["res://source/common/gameplay/items/weapons/sword/sword_dawnbreaker.item.tres", 0.015],
-		["res://source/common/gameplay/items/weapons/hammer/hammer_riftedge.item.tres", 0.015],
-		["res://source/common/gameplay/items/weapons/sword/sword_nightfall.item.tres", 0.008],
-		["res://source/common/gameplay/items/weapons/hammer/hammer_kingsbane.item.tres", 0.008],
-		["res://source/common/gameplay/items/weapons/sword/sword_worldbreaker.item.tres", 0.004],
+		["res://source/common/gameplay/items/weapons/sword/sword_wyrmguard.item.tres", 0.1],
+		["res://source/common/gameplay/items/weapons/hammer/hammer_wyrmguard.item.tres", 0.1],
+		["res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres", 0.1],
+		["res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres", 0.1],
+		["res://source/common/gameplay/items/weapons/book/book_astral.item.tres", 0.1],
+		["res://source/common/gameplay/items/weapons/sword/sword_colossus.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/bow/tempest_bow.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/book/book_voidsilk.item.tres", 0.06],
 		["res://source/common/gameplay/items/gears/jewelry/reliquary_of_verdance.tres", 0.01],
 		["res://source/common/gameplay/items/gears/rings/ring_sovereign.tres", 0.01],
 	]:

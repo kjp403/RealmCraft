@@ -254,6 +254,38 @@ static func add_item(
 	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining}
 
 
+## Move as much as possible from [param from_uid] onto [param to_uid] when both
+## slots hold the same stackable item and the destination still has room.
+## Returns the amount moved. Erases [param from_uid] if it empties. No-op (0)
+## when the slots are incompatible or the destination is already full.
+static func merge_slots(
+	inventory: Dictionary,
+	from_uid: int,
+	to_uid: int,
+	in_bank: bool = false
+) -> int:
+	if from_uid == to_uid or not inventory.has(from_uid) or not inventory.has(to_uid):
+		return 0
+	var from_slot: Dictionary = inventory[from_uid]
+	var to_slot: Dictionary = inventory[to_uid]
+	var item_id: int = int(from_slot.get("id", 0))
+	if item_id <= 0 or item_id != int(to_slot.get("id", 0)):
+		return 0
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item == null or not item.is_stackable():
+		return 0
+	var limit: int = stack_limit_for(item, in_bank)
+	var have_to: int = int(to_slot.get("a", 0))
+	var have_from: int = int(from_slot.get("a", 0))
+	var space: int = have_from if limit <= 0 else maxi(0, limit - have_to)
+	var moved: int = mini(have_from, space)
+	if moved <= 0:
+		return 0
+	to_slot["a"] = have_to + moved
+	remove_from_slot(inventory, from_uid, moved)
+	return moved
+
+
 ## Remove up to `amount` from a slot, erasing the slot when it empties.
 ## Returns the amount actually removed (0 if the slot is missing).
 static func remove_from_slot(inventory: Dictionary, slot_uid: int, amount: int = 1) -> int:

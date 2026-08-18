@@ -170,10 +170,14 @@ static func on_kill(
 	var xp_result: Dictionary = resource.add_skill_xp(&"slayer", xp)
 
 	var remaining: int = int(resource.current_slayer_task.get("remaining", 0)) - 1
+	var slayer_level: int = int(xp_result.get("level", 1))
 	var out: Dictionary = {
 		"advanced": true,
 		"remaining": maxi(remaining, 0),
 		"xp_gained": xp,
+		"level": slayer_level,
+		"xp": int(xp_result.get("xp", 0)),
+		"xp_to_next": resource.skill_xp_to_next(slayer_level),
 		"leveled_up": bool(xp_result.get("leveled_up", false)),
 		"complete": false,
 	}

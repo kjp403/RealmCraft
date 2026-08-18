@@ -22,6 +22,15 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_pristine.tres" id="20_gem_vital_pristine"]
 [ext_resource type="Resource" uid="uid://cf7feaf3b28ffd" path="res://source/common/gameplay/items/chests/wood_gold_small.tres" id="21_wood_gold_small"]
 [ext_resource type="Resource" uid="uid://c51242b03c52c7" path="res://source/common/gameplay/items/chests/wood_gold_medium.tres" id="22_wood_gold_medium"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="23_ench_cloth"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="24_ench_ore"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="25_ench_gem"]
+[ext_resource type="Resource" uid="uid://dcb9fcb729f94" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="26_si_leather"]
+[ext_resource type="Resource" uid="uid://b59e792b5e9c4" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="27_si_cloth"]
+[ext_resource type="Resource" uid="uid://2b0e9c5409264" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="28_si_gem"]
+[ext_resource type="Resource" uid="uid://f810bf3193c74" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="29_dr_ore"]
+[ext_resource type="Resource" uid="uid://57b4efbbfde34" path="res://source/common/gameplay/items/materials/cloth/dragon_cloth.tres" id="30_dr_cloth"]
+[ext_resource type="Resource" uid="uid://d2ff6e258bcd4" path="res://source/common/gameplay/items/materials/gems/dragon_gem.tres" id="31_dr_gem"]
 
 [sub_resource type="Resource" id="Entry_wood_gold_small"]
 script = ExtResource("1_entry")
@@ -32,6 +41,51 @@ price = 15
 script = ExtResource("1_entry")
 item = ExtResource("22_wood_gold_medium")
 price = 30
+
+[sub_resource type="Resource" id="Entry_ench_cloth"]
+script = ExtResource("1_entry")
+item = ExtResource("23_ench_cloth")
+price = 4
+
+[sub_resource type="Resource" id="Entry_ench_ore"]
+script = ExtResource("1_entry")
+item = ExtResource("24_ench_ore")
+price = 4
+
+[sub_resource type="Resource" id="Entry_ench_gem"]
+script = ExtResource("1_entry")
+item = ExtResource("25_ench_gem")
+price = 8
+
+[sub_resource type="Resource" id="Entry_si_leather"]
+script = ExtResource("1_entry")
+item = ExtResource("26_si_leather")
+price = 6
+
+[sub_resource type="Resource" id="Entry_si_cloth"]
+script = ExtResource("1_entry")
+item = ExtResource("27_si_cloth")
+price = 6
+
+[sub_resource type="Resource" id="Entry_si_gem"]
+script = ExtResource("1_entry")
+item = ExtResource("28_si_gem")
+price = 12
+
+[sub_resource type="Resource" id="Entry_dr_ore"]
+script = ExtResource("1_entry")
+item = ExtResource("29_dr_ore")
+price = 8
+
+[sub_resource type="Resource" id="Entry_dr_cloth"]
+script = ExtResource("1_entry")
+item = ExtResource("30_dr_cloth")
+price = 8
+
+[sub_resource type="Resource" id="Entry_dr_gem"]
+script = ExtResource("1_entry")
+item = ExtResource("31_dr_gem")
+price = 16
 
 [sub_resource type="Resource" id="Entry_gem_guard_low"]
 script = ExtResource("1_entry")
@@ -117,6 +171,6 @@ price = 40
 script = ExtResource("2_shop")
 shop_name = "Slayer Shop"
 currency_item = ExtResource("4_pts")
-entries = Array[ExtResource("1_entry")]([SubResource("Entry_wood_gold_small"), SubResource("Entry_wood_gold_medium"), SubResource("Entry_gem_guard_low"), SubResource("Entry_gem_guard_medium"), SubResource("Entry_gem_guard_high"), SubResource("Entry_gem_guard_pristine"), SubResource("Entry_gem_agile_low"), SubResource("Entry_gem_agile_medium"), SubResource("Entry_gem_agile_high"), SubResource("Entry_gem_agile_pristine"), SubResource("Entry_gem_focus_low"), SubResource("Entry_gem_focus_medium"), SubResource("Entry_gem_focus_high"), SubResource("Entry_gem_focus_pristine"), SubResource("Entry_gem_vital_low"), SubResource("Entry_gem_vital_medium"), SubResource("Entry_gem_vital_high"), SubResource("Entry_gem_vital_pristine")])
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_wood_gold_small"), SubResource("Entry_wood_gold_medium"), SubResource("Entry_ench_cloth"), SubResource("Entry_ench_ore"), SubResource("Entry_ench_gem"), SubResource("Entry_si_leather"), SubResource("Entry_si_cloth"), SubResource("Entry_si_gem"), SubResource("Entry_dr_ore"), SubResource("Entry_dr_cloth"), SubResource("Entry_dr_gem"), SubResource("Entry_gem_guard_low"), SubResource("Entry_gem_guard_medium"), SubResource("Entry_gem_guard_high"), SubResource("Entry_gem_guard_pristine"), SubResource("Entry_gem_agile_low"), SubResource("Entry_gem_agile_medium"), SubResource("Entry_gem_agile_high"), SubResource("Entry_gem_agile_pristine"), SubResource("Entry_gem_focus_low"), SubResource("Entry_gem_focus_medium"), SubResource("Entry_gem_focus_high"), SubResource("Entry_gem_focus_pristine"), SubResource("Entry_gem_vital_low"), SubResource("Entry_gem_vital_medium"), SubResource("Entry_gem_vital_high"), SubResource("Entry_gem_vital_pristine")])
 buys_vendor_priced = false
 metadata/slug = &"slayer_shop"

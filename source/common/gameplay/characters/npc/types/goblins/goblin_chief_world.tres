@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_mossgrown.tres" id="relic_mossgrown"]
 
 [sub_resource type="Resource" id="Lunge_chief"]
@@ -67,6 +69,16 @@ script = ExtResource("1_4uukv")
 item = ExtResource("drop_dungeon_key_item")
 chance = 0.04
 
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("1_4uukv")
+item = ExtResource("fx_chest_s")
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("1_4uukv")
+item = ExtResource("fx_chest_m")
+chance = 0.18
+
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_4uukv")
 item = ExtResource("bone_item")
@@ -104,7 +116,7 @@ wander_pause_max_s = 4.0
 xp_reward = 1800
 respawn_delay = 150.0
 respawns = true
-loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_mossgrown")])
+loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_mossgrown")])
 combat_skill_xp_override = 9000
 enrage_health_fraction = 0.5
 slam_radius = 125.0

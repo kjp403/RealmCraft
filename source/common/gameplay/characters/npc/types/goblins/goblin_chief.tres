@@ -15,6 +15,8 @@
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 
 [sub_resource type="Resource" id="Lunge_chief"]
 script = ExtResource("91_lunge")
@@ -64,12 +66,22 @@ chance = 0.05
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("1_4uukv")
 item = ExtResource("drop_dungeon_key_item")
-chance = 1.0
+chance = 0.04
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_4uukv")
 item = ExtResource("bone_item")
 chance = 1.0
+
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("1_4uukv")
+item = ExtResource("fx_chest_s")
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("1_4uukv")
+item = ExtResource("fx_chest_m")
+chance = 0.12
 
 [resource]
 script = ExtResource("8_tvh5y")
@@ -95,7 +107,7 @@ xp_reward = 400
 combat_skill_xp_override = 2800
 respawn_delay = 90.0
 respawns = true
-loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_bone")])
+loot = Array[ExtResource("1_4uukv")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone")])
 slam_radius = 115.0
 slam_windup_s = 0.85
 slam_damage = 65.0

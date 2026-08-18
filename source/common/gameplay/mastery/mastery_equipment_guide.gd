@@ -15,6 +15,7 @@ const CATEGORY_ORDER: Array[StringName] = [
 ]
 
 const ARMOR_CATEGORY := &"armor"
+const ARMOR_STYLE_ORDER: Array[StringName] = [&"melee", &"magic", &"archery"]
 
 ## Display labels matching the Combat tab (Swordsmanship, etc.).
 static func display_name_for(category: StringName) -> String:
@@ -24,6 +25,18 @@ static func display_name_for(category: StringName) -> String:
 	if tree != null and not tree.display_name.is_empty():
 		return tree.display_name
 	return String(category).capitalize()
+
+
+static func armor_style_name(style: StringName) -> String:
+	match style:
+		&"melee":
+			return "Melee"
+		&"magic":
+			return "Magic"
+		&"archery":
+			return "Archery"
+		_:
+			return String(style).capitalize()
 
 
 ## All WeaponItems that use [param category] for mastery XP / equip gates,
@@ -71,6 +84,11 @@ static func armor_for() -> Array[Dictionary]:
 			continue
 		if path.find("/jewelry/") >= 0 or path.find("/rings/") >= 0:
 			continue
+		if path.find("/skilling/") >= 0:
+			continue
+		var style: StringName = _armor_style_from_path(path)
+		if style == &"":
+			continue
 		# Silver is jewelry-only — keep amulets/rings, drop silver plate.
 		var base: String = path.get_file().get_basename()
 		if base.begins_with("silver_"):
@@ -89,9 +107,19 @@ static func armor_for() -> Array[Dictionary]:
 		var lvl: int = int(gear.required_mastery_level)
 		if lvl <= 0:
 			lvl = int(gear.required_level)
-		out.append({"item": gear, "level": lvl})
+		out.append({"item": gear, "level": lvl, "style": style})
 	out.sort_custom(_sort_by_level_then_name)
 	return out
+
+
+static func _armor_style_from_path(path: String) -> StringName:
+	if path.find("/gears/metal/") >= 0:
+		return &"melee"
+	if path.find("/gears/cloth/") >= 0:
+		return &"magic"
+	if path.find("/gears/leather/") >= 0:
+		return &"archery"
+	return &""
 
 
 static func _sort_by_level_then_name(a: Dictionary, b: Dictionary) -> bool:

@@ -50,6 +50,10 @@ var enraged_arm_shot_interval_s: float = 0.0
 var add_enemy_slug: StringName = &"rat_base"
 var add_count: int = 2
 var add_spread_px: float = 48.0
+## Dungeon RoomNode stamps these so enrage adds use the same HP/dmg table as
+## wave trash. 1,1 = world-boss default (the old 1.75 / 1.35 bump).
+var add_health_mult: float = 1.0
+var add_damage_mult: float = 1.0
 ## Move-speed multiplier applied on enrage (the body chases harder).
 var enrage_speed_mult: float = 1.3
 
@@ -433,7 +437,7 @@ func _slam() -> void:
 			var player: Player = instance.players_by_peer_id[peer_id]
 			if player != null and not player.is_dead \
 					and center.distance_to(player.global_position) <= slam_radius:
-				player.take_damage(slam_damage, boss)
+				_hurt(player, slam_damage)
 	if slam_followup_lunge:
 		boss.action_root_until_ms = 0
 		_force_lunge()
@@ -476,7 +480,7 @@ func _laser() -> void:
 			if player == null or player.is_dead:
 				continue
 			if _dist_to_segment(player.global_position, origin, end) <= laser_width:
-				player.take_damage(laser_damage, boss)
+				_hurt(player, laser_damage)
 	await _finish_cast(&"laser", LASER_RECOVER_S)
 
 
@@ -545,22 +549,30 @@ func _meteor_spot() -> Vector2:
 
 
 ## One meteor: circle now, comet through the last stretch, blast on landing.
-## Fire-and-forget — the volley loop does not await it, so meteors overlap.
+## SceneTreeTimers own the callbacks so overlapping rocks still detonate even
+## if the volley loop does not await this function.
 func _drop_meteor(at: Vector2) -> void:
-	# One hurl gesture per rock, so the body is animating for the whole volley
-	# rather than throwing once and standing still through the other three.
+	if not is_instance_valid(boss) or boss.is_dead:
+		return
 	boss.replicate_visual(&"rp_play_skin_anim", [&"attack", meteor_stagger_s])
 	boss.replicate_visual(&"rp_elem_telegraph", [at, meteor_radius, meteor_windup_s, 0, 0])
-	await get_tree().create_timer(maxf(meteor_windup_s - METEOR_FALL_S, 0.0)).timeout
+	var delay: float = maxf(meteor_windup_s - METEOR_FALL_S, 0.0)
+	get_tree().create_timer(delay).timeout.connect(_meteor_fall.bind(at), CONNECT_ONE_SHOT)
+
+
+func _meteor_fall(at: Vector2) -> void:
 	if not is_instance_valid(boss) or boss.is_dead:
 		return
 	boss.replicate_visual(&"rp_meteor_fall", [at, METEOR_FALL_S, meteor_radius])
-	await get_tree().create_timer(METEOR_FALL_S).timeout
+	get_tree().create_timer(METEOR_FALL_S).timeout.connect(_meteor_blast.bind(at), CONNECT_ONE_SHOT)
+
+
+func _meteor_blast(at: Vector2) -> void:
 	if not is_instance_valid(boss) or boss.is_dead:
 		return
 	for player: Player in _live_players():
 		if at.distance_to(player.global_position) <= meteor_radius:
-			player.take_damage(meteor_damage, boss)
+			_hurt(player, meteor_damage, true)
 
 
 ## CINDER LASH — a beam that travels through an arc. The fixed laser corridor is
@@ -609,7 +621,7 @@ func _cinder_lash() -> void:
 			if burned.has(player.get_instance_id()):
 				continue
 			if _dist_to_segment(player.global_position, origin, tip) <= sweep_width:
-				player.take_damage(sweep_damage, boss)
+				_hurt(player, sweep_damage, true)
 				burned[player.get_instance_id()] = true
 		await get_tree().create_timer(SWEEP_TICK_S).timeout
 		if not is_instance_valid(boss) or boss.is_dead:
@@ -639,7 +651,7 @@ func _killing_frost() -> void:
 	boss.replicate_visual(&"rp_frost_nova", [origin, frost_safe_radius * 0.9])
 	for player: Player in _live_players():
 		if safe_at.distance_to(player.global_position) > frost_safe_radius:
-			player.take_damage(frost_damage, boss)
+			_hurt(player, frost_damage, true)
 	await _finish_cast(&"frost", 0.45)
 
 
@@ -696,9 +708,7 @@ func _static_arc() -> void:
 	for i: int in struck.size():
 		var victim: Player = struck[i]
 		if is_instance_valid(victim) and not victim.is_dead:
-			victim.take_damage(
-				chain_damage * (1.0 + 0.35 * float(i)), boss, CombatHit.DAMAGE_MAGIC
-			)
+			_hurt(victim, chain_damage * (1.0 + 0.35 * float(i)), true)
 	await _finish_cast(&"chain", 0.4)
 
 
@@ -719,15 +729,20 @@ func _sear_wound() -> void:
 		return
 	_callout("Searing Wound")
 	boss._face_target()
+	var center: Vector2 = target.global_position
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((sear_wound_windup_s + 0.4) * 1000.0)
 	boss.replicate_visual(&"rp_play_skin_anim", [cast_anim, sear_wound_windup_s])
 	boss.replicate_visual(&"rp_elem_telegraph",
-		[target.global_position, sear_wound_radius, sear_wound_windup_s, _element(), 0])
+		[center, sear_wound_radius, sear_wound_windup_s, _element(), 0])
 	await get_tree().create_timer(sear_wound_windup_s).timeout
 	if not is_instance_valid(boss) or boss.is_dead:
 		_casting = false
 		return
+	boss.replicate_visual(&"rp_slam_impact", [center, sear_wound_radius])
 	for player: Player in _live_players():
+		if center.distance_to(player.global_position) > sear_wound_radius:
+			continue
+		_hurt(player, sear_wound_damage, true)
 		player.apply_sear_wound(sear_wound_duration_s, sear_wound_damage, sear_wound_radius, boss)
 	await _finish_cast(&"wound", 0.35)
 
@@ -797,6 +812,16 @@ func _callout(text: String) -> void:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"boss.callout", {"text": text})
 
 
+## Server hit helper — skips dead/invalid bodies and tags magic so fire/storm
+## kit is not eaten by plate armor the way a melee slap is.
+func _hurt(player: Player, amount: float, magic: bool = false) -> void:
+	if player == null or not is_instance_valid(player) or player.is_dead or amount <= 0.0:
+		return
+	player.take_damage(
+		amount, boss, CombatHit.DAMAGE_MAGIC if magic else CombatHit.DAMAGE_PHYSICAL
+	)
+
+
 ## Distance from [param point] to the closest point on segment [param a]→[param b].
 func _dist_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab: Vector2 = b - a
@@ -863,13 +888,18 @@ func _summon_adds() -> void:
 			continue
 		# World trash archetypes (yeti, demon adds, …) ship chase_on_area=false so
 		# they don't jump skillers. Enrage summons must fight immediately — stamp
-		# aggro + a spawn burst, and beef them a touch so they aren't free food.
-		var add_hp: float = 1.75
-		var add_dmg: float = 1.35
+		# aggro + a spawn burst. Dungeon RoomNodes pass the wave HP/dmg table so
+		# adds actually hurt; world bosses keep the old 1.75 / 1.35 bump. Hard
+		# stacks an extra multiplier so enrage adds are not free food.
+		var hp_m: float = add_health_mult
+		var dmg_m: float = add_damage_mult
+		if is_equal_approx(hp_m, 1.0) and is_equal_approx(dmg_m, 1.0):
+			hp_m = 1.75
+			dmg_m = 1.35
 		if DungeonService.is_hard_run(_instance()):
-			add_hp *= 2.0
-			add_dmg *= 1.6
-		npc.apply_difficulty(add_hp, add_dmg)
+			hp_m *= 2.0
+			dmg_m *= 1.6
+		npc.apply_difficulty(hp_m, dmg_m)
 		npc._process_synchronization()
 		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
 		npc.replicate_visual(&"rp_spawn_effect", [])

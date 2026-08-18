@@ -6,7 +6,10 @@ extends PanelContainer
 
 const PANEL_SIZE: Vector2 = Vector2(150.0, 112.0)
 const VIEW_SIZE: Vector2i = Vector2i(140, 82)
-const MAP_ZOOM: float = 0.12
+const MAP_ZOOM_DEFAULT: float = 0.12
+const MAP_ZOOM_MIN: float = 0.06
+const MAP_ZOOM_MAX: float = 0.45
+const MAP_ZOOM_STEP: float = 1.18
 const EDGE_PADDING: float = 9.0
 const VISIT_PREFIX: String = "Speak with "
 const TARGET_FIX_VERSION: String = "2026-08-07-c"
@@ -30,6 +33,7 @@ var _quest_target_name: String = ""
 var _quest_target: Node2D
 var _resolved_map: Node
 var _refresh_retry: float = 0.0
+var _map_zoom: float = MAP_ZOOM_DEFAULT
 
 
 func _ready() -> void:
@@ -138,7 +142,7 @@ func _build_interface() -> void:
 
 	_map_camera = Camera2D.new()
 	_map_camera.name = "MapCamera"
-	_map_camera.zoom = Vector2.ONE * MAP_ZOOM
+	_map_camera.zoom = Vector2.ONE * _map_zoom
 	_map_camera.enabled = true
 	_map_camera.position_smoothing_enabled = false
 	_sub_viewport.add_child(_map_camera)
@@ -364,7 +368,7 @@ func _update_markers(player: LocalPlayer) -> void:
 
 	var relative: Vector2 = (
 		_quest_target.global_position - player.global_position
-	) * MAP_ZOOM
+	) * _map_zoom
 	var raw_position: Vector2 = center + relative
 	var safe_rect := Rect2(
 		Vector2.ONE * EDGE_PADDING,
@@ -423,7 +427,7 @@ func _update_other_player_markers(player: LocalPlayer, center: Vector2) -> void:
 		)
 		var relative: Vector2 = (
 			other.global_position - player.global_position
-		) * MAP_ZOOM
+		) * _map_zoom
 		var raw_position: Vector2 = center + relative
 		var marker_position: Vector2 = Vector2(
 			clampf(raw_position.x, safe_rect.position.x, safe_rect.end.x),
@@ -444,10 +448,21 @@ func _on_map_gui_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton:
 		return
 	var mouse_event := event as InputEventMouseButton
+	if not mouse_event.pressed:
+		return
 	if (
-		mouse_event.button_index != MOUSE_BUTTON_LEFT
-		or not mouse_event.pressed
+		mouse_event.button_index == MOUSE_BUTTON_WHEEL_UP
+		or mouse_event.button_index == MOUSE_BUTTON_WHEEL_DOWN
 	):
+		var factor: float = (
+			MAP_ZOOM_STEP
+			if mouse_event.button_index == MOUSE_BUTTON_WHEEL_UP
+			else 1.0 / MAP_ZOOM_STEP
+		)
+		_set_map_zoom(_map_zoom * factor)
+		accept_event()
+		return
+	if mouse_event.button_index != MOUSE_BUTTON_LEFT:
 		return
 
 	var player: LocalPlayer = ClientState.local_player
@@ -458,12 +473,18 @@ func _on_map_gui_input(event: InputEvent) -> void:
 		player.global_position
 		+ (
 			local_position - Vector2(VIEW_SIZE) * 0.5
-		) / MAP_ZOOM
+		) / _map_zoom
 	)
 	if player.has_method(&"set_click_move_target"):
 		player.call(&"set_click_move_target", world_position)
 		_show_click_marker(local_position)
 	accept_event()
+
+
+func _set_map_zoom(zoom: float) -> void:
+	_map_zoom = clampf(zoom, MAP_ZOOM_MIN, MAP_ZOOM_MAX)
+	if _map_camera != null:
+		_map_camera.zoom = Vector2.ONE * _map_zoom
 
 
 func _show_click_marker(local_position: Vector2) -> void:

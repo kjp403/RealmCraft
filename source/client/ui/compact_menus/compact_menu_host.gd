@@ -247,6 +247,7 @@ func _display_entries(entries: Array[Dictionary], order: Array) -> void:
 			child.queue_free()
 
 		# Every square accepts drops so items can land on empty cells.
+		slot.remove_meta(&"item_id")
 		slot.set_drag_forwarding(
 			_bag_get_drag_data_empty,
 			_bag_can_drop_data,
@@ -265,6 +266,7 @@ func _display_entries(entries: Array[Dictionary], order: Array) -> void:
 
 		slot.icon = item.item_icon
 		slot.tooltip_text = ItemTooltip.hover_text(item)
+		slot.set_meta(&"item_id", int(item.get_meta(&"id", 0)))
 
 		slot.gui_input.connect(
 			_on_slot_gui_input.bind(entry, slot),
@@ -335,6 +337,16 @@ func _bag_drop_data(_at_position: Vector2, data: Variant, to_index: int) -> void
 	if to_index < order.size():
 		dest_uid = int(order[to_index])
 	if dest_uid >= 0 and dest_uid != from_uid:
+		var from_id: int = int((data as Dictionary).get("item_id", 0))
+		var dest_id: int = 0
+		var slots: Array[Node] = inventory_grid.get_children()
+		if to_index < slots.size():
+			dest_id = int(slots[to_index].get_meta(&"item_id", 0))
+		if from_id > 0 and from_id == dest_id:
+			var moved: int = await StackMerge.try_merge(from_uid, dest_uid, false)
+			if moved > 0:
+				_refresh_inventory()
+				return
 		BagOrder.swap(order, from_uid, dest_uid)
 	else:
 		BagOrder.move_to_index(order, from_uid, to_index)
