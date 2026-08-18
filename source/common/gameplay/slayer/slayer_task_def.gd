@@ -53,7 +53,13 @@ func task_slug() -> StringName:
 
 ## True if a kill of [param enemy_type] advances this task.
 func matches(enemy_type: StringName) -> bool:
-	return enemy_types.has(enemy_type)
+	var needle: String = String(enemy_type)
+	if needle.is_empty():
+		return false
+	for slug: StringName in enemy_types:
+		if String(slug) == needle:
+			return true
+	return false
 
 
 ## Base Slayer XP/kill across this task's roster, boss bonus included (perk

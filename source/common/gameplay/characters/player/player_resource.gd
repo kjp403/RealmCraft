@@ -427,9 +427,24 @@ const RENAMED_PERKS: Dictionary[StringName, StringName] = {
 ## Returns the {"level", "xp", "perks"} entry for a skill, creating it at level 1 if
 ## missing. Also backfills "perks" on entries loaded from older saves.
 func get_skill(skill_name: StringName) -> Dictionary:
-	if not skills.has(skill_name):
-		skills[skill_name] = {"level": 1, "xp": 0, "perks": {}}
-	var skill: Dictionary = skills[skill_name]
+	var key := StringName(String(skill_name))
+	if not skills.has(key):
+		# JSON / mixed String vs StringName keys can leave a sibling entry —
+		# adopt it under the canonical StringName key before creating a stub.
+		for existing: Variant in skills.keys():
+			if String(existing) == String(key):
+				var adopted: Dictionary = skills[existing]
+				skills.erase(existing)
+				skills[key] = adopted
+				if int(adopted.get("level", 1)) > SkillXp.LEVEL_CAP:
+					adopted["level"] = SkillXp.LEVEL_CAP
+					adopted["xp"] = 0
+				return _normalize_skill(adopted)
+		skills[key] = {"level": 1, "xp": 0, "perks": {}}
+	return _normalize_skill(skills[key])
+
+
+func _normalize_skill(skill: Dictionary) -> Dictionary:
 	if not skill.has("perks"):
 		skill["perks"] = {}
 	var perks: Dictionary = skill["perks"]
@@ -456,9 +471,11 @@ func skill_xp_to_next(skill_level: int) -> int:
 func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	var skill: Dictionary = get_skill(skill_name)
 	var level: int = int(skill["level"])
-	if level >= SkillXp.LEVEL_CAP or amount <= 0:
+	if level >= SkillXp.LEVEL_CAP:
 		skill["xp"] = 0
 		return {"level": level, "xp": 0, "leveled_up": false}
+	if amount <= 0:
+		return {"level": level, "xp": int(skill["xp"]), "leveled_up": false}
 
 	skill["xp"] = int(skill["xp"]) + amount
 	var leveled_up: bool = false
@@ -561,13 +578,24 @@ func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 	var entry: Dictionary = get_mastery(category)
 	var level: int = int(entry["level"])
 	var leveled_up: bool = false
-	if level >= MASTERY_LEVEL_CAP or amount <= 0:
+	if level >= MASTERY_LEVEL_CAP:
 		entry["xp"] = 0
 		return {
 			"category": String(category),
 			"level": level,
 			"xp": 0,
 			"xp_to_next": 0,
+			"gained": 0,
+			"leveled_up": false,
+			"started": started,
+		}
+	if amount <= 0:
+		return {
+			"category": String(category),
+			"level": level,
+			"xp": int(entry["xp"]),
+			"xp_to_next": mastery_xp_to_next(level),
+			"gained": 0,
 			"leveled_up": false,
 			"started": started,
 		}
@@ -593,6 +621,7 @@ func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 		"level": level,
 		"xp": int(entry["xp"]),
 		"xp_to_next": mastery_xp_to_next(level),
+		"gained": amount,
 		"leveled_up": leveled_up,
 		"started": started,
 		"combat_levels_gained": combat_levels_gained,

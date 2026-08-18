@@ -127,7 +127,7 @@ func _init() -> void:
 		if not has_dungeon_inter:
 			fails.append("FungalKeeper missing DungeonInteraction")
 
-	# --- Boss key drops (world / farm bosses; story keys are quest turn-in) ---
+	# --- Boss key drops (world pads + instance/quest bosses; story keys also quest turn-in) ---
 	var bosses_with_key: int = _count_boss_keys_recursive("res://source/common/gameplay/characters/npc/types")
 	if bosses_with_key < 12:
 		fails.append("expected >=12 bosses with dungeon_key drop, got %d" % bosses_with_key)
@@ -157,22 +157,39 @@ func _init() -> void:
 				quest.quest_name, int(entry["min"]), keys
 			])
 
-	for path: String in [
+	var instance_and_world: Array[String] = [
 		"res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres",
+		"res://source/common/gameplay/characters/npc/types/goblins/goblin_chief_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bandit_captain.tres",
+		"res://source/common/gameplay/characters/npc/types/bandit_captain_world.tres",
 		"res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres",
+		"res://source/common/gameplay/characters/npc/types/fungus/fungal_heart_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres",
 		"res://source/common/gameplay/characters/npc/types/mecha_stone_golem.tres",
-	]:
+		"res://source/common/gameplay/characters/npc/types/mecha_stone_golem_world.tres",
+	]
+	for path: String in instance_and_world:
 		var et: EnemyTypeResource = load(path) as EnemyTypeResource
 		if et == null:
-			fails.append("missing quest boss %s" % path)
+			fails.append("missing boss %s" % path)
 			continue
+		var names: PackedStringArray = PackedStringArray()
 		for drop: LootDrop in et.loot:
-			if drop != null and drop.item != null and str(drop.item.item_name) == "Dungeon Key":
-				fails.append("%s quest boss still drops dungeon keys" % et.display_name)
+			if drop == null or drop.item == null:
+				continue
+			names.append(str(drop.item.item_name))
+			if str(drop.item.item_name) == "Dungeon Key" and drop.chance >= 0.999:
+				fails.append("%s dungeon key must not be guaranteed (chance=%s)" % [
+					path.get_file(), drop.chance
+				])
+		for need: String in ["Dungeon Key", "Wood Chest (Silver, Small)", "Wood Chest (Silver, Medium)"]:
+			if need not in names:
+				fails.append("%s missing %s drop" % [path.get_file(), need])
 
 	if fails.is_empty():
 		print("VERIFY_PASS dungeon_loot_fungus")

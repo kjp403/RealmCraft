@@ -269,22 +269,38 @@ static func _reward(
 	# names an enemy — so pushing here would spatter a "Defeated a Spore Swarm" toast
 	# with no reward on it across every dungeon room. Progression below still runs;
 	# quest and Slayer pushes carry their own feedback when they actually advance.
-	if peer_id > 0 and (npc.xp_reward > 0 or not loot_gained.is_empty() or not mastery.is_empty()):
+	if peer_id > 0 and (
+		npc.xp_reward > 0 or not loot_gained.is_empty()
+		or not mastery.is_empty() or not slayer_result.is_empty()
+	):
+		var bar_xp: int = int(resource.experience)
+		var bar_next: int = resource.level_xp_to_next()
+		var shown_xp: int = npc.xp_reward
+		if not mastery.is_empty():
+			bar_xp = int(mastery.get("xp", 0))
+			bar_next = int(mastery.get("xp_to_next", 1))
+			shown_xp = int(mastery.get("gained", skill_xp))
+		elif not slayer_result.is_empty():
+			bar_xp = int(slayer_result.get("xp", 0))
+			bar_next = int(slayer_result.get("xp_to_next", 1))
+			shown_xp = int(slayer_result.get("xp_gained", 0))
 		WorldServer.curr.data_push.rpc_id(peer_id, &"combat.reward", {
 			"enemy_type": npc.enemy_type,
-			"xp": npc.xp_reward,
+			"xp": shown_xp,
+			"skill_xp": skill_xp,
 			"level": resource.level,
 			"levels_gained": resource.level - level_before,
 			"points_gained": PlayerResource.attribute_points_at_level(resource.level)
 				- PlayerResource.attribute_points_at_level(level_before),
-			"experience": resource.experience,
-			"xp_to_next": resource.level_xp_to_next(),
+			"experience": bar_xp,
+			"xp_to_next": bar_next,
 			"loot": loot_gained,
 			# Boss Hunt loot is banked, not scattered — the client's reward card
 			# reads "sent to your Hunt Chest" instead of "on the ground".
 			"ground": not hunt_kill,
 			"hunt_chest": hunt_kill,
 			"mastery": mastery,
+			"slayer": slayer_result,
 		})
 
 	var instance: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null

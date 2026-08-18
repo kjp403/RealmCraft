@@ -63,6 +63,16 @@ func _init() -> void:
 	if int(res.get_skill(&"slayer").get("xp", 0)) <= 0:
 		failures.append("no Slayer XP banked mid-task — XP is not being paid per kill")
 
+	var wipe := PlayerResource.new()
+	wipe.skills[&"slayer"] = {"level": 11, "xp": 400, "perks": {}}
+	wipe.add_skill_xp(&"slayer", 0)
+	if int(wipe.get_skill(&"slayer").get("xp", 0)) != 400:
+		failures.append("add_skill_xp(0) wiped in-level XP")
+	var rats: SlayerTaskDef = load("res://source/common/gameplay/slayer/tasks/rats.tres") as SlayerTaskDef
+	if rats == null or not rats.matches(&"woodland_rat") or not rats.matches(&"badger") \
+			or not rats.matches(&"desert_badger"):
+		failures.append("Badgers task does not match woodland_rat / badger / desert_badger")
+
 	# --- Slayer must never out-earn combat XP for the same kill ------------
 	for combat_xp: int in [4, 15, 140, 3200]:
 		var probe := PlayerResource.new()

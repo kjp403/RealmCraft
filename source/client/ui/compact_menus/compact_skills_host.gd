@@ -112,11 +112,12 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
 	Client.subscribe(&"skills.get", _on_skills_received)
+	Client.subscribe(&"combat.reward", _on_combat_skill_xp)
 	# Keep the Slayer guide's "Current task" line ticking with the kill pushes,
 	# same as the HUD tracker does.
 	Client.subscribe(&"slayer.update", func(_payload: Dictionary) -> void:
-		if visible and _selected_slug == SLAYER_SLUG:
-			_request_slayer_info())
+		if visible and _mode == Mode.SKILLS:
+			_queue_skills_refresh())
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -303,6 +304,12 @@ func _on_visibility_changed() -> void:
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
+	if not visible or _mode != Mode.SKILLS:
+		return
+	_queue_skills_refresh()
+
+
+func _on_combat_skill_xp(_data: Dictionary) -> void:
 	if not visible or _mode != Mode.SKILLS:
 		return
 	_queue_skills_refresh()
