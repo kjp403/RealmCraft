@@ -13,6 +13,10 @@ const HOSTILE_CONTEXT_MENU_SCRIPT: Script = preload(
 const SLAYER_TRACKER_SCRIPT: Script = preload(
 	"res://source/client/ui/hud/slayer_tracker.gd"
 )
+## Submenus sit at z=100. Chat stays this high over the dungeon lobby so Enter
+## can still compose a room code without closing the keeper UI.
+const CHAT_ABOVE_MENU_Z: int = 110
+const CHAT_DEFAULT_Z: int = 1
 
 @export var sub_menu: Control
 
@@ -389,6 +393,7 @@ func _on_submenu_visiblity_changed(_menu: Control) -> void:
 ## Stacked menus are handled by _any_submenu_visible (the HUD stays hidden until ALL close).
 func _refresh_hud_for_menus() -> void:
 	var covered: bool = _any_submenu_visible() or (menu_overlay != null and menu_overlay.visible) or trade_panel.visible
+	var keep_chat: bool = covered and _menu_allows_chat()
 	if covered:
 		# Capture-and-hide ONCE: only nodes currently visible, so we never force-show a node that
 		# was hidden by its OWN logic (TwinSticks is touch-only; QuestTracker shows only while a
@@ -402,17 +407,30 @@ func _refresh_hud_for_menus() -> void:
 				hud_nodes.append(_party_hud)
 			for node: CanvasItem in hud_nodes:
 				if node != null and node.visible:
+					if keep_chat and node == chat:
+						continue
 					node.hide()
 					_hidden_for_menu.append(node)
 		# Compact inventory / skills / etc. sit on the HUD and used to cover
 		# bank Withdraw and other footer buttons. Hide them whenever a menu owns
 		# the screen — not only during Secure Trade.
 		_hide_compact_panels()
+		if keep_chat:
+			_raise_chat_over_menu()
+		else:
+			_restore_chat_layer()
+			# Dungeon kept Chat out of the hide-list; if another overlay still
+			# covers the HUD, tuck it away so it doesn't bleed through.
+			if chat != null and chat.visible:
+				chat.hide()
+				if _hidden_for_menu.find(chat) < 0:
+					_hidden_for_menu.append(chat)
 		if trade_panel.visible:
 			trade_panel.z_index = 20
 			trade_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 			trade_panel.move_to_front()
 	else:
+		_restore_chat_layer()
 		for node: CanvasItem in _hidden_for_menu:
 			node.show()
 		_hidden_for_menu.clear()
@@ -471,6 +489,29 @@ func _any_submenu_visible() -> bool:
 		if menu.visible:
 			return true
 	return false
+
+
+## Dungeon lobbies need live chat so a leader can paste the private room code
+## without closing the keeper UI. Other fullscreen shells still hide it.
+func _menu_allows_chat() -> bool:
+	var dungeon: Control = menus.get(&"dungeon") as Control
+	return dungeon != null and dungeon.visible
+
+
+func _raise_chat_over_menu() -> void:
+	if chat == null:
+		return
+	var hidden_at: int = _hidden_for_menu.find(chat)
+	if hidden_at >= 0:
+		_hidden_for_menu.remove_at(hidden_at)
+	chat.show()
+	chat.z_index = CHAT_ABOVE_MENU_Z
+	chat.move_to_front()
+
+
+func _restore_chat_layer() -> void:
+	if chat != null:
+		chat.z_index = CHAT_DEFAULT_Z
 
 
 func display_menu(menu_name: StringName, arg: Variant = null) -> void:

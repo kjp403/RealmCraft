@@ -237,6 +237,23 @@ func _reset_keyboard_lift() -> void:
 	set_process(false)
 
 
+## Open compose, optionally with a starter line (dungeon room codes, etc.).
+func start_compose(prefill: String = "") -> void:
+	if not full_feed.visible:
+		_show_full_feed()
+	_sync_tab_buttons()
+	_update_tab_labels()
+	_refresh_full_feed()
+	_update_input_enabled_state()
+	if not full_feed_message_edit.editable:
+		_open_writable_view()
+	if not prefill.is_empty():
+		full_feed_message_edit.text = prefill.left(MAX_MESSAGE_LEN)
+		full_feed_message_edit.caret_column = full_feed_message_edit.text.length()
+	full_feed_message_edit.grab_focus()
+	_stop_auto_hide()
+
+
 ## Toggle the full chat panel. Enter (player_chat) and DM/profile openers call this;
 ## the panel also has its own Close button.
 func toggle_feed() -> void:
@@ -330,6 +347,13 @@ func _input(event: InputEvent) -> void:
 		# click regardless of `editable` — and letting that focus keep Enter is
 		# what left players unable to open chat with the keyboard at all.
 		if full_feed_message_edit.has_focus() and full_feed_message_edit.editable:
+			return
+		# Join-code / search / gold fields must keep Enter for submit. Chat still
+		# opens from Enter when a Button or the world has focus.
+		var focused: Control = get_viewport().gui_get_focus_owner()
+		if focused is TextEdit:
+			return
+		if focused is LineEdit and focused != full_feed_message_edit and (focused as LineEdit).editable:
 			return
 		get_viewport().set_input_as_handled()
 		accept_event()
