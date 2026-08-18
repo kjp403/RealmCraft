@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="DungeonResource" format=3 uid="uid://chelldungres01"]
+
+[ext_resource type="Script" uid="uid://i1qmy82mdrm8" path="res://source/common/gameplay/dungeon/dungeon_resource.gd" id="1_dres"]
+[ext_resource type="Resource" uid="uid://chellrewarn01" path="res://source/common/gameplay/dungeon/hell_reward_normal.tres" id="2_reward"]
+[ext_resource type="Resource" uid="uid://chellrewarh01" path="res://source/common/gameplay/dungeon/hell_reward_hard.tres" id="3_hard"]
+
+[resource]
+script = ExtResource("1_dres")
+display_name = "The Brimstone Vault"
+description = "Five sealed halls under cold blue fire. Come in Wyrmguard / Astral / Nightglass from the Ossuary Necromancer — anything less and the Queen will not notice you. Clears pay that set; Hard drips Godsteel. Hard is a raid check."
+recommended_level = 100
+reward = ExtResource("2_reward")
+hard_reward = ExtResource("3_hard")
+normal_health_mult = 24.0
+normal_damage_mult = 16.0
+boss_health_mult = 1.0
+boss_damage_mult = 0.1
+boss_health_by_party = PackedFloat32Array(50000, 90000, 140000, 190000)
+boss_slam_damage = 480.0
+hard_health_mult = 48.0
+hard_damage_mult = 28.0
+instance_name = &"hell_dungeon"
+map_path = "res://source/common/gameplay/maps/maps/hell_dungeon/hell_dungeon.tscn"
+zone_title = "The Brimstone Vault"
+level_min = 85
+level_max = 120
+show_discovery = true
+metadata/slug = &"hell_dungeon"

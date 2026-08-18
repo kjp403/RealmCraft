@@ -53,6 +53,7 @@ const DOMAINS: Array = [
 	# Dungeon fastest-clear boards (Hard only). board_id is "dungeon:<instance_name>";
 	# scores are SECONDS shown as m:ss (lower is better). One entry per ranked dungeon.
 	{"id": "dungeon_main", "label": "Fastest Clear (Hard)", "category": "dungeon", "board_id": "dungeon:Dungeon", "periods": []},
+	{"id": "dungeon_hell", "label": "Brimstone Vault (Hard)", "category": "dungeon", "board_id": "dungeon:hell_dungeon", "periods": []},
 ]
 
 const RANK_COLORS: Dictionary = {

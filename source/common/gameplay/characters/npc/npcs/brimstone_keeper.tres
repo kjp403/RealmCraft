@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://chellkeeper001"]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_i3jo1"]
+[ext_resource type="Resource" uid="uid://chelldungres01" path="res://source/common/gameplay/maps/instance/instance_collection/dungeons/hell_dungeon.tres" id="2_dung"]
+[ext_resource type="Script" uid="uid://b36k3ordtiw1u" path="res://source/common/gameplay/characters/npc/interactions/dungeon_interaction.gd" id="3_dint"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dial"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/hell_old_demon.tres" id="6_skin"]
+
+[sub_resource type="Resource" id="Resource_dial"]
+script = ExtResource("4_dial")
+lines = Array[String](["Five halls. Doors lock. The Queen sits on a skull at the end and she does not get tired — you do.", "Wear what you took off the Necromancer. Wyrmguard, Astral, Nightglass. Dragon is not enough. Hard is a different animal.", "The Vault pays that same set on a clear — ore, cloth, hide, the weapons. Hard drips Godsteel plate and blades. Sunsteel stays in the Cave.", "Three rewarded clears a day. Solo fattens the haul — extra roll, amounts climb by half. Keys restore a charge. Failures don't spend one."])
+label_override = "What's down there?"
+metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+
+[sub_resource type="Resource" id="Resource_dint"]
+script = ExtResource("3_dint")
+dungeon = ExtResource("2_dung")
+metadata/_custom_type_script = "uid://b36k3ordtiw1u"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Brimstone Keeper"
+skin = ExtResource("6_skin")
+greeting = "Cold fire down those steps. Wear Necromancer kit or she will not notice you. Clear it and the Vault pays Wyrmguard — Godsteel if Hard likes you. Three charges a day; keys buy more. I keep the seal."
+interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_dial"), SubResource("Resource_dint")])
+metadata/_custom_type_script = "uid://ddps5vwhnf048"
