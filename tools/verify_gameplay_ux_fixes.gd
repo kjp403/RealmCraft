@@ -34,6 +34,8 @@ func _init() -> void:
 		failures.append("hub still has AscensionBrokerVael")
 	if hub.find("ascension_broker_vael") >= 0:
 		failures.append("hub still references ascension_broker_vael")
+	if hub.find("BankerYard") >= 0:
+		failures.append("hub still has outdoor banker by the smith house")
 	var merchant: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/characters/npc/npcs/dev_all_merchant.tres"
 	)
@@ -85,11 +87,42 @@ func _init() -> void:
 	)
 	if trade.find("func _open_qty") < 0 or trade.find("_make_picker_gold_button") < 0:
 		failures.append("trade panel missing gold picker / offer-X amount UI")
+	if trade.find("_qty_spin.apply()") < 0 or trade.find("_gold_spin.apply()") < 0:
+		failures.append("trade panel must apply() SpinBox text before offering gold")
+	if trade.find("current if current > 0 else owned") >= 0:
+		failures.append("trade qty overlay must not default to all owned gold/items")
 	var chat: String = FileAccess.get_file_as_string(
 		"res://source/client/ui/menus/chat/chat_menu.gd"
 	)
 	if chat.find("_pending_chat_focus") < 0:
 		failures.append("chat must defer Enter focus so combat+chat doesn't crash")
+
+	var smith_inside: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/maps/smith_house/inside_map.tscn"
+	)
+	if smith_inside.find("ForgeSmith") >= 0 or smith_inside.find("Forge Smith") >= 0:
+		failures.append("smith house inside still has Forge Smith — replace with banker beside Mira")
+	if smith_inside.find("npcs/banker.tres") < 0 or smith_inside.find("npcs/mira.tres") < 0:
+		failures.append("smith house inside must have banker beside Mira")
+	var east: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/maps/maps/woodland/woodland_east.tscn"
+	)
+	if east.find("mineable_nodes/bloodcap.tres") < 0 \
+			or east.find("mineable_nodes/starblossom.tres") < 0 \
+			or east.find("mineable_nodes/grimshade.tres") < 0:
+		failures.append("woodland east missing bloodcap/starblossom/grimshade nodes")
+	var slayer_shop: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/shops/resources/slayer_shop.tres"
+	)
+	if slayer_shop.find("enchanted_cloth.tres") < 0 \
+			or slayer_shop.find("dragon_ore.tres") < 0 \
+			or slayer_shop.find("sirenic_leather.tres") < 0:
+		failures.append("slayer shop missing Enchanted/Dragon/Sirenic materials")
+	var fighter: String = FileAccess.get_file_as_string(
+		"res://source/common/gameplay/characters/npc/types/bandits/bandit_fighter.tres"
+	)
+	if fighter.find("attack_damage = 29.0") >= 0:
+		failures.append("bandit fighter damage was not nerfed for new players")
 
 	if failures.is_empty():
 		print("VERIFY_PASS gameplay_ux_fixes")
