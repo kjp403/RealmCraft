@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1_dres")
-display_name = "The Brimstone Vault"
+display_name = "Fire and Flames"
 description = "Five sealed halls under cold blue fire. Come in Wyrmguard / Astral / Nightglass from the Ossuary Necromancer — anything less and the Queen will not notice you. Clears pay that set; Hard drips Godsteel. Hard is a raid check."
 recommended_level = 100
 reward = ExtResource("2_reward")
@@ -21,7 +21,7 @@ hard_health_mult = 48.0
 hard_damage_mult = 28.0
 instance_name = &"hell_dungeon"
 map_path = "res://source/common/gameplay/maps/maps/hell_dungeon/hell_dungeon.tscn"
-zone_title = "The Brimstone Vault"
+zone_title = "Fire and Flames"
 level_min = 85
 level_max = 120
 show_discovery = true

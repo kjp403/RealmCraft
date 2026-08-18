@@ -1,5 +1,5 @@
 extends SceneTree
-## Headless checks for The Brimstone Vault (third dungeon).
+## Headless checks for Fire and Flames (third dungeon).
 ## Run: godot --headless --path . -s tools/verify_hell_dungeon.gd
 ## Expect: VERIFY_PASS
 
@@ -226,6 +226,14 @@ func _init() -> void:
 		if not opens:
 			failures.append("Brimstone Keeper has no DungeonInteraction for hell_dungeon")
 
+	var dungeon: DungeonResource = load(
+		"res://source/common/gameplay/maps/instance/instance_collection/dungeons/hell_dungeon.tres"
+	) as DungeonResource
+	if dungeon == null:
+		failures.append("hell_dungeon.tres failed to load")
+	elif dungeon.display_name != "Fire and Flames" or dungeon.zone_title != "Fire and Flames":
+		failures.append("hell dungeon title must be Fire and Flames")
+
 	var hall: String = FileAccess.get_file_as_string(
 		"res://source/common/gameplay/maps/maps/guild_house/inside_map.tscn"
 	)
@@ -242,11 +250,11 @@ func _init() -> void:
 	var menu: String = FileAccess.get_file_as_string(
 		"res://source/client/ui/menus/leaderboard/leaderboard_menu.gd"
 	)
-	if menu.find("dungeon:hell_dungeon") < 0:
-		failures.append("leaderboard menu missing Brimstone Vault board")
+	if menu.find("dungeon:hell_dungeon") < 0 or menu.find("Fire and Flames") < 0:
+		failures.append("leaderboard menu missing Fire and Flames board")
 	var site: String = FileAccess.get_file_as_string("res://website/src/leaderboards.js")
-	if site.find("dungeon:hell_dungeon") < 0:
-		failures.append("website leaderboards.js missing Brimstone Vault board")
+	if site.find("dungeon:hell_dungeon") < 0 or site.find("Fire and Flames") < 0:
+		failures.append("website leaderboards.js missing Fire and Flames board")
 
 	if failures.is_empty():
 		print("VERIFY_PASS hell_dungeon")

@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_dial"]
 script = ExtResource("4_dial")
-lines = Array[String](["Five halls. Doors lock. The Queen sits on a skull at the end and she does not get tired — you do.", "Wear what you took off the Necromancer. Wyrmguard, Astral, Nightglass. Dragon is not enough. Hard is a different animal.", "The Vault pays that same set on a clear — ore, cloth, hide, the weapons. Hard drips Godsteel plate and blades. Sunsteel stays in the Cave.", "Three rewarded clears a day. Solo fattens the haul — extra roll, amounts climb by half. Keys restore a charge. Failures don't spend one."])
+lines = Array[String](["Five halls. Doors lock. The Queen sits on a skull at the end and she does not get tired — you do.", "Wear what you took off the Necromancer. Wyrmguard, Astral, Nightglass. Dragon is not enough. Hard is a different animal.", "Fire and Flames pays that same set on a clear — ore, cloth, hide, the weapons. Hard drips Godsteel plate and blades. Sunsteel stays in the Cave.", "Three rewarded clears a day. Solo fattens the haul — extra roll, amounts climb by half. Keys restore a charge. Failures don't spend one."])
 label_override = "What's down there?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -22,6 +22,6 @@ metadata/_custom_type_script = "uid://b36k3ordtiw1u"
 script = ExtResource("5_npc")
 npc_name = "Brimstone Keeper"
 skin = ExtResource("6_skin")
-greeting = "Cold fire down those steps. Wear Necromancer kit or she will not notice you. Clear it and the Vault pays Wyrmguard — Godsteel if Hard likes you. Three charges a day; keys buy more. I keep the seal."
+greeting = "Cold fire down those steps. Wear Necromancer kit or she will not notice you. Clear Fire and Flames and it pays Wyrmguard — Godsteel if Hard likes you. Three charges a day; keys buy more. I keep the seal."
 interactions = Array[ExtResource("1_i3jo1")]([SubResource("Resource_dial"), SubResource("Resource_dint")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
