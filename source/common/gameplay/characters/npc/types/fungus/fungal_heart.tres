@@ -72,7 +72,7 @@ chance = 0.12
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 1.0
+chance = 0.18
 
 [sub_resource type="Resource" id="Drop_chest_small"]
 script = ExtResource("2_loot")
@@ -112,7 +112,7 @@ xp_reward = 700
 combat_skill_xp_override = 5500
 respawns = true
 respawn_delay = 90.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone")])
 slam_radius = 125.0
 slam_windup_s = 0.9
 slam_damage = 120.0

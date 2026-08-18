@@ -14,6 +14,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_sewer.tres" id="hide_sewer"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="dungeon_key"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_poison.item.tres" id="fire_sword"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_poison.item.tres" id="fire_hammer"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/poison_bow.item.tres" id="fire_bow"]
@@ -74,7 +76,15 @@ script = ExtResource("3_loot")
 item = ExtResource("dungeon_key")
 min_amount = 1
 max_amount = 2
-chance = 1.0
+chance = 0.04
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.5
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.12
 [sub_resource type="Resource" id="Drop_fire_sword"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_sword")
@@ -207,6 +217,6 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium")])
 metadata/slug = &"cistern_sovereign"
 metadata/id = 82

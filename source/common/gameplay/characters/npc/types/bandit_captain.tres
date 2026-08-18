@@ -21,6 +21,8 @@
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
 [ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="willow_log"]
 [ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 
 [sub_resource type="Resource" id="Lunge_captain"]
 script = ExtResource("91_lunge")
@@ -58,7 +60,17 @@ chance = 0.05
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 1.0
+chance = 0.04
+
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
@@ -142,7 +154,7 @@ chase_on_area = true
 xp_reward = 1200
 combat_skill_xp_override = 9000
 respawn_delay = 120.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone")])
 slam_radius = 120.0
 slam_windup_s = 0.85
 slam_damage = 165.0

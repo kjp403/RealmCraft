@@ -20,6 +20,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_pink_large.tres" id="chest_pink"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="mithril_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_coreblossom.tres" id="relic_coreblossom"]
@@ -121,6 +123,16 @@ script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
 chance = 0.04
 
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.55
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("2_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.18
+
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("2_loot")
 item = ExtResource("bone_item")
@@ -158,7 +170,7 @@ wander_pause_max_s = 4.0
 xp_reward = 32000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_runite"), SubResource("Drop_mithril_bar"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_coreblossom")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_runite"), SubResource("Drop_mithril_bar"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_coreblossom")])
 combat_skill_xp_override = 40000
 enrage_health_fraction = 0.4
 slam_radius = 150.0

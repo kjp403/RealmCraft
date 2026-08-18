@@ -141,6 +141,30 @@ func _init() -> void:
 	if shop == null or shop.entries.is_empty():
 		errors.append("ascension shop empty")
 
+	var dungeon_reward: DungeonReward = ResourceLoader.load(
+		"res://source/common/gameplay/dungeon/ascension_reward.tres"
+	) as DungeonReward
+	if dungeon_reward == null or dungeon_reward.loot.is_empty():
+		errors.append("ascension_reward missing loot")
+	else:
+		var names: PackedStringArray = PackedStringArray()
+		for drop: LootDrop in dungeon_reward.loot:
+			if drop != null and drop.item != null:
+				names.append(str(drop.item.item_name))
+		for need: String in [
+			"Colossus Sword", "Colossus Hammer", "Nightglass Bow", "Tempest Bow",
+			"Astral Wand", "Astral Tome", "Voidsilk Wand", "Voidsilk Tome",
+			"Wyrmguard Sword", "Wyrmguard Hammer",
+			"Colossus Ore", "Tempest Leather", "Voidsilk Cloth", "Astral Cloth",
+			"Wyrmguard Ore", "Nightglass Leather",
+		]:
+			if need not in names:
+				errors.append("ascension_reward missing %s" % need)
+		for banned: String in ["Godsteel", "Worldbreaker", "Starfall", "Primordial", "Behemoth"]:
+			for seen: String in names:
+				if seen.find(banned) >= 0:
+					errors.append("ascension_reward still has %s" % seen)
+
 	# Stat monotonicity: Worldbreaker sword AD > Basilisk sword AD
 	var s40: WeaponItem = ResourceLoader.load(
 		"res://source/common/gameplay/items/weapons/sword/sword_basilisk.item.tres"

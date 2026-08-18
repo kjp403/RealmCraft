@@ -330,10 +330,11 @@ func _on_combat_reward(data: Dictionary) -> void:
 	# Keep the mastery mirror current off every kill — gear tooltips colour their
 	# wear-gates against it, so a stale mirror reads as "locked" on gear you just
 	# unlocked.
-	set_mastery_level(
-		StringName(str(mastery.get("category", ""))),
-		int(mastery.get("level", 0)),
-	)
+	if not str(mastery.get("category", "")).is_empty():
+		set_mastery_level(
+			StringName(str(mastery.get("category", ""))),
+			int(mastery.get("level", 0)),
+		)
 	if bool(mastery.get("started", false)):
 		big.append("%s Mastery begun! +1 mastery point (Character > Mastery)" % str(mastery.get("category", "")).capitalize())
 	elif bool(mastery.get("leveled_up", false)):
@@ -349,6 +350,15 @@ func _on_combat_reward(data: Dictionary) -> void:
 				str(mastery.get("category", "")).capitalize(),
 				int(mastery.get("level", 1)),
 			])
+	var slayer: Dictionary = data.get("slayer", {})
+	if bool(slayer.get("leveled_up", false)):
+		set_skill_level(&"slayer", int(slayer.get("level", 1)))
+		if local_player != null:
+			LevelUpFx.celebrate(local_player, "Slayer", int(slayer.get("level", 1)))
+		else:
+			big.append("Slayer Lv %d!" % int(slayer.get("level", 1)))
+	elif int(slayer.get("level", 0)) > 0:
+		set_skill_level(&"slayer", int(slayer.get("level", 1)))
 	if not big.is_empty():
 		Toaster.toast_group("Mastery", big)
 

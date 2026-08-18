@@ -11,6 +11,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="li3"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="drop_dungeon_key_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_fire.item.tres" id="fire_sword"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_fire.item.tres" id="fire_hammer"]
@@ -51,7 +53,17 @@ script = ExtResource("3_loot")
 item = ExtResource("drop_dungeon_key_item")
 min_amount = 1
 max_amount = 2
-chance = 1.0
+chance = 0.04
+
+[sub_resource type="Resource" id="Drop_chest_small"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_s")
+chance = 0.5
+
+[sub_resource type="Resource" id="Drop_chest_medium"]
+script = ExtResource("3_loot")
+item = ExtResource("fx_chest_m")
+chance = 0.12
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_loot")
@@ -112,7 +124,7 @@ xp_reward = 22000
 combat_skill_xp_override = 24000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_bone")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone")])
 enrage_health_fraction = 0.4
 slam_radius = 125.0
 slam_windup_s = 1.0

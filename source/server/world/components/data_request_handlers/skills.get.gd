@@ -18,7 +18,7 @@ func data_request_handler(
 	# from. Unstarted jobs render as "Lv 1 — 0 xp" with no perk choices.
 	for skill_name in JobRegistry.JOBS:
 		var jp: JobPerks = JobRegistry.JOBS[skill_name]
-		var entry: Dictionary = resource.skills.get(skill_name, {})
+		var entry: Dictionary = resource.get_skill(skill_name)
 		var skill_level: int = int(entry.get("level", 1))
 		var info: Dictionary = {
 			"level": skill_level,
