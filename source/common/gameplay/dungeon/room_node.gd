@@ -53,6 +53,7 @@ var _boss_dmg_mult: float = 1.0
 ## Absolute boss HP by party size (empty = multiplier path).
 var _boss_health_by_party: PackedFloat32Array = PackedFloat32Array()
 var _boss_slam_damage: float = 0.0
+var _hard_boss_hp_mult: float = 1.0
 
 
 func _ready() -> void:
@@ -162,6 +163,7 @@ func _resolve_difficulty(map: Node) -> void:
 		_boss_dmg_mult = dres.boss_damage_mult
 		_boss_health_by_party = dres.boss_health_by_party
 		_boss_slam_damage = dres.boss_slam_damage
+		_hard_boss_hp_mult = dres.hard_boss_health_mult if _hard else 1.0
 	else:
 		_normal_hp_mult = 1.0
 		_normal_dmg_mult = 1.0
@@ -171,6 +173,7 @@ func _resolve_difficulty(map: Node) -> void:
 		_boss_dmg_mult = 1.0
 		_boss_health_by_party = PackedFloat32Array()
 		_boss_slam_damage = 0.0
+		_hard_boss_hp_mult = 1.0
 
 
 ## Group SpawnMarker children into _waves by their `wave` index (0,1,2…); markers without an enemy
@@ -231,8 +234,8 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 			dmg_m *= _boss_dmg_mult
 		var party_hp: float = _party_boss_health()
 		if is_boss and party_hp > 0.0:
-			if _hard and _normal_hp_mult > 0.0:
-				party_hp *= _hp_mult / _normal_hp_mult
+			if _hard and _hard_boss_hp_mult > 1.0:
+				party_hp *= _hard_boss_hp_mult
 			if not is_equal_approx(dmg_m, 1.0):
 				npc.apply_difficulty(1.0, dmg_m)
 			npc.apply_max_health(party_hp)
@@ -246,9 +249,10 @@ func _spawn_marker_mob(marker: SpawnMarker) -> void:
 		brain.add_health_mult = _hp_mult
 		brain.add_damage_mult = _dmg_mult
 		if _boss_slam_damage > 0.0:
-			brain.slam_damage = _boss_slam_damage
-			if _hard and _normal_dmg_mult > 0.0:
-				brain.slam_damage *= _dmg_mult / _normal_dmg_mult
+			var slam: float = _boss_slam_damage
+			if _hard:
+				slam *= maxf(1.75, _hard_boss_hp_mult * 0.8)
+			brain.slam_damage = slam
 		else:
 			var slam_m: float = _dmg_mult * (_boss_dmg_mult if is_boss else 1.0)
 			if not is_equal_approx(slam_m, 1.0):

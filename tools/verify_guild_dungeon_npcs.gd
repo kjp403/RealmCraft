@@ -59,6 +59,13 @@ func _init() -> void:
 		failures.append("dungeon menu no longer labels the Solo Bonus")
 	if menu_src.find("\"Reward: %s\"") >= 0 or menu_src.find("\"Hard: %s\"") >= 0:
 		failures.append("dungeon menu still recites the Normal/Hard drop tables")
+	if menu_src.find("_open_lobby_chat") < 0:
+		failures.append("dungeon menu has no share-code-to-chat path")
+	var hud_src: String = FileAccess.get_file_as_string(
+		"res://source/client/ui/hud/hud.gd"
+	)
+	if hud_src.find("_menu_allows_chat") < 0 or hud_src.find("CHAT_ABOVE_MENU_Z") < 0:
+		failures.append("HUD must keep chat usable over the dungeon lobby")
 
 	if failures.is_empty():
 		print("VERIFY_PASS guild_dungeon_npcs")

@@ -889,12 +889,16 @@ func _summon_adds() -> void:
 		# World trash archetypes (yeti, demon adds, …) ship chase_on_area=false so
 		# they don't jump skillers. Enrage summons must fight immediately — stamp
 		# aggro + a spawn burst. Dungeon RoomNodes pass the wave HP/dmg table so
-		# adds actually hurt; world bosses keep the old 1.75 / 1.35 bump.
+		# adds actually hurt; world bosses keep the old 1.75 / 1.35 bump. Hard
+		# stacks an extra multiplier so enrage adds are not free food.
 		var hp_m: float = add_health_mult
 		var dmg_m: float = add_damage_mult
 		if is_equal_approx(hp_m, 1.0) and is_equal_approx(dmg_m, 1.0):
 			hp_m = 1.75
 			dmg_m = 1.35
+		if DungeonService.is_hard_run(_instance()):
+			hp_m *= 2.0
+			dmg_m *= 1.6
 		npc.apply_difficulty(hp_m, dmg_m)
 		npc._process_synchronization()
 		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)

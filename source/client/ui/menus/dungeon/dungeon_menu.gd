@@ -28,6 +28,16 @@ var _tab_buttons: Dictionary[StringName, Button] = {}
 
 func _ready() -> void:
 	build_shell("Dungeon", null, true)
+	var chat_btn: Button = Button.new()
+	chat_btn.text = "Chat"
+	chat_btn.custom_minimum_size = Vector2(72, 34)
+	chat_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	chat_btn.pressed.connect(func() -> void:
+		var code: String = str(_room.get("code", ""))
+		_open_lobby_chat("" if code.is_empty() else "Room code: %s" % code)
+	)
+	header_right.add_child(chat_btn)
+	header_right.move_child(chat_btn, 0)
 	Client.subscribe(&"dungeon.lobby.update", _on_lobby_update)
 	Client.subscribe(&"dungeon.room.update", _on_room_update)
 	_build_layout()
@@ -212,7 +222,7 @@ func _build_private_panel() -> void:
 	var vbox: VBoxContainer = _panel_body()
 	if _room.is_empty():
 		var blurb: Label = Label.new()
-		blurb.text = "Make a private room and share its code, or join one by code."
+		blurb.text = "Make a private room and share its code in chat (Enter). Friends join from any keeper for this dungeon — type 7 for 07."
 		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		blurb.modulate = Color(1, 1, 1, 0.7)
 		vbox.add_child(blurb)
@@ -235,6 +245,7 @@ func _build_private_panel() -> void:
 		code_edit.placeholder_text = "Code"
 		code_edit.max_length = DungeonService.ROOM_CODE_LEN
 		code_edit.custom_minimum_size = Vector2(90, 0)
+		code_edit.text_submitted.connect(func(text: String) -> void: _room_request("join_code", {"code": text}))
 		join_row.add_child(code_edit)
 		join_row.add_child(_action_button("Join by code", func() -> void: _room_request("join_code", {"code": code_edit.text})))
 		return
@@ -245,6 +256,17 @@ func _build_private_panel() -> void:
 	code_label.add_theme_font_size_override(&"font_size", 18)
 	code_label.add_theme_color_override(&"font_color", Color(1.0, 0.92, 0.55))
 	vbox.add_child(code_label)
+	var share_row: HBoxContainer = HBoxContainer.new()
+	share_row.add_theme_constant_override(&"separation", 8)
+	vbox.add_child(share_row)
+	var code: String = str(_room.get("code", ""))
+	share_row.add_child(_action_button("Copy", func() -> void: _copy_room_code(code)))
+	share_row.add_child(_action_button("Chat code", func() -> void: _open_lobby_chat("Room code: %s" % code)))
+	var chat_hint: Label = Label.new()
+	chat_hint.text = "Enter opens chat without leaving this screen."
+	chat_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	chat_hint.modulate = Color(1, 1, 1, 0.55)
+	vbox.add_child(chat_hint)
 	if bool(_room.get("hard", false)):
 		_info_into(vbox, "Hard Mode", Color(0.86, 0.7, 0.5))
 	_add_roster(vbox, "Members", _room.get("members", []), int(_room.get("capacity", 4)), false)
@@ -338,6 +360,7 @@ func _on_room_response(response: Dictionary) -> void:
 		Toaster.toast({
 			"full": "Room is full.",
 			"no_room": "No room with that code.",
+			"wrong_dungeon": "That code is for a different dungeon.",
 			"in_run": "You're already in a dungeon.",
 			"too_far": "You're too far from the dungeon.",
 			"not_leader": "Only the leader can start.",
@@ -420,6 +443,21 @@ func _info_into(vbox: VBoxContainer, text: String, color: Color) -> void:
 	label.text = text
 	label.add_theme_color_override(&"font_color", color)
 	vbox.add_child(label)
+
+
+func _copy_room_code(code: String) -> void:
+	if code.is_empty():
+		return
+	DisplayServer.clipboard_set(code)
+	Toaster.toast("Copied room code %s." % code)
+
+
+func _open_lobby_chat(prefill: String = "") -> void:
+	var found: Array[Node] = get_tree().root.find_children("*", "ChatMenu", true, false)
+	if found.is_empty():
+		Toaster.toast("Chat isn't available.")
+		return
+	(found[0] as ChatMenu).start_compose(prefill)
 
 
 func _action_button(text: String, callback: Callable) -> Button:
