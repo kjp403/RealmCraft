@@ -78,6 +78,9 @@ var _aim_assist: AimAssist = null
 ## teleport is applied locally (position is client-authoritative).
 var _dead: bool = false
 var _respawn_position: Vector2
+## Stay locked until the death-screen countdown ends even if the server already
+## filled HP (hard-fail used to revive in place and let you walk the corpse).
+var _death_lock_until_ms: int = 0
 
 ## Last-seen PvP state, so the zone-crossing toast fires only on the SAFE<->PVP
 ## edge. zone_flags is server-authoritative (synced via correction); we just
@@ -272,22 +275,24 @@ func _on_player_died(data: Dictionary) -> void:
 	_dead = true
 	_respawn_position = data.get("spawn", global_position)
 	var return_home: bool = bool(data.get("return_home", false))
-	await get_tree().create_timer(float(data.get("respawn_in", 3.0))).timeout
+	var delay: float = float(data.get("respawn_in", 3.0))
+	_death_lock_until_ms = Time.get_ticks_msec() + int(round(delay * 1000.0))
+	await get_tree().create_timer(delay).timeout
 	if not is_instance_valid(self):
 		return
-	# Do not unlock while HP is still 0 — the server owns revive. Clearing _dead
-	# here used to let you walk and input a corpse until (or unless) HP came back.
-	if stats_component.get_stat(Stat.HEALTH) > 0.0:
-		_dead = false
 	if return_home:
 		return
-	if not _dead:
+	if stats_component != null and stats_component.get_stat(Stat.HEALTH) > 0.0:
 		global_position = _respawn_position
 
 
 ## Stay locked while HEALTH is 0 even if player.died never arrived (hard-dungeon
-## fail) or the 3s unlock raced the server revive. Unlock the moment HP returns.
+## fail) or the 3s unlock raced the server revive. Also honor the death-screen
+## countdown so an early server revive cannot unlock movement on the corpse.
 func _sync_dead_lock() -> void:
+	if Time.get_ticks_msec() < _death_lock_until_ms:
+		_dead = true
+		return
 	if stats_component == null:
 		return
 	if stats_component.get_stat(Stat.HEALTH) <= 0.0:
