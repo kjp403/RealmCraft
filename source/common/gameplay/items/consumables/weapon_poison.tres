@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_weapon_poison.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+coating_kind = &"poison"
+coating_potency = 4.0
+coating_hit_duration_s = 6.0
+coating_duration_s = 300.0
+shared_cooldown_ms = 3000
+cooldown_category = &"weapon_coating"
+item_name = &"Weapon Poison"
+item_icon = ExtResource("1_tex")
+description = "Smear it along the edge before a fight. Everything you cut keeps bleeding green for a while after."
+vendor_value = 1300
+metadata/slug = &"weapon_poison"
+metadata/id = 586

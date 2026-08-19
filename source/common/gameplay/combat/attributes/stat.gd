@@ -12,6 +12,14 @@ const MANA_REGEN: StringName = &"mana_regen"
 const ENERGY: StringName = &"energy"
 const ENERGY_MAX: StringName = &"energy_max"
 
+## Prayer points. The pool is PRAYER_MAX = your Prayer level (OSRS rule), so it
+## is recomposed from the skill on every spawn; the CURRENT value is runtime
+## state on the PlayerResource, restored on top of the rebuild by
+## PrayerService.reapply — if it lived in the recomposed block instead, walking
+## into any building would refill it for free.
+const PRAYER: StringName = &"prayer"
+const PRAYER_MAX: StringName = &"prayer_max"
+
 const SHIELD: StringName = &"shield"
 
 ## Physical Resistance
@@ -43,6 +51,13 @@ const DAMAGE_VS_LOW_HP: StringName = &"damage_vs_low_hp"
 ## server-side in Character.take_damage on the attacker. See BuffService / Berserk.
 const LIFESTEAL: StringName = &"lifesteal"
 
+## Gathering speed multiplier. 1.0 = normal, 1.2 = 20% faster, etc.
+const GATHER_SPEED: StringName = &"gather_speed"
+## Gathering bonus yield chance. 0.15 = 15% chance of extra resources.
+const GATHER_YIELD: StringName = &"gather_yield"
+## Gathering XP multiplier. 0.20 = 20% more XP.
+const GATHER_XP: StringName = &"gather_xp"
+
 
 ## Player-facing labels for stats shown in tooltips. Anything not listed falls back
 ## to a capitalized form of the raw key.
@@ -50,6 +65,7 @@ const DISPLAY_NAMES: Dictionary = {
 	HEALTH_MAX: "Max Health",
 	MANA_MAX: "Max Mana",
 	MANA_REGEN: "Mana Regen",
+	PRAYER_MAX: "Max Prayer",
 	ARMOR: "Armor",
 	MR: "Magic Resist",
 	AD: "Attack Damage",
@@ -62,10 +78,13 @@ const DISPLAY_NAMES: Dictionary = {
 	ABILITY_HASTE: "Ability Haste",
 	DAMAGE_VS_LOW_HP: "Damage vs Low HP",
 	LIFESTEAL: "Lifesteal",
+	GATHER_SPEED: "Gather Speed",
+	GATHER_YIELD: "Gather Yield",
+	GATHER_XP: "Gather XP",
 }
 
 ## Stats whose value reads as a percentage in UI (rendered "+25%" not "+25").
-const PERCENT_STATS: Array[StringName] = [DAMAGE_VS_LOW_HP, LIFESTEAL]
+const PERCENT_STATS: Array[StringName] = [DAMAGE_VS_LOW_HP, LIFESTEAL, GATHER_SPEED, GATHER_YIELD, GATHER_XP]
 
 
 static func display_name(stat_name: StringName) -> String:

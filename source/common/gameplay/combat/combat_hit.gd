@@ -79,6 +79,10 @@ static func try_damage(source: Character, body: Node2D, damage: float, damage_ty
 		return Result.IGNORED
 
 	body.take_damage(damage, source, damage_type)
+	# A weapon coating rides on top of a landed hit. Placed HERE, past every
+	# target rule, so one hook covers every weapon type at once — a melee arc and
+	# an arrow both arrive through this line.
+	CoatingService.on_hit(source, body as Character)
 	return Result.DAMAGED
 
 

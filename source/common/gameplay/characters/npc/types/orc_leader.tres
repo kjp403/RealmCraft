@@ -18,6 +18,7 @@
 [ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="mithril_ore"]
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
 [ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -102,6 +103,14 @@ min_amount = 4
 max_amount = 10
 chance = 0.5
 
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("1_3a3qb")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
+
 [resource]
 script = ExtResource("2_1jsux")
 enemy_type = &"orc_leader"
@@ -125,7 +134,7 @@ chase_on_area = true
 xp_reward = 1400
 combat_skill_xp_override = 8500
 respawn_delay = 480.0
-loot = Array[ExtResource("1_3a3qb")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_mithril"), SubResource("Drop_steel"), SubResource("Drop_maple"), SubResource("Resource_1jsux"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_emberbrand")])
+loot = Array[ExtResource("1_3a3qb")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_mithril"), SubResource("Drop_steel"), SubResource("Drop_maple"), SubResource("Resource_1jsux"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_relic_emberbrand"), SubResource("Drop_big_bones")])
 slam_radius = 130.0
 slam_windup_s = 0.9
 slam_damage = 360.0

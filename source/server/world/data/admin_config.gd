@@ -1,23 +1,22 @@
 class_name AdminConfig
-## Maps character display names (or #player_id) to a server role, granted LIVE
-## (read on each permission check, not written to the DB). Lets the server owner
-## grant admin by editing a config file — no DB edits, no debug-only hacks —
-## and removing a character revokes it immediately.
+## Maps character display names (or numeric player_id) to a server role, granted
+## LIVE (read on each permission check, not written to the DB).
 ##
-## Grants are CHARACTER-bound: other characters on the same login stay regular
-## players. Use /grant and /revoke for in-game moderator/admin on a specific
-## character.
+## Do NOT use Godot ConfigFile here. ConfigFile is a VariantParser: a single
+## `#` in a comment or a numeric key can abort the whole load, and then every
+## owner grant is silently empty ("Command not found" for /gold). This reader
+## is line-based, never fails closed, and falls back to the bundled file.
 ##
-## Looks for "user://server_admins.cfg" first (editable next to a deployed build), then the
-## bundled "res://data/config/server_admins.cfg". Format (role names come from ServerRoles):
+## Lookup:
+##   1. user://server_admins.cfg if it exists AND parsed at least one admin
+##   2. else res://data/config/server_admins.cfg
+##
+## Format:
 ##   [admins]
-##   MyStaffChar="owner"
-##   #1042="senior_admin"
+##   KJP="owner"
+##   2="owner"
 ##   [leaderboard_hide]
-##   SomeDisplayName=1
-##
-## SECURITY: guest* names are never honored — they previously matched auto-created
-## guest logins and granted free senior_admin. owner / senior_admin belong only here.
+##   SomeName=1
 
 const USER_PATH: String = "user://server_admins.cfg"
 const RES_PATH: String = "res://data/config/server_admins.cfg"
@@ -25,10 +24,11 @@ const RES_PATH: String = "res://data/config/server_admins.cfg"
 static var _roles: Dictionary
 static var _leaderboard_hide: Dictionary
 static var _loaded: bool
+static var _source_path: String = ""
 
 
 ## Role granted to this character via the config, or "" if none.
-## Matches [param display_name] (case-insensitive) or `#player_id` / `player_id`.
+## Matches [param display_name] (case-insensitive) or `player_id` / `#player_id`.
 static func role_for_character(display_name: String, player_id: int = 0) -> String:
 	if not _loaded:
 		_load()
@@ -76,6 +76,7 @@ static func reload() -> void:
 	_roles.clear()
 	_leaderboard_hide.clear()
 	_loaded = false
+	_source_path = ""
 
 
 static func _is_forbidden_name(name: String) -> bool:
@@ -88,32 +89,69 @@ static func _is_forbidden_name(name: String) -> bool:
 
 static func _load() -> void:
 	_loaded = true
-	var config: ConfigFile = ConfigFile.new()
-	var path: String = USER_PATH if FileAccess.file_exists(USER_PATH) else RES_PATH
-	if config.load(path) != OK:
-		return
-	if config.has_section("admins"):
-		for entry: String in config.get_section_keys("admins"):
-			if _is_forbidden_name(entry):
-				push_warning(
-					"AdminConfig: ignoring forbidden guest* admin entry '%s' in %s"
-					% [entry, path]
-				)
+	_roles.clear()
+	_leaderboard_hide.clear()
+	_source_path = ""
+	if FileAccess.file_exists(USER_PATH) and _read_path(USER_PATH) and not _roles.is_empty():
+		_source_path = USER_PATH
+	elif FileAccess.file_exists(RES_PATH) and _read_path(RES_PATH):
+		_source_path = RES_PATH
+	var keys: PackedStringArray = PackedStringArray(_roles.keys())
+	print(
+		"AdminConfig: %d admin(s) from %s (%s)"
+		% [_roles.size(), _source_path if not _source_path.is_empty() else "none", ", ".join(keys)]
+	)
+
+
+static func _read_path(path: String) -> bool:
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_warning("AdminConfig: cannot open %s" % path)
+		return false
+	var text: String = file.get_as_text()
+	file.close()
+	_parse_text(text)
+	return true
+
+
+## Line-based INI. Full-line `;` / `#` comments only. Never aborts the file.
+static func _parse_text(text: String) -> void:
+	var section: String = ""
+	for raw_line: String in text.split("\n"):
+		var line: String = raw_line.strip_edges()
+		if line.is_empty() or line.begins_with(";") or line.begins_with("#"):
+			continue
+		if line.begins_with("[") and line.ends_with("]"):
+			section = line.substr(1, line.length() - 2).strip_edges().to_lower()
+			continue
+		var eq: int = line.find("=")
+		if eq <= 0:
+			continue
+		var key: String = _unquote(line.substr(0, eq).strip_edges())
+		var value: String = _unquote(line.substr(eq + 1).strip_edges())
+		if key.is_empty():
+			continue
+		if section == "admins":
+			if _is_forbidden_name(key):
+				push_warning("AdminConfig: ignoring forbidden guest* admin entry '%s'" % key)
 				continue
-			var role: String = str(config.get_value("admins", entry, "")).strip_edges()
-			if role.is_empty():
+			if value.is_empty():
 				continue
-			_roles[entry.to_lower()] = role
-	if config.has_section("leaderboard_hide"):
-		for key: String in config.get_section_keys("leaderboard_hide"):
-			var raw: Variant = config.get_value("leaderboard_hide", key, 0)
-			var on: bool = false
-			if raw is bool:
-				on = raw
-			elif raw is int or raw is float:
-				on = int(raw) != 0
-			else:
-				var s: String = str(raw).strip_edges().to_lower()
-				on = s in ["1", "true", "yes", "on"]
+			_roles[key.to_lower()] = value
+		elif section == "leaderboard_hide":
+			var on: bool = value.to_lower() in ["1", "true", "yes", "on"]
 			if on:
 				_leaderboard_hide[key.to_lower()] = true
+
+
+static func _unquote(s: String) -> String:
+	if s.length() >= 2 and s.begins_with("\"") and s.ends_with("\""):
+		return s.substr(1, s.length() - 2)
+	return s
+
+
+## Headless tests: parse [param text] as if it were a cfg file.
+static func load_text_for_verify(text: String) -> void:
+	reload()
+	_loaded = true
+	_parse_text(text)

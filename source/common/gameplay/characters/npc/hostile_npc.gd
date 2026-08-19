@@ -1871,7 +1871,7 @@ func _boss_brain() -> BossController:
 ## 3. Engages an IDLE mob that's been hit from outside detection range
 ##    (a far-away snipe wouldn't trigger CHASE through detection_area).
 ## 4. Pre/post logs gated on DEBUG_NPC for future bug triage.
-func take_damage(amount: float, attacker: Character = null, damage_type: StringName = CombatHit.DAMAGE_PHYSICAL) -> void:
+func take_damage(amount: float, attacker: Character = null, damage_type: StringName = CombatHit.DAMAGE_PHYSICAL, effect_kind: StringName = &"") -> void:
 	# Ally protection: a guild guard ignores damage from its own guild's members.
 	# Blocking here (before super) means no HP loss, no death, and no hit feedback
 	# (numbers/flash/sound all hang off the HP-decrease push).
@@ -1881,7 +1881,7 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 			return
 
 	if not GameMode.is_world_server():
-		super.take_damage(amount, attacker, damage_type)
+		super.take_damage(amount, attacker, damage_type, effect_kind)
 		return
 
 	# Participation: tally each player's damage BEFORE applying it, so a killing
@@ -1901,7 +1901,7 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 			String(attacker.name) if attacker else "null"
 		])
 
-	super.take_damage(amount, attacker, damage_type)
+	super.take_damage(amount, attacker, damage_type, effect_kind)
 	if amount > 0.0:
 		_mark_combat_activity()
 

@@ -15,6 +15,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="li_gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="li_key"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_blue_grand.tres" id="mat_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -61,6 +62,14 @@ script = ExtResource("3_loot")
 item = ExtResource("l70_w_bow")
 chance = 0.0025
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("3_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"ossuran"
@@ -89,7 +98,7 @@ wander_pause_max_s = 4.0
 xp_reward = 11000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow"), SubResource("Drop_dragon_bones")])
 combat_skill_xp_override = 16000
 enrage_health_fraction = 0.6
 slam_radius = 130.0

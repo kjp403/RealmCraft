@@ -426,6 +426,101 @@ godot --headless --path . -s tools/verify_boss_relics.gd
 
 For a potion, duplicate something under `consumables/` instead and set `heal_amount` / etc.
 
+### Breaking items down (salvage)
+
+One table drives the bag's **Break Down** button:
+`source/common/gameplay/crafting/resources/salvage_table.tres` (`SalvageTable`).
+There is no station and no per-item code — an item is salvageable purely because
+it has a row here.
+
+Current spec (29 rows: five weapons per family, but there is no rustic *wand* in
+the art pack):
+
+| Weapon family | Breaks into | Herblore to do it | Feeds |
+|---|---|---|---|
+| Spore | 1 Blightspore | 1 | Weapon Poison |
+| Poison | 1 Venom Sac | 20 | Weapon Poison ++ |
+| Fairy | 1 Fairy Dust | 25 | Weapon Salve |
+| Fire | 1 Ember Ash | 30 | Weapon Ember |
+| Bone | **2-4** Bone | 1 | (existing bone economy) |
+| Rustic | **1-3** Iron Bar | 1 | (existing smithing) |
+
+Each row is a `SalvageRecipe`:
+
+| Field | Meaning |
+|-------|---------|
+| `source_item` | the item consumed (one unit per Break Down) |
+| `outputs` | `Array[SalvageOutput]` — what one unit yields |
+| `required_level` | level in the table's `profession` needed to do it |
+| `xp_reward` | profession xp per unit, before perks |
+
+A `SalvageOutput` is `{item, min_amount, max_amount}`. **A fixed yield is just
+`min == max`**, so "1 Blightspore" and "1-3 Iron Bars" are one shape and the UI
+has one thing to render. Rolls happen **per unit, server-side** in
+`item.salvage.gd` — breaking 5 rustic swords is five independent rolls, and the
+client only learns the result from the response.
+
+The table's `profession` (currently `&"herblore"`) gates and is paid by every
+row, and its Green Thumb xp perk applies exactly as it does to brewing.
+
+To make another weapon family salvageable, add a `SalvageOutput` + a
+`SalvageRecipe` sub-resource and append it to `recipes` — nothing else. The bag
+button appears for it automatically, on both the client (which reads this table
+only to decide whether to offer the button) and the server handler.
+
+Two guards worth knowing: **favorited stacks refuse to break down** (the pin is
+treated as "don't touch this", because unlike Drop this is not recoverable), and
+the whole yield has to fit in the bag or nothing happens.
+
+### Weapon coatings
+
+A `ConsumableItem` with `coating_kind` set is a weapon coating rather than a
+drink:
+
+| Field | Meaning |
+|-------|---------|
+| `coating_kind` | `&"poison"` / `&"burn"` / `&"heal"` (see `CoatingService`) |
+| `coating_potency` | damage per second for poison/burn; **health per landed hit** for heal |
+| `coating_hit_duration_s` | how long the DoT burns on each victim. Unused by `heal` |
+| `coating_duration_s` | how long the coating stays on YOUR weapon |
+
+Authored set — all four last **5 minutes**:
+
+| Potion | Kind | Effect per hit | Herblore |
+|---|---|---|---|
+| Weapon Poison | poison | 24 damage over 6s | 35 |
+| Weapon Salve | heal | heals you 3 | 45 |
+| Weapon Ember | burn | 30 damage over 5s | 55 |
+| Weapon Poison ++ | poison | 72 damage over 8s | 65 |
+
+Leave a kind empty and the item is not treated as a coating at all (a
+half-filled set is an authoring slip, not a weak coating). While a coating
+lasts, every hit the drinker lands fires it — hooked **once** in
+`CombatHit.try_damage`, so it already works for every weapon type, melee and
+projectile alike, with no per-weapon code.
+
+**One at a time.** Drinking any coating while another is running is *refused*,
+not merged and not refreshed — including re-drinking the same one. The player
+gets "You already have an active potion." from both the bag and the hotbar. A
+refused drink does **not** consume the vial. Coatings share the
+`&"weapon_coating"` cooldown category, deliberately separate from `&"potion"`,
+so coating a weapon can never block an emergency health potion.
+
+The coating is runtime-only state on `PlayerResource.weapon_coating` (like
+`active_buffs`): it survives an instance change within a session and is gone on
+logout. It is **not** persisted, so no save data changes shape.
+
+Brew levels are the one dial to retune if this ladder feels long — they are set
+in `alchemy_station.tres` and mirrored in `jobs/herblore.tres` (`recipe_levels`
+is positional and must stay parallel to `recipe_items`).
+
+Gates:
+
+```bash
+godot --headless --path . --mode=client res://tools/verify_weapon_coatings.tscn
+godot --headless --path . --mode=client res://tools/verify_coating_behaviour.tscn
+```
+
 ### Ascension gear (mastery 40–90)
 
 Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / cloth split:

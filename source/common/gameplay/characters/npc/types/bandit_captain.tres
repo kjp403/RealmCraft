@@ -23,6 +23,7 @@
 [ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="maple_log"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
 [ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Lunge_captain"]
 script = ExtResource("91_lunge")
@@ -132,6 +133,14 @@ min_amount = 3
 max_amount = 7
 chance = 0.4
 
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("2_loot")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_captain"
@@ -154,7 +163,7 @@ chase_on_area = true
 xp_reward = 1200
 combat_skill_xp_override = 9000
 respawn_delay = 120.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 slam_radius = 120.0
 slam_windup_s = 0.85
 slam_damage = 165.0

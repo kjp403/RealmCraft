@@ -32,6 +32,17 @@ static func sync(player: Player) -> void:
 		else:
 			buffs.append({"id": stat, "remaining": remaining})
 
+	# A weapon coating is a buff on YOU (your hits do something extra), not a
+	# debuff — it rides the buff strip even when its kind names a harmful effect.
+	# The id is prefixed so "coating_poison" on your strip cannot be confused
+	# with "poison" on a victim's.
+	var coating_left: int = CoatingService.remaining_seconds(player)
+	if coating_left > 0:
+		buffs.append({
+			"id": CoatingService.status_id(CoatingService.active_kind(player)),
+			"remaining": coating_left,
+		})
+
 	for child: Node in player.get_children():
 		if child is DamageOverTime:
 			debuffs.append({

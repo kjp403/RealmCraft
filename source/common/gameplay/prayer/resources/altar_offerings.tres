@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="AltarOfferingTable" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/prayer/altar_offering_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://source/common/gameplay/prayer/altar_offering.gd" id="2_offering"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="mat_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="mat_big_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="mat_dragon_bones"]
+
+[sub_resource type="Resource" id="O_bone"]
+script = ExtResource("2_offering")
+item = ExtResource("mat_bone")
+xp = 550
+required_level = 0
+
+[sub_resource type="Resource" id="O_big_bones"]
+script = ExtResource("2_offering")
+item = ExtResource("mat_big_bones")
+xp = 1650
+required_level = 0
+
+[sub_resource type="Resource" id="O_dragon_bones"]
+script = ExtResource("2_offering")
+item = ExtResource("mat_dragon_bones")
+xp = 4400
+required_level = 0
+
+[resource]
+script = ExtResource("1_table")
+profession = &"prayer"
+offerings = Array[ExtResource("2_offering")]([SubResource("O_bone"), SubResource("O_big_bones"), SubResource("O_dragon_bones")])

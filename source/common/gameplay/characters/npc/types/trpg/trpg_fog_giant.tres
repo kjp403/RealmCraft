@@ -7,6 +7,7 @@
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="loot_gold"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_fog_giant.tres" id="5_toiot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_010ao")
@@ -20,6 +21,14 @@ script = ExtResource("3_010ao")
 item = ExtResource("loot_bone")
 chance = 1.0
 
+
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("3_010ao")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
 
 [resource]
 script = ExtResource("4_l4d7s")
@@ -49,7 +58,7 @@ wander_pause_max_s = 4.0
 xp_reward = 90
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_010ao")]([SubResource("Drop_gold"), SubResource("Drop_bone")])
+loot = Array[ExtResource("3_010ao")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

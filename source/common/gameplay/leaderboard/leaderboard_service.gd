@@ -13,9 +13,9 @@ class_name LeaderboardService
 ## Fastest-clear keys must match instance_name (what the UI queries). Older
 ## clears were stored under display titles; those aliases still rank until the
 ## next record rewrite.
-static var DUNGEON_KEY_ALIASES: Dictionary = {
-	"Dungeon": PackedStringArray(["The Dark Cave"]),
-	"fungus_dungeon": PackedStringArray(["Fungus Domain"]),
+const DUNGEON_KEY_ALIASES: Dictionary = {
+	"Dungeon": ["The Dark Cave"],
+	"fungus_dungeon": ["Fungus Domain"],
 }
 const DAY_MS: int = 24 * 60 * 60 * 1000
 const WEEK_MS: int = 7 * DAY_MS
@@ -57,9 +57,8 @@ static func record_dungeon_clear(player: Player, dungeon_name: String, seconds: 
 	var stats: Dictionary = player.player_resource.lb_stats
 	var best: Dictionary = stats.get("dungeon_best", {})
 	var prev: int = int(best.get(dungeon_name, 0))
-	var aliases: PackedStringArray = DUNGEON_KEY_ALIASES.get(
-		dungeon_name, PackedStringArray()
-	)
+	var raw_aliases: Array = DUNGEON_KEY_ALIASES.get(dungeon_name, [])
+	var aliases: PackedStringArray = PackedStringArray(raw_aliases)
 	for alias: String in aliases:
 		if not best.has(alias):
 			continue
@@ -331,6 +330,7 @@ const TOTAL_LEVEL_SKILLS: Array[StringName] = [
 	&"herblore",
 	&"fletching",
 	&"slayer",
+	&"prayer",
 ]
 
 
@@ -412,9 +412,8 @@ static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int)
 
 static func _best_dungeon_seconds(best: Dictionary, dungeon_name: String) -> int:
 	var seconds: int = int(best.get(dungeon_name, 0))
-	var aliases: PackedStringArray = DUNGEON_KEY_ALIASES.get(
-		dungeon_name, PackedStringArray()
-	)
+	var raw_aliases: Array = DUNGEON_KEY_ALIASES.get(dungeon_name, [])
+	var aliases: PackedStringArray = PackedStringArray(raw_aliases)
 	for alias: String in aliases:
 		var alt: int = int(best.get(alias, 0))
 		if alt > 0 and (seconds <= 0 or alt < seconds):

@@ -12,6 +12,20 @@ extends Item
 @export var buff_stat: StringName = &""
 @export var buff_amount: float = 0.0
 @export var buff_duration_s: float = 0.0
+## Weapon coating (via CoatingService): while it lasts, every hit the drinker
+## LANDS does something extra. &"" = this consumable is not a coating. Kept
+## separate from buff_* because "your hits poison" is not a stat.
+## One of CoatingService.KIND_POISON / KIND_BURN / KIND_HEAL.
+@export var coating_kind: StringName = &""
+## Damage per second for poison/ember; health per landed hit for salve.
+@export var coating_potency: float = 0.0
+## How long the damage-over-time burns on each victim you hit. Unused by HEAL,
+## which pays out per hit instead of over time.
+@export var coating_hit_duration_s: float = 0.0
+## How long the coating stays on YOUR weapon.
+@export var coating_duration_s: float = 0.0
+## Prayer points restored on use (via PrayerService). 0 = not a prayer potion.
+@export var prayer_amount: int = 0
 ## Drink cooldown in ms, SHARED across every item with the same cooldown_category.
 ## 0 = no cooldown (potions and food can be used as fast as you tap them).
 ## Persists across re-equip (banked on Character.ability_cooldowns) when > 0.
@@ -54,16 +68,67 @@ static func stamp_client_cooldown(consumable: ConsumableItem) -> void:
 	ClientState.local_player.ability_cooldowns[key] = Time.get_ticks_msec() / 1000.0
 
 
+## Does this vial coat the drinker's weapon? The fields its kind needs have to
+## be authored — a half-filled set is an authoring slip, not a weak coating, so
+## it reads as "not a coating" everywhere rather than silently applying a
+## zero-length one.
+func is_coating() -> bool:
+	if coating_kind.is_empty() or coating_potency <= 0.0 or coating_duration_s <= 0.0:
+		return false
+	# Only the damage-over-time kinds need a per-victim duration.
+	return coating_hit_duration_s > 0.0 or not CoatingService.is_dot_kind(coating_kind)
+
+
+## "5m" / "45s". Shared by every timed line so they read the same way.
+static func _format_duration(seconds: float) -> String:
+	return ("%dm" % int(seconds / 60.0)) if seconds >= 60.0 else ("%ds" % int(seconds))
+
+
+## Whole when whole, one decimal otherwise — matches GearItem's modifier format.
+static func _format_amount(value: float) -> String:
+	return ("%d" % int(value)) if is_equal_approx(value, roundf(value)) else ("%.1f" % value)
+
+
+## The one-line "what it does per hit" tooltip, phrased per kind. Damage kinds
+## quote the TOTAL a single application deals, because that is the number that
+## compares against a weapon's AD; a per-second figure reads smaller than it is.
+func _coating_effect_line() -> String:
+	match coating_kind:
+		CoatingService.KIND_POISON:
+			return "Your hits poison for %s damage over %s" % [
+				_format_amount(coating_potency * coating_hit_duration_s),
+				_format_duration(coating_hit_duration_s),
+			]
+		CoatingService.KIND_BURN:
+			return "Your hits burn for %s damage over %s" % [
+				_format_amount(coating_potency * coating_hit_duration_s),
+				_format_duration(coating_hit_duration_s),
+			]
+		CoatingService.KIND_HEAL:
+			return "Your hits heal you for %s" % _format_amount(coating_potency)
+	return "Your hits carry %s" % String(coating_kind).capitalize()
+
+
 func stat_lines() -> Array[Dictionary]:
 	var lines: Array[Dictionary] = []
 	if heal_amount > 0:
 		lines.append({"text": "Restores %d health" % heal_amount, "kind": &"heal"})
 	if mana_amount > 0:
 		lines.append({"text": "Restores %d mana" % mana_amount, "kind": &"mana"})
+	if prayer_amount > 0:
+		lines.append({"text": "Restores %d prayer" % prayer_amount, "kind": &"prayer"})
 	if buff_stat != &"" and not is_zero_approx(buff_amount) and buff_duration_s > 0.0:
 		var number: String = ("%+d" % int(buff_amount)) if is_equal_approx(buff_amount, roundf(buff_amount)) else ("%+.1f" % buff_amount)
-		var duration: String = ("%dm" % int(buff_duration_s / 60.0)) if buff_duration_s >= 60.0 else ("%ds" % int(buff_duration_s))
-		lines.append({"text": "%s %s for %s" % [number, Stat.display_name(buff_stat), duration], "stat": StringName(buff_stat)})
+		lines.append({
+			"text": "%s %s for %s" % [number, Stat.display_name(buff_stat), _format_duration(buff_duration_s)],
+			"stat": StringName(buff_stat),
+		})
+	if is_coating():
+		lines.append({
+			"text": "Coats your weapon for %s" % _format_duration(coating_duration_s),
+			"kind": &"poison",
+		})
+		lines.append({"text": _coating_effect_line(), "kind": &"poison"})
 	if default_charges > 1:
 		lines.append({"text": "%d charges" % default_charges, "kind": &"charges"})
 	return lines
@@ -76,9 +141,20 @@ func can_use(character: Character) -> bool:
 		return true
 	if mana_amount > 0 and character.stats_component.get_stat(Stat.MANA) < character.stats_component.get_stat(Stat.MANA_MAX):
 		return true
+	# A prayer potion is wasted at a full pool, so refuse it there — same rule
+	# health and mana potions already follow.
+	if prayer_amount > 0 and character is Player:
+		var player: Player = character as Player
+		if PrayerService.points(player) < PrayerService.max_points(player):
+			return true
 	# Buff potions always drinkable — re-drinking refreshes the duration.
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0:
 		return true
+	# A coating is drinkable only on a CLEAN weapon — one at a time, by design
+	# (CoatingService.apply). Refusing here is what makes the bag button, the
+	# hotbar and the held sip all agree with the server.
+	if is_coating():
+		return character is Player and not CoatingService.is_active(character as Player)
 	return false
 
 
@@ -94,8 +170,24 @@ func on_use(character: Character) -> void:
 			stats_component.get_stat(Stat.MANA_MAX)
 		)
 		stats_component.set_stat(Stat.MANA, refilled)
+	if prayer_amount > 0 and character is Player:
+		PrayerService.restore(character as Player, float(prayer_amount))
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0 and character is Player:
 		BuffService.apply(character as Player, buff_stat, buff_amount, buff_duration_s)
+	if is_coating():
+		# A refused coating must NOT eat the vial — bail before the bag removal
+		# below rather than charging the player for nothing.
+		if character is not Player:
+			return
+		var coated: bool = CoatingService.apply(
+			character as Player,
+			coating_kind,
+			coating_potency,
+			coating_hit_duration_s,
+			coating_duration_s
+		)
+		if not coated:
+			return
 	if character is Player:
 		Inventory.remove_one_by_id(character.player_resource.inventory, get_meta(&"id"))
 

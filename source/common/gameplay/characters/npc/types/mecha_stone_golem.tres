@@ -24,6 +24,7 @@
 [ext_resource type="Resource" uid="uid://cruniteoremat01" path="res://source/common/gameplay/items/materials/metals/runite_ore.tres" id="runite_ore"]
 [ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
 [ext_resource type="Resource" uid="uid://0epju752htr8" path="res://source/common/gameplay/items/chests/gold_steel_grand.tres" id="chest_steel_grand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Lunge_charge"]
 script = ExtResource("91_lunge")
@@ -143,6 +144,14 @@ script = ExtResource("2_loot")
 item = ExtResource("chest_steel_grand")
 chance = 0.1
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("2_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"mecha_stone_golem"
@@ -166,7 +175,7 @@ xp_reward = 28000
 combat_skill_xp_override = 30000
 respawns = true
 respawn_delay = 300.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_runite"), SubResource("Drop_mithril_bar"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_grand_steel")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_bar"), SubResource("Drop_coal"), SubResource("Drop_steel"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_runite"), SubResource("Drop_mithril_bar"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_grand_steel"), SubResource("Drop_dragon_bones")])
 enrage_health_fraction = 0.4
 slam_radius = 150.0
 slam_windup_s = 0.9

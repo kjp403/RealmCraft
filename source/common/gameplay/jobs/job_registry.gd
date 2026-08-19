@@ -24,6 +24,9 @@ static var JOBS: Dictionary[StringName, JobPerks] = {
 	# docs/slayer_skill.md. category == &"combat" is new; the Jobs UI's
 	# gathering/crafting bucketing needs a third bucket to show it.
 	&"slayer": preload("res://source/common/gameplay/jobs/slayer.tres"),
+	# Combat skill too, trained by burning bones at the church altar rather than
+	# by killing. See docs/prayer_skill.md.
+	&"prayer": preload("res://source/common/gameplay/jobs/prayer.tres"),
 }
 
 

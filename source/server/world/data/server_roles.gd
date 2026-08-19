@@ -21,6 +21,10 @@ extends Resource
 	"senior_admin": {
 		"priority": 100,
 		"commands": []
+	},
+	"owner": {
+		"priority": 1000,
+		"commands": []
 	}
 }
 

@@ -1,8 +1,14 @@
-extends SceneTree
+extends Node
 ## Load-and-shape check for Farming herb ladder + Herblore alchemy station.
-## Run: godot --headless --path . -s tools/verify_herblore.gd
+##
+## Runs as a SCENE, not `-s`: under `-s` there are no autoloads, so
+## ConsumableItem (which reaches ClientState) fails to compile and every potion
+## in the station and the job list loads as null — the check then reports
+## cascading false failures. See verify_bank.gd for the same note.
+##
+##   godot --headless --path . --mode=client res://tools/verify_herblore.tscn
 
-func _init() -> void:
+func _ready() -> void:
 	var fails: Array[String] = []
 
 	var farm: JobPerks = JobRegistry.perks_for(&"harvesting")
@@ -18,8 +24,9 @@ func _init() -> void:
 		fails.append("JobRegistry missing herblore")
 	else:
 		print("herblore=", herb.display_name, " recipes=", herb.recipe_items.size())
-		if herb.recipe_items.size() != 7:
-			fails.append("Herblore recipe_items expected 7, got %d" % herb.recipe_items.size())
+		# 7 potion ladder + 4 weapon coatings + prayer potion + 2 Hollow Seep brews.
+		if herb.recipe_items.size() != 14:
+			fails.append("Herblore recipe_items expected 14, got %d" % herb.recipe_items.size())
 
 	if not JobRegistry.JOBS.has(&"herblore"):
 		fails.append("JOBS dict missing herblore")
@@ -34,8 +41,8 @@ func _init() -> void:
 			" recipes=", station.recipes.size())
 		if station.profession != &"herblore":
 			fails.append("alchemy station profession should be herblore")
-		if station.recipes.size() != 7:
-			fails.append("expected 7 brew recipes, got %d" % station.recipes.size())
+		if station.recipes.size() != 14:
+			fails.append("expected 14 brew recipes, got %d" % station.recipes.size())
 		for r: CraftingRecipe in station.recipes:
 			if r == null or r.output_item == null:
 				fails.append("null brew recipe")
@@ -128,8 +135,8 @@ func _init() -> void:
 
 	if fails.is_empty():
 		print("VERIFY_PASS herblore")
-		quit(0)
+		get_tree().quit(0)
 	else:
 		for f: String in fails:
 			print("VERIFY_FAIL ", f)
-		quit(1)
+		get_tree().quit(1)
