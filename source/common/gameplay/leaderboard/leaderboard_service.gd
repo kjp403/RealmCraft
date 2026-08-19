@@ -13,7 +13,7 @@ class_name LeaderboardService
 ## Fastest-clear keys must match instance_name (what the UI queries). Older
 ## clears were stored under display titles; those aliases still rank until the
 ## next record rewrite.
-const DUNGEON_KEY_ALIASES: Dictionary = {
+static var DUNGEON_KEY_ALIASES: Dictionary = {
 	"Dungeon": PackedStringArray(["The Dark Cave"]),
 	"fungus_dungeon": PackedStringArray(["Fungus Domain"]),
 }
