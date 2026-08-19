@@ -84,12 +84,20 @@ func data_request_handler(
 			continue
 		yields[out_id] = int(yields.get(out_id, 0)) + total
 		needed += Inventory.slots_needed(inventory, out_id, total)
-	if yields.is_empty() or needed > Inventory.free_slots(inventory):
-		Inventory.add_item(inventory, item_id, removed)
+	# Space is counted across every unlocked bag, not just the open tab: the
+	# stack being broken down can free a square in one bag while the materials
+	# land in another.
+	var active_bag: int = resource.active_inventory_bag
+	var bag_count: int = resource.inventory_bags
+	if yields.is_empty() or needed > Inventory.total_free_slots(inventory, bag_count):
+		Inventory.add_item(inventory, item_id, removed, false, active_bag, bag_count)
 		return {"ok": false, "reason": "inventory_full"}
 
 	for out_id: int in yields:
-		Inventory.try_add_item(inventory, out_id, yields[out_id])
+		Inventory.try_add_item(
+			inventory, out_id, yields[out_id], Inventory.MAX_SLOTS,
+			false, active_bag, bag_count
+		)
 
 	# Herblore xp, run through the same perk multiplier crafting uses so Green
 	# Thumb pays out consistently across the whole skill.

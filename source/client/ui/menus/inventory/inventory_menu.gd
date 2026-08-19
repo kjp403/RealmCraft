@@ -289,7 +289,9 @@ func _on_bag_tab(index: int) -> void:
 	if index < _bag_count:
 		_pending_bag_purchase = -1
 		_active_bag = index
-		Client.request_data(&"inventory.set_active_bag", {"bag": index}, InstanceClient.current.name)
+		Client.request_data(
+			&"inventory.set_active_bag", Callable(), {"bag": index}, InstanceClient.current.name
+		)
 		_update_bag_tabs()
 		_rebuild_grid()
 		return
