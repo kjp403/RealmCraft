@@ -19,11 +19,19 @@ var _busy: bool = false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# The HUD only calls open() when a menu is opened WITH an argument, and the
-	# prayer book is opened without one (dock icon / menu entry). Building on
-	# show keeps the panel from coming up as an empty full-screen Control that
-	# eats every click with no Close button — which reads as a frozen game.
+	# Build on _ready like every other menu (see inventory_menu). Two traps here,
+	# and hitting either leaves an EMPTY full-rect Control over the game that
+	# swallows every click with no Close button — indistinguishable from a freeze:
+	#
+	#  1. hud.display_menu only calls open() for menus opened WITH an argument.
+	#     The prayer book is opened without one (dock icon), so open() never runs.
+	#  2. Menu scene roots ship visible = true, so display_menu's show() on a
+	#     freshly instantiated menu is a NO-OP and visibility_changed does not
+	#     fire on first open — a visibility hook alone is not enough.
+	#
+	# visibility_changed still refreshes the data on REOPEN (hide → show).
 	visibility_changed.connect(_on_visibility_changed)
+	_refresh()
 
 
 func _on_visibility_changed() -> void:
@@ -47,6 +55,11 @@ func _refresh() -> void:
 	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(loading)
 	_content.add_child(_button("Close", hide))
+
+	# Never fire the request into a null peer — the card above is already
+	# escapable, which is the part that matters.
+	if not is_instance_valid(Client) or not Client.is_connected_to_server:
+		return
 
 	var result: Array = await Client.request_data_await(
 		&"prayer.state", {}, _instance_name()
