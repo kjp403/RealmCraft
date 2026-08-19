@@ -322,6 +322,10 @@ func _flash_health_bar() -> void:
 var is_dead: bool = false
 ## The character that dealt the most recent damage (for kill attribution).
 var last_attacker: Character
+## The damage type of the most recent hit (physical / magic), for feedback color.
+var last_damage_type: StringName = &""
+## The effect kind of the most recent hit (poison / burn / ""), for feedback color.
+var last_effect_kind: StringName = &""
 
 ## How long a hit (dealt OR taken) keeps a combatant "in combat" (UI status).
 const COMBAT_LINGER_MS: int = 5000
@@ -454,13 +458,15 @@ func _detonate_sear_wound(_heal_source: Character) -> void:
 ## damage-type constants) — then triggers death at zero health. Every attack
 ## (projectiles, melee, NPC hits) routes through here so damage/death/attribution
 ## live in one place.
-func take_damage(amount: float, attacker: Character = null, damage_type: StringName = CombatHit.DAMAGE_PHYSICAL) -> void:
+func take_damage(amount: float, attacker: Character = null, damage_type: StringName = CombatHit.DAMAGE_PHYSICAL, effect_kind: StringName = &"") -> void:
 	if not multiplayer.is_server() or is_dead or amount <= 0.0:
 		return
 	if attacker is HostileNpc:
 		amount *= (attacker as HostileNpc).damage_dealt_mult
 	# Any landed hit puts BOTH sides in combat (locks gear swaps for a few
 	# seconds): the victim here, and the attacker so they can't tag-and-swap.
+	last_damage_type = damage_type
+	last_effect_kind = effect_kind
 	var now: int = Time.get_ticks_msec()
 	combat_until_ms = now + COMBAT_LINGER_MS
 	if attacker:
@@ -525,7 +531,10 @@ func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 	var payload: Dictionary = {
 		"amount": int(round(mitigated_amount)),
 		"position": global_position,
+		"damage_type": String(last_damage_type) if not last_damage_type.is_empty() else String(CombatHit.DAMAGE_PHYSICAL),
 	}
+	if not last_effect_kind.is_empty():
+		payload["effect_kind"] = String(last_effect_kind)
 	# Auto-retaliate: tell the victim client which hostile hit them.
 	if self is Player and last_attacker != null and is_instance_valid(last_attacker):
 		var victim: Player = self as Player

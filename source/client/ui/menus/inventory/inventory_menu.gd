@@ -71,6 +71,12 @@ var _selected_slot_uid: int = -1
 ## Set when an equipped tile is selected (Unequip mode); empty for a bag item.
 var _selected_gear_slot: StringName
 var _selected_pinned: bool
+## Salvage recipe for the current selection, or null when it can't be broken
+## down. Drives whether the Break Down button shows at all.
+var _selected_salvage: SalvageRecipe
+## Built at runtime (same pattern as PlayerContextMenu's dialogs). Breaking down
+## destroys the item, so it is the one bag action behind a confirm.
+var _salvage_dialog: ConfirmationDialog
 
 ## Wallet widgets, created in the shell header at runtime.
 var wallet_icon: TextureRect
@@ -103,6 +109,7 @@ var _detail_pixel: TextureRect
 @onready var action_button: Button = %ActionButton
 @onready var hotkey_button: Button = %HotkeyButton
 @onready var pin_button: Button = %PinButton
+@onready var salvage_button: Button = %SalvageButton
 
 
 func _ready() -> void:
@@ -126,6 +133,13 @@ func _ready() -> void:
 	action_button.pressed.connect(_on_action_button_pressed)
 	hotkey_button.pressed.connect(_on_hotkey_button_pressed)
 	pin_button.pressed.connect(_on_pin_button_pressed)
+	salvage_button.pressed.connect(_on_salvage_button_pressed)
+	_salvage_dialog = ConfirmationDialog.new()
+	_salvage_dialog.title = "Break Down"
+	_salvage_dialog.ok_button_text = "Break Down"
+	_salvage_dialog.cancel_button_text = "Cancel"
+	_salvage_dialog.confirmed.connect(_confirm_salvage)
+	add_child(_salvage_dialog)
 
 	_connect_equipment_signal()
 	ClientState.local_player_ready.connect(func(_lp: LocalPlayer): _connect_equipment_signal())
@@ -582,6 +596,7 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 	detail_name.text = str(_selected_item.item_name)
 	detail_description.text = ItemTooltip.body(_selected_item, _compare_target())
 
+	salvage_button.visible = false
 	if entry.equipped:
 		action_button.text = "Unequip"
 		action_button.disabled = false
@@ -615,6 +630,15 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 	)
 	pin_button.disabled = false
 	pin_button.text = "Unfavorite" if _selected_pinned else "Favorite"
+	# Breaking down is offered only for items the salvage table actually knows,
+	# so the button never appears as a dead end on ordinary gear.
+	var salvage_table: SalvageTable = SalvageTable.shared()
+	_selected_salvage = (
+		salvage_table.recipe_for(_selected_item_id)
+		if salvage_table != null and _selected_slot_uid >= 0
+		else null
+	)
+	salvage_button.visible = _selected_salvage != null
 
 
 ## The equipped counterpart for stat deltas — only when the selection is bag
@@ -644,6 +668,8 @@ func _clear_detail() -> void:
 	hotkey_button.disabled = true
 	pin_button.disabled = true
 	pin_button.text = "Favorite"
+	_selected_salvage = null
+	salvage_button.visible = false
 
 
 # --- Actions ---
@@ -700,6 +726,58 @@ func _on_action_button_pressed() -> void:
 		)
 		if not _surface_item_rejection(drop_result):
 			fill_inventory()
+
+
+## Asks before breaking the selection down — the item is destroyed and the
+## yield is worth a fraction of it, so a misclick here is not recoverable the
+## way a Drop is (that one leaves the stack on the ground).
+func _on_salvage_button_pressed() -> void:
+	if _selected_item == null or _selected_salvage == null or _selected_slot_uid < 0:
+		return
+	_salvage_dialog.dialog_text = "Break down 1 %s into %s?\nThe %s is destroyed." % [
+		_selected_item.item_name, _salvage_yield_text(_selected_salvage), _selected_item.item_name
+	]
+	_salvage_dialog.popup_centered()
+
+
+func _confirm_salvage() -> void:
+	if _selected_slot_uid < 0:
+		return
+	var result: Array = await Client.request_data_await(
+		&"item.salvage",
+		{"uid": _selected_slot_uid, "amount": 1},
+		InstanceClient.current.name
+	)
+	if _surface_item_rejection(result):
+		return
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	Toaster.toast("Broke it down into %s." % _granted_text(payload.get("granted", [])))
+	fill_inventory()
+
+
+## "1-3x Iron Bar" — the authored yield, for the confirm prompt. Ranges stay
+## ranges here: the roll happens server-side, so this cannot promise a number.
+func _salvage_yield_text(recipe: SalvageRecipe) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for output: SalvageOutput in recipe.outputs:
+		if output == null or output.item == null:
+			continue
+		parts.append(output.describe())
+	return ", ".join(parts) if not parts.is_empty() else "nothing"
+
+
+## Same shape, built from what the server actually GRANTED — which is the only
+## place a rolled yield (1-3 iron bars) becomes a real number.
+func _granted_text(granted: Array) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for entry: Variant in granted:
+		if entry is not Dictionary:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", int(entry.get("id", 0))) as Item
+		if item == null:
+			continue
+		parts.append("%dx %s" % [int(entry.get("amount", 0)), item.item_name])
+	return ", ".join(parts) if not parts.is_empty() else "nothing"
 
 
 ## Opens the shared slot picker for the selected bag item. Picking the slot
@@ -768,6 +846,21 @@ func _surface_item_rejection(result: Array) -> bool:
 			return true
 		"cant_drop":
 			Toaster.toast("That item cannot be dropped.")
+			return true
+		"coating_active":
+			Toaster.toast("You already have an active potion.")
+			return true
+		"cant_salvage":
+			Toaster.toast("That item cannot be broken down.")
+			return true
+		"salvage_level":
+			Toaster.toast("Requires %s %d to break that down." % [
+				str(payload.get("profession", "herblore")).capitalize(),
+				int(payload.get("required_level", 0)),
+			])
+			return true
+		"pinned":
+			Toaster.toast("Unfavorite it first — favorites can't be broken down.")
 			return true
 		"dead":
 			Toaster.toast("You cannot do that while dead.")

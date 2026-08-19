@@ -32,6 +32,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="sirenic_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="sirenic_leather"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Lunge_sov"]
 script = ExtResource("91_lunge")
@@ -184,6 +185,14 @@ script = ExtResource("3_loot")
 item = ExtResource("relic_rotmire")
 chance = 0.001
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("3_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cistern_sovereign"
@@ -212,7 +221,7 @@ wander_pause_max_s = 4.0
 xp_reward = 7200
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth"), SubResource("Drop_relic_rotmire")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth"), SubResource("Drop_relic_rotmire"), SubResource("Drop_dragon_bones")])
 combat_skill_xp_override = 22000
 enrage_health_fraction = 0.4
 slam_radius = 130.0

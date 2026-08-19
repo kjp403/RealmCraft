@@ -21,6 +21,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="li2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="li3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres" id="relic_cinderheart"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Lunge_cinder"]
 script = ExtResource("91_lunge")
@@ -104,6 +105,14 @@ script = ExtResource("3_loot")
 item = ExtResource("fire_book")
 chance = 0.08
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("3_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cinderborn"
@@ -132,7 +141,7 @@ wander_pause_max_s = 4.0
 xp_reward = 28000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_bones")])
 combat_skill_xp_override = 36000
 enrage_health_fraction = 0.4
 slam_radius = 135.0

@@ -1,0 +1,284 @@
+[gd_resource type="Resource" script_class="SalvageTable" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/salvage_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/salvage_recipe.gd" id="2_recipe"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/salvage_output.gd" id="3_output"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/blightspore.tres" id="mat_blightspore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/venom_sac.tres" id="mat_venom_sac"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/fairy_dust.tres" id="mat_fairy_dust"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/ember_ash.tres" id="mat_ember_ash"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="mat_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_bar.tres" id="mat_iron_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_spore.item.tres" id="w_sword_spore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_spore.item.tres" id="w_hammer_spore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/spore_bow.item.tres" id="w_spore_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_spore.item.tres" id="w_wand_spore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_spore.item.tres" id="w_book_spore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_poison.item.tres" id="w_sword_poison"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_poison.item.tres" id="w_hammer_poison"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/poison_bow.item.tres" id="w_poison_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_poison.item.tres" id="w_wand_poison"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_poison.item.tres" id="w_book_poison"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_fairy.item.tres" id="w_sword_fairy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_fairy.item.tres" id="w_hammer_fairy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/fairy_bow.item.tres" id="w_fairy_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_fairy.item.tres" id="w_wand_fairy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_fairy.item.tres" id="w_book_fairy"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_fire.item.tres" id="w_sword_fire"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_fire.item.tres" id="w_hammer_fire"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/fire_bow.item.tres" id="w_fire_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/fire_wand.item.tres" id="w_fire_wand"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_fire.item.tres" id="w_book_fire"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_bone.item.tres" id="w_sword_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_bone.item.tres" id="w_hammer_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/bone_bow.item.tres" id="w_bone_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_bone.item.tres" id="w_wand_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_bone.item.tres" id="w_book_bone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_rustic.item.tres" id="w_sword_rustic"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="w_hammer_rustic"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="w_rustic_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_rustic.item.tres" id="w_book_rustic"]
+
+[sub_resource type="Resource" id="Y_spore"]
+script = ExtResource("3_output")
+item = ExtResource("mat_blightspore")
+min_amount = 1
+max_amount = 1
+
+[sub_resource type="Resource" id="Y_poison"]
+script = ExtResource("3_output")
+item = ExtResource("mat_venom_sac")
+min_amount = 1
+max_amount = 1
+
+[sub_resource type="Resource" id="Y_fairy"]
+script = ExtResource("3_output")
+item = ExtResource("mat_fairy_dust")
+min_amount = 1
+max_amount = 1
+
+[sub_resource type="Resource" id="Y_fire"]
+script = ExtResource("3_output")
+item = ExtResource("mat_ember_ash")
+min_amount = 1
+max_amount = 1
+
+[sub_resource type="Resource" id="Y_bone"]
+script = ExtResource("3_output")
+item = ExtResource("mat_bone")
+min_amount = 2
+max_amount = 4
+
+[sub_resource type="Resource" id="Y_rustic"]
+script = ExtResource("3_output")
+item = ExtResource("mat_iron_bar")
+min_amount = 1
+max_amount = 3
+
+[sub_resource type="Resource" id="S_sword_spore"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_spore")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
+required_level = 1
+xp_reward = 60
+
+[sub_resource type="Resource" id="S_hammer_spore"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_spore")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
+required_level = 1
+xp_reward = 60
+
+[sub_resource type="Resource" id="S_spore_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_spore_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
+required_level = 1
+xp_reward = 60
+
+[sub_resource type="Resource" id="S_wand_spore"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_wand_spore")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
+required_level = 1
+xp_reward = 60
+
+[sub_resource type="Resource" id="S_book_spore"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_spore")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
+required_level = 1
+xp_reward = 60
+
+[sub_resource type="Resource" id="S_sword_poison"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_poison")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
+required_level = 20
+xp_reward = 140
+
+[sub_resource type="Resource" id="S_hammer_poison"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_poison")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
+required_level = 20
+xp_reward = 140
+
+[sub_resource type="Resource" id="S_poison_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_poison_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
+required_level = 20
+xp_reward = 140
+
+[sub_resource type="Resource" id="S_wand_poison"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_wand_poison")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
+required_level = 20
+xp_reward = 140
+
+[sub_resource type="Resource" id="S_book_poison"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_poison")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
+required_level = 20
+xp_reward = 140
+
+[sub_resource type="Resource" id="S_sword_fairy"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_fairy")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
+required_level = 25
+xp_reward = 170
+
+[sub_resource type="Resource" id="S_hammer_fairy"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_fairy")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
+required_level = 25
+xp_reward = 170
+
+[sub_resource type="Resource" id="S_fairy_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_fairy_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
+required_level = 25
+xp_reward = 170
+
+[sub_resource type="Resource" id="S_wand_fairy"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_wand_fairy")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
+required_level = 25
+xp_reward = 170
+
+[sub_resource type="Resource" id="S_book_fairy"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_fairy")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
+required_level = 25
+xp_reward = 170
+
+[sub_resource type="Resource" id="S_sword_fire"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_fire")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
+required_level = 30
+xp_reward = 220
+
+[sub_resource type="Resource" id="S_hammer_fire"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_fire")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
+required_level = 30
+xp_reward = 220
+
+[sub_resource type="Resource" id="S_fire_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_fire_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
+required_level = 30
+xp_reward = 220
+
+[sub_resource type="Resource" id="S_fire_wand"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_fire_wand")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
+required_level = 30
+xp_reward = 220
+
+[sub_resource type="Resource" id="S_book_fire"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_fire")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
+required_level = 30
+xp_reward = 220
+
+[sub_resource type="Resource" id="S_sword_bone"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_bone")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
+required_level = 1
+xp_reward = 25
+
+[sub_resource type="Resource" id="S_hammer_bone"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_bone")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
+required_level = 1
+xp_reward = 25
+
+[sub_resource type="Resource" id="S_bone_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_bone_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
+required_level = 1
+xp_reward = 25
+
+[sub_resource type="Resource" id="S_wand_bone"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_wand_bone")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
+required_level = 1
+xp_reward = 25
+
+[sub_resource type="Resource" id="S_book_bone"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_bone")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
+required_level = 1
+xp_reward = 25
+
+[sub_resource type="Resource" id="S_sword_rustic"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_rustic")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
+required_level = 1
+xp_reward = 90
+
+[sub_resource type="Resource" id="S_hammer_rustic"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_rustic")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
+required_level = 1
+xp_reward = 90
+
+[sub_resource type="Resource" id="S_rustic_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_rustic_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
+required_level = 1
+xp_reward = 90
+
+[sub_resource type="Resource" id="S_book_rustic"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_rustic")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
+required_level = 1
+xp_reward = 90
+
+[resource]
+script = ExtResource("1_table")
+profession = &"herblore"
+recipes = Array[ExtResource("2_recipe")]([SubResource("S_sword_spore"), SubResource("S_hammer_spore"), SubResource("S_spore_bow"), SubResource("S_wand_spore"), SubResource("S_book_spore"), SubResource("S_sword_poison"), SubResource("S_hammer_poison"), SubResource("S_poison_bow"), SubResource("S_wand_poison"), SubResource("S_book_poison"), SubResource("S_sword_fairy"), SubResource("S_hammer_fairy"), SubResource("S_fairy_bow"), SubResource("S_wand_fairy"), SubResource("S_book_fairy"), SubResource("S_sword_fire"), SubResource("S_hammer_fire"), SubResource("S_fire_bow"), SubResource("S_fire_wand"), SubResource("S_book_fire"), SubResource("S_sword_bone"), SubResource("S_hammer_bone"), SubResource("S_bone_bow"), SubResource("S_wand_bone"), SubResource("S_book_bone"), SubResource("S_sword_rustic"), SubResource("S_hammer_rustic"), SubResource("S_rustic_bow"), SubResource("S_book_rustic")])

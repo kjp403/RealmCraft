@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/blightspore.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Blightspore"
+item_icon = ExtResource("1_tex")
+description = "Fungus scraped off a weapon that was grown, not forged. Still faintly alive. The base for weapon poison."
+holdable = false
+can_trade = true
+vendor_value = 8
+stack_limit = 10
+tags = PackedStringArray()
+metadata/slug = &"blightspore"
+metadata/id = 585

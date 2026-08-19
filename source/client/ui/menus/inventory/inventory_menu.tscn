@@ -138,6 +138,15 @@ disabled = true
 text = "Favorite"
 clip_text = true
 
+[node name="SalvageButton" type="Button" parent="MainBody/DetailColumn/Margin/VBox/Actions" unique_id=884512067]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_type_variation = &"FlatButton"
+text = "Break Down"
+clip_text = true
+
 [node name="EquipmentBody" type="HBoxContainer" parent="." unique_id=1999000301]
 visible = false
 layout_mode = 0

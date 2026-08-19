@@ -28,6 +28,8 @@ const LEVEL_COLOR: String = "d98080"   ## red — level gate the player does NOT
 const LEVEL_MET_COLOR: String = "9aa0aa"
 const HEAL_COLOR: String = "82c785"
 const MANA_COLOR: String = "6fb0e0"
+const POISON_COLOR: String = "8fbf5a"  ## venom green — weapon poison lines
+const PRAYER_COLOR: String = "5fd3d3"  ## cyan — prayer restore lines
 const MUTED_COLOR: String = "9aa0aa"   ## charges and the like
 const DEFAULT_COLOR: String = "c8c8d0" ## any stat without a role mapping
 const DELTA_UP_COLOR: String = "82c785"
@@ -147,6 +149,8 @@ static func _entry_color(entry: Dictionary, item: Item = null) -> String:
 		&"level": return LEVEL_MET_COLOR if _requirement_met(entry, item) else LEVEL_COLOR
 		&"heal": return HEAL_COLOR
 		&"mana": return MANA_COLOR
+		&"poison": return POISON_COLOR
+		&"prayer": return PRAYER_COLOR
 		&"charges": return MUTED_COLOR
 	return DEFAULT_COLOR
 

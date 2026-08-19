@@ -11,6 +11,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres" id="11_gswd"]
 [ext_resource type="Script" path="res://source/common/gameplay/characters/npc/enemy_type_resource.gd" id="9_qljtp"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/hell_vault_queen.tres" id="10_lhiof"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Resource_pypyr"]
 script = ExtResource("3_jh6vt")
@@ -46,6 +47,14 @@ script = ExtResource("3_jh6vt")
 item = ExtResource("11_gswd")
 chance = 0.01
 
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("3_jh6vt")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
+
 [resource]
 script = ExtResource("9_qljtp")
 enemy_type = &"hell_vault_queen"
@@ -74,7 +83,7 @@ wander_pause_max_s = 4.0
 xp_reward = 24000
 respawn_delay = 5.0
 respawns = false
-loot = Array[ExtResource("3_jh6vt")]([SubResource("Resource_pypyr"), SubResource("Resource_btboc"), SubResource("Resource_6tf84"), SubResource("Resource_r0s05"), SubResource("Resource_fuory"), SubResource("Resource_gswd")])
+loot = Array[ExtResource("3_jh6vt")]([SubResource("Resource_pypyr"), SubResource("Resource_btboc"), SubResource("Resource_6tf84"), SubResource("Resource_r0s05"), SubResource("Resource_fuory"), SubResource("Resource_gswd"), SubResource("Drop_big_bones")])
 combat_skill_xp_override = 40000
 enrage_health_fraction = 0.55
 slam_radius = 170.0

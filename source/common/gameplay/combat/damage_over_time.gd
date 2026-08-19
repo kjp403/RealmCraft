@@ -67,6 +67,6 @@ func _tick() -> void:
 		queue_free()
 		return
 	_remaining_ticks -= 1
-	victim.take_damage(damage_per_tick, source, damage_type)
+	victim.take_damage(damage_per_tick, source, damage_type, kind)
 	if _remaining_ticks <= 0:
 		queue_free()

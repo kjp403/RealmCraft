@@ -139,7 +139,7 @@ func _process(_delta: float) -> void:
 # --- Server-side: damage + capture ---
 
 ## Mirrors Character.take_damage so existing hit code (arrows) just works.
-func take_damage(amount: float, attacker: Character = null) -> void:
+func take_damage(amount: float, attacker: Character = null, _damage_type: StringName = &"physical", _effect_kind: StringName = &"") -> void:
 	if not multiplayer.is_server() or amount <= 0.0:
 		return
 	if Time.get_ticks_msec() < grace_until_ms:

@@ -226,12 +226,12 @@ func _init() -> void:
 		if not opens:
 			failures.append("Brimstone Keeper has no DungeonInteraction for hell_dungeon")
 
-	var dungeon: DungeonResource = load(
+	var title_dungeon: DungeonResource = load(
 		"res://source/common/gameplay/maps/instance/instance_collection/dungeons/hell_dungeon.tres"
 	) as DungeonResource
-	if dungeon == null:
-		failures.append("hell_dungeon.tres failed to load")
-	elif dungeon.display_name != "Fire and Flames" or dungeon.zone_title != "Fire and Flames":
+	if title_dungeon == null:
+		failures.append("hell_dungeon.tres failed to load (title check)")
+	elif title_dungeon.display_name != "Fire and Flames" or title_dungeon.zone_title != "Fire and Flames":
 		failures.append("hell dungeon title must be Fire and Flames")
 
 	var hall: String = FileAccess.get_file_as_string(

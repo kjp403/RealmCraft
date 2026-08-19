@@ -14,6 +14,12 @@ const TILE: float = 30.0
 const BUFF_ICONS: Dictionary = {
 	&"mana_regen": "manaregen.png",
 	&"move_speed": "buff.png",
+	# Weapon coatings are BUFFS on the drinker (their hits do something extra),
+	# so they sit in the buff strip while borrowing the victim-side art. The
+	# "coating_" prefix keeps them distinct from the debuff of the same name.
+	&"coating_poison": "poison.png",
+	&"coating_burn": "burn.png",
+	&"coating_heal": "buff.png",
 }
 const DEBUFF_ICONS: Dictionary = {
 	&"burn": "burn.png",
@@ -44,6 +50,9 @@ const DESCRIPTIONS: Dictionary = {
 	&"slow": "Slowed. Reduced movement speed.",
 	&"mana_regen": "Mana Tonic. Your mana regenerates faster.",
 	&"move_speed": "Hastened. Increased movement speed.",
+	&"coating_poison": "Envenomed weapon. Your hits poison what they land on.",
+	&"coating_burn": "Burning weapon. Your hits set what they land on alight.",
+	&"coating_heal": "Blessed weapon. Your hits heal you.",
 }
 
 ## How long the tap-to-read label lingers on mobile (no hover there).

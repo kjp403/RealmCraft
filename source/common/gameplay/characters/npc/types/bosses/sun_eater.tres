@@ -35,6 +35,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/starfall_gem.tres" id="m_sf_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_primordial.tres" id="m_pri_fiber"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/primordial_gem.tres" id="m_pri_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
@@ -181,6 +182,14 @@ script = ExtResource("3_loot")
 item = ExtResource("w90_tome")
 chance = 0.002
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("3_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sun_eater"
@@ -209,7 +218,7 @@ xp_reward = 30000
 combat_skill_xp_override = 32000
 respawn_delay = 420.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_dungeon_key"), SubResource("Drop_beh_ore"), SubResource("Drop_beh_gem"), SubResource("Drop_ecl_hide"), SubResource("Drop_ecl_gem"), SubResource("Drop_emp_fiber"), SubResource("Drop_emp_gem"), SubResource("Drop_wb_ore"), SubResource("Drop_wb_gem"), SubResource("Drop_sf_hide"), SubResource("Drop_sf_gem"), SubResource("Drop_pri_fiber"), SubResource("Drop_pri_gem"), SubResource("Drop_w80_sword"), SubResource("Drop_w80_hammer"), SubResource("Drop_w80_bow"), SubResource("Drop_w80_wand"), SubResource("Drop_w80_tome"), SubResource("Drop_w90_sword"), SubResource("Drop_w90_hammer"), SubResource("Drop_w90_bow"), SubResource("Drop_w90_wand"), SubResource("Drop_w90_tome")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_dungeon_key"), SubResource("Drop_beh_ore"), SubResource("Drop_beh_gem"), SubResource("Drop_ecl_hide"), SubResource("Drop_ecl_gem"), SubResource("Drop_emp_fiber"), SubResource("Drop_emp_gem"), SubResource("Drop_wb_ore"), SubResource("Drop_wb_gem"), SubResource("Drop_sf_hide"), SubResource("Drop_sf_gem"), SubResource("Drop_pri_fiber"), SubResource("Drop_pri_gem"), SubResource("Drop_w80_sword"), SubResource("Drop_w80_hammer"), SubResource("Drop_w80_bow"), SubResource("Drop_w80_wand"), SubResource("Drop_w80_tome"), SubResource("Drop_w90_sword"), SubResource("Drop_w90_hammer"), SubResource("Drop_w90_bow"), SubResource("Drop_w90_wand"), SubResource("Drop_w90_tome"), SubResource("Drop_dragon_bones")])
 
 enrage_health_fraction = 0.45
 slam_radius = 135.0

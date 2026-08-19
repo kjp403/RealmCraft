@@ -7,11 +7,20 @@
 [ext_resource type="SpriteFrames" uid="uid://q0781507yc0n" path="res://source/common/gameplay/characters/sprite_frames/orc_rogue.tres" id="3_knvur"]
 [ext_resource type="Resource" uid="uid://bob6a10f1tu10" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="4_xmfpj"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_knvur")
 item = ExtResource("bone_item")
 chance = 1.0
+
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("1_knvur")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
 
 [resource]
 script = ExtResource("2_xmfpj")
@@ -30,7 +39,7 @@ max_distance_from_spawn = 200
 chase_on_area = true
 xp_reward = 52
 respawn_delay = 20.0
-loot = Array[ExtResource("1_knvur")]([SubResource("Drop_bone")])
+loot = Array[ExtResource("1_knvur")]([SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 metadata/_custom_type_script = "uid://swk8b8q32qv2"
 metadata/slug = &"orc_rogue"
 metadata/id = 14

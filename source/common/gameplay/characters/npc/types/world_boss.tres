@@ -14,6 +14,7 @@
 [ext_resource type="Resource" uid="uid://cadamantoremat1" path="res://source/common/gameplay/items/materials/metals/adamant_ore.tres" id="adamant_ore"]
 [ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
 [ext_resource type="Resource" uid="uid://cmithrilbarma1" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
@@ -73,6 +74,14 @@ script = ExtResource("2_loot")
 item = ExtResource("bone_item")
 chance = 1.0
 
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("2_loot")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"world_boss"
@@ -92,7 +101,7 @@ chase_on_area = true
 xp_reward = 1000
 respawn_delay = 600.0
 respawns = false
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_coal"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_steel"), SubResource("Drop_mithril_bar"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_iron"), SubResource("Drop_coal"), SubResource("Drop_mithril"), SubResource("Drop_adamant"), SubResource("Drop_steel"), SubResource("Drop_mithril_bar"), SubResource("Drop_dungeon_key"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 slam_radius = 150.0
 slam_windup_s = 2.2
 slam_damage = 55.0

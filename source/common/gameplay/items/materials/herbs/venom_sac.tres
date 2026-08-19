@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/venom_sac.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Venom Sac"
+item_icon = ExtResource("1_tex")
+description = "A gland cut from a weapon that was bred to kill slowly. Heavier stuff than blightspore."
+holdable = false
+can_trade = true
+vendor_value = 14
+stack_limit = 10
+tags = PackedStringArray()
+metadata/slug = &"venom_sac"
+metadata/id = 589

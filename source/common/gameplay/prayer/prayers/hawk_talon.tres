@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PrayerResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/prayer/prayer_resource.gd" id="1_prayer"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prayer_icons/hawk_talon.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("3_mod")
+stat_name = "ad"
+value = 10.0
+
+[resource]
+script = ExtResource("1_prayer")
+slug = &"hawk_talon"
+display_name = "Hawk's Talon"
+description = "Strike like a raptor from the ridge. Your blows find the soft spots first."
+required_level = 1
+drain_per_minute = 1.0
+icon = ExtResource("2_icon")
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_0")])
+exclusive_groups = Array[StringName]([&"offence"])
