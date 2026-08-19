@@ -63,6 +63,11 @@ var _filling: bool
 ## A refresh that arrived while one was in flight — run it after (an
 ## equipment_changed can land mid-fill when a weapon draw completes).
 var _refill_queued: bool
+## Current active inventory bag (0-2) and unlocked count (1-3).
+var _active_bag: int = 0
+var _bag_count: int = 1
+var _bag_tab_buttons: Array[Button] = []
+var _bag_tab_container: HBoxContainer
 
 ## Current selection driving the detail column.
 var _selected_item: Item
@@ -120,6 +125,7 @@ func _ready() -> void:
 	detail_icon.texture = null
 	_detail_pixel = PixelIcon.mount(detail_icon)
 
+	_build_bag_tabs()
 	_build_rail_tabs()
 	_build_hint_bar()
 
@@ -205,6 +211,54 @@ func _set_view(view: StringName) -> void:
 
 # --- Category rail ---
 
+func _build_bag_tabs() -> void:
+	_bag_tab_container = HBoxContainer.new()
+	_bag_tab_container.add_theme_constant_override(&"separation", 4)
+	_bag_tab_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_col.add_child(_bag_tab_container)
+	left_col.move_child(_bag_tab_container, 0)
+	var group: ButtonGroup = ButtonGroup.new()
+	for i: int in range(Inventory.MAX_BAGS):
+		var button: Button = Button.new()
+		button.text = "Bag %d" % (i + 1)
+		button.toggle_mode = true
+		button.button_group = group
+		button.theme_type_variation = &"FlatButton"
+		button.custom_minimum_size = Vector2(0, 28)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(_on_bag_tab.bind(i))
+		_bag_tab_container.add_child(button)
+		_bag_tab_buttons.append(button)
+
+
+func _update_bag_tabs() -> void:
+	for i: int in _bag_tab_buttons.size():
+		var button: Button = _bag_tab_buttons[i]
+		button.visible = true
+		button.disabled = false
+		button.set_pressed_no_signal(i == _active_bag)
+		if i == 0:
+			button.text = "Bag 1"
+		elif i == 1:
+			button.text = "Bag 2 (500K)" if _bag_count < 2 else "Bag 2"
+		elif i == 2:
+			button.text = "Bag 3 (1.25M)" if _bag_count < 3 else "Bag 3"
+
+
+func _on_bag_tab(index: int) -> void:
+	if index >= _bag_count:
+		# Locked tab: request purchase. The handler will return ok or refuse.
+		var result: Array = await Client.request_data_await(&"inventory.upgrade_bag", {}, InstanceClient.current.name)
+		if result[1] == OK and bool(result[0].get("ok", false)):
+			Toaster.toast("Inventory bag unlocked!")
+		else:
+			Toaster.toast(str(result[0].get("reason", "Locked")))
+		return
+	_active_bag = index
+	Client.request_data(&"inventory.set_active_bag", {"bag": index}, InstanceClient.current.name)
+	_rebuild_grid()
+
+
 func _build_rail_tabs() -> void:
 	var group: ButtonGroup = ButtonGroup.new()
 	for tab: Array in RAIL_TABS:
@@ -286,6 +340,7 @@ func fill_inventory() -> void:
 		_refill_queued = true
 		return
 	_filling = true
+	var bag_result: Array = await Client.request_data_await(&"inventory.bags", {}, InstanceClient.current.name)
 	var result: Array = await Client.request_data_await(&"inventory.get", {}, InstanceClient.current.name)
 	_filling = false
 	if _refill_queued:
@@ -297,7 +352,12 @@ func fill_inventory() -> void:
 		return
 
 	_inventory = result[0]
+	if bag_result[1] == OK:
+		var bag_data: Dictionary = bag_result[0] if bag_result[0] is Dictionary else {}
+		_bag_count = clampi(int(bag_data.get("bags", 1)), 1, Inventory.MAX_BAGS)
+		_active_bag = clampi(int(bag_data.get("active_bag", 0)), 0, _bag_count - 1)
 	_set_wallet(Inventory.count(_inventory, _gold_id))
+	_update_bag_tabs()
 	_update_dynamic_tabs()
 	_rebuild_grid()
 
@@ -427,6 +487,8 @@ func _collect_entries() -> Array[Dictionary]:
 			})
 	for slot_uid_key in _inventory:
 		var data: Dictionary = _inventory[slot_uid_key]
+		if int(data.get("bag", 0)) != _active_bag:
+			continue
 		var item_id: int = int(data.get("id", 0))
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item == null or item.is_currency:
