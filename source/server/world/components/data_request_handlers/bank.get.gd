@@ -18,6 +18,8 @@ func data_request_handler(
 	return {
 		"ok": true,
 		"inventory": player.inventory,
+		"inventory_bags": player.inventory_bags,
+		"active_bag": player.active_inventory_bag,
 		"bank": player.bank,
 		"bank_slots": capacity,
 	}
