@@ -12,6 +12,6 @@ func data_request_handler(peer_id: int, instance: ServerInstance, _args: Diction
 		"error": 0,
 		"ok": true,
 		"stacks": HuntChest.to_payload(resource),
-		"free_slots": Inventory.free_slots(resource.inventory),
+		"free_slots": Inventory.total_free_slots(resource.inventory, resource.inventory_bags),
 		"capacity": HuntChest.MAX_STACKS,
 	}

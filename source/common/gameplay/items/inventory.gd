@@ -117,6 +117,14 @@ static func free_slots(inventory: Dictionary, capacity: int = MAX_SLOTS, bag_ind
 	return maxi(0, capacity - used_slots(inventory, bag_index))
 
 
+## Free squares across every UNLOCKED bag. Use this for anything a player sees as
+## "space left in my inventory": plain [method free_slots] defaults to ONE bag's
+## capacity, so it reports 0 free for a 3-bag player holding 28 items even though
+## 56 squares are open.
+static func total_free_slots(inventory: Dictionary, bag_count: int = 1) -> int:
+	return free_slots(inventory, MAX_SLOTS * maxi(1, bag_count), -1)
+
+
 ## Largest amount of [param item_id] that still fits (existing stack space + free
 ## slots × stack_limit). Used by bank Max-withdraw and capacity-capped deposits.
 ## [param start_bag] / [param bag_count] control which bag(s) to consider.
@@ -263,7 +271,7 @@ static func add_item(
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		for _i: int in amount:
-			var bag: int = _next_bag_with_space(inventory, 1, start_bag, bag_count)
+			var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
 			inventory[next_uid(inventory)] = {"id": item_id, "a": 1, "bag": bag}
 		return
 
@@ -287,9 +295,12 @@ static func add_item(
 			remaining -= put
 
 		# Open new slots, wrapping through unlocked bags starting at [param start_bag].
+		# bag_count is floored at 1: inventory_bags is clamped [1, MAX_BAGS] on save
+		# and load, but a stray 0 here would divide by zero on the wrap below.
+		var bags: int = maxi(1, bag_count)
 		var current_bag: int = start_bag
 		var checked: int = 0
-		while remaining > 0 and checked < bag_count:
+		while remaining > 0 and checked < bags:
 			var free_in_bag: int = free_slots(inventory, MAX_SLOTS, current_bag)
 			if free_in_bag > 0:
 				var can_fit_here: int = free_in_bag * limit
@@ -300,7 +311,7 @@ static func add_item(
 					put_here -= put
 					remaining -= put
 					free_in_bag -= 1
-			current_bag = (current_bag + 1) % bag_count
+			current_bag = (current_bag + 1) % bags
 			checked += 1
 		return
 
@@ -309,12 +320,17 @@ static func add_item(
 		if int(inventory[slot_uid].get("id", 0)) == item_id:
 			inventory[slot_uid]["a"] = int(inventory[slot_uid].get("a", 0)) + remaining
 			return
-	var bag: int = _next_bag_with_space(inventory, 1, start_bag, bag_count)
+	var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
 	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining, "bag": bag}
 
 
 ## Find the next unlocked bag with at least one free slot, starting from
 ## [param start_bag] and wrapping. Falls back to [param start_bag] if all are full.
+##
+## [param capacity] is the PER-BAG slot cap and must be [constant MAX_SLOTS] for
+## the player bag. Passing 1 makes "has space" mean "is entirely empty", which
+## scatters one item into each bag instead of filling the active one — see
+## tools/verify_bags.tscn.
 static func _next_bag_with_space(
 	inventory: Dictionary,
 	capacity: int,

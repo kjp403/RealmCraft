@@ -29,7 +29,7 @@ func data_request_handler(
 				"reason": "full",
 				"moved": 0,
 				"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
-				"free_slots": Inventory.free_slots(resource.inventory),
+				"free_slots": Inventory.total_free_slots(resource.inventory, resource.inventory_bags),
 				"bank": resource.bank,
 				"bank_slots": capacity,
 			}
@@ -41,7 +41,7 @@ func data_request_handler(
 		"ok": true,
 		"moved": moved,
 		"pending": PendingChestLoot.to_payload(resource.pending_chest_loot),
-		"free_slots": Inventory.free_slots(resource.inventory),
+		"free_slots": Inventory.total_free_slots(resource.inventory, resource.inventory_bags),
 		"bank": resource.bank,
 		"bank_slots": capacity,
 	}

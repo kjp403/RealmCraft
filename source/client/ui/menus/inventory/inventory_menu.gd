@@ -43,6 +43,13 @@ const GROUPS: Array[Array] = [
 	[&"quest", "Quest"],
 	[&"items", "Items"],
 ]
+## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
+## The authoritative costs live in inventory.upgrade_bag.gd on the server.
+const BAG_PRICE_LABELS: Dictionary = {
+	2: "500K",
+	3: "1.25M",
+}
+
 const GRID_COLUMNS: int = 4
 const SECTION_HEADER_COLOR: Color = Color(0.56, 0.72, 0.85)
 const EQUIPPED_BADGE_COLOR: Color = Color(1.0, 0.9, 0.55)
@@ -68,6 +75,9 @@ var _active_bag: int = 0
 var _bag_count: int = 1
 var _bag_tab_buttons: Array[Button] = []
 var _bag_tab_container: HBoxContainer
+## Bag tab index armed for purchase, or -1. Buying costs 500K/1.25M gold from a
+## TAB click, so it takes two clicks — see _on_bag_tab.
+var _pending_bag_purchase: int = -1
 
 ## Current selection driving the detail column.
 var _selected_item: Item
@@ -249,29 +259,80 @@ func _update_bag_tabs() -> void:
 	for i: int in _bag_tab_buttons.size():
 		var button: Button = _bag_tab_buttons[i]
 		button.visible = true
-		button.disabled = false
 		button.set_pressed_no_signal(i == _active_bag)
-		if i == 0:
-			button.text = "Bag 1"
-		elif i == 1:
-			button.text = "Bag 2 (500K)" if _bag_count < 2 else "Bag 2"
-		elif i == 2:
-			button.text = "Bag 3 (1.25M)" if _bag_count < 3 else "Bag 3"
+		if i < _bag_count:
+			# Owned.
+			button.disabled = false
+			button.text = "Bag %d" % (i + 1)
+			button.tooltip_text = ""
+			continue
+		# Locked. Only the NEXT bag is buyable — bag 3 cannot be bought before
+		# bag 2, and the server refuses a mismatch (reason "wrong_bag").
+		var buyable: bool = i == _bag_count
+		button.disabled = not buyable
+		if not buyable:
+			button.text = "Bag %d (locked)" % (i + 1)
+			button.tooltip_text = "Unlock Bag %d first." % (i)
+			continue
+		var price: String = BAG_PRICE_LABELS.get(i + 1, "?")
+		if _pending_bag_purchase == i:
+			button.text = "Buy for %s? Click again" % price
+			button.tooltip_text = "Click once more to spend %s gold." % price
+		else:
+			button.text = "Bag %d (%s)" % [i + 1, price]
+			button.tooltip_text = "Buy Bag %d for %s gold." % [i + 1, price]
 
 
 func _on_bag_tab(index: int) -> void:
-	if index >= _bag_count:
-		# Locked tab: request purchase. The handler will return ok or refuse.
-		var result: Array = await Client.request_data_await(&"inventory.upgrade_bag", {}, InstanceClient.current.name)
-		if result[1] == OK and bool(result[0].get("ok", false)):
-			Toaster.toast("Inventory bag unlocked!")
-			fill_inventory()
-		else:
-			Toaster.toast(str(result[0].get("reason", "Locked")))
+	if InstanceClient.current == null:
 		return
-	_active_bag = index
-	Client.request_data(&"inventory.set_active_bag", {"bag": index}, InstanceClient.current.name)
-	_rebuild_grid()
+	if index < _bag_count:
+		_pending_bag_purchase = -1
+		_active_bag = index
+		Client.request_data(&"inventory.set_active_bag", {"bag": index}, InstanceClient.current.name)
+		_update_bag_tabs()
+		_rebuild_grid()
+		return
+
+	# Locked tab. Only the next bag is for sale.
+	if index != _bag_count:
+		Toaster.toast("Unlock Bag %d first." % index)
+		_update_bag_tabs()
+		return
+
+	# These cost 500,000 / 1,250,000 gold and the affordance is a TAB, so a
+	# single stray click must never spend it. First click arms, second buys.
+	if _pending_bag_purchase != index:
+		_pending_bag_purchase = index
+		_update_bag_tabs()
+		Toaster.toast("Click again to buy Bag %d for %s gold." % [
+			index + 1, BAG_PRICE_LABELS.get(index + 1, "?")
+		])
+		return
+
+	_pending_bag_purchase = -1
+	# Send which bag we believe we are buying; the server refuses a mismatch so
+	# the label and the charge can never disagree.
+	var result: Array = await Client.request_data_await(
+		&"inventory.upgrade_bag", {"bag": index + 1}, InstanceClient.current.name
+	)
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if result[1] == OK and bool(payload.get("ok", false)):
+		Toaster.toast("Bag %d unlocked!" % int(payload.get("bags", index + 1)))
+		fill_inventory()
+		return
+	match str(payload.get("reason", "")):
+		"cant_afford":
+			Toaster.toast("You need %s gold." % BAG_PRICE_LABELS.get(index + 1, "more"))
+		"max_bags":
+			Toaster.toast("You already own every bag.")
+		"dead":
+			Toaster.toast("Not while you are dead.")
+		"wrong_bag":
+			Toaster.toast("Unlock Bag %d first." % int(payload.get("next_bag", index)))
+		_:
+			Toaster.toast("Could not buy that bag.")
+	_update_bag_tabs()
 
 
 func _build_rail_tabs() -> void:
