@@ -257,7 +257,7 @@ focus_mode = 0
 metadata/_edit_lock_ = true
 
 [node name="MenuButton" type="Button" parent="MenuButtons/ButtonRail" unique_id=948283629]
-visible = false
+visible = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 0
