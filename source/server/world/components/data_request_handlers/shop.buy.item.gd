@@ -34,13 +34,18 @@ func data_request_handler(
 		return {"ok": false, "reason": "not_sold_here"}
 
 	var inventory: Dictionary = player.player_resource.inventory
+	var active_bag: int = player.player_resource.active_inventory_bag
+	var bag_count: int = player.player_resource.inventory_bags
 	var currency_id: int = int(entry.get("currency_id", 0))
 	var total: int = int(entry.get("price", 0)) * amount
 	# Pay with the currency item (gold by default). currency_id 0 means the items
 	# registry failed to resolve gold — surface that separately from a real shortfall.
 	if currency_id <= 0:
 		return {"ok": false, "reason": "no_currency"}
-	if not Inventory.can_add(inventory, item_id, amount):
+	if not Inventory.can_add(
+		inventory, item_id, amount, Inventory.MAX_SLOTS, false,
+		active_bag, bag_count
+	):
 		return {"ok": false, "reason": "inventory_full"}
 
 	var paid_slayer_points: bool = Economy.is_slayer_points_id(currency_id)
@@ -53,14 +58,20 @@ func data_request_handler(
 
 	# Add one at a time so stackable items merge and non-stackable get separate slots.
 	for i: int in amount:
-		if not Inventory.try_add_item(inventory, item_id, 1):
+		if not Inventory.try_add_item(
+			inventory, item_id, 1, Inventory.MAX_SLOTS, false,
+			active_bag, bag_count
+		):
 			# Shouldn't happen after can_add — refund remaining currency for safety.
 			var refund: int = int(entry.get("price", 0)) * (amount - i)
 			if refund > 0:
 				if paid_slayer_points:
 					player.player_resource.slayer_points += refund
 				else:
-					Inventory.add_item(inventory, currency_id, refund)
+					Inventory.add_item(
+						inventory, currency_id, refund, false,
+						active_bag, bag_count
+					)
 			return {"ok": false, "reason": "inventory_full"}
 
 	# Silent quest refresh: a bought item may satisfy a "Bring N item" (COLLECT)

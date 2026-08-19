@@ -28,10 +28,15 @@ func data_request_handler(
 		return {"ok": false, "reason": "missing"}
 
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	var active_bag: int = player.player_resource.active_inventory_bag
+	var bag_count: int = player.player_resource.inventory_bags
 	if item != null and item.is_currency:
 		var purged: int = Inventory.remove_from_slot(bank, slot_uid, have)
 		if purged > 0:
-			Inventory.add_item(player.player_resource.inventory, item_id, purged)
+			Inventory.add_item(
+				player.player_resource.inventory, item_id, purged, false,
+				active_bag, bag_count
+			)
 			instance.world_server.database.save_player(player.player_resource)
 		return {
 			"ok": false,
@@ -46,7 +51,10 @@ func data_request_handler(
 		amount = banked_total
 	amount = mini(amount, banked_total)
 	# Never try to pull more than the bag can accept — fill as much as fits.
-	var fit: int = Inventory.max_fit(player.player_resource.inventory, item_id)
+	var fit: int = Inventory.max_fit(
+		player.player_resource.inventory, item_id, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	)
 	amount = mini(amount, fit)
 	if amount <= 0:
 		return {"ok": false, "reason": "inventory_full"}
@@ -73,7 +81,10 @@ func data_request_handler(
 	if total_removed <= 0:
 		return {"ok": false, "reason": "missing"}
 
-	if not Inventory.try_add_item(player.player_resource.inventory, item_id, total_removed):
+	if not Inventory.try_add_item(
+		player.player_resource.inventory, item_id, total_removed, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	):
 		Inventory.add_item(bank, item_id, total_removed, true)
 		return {"ok": false, "reason": "inventory_full"}
 	instance.world_server.database.save_player(player.player_resource)

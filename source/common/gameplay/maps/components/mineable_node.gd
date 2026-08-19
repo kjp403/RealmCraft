@@ -249,10 +249,16 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 				byproduct_amount = 0
 
 	var ore_id: int = int(caught.get_meta(&"id", 0))
-	var bag_full: bool = not Inventory.can_add(player.player_resource.inventory, ore_id, amount)
+	var bag_count: int = player.player_resource.inventory_bags
+	var active_bag: int = player.player_resource.active_inventory_bag
+	var bag_full: bool = not Inventory.can_add(
+		player.player_resource.inventory, ore_id, amount, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	)
 	if not bag_full and byproduct_amount > 0:
 		bag_full = not Inventory.can_add(
-			player.player_resource.inventory, byproduct_id, byproduct_amount
+			player.player_resource.inventory, byproduct_id, byproduct_amount,
+			Inventory.MAX_SLOTS, false, active_bag, bag_count
 		)
 	if bag_full:
 		# Keep progress drained? Prefer restoring progress so they can bank and finish.
@@ -273,10 +279,16 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	_progress_hp_by_player.erase(player_id)
 	charges_left = _charges_for(player_id)
 
-	Inventory.try_add_item(player.player_resource.inventory, ore_id, amount)
+	Inventory.try_add_item(
+		player.player_resource.inventory, ore_id, amount, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	)
 	DailyQuestService.on_collect(player.player_resource, ore_id, amount)
 	if byproduct_amount > 0:
-		Inventory.try_add_item(player.player_resource.inventory, byproduct_id, byproduct_amount)
+		Inventory.try_add_item(
+			player.player_resource.inventory, byproduct_id, byproduct_amount,
+			Inventory.MAX_SLOTS, false, active_bag, bag_count
+		)
 		DailyQuestService.on_collect(player.player_resource, byproduct_id, byproduct_amount)
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.

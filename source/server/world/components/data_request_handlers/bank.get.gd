@@ -37,6 +37,9 @@ func _purge_currency_from_bank(player: PlayerResource) -> bool:
 			continue
 		var removed: int = Inventory.remove_from_slot(player.bank, int(uid), amount)
 		if removed > 0:
-			Inventory.add_item(player.inventory, item_id, removed)
+			Inventory.add_item(
+				player.inventory, item_id, removed, false,
+				player.active_inventory_bag, player.inventory_bags
+			)
 			changed = true
 	return changed

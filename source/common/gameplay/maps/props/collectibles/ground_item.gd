@@ -149,7 +149,10 @@ func try_pickup(player: Player) -> Dictionary:
 		return {"ok": false, "reason": "reserved"}
 
 	collected = true
-	if not Inventory.try_add_item(player.player_resource.inventory, item_id, amount):
+	if not Inventory.try_add_item(
+		player.player_resource.inventory, item_id, amount, Inventory.MAX_SLOTS,
+		false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags
+	):
 		collected = false
 		return {"ok": false, "reason": "inventory_full"}
 
