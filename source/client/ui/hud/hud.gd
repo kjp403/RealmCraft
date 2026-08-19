@@ -155,6 +155,10 @@ func _ready() -> void:
 
 	var prayer_button := Button.new()
 	prayer_button.custom_minimum_size = Vector2(26, 26)
+	# Every dock button in hud.tscn caps its glyph at 18px. Without this the
+	# 32px source art renders full size, which inflates the button and stretches
+	# the whole dock row.
+	prayer_button.add_theme_constant_override(&"icon_max_width", 18)
 	prayer_button.icon = preload("res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Prayer.png")
 	prayer_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prayer_button.tooltip_text = "Prayers"

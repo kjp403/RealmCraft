@@ -20,7 +20,6 @@
 [ext_resource type="SpriteFrames" uid="uid://dikmb6ti5t2j6" path="res://source/common/gameplay/characters/sprite_frames/royal_soldier.tres" id="26_t0at5"]
 [ext_resource type="SpriteFrames" uid="uid://bfer1b8yk1buk" path="res://source/common/gameplay/characters/sprite_frames/royal_archer.tres" id="27_eqvv7"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="29_2sqao"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/church.tres" id="60_church"]
 [ext_resource type="Resource" uid="uid://dfeyr0kdescac" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/forest.tres" id="30_og50n"]
 [ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="35_2opns"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="35_o1ke5"]
@@ -161,12 +160,6 @@ scale = Vector2(2, 1)
 target_instance = ExtResource("8_smith")
 warper_id = 4
 target_id = 5
-
-[node name="ChurchPortal" parent="Warpers" unique_id=1093900766 instance=ExtResource("29_2sqao")]
-position = Vector2(-192, 0)
-target_instance = ExtResource("60_church")
-warper_id = 6
-target_id = 9
 
 [node name="DarkForestPortal" parent="Warpers" unique_id=375786523 instance=ExtResource("29_2sqao")]
 position = Vector2(992, -112)

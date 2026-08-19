@@ -21,6 +21,8 @@
 [ext_resource type="Resource" uid="uid://dtojmae8u5g6l" path="res://source/common/gameplay/characters/npc/npcs/mira.tres" id="40_mira"]
 [ext_resource type="Resource" path="res://source/common/gameplay/crafting/resources/alchemy_station.tres" id="41_alchemy"]
 [ext_resource type="Texture2D" uid="uid://kjdva1dwytwi" path="res://assets/sprites/environment/structures/stations/alchemy/alchemy_table.png" id="42_alchart"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="44_portal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/church.tres" id="45_church"]
 
 [sub_resource type="Resource" id="Resource_s648a"]
 script = ExtResource("21_0vs1f")
@@ -54,6 +56,12 @@ scale = Vector2(1.6, 1)
 target_instance = ExtResource("4_alrfp")
 warper_id = 5
 target_id = 4
+
+[node name="ChurchPortal" parent="." unique_id=1093900766 instance=ExtResource("44_portal")]
+position = Vector2(324, 280)
+target_instance = ExtResource("45_church")
+warper_id = 6
+target_id = 9
 
 [node name="Banker" parent="." unique_id=1922057613 instance=ExtResource("14_qwuyn")]
 position = Vector2(-184, 336)
