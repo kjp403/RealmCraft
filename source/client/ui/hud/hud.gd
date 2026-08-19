@@ -153,6 +153,14 @@ func _ready() -> void:
 	# Boss Hunt HUD (contract countdown + kill tally) — same deal on boss_hunt.hud.
 	add_child(BossHuntHud.new())
 
+	var prayer_button := Button.new()
+	prayer_button.custom_minimum_size = Vector2(26, 26)
+	prayer_button.icon = preload("res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Prayer.png")
+	prayer_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	prayer_button.tooltip_text = "Prayers"
+	prayer_button.pressed.connect(display_menu.bind(&"prayer"))
+	$BottomMenuDock.add_child(prayer_button)
+
 	# Dock icons must never take keyboard focus — Space is the attack bind, and Godot's default
 	# Button FOCUS_ALL would let ui_accept / focused-button activation toggle inventory on Space.
 	for dock_button: Node in $BottomMenuDock.get_children():
