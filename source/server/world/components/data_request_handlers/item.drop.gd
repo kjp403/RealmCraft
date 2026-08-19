@@ -63,7 +63,7 @@ func data_request_handler(
 	)
 	if ground == null:
 		# Refund — spawn failed.
-		Inventory.add_item(inventory, item_id, removed)
+		Inventory.add_item(inventory, item_id, removed, false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags)
 		return {"ok": false, "reason": "spawn_failed"}
 
 	return {

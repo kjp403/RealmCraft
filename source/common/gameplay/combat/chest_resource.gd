@@ -59,7 +59,7 @@ func roll_and_grant(player: Player) -> Dictionary:
 	if gold_max > 0:
 		gold = randi_range(gold_min, gold_max)
 		if gold > 0 and Economy.gold_id() > 0:
-			Inventory.add_item(resource.inventory, Economy.gold_id(), gold)
+			Inventory.add_item(resource.inventory, Economy.gold_id(), gold, false, resource.active_inventory_bag, resource.inventory_bags)
 
 	var items: Array = []
 	var draws: int = randi_range(maxi(1, mini(rolls_min, rolls_max)), maxi(1, rolls_max))

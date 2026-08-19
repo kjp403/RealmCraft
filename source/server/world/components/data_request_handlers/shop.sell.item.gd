@@ -57,7 +57,7 @@ func data_request_handler(
 		if stripped < remaining:
 			return {"ok": false, "reason": "not_enough"}
 
-	Inventory.add_item(inventory, Economy.gold_id(), unit_price * amount)
+	Inventory.add_item(inventory, Economy.gold_id(), unit_price * amount, false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags)
 	return {"ok": true, "amount": amount, "paid": unit_price * amount}
 
 

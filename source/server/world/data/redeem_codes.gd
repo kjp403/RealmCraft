@@ -119,9 +119,9 @@ static func apply_grants(pr: PlayerResource, grants: Array) -> Array:
 		var grant: Dictionary = g
 		match str(grant.get("type", "")):
 			"currency":
-				Inventory.add_item(pr.inventory, Economy.gold_id(), int(grant.get("amount", 0)))
+				Inventory.add_item(pr.inventory, Economy.gold_id(), int(grant.get("amount", 0)), false, pr.active_inventory_bag, pr.inventory_bags)
 			"item":
-				Inventory.add_item(pr.inventory, int(grant.get("id", 0)), int(grant.get("amount", 0)))
+				Inventory.add_item(pr.inventory, int(grant.get("id", 0)), int(grant.get("amount", 0)), false, pr.active_inventory_bag, pr.inventory_bags)
 			"xp":
 				pr.add_experience(int(grant.get("amount", 0)))
 			"title":

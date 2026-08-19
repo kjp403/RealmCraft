@@ -32,7 +32,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	var inventory: Dictionary = resource.inventory
 	var loot: Array = []
 	if gold > 0:
-		Inventory.add_item(inventory, Economy.gold_id(), gold)
+		Inventory.add_item(inventory, Economy.gold_id(), gold, false, resource.active_inventory_bag, resource.inventory_bags)
 		loot.append({"id": Economy.gold_id(), "amount": gold, "name": "Gold"})
 
 	var level_before: int = resource.level
