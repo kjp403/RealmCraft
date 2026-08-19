@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
 [ext_resource type="SpriteFrames" uid="uid://bp5625khvdl8r" path="res://source/common/gameplay/characters/sprite_frames/scholar_censor.tres" id="4_skin"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="Script" uid="uid://d2k7m1p4q8r0s6935649" path="res://source/common/gameplay/characters/npc/interactions/backpack_interaction.gd" id="6_backpack"]
 
 [sub_resource type="Resource" id="BankInteraction_main"]
 script = ExtResource("2_bank")
@@ -16,10 +17,14 @@ lines = Array[String](["I keep every Hero's vault. Deposit what you cannot carry
 label_override = "How does the bank work?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
+[sub_resource type="Resource" id="BackpackInteraction_banker"]
+script = ExtResource("6_backpack")
+metadata/_custom_type_script = "uid://d2k7m1p4q8r0s6935649"
+
 [resource]
 script = ExtResource("5_npc")
 npc_name = "Banker"
 skin = ExtResource("4_skin")
 greeting = "Your vault is ready. Fifty slots to start — buy more when you need them."
-interactions = Array[ExtResource("1_interaction")]([SubResource("BankInteraction_main"), SubResource("Dialogue_banker")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("BankInteraction_main"), SubResource("BackpackInteraction_banker"), SubResource("Dialogue_banker")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"
