@@ -19,6 +19,16 @@ var _busy: bool = false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The HUD only calls open() when a menu is opened WITH an argument, and the
+	# prayer book is opened without one (dock icon / menu entry). Building on
+	# show keeps the panel from coming up as an empty full-screen Control that
+	# eats every click with no Close button — which reads as a frozen game.
+	visibility_changed.connect(_on_visibility_changed)
+
+
+func _on_visibility_changed() -> void:
+	if is_visible_in_tree():
+		_refresh()
 
 
 func open(_arg: Variant = null) -> void:
@@ -26,6 +36,18 @@ func open(_arg: Variant = null) -> void:
 
 
 func _refresh() -> void:
+	# Draw a loading card with a live Close button BEFORE waiting on the server.
+	# A full-screen Control with nothing in it blocks the whole game, so the
+	# panel must always be escapable even if the request never comes back.
+	_build_shell()
+	var loading: Label = Label.new()
+	loading.text = "Prayers"
+	loading.add_theme_font_size_override(&"font_size", 22)
+	loading.add_theme_color_override(&"font_color", GOLD)
+	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_content.add_child(loading)
+	_content.add_child(_button("Close", hide))
+
 	var result: Array = await Client.request_data_await(
 		&"prayer.state", {}, _instance_name()
 	)
