@@ -390,7 +390,10 @@ func _complete_hand_draw(item_id: int) -> void:
 	else:
 		player_resource.equipment.erase(&"weapon")
 	if previous_is_gear:
-		Inventory.add_item(inventory, previous_id, 1)
+		Inventory.add_item(
+			inventory, previous_id, 1, false,
+			player_resource.active_inventory_bag, player_resource.inventory_bags
+		)
 	equipment_component.set_hand(item_id)
 
 

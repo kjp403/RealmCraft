@@ -438,7 +438,10 @@ static func _bank_hunt_loot(player: Player, loot_gained: Array) -> void:
 			continue
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item != null and item.is_currency:
-			Inventory.add_item(resource.inventory, item_id, amount)
+			Inventory.add_item(
+				resource.inventory, item_id, amount, false,
+				resource.active_inventory_bag, resource.inventory_bags
+			)
 			entry["banked"] = true
 			continue
 		entry["banked"] = HuntChest.deposit(resource, item_id, amount) > 0
