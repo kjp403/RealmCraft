@@ -251,6 +251,7 @@ func _on_bag_tab(index: int) -> void:
 		var result: Array = await Client.request_data_await(&"inventory.upgrade_bag", {}, InstanceClient.current.name)
 		if result[1] == OK and bool(result[0].get("ok", false)):
 			Toaster.toast("Inventory bag unlocked!")
+			fill_inventory()
 		else:
 			Toaster.toast(str(result[0].get("reason", "Locked")))
 		return
