@@ -20,6 +20,7 @@
 [ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="fx_potion"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
 [ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="fx_key"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
 script = ExtResource("91_lunge")
@@ -103,6 +104,14 @@ script = ExtResource("2_loot")
 item = ExtResource("bone_item")
 max_amount = 3
 
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("2_loot")
+item = ExtResource("loot_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.35
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"myconid_brute"
@@ -121,6 +130,6 @@ detection_radius = 130
 chase_on_area = true
 xp_reward = 40
 respawn_delay = 20.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_leather"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_key"), SubResource("Drop_chest"), SubResource("Drop_bone")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_leather"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_key"), SubResource("Drop_chest"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 metadata/slug = &"myconid_brute"
 metadata/id = 32

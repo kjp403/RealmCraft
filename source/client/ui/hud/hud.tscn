@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dshitaaapbs6x" path="res://source/client/ui/hud/hud.gd" id="1_rchld"]
 [ext_resource type="PackedScene" uid="uid://rncsatpcsbm" path="res://source/client/ui/hud/health_bar/health_bar.tscn" id="2_klco5"]
 [ext_resource type="PackedScene" path="res://source/client/ui/hud/mana_bar/mana_bar.tscn" id="2_manabar"]
+[ext_resource type="PackedScene" path="res://source/client/ui/hud/prayer_bar/prayer_bar.tscn" id="2_prayerbar"]
 [ext_resource type="PackedScene" path="res://source/client/ui/hud/boss_bar/boss_bar.tscn" id="2_bossbar"]
 [ext_resource type="PackedScene" uid="uid://cmv168mgurrlp" path="res://source/client/ui/menus/chat/chat_menu.tscn" id="2_xs74v"]
 [ext_resource type="Script" uid="uid://pkprr0ll1y44" path="res://source/client/ui/hud/item_slots.gd" id="4_8qpw0"]
@@ -225,6 +226,10 @@ text = "Lv 1"
 vertical_alignment = 1
 
 [node name="ManaBar" parent="Resources" unique_id=1668640601 instance=ExtResource("2_manabar")]
+layout_mode = 1
+metadata/_edit_lock_ = true
+
+[node name="PrayerBar" parent="Resources" instance=ExtResource("2_prayerbar")]
 layout_mode = 1
 metadata/_edit_lock_ = true
 

@@ -95,6 +95,9 @@ func _on_status_tick() -> void:
 		# stored field agree, and the next vial is drinkable the second the icon
 		# clears rather than on the next swing.
 		CoatingService.tick(player)
+		# Burn a second of prayer drain. Switches everything off at zero, so a
+		# player who runs dry loses the bonuses the same tick the orb empties.
+		PrayerService.tick(player)
 		# Status HUD snapshot (buffs / DoTs / in-combat) — after the expiry pass
 		# so dropped buffs vanish from the strip the same second they end.
 		StatusService.sync(player)
@@ -362,6 +365,11 @@ func instantiate_player(peer_id: int) -> Player:
 		# Stats were rebuilt from base + attributes + gear above — put any live
 		# timed buffs (potions) back on top so an instance change doesn't strip them.
 		BuffService.reapply(new_player)
+		# Same for prayer: seat the pool (size comes from the Prayer level, the
+		# CURRENT value carries across the instance change) and re-apply whatever
+		# prayers were switched on. Must run AFTER the rebuild for the same
+		# reason BuffService.reapply does.
+		PrayerService.reapply(new_player)
 
 		# Live level-ups raise the HP floor immediately (a method target, not a
 		# lambda, so the connection auto-cleans when this node frees on instance

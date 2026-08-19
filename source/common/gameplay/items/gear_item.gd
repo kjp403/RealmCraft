@@ -81,10 +81,16 @@ func _mastery_label() -> String:
 	return " / ".join(names)
 
 
-## "+5 Attack Damage" / "-3 Armor". Integer when whole, else one decimal.
+## "+5 Attack Damage" / "-3 Armor" / "+15% Gather Speed". Integer when whole,
+## one decimal otherwise; percent stats render with a % sign.
 static func _format_modifier(modifier: StatModifier) -> String:
 	var value: float = modifier.value
+	var is_percent: bool = Stat.is_percent(StringName(modifier.stat_name))
+	if is_percent:
+		value *= 100.0
 	var number: String = ("%+d" % int(value)) if is_equal_approx(value, roundf(value)) else ("%+.1f" % value)
+	if is_percent:
+		number += "%%"
 	return "%s %s" % [number, Stat.display_name(modifier.stat_name)]
 
 

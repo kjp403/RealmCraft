@@ -12,29 +12,52 @@ const LIFETIME: float = 0.9
 ## blob.
 const JITTER_X: float = 12.0
 
-## Green for heals, soft white for damage.
-const HEAL_COLOR: Color = Color(0.45, 0.9, 0.45)
+## White for physical damage.
 const DAMAGE_COLOR: Color = Color(1.0, 1.0, 1.0)
+## Purple for magic damage.
+const MAGIC_COLOR: Color = Color(0.75, 0.45, 1.0)
+## Green for poison DoT.
+const POISON_COLOR: Color = Color(0.45, 0.95, 0.2)
+## Orange for burn DoT.
+const BURN_COLOR: Color = Color(1.0, 0.55, 0.15)
+## Green for heals.
+const HEAL_COLOR: Color = Color(0.2, 0.9, 0.45)
 
 @onready var label: Label = $Label
 
 var _amount: int = 0
 var _is_heal: bool = false
+var _damage_type: StringName = &""
+var _effect_kind: StringName = &""
 var _spawn_position: Vector2
 
 
 ## Set before adding to the tree so [member label] has the value when it wakes
 ## up. [param is_heal] renders a green "+N" instead of a white "N".
-func set_amount(amount: int, is_heal: bool = false) -> void:
+func set_amount(amount: int, is_heal: bool = false, damage_type: StringName = &"", effect_kind: StringName = &"") -> void:
 	_amount = amount
 	_is_heal = is_heal
+	_damage_type = damage_type
+	_effect_kind = effect_kind
 	if label != null:
 		_apply_label()
 
 
 func _apply_label() -> void:
 	label.text = ("+%d" % _amount) if _is_heal else str(_amount)
-	label.add_theme_color_override(&"font_color", HEAL_COLOR if _is_heal else DAMAGE_COLOR)
+	label.add_theme_color_override(&"font_color", _color())
+
+
+func _color() -> Color:
+	if _is_heal:
+		return HEAL_COLOR
+	if _effect_kind == &"poison":
+		return POISON_COLOR
+	if _effect_kind == &"burn":
+		return BURN_COLOR
+	if _damage_type == &"magic":
+		return MAGIC_COLOR
+	return DAMAGE_COLOR
 
 
 ## Pass the world-space spawn position BEFORE add_child. _ready uses this

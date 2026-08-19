@@ -231,6 +231,20 @@ var active_buffs: Array[Dictionary] = []
 ## cannot live in active_buffs; runtime only for the same reason those are.
 var weapon_coating: Dictionary = {}
 
+## Prayer points left in the pool. Runtime only — the pool SIZE is a composed
+## stat (rebuilt every spawn from the Prayer level), but the current value must
+## not be, or entering any building would refill it. PrayerService.UNINITIALISED
+## means "fresh session, fill it"; see PrayerService.reapply.
+var prayer_points: float = PrayerService.UNINITIALISED
+
+## Prayers currently switched on, by slug. Runtime only, like active_buffs.
+var active_prayers: Array[StringName] = []
+
+## Stat bonuses currently applied BY prayers ({prayer, stat, value}), so
+## switching one off reverts exactly what it granted. Runtime only; mirrors
+## applied_mastery_passives.
+var applied_prayer_modifiers: Array[Dictionary] = []
+
 ## Mastery passive modifiers currently applied to live stats ({stat, value}).
 ## Runtime only — rebuilt by MasteryService.refresh on spawn and weapon swaps.
 var applied_mastery_passives: Array[Dictionary] = []

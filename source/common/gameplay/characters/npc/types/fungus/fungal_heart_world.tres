@@ -20,6 +20,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_cave.tres" id="fx_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_sporebloom.tres" id="relic_sporebloom"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Lunge_heart"]
 script = ExtResource("91_lunge")
@@ -105,6 +106,14 @@ script = ExtResource("2_loot")
 item = ExtResource("relic_sporebloom")
 chance = 0.001
 
+
+[sub_resource type="Resource" id="Drop_dragon_bones"]
+script = ExtResource("2_loot")
+item = ExtResource("loot_dragon_bones")
+min_amount = 1
+max_amount = 2
+chance = 1.0
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"fungal_heart"
@@ -133,7 +142,7 @@ wander_pause_max_s = 4.0
 xp_reward = 2400
 respawn_delay = 150.0
 respawns = true
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_sporebloom")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_sporebloom"), SubResource("Drop_dragon_bones")])
 combat_skill_xp_override = 14000
 enrage_health_fraction = 0.5
 slam_radius = 135.0

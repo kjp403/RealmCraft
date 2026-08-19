@@ -124,6 +124,10 @@ func incoming_damage_factor(attacker: Character) -> float:
 ## targets) instead of trailing the corpse.
 func die(killer: Character) -> void:
 	_died_at_ms = Time.get_ticks_msec()
+	# Prayers go out when you do (the OSRS rule). Done FIRST so the stat ledger
+	# unwinds while the player object is still intact — a respawn rebuilds stats
+	# from scratch and would otherwise strand the applied prayer modifiers.
+	PrayerService.deactivate_all(self)
 	# Leaderboard: credit the killer for real open-world PvP only — never
 	# sparring/duels (those are tallied as arena wins/losses). in_match is still
 	# true here (on_player_died_in_match clears it below). NPC killers are

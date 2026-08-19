@@ -20,9 +20,10 @@ const SKILL_ORDER: Array[String] = [
 	"harvesting",
 	"fletching",
 	"herblore",
-	# Combat skill (category == &"combat"), listed last so the existing
+	# Combat skills (category == &"combat"), listed last so the existing
 	# gathering/crafting tiles keep their grid positions.
 	"slayer",
+	"prayer",
 ]
 
 ## Slayer's detail page is hand-built (masters + task tables), not a JobPerks

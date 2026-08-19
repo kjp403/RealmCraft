@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1787088640
-next_id = 593
+version = 1787090446
+next_id = 596
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2742,6 +2742,21 @@ entries = Array[Dictionary]([{
 &"id": 592,
 &"path": "res://source/common/gameplay/items/consumables/weapon_poison_plus.tres",
 &"slug": &"weapon_poison_plus"
+}, {
+&"hash": "cac82891a50a69677b7197597478c91dad654583102af178d9dfbadc0e328136",
+&"id": 593,
+&"path": "res://source/common/gameplay/items/materials/big_bones.tres",
+&"slug": &"big_bones"
+}, {
+&"hash": "c2de5ae5ca6759187f4c5e799e2e29f65b0996efeeeff9c3b6ae8658dd51abe7",
+&"id": 594,
+&"path": "res://source/common/gameplay/items/materials/dragon_bones.tres",
+&"slug": &"dragon_bones"
+}, {
+&"hash": "70d0d2949360e934beaff2f7e8733c778edc7ca4a4357c4d82e77de4e1c871b8",
+&"id": 595,
+&"path": "res://source/common/gameplay/items/consumables/prayer_potion.tres",
+&"slug": &"prayer_potion"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

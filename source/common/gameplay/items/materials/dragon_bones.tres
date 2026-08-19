@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_dragon_bones.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Dragon Bones"
+item_icon = ExtResource("1_tex")
+description = "Cold to the touch and faintly blue under the marrow. The altar takes these very seriously."
+holdable = false
+can_trade = true
+vendor_value = 40
+stack_limit = 100
+tags = PackedStringArray()
+metadata/slug = &"dragon_bones"
+metadata/id = 594

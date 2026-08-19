@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="JobPerks" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/jobs/job_perks.gd" id="1_jp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Prayer.png" id="icon_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="1_item"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/bone.tres" id="s0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="s1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="s2"]
+
+[resource]
+script = ExtResource("1_jp")
+icon = ExtResource("icon_tex")
+job_slug = &"prayer"
+display_name = "Prayer"
+category = &"combat"
+sort_order = 11
+perk_every_levels = 15
+perks = Array[Dictionary]([{
+"effect": "xp",
+"id": "devout",
+"max_rank": 3,
+"name": "Devout",
+"per_rank": 0.05
+}, {
+"effect": "prayer_drain",
+"id": "conservation",
+"max_rank": 3,
+"name": "Conservation",
+"per_rank": 0.05
+}])
+source_items = Array[ExtResource("1_item")]([ExtResource("s0"), ExtResource("s1"), ExtResource("s2")])
+source_levels = Array[int]([1, 1, 1])
+describe_lines = Array[String](["Prayer XP +{xp}%", "Prayer drain -{prayer_drain}%"])

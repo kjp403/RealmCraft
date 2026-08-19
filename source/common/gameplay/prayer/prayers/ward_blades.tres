@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PrayerResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/prayer/prayer_resource.gd" id="1_prayer"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prayer_icons/ward_blades.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("3_mod")
+stat_name = "armor"
+value = 120.0
+
+[resource]
+script = ExtResource("1_prayer")
+slug = &"ward_blades"
+display_name = "Ward of Blades"
+description = "A wall of turned steel, one prayer thick. Physical blades lose their edge against it."
+required_level = 50
+drain_per_minute = 12.0
+icon = ExtResource("2_icon")
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_0")])
+exclusive_groups = Array[StringName]([&"protection"])

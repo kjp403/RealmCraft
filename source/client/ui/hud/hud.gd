@@ -444,6 +444,13 @@ func _refresh_hud_for_menus() -> void:
 		_place_right_rail()
 
 
+## Prayer state handler — pass through to the prayer bar (it subscribes independently,
+## but we also handle it here for any HUD-level prayer state needs).
+func _on_prayer_state(payload: Dictionary) -> void:
+	# The prayer bar handles its own subscription, this is for any HUD-level needs
+	pass
+
+
 ## Stack the upper-right rail top-down: minimap (fixed), then the quest tracker.
 ## A hidden panel leaves no gap and the tracker can't drift down into the
 ## quickslot bar.

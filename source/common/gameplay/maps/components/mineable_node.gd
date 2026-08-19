@@ -221,6 +221,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		if job_perks_resource != null:
 			abs_max = job_perks_resource.abs_max_bonus_yield_chance
 		bonus_chance = minf(abs_max, bonus_chance + tool_bonus)
+	# Prayer gathering yield bonus stacks on top.
+	if player.stats_component != null:
+		bonus_chance += player.stats_component.get_stat(Stat.GATHER_YIELD)
 	if bonus_chance > 0.0 and randf() < bonus_chance:
 		amount += 1
 
@@ -281,6 +284,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
+	var prayer_xp: float = 1.0
+	if player.stats_component != null:
+		prayer_xp += player.stats_component.get_stat(Stat.GATHER_XP)
 	for job_name: StringName in xp_table:
 		var raw: int = int(xp_table[job_name])
 		var xp_gain: int = raw
@@ -290,6 +296,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			var skill_entry: Dictionary = player.player_resource.skills.get(job_name, {})
 			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
 			rate *= jp.xp_multiplier(job_perks_dict)
+		rate *= prayer_xp
 		if rate != 1.0:
 			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
@@ -298,6 +305,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	var cooldown_factor: float = 1.0
 	if job_perks_resource != null:
 		cooldown_factor = job_perks_resource.effective_cooldown_factor(job_level, job_perks)
+	# Prayer gathering haste reduces the cooldown further.
+	if player.stats_component != null:
+		cooldown_factor *= maxf(0.1, 1.0 - player.stats_component.get_stat(Stat.GATHER_SPEED))
 	_cooldown_until_ms_by_player[player_id] = now_ms + int(
 		data.player_cooldown_seconds * 1000.0 * cooldown_factor
 	)

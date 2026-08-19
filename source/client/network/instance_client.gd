@@ -417,7 +417,9 @@ func _on_combat_hit(payload: Dictionary) -> void:
 	var pos_v: Variant = payload.get("position", Vector2.ZERO)
 	var pos: Vector2 = pos_v if pos_v is Vector2 else Vector2.ZERO
 	var number: FloatingDamageNumber = FLOATING_DAMAGE_NUMBER.instantiate()
-	number.set_amount(amount, bool(payload.get("heal", false)))
+	var damage_type: StringName = StringName(str(payload.get("damage_type", "")))
+	var effect_kind: StringName = StringName(str(payload.get("effect_kind", "")))
+	number.set_amount(amount, bool(payload.get("heal", false)), damage_type, effect_kind)
 	# Hand spawn position to the node BEFORE add_child so its _ready (which
 	# fires synchronously during add_child) can seed its tween against the
 	# real position instead of (0,0).

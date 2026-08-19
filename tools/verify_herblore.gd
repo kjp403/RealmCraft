@@ -24,9 +24,9 @@ func _ready() -> void:
 		fails.append("JobRegistry missing herblore")
 	else:
 		print("herblore=", herb.display_name, " recipes=", herb.recipe_items.size())
-		# 7 potion ladder + 4 weapon coatings + the 2 Hollow Seep quest brews.
-		if herb.recipe_items.size() != 13:
-			fails.append("Herblore recipe_items expected 13, got %d" % herb.recipe_items.size())
+		# 7 potion ladder + 4 weapon coatings + prayer potion + 2 Hollow Seep brews.
+		if herb.recipe_items.size() != 14:
+			fails.append("Herblore recipe_items expected 14, got %d" % herb.recipe_items.size())
 
 	if not JobRegistry.JOBS.has(&"herblore"):
 		fails.append("JOBS dict missing herblore")
@@ -41,8 +41,8 @@ func _ready() -> void:
 			" recipes=", station.recipes.size())
 		if station.profession != &"herblore":
 			fails.append("alchemy station profession should be herblore")
-		if station.recipes.size() != 13:
-			fails.append("expected 13 brew recipes, got %d" % station.recipes.size())
+		if station.recipes.size() != 14:
+			fails.append("expected 14 brew recipes, got %d" % station.recipes.size())
 		for r: CraftingRecipe in station.recipes:
 			if r == null or r.output_item == null:
 				fails.append("null brew recipe")

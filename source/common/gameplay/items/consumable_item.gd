@@ -24,6 +24,8 @@ extends Item
 @export var coating_hit_duration_s: float = 0.0
 ## How long the coating stays on YOUR weapon.
 @export var coating_duration_s: float = 0.0
+## Prayer points restored on use (via PrayerService). 0 = not a prayer potion.
+@export var prayer_amount: int = 0
 ## Drink cooldown in ms, SHARED across every item with the same cooldown_category.
 ## 0 = no cooldown (potions and food can be used as fast as you tap them).
 ## Persists across re-equip (banked on Character.ability_cooldowns) when > 0.
@@ -113,6 +115,8 @@ func stat_lines() -> Array[Dictionary]:
 		lines.append({"text": "Restores %d health" % heal_amount, "kind": &"heal"})
 	if mana_amount > 0:
 		lines.append({"text": "Restores %d mana" % mana_amount, "kind": &"mana"})
+	if prayer_amount > 0:
+		lines.append({"text": "Restores %d prayer" % prayer_amount, "kind": &"prayer"})
 	if buff_stat != &"" and not is_zero_approx(buff_amount) and buff_duration_s > 0.0:
 		var number: String = ("%+d" % int(buff_amount)) if is_equal_approx(buff_amount, roundf(buff_amount)) else ("%+.1f" % buff_amount)
 		lines.append({
@@ -137,6 +141,12 @@ func can_use(character: Character) -> bool:
 		return true
 	if mana_amount > 0 and character.stats_component.get_stat(Stat.MANA) < character.stats_component.get_stat(Stat.MANA_MAX):
 		return true
+	# A prayer potion is wasted at a full pool, so refuse it there — same rule
+	# health and mana potions already follow.
+	if prayer_amount > 0 and character is Player:
+		var player: Player = character as Player
+		if PrayerService.points(player) < PrayerService.max_points(player):
+			return true
 	# Buff potions always drinkable — re-drinking refreshes the duration.
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0:
 		return true
@@ -160,6 +170,8 @@ func on_use(character: Character) -> void:
 			stats_component.get_stat(Stat.MANA_MAX)
 		)
 		stats_component.set_stat(Stat.MANA, refilled)
+	if prayer_amount > 0 and character is Player:
+		PrayerService.restore(character as Player, float(prayer_amount))
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0 and character is Player:
 		BuffService.apply(character as Player, buff_stat, buff_amount, buff_duration_s)
 	if is_coating():

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="PrayerResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/prayer/prayer_resource.gd" id="1_prayer"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prayer_icons/oath_slayer.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_0"]
+script = ExtResource("3_mod")
+stat_name = "ad"
+value = 60.0
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("3_mod")
+stat_name = "ap"
+value = 60.0
+
+[sub_resource type="Resource" id="Mod_2"]
+script = ExtResource("3_mod")
+stat_name = "armor"
+value = 40.0
+
+[resource]
+script = ExtResource("1_prayer")
+slug = &"oath_slayer"
+display_name = "Oath of the Slayer"
+description = "The old hunter's pact. Everything you are, sharpened at once — and it burns through your reserves."
+required_level = 85
+drain_per_minute = 24.0
+icon = ExtResource("2_icon")
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+exclusive_groups = Array[StringName]([&"offence", &"defence"])

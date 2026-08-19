@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_prayer.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+prayer_amount = 12
+shared_cooldown_ms = 3000
+cooldown_category = &"prayer_potion"
+item_name = &"Prayer Potion"
+item_icon = ExtResource("1_tex")
+description = "Ground bone in a bitter green base. Tastes like a church smells. Puts prayer points back."
+vendor_value = 1500
+metadata/slug = &"prayer_potion"
+metadata/id = 595
