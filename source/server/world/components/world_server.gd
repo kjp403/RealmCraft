@@ -426,13 +426,16 @@ func _data_request(
 	if not data_handlers.has(type):
 		var path: String = DATA_REQUEST_HANDLERS_PATH + type + ".gd"
 		if not ResourceLoader.exists(path):
+			_data_response.rpc_id(peer_id, request_id, type, {"ok": false, "reason": "unknown_request"})
 			return
 		var script: GDScript = load(path)
 		if not script:
+			_data_response.rpc_id(peer_id, request_id, type, {"ok": false, "reason": "handler_load_failed"})
 			return
 
 		var handler = script.new() as DataRequestHandler
 		if not handler:
+			_data_response.rpc_id(peer_id, request_id, type, {"ok": false, "reason": "handler_init_failed"})
 			return
 		data_handlers[type] = handler
 
