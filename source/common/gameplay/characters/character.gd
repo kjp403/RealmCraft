@@ -517,16 +517,12 @@ func incoming_damage_factor(_attacker: Character) -> float:
 func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 	if mitigated_amount <= 0.0 or WorldServer.curr == null:
 		return
-	# Character is parented under Map, which is parented under ServerInstance.
-	# Walk up two steps to find the instance to scope the broadcast to. We
-	# don't type-check ServerInstance here because common-side code mustn't
-	# import server-only classes — propagate_rpc just needs the instance
-	# name (a String) and gracefully falls back if not found.
-	var maybe_map: Node = get_parent()
-	if maybe_map == null:
-		return
-	var maybe_instance: Node = maybe_map.get_parent()
-	if maybe_instance == null:
+	# Ask the server which instance we are in rather than assuming Map ->
+	# ServerInstance is exactly two steps up: inside a dungeon the character is
+	# nested deeper, so the two-step walk named a node the InstanceManager could
+	# not resolve and the hit fell through to every player in the world.
+	var instance_name: String = WorldServer.curr.instance_name_for(self)
+	if instance_name.is_empty():
 		return
 	var payload: Dictionary = {
 		"amount": int(round(mitigated_amount)),
@@ -546,18 +542,15 @@ func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 				payload["attacker_prop_id"] = mob.container.child_id_of_node(mob)
 	WorldServer.curr.propagate_rpc(
 		WorldServer.curr.data_push.bind(&"combat.hit", payload),
-		maybe_instance.name
+		instance_name
 	)
 
 
 func _broadcast_heal_feedback(healed: float) -> void:
 	if healed <= 0.0 or WorldServer.curr == null:
 		return
-	var maybe_map: Node = get_parent()
-	if maybe_map == null:
-		return
-	var maybe_instance: Node = maybe_map.get_parent()
-	if maybe_instance == null:
+	var heal_instance: String = WorldServer.curr.instance_name_for(self)
+	if heal_instance.is_empty():
 		return
 	WorldServer.curr.propagate_rpc(
 		WorldServer.curr.data_push.bind(&"combat.hit", {
@@ -565,7 +558,7 @@ func _broadcast_heal_feedback(healed: float) -> void:
 			"position": global_position,
 			"heal": true,
 		}),
-		maybe_instance.name
+		heal_instance
 	)
 
 

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
 [ext_resource type="TileSet" uid="uid://cp3aq00j7d6as" path="res://source/common/gameplay/maps/tilesets/buildings_inside_tileset.tres" id="2_tileset"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="3_warper"]
-[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="4_overworld"]
+[ext_resource type="Resource" uid="uid://csp4j7lr4famg" path="res://source/common/gameplay/maps/instance/instance_collection/building/smith_house.tres" id="4_smith_house"]
 [ext_resource type="Script" path="res://source/common/gameplay/prayer/altar.gd" id="5_altar"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/structures/stations/altar/altar.png" id="6_altar_tex"]
 
@@ -32,7 +32,7 @@ tile_set = ExtResource("2_tileset")
 [node name="Entrance" parent="." instance=ExtResource("3_warper")]
 position = Vector2(8, 433)
 scale = Vector2(1.6, 1)
-target_instance = ExtResource("4_overworld")
+target_instance = ExtResource("4_smith_house")
 warper_id = 9
 target_id = 6
 
