@@ -75,8 +75,19 @@ func _go() -> void:
 		var nodes: Node = root.get_node_or_null("MineableNodes")
 		var placed: int = nodes.get_child_count() if nodes != null else 0
 		print("map placed holes: ", placed)
-		if placed != TIERS.size():
-			_fail("expected %d holes in the map, found %d" % [TIERS.size(), placed])
+		# Several holes per tier, so a player works along the coves instead of
+		# camping one spot. Every tier must still be represented.
+		if placed < TIERS.size():
+			_fail("expected at least %d holes in the map, found %d" % [TIERS.size(), placed])
+		var tiers_present: Dictionary = {}
+		for hole: Node in nodes.get_children():
+			var data: Resource = hole.get("data")
+			if data != null and data.ore != null:
+				tiers_present[String(data.ore.get_meta(&"slug", &""))] = true
+		for slug: String in TIERS:
+			if not tiers_present.has(slug):
+				_fail("no %s hole placed in the map" % slug)
+		print("tiers present: ", tiers_present.keys())
 		if root.get_node_or_null("RespawnPoint") == null:
 			_fail("map has no RespawnPoint warper — arrivals would land at the origin")
 		root.free()
