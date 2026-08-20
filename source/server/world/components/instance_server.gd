@@ -229,6 +229,22 @@ func spawn_player(peer_id: int) -> void:
 	var spawn_index: int = 0
 	var spawn_position: Vector2
 
+	# Warpers self-register from their OWN _ready, so on a big tiled map (the
+	# woodland) a join that lands in the same frame as the map load finds
+	# Map.warpers empty. get_spawn_position then falls through to the map's
+	# global_position — (0, 0), the top-left border wall — and the player spawns
+	# wedged in it: no movement, camera parked on whatever sits up there (the
+	# goblin chief). Waiting for the map settles it before anything reads spawns.
+	if not instance_map.is_node_ready():
+		await instance_map.ready
+	if instance_map.warpers.is_empty():
+		await get_tree().process_frame
+	if instance_map.warpers.is_empty():
+		ServerLog.warn(
+			"Instance '%s': no warpers registered at spawn — falling back to map origin."
+			% instance_resource.instance_name
+		)
+
 	if awaiting_peers.has(peer_id):
 		var player_info: Dictionary = awaiting_peers[peer_id]
 		player = player_info["player"] if "player" in player_info else instantiate_player(peer_id)
@@ -402,6 +418,15 @@ func instantiate_player(peer_id: int) -> Player:
 			new_player.stats_component.get_stat(Stat.MANA_MAX)
 		)
 		WorldServer.curr.data_push.rpc_id(peer_id, &"stats.get", new_player.stats_component.stats.values)
+		# Wardstone mirror, re-pushed per instance join. Sealed portals are drawn
+		# from ClientState.wardstones, which is only filled by the login push and
+		# by a live grant — a client that earns a stone and then changes instance
+		# (or whose login push raced the map load) renders open portals as sealed
+		# until relog. Idempotent and tiny; the client just re-emits.
+		if new_player.player_resource != null:
+			WorldServer.curr.data_push.rpc_id(
+				peer_id, &"wardstones.set", {"wardstones": new_player.player_resource.wardstones}
+			)
 	new_player.ready.connect(setup_new_player,CONNECT_ONE_SHOT)
 	return new_player
 

@@ -90,7 +90,7 @@ static func _format_modifier(modifier: StatModifier) -> String:
 		value *= 100.0
 	var number: String = ("%+d" % int(value)) if is_equal_approx(value, roundf(value)) else ("%+.1f" % value)
 	if is_percent:
-		number += "%%"
+		number += "%"
 	return "%s %s" % [number, Stat.display_name(modifier.stat_name)]
 
 

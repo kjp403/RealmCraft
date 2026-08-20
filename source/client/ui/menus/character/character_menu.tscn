@@ -173,7 +173,7 @@ theme_override_constants/separation = 10
 [node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer2" unique_id=1536117576]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Strenght 0"
+text = "Strength 0"
 
 [node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer2" unique_id=207070448]
 custom_minimum_size = Vector2(40, 40)

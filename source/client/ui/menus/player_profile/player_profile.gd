@@ -458,12 +458,9 @@ func _render_stats(stats: Dictionary) -> void:
 		))
 
 	var level: int = int(stats.get("level", 1))
-	var level_text: String = (
-		"%d (MAX)" % level if level >= 20 else str(level)
-	)
 	stats_list.add_child(_stat_row(
 		"Combat level",
-		level_text,
+		str(level),
 		COLOR_VALUE_PROGRESS
 	))
 

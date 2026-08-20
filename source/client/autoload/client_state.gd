@@ -535,7 +535,13 @@ func _on_gather_result(data: Dictionary) -> void:
 	var grants_v: Variant = data.get("grants", [])
 	if grants_v is Array:
 		for grant: Dictionary in grants_v:
-			lines.append("+%d %s XP" % [int(grant.get("xp", 0)), str(grant.get("job", "")).capitalize()])
+			# JobRegistry, not capitalize(): the harvesting job DISPLAYS as
+			# Farming, so a capitalized slug printed "Harvesting XP" beside a
+			# Farming skill bar.
+			lines.append("+%d %s XP" % [
+				int(grant.get("xp", 0)),
+				JobRegistry.display_name(StringName(str(grant.get("job", "")))),
+			])
 	# Profession level-up: fireworks + jingle + "Your Mining level has achieved N".
 	# Check every grant so multi-job nodes (e.g. herb + medicine) each celebrate.
 	var leveled_jobs: Dictionary = {}
