@@ -45,6 +45,8 @@
     }))
   );
   const REFRESH_MS = 30000;
+  // Mirrors LeaderboardService.HISCORE_INDEX_LIMIT.
+  const HISCORE_DEPTH = 100;
 
   const catBar = root.querySelector("[data-lb-cats]");
   const boardBar = root.querySelector("[data-lb-boards]");
@@ -154,8 +156,67 @@
     </table>`;
   }
 
+  // --- Personal hiscore lookup -------------------------------------------
+  // The boards show the top 20; this answers "where am I?" for anyone inside
+  // HISCORE_INDEX_LIMIT, using the name-keyed index the world publishes.
+  const lookupForm = root.querySelector("[data-lb-lookup]");
+  const personal = root.querySelector("[data-lb-personal]");
+
+  function hiscoreIndex() {
+    return (payload && payload.boards && payload.boards._hiscore_index) || {};
+  }
+
+  function renderPersonal(query) {
+    const name = String(query || "").trim();
+    if (!name) {
+      personal.hidden = true;
+      return;
+    }
+    personal.hidden = false;
+    const record = hiscoreIndex()[name.toLowerCase()];
+    if (!record) {
+      personal.innerHTML =
+        `<h2>${esc(name)}</h2>` +
+        `<p class="muted">Not ranked yet. The hiscores list the top ${HISCORE_DEPTH} of each skill.</p>`;
+      return;
+    }
+    const rows = SKILLS.map(([slug, label]) => {
+      const entry = record.skills && record.skills[slug];
+      if (!entry) {
+        return `<tr class="lb-unranked">
+          <td class="lb-name">${esc(label)}</td>
+          <td class="lb-level">—</td>
+          <td class="lb-rank-cell">—</td>
+          <td class="lb-score">—</td>
+        </tr>`;
+      }
+      return `<tr>
+        <td class="lb-name">${esc(label)}</td>
+        <td class="lb-level">${esc(String(entry.level))}</td>
+        <td class="lb-rank-cell">#${esc(String(entry.rank))}</td>
+        <td class="lb-score">${esc(Number(entry.xp).toLocaleString())}</td>
+      </tr>`;
+    }).join("");
+    personal.innerHTML = `<h2>${esc(record.name || name)}</h2>
+      <table class="lb-table">
+        <thead><tr><th>Skill</th><th>Level</th><th>Rank</th><th>XP</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  if (lookupForm) {
+    lookupForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      renderPersonal(lookupForm.querySelector("input[name=name]").value);
+    });
+  }
+
   function render() {
     renderNav();
+    if (lookupForm) {
+      const current = lookupForm.querySelector("input[name=name]").value;
+      if (current.trim()) renderPersonal(current);
+    }
     if (!payload) {
       tableWrap.innerHTML = "";
       return;

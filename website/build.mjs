@@ -2131,10 +2131,16 @@ function build() {
           <p class="lb-status" data-lb-status>Loading live ranks…</p>
         </div>
         <p class="muted">The same public boards as in-game, refreshed from the live world about every 30 seconds. Staff characters stay hidden.</p>
+        <form class="lb-lookup" data-lb-lookup>
+          <label for="lb-name">Find a player</label>
+          <input id="lb-name" type="search" name="name" placeholder="Character name" autocomplete="off" spellcheck="false">
+          <button type="submit">Look up</button>
+        </form>
+        <section class="lb-panel lb-personal" data-lb-personal hidden></section>
         <div class="filters lb-cats" data-lb-cats></div>
         <div class="filters lb-boards" data-lb-boards></div>
         <section class="lb-panel">
-          <h2 data-lb-title>PvP · All-Time</h2>
+          <h2 data-lb-title>Total Level</h2>
           <div data-lb-table></div>
         </section>
       </main>`,

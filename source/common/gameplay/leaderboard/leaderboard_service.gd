@@ -128,6 +128,9 @@ const PUBLIC_BOARDS: Array[String] = [
 	"dungeon:hell_dungeon",
 ]
 const PUBLIC_LIMIT: int = 20
+## How deep the by-name rank lookup goes per skill. Past this the tail is
+## near-zero XP and the index still has to ride the 10s heartbeat.
+const HISCORE_INDEX_LIMIT: int = 100
 const PUBLIC_CACHE_TTL_MS: int = 10000
 static var _public_cache: Dictionary = {}
 static var _public_cache_ms: int = 0
@@ -156,9 +159,36 @@ static func public_snapshot(world_server: Node) -> Dictionary:
 				"level": int(entry.get("level", 0)),
 			})
 		boards[board] = rows
+	boards["_hiscore_index"] = _hiscore_index(world_server)
 	_public_cache = boards
 	_public_cache_ms = now
 	return boards
+
+
+## Name -> { skill_slug: {rank, level, xp} } for the site's "what rank am I?"
+## lookup. The display boards only carry the top [constant PUBLIC_LIMIT], which
+## answers nothing for the player sitting at rank 340.
+##
+## Capped at [constant HISCORE_INDEX_LIMIT] per skill: past that the entry is a
+## long tail of near-zero XP, and the whole index rides a 10s heartbeat.
+## Names are lowercased keys — the site searches case-insensitively.
+static func _hiscore_index(world_server: Node) -> Dictionary:
+	var index: Dictionary = {}
+	for job_slug: StringName in TOTAL_LEVEL_SKILLS:
+		var ranked: Array = top_n(world_server, "skill:" + String(job_slug), HISCORE_INDEX_LIMIT)
+		for i: int in ranked.size():
+			var entry: Dictionary = ranked[i]
+			var key: String = str(entry.get("name", "")).to_lower()
+			if key.is_empty():
+				continue
+			if not index.has(key):
+				index[key] = {"name": str(entry.get("name", "")), "skills": {}}
+			index[key]["skills"][String(job_slug)] = {
+				"rank": i + 1,
+				"level": int(entry.get("level", 1)),
+				"xp": int(entry.get("score", 0)),
+			}
+	return index
 
 
 # --- internals ---

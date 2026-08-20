@@ -661,6 +661,40 @@ body[class^="theme-"] article.page {
 .lb-table th, .lb-table td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); }
 .lb-table th { color: var(--muted); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
 .lb-rank { width: 2.4rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lb-lookup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1rem 0 0.4rem;
+}
+.lb-lookup label { color: var(--muted); font-family: var(--ui); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.lb-lookup input {
+  flex: 1 1 14rem;
+  max-width: 20rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--sans);
+}
+.lb-lookup input:focus { outline: none; border-color: var(--accent); }
+.lb-lookup button {
+  padding: 0.5rem 0.9rem;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--ui);
+  cursor: pointer;
+}
+.lb-lookup button:hover { border-color: var(--accent); color: var(--accent); }
+.lb-personal { margin-bottom: 1.4rem; }
+.lb-personal .lb-name { color: var(--text); }
+.lb-rank-cell { text-align: right !important; color: var(--accent); font-variant-numeric: tabular-nums; }
+.lb-unranked td { color: var(--muted); }
+
 .lb-level {
   width: 3.4rem;
   text-align: right !important;
