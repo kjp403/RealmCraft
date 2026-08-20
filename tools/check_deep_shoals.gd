@@ -68,12 +68,14 @@ func _go() -> void:
 			continue
 		print("cook  %-14s level %2d  xp %d" % [slug, recipe.required_level, recipe.xp_reward])
 
-	# The map itself, and the holes actually placed in it.
+	# The map itself, and the holes actually placed in it. Instantiated ONCE and
+	# freed at the end — a second instantiate for the station check deadlocked.
+	var root: Node = null
 	var packed: PackedScene = load(MAP) as PackedScene
 	if packed == null:
 		_fail("Deep Shoals map failed to load")
 	else:
-		var root: Node = packed.instantiate()
+		root = packed.instantiate()
 		var nodes: Node = root.get_node_or_null("MineableNodes")
 		var placed: int = nodes.get_child_count() if nodes != null else 0
 		print("map placed holes: ", placed)
@@ -110,7 +112,44 @@ func _go() -> void:
 					])
 		if root.get_node_or_null("RespawnPoint") == null:
 			_fail("map has no RespawnPoint warper — arrivals would land at the origin")
-		root.free()
+
+	# Reachability of the cooking station: it must not sit inside a solid
+	# footprint, and there must be clear sand next to it to stand on. The Shoals
+	# cooker was buried inside the shipwreck's collider, visible but unusable.
+	var world: Node = root
+	if world != null:
+		var cooker: Node2D = world.get_node_or_null("CookingStation") as Node2D
+		var shore_node: Node = world.get_node_or_null("Shore")
+		if cooker == null:
+			_fail("map has no CookingStation")
+		elif shore_node != null:
+			var blocked: bool = false
+			var approach: bool = false
+			# The station has a footprint of its own; standing in it is expected.
+			var own := Rect2(cooker.position - Vector2(32, 20), Vector2(64, 34))
+			for rect: Rect2 in shore_node.get("solid_footprints"):
+				if rect != own and rect.has_point(cooker.position):
+					blocked = true
+			# Somewhere within arm's reach that no footprint covers.
+			for angle: int in range(0, 360, 30):
+				var probe: Vector2 = cooker.position + Vector2(
+					cos(deg_to_rad(angle)), sin(deg_to_rad(angle))
+				) * 40.0
+				var free: bool = true
+				for rect: Rect2 in shore_node.get("solid_footprints"):
+					if rect != own and rect.has_point(probe):
+						free = false
+						break
+				if free:
+					approach = true
+					break
+			print("cooking station at %s: buried = %s, has approach = %s" % [
+				cooker.position, blocked, approach
+			])
+			if blocked:
+				_fail("the cooking station is inside a solid footprint")
+			if not approach:
+				_fail("the cooking station has no clear side to walk up to")
 
 	if load(INSTANCE) == null:
 		_fail("deep_shoals instance resource failed to load")
@@ -128,6 +167,8 @@ func _go() -> void:
 				gated = true
 	if not gated:
 		_fail("Beach Angler has no Fishing 60 warp to the Deep Shoals")
+	if root != null:
+		root.free()
 
 	print("RESULT ", "FAIL" if _failed else "PASS")
 	get_tree().quit(1 if _failed else 0)
