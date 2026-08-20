@@ -8,11 +8,14 @@ extends SceneTree
 ## so the result matches the palette exactly.
 ##   godot --headless --path . -s tools/build_pond_tiles.gd
 
-const WATER: String = "res://assets/sprites/environment/overworld/water_tiles.png"
+## The SAME water the beaches use, downscaled to the woodland's 16px grid, so a
+## pond and the sea read as the same substance.
+const WATER: String = "res://assets/sprites/environment/sea/tilesets/water_anim.png"
 const OUT: String = "res://assets/sprites/environment/overworld/pond_tiles.png"
 const TILE: int = 16
 ## Flat water and a plain grass tile from the same sheets the map already uses.
-const WATER_CELL := Vector2i(2, 7)
+const WATER_CELL := Vector2i(0, 0)
+const WATER_TILE: int = 32
 const GRASS_SRC: String = "res://assets/sprites/environment/overworld/floor_tiles.png"
 const GRASS_CELL := Vector2i(1, 10)
 ## Bank thickness in pixels — how far the grass creeps over the water edge.
@@ -27,7 +30,8 @@ func _init() -> void:
 		quit(1)
 		return
 	var water: Image = water_tex.get_image().get_region(
-		Rect2i(WATER_CELL * TILE, Vector2i(TILE, TILE)))
+		Rect2i(WATER_CELL * WATER_TILE, Vector2i(WATER_TILE, WATER_TILE)))
+	water.resize(TILE, TILE, Image.INTERPOLATE_NEAREST)
 	var grass: Image = grass_tex.get_image().get_region(
 		Rect2i(GRASS_CELL * TILE, Vector2i(TILE, TILE)))
 	if water.get_format() != Image.FORMAT_RGBA8:
