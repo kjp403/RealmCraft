@@ -271,7 +271,9 @@ static func add_item(
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		for _i: int in amount:
-			var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
+			var bag: int = 0 if in_bank else _next_bag_with_space(
+				inventory, MAX_SLOTS, start_bag, bag_count
+			)
 			inventory[next_uid(inventory)] = {"id": item_id, "a": 1, "bag": bag}
 		return
 
@@ -294,6 +296,19 @@ static func add_item(
 			inventory[slot_uid]["a"] = have + put
 			remaining -= put
 
+		# The BANK has no bags and its capacity is PlayerResource.bank_slots, not
+		# MAX_SLOTS. Running it through the bag loop below bounded new vault
+		# slots at 28 per "bag 0", so a bank holding 28+ stacks reported zero
+		# free slots and the loop exited with items still in hand — which this
+		# void function then dropped, after the deposit had already taken them
+		# out of the player's bag. Callers gate bank adds with max_fit().
+		if in_bank:
+			while remaining > 0:
+				var bank_put: int = mini(limit, remaining)
+				inventory[next_uid(inventory)] = {"id": item_id, "a": bank_put, "bag": 0}
+				remaining -= bank_put
+			return
+
 		# Open new slots, wrapping through unlocked bags starting at [param start_bag].
 		# bag_count is floored at 1: inventory_bags is clamped [1, MAX_BAGS] on save
 		# and load, but a stray 0 here would divide by zero on the wrap below.
@@ -313,6 +328,14 @@ static func add_item(
 					free_in_bag -= 1
 			current_bag = (current_bag + 1) % bags
 			checked += 1
+		if remaining > 0:
+			# add_item returns void, so anything still here is GONE. Callers are
+			# supposed to pre-check with can_add()/max_fit(); shout rather than
+			# lose it quietly, the way the bank path did.
+			push_error(
+				"Inventory.add_item dropped %d x item %d — capacity check missing upstream"
+				% [remaining, item_id]
+			)
 		return
 
 	# Pseudo-infinite stack: add to any existing stack, else a new one.
@@ -320,7 +343,9 @@ static func add_item(
 		if int(inventory[slot_uid].get("id", 0)) == item_id:
 			inventory[slot_uid]["a"] = int(inventory[slot_uid].get("a", 0)) + remaining
 			return
-	var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
+	var bag: int = 0 if in_bank else _next_bag_with_space(
+		inventory, MAX_SLOTS, start_bag, bag_count
+	)
 	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining, "bag": bag}
 
 
