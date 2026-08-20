@@ -12,18 +12,13 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_02.png" id="9_tree1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_03.png" id="10_tree2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_04.png" id="11_tree3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/pond_tiles.png" id="12_swamp"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_05.png" id="12_tree4"]
-[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/hostile_npc.gd" id="14_03dvm"]
 [ext_resource type="Script" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.gd" id="15_4aa3h"]
 [ext_resource type="Script" path="res://source/common/network/sync/replicated_props.gd" id="17_rp"]
 [ext_resource type="Script" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.gd" id="18_lebv5"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.gd" id="18_swamp"]
-[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc.gd" id="22_uuuau"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
 [ext_resource type="Script" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="24_svn3l"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/components/mineable_node.gd" id="26_e80ok"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
@@ -32,6 +27,23 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/slayer_house.tres" id="41_slayer_inst"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/lost_woods.ogg" id="mus_lost_woods"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/pond_tiles.png" id="12_swamp"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uuuau"]
+texture = ExtResource("12_swamp")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+
 
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
 texture = ExtResource("1_floor")
@@ -513,21 +525,6 @@ texture = ExtResource("27_water")
 3:8/0 = 0
 4:7/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uuuau"]
-texture = ExtResource("12_swamp")
-0:0/0 = 0
-1:0/0 = 0
-2:0/0 = 0
-3:0/0 = 0
-0:1/0 = 0
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
-2:2/0 = 0
-3:2/0 = 0
-
 [sub_resource type="TileSet" id="tileset"]
 physics_layer_0/collision_layer = 2
 physics_layer_0/collision_mask = 0
@@ -554,8 +551,22 @@ size = Vector2(48, 560)
 [node name="Woodland" type="Node2D" unique_id=618164945 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("0_map")
 aoi_mode = 1
+aoi_cell_size = Vector2i(250, 250)
+aoi_visible_radius_cells = 2
+aoi_margin_cells = 1
+aoi_origin = Vector2i(0, 0)
+preview_aoi = true
+preview_aoi_follow_mouse = true
+preview_rect = Rect2(-4096, -4096, 8192, 8192)
+aoi_test_point = Vector2(0, 0)
+default_mode = 0
+default_modifiers = 0
+zone_cell_size = Vector2i(64, 64)
 replicated_props_container = NodePath("ReplicatedPropsContainer")
+map_background_color = Color(0, 0, 0, 1)
 music = ExtResource("mus_lost_woods")
+music_playlist = Array[AudioStream]([])
+weather = Array[AudioStream]([])
 camera_limit_left = 0
 camera_limit_top = 0
 camera_limit_right = 5824
@@ -657,6 +668,11 @@ id_to_node = {
 64: NodePath("CamelDesertBadger4")
 }
 node_to_id = {
+NodePath("WoodlandRat1"): 33,
+NodePath("WoodlandRat2"): 34,
+NodePath("WoodlandRat3"): 35,
+NodePath("WoodlandRat4"): 36,
+NodePath("WoodlandRat5"): 37,
 NodePath("WoodlandRat6"): 38,
 NodePath("WoodlandRat7"): 39,
 NodePath("WoodlandRat8"): 40,
@@ -668,27 +684,27 @@ NodePath("WoodlandRat13"): 45,
 NodePath("WoodlandRat14"): 46,
 NodePath("WoodlandRat15"): 47,
 NodePath("WoodlandRat16"): 48,
+NodePath("WoodlandRat17"): 49,
+NodePath("WoodlandRat18"): 50,
+NodePath("WoodlandRat19"): 51,
+NodePath("WoodlandRat20"): 52,
+NodePath("WoodlandRat21"): 53,
+NodePath("WoodlandRat22"): 54,
+NodePath("WoodlandRat23"): 55,
+NodePath("WoodlandRat24"): 56,
+NodePath("WoodlandRat25"): 57,
+NodePath("WoodlandRat26"): 58,
+NodePath("WoodlandRat27"): 59,
+NodePath("WoodlandRat28"): 60,
+NodePath("CamelDesertBadger1"): 61,
+NodePath("CamelDesertBadger2"): 62,
+NodePath("CamelDesertBadger3"): 63,
+NodePath("CamelDesertBadger4"): 64,
 NodePath("GateRunt1"): 0,
 NodePath("GateRunt2"): 1,
 NodePath("GateRunt3"): 2,
 NodePath("GateRunt4"): 3,
 NodePath("GateRunt5"): 4,
-NodePath("CamelDesertBadger4"): 64,
-NodePath("CamelDesertBadger3"): 63,
-NodePath("CamelDesertBadger2"): 62,
-NodePath("CamelDesertBadger1"): 61,
-NodePath("WoodlandRat28"): 60,
-NodePath("WoodlandRat27"): 59,
-NodePath("WoodlandRat26"): 58,
-NodePath("WoodlandRat25"): 57,
-NodePath("WoodlandRat24"): 56,
-NodePath("WoodlandRat23"): 55,
-NodePath("WoodlandRat22"): 54,
-NodePath("WoodlandRat21"): 53,
-NodePath("WoodlandRat20"): 52,
-NodePath("WoodlandRat19"): 51,
-NodePath("WoodlandRat18"): 50,
-NodePath("WoodlandRat17"): 49,
 NodePath("PathRunt1"): 5,
 NodePath("PathRunt2"): 6,
 NodePath("PathCutter1"): 7,
@@ -701,27 +717,22 @@ NodePath("CampCutter3"): 13,
 NodePath("CampCutter4"): 14,
 NodePath("CampRunt2"): 15,
 NodePath("WildWolf8"): 32,
-NodePath("WoodlandRat1"): 33,
-NodePath("WoodlandRat2"): 34,
-NodePath("WoodlandRat3"): 35,
-NodePath("WoodlandRat4"): 36,
-NodePath("WoodlandRat5"): 37,
-NodePath("Slinger1"): 16,
-NodePath("Slinger2"): 17,
-NodePath("Slinger3"): 18,
-NodePath("Shaman1"): 19,
-NodePath("ShamanEscortCutter"): 20,
-NodePath("Shaman2"): 21,
-NodePath("ChiefGuardRunt1"): 22,
-NodePath("GoblinChief"): 23,
-NodePath("ChiefGuardRunt2"): 24,
-NodePath("WildWolf1"): 25,
-NodePath("WildWolf2"): 26,
-NodePath("WildWolf3"): 27,
-NodePath("WildWolf4"): 28,
-NodePath("WildWolf5"): 29,
+NodePath("WildWolf7"): 31,
 NodePath("WildWolf6"): 30,
-NodePath("WildWolf7"): 31
+NodePath("WildWolf5"): 29,
+NodePath("WildWolf4"): 28,
+NodePath("WildWolf3"): 27,
+NodePath("WildWolf2"): 26,
+NodePath("WildWolf1"): 25,
+NodePath("ChiefGuardRunt2"): 24,
+NodePath("GoblinChief"): 23,
+NodePath("ChiefGuardRunt1"): 22,
+NodePath("Shaman2"): 21,
+NodePath("ShamanEscortCutter"): 20,
+NodePath("Shaman1"): 19,
+NodePath("Slinger3"): 18,
+NodePath("Slinger2"): 17,
+NodePath("Slinger1"): 16
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
@@ -729,434 +740,370 @@ metadata/_custom_type_script = "uid://wq8klpndipnu"
 texture_filter = 1
 position = Vector2(296, 1096)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="GateRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1405547471 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(504, 936)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="GateRunt3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1885119429 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(216, 760)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="GateRunt4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=520457107 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(424, 616)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="GateRunt5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1894583821 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(680, 1080)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="PathRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1173835823 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(824, 984)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="PathRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1331615902 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1080, 1064)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="PathCutter1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1994546004 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(904, 744)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="PathCutter2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=173491673 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1144, 680)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="PathCutter3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1999618966 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1384, 696)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampCutter1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1055611707 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1496, 376)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampCutter2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1258013794 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1752, 456)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=181245692 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1576, 552)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampCutter3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=2086749782 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1816, 376)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampCutter4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=438744078 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1896, 536)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CampRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=91795151 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1464, 616)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Slinger1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1868700488 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1240, 296)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Slinger2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1022336770 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1064, 264)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Slinger3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=915204169 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(824, 280)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Shaman1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1361130257 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(568, 280)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="ShamanEscortCutter" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1043721412 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(744, 424)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Shaman2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1439415590 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(984, 424)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="ChiefGuardRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=949143438 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(344, 168)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="GoblinChief" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=608139457 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(472, 232)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="ChiefGuardRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1611268690 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(568, 168)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001000 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(248, 696)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001001 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(200, 728)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001002 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(280, 648)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001003 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(296, 728)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001004 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1752, 776)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf6" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001005 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1800, 744)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf7" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001006 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1704, 808)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WildWolf8" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001007 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1864, 744)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001008 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(888, 600)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001009 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(840, 552)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001010 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(888, 520)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001011 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(936, 600)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001012 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(936, 520)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat6" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001013 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1144, 376)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat7" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001014 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1160, 424)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat8" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1192, 360)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat9" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1096, 376)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat10" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(1112, 424)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat11" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(424, 920)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat12" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(360, 936)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat13" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(472, 904)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat14" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(520, 936)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat15" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=994491646 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(424, 872)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat16" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1109516851 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1448, 1208)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat17" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1691666201 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1464, 1256)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat18" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1670552385 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1496, 1208)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat19" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1890570354 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1512, 1256)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat20" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1412351682 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1416, 1256)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat21" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=88118995 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1720, 280)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat22" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001022 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1784, 312)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat23" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001023 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1720, 232)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat24" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001024 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1768, 376)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat25" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001025 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1944, 984)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat26" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001026 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1928, 936)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat27" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001027 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1896, 1016)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="WoodlandRat28" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001028 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
 texture_filter = 1
 position = Vector2(1944, 1032)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CamelDesertBadger1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002101 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(4584, 1400)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CamelDesertBadger2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002102 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(4680, 1416)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CamelDesertBadger3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002103 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(4632, 1448)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="CamelDesertBadger4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002104 instance=ExtResource("3_2hhap")]
 texture_filter = 1
 position = Vector2(4664, 1336)
 collision_mask = 2
-script = ExtResource("14_03dvm")
 
 [node name="Entrance" type="Area2D" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
 monitorable = false
 script = ExtResource("15_4aa3h")
+target_instance = null
 warper_id = 23
+target_id = 0
+warp_delay_s = 0.0
 
 [node name="HubPortal" type="Area2D" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
 position = Vector2(984, 1320)
 monitorable = false
-script = ExtResource("18_swamp")
-warp_delay_s = 0.45
 
 [node name="FungusCavePortal" type="Area2D" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]
 position = Vector2(2696, 648)
 monitorable = false
-script = ExtResource("18_swamp")
-warp_delay_s = 0.45
 
 [node name="MiningCavePortal" type="Area2D" parent="." unique_id=766829581 instance=ExtResource("4_2dprc")]
 position = Vector2(978, 839)
 monitorable = false
-script = ExtResource("18_swamp")
-warp_delay_s = 0.45
 
 [node name="RespawnPoint" type="Area2D" parent="." unique_id=1537871885 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
 monitorable = false
 script = ExtResource("15_4aa3h")
+target_instance = null
+warper_id = 0
+target_id = 0
+warp_delay_s = 0.0
 
 [node name="TeleporterEntry" type="Area2D" parent="." unique_id=1508016588 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
 z_index = 10
@@ -1176,55 +1123,46 @@ target = NodePath("../TeleporterEntry")
 texture_filter = 1
 position = Vector2(1048, 1368)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="SecretHermit" type="CharacterBody2D" parent="NPCs" unique_id=957533930 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(2696, 600)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="ScoutCalder" type="CharacterBody2D" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(2664, 584)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="BeachAngler" type="CharacterBody2D" parent="NPCs" unique_id=1900000201 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(1220, 1640)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="DesertCamel" type="CharacterBody2D" parent="NPCs" unique_id=1900000301 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(4634, 1384)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="SwampHermit" type="CharacterBody2D" parent="NPCs" unique_id=1900000302 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(4804, 680)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="ForgeGolem" type="CharacterBody2D" parent="NPCs" unique_id=1900000303 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(4823, 245)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="WingBanker" type="CharacterBody2D" parent="NPCs" unique_id=265428134 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(4184, 696)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="BeachBanker" type="CharacterBody2D" parent="NPCs" unique_id=1900000402 instance=ExtResource("6_mn6pe")]
 texture_filter = 1
 position = Vector2(1048, 1560)
 collision_mask = 2
-script = ExtResource("22_uuuau")
 
 [node name="SlayerHouse" type="Node2D" parent="." unique_id=701268441 instance=ExtResource("40_slayer_house")]
 y_sort_enabled = true
@@ -1237,591 +1175,459 @@ script = ExtResource("15_4aa3h")
 target_instance = ExtResource("41_slayer_inst")
 warper_id = 31
 target_id = 32
+warp_delay_s = 0.0
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=59547489]
 
 [node name="WoodStand1" type="Area2D" parent="MineableNodes" unique_id=1930000000 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(360, 1144)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand2" type="Area2D" parent="MineableNodes" unique_id=1930000001 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(312, 1224)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand3" type="Area2D" parent="MineableNodes" unique_id=1930000002 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(264, 1144)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand4" type="Area2D" parent="MineableNodes" unique_id=1930000003 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(408, 1224)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand5" type="Area2D" parent="MineableNodes" unique_id=1930000004 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(216, 1224)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand6" type="Area2D" parent="MineableNodes" unique_id=1930000005 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(456, 1128)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand7" type="Area2D" parent="MineableNodes" unique_id=1930000006 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(360, 1304)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand8" type="Area2D" parent="MineableNodes" unique_id=1930000007 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(264, 1304)
-script = ExtResource("26_e80ok")
 
 [node name="WoodStand9" type="Area2D" parent="MineableNodes" unique_id=1930000008 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(232, 1048)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood1" type="Area2D" parent="MineableNodes" unique_id=1930000009 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1784, 248)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood2" type="Area2D" parent="MineableNodes" unique_id=1930000010 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1864, 296)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood3" type="Area2D" parent="MineableNodes" unique_id=1930000011 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1736, 328)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood4" type="Area2D" parent="MineableNodes" unique_id=1930000012 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1864, 200)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood5" type="Area2D" parent="MineableNodes" unique_id=1930000013 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 152)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood6" type="Area2D" parent="MineableNodes" unique_id=1930000014 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1816, 376)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood7" type="Area2D" parent="MineableNodes" unique_id=1930000015 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1944, 248)
-script = ExtResource("26_e80ok")
 
 [node name="NorthWood8" type="Area2D" parent="MineableNodes" unique_id=1930000016 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1912, 376)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood1" type="Area2D" parent="MineableNodes" unique_id=1930000017 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1832, 888)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood2" type="Area2D" parent="MineableNodes" unique_id=1930000018 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 840)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood3" type="Area2D" parent="MineableNodes" unique_id=1930000019 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1832, 792)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood4" type="Area2D" parent="MineableNodes" unique_id=1930000020 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1928, 872)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood5" type="Area2D" parent="MineableNodes" unique_id=1930000021 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 936)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood6" type="Area2D" parent="MineableNodes" unique_id=1930000022 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1880, 968)
-script = ExtResource("26_e80ok")
 
 [node name="EastWood7" type="Area2D" parent="MineableNodes" unique_id=1930000023 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1800, 1016)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise1" type="Area2D" parent="MineableNodes" unique_id=1930000024 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1672, 648)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise2" type="Area2D" parent="MineableNodes" unique_id=1930000025 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1560, 616)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise3" type="Area2D" parent="MineableNodes" unique_id=1930000026 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1576, 744)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise4" type="Area2D" parent="MineableNodes" unique_id=1930000027 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1768, 568)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise5" type="Area2D" parent="MineableNodes" unique_id=1930000028 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1608, 504)
-script = ExtResource("26_e80ok")
 
 [node name="OakRise6" type="Area2D" parent="MineableNodes" unique_id=1930000029 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1800, 680)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow1" type="Area2D" parent="MineableNodes" unique_id=1930000030 instance=ExtResource("7_jiw8u")]
 position = Vector2(1240, 1176)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow2" type="Area2D" parent="MineableNodes" unique_id=1930000031 instance=ExtResource("7_jiw8u")]
 position = Vector2(1176, 1192)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow3" type="Area2D" parent="MineableNodes" unique_id=1930000032 instance=ExtResource("7_jiw8u")]
 position = Vector2(1240, 1240)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow4" type="Area2D" parent="MineableNodes" unique_id=1930000033 instance=ExtResource("7_jiw8u")]
 position = Vector2(1192, 1128)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow5" type="Area2D" parent="MineableNodes" unique_id=1930000034 instance=ExtResource("7_jiw8u")]
 position = Vector2(1304, 1176)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow6" type="Area2D" parent="MineableNodes" unique_id=1930000035 instance=ExtResource("7_jiw8u")]
 position = Vector2(1176, 1256)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow7" type="Area2D" parent="MineableNodes" unique_id=1930000036 instance=ExtResource("7_jiw8u")]
 position = Vector2(1304, 1240)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow8" type="Area2D" parent="MineableNodes" unique_id=1930000037 instance=ExtResource("7_jiw8u")]
 position = Vector2(1128, 1144)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow9" type="Area2D" parent="MineableNodes" unique_id=1930000038 instance=ExtResource("7_jiw8u")]
 position = Vector2(1320, 1112)
-script = ExtResource("26_e80ok")
 
 [node name="HerbMeadow10" type="Area2D" parent="MineableNodes" unique_id=1930000039 instance=ExtResource("7_jiw8u")]
 position = Vector2(1224, 1064)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb1" type="Area2D" parent="MineableNodes" unique_id=1930000040 instance=ExtResource("7_jiw8u")]
 position = Vector2(328, 840)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb2" type="Area2D" parent="MineableNodes" unique_id=1930000041 instance=ExtResource("7_jiw8u")]
 position = Vector2(328, 776)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb3" type="Area2D" parent="MineableNodes" unique_id=1930000042 instance=ExtResource("7_jiw8u")]
 position = Vector2(392, 824)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb4" type="Area2D" parent="MineableNodes" unique_id=1930000043 instance=ExtResource("7_jiw8u")]
 position = Vector2(376, 888)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb5" type="Area2D" parent="MineableNodes" unique_id=1930000044 instance=ExtResource("7_jiw8u")]
 position = Vector2(312, 904)
-script = ExtResource("26_e80ok")
 
 [node name="PondHerb6" type="Area2D" parent="MineableNodes" unique_id=1930000045 instance=ExtResource("7_jiw8u")]
 position = Vector2(264, 856)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField1" type="Area2D" parent="MineableNodes" unique_id=1930000046 instance=ExtResource("7_jiw8u")]
 position = Vector2(712, 1208)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField2" type="Area2D" parent="MineableNodes" unique_id=1930000047 instance=ExtResource("7_jiw8u")]
 position = Vector2(648, 1224)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField3" type="Area2D" parent="MineableNodes" unique_id=1930000048 instance=ExtResource("7_jiw8u")]
 position = Vector2(664, 1160)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField4" type="Area2D" parent="MineableNodes" unique_id=1930000049 instance=ExtResource("7_jiw8u")]
 position = Vector2(712, 1272)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField5" type="Area2D" parent="MineableNodes" unique_id=1930000050 instance=ExtResource("7_jiw8u")]
 position = Vector2(728, 1144)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField6" type="Area2D" parent="MineableNodes" unique_id=1930000051 instance=ExtResource("7_jiw8u")]
 position = Vector2(776, 1208)
-script = ExtResource("26_e80ok")
 
 [node name="FlaxField7" type="Area2D" parent="MineableNodes" unique_id=1930000052 instance=ExtResource("7_jiw8u")]
 position = Vector2(776, 1272)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow1" type="Area2D" parent="MineableNodes" unique_id=1930000053 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 488)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow2" type="Area2D" parent="MineableNodes" unique_id=1930000054 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 552)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow3" type="Area2D" parent="MineableNodes" unique_id=1930000055 instance=ExtResource("7_jiw8u")]
 position = Vector2(232, 472)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow4" type="Area2D" parent="MineableNodes" unique_id=1930000056 instance=ExtResource("7_jiw8u")]
 position = Vector2(232, 536)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow5" type="Area2D" parent="MineableNodes" unique_id=1930000057 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 424)
-script = ExtResource("26_e80ok")
 
 [node name="FrostHollow6" type="Area2D" parent="MineableNodes" unique_id=1930000058 instance=ExtResource("7_jiw8u")]
 position = Vector2(104, 520)
-script = ExtResource("26_e80ok")
 
 [node name="WingHerb1" type="Area2D" parent="MineableNodes" unique_id=1930000059 instance=ExtResource("7_jiw8u")]
 position = Vector2(2920, 744)
-script = ExtResource("26_e80ok")
 
 [node name="WingHerb2" type="Area2D" parent="MineableNodes" unique_id=1930000060 instance=ExtResource("7_jiw8u")]
 position = Vector2(2920, 808)
-script = ExtResource("26_e80ok")
 
 [node name="WingHerb3" type="Area2D" parent="MineableNodes" unique_id=1930000061 instance=ExtResource("7_jiw8u")]
 position = Vector2(2872, 696)
-script = ExtResource("26_e80ok")
 
 [node name="WingHerb4" type="Area2D" parent="MineableNodes" unique_id=1930000062 instance=ExtResource("7_jiw8u")]
 position = Vector2(2984, 744)
-script = ExtResource("26_e80ok")
 
 [node name="WingHerb5" type="Area2D" parent="MineableNodes" unique_id=1930000063 instance=ExtResource("7_jiw8u")]
 position = Vector2(2936, 680)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort1" type="Area2D" parent="MineableNodes" unique_id=1930000064 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 248)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort2" type="Area2D" parent="MineableNodes" unique_id=1930000065 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 312)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort3" type="Area2D" parent="MineableNodes" unique_id=1930000066 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 264)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort4" type="Area2D" parent="MineableNodes" unique_id=1930000067 instance=ExtResource("7_jiw8u")]
 position = Vector2(3624, 232)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort5" type="Area2D" parent="MineableNodes" unique_id=1930000068 instance=ExtResource("7_jiw8u")]
 position = Vector2(3512, 200)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort6" type="Area2D" parent="MineableNodes" unique_id=1930000069 instance=ExtResource("7_jiw8u")]
 position = Vector2(3624, 296)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort7" type="Area2D" parent="MineableNodes" unique_id=1930000070 instance=ExtResource("7_jiw8u")]
 position = Vector2(3576, 184)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort8" type="Area2D" parent="MineableNodes" unique_id=1930000071 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 328)
-script = ExtResource("26_e80ok")
 
 [node name="WingSunwort9" type="Area2D" parent="MineableNodes" unique_id=1930000072 instance=ExtResource("7_jiw8u")]
 position = Vector2(3608, 360)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple1" type="Area2D" parent="MineableNodes" unique_id=1930000073 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3320, 488)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple2" type="Area2D" parent="MineableNodes" unique_id=1930000074 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3288, 376)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple3" type="Area2D" parent="MineableNodes" unique_id=1930000075 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3240, 568)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple4" type="Area2D" parent="MineableNodes" unique_id=1930000076 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3192, 440)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple5" type="Area2D" parent="MineableNodes" unique_id=1930000077 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3400, 408)
-script = ExtResource("26_e80ok")
 
 [node name="WingMaple6" type="Area2D" parent="MineableNodes" unique_id=1930000078 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3352, 600)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom1" type="Area2D" parent="MineableNodes" unique_id=1930000079 instance=ExtResource("7_jiw8u")]
 position = Vector2(4728, 680)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom2" type="Area2D" parent="MineableNodes" unique_id=1930000080 instance=ExtResource("7_jiw8u")]
 position = Vector2(4728, 760)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom3" type="Area2D" parent="MineableNodes" unique_id=1930000081 instance=ExtResource("7_jiw8u")]
 position = Vector2(4872, 680)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom4" type="Area2D" parent="MineableNodes" unique_id=1930000082 instance=ExtResource("7_jiw8u")]
 position = Vector2(4664, 696)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom5" type="Area2D" parent="MineableNodes" unique_id=1930000083 instance=ExtResource("7_jiw8u")]
 position = Vector2(4680, 632)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom6" type="Area2D" parent="MineableNodes" unique_id=1930000084 instance=ExtResource("7_jiw8u")]
 position = Vector2(4664, 760)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom7" type="Area2D" parent="MineableNodes" unique_id=1930000085 instance=ExtResource("7_jiw8u")]
 position = Vector2(4744, 824)
-script = ExtResource("26_e80ok")
 
 [node name="WingMoonbloom8" type="Area2D" parent="MineableNodes" unique_id=1930000086 instance=ExtResource("7_jiw8u")]
 position = Vector2(4888, 776)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow1" type="Area2D" parent="MineableNodes" unique_id=1930000087 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4456, 824)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow2" type="Area2D" parent="MineableNodes" unique_id=1930000088 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4536, 904)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow3" type="Area2D" parent="MineableNodes" unique_id=1930000089 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4552, 760)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow4" type="Area2D" parent="MineableNodes" unique_id=1930000090 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4440, 712)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow5" type="Area2D" parent="MineableNodes" unique_id=1930000091 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4360, 888)
-script = ExtResource("26_e80ok")
 
 [node name="WingWillow6" type="Area2D" parent="MineableNodes" unique_id=1930000092 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4440, 968)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost1" type="Area2D" parent="MineableNodes" unique_id=1930000093 instance=ExtResource("7_jiw8u")]
 position = Vector2(3752, 1096)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost2" type="Area2D" parent="MineableNodes" unique_id=1930000094 instance=ExtResource("7_jiw8u")]
 position = Vector2(3800, 1048)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost3" type="Area2D" parent="MineableNodes" unique_id=1930000095 instance=ExtResource("7_jiw8u")]
 position = Vector2(3736, 1032)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost4" type="Area2D" parent="MineableNodes" unique_id=1930000096 instance=ExtResource("7_jiw8u")]
 position = Vector2(3736, 1160)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost5" type="Area2D" parent="MineableNodes" unique_id=1930000097 instance=ExtResource("7_jiw8u")]
 position = Vector2(3688, 1080)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost6" type="Area2D" parent="MineableNodes" unique_id=1930000098 instance=ExtResource("7_jiw8u")]
 position = Vector2(3800, 1160)
-script = ExtResource("26_e80ok")
 
 [node name="WingFrost7" type="Area2D" parent="MineableNodes" unique_id=1930000099 instance=ExtResource("7_jiw8u")]
 position = Vector2(3784, 984)
-script = ExtResource("26_e80ok")
 
 [node name="WingYew1" type="Area2D" parent="MineableNodes" unique_id=1930000100 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1336)
-script = ExtResource("26_e80ok")
 
 [node name="WingYew2" type="Area2D" parent="MineableNodes" unique_id=1930000101 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4856, 1368)
-script = ExtResource("26_e80ok")
 
 [node name="WingYew3" type="Area2D" parent="MineableNodes" unique_id=1930000102 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1464)
-script = ExtResource("26_e80ok")
 
 [node name="WingYew4" type="Area2D" parent="MineableNodes" unique_id=1930000103 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4648, 1256)
-script = ExtResource("26_e80ok")
 
 [node name="WingYew5" type="Area2D" parent="MineableNodes" unique_id=1930000104 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1192)
-script = ExtResource("26_e80ok")
 
 [node name="WingYewCamp1" type="Area2D" parent="MineableNodes" unique_id=1930000105 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4008, 584)
-script = ExtResource("26_e80ok")
 
 [node name="WingYewCamp2" type="Area2D" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3944, 680)
-script = ExtResource("26_e80ok")
 
 [node name="WingYewCamp3" type="Area2D" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3896, 552)
-script = ExtResource("26_e80ok")
 
 [node name="WingYewCamp4" type="Area2D" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4136, 584)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom1" type="Area2D" parent="MineableNodes" unique_id=1930000109 instance=ExtResource("7_jiw8u")]
 position = Vector2(3992, 232)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom2" type="Area2D" parent="MineableNodes" unique_id=1930000110 instance=ExtResource("7_jiw8u")]
 position = Vector2(3992, 296)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom3" type="Area2D" parent="MineableNodes" unique_id=1930000111 instance=ExtResource("7_jiw8u")]
 position = Vector2(3928, 248)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom4" type="Area2D" parent="MineableNodes" unique_id=1930000112 instance=ExtResource("7_jiw8u")]
 position = Vector2(4008, 168)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom5" type="Area2D" parent="MineableNodes" unique_id=1930000113 instance=ExtResource("7_jiw8u")]
 position = Vector2(3944, 184)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom6" type="Area2D" parent="MineableNodes" unique_id=1930000114 instance=ExtResource("7_jiw8u")]
 position = Vector2(4056, 296)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom7" type="Area2D" parent="MineableNodes" unique_id=1930000115 instance=ExtResource("7_jiw8u")]
 position = Vector2(3928, 312)
-script = ExtResource("26_e80ok")
 
 [node name="WingStarblossom8" type="Area2D" parent="MineableNodes" unique_id=1930000116 instance=ExtResource("7_jiw8u")]
 position = Vector2(4072, 152)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap1" type="Area2D" parent="MineableNodes" unique_id=1930000117 instance=ExtResource("7_jiw8u")]
 position = Vector2(5112, 440)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap2" type="Area2D" parent="MineableNodes" unique_id=1930000118 instance=ExtResource("7_jiw8u")]
 position = Vector2(5144, 504)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap3" type="Area2D" parent="MineableNodes" unique_id=1930000119 instance=ExtResource("7_jiw8u")]
 position = Vector2(5048, 408)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap4" type="Area2D" parent="MineableNodes" unique_id=1930000120 instance=ExtResource("7_jiw8u")]
 position = Vector2(5128, 568)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap5" type="Area2D" parent="MineableNodes" unique_id=1930000121 instance=ExtResource("7_jiw8u")]
 position = Vector2(5208, 456)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap6" type="Area2D" parent="MineableNodes" unique_id=1930000122 instance=ExtResource("7_jiw8u")]
 position = Vector2(5208, 520)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap7" type="Area2D" parent="MineableNodes" unique_id=1930000123 instance=ExtResource("7_jiw8u")]
 position = Vector2(5144, 344)
-script = ExtResource("26_e80ok")
 
 [node name="WingBloodcap8" type="Area2D" parent="MineableNodes" unique_id=1930000124 instance=ExtResource("7_jiw8u")]
 position = Vector2(5192, 584)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade1" type="Area2D" parent="MineableNodes" unique_id=1930000125 instance=ExtResource("7_jiw8u")]
 position = Vector2(3480, 1176)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade2" type="Area2D" parent="MineableNodes" unique_id=1930000126 instance=ExtResource("7_jiw8u")]
 position = Vector2(3416, 1208)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade3" type="Area2D" parent="MineableNodes" unique_id=1930000127 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1176)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade4" type="Area2D" parent="MineableNodes" unique_id=1930000128 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1112)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade5" type="Area2D" parent="MineableNodes" unique_id=1930000129 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 1240)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade6" type="Area2D" parent="MineableNodes" unique_id=1930000130 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 1144)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade7" type="Area2D" parent="MineableNodes" unique_id=1930000131 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1240)
-script = ExtResource("26_e80ok")
 
 [node name="WingGrimshade8" type="Area2D" parent="MineableNodes" unique_id=1930000132 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1048)
-script = ExtResource("26_e80ok")
 
 [node name="WoodlandBeach" type="Node2D" parent="." unique_id=1563115651 instance=ExtResource("29_beach")]
 y_sort_enabled = true
@@ -1860,10 +1666,10 @@ offset_left = 3322.0
 offset_top = 624.0
 offset_right = 3462.0
 offset_bottom = 648.0
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.9, 0.95, 0.7, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 15
 text = "East Crossroads"
 horizontal_alignment = 1
 
@@ -1872,10 +1678,10 @@ offset_left = 3610.0
 offset_top = 216.0
 offset_right = 3750.0
 offset_bottom = 240.0
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.95, 0.9, 0.65, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 15
 text = "Sunlit Meadow"
 horizontal_alignment = 1
 
@@ -1884,10 +1690,10 @@ offset_left = 4730.0
 offset_top = 632.0
 offset_right = 4870.0
 offset_bottom = 656.0
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.75, 0.95, 0.8, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 15
 text = "Murkwood Ponds"
 horizontal_alignment = 1
 
@@ -1896,10 +1702,10 @@ offset_left = 3690.0
 offset_top = 1112.0
 offset_right = 3830.0
 offset_bottom = 1136.0
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 15
 text = "Stone Shelves"
 horizontal_alignment = 1
 
@@ -1908,10 +1714,10 @@ offset_left = 4580.0
 offset_top = 1336.0
 offset_right = 4700.0
 offset_bottom = 1360.0
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.95, 0.88, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 15
 text = "East Shore"
 horizontal_alignment = 1
 
