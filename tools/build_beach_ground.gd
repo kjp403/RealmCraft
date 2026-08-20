@@ -48,7 +48,7 @@ const MAPS: Array[Dictionary] = [
 	},
 	{
 		"name": "deep_shoals_ground",
-		"cols": 34, "rows": 24,
+		"cols": 60, "rows": 34,
 		"shape": "shoals",
 	},
 ]
@@ -83,10 +83,13 @@ func _shore_row(shape: String, col: int, cols: int, rows: int) -> float:
 		return clampf(link_rows + 1.4 * sin(t * PI), 3.0, float(rows) - 4.0)
 	# Shoals: a sheltered crescent — deep water in the middle, arms north at
 	# both ends, so every fishing hole sits in its own pocket of water.
-	# Deep enough inland for a lighthouse and a house to stand at full height.
-	var crescent: float = 14.0 + 3.6 * (1.0 - cos(t * PI * 2.0)) * 0.5
-	var coves: float = 0.9 * sin(t * PI * 6.0)
-	return clampf(crescent + coves, 3.0, float(rows) - 5.0)
+	# Two coves and a headland across a long strand, with enough sand inland for
+	# a lighthouse, a house and a market to stand clear of each other.
+	var bays: float = 19.0 - 4.5 * cos(t * PI * 2.2)
+	var west_cove: float = -3.0 * exp(-pow((t - 0.18) * 7.0, 2.0))
+	var east_cove: float = -2.6 * exp(-pow((t - 0.62) * 8.0, 2.0))
+	var point: float = 3.2 * exp(-pow((t - 0.86) * 6.0, 2.0))
+	return clampf(bays + west_cove + east_cove + point, 4.0, float(rows) - 5.0)
 
 
 ## Per-column shore row, QUANTISED to whole tiles and limited to one tile of

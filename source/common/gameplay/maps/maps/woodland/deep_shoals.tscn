@@ -13,31 +13,39 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_wolffish.tres" id="h2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_blue_lobster.tres" id="h3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stranded_ship.png" id="p_stranded_ship"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stranded_boat2.png" id="p_stranded_boat2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bones.png" id="p_bones"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small.png" id="p_rock_small"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small2.png" id="p_rock_small2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/skull_arch.png" id="p_skull_arch"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/tent.png" id="p_tent"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fisherman_house.png" id="p_fisherman_house"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/lighthouse_cabin.png" id="p_lighthouse_cabin"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/watchtower.png" id="p_watchtower"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_wide.png" id="p_stall_wide"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_small.png" id="p_stall_small"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_alt.png" id="p_stall_alt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/lighthouse_base.png" id="p_lighthouse_base"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="p_palm_1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_3.png" id="p_palm_3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="p_palm_2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/tent.png" id="p_tent"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_wide.png" id="p_stall_wide"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stranded_boat2.png" id="p_stranded_boat2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_basket.png" id="p_fish_basket"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/boat_wreck2.png" id="p_boat_wreck2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/chest.png" id="p_chest"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/barrel_skeleton.png" id="p_barrel_skeleton"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_crate.png" id="p_fish_crate"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_a.png" id="p_dry_fish_a"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_b.png" id="p_dry_fish_b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/crate_open.png" id="p_crate_open"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/basket.png" id="p_basket"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/barrels.png" id="p_barrels"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_barrel.png" id="p_fish_barrel"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rope.png" id="p_rope"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bucket.png" id="p_bucket"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fisherman_house.png" id="p_fisherman_house"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_small.png" id="p_stall_small"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/lighthouse_base.png" id="p_lighthouse_base"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/lighthouse_cabin.png" id="p_lighthouse_cabin"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/crates.png" id="p_crates"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/chest.png" id="p_chest"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bones.png" id="p_bones"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small.png" id="p_rock_small"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small2.png" id="p_rock_small2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_a.png" id="p_shells_a"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_b.png" id="p_shells_b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/coconut.png" id="p_coconut"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_a.png" id="p_dry_fish_a"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_b.png" id="p_dry_fish_b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bucket.png" id="p_bucket"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rope.png" id="p_rope"]
 
 [node name="DeepShoals" type="Node2D"]
 y_sort_enabled = true
@@ -51,17 +59,17 @@ texture = ExtResource("2_ground")
 
 [node name="Shore" type="Node2D" parent="."]
 script = ExtResource("3_col")
-ground_size = Vector2(1088, 768)
-shoreline = PackedVector2Array(0, 458, 16, 458, 32, 490, 48, 490, 64, 490, 80, 490, 96, 490, 112, 490, 128, 490, 144, 490, 160, 490, 176, 490, 192, 490, 208, 490, 224, 490, 240, 490, 256, 490, 272, 490, 288, 490, 304, 490, 320, 522, 336, 522, 352, 554, 368, 554, 384, 554, 400, 554, 416, 586, 432, 586, 448, 586, 464, 586, 480, 586, 496, 586, 512, 586, 528, 586, 544, 554, 560, 554, 576, 554, 592, 554, 608, 554, 624, 554, 640, 522, 656, 522, 672, 522, 688, 522, 704, 554, 720, 554, 736, 554, 752, 554, 768, 554, 784, 554, 800, 554, 816, 554, 832, 522, 848, 522, 864, 490, 880, 490, 896, 490, 912, 490, 928, 458, 944, 458, 960, 426, 976, 426, 992, 426, 1008, 426, 1024, 458, 1040, 458, 1056, 458, 1072, 458)
+ground_size = Vector2(1920, 1088)
+shoreline = PackedVector2Array(0, 458, 16, 458, 32, 458, 48, 458, 64, 458, 80, 458, 96, 426, 112, 426, 128, 426, 144, 426, 160, 426, 176, 426, 192, 426, 208, 426, 224, 426, 240, 426, 256, 458, 272, 458, 288, 458, 304, 458, 320, 458, 336, 458, 352, 490, 368, 490, 384, 490, 400, 490, 416, 522, 432, 522, 448, 554, 464, 554, 480, 586, 496, 586, 512, 586, 528, 586, 544, 618, 560, 618, 576, 650, 592, 650, 608, 682, 624, 682, 640, 682, 656, 682, 672, 714, 688, 714, 704, 714, 720, 714, 736, 746, 752, 746, 768, 746, 784, 746, 800, 746, 816, 746, 832, 746, 848, 746, 864, 746, 880, 746, 896, 746, 912, 746, 928, 714, 944, 714, 960, 714, 976, 714, 992, 714, 1008, 714, 1024, 682, 1040, 682, 1056, 650, 1072, 650, 1088, 650, 1104, 650, 1120, 618, 1136, 618, 1152, 618, 1168, 618, 1184, 618, 1200, 618, 1216, 586, 1232, 586, 1248, 586, 1264, 586, 1280, 586, 1296, 586, 1312, 586, 1328, 586, 1344, 586, 1360, 586, 1376, 586, 1392, 586, 1408, 586, 1424, 586, 1440, 586, 1456, 586, 1472, 586, 1488, 586, 1504, 586, 1520, 586, 1536, 586, 1552, 586, 1568, 586, 1584, 586, 1600, 586, 1616, 586, 1632, 586, 1648, 586, 1664, 586, 1680, 586, 1696, 586, 1712, 586, 1728, 554, 1744, 554, 1760, 554, 1776, 554, 1792, 554, 1808, 554, 1824, 554, 1840, 554, 1856, 554, 1872, 554, 1888, 554, 1904, 554)
 dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(-15, 406, 430, 80), Rect2(378, 550, 84, 28), Rect2(48, 464, 24, 16), Rect2(320, 492, 20, 14), Rect2(140, 266, 20, 14), Rect2(410, 322, 20, 14), Rect2(190, 260, 220, 80), Rect2(435, 516, 170, 60), Rect2(408, 550, 84, 30), Rect2(586, 522, 28, 26), Rect2(616, 522, 28, 26), Rect2(686, 522, 28, 26), Rect2(717, 522, 26, 26), Rect2(470, 422, 20, 14), Rect2(628, 276, 24, 16), Rect2(735, 392, 190, 90), Rect2(845, 418, 110, 60), Rect2(915, 356, 140, 60), Rect2(926, 426, 28, 26), Rect2(844, 458, 52, 26), Rect2(750, 340, 20, 14), Rect2(1030, 264, 20, 14), Rect2(524, 422, 64, 34)])
+solid_footprints = Array[Rect2]([Rect2(45, 372, 430, 80), Rect2(508, 326, 480, 90), Rect2(1470, 356, 220, 80), Rect2(1013, 238, 190, 90), Rect2(1405, 196, 110, 54), Rect2(895, 640, 170, 60), Rect2(1105, 544, 110, 60), Rect2(1275, 512, 110, 60), Rect2(1748, 480, 140, 60), Rect2(114, 254, 24, 16), Rect2(456, 166, 24, 16), Rect2(1288, 270, 24, 16), Rect2(334, 282, 20, 14), Rect2(610, 518, 20, 14), Rect2(1704, 552, 20, 14), Rect2(190, 162, 20, 14), Rect2(820, 542, 20, 14), Rect2(854, 472, 20, 14), Rect2(1844, 196, 20, 14), Rect2(478, 550, 84, 28), Rect2(1016, 542, 84, 30), Rect2(158, 250, 56, 26), Rect2(1444, 554, 52, 26), Rect2(290, 282, 28, 26), Rect2(1226, 554, 28, 26), Rect2(1232, 446, 28, 26), Rect2(1398, 554, 28, 26), Rect2(1404, 482, 28, 26), Rect2(1160, 586, 28, 26), Rect2(1347, 554, 26, 26), Rect2(1606, 554, 28, 26), Rect2(1300, 426, 64, 34)])
 rim_east = false
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
 
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
-position = Vector2(556, 442)
+position = Vector2(1332, 446)
 station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
@@ -75,188 +83,260 @@ warper_id = 0
 y_sort_enabled = true
 
 [node name="Wreck" type="Sprite2D" parent="Scenery"]
-position = Vector2(200, 342)
+position = Vector2(260, 308)
 texture = ExtResource("p_stranded_ship")
 
-[node name="WreckBoat" type="Sprite2D" parent="Scenery"]
-position = Vector2(420, 546)
-texture = ExtResource("p_stranded_boat2")
+[node name="SkullArch" type="Sprite2D" parent="Scenery"]
+position = Vector2(748, 288)
+texture = ExtResource("p_skull_arch")
 
-[node name="Bones" type="Sprite2D" parent="Scenery"]
-position = Vector2(300, 471)
-texture = ExtResource("p_bones")
+[node name="AnglersTent" type="Sprite2D" parent="Scenery"]
+position = Vector2(1580, 260)
+texture = ExtResource("p_tent")
 
-[node name="Rocks1" type="Sprite2D" parent="Scenery"]
-position = Vector2(120, 470)
-texture = ExtResource("p_rock_small")
+[node name="FishermanHouse" type="Sprite2D" parent="Scenery"]
+position = Vector2(1108, 184)
+texture = ExtResource("p_fisherman_house")
 
-[node name="Rocks2" type="Sprite2D" parent="Scenery"]
-position = Vector2(360, 534)
-texture = ExtResource("p_rock_small2")
+[node name="LighthouseCabin" type="Sprite2D" parent="Scenery"]
+position = Vector2(1794, 306)
+texture = ExtResource("p_lighthouse_cabin")
+
+[node name="Watchtower" type="Sprite2D" parent="Scenery"]
+position = Vector2(1460, 138)
+texture = ExtResource("p_watchtower")
+
+[node name="StallWide" type="Sprite2D" parent="Scenery"]
+position = Vector2(980, 620)
+texture = ExtResource("p_stall_wide")
+
+[node name="StallSmall" type="Sprite2D" parent="Scenery"]
+position = Vector2(1160, 524)
+texture = ExtResource("p_stall_small")
+
+[node name="StallAlt" type="Sprite2D" parent="Scenery"]
+position = Vector2(1330, 492)
+texture = ExtResource("p_stall_alt")
+
+[node name="LighthouseBase" type="Sprite2D" parent="Scenery"]
+position = Vector2(1818, 476)
+texture = ExtResource("p_lighthouse_base")
 
 [node name="PalmW1" type="Sprite2D" parent="Scenery"]
-position = Vector2(60, 396)
+position = Vector2(126, 186)
+texture = ExtResource("p_palm_1")
+
+[node name="PalmW4" type="Sprite2D" parent="Scenery"]
+position = Vector2(468, 98)
+texture = ExtResource("p_palm_1")
+
+[node name="PalmV2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1300, 202)
 texture = ExtResource("p_palm_1")
 
 [node name="PalmW2" type="Sprite2D" parent="Scenery"]
-position = Vector2(330, 435)
+position = Vector2(344, 225)
+texture = ExtResource("p_palm_3")
+
+[node name="PalmA1" type="Sprite2D" parent="Scenery"]
+position = Vector2(620, 461)
+texture = ExtResource("p_palm_3")
+
+[node name="PalmE1" type="Sprite2D" parent="Scenery"]
+position = Vector2(1714, 495)
 texture = ExtResource("p_palm_3")
 
 [node name="PalmW3" type="Sprite2D" parent="Scenery"]
-position = Vector2(150, 217)
+position = Vector2(200, 112)
 texture = ExtResource("p_palm_2")
 
-[node name="PalmW4" type="Sprite2D" parent="Scenery"]
-position = Vector2(420, 265)
-texture = ExtResource("p_palm_3")
+[node name="PalmA2" type="Sprite2D" parent="Scenery"]
+position = Vector2(830, 492)
+texture = ExtResource("p_palm_2")
 
-[node name="AnglersTent" type="Sprite2D" parent="Scenery"]
-position = Vector2(300, 180)
-texture = ExtResource("p_tent")
+[node name="PalmV1" type="Sprite2D" parent="Scenery"]
+position = Vector2(864, 422)
+texture = ExtResource("p_palm_2")
 
-[node name="StallWide" type="Sprite2D" parent="Scenery"]
-position = Vector2(520, 496)
-texture = ExtResource("p_stall_wide")
+[node name="PalmE2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1854, 146)
+texture = ExtResource("p_palm_2")
+
+[node name="WreckBoat" type="Sprite2D" parent="Scenery"]
+position = Vector2(520, 546)
+texture = ExtResource("p_stranded_boat2")
 
 [node name="FishBaskets" type="Sprite2D" parent="Scenery"]
-position = Vector2(450, 548)
+position = Vector2(1058, 540)
 texture = ExtResource("p_fish_basket")
 
+[node name="BoatWreck2" type="Sprite2D" parent="Scenery"]
+position = Vector2(186, 244)
+texture = ExtResource("p_boat_wreck2")
+
+[node name="Chest" type="Sprite2D" parent="Scenery"]
+position = Vector2(1470, 548)
+texture = ExtResource("p_chest")
+
+[node name="BarrelSkeleton" type="Sprite2D" parent="Scenery"]
+position = Vector2(304, 276)
+texture = ExtResource("p_barrel_skeleton")
+
 [node name="FishCrate1" type="Sprite2D" parent="Scenery"]
-position = Vector2(600, 516)
+position = Vector2(1240, 548)
 texture = ExtResource("p_fish_crate")
 
 [node name="FishCrate2" type="Sprite2D" parent="Scenery"]
-position = Vector2(630, 516)
+position = Vector2(1246, 440)
 texture = ExtResource("p_fish_crate")
 
-[node name="DryFish1" type="Sprite2D" parent="Scenery"]
-position = Vector2(560, 535)
-texture = ExtResource("p_dry_fish_a")
+[node name="CrateOpen" type="Sprite2D" parent="Scenery"]
+position = Vector2(1412, 548)
+texture = ExtResource("p_crate_open")
 
-[node name="DryFish2" type="Sprite2D" parent="Scenery"]
-position = Vector2(660, 503)
-texture = ExtResource("p_dry_fish_b")
+[node name="Basket" type="Sprite2D" parent="Scenery"]
+position = Vector2(1418, 476)
+texture = ExtResource("p_basket")
 
 [node name="Barrels" type="Sprite2D" parent="Scenery"]
-position = Vector2(700, 516)
+position = Vector2(1174, 580)
 texture = ExtResource("p_barrels")
 
 [node name="FishBarrel" type="Sprite2D" parent="Scenery"]
-position = Vector2(730, 516)
+position = Vector2(1360, 548)
 texture = ExtResource("p_fish_barrel")
 
-[node name="Rope" type="Sprite2D" parent="Scenery"]
-position = Vector2(680, 503)
-texture = ExtResource("p_rope")
-
-[node name="Bucket" type="Sprite2D" parent="Scenery"]
-position = Vector2(750, 535)
-texture = ExtResource("p_bucket")
-
-[node name="PalmM1" type="Sprite2D" parent="Scenery"]
-position = Vector2(480, 373)
-texture = ExtResource("p_palm_2")
-
-[node name="PalmM2" type="Sprite2D" parent="Scenery"]
-position = Vector2(640, 208)
-texture = ExtResource("p_palm_1")
-
-[node name="FishermanHouse" type="Sprite2D" parent="Scenery"]
-position = Vector2(830, 338)
-texture = ExtResource("p_fisherman_house")
-
-[node name="StallSmall" type="Sprite2D" parent="Scenery"]
-position = Vector2(900, 398)
-texture = ExtResource("p_stall_small")
-
-[node name="LighthouseBase" type="Sprite2D" parent="Scenery"]
-position = Vector2(985, 352)
-texture = ExtResource("p_lighthouse_base")
-
-[node name="LighthouseCabin" type="Sprite2D" parent="Scenery"]
-position = Vector2(985, 182)
-texture = ExtResource("p_lighthouse_cabin")
-
-[node name="Crates" type="Sprite2D" parent="Scenery"]
-position = Vector2(940, 420)
+[node name="CratesCamp" type="Sprite2D" parent="Scenery"]
+position = Vector2(1620, 548)
 texture = ExtResource("p_crates")
 
-[node name="Chest" type="Sprite2D" parent="Scenery"]
-position = Vector2(870, 452)
-texture = ExtResource("p_chest")
+[node name="Bones1" type="Sprite2D" parent="Scenery"]
+position = Vector2(260, 439)
+texture = ExtResource("p_bones")
 
-[node name="PalmE1" type="Sprite2D" parent="Scenery"]
-position = Vector2(760, 283)
-texture = ExtResource("p_palm_3")
+[node name="Bones2" type="Sprite2D" parent="Scenery"]
+position = Vector2(430, 503)
+texture = ExtResource("p_bones")
 
-[node name="PalmE2" type="Sprite2D" parent="Scenery"]
-position = Vector2(1040, 215)
-texture = ExtResource("p_palm_2")
-
-[node name="Rocks3" type="Sprite2D" parent="Scenery"]
-position = Vector2(800, 534)
+[node name="RocksW1" type="Sprite2D" parent="Scenery"]
+position = Vector2(168, 226)
 texture = ExtResource("p_rock_small")
 
-[node name="Rocks4" type="Sprite2D" parent="Scenery"]
-position = Vector2(900, 234)
+[node name="RocksW2" type="Sprite2D" parent="Scenery"]
+position = Vector2(300, 438)
 texture = ExtResource("p_rock_small2")
 
-[node name="ShellsA" type="Sprite2D" parent="Scenery"]
-position = Vector2(180, 471)
+[node name="ShellsW1" type="Sprite2D" parent="Scenery"]
+position = Vector2(252, 367)
 texture = ExtResource("p_shells_a")
 
-[node name="ShellsB" type="Sprite2D" parent="Scenery"]
-position = Vector2(390, 535)
+[node name="ShellsW2" type="Sprite2D" parent="Scenery"]
+position = Vector2(470, 535)
 texture = ExtResource("p_shells_b")
 
-[node name="ShellsC" type="Sprite2D" parent="Scenery"]
-position = Vector2(820, 535)
+[node name="CoconutA" type="Sprite2D" parent="Scenery"]
+position = Vector2(760, 727)
+texture = ExtResource("p_coconut")
+
+[node name="DryFish1" type="Sprite2D" parent="Scenery"]
+position = Vector2(1108, 631)
+texture = ExtResource("p_dry_fish_a")
+
+[node name="DryFish2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1300, 567)
+texture = ExtResource("p_dry_fish_b")
+
+[node name="Bucket" type="Sprite2D" parent="Scenery"]
+position = Vector2(1144, 599)
+texture = ExtResource("p_bucket")
+
+[node name="ShellsV1" type="Sprite2D" parent="Scenery"]
+position = Vector2(1030, 663)
 texture = ExtResource("p_shells_a")
 
-[node name="ShellsD" type="Sprite2D" parent="Scenery"]
-position = Vector2(1045, 439)
+[node name="ShellsV2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1354, 423)
+texture = ExtResource("p_shells_b")
+
+[node name="Rope" type="Sprite2D" parent="Scenery"]
+position = Vector2(1540, 567)
+texture = ExtResource("p_rope")
+
+[node name="RocksC" type="Sprite2D" parent="Scenery"]
+position = Vector2(1488, 494)
+texture = ExtResource("p_rock_small")
+
+[node name="RocksE1" type="Sprite2D" parent="Scenery"]
+position = Vector2(1660, 566)
+texture = ExtResource("p_rock_small2")
+
+[node name="RocksE2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1870, 534)
+texture = ExtResource("p_rock_small")
+
+[node name="ShellsE1" type="Sprite2D" parent="Scenery"]
+position = Vector2(1700, 567)
+texture = ExtResource("p_shells_a")
+
+[node name="ShellsE2" type="Sprite2D" parent="Scenery"]
+position = Vector2(1884, 535)
 texture = ExtResource("p_shells_b")
 
 [node name="MineableNodes" type="Node2D" parent="."]
 
 [node name="HalibutHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(120, 524)
+position = Vector2(170, 458)
 data = ExtResource("h0")
 
 [node name="HalibutHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(300, 520)
+position = Vector2(420, 552)
 data = ExtResource("h0")
 
 [node name="HalibutHole3" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(470, 620)
+position = Vector2(1050, 682)
+data = ExtResource("h0")
+
+[node name="HalibutHole4" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(1420, 616)
 data = ExtResource("h0")
 
 [node name="StingrayHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(210, 522)
+position = Vector2(300, 488)
 data = ExtResource("h1")
 
 [node name="StingrayHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(560, 584)
+position = Vector2(900, 778)
 data = ExtResource("h1")
 
 [node name="StingrayHole3" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(780, 588)
+position = Vector2(1250, 616)
+data = ExtResource("h1")
+
+[node name="StingrayHole4" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(1620, 618)
 data = ExtResource("h1")
 
 [node name="WolffishHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(380, 586)
+position = Vector2(620, 714)
 data = ExtResource("h2")
 
 [node name="WolffishHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(900, 520)
+position = Vector2(1140, 648)
+data = ExtResource("h2")
+
+[node name="WolffishHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(1780, 586)
 data = ExtResource("h2")
 
 [node name="BlueLobsterHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(650, 556)
+position = Vector2(760, 776)
 data = ExtResource("h3")
 
 [node name="BlueLobsterHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(1010, 458)
+position = Vector2(1520, 618)
+data = ExtResource("h3")
+
+[node name="BlueLobsterHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(1880, 584)
 data = ExtResource("h3")
 

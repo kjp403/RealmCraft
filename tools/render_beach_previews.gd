@@ -14,7 +14,7 @@ const SHOTS: Array[Dictionary] = [
 	},
 	{
 		"scene": "res://source/common/gameplay/maps/maps/woodland/deep_shoals.tscn",
-		"file": "beach-deep-shoals.png", "size": Vector2i(1088, 768),
+		"file": "beach-deep-shoals.png", "size": Vector2i(1920, 1088),
 	},
 ]
 
