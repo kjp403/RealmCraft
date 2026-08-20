@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/strip_dead_walls.gd" id="1_walls"]
+
+[node name="StripDeadWalls" type="Node"]
+script = ExtResource("1_walls")
