@@ -95,11 +95,21 @@ def scenery(entries, shore_name):
         node, tex, x, sink = entries[idx]
         w, h = SIZE[tex]
         candidates = [(0, 0)]
-        for step in range(1, 50):
-            for d in (-12, 12):
+        for step in range(1, 7):          # +/- 48px, then a little inland
+            for d in (-8, 8):
                 candidates.append((d * step, 0))
-                candidates.append((d * step, 36 * ((step % 5) + 1)))
+        for step in range(1, 7):
+            for d in (-8, 8):
+                candidates.append((d * step, 12 * step))
+        # Second pass is wider, and anything that uses it gets reported: a prop
+        # that had to travel is a composition problem for a human to look at,
+        # not something the tool should quietly paper over.
+        for step in range(7, 20):
+            for d in (-8, 8):
+                candidates.append((d * step, 0))
+                candidates.append((d * step, 10 * step))
         got = None
+        blocker = None
         for dx, extra in candidates:
             cx = x + dx
             if cx - w // 2 < 4 or cx + w // 2 > max(shore[shore_name]) - 4:
@@ -114,12 +124,16 @@ def scenery(entries, shore_name):
                 other = taken.get(c)
                 if other is not None and (node, other) not in STACKS and (other, node) not in STACKS:
                     clash = True
+                    if blocker is None:
+                        blocker = other
                     break
             if not clash:
                 got = (cx, base, top, cells)
+                if abs(dx) > 48 or extra > 48:
+                    print("  MOVED %-16s %+d,%+d (was blocked by %s)" % (node, dx, extra, blocker))
                 break
         if got is None:
-            dropped.append(node)
+            dropped.append("%s (blocked by %s)" % (node, blocker))
             continue
         cx, base, top, cells = got
         for c in cells:
@@ -226,58 +240,76 @@ def rebuild(path, shore_name, entries, holes, hole_res, station_x, ground_size):
 # house above it, the anglers' camp and market where the cooking station is, then
 # the watchtower and lighthouse out on the east point.
 SHOALS = [
-    # --- West cove: the wreck that named the place, and nothing else nearby. ---
-    ("Wreck", "stranded_ship", 260, 6),
-    ("WreckBoat", "stranded_boat2", 520, 8),
-    ("BoatWreck2", "boat_wreck2", 150, 6),
-    ("BarrelSkeleton", "barrel_skeleton", 340, 6),
-    ("Bones1", "bones", 200, 3), ("Bones2", "bones", 430, 3),
-    ("PalmW1", "palm_1", 90, 12), ("PalmW2", "palm_3", 380, 18),
-    ("PalmW3", "palm_2", 200, 250), ("PalmW4", "palm_1", 480, 300),
-    ("RocksW1", "rock_small", 120, 4), ("RocksW2", "rock_small2", 300, 4),
-    ("ShellsW1", "shells_a", 240, 3), ("ShellsW2", "shells_b", 470, 3),
-    # --- Bone arch on the dunes between the cove and the village. ---
-    ("SkullArch", "skull_arch", 700, 330),
-    ("PalmA1", "palm_3", 620, 150), ("PalmA2", "palm_2", 830, 190),
-    ("CoconutA", "coconut", 760, 3),
-    # --- The village: market row along the water, house set back. ---
-    ("StallWide", "stall_wide", 980, 14),
-    ("StallSmall", "stall_small", 1160, 14),
-    ("StallAlt", "stall_alt", 1330, 14),
-    ("FishBaskets", "fish_basket", 1070, 6),
-    ("FishCrate1", "fish_crate", 1240, 6), ("FishCrate2", "fish_crate", 1270, 6),
-    ("CrateOpen", "crate_open", 1400, 6), ("Basket", "basket", 1430, 6),
-    ("DryFish1", "dry_fish_a", 1120, 3), ("DryFish2", "dry_fish_b", 1300, 3),
-    ("Barrels", "barrels", 1210, 6), ("FishBarrel", "fish_barrel", 1360, 6),
-    ("FishermanHouse", "fisherman_house", 1120, 250),
-    ("Chest", "chest", 1470, 6), ("Bucket", "bucket", 1180, 3),
-    ("PalmV1", "palm_2", 900, 260), ("PalmV2", "palm_1", 1300, 300),
-    ("ShellsV1", "shells_a", 1030, 3), ("ShellsV2", "shells_b", 1390, 3),
-    # --- The anglers' camp, off on its own east of the village. ---
-    ("AnglersTent", "tent", 1580, 150),
-    ("Rope", "rope", 1540, 3), ("CratesCamp", "crates", 1620, 6),
-    ("RocksC", "rock_small", 1500, 4),
-    # --- The point: lighthouse and watchtower, with clear ground around them. ---
-    ("Watchtower", "watchtower", 1640, 300),
-    ("LighthouseBase", "lighthouse_base", 1830, 14),
-    ("LighthouseCabin", "lighthouse_cabin", 1830, 120),
-    ("PalmE1", "palm_3", 1750, 20), ("PalmE2", "palm_2", 1890, 200),
-    ("RocksE1", "rock_small2", 1660, 4), ("RocksE2", "rock_small", 1870, 4),
-    ("ShellsE1", "shells_a", 1700, 3), ("ShellsE2", "shells_b", 1860, 3),
+    # ------------------------------------------------------------------ #
+    # WRECK COVE (x 60-560). Where the sea throws things up. Story, not
+    # function: no stalls, no station, nothing to use. It sets the tone and
+    # gives the village something to be arriving FROM.
+    # ------------------------------------------------------------------ #
+    ("Wreck", "stranded_ship", 250, 0),
+    ("WreckBoat", "stranded_boat2", 500, 4),
+    ("BarrelSkeleton", "barrel_skeleton", 300, 4),
+    ("Bones1", "bones", 360, 3), ("Bones2", "bones", 405, 3),
+    ("RocksW1", "rock_small", 545, 3), ("RocksW2", "rock_small2", 575, 3),
+    ("ShellsW1", "shells_a", 460, 3),
+    ("PalmW1", "palm_1", 120, 210), ("PalmW2", "palm_3", 235, 250),
+    ("PalmW3", "palm_2", 400, 230),
+
+    # ------------------------------------------------------------------ #
+    # THE DUNES (x 600-880). Deliberately empty except one landmark: the
+    # bone arch you walk under between the cove and the village. Negative
+    # space is the point — it makes the village read as a destination.
+    # ------------------------------------------------------------------ #
+    ("SkullArch", "skull_arch", 730, 300),
+    ("CoconutA", "coconut", 690, 3),
+    ("PalmA1", "palm_2", 620, 150),
+
+    # ------------------------------------------------------------------ #
+    # THE VILLAGE (x 950-1500). A market row facing the water, evenly
+    # spaced, with the goods stacked between the stalls and the house set
+    # back behind it. This is where the cooking station belongs: you land
+    # your catch, cook it at the row, sell from the stalls.
+    # ------------------------------------------------------------------ #
+    ("StallWide", "stall_wide", 980, 8),
+    ("StallSmall", "stall_small", 1180, 8),
+    ("StallAlt", "stall_alt", 1360, 8),
+    ("FishBaskets", "fish_basket", 1085, 4),
+    ("FishCrate1", "fish_crate", 1270, 4), ("FishCrate2", "fish_crate", 1300, 4),
+    ("Basket", "basket", 1440, 4), ("CrateOpen", "crate_open", 1470, 4),
+    ("DryFish1", "dry_fish_a", 1130, 3), ("DryFish2", "dry_fish_b", 1230, 3),
+    ("Bucket", "bucket", 1330, 3),
+    ("FishermanHouse", "fisherman_house", 1150, 300),
+    ("Barrels", "barrels", 1055, 200), ("FishBarrel", "fish_barrel", 1250, 210),
+    ("Chest", "chest", 1400, 205),
+    ("PalmV1", "palm_3", 1010, 330), ("PalmV2", "palm_1", 1330, 280),
+    ("ShellsV1", "shells_b", 1015, 3), ("ShellsV2", "shells_a", 1395, 3),
+
+    # ------------------------------------------------------------------ #
+    # THE CAMP AND THE POINT (x 1550-1900). The anglers' camp sits apart
+    # from the market, and the point carries the two things you navigate
+    # by: the watchtower, and the lighthouse right on the end.
+    # ------------------------------------------------------------------ #
+    ("AnglersTent", "tent", 1600, 210),
+    ("CratesCamp", "crates", 1520, 4), ("Rope", "rope", 1555, 3),
+    ("Watchtower", "watchtower", 1740, 230),
+    ("Lighthouse", "lighthouse_cabin", 1850, 6),
+    ("RocksE1", "rock_small2", 1660, 3), ("RocksE2", "rock_small", 1810, 3),
+    ("ShellsE1", "shells_a", 1700, 3),
+    ("PalmE1", "palm_2", 1560, 300), ("PalmE2", "palm_3", 1470, 320),
 ]
 
 # A couple-few of each tier, spread along the coves so a player works the whole
 # beach instead of standing on one hole.
 SHOALS_HOLES = [
-    # Spread the length of the strand: the west cove, the village frontage,
-    # and the deep water off the point, so tiers are worked in different places.
-    ("HalibutHole1", "h0", 170, 32), ("HalibutHole2", "h0", 420, 30),
-    ("HalibutHole3", "h0", 1050, 32), ("HalibutHole4", "h0", 1420, 30),
-    ("StingrayHole1", "h1", 300, 30), ("StingrayHole2", "h1", 900, 32),
-    ("StingrayHole3", "h1", 1250, 30), ("StingrayHole4", "h1", 1620, 32),
-    ("WolffishHole1", "h2", 620, 32), ("WolffishHole2", "h2", 1140, 30),
-    ("WolffishHole3", "h2", 1780, 32),
-    ("BlueLobsterHole1", "h3", 760, 30), ("BlueLobsterHole2", "h3", 1520, 32),
+    # Grouped by where you would fish them: the shallow tiers along the
+    # village frontage where the market is, the deep tiers out by the wreck
+    # and off the point.
+    ("HalibutHole1", "h0", 1000, 30), ("HalibutHole2", "h0", 1120, 32),
+    ("HalibutHole3", "h0", 1260, 30), ("HalibutHole4", "h0", 1400, 32),
+    ("StingrayHole1", "h1", 1060, 32), ("StingrayHole2", "h1", 1200, 30),
+    ("StingrayHole3", "h1", 1340, 32), ("StingrayHole4", "h1", 1480, 30),
+    ("WolffishHole1", "h2", 300, 32), ("WolffishHole2", "h2", 470, 30),
+    ("WolffishHole3", "h2", 1620, 32),
+    ("BlueLobsterHole1", "h3", 150, 30), ("BlueLobsterHole2", "h3", 1760, 32),
     ("BlueLobsterHole3", "h3", 1880, 30),
 ]
 
@@ -287,12 +319,12 @@ BEACH = [
     ("FishCrate", "fish_crate", 420, 6), ("Barrels", "barrels", 450, 6),
     ("DryFish", "dry_fish_a", 300, 3), ("Bucket", "bucket", 400, 3),
     ("Barricade", "barricade", 590, 6),
-    ("BeachedBoat", "stranded_boat", 690, 6),
+    ("BeachedBoat", "stranded_boat", 545, 4),
     ("PointRocks", "rocky_skull", 795, 12),
     ("PalmW1", "palm_1", 55, 10), ("PalmW2", "palm_2", 140, 16),
     ("PalmM1", "palm_3", 330, 120), ("PalmM2", "palm_1", 520, 130),
     ("PalmE1", "palm_2", 640, 12), ("PalmE2", "palm_3", 745, 18),
-    ("Rocks1", "rock_small", 110, 4), ("Rocks2", "rock_small2", 545, 4),
+    ("Rocks1", "rock_small", 110, 4), ("Rocks2", "rock_small2", 640, 4),
     ("ShellsA", "shells_a", 200, 3), ("ShellsB", "shells_b", 480, 3),
     ("ShellsC", "shells_a", 720, 3),
 ]
@@ -303,6 +335,6 @@ BEACH_HOLES = [
 ]
 
 rebuild("source/common/gameplay/maps/maps/woodland/deep_shoals.tscn", "deep_shoals_ground",
-        SHOALS, SHOALS_HOLES, "5_node", 1500, "1920, 1088")
+        SHOALS, SHOALS_HOLES, "5_node", 1150, "1920, 1088")
 rebuild("source/common/gameplay/maps/maps/woodland/woodland_beach.tscn", "woodland_beach_ground",
         BEACH, BEACH_HOLES, "5_node", 330, "832, 512")
