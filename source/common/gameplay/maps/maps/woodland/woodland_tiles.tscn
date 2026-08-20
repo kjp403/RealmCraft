@@ -37,6 +37,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="29_frost"]
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
+[ext_resource type="PackedScene" uid="uid://ceastlink00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_link.tscn" id="31_link"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_shore.tscn" id="30_eastshore"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="31_ntree"]
 [ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="32_otree"]
@@ -1782,6 +1783,9 @@ position = Vector2(900, 1520)
 
 [node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
 position = Vector2(1732, 1540)
+
+[node name="WoodlandEastLink" parent="." instance=ExtResource("31_link")]
+position = Vector2(2436, 1540)
 
 
 

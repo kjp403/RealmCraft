@@ -1,19 +1,28 @@
 [gd_scene format=3 uid="uid://cshoals00000001"]
 
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_deep_cove_ground.png" id="2_ground"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deep_shoals_ground.png" id="2_ground"]
 [ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="3_col"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="4_warper"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
 [ext_resource type="Resource" uid="uid://c7bc2b3bd11a32" path="res://source/common/gameplay/crafting/resources/cooking_station.tres" id="7_cook"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/structures/stations/cooking_station/cooker/cooker_01.png" id="8_cookart"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/shoals/fish_shop.png" id="9_shop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/shoals/beach_bar.png" id="10_bar"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_halibut.tres" id="h0"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_stingray.tres" id="h1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_wolffish.tres" id="h2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_blue_lobster.tres" id="h3"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stranded_ship.png" id="p_stranded_ship"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/tent.png" id="p_tent"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/watchtower.png" id="p_watchtower"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="p_palm_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="p_palm_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_basket.png" id="p_fish_basket"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_barrel.png" id="p_fish_barrel"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rope.png" id="p_rope"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_a.png" id="p_shells_a"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_b.png" id="p_shells_b"]
 
 [node name="DeepShoals" type="Node2D"]
 y_sort_enabled = true
@@ -27,8 +36,8 @@ texture = ExtResource("2_ground")
 
 [node name="Shore" type="Node2D" parent="."]
 script = ExtResource("3_col")
-ground_size = Vector2(704, 480)
-shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
+ground_size = Vector2(1088, 640)
+shoreline = PackedVector2Array(0, 298, 16, 298, 32, 330, 48, 330, 64, 330, 80, 330, 96, 330, 112, 330, 128, 330, 144, 330, 160, 330, 176, 330, 192, 330, 208, 330, 224, 330, 240, 330, 256, 330, 272, 330, 288, 330, 304, 330, 320, 362, 336, 362, 352, 394, 368, 394, 384, 394, 400, 394, 416, 426, 432, 426, 448, 426, 464, 426, 480, 426, 496, 426, 512, 426, 528, 426, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 362, 656, 362, 672, 362, 688, 362, 704, 394, 720, 394, 736, 394, 752, 394, 768, 394, 784, 394, 800, 394, 816, 394, 832, 362, 848, 362, 864, 330, 880, 330, 896, 330, 912, 330, 928, 298, 944, 298, 960, 266, 976, 266, 992, 266, 1008, 266, 1024, 298, 1040, 298, 1056, 298, 1072, 298)
 dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
 solid_footprints = Array[Rect2]([Rect2(96, 300, 64, 40), Rect2(520, 300, 64, 40)])
@@ -36,41 +45,90 @@ rim_east = false
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
 
-[node name="FishShop" type="Sprite2D" parent="."]
-centered = false
-position = Vector2(96, 292)
-texture = ExtResource("9_shop")
-
-[node name="BeachBar" type="Sprite2D" parent="."]
-centered = false
-position = Vector2(520, 292)
-texture = ExtResource("10_bar")
-
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
-position = Vector2(320, 372)
+position = Vector2(560, 298)
 station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 texture = ExtResource("8_cookart")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("4_warper")]
-position = Vector2(320, 420)
+position = Vector2(544, 244)
 warper_id = 0
+
+[node name="Scenery" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="StrandedShip" type="Sprite2D" parent="Scenery"]
+position = Vector2(230, 166)
+texture = ExtResource("p_stranded_ship")
+
+[node name="AnglersTent" type="Sprite2D" parent="Scenery"]
+position = Vector2(600, 180)
+texture = ExtResource("p_tent")
+
+[node name="Watchtower" type="Sprite2D" parent="Scenery"]
+position = Vector2(960, 116)
+texture = ExtResource("p_watchtower")
+
+[node name="PalmWest" type="Sprite2D" parent="Scenery"]
+position = Vector2(90, 92)
+texture = ExtResource("p_palm_1")
+
+[node name="PalmWest2" type="Sprite2D" parent="Scenery"]
+position = Vector2(380, 136)
+texture = ExtResource("p_palm_2")
+
+[node name="PalmMid" type="Sprite2D" parent="Scenery"]
+position = Vector2(700, 146)
+texture = ExtResource("p_palm_1")
+
+[node name="PalmEast" type="Sprite2D" parent="Scenery"]
+position = Vector2(850, 84)
+texture = ExtResource("p_palm_2")
+
+[node name="FishBaskets" type="Sprite2D" parent="Scenery"]
+position = Vector2(500, 370)
+texture = ExtResource("p_fish_basket")
+
+[node name="FishBarrel" type="Sprite2D" parent="Scenery"]
+position = Vector2(660, 304)
+texture = ExtResource("p_fish_barrel")
+
+[node name="Rope" type="Sprite2D" parent="Scenery"]
+position = Vector2(690, 334)
+texture = ExtResource("p_rope")
+
+[node name="ShellsA" type="Sprite2D" parent="Scenery"]
+position = Vector2(170, 300)
+texture = ExtResource("p_shells_a")
+
+[node name="ShellsB" type="Sprite2D" parent="Scenery"]
+position = Vector2(330, 334)
+texture = ExtResource("p_shells_b")
+
+[node name="ShellsC" type="Sprite2D" parent="Scenery"]
+position = Vector2(790, 364)
+texture = ExtResource("p_shells_a")
+
+[node name="ShellsD" type="Sprite2D" parent="Scenery"]
+position = Vector2(1040, 270)
+texture = ExtResource("p_shells_b")
 
 [node name="MineableNodes" type="Node2D" parent="."]
 
 [node name="HalibutHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(176, 246)
+position = Vector2(210, 390)
 data = ExtResource("h0")
 
 [node name="StingrayHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(288, 190)
+position = Vector2(430, 486)
 data = ExtResource("h1")
 
 [node name="WolffishHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(432, 178)
+position = Vector2(700, 454)
 data = ExtResource("h2")
 
 [node name="BlueLobsterHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(576, 234)
+position = Vector2(930, 358)
 data = ExtResource("h3")

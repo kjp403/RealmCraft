@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jq7r6qnq3fvj"
-path="res://.godot/imported/beach_bar.png-060aeac90b9a2e1887589402bd743c5c.ctex"
+uid="uid://dcv1ubj4hac0t"
+path="res://.godot/imported/props.png-db7b9163ce1a7988883360efeb592330.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/environment/fishing/shoals/beach_bar.png"
-dest_files=["res://.godot/imported/beach_bar.png-060aeac90b9a2e1887589402bd743c5c.ctex"]
+source_file="res://assets/sprites/environment/sea/props/props.png"
+dest_files=["res://.godot/imported/props.png-db7b9163ce1a7988883360efeb592330.ctex"]
 
 [params]
 

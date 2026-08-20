@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://ceastlink00001"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_east_link_ground.png" id="1_ground"]
+[ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="2_col"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="3_palm1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="4_palm2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rocky_skull.png" id="5_rocks"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_a.png" id="6_shell"]
+
+[node name="WoodlandEastLink" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("2_col")
+ground_size = Vector2(768, 512)
+shoreline = PackedVector2Array(0, 330, 16, 330, 32, 362, 48, 362, 64, 362, 80, 362, 96, 362, 112, 362, 128, 362, 144, 362, 160, 362, 176, 362, 192, 362, 208, 362, 224, 394, 240, 394, 256, 394, 272, 394, 288, 394, 304, 394, 320, 394, 336, 394, 352, 394, 368, 394, 384, 394, 400, 394, 416, 394, 432, 394, 448, 394, 464, 394, 480, 394, 496, 394, 512, 394, 528, 394, 544, 362, 560, 362, 576, 362, 592, 362, 608, 362, 624, 362, 640, 362, 656, 362, 672, 362, 688, 362, 704, 362, 720, 362, 736, 330, 752, 330)
+dock_walk = Rect2(0, 0, 0, 0)
+boat_pad = Rect2(0, 0, 0, 0)
+solid_footprints = Array[Rect2]([])
+rim_east = false
+
+[node name="Ground" type="Sprite2D" parent="."]
+z_index = -5
+centered = false
+texture = ExtResource("1_ground")
+
+[node name="Scenery" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Palm1" type="Sprite2D" parent="Scenery"]
+position = Vector2(90, 144)
+texture = ExtResource("3_palm1")
+
+[node name="Palm2" type="Sprite2D" parent="Scenery"]
+position = Vector2(250, 146)
+texture = ExtResource("4_palm2")
+
+[node name="Palm3" type="Sprite2D" parent="Scenery"]
+position = Vector2(520, 166)
+texture = ExtResource("3_palm1")
+
+[node name="Palm4" type="Sprite2D" parent="Scenery"]
+position = Vector2(690, 104)
+texture = ExtResource("4_palm2")
+
+[node name="Rocks" type="Sprite2D" parent="Scenery"]
+position = Vector2(400, 270)
+texture = ExtResource("5_rocks")
+
+[node name="Shells" type="Sprite2D" parent="Scenery"]
+position = Vector2(600, 332)
+texture = ExtResource("6_shell")
+

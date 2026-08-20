@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drdpdwrwqs3tp"
-path="res://.godot/imported/fish_shop.png-70e06ae679fce7a09f3fe3506751eeae.ctex"
+uid="uid://pyuv864u0lyk"
+path="res://.godot/imported/tent.png-94a7e2deaa9ea6d2b6640a12a5edcfc0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/environment/fishing/shoals/fish_shop.png"
-dest_files=["res://.godot/imported/fish_shop.png-70e06ae679fce7a09f3fe3506751eeae.ctex"]
+source_file="res://assets/sprites/environment/sea/props/tent.png"
+dest_files=["res://.godot/imported/tent.png-94a7e2deaa9ea6d2b6640a12a5edcfc0.ctex"]
 
 [params]
 
