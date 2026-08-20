@@ -29,6 +29,10 @@ const SKILL_ORDER: Array[String] = [
 ## Slayer's detail page is hand-built (masters + task tables), not a JobPerks
 ## source/recipe list like every other skill — see _build_slayer_guide.
 const SLAYER_SLUG: String = "slayer"
+## Prayer's JobPerks source_items are BONES (what you offer), so the stock
+## resources list rendered a bone catalogue on a page players open to read the
+## prayers. It gets its own guide, same as slayer.
+const PRAYER_SLUG: String = "prayer"
 
 enum Mode { SKILLS, COMBAT }
 
@@ -837,6 +841,10 @@ func _rebuild_detail() -> void:
 		_build_slayer_guide(list)
 		return
 
+	if _selected_slug == PRAYER_SLUG:
+		_build_prayer_guide(list, level)
+		return
+
 	if show_tools_tab and _detail_section == &"tools":
 		_fill_tools_list(list, skill_slug, level)
 		return
@@ -883,6 +891,81 @@ func _rebuild_detail() -> void:
 ## gate, payout, and full weighted task table. Masters + tasks are common/
 ## content (SlayerMasterRegistry), so this reads them directly — no round-trip,
 ## and masters the player has never met still show up with where to find them.
+## The prayer book as a reference page: every prayer, its effect and drain, and
+## the level it unlocks at — then the bones you burn to train it.
+func _build_prayer_guide(list: VBoxContainer, level: int) -> void:
+	var title := Label.new()
+	title.text = "Prayers"
+	title.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	title.add_theme_font_size_override(&"font_size", 12)
+	list.add_child(title)
+
+	for prayer: PrayerResource in PrayerBook.PRAYERS:
+		if prayer == null:
+			continue
+		var unlocked: bool = level >= prayer.required_level
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override(&"separation", 6)
+
+		if prayer.icon != null:
+			var icon := TextureRect.new()
+			icon.custom_minimum_size = Vector2(22, 22)
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			icon.texture = prayer.icon
+			icon.modulate = Color.WHITE if unlocked else Color(0.5, 0.5, 0.5)
+			row.add_child(icon)
+
+		var text := VBoxContainer.new()
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+
+		var name_label := Label.new()
+		name_label.text = prayer.display_name
+		name_label.clip_text = true
+		name_label.add_theme_font_size_override(&"font_size", 11)
+		name_label.add_theme_color_override(
+			&"font_color",
+			Color(0.92, 0.92, 0.95) if unlocked else Color(0.62, 0.45, 0.45)
+		)
+		text.add_child(name_label)
+
+		var detail := Label.new()
+		detail.text = "%s   ·   %s" % [prayer.describe_modifiers(), prayer.describe_drain()]
+		detail.clip_text = true
+		detail.add_theme_font_size_override(&"font_size", 9)
+		detail.add_theme_color_override(&"font_color", Color(0.72, 0.74, 0.8))
+		text.add_child(detail)
+
+		var req := Label.new()
+		req.text = "Lv %d" % prayer.required_level
+		req.add_theme_font_size_override(&"font_size", 10)
+		req.add_theme_color_override(
+			&"font_color",
+			Color(0.55, 0.85, 0.55) if unlocked else Color(0.72, 0.74, 0.8)
+		)
+		row.add_child(req)
+		list.add_child(row)
+
+	# Bones stay on the page — they are how the skill is trained — just under a
+	# heading that says so instead of standing in for the prayers.
+	var jp: JobPerks = JobRegistry.perks_for(StringName(PRAYER_SLUG))
+	if jp == null or jp.source_items.is_empty():
+		return
+	var offerings := Label.new()
+	offerings.text = "Offerings"
+	offerings.add_theme_color_override(&"font_color", Color(0.95, 0.85, 0.55))
+	offerings.add_theme_font_size_override(&"font_size", 12)
+	list.add_child(offerings)
+	for i: int in jp.source_items.size():
+		var item: Item = jp.source_items[i]
+		if item == null:
+			continue
+		var req_level: int = jp.source_levels[i] if i < jp.source_levels.size() else 0
+		list.add_child(_make_source_row(item, req_level, level))
+
+
 func _build_slayer_guide(list: VBoxContainer) -> void:
 	list.add_child(_slayer_section_label("Current task"))
 	_slayer_task_box = VBoxContainer.new()

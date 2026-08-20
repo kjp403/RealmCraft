@@ -580,11 +580,27 @@ func _open_context_menu(entry: Dictionary) -> void:
 		else null
 	)
 	if item is GearItem or item.holdable:
-		context_menu.add_item("Break down", ACTION_SALVAGE)
-		if recipe == null:
+		# Show the level gate ON the row. Letting it through to the confirm
+		# dialog meant agreeing to destroy the item and THEN being refused.
+		var salvage_level: int = int(
+			ClientState.skill_levels.get(String(salvage_table.profession), 1)
+		) if salvage_table != null else 1
+		var under_level: bool = recipe != null and salvage_level < recipe.required_level
+		var label: String = "Break down"
+		if under_level:
+			label = "Break down (%s %d)" % [
+				JobRegistry.display_name(salvage_table.profession), recipe.required_level
+			]
+		context_menu.add_item(label, ACTION_SALVAGE)
+		if recipe == null or under_level:
 			context_menu.set_item_disabled(context_menu.item_count - 1, true)
 			context_menu.set_item_tooltip(
-				context_menu.item_count - 1, "This can't be broken down."
+				context_menu.item_count - 1,
+				"This can't be broken down." if recipe == null
+				else "Requires %s %d." % [
+					JobRegistry.display_name(salvage_table.profession),
+					recipe.required_level,
+				]
 			)
 
 	if item.can_drop():
@@ -657,7 +673,22 @@ func _confirm_salvage(slot_uid: int) -> void:
 	)
 	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
 	if result.size() < 2 or result[1] != OK or not bool(payload.get("ok", true)):
-		Toaster.toast(str(payload.get("reason", "Could not break that down.")))
+		# Reasons are wire keys, not copy. Toasting them raw put "salvage_level"
+		# on screen with no hint about which skill or what level.
+		match str(payload.get("reason", "")):
+			"salvage_level":
+				Toaster.toast("Requires %s %d to break this down." % [
+					JobRegistry.display_name(StringName(str(payload.get("profession", "")))),
+					int(payload.get("required_level", 0)),
+				])
+			"inventory_full":
+				Toaster.toast("Not enough bag space for the materials.")
+			"cant_salvage":
+				Toaster.toast("That can't be broken down.")
+			"missing":
+				Toaster.toast("You no longer have that item.")
+			_:
+				Toaster.toast("Could not break that down.")
 		return
 	Toaster.toast("Broke it down into %s." % _granted_text(payload.get("granted", [])))
 	_refresh_inventory()
