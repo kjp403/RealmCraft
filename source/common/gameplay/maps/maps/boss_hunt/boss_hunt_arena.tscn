@@ -49,4 +49,4 @@ script = ExtResource("5_arena")
 boss_spawn = NodePath("BossSpawn")
 
 [node name="BossSpawn" type="Marker2D" parent="Arena"]
-position = Vector2(264, 100)
+position = Vector2(264, 164)
