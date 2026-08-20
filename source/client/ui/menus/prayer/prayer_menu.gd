@@ -161,9 +161,9 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 
 	var name_label: Label = Label.new()
 	name_label.text = prayer.display_name
-	# One line per row: at 300px the longest name ("Bulwark of the Mountain")
-	# fits, and wrapping cost more rows than it saved width.
-	name_label.add_theme_font_size_override(&"font_size", 12)
+	# One line per row. 11px is set by the longest name in the book — "Bulwark
+	# of the Mountain" clipped at 12px in the 300px panel.
+	name_label.add_theme_font_size_override(&"font_size", 11)
 	name_label.clip_text = true
 	name_label.add_theme_color_override(
 		&"font_color", ON_TINT if is_on else (GOLD if unlocked else LOCKED)
