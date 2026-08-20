@@ -19,6 +19,7 @@
 [sub_resource type="Resource" id="Obj_kill_sovereign"]
 script = ExtResource("1_obj")
 enemy_type = &"cistern_sovereign"
+label_override = "Defeat The Bloated Sovereign"
 grant_item = ExtResource("4_shard")
 
 [sub_resource type="Resource" id="Obj_collect_shard"]
@@ -40,7 +41,7 @@ amount = 2
 [resource]
 script = ExtResource("2_quest")
 quest_name = "The Sovereign Below"
-description = "Kill the Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper. A poison weapon of your discipline is the next blade after rustic."
+description = "Kill The Bloated Sovereign in the Drowned Cistern. It splits when hurt. Recover the Coreblossom Shard and take it to the Hall Keeper. A poison weapon of your discipline is the next blade after rustic."
 objectives = Array[ExtResource("1_obj")]([SubResource("Obj_kill_sovereign"), SubResource("Obj_collect_shard")])
 min_level = 18
 unlock_message = "[Drowned Keeper Vess] It has no name anyone wrote down. Kill it. Bring what it was keeping to the Hall."

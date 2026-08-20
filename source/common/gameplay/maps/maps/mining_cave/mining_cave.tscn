@@ -642,6 +642,41 @@ y_sort_enabled = true
 position = Vector2(1712.0, 336.0)
 data = ExtResource("17_rune")
 
+[node name="AdamantVein5" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1840.0, 368.0)
+data = ExtResource("16_adam")
+
+[node name="AdamantVein6" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1776.0, 432.0)
+data = ExtResource("16_adam")
+
+[node name="AdamantVein7" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1904.0, 432.0)
+data = ExtResource("16_adam")
+
+[node name="AdamantVein8" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1712.0, 464.0)
+data = ExtResource("16_adam")
+
+[node name="RuniteVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1904.0, 368.0)
+data = ExtResource("17_rune")
+
+[node name="RuniteVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1840.0, 432.0)
+data = ExtResource("17_rune")
+
+[node name="RuniteVein5" parent="MineableNodes" instance=ExtResource("10_mine")]
+y_sort_enabled = true
+position = Vector2(1776.0, 496.0)
+data = ExtResource("17_rune")
+
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(368.0, 1200.0)

@@ -3,27 +3,6 @@ extends Control
 
 const MENU_ENTRIES: Array = [
 	{"label": "Profile", "menu": ""},
-	{"label": "Character", "menu": "character"},
-	# Explicit icon: the default path is ICON_DIR + label, and the Prayer art
-	# lives in the realmcraft_menu_icons subfolder with the other skill icons.
-	{
-		"label": "Prayers", "menu": "prayer",
-		"icon": "res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Prayer.png",
-	},
-	{"label": "Quests", "menu": "quests"},
-	{"label": "Inventory", "menu": "inventory"},
-	{"label": "Friends", "menu": "friends"},
-	{"label": "Mail", "menu": "mail"},
-	{"label": "Guild", "menu": "guild"},
-	{"label": "Leaderboard", "menu": "leaderboard"},
-	{"label": "Map", "menu": "world_map"},
-	{"label": "Achievements"},
-	{"label": "Bestiary"},
-	{"label": "House"},
-	{"label": "Shop"},
-	{"label": "Help", "menu": "help"},
-	{"label": "Redeem", "menu": "redeem"},
-	{"label": "Settings", "menu": "settings"}
 ]
 
 const ICON_DIR := \

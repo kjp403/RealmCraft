@@ -389,14 +389,41 @@ func _ready() -> void:
 
 
 ## If no instance_id is provided, will use all peers connected in the world.
+## The instance name to scope a broadcast to for [param node], or "" if it does
+## not live in one. Walks up to the child of the InstanceManager rather than
+## assuming a fixed depth: characters sit at Map/Character in the open world but
+## deeper inside a dungeon (rooms nest them), and a two-step walk therefore
+## resolved to a node the manager could not find.
+func instance_name_for(node: Node) -> String:
+	var current: Node = node
+	while current != null:
+		var parent: Node = current.get_parent()
+		if parent == instance_manager:
+			return String(current.name)
+		current = parent
+	return ""
+
+
 func propagate_rpc(callable: Callable, instance_id: String = "") -> void:
 	var instance: ServerInstance = instance_manager.get_instance_server_by_id(instance_id)
 	if instance:
 		for peer_id: int in instance.connected_peers:
 			callable.rpc_id(peer_id)
-	else:
-		for peer_id: int in instance_manager.world_server.connected_players:
-			callable.rpc_id(peer_id)
+		return
+	# A NAMED instance that does not resolve must not fall through to everyone.
+	# Combat feedback scopes itself by walking up from the character to its
+	# instance node (Character._broadcast_hit_feedback); when that walk lands on
+	# a node the manager cannot resolve — dungeons — every hit was broadcast
+	# world-wide, so damage numbers from a dungeon fight popped on players
+	# standing in the Guild Hall and Smith House.
+	if not instance_id.is_empty():
+		ServerLog.warn(
+			"propagate_rpc: no instance '%s' — dropping instead of broadcasting world-wide."
+			% instance_id
+		)
+		return
+	for peer_id: int in instance_manager.world_server.connected_players:
+		callable.rpc_id(peer_id)
 
 
 ## Recall payoff (called via WorldServer.curr from RecallAbility.channel_complete): send

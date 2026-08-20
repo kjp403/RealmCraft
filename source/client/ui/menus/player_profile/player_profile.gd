@@ -90,6 +90,8 @@ var _equipment_right_list: VBoxContainer
 var _skills_left_list: VBoxContainer
 var _skills_right_list: VBoxContainer
 var _tab_buttons: Array[Button] = []
+## Self-profile only: opens the edit view where titles are picked.
+var _titles_button: Button
 
 
 func _ready() -> void:
@@ -216,6 +218,10 @@ func _build_profile_tabs() -> void:
 	_tab_buttons.append(
 		_make_tab_button("Skills", ProfileTab.SKILLS, tab_bar)
 	)
+	# The three-dots overlay is Profile-only now, so Profile is where the menus
+	# that have no dock button live. These hand off to the existing fullscreen
+	# menus rather than re-hosting them: one owner per screen, no duplicate UI.
+	_build_handoff_buttons(tab_bar)
 
 	_equipment_left = _make_switching_view(left_panel)
 	_equipment_right = _make_switching_view(right_panel)
@@ -228,6 +234,44 @@ func _build_profile_tabs() -> void:
 	_skills_right_list = _make_view_list(_skills_right)
 
 	_select_profile_tab(ProfileTab.OVERVIEW)
+
+
+## Buttons that leave Profile for another menu, styled like tabs but never
+## toggled — they are navigation, not a view of this panel.
+func _build_handoff_buttons(tab_bar: HBoxContainer) -> void:
+	# Titles is not another menu: it opens this panel's own edit view, because
+	# "where do I change my title?" was answered by Edit -> Trophies, which
+	# named the feature something players never call it.
+	# Built hidden: the tab row exists before any payload does, and only the
+	# owner of a profile may change its titles.
+	_titles_button = Button.new()
+	_titles_button.text = "Titles"
+	_titles_button.focus_mode = Control.FOCUS_NONE
+	_titles_button.custom_minimum_size = Vector2(104.0, 28.0)
+	_titles_button.add_theme_font_size_override(&"font_size", 11)
+	_titles_button.pressed.connect(_open_edit_panel)
+	_titles_button.hide()
+	tab_bar.add_child(_titles_button)
+
+	for entry: Array in [
+		["Character", &"character"],
+		["Skins", &"cosmetics"],
+		["Guild", &"guild"],
+	]:
+		var button := Button.new()
+		button.text = String(entry[0])
+		button.focus_mode = Control.FOCUS_NONE
+		button.custom_minimum_size = Vector2(104.0, 28.0)
+		button.add_theme_font_size_override(&"font_size", 11)
+		button.pressed.connect(_open_menu.bind(StringName(entry[1])))
+		tab_bar.add_child(button)
+
+
+## display_menu hides every other fullscreen shell, so Profile closes itself as
+## a side effect — no explicit hide() needed, and none wanted (going Back from
+## the other menu should not re-open Profile underneath it).
+func _open_menu(menu_name: StringName) -> void:
+	ClientState.open_menu_requested.emit(menu_name, null)
 
 
 func _make_tab_button(
@@ -374,6 +418,8 @@ func apply_profile(profile: Dictionary) -> void:
 	description_text.append_text(description)
 
 	_render_stats(profile.get("stats", {}))
+	if _titles_button != null:
+		_titles_button.visible = is_self
 	_render_title_strip(profile)
 	_render_public_equipment(profile.get("equipment", {}))
 	_render_public_skills(profile.get("skills", {}))
@@ -412,12 +458,9 @@ func _render_stats(stats: Dictionary) -> void:
 		))
 
 	var level: int = int(stats.get("level", 1))
-	var level_text: String = (
-		"%d (MAX)" % level if level >= 20 else str(level)
-	)
 	stats_list.add_child(_stat_row(
 		"Combat level",
-		level_text,
+		str(level),
 		COLOR_VALUE_PROGRESS
 	))
 
@@ -614,7 +657,11 @@ func _render_title_strip(profile: Dictionary) -> void:
 
 	if trophies.is_empty():
 		var empty: Label = Label.new()
-		empty.text = "No trophies yet." if not profile.get("self", false) else "Pin trophies from Edit → Trophies."
+		empty.text = (
+			"No titles yet."
+			if not profile.get("self", false)
+			else "Pick titles from the Titles tab."
+		)
 		empty.self_modulate = Color(0.55, 0.55, 0.6)
 		title_strip.add_child(empty)
 		return
@@ -919,7 +966,7 @@ func _build_edit_ui() -> void:
 	# checked at once. Header + live counter so the cap is obvious.
 	var trophy_header: HBoxContainer = HBoxContainer.new()
 	vbox.add_child(trophy_header)
-	var trophy_label: Label = _make_field_label("Trophies")
+	var trophy_label: Label = _make_field_label("Displayed titles")
 	trophy_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	trophy_header.add_child(trophy_label)
 	_trophies_counter = Label.new()

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/find_alcove_ore_slots.gd" id="1_alcoveslots"]
+
+[node name="AlcoveOreSlots" type="Node"]
+script = ExtResource("1_alcoveslots")
