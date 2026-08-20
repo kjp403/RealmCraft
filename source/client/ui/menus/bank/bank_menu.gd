@@ -852,7 +852,10 @@ func _rebuild_grids() -> void:
 
 	var bag_used: int = _stack_uids(_inventory).size()
 	var vault_used: int = _stack_uids(_bank).size()
-	_bag_count.text = "%d / %d" % [bag_used, Inventory.MAX_SLOTS]
+	# Capacity is per-bag x bags owned. Printing MAX_SLOTS flat showed a player
+	# with two bags "56 / 28", which reads as an overflowing bag rather than a
+	# miscounted header.
+	_bag_count.text = "%d / %d" % [bag_used, Inventory.MAX_SLOTS * maxi(1, _inventory_bags)]
 	_vault_count.text = "%d / %d" % [vault_used, _bank_slots]
 	if _gold_label != null:
 		_gold_label.text = _fmt_gold(Inventory.count(_inventory, _gold_id))
@@ -911,7 +914,7 @@ func _fill_grid(grid: GridContainer, store: Dictionary, uids: Array, is_bag: boo
 	var columns: int = grid.columns
 	var placeholders: int = 0
 	if is_bag and _query().is_empty():
-		placeholders = maxi(0, Inventory.MAX_SLOTS - uids.size())
+		placeholders = maxi(0, Inventory.MAX_SLOTS * maxi(1, _inventory_bags) - uids.size())
 	elif uids.size() % columns != 0:
 		placeholders = columns - (uids.size() % columns)
 	elif uids.is_empty():
