@@ -9,10 +9,13 @@ const ICON_DIR := \
 	"res://assets/sprites/ui/menu_icons_shadow/32px/"
 
 # Bottom-right panel placement.
-const PANEL_LEFT := -252.0
+const PANEL_LEFT := -196.0
 const PANEL_RIGHT := -12.0
-const PANEL_TOP := -524.0
 const PANEL_BOTTOM := -12.0
+## Height comes from the CONTENT, not a fixed 512px slab. The list is one entry
+## now, and the old height ran the panel up over the minimap.
+const PANEL_ROW_HEIGHT := 42.0
+const PANEL_CHROME_HEIGHT := 136.0
 
 # Positive value makes it slide in from the right edge.
 const PANEL_SLIDE := 260.0
@@ -50,7 +53,7 @@ func _build_menu() -> void:
 	_panel.anchor_right = 1.0
 	_panel.anchor_bottom = 1.0
 	_panel.offset_left = PANEL_LEFT
-	_panel.offset_top = PANEL_TOP
+	_panel.offset_top = -(PANEL_CHROME_HEIGHT + PANEL_ROW_HEIGHT * MENU_ENTRIES.size())
 	_panel.offset_right = PANEL_RIGHT
 	_panel.offset_bottom = PANEL_BOTTOM
 	_panel.add_theme_stylebox_override(
