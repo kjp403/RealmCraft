@@ -10,6 +10,8 @@ const INSTANCE: String = "res://source/common/gameplay/maps/instance/instance_co
 const ANGLER: String = "res://source/common/gameplay/characters/npc/npcs/woodland/beach_angler.tres"
 const COOKING: String = "res://source/common/gameplay/crafting/resources/cooking_station.tres"
 const TIERS: Dictionary = {"halibut": 60, "stingray": 70, "wolffish": 80, "blue_lobster": 90}
+## Mirrors HarvestController.GATHER_RANGE.
+const GATHER_RANGE: float = 48.0
 
 var _failed: bool = false
 
@@ -88,6 +90,24 @@ func _go() -> void:
 			if not tiers_present.has(slug):
 				_fail("no %s hole placed in the map" % slug)
 		print("tiers present: ", tiers_present.keys())
+		# Reachability: a hole further from the walkable sand than
+		# HarvestController.GATHER_RANGE cannot be fished at all — the player
+		# cannot swim out to it. Measured against the shoreline the collider
+		# builds, which is where the sand actually ends.
+		var shore_node: Node = root.get_node_or_null("Shore")
+		var line: PackedVector2Array = shore_node.get("shoreline") if shore_node != null else PackedVector2Array()
+		if line.is_empty():
+			_fail("map has no shoreline data to measure reach against")
+		else:
+			for hole: Node2D in nodes.get_children():
+				var best: float = INF
+				for pt: Vector2 in line:
+					best = minf(best, hole.position.distance_to(pt))
+				print("  %-18s %.0f px from shore" % [hole.name, best])
+				if best > GATHER_RANGE:
+					_fail("%s is %.0f px out — beyond the %d px gather range" % [
+						hole.name, best, GATHER_RANGE
+					])
 		if root.get_node_or_null("RespawnPoint") == null:
 			_fail("map has no RespawnPoint warper — arrivals would land at the origin")
 		root.free()

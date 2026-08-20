@@ -184,18 +184,18 @@ texture = ExtResource("p_shells_a")
 [node name="MineableNodes" type="Node2D" parent="."]
 
 [node name="ShrimpHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(110, 326)
+position = Vector2(110, 298)
 data = ExtResource("h0")
 
 [node name="HerringHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(280, 330)
+position = Vector2(280, 300)
 data = ExtResource("h1")
 
 [node name="TroutHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(470, 424)
+position = Vector2(470, 392)
 data = ExtResource("h2")
 
 [node name="TunaHole" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(690, 454)
+position = Vector2(690, 426)
 data = ExtResource("h3")
 

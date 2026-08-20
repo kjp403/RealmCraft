@@ -52,10 +52,10 @@ texture = ExtResource("2_ground")
 [node name="Shore" type="Node2D" parent="."]
 script = ExtResource("3_col")
 ground_size = Vector2(1088, 768)
-shoreline = PackedVector2Array(0, 298, 16, 298, 32, 330, 48, 330, 64, 330, 80, 330, 96, 330, 112, 330, 128, 330, 144, 330, 160, 330, 176, 330, 192, 330, 208, 330, 224, 330, 240, 330, 256, 330, 272, 330, 288, 330, 304, 330, 320, 362, 336, 362, 352, 394, 368, 394, 384, 394, 400, 394, 416, 426, 432, 426, 448, 426, 464, 426, 480, 426, 496, 426, 512, 426, 528, 426, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 362, 656, 362, 672, 362, 688, 362, 704, 394, 720, 394, 736, 394, 752, 394, 768, 394, 784, 394, 800, 394, 816, 394, 832, 362, 848, 362, 864, 330, 880, 330, 896, 330, 912, 330, 928, 298, 944, 298, 960, 266, 976, 266, 992, 266, 1008, 266, 1024, 298, 1040, 298, 1056, 298, 1072, 298)
+shoreline = PackedVector2Array(0, 458, 16, 458, 32, 490, 48, 490, 64, 490, 80, 490, 96, 490, 112, 490, 128, 490, 144, 490, 160, 490, 176, 490, 192, 490, 208, 490, 224, 490, 240, 490, 256, 490, 272, 490, 288, 490, 304, 490, 320, 522, 336, 522, 352, 554, 368, 554, 384, 554, 400, 554, 416, 586, 432, 586, 448, 586, 464, 586, 480, 586, 496, 586, 512, 586, 528, 586, 544, 554, 560, 554, 576, 554, 592, 554, 608, 554, 624, 554, 640, 522, 656, 522, 672, 522, 688, 522, 704, 554, 720, 554, 736, 554, 752, 554, 768, 554, 784, 554, 800, 554, 816, 554, 832, 522, 848, 522, 864, 490, 880, 490, 896, 490, 912, 490, 928, 458, 944, 458, 960, 426, 976, 426, 992, 426, 1008, 426, 1024, 458, 1040, 458, 1056, 458, 1072, 458)
 dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(-15, 406, 430, 80), Rect2(378, 550, 84, 28), Rect2(48, 464, 24, 16), Rect2(320, 492, 20, 14), Rect2(140, 266, 20, 14), Rect2(410, 322, 20, 14), Rect2(190, 260, 220, 80), Rect2(435, 516, 170, 60), Rect2(408, 550, 84, 30), Rect2(586, 522, 28, 26), Rect2(616, 522, 28, 26), Rect2(686, 522, 28, 26), Rect2(717, 522, 26, 26), Rect2(470, 422, 20, 14), Rect2(628, 276, 24, 16), Rect2(735, 392, 190, 90), Rect2(845, 418, 110, 60), Rect2(915, 356, 140, 60), Rect2(926, 426, 28, 26), Rect2(844, 458, 52, 26), Rect2(750, 340, 20, 14), Rect2(1030, 264, 20, 14), Rect2(528, 424, 64, 40)])
+solid_footprints = Array[Rect2]([Rect2(-15, 406, 430, 80), Rect2(378, 550, 84, 28), Rect2(48, 464, 24, 16), Rect2(320, 492, 20, 14), Rect2(140, 266, 20, 14), Rect2(410, 322, 20, 14), Rect2(190, 260, 220, 80), Rect2(435, 516, 170, 60), Rect2(408, 550, 84, 30), Rect2(586, 522, 28, 26), Rect2(616, 522, 28, 26), Rect2(686, 522, 28, 26), Rect2(717, 522, 26, 26), Rect2(470, 422, 20, 14), Rect2(628, 276, 24, 16), Rect2(735, 392, 190, 90), Rect2(845, 418, 110, 60), Rect2(915, 356, 140, 60), Rect2(926, 426, 28, 26), Rect2(844, 458, 52, 26), Rect2(750, 340, 20, 14), Rect2(1030, 264, 20, 14), Rect2(338, 424, 64, 40)])
 rim_east = false
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
@@ -221,42 +221,42 @@ texture = ExtResource("p_shells_b")
 [node name="MineableNodes" type="Node2D" parent="."]
 
 [node name="HalibutHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(120, 552)
+position = Vector2(120, 524)
 data = ExtResource("h0")
 
 [node name="HalibutHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(300, 560)
+position = Vector2(300, 520)
 data = ExtResource("h0")
 
 [node name="HalibutHole3" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(470, 650)
+position = Vector2(470, 620)
 data = ExtResource("h0")
 
 [node name="StingrayHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(210, 610)
+position = Vector2(210, 522)
 data = ExtResource("h1")
 
 [node name="StingrayHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(560, 672)
+position = Vector2(560, 584)
 data = ExtResource("h1")
 
 [node name="StingrayHole3" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(780, 618)
+position = Vector2(780, 588)
 data = ExtResource("h1")
 
 [node name="WolffishHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(380, 724)
+position = Vector2(380, 586)
 data = ExtResource("h2")
 
 [node name="WolffishHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(900, 610)
+position = Vector2(900, 520)
 data = ExtResource("h2")
 
 [node name="BlueLobsterHole1" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(650, 697)
+position = Vector2(650, 556)
 data = ExtResource("h3")
 
 [node name="BlueLobsterHole2" parent="MineableNodes" instance=ExtResource("5_node")]
-position = Vector2(1010, 492)
+position = Vector2(1010, 458)
 data = ExtResource("h3")
 
