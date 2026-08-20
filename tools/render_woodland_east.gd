@@ -7,7 +7,7 @@ const MAP: String = "res://source/common/gameplay/maps/maps/woodland/woodland_ti
 const TILE: int = 16
 ## Tile-space windows across the east wing.
 ## Centred on the Swamp Hermit at tile (300, 42), where the ponds are.
-const SHOTS: Array[Vector2i] = [Vector2i(262, 20), Vector2i(300, 20)]
+const SHOTS: Array[Vector2i] = [Vector2i(200, 12), Vector2i(262, 20), Vector2i(300, 40)]
 const SIZE := Vector2i(80, 50)
 
 
