@@ -19,7 +19,7 @@ config/version="0.28.145"
 ; Oldest published Windows zip still allowed to log in. Keep this at the last
 ; play.arkenelle.com/desktop userversion until Release clients has caught up —
 ; exact-match alone soft-locks everyone when Deploy VPS lands before the zip.
-config/min_client_version="0.28.144"
+config/min_client_version="0.28.145"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
