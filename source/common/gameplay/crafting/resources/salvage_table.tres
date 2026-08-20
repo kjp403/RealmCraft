@@ -42,38 +42,38 @@
 [sub_resource type="Resource" id="Y_spore"]
 script = ExtResource("3_output")
 item = ExtResource("mat_blightspore")
-min_amount = 1
-max_amount = 1
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Y_poison"]
 script = ExtResource("3_output")
 item = ExtResource("mat_venom_sac")
-min_amount = 1
-max_amount = 1
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Y_fairy"]
 script = ExtResource("3_output")
 item = ExtResource("mat_fairy_dust")
-min_amount = 1
-max_amount = 1
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Y_fire"]
 script = ExtResource("3_output")
 item = ExtResource("mat_ember_ash")
-min_amount = 1
-max_amount = 1
+min_amount = 12
+max_amount = 18
 
 [sub_resource type="Resource" id="Y_bone"]
 script = ExtResource("3_output")
 item = ExtResource("mat_bone")
-min_amount = 2
-max_amount = 4
+min_amount = 8
+max_amount = 12
 
 [sub_resource type="Resource" id="Y_rustic"]
 script = ExtResource("3_output")
 item = ExtResource("mat_iron_bar")
-min_amount = 1
-max_amount = 3
+min_amount = 3
+max_amount = 5
 
 [sub_resource type="Resource" id="S_sword_spore"]
 script = ExtResource("2_recipe")
