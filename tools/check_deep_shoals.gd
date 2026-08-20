@@ -20,6 +20,18 @@ func _ready() -> void:
 	call_deferred(&"_go")
 
 
+## Waterline height at a column, from the collider polygon.
+func _shore_y_at(line: PackedVector2Array, x: float) -> float:
+	var best_dx: float = INF
+	var y: float = 0.0
+	for pt: Vector2 in line:
+		var dx: float = absf(pt.x - x)
+		if dx < best_dx:
+			best_dx = dx
+			y = pt.y
+	return y
+
+
 func _fail(msg: String) -> void:
 	push_error(msg)
 	_failed = true
@@ -105,11 +117,39 @@ func _go() -> void:
 				var best: float = INF
 				for pt: Vector2 in line:
 					best = minf(best, hole.position.distance_to(pt))
-				print("  %-18s %.0f px from shore" % [hole.name, best])
+				# Distance alone is not enough: the sand within reach must also
+				# be FREE. Market stalls and crates parked on the waterline had
+				# every hole in range and none of them fishable.
+				var stand: bool = false
+				var footprints: Array = shore_node.get("solid_footprints")
+				for angle: int in range(0, 360, 15):
+					for reach: int in [20, 30, 40, 46]:
+						var spot: Vector2 = hole.position + Vector2(
+							cos(deg_to_rad(angle)), sin(deg_to_rad(angle))
+						) * float(reach)
+						# Must be on sand (above the waterline at that column).
+						var shore_y: float = _shore_y_at(line, spot.x)
+						if spot.y > shore_y - 4.0:
+							continue
+						var free: bool = true
+						for rect: Rect2 in footprints:
+							if rect.has_point(spot):
+								free = false
+								break
+						if free:
+							stand = true
+							break
+					if stand:
+						break
+				print("  %-18s %.0f px from shore, standing spot = %s" % [
+					hole.name, best, stand
+				])
 				if best > GATHER_RANGE:
 					_fail("%s is %.0f px out — beyond the %d px gather range" % [
 						hole.name, best, GATHER_RANGE
 					])
+				if not stand:
+					_fail("%s has no free sand to fish from — something is parked on it" % hole.name)
 		if root.get_node_or_null("RespawnPoint") == null:
 			_fail("map has no RespawnPoint warper — arrivals would land at the origin")
 

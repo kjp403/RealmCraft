@@ -80,6 +80,12 @@ def mask_cells(tex, x, top):
     return cells
 
 
+# The waterline is where players STAND to fish. Nothing solid may sit within
+# this many pixels of it, or it blocks the very holes the beach exists for.
+# Flat dressing (shells, drying fish, rope, bones) is exempt: you walk over it.
+FRONTAGE = 72
+
+
 def scenery(entries, shore_name):
     """Place props against each other's drawn pixels, not their boxes.
 
@@ -117,6 +123,9 @@ def scenery(entries, shore_name):
             base = sy(shore_name, cx) - sink - extra
             top = base - h
             if top < 4:
+                continue
+            # Keep the fishing frontage clear.
+            if tex in SOLID and base > sy(shore_name, cx) - FRONTAGE:
                 continue
             cells = mask_cells(tex, cx, top)
             clash = False
@@ -205,9 +214,9 @@ def rebuild(path, shore_name, entries, holes, hole_res, station_x, ground_size):
     width = max(shore[shore_name])
     best_spot, best_cost = None, None
     for cx in range(60, width - 60, 8):
-        for inland in (58, 84, 112, 140):
+        for inland in (96, 124, 152, 180, 208):
             cy = sy(shore_name, cx) - inland
-            if cy <= 48 or not clear(cx, cy):
+            if cy <= 40 or not clear(cx, cy):
                 continue
             cost = abs(cx - station_x) + inland
             if best_cost is None or cost < best_cost:
@@ -245,9 +254,9 @@ SHOALS = [
     # function: no stalls, no station, nothing to use. It sets the tone and
     # gives the village something to be arriving FROM.
     # ------------------------------------------------------------------ #
-    ("Wreck", "stranded_ship", 250, 0),
-    ("WreckBoat", "stranded_boat2", 500, 4),
-    ("BarrelSkeleton", "barrel_skeleton", 300, 4),
+    ("Wreck", "stranded_ship", 250, 90),
+    ("WreckBoat", "stranded_boat2", 500, 90),
+    ("BarrelSkeleton", "barrel_skeleton", 300, 90),
     ("Bones1", "bones", 360, 3), ("Bones2", "bones", 405, 3),
     ("RocksW1", "rock_small", 545, 3), ("RocksW2", "rock_small2", 575, 3),
     ("ShellsW1", "shells_a", 460, 3),
@@ -269,12 +278,12 @@ SHOALS = [
     # back behind it. This is where the cooking station belongs: you land
     # your catch, cook it at the row, sell from the stalls.
     # ------------------------------------------------------------------ #
-    ("StallWide", "stall_wide", 980, 8),
-    ("StallSmall", "stall_small", 1180, 8),
-    ("StallAlt", "stall_alt", 1360, 8),
-    ("FishBaskets", "fish_basket", 1085, 4),
-    ("FishCrate1", "fish_crate", 1270, 4), ("FishCrate2", "fish_crate", 1300, 4),
-    ("Basket", "basket", 1440, 4), ("CrateOpen", "crate_open", 1470, 4),
+    ("StallWide", "stall_wide", 980, 90),
+    ("StallSmall", "stall_small", 1180, 90),
+    ("StallAlt", "stall_alt", 1360, 90),
+    ("FishBaskets", "fish_basket", 1085, 90),
+    ("FishCrate1", "fish_crate", 1270, 90), ("FishCrate2", "fish_crate", 1300, 90),
+    ("Basket", "basket", 1440, 90), ("CrateOpen", "crate_open", 1470, 90),
     ("DryFish1", "dry_fish_a", 1130, 3), ("DryFish2", "dry_fish_b", 1230, 3),
     ("Bucket", "bucket", 1330, 3),
     ("FishermanHouse", "fisherman_house", 1150, 300),
@@ -288,10 +297,10 @@ SHOALS = [
     # from the market, and the point carries the two things you navigate
     # by: the watchtower, and the lighthouse right on the end.
     # ------------------------------------------------------------------ #
-    ("AnglersTent", "tent", 1600, 210),
-    ("CratesCamp", "crates", 1520, 4), ("Rope", "rope", 1555, 3),
+    ("AnglersTent", "tent", 1580, 250),
+    ("CratesCamp", "crates", 1520, 90), ("Rope", "rope", 1555, 3),
     ("Watchtower", "watchtower", 1740, 230),
-    ("Lighthouse", "lighthouse_cabin", 1850, 6),
+    ("Lighthouse", "lighthouse_cabin", 1850, 90),
     ("RocksE1", "rock_small2", 1660, 3), ("RocksE2", "rock_small", 1810, 3),
     ("ShellsE1", "shells_a", 1700, 3),
     ("PalmE1", "palm_2", 1560, 300), ("PalmE2", "palm_3", 1470, 320),
@@ -314,16 +323,16 @@ SHOALS_HOLES = [
 ]
 
 BEACH = [
-    ("FishStall", "stall_small", 230, 12),
-    ("CatchBaskets", "fish_basket", 380, 6),
-    ("FishCrate", "fish_crate", 420, 6), ("Barrels", "barrels", 450, 6),
+    ("FishStall", "stall_small", 230, 90),
+    ("CatchBaskets", "fish_basket", 380, 90),
+    ("FishCrate", "fish_crate", 420, 90), ("Barrels", "barrels", 450, 90),
     ("DryFish", "dry_fish_a", 300, 3), ("Bucket", "bucket", 400, 3),
-    ("Barricade", "barricade", 590, 6),
-    ("BeachedBoat", "stranded_boat", 545, 4),
-    ("PointRocks", "rocky_skull", 795, 12),
-    ("PalmW1", "palm_1", 55, 10), ("PalmW2", "palm_2", 140, 16),
+    ("Barricade", "barricade", 590, 90),
+    ("BeachedBoat", "stranded_boat", 545, 90),
+    ("PointRocks", "rocky_skull", 795, 90),
+    ("PalmW1", "palm_1", 55, 90), ("PalmW2", "palm_2", 140, 90),
     ("PalmM1", "palm_3", 330, 120), ("PalmM2", "palm_1", 520, 130),
-    ("PalmE1", "palm_2", 640, 12), ("PalmE2", "palm_3", 745, 18),
+    ("PalmE1", "palm_2", 640, 90), ("PalmE2", "palm_3", 745, 90),
     ("Rocks1", "rock_small", 110, 4), ("Rocks2", "rock_small2", 640, 4),
     ("ShellsA", "shells_a", 200, 3), ("ShellsB", "shells_b", 480, 3),
     ("ShellsC", "shells_a", 720, 3),
