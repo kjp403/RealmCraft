@@ -93,6 +93,8 @@ static func top_n(world_server: Node, board: String, limit: int) -> Array:
 		return _top_n_guild(world_server, board, limit)
 	if board.begins_with("dungeon:"):
 		return _top_n_dungeon(world_server, board.substr(8), limit)
+	if board.begins_with("skill:"):
+		return _top_n_skill(world_server, StringName(board.substr(6)), limit)
 	return _top_n_player(world_server, board, limit)
 
 
@@ -109,17 +111,18 @@ static func _account_omitted_from_boards(account_name: String) -> bool:
 
 ## Boards the public website / HTTP API publishes. Keep in sync with the in-game
 ## Leaderboard menu (source/client/ui/menus/leaderboard/leaderboard_menu.gd DOMAINS).
+## Website boards. No PvP here by design — the hiscores are a progression
+## record, and kill counts turned them into a harassment scoreboard.
+## Per-skill boards are appended in _build_public_boards(): one "skill:<slug>"
+## per entry in [constant TOTAL_LEVEL_SKILLS], ranked on that skill's TOTAL XP.
 const PUBLIC_BOARDS: Array[String] = [
-	"pvp_total",
-	"pvp_week",
-	"pve_total",
-	"pve_week",
-	"arena_wins",
-	"glory_seasonal",
-	"glory_eternal",
 	"total_level",
 	"level",
 	"gold",
+	"pve_total",
+	"pve_week",
+	"glory_seasonal",
+	"glory_eternal",
 	"dungeon:Dungeon",
 	"dungeon:fungus_dungeon",
 	"dungeon:hell_dungeon",
@@ -138,12 +141,19 @@ static func public_snapshot(world_server: Node) -> Dictionary:
 	if not _public_cache.is_empty() and now - _public_cache_ms < PUBLIC_CACHE_TTL_MS:
 		return _public_cache
 	var boards: Dictionary = {}
-	for board: String in PUBLIC_BOARDS:
+	var wanted: Array[String] = PUBLIC_BOARDS.duplicate()
+	for job_slug: StringName in TOTAL_LEVEL_SKILLS:
+		wanted.append("skill:" + String(job_slug))
+	for board: String in wanted:
 		var rows: Array = []
 		for entry: Dictionary in top_n(world_server, board, PUBLIC_LIMIT):
+			# "level" rides along for the skill boards: a hiscore row is
+			# rank + name + level + XP, and the site should not have to derive
+			# the level from the XP curve itself.
 			rows.append({
 				"name": str(entry.get("name", "")),
 				"score": int(entry.get("score", 0)),
+				"level": int(entry.get("level", 0)),
 			})
 		boards[board] = rows
 	_public_cache = boards
@@ -361,6 +371,72 @@ static func _total_skill_xp_of(skills: Dictionary) -> int:
 ## Fastest-clear board for one dungeon. Score = best clear SECONDS, ranked
 ## ASCENDING (lower is better) — the inverse of the kill/level boards. Live players
 ## override their stale DB row, same as _top_n_player.
+## Hiscore board for ONE skill, ranked on that skill's total XP (RuneScape
+## rules: XP decides the order, level is what you show). Rows carry both, plus
+## the level, so the site never has to invert the XP curve.
+##
+## Unstarted skills are omitted rather than listed at level 1 with 0 XP — a
+## board of thousands of tied zeroes tells a player nothing.
+static func _top_n_skill(world_server: Node, skill_slug: StringName, limit: int) -> Array:
+	var db = world_server.database.store.db
+	db.query("SELECT player_id, account_name, display_name, skills_json, server_roles_json FROM players;")
+	var rows: Array = db.query_result.duplicate()
+	var role_definitions: Dictionary = ServerInstance.global_role_definitions
+
+	var live_by_player_id: Dictionary = {}
+	for peer_id: int in world_server.connected_players:
+		var p: PlayerResource = world_server.connected_players[peer_id]
+		if p != null:
+			live_by_player_id[p.player_id] = p
+
+	var scored: Array = []
+	for row: Dictionary in rows:
+		var player_id: int = int(row.get("player_id", 0))
+		var live: PlayerResource = live_by_player_id.get(player_id)
+		var skills: Dictionary
+		var display_name: String
+		var roles: Dictionary
+		var account_name: String
+		if live != null:
+			skills = live.skills
+			display_name = live.display_name
+			roles = live.server_roles
+			account_name = live.account_name
+		else:
+			var parsed: Variant = JSON.parse_string(str(row.get("skills_json", "{}")))
+			skills = parsed if parsed is Dictionary else {}
+			display_name = str(row.get("display_name", "?"))
+			var roles_parsed: Variant = JSON.parse_string(str(row.get("server_roles_json", "{}")))
+			roles = roles_parsed if roles_parsed is Dictionary else {}
+			account_name = str(row.get("account_name", ""))
+		if CommandPermissions.is_hidden_from_leaderboard(
+			roles, role_definitions, display_name, player_id
+		):
+			continue
+		if _account_omitted_from_boards(account_name):
+			continue
+		# skills_json keys arrive as String from JSON and StringName when live.
+		var entry: Variant = skills.get(skill_slug, skills.get(String(skill_slug), null))
+		if entry is not Dictionary:
+			continue
+		var data: Dictionary = entry as Dictionary
+		var level: int = maxi(1, int(data.get("level", 1)))
+		# Skills store level + XP INTO that level, not a running total — the
+		# same sum the Skills panel shows as "Total XP".
+		var total_xp: int = SkillXp.total_xp_for_level(level) + maxi(0, int(data.get("xp", 0)))
+		if total_xp <= 0:
+			continue
+		scored.append({
+			"id": player_id,
+			"name": display_name,
+			"score": total_xp,
+			"level": level,
+			"sub": 0,
+		})
+	scored.sort_custom(func(a, b): return a["score"] > b["score"])
+	return scored.slice(0, limit)
+
+
 static func _top_n_dungeon(world_server: Node, dungeon_name: String, limit: int) -> Array:
 	var db = world_server.database.store.db
 	db.query("SELECT player_id, account_name, display_name, stats_json, server_roles_json FROM players;")

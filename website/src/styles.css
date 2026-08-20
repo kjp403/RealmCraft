@@ -661,6 +661,12 @@ body[class^="theme-"] article.page {
 .lb-table th, .lb-table td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); }
 .lb-table th { color: var(--muted); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
 .lb-rank { width: 2.4rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lb-level {
+  width: 3.4rem;
+  text-align: right !important;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
 .lb-score { text-align: right !important; color: var(--accent-2); font-variant-numeric: tabular-nums; font-weight: 600; }
 .lb-table thead th:last-child { text-align: right; }
 .lb-table tr.rank-1 .lb-rank, .lb-table tr.rank-1 .lb-name { color: #f0d36a; }

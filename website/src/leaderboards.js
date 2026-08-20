@@ -3,17 +3,31 @@
   if (!root) return;
 
   const CATEGORIES = [
+    { id: "progression", label: "Overall" },
+    { id: "skill", label: "Skills" },
     { id: "combat", label: "Combat" },
-    { id: "progression", label: "Progression" },
     { id: "guild", label: "Guild" },
     { id: "dungeon", label: "Dungeons" },
   ];
+  // One hiscore per skill, ranked on that skill's total XP. Order matches the
+  // in-game Skills panel so a player reads the same list in both places.
+  const SKILLS = [
+    ["mining", "Mining"],
+    ["harvesting", "Farming"],
+    ["woodcutting", "Woodcutting"],
+    ["fishing", "Fishing"],
+    ["smithing", "Smithing"],
+    ["outfitting", "Outfitting"],
+    ["cooking", "Cooking"],
+    ["herblore", "Herblore"],
+    ["fletching", "Fletching"],
+    ["slayer", "Slayer"],
+    ["prayer", "Prayer"],
+  ];
   const BOARDS = [
-    { id: "pvp_total", label: "PvP · All-Time", category: "combat", format: "count" },
-    { id: "pvp_week", label: "PvP · This Week", category: "combat", format: "count" },
+    // No PvP boards by design — see LeaderboardService.PUBLIC_BOARDS.
     { id: "pve_total", label: "PvE · All-Time", category: "combat", format: "count" },
     { id: "pve_week", label: "PvE · This Week", category: "combat", format: "count" },
-    { id: "arena_wins", label: "Arena Wins", category: "combat", format: "count" },
     { id: "total_level", label: "Total Level", category: "progression", format: "count" },
     { id: "level", label: "Combat Level", category: "progression", format: "count" },
     { id: "gold", label: "Richest", category: "progression", format: "gold" },
@@ -22,7 +36,14 @@
     { id: "dungeon:Dungeon", label: "The Dark Cave (Hard)", category: "dungeon", format: "time" },
     { id: "dungeon:fungus_dungeon", label: "Fungus Domain (Hard)", category: "dungeon", format: "time" },
     { id: "dungeon:hell_dungeon", label: "Fire and Flames (Hard)", category: "dungeon", format: "time" },
-  ];
+  ].concat(
+    SKILLS.map(([slug, label]) => ({
+      id: "skill:" + slug,
+      label: label,
+      category: "skill",
+      format: "xp",
+    }))
+  );
   const REFRESH_MS = 30000;
 
   const catBar = root.querySelector("[data-lb-cats]");
@@ -32,7 +53,7 @@
   const title = root.querySelector("[data-lb-title]");
 
   let catId = CATEGORIES[0].id;
-  let boardId = BOARDS[0].id;
+  let boardId = "total_level";
   let payload = null;
   let timer = 0;
 
@@ -64,6 +85,7 @@
   function scoreLabel(format) {
     if (format === "gold") return "Gold";
     if (format === "time") return "Time";
+    if (format === "xp") return "XP";
     return "Score";
   }
 
@@ -111,19 +133,23 @@
       tableWrap.innerHTML = "<p class='muted'>No scores on this board yet.</p>";
       return;
     }
+    const isSkill = board.category === "skill";
     const body = rows
       .map((row, i) => {
         const rank = i + 1;
         const medal = rank <= 3 ? " rank-" + rank : "";
+        const levelCell = isSkill ? `<td class="lb-level">${esc(String(row.level || 1))}</td>` : "";
         return `<tr class="${medal.trim()}">
           <td class="lb-rank">${rank}</td>
           <td class="lb-name">${esc(row.name)}</td>
+          ${levelCell}
           <td class="lb-score">${esc(formatScore(row.score, board.format))}</td>
         </tr>`;
       })
       .join("");
+    const levelHead = isSkill ? "<th>Level</th>" : "";
     tableWrap.innerHTML = `<table class="lb-table">
-      <thead><tr><th>#</th><th>Name</th><th>${esc(scoreLabel(board.format))}</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Name</th>${levelHead}<th>${esc(scoreLabel(board.format))}</th></tr></thead>
       <tbody>${body}</tbody>
     </table>`;
   }
