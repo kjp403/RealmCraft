@@ -216,6 +216,10 @@ func _build_profile_tabs() -> void:
 	_tab_buttons.append(
 		_make_tab_button("Skills", ProfileTab.SKILLS, tab_bar)
 	)
+	# The three-dots overlay is Profile-only now, so Profile is where the menus
+	# that have no dock button live. These hand off to the existing fullscreen
+	# menus rather than re-hosting them: one owner per screen, no duplicate UI.
+	_build_handoff_buttons(tab_bar)
 
 	_equipment_left = _make_switching_view(left_panel)
 	_equipment_right = _make_switching_view(right_panel)
@@ -228,6 +232,30 @@ func _build_profile_tabs() -> void:
 	_skills_right_list = _make_view_list(_skills_right)
 
 	_select_profile_tab(ProfileTab.OVERVIEW)
+
+
+## Buttons that leave Profile for another menu, styled like tabs but never
+## toggled — they are navigation, not a view of this panel.
+func _build_handoff_buttons(tab_bar: HBoxContainer) -> void:
+	for entry: Array in [
+		["Character", &"character"],
+		["Skins", &"cosmetics"],
+		["Guild", &"guild"],
+	]:
+		var button := Button.new()
+		button.text = String(entry[0])
+		button.focus_mode = Control.FOCUS_NONE
+		button.custom_minimum_size = Vector2(104.0, 28.0)
+		button.add_theme_font_size_override(&"font_size", 11)
+		button.pressed.connect(_open_menu.bind(StringName(entry[1])))
+		tab_bar.add_child(button)
+
+
+## display_menu hides every other fullscreen shell, so Profile closes itself as
+## a side effect — no explicit hide() needed, and none wanted (going Back from
+## the other menu should not re-open Profile underneath it).
+func _open_menu(menu_name: StringName) -> void:
+	ClientState.open_menu_requested.emit(menu_name, null)
 
 
 func _make_tab_button(
