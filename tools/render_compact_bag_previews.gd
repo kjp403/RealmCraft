@@ -75,6 +75,38 @@ func _go() -> void:
 	get_tree().quit(0)
 
 
+## A full bag of REAL items, so previews prove icons and stack counts are
+## legible at the shipping slot size instead of showing empty squares.
+func _fill_fixture() -> void:
+	var slugs: Array[StringName] = [
+		&"iron_ore", &"coal_ore", &"mithril_ore", &"adamant_ore", &"runite_ore",
+		&"oak_log", &"willow_log", &"maple_log", &"yew_log", &"logs",
+		&"cooked_shrimp", &"cooked_trout", &"cooked_salmon", &"cooked_lobster",
+		&"health_potion", &"greater_health_potion", &"mana_potion", &"bone",
+		&"iron_bar", &"steel_bar", &"mithril_bar", &"healing_herb", &"frostpetal",
+		&"sunwort", &"moonbloom", &"bloodcap", &"vial_of_water", &"bronze_arrow",
+		&"sword_runite.item", &"iron_helmet",
+	]
+	var entries: Array[Dictionary] = []
+	var uid: int = 1
+	for slug: StringName in slugs:
+		var item_id: int = ContentRegistryHub.id_from_slug(&"items", slug)
+		if item_id <= 0:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if item == null:
+			continue
+		var amount: int = [1, 7, 10, 42, 128, 999][uid % 6]
+		entries.append({
+			"uid": uid,
+			"data": {"id": item_id, "a": amount, "bag": 0},
+			"item": item,
+		})
+		uid += 1
+	_panel._build_empty_grid(Inventory.MAX_SLOTS)
+	_panel._display_entries(entries, BagOrder.sync_with_entries(entries))
+
+
 func _apply(bags: int, active: int, pending: int) -> void:
 	_panel.bag_count = bags
 	_panel.active_bag = active
@@ -109,6 +141,7 @@ func _render_states() -> void:
 		[3, 2, -1, "ALL THREE OWNED - BAG 3 OPEN"],
 	]:
 		_apply(int(entry[0]), int(entry[1]), int(entry[2]))
+		_fill_fixture()
 		_caption.text = String(entry[3])
 		_caption.visible = true
 		cells.append(await _grab())
