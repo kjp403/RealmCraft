@@ -764,7 +764,14 @@ func _on_entry_pressed(entry: Dictionary) -> void:
 		if salvage_table != null and _selected_slot_uid >= 0
 		else null
 	)
-	salvage_button.visible = _selected_salvage != null
+	# Shown for anything that COULD have a recipe, disabled when it does not, so
+	# "where is salvage?" is answered on the item itself instead of by hunting.
+	var salvageable_kind: bool = _selected_item is GearItem or _selected_item.holdable
+	salvage_button.visible = salvageable_kind and _selected_slot_uid >= 0
+	salvage_button.disabled = _selected_salvage == null
+	salvage_button.tooltip_text = (
+		"" if _selected_salvage != null else "This can't be broken down."
+	)
 
 
 ## The equipped counterpart for stat deltas — only when the selection is bag

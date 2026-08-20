@@ -26,6 +26,7 @@ const BAG_PRICE_LABELS: Dictionary = {
 const ACTION_PRIMARY := 0
 const ACTION_DROP := 1
 const ACTION_HOTKEY := 2
+const ACTION_SALVAGE := 3
 
 @onready var header: HBoxContainer = $MarginContainer/MainColumn/Header
 @onready var close_button: Button = $MarginContainer/MainColumn/Header/CloseButton
@@ -568,6 +569,24 @@ func _open_context_menu(entry: Dictionary) -> void:
 	):
 		context_menu.add_item("Bind to 1-2-3", ACTION_HOTKEY)
 
+	# Break down is the only route to salvage from the dock. Items the salvage
+	# table does not know still get the row, disabled, so players stop hunting
+	# for a feature that simply does not apply to that item.
+	var salvage_table: SalvageTable = SalvageTable.shared()
+	var item_id: int = int((entry.get("data", {}) as Dictionary).get("id", 0))
+	var recipe: SalvageRecipe = (
+		salvage_table.recipe_for(item_id)
+		if salvage_table != null
+		else null
+	)
+	if item is GearItem or item.holdable:
+		context_menu.add_item("Break down", ACTION_SALVAGE)
+		if recipe == null:
+			context_menu.set_item_disabled(context_menu.item_count - 1, true)
+			context_menu.set_item_tooltip(
+				context_menu.item_count - 1, "This can't be broken down."
+			)
+
 	if item.can_drop():
 		context_menu.add_item("Drop", ACTION_DROP)
 
@@ -589,6 +608,82 @@ func _on_context_action(action_id: int) -> void:
 		_perform_drop(context_entry)
 	elif action_id == ACTION_HOTKEY:
 		_assign_hotkey(context_entry)
+	elif action_id == ACTION_SALVAGE:
+		_perform_salvage(context_entry)
+
+
+## Break down one copy for materials. Confirmed first: salvage DESTROYS the
+## item, and the dock sits under the player's thumb during combat.
+func _perform_salvage(entry: Dictionary) -> void:
+	if InstanceClient.current == null:
+		return
+	var item: Item = entry.get("item", null) as Item
+	if item == null:
+		return
+	var salvage_table: SalvageTable = SalvageTable.shared()
+	var item_id: int = int((entry.get("data", {}) as Dictionary).get("id", 0))
+	var recipe: SalvageRecipe = (
+		salvage_table.recipe_for(item_id) if salvage_table != null else null
+	)
+	if recipe == null:
+		Toaster.toast("%s can't be broken down." % item.item_name)
+		return
+
+	var dialog := ConfirmationDialog.new()
+	dialog.title = "Break Down"
+	dialog.ok_button_text = "Break Down"
+	dialog.cancel_button_text = "Cancel"
+	dialog.dialog_text = "Break down 1 %s into %s?
+The %s is destroyed." % [
+		item.item_name, _salvage_yield_text(recipe), item.item_name
+	]
+	dialog.confirmed.connect(_confirm_salvage.bind(int(entry.get("uid", -1))))
+	dialog.visibility_changed.connect(
+		func() -> void:
+			if not dialog.visible:
+				dialog.queue_free()
+	)
+	add_child(dialog)
+	dialog.popup_centered()
+
+
+func _confirm_salvage(slot_uid: int) -> void:
+	if slot_uid < 0 or InstanceClient.current == null:
+		return
+	var result: Array = await Client.request_data_await(
+		&"item.salvage",
+		{"uid": slot_uid, "amount": 1},
+		InstanceClient.current.name
+	)
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if result.size() < 2 or result[1] != OK or not bool(payload.get("ok", true)):
+		Toaster.toast(str(payload.get("reason", "Could not break that down.")))
+		return
+	Toaster.toast("Broke it down into %s." % _granted_text(payload.get("granted", [])))
+	_refresh_inventory()
+
+
+## "1-3x Iron Bar" — the authored yield, for the confirm prompt. Ranges stay
+## ranges: the roll happens server-side, so this cannot promise a number.
+func _salvage_yield_text(recipe: SalvageRecipe) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for output: SalvageOutput in recipe.outputs:
+		if output == null or output.item == null:
+			continue
+		parts.append(output.describe())
+	return ", ".join(parts) if not parts.is_empty() else "materials"
+
+
+func _granted_text(granted: Array) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for entry: Variant in granted:
+		if entry is not Dictionary:
+			continue
+		var item: Item = ContentRegistryHub.load_by_id(&"items", int(entry.get("id", 0))) as Item
+		if item == null:
+			continue
+		parts.append("%dx %s" % [int(entry.get("amount", 0)), item.item_name])
+	return ", ".join(parts) if not parts.is_empty() else "nothing"
 
 
 func _assign_hotkey(entry: Dictionary) -> void:
