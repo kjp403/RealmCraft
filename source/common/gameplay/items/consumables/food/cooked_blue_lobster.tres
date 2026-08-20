@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3]
+
+[ext_resource type="Script" uid="uid://bprsise4rcsak" path="res://source/common/gameplay/items/consumable_item.gd" id="1_con"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/fish_blue_lobster_cooked.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_con")
+heal_amount = 100
+shared_cooldown_ms = 0
+cooldown_category = &"food"
+use_freeze_ms = 700
+item_name = &"Cooked Blue Lobster"
+item_icon = ExtResource("2_icon")
+description = "Grilled blue lobster. Restores 100 health."
+stack_limit = 10
+vendor_value = 42
+metadata/slug = &"cooked_blue_lobster"
+metadata/id = 603

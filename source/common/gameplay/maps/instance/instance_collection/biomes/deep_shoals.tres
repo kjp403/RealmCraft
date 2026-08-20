@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3 uid="uid://cdeepshoals001"]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_inst"]
+
+[resource]
+script = ExtResource("1_inst")
+instance_name = &"deep_shoals"
+map_path = "uid://cshoals00000001"
+zone_title = "The Deep Shoals"
+level_min = 1
+level_max = 99
+show_discovery = true
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

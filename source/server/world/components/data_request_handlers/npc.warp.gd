@@ -34,6 +34,24 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	if warp == null or warp.target_instance == null:
 		return {"ok": false, "reason": "no_warp"}
 
+	# Skill gate (Beach Angler -> Deep Shoals needs Fishing 60). Authoritative
+	# here; WarpInteraction.menu_entry only greys the option out client-side.
+	if not warp.required_skill.is_empty():
+		var have: int = int(
+			(player.player_resource.skills.get(
+				warp.required_skill,
+				player.player_resource.skills.get(String(warp.required_skill), {})
+			) as Dictionary).get("level", 1)
+		)
+		if have < warp.required_skill_level:
+			WorldServer.curr.chat_service.push_system_to_player(
+				instance, player.player_resource.player_id,
+				"You need %s %d to go there." % [
+					JobRegistry.display_name(warp.required_skill), warp.required_skill_level
+				]
+			)
+			return {"ok": false, "reason": "skill_level"}
+
 	var target_res: InstanceResource = warp.target_instance
 	if not target_res.can_join_instance(player):
 		var stone: String = String(target_res.required_wardstone)
