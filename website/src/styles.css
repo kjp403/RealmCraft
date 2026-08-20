@@ -785,3 +785,31 @@ body.location-scene article.page {
 .prose h3 { margin: 1.1rem 0 0.2rem; font-size: 1rem; }
 .prose .item-grid { margin: 0.8rem 0 1.6rem; }
 .stats a { color: var(--accent-2); }
+
+/* Legible digits: render 0-9 in Inter (self-hosted, SIL OFL) while every
+   other glyph keeps the pixel fonts. Declared after the Google Fonts link
+   so these faces win for the digit range within each family. */
+@font-face {
+  font-family: "Jersey 10";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+  size-adjust: 88%;
+}
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+  size-adjust: 95%;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+  size-adjust: 95%;
+}
