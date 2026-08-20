@@ -344,7 +344,10 @@ func instantiate_player(peer_id: int) -> Player:
 				else:
 					# Amulet already filled — return the old relic-slot necklace.
 					saved_equipment.erase(&"relic")
-					Inventory.add_item(player_resource.inventory, relic_id, 1)
+					Inventory.add_item(
+						player_resource.inventory, relic_id, 1, false,
+						player_resource.active_inventory_bag, player_resource.inventory_bags
+					)
 		player_resource.equipment.clear()
 		for slot_key: StringName in saved_equipment:
 			var equip_id: int = int(saved_equipment[slot_key])
@@ -360,7 +363,10 @@ func instantiate_player(peer_id: int) -> Player:
 				# Rule changed (level/slot) -> return it to inventory rather than lose it.
 				# Reference-slotted gear is excluded: it never left the bag, so
 				# "returning" it mints a free one (see is_reference_slotted).
-				Inventory.add_item(player_resource.inventory, equip_id, 1)
+				Inventory.add_item(
+					player_resource.inventory, equip_id, 1, false,
+					player_resource.active_inventory_bag, player_resource.inventory_bags
+				)
 
 		# Stats were rebuilt from base + attributes + gear above — put any live
 		# timed buffs (potions) back on top so an instance change doesn't strip them.

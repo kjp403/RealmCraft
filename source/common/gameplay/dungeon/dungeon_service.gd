@@ -613,7 +613,7 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 		gold = randi_range(reward.gold_min, reward.gold_max)
 		gold = _scale_amount(gold, amount_mult)
 		if gold > 0 and Economy.gold_id() > 0:
-			Inventory.add_item(resource.inventory, Economy.gold_id(), gold)
+			Inventory.add_item(resource.inventory, Economy.gold_id(), gold, false, resource.active_inventory_bag, resource.inventory_bags)
 
 	var items: Array = []
 	# Main table: 3–4 weighted draws (chest-style), not an independent roll per
@@ -646,7 +646,7 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 		for hit: Dictionary in hits:
 			var drop: LootDrop = hit["drop"]
 			var amount: int = int(hit["amount"])
-			Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
+			Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount, false, resource.active_inventory_bag, resource.inventory_bags)
 			items.append({"name": str(drop.item.item_name), "amount": amount})
 
 	# Guaranteed T3 Ornate Gold Chest — fixed count (Hard tables author 2× Normal).
@@ -656,7 +656,7 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 		var chest_id: int = RewardService.ORNATE_CHEST_IDS[0] if not RewardService.ORNATE_CHEST_IDS.is_empty() else 249
 		var chest_item: Item = ContentRegistryHub.load_by_id(&"items", chest_id) as Item
 		if chest_item != null:
-			Inventory.add_item(resource.inventory, chest_id, ornate_n)
+			Inventory.add_item(resource.inventory, chest_id, ornate_n, false, resource.active_inventory_bag, resource.inventory_bags)
 			items.append({"name": str(chest_item.item_name), "amount": ornate_n})
 
 	return {
@@ -679,7 +679,7 @@ static func _grant_drawn_drop(
 	amount = _scale_amount(amount, amount_mult)
 	if amount <= 0:
 		return
-	Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount)
+	Inventory.add_item(resource.inventory, int(drop.item.get_meta(&"id", 0)), amount, false, resource.active_inventory_bag, resource.inventory_bags)
 	items.append({"name": str(drop.item.item_name), "amount": amount})
 
 

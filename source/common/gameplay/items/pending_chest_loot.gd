@@ -75,12 +75,18 @@ static func take_to_bag(resource: PlayerResource, item_id: int, amount: int = -1
 	if have <= 0:
 		return 0
 	var want: int = have if amount < 0 else mini(amount, have)
-	var fit: int = Inventory.max_fit(resource.inventory, item_id)
+	var fit: int = Inventory.max_fit(
+		resource.inventory, item_id, Inventory.MAX_SLOTS,
+		false, resource.active_inventory_bag, resource.inventory_bags
+	)
 	var move: int = mini(want, fit)
 	if move <= 0:
 		return 0
 	take(pending, item_id, move)
-	Inventory.add_item(resource.inventory, item_id, move)
+	Inventory.add_item(
+		resource.inventory, item_id, move, false,
+		resource.active_inventory_bag, resource.inventory_bags
+	)
 	return move
 
 

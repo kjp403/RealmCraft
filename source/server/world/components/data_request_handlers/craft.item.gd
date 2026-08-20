@@ -46,6 +46,8 @@ func data_request_handler(
 
 	var resource: PlayerResource = player.player_resource
 	var inventory: Dictionary = resource.inventory
+	var active_bag: int = resource.active_inventory_bag
+	var bag_count: int = resource.inventory_bags
 
 	# Crafting-profession level gate.
 	var level: int = int((resource.skills.get(station.profession, {}) as Dictionary).get("level", 1))
@@ -105,27 +107,39 @@ func data_request_handler(
 		output_amount += 1
 	# Ingredients already freed space; still gate so a full bag of unrelated gear
 	# can't absorb a craft that needs a new square.
-	if not Inventory.can_add(inventory, output_id, output_amount):
+	if not Inventory.can_add(
+		inventory, output_id, output_amount, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	):
 		# Rollback ingredients + fee so the craft stays atomic. Refunds are only
 		# granted below, so there is nothing of theirs to undo here.
 		for ingredient: CraftIngredient in recipe.ingredients:
 			if ingredient == null or ingredient.item == null:
 				continue
 			var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
-			Inventory.add_item(inventory, ing_id, ingredient.amount)
+			Inventory.add_item(inventory, ing_id, ingredient.amount, false, active_bag, bag_count)
 		if fee > 0:
-			Inventory.add_item(inventory, gold_id, fee)
+			Inventory.add_item(inventory, gold_id, fee, false, active_bag, bag_count)
 		_last_craft_ms.erase(player_id)
 		return {"ok": false, "reason": "inventory_full"}
 	for _i: int in output_amount:
-		Inventory.try_add_item(inventory, output_id, 1)
+		Inventory.try_add_item(
+			inventory, output_id, 1, Inventory.MAX_SLOTS,
+			false, active_bag, bag_count
+		)
 	# Refunded ingredients go back last. They came out of the bag moments ago so
 	# the space exists; can_add still guards the case where the output claimed
 	# the freed square.
 	for ing_id: int in refunded:
 		var kept: int = refunded[ing_id]
-		if Inventory.can_add(inventory, ing_id, kept):
-			Inventory.try_add_item(inventory, ing_id, kept)
+		if Inventory.can_add(
+			inventory, ing_id, kept, Inventory.MAX_SLOTS,
+			false, active_bag, bag_count
+		):
+			Inventory.try_add_item(
+				inventory, ing_id, kept, Inventory.MAX_SLOTS,
+				false, active_bag, bag_count
+			)
 
 	# Award crafting-profession xp (perk XP multiplier matches gathering / UI).
 	var progress: Dictionary = {}

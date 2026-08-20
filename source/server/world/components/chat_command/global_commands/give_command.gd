@@ -52,7 +52,10 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	if item_id <= 0:
 		return "Item '%s' has no registry id." % token
 
-	Inventory.add_item(target.resource.inventory, item_id, amount)
+	Inventory.add_item(
+		target.resource.inventory, item_id, amount, false,
+		target.resource.active_inventory_bag, target.resource.inventory_bags
+	)
 	server_instance.world_server.database.save_player(target.resource)
 	# Prefer CommandTarget.peer_id (live connection map) over current_peer_id,
 	# which can lag after reconnects and leave the bag UI stale while chat still

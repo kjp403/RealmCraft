@@ -22,6 +22,6 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		"moved": moved,
 		"message": "" if moved > 0 else "Your bag is full.",
 		"stacks": HuntChest.to_payload(resource),
-		"free_slots": Inventory.free_slots(resource.inventory),
+		"free_slots": Inventory.total_free_slots(resource.inventory, resource.inventory_bags),
 		"capacity": HuntChest.MAX_STACKS,
 	}

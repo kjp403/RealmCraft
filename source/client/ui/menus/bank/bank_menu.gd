@@ -64,6 +64,8 @@ const TAB_ACCENTS: Dictionary = {
 var _inventory: Dictionary = {}
 var _bank: Dictionary = {}
 var _bank_slots: int = BankInteraction.STARTING_SLOTS
+var _inventory_bags: int = 1
+var _active_bag: int = 0
 var _busy: bool = false
 var _gold_id: int = 0
 
@@ -684,6 +686,10 @@ func _apply_payload(payload: Dictionary) -> void:
 		_inventory = payload.get("inventory", {}) as Dictionary
 	if payload.has("bank"):
 		_bank = payload.get("bank", {}) as Dictionary
+	if payload.has("inventory_bags"):
+		_inventory_bags = clampi(int(payload.get("inventory_bags", 1)), 1, Inventory.MAX_BAGS)
+	if payload.has("active_bag"):
+		_active_bag = clampi(int(payload.get("active_bag", 0)), 0, _inventory_bags - 1)
 	if payload.has("bank_slots"):
 		_bank_slots = maxi(
 			BankInteraction.STARTING_SLOTS,
@@ -1127,7 +1133,10 @@ func _max_transferable() -> int:
 		var capacity: int = maxi(BankInteraction.STARTING_SLOTS, _bank_slots)
 		return mini(held, Inventory.max_fit(_bank, _selected_item_id, capacity, true))
 	var banked: int = Inventory.count(_bank, _selected_item_id)
-	return mini(banked, Inventory.max_fit(_inventory, _selected_item_id))
+	return mini(banked, Inventory.max_fit(
+		_inventory, _selected_item_id, Inventory.MAX_SLOTS,
+		false, _active_bag, _inventory_bags
+	))
 
 
 func _sync_selection_highlights() -> void:

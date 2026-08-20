@@ -55,7 +55,7 @@ func data_request_handler(
 	if quest.grant_on_accept:
 		var item_id: int = int(quest.grant_on_accept.get_meta(&"id", 0))
 		if item_id > 0:
-			Inventory.add_item(resource.inventory, item_id, 1)
+			Inventory.add_item(resource.inventory, item_id, 1, false, resource.active_inventory_bag, resource.inventory_bags)
 
 	QuestService.replenish_seep_root_if_needed(resource, peer_id)
 	QuestService.notify_passive_ready(resource, peer_id)

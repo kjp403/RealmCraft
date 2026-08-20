@@ -167,8 +167,8 @@ func _try_swap(a: Player, b: Player) -> bool:
 	var inv_b: Dictionary = b.player_resource.inventory
 	if not _can_afford(inv_a, seat_offers[0]) or not _can_afford(inv_b, seat_offers[1]):
 		return false
-	_give(inv_a, inv_b, seat_offers[0])
-	_give(inv_b, inv_a, seat_offers[1])
+	_give(inv_a, inv_b, b.player_resource, seat_offers[0])
+	_give(inv_b, inv_a, a.player_resource, seat_offers[1])
 	return true
 
 
@@ -182,17 +182,17 @@ func _can_afford(inventory: Dictionary, offer: Dictionary) -> bool:
 	return true
 
 
-func _give(from_inventory: Dictionary, to_inventory: Dictionary, offer: Dictionary) -> void:
+func _give(from_inventory: Dictionary, to_inventory: Dictionary, to_resource: PlayerResource, offer: Dictionary) -> void:
 	var gold: int = int(offer.get("gold", 0))
 	if gold > 0:
 		Inventory.remove_amount_by_id(from_inventory, Economy.gold_id(), gold)
-		Inventory.add_item(to_inventory, Economy.gold_id(), gold)
+		Inventory.add_item(to_inventory, Economy.gold_id(), gold, false, to_resource.active_inventory_bag, to_resource.inventory_bags)
 	var items: Dictionary = offer.get("items", {})
 	for item_id in items:
 		var amount: int = int(items[item_id])
 		Inventory.remove_amount_by_id(from_inventory, int(item_id), amount)
 		for i: int in amount:
-			Inventory.add_item(to_inventory, int(item_id), 1)
+			Inventory.add_item(to_inventory, int(item_id), 1, false, to_resource.active_inventory_bag, to_resource.inventory_bags)
 
 
 func _server_instance() -> Node:

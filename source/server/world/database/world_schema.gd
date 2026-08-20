@@ -66,6 +66,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 19:
 		_migration_v19(db)
 		_set_schema_version(db, 19)
+	if version < 20:
+		_migration_v20(db)
+		_set_schema_version(db, 20)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -344,6 +347,13 @@ static func _migration_v18(db: SQLite) -> void:
 static func _migration_v19(db: SQLite) -> void:
 	if not _column_exists(db, "players", "hunt_chest_json"):
 		db.query("ALTER TABLE players ADD COLUMN hunt_chest_json TEXT NOT NULL DEFAULT '[]';")
+
+
+## v20: unlocked inventory bag count. Players start at 1; banker sells bags 2 and 3.
+## ADD COLUMN with DEFAULT — no DB wipe; existing players get 1 bag.
+static func _migration_v20(db: SQLite) -> void:
+	if not _column_exists(db, "players", "inventory_bags"):
+		db.query("ALTER TABLE players ADD COLUMN inventory_bags INTEGER NOT NULL DEFAULT 1;")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

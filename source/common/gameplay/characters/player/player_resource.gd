@@ -58,6 +58,12 @@ const HEALTH_PER_LEVEL: float = 0.76
 @export var vault_skin_id: int = 0
 
 @export var inventory: Dictionary
+## Number of unlocked inventory bags. Starts at 1; banker sells bag 2 for 500K
+## and bag 3 for 1.25M gold. Persisted as inventory_bags column.
+@export var inventory_bags: int = 1
+## Which bag tab the client currently has open (transient — not saved).
+## Used by the server to decide where picked-up loot lands.
+var active_inventory_bag: int = 0
 ## Personal bank vault (same slot format as inventory). Capacity is
 ## [member bank_slots] (starts at 50; buy +50 for 5,000G at the banker).
 ## Stored separately so bag UI stay compact while long-term storage grows.

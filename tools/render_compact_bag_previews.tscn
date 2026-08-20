@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_compact_bag_previews.gd" id="1_cmpbagprev"]
+
+[node name="CompactBagPreviewRig" type="Node"]
+script = ExtResource("1_cmpbagprev")

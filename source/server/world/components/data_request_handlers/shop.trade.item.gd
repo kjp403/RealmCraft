@@ -45,5 +45,5 @@ func data_request_handler(
 		int(trade.currency_item.get_meta(&"id", 0)) if trade.currency_item
 		else Economy.gold_id()
 	)
-	Inventory.add_item(inventory, currency_id, trade.payout * bundles)
+	Inventory.add_item(inventory, currency_id, trade.payout * bundles, false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags)
 	return {"ok": true, "bundles": bundles}

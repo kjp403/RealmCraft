@@ -266,11 +266,13 @@ static func _complete_after_countdown(
 	_transfer_offer(
 		first_inventory,
 		second_inventory,
+		second.player_resource,
 		offers[0]
 	)
 	_transfer_offer(
 		second_inventory,
 		first_inventory,
+		first.player_resource,
 		offers[1]
 	)
 
@@ -350,22 +352,27 @@ static func _can_afford(inventory: Dictionary, offer: Dictionary) -> bool:
 	return true
 
 
+## [param to_resource] owns [param to_inventory] — needed so received items land
+## in the RECEIVER's active bag and overflow through their unlocked bags.
 static func _transfer_offer(
 	from_inventory: Dictionary,
 	to_inventory: Dictionary,
+	to_resource: PlayerResource,
 	offer: Dictionary
 ) -> void:
+	var to_bag: int = to_resource.active_inventory_bag if to_resource != null else 0
+	var to_bags: int = to_resource.inventory_bags if to_resource != null else 1
 	var gold: int = int(offer.get("gold", 0))
 	if gold > 0:
 		Inventory.remove_amount_by_id(from_inventory, Economy.gold_id(), gold)
-		Inventory.add_item(to_inventory, Economy.gold_id(), gold)
+		Inventory.add_item(to_inventory, Economy.gold_id(), gold, false, to_bag, to_bags)
 	var items: Dictionary = offer.get("items", {})
 	for raw_id: Variant in items:
 		var item_id: int = int(raw_id)
 		var amount: int = int(items[raw_id])
 		Inventory.remove_amount_by_id(from_inventory, item_id, amount)
 		for _copy: int in amount:
-			Inventory.add_item(to_inventory, item_id, 1)
+			Inventory.add_item(to_inventory, item_id, 1, false, to_bag, to_bags)
 
 
 static func _broadcast(instance: ServerInstance, trade_id: int) -> void:

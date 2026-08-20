@@ -20,6 +20,8 @@ class_name Inventory
 
 ## Hard cap on non-currency bag slots (OSRS-style). Forces bank usage.
 const MAX_SLOTS: int = 28
+## Number of inventory bags a player can unlock.
+const MAX_BAGS: int = 3
 ## Materials (ores, logs, bars, hides, herbs) and cooked food stack this high
 ## in the bank. The bag still uses [member Item.stack_limit] (10 for most).
 const BANK_RESOURCE_STACK: int = 50
@@ -60,6 +62,7 @@ static func normalize(raw: Dictionary) -> Dictionary:
 		var clean: Dictionary = {
 			"id": int(slot.get("id", 0)),
 			"a": int(slot.get("a", 1)),
+			"bag": int(slot.get("bag", 0)),
 		}
 		if slot.get("p", false):
 			clean["p"] = true
@@ -84,10 +87,23 @@ static func counts_toward_capacity(item: Item) -> bool:
 	return item == null or not item.is_currency
 
 
-## Occupied bag squares (excludes currency stacks).
-static func used_slots(inventory: Dictionary) -> int:
-	var total: int = 0
+## Slots that belong to [param bag_index] (0-2). When [param bag_index] is -1,
+## every slot is returned.
+static func slots_of_bag(inventory: Dictionary, bag_index: int = -1) -> Array:
+	if bag_index < 0:
+		return inventory.keys()
+	var uids: Array = []
 	for slot_uid in inventory:
+		if int(inventory[slot_uid].get("bag", 0)) == bag_index:
+			uids.append(slot_uid)
+	return uids
+
+
+## Occupied bag squares for [param bag_index] (or all bags if -1).
+static func used_slots(inventory: Dictionary, bag_index: int = -1) -> int:
+	var total: int = 0
+	var uids: Array = slots_of_bag(inventory, bag_index)
+	for slot_uid in uids:
 		var item_id: int = int(inventory[slot_uid].get("id", 0))
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if counts_toward_capacity(item):
@@ -95,37 +111,50 @@ static func used_slots(inventory: Dictionary) -> int:
 	return total
 
 
-## Remaining free squares under [param capacity] (bag default [constant MAX_SLOTS]).
-static func free_slots(inventory: Dictionary, capacity: int = MAX_SLOTS) -> int:
-	return maxi(0, capacity - used_slots(inventory))
+## Remaining free squares under [param capacity] for [param bag_index].
+## For all bags pass -1 and a capacity equal to [member MAX_SLOTS] × unlocked bags.
+static func free_slots(inventory: Dictionary, capacity: int = MAX_SLOTS, bag_index: int = -1) -> int:
+	return maxi(0, capacity - used_slots(inventory, bag_index))
+
+
+## Free squares across every UNLOCKED bag. Use this for anything a player sees as
+## "space left in my inventory": plain [method free_slots] defaults to ONE bag's
+## capacity, so it reports 0 free for a 3-bag player holding 28 items even though
+## 56 squares are open.
+static func total_free_slots(inventory: Dictionary, bag_count: int = 1) -> int:
+	return free_slots(inventory, MAX_SLOTS * maxi(1, bag_count), -1)
 
 
 ## Largest amount of [param item_id] that still fits (existing stack space + free
 ## slots × stack_limit). Used by bank Max-withdraw and capacity-capped deposits.
+## [param start_bag] / [param bag_count] control which bag(s) to consider.
 static func max_fit(
 	inventory: Dictionary,
 	item_id: int,
 	capacity: int = MAX_SLOTS,
-	in_bank: bool = false
+	in_bank: bool = false,
+	start_bag: int = 0,
+	bag_count: int = 1
 ) -> int:
 	if item_id <= 0:
 		return 0
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item != null and item.is_currency:
 		return 1 << 30
-	var free: int = free_slots(inventory, capacity)
+	var free: int = free_slots(inventory, capacity, start_bag) if bag_count <= 1 else free_slots(inventory, capacity * bag_count, -1)
+	var uids: Array = slots_of_bag(inventory, start_bag) if bag_count <= 1 else slots_of_bag(inventory, -1)
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		return free
 	var limit: int = stack_limit_for(item, in_bank)
 	if limit <= 0:
 		# Pseudo-infinite: one existing stack absorbs any amount; else need 1 free slot.
-		for slot_uid in inventory:
+		for slot_uid in uids:
 			if int(inventory[slot_uid].get("id", 0)) == item_id:
 				return 1 << 30
 		return 1 << 30 if free > 0 else 0
 	var space: int = 0
-	for slot_uid in inventory:
+	for slot_uid in uids:
 		if int(inventory[slot_uid].get("id", 0)) != item_id:
 			continue
 		var have: int = int(inventory[slot_uid].get("a", 0))
@@ -137,11 +166,13 @@ static func max_fit(
 
 ## How many *new* bag slots [param amount] of [param item_id] would open after
 ## filling existing stacks up to [member Item.stack_limit]. Currency always 0.
+## [param bag_index] -1 checks all bags; a specific index checks only that bag.
 static func slots_needed(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int,
-	in_bank: bool = false
+	in_bank: bool = false,
+	bag_index: int = -1
 ) -> int:
 	if item_id <= 0 or amount <= 0:
 		return 0
@@ -153,8 +184,9 @@ static func slots_needed(
 		return amount
 	var limit: int = stack_limit_for(item, in_bank)
 	var remaining: int = amount
+	var uids: Array = slots_of_bag(inventory, bag_index)
 	if limit > 0:
-		for slot_uid in inventory:
+		for slot_uid in uids:
 			if remaining <= 0:
 				break
 			if int(inventory[slot_uid].get("id", 0)) != item_id:
@@ -168,7 +200,7 @@ static func slots_needed(
 		@warning_ignore("integer_division")
 		return (remaining + limit - 1) / limit
 	# Pseudo-infinite stack: one existing slot absorbs everything, else one new.
-	for slot_uid in inventory:
+	for slot_uid in uids:
 		if int(inventory[slot_uid].get("id", 0)) == item_id:
 			return 0
 	return 1
@@ -176,29 +208,41 @@ static func slots_needed(
 
 ## True if the store can accept the full [param amount] without exceeding
 ## [param capacity]. Currency always fits.
+## [param start_bag] is where new slots are placed first; [param bag_count] is
+## how many unlocked bags the player has (1-3). When [param bag_count] is 1,
+## only [param start_bag] is checked.
 static func can_add(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int = 1,
 	capacity: int = MAX_SLOTS,
-	in_bank: bool = false
+	in_bank: bool = false,
+	start_bag: int = 0,
+	bag_count: int = 1
 ) -> bool:
-	return slots_needed(inventory, item_id, amount, in_bank) <= free_slots(inventory, capacity)
+	if bag_count <= 1:
+		return slots_needed(inventory, item_id, amount, in_bank, start_bag) <= free_slots(inventory, capacity, start_bag)
+	var need: int = slots_needed(inventory, item_id, amount, in_bank, -1)
+	var total_free: int = free_slots(inventory, capacity * bag_count, -1)
+	return need <= total_free
 
 
 ## Add to a capacity-capped store. Returns false without mutating when the full
 ## amount would not fit. Currency / stacking into free stack space still works
 ## on a "full" bag or bank.
+## [param start_bag] is the active/preferred bag; [param bag_count] is unlocked bags.
 static func try_add_item(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int = 1,
 	capacity: int = MAX_SLOTS,
-	in_bank: bool = false
+	in_bank: bool = false,
+	start_bag: int = 0,
+	bag_count: int = 1
 ) -> bool:
-	if not can_add(inventory, item_id, amount, capacity, in_bank):
+	if not can_add(inventory, item_id, amount, capacity, in_bank, start_bag, bag_count):
 		return false
-	add_item(inventory, item_id, amount, in_bank)
+	add_item(inventory, item_id, amount, in_bank, start_bag, bag_count)
 	return true
 
 
@@ -206,11 +250,16 @@ static func try_add_item(
 ## Respects [member Item.stack_limit]: fill existing stacks up to the cap, then
 ## open new slots for the remainder. No capacity check — use [method try_add_item]
 ## for the player bag or bank.
+## [param start_bag] is where new slots are placed first; new slots wrap through
+## [param bag_count] unlocked bags. Existing stacks of the same item are filled
+## regardless of which bag they live in.
 static func add_item(
 	inventory: Dictionary,
 	item_id: int,
 	amount: int = 1,
-	in_bank: bool = false
+	in_bank: bool = false,
+	start_bag: int = 0,
+	bag_count: int = 1
 ) -> void:
 	if item_id <= 0 or amount <= 0:
 		return
@@ -222,12 +271,15 @@ static func add_item(
 	var stackable: bool = item != null and item.is_stackable()
 	if not stackable:
 		for _i: int in amount:
-			inventory[next_uid(inventory)] = {"id": item_id, "a": 1}
+			var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
+			inventory[next_uid(inventory)] = {"id": item_id, "a": 1, "bag": bag}
 		return
 
 	# 0 = pseudo-infinite (legacy default); otherwise hard cap per slot.
 	var limit: int = stack_limit_for(item, in_bank)
 	var remaining: int = amount
+
+	# Fill existing stacks anywhere first.
 	if limit > 0:
 		for slot_uid in inventory:
 			if remaining <= 0:
@@ -241,17 +293,55 @@ static func add_item(
 			var put: int = mini(space, remaining)
 			inventory[slot_uid]["a"] = have + put
 			remaining -= put
-		while remaining > 0:
-			var put: int = mini(limit, remaining)
-			inventory[next_uid(inventory)] = {"id": item_id, "a": put}
-			remaining -= put
+
+		# Open new slots, wrapping through unlocked bags starting at [param start_bag].
+		# bag_count is floored at 1: inventory_bags is clamped [1, MAX_BAGS] on save
+		# and load, but a stray 0 here would divide by zero on the wrap below.
+		var bags: int = maxi(1, bag_count)
+		var current_bag: int = start_bag
+		var checked: int = 0
+		while remaining > 0 and checked < bags:
+			var free_in_bag: int = free_slots(inventory, MAX_SLOTS, current_bag)
+			if free_in_bag > 0:
+				var can_fit_here: int = free_in_bag * limit
+				var put_here: int = mini(can_fit_here, remaining)
+				while put_here > 0:
+					var put: int = mini(limit, put_here)
+					inventory[next_uid(inventory)] = {"id": item_id, "a": put, "bag": current_bag}
+					put_here -= put
+					remaining -= put
+					free_in_bag -= 1
+			current_bag = (current_bag + 1) % bags
+			checked += 1
 		return
 
+	# Pseudo-infinite stack: add to any existing stack, else a new one.
 	for slot_uid in inventory:
 		if int(inventory[slot_uid].get("id", 0)) == item_id:
 			inventory[slot_uid]["a"] = int(inventory[slot_uid].get("a", 0)) + remaining
 			return
-	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining}
+	var bag: int = _next_bag_with_space(inventory, MAX_SLOTS, start_bag, bag_count)
+	inventory[next_uid(inventory)] = {"id": item_id, "a": remaining, "bag": bag}
+
+
+## Find the next unlocked bag with at least one free slot, starting from
+## [param start_bag] and wrapping. Falls back to [param start_bag] if all are full.
+##
+## [param capacity] is the PER-BAG slot cap and must be [constant MAX_SLOTS] for
+## the player bag. Passing 1 makes "has space" mean "is entirely empty", which
+## scatters one item into each bag instead of filling the active one — see
+## tools/verify_bags.tscn.
+static func _next_bag_with_space(
+	inventory: Dictionary,
+	capacity: int,
+	start_bag: int,
+	bag_count: int
+) -> int:
+	for i: int in bag_count:
+		var bag: int = (start_bag + i) % maxi(1, bag_count)
+		if free_slots(inventory, capacity, bag) > 0:
+			return bag
+	return start_bag
 
 
 ## Move as much as possible from [param from_uid] onto [param to_uid] when both

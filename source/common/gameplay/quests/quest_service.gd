@@ -120,6 +120,8 @@ static func apply_turn_in(
 	instance: Node
 ) -> void:
 	var inventory: Dictionary = resource.inventory
+	var active_bag: int = resource.active_inventory_bag
+	var bag_count: int = resource.inventory_bags
 
 	# Consume COLLECT items + grant_on_accept (delivery item served its narrative).
 	for objective: QuestObjective in quest.objectives:
@@ -141,18 +143,18 @@ static func apply_turn_in(
 	var progress: Dictionary = resource.add_experience(quest.reward_xp)
 	var mastery: Dictionary = RewardService.grant_mastery_reward(peer_id, quest.reward_mastery_xp)
 	if quest.reward_gold > 0:
-		Inventory.add_item(inventory, Economy.gold_id(), quest.reward_gold)
+		Inventory.add_item(inventory, Economy.gold_id(), quest.reward_gold, false, active_bag, bag_count)
 		loot.append({"id": Economy.gold_id(), "amount": quest.reward_gold, "name": "Gold"})
 	for reward: QuestReward in quest.reward_items:
 		if reward and reward.item:
 			var reward_id: int = int(reward.item.get_meta(&"id", 0))
-			Inventory.add_item(inventory, reward_id, reward.amount)
+			Inventory.add_item(inventory, reward_id, reward.amount, false, active_bag, bag_count)
 			loot.append({"id": reward_id, "amount": reward.amount, "name": str(reward.item.item_name)})
 	var style_weapon: Item = quest.pick_style_weapon_for(resource)
 	if style_weapon:
 		var style_id: int = int(style_weapon.get_meta(&"id", 0))
 		if style_id > 0:
-			Inventory.add_item(inventory, style_id, 1)
+			Inventory.add_item(inventory, style_id, 1, false, active_bag, bag_count)
 			loot.append({"id": style_id, "amount": 1, "name": str(style_weapon.item_name)})
 	var quest_id: int = int(quest.get_meta(&"id", 0))
 	resource.set_quest_turned_in(quest_id)
@@ -261,7 +263,10 @@ static func _grant_objective_item(
 	var item_id: int = int(objective.grant_item.get_meta(&"id", 0))
 	if item_id <= 0:
 		return
-	Inventory.add_item(resource.inventory, item_id, 1)
+	Inventory.add_item(
+		resource.inventory, item_id, 1, false,
+		resource.active_inventory_bag, resource.inventory_bags
+	)
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {
 			"id": item_id,
@@ -398,7 +403,10 @@ static func replenish_seep_root_if_needed(resource: PlayerResource, peer_id: int
 static func _grant_seep_recovery_item(
 	resource: PlayerResource, peer_id: int, item_id: int, fallback_name: String
 ) -> void:
-	Inventory.add_item(resource.inventory, item_id, 1)
+	Inventory.add_item(
+		resource.inventory, item_id, 1, false,
+		resource.active_inventory_bag, resource.inventory_bags
+	)
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"item.picked_up", {

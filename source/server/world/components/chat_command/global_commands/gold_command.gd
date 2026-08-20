@@ -24,7 +24,10 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 
 	var res: PlayerResource = target.resource
 	var gold_id: int = Economy.gold_id()
-	Inventory.add_item(res.inventory, gold_id, amount)
+	Inventory.add_item(
+		res.inventory, gold_id, amount, false,
+		res.active_inventory_bag, res.inventory_bags
+	)
 	server_instance.world_server.database.save_player(res)
 	ChatCommand.notify_inventory_changed(target.peer_id, gold_id, amount, "Gold")
 	return "Gave %d gold to %s. New balance: %d." % [

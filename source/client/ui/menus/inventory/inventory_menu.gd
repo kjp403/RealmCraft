@@ -43,6 +43,13 @@ const GROUPS: Array[Array] = [
 	[&"quest", "Quest"],
 	[&"items", "Items"],
 ]
+## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
+## The authoritative costs live in inventory.upgrade_bag.gd on the server.
+const BAG_PRICE_LABELS: Dictionary = {
+	2: "500K",
+	3: "1.25M",
+}
+
 const GRID_COLUMNS: int = 4
 const SECTION_HEADER_COLOR: Color = Color(0.56, 0.72, 0.85)
 const EQUIPPED_BADGE_COLOR: Color = Color(1.0, 0.9, 0.55)
@@ -63,6 +70,14 @@ var _filling: bool
 ## A refresh that arrived while one was in flight — run it after (an
 ## equipment_changed can land mid-fill when a weapon draw completes).
 var _refill_queued: bool
+## Current active inventory bag (0-2) and unlocked count (1-3).
+var _active_bag: int = 0
+var _bag_count: int = 1
+var _bag_tab_buttons: Array[Button] = []
+var _bag_tab_container: HBoxContainer
+## Bag tab index armed for purchase, or -1. Buying costs 500K/1.25M gold from a
+## TAB click, so it takes two clicks — see _on_bag_tab.
+var _pending_bag_purchase: int = -1
 
 ## Current selection driving the detail column.
 var _selected_item: Item
@@ -127,6 +142,7 @@ func _ready() -> void:
 	detail_icon.texture = null
 	_detail_pixel = PixelIcon.mount(detail_icon)
 
+	_build_bag_tabs()
 	_build_rail_tabs()
 	_build_hint_bar()
 
@@ -219,6 +235,108 @@ func _set_view(view: StringName) -> void:
 
 # --- Category rail ---
 
+func _build_bag_tabs() -> void:
+	_bag_tab_container = HBoxContainer.new()
+	_bag_tab_container.add_theme_constant_override(&"separation", 4)
+	_bag_tab_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_col.add_child(_bag_tab_container)
+	left_col.move_child(_bag_tab_container, 0)
+	var group: ButtonGroup = ButtonGroup.new()
+	for i: int in range(Inventory.MAX_BAGS):
+		var button: Button = Button.new()
+		button.text = "Bag %d" % (i + 1)
+		button.toggle_mode = true
+		button.button_group = group
+		button.theme_type_variation = &"FlatButton"
+		button.custom_minimum_size = Vector2(0, 28)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(_on_bag_tab.bind(i))
+		_bag_tab_container.add_child(button)
+		_bag_tab_buttons.append(button)
+
+
+func _update_bag_tabs() -> void:
+	for i: int in _bag_tab_buttons.size():
+		var button: Button = _bag_tab_buttons[i]
+		button.visible = true
+		button.set_pressed_no_signal(i == _active_bag)
+		if i < _bag_count:
+			# Owned.
+			button.disabled = false
+			button.text = "Bag %d" % (i + 1)
+			button.tooltip_text = ""
+			continue
+		# Locked. Only the NEXT bag is buyable — bag 3 cannot be bought before
+		# bag 2, and the server refuses a mismatch (reason "wrong_bag").
+		var buyable: bool = i == _bag_count
+		button.disabled = not buyable
+		if not buyable:
+			button.text = "Bag %d (locked)" % (i + 1)
+			button.tooltip_text = "Unlock Bag %d first." % (i)
+			continue
+		var price: String = BAG_PRICE_LABELS.get(i + 1, "?")
+		if _pending_bag_purchase == i:
+			button.text = "Buy for %s? Click again" % price
+			button.tooltip_text = "Click once more to spend %s gold." % price
+		else:
+			button.text = "Bag %d (%s)" % [i + 1, price]
+			button.tooltip_text = "Buy Bag %d for %s gold." % [i + 1, price]
+
+
+func _on_bag_tab(index: int) -> void:
+	if InstanceClient.current == null:
+		return
+	if index < _bag_count:
+		_pending_bag_purchase = -1
+		_active_bag = index
+		Client.request_data(
+			&"inventory.set_active_bag", Callable(), {"bag": index}, InstanceClient.current.name
+		)
+		_update_bag_tabs()
+		_rebuild_grid()
+		return
+
+	# Locked tab. Only the next bag is for sale.
+	if index != _bag_count:
+		Toaster.toast("Unlock Bag %d first." % index)
+		_update_bag_tabs()
+		return
+
+	# These cost 500,000 / 1,250,000 gold and the affordance is a TAB, so a
+	# single stray click must never spend it. First click arms, second buys.
+	if _pending_bag_purchase != index:
+		_pending_bag_purchase = index
+		_update_bag_tabs()
+		Toaster.toast("Click again to buy Bag %d for %s gold." % [
+			index + 1, BAG_PRICE_LABELS.get(index + 1, "?")
+		])
+		return
+
+	_pending_bag_purchase = -1
+	# Send which bag we believe we are buying; the server refuses a mismatch so
+	# the label and the charge can never disagree.
+	var result: Array = await Client.request_data_await(
+		&"inventory.upgrade_bag", {"bag": index + 1}, InstanceClient.current.name
+	)
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if result[1] == OK and bool(payload.get("ok", false)):
+		Toaster.toast("Bag %d unlocked!" % int(payload.get("bags", index + 1)))
+		fill_inventory()
+		return
+	match str(payload.get("reason", "")):
+		"cant_afford":
+			Toaster.toast("You need %s gold." % BAG_PRICE_LABELS.get(index + 1, "more"))
+		"max_bags":
+			Toaster.toast("You already own every bag.")
+		"dead":
+			Toaster.toast("Not while you are dead.")
+		"wrong_bag":
+			Toaster.toast("Unlock Bag %d first." % int(payload.get("next_bag", index)))
+		_:
+			Toaster.toast("Could not buy that bag.")
+	_update_bag_tabs()
+
+
 func _build_rail_tabs() -> void:
 	var group: ButtonGroup = ButtonGroup.new()
 	for tab: Array in RAIL_TABS:
@@ -300,6 +418,7 @@ func fill_inventory() -> void:
 		_refill_queued = true
 		return
 	_filling = true
+	var bag_result: Array = await Client.request_data_await(&"inventory.bags", {}, InstanceClient.current.name)
 	var result: Array = await Client.request_data_await(&"inventory.get", {}, InstanceClient.current.name)
 	_filling = false
 	if _refill_queued:
@@ -311,7 +430,12 @@ func fill_inventory() -> void:
 		return
 
 	_inventory = result[0]
+	if bag_result[1] == OK:
+		var bag_data: Dictionary = bag_result[0] if bag_result[0] is Dictionary else {}
+		_bag_count = clampi(int(bag_data.get("bags", 1)), 1, Inventory.MAX_BAGS)
+		_active_bag = clampi(int(bag_data.get("active_bag", 0)), 0, _bag_count - 1)
 	_set_wallet(Inventory.count(_inventory, _gold_id))
+	_update_bag_tabs()
 	_update_dynamic_tabs()
 	_rebuild_grid()
 
@@ -441,6 +565,8 @@ func _collect_entries() -> Array[Dictionary]:
 			})
 	for slot_uid_key in _inventory:
 		var data: Dictionary = _inventory[slot_uid_key]
+		if int(data.get("bag", 0)) != _active_bag:
+			continue
 		var item_id: int = int(data.get("id", 0))
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		if item == null or item.is_currency:

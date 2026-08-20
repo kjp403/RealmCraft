@@ -28,7 +28,12 @@ func data_request_handler(
 	# Gear returns to the bag — need a free square first. Ammo stays bag-resident
 	# while slotted, so it never needs a free square on unequip.
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
-	if item is GearItem and item is not AmmoItem and not Inventory.can_add(player.player_resource.inventory, item_id, 1):
+	var active_bag: int = player.player_resource.active_inventory_bag
+	var bag_count: int = player.player_resource.inventory_bags
+	if item is GearItem and item is not AmmoItem and not Inventory.can_add(
+		player.player_resource.inventory, item_id, 1, Inventory.MAX_SLOTS,
+		false, active_bag, bag_count
+	):
 		return {"ok": false, "reason": "inventory_full"}
 
 	player.equipment_component.unequip(slot)
@@ -36,6 +41,9 @@ func data_request_handler(
 	# materials are REFERENCED while held — they never left the bag, so re-adding
 	# would duplicate them. Ammo is also reference-slotted (stack stays in the bag).
 	if item is GearItem and item is not AmmoItem:
-		Inventory.try_add_item(player.player_resource.inventory, item_id, 1)
+		Inventory.try_add_item(
+			player.player_resource.inventory, item_id, 1, Inventory.MAX_SLOTS,
+			false, active_bag, bag_count
+		)
 	player.player_resource.equipment.erase(slot)
 	return {"ok": true}

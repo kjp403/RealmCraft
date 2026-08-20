@@ -171,7 +171,7 @@ static func _refund(player: Player, cost: int) -> void:
 		return
 	var gold_id: int = Economy.gold_id()
 	if gold_id > 0:
-		Inventory.add_item(player.player_resource.inventory, gold_id, cost)
+		Inventory.add_item(player.player_resource.inventory, gold_id, cost, false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags)
 
 
 # --- run lifecycle -----------------------------------------------------------

@@ -81,7 +81,11 @@ func data_request_handler(
 		# Move the item out of inventory; return any swapped-out gear to it.
 		Inventory.remove_one_by_id(inventory, item_id)
 		if previous_id > 0:
-			Inventory.add_item(inventory, previous_id, 1)
+			Inventory.add_item(
+				inventory, previous_id, 1, false,
+				player.player_resource.active_inventory_bag,
+				player.player_resource.inventory_bags
+			)
 		player.player_resource.equipment[slot_key] = item_id
 		# Non-weapon gear equips instantly — must return success here. Without
 		# this, fall-through returns cant_equip and the client toasts failure
