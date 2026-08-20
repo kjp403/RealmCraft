@@ -90,6 +90,8 @@ var _equipment_right_list: VBoxContainer
 var _skills_left_list: VBoxContainer
 var _skills_right_list: VBoxContainer
 var _tab_buttons: Array[Button] = []
+## Self-profile only: opens the edit view where titles are picked.
+var _titles_button: Button
 
 
 func _ready() -> void:
@@ -237,6 +239,20 @@ func _build_profile_tabs() -> void:
 ## Buttons that leave Profile for another menu, styled like tabs but never
 ## toggled — they are navigation, not a view of this panel.
 func _build_handoff_buttons(tab_bar: HBoxContainer) -> void:
+	# Titles is not another menu: it opens this panel's own edit view, because
+	# "where do I change my title?" was answered by Edit -> Trophies, which
+	# named the feature something players never call it.
+	# Built hidden: the tab row exists before any payload does, and only the
+	# owner of a profile may change its titles.
+	_titles_button = Button.new()
+	_titles_button.text = "Titles"
+	_titles_button.focus_mode = Control.FOCUS_NONE
+	_titles_button.custom_minimum_size = Vector2(104.0, 28.0)
+	_titles_button.add_theme_font_size_override(&"font_size", 11)
+	_titles_button.pressed.connect(_open_edit_panel)
+	_titles_button.hide()
+	tab_bar.add_child(_titles_button)
+
 	for entry: Array in [
 		["Character", &"character"],
 		["Skins", &"cosmetics"],
@@ -402,6 +418,8 @@ func apply_profile(profile: Dictionary) -> void:
 	description_text.append_text(description)
 
 	_render_stats(profile.get("stats", {}))
+	if _titles_button != null:
+		_titles_button.visible = is_self
 	_render_title_strip(profile)
 	_render_public_equipment(profile.get("equipment", {}))
 	_render_public_skills(profile.get("skills", {}))
@@ -642,7 +660,11 @@ func _render_title_strip(profile: Dictionary) -> void:
 
 	if trophies.is_empty():
 		var empty: Label = Label.new()
-		empty.text = "No trophies yet." if not profile.get("self", false) else "Pin trophies from Edit → Trophies."
+		empty.text = (
+			"No titles yet."
+			if not profile.get("self", false)
+			else "Pick titles from the Titles tab."
+		)
 		empty.self_modulate = Color(0.55, 0.55, 0.6)
 		title_strip.add_child(empty)
 		return
@@ -947,7 +969,7 @@ func _build_edit_ui() -> void:
 	# checked at once. Header + live counter so the cap is obvious.
 	var trophy_header: HBoxContainer = HBoxContainer.new()
 	vbox.add_child(trophy_header)
-	var trophy_label: Label = _make_field_label("Trophies")
+	var trophy_label: Label = _make_field_label("Displayed titles")
 	trophy_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	trophy_header.add_child(trophy_label)
 	_trophies_counter = Label.new()

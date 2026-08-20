@@ -150,7 +150,7 @@ fit_content = true
 [node name="TitleStripLabel" type="Label" parent="CenterContainer/Card/CardMargin/VBox/Body/RightPanel/RightMargin/RightVBox" unique_id=1302408767]
 self_modulate = Color(0.7, 0.7, 0.75, 1)
 layout_mode = 2
-text = "Trophies"
+text = "Titles"
 
 [node name="TitleStripScroll" type="ScrollContainer" parent="CenterContainer/Card/CardMargin/VBox/Body/RightPanel/RightMargin/RightVBox" unique_id=299403802]
 custom_minimum_size = Vector2(0, 80)
