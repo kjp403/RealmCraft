@@ -1,6 +1,9 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 300.0)
+## Sized to the GRID, not the other way round: 7 rows of 36px slots plus the
+## header, bag tabs and margins. Shrinking slots to fit a fixed 300px panel made
+## item icons unreadable.
+const PANEL_SIZE := Vector2(180.0, 372.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 48.0
 
@@ -15,7 +18,7 @@ const GRID_ROWS := 7
 const CELL_COUNT := GRID_COLUMNS * GRID_ROWS
 const MIN_SLOT_COUNT := CELL_COUNT
 const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
-const SLOT_SIZE := Vector2(24.0, 24.0)
+const SLOT_SIZE := Vector2(36.0, 36.0)
 
 ## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
 ## The authoritative costs live in inventory.upgrade_bag.gd on the server.
@@ -54,8 +57,8 @@ func _ready() -> void:
 	size = PANEL_SIZE
 
 	inventory_grid.columns = GRID_COLUMNS
-	inventory_grid.add_theme_constant_override(&"h_separation", 3)
-	inventory_grid.add_theme_constant_override(&"v_separation", 3)
+	inventory_grid.add_theme_constant_override(&"h_separation", 4)
+	inventory_grid.add_theme_constant_override(&"v_separation", 4)
 
 	content_margin.add_theme_constant_override(&"margin_left", 10)
 
@@ -268,7 +271,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		slot.focus_mode = Control.FOCUS_NONE
 		# STOP so empty squares can accept bag-drag drops.
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
-		slot.add_theme_constant_override(&"icon_max_width", 18)
+		slot.add_theme_constant_override(&"icon_max_width", 24)
 
 		inventory_grid.add_child(slot)
 
