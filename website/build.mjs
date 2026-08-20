@@ -509,6 +509,16 @@ function locationBgUrl(slug) {
   return "";
 }
 
+function copyFonts() {
+  const src = path.join(SRC, "fonts");
+  if (!fs.existsSync(src)) return;
+  const dest = path.join(DIST, "fonts");
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(src)) {
+    fs.copyFileSync(path.join(src, name), path.join(dest, name));
+  }
+}
+
 function copyLocationBgs() {
   if (!fs.existsSync(LOC_BG_DIR)) return;
   const dest = path.join(DIST, "media", "locations");
@@ -1916,6 +1926,7 @@ function build() {
   );
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
+  copyFonts();
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
   fs.copyFileSync(path.join(SRC, "leaderboards.js"), path.join(DIST, "leaderboards.js"));
   write(
