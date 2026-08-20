@@ -9,7 +9,9 @@ const ICON_DIR := \
 	"res://assets/sprites/ui/menu_icons_shadow/32px/"
 
 # Bottom-right panel placement.
-const PANEL_LEFT := -196.0
+## Width must exceed the widest child min-size or the PanelContainer grows past
+## its own offsets and hangs off the right edge of the screen.
+const PANEL_LEFT := -212.0
 const PANEL_RIGHT := -12.0
 const PANEL_BOTTOM := -12.0
 ## Height comes from the CONTENT, not a fixed 512px slab. The list is one entry
@@ -151,7 +153,7 @@ func _make_menu_button(entry: Dictionary) -> Button:
 
 	button.text = label
 	button.tooltip_text = label
-	button.custom_minimum_size = Vector2(210, 48)
+	button.custom_minimum_size = Vector2(0, 40)
 	button.size_flags_horizontal = \
 		Control.SIZE_EXPAND_FILL
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT

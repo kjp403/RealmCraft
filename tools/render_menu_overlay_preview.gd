@@ -54,8 +54,22 @@ func _go() -> void:
 	await get_tree().process_frame
 	if overlay.has_method("open"):
 		overlay.call("open")
-	for _i: int in 20:
+	# open() slides the panel in from the right over 0.18s. Screenshotting after
+	# 20 frames caught it mid-tween and made the panel look cropped.
+	for _i: int in 60:
 		await get_tree().process_frame
+	# Assert, don't eyeball: the panel grew past its own offsets once because a
+	# child min-size exceeded the panel width, and it hung off the screen edge.
+	var panel: Control = overlay.get("_panel") as Control
+	if panel != null:
+		var rect: Rect2 = panel.get_global_rect()
+		print("panel rect: ", rect, " viewport: ", Vector2(W, H))
+		if rect.position.x < 0.0 or rect.end.x > float(W) or rect.position.y < 0.0 				or rect.end.y > float(H):
+			push_error("menu overlay is off-screen: %s" % rect)
+			print("RESULT FAIL")
+			get_tree().quit(1)
+			return
+		print("RESULT PASS")
 
 	var image: Image = sv.get_texture().get_image()
 	image.resize(W * 2, H * 2, Image.INTERPOLATE_NEAREST)
