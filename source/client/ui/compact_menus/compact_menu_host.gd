@@ -255,7 +255,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 	if count % GRID_COLUMNS != 0:
 		count = mini(CELL_COUNT, count + (GRID_COLUMNS - (count % GRID_COLUMNS)))
 
-	for _index: int in range(count):
+	for index: int in range(count):
 		var slot := Button.new()
 
 		# Both minimum and maximum are fixed so item textures cannot resize rows.
@@ -268,6 +268,16 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		# STOP so empty squares can accept bag-drag drops.
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 		slot.add_theme_constant_override(&"icon_max_width", 20)
+
+		# 5x6 draws 30 squares but a bag holds MAX_SLOTS (28). The last two are
+		# structural filler that keeps the final row square — players read two
+		# identical-looking squares that never accept an item as broken slots,
+		# so they are dimmed, disabled and inert instead.
+		if index >= MAX_SLOT_COUNT:
+			slot.disabled = true
+			slot.modulate = Color(1.0, 1.0, 1.0, 0.25)
+			slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.tooltip_text = "Not a bag slot — a bag holds %d." % MAX_SLOT_COUNT
 
 		inventory_grid.add_child(slot)
 
