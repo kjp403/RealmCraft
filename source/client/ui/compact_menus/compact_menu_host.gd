@@ -4,17 +4,18 @@ const PANEL_SIZE := Vector2(180.0, 300.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 48.0
 
-const GRID_COLUMNS := 5
-const GRID_ROWS := 6
-## 5×6 = 30 cells for a 28-slot bag ([constant Inventory.MAX_SLOTS]): the whole
-## bag fits the panel at once, so the dock never needs a scrollbar. The last two
-## cells stay empty. Slots are sized so five columns fit the 180px panel.
-## Cells drawn (30) vs. slots a bag can actually hold (28) — the last two cells
-## are always empty filler that keeps the final row square.
+const GRID_COLUMNS := 4
+const GRID_ROWS := 7
+## 4x7 = 28 cells, EXACTLY [constant Inventory.MAX_SLOTS]. 5x6 drew 30 and the
+## two spares had no slot behind them: solid they read as broken slots, dimmed
+## they vanished and left a ragged three-square last row. At 28px the whole bag
+## still fits the panel at once, so there is no scrollbar either way.
+## Cells drawn == slots a bag holds. Keep it that way: any mismatch puts squares
+## on screen that silently refuse items.
 const CELL_COUNT := GRID_COLUMNS * GRID_ROWS
 const MIN_SLOT_COUNT := CELL_COUNT
 const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
-const SLOT_SIZE := Vector2(28.0, 28.0)
+const SLOT_SIZE := Vector2(24.0, 24.0)
 
 ## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
 ## The authoritative costs live in inventory.upgrade_bag.gd on the server.
@@ -255,7 +256,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 	if count % GRID_COLUMNS != 0:
 		count = mini(CELL_COUNT, count + (GRID_COLUMNS - (count % GRID_COLUMNS)))
 
-	for index: int in range(count):
+	for _index: int in range(count):
 		var slot := Button.new()
 
 		# Both minimum and maximum are fixed so item textures cannot resize rows.
@@ -267,17 +268,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		slot.focus_mode = Control.FOCUS_NONE
 		# STOP so empty squares can accept bag-drag drops.
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
-		slot.add_theme_constant_override(&"icon_max_width", 20)
-
-		# 5x6 draws 30 squares but a bag holds MAX_SLOTS (28). The last two are
-		# structural filler that keeps the final row square — players read two
-		# identical-looking squares that never accept an item as broken slots,
-		# so they are dimmed, disabled and inert instead.
-		if index >= MAX_SLOT_COUNT:
-			slot.disabled = true
-			slot.modulate = Color(1.0, 1.0, 1.0, 0.25)
-			slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot.tooltip_text = "Not a bag slot — a bag holds %d." % MAX_SLOT_COUNT
+		slot.add_theme_constant_override(&"icon_max_width", 18)
 
 		inventory_grid.add_child(slot)
 
