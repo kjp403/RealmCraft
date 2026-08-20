@@ -4,12 +4,24 @@ const PANEL_SIZE := Vector2(180.0, 300.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 48.0
 
-const GRID_COLUMNS := 4
-const GRID_ROWS := 7
-## Fixed 28-slot bag (4×7). Matches [constant Inventory.MAX_SLOTS].
-const MIN_SLOT_COUNT := GRID_COLUMNS * GRID_ROWS
+const GRID_COLUMNS := 5
+const GRID_ROWS := 6
+## 5×6 = 30 cells for a 28-slot bag ([constant Inventory.MAX_SLOTS]): the whole
+## bag fits the panel at once, so the dock never needs a scrollbar. The last two
+## cells stay empty. Slots are sized so five columns fit the 180px panel.
+## Cells drawn (30) vs. slots a bag can actually hold (28) — the last two cells
+## are always empty filler that keeps the final row square.
+const CELL_COUNT := GRID_COLUMNS * GRID_ROWS
+const MIN_SLOT_COUNT := CELL_COUNT
 const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
-const SLOT_SIZE := Vector2(36.0, 36.0)
+const SLOT_SIZE := Vector2(28.0, 28.0)
+
+## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
+## The authoritative costs live in inventory.upgrade_bag.gd on the server.
+const BAG_PRICE_LABELS: Dictionary = {
+	2: "500K",
+	3: "1.25M",
+}
 
 const ACTION_PRIMARY := 0
 const ACTION_DROP := 1
@@ -21,6 +33,14 @@ const ACTION_HOTKEY := 2
 @onready var inventory_grid: GridContainer = $MarginContainer/MainColumn/Content/InventoryScroll/InventoryGrid
 
 var gold_label: Label
+## Current active inventory bag (0-2) and unlocked count (1-3), mirrored from
+## the server by inventory.bags. The grid below shows ONE bag at a time.
+var active_bag: int = 0
+var bag_count: int = 1
+var bag_tab_buttons: Array[Button] = []
+## A tab is a cheap click target and a bag costs up to 1.25M gold, so buying
+## takes two clicks: the first arms, the second spends. Mirrors inventory_menu.
+var pending_bag_purchase: int = -1
 var context_menu: PopupMenu
 var context_entry: Dictionary = {}
 var primary_action_in_progress: bool = false
@@ -32,12 +52,13 @@ func _ready() -> void:
 	size = PANEL_SIZE
 
 	inventory_grid.columns = GRID_COLUMNS
-	inventory_grid.add_theme_constant_override(&"h_separation", 4)
-	inventory_grid.add_theme_constant_override(&"v_separation", 4)
+	inventory_grid.add_theme_constant_override(&"h_separation", 3)
+	inventory_grid.add_theme_constant_override(&"v_separation", 3)
 
 	content_margin.add_theme_constant_override(&"margin_left", 10)
 
 	_build_currency_pouch()
+	_build_bag_tabs()
 	_build_context_menu()
 	_build_empty_grid()
 
@@ -111,6 +132,111 @@ func _build_currency_pouch() -> void:
 	header.move_child(pouch, close_button.get_index())
 
 
+## Bag 1/2/3 selector directly under the header, above the grid. The grid, the
+## slots and every action below it are untouched — the tabs only change WHICH
+## bag those 28 squares are showing.
+func _build_bag_tabs() -> void:
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override(&"separation", 2)
+	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	for index: int in range(Inventory.MAX_BAGS):
+		var tab := Button.new()
+		tab.toggle_mode = true
+		tab.focus_mode = Control.FOCUS_NONE
+		tab.custom_minimum_size = Vector2(0.0, 20.0)
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab.add_theme_font_size_override(&"font_size", 11)
+		tab.pressed.connect(_on_bag_tab.bind(index))
+		tabs.add_child(tab)
+		bag_tab_buttons.append(tab)
+
+	var column: VBoxContainer = content_margin.get_parent() as VBoxContainer
+	column.add_child(tabs)
+	column.move_child(tabs, content_margin.get_index())
+	_update_bag_tabs()
+
+
+func _update_bag_tabs() -> void:
+	for index: int in bag_tab_buttons.size():
+		var tab: Button = bag_tab_buttons[index]
+		tab.set_pressed_no_signal(index == active_bag)
+		if index < bag_count:
+			tab.disabled = false
+			tab.text = str(index + 1)
+			tab.tooltip_text = "Bag %d" % (index + 1)
+			continue
+		# Locked. Only the NEXT bag is buyable — bag 3 cannot be bought before
+		# bag 2, and the server refuses a mismatch (reason "wrong_bag").
+		var price: String = BAG_PRICE_LABELS.get(index + 1, "?")
+		var buyable: bool = index == bag_count
+		tab.disabled = not buyable
+		if not buyable:
+			tab.text = str(index + 1)
+			tab.tooltip_text = "Unlock Bag %d first." % index
+			continue
+		if pending_bag_purchase == index:
+			tab.text = "Buy?"
+			tab.tooltip_text = "Click again to spend %s gold." % price
+		else:
+			tab.text = "%d +" % (index + 1)
+			tab.tooltip_text = "Buy Bag %d for %s gold." % [index + 1, price]
+
+
+func _on_bag_tab(index: int) -> void:
+	if InstanceClient.current == null:
+		return
+
+	if index < bag_count:
+		pending_bag_purchase = -1
+		active_bag = index
+		Client.request_data(
+			&"inventory.set_active_bag",
+			Callable(),
+			{"bag": index},
+			InstanceClient.current.name
+		)
+		_update_bag_tabs()
+		_refresh_inventory()
+		return
+
+	# Locked tab. Only the next bag is for sale.
+	if index != bag_count:
+		Toaster.toast("Unlock Bag %d first." % index)
+		_update_bag_tabs()
+		return
+
+	if pending_bag_purchase != index:
+		pending_bag_purchase = index
+		_update_bag_tabs()
+		Toaster.toast("Tap again to buy Bag %d for %s gold." % [
+			index + 1, BAG_PRICE_LABELS.get(index + 1, "?")
+		])
+		return
+
+	pending_bag_purchase = -1
+	# Send which bag we believe we are buying; the server refuses a mismatch so
+	# the label and the charge can never disagree.
+	var result: Array = await Client.request_data_await(
+		&"inventory.upgrade_bag",
+		{"bag": index + 1},
+		InstanceClient.current.name
+	)
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if result[1] == OK and bool(payload.get("ok", false)):
+		Toaster.toast("Bag %d unlocked!" % int(payload.get("bags", index + 1)))
+		_refresh_inventory()
+		return
+	match str(payload.get("reason", "")):
+		"cant_afford":
+			Toaster.toast("You need %s gold." % BAG_PRICE_LABELS.get(index + 1, "more"))
+		"max_bags":
+			Toaster.toast("You already own every bag.")
+		_:
+			Toaster.toast("Could not buy Bag %d." % (index + 1))
+	_update_bag_tabs()
+
+
 func _build_context_menu() -> void:
 	context_menu = PopupMenu.new()
 	context_menu.id_pressed.connect(_on_context_action)
@@ -122,9 +248,11 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		inventory_grid.remove_child(child)
 		child.queue_free()
 
-	var count: int = clampi(slot_count, MIN_SLOT_COUNT, MAX_SLOT_COUNT)
+	# Always the full 5x6 block: a partial last row would leave a gap where the
+	# scrollbar used to be, and the bag never exceeds CELL_COUNT anyway.
+	var count: int = clampi(slot_count, 0, CELL_COUNT)
 	if count % GRID_COLUMNS != 0:
-		count = mini(MAX_SLOT_COUNT, count + (GRID_COLUMNS - (count % GRID_COLUMNS)))
+		count = mini(CELL_COUNT, count + (GRID_COLUMNS - (count % GRID_COLUMNS)))
 
 	for _index: int in range(count):
 		var slot := Button.new()
@@ -138,7 +266,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		slot.focus_mode = Control.FOCUS_NONE
 		# STOP so empty squares can accept bag-drag drops.
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
-		slot.add_theme_constant_override(&"icon_max_width", 24)
+		slot.add_theme_constant_override(&"icon_max_width", 20)
 
 		inventory_grid.add_child(slot)
 
@@ -207,6 +335,17 @@ func _refresh_inventory() -> void:
 		Inventory.count(inventory, Economy.gold_id())
 	)
 
+	var bag_result: Array = await Client.request_data_await(
+		&"inventory.bags",
+		{},
+		InstanceClient.current.name
+	)
+	if bag_result.size() >= 2 and bag_result[1] == OK:
+		var bag_data: Dictionary = bag_result[0] if bag_result[0] is Dictionary else {}
+		bag_count = clampi(int(bag_data.get("bags", 1)), 1, Inventory.MAX_BAGS)
+		active_bag = clampi(int(bag_data.get("active_bag", 0)), 0, bag_count - 1)
+	_update_bag_tabs()
+
 	for slot_uid: Variant in inventory:
 		var data: Dictionary = inventory[slot_uid]
 		var item: Item = ContentRegistryHub.load_by_id(
@@ -216,6 +355,10 @@ func _refresh_inventory() -> void:
 
 		# Currency is displayed in the pouch instead of consuming a slot.
 		if item == null or item.is_currency:
+			continue
+
+		# One bag at a time: the grid only ever holds the active bag's slots.
+		if int(data.get("bag", 0)) != active_bag:
 			continue
 
 		entries.append({

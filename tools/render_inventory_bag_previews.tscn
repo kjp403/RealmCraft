@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_inventory_bag_previews.gd" id="1_invbagprev"]
+
+[node name="InventoryBagPreviewRig" type="Node"]
+script = ExtResource("1_invbagprev")
