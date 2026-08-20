@@ -1,6 +1,8 @@
 extends Control
-## The prayer book: every prayer, what it does, and a switch. Opened from the
-## Skills panel or a keybind (open_menu_requested(&"prayer")).
+## The prayer book: every prayer, what it does, and a switch. Lives in the
+## bottom dock beside the inventory, NOT as a fullscreen shell — prayers are
+## flipped mid-fight, and a full-rect card with a dimming backdrop meant the
+## player could neither see the fight nor click it.
 ##
 ## The server is authoritative on what is on — every toggle response carries a
 ## full status snapshot and this redraws from THAT, never from what it hoped
@@ -13,12 +15,20 @@ const CYAN: Color = Color(0.37, 0.83, 0.83)
 const LOCKED: Color = Color(0.62, 0.45, 0.45)
 const ON_TINT: Color = Color(0.55, 0.85, 0.55)
 
+## Dock geometry, matching CompactSkillsHost so the panels line up.
+const PANEL_SIZE := Vector2(300.0, 340.0)
+const RIGHT_MARGIN := 12.0
+const BOTTOM_CLEARANCE := 48.0
+
 var _content: VBoxContainer
 var _busy: bool = false
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_place_panel()
+	var hud: Control = get_parent() as Control
+	if hud != null:
+		hud.resized.connect(_place_panel)
 	# Build on _ready like every other menu (see inventory_menu). Two traps here,
 	# and hitting either leaves an EMPTY full-rect Control over the game that
 	# swallows every click with no Close button — indistinguishable from a freeze:
@@ -50,7 +60,7 @@ func _refresh() -> void:
 	_build_shell()
 	var loading: Label = Label.new()
 	loading.text = "Prayers"
-	loading.add_theme_font_size_override(&"font_size", 22)
+	loading.add_theme_font_size_override(&"font_size", 15)
 	loading.add_theme_color_override(&"font_color", GOLD)
 	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(loading)
@@ -77,13 +87,15 @@ func _build(state: Dictionary) -> void:
 
 	var title: Label = Label.new()
 	title.text = "Prayers"
-	title.add_theme_font_size_override(&"font_size", 22)
+	title.add_theme_font_size_override(&"font_size", 15)
 	title.add_theme_color_override(&"font_color", GOLD)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_content.add_child(title)
 
 	var points: Label = Label.new()
 	points.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	points.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	points.add_theme_font_size_override(&"font_size", 11)
 	points.add_theme_color_override(&"font_color", CYAN)
 	var drain: float = float(state.get("drain", 0.0))
 	points.text = "%d / %d points" % [
@@ -99,15 +111,12 @@ func _build(state: Dictionary) -> void:
 		]
 	_content.add_child(points)
 
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, 340)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_content.add_child(scroll)
-
+	# No nested ScrollContainer: _build_shell already scrolls, and a second one
+	# with a fixed 340px minimum forced the rows wider than the dock panel.
 	var list: VBoxContainer = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override(&"separation", 6)
-	scroll.add_child(list)
+	list.add_theme_constant_override(&"separation", 4)
+	_content.add_child(list)
 
 	for prayer: PrayerResource in PrayerBook.PRAYERS:
 		if prayer == null:
@@ -120,22 +129,23 @@ func _build(state: Dictionary) -> void:
 func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 	var unlocked: bool = level >= prayer.required_level
 	var row: PanelContainer = PanelContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var pad: MarginContainer = MarginContainer.new()
 	for side: String in ["left", "right"]:
-		pad.add_theme_constant_override(StringName("margin_" + side), 10)
-	for side: String in ["top", "bottom"]:
 		pad.add_theme_constant_override(StringName("margin_" + side), 6)
+	for side: String in ["top", "bottom"]:
+		pad.add_theme_constant_override(StringName("margin_" + side), 4)
 	row.add_child(pad)
 
 	var line: HBoxContainer = HBoxContainer.new()
-	line.add_theme_constant_override(&"separation", 10)
+	line.add_theme_constant_override(&"separation", 6)
 	line.alignment = BoxContainer.ALIGNMENT_BEGIN
 	pad.add_child(line)
 
 	# Prayer icon, if one is authored.
 	if prayer.icon != null:
 		var icon: TextureRect = TextureRect.new()
-		icon.custom_minimum_size = Vector2(28, 28)
+		icon.custom_minimum_size = Vector2(20, 20)
 		icon.texture = prayer.icon
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -144,10 +154,17 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 
 	var text: VBoxContainer = VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Long names ("Bulwark of the Mountain") must wrap inside the dock width
+	# instead of pushing the toggle off the panel.
+	text.custom_minimum_size = Vector2(0, 0)
 	line.add_child(text)
 
 	var name_label: Label = Label.new()
 	name_label.text = prayer.display_name
+	# One line per row. 11px is set by the longest name in the book — "Bulwark
+	# of the Mountain" clipped at 12px in the 300px panel.
+	name_label.add_theme_font_size_override(&"font_size", 11)
+	name_label.clip_text = true
 	name_label.add_theme_color_override(
 		&"font_color", ON_TINT if is_on else (GOLD if unlocked else LOCKED)
 	)
@@ -155,7 +172,8 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 
 	var detail: Label = Label.new()
 	detail.add_theme_color_override(&"font_color", MUTED)
-	detail.add_theme_font_size_override(&"font_size", 12)
+	detail.add_theme_font_size_override(&"font_size", 10)
+	detail.clip_text = true
 	if unlocked:
 		detail.text = "%s   ·   %s" % [prayer.describe_modifiers(), prayer.describe_drain()]
 	else:
@@ -163,7 +181,9 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 	text.add_child(detail)
 
 	var toggle: Button = Button.new()
-	toggle.custom_minimum_size = Vector2(78, 34)
+	toggle.custom_minimum_size = Vector2(44, 24)
+	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	toggle.add_theme_font_size_override(&"font_size", 11)
 	toggle.text = "On" if is_on else "Off"
 	toggle.disabled = not unlocked
 	toggle.pressed.connect(_on_toggle.bind(prayer.slug, not is_on))
@@ -210,38 +230,51 @@ func _instance_name() -> String:
 	return String(InstanceClient.current.name) if InstanceClient.current else ""
 
 
+## Bottom-right, above the dock, matching the compact hosts. No backdrop and no
+## full-rect Control: the world behind stays visible AND clickable, so a prayer
+## can be flipped without giving up the fight.
+func _place_panel() -> void:
+	var hud: Control = get_parent() as Control
+	if hud == null:
+		return
+	custom_minimum_size = PANEL_SIZE
+	size = PANEL_SIZE
+	position = Vector2(
+		hud.size.x - PANEL_SIZE.x - RIGHT_MARGIN,
+		hud.size.y - PANEL_SIZE.y - BOTTOM_CLEARANCE
+	)
+
+
 func _build_shell() -> void:
 	for child: Node in get_children():
 		child.queue_free()
-	var backdrop: ColorRect = ColorRect.new()
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	backdrop.color = Color(0.04, 0.05, 0.08, 0.7)
-	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(backdrop)
-
-	var center: CenterContainer = CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place_panel()
 
 	var card: PanelContainer = PanelContainer.new()
-	card.custom_minimum_size = Vector2(460, 0)
-	center.add_child(card)
+	card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(card)
 
 	var pad: MarginContainer = MarginContainer.new()
-	pad.add_theme_constant_override(&"margin_left", 18)
-	pad.add_theme_constant_override(&"margin_right", 18)
-	pad.add_theme_constant_override(&"margin_top", 14)
-	pad.add_theme_constant_override(&"margin_bottom", 14)
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 10)
 	card.add_child(pad)
 
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pad.add_child(scroll)
+
 	_content = VBoxContainer.new()
-	_content.add_theme_constant_override(&"separation", 10)
-	pad.add_child(_content)
+	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_theme_constant_override(&"separation", 6)
+	scroll.add_child(_content)
 
 
 func _button(text: String, callback: Callable) -> Button:
 	var b: Button = Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(110, 38)
+	b.custom_minimum_size = Vector2(84, 26)
 	b.pressed.connect(callback)
 	return b

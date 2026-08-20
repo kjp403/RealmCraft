@@ -15,11 +15,15 @@ const SLAYER_TRACKER_SCRIPT: Script = preload(
 )
 ## Submenus sit at z=100. Chat stays this high over the dungeon lobby so Enter
 ## can still compose a room code without closing the keeper UI.
+## The prayer book, hosted in the dock rather than as a fullscreen shell.
+const PRAYER_PANEL_SCENE: String = "res://source/client/ui/menus/prayer/prayer_menu.tscn"
+
 const CHAT_ABOVE_MENU_Z: int = 110
 const CHAT_DEFAULT_Z: int = 1
 
 @export var sub_menu: Control
 
+var _prayer_dock: Control
 var notifications: Array[Dictionary]
 var menus: Dictionary[StringName, Control]
 var _xp_tween: Tween
@@ -162,7 +166,7 @@ func _ready() -> void:
 	prayer_button.icon = preload("res://assets/sprites/ui/menu_icons_shadow/32px/realmcraft_menu_icons/Prayer.png")
 	prayer_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prayer_button.tooltip_text = "Prayers"
-	prayer_button.pressed.connect(display_menu.bind(&"prayer"))
+	prayer_button.pressed.connect(_on_prayer_dock_button_pressed)
 	$BottomMenuDock.add_child(prayer_button)
 
 	# Dock icons must never take keyboard focus — Space is the attack bind, and Godot's default
@@ -761,7 +765,7 @@ func _animate_menu_open(menu: Control) -> void:
 
 
 func _compact_panels() -> Array[Control]:
-	return [
+	var panels: Array[Control] = [
 		$CompactMenuHost,
 		$CompactEquipmentHost,
 		$CompactSkillsHost,
@@ -770,6 +774,9 @@ func _compact_panels() -> Array[Control]:
 		$CompactFriendsHost,
 		$CompactSettingsHost,
 	]
+	if _prayer_dock != null and is_instance_valid(_prayer_dock):
+		panels.append(_prayer_dock)
+	return panels
 
 
 func _hide_compact_panels() -> void:
@@ -789,6 +796,22 @@ func _toggle_compact_panel(selected_panel: Control) -> void:
 
 func _on_inventory_dock_button_pressed() -> void:
 	_toggle_compact_panel($CompactMenuHost)
+
+
+## The prayer book is a dock panel, not a fullscreen shell — built on first use
+## because it is not in hud.tscn (it ships as its own menu scene).
+func _on_prayer_dock_button_pressed() -> void:
+	_toggle_compact_panel(_prayer_panel())
+
+
+func _prayer_panel() -> Control:
+	if _prayer_dock != null and is_instance_valid(_prayer_dock):
+		return _prayer_dock
+	_prayer_dock = load(PRAYER_PANEL_SCENE).instantiate() as Control
+	_prayer_dock.z_index = 5
+	add_child(_prayer_dock)
+	_prayer_dock.hide()
+	return _prayer_dock
 
 
 func _on_equipment_dock_button_pressed() -> void:
