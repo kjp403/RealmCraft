@@ -19,7 +19,7 @@ class_name Inventory
 
 
 ## Hard cap on non-currency bag slots (OSRS-style). Forces bank usage.
-const MAX_SLOTS: int = 28
+const MAX_SLOTS: int = 30
 ## Number of inventory bags a player can unlock.
 const MAX_BAGS: int = 3
 ## Materials (ores, logs, bars, hides, herbs) and cooked food stack this high

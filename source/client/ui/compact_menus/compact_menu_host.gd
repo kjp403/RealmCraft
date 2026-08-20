@@ -1,21 +1,23 @@
 extends PanelContainer
 
-const PANEL_SIZE := Vector2(180.0, 300.0)
+## Sized to the GRID, not the other way round: 5 columns x 6 rows of 36px slots
+## plus the header, bag tabs and margins. Shrinking slots to fit a fixed panel
+## made item icons unreadable.
+const PANEL_SIZE := Vector2(224.0, 330.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 48.0
 
-const GRID_COLUMNS := 4
-const GRID_ROWS := 7
-## 4x7 = 28 cells, EXACTLY [constant Inventory.MAX_SLOTS]. 5x6 drew 30 and the
-## two spares had no slot behind them: solid they read as broken slots, dimmed
-## they vanished and left a ragged three-square last row. At 28px the whole bag
-## still fits the panel at once, so there is no scrollbar either way.
+const GRID_COLUMNS := 5
+const GRID_ROWS := 6
+## 5x6 = 30 cells, EXACTLY [constant Inventory.MAX_SLOTS]. Cells drawn and slots
+## held must stay equal — any mismatch puts squares on screen that silently
+## refuse items.
 ## Cells drawn == slots a bag holds. Keep it that way: any mismatch puts squares
 ## on screen that silently refuse items.
 const CELL_COUNT := GRID_COLUMNS * GRID_ROWS
 const MIN_SLOT_COUNT := CELL_COUNT
 const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
-const SLOT_SIZE := Vector2(24.0, 24.0)
+const SLOT_SIZE := Vector2(36.0, 36.0)
 
 ## Display-only price labels for buyable bags, keyed by BAG NUMBER (not index).
 ## The authoritative costs live in inventory.upgrade_bag.gd on the server.
@@ -54,8 +56,8 @@ func _ready() -> void:
 	size = PANEL_SIZE
 
 	inventory_grid.columns = GRID_COLUMNS
-	inventory_grid.add_theme_constant_override(&"h_separation", 3)
-	inventory_grid.add_theme_constant_override(&"v_separation", 3)
+	inventory_grid.add_theme_constant_override(&"h_separation", 4)
+	inventory_grid.add_theme_constant_override(&"v_separation", 4)
 
 	content_margin.add_theme_constant_override(&"margin_left", 10)
 
@@ -136,7 +138,7 @@ func _build_currency_pouch() -> void:
 
 ## Bag 1/2/3 selector directly under the header, above the grid. The grid, the
 ## slots and every action below it are untouched — the tabs only change WHICH
-## bag those 28 squares are showing.
+## bag those 30 squares are showing.
 func _build_bag_tabs() -> void:
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override(&"separation", 2)
@@ -268,7 +270,7 @@ func _build_empty_grid(slot_count: int = MIN_SLOT_COUNT) -> void:
 		slot.focus_mode = Control.FOCUS_NONE
 		# STOP so empty squares can accept bag-drag drops.
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
-		slot.add_theme_constant_override(&"icon_max_width", 18)
+		slot.add_theme_constant_override(&"icon_max_width", 24)
 
 		inventory_grid.add_child(slot)
 
