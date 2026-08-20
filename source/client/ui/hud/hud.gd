@@ -168,6 +168,9 @@ func _ready() -> void:
 	prayer_button.tooltip_text = "Prayers"
 	prayer_button.pressed.connect(_on_prayer_dock_button_pressed)
 	$BottomMenuDock.add_child(prayer_button)
+	# Built in code, so it appends AFTER the scene's buttons and pushed Settings
+	# off the end of the row. Settings is the one that belongs last.
+	$BottomMenuDock.move_child(prayer_button, $BottomMenuDock/SettingsDockButton.get_index())
 
 	# Dock icons must never take keyboard focus — Space is the attack bind, and Godot's default
 	# Button FOCUS_ALL would let ui_accept / focused-button activation toggle inventory on Space.
