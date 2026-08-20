@@ -4,10 +4,11 @@ extends Node
 ##   godot --path . --mode=client res://tools/render_woodland_east.tscn
 
 const MAP: String = "res://source/common/gameplay/maps/maps/woodland/woodland_tiles.tscn"
-const TILE: int = 32
+const TILE: int = 16
 ## Tile-space windows across the east wing.
-const SHOTS: Array[Vector2i] = [Vector2i(120, 6), Vector2i(180, 6), Vector2i(240, 6)]
-const SIZE := Vector2i(60, 34)
+## Centred on the Swamp Hermit at tile (300, 42), where the ponds are.
+const SHOTS: Array[Vector2i] = [Vector2i(262, 20), Vector2i(300, 20)]
+const SIZE := Vector2i(80, 50)
 
 
 func _ready() -> void:

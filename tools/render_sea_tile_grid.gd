@@ -3,8 +3,8 @@ extends SceneTree
 ## read off precisely instead of guessed. Region + sheet are set by args:
 ##   godot --headless --path . -s tools/render_sea_tile_grid.gd -- beach_foam 0 0 20 8
 
-const DIR: String = "res://assets/sprites/environment/sea/tilesets/"
-const TILE: int = 32
+const DIR: String = ""
+const TILE: int = 16
 const SCALE: int = 2
 const GRID: Color = Color(1, 0, 0.6, 0.55)
 const LABEL_BG: Color = Color(0, 0, 0, 0.65)
@@ -18,7 +18,7 @@ func _init() -> void:
 	var cw: int = int(args[3]) if args.size() > 3 else 20
 	var ch: int = int(args[4]) if args.size() > 4 else 8
 
-	var tex: Texture2D = load(DIR + sheet + ".png")
+	var tex: Texture2D = load(sheet)
 	if tex == null:
 		push_error("no sheet %s" % sheet)
 		quit(1)
@@ -50,7 +50,7 @@ func _init() -> void:
 				cut.set_pixel(ox + 1, oy + 1 + py, LABEL_BG)
 
 	var out: String = ProjectSettings.globalize_path("res://previews/sea").path_join(
-		"grid_%s_%d_%d.png" % [sheet, cx, cy]
+		"grid_src_%d_%d.png" % [cx, cy]
 	)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://previews/sea"))
 	cut.save_png(out)
