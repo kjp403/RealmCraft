@@ -37,10 +37,10 @@ node_to_id = {}
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
 [node name="Entrance" parent="." instance=ExtResource("3_warper")]
-position = Vector2(496, 592)
+position = Vector2(56, 584)
 
 [node name="HuntExit" parent="." instance=ExtResource("6_exit")]
-position = Vector2(432, 592)
+position = Vector2(136, 584)
 hover_name = "Leave the hunt"
 
 [node name="ExitSign" type="Label" parent="."]
