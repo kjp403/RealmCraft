@@ -17,7 +17,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_blood_monster_a.tres" id="e14"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_elite_orc.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/trpg/trpg_armored_axeman.tres" id="e16"]
-[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/bosses/sun_eater.tres" id="e17"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="e18"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/cinderwright_maro.tres" id="e19"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e20"]
@@ -863,8 +862,7 @@ id_to_node = {
 22: NodePath("EliteOrc3"),
 23: NodePath("EliteOrc4"),
 24: NodePath("Axeman"),
-25: NodePath("Axeman2"),
-26: NodePath("Malacor")
+25: NodePath("Axeman2")
 }
 node_to_id = {
 NodePath("Demon"): 0,
@@ -892,8 +890,7 @@ NodePath("EliteOrc2"): 21,
 NodePath("EliteOrc3"): 22,
 NodePath("EliteOrc4"): 23,
 NodePath("Axeman"): 24,
-NodePath("Axeman2"): 25,
-NodePath("Malacor"): 26
+NodePath("Axeman2"): 25
 }
 
 [node name="Demon" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
@@ -1050,12 +1047,6 @@ weapon = null
 position = Vector2(5400.0, 1288.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("e16")
-weapon = null
-
-[node name="Malacor" parent="ReplicatedPropsContainer" instance=ExtResource("e8")]
-position = Vector2(4488.0, 4408.0)
-debug_draw_ranges = false
-enemy_data = ExtResource("e17")
 weapon = null
 
 [node name="NPCs" type="Node2D" parent="."]
