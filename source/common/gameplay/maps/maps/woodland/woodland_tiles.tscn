@@ -574,10 +574,13 @@ sources/9 = SubResource("TileSetAtlasSource_uuuau")
 size = Vector2(5824, 64)
 
 [sub_resource type="RectangleShape2D" id="MapEdgeV"]
-size = Vector2(64, 2176)
+size = Vector2(64, 1728)
 
-[sub_resource type="RectangleShape2D" id="MapEdgeH"]
-size = Vector2(5952, 64)
+[sub_resource type="RectangleShape2D" id="MapEdgeSouthW"]
+size = Vector2(940, 64)
+
+[sub_resource type="RectangleShape2D" id="MapEdgeSouthE"]
+size = Vector2(1180, 64)
 
 [sub_resource type="RectangleShape2D" id="BeachVoidSouth"]
 size = Vector2(2400, 64)
@@ -1903,16 +1906,20 @@ collision_mask = 0
 position = Vector2(0, 0)
 
 [node name="MapEdgeWest" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(-32, 1024)
+position = Vector2(-32, 800)
 shape = SubResource("MapEdgeV")
 
 [node name="MapEdgeEast" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(5856, 1024)
+position = Vector2(5344, 800)
 shape = SubResource("MapEdgeV")
 
-[node name="MapEdgeSouth" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(2912, 2080)
-shape = SubResource("MapEdgeH")
+[node name="MapEdgeSouthWest" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(438, 1632)
+shape = SubResource("MapEdgeSouthW")
+
+[node name="MapEdgeSouthEast" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(4756, 1632)
+shape = SubResource("MapEdgeSouthE")
 
 [node name="NorthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(2912, -32)
