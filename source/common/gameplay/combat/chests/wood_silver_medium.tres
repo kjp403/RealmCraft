@@ -13,43 +13,43 @@
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
-min_amount = 12
-max_amount = 28
+min_amount = 3
+max_amount = 7
 chance = 0.75
 
 [sub_resource type="Resource" id="Drop_1"]
 script = ExtResource("1_loot")
 item = ExtResource("item_1")
-min_amount = 10
-max_amount = 25
+min_amount = 2
+max_amount = 6
 chance = 0.7
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
-min_amount = 10
-max_amount = 25
+min_amount = 2
+max_amount = 6
 chance = 0.8
 
 [sub_resource type="Resource" id="Drop_3"]
 script = ExtResource("1_loot")
 item = ExtResource("item_3")
-min_amount = 10
-max_amount = 25
+min_amount = 2
+max_amount = 6
 chance = 0.7
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
 item = ExtResource("item_4")
-min_amount = 6
-max_amount = 16
+min_amount = 2
+max_amount = 4
 chance = 0.5
 
 [sub_resource type="Resource" id="Drop_5"]
 script = ExtResource("1_loot")
 item = ExtResource("item_5")
-min_amount = 6
-max_amount = 16
+min_amount = 2
+max_amount = 4
 chance = 0.45
 
 [resource]

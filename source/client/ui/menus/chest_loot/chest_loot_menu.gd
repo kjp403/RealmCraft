@@ -210,10 +210,18 @@ func _request_claim(request: StringName, args: Dictionary, close_after: bool = f
 	ClientState.inventory_changed.emit(payload)
 	var moved: int = int(payload.get("moved", 0))
 	if moved > 0:
-		var dest: String = "bag" if request == &"chest.loot_take" else "bank"
-		Toaster.toast("Moved %d item%s to your %s." % [
-			moved, "" if moved == 1 else "s", dest
-		])
+		# A bank send that overflowed reports where each part actually landed
+		# (bank -> bag -> the ground), so a full vault is never a silent loss.
+		var note: String = str(payload.get("overflow_note", ""))
+		if not note.is_empty() and (
+			int(payload.get("bagged", 0)) > 0 or int(payload.get("dropped", 0)) > 0
+		):
+			Toaster.toast(note + ".")
+		else:
+			var dest: String = "bag" if request == &"chest.loot_take" else "bank"
+			Toaster.toast("Moved %d item%s to your %s." % [
+				moved, "" if moved == 1 else "s", dest
+			])
 	if close_after:
 		hide()
 	elif request == &"chest.loot_take" and moved <= 0 and not _pending.is_empty():

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/check_trade_space.gd" id="1_tradespace"]
+
+[node name="TradeSpaceCheck" type="Node"]
+script = ExtResource("1_tradespace")
