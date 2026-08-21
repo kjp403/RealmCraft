@@ -874,7 +874,7 @@ func _summon_adds() -> void:
 	var container: ReplicatedPropsContainer = boss.container
 	for i: int in add_count:
 		var angle: float = TAU * float(i) / float(maxi(add_count, 1))
-		var spot: Vector2 = boss.global_position + Vector2.RIGHT.rotated(angle) * add_spread_px
+		var spot: Vector2 = _free_spot_near(boss.global_position, angle)
 		var add: Node = container.spawn_dynamic(
 			ReplicatedPropsContainer.SCENE_HOSTILE_NPC,
 			container.to_local(spot),
@@ -904,6 +904,27 @@ func _summon_adds() -> void:
 		npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
 		npc.replicate_visual(&"rp_spawn_effect", [])
 		npc.engage_nearest_player()
+
+
+## Adds used to appear on a blind ring around the boss, so a boss fought with its
+## back to a wall summoned its minions INSIDE that wall — they spawned stuck and
+## slid out through the geometry. Walk the ring point back toward the boss until
+## it lands on open floor, and fall back to the boss's own feet (always walkable,
+## since the boss is standing there).
+func _free_spot_near(origin: Vector2, angle: float) -> Vector2:
+	var space: PhysicsDirectSpaceState2D = boss.get_world_2d().direct_space_state
+	var dir: Vector2 = Vector2.RIGHT.rotated(angle)
+	var point := PhysicsPointQueryParameters2D.new()
+	point.collision_mask = 2 # world solids (walls / water / void)
+	point.collide_with_areas = false
+	point.exclude = [boss.get_rid()]
+	var dist: float = add_spread_px
+	while dist >= 8.0:
+		point.position = origin + dir * dist
+		if space.intersect_point(point, 1).is_empty():
+			return point.position
+		dist -= 8.0
+	return origin
 
 
 ## boss → ReplicatedPropsContainer → Map → ServerInstance.

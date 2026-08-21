@@ -29,6 +29,11 @@ var target: BossHuntTarget
 var _boss: HostileNpc = null
 ## ticks_msec at which the next boss spawns; 0 = not waiting on a respawn.
 var _respawn_at_ms: int = 0
+## The body of the last boss killed. Corpses used to be left where they fell, so
+## a long farm session filled the room with dead necromancers and their
+## nameplates while the next one spawned on top of them. Cleared when the
+## replacement goes in.
+var _corpse: HostileNpc = null
 ## Bosses killed so far — reported in the wrap-up.
 var _kills: int = 0
 var _running: bool = false
@@ -58,6 +63,9 @@ func stop() -> void:
 	_running = false
 	set_process(false)
 	_respawn_at_ms = 0
+	var teardown_map: Map = Map.of(self)
+	if teardown_map != null and teardown_map.replicated_props_container != null:
+		_clear_corpse(teardown_map.replicated_props_container)
 	if is_instance_valid(_boss):
 		var map: Map = Map.of(self)
 		var container: ReplicatedPropsContainer = map.replicated_props_container if map != null else null
@@ -103,6 +111,7 @@ func _spawn_boss() -> void:
 		push_warning("BossHuntArena: no ReplicatedPropsContainer on the map — cannot spawn.")
 		return
 	var container: ReplicatedPropsContainer = map.replicated_props_container
+	_clear_corpse(container)
 	var at: Vector2 = boss_spawn.global_position if boss_spawn != null else global_position
 	var mob: Node = container.spawn_dynamic(
 		ReplicatedPropsContainer.SCENE_HOSTILE_NPC,
@@ -162,6 +171,9 @@ func _spawn_boss() -> void:
 func _on_boss_died(_killer: Character, npc: HostileNpc) -> void:
 	if npc != _boss:
 		return
+	# Hold the body so the kill still reads, then take it away when the next
+	# boss arrives — the room resets instead of accumulating corpses.
+	_corpse = npc
 	_kills += 1
 	BossHuntService.on_boss_killed(_instance(), _kills)
 	_arm_respawn()
@@ -187,3 +199,15 @@ func _arm_respawn() -> void:
 func _instance() -> Node:
 	var map: Map = Map.of(self)
 	return map.get_parent() if map != null else null
+
+
+## Remove the previous kill's body through the container, the same way stop()
+## does, so every client drops it rather than keeping a ghost nameplate.
+func _clear_corpse(container: ReplicatedPropsContainer) -> void:
+	if _corpse == null:
+		return
+	if is_instance_valid(_corpse):
+		var child_id: int = container.child_id_of_node(_corpse)
+		if child_id >= 0:
+			container.despawn_dynamic(child_id)
+	_corpse = null

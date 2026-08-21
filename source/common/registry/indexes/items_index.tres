@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1787090446
-next_id = 596
+version = 1787251982
+next_id = 604
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2757,6 +2757,46 @@ entries = Array[Dictionary]([{
 &"id": 595,
 &"path": "res://source/common/gameplay/items/consumables/prayer_potion.tres",
 &"slug": &"prayer_potion"
+}, {
+&"hash": "b4d552ef2c5fa4dc6cc4507cab27c1fd7de2733bbe7854e093c6631615d3a9c7",
+&"id": 596,
+&"path": "res://source/common/gameplay/items/materials/fish/blue_lobster.tres",
+&"slug": &"blue_lobster"
+}, {
+&"hash": "5120f45acd09a855a63a5e888e014e1b4d1d9b3eed3869bc5c053e9e89d5c62c",
+&"id": 597,
+&"path": "res://source/common/gameplay/items/materials/fish/halibut.tres",
+&"slug": &"halibut"
+}, {
+&"hash": "f2d7a170ce1a85cd69f486c24f4a527d37c3b4994ae6a9018e2214e04568f90a",
+&"id": 598,
+&"path": "res://source/common/gameplay/items/materials/fish/stingray.tres",
+&"slug": &"stingray"
+}, {
+&"hash": "dfda6bc403325e5f64241b2ff492c44378c8d35dce5139e70a341265e6aac545",
+&"id": 599,
+&"path": "res://source/common/gameplay/items/materials/fish/wolffish.tres",
+&"slug": &"wolffish"
+}, {
+&"hash": "3bf7ffff4b0ded3a8f6664ff010bfce1ee77e2d0c902ca454bec9792037bf768",
+&"id": 600,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_halibut.tres",
+&"slug": &"cooked_halibut"
+}, {
+&"hash": "29af71b91828a25416ddc97331c7c4f52b5592b6830564be9abf656fe0cc7630",
+&"id": 601,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_stingray.tres",
+&"slug": &"cooked_stingray"
+}, {
+&"hash": "a94e0e4f472d2a71f452c64fb98900d18664133553f7682d13a363b9692b4c9b",
+&"id": 602,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_wolffish.tres",
+&"slug": &"cooked_wolffish"
+}, {
+&"hash": "34c84905a5c4611f22edc3c9a852804ec734f458b04b2e8711279f0f3725065f",
+&"id": 603,
+&"path": "res://source/common/gameplay/items/consumables/food/cooked_blue_lobster.tres",
+&"slug": &"cooked_blue_lobster"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

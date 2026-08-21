@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="InstanceResource" format=3]
 
 [ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_instance"]
+[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="2_hub"]
 
 [resource]
 script = ExtResource("1_instance")
@@ -9,5 +10,7 @@ map_path = "res://source/common/gameplay/maps/maps/boss_hunt/boss_hunt_arena.tsc
 load_at_startup = false
 zone_title = "Hunting Grounds"
 show_discovery = true
+death_return_instance = ExtResource("2_hub")
+death_return_warper_id = 0
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"
 metadata/slug = &"boss_hunt_arena"
