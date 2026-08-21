@@ -652,6 +652,8 @@ func _apply_sprite() -> void:
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
 	_sprite.modulate = Color.WHITE
+	# Celestial / Astralite veins shine; everything else keeps a null material.
+	_sprite.material = data.shimmer_material()
 	var s: float = maxf(0.1, data.visual_scale)
 	_sprite.scale = Vector2(s, s)
 

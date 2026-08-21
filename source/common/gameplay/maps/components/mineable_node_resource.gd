@@ -12,6 +12,10 @@ extends Resource
 ## resource's `job_xp` dict, and auto-populate the matching JobPerks
 ## `source_slugs` lists — killing the hand-maintained content drift.
 
+const SHIMMER_SHADER: Shader = preload("res://source/common/gameplay/items/shimmer.gdshader")
+
+var _shimmer_material: ShaderMaterial = null
+
 ## Optional world label (e.g. "Oak Tree"). Empty → falls back to the ore item name.
 @export var display_name: String = ""
 ## The item granted per yield (a MaterialItem; its outlet is a vendor trade or a recipe).
@@ -108,6 +112,16 @@ extends Resource
 ## drop it toward 0.2 for a 4-frame pulse that should feel like energy.
 @export var idle_frame_seconds: float = 0.5
 
+## Animated shine over the node sprite (Celestial's starlight, Astralite's
+## cosmic pulse). 0 = no shimmer. Mirrors [member Item.shimmer_strength].
+@export_range(0.0, 2.0, 0.05) var shimmer_strength: float = 0.0
+## Colour of the highlight sweep and twinkle.
+@export var shimmer_tint: Color = Color(1.0, 0.95, 0.72)
+## Sweep / twinkle rate.
+@export_range(0.1, 4.0, 0.05) var shimmer_speed: float = 1.0
+## Cycle the sprite's hues as well.
+@export var shimmer_iridescent: bool = false
+
 @export_group("Chop FX")
 ## Particle burst played on the gathering player's client each time a swing
 ## lands. Empty = no burst (the default; ore veins and herbs stay quiet).
@@ -121,3 +135,17 @@ extends Resource
 @export var chop_fx_color_alt: Color = Color.WHITE
 ## Particles per swing. Keep it low — this fires on every axe hit.
 @export var chop_fx_amount: int = 10
+
+
+## Shared material for [member shimmer_strength] > 0, else null. Client-only.
+func shimmer_material() -> ShaderMaterial:
+	if shimmer_strength <= 0.0:
+		return null
+	if _shimmer_material == null:
+		_shimmer_material = ShaderMaterial.new()
+		_shimmer_material.shader = SHIMMER_SHADER
+		_shimmer_material.set_shader_parameter(&"shimmer_strength", shimmer_strength)
+		_shimmer_material.set_shader_parameter(&"shimmer_tint", shimmer_tint)
+		_shimmer_material.set_shader_parameter(&"shimmer_speed", shimmer_speed)
+		_shimmer_material.set_shader_parameter(&"shimmer_iridescent", shimmer_iridescent)
+	return _shimmer_material

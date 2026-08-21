@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3]
+
+[ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_0cagq"]
+[ext_resource type="Texture2D" uid="uid://co3hbm3jbrape" path="res://assets/sprites/items/weapons/celestial/celestial.png" id="1_tex"]
+[ext_resource type="Script" uid="uid://b5hsnu4140fky" path="res://source/common/gameplay/items/weapons/tool_item.gd" id="2_tool"]
+[ext_resource type="Resource" uid="uid://qav4p12rsbn3" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="3_slot"]
+[ext_resource type="PackedScene" uid="uid://cwoodaxescene1" path="res://source/common/gameplay/items/weapons/tools/axe.tscn" id="4_scene"]
+
+[sub_resource type="AtlasTexture" id="Atlas_icon"]
+atlas = ExtResource("1_tex")
+region = Rect2(112, 48, 16, 32)
+
+[resource]
+script = ExtResource("2_tool")
+tool_type = &"axe"
+extraction_damage = 8
+swing_cooldown = 0.26
+required_skill = &"woodcutting"
+required_skill_level = 85
+bonus_yield_chance = 0.25
+right_hand_scene = ExtResource("4_scene")
+slot = ExtResource("3_slot")
+item_name = &"Celestial Axe"
+item_icon = SubResource("Atlas_icon")
+description = "Brilliant meteor-silver, haloed by a faint starlight glow. Requires Woodcutting 85."
+can_trade = true
+vendor_value = 1050
+stack_limit = 10
+tags = PackedStringArray()
+shimmer_strength = 0.6
+shimmer_tint = Color(1, 0.99, 0.93, 1)
+shimmer_speed = 1.1
+metadata/slug = &"axe_celestial"
+metadata/id = 651

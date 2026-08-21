@@ -53,7 +53,7 @@ func equip(character: Character) -> void:
 		character.right_hand_spot.add_child(right_hand_weapon)
 		# Skin the in-hand sprite from this item's icon, so one type-scene
 		# (sword.tscn) serves every sword skin (fire, rustic, ...).
-		right_hand_weapon.apply_skin(item_icon, sprite_offset)
+		right_hand_weapon.apply_skin(item_icon, sprite_offset, shimmer_material())
 		# Ascended cosmetic glow, if this character has it equipped AND this weapon
 		# has an authored effect. Both checks live in one place so a remount can
 		# never leave a stale overlay behind.

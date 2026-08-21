@@ -52,9 +52,11 @@ var _base_ability_count: int = 1
 ## pass so the handle sits in the Hand instead of floating beside it. [param
 ## extra_offset] nudges a skin whose art sits differently (a taller blade).
 ## Client-only — pure visual.
-func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO) -> void:
+func apply_skin(icon: Texture2D, extra_offset: Vector2 = Vector2.ZERO, shimmer: ShaderMaterial = null) -> void:
 	if not GameMode.is_client() or weapon_sprite == null or icon == null:
 		return
+	# High-tier metals shine in the hand rather than in their (flat) icon art.
+	weapon_sprite.material = shimmer
 	# Capture the type-scene's authored placement BEFORE we rewrite it — remounts
 	# must not accumulate offsets on top of a previous apply_skin call.
 	var base_pos: Vector2 = weapon_sprite.position

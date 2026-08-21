@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_ore.tres" id="2_ore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_astralite.png" id="3_tex"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Astralite Vein"
+ore = ExtResource("2_ore")
+job_xp = Dictionary[StringName, int]({
+&"mining": 220
+})
+required_level = 90
+required_tool = &"pickaxe"
+extraction_hp = 12
+min_charges = 2
+max_charges = 16
+charge_regen_seconds = 30.0
+depleted_recharge_seconds = 160.0
+texture = ExtResource("3_tex")
+shimmer_strength = 0.55
+shimmer_tint = Color(0.86, 0.82, 1, 1)
+shimmer_speed = 1.3
+shimmer_iridescent = true

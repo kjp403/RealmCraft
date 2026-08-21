@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788146051
-next_id = 643
+version = 1788300797
+next_id = 663
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -2987,6 +2987,106 @@ entries = Array[Dictionary]([{
 &"id": 642,
 &"path": "res://source/common/gameplay/items/peddler/wandering_tonic.tres",
 &"slug": &"wandering_tonic"
+}, {
+&"hash": "635fab856fee6521013f81e86ec99441271f0612d8893a7d8ad37b6316627978",
+&"id": 643,
+&"path": "res://source/common/gameplay/items/materials/metals/astralite_bar.tres",
+&"slug": &"astralite_bar"
+}, {
+&"hash": "ba6eebbc2a35671506896517242c7d6812f69045d375d6f2db37cd838209d0c6",
+&"id": 644,
+&"path": "res://source/common/gameplay/items/materials/metals/astralite_ore.tres",
+&"slug": &"astralite_ore"
+}, {
+&"hash": "98e720debb29a27ec4c0b30a755f94a126740cb0e758f19fc85e5123cadddb99",
+&"id": 645,
+&"path": "res://source/common/gameplay/items/materials/metals/celestial_bar.tres",
+&"slug": &"celestial_bar"
+}, {
+&"hash": "ae21c3bd24318e93386a65adfd3a26f6dba6e37257adc15c6fb531e23cac7f0a",
+&"id": 646,
+&"path": "res://source/common/gameplay/items/materials/metals/celestial_ore.tres",
+&"slug": &"celestial_ore"
+}, {
+&"hash": "bd82374ca31d5bc53b5ab9a60d3db9a5a21cd1a8bc179b260fb4caa2c7573874",
+&"id": 647,
+&"path": "res://source/common/gameplay/items/materials/metals/dragon_bar.tres",
+&"slug": &"dragon_bar"
+}, {
+&"hash": "b5949e75553ef30425aed80746c236c711124e880746a5c7f4a8379b18f8a5e6",
+&"id": 648,
+&"path": "res://source/common/gameplay/items/materials/metals/obsidian_bar.tres",
+&"slug": &"obsidian_bar"
+}, {
+&"hash": "c4b2ada0c666c2c938215824abd79e42782531b12719d75361f2c331801b5a64",
+&"id": 649,
+&"path": "res://source/common/gameplay/items/materials/metals/obsidian_ore.tres",
+&"slug": &"obsidian_ore"
+}, {
+&"hash": "c3e4bfd1a9bcdb3307863a8a8a54122d13a378f9972f35a03a41c85197677d25",
+&"id": 650,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_astralite.tres",
+&"slug": &"axe_astralite"
+}, {
+&"hash": "9997d09304d6dbc9328c66e5b8c3b62d9a95ceb7684b3072f52e5134f930cf15",
+&"id": 651,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_celestial.tres",
+&"slug": &"axe_celestial"
+}, {
+&"hash": "648fcc3a856035052493767e639a62dcdb95f20b2df069dcd7a2234c055f543e",
+&"id": 652,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_dragon.tres",
+&"slug": &"axe_dragon"
+}, {
+&"hash": "99247a16df0ff36df8fc6ad0d883b85607da6e45d5fcd224ec38dd24b6a9d263",
+&"id": 653,
+&"path": "res://source/common/gameplay/items/weapons/tools/axe_obsidian.tres",
+&"slug": &"axe_obsidian"
+}, {
+&"hash": "7cebedb019655e715b39414cf6ae7152527a385c904e04b15d4005477b7a0039",
+&"id": 654,
+&"path": "res://source/common/gameplay/items/weapons/tools/fishing_rod_dragon.tres",
+&"slug": &"fishing_rod_dragon"
+}, {
+&"hash": "b9331a1f9de09e4792915ded85f40e36e37854f5a383562f9af7c5c25feb3cc3",
+&"id": 655,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_astralite.tres",
+&"slug": &"pickaxe_astralite"
+}, {
+&"hash": "03e7b45e8b9864eabf9cc3a55ec0e23d9c129850f5d4f20ea5e41d9bbf8570a7",
+&"id": 656,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_celestial.tres",
+&"slug": &"pickaxe_celestial"
+}, {
+&"hash": "0aae09c0c55aa5e998481f6ca878d01c7e91d10422c63c71d443a8d99daea198",
+&"id": 657,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_dragon.tres",
+&"slug": &"pickaxe_dragon"
+}, {
+&"hash": "64c483ab8510673dccb602311f96c5b63a0982c8dee9cf6af913e9ce2fb94cac",
+&"id": 658,
+&"path": "res://source/common/gameplay/items/weapons/tools/pickaxe_obsidian.tres",
+&"slug": &"pickaxe_obsidian"
+}, {
+&"hash": "db74c83e981ddf030dd50787957189653ab9413ee18ad7382aa6c457d5eed178",
+&"id": 659,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_astralite.tres",
+&"slug": &"sickle_astralite"
+}, {
+&"hash": "e51aa3a5d02b3bc268395fb13e9bf864afddc2c9f80f25ed8202e91e2e5bac30",
+&"id": 660,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_celestial.tres",
+&"slug": &"sickle_celestial"
+}, {
+&"hash": "eb6cee35d4bc3902f2c1726ff6051f5f1e009cbf91822b24246fbceaf8b97835",
+&"id": 661,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_dragon.tres",
+&"slug": &"sickle_dragon"
+}, {
+&"hash": "cdc4affb50ec5736b65e6079cbae00b1b775b9673b951a1c05fc3845c985971d",
+&"id": 662,
+&"path": "res://source/common/gameplay/items/weapons/tools/sickle_obsidian.tres",
+&"slug": &"sickle_obsidian"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

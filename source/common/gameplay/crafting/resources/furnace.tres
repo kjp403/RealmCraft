@@ -21,6 +21,15 @@
 [ext_resource type="Resource" uid="uid://cadamantbarma1" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="19_adam_bar"]
 [ext_resource type="Resource" uid="uid://crunitebarma01" path="res://source/common/gameplay/items/materials/metals/runite_bar.tres" id="20_rune_bar"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="30_dragon_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_bar.tres" id="31_dragon_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_ore.tres" id="30_obsidian_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_bar.tres" id="31_obsidian_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/celestial_ore.tres" id="30_celestial_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/celestial_bar.tres" id="31_celestial_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_ore.tres" id="30_astralite_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_bar.tres" id="31_astralite_bar"]
+
 [sub_resource type="Resource" id="I_br_cu"]
 script = ExtResource("3_ingred")
 item = ExtResource("4_cop_ore")
@@ -132,9 +141,73 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_rune_ore"), SubReso
 required_level = 65
 xp_reward = 254
 
+[sub_resource type="Resource" id="I_dragon_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("30_dragon_ore")
+
+[sub_resource type="Resource" id="I_dragon_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 5
+
+[sub_resource type="Resource" id="R_dragon_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("31_dragon_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_dragon_ore"), SubResource("I_dragon_coal")])
+required_level = 68
+xp_reward = 35
+
+[sub_resource type="Resource" id="I_obsidian_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("30_obsidian_ore")
+
+[sub_resource type="Resource" id="I_obsidian_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 6
+
+[sub_resource type="Resource" id="R_obsidian_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("31_obsidian_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_obsidian_ore"), SubResource("I_obsidian_coal")])
+required_level = 72
+xp_reward = 39
+
+[sub_resource type="Resource" id="I_celestial_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("30_celestial_ore")
+
+[sub_resource type="Resource" id="I_celestial_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 7
+
+[sub_resource type="Resource" id="R_celestial_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("31_celestial_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_celestial_ore"), SubResource("I_celestial_coal")])
+required_level = 80
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_astralite_ore"]
+script = ExtResource("3_ingred")
+item = ExtResource("30_astralite_ore")
+
+[sub_resource type="Resource" id="I_astralite_coal"]
+script = ExtResource("3_ingred")
+item = ExtResource("7_coal")
+amount = 8
+
+[sub_resource type="Resource" id="R_astralite_bar"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("31_astralite_bar")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_astralite_ore"), SubResource("I_astralite_coal")])
+required_level = 88
+xp_reward = 53
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Furnace"
 profession = &"smithing"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_bronze_bar"), SubResource("R_iron_bar"), SubResource("R_steel_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar"), SubResource("R_mithril_bar"), SubResource("R_adamant_bar"), SubResource("R_runite_bar")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_bronze_bar"), SubResource("R_iron_bar"), SubResource("R_steel_bar"), SubResource("R_silver_bar"), SubResource("R_gold_bar"), SubResource("R_mithril_bar"), SubResource("R_adamant_bar"), SubResource("R_runite_bar"), SubResource("R_dragon_bar"), SubResource("R_obsidian_bar"), SubResource("R_celestial_bar"), SubResource("R_astralite_bar")])

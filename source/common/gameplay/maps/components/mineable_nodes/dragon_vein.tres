@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_ore.tres" id="2_ore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_dragon.png" id="3_tex"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Dragon Vein"
+ore = ExtResource("2_ore")
+job_xp = Dictionary[StringName, int]({
+&"mining": 115
+})
+required_level = 65
+required_tool = &"pickaxe"
+extraction_hp = 8
+min_charges = 3
+max_charges = 22
+charge_regen_seconds = 24.0
+depleted_recharge_seconds = 120.0
+texture = ExtResource("3_tex")

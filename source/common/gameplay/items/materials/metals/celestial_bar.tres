@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" uid="uid://csj3rmb6pdg85" path="res://assets/sprites/items/icons/bar_celestial.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Celestial Bar"
+item_icon = ExtResource("1_icon")
+description = "A silver-white bar refined from fallen meteors."
+holdable = false
+can_trade = true
+vendor_value = 180
+stack_limit = 50
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"celestial_bar"
+metadata/id = 645
