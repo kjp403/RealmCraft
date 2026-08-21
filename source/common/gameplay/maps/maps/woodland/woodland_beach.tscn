@@ -143,10 +143,6 @@ texture = ExtResource("p_stranded_boat")
 position = Vector2(175, 225)
 texture = ExtResource("p_fish_basket")
 
-[node name="Barricade" type="Sprite2D" parent="Scenery"]
-position = Vector2(610, 300)
-texture = ExtResource("p_barricade")
-
 [node name="FishCrate" type="Sprite2D" parent="Scenery"]
 position = Vector2(245, 150)
 texture = ExtResource("p_fish_crate")

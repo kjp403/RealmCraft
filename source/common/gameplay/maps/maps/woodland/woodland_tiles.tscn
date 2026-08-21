@@ -591,6 +591,9 @@ size = Vector2(48, 560)
 [sub_resource type="RectangleShape2D" id="BeachVoidEast"]
 size = Vector2(48, 560)
 
+[sub_resource type="RectangleShape2D" id="BeachVoidGapNorth"]
+size = Vector2(764, 64)
+
 [node name="Woodland" type="Node2D" unique_id=618164945 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("0_map")
 replicated_props_container = NodePath("ReplicatedPropsContainer")
@@ -1936,3 +1939,7 @@ shape = SubResource("BeachVoidWest")
 [node name="EastWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(4200, 1780)
 shape = SubResource("BeachVoidEast")
+
+[node name="GapNorthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(2818, 1592)
+shape = SubResource("BeachVoidGapNorth")
