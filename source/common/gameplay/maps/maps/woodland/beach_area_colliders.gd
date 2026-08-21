@@ -18,6 +18,11 @@ extends Node2D
 ## When false, that side stays open so adjacent beach strips can join.
 @export var rim_west: bool = true
 @export var rim_east: bool = true
+## The north edge used to be unconditionally open, on the assumption every beach
+## seams into woodland up there. A standalone beach (Deep Shoals) inherited that
+## and had nothing but void above the art to walk into. Default closed; set false
+## only where something real is actually joined on.
+@export var rim_north: bool = true
 
 
 func _ready() -> void:
@@ -113,8 +118,9 @@ func _add_rim(body: StaticBody2D) -> void:
 	var t: float = rim_thickness
 	var w: float = ground_size.x
 	var h: float = ground_size.y
-	# Bottom + optional sides — top stays open so the beach connects to woodland.
 	_add_rect(body, Rect2(0.0, h - t, w, t * 2.0))
+	if rim_north:
+		_add_rect(body, Rect2(0.0, -t, w, t))
 	if rim_west:
 		_add_rect(body, Rect2(-t, 0.0, t, h))
 	if rim_east:

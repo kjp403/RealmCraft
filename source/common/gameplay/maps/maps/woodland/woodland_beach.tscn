@@ -42,6 +42,7 @@ dock_walk = Rect2(400, 236, 32, 120)
 boat_pad = Rect2(408, 296, 72, 56)
 solid_footprints = Array[Rect2]([Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
 rim_east = false
+rim_north = false
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
