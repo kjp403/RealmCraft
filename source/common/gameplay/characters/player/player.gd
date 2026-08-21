@@ -245,11 +245,13 @@ func _death_peer_id() -> int:
 	return 0
 
 
+## Death sends you home (Guild Hall) everywhere except an active match — a Boss
+## Hunt death used to be excluded here, which is what respawned players inside the
+## arena with the boss still up.
 func _should_return_home() -> bool:
 	if player_resource != null and player_resource.in_match:
 		return false
-	var map: Map = get_parent() as Map
-	return not BossHuntService.is_hunt_instance(map.get_parent() if map else null)
+	return true
 
 
 ## Revive, then Guild Hall (or jail) unless this death stays in-arena.

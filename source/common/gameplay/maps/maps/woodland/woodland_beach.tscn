@@ -106,7 +106,7 @@ position = Vector2(55, 92)
 texture = ExtResource("p_palm_1")
 
 [node name="PalmM2" type="Sprite2D" parent="Scenery"]
-position = Vector2(520, 180)
+position = Vector2(430, 168)
 texture = ExtResource("p_palm_1")
 
 [node name="PointRocks" type="Sprite2D" parent="Scenery"]
@@ -130,31 +130,31 @@ position = Vector2(640, 240)
 texture = ExtResource("p_palm_2")
 
 [node name="BeachedBoat" type="Sprite2D" parent="Scenery"]
-position = Vector2(545, 272)
+position = Vector2(700, 330)
 texture = ExtResource("p_stranded_boat")
 
 [node name="CatchBaskets" type="Sprite2D" parent="Scenery"]
-position = Vector2(380, 208)
+position = Vector2(175, 225)
 texture = ExtResource("p_fish_basket")
 
 [node name="Barricade" type="Sprite2D" parent="Scenery"]
-position = Vector2(478, 224)
+position = Vector2(610, 300)
 texture = ExtResource("p_barricade")
 
 [node name="FishCrate" type="Sprite2D" parent="Scenery"]
-position = Vector2(380, 148)
+position = Vector2(245, 150)
 texture = ExtResource("p_fish_crate")
 
 [node name="Barrels" type="Sprite2D" parent="Scenery"]
-position = Vector2(522, 182)
+position = Vector2(775, 300)
 texture = ExtResource("p_barrels")
 
 [node name="DryFish" type="Sprite2D" parent="Scenery"]
-position = Vector2(300, 279)
+position = Vector2(95, 238)
 texture = ExtResource("p_dry_fish_a")
 
 [node name="Bucket" type="Sprite2D" parent="Scenery"]
-position = Vector2(400, 311)
+position = Vector2(560, 330)
 texture = ExtResource("p_bucket")
 
 [node name="Rocks1" type="Sprite2D" parent="Scenery"]
