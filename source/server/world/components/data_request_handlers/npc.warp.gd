@@ -34,7 +34,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	if warp == null or warp.target_instance == null:
 		return {"ok": false, "reason": "no_warp"}
 
-	# Skill gate (Beach Angler -> Deep Shoals needs Fishing 60). Authoritative
+	# Skill gate (Beach Angler -> Pirate's Cove needs Fishing 60). Authoritative
 	# here; WarpInteraction.menu_entry only greys the option out client-side.
 	if not warp.required_skill.is_empty():
 		var have: int = int(

@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_inst")
-instance_name = &"deep_shoals"
+instance_name = &"pirates_cove"
 map_path = "uid://cshoals00000001"
-zone_title = "The Deep Shoals"
+zone_title = "Pirate's Cove"
 level_min = 1
 level_max = 99
 show_discovery = true

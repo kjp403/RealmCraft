@@ -15,14 +15,14 @@ shop = ExtResource("5_shop")
 
 [sub_resource type="Resource" id="Dialogue_tide"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Past sixty, the shallows have nothing left to teach you. I run a boat out to the Deep Shoals — halibut, ray, wolffish, and the blue ones if you're lucky.", "Tide's fair. Rods for every angler — starter through seasoned.", "Better gear means fewer wasted casts. The fish still decide, though.", "Deep Cove keeps the bigger bites. Bring a stronger rod if you go."])
+lines = Array[String](["Past sixty, the shallows have nothing left to teach you. I run a boat out to Pirate's Cove — halibut, ray, wolffish, and the blue ones if you're lucky.", "Tide's fair. Rods for every angler — starter through seasoned.", "Better gear means fewer wasted casts. The fish still decide, though.", "Pirate's Cove keeps the bigger bites. Bring a stronger rod if you go."])
 label_override = "Ask about fishing"
 
 [sub_resource type="Resource" id="Warp_shoals"]
 script = ExtResource("7_warp")
 target_instance = ExtResource("8_shoals")
 target_id = 0
-destination_label = "The Deep Shoals"
+destination_label = "Pirate's Cove"
 required_skill = &"fishing"
 required_skill_level = 60
 
