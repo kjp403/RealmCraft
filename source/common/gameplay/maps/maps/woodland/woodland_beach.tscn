@@ -14,7 +14,6 @@
 [ext_resource type="Resource" uid="uid://cb0192f335f9fc" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_trout.tres" id="h2"]
 [ext_resource type="Resource" uid="uid://c387cddeb037ad" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_tuna.tres" id="h3"]
 [ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="99_col"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_small.png" id="p_stall_small"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="p_palm_1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rocky_skull.png" id="p_rocky_skull"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_3.png" id="p_palm_3"]
@@ -41,7 +40,7 @@ ground_size = Vector2(832, 512)
 shoreline = PackedVector2Array(0, 266, 16, 266, 32, 266, 48, 266, 64, 266, 80, 266, 96, 266, 112, 266, 128, 266, 144, 266, 160, 266, 176, 266, 192, 266, 208, 266, 224, 266, 240, 266, 256, 266, 272, 266, 288, 298, 304, 298, 320, 298, 336, 298, 352, 330, 368, 330, 384, 330, 400, 330, 416, 330, 432, 330, 448, 362, 464, 362, 480, 362, 496, 362, 512, 394, 528, 394, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 394, 656, 394, 672, 394, 688, 394, 704, 394, 720, 394, 736, 394, 752, 394, 768, 362, 784, 362, 800, 362, 816, 362)
 dock_walk = Rect2(400, 236, 32, 120)
 boat_pad = Rect2(408, 296, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(175, 116, 110, 60), Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
+solid_footprints = Array[Rect2]([Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
 rim_east = false
 
 [node name="Ground" type="Sprite2D" parent="."]
@@ -100,10 +99,6 @@ shape = SubResource("BoatShape")
 
 [node name="Scenery" type="Node2D" parent="."]
 y_sort_enabled = true
-
-[node name="FishStall" type="Sprite2D" parent="Scenery"]
-position = Vector2(230, 96)
-texture = ExtResource("p_stall_small")
 
 [node name="PalmW1" type="Sprite2D" parent="Scenery"]
 position = Vector2(55, 92)

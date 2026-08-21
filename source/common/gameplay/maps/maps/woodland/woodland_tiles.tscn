@@ -1,34 +1,64 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://cewfj4jpiebos"]
 
-[ext_resource type="Script" path="res://source/common/gameplay/maps/map.gd" id="0_map"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/floor_tiles.png" id="1_floor"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/wall_tiles.png" id="2_wall"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="3_2hhap"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="4_2dprc"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="5_jiw8u"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/characters/npc/npc.tscn" id="6_mn6pe"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="7_jiw8u"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/vegetation.png" id="8_veg"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_02.png" id="9_tree1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_03.png" id="10_tree2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_04.png" id="11_tree3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/trees/model1/size_05.png" id="12_tree4"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.gd" id="15_4aa3h"]
-[ext_resource type="Script" path="res://source/common/network/sync/replicated_props.gd" id="17_rp"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.gd" id="18_lebv5"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
-[ext_resource type="Script" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="24_svn3l"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
+[ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="0_map"]
+[ext_resource type="Texture2D" uid="uid://fr03duk228dl" path="res://assets/sprites/environment/overworld/floor_tiles.png" id="1_floor"]
+[ext_resource type="AudioStream" uid="uid://d3x02k8rxue5y" path="res://assets/audio/music/lost_woods.ogg" id="2_6wtwb"]
+[ext_resource type="Texture2D" uid="uid://cwjqodgs3etrf" path="res://assets/sprites/environment/overworld/wall_tiles.png" id="2_wall"]
+[ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="3_2hhap"]
+[ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="4_2dprc"]
+[ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="5_jiw8u"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="6_mn6pe"]
+[ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="7_jiw8u"]
+[ext_resource type="Texture2D" uid="uid://cdx2j7c3c6l37" path="res://assets/sprites/environment/overworld/vegetation.png" id="8_veg"]
+[ext_resource type="Texture2D" uid="uid://t7wb488pjhq0" path="res://assets/sprites/environment/overworld/trees/model1/size_02.png" id="9_tree1"]
+[ext_resource type="Texture2D" uid="uid://cygrvjniofbim" path="res://assets/sprites/environment/overworld/trees/model1/size_03.png" id="10_tree2"]
+[ext_resource type="Texture2D" uid="uid://cbqtf3xfjikgf" path="res://assets/sprites/environment/overworld/trees/model1/size_04.png" id="11_tree3"]
+[ext_resource type="Texture2D" uid="uid://b1mfwjqfvwuxn" path="res://assets/sprites/environment/overworld/trees/model1/size_05.png" id="12_tree4"]
+[ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="17_rp"]
+[ext_resource type="Resource" uid="uid://w6x74of1jswy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_runt.tres" id="18_runt"]
+[ext_resource type="Resource" uid="uid://tr5yubwcqy8" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_cutter.tres" id="19_cutter"]
+[ext_resource type="Resource" uid="uid://bolo6wgji05kf" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_shaman.tres" id="20_shaman"]
+[ext_resource type="Resource" uid="uid://i26d4k5wypcy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_slinger.tres" id="21_slinger"]
+[ext_resource type="Resource" uid="uid://c43oawxmbygiq" path="res://source/common/gameplay/characters/npc/types/wolf.tres" id="35_wolf"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/desert_badger.tres" id="et_dbadger"]
+[ext_resource type="Resource" uid="uid://bq8woodlandrat01" path="res://source/common/gameplay/characters/npc/types/woodland_rat.tres" id="36_wrat"]
+[ext_resource type="Resource" uid="uid://deo2ei3h78ouy" path="res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres" id="22_chief"]
+[ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="23_tp"]
+[ext_resource type="Texture2D" uid="uid://cyxm7wgu1engl" path="res://assets/sprites/environment/overworld/wall_variations.png" id="24_wallvar"]
+[ext_resource type="Resource" uid="uid://bdg1wvajij76o" path="res://source/common/gameplay/characters/npc/npcs/woodland/warden_bren.tres" id="25_bren"]
+[ext_resource type="Resource" uid="uid://m6ronoxklq18" path="res://source/common/gameplay/characters/npc/npcs/woodland/hermit.tres" id="26_hermit"]
+[ext_resource type="Resource" uid="uid://cbeachangler01" path="res://source/common/gameplay/characters/npc/npcs/woodland/beach_angler.tres" id="26_angler"]
+[ext_resource type="Resource" uid="uid://dsvbif0isp6d5" path="res://source/common/gameplay/maps/components/mineable_nodes/flax.tres" id="27_lebv5"]
+[ext_resource type="Texture2D" uid="uid://c8hkbwyu84tec" path="res://assets/sprites/environment/overworld/water_tiles.png" id="27_water"]
+[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="28_hub"]
+[ext_resource type="Resource" uid="uid://iuqxmo63ipnn" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fungus_cave.tres" id="28_fungus"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/mining_cave.tres" id="28_mining"]
+[ext_resource type="Resource" uid="uid://g8rxlnr0pfyk" path="res://source/common/gameplay/maps/components/mineable_nodes/healing_herb.tres" id="28_svn3l"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/frostpetal.tres" id="29_frost"]
+[ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
+[ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_shore.tscn" id="30_eastshore"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_link.tscn" id="31_link"]
-[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
+[ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="31_ntree"]
+[ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="32_otree"]
+[ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="33_wtree"]
+[ext_resource type="PackedScene" uid="uid://bm5002tcxs41l" path="res://source/common/gameplay/maps/maps/misc_buildings/house.tscn" id="40_slayer_house"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/slayer_house.tres" id="41_slayer_inst"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/lost_woods.ogg" id="mus_lost_woods"]
+[ext_resource type="Resource" uid="uid://cmapltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/maple_tree.tres" id="34_mtree"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/bloodcap.tres" id="47_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/starblossom.tres" id="48_star"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/grimshade.tres" id="49_grim"]
+[ext_resource type="Resource" uid="uid://cyewtree001xxx" path="res://source/common/gameplay/maps/components/mineable_nodes/yew_tree.tres" id="37_ytree"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/sunwort.tres" id="38_sunwrt"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/moonbloom.tres" id="39_moonb"]
+[ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
+[ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
+[ext_resource type="AudioStream" uid="uid://d3x02k8rxue5y" path="res://assets/audio/music/lost_woods.ogg" id="mus_lost_woods"]
+[ext_resource type="Resource" uid="uid://cnpcdesertcamel1" path="res://source/common/gameplay/characters/npc/npcs/desert_camel.tres" id="42_camel"]
+[ext_resource type="Resource" uid="uid://cnpcforgegolem01" path="res://source/common/gameplay/characters/npc/npcs/forge_golem.tres" id="43_golem"]
+[ext_resource type="Resource" uid="uid://cnpcswampherm01" path="res://source/common/gameplay/characters/npc/npcs/swamp_hermit.tres" id="44_hermit"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/scout_calder.tres" id="45_calder"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="46_banker"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/overworld/pond_tiles.png" id="12_swamp"]
-
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uuuau"]
 texture = ExtResource("12_swamp")
 0:0/0 = 0
@@ -43,6 +73,7 @@ texture = ExtResource("12_swamp")
 1:2/0 = 0
 2:2/0 = 0
 3:2/0 = 0
+
 
 
 [sub_resource type="TileSetAtlasSource" id="atlas_floor"]
@@ -550,23 +581,11 @@ size = Vector2(48, 560)
 
 [node name="Woodland" type="Node2D" unique_id=618164945 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("0_map")
+replicated_props_container = NodePath("ReplicatedPropsContainer")
+music = ExtResource("2_6wtwb")
 aoi_mode = 1
 aoi_cell_size = Vector2i(250, 250)
 aoi_visible_radius_cells = 2
-aoi_margin_cells = 1
-aoi_origin = Vector2i(0, 0)
-preview_aoi = true
-preview_aoi_follow_mouse = true
-preview_rect = Rect2(-4096, -4096, 8192, 8192)
-aoi_test_point = Vector2(0, 0)
-default_mode = 0
-default_modifiers = 0
-zone_cell_size = Vector2i(64, 64)
-replicated_props_container = NodePath("ReplicatedPropsContainer")
-map_background_color = Color(0, 0, 0, 1)
-music = ExtResource("mus_lost_woods")
-music_playlist = Array[AudioStream]([])
-weather = Array[AudioStream]([])
 camera_limit_left = 0
 camera_limit_top = 0
 camera_limit_right = 5824
@@ -596,6 +615,7 @@ tile_set = SubResource("tileset")
 
 [node name="Trees" type="TileMapLayer" parent="." unique_id=2136582253]
 y_sort_enabled = true
+tile_map_data = PackedByteArray()
 tile_set = SubResource("tileset")
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="." unique_id=487766068 node_paths=PackedStringArray("id_to_node", "node_to_id")]
@@ -668,6 +688,39 @@ id_to_node = {
 64: NodePath("CamelDesertBadger4")
 }
 node_to_id = {
+NodePath("GateRunt1"): 0,
+NodePath("GateRunt2"): 1,
+NodePath("GateRunt3"): 2,
+NodePath("GateRunt4"): 3,
+NodePath("GateRunt5"): 4,
+NodePath("PathRunt1"): 5,
+NodePath("PathRunt2"): 6,
+NodePath("PathCutter1"): 7,
+NodePath("PathCutter2"): 8,
+NodePath("PathCutter3"): 9,
+NodePath("CampCutter1"): 10,
+NodePath("CampCutter2"): 11,
+NodePath("CampRunt1"): 12,
+NodePath("CampCutter3"): 13,
+NodePath("CampCutter4"): 14,
+NodePath("CampRunt2"): 15,
+NodePath("Slinger1"): 16,
+NodePath("Slinger2"): 17,
+NodePath("Slinger3"): 18,
+NodePath("Shaman1"): 19,
+NodePath("ShamanEscortCutter"): 20,
+NodePath("Shaman2"): 21,
+NodePath("ChiefGuardRunt1"): 22,
+NodePath("GoblinChief"): 23,
+NodePath("ChiefGuardRunt2"): 24,
+NodePath("WildWolf1"): 25,
+NodePath("WildWolf2"): 26,
+NodePath("WildWolf3"): 27,
+NodePath("WildWolf4"): 28,
+NodePath("WildWolf5"): 29,
+NodePath("WildWolf6"): 30,
+NodePath("WildWolf7"): 31,
+NodePath("WildWolf8"): 32,
 NodePath("WoodlandRat1"): 33,
 NodePath("WoodlandRat2"): 34,
 NodePath("WoodlandRat3"): 35,
@@ -699,1048 +752,1155 @@ NodePath("WoodlandRat28"): 60,
 NodePath("CamelDesertBadger1"): 61,
 NodePath("CamelDesertBadger2"): 62,
 NodePath("CamelDesertBadger3"): 63,
-NodePath("CamelDesertBadger4"): 64,
-NodePath("GateRunt1"): 0,
-NodePath("GateRunt2"): 1,
-NodePath("GateRunt3"): 2,
-NodePath("GateRunt4"): 3,
-NodePath("GateRunt5"): 4,
-NodePath("PathRunt1"): 5,
-NodePath("PathRunt2"): 6,
-NodePath("PathCutter1"): 7,
-NodePath("PathCutter2"): 8,
-NodePath("PathCutter3"): 9,
-NodePath("CampCutter1"): 10,
-NodePath("CampCutter2"): 11,
-NodePath("CampRunt1"): 12,
-NodePath("CampCutter3"): 13,
-NodePath("CampCutter4"): 14,
-NodePath("CampRunt2"): 15,
-NodePath("WildWolf8"): 32,
-NodePath("WildWolf7"): 31,
-NodePath("WildWolf6"): 30,
-NodePath("WildWolf5"): 29,
-NodePath("WildWolf4"): 28,
-NodePath("WildWolf3"): 27,
-NodePath("WildWolf2"): 26,
-NodePath("WildWolf1"): 25,
-NodePath("ChiefGuardRunt2"): 24,
-NodePath("GoblinChief"): 23,
-NodePath("ChiefGuardRunt1"): 22,
-NodePath("Shaman2"): 21,
-NodePath("ShamanEscortCutter"): 20,
-NodePath("Shaman1"): 19,
-NodePath("Slinger3"): 18,
-NodePath("Slinger2"): 17,
-NodePath("Slinger1"): 16
+NodePath("CamelDesertBadger4"): 64
 }
 metadata/_custom_type_script = "uid://wq8klpndipnu"
 
-[node name="GateRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=138946250 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="GateRunt1" parent="ReplicatedPropsContainer" unique_id=138946250 instance=ExtResource("3_2hhap")]
 position = Vector2(296, 1096)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="GateRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1405547471 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="GateRunt2" parent="ReplicatedPropsContainer" unique_id=1405547471 instance=ExtResource("3_2hhap")]
 position = Vector2(504, 936)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="GateRunt3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1885119429 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="GateRunt3" parent="ReplicatedPropsContainer" unique_id=1885119429 instance=ExtResource("3_2hhap")]
 position = Vector2(216, 760)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="GateRunt4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=520457107 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="GateRunt4" parent="ReplicatedPropsContainer" unique_id=520457107 instance=ExtResource("3_2hhap")]
 position = Vector2(424, 616)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="GateRunt5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1894583821 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="GateRunt5" parent="ReplicatedPropsContainer" unique_id=1894583821 instance=ExtResource("3_2hhap")]
 position = Vector2(680, 1080)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="PathRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1173835823 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="PathRunt1" parent="ReplicatedPropsContainer" unique_id=1173835823 instance=ExtResource("3_2hhap")]
 position = Vector2(824, 984)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="PathRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1331615902 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="PathRunt2" parent="ReplicatedPropsContainer" unique_id=1331615902 instance=ExtResource("3_2hhap")]
 position = Vector2(1080, 1064)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="PathCutter1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1994546004 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="PathCutter1" parent="ReplicatedPropsContainer" unique_id=1994546004 instance=ExtResource("3_2hhap")]
 position = Vector2(904, 744)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="PathCutter2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=173491673 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="PathCutter2" parent="ReplicatedPropsContainer" unique_id=173491673 instance=ExtResource("3_2hhap")]
 position = Vector2(1144, 680)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="PathCutter3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1999618966 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="PathCutter3" parent="ReplicatedPropsContainer" unique_id=1999618966 instance=ExtResource("3_2hhap")]
 position = Vector2(1384, 696)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="CampCutter1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1055611707 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampCutter1" parent="ReplicatedPropsContainer" unique_id=1055611707 instance=ExtResource("3_2hhap")]
 position = Vector2(1496, 376)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="CampCutter2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1258013794 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampCutter2" parent="ReplicatedPropsContainer" unique_id=1258013794 instance=ExtResource("3_2hhap")]
 position = Vector2(1752, 456)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="CampRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=181245692 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampRunt1" parent="ReplicatedPropsContainer" unique_id=181245692 instance=ExtResource("3_2hhap")]
 position = Vector2(1576, 552)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="CampCutter3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=2086749782 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampCutter3" parent="ReplicatedPropsContainer" unique_id=2086749782 instance=ExtResource("3_2hhap")]
 position = Vector2(1816, 376)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="CampCutter4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=438744078 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampCutter4" parent="ReplicatedPropsContainer" unique_id=438744078 instance=ExtResource("3_2hhap")]
 position = Vector2(1896, 536)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="CampRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=91795151 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CampRunt2" parent="ReplicatedPropsContainer" unique_id=91795151 instance=ExtResource("3_2hhap")]
 position = Vector2(1464, 616)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="Slinger1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1868700488 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="Slinger1" parent="ReplicatedPropsContainer" unique_id=1868700488 instance=ExtResource("3_2hhap")]
 position = Vector2(1240, 296)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("21_slinger")
+weapon = null
 
-[node name="Slinger2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1022336770 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="Slinger2" parent="ReplicatedPropsContainer" unique_id=1022336770 instance=ExtResource("3_2hhap")]
 position = Vector2(1064, 264)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("21_slinger")
+weapon = null
 
-[node name="Slinger3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=915204169 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="Slinger3" parent="ReplicatedPropsContainer" unique_id=915204169 instance=ExtResource("3_2hhap")]
 position = Vector2(824, 280)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("21_slinger")
+weapon = null
 
-[node name="Shaman1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1361130257 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="Shaman1" parent="ReplicatedPropsContainer" unique_id=1361130257 instance=ExtResource("3_2hhap")]
 position = Vector2(568, 280)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("20_shaman")
+weapon = null
 
-[node name="ShamanEscortCutter" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1043721412 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="ShamanEscortCutter" parent="ReplicatedPropsContainer" unique_id=1043721412 instance=ExtResource("3_2hhap")]
 position = Vector2(744, 424)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("19_cutter")
+weapon = null
 
-[node name="Shaman2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1439415590 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="Shaman2" parent="ReplicatedPropsContainer" unique_id=1439415590 instance=ExtResource("3_2hhap")]
 position = Vector2(984, 424)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("20_shaman")
+weapon = null
 
-[node name="ChiefGuardRunt1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=949143438 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="ChiefGuardRunt1" parent="ReplicatedPropsContainer" unique_id=949143438 instance=ExtResource("3_2hhap")]
 position = Vector2(344, 168)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="GoblinChief" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=608139457 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+
+[node name="GoblinChief" parent="ReplicatedPropsContainer" unique_id=608139457 instance=ExtResource("3_2hhap")]
 position = Vector2(472, 232)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("22_chief")
+weapon = null
 
-[node name="ChiefGuardRunt2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1611268690 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="ChiefGuardRunt2" parent="ReplicatedPropsContainer" unique_id=1611268690 instance=ExtResource("3_2hhap")]
 position = Vector2(568, 168)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("18_runt")
+weapon = null
 
-[node name="WildWolf1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001000 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+
+[node name="WildWolf1" parent="ReplicatedPropsContainer" unique_id=1900001000 instance=ExtResource("3_2hhap")]
 position = Vector2(248, 696)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001001 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf2" parent="ReplicatedPropsContainer" unique_id=1900001001 instance=ExtResource("3_2hhap")]
 position = Vector2(200, 728)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001002 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf3" parent="ReplicatedPropsContainer" unique_id=1900001002 instance=ExtResource("3_2hhap")]
 position = Vector2(280, 648)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001003 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf4" parent="ReplicatedPropsContainer" unique_id=1900001003 instance=ExtResource("3_2hhap")]
 position = Vector2(296, 728)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001004 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf5" parent="ReplicatedPropsContainer" unique_id=1900001004 instance=ExtResource("3_2hhap")]
 position = Vector2(1752, 776)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf6" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001005 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf6" parent="ReplicatedPropsContainer" unique_id=1900001005 instance=ExtResource("3_2hhap")]
 position = Vector2(1800, 744)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf7" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001006 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf7" parent="ReplicatedPropsContainer" unique_id=1900001006 instance=ExtResource("3_2hhap")]
 position = Vector2(1704, 808)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WildWolf8" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001007 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WildWolf8" parent="ReplicatedPropsContainer" unique_id=1900001007 instance=ExtResource("3_2hhap")]
 position = Vector2(1864, 744)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("35_wolf")
+weapon = null
 
-[node name="WoodlandRat1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001008 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat1" parent="ReplicatedPropsContainer" unique_id=1900001008 instance=ExtResource("3_2hhap")]
 position = Vector2(888, 600)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001009 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat2" parent="ReplicatedPropsContainer" unique_id=1900001009 instance=ExtResource("3_2hhap")]
 position = Vector2(840, 552)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001010 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat3" parent="ReplicatedPropsContainer" unique_id=1900001010 instance=ExtResource("3_2hhap")]
 position = Vector2(888, 520)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001011 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat4" parent="ReplicatedPropsContainer" unique_id=1900001011 instance=ExtResource("3_2hhap")]
 position = Vector2(936, 600)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat5" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001012 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat5" parent="ReplicatedPropsContainer" unique_id=1900001012 instance=ExtResource("3_2hhap")]
 position = Vector2(936, 520)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat6" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001013 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat6" parent="ReplicatedPropsContainer" unique_id=1900001013 instance=ExtResource("3_2hhap")]
 position = Vector2(1144, 376)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat7" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001014 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat7" parent="ReplicatedPropsContainer" unique_id=1900001014 instance=ExtResource("3_2hhap")]
 position = Vector2(1160, 424)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat8" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat8" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
 position = Vector2(1192, 360)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat9" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat9" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
 position = Vector2(1096, 376)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat10" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat10" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
 position = Vector2(1112, 424)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat11" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat11" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
 position = Vector2(424, 920)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat12" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat12" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
 position = Vector2(360, 936)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat13" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat13" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
 position = Vector2(472, 904)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat14" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="WoodlandRat14" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
 position = Vector2(520, 936)
-collision_mask = 2
+debug_draw_ranges = false
+enemy_data = ExtResource("36_wrat")
+weapon = null
 
-[node name="WoodlandRat15" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=994491646 instance=ExtResource("3_2hhap")]
+
+[node name="WoodlandRat15" parent="ReplicatedPropsContainer" unique_id=1900001015 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(424, 872)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat16" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1109516851 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat16" parent="ReplicatedPropsContainer" unique_id=1900001016 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1448, 1208)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat17" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1691666201 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat17" parent="ReplicatedPropsContainer" unique_id=1900001017 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1464, 1256)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat18" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1670552385 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat18" parent="ReplicatedPropsContainer" unique_id=1900001018 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1496, 1208)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat19" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1890570354 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat19" parent="ReplicatedPropsContainer" unique_id=1900001019 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1512, 1256)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat20" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1412351682 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat20" parent="ReplicatedPropsContainer" unique_id=1900001020 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1416, 1256)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat21" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=88118995 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat21" parent="ReplicatedPropsContainer" unique_id=1900001021 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1720, 280)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat22" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001022 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat22" parent="ReplicatedPropsContainer" unique_id=1900001022 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1784, 312)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat23" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001023 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat23" parent="ReplicatedPropsContainer" unique_id=1900001023 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1720, 232)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat24" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001024 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat24" parent="ReplicatedPropsContainer" unique_id=1900001024 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1768, 376)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat25" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001025 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat25" parent="ReplicatedPropsContainer" unique_id=1900001025 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1944, 984)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat26" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001026 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat26" parent="ReplicatedPropsContainer" unique_id=1900001026 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1928, 936)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat27" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001027 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat27" parent="ReplicatedPropsContainer" unique_id=1900001027 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1896, 1016)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="WoodlandRat28" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900001028 instance=ExtResource("3_2hhap")]
+[node name="WoodlandRat28" parent="ReplicatedPropsContainer" unique_id=1900001028 instance=ExtResource("3_2hhap")]
 y_sort_enabled = true
-texture_filter = 1
 position = Vector2(1944, 1032)
-collision_mask = 2
+enemy_data = ExtResource("36_wrat")
 
-[node name="CamelDesertBadger1" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002101 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CamelDesertBadger1" parent="ReplicatedPropsContainer" unique_id=1900002101 instance=ExtResource("3_2hhap")]
 position = Vector2(4584, 1400)
-collision_mask = 2
+enemy_data = ExtResource("et_dbadger")
 
-[node name="CamelDesertBadger2" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002102 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CamelDesertBadger2" parent="ReplicatedPropsContainer" unique_id=1900002102 instance=ExtResource("3_2hhap")]
 position = Vector2(4680, 1416)
-collision_mask = 2
+enemy_data = ExtResource("et_dbadger")
 
-[node name="CamelDesertBadger3" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002103 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CamelDesertBadger3" parent="ReplicatedPropsContainer" unique_id=1900002103 instance=ExtResource("3_2hhap")]
 position = Vector2(4632, 1448)
-collision_mask = 2
+enemy_data = ExtResource("et_dbadger")
 
-[node name="CamelDesertBadger4" type="CharacterBody2D" parent="ReplicatedPropsContainer" unique_id=1900002104 instance=ExtResource("3_2hhap")]
-texture_filter = 1
+[node name="CamelDesertBadger4" parent="ReplicatedPropsContainer" unique_id=1900002104 instance=ExtResource("3_2hhap")]
 position = Vector2(4664, 1336)
-collision_mask = 2
-
-[node name="Entrance" type="Area2D" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
+enemy_data = ExtResource("et_dbadger")
+[node name="Entrance" parent="." unique_id=766829578 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
-monitorable = false
-script = ExtResource("15_4aa3h")
-target_instance = null
 warper_id = 23
-target_id = 0
-warp_delay_s = 0.0
 
-[node name="HubPortal" type="Area2D" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
+[node name="HubPortal" parent="." unique_id=766829579 instance=ExtResource("4_2dprc")]
 position = Vector2(984, 1320)
-monitorable = false
+portal_color = Color(0.3670073, 0.5757053, 0.25363114, 1)
+destination_label = "Castle Garden"
+target_instance = ExtResource("28_hub")
+warper_id = 123
+target_id = 23
 
-[node name="FungusCavePortal" type="Area2D" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]
+[node name="FungusCavePortal" parent="." unique_id=766829580 instance=ExtResource("4_2dprc")]
 position = Vector2(2696, 648)
-monitorable = false
+portal_color = Color(0.37106, 0.22349265, 0.094957806, 1)
+destination_label = "Fungus Cave"
+target_instance = ExtResource("28_fungus")
+warper_id = 24
+target_id = 21
 
-[node name="MiningCavePortal" type="Area2D" parent="." unique_id=766829581 instance=ExtResource("4_2dprc")]
+[node name="MiningCavePortal" parent="." unique_id=766829581 instance=ExtResource("4_2dprc")]
 position = Vector2(978, 839)
-monitorable = false
+portal_color = Color(0.55, 0.62, 0.72, 1)
+destination_label = "Mining Cave"
+target_instance = ExtResource("28_mining")
+warper_id = 130
+target_id = 30
 
-[node name="RespawnPoint" type="Area2D" parent="." unique_id=1537871885 instance=ExtResource("5_jiw8u")]
+[node name="RespawnPoint" parent="." unique_id=1537871885 instance=ExtResource("5_jiw8u")]
 position = Vector2(920, 1280)
-monitorable = false
-script = ExtResource("15_4aa3h")
-target_instance = null
-warper_id = 0
-target_id = 0
-warp_delay_s = 0.0
 
-[node name="TeleporterEntry" type="Area2D" parent="." unique_id=1508016588 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
-z_index = 10
+[node name="TeleporterEntry" parent="." unique_id=1508016588 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
 position = Vector2(1656, 128)
-script = ExtResource("18_lebv5")
 target = NodePath("../TeleporterGrove")
 
-[node name="TeleporterGrove" type="Area2D" parent="." unique_id=979578714 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
-z_index = 10
+[node name="TeleporterGrove" parent="." unique_id=979578714 node_paths=PackedStringArray("target") instance=ExtResource("23_tp")]
 position = Vector2(2616, 544)
-script = ExtResource("18_lebv5")
 target = NodePath("../TeleporterEntry")
 
 [node name="NPCs" type="Node2D" parent="." unique_id=1210250776]
 
-[node name="WardenBren" type="CharacterBody2D" parent="NPCs" unique_id=61718964 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
+[node name="WardenBren" parent="NPCs" unique_id=61718964 instance=ExtResource("6_mn6pe")]
 position = Vector2(1048, 1368)
-collision_mask = 2
+npc_resource = ExtResource("25_bren")
 
-[node name="SecretHermit" type="CharacterBody2D" parent="NPCs" unique_id=957533930 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(2696, 600)
-collision_mask = 2
+[node name="SlayerHouse" parent="." instance=ExtResource("40_slayer_house")]position = Vector2(1489, 1015)
 
-[node name="ScoutCalder" type="CharacterBody2D" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(2664, 584)
-collision_mask = 2
-
-[node name="BeachAngler" type="CharacterBody2D" parent="NPCs" unique_id=1900000201 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(1220, 1640)
-collision_mask = 2
-
-[node name="DesertCamel" type="CharacterBody2D" parent="NPCs" unique_id=1900000301 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(4634, 1384)
-collision_mask = 2
-
-[node name="SwampHermit" type="CharacterBody2D" parent="NPCs" unique_id=1900000302 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(4804, 680)
-collision_mask = 2
-
-[node name="ForgeGolem" type="CharacterBody2D" parent="NPCs" unique_id=1900000303 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(4823, 245)
-collision_mask = 2
-
-[node name="WingBanker" type="CharacterBody2D" parent="NPCs" unique_id=265428134 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(4184, 696)
-collision_mask = 2
-
-[node name="BeachBanker" type="CharacterBody2D" parent="NPCs" unique_id=1900000402 instance=ExtResource("6_mn6pe")]
-texture_filter = 1
-position = Vector2(1048, 1560)
-collision_mask = 2
-
-[node name="SlayerHouse" type="Node2D" parent="." unique_id=701268441 instance=ExtResource("40_slayer_house")]
-y_sort_enabled = true
-position = Vector2(1489, 1015)
-
-[node name="SlayerHouseDoor" type="Area2D" parent="." unique_id=360857946 instance=ExtResource("5_jiw8u")]
+[node name="SlayerHouseDoor" parent="." instance=ExtResource("5_jiw8u")]
 position = Vector2(1489, 1079)
-monitorable = false
-script = ExtResource("15_4aa3h")
 target_instance = ExtResource("41_slayer_inst")
 warper_id = 31
 target_id = 32
-warp_delay_s = 0.0
+
+[node name="SecretHermit" parent="NPCs" unique_id=957533930 instance=ExtResource("6_mn6pe")]
+position = Vector2(2696, 600)
+npc_resource = ExtResource("26_hermit")
+
+[node name="ScoutCalder" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
+position = Vector2(2664, 584)
+npc_resource = ExtResource("45_calder")
+
+[node name="BeachAngler" parent="NPCs" unique_id=1900000201 instance=ExtResource("6_mn6pe")]
+position = Vector2(1220, 1640)
+npc_resource = ExtResource("26_angler")
+
+[node name="DesertCamel" parent="NPCs" unique_id=1900000301 instance=ExtResource("6_mn6pe")]
+position = Vector2(4634, 1384)
+npc_resource = ExtResource("42_camel")
+
+[node name="SwampHermit" parent="NPCs" unique_id=1900000302 instance=ExtResource("6_mn6pe")]
+position = Vector2(4804, 680)
+npc_resource = ExtResource("44_hermit")
+
+[node name="ForgeGolem" parent="NPCs" unique_id=1900000303 instance=ExtResource("6_mn6pe")]
+position = Vector2(4823, 245)
+npc_resource = ExtResource("43_golem")
+
+[node name="WingBanker" parent="NPCs" unique_id=1900000401 instance=ExtResource("6_mn6pe")]
+position = Vector2(4184, 696)
+npc_resource = ExtResource("46_banker")
+
+[node name="BeachBanker" parent="NPCs" unique_id=1900000402 instance=ExtResource("6_mn6pe")]
+position = Vector2(1048, 1560)
+npc_resource = ExtResource("46_banker")
 
 [node name="MineableNodes" type="Node2D" parent="." unique_id=59547489]
 
-[node name="WoodStand1" type="Area2D" parent="MineableNodes" unique_id=1930000000 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand1" parent="MineableNodes" unique_id=1930000000 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(360, 1144)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand2" type="Area2D" parent="MineableNodes" unique_id=1930000001 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand2" parent="MineableNodes" unique_id=1930000001 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(312, 1224)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand3" type="Area2D" parent="MineableNodes" unique_id=1930000002 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand3" parent="MineableNodes" unique_id=1930000002 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(264, 1144)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand4" type="Area2D" parent="MineableNodes" unique_id=1930000003 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand4" parent="MineableNodes" unique_id=1930000003 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(408, 1224)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand5" type="Area2D" parent="MineableNodes" unique_id=1930000004 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand5" parent="MineableNodes" unique_id=1930000004 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(216, 1224)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand6" type="Area2D" parent="MineableNodes" unique_id=1930000005 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand6" parent="MineableNodes" unique_id=1930000005 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(456, 1128)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand7" type="Area2D" parent="MineableNodes" unique_id=1930000006 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand7" parent="MineableNodes" unique_id=1930000006 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(360, 1304)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand8" type="Area2D" parent="MineableNodes" unique_id=1930000007 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand8" parent="MineableNodes" unique_id=1930000007 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(264, 1304)
+data = ExtResource("31_ntree")
 
-[node name="WoodStand9" type="Area2D" parent="MineableNodes" unique_id=1930000008 instance=ExtResource("7_jiw8u")]
+[node name="WoodStand9" parent="MineableNodes" unique_id=1930000008 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(232, 1048)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood1" type="Area2D" parent="MineableNodes" unique_id=1930000009 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood1" parent="MineableNodes" unique_id=1930000009 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1784, 248)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood2" type="Area2D" parent="MineableNodes" unique_id=1930000010 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood2" parent="MineableNodes" unique_id=1930000010 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1864, 296)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood3" type="Area2D" parent="MineableNodes" unique_id=1930000011 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood3" parent="MineableNodes" unique_id=1930000011 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1736, 328)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood4" type="Area2D" parent="MineableNodes" unique_id=1930000012 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood4" parent="MineableNodes" unique_id=1930000012 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1864, 200)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood5" type="Area2D" parent="MineableNodes" unique_id=1930000013 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood5" parent="MineableNodes" unique_id=1930000013 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 152)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood6" type="Area2D" parent="MineableNodes" unique_id=1930000014 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood6" parent="MineableNodes" unique_id=1930000014 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1816, 376)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood7" type="Area2D" parent="MineableNodes" unique_id=1930000015 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood7" parent="MineableNodes" unique_id=1930000015 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1944, 248)
+data = ExtResource("31_ntree")
 
-[node name="NorthWood8" type="Area2D" parent="MineableNodes" unique_id=1930000016 instance=ExtResource("7_jiw8u")]
+[node name="NorthWood8" parent="MineableNodes" unique_id=1930000016 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1912, 376)
+data = ExtResource("31_ntree")
 
-[node name="EastWood1" type="Area2D" parent="MineableNodes" unique_id=1930000017 instance=ExtResource("7_jiw8u")]
+[node name="EastWood1" parent="MineableNodes" unique_id=1930000017 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1832, 888)
+data = ExtResource("31_ntree")
 
-[node name="EastWood2" type="Area2D" parent="MineableNodes" unique_id=1930000018 instance=ExtResource("7_jiw8u")]
+[node name="EastWood2" parent="MineableNodes" unique_id=1930000018 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 840)
+data = ExtResource("31_ntree")
 
-[node name="EastWood3" type="Area2D" parent="MineableNodes" unique_id=1930000019 instance=ExtResource("7_jiw8u")]
+[node name="EastWood3" parent="MineableNodes" unique_id=1930000019 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1832, 792)
+data = ExtResource("31_ntree")
 
-[node name="EastWood4" type="Area2D" parent="MineableNodes" unique_id=1930000020 instance=ExtResource("7_jiw8u")]
+[node name="EastWood4" parent="MineableNodes" unique_id=1930000020 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1928, 872)
+data = ExtResource("31_ntree")
 
-[node name="EastWood5" type="Area2D" parent="MineableNodes" unique_id=1930000021 instance=ExtResource("7_jiw8u")]
+[node name="EastWood5" parent="MineableNodes" unique_id=1930000021 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1752, 936)
+data = ExtResource("31_ntree")
 
-[node name="EastWood6" type="Area2D" parent="MineableNodes" unique_id=1930000022 instance=ExtResource("7_jiw8u")]
+[node name="EastWood6" parent="MineableNodes" unique_id=1930000022 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1880, 968)
+data = ExtResource("31_ntree")
 
-[node name="EastWood7" type="Area2D" parent="MineableNodes" unique_id=1930000023 instance=ExtResource("7_jiw8u")]
+[node name="EastWood7" parent="MineableNodes" unique_id=1930000023 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1800, 1016)
+data = ExtResource("31_ntree")
 
-[node name="OakRise1" type="Area2D" parent="MineableNodes" unique_id=1930000024 instance=ExtResource("7_jiw8u")]
+[node name="OakRise1" parent="MineableNodes" unique_id=1930000024 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1672, 648)
+data = ExtResource("32_otree")
 
-[node name="OakRise2" type="Area2D" parent="MineableNodes" unique_id=1930000025 instance=ExtResource("7_jiw8u")]
+[node name="OakRise2" parent="MineableNodes" unique_id=1930000025 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1560, 616)
+data = ExtResource("32_otree")
 
-[node name="OakRise3" type="Area2D" parent="MineableNodes" unique_id=1930000026 instance=ExtResource("7_jiw8u")]
+[node name="OakRise3" parent="MineableNodes" unique_id=1930000026 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1576, 744)
+data = ExtResource("32_otree")
 
-[node name="OakRise4" type="Area2D" parent="MineableNodes" unique_id=1930000027 instance=ExtResource("7_jiw8u")]
+[node name="OakRise4" parent="MineableNodes" unique_id=1930000027 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1768, 568)
+data = ExtResource("32_otree")
 
-[node name="OakRise5" type="Area2D" parent="MineableNodes" unique_id=1930000028 instance=ExtResource("7_jiw8u")]
+[node name="OakRise5" parent="MineableNodes" unique_id=1930000028 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1608, 504)
+data = ExtResource("32_otree")
 
-[node name="OakRise6" type="Area2D" parent="MineableNodes" unique_id=1930000029 instance=ExtResource("7_jiw8u")]
+[node name="OakRise6" parent="MineableNodes" unique_id=1930000029 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(1800, 680)
+data = ExtResource("32_otree")
 
-[node name="HerbMeadow1" type="Area2D" parent="MineableNodes" unique_id=1930000030 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow1" parent="MineableNodes" unique_id=1930000030 instance=ExtResource("7_jiw8u")]
 position = Vector2(1240, 1176)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow2" type="Area2D" parent="MineableNodes" unique_id=1930000031 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow2" parent="MineableNodes" unique_id=1930000031 instance=ExtResource("7_jiw8u")]
 position = Vector2(1176, 1192)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow3" type="Area2D" parent="MineableNodes" unique_id=1930000032 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow3" parent="MineableNodes" unique_id=1930000032 instance=ExtResource("7_jiw8u")]
 position = Vector2(1240, 1240)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow4" type="Area2D" parent="MineableNodes" unique_id=1930000033 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow4" parent="MineableNodes" unique_id=1930000033 instance=ExtResource("7_jiw8u")]
 position = Vector2(1192, 1128)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow5" type="Area2D" parent="MineableNodes" unique_id=1930000034 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow5" parent="MineableNodes" unique_id=1930000034 instance=ExtResource("7_jiw8u")]
 position = Vector2(1304, 1176)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow6" type="Area2D" parent="MineableNodes" unique_id=1930000035 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow6" parent="MineableNodes" unique_id=1930000035 instance=ExtResource("7_jiw8u")]
 position = Vector2(1176, 1256)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow7" type="Area2D" parent="MineableNodes" unique_id=1930000036 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow7" parent="MineableNodes" unique_id=1930000036 instance=ExtResource("7_jiw8u")]
 position = Vector2(1304, 1240)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow8" type="Area2D" parent="MineableNodes" unique_id=1930000037 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow8" parent="MineableNodes" unique_id=1930000037 instance=ExtResource("7_jiw8u")]
 position = Vector2(1128, 1144)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow9" type="Area2D" parent="MineableNodes" unique_id=1930000038 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow9" parent="MineableNodes" unique_id=1930000038 instance=ExtResource("7_jiw8u")]
 position = Vector2(1320, 1112)
+data = ExtResource("28_svn3l")
 
-[node name="HerbMeadow10" type="Area2D" parent="MineableNodes" unique_id=1930000039 instance=ExtResource("7_jiw8u")]
+[node name="HerbMeadow10" parent="MineableNodes" unique_id=1930000039 instance=ExtResource("7_jiw8u")]
 position = Vector2(1224, 1064)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb1" type="Area2D" parent="MineableNodes" unique_id=1930000040 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb1" parent="MineableNodes" unique_id=1930000040 instance=ExtResource("7_jiw8u")]
 position = Vector2(328, 840)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb2" type="Area2D" parent="MineableNodes" unique_id=1930000041 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb2" parent="MineableNodes" unique_id=1930000041 instance=ExtResource("7_jiw8u")]
 position = Vector2(328, 776)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb3" type="Area2D" parent="MineableNodes" unique_id=1930000042 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb3" parent="MineableNodes" unique_id=1930000042 instance=ExtResource("7_jiw8u")]
 position = Vector2(392, 824)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb4" type="Area2D" parent="MineableNodes" unique_id=1930000043 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb4" parent="MineableNodes" unique_id=1930000043 instance=ExtResource("7_jiw8u")]
 position = Vector2(376, 888)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb5" type="Area2D" parent="MineableNodes" unique_id=1930000044 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb5" parent="MineableNodes" unique_id=1930000044 instance=ExtResource("7_jiw8u")]
 position = Vector2(312, 904)
+data = ExtResource("28_svn3l")
 
-[node name="PondHerb6" type="Area2D" parent="MineableNodes" unique_id=1930000045 instance=ExtResource("7_jiw8u")]
+[node name="PondHerb6" parent="MineableNodes" unique_id=1930000045 instance=ExtResource("7_jiw8u")]
 position = Vector2(264, 856)
+data = ExtResource("28_svn3l")
 
-[node name="FlaxField1" type="Area2D" parent="MineableNodes" unique_id=1930000046 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField1" parent="MineableNodes" unique_id=1930000046 instance=ExtResource("7_jiw8u")]
 position = Vector2(712, 1208)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField2" type="Area2D" parent="MineableNodes" unique_id=1930000047 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField2" parent="MineableNodes" unique_id=1930000047 instance=ExtResource("7_jiw8u")]
 position = Vector2(648, 1224)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField3" type="Area2D" parent="MineableNodes" unique_id=1930000048 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField3" parent="MineableNodes" unique_id=1930000048 instance=ExtResource("7_jiw8u")]
 position = Vector2(664, 1160)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField4" type="Area2D" parent="MineableNodes" unique_id=1930000049 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField4" parent="MineableNodes" unique_id=1930000049 instance=ExtResource("7_jiw8u")]
 position = Vector2(712, 1272)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField5" type="Area2D" parent="MineableNodes" unique_id=1930000050 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField5" parent="MineableNodes" unique_id=1930000050 instance=ExtResource("7_jiw8u")]
 position = Vector2(728, 1144)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField6" type="Area2D" parent="MineableNodes" unique_id=1930000051 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField6" parent="MineableNodes" unique_id=1930000051 instance=ExtResource("7_jiw8u")]
 position = Vector2(776, 1208)
+data = ExtResource("27_lebv5")
 
-[node name="FlaxField7" type="Area2D" parent="MineableNodes" unique_id=1930000052 instance=ExtResource("7_jiw8u")]
+[node name="FlaxField7" parent="MineableNodes" unique_id=1930000052 instance=ExtResource("7_jiw8u")]
 position = Vector2(776, 1272)
+data = ExtResource("27_lebv5")
 
-[node name="FrostHollow1" type="Area2D" parent="MineableNodes" unique_id=1930000053 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow1" parent="MineableNodes" unique_id=1930000053 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 488)
+data = ExtResource("29_frost")
 
-[node name="FrostHollow2" type="Area2D" parent="MineableNodes" unique_id=1930000054 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow2" parent="MineableNodes" unique_id=1930000054 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 552)
+data = ExtResource("29_frost")
 
-[node name="FrostHollow3" type="Area2D" parent="MineableNodes" unique_id=1930000055 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow3" parent="MineableNodes" unique_id=1930000055 instance=ExtResource("7_jiw8u")]
 position = Vector2(232, 472)
+data = ExtResource("29_frost")
 
-[node name="FrostHollow4" type="Area2D" parent="MineableNodes" unique_id=1930000056 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow4" parent="MineableNodes" unique_id=1930000056 instance=ExtResource("7_jiw8u")]
 position = Vector2(232, 536)
+data = ExtResource("29_frost")
 
-[node name="FrostHollow5" type="Area2D" parent="MineableNodes" unique_id=1930000057 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow5" parent="MineableNodes" unique_id=1930000057 instance=ExtResource("7_jiw8u")]
 position = Vector2(168, 424)
+data = ExtResource("29_frost")
 
-[node name="FrostHollow6" type="Area2D" parent="MineableNodes" unique_id=1930000058 instance=ExtResource("7_jiw8u")]
+[node name="FrostHollow6" parent="MineableNodes" unique_id=1930000058 instance=ExtResource("7_jiw8u")]
 position = Vector2(104, 520)
+data = ExtResource("29_frost")
 
-[node name="WingHerb1" type="Area2D" parent="MineableNodes" unique_id=1930000059 instance=ExtResource("7_jiw8u")]
+[node name="WingHerb1" parent="MineableNodes" unique_id=1930000059 instance=ExtResource("7_jiw8u")]
 position = Vector2(2920, 744)
+data = ExtResource("28_svn3l")
 
-[node name="WingHerb2" type="Area2D" parent="MineableNodes" unique_id=1930000060 instance=ExtResource("7_jiw8u")]
+[node name="WingHerb2" parent="MineableNodes" unique_id=1930000060 instance=ExtResource("7_jiw8u")]
 position = Vector2(2920, 808)
+data = ExtResource("28_svn3l")
 
-[node name="WingHerb3" type="Area2D" parent="MineableNodes" unique_id=1930000061 instance=ExtResource("7_jiw8u")]
+[node name="WingHerb3" parent="MineableNodes" unique_id=1930000061 instance=ExtResource("7_jiw8u")]
 position = Vector2(2872, 696)
+data = ExtResource("28_svn3l")
 
-[node name="WingHerb4" type="Area2D" parent="MineableNodes" unique_id=1930000062 instance=ExtResource("7_jiw8u")]
+[node name="WingHerb4" parent="MineableNodes" unique_id=1930000062 instance=ExtResource("7_jiw8u")]
 position = Vector2(2984, 744)
+data = ExtResource("28_svn3l")
 
-[node name="WingHerb5" type="Area2D" parent="MineableNodes" unique_id=1930000063 instance=ExtResource("7_jiw8u")]
+[node name="WingHerb5" parent="MineableNodes" unique_id=1930000063 instance=ExtResource("7_jiw8u")]
 position = Vector2(2936, 680)
+data = ExtResource("28_svn3l")
 
-[node name="WingSunwort1" type="Area2D" parent="MineableNodes" unique_id=1930000064 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort1" parent="MineableNodes" unique_id=1930000064 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 248)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort2" type="Area2D" parent="MineableNodes" unique_id=1930000065 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort2" parent="MineableNodes" unique_id=1930000065 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 312)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort3" type="Area2D" parent="MineableNodes" unique_id=1930000066 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort3" parent="MineableNodes" unique_id=1930000066 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 264)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort4" type="Area2D" parent="MineableNodes" unique_id=1930000067 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort4" parent="MineableNodes" unique_id=1930000067 instance=ExtResource("7_jiw8u")]
 position = Vector2(3624, 232)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort5" type="Area2D" parent="MineableNodes" unique_id=1930000068 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort5" parent="MineableNodes" unique_id=1930000068 instance=ExtResource("7_jiw8u")]
 position = Vector2(3512, 200)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort6" type="Area2D" parent="MineableNodes" unique_id=1930000069 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort6" parent="MineableNodes" unique_id=1930000069 instance=ExtResource("7_jiw8u")]
 position = Vector2(3624, 296)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort7" type="Area2D" parent="MineableNodes" unique_id=1930000070 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort7" parent="MineableNodes" unique_id=1930000070 instance=ExtResource("7_jiw8u")]
 position = Vector2(3576, 184)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort8" type="Area2D" parent="MineableNodes" unique_id=1930000071 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort8" parent="MineableNodes" unique_id=1930000071 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 328)
+data = ExtResource("38_sunwrt")
 
-[node name="WingSunwort9" type="Area2D" parent="MineableNodes" unique_id=1930000072 instance=ExtResource("7_jiw8u")]
+[node name="WingSunwort9" parent="MineableNodes" unique_id=1930000072 instance=ExtResource("7_jiw8u")]
 position = Vector2(3608, 360)
+data = ExtResource("38_sunwrt")
 
-[node name="WingMaple1" type="Area2D" parent="MineableNodes" unique_id=1930000073 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple1" parent="MineableNodes" unique_id=1930000073 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3320, 488)
+data = ExtResource("34_mtree")
 
-[node name="WingMaple2" type="Area2D" parent="MineableNodes" unique_id=1930000074 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple2" parent="MineableNodes" unique_id=1930000074 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3288, 376)
+data = ExtResource("34_mtree")
 
-[node name="WingMaple3" type="Area2D" parent="MineableNodes" unique_id=1930000075 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple3" parent="MineableNodes" unique_id=1930000075 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3240, 568)
+data = ExtResource("34_mtree")
 
-[node name="WingMaple4" type="Area2D" parent="MineableNodes" unique_id=1930000076 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple4" parent="MineableNodes" unique_id=1930000076 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3192, 440)
+data = ExtResource("34_mtree")
 
-[node name="WingMaple5" type="Area2D" parent="MineableNodes" unique_id=1930000077 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple5" parent="MineableNodes" unique_id=1930000077 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3400, 408)
+data = ExtResource("34_mtree")
 
-[node name="WingMaple6" type="Area2D" parent="MineableNodes" unique_id=1930000078 instance=ExtResource("7_jiw8u")]
+[node name="WingMaple6" parent="MineableNodes" unique_id=1930000078 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3352, 600)
+data = ExtResource("34_mtree")
 
-[node name="WingMoonbloom1" type="Area2D" parent="MineableNodes" unique_id=1930000079 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom1" parent="MineableNodes" unique_id=1930000079 instance=ExtResource("7_jiw8u")]
 position = Vector2(4728, 680)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom2" type="Area2D" parent="MineableNodes" unique_id=1930000080 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom2" parent="MineableNodes" unique_id=1930000080 instance=ExtResource("7_jiw8u")]
 position = Vector2(4728, 760)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom3" type="Area2D" parent="MineableNodes" unique_id=1930000081 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom3" parent="MineableNodes" unique_id=1930000081 instance=ExtResource("7_jiw8u")]
 position = Vector2(4872, 680)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom4" type="Area2D" parent="MineableNodes" unique_id=1930000082 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom4" parent="MineableNodes" unique_id=1930000082 instance=ExtResource("7_jiw8u")]
 position = Vector2(4664, 696)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom5" type="Area2D" parent="MineableNodes" unique_id=1930000083 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom5" parent="MineableNodes" unique_id=1930000083 instance=ExtResource("7_jiw8u")]
 position = Vector2(4680, 632)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom6" type="Area2D" parent="MineableNodes" unique_id=1930000084 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom6" parent="MineableNodes" unique_id=1930000084 instance=ExtResource("7_jiw8u")]
 position = Vector2(4664, 760)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom7" type="Area2D" parent="MineableNodes" unique_id=1930000085 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom7" parent="MineableNodes" unique_id=1930000085 instance=ExtResource("7_jiw8u")]
 position = Vector2(4744, 824)
+data = ExtResource("39_moonb")
 
-[node name="WingMoonbloom8" type="Area2D" parent="MineableNodes" unique_id=1930000086 instance=ExtResource("7_jiw8u")]
+[node name="WingMoonbloom8" parent="MineableNodes" unique_id=1930000086 instance=ExtResource("7_jiw8u")]
 position = Vector2(4888, 776)
+data = ExtResource("39_moonb")
 
-[node name="WingWillow1" type="Area2D" parent="MineableNodes" unique_id=1930000087 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow1" parent="MineableNodes" unique_id=1930000087 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4456, 824)
+data = ExtResource("33_wtree")
 
-[node name="WingWillow2" type="Area2D" parent="MineableNodes" unique_id=1930000088 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow2" parent="MineableNodes" unique_id=1930000088 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4536, 904)
+data = ExtResource("33_wtree")
 
-[node name="WingWillow3" type="Area2D" parent="MineableNodes" unique_id=1930000089 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow3" parent="MineableNodes" unique_id=1930000089 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4552, 760)
+data = ExtResource("33_wtree")
 
-[node name="WingWillow4" type="Area2D" parent="MineableNodes" unique_id=1930000090 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow4" parent="MineableNodes" unique_id=1930000090 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4440, 712)
+data = ExtResource("33_wtree")
 
-[node name="WingWillow5" type="Area2D" parent="MineableNodes" unique_id=1930000091 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow5" parent="MineableNodes" unique_id=1930000091 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4360, 888)
+data = ExtResource("33_wtree")
 
-[node name="WingWillow6" type="Area2D" parent="MineableNodes" unique_id=1930000092 instance=ExtResource("7_jiw8u")]
+[node name="WingWillow6" parent="MineableNodes" unique_id=1930000092 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4440, 968)
+data = ExtResource("33_wtree")
 
-[node name="WingFrost1" type="Area2D" parent="MineableNodes" unique_id=1930000093 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost1" parent="MineableNodes" unique_id=1930000093 instance=ExtResource("7_jiw8u")]
 position = Vector2(3752, 1096)
+data = ExtResource("29_frost")
 
-[node name="WingFrost2" type="Area2D" parent="MineableNodes" unique_id=1930000094 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost2" parent="MineableNodes" unique_id=1930000094 instance=ExtResource("7_jiw8u")]
 position = Vector2(3800, 1048)
+data = ExtResource("29_frost")
 
-[node name="WingFrost3" type="Area2D" parent="MineableNodes" unique_id=1930000095 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost3" parent="MineableNodes" unique_id=1930000095 instance=ExtResource("7_jiw8u")]
 position = Vector2(3736, 1032)
+data = ExtResource("29_frost")
 
-[node name="WingFrost4" type="Area2D" parent="MineableNodes" unique_id=1930000096 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost4" parent="MineableNodes" unique_id=1930000096 instance=ExtResource("7_jiw8u")]
 position = Vector2(3736, 1160)
+data = ExtResource("29_frost")
 
-[node name="WingFrost5" type="Area2D" parent="MineableNodes" unique_id=1930000097 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost5" parent="MineableNodes" unique_id=1930000097 instance=ExtResource("7_jiw8u")]
 position = Vector2(3688, 1080)
+data = ExtResource("29_frost")
 
-[node name="WingFrost6" type="Area2D" parent="MineableNodes" unique_id=1930000098 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost6" parent="MineableNodes" unique_id=1930000098 instance=ExtResource("7_jiw8u")]
 position = Vector2(3800, 1160)
+data = ExtResource("29_frost")
 
-[node name="WingFrost7" type="Area2D" parent="MineableNodes" unique_id=1930000099 instance=ExtResource("7_jiw8u")]
+[node name="WingFrost7" parent="MineableNodes" unique_id=1930000099 instance=ExtResource("7_jiw8u")]
 position = Vector2(3784, 984)
+data = ExtResource("29_frost")
 
-[node name="WingYew1" type="Area2D" parent="MineableNodes" unique_id=1930000100 instance=ExtResource("7_jiw8u")]
+[node name="WingYew1" parent="MineableNodes" unique_id=1930000100 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1336)
+data = ExtResource("37_ytree")
 
-[node name="WingYew2" type="Area2D" parent="MineableNodes" unique_id=1930000101 instance=ExtResource("7_jiw8u")]
+[node name="WingYew2" parent="MineableNodes" unique_id=1930000101 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4856, 1368)
+data = ExtResource("37_ytree")
 
-[node name="WingYew3" type="Area2D" parent="MineableNodes" unique_id=1930000102 instance=ExtResource("7_jiw8u")]
+[node name="WingYew3" parent="MineableNodes" unique_id=1930000102 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1464)
+data = ExtResource("37_ytree")
 
-[node name="WingYew4" type="Area2D" parent="MineableNodes" unique_id=1930000103 instance=ExtResource("7_jiw8u")]
+[node name="WingYew4" parent="MineableNodes" unique_id=1930000103 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4648, 1256)
+data = ExtResource("37_ytree")
 
-[node name="WingYew5" type="Area2D" parent="MineableNodes" unique_id=1930000104 instance=ExtResource("7_jiw8u")]
+[node name="WingYew5" parent="MineableNodes" unique_id=1930000104 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4744, 1192)
+data = ExtResource("37_ytree")
 
-[node name="WingYewCamp1" type="Area2D" parent="MineableNodes" unique_id=1930000105 instance=ExtResource("7_jiw8u")]
+[node name="WingYewCamp1" parent="MineableNodes" unique_id=1930000105 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4008, 584)
+data = ExtResource("37_ytree")
 
-[node name="WingYewCamp2" type="Area2D" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("7_jiw8u")]
+[node name="WingYewCamp2" parent="MineableNodes" unique_id=1930000106 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3944, 680)
+data = ExtResource("37_ytree")
 
-[node name="WingYewCamp3" type="Area2D" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("7_jiw8u")]
+[node name="WingYewCamp3" parent="MineableNodes" unique_id=1930000107 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(3896, 552)
+data = ExtResource("37_ytree")
 
-[node name="WingYewCamp4" type="Area2D" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("7_jiw8u")]
+[node name="WingYewCamp4" parent="MineableNodes" unique_id=1930000108 instance=ExtResource("7_jiw8u")]
 y_sort_enabled = true
 position = Vector2(4136, 584)
+data = ExtResource("37_ytree")
 
-[node name="WingStarblossom1" type="Area2D" parent="MineableNodes" unique_id=1930000109 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom1" parent="MineableNodes" unique_id=1930000109 instance=ExtResource("7_jiw8u")]
 position = Vector2(3992, 232)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom2" type="Area2D" parent="MineableNodes" unique_id=1930000110 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom2" parent="MineableNodes" unique_id=1930000110 instance=ExtResource("7_jiw8u")]
 position = Vector2(3992, 296)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom3" type="Area2D" parent="MineableNodes" unique_id=1930000111 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom3" parent="MineableNodes" unique_id=1930000111 instance=ExtResource("7_jiw8u")]
 position = Vector2(3928, 248)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom4" type="Area2D" parent="MineableNodes" unique_id=1930000112 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom4" parent="MineableNodes" unique_id=1930000112 instance=ExtResource("7_jiw8u")]
 position = Vector2(4008, 168)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom5" type="Area2D" parent="MineableNodes" unique_id=1930000113 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom5" parent="MineableNodes" unique_id=1930000113 instance=ExtResource("7_jiw8u")]
 position = Vector2(3944, 184)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom6" type="Area2D" parent="MineableNodes" unique_id=1930000114 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom6" parent="MineableNodes" unique_id=1930000114 instance=ExtResource("7_jiw8u")]
 position = Vector2(4056, 296)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom7" type="Area2D" parent="MineableNodes" unique_id=1930000115 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom7" parent="MineableNodes" unique_id=1930000115 instance=ExtResource("7_jiw8u")]
 position = Vector2(3928, 312)
+data = ExtResource("48_star")
 
-[node name="WingStarblossom8" type="Area2D" parent="MineableNodes" unique_id=1930000116 instance=ExtResource("7_jiw8u")]
+[node name="WingStarblossom8" parent="MineableNodes" unique_id=1930000116 instance=ExtResource("7_jiw8u")]
 position = Vector2(4072, 152)
+data = ExtResource("48_star")
 
-[node name="WingBloodcap1" type="Area2D" parent="MineableNodes" unique_id=1930000117 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap1" parent="MineableNodes" unique_id=1930000117 instance=ExtResource("7_jiw8u")]
 position = Vector2(5112, 440)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap2" type="Area2D" parent="MineableNodes" unique_id=1930000118 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap2" parent="MineableNodes" unique_id=1930000118 instance=ExtResource("7_jiw8u")]
 position = Vector2(5144, 504)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap3" type="Area2D" parent="MineableNodes" unique_id=1930000119 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap3" parent="MineableNodes" unique_id=1930000119 instance=ExtResource("7_jiw8u")]
 position = Vector2(5048, 408)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap4" type="Area2D" parent="MineableNodes" unique_id=1930000120 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap4" parent="MineableNodes" unique_id=1930000120 instance=ExtResource("7_jiw8u")]
 position = Vector2(5128, 568)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap5" type="Area2D" parent="MineableNodes" unique_id=1930000121 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap5" parent="MineableNodes" unique_id=1930000121 instance=ExtResource("7_jiw8u")]
 position = Vector2(5208, 456)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap6" type="Area2D" parent="MineableNodes" unique_id=1930000122 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap6" parent="MineableNodes" unique_id=1930000122 instance=ExtResource("7_jiw8u")]
 position = Vector2(5208, 520)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap7" type="Area2D" parent="MineableNodes" unique_id=1930000123 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap7" parent="MineableNodes" unique_id=1930000123 instance=ExtResource("7_jiw8u")]
 position = Vector2(5144, 344)
+data = ExtResource("47_blood")
 
-[node name="WingBloodcap8" type="Area2D" parent="MineableNodes" unique_id=1930000124 instance=ExtResource("7_jiw8u")]
+[node name="WingBloodcap8" parent="MineableNodes" unique_id=1930000124 instance=ExtResource("7_jiw8u")]
 position = Vector2(5192, 584)
+data = ExtResource("47_blood")
 
-[node name="WingGrimshade1" type="Area2D" parent="MineableNodes" unique_id=1930000125 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade1" parent="MineableNodes" unique_id=1930000125 instance=ExtResource("7_jiw8u")]
 position = Vector2(3480, 1176)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade2" type="Area2D" parent="MineableNodes" unique_id=1930000126 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade2" parent="MineableNodes" unique_id=1930000126 instance=ExtResource("7_jiw8u")]
 position = Vector2(3416, 1208)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade3" type="Area2D" parent="MineableNodes" unique_id=1930000127 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade3" parent="MineableNodes" unique_id=1930000127 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1176)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade4" type="Area2D" parent="MineableNodes" unique_id=1930000128 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade4" parent="MineableNodes" unique_id=1930000128 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1112)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade5" type="Area2D" parent="MineableNodes" unique_id=1930000129 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade5" parent="MineableNodes" unique_id=1930000129 instance=ExtResource("7_jiw8u")]
 position = Vector2(3496, 1240)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade6" type="Area2D" parent="MineableNodes" unique_id=1930000130 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade6" parent="MineableNodes" unique_id=1930000130 instance=ExtResource("7_jiw8u")]
 position = Vector2(3560, 1144)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade7" type="Area2D" parent="MineableNodes" unique_id=1930000131 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade7" parent="MineableNodes" unique_id=1930000131 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1240)
+data = ExtResource("49_grim")
 
-[node name="WingGrimshade8" type="Area2D" parent="MineableNodes" unique_id=1930000132 instance=ExtResource("7_jiw8u")]
+[node name="WingGrimshade8" parent="MineableNodes" unique_id=1930000132 instance=ExtResource("7_jiw8u")]
 position = Vector2(3352, 1048)
+data = ExtResource("49_grim")
 
-[node name="WoodlandBeach" type="Node2D" parent="." unique_id=1563115651 instance=ExtResource("29_beach")]
-y_sort_enabled = true
+[node name="WoodlandBeach" parent="." instance=ExtResource("29_beach")]
 position = Vector2(900, 1520)
-script = ExtResource("24_svn3l")
-shoreline = PackedVector2Array(0, 266, 16, 266, 32, 266, 48, 266, 64, 266, 80, 266, 96, 266, 112, 266, 128, 266, 144, 266, 160, 266, 176, 266, 192, 266, 208, 266, 224, 266, 240, 266, 256, 266, 272, 266, 288, 298, 304, 298, 320, 298, 336, 298, 352, 330, 368, 330, 384, 330, 400, 330, 416, 330, 432, 330, 448, 362, 464, 362, 480, 362, 496, 362, 512, 394, 528, 394, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 394, 656, 394, 672, 394, 688, 394, 704, 394, 720, 394, 736, 394, 752, 394, 768, 362, 784, 362, 800, 362, 816, 362)
-dock_walk = Rect2(400, 236, 32, 120)
-boat_pad = Rect2(408, 296, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(175, 116, 110, 60), Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
-rim_east = false
 
-[node name="WoodlandDeepCove" type="Node2D" parent="." unique_id=854262756 instance=ExtResource("30_deep")]
-y_sort_enabled = true
+[node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
 position = Vector2(1732, 1540)
-script = ExtResource("24_svn3l")
-ground_size = Vector2(704, 480)
-shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
-dock_walk = Rect2(336, 120, 32, 120)
-boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(144, 124, 12, 12)])
-rim_west = false
-rim_east = false
 
-[node name="WoodlandEastLink" type="Node2D" parent="." unique_id=11640828 instance=ExtResource("31_link")]
-y_sort_enabled = true
-position = Vector2(2436, 1540)
-script = ExtResource("24_svn3l")
-ground_size = Vector2(768, 512)
-shoreline = PackedVector2Array(0, 330, 16, 330, 32, 362, 48, 362, 64, 362, 80, 362, 96, 362, 112, 362, 128, 362, 144, 362, 160, 362, 176, 362, 192, 362, 208, 362, 224, 394, 240, 394, 256, 394, 272, 394, 288, 394, 304, 394, 320, 394, 336, 394, 352, 394, 368, 394, 384, 394, 400, 394, 416, 394, 432, 394, 448, 394, 464, 394, 480, 394, 496, 394, 512, 394, 528, 394, 544, 362, 560, 362, 576, 362, 592, 362, 608, 362, 624, 362, 640, 362, 656, 362, 672, 362, 688, 362, 704, 362, 720, 362, 736, 330, 752, 330)
-rim_east = false
 
-[node name="EastWingLandmarks" type="Node2D" parent="." unique_id=1388351382]
 
-[node name="LabelCross" type="Label" parent="EastWingLandmarks" unique_id=412207541]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[node name="EastWingLandmarks" type="Node2D" parent="."]
+
+[node name="LabelCross" type="Label" parent="EastWingLandmarks"]
 offset_left = 3322.0
 offset_top = 624.0
 offset_right = 3462.0
 offset_bottom = 648.0
-theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.9, 0.95, 0.7, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
 text = "East Crossroads"
 horizontal_alignment = 1
 
-[node name="LabelMeadow" type="Label" parent="EastWingLandmarks" unique_id=1268536789]
+[node name="LabelMeadow" type="Label" parent="EastWingLandmarks"]
 offset_left = 3610.0
 offset_top = 216.0
 offset_right = 3750.0
 offset_bottom = 240.0
-theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.95, 0.9, 0.65, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
 text = "Sunlit Meadow"
 horizontal_alignment = 1
 
-[node name="LabelMarsh" type="Label" parent="EastWingLandmarks" unique_id=1700042303]
+[node name="LabelMarsh" type="Label" parent="EastWingLandmarks"]
 offset_left = 4730.0
 offset_top = 632.0
 offset_right = 4870.0
 offset_bottom = 656.0
-theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.75, 0.95, 0.8, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
 text = "Murkwood Ponds"
 horizontal_alignment = 1
 
-[node name="LabelShelves" type="Label" parent="EastWingLandmarks" unique_id=1944726272]
+[node name="LabelShelves" type="Label" parent="EastWingLandmarks"]
 offset_left = 3690.0
 offset_top = 1112.0
 offset_right = 3830.0
 offset_bottom = 1136.0
-theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
 text = "Stone Shelves"
 horizontal_alignment = 1
 
-[node name="LabelShore" type="Label" parent="EastWingLandmarks" unique_id=791899207]
+[node name="LabelShore" type="Label" parent="EastWingLandmarks"]
 offset_left = 4580.0
 offset_top = 1336.0
 offset_right = 4700.0
 offset_bottom = 1360.0
-theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.95, 0.88, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 15
 text = "East Shore"
 horizontal_alignment = 1
 
-[node name="WoodlandEastShore" type="Node2D" parent="." unique_id=410608449 instance=ExtResource("30_eastshore")]
-y_sort_enabled = true
+[node name="WoodlandEastShore" parent="." instance=ExtResource("30_eastshore")]
 position = Vector2(3200, 1540)
-script = ExtResource("24_svn3l")
-ground_size = Vector2(704, 480)
-shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
-rim_west = false
 
-[node name="BeachVoidBounds" type="StaticBody2D" parent="." unique_id=2114334688]
+[node name="BeachVoidBounds" type="StaticBody2D" parent="."]
 collision_layer = 2
 collision_mask = 0
+position = Vector2(0, 0)
 
-[node name="SouthWall" type="CollisionShape2D" parent="BeachVoidBounds" unique_id=1749444477]
+[node name="SouthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(2000, 2064)
 shape = SubResource("BeachVoidSouth")
 
-[node name="WestWall" type="CollisionShape2D" parent="BeachVoidBounds" unique_id=843184047]
+[node name="WestWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(876, 1780)
 shape = SubResource("BeachVoidWest")
 
-[node name="EastWall" type="CollisionShape2D" parent="BeachVoidBounds" unique_id=620039970]
+[node name="EastWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(4200, 1780)
 shape = SubResource("BeachVoidEast")

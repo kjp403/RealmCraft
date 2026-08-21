@@ -17,9 +17,6 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fisherman_house.png" id="p_fisherman_house"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/lighthouse_cabin.png" id="p_lighthouse_cabin"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/watchtower.png" id="p_watchtower"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_wide.png" id="p_stall_wide"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_small.png" id="p_stall_small"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stall_alt.png" id="p_stall_alt"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="p_palm_1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_3.png" id="p_palm_3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="p_palm_2"]
@@ -60,7 +57,7 @@ ground_size = Vector2(1920, 1088)
 shoreline = PackedVector2Array(0, 458, 16, 458, 32, 458, 48, 458, 64, 458, 80, 458, 96, 426, 112, 426, 128, 426, 144, 426, 160, 426, 176, 426, 192, 426, 208, 426, 224, 426, 240, 426, 256, 458, 272, 458, 288, 458, 304, 458, 320, 458, 336, 458, 352, 490, 368, 490, 384, 490, 400, 490, 416, 522, 432, 522, 448, 554, 464, 554, 480, 586, 496, 586, 512, 586, 528, 586, 544, 618, 560, 618, 576, 650, 592, 650, 608, 682, 624, 682, 640, 682, 656, 682, 672, 714, 688, 714, 704, 714, 720, 714, 736, 746, 752, 746, 768, 746, 784, 746, 800, 746, 816, 746, 832, 746, 848, 746, 864, 746, 880, 746, 896, 746, 912, 746, 928, 714, 944, 714, 960, 714, 976, 714, 992, 714, 1008, 714, 1024, 682, 1040, 682, 1056, 650, 1072, 650, 1088, 650, 1104, 650, 1120, 618, 1136, 618, 1152, 618, 1168, 618, 1184, 618, 1200, 618, 1216, 586, 1232, 586, 1248, 586, 1264, 586, 1280, 586, 1296, 586, 1312, 586, 1328, 586, 1344, 586, 1360, 586, 1376, 586, 1392, 586, 1408, 586, 1424, 586, 1440, 586, 1456, 586, 1472, 586, 1488, 586, 1504, 586, 1520, 586, 1536, 586, 1552, 586, 1568, 586, 1584, 586, 1600, 586, 1616, 586, 1632, 586, 1648, 586, 1664, 586, 1680, 586, 1696, 586, 1712, 586, 1728, 554, 1744, 554, 1760, 554, 1776, 554, 1792, 554, 1808, 554, 1824, 554, 1840, 554, 1856, 554, 1872, 554, 1888, 554, 1904, 554)
 dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(51, 288, 430, 80), Rect2(490, 356, 480, 90), Rect2(1055, 228, 190, 90), Rect2(1621, 222, 110, 54), Rect2(895, 564, 170, 60), Rect2(1125, 468, 110, 60), Rect2(1305, 436, 110, 60), Rect2(148, 200, 24, 16), Rect2(1318, 290, 24, 16), Rect2(217, 162, 20, 14), Rect2(960, 310, 20, 14), Rect2(1460, 252, 20, 14), Rect2(334, 144, 20, 14), Rect2(610, 518, 20, 14), Rect2(1550, 272, 20, 14), Rect2(458, 468, 84, 28), Rect2(1043, 530, 84, 30), Rect2(1382, 355, 52, 26), Rect2(278, 342, 28, 26), Rect2(1256, 470, 28, 26), Rect2(1310, 470, 28, 26), Rect2(1426, 470, 28, 26), Rect2(1464, 470, 28, 26), Rect2(1041, 424, 28, 26), Rect2(1237, 350, 26, 26), Rect2(1506, 470, 28, 26), Rect2(796, 630, 64, 34)])
+solid_footprints = Array[Rect2]([Rect2(51, 288, 430, 80), Rect2(490, 356, 480, 90), Rect2(1055, 228, 190, 90), Rect2(1621, 222, 110, 54), Rect2(148, 200, 24, 16), Rect2(1318, 290, 24, 16), Rect2(217, 162, 20, 14), Rect2(960, 310, 20, 14), Rect2(1460, 252, 20, 14), Rect2(334, 144, 20, 14), Rect2(610, 518, 20, 14), Rect2(1550, 272, 20, 14), Rect2(458, 468, 84, 28), Rect2(1043, 530, 84, 30), Rect2(1382, 355, 52, 26), Rect2(278, 342, 28, 26), Rect2(1256, 470, 28, 26), Rect2(1310, 470, 28, 26), Rect2(1426, 470, 28, 26), Rect2(1464, 470, 28, 26), Rect2(1041, 424, 28, 26), Rect2(1237, 350, 26, 26), Rect2(1506, 470, 28, 26), Rect2(796, 630, 64, 34)])
 rim_east = false
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
@@ -98,18 +95,6 @@ texture = ExtResource("p_lighthouse_cabin")
 [node name="Watchtower" type="Sprite2D" parent="Scenery"]
 position = Vector2(1676, 164)
 texture = ExtResource("p_watchtower")
-
-[node name="StallWide" type="Sprite2D" parent="Scenery"]
-position = Vector2(980, 544)
-texture = ExtResource("p_stall_wide")
-
-[node name="StallSmall" type="Sprite2D" parent="Scenery"]
-position = Vector2(1180, 448)
-texture = ExtResource("p_stall_small")
-
-[node name="StallAlt" type="Sprite2D" parent="Scenery"]
-position = Vector2(1360, 416)
-texture = ExtResource("p_stall_alt")
 
 [node name="PalmW1" type="Sprite2D" parent="Scenery"]
 position = Vector2(160, 132)
