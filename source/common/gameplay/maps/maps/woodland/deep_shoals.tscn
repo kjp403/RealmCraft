@@ -42,6 +42,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rope.png" id="p_rope"]
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="20_npc"]
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="21_banker"]
+[ext_resource type="Resource" uid="uid://c0m2t2hjlih2p" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres" id="22_woodland"]
 
 [node name="DeepShoals" type="Node2D"]
 y_sort_enabled = true
@@ -82,6 +83,24 @@ npc_resource = ExtResource("21_banker")
 [node name="RespawnPoint" parent="." instance=ExtResource("4_warper")]
 position = Vector2(500, 516)
 warper_id = 0
+
+[node name="ReturnToWoodland" parent="." instance=ExtResource("4_warper")]
+position = Vector2(870, 544)
+warper_id = 1
+target_instance = ExtResource("22_woodland")
+target_id = 0
+
+[node name="ReturnLabel" type="Label" parent="."]
+offset_left = 830
+offset_top = 500
+offset_right = 910
+offset_bottom = 516
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+text = "Sail Back"
+horizontal_alignment = 1
 
 [node name="Scenery" type="Node2D" parent="."]
 y_sort_enabled = true
