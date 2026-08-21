@@ -168,14 +168,10 @@ func die(killer: Character) -> void:
 			spawn_position = sparring_pos
 		SparringService.on_player_died_in_match(self, killer)
 
-	# Boss Hunt: the contract is paid for by the half hour, so a death costs you
-	# time, not the arena. Respawn on the arena's own spawn pad and keep farming —
-	# same in-place treatment sparring gets, for the same reason.
-	var hunt_death: bool = BossHuntService.is_hunt_instance(map.get_parent() if map else null)
-
 	# Open-world / dungeon / boss deaths: always eject to Guild Hall (Hall Keeper),
-	# not the local map pad. Sparring and boss hunts stay in-arena.
-	var return_home: bool = not sparring_death and not hunt_death
+	# not the local map pad. Sparring stays in-arena; Boss Hunt does not — a hunt
+	# death ends the contract and sends you home (matches _should_return_home()).
+	var return_home: bool = not sparring_death
 
 	var peer_id: int = _death_peer_id()
 	if peer_id > 0 and WorldServer.curr != null:
