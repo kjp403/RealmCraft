@@ -38,6 +38,7 @@
 [ext_resource type="PackedScene" uid="uid://cf9f162e5c50c5" path="res://source/common/gameplay/maps/maps/woodland/woodland_beach.tscn" id="29_beach"]
 [ext_resource type="PackedScene" uid="uid://cdeepcove00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_deep_cove.tscn" id="30_deep"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_shore.tscn" id="30_eastshore"]
+[ext_resource type="PackedScene" uid="uid://ceastlink00001" path="res://source/common/gameplay/maps/maps/woodland/woodland_east_link.tscn" id="31_eastlink"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="31_ntree"]
 [ext_resource type="Resource" uid="uid://coaktree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/oak_tree.tres" id="32_otree"]
 [ext_resource type="Resource" uid="uid://cwilltree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/willow_tree.tres" id="33_wtree"]
@@ -592,7 +593,7 @@ size = Vector2(48, 560)
 size = Vector2(48, 560)
 
 [sub_resource type="RectangleShape2D" id="BeachVoidGapNorth"]
-size = Vector2(764, 64)
+size = Vector2(768, 64)
 
 [node name="Woodland" type="Node2D" unique_id=618164945 node_paths=PackedStringArray("replicated_props_container")]
 script = ExtResource("0_map")
@@ -1817,6 +1818,9 @@ position = Vector2(900, 1520)
 [node name="WoodlandDeepCove" parent="." instance=ExtResource("30_deep")]
 position = Vector2(1732, 1540)
 
+[node name="WoodlandEastLink" parent="." instance=ExtResource("31_eastlink")]
+position = Vector2(2436, 1520)
+
 
 
 
@@ -1941,5 +1945,5 @@ position = Vector2(4200, 1780)
 shape = SubResource("BeachVoidEast")
 
 [node name="GapNorthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
-position = Vector2(2818, 1592)
+position = Vector2(2820, 1520)
 shape = SubResource("BeachVoidGapNorth")

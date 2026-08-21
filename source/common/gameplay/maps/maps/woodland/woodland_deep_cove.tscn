@@ -11,6 +11,17 @@
 [ext_resource type="Resource" uid="uid://c77e507ca6a840" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_parrot.tres" id="h2"]
 [ext_resource type="Resource" uid="uid://cbd7da43f6555e" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_angler.tres" id="h3"]
 [ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="99_col"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_1.png" id="p_palm1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="p_palm2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_3.png" id="p_palm3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rocky_skull.png" id="p_rock_skull"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_a.png" id="p_shells_a"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_b.png" id="p_shells_b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bones.png" id="p_bones"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small.png" id="p_rock_small"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small2.png" id="p_rock_small2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/coconut.png" id="p_coconut"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_a.png" id="p_dry_fish"]
 
 [sub_resource type="RectangleShape2D" id="BoatShape"]
 size = Vector2(64, 64)
@@ -24,7 +35,7 @@ dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
 solid_footprints = Array[Rect2]([Rect2(144, 124, 12, 12)])
 rim_west = false
-rim_east = true
+rim_east = false
 rim_north = false
 
 [node name="Ground" type="Sprite2D" parent="."]
@@ -85,3 +96,54 @@ data = ExtResource("h2")
 [node name="AnglerHole" parent="MineableNodes" instance=ExtResource("5_node")]
 position = Vector2(608, 282)
 data = ExtResource("h3")
+
+[node name="Scenery" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="PalmW1" type="Sprite2D" parent="Scenery"]
+position = Vector2(40, 240)
+texture = ExtResource("p_palm1")
+
+[node name="AccentRock" type="Sprite2D" parent="Scenery"]
+position = Vector2(75, 190)
+texture = ExtResource("p_rock_skull")
+
+[node name="ShellsW" type="Sprite2D" parent="Scenery"]
+position = Vector2(20, 300)
+texture = ExtResource("p_shells_a")
+
+[node name="BonesW" type="Sprite2D" parent="Scenery"]
+position = Vector2(150, 190)
+texture = ExtResource("p_bones")
+
+[node name="PalmMid1" type="Sprite2D" parent="Scenery"]
+position = Vector2(250, 110)
+texture = ExtResource("p_palm2")
+
+[node name="PalmMid2" type="Sprite2D" parent="Scenery"]
+position = Vector2(400, 115)
+texture = ExtResource("p_palm3")
+
+[node name="RockMid" type="Sprite2D" parent="Scenery"]
+position = Vector2(350, 120)
+texture = ExtResource("p_rock_small")
+
+[node name="CoconutE" type="Sprite2D" parent="Scenery"]
+position = Vector2(500, 150)
+texture = ExtResource("p_coconut")
+
+[node name="PalmE1" type="Sprite2D" parent="Scenery"]
+position = Vector2(560, 180)
+texture = ExtResource("p_palm1")
+
+[node name="DryFishE" type="Sprite2D" parent="Scenery"]
+position = Vector2(650, 260)
+texture = ExtResource("p_dry_fish")
+
+[node name="RockE2" type="Sprite2D" parent="Scenery"]
+position = Vector2(680, 300)
+texture = ExtResource("p_rock_small2")
+
+[node name="ShellsE" type="Sprite2D" parent="Scenery"]
+position = Vector2(620, 230)
+texture = ExtResource("p_shells_b")
