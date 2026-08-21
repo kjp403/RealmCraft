@@ -58,6 +58,15 @@ func _ready() -> void:
 	inventory_grid.columns = GRID_COLUMNS
 	inventory_grid.add_theme_constant_override(&"h_separation", 4)
 	inventory_grid.add_theme_constant_override(&"v_separation", 4)
+	# The grid accepts drops too. A 4px gutter runs between the squares, and a
+	# release that landed in it used to hit the GridContainer, which had no
+	# handler at all: Godot rejected the drop, the item sprang back, and the
+	# drag read as "dragging items does nothing".
+	inventory_grid.set_drag_forwarding(
+		_bag_get_drag_data_empty,
+		_bag_can_drop_data,
+		_bag_drop_data_nearest,
+	)
 
 	content_margin.add_theme_constant_override(&"margin_left", 10)
 
@@ -498,6 +507,29 @@ func _bag_drop_data(_at_position: Vector2, data: Variant, to_index: int) -> void
 	else:
 		BagOrder.move_to_index(order, from_uid, to_index)
 	_refresh_inventory()
+
+
+## Route a drop that landed between the squares to the square the player was
+## actually aiming at: the one under the cursor, or failing that the closest.
+## [param at_position] is local to the grid, as are the children's rects.
+func _bag_drop_data_nearest(at_position: Vector2, data: Variant) -> void:
+	var slots: Array[Node] = inventory_grid.get_children()
+	var best: int = -1
+	var best_distance: float = INF
+	for index: int in slots.size():
+		var slot := slots[index] as Control
+		if slot == null:
+			continue
+		var rect: Rect2 = slot.get_rect()
+		if rect.has_point(at_position):
+			best = index
+			break
+		var distance: float = rect.get_center().distance_to(at_position)
+		if distance < best_distance:
+			best_distance = distance
+			best = index
+	if best >= 0:
+		_bag_drop_data(at_position, data, best)
 
 
 func _on_slot_gui_input(

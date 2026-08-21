@@ -27,15 +27,31 @@ const MAX_BAGS: int = 3
 const BANK_RESOURCE_STACK: int = 50
 
 
+## Slugs that stay unlimited in the BANK by design. Everything else caps at
+## [constant BANK_RESOURCE_STACK] there, including items that never authored a
+## stack_limit: 0 means "pseudo-infinite", so those sat in single 1.8k piles
+## beside 50-capped ores and read as a duplication glitch.
+const UNLIMITED_IN_BANK: Array[StringName] = [&"bone", &"vial_of_water"]
+
+
 ## Per-slot stack cap for [param item]. 0 = unlimited. Bank materials and cooked
 ## food use [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
-## Bones are unlimited in the bank (bag stays at [member Item.stack_limit]).
+## [constant UNLIMITED_IN_BANK] slugs are unlimited there (bag stays at
+## [member Item.stack_limit]).
 static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 	var limit: int = 0 if item == null else int(item.stack_limit)
 	if in_bank and item != null:
-		if _is_bone(item):
+		if StringName(item.get_meta(&"slug", &"")) in UNLIMITED_IN_BANK:
 			return 0
-		if limit > 0 and _bank_bulk_item(item):
+		if limit <= 0:
+			# Ammo authors no stack_limit and players hold thousands of arrows.
+			# Capping those at 50 would shatter one pile into forty bank rows.
+			if item is AmmoItem:
+				return 0
+			# Unauthored (0 = pseudo-infinite). Cap it like every other vault
+			# stack rather than letting it grow without bound.
+			return BANK_RESOURCE_STACK
+		if _bank_bulk_item(item):
 			return maxi(limit, BANK_RESOURCE_STACK)
 	return limit
 
