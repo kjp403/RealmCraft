@@ -127,6 +127,15 @@ static func index_of(order: Array, uid: int) -> int:
 static func swap(order: Array, uid_a: int, uid_b: int) -> Array:
 	var ia: int = order.find(uid_a)
 	var ib: int = order.find(uid_b)
+	# A dragged item the saved order has never seen (freshly looted, or the
+	# order was pruned while another bag was open) used to fall through here and
+	# silently do nothing. Put it where the player dropped it instead.
+	if ia < 0 and ib >= 0:
+		# move_to_index needs the uid to already be in the list, so place it
+		# here directly.
+		order.insert(ib, uid_a)
+		save_order(order)
+		return order
 	if ia < 0 or ib < 0 or ia == ib:
 		return order
 	var tmp: Variant = order[ia]
