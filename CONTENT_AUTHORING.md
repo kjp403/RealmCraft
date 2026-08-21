@@ -114,6 +114,9 @@ Map: `source/common/gameplay/maps/maps/woodland/woodland.tscn`
 
 ## 2. Maps
 
+> **New here?** Step-by-step beginner guide (download asset pack → TileSet → map → portals):  
+> **[`CREATE_A_NEW_MAP.md`](CREATE_A_NEW_MAP.md)**
+
 ### Where map scenes live
 
 Root folder: `source/common/gameplay/maps/maps/`
