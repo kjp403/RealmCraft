@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="InstanceResource" format=3]
 
 [ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_instance"]
-[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="2_hub"]
+[ext_resource type="Resource" uid="uid://c0xqjh15bmdkm" path="res://source/common/gameplay/maps/instance/instance_collection/building/guild_house.tres" id="2_hub"]
 
 [resource]
 script = ExtResource("1_instance")
