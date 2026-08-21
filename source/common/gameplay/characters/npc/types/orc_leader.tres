@@ -36,7 +36,7 @@ metadata/_custom_type_script = "uid://dyw7fn4hr7rbh"
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("1_3a3qb")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.025
+chance = 0.02
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_3a3qb")
