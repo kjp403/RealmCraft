@@ -29,6 +29,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rock_small2.png" id="p_rock_small2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_a.png" id="p_shells_a"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_b.png" id="p_shells_b"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="20_npc"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="21_banker"]
 
 [sub_resource type="RectangleShape2D" id="BoatShape"]
 size = Vector2(64, 64)
@@ -60,11 +62,15 @@ texture = ExtResource("p5")
 offset = Vector2(0, -8)
 
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
-position = Vector2(108, 86)
+position = Vector2(615, 265)
 station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 position = Vector2(0, -16)
+
+[node name="Banker" parent="." instance=ExtResource("20_npc")]
+position = Vector2(560, 260)
+npc_resource = ExtResource("21_banker")
 texture = ExtResource("8_cookart")
 
 [node name="Dock" type="Sprite2D" parent="."]
