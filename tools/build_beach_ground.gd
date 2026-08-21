@@ -51,6 +51,30 @@ const MAPS: Array[Dictionary] = [
 		"cols": 60, "rows": 34,
 		"shape": "shoals",
 	},
+	{
+		"name": "woodland_deep_cove_ground",
+		"cols": 22, "rows": 15,
+		# Deep Cove and East Shore share this file. It predates this tool (from
+		# before the Sea Adventures pack pipeline existed) and its sand/water
+		# read visibly different from Beach/EastLink once those two were
+		# rebuilt through here — reported directly by a player. Regenerated
+		# from the SAME classifier/sheet, at the scenes' own existing
+		# shoreline (COVE_ROWS below, lifted from woodland_deep_cove.tscn's
+		# shoreline curve, not invented), so the collision data both scenes
+		# already ship with — and every prop already placed against it —
+		# stays correct.
+		"shape": "cove",
+	},
+]
+
+## Deep Cove / East Shore's existing shoreline (beach_area_colliders.gd,
+## PackedVector2Array, 16px steps) resampled at this tool's 32px TILE stride
+## and converted to row units (y_px / TILE). Every stride lands on an
+## existing sample exactly since 32 is a multiple of 16 — no interpolation.
+const COVE_ROWS: PackedFloat32Array = [
+	10.375, 9.875, 8.28125, 7.375, 7.375, 6.875, 5.875, 4.78125, 4.78125,
+	4.78125, 4.375, 4.375, 4.78125, 4.78125, 4.78125, 5.28125, 5.78125,
+	6.78125, 7.28125, 7.78125, 8.78125, 10.28125,
 ]
 
 
@@ -81,6 +105,8 @@ func _shore_row(shape: String, col: int, cols: int, rows: int) -> float:
 		# middle rather than a dead straight line.
 		var link_rows: float = 332.0 / float(TILE)
 		return clampf(link_rows + 1.4 * sin(t * PI), 3.0, float(rows) - 4.0)
+	if shape == "cove":
+		return COVE_ROWS[clampi(col, 0, COVE_ROWS.size() - 1)]
 	# Shoals: a sheltered crescent — deep water in the middle, arms north at
 	# both ends, so every fishing hole sits in its own pocket of water.
 	# Two coves and a headland across a long strand, with enough sand inland for
