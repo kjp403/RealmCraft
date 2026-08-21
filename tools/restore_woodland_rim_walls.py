@@ -27,7 +27,10 @@ N4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
 BEACH_X = [
     (56, 108),   # WoodlandBeach
     (108, 152),  # WoodlandDeepCove
-    (200, 244),  # WoodlandEastShore
+    # WoodlandEastShore is no longer its own doorway from the grass — it's
+    # reached by walking the beach through Cove and the East Link, same as
+    # those two. A second grass-side opening straight into it was an
+    # inconsistent leftover and read as a bare, unwalled edge.
 ]
 
 
