@@ -44,6 +44,10 @@ static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 		if StringName(item.get_meta(&"slug", &"")) in UNLIMITED_IN_BANK:
 			return 0
 		if limit <= 0:
+			# Ammo authors no stack_limit and players hold thousands of arrows.
+			# Capping those at 50 would shatter one pile into forty bank rows.
+			if item is AmmoItem:
+				return 0
 			# Unauthored (0 = pseudo-infinite). Cap it like every other vault
 			# stack rather than letting it grow without bound.
 			return BANK_RESOURCE_STACK
