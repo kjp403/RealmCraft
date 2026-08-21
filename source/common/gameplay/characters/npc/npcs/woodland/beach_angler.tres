@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
 [ext_resource type="Resource" uid="uid://cbeachanglshop" path="res://source/common/gameplay/shops/resources/beach_angler_shop.tres" id="5_shop"]
 [ext_resource type="SpriteFrames" uid="uid://v5y6komavnpb" path="res://source/common/gameplay/characters/sprite_frames/wizard.tres" id="6_skin"]
-[ext_resource type="Script" uid="uid://tymg4stz49lmb" path="res://source/common/gameplay/characters/npc/interactions/warp_interaction.gd" id="7_warp"]
-[ext_resource type="Resource" uid="uid://cdeepshoals001" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/deep_shoals.tres" id="8_shoals"]
 
 [sub_resource type="Resource" id="ShopInteraction_angler"]
 script = ExtResource("3_shop")
@@ -15,20 +13,12 @@ shop = ExtResource("5_shop")
 
 [sub_resource type="Resource" id="Dialogue_tide"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Past sixty, the shallows have nothing left to teach you. I run a boat out to Pirate's Cove — halibut, ray, wolffish, and the blue ones if you're lucky.", "Tide's fair. Rods for every angler — starter through seasoned.", "Better gear means fewer wasted casts. The fish still decide, though.", "Pirate's Cove keeps the bigger bites. Bring a stronger rod if you go."])
+lines = Array[String](["Tide's fair. Rods for every angler — starter through seasoned.", "Better gear means fewer wasted casts. The fish still decide, though.", "Deep Cove keeps the bigger bites. Bring a stronger rod if you go."])
 label_override = "Ask about fishing"
-
-[sub_resource type="Resource" id="Warp_shoals"]
-script = ExtResource("7_warp")
-target_instance = ExtResource("8_shoals")
-target_id = 0
-destination_label = "Pirate's Cove"
-required_skill = &"fishing"
-required_skill_level = 60
 
 [resource]
 script = ExtResource("1_npcres")
 npc_name = "Beach Angler"
 skin = ExtResource("6_skin")
 greeting = "Need a rod? I've got four tiers — from first cast to faster reels."
-interactions = Array[ExtResource("2_npcint")]([SubResource("ShopInteraction_angler"), SubResource("Warp_shoals"), SubResource("Dialogue_tide")])
+interactions = Array[ExtResource("2_npcint")]([SubResource("ShopInteraction_angler"), SubResource("Dialogue_tide")])

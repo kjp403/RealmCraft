@@ -28,14 +28,6 @@
 [ext_resource type="Resource" uid="uid://cfb82bd722210b" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="r11"]
 [ext_resource type="Resource" uid="uid://c7704cedbdbb03" path="res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres" id="c11"]
 
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/halibut.tres" id="rn0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_halibut.tres" id="cn0"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/stingray.tres" id="rn1"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_stingray.tres" id="cn1"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/wolffish.tres" id="rn2"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_wolffish.tres" id="cn2"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/blue_lobster.tres" id="rn3"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_blue_lobster.tres" id="cn3"]
 [sub_resource type="Resource" id="I_shrimp"]
 script = ExtResource("3_ingred")
 item = ExtResource("r0")
@@ -180,57 +172,9 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_anglerfish")])
 required_level = 50
 xp_reward = 552
 
-[sub_resource type="Resource" id="I_halibut"]
-script = ExtResource("3_ingred")
-item = ExtResource("rn0")
-amount = 1
-
-[sub_resource type="Resource" id="R_halibut"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("cn0")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_halibut")])
-required_level = 60
-xp_reward = 640
-
-[sub_resource type="Resource" id="I_stingray"]
-script = ExtResource("3_ingred")
-item = ExtResource("rn1")
-amount = 1
-
-[sub_resource type="Resource" id="R_stingray"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("cn1")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_stingray")])
-required_level = 70
-xp_reward = 730
-
-[sub_resource type="Resource" id="I_wolffish"]
-script = ExtResource("3_ingred")
-item = ExtResource("rn2")
-amount = 1
-
-[sub_resource type="Resource" id="R_wolffish"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("cn2")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_wolffish")])
-required_level = 80
-xp_reward = 830
-
-[sub_resource type="Resource" id="I_blue_lobster"]
-script = ExtResource("3_ingred")
-item = ExtResource("rn3")
-amount = 1
-
-[sub_resource type="Resource" id="R_blue_lobster"]
-script = ExtResource("1_recipe")
-output_item = ExtResource("cn3")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_blue_lobster")])
-required_level = 90
-xp_reward = 960
-
 [resource]
 script = ExtResource("2_station")
 station_name = "Cooking Station"
 profession = &"cooking"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_shrimp"), SubResource("R_herring"), SubResource("R_cod"), SubResource("R_trout"), SubResource("R_salmon"), SubResource("R_tuna"), SubResource("R_lobster"), SubResource("R_lionfish"), SubResource("R_crab"), SubResource("R_turtle"), SubResource("R_parrot_fish"), SubResource("R_anglerfish"), SubResource("R_halibut"), SubResource("R_stingray"), SubResource("R_wolffish"), SubResource("R_blue_lobster")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_shrimp"), SubResource("R_herring"), SubResource("R_cod"), SubResource("R_trout"), SubResource("R_salmon"), SubResource("R_tuna"), SubResource("R_lobster"), SubResource("R_lionfish"), SubResource("R_crab"), SubResource("R_turtle"), SubResource("R_parrot_fish"), SubResource("R_anglerfish")])

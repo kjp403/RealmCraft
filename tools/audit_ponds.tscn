@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://tools/audit_ponds.gd" id="1_ponds"]
-
-[node name="PondAudit" type="Node"]
-script = ExtResource("1_ponds")

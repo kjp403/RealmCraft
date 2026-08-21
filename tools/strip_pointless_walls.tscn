@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://tools/strip_pointless_walls.gd" id="1_swalls"]
-
-[node name="StripPointlessWalls" type="Node"]
-script = ExtResource("1_swalls")

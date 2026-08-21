@@ -11,10 +11,6 @@
 [ext_resource type="Resource" uid="uid://c3ca19e6f14fd5" path="res://source/common/gameplay/items/materials/fish/crab.tres" id="f8"]
 [ext_resource type="Resource" uid="uid://c595d065e50ed1" path="res://source/common/gameplay/items/materials/fish/parrot_fish.tres" id="f10"]
 [ext_resource type="Resource" uid="uid://cfb82bd722210b" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="f11"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/halibut.tres" id="f12"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/stingray.tres" id="f13"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/wolffish.tres" id="f14"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/fish/blue_lobster.tres" id="f15"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -44,6 +40,6 @@ perks = Array[Dictionary]([{
 "name": "Angler",
 "per_rank": 0.1
 }])
-source_items = Array[ExtResource("1_item")]([ExtResource("f0"), ExtResource("f1"), ExtResource("f3"), ExtResource("f5"), ExtResource("f7"), ExtResource("f8"), ExtResource("f10"), ExtResource("f11"), ExtResource("f12"), ExtResource("f13"), ExtResource("f14"), ExtResource("f15")])
-source_levels = Array[int]([1, 5, 10, 20, 25, 30, 40, 50, 60, 70, 80, 90])
+source_items = Array[ExtResource("1_item")]([ExtResource("f0"), ExtResource("f1"), ExtResource("f3"), ExtResource("f5"), ExtResource("f7"), ExtResource("f8"), ExtResource("f10"), ExtResource("f11")])
+source_levels = Array[int]([1, 5, 10, 20, 25, 30, 40, 50])
 describe_lines = Array[String](["Cast speed +{cooldown}%", "Bonus catch +{bonus_yield}%", "Fishing XP +{xp}%"])

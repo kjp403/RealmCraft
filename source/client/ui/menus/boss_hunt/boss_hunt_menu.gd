@@ -15,8 +15,6 @@ const COLOR_BAD: Color = Color(0.92, 0.55, 0.45)
 var _station: String = ""
 var _contracts: Array = []
 var _selected: String = ""
-## Live confirm dialog, rebuilt per press so stale ones cannot stack up.
-var _confirm: ConfirmationDialog
 var _members: Array = []
 var _capacity: int = 4
 var _in_queue: bool = false
@@ -295,38 +293,7 @@ func _on_leave() -> void:
 
 
 func _on_start() -> void:
-	# The fee is spent the moment the contract opens and a death ends the run,
-	# so this is the last point where a player can back out. Confirm in the
-	# clearest terms the cost and the consequence.
-	if _confirm != null and is_instance_valid(_confirm):
-		_confirm.queue_free()
-	_confirm = ConfirmationDialog.new()
-	_confirm.title = "Open Contract"
-	_confirm.ok_button_text = "Pay and start"
-	_confirm.cancel_button_text = "Not yet"
-	var cost: int = int(_contract_cost())
-	_confirm.dialog_text = (
-		"Open this contract for %s gold?
-
-"
-		+ "If you die, or leave the arena for any reason, the hunt ends there.
-"
-		+ "The gold is not refunded and the room closes behind you.
-
-"
-		+ "Bring food."
-	) % _fmt_gold(cost)
-	_confirm.confirmed.connect(func() -> void: _send("start"))
-	add_child(_confirm)
-	_confirm.popup_centered()
-
-
-## Fee for the selected contract, for the confirm prompt.
-func _contract_cost() -> int:
-	for contract: Dictionary in _contracts:
-		if str(contract.get("id", "")) == _selected:
-			return int(contract.get("cost", 0))
-	return 0
+	_send("start")
 
 
 func _send(action: String, extra: Dictionary = {}) -> void:
