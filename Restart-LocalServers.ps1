@@ -13,9 +13,20 @@ Set-Location $RepoRoot
 
 function Resolve-Godot {
     param([string]$Candidate)
-    if (Test-Path $Candidate) { return (Resolve-Path $Candidate).Path }
+    if ([string]::IsNullOrWhiteSpace($Candidate)) { return $null }
+
+    # Must be a real .exe file — never a folder (people often pass the repo path by mistake).
+    if (Test-Path -LiteralPath $Candidate) {
+        $item = Get-Item -LiteralPath $Candidate
+        if ($item.PSIsContainer) { return $null }
+        if ($item.Extension -ieq ".exe") { return $item.FullName }
+        return $null
+    }
+
     $cmd = Get-Command $Candidate -ErrorAction SilentlyContinue
-    if ($cmd) { return $cmd.Source }
+    if ($cmd -and $cmd.Source -and (Test-Path -LiteralPath $cmd.Source) -and -not (Get-Item -LiteralPath $cmd.Source).PSIsContainer) {
+        return $cmd.Source
+    }
     return $null
 }
 
@@ -23,10 +34,15 @@ $godot = Resolve-Godot $GodotExe
 if (-not $godot) {
     Write-Host ""
     Write-Host "Could not find Godot." -ForegroundColor Red
-    Write-Host "Install Godot 4.7, add it to PATH as 'godot', or run:"
-    Write-Host '  .\Restart-LocalServers.ps1 -GodotExe "C:\path\to\Godot_v4.7.1-stable_win64.exe"'
+    Write-Host "You must point at the Godot ENGINE .exe (not the RealmCraft folder)."
     Write-Host ""
-    Write-Host "See docs\LOCAL_SERVERS_WINDOWS.md"
+    Write-Host "1) Download Godot 4.7 from https://godotengine.org/download/windows/"
+    Write-Host "2) Unzip it (example): C:\Godot\Godot_v4.7.1-stable_win64.exe"
+    Write-Host "3) Then run:"
+    Write-Host '   cd $HOME\Documents\RealmCraft'
+    Write-Host '   .\Restart-LocalServers.ps1 -GodotExe "C:\Godot\Godot_v4.7.1-stable_win64.exe"'
+    Write-Host ""
+    Write-Host "See LOCAL_SERVERS_WINDOWS.md"
     exit 1
 }
 
