@@ -12,6 +12,7 @@ shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 2
 solid_footprints = Array[Rect2]([])
 rim_west = false
 rim_east = true
+rim_north = false
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5

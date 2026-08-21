@@ -16,6 +16,7 @@ dock_walk = Rect2(0, 0, 0, 0)
 boat_pad = Rect2(0, 0, 0, 0)
 solid_footprints = Array[Rect2]([])
 rim_east = false
+rim_north = false
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5

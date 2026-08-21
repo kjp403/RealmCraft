@@ -25,6 +25,7 @@ boat_pad = Rect2(344, 180, 72, 56)
 solid_footprints = Array[Rect2]([Rect2(144, 124, 12, 12)])
 rim_west = false
 rim_east = false
+rim_north = false
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5

@@ -570,6 +570,9 @@ sources/7 = SubResource("atlas_wallvar")
 sources/8 = SubResource("atlas_water")
 sources/9 = SubResource("TileSetAtlasSource_uuuau")
 
+[sub_resource type="RectangleShape2D" id="BeachVoidNorth"]
+size = Vector2(5824, 64)
+
 [sub_resource type="RectangleShape2D" id="BeachVoidSouth"]
 size = Vector2(2400, 64)
 
@@ -1892,6 +1895,10 @@ position = Vector2(3200, 1540)
 collision_layer = 2
 collision_mask = 0
 position = Vector2(0, 0)
+
+[node name="NorthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
+position = Vector2(2912, -32)
+shape = SubResource("BeachVoidNorth")
 
 [node name="SouthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(2000, 2064)
