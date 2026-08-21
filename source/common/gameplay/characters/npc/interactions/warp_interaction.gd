@@ -24,15 +24,19 @@ func menu_entry(npc: Node) -> Dictionary:
 		# discoverable — a gate you cannot see is a gate players never train for.
 		var have: int = int(ClientState.skill_levels.get(String(required_skill), 1))
 		if have < required_skill_level:
+			# A spoken line, NOT a disabled button: npc_menu has no "disabled"
+			# key, so the entry would render as a live option, close the
+			# dialogue and fire an empty request at the server. This keeps the
+			# destination discoverable and says what it costs to get there.
 			return {
 				"label": _label_or("%s — needs %s %d" % [
 					_destination_label(), JobRegistry.display_name(required_skill),
 					required_skill_level,
 				]),
 				"icon": _icon_or(""),
-				"disabled": true,
-				"request": &"",
-				"args": {},
+				"lines": ["Come back when you have %s %d and I'll take you out there." % [
+					JobRegistry.display_name(required_skill), required_skill_level,
+				]],
 			}
 	return {
 		"label": _label_or("Travel to %s" % _destination_label()),

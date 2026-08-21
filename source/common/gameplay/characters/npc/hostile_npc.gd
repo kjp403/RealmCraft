@@ -2080,29 +2080,37 @@ func _build_client_click_area() -> void:
 	area.tree_exiting.connect(_set_hostile_hover.bind(false))
 
 
-## Grow the shared HurtBox to match the (optionally enlarged) sprite. Nav body
-## stays tiny so the mob can still path into melee range.
 ## The WALK collider (the little 12x8 box at the feet) is the same size for a
-## slime and for Malacor, so a big boss walked until its feet touched a wall and
-## the other ~130px of drawn body sat inside it — reading as "the boss is in the
-## wall". Widen the walk box with the drawn body so a large mob stops further
-## out. Capped at 2x (24x16, still under one 16px tile) so no mob outgrows a
-## two-tile corridor and wedges itself somewhere it used to fit.
+## slime and for a boss, so a boss walked until its feet touched a wall and the
+## other ~130px of drawn body sat inside it — reading as "the boss is in the
+## wall". Widen the walk box with the drawn body so a large body stops further
+## out.
+##
+## BOSSES ONLY. Trash keeps the stock box: two thirds of the roster is drawn at
+## some scale or other, and quietly growing every one of their colliders risks
+## a mob wedging in a corridor it has always fitted through. Bosses fight in
+## open rooms, which is where the problem actually shows.
+##
+## Capped at 2x (24x16, still under one 16px tile).
 const MAX_BODY_COLLIDER_SCALE: float = 2.0
 
 
 func _scale_body_to_sprite() -> void:
+	if enemy_data == null or not enemy_data.is_boss:
+		return
 	var shape_node: CollisionShape2D = get_node_or_null(^"CollisionShape2D") as CollisionShape2D
 	if shape_node == null:
 		return
 	var factor: float = clampf(body_scale(), 1.0, MAX_BODY_COLLIDER_SCALE)
 	if is_equal_approx(factor, 1.0):
-		return # keep the shared shape resource untouched for ordinary trash
+		return # keep the shared shape resource untouched
 	var rect := RectangleShape2D.new()
 	rect.size = Vector2(12.0, 8.0) * factor
 	shape_node.shape = rect
 
 
+## Grow the shared HurtBox to match the (optionally enlarged) sprite. Nav body
+## stays tiny so the mob can still path into melee range.
 func _scale_hurtbox_to_sprite() -> void:
 	var shape_node: CollisionShape2D = get_node_or_null(^"HurtBox/CollisionShape2D") as CollisionShape2D
 	if shape_node == null:
