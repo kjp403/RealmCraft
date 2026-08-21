@@ -40,11 +40,17 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/bucket.png" id="p_bucket"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/shells_b.png" id="p_shells_b"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/rope.png" id="p_rope"]
+[ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="20_npc"]
+[ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="21_banker"]
 
 [node name="DeepShoals" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_map")
 map_background_color = Color(0.08, 0.14, 0.2, 1)
+camera_limit_left = 0
+camera_limit_top = 0
+camera_limit_right = 1920
+camera_limit_bottom = 1088
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -5
@@ -58,16 +64,20 @@ shoreline = PackedVector2Array(0, 458, 16, 458, 32, 458, 48, 458, 64, 458, 80, 4
 dock_walk = Rect2(336, 120, 32, 120)
 boat_pad = Rect2(344, 180, 72, 56)
 solid_footprints = Array[Rect2]([Rect2(51, 288, 430, 80), Rect2(490, 356, 480, 90), Rect2(1055, 228, 190, 90), Rect2(1621, 222, 110, 54), Rect2(148, 200, 24, 16), Rect2(1318, 290, 24, 16), Rect2(217, 162, 20, 14), Rect2(960, 310, 20, 14), Rect2(1460, 252, 20, 14), Rect2(334, 144, 20, 14), Rect2(610, 518, 20, 14), Rect2(1550, 272, 20, 14), Rect2(458, 468, 84, 28), Rect2(1043, 530, 84, 30), Rect2(1382, 355, 52, 26), Rect2(278, 342, 28, 26), Rect2(1256, 470, 28, 26), Rect2(1310, 470, 28, 26), Rect2(1426, 470, 28, 26), Rect2(1464, 470, 28, 26), Rect2(1041, 424, 28, 26), Rect2(1237, 350, 26, 26), Rect2(1506, 470, 28, 26), Rect2(796, 630, 64, 34)])
-rim_east = false
+rim_east = true
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
 
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
-position = Vector2(828, 650)
+position = Vector2(930, 544)
 station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 texture = ExtResource("8_cookart")
+
+[node name="Banker" parent="." instance=ExtResource("20_npc")]
+position = Vector2(990, 544)
+npc_resource = ExtResource("21_banker")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("4_warper")]
 position = Vector2(500, 516)
