@@ -42,7 +42,16 @@ var viewed_trade_id: int
 signal input_changed(input_type: InputComponent.InputType)
 
 var local_player: LocalPlayer
-var player_id: int
+## Persistent account id of the character we're playing. Normally arrives in the
+## player_id.set push at login, but that push is fired during auth — a client that
+## isn't listening yet keeps a 0 here, and everything keyed on "who am I" (DM
+## threads most visibly) then builds itself around the wrong id. The local Player
+## node carries the same id as a synced property, so a missed push self-heals on
+## the first read instead of stranding the session.
+var player_id: int = 0:
+	get = _get_player_id,
+	set = _set_player_id
+var _player_id: int = 0
 ## Fires when the wardstone mirror updates (login sync or a fresh grant) —
 ## sealed portals listen so they unseal live, without a map reload.
 signal wardstones_changed
@@ -177,6 +186,17 @@ func remove_friend_id(id: int) -> void:
 	Character.local_friend_ids = friend_ids.duplicate()
 	friend_ids_changed.emit()
 	_retint_local_players()
+
+
+func _get_player_id() -> int:
+	if _player_id <= 0 and is_instance_valid(local_player) and local_player.player_id > 0:
+		_player_id = local_player.player_id
+	return _player_id
+
+
+func _set_player_id(value: int) -> void:
+	if value > 0 or _player_id <= 0:
+		_player_id = value
 
 
 func _hydrate_friend_ids(_lp: LocalPlayer = null) -> void:

@@ -30,7 +30,7 @@ item = ExtResource("li_bone")
 [sub_resource type="Resource" id="Drop_key"]
 script = ExtResource("3_loot")
 item = ExtResource("li_key")
-chance = 0.025
+chance = 0.15
 
 [sub_resource type="Resource" id="Drop_mat_chest"]
 script = ExtResource("3_loot")

@@ -167,9 +167,26 @@ func _try_swap(a: Player, b: Player) -> bool:
 	var inv_b: Dictionary = b.player_resource.inventory
 	if not _can_afford(inv_a, seat_offers[0]) or not _can_afford(inv_b, seat_offers[1]):
 		return false
+	# Both bags must hold what they are about to receive — _give adds past capacity,
+	# so an overflowing swap would complete and lose the excess.
+	if not _has_room(a, seat_offers[1], seat_offers[0]) 			or not _has_room(b, seat_offers[0], seat_offers[1]):
+		return false
 	_give(inv_a, inv_b, b.player_resource, seat_offers[0])
 	_give(inv_b, inv_a, a.player_resource, seat_offers[1])
 	return true
+
+
+## True when [param player] can hold [param incoming] once [param outgoing] (their
+## own side of the swap) has left the bag.
+func _has_room(player: Player, incoming: Dictionary, outgoing: Dictionary) -> bool:
+	var resource: PlayerResource = player.player_resource
+	return InventorySpace.can_receive_all(
+		resource.inventory,
+		incoming.get("items", {}),
+		outgoing.get("items", {}),
+		resource.active_inventory_bag,
+		resource.inventory_bags
+	)
 
 
 func _can_afford(inventory: Dictionary, offer: Dictionary) -> bool:

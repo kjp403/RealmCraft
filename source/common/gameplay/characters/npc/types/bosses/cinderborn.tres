@@ -54,7 +54,7 @@ script = ExtResource("3_loot")
 item = ExtResource("drop_dungeon_key_item")
 min_amount = 1
 max_amount = 2
-chance = 0.04
+chance = 0.15
 
 [sub_resource type="Resource" id="Drop_chest_small"]
 script = ExtResource("3_loot")

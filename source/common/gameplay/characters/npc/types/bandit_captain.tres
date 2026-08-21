@@ -61,7 +61,7 @@ chance = 0.05
 [sub_resource type="Resource" id="Drop_dungeon_key"]
 script = ExtResource("2_loot")
 item = ExtResource("drop_dungeon_key_item")
-chance = 0.04
+chance = 0.02
 
 [sub_resource type="Resource" id="Drop_chest_small"]
 script = ExtResource("2_loot")

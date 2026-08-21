@@ -193,6 +193,15 @@ static func set_accepted(
 		session["countdown_until"] = (
 			Time.get_ticks_msec() + CONFIRM_COUNTDOWN_MS
 		)
+	if bool(session.get("locked", false)):
+		# Decline BEFORE the countdown starts when either bag is too small for what
+		# it is about to receive. The swap itself used to add straight past capacity,
+		# so a 15-slot offer into 10 free squares completed and the overflow was gone.
+		var blocked: Array = _peers_without_room(instance, session)
+		if not blocked.is_empty():
+			_close_full_inventory(instance, trade_id, blocked)
+			return {"ok": false, "reason": "inventory_full"}
+
 	_sessions[trade_id] = session
 	_broadcast(instance, trade_id)
 	if bool(session.get("locked", false)):
@@ -242,6 +251,13 @@ static func _complete_after_countdown(
 	var second: Player = instance.players_by_peer_id.get(int(peers[1]), null)
 	if not _participants_can_finish(first, second, session):
 		_close_session(instance, trade_id, "Trade failed because the offer changed or a player moved away.")
+		return
+
+	# Space can vanish during the 5s countdown (a chest opened, loot picked up), so
+	# the last word on capacity is here, immediately before the exchange.
+	var blocked: Array = _peers_without_room(instance, session)
+	if not blocked.is_empty():
+		_close_full_inventory(instance, trade_id, blocked)
 		return
 
 	var offers: Array = session["offers"]
@@ -337,6 +353,78 @@ static func _participants_can_finish(
 		_can_afford(first.player_resource.inventory, offers[0])
 		and _can_afford(second.player_resource.inventory, offers[1])
 	)
+
+
+## Which participants cannot hold what the other side is offering them. Returns
+## rows of { "index", "peer", "name", "missing" } — empty when the swap fits both
+## bags. Each side is measured against the inventory it will have AFTER its own
+## offer leaves, so trading 15 slots for 15 slots is not reported as full.
+static func _peers_without_room(
+	instance: ServerInstance,
+	session: Dictionary
+) -> Array:
+	var peers: Array = session.get("peers", [])
+	var offers: Array = session.get("offers", [])
+	if peers.size() < 2 or offers.size() < 2:
+		return []
+	var blocked: Array = []
+	for i: int in 2:
+		var peer_id: int = int(peers[i])
+		var player: Player = instance.players_by_peer_id.get(peer_id, null)
+		if player == null or player.player_resource == null:
+			continue
+		var resource: PlayerResource = player.player_resource
+		var missing: int = InventorySpace.missing_slots_for(
+			resource.inventory,
+			offers[1 - i].get("items", {}),
+			offers[i].get("items", {}),
+			resource.active_inventory_bag,
+			resource.inventory_bags
+		)
+		if missing > 0:
+			blocked.append({
+				"index": i,
+				"peer": peer_id,
+				"name": player.display_name,
+				"missing": missing,
+			})
+	return blocked
+
+
+## Close a trade that would have overflowed a bag, telling each side whose bag is
+## the problem — the player who is full gets "free up N slots", their partner gets
+## the name, so neither is left guessing why nothing happened.
+static func _close_full_inventory(
+	instance: ServerInstance,
+	trade_id: int,
+	blocked: Array
+) -> void:
+	var session: Dictionary = _sessions.get(trade_id, {})
+	if session.is_empty():
+		return
+	var peers: Array = session.get("peers", [])
+	var reasons: Array = ["", ""]
+	for row: Dictionary in blocked:
+		var index: int = int(row["index"])
+		var missing: int = int(row["missing"])
+		var slots: String = "slot" if missing == 1 else "slots"
+		reasons[index] = (
+			"Trade declined — your inventory is too full. Free up %d more %s."
+			% [missing, slots]
+		)
+		var other: int = 1 - index
+		if reasons[other].is_empty():
+			reasons[other] = (
+				"Trade declined — %s doesn't have enough inventory space (needs %d more %s)."
+				% [str(row["name"]), missing, slots]
+			)
+	_sessions.erase(trade_id)
+	for i: int in peers.size():
+		var reason: String = str(reasons[i]) if i < reasons.size() else ""
+		_push(int(peers[i]), &"trade.closed", {
+			"trade": trade_id,
+			"reason": reason if not reason.is_empty() else "Trade declined — an inventory was too full.",
+		})
 
 
 static func _can_afford(inventory: Dictionary, offer: Dictionary) -> bool:

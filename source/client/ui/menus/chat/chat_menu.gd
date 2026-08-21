@@ -66,6 +66,11 @@ var raw_messages_by_conversation: Dictionary[String, Array] = {}
 var conversation_buttons: Dictionary[String, Button] = {}
 
 var dm_name_by_player_id: Dictionary[int, String] = {}
+## conversation_id -> the OTHER player in it. The id is normally derivable from
+## the conversation id ("dm:lo:hi" minus our own id), but that needs our own id to
+## be known and correct; this remembers who the thread belongs to from the moment
+## it is opened, so a reply target survives a login that never learned it.
+var dm_other_by_conversation: Dictionary[String, int] = {}
 var pending_name_fetch_at_ms: Dictionary[int, int] = {}
 
 var unread_by_conversation: Dictionary[String, int] = {}
@@ -439,8 +444,13 @@ func _on_chat_message(message: Dictionary) -> void:
 		return
 
 	if convo_id.begins_with("dm:"):
-		var self_id_dm: int = int(ClientState.player_id)
-		var other_id_dm: int = _dm_other_id_from_conversation(convo_id, self_id_dm)
+		var other_id_dm: int = _resolve_dm_other_id(convo_id)
+		# A thread that lands before our own id does resolves to nobody. The sender
+		# of an incoming DM *is* the other party, so learn the thread from them —
+		# otherwise the message arrives with no chip and no reply target.
+		if other_id_dm <= 0 and sender_id > 0 and sender_id != int(ClientState.player_id):
+			other_id_dm = sender_id
+			dm_other_by_conversation[convo_id] = sender_id
 		if other_id_dm > 0:
 			if sender_id == other_id_dm and not sender_name.is_empty():
 				dm_name_by_player_id[other_id_dm] = sender_name
@@ -753,7 +763,7 @@ func open_conversation(conversation_id: String) -> void:
 	current_conversation_id = conversation_id
 
 	if conversation_id.begins_with("dm:"):
-		current_dm_other_id = _dm_other_id_from_conversation(conversation_id, int(ClientState.player_id))
+		current_dm_other_id = _resolve_dm_other_id(conversation_id)
 	else:
 		current_dm_other_id = 0
 		if conversation_id.begins_with("global_"):
@@ -773,6 +783,7 @@ func open_dm(other_id: int) -> void:
 
 	var self_id: int = int(ClientState.player_id)
 	current_conversation_id = ChatConstants.dm_conversation_id(self_id, other_id)
+	dm_other_by_conversation[current_conversation_id] = other_id
 
 	_ensure_conversation_exists(current_conversation_id)
 	_ensure_dm_button(current_conversation_id, other_id)
@@ -935,9 +946,13 @@ func _title_for_current() -> String:
 	if current_conversation_id.begins_with("dm:"):
 		var other_id: int = current_dm_other_id
 		if other_id <= 0:
-			other_id = _dm_other_id_from_conversation(current_conversation_id, int(ClientState.player_id))
+			other_id = _resolve_dm_other_id(current_conversation_id)
 		var title_text: String = str(dm_name_by_player_id.get(other_id, ""))
-		return title_text if not title_text.is_empty() else "DM %d" % other_id
+		if not title_text.is_empty():
+			return title_text
+		# Never caption a thread "DM 0" — that is the id we failed to resolve, not
+		# a name, and it is what made the compose box read "Message DM 0".
+		return ("DM %d" % other_id) if other_id > 0 else "Private message"
 
 	if _is_system_conversation(current_conversation_id):
 		return _tab_label_system
@@ -1092,8 +1107,7 @@ func _staff_badge_bbcode(role: String) -> String:
 ## known so two DM threads don't collide visually.
 func _channel_prefix_for_conversation(convo_id: String) -> String:
 	if convo_id.begins_with("dm:"):
-		var self_id: int = int(ClientState.player_id)
-		var other_id: int = _dm_other_id_from_conversation(convo_id, self_id)
+		var other_id: int = _resolve_dm_other_id(convo_id)
 		var dm_name: String = str(dm_name_by_player_id.get(other_id, ""))
 		return ("DM:" + dm_name) if not dm_name.is_empty() else "DM"
 	if convo_id.begins_with("guild:"):
@@ -1131,6 +1145,36 @@ func _tag_color_for_conversation(convo_id: String) -> String:
 
 
 #region DM helpers
+## Who a DM thread is with, tried every way we know: our own id against the
+## conversation id first, then the partner remembered when the thread opened, then
+## the only non-zero half of a thread that was built before our id arrived.
+## Returning 0 here is what used to leave the compose box addressed to "DM 0" and
+## the reply un-sendable, so every caller goes through this rather than the raw
+## conversation-id parse.
+func _resolve_dm_other_id(convo_id: String) -> int:
+	if not convo_id.begins_with("dm:"):
+		return 0
+
+	var from_id: int = _dm_other_id_from_conversation(convo_id, int(ClientState.player_id))
+	if from_id > 0:
+		return from_id
+
+	var remembered: int = int(dm_other_by_conversation.get(convo_id, 0))
+	if remembered > 0:
+		return remembered
+
+	# A thread opened while our own id was still unknown reads "dm:0:<them>".
+	var parts: PackedStringArray = convo_id.split(":", false)
+	if parts.size() == 3:
+		var lo: int = int(parts[1])
+		var hi: int = int(parts[2])
+		if lo <= 0 and hi > 0:
+			return hi
+		if hi <= 0 and lo > 0:
+			return lo
+	return 0
+
+
 func _dm_other_id_from_conversation(convo_id: String, self_id: int) -> int:
 	var parts: PackedStringArray = convo_id.split(":", false)
 	if parts.size() != 3:
@@ -1173,6 +1217,8 @@ func _ensure_dm_button(convo_id: String, other_id: int) -> void:
 
 	dm_container.add_child(button)
 	conversation_buttons[convo_id] = button
+	if other_id > 0:
+		dm_other_by_conversation[convo_id] = other_id
 
 	_update_dm_button_label(convo_id, other_id)
 	_request_player_name_if_needed(other_id)
@@ -1201,7 +1247,7 @@ func _update_dm_button_label(convo_id: String, other_id: int) -> void:
 
 	var button_text: String = str(dm_name_by_player_id.get(other_id, ""))
 	if button_text.is_empty():
-		button_text = "DM %d" % other_id
+		button_text = ("DM %d" % other_id) if other_id > 0 else "DM"
 
 	var unread: int = _get_unread(convo_id)
 	button.text = ("(%d) %s" % [unread, button_text]) if unread > 0 else button_text
@@ -1305,8 +1351,7 @@ func _update_dm_button_if_needed(convo_id: String) -> void:
 	if not convo_id.begins_with("dm:"):
 		return
 
-	var self_id: int = int(ClientState.player_id)
-	var other_id: int = _dm_other_id_from_conversation(convo_id, self_id)
+	var other_id: int = _resolve_dm_other_id(convo_id)
 	if other_id > 0:
 		_update_dm_button_label(convo_id, other_id)
 

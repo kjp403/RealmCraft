@@ -6,11 +6,6 @@
 [ext_resource type="Resource" uid="uid://cp04kpxb8r61s" path="res://source/common/gameplay/items/materials/leather/hide_cave.tres" id="3_hide"]
 [ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="3_gold"]
 [ext_resource type="SpriteFrames" uid="uid://0bdmuknids0j" path="res://source/common/gameplay/characters/sprite_frames/fungus_heavy.tres" id="4_skin"]
-[ext_resource type="Resource" uid="uid://f73fbhjwsu73" path="res://source/common/gameplay/items/weapons/sword/sword_spore.item.tres" id="5_sword"]
-[ext_resource type="Resource" uid="uid://jgkj3ooungr0" path="res://source/common/gameplay/items/weapons/hammer/hammer_spore.item.tres" id="6_hammer"]
-[ext_resource type="Resource" uid="uid://c118jtihx3ybm" path="res://source/common/gameplay/items/weapons/wand/wand_spore.item.tres" id="7_wand"]
-[ext_resource type="Resource" uid="uid://dowcv48c5suhy" path="res://source/common/gameplay/items/weapons/bow/spore_bow.item.tres" id="8_bow"]
-[ext_resource type="Resource" uid="uid://cikrefs0c7r42" path="res://source/common/gameplay/items/weapons/book/book_spore.item.tres" id="9_book"]
 [ext_resource type="Script" uid="uid://demrirc4r2iay" path="res://source/common/gameplay/characters/npc/behaviors/mob_behavior.gd" id="90_mobb"]
 [ext_resource type="Script" uid="uid://cu0vfk2poexsd" path="res://source/common/gameplay/characters/npc/behaviors/lunge_behavior.gd" id="91_lunge"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
@@ -19,7 +14,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/bloodcap.tres" id="fx_bloodcap"]
 [ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="fx_potion"]
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
-[ext_resource type="Resource" uid="uid://cdungeonkeyitem1" path="res://source/common/gameplay/items/consumables/dungeon_key.tres" id="fx_key"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
 
 [sub_resource type="Resource" id="Lunge_migrated"]
@@ -64,36 +58,6 @@ script = ExtResource("2_loot")
 item = ExtResource("fx_potion")
 chance = 0.15
 
-[sub_resource type="Resource" id="Drop_sword"]
-script = ExtResource("2_loot")
-item = ExtResource("5_sword")
-chance = 0.04
-
-[sub_resource type="Resource" id="Drop_hammer"]
-script = ExtResource("2_loot")
-item = ExtResource("6_hammer")
-chance = 0.04
-
-[sub_resource type="Resource" id="Drop_wand"]
-script = ExtResource("2_loot")
-item = ExtResource("7_wand")
-chance = 0.04
-
-[sub_resource type="Resource" id="Drop_bow"]
-script = ExtResource("2_loot")
-item = ExtResource("8_bow")
-chance = 0.04
-
-[sub_resource type="Resource" id="Drop_book"]
-script = ExtResource("2_loot")
-item = ExtResource("9_book")
-chance = 0.04
-
-[sub_resource type="Resource" id="Drop_key"]
-script = ExtResource("2_loot")
-item = ExtResource("fx_key")
-chance = 0.02
-
 [sub_resource type="Resource" id="Drop_chest"]
 script = ExtResource("2_loot")
 item = ExtResource("fx_chest_s")
@@ -130,6 +94,6 @@ detection_radius = 130
 chase_on_area = true
 xp_reward = 40
 respawn_delay = 20.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_leather"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_key"), SubResource("Drop_chest"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_leather"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_potion"), SubResource("Drop_chest"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
 metadata/slug = &"myconid_brute"
 metadata/id = 32
