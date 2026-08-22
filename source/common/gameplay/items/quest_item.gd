@@ -19,4 +19,4 @@ func group_key() -> StringName:
 
 
 func can_drop() -> bool:
-	return false
+	return true
