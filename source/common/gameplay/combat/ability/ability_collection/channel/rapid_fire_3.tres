@@ -14,3 +14,4 @@ mobile_speed_mult = 0.65
 name = "Rapid Fire III"
 cooldown = 7.0
 metadata/slug = &"rapid_fire_3"
+metadata/id = 105
