@@ -6,7 +6,7 @@
 script = ExtResource("1_pce05")
 content_name = &"abilities"
 version = 1787421653
-next_id = 107
+next_id = 114
 entries = Array[Dictionary]([{
 &"hash": "fb4a6a7491a0eacddb0d7b118f06f893acc74eafa6db4802bc89825ab2409b19",
 &"id": 12,
@@ -537,6 +537,41 @@ entries = Array[Dictionary]([{
 &"id": 106,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_4.tres",
 &"slug": &"rapid_fire_4"
+}, {
+&"hash": "8f7ad421332d8a65029b69887776420fca25fe2096af2c77bd88874a43ed7ed1",
+&"id": 107,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/berserk/hammer_rampage.tres",
+&"slug": &"hammer_rampage"
+}, {
+&"hash": "988c727ff2c12c36250a6b8b1d661efe4fa3796892a7b4da23dc2115f69b8d33",
+&"id": 108,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/berserk/hammer_rampage_2.tres",
+&"slug": &"hammer_rampage_2"
+}, {
+&"hash": "6697527aa66207bf26ed48b4f97e27f08deaad6fd40a423a642cf9d556c20202",
+&"id": 109,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/berserk/hammer_rampage_3.tres",
+&"slug": &"hammer_rampage_3"
+}, {
+&"hash": "ba5b18cea09f3f7290e30b292cb9c2e4300814c7acd9bb8f53590782a9d6897a",
+&"id": 110,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/berserk/hammer_rampage_4.tres",
+&"slug": &"hammer_rampage_4"
+}, {
+&"hash": "6138194317a91c7b800ec74e4b6b038c05a26276ef50914d22672556dda505bb",
+&"id": 111,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock.tres",
+&"slug": &"hammer_aftershock"
+}, {
+&"hash": "e60c29410760ce6f4737fa22a58a93cdc8a42ae6c6621ae3772f3c227586faa5",
+&"id": 112,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock_2.tres",
+&"slug": &"hammer_aftershock_2"
+}, {
+&"hash": "abdffb3870a1c3fa34542eaab87c0250c94de76eec3c12f0cb7f7499b99b8673",
+&"id": 113,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock_3.tres",
+&"slug": &"hammer_aftershock_3"
 }])
 scan_path = "res://source/common/gameplay/combat/ability/ability_collection"
 filters = PackedStringArray("*.tres")

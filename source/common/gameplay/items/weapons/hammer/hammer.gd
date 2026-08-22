@@ -39,9 +39,13 @@ func perform_action(
 	if action_index < 0 or action_index >= abilities.size():
 		return
 	var ability: AbilityResource = abilities[action_index]
-	# Only the melee SLAMS get the punchy slam swing. A channeled special (the
-	# healing aura) uses its own stance pose — it must NOT trigger a swing.
-	if ability is not MeleeSwingAbility:
+	# Melee swings AND self-centered novas (Aftershock — a plant-and-detonate burst,
+	# same fantasy as a slam) get the punchy swing; NovaAbility's own arc_scene
+	# handles the actual hit independently, so this stays purely cosmetic layering.
+	# A channeled special (the old healing aura, still used by other trees) uses its
+	# own stance pose instead; a plain self-buff (Rampage) needs neither — it just
+	# shows its aura pulse — and both fall through to the early return below.
+	if ability is not MeleeSwingAbility and ability is not NovaAbility:
 		return
 	_slam_ability = ability
 	_slam_dir = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
