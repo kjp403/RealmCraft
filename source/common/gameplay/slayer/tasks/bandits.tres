@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_task")
 display_name = "Bandits"
-enemy_types = Array[StringName]([&"bandit_fighter", &"bandit_archer", &"bandit", &"bandit_sorcerer", &"bandit_brute"])
+enemy_types = Array[StringName]([&"bandit_fighter", &"bandit_archer", &"bandit", &"bandit_sorcerer", &"bandit_brute", &"bandit_cutpurse", &"bandit_captain"])
 min_slayer_level = 10
 xp_per_kill = 197
-guide_notes = "The bandit hideout's rank and file — archers and sorcerers hit from range, so break line of sight or close distance fast. Bandit Captain does NOT count toward this task."
+guide_notes = "The bandit hideout's rank and file — archers and sorcerers hit from range, so break line of sight or close distance fast. The Bandit Captain counts too, and pays a boss bonus on top."
 location_hint = "Bandit Hideout"
