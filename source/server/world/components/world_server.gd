@@ -96,7 +96,7 @@ func _stamp_location(peer_id: int, player: PlayerResource) -> void:
 		return
 	player.current_instance = inst.instance_resource.instance_name
 	var node: Player = inst.get_player(peer_id)
-	if node != null:
+	if node != null and node.global_position.is_finite():
 		player.last_position = node.global_position
 	player.lb_stats["last_instance"] = player.current_instance
 	player.lb_stats["last_x"] = player.last_position.x
