@@ -14,6 +14,11 @@ extends AbilityResource
 
 ## The projectile scene (root must be a Projectile). No hardcoded preloads.
 @export var projectile_scene: PackedScene
+## Splat/mitigation type for the spawned projectile. Every current use of this
+## ability (bow shots, multishot, venom shot, arrow storm) is a bow arrow, so
+## this defaults to ranged; a future magic-projectile use (fireball staff)
+## would override it to CombatHit.DAMAGE_MAGIC.
+@export var projectile_damage_type: StringName = CombatHit.DAMAGE_RANGED
 ## Seconds of holding for a full-power shot.
 @export var charge_time_s: float = 0.9
 ## Damage as a fraction of the wielder's AD: tap = min, full hold = max.
@@ -193,6 +198,7 @@ func _spawn(entity: Entity, direction: Vector2, damage: float, speed: float, arm
 	projectile.speed = speed
 	projectile.source = entity
 	projectile.damage = damage
+	projectile.damage_type = projectile_damage_type
 	# Armed-override extras (docs/bow.md): pierce (Deadeye), stun + shockwave slow +
 	# a scaled-up arrow (the Pinning Arrow ult).
 	if not armed.is_empty():
