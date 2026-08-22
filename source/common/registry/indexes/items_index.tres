@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1787251982
-next_id = 604
+next_id = 605
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2797,6 +2797,11 @@ entries = Array[Dictionary]([{
 &"id": 603,
 &"path": "res://source/common/gameplay/items/consumables/food/cooked_blue_lobster.tres",
 &"slug": &"cooked_blue_lobster"
+}, {
+&"hash": "9cd452c81cbc29682cbd3cdbefa1e62205a7b8bf0d310b844cf138d31e3791b8",
+&"id": 604,
+&"path": "res://source/common/gameplay/items/gears/leather/cindermantle.tres",
+&"slug": &"cindermantle"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

@@ -257,13 +257,13 @@ chance = 1.0
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sand_king"
-display_name = "Ankhemet Unbound"
+display_name = "Ankhemet, the Sand King"
 skin = ExtResource("5_skin")
 visual_scale = 2.05
 is_boss = true
 combat_level = 75
-max_health = 40000.0
-attack_damage = 145.0
+max_health = 34000.0
+attack_damage = 95.0
 attack_cooldown = 1.3
 armor = 115.0
 mr = 82.0

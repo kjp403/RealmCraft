@@ -22,6 +22,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="li3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres" id="relic_cinderheart"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/cindermantle.tres" id="cindermantle"]
 
 [sub_resource type="Resource" id="Lunge_cinder"]
 script = ExtResource("91_lunge")
@@ -33,27 +34,27 @@ lunge_cooldown = 6.0
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
 item = ExtResource("li0")
-min_amount = 5200
-max_amount = 8800
+min_amount = 12000
+max_amount = 18000
 
 [sub_resource type="Resource" id="Drop_mithril_ore"]
 script = ExtResource("3_loot")
 item = ExtResource("li1")
-min_amount = 2
-max_amount = 5
+min_amount = 4
+max_amount = 8
 chance = 0.7
 
 [sub_resource type="Resource" id="Drop_iron_bar"]
 script = ExtResource("3_loot")
 item = ExtResource("li2")
-min_amount = 5
-max_amount = 10
+min_amount = 8
+max_amount = 15
 
 [sub_resource type="Resource" id="Drop_coal_ore"]
 script = ExtResource("3_loot")
 item = ExtResource("li3")
-min_amount = 8
-max_amount = 14
+min_amount = 12
+max_amount = 20
 chance = 0.8
 
 [sub_resource type="Resource" id="Drop_dungeon_key"]
@@ -83,27 +84,27 @@ chance = 0.001
 [sub_resource type="Resource" id="Drop_fire_sword"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_sword")
-chance = 0.08
+chance = 0.16
 
 [sub_resource type="Resource" id="Drop_fire_hammer"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_hammer")
-chance = 0.08
+chance = 0.16
 
 [sub_resource type="Resource" id="Drop_fire_bow"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_bow")
-chance = 0.08
+chance = 0.16
 
 [sub_resource type="Resource" id="Drop_fire_wand"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_wand")
-chance = 0.08
+chance = 0.16
 
 [sub_resource type="Resource" id="Drop_fire_book"]
 script = ExtResource("3_loot")
 item = ExtResource("fire_book")
-chance = 0.08
+chance = 0.16
 
 
 [sub_resource type="Resource" id="Drop_dragon_bones"]
@@ -113,19 +114,24 @@ min_amount = 1
 max_amount = 2
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_cindermantle"]
+script = ExtResource("3_loot")
+item = ExtResource("cindermantle")
+chance = 0.18
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cinderborn"
-display_name = "Vurthek Unbound"
+display_name = "Vurthek, the Cinderborn"
 skin = ExtResource("5_skin")
 visual_scale = 2.35
 is_boss = true
 combat_level = 90
-max_health = 32000.0
-attack_damage = 185.0
+max_health = 24000.0
+attack_damage = 130.0
 attack_cooldown = 1.2
-armor = 145.0
-mr = 130.0
+armor = 110.0
+mr = 95.0
 behaviors = Array[ExtResource("2_beh")]([SubResource("Lunge_cinder")])
 attacks = Array[ExtResource("1_atk")]([])
 move_speed = 68
@@ -141,12 +147,12 @@ wander_pause_max_s = 4.0
 xp_reward = 28000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_bones")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_bones"), SubResource("Drop_cindermantle")])
 combat_skill_xp_override = 36000
 enrage_health_fraction = 0.4
 slam_radius = 135.0
 slam_windup_s = 0.9
-slam_damage = 520.0
+slam_damage = 320.0
 slam_on_target = true
 slam_interval_s = 7.2
 enraged_slam_interval_s = 4.6
@@ -157,11 +163,11 @@ enrage_speed_mult = 1.5
 laser_range = 360.0
 laser_width = 32.0
 laser_windup_s = 1.35
-laser_damage = 420.0
+laser_damage = 260.0
 laser_interval_s = 8.0
 enraged_laser_interval_s = 5.2
 arm_shot_interval_s = 5.5
-arm_shot_damage = 300.0
+arm_shot_damage = 180.0
 arm_shot_speed = 200.0
 arm_shot_lifetime_s = 1.85
 enraged_arm_shot_interval_s = 3.8
@@ -189,7 +195,7 @@ sweep_range = 360.0
 sweep_width = 38.0
 sweep_windup_s = 1.1
 sweep_duration_s = 1.2
-sweep_damage = 320.0
+sweep_damage = 200.0
 sweep_interval_s = 9.0
 enraged_sweep_interval_s = 5.8
 sweep_phase = 0

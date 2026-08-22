@@ -1,63 +1,59 @@
-[gd_resource type="Resource" script_class="GearItem" format=3 uid="uid://cyv3ssopexdcr"]
+[gd_resource type="Resource" script_class="GearItem" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
-[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gear_phantom_hood.png" id="2_icon"]
+[ext_resource type="Texture2D" uid="uid://c10h1m5a4bxvn" path="res://assets/sprites/items/icons/relic_cinderheart.png" id="2_icon"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/gear_item.gd" id="3_gear"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/helmet.tres" id="4_slot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/torso.tres" id="4_slot"]
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "armor"
-value = 16.0
+value = 58.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "health_max"
-value = 30.0
+value = 115.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "mr"
-value = 11.0
+value = 39.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_3"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 27.0
+value = 98.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_4"]
 script = ExtResource("1_mod")
 stat_name = "move_speed"
-value = 10.0
+value = 25.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_5"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 4.0
+value = 12.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("3_gear")
-required_level = 0
 required_mastery_categories = Array[StringName]([&"any"])
-required_mastery_level = 15
+required_mastery_level = 65
 slot = ExtResource("4_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2"), SubResource("Mod_3"), SubResource("Mod_4"), SubResource("Mod_5")])
-item_name = &"Phantom Hood"
+item_name = &"Cindermantle"
 item_icon = ExtResource("2_icon")
-description = ""
-holdable = true
-is_currency = false
-can_trade = false
-market_minimum_price = 0
-vendor_value = 100
+description = "Cut from Vurthek's own hide while it still smoldered. Never quite goes cold."
+can_trade = true
+vendor_value = 550
 stack_limit = 10
-tags = PackedStringArray()
+tags = PackedStringArray("ascension")
 metadata/_custom_type_script = "uid://dnmtdktay2df6"
-metadata/slug = &"phantom_hood"
-metadata/id = 121
+metadata/slug = &"cindermantle"
+metadata/id = 604
