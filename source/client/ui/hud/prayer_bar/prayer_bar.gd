@@ -26,8 +26,18 @@ func _ready() -> void:
 			_on_stat_changed(Stat.PRAYER_MAX, local_player.stats_component.get_stat(Stat.PRAYER_MAX))
 			_on_stat_changed(Stat.PRAYER, local_player.stats_component.get_stat(Stat.PRAYER))
 	)
-	# Subscribe to prayer state updates for drain rate
-	Client.subscribe(&"prayer.state", _on_prayer_state)
+	# Client._data_response pushes under the exact type string the REQUEST used
+	# (see client.gd), not a shared "prayer changed" channel -- so the book's
+	# individual On/Off toggle (prayer.toggle) and this bar's own Q button
+	# (prayer.quick_toggle) each only reach subscribers of THAT literal string.
+	# Subscribing to all three prayer.* request types is what actually keeps
+	# _active and the drain label current regardless of which UI made the
+	# change: without this, flipping a starred prayer from the book left the Q
+	# button's own on/off read stale, so a press could reverse a prayer the
+	# player believed was already off (or on) instead of matching what the
+	# button's tooltip told them it would do.
+	for type: StringName in [&"prayer.state", &"prayer.toggle", &"prayer.quick_toggle"]:
+		Client.subscribe(type, _on_prayer_state)
 	quick_button.pressed.connect(_on_quick_pressed)
 	ClientState.quick_prayers_changed.connect(_update_quick_button)
 	_update_quick_button()
@@ -81,10 +91,32 @@ func _on_quick_pressed() -> void:
 		Toaster.toast("Could not toggle quick prayers.")
 		return
 	_active = payload.get("active", [])
-	var skipped: Array = payload.get("skipped", [])
-	if not skipped.is_empty():
-		Toaster.toast("Not enough prayer points for %d of your quick prayers." % skipped.size())
+	_toast_skipped(payload.get("skipped", []))
 	_update_quick_button()
+
+
+## One toast that names the actual cause instead of always blaming points --
+## skipped entries carry {"slug", "reason"} now (no_points / prayer_level /
+## unknown_prayer), and a batch can hit more than one kind at once.
+func _toast_skipped(skipped: Array) -> void:
+	if skipped.is_empty():
+		return
+	var reasons: Dictionary = {}
+	for entry: Variant in skipped:
+		if entry is Dictionary:
+			var reason: String = str((entry as Dictionary).get("reason", ""))
+			reasons[reason] = int(reasons.get(reason, 0)) + 1
+	var parts: PackedStringArray = PackedStringArray()
+	if reasons.has("no_points"):
+		parts.append("not enough points for %d" % int(reasons["no_points"]))
+	if reasons.has("prayer_level"):
+		parts.append("%d need a higher Prayer level" % int(reasons["prayer_level"]))
+	if reasons.has("unknown_prayer"):
+		parts.append("%d are no longer available" % int(reasons["unknown_prayer"]))
+	if parts.is_empty():
+		Toaster.toast("Could not activate %d of your quick prayers." % skipped.size())
+		return
+	Toaster.toast("Quick prayers: %s." % ", ".join(parts))
 
 
 ## Amber + pressed when every starred prayer is currently active, muted

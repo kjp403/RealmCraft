@@ -36,15 +36,19 @@ func data_request_handler(
 			break
 	var want_on: bool = bool(args.get("on", not all_already_on))
 
-	var activated: Array[String] = []
-	var skipped: Array[String] = []
+	# {"slug", "reason"} per skip, not just the slug -- no_points, prayer_level
+	# (a starred pick the player has since fallen under, e.g. a respec) and
+	# unknown_prayer (a starred slug retired from PrayerBook; QuickPrayers is a
+	# client-local preference the server never prunes) are all real, distinct
+	# causes, and collapsing them into one generic "not enough points" message
+	# blames the pool for something that was never about points.
+	var skipped: Array[Dictionary] = []
 	if want_on:
 		for slug: StringName in slugs:
 			var result: Dictionary = PrayerService.activate(player, slug)
 			if bool(result.get("ok", false)):
-				activated.append(String(slug))
 				continue
-			skipped.append(String(slug))
+			skipped.append({"slug": String(slug), "reason": str(result.get("reason", ""))})
 			if str(result.get("reason", "")) == "no_points":
 				break # pool is dry -- further attempts would just repeat the refusal
 	else:
@@ -53,6 +57,16 @@ func data_request_handler(
 
 	var status: Dictionary = PrayerService.status(player)
 	status["ok"] = true
+	# Reported against the FINAL snapshot, not "which activate() calls
+	# returned ok" -- two starred prayers that conflict with each other (same
+	# exclusive_groups entry) each report ok in turn, but activating the
+	# second one silently switches the first back off, so trusting the raw
+	# per-call results would list both as active when only one really is.
+	var active_now: Array = status.get("active", [])
+	var activated: Array[String] = []
+	for slug: StringName in slugs:
+		if active_now.has(String(slug)):
+			activated.append(String(slug))
 	status["activated"] = activated
 	status["skipped"] = skipped
 	return status

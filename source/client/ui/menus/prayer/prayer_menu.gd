@@ -42,7 +42,18 @@ func _ready() -> void:
 	#
 	# visibility_changed still refreshes the data on REOPEN (hide → show).
 	visibility_changed.connect(_on_visibility_changed)
+	# The bar's Q button (prayer.quick_toggle) can flip prayers this book is
+	# currently displaying without this panel ever sending a request itself --
+	# Client pushes a response only to subscribers of that exact request type
+	# (see client.gd), so without this the book's row tints go stale the
+	# moment the player uses the bar instead of a row's own On/Off button.
+	Client.subscribe(&"prayer.quick_toggle", _on_external_prayer_change)
 	_refresh()
+
+
+func _on_external_prayer_change(payload: Dictionary) -> void:
+	if visible and bool(payload.get("ok", false)):
+		_build(payload)
 
 
 func _on_visibility_changed() -> void:
