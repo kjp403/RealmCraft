@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="RapidFireAbility" format=3]
 
 [ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_ability.gd" id="1_rapid"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/items/weapons/bow/arrow.tscn" id="1_wsgmh"]
 
 [resource]
 script = ExtResource("1_rapid")
