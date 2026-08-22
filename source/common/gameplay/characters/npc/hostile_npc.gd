@@ -1462,13 +1462,13 @@ func _pick_wander_target() -> void:
 		var dist: float = randf_range(max_r * 0.35, max_r)
 		var candidate: Vector2 = spawn_position + Vector2.from_angle(angle) * dist
 		var ray := PhysicsRayQueryParameters2D.create(global_position, candidate)
-		ray.collision_mask = 2 # world solids (walls / water / void)
+		ray.collision_mask = PhysicsLayers.SOLID_GROUND_MASK # world solids + decoration (walls / water / void / scenery)
 		ray.exclude = [get_rid()]
 		if not space.intersect_ray(ray).is_empty():
 			continue
 		var point := PhysicsPointQueryParameters2D.new()
 		point.position = candidate
-		point.collision_mask = 2
+		point.collision_mask = PhysicsLayers.SOLID_GROUND_MASK
 		point.collide_with_areas = false
 		point.exclude = [get_rid()]
 		if not space.intersect_point(point, 1).is_empty():

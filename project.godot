@@ -220,6 +220,7 @@ locale/translations=PackedStringArray("res://data/translations/translations.en_U
 2d_physics/layer_5="flag"
 2d_physics/layer_6="harvestable"
 2d_physics/layer_7="interactable"
+2d_physics/layer_8="scenery"
 
 [rendering]
 

@@ -109,6 +109,14 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 
 	_clear_slot(slot)
 
+	if slot == &"weapon" and character != null:
+		# An armed shot override (Multishot/Deadeye/...) belongs to the BOW's
+		# ChargeAbility — no other weapon can ever consume it. Left uncleared,
+		# swapping off the bow mid-arm silently locked the new weapon's Q/E
+		# slots (has_armed_shot() doesn't know which weapon armed it) for up
+		# to ShotOverrideAbility.EXPIRY_S with no UI feedback why.
+		ShotOverrideAbility.clear_armed(character)
+
 	if item_id == 0:
 		if slot == &"weapon":
 			_mount_unarmed()

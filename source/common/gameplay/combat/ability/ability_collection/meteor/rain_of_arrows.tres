@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1_rain")
-ap_ratio = 4.0
+ap_ratio = 5.5
 blast_radius = 90.0
 cast_range = 185.0
 windup_s = 0.9

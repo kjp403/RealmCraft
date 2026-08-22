@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RapidFireAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_ability.gd" id="1_rapid"]
+
+[resource]
+script = ExtResource("1_rapid")
+ad_ratio = 0.45
+projectile_speed = 500.0
+channel_duration_s = 3.0
+tick_interval_s = 0.35
+mana_per_tick = 3.0
+mobile = true
+mobile_speed_mult = 0.6
+name = "Rapid Fire"
+cooldown = 8.0
+metadata/slug = &"rapid_fire"

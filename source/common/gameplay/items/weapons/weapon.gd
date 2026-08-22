@@ -315,9 +315,16 @@ func perform_action(
 	if ground_target is Vector2:
 		ability.aim_point = ground_target
 		ability.has_aim_point = true
-	# Cooldown + mana stamp on the COMPLETING phase: press for single-phase
-	# abilities, release for charge abilities. mark_used here (not only in
+	# Cooldown stamps on the STARTING phase for every ability, charge weapons
+	# included: press for single-phase abilities AND for a charge ability's
+	# draw, release only pays mana. mark_used here (not only in
 	# try_perform_action) so the server action.perform path respects cooldowns.
+	# Charge weapons used to stamp on release, which stacked charge_time_s on
+	# TOP of cooldown instead of netting it — a bow's 0.9s draw plus 0.8s
+	# cooldown became a strictly additive 1.7s cycle, the slowest basic attack
+	# in the game despite dealing the same 1.0x AD as a sword swing. Stamping
+	# on press lets the draw run concurrently with the cooldown, same as a
+	# telegraphed swing's cast_time_s already does for single-phase abilities.
 	if released:
 		# No can_use_release re-gate here: the SERVER gates via the action.perform
 		# handler before calling, and client copies must apply echoes blindly —
@@ -327,15 +334,15 @@ func perform_action(
 		if not ability.has_release:
 			return
 		ability.release_ability(character, direction)
-		_stamp_cooldown(ability)
 		_consume_mana(ability)
 	else:
 		ability.use_ability(character, direction)
 		# Shot overrides defer cooldown + mana to the consuming shot (ChargeAbility
 		# stamps them through _stamp_armed_override when the draw fires).
-		if not ability.has_release and ability is not ShotOverrideAbility:
+		if ability is not ShotOverrideAbility:
 			_stamp_cooldown(ability)
-			_consume_mana(ability)
+			if not ability.has_release:
+				_consume_mana(ability)
 
 
 ## Server-authoritative mana payment for a just-completed ability. Clients see

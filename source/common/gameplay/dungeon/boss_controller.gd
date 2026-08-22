@@ -915,7 +915,7 @@ func _free_spot_near(origin: Vector2, angle: float) -> Vector2:
 	var space: PhysicsDirectSpaceState2D = boss.get_world_2d().direct_space_state
 	var dir: Vector2 = Vector2.RIGHT.rotated(angle)
 	var point := PhysicsPointQueryParameters2D.new()
-	point.collision_mask = 2 # world solids (walls / water / void)
+	point.collision_mask = PhysicsLayers.SOLID_GROUND_MASK # world solids + decoration (walls / water / void / scenery)
 	point.collide_with_areas = false
 	point.exclude = [boss.get_rid()]
 	var dist: float = add_spread_px
