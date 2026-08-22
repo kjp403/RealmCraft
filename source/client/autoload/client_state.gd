@@ -407,17 +407,13 @@ func _on_item_picked_up(data: Dictionary) -> void:
 	var item_id: int = int(data.get("id", 0))
 	var amount: int = int(data.get("amount", 0))
 	var item_name: String = str(data.get("name", "item"))
-	# Ground-drop / admin-grant pickups are "quiet": refresh the bag, but do NOT
-	# inflate the left-side LootFeed (drop→pickup loops were showing Copper Ore
-	# ×50 while the bag still held 10). Combat/mining loot keeps using LootFeed.
-	if not bool(data.get("quiet", false)):
-		if item_id > 0 and amount > 0:
-			LootFeed.add_item(item_id, amount, item_name)
-	elif item_id > 0 and amount > 0:
-		# Quiet grants still need a readable confirmation — otherwise /give can
-		# succeed server-side while the player thinks nothing arrived.
-		Toaster.toast("Received %s ×%d" % [item_name, amount] if amount > 1 \
-			else "Received %s" % item_name)
+	# Every pickup (ground click/area-loot, mining, /give) reports through the
+	# same compact left-side feed — it already coalesces repeats, so a
+	# drop→pickup loop bumps one pill's ×N instead of spawning a new one.
+	# Previously "quiet" grants (ground pickups) routed to a big centered
+	# Toaster card instead, which read louder than everything else, not quieter.
+	if item_id > 0 and amount > 0:
+		LootFeed.add_item(item_id, amount, item_name)
 	inventory_changed.emit(data)
 
 
