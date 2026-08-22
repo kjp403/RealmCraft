@@ -31,7 +31,15 @@ const BANK_RESOURCE_STACK: int = 50
 ## [constant BANK_RESOURCE_STACK] there, including items that never authored a
 ## stack_limit: 0 means "pseudo-infinite", so those sat in single 1.8k piles
 ## beside 50-capped ores and read as a duplication glitch.
-const UNLIMITED_IN_BANK: Array[StringName] = [&"bone", &"vial_of_water"]
+const UNLIMITED_IN_BANK: Array[StringName] = [
+	&"bone", &"vial_of_water",
+	&"bronze_arrowheads", &"iron_arrowheads", &"steel_arrowheads",
+	&"mithril_arrowheads", &"adamant_arrowheads", &"runite_arrowheads",
+	&"headless_arrow",
+	&"minor_health_potion", &"health_potion", &"greater_health_potion",
+	&"minor_mana_potion", &"mana_potion", &"greater_mana_potion",
+	&"prayer_potion",
+]
 
 
 ## Per-slot stack cap for [param item]. 0 = unlimited. Bank materials and cooked
