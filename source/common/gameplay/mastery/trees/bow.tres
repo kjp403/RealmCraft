@@ -8,11 +8,12 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/bow_multishot_2.tres" id="4_multi2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/bow_multishot_3.tres" id="4_multi3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/bow_multishot_4.tres" id="4_multi4"]
-[ext_resource type="Resource" uid="uid://m8sb3unjvaqj" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/arrow_storm.tres" id="6_storm"]
-[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/arrow_storm_2.tres" id="6_storm2"]
-[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/arrow_storm_3.tres" id="6_storm3"]
-[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/arrow_storm_4.tres" id="6_storm4"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_1.tres" id="6_storm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_2.tres" id="6_storm2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_3.tres" id="6_storm3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_4.tres" id="6_storm4"]
 [ext_resource type="Texture2D" uid="uid://bg13js5fnm8wk" path="res://assets/sprites/ui/ability_icons/juggernaut.png" id="7_jug"]
+[ext_resource type="Resource" uid="uid://b85pgtif6blf8" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/venom_shot.tres" id="9_venom"]
 [ext_resource type="Texture2D" uid="uid://cb2s6s0f4vdny" path="res://assets/sprites/ui/ability_icons/momentum.png" id="8_mom"]
 [ext_resource type="Texture2D" uid="uid://b8qf7bum774bc" path="res://assets/sprites/ui/ability_icons/haste.png" id="9_haste"]
 [ext_resource type="Resource" uid="uid://djxvwss5v1ngk" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye.tres" id="10_deadeye"]
@@ -64,6 +65,14 @@ tier = 4
 ability = ExtResource("4_multi4")
 upgrades = &"bow_multishot_3"
 
+[sub_resource type="Resource" id="Node_venom"]
+script = ExtResource("2_node")
+id = &"bow_venom_shot"
+node_name = "Venom Shot"
+description = "Replaces your draw with a poisoned arrow: full power, plus a lingering toxin. No cooldown beyond the draw itself — this is your new basic attack, not a burst window."
+branch = &"domination"
+ability = ExtResource("9_venom")
+
 [sub_resource type="Resource" id="Node_deadeye"]
 script = ExtResource("2_node")
 id = &"bow_deadeye"
@@ -101,15 +110,16 @@ upgrades = &"bow_deadeye_3"
 [sub_resource type="Resource" id="Node_storm"]
 script = ExtResource("2_node")
 id = &"bow_arrowstorm"
-node_name = "Arrow Storm"
-description = "Arm your bow: the next draw unleashes a wide storm of arrows."
+node_name = "Rapid Fire"
+description = "Hold to unload — keep loosing arrows in your aim direction until you release or run dry."
 branch = &"domination"
 ability = ExtResource("6_storm")
 
 [sub_resource type="Resource" id="Node_storm2"]
 script = ExtResource("2_node")
 id = &"bow_arrowstorm_2"
-description = "A denser storm — more arrows, more damage each."
+node_name = "Rapid Fire II"
+description = "Faster follow-through — a tighter interval between arrows."
 branch = &"domination"
 tier = 2
 ability = ExtResource("6_storm2")
@@ -118,7 +128,8 @@ upgrades = &"bow_arrowstorm"
 [sub_resource type="Resource" id="Node_storm3"]
 script = ExtResource("2_node")
 id = &"bow_arrowstorm_3"
-description = "A blistering storm that saturates the cone."
+node_name = "Rapid Fire III"
+description = "A relentless volley — longer barrage, less time between shots."
 branch = &"domination"
 tier = 3
 ability = ExtResource("6_storm3")
@@ -127,7 +138,8 @@ upgrades = &"bow_arrowstorm_2"
 [sub_resource type="Resource" id="Node_storm4"]
 script = ExtResource("2_node")
 id = &"bow_arrowstorm_4"
-description = "Nine arrows of destruction — the ultimate storm."
+node_name = "Rapid Fire IV"
+description = "A wall of arrows — the fastest, longest barrage a bow can loose."
 branch = &"domination"
 tier = 4
 ability = ExtResource("6_storm4")
@@ -135,27 +147,29 @@ upgrades = &"bow_arrowstorm_3"
 
 [sub_resource type="Resource" id="Mod_hp_survival"]
 script = ExtResource("3_mod")
-value = 30.0
+stat_name = "move_speed"
+value = 10.0
 
 [sub_resource type="Resource" id="Node_survival"]
 script = ExtResource("2_node")
 id = &"bow_survival"
-node_name = "Survival Instinct"
+node_name = "Fleet Footed"
 icon = ExtResource("7_jug")
-description = "+30 max health."
+description = "+10 move speed. An archer's edge is distance, not a bigger health bar."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival")])
 
 [sub_resource type="Resource" id="Mod_hp_survival2"]
 script = ExtResource("3_mod")
-value = 25.0
+stat_name = "move_speed"
+value = 4.0
 
 [sub_resource type="Resource" id="Node_survival2"]
 script = ExtResource("2_node")
 id = &"bow_survival_2"
-node_name = "Survival Instinct II"
+node_name = "Fleet Footed II"
 icon = ExtResource("7_jug")
-description = "+25 more max health."
+description = "+4 more move speed."
 branch = &"resolve"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival2")])
@@ -163,14 +177,15 @@ upgrades = &"bow_survival"
 
 [sub_resource type="Resource" id="Mod_hp_survival3"]
 script = ExtResource("3_mod")
-value = 30.0
+stat_name = "move_speed"
+value = 4.0
 
 [sub_resource type="Resource" id="Node_survival3"]
 script = ExtResource("2_node")
 id = &"bow_survival_3"
-node_name = "Survival Instinct III"
+node_name = "Fleet Footed III"
 icon = ExtResource("7_jug")
-description = "+30 more max health. Harder to pick off."
+description = "+4 more move speed. Nobody outruns a bow that keeps its distance."
 branch = &"resolve"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival3")])
@@ -315,7 +330,7 @@ script = ExtResource("2_node")
 id = &"bow_steady_aim"
 node_name = "Steady Aim"
 icon = ExtResource("12_steady")
-description = "Plant your feet: a full draw released without moving hits 40% harder."
+description = "Hold still while you draw: if you don't move at all between nocking and loosing a FULL charge, that shot deals 40% bonus damage. Moving even one step during the draw cancels it — this rewards planting and firing, not walking shots."
 branch = &"inspiration"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_steady")])
@@ -343,4 +358,4 @@ script = ExtResource("1_tree")
 category = &"bow"
 display_name = "Archery"
 category_icon = ExtResource("1_sl0ww")
-nodes = Array[ExtResource("2_node")]([SubResource("Node_multishot"), SubResource("Node_multishot2"), SubResource("Node_multishot3"), SubResource("Node_deadeye"), SubResource("Node_deadeye2"), SubResource("Node_deadeye3"), SubResource("Node_storm"), SubResource("Node_storm2"), SubResource("Node_storm3"), SubResource("Node_survival"), SubResource("Node_survival2"), SubResource("Node_survival3"), SubResource("Node_rain1"), SubResource("Node_rain2"), SubResource("Node_rain3"), SubResource("Node_pin1"), SubResource("Node_pin2"), SubResource("Node_pin3"), SubResource("Node_lightstep"), SubResource("Node_lightstep2"), SubResource("Node_hawkeye"), SubResource("Node_hawkeye2"), SubResource("Node_steady"), SubResource("Node_steady2")])
+nodes = Array[ExtResource("2_node")]([SubResource("Node_venom"), SubResource("Node_multishot"), SubResource("Node_multishot2"), SubResource("Node_multishot3"), SubResource("Node_deadeye"), SubResource("Node_deadeye2"), SubResource("Node_deadeye3"), SubResource("Node_storm"), SubResource("Node_storm2"), SubResource("Node_storm3"), SubResource("Node_survival"), SubResource("Node_survival2"), SubResource("Node_survival3"), SubResource("Node_rain1"), SubResource("Node_rain2"), SubResource("Node_rain3"), SubResource("Node_pin1"), SubResource("Node_pin2"), SubResource("Node_pin3"), SubResource("Node_lightstep"), SubResource("Node_lightstep2"), SubResource("Node_hawkeye"), SubResource("Node_hawkeye2"), SubResource("Node_steady"), SubResource("Node_steady2")])

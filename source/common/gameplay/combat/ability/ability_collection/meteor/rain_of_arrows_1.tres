@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1_script")
-ap_ratio = 1.5
+ap_ratio = 2.2
 blast_radius = 55.0
 cast_range = 150.0
 windup_s = 1.0

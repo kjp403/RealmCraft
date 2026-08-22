@@ -24,9 +24,10 @@ func predict_use(user: Entity, direction: Vector2) -> void:
 	var dir: Vector2 = direction.normalized() if direction != Vector2.ZERO else Vector2.RIGHT
 	var from: Vector2 = player.global_position
 	var to: Vector2 = from + dir * distance
-	# Clamp to the first WORLD-layer wall along the path so we land in front of it.
+	# Clamp to the first wall or decoration along the path so we land in front of
+	# it, not inside a tree/crate you'd otherwise blink straight through.
 	var space: PhysicsDirectSpaceState2D = player.get_world_2d().direct_space_state
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, PhysicsLayers.WORLD)
+	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, PhysicsLayers.SOLID_GROUND_MASK)
 	query.collide_with_areas = false
 	query.exclude = [player.get_rid()]
 	var hit: Dictionary = space.intersect_ray(query)

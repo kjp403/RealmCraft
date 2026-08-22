@@ -10,10 +10,13 @@ extends AbilityResource
 ## Bonus: the armed shot still scales with DRAW time, so a panic-tap Multishot is weak
 ## and a full-draw one is the real volley.
 ##
-## Rules (docs/bow.md): one override armed at a time (re-arm replaces), cooldown+mana
-## stamp on press, ~EXPIRY_S grace then it fizzles. Armed state lives in
-## Character.armed_shot, set identically on every peer by the action echo; the consume
-## happens in ChargeAbility.release_ability on every peer too — deterministic, no sync.
+## Rules: one override armed at a time — arming while already armed is REFUSED (see
+## can_use below), the loaded shot is a commitment, not a swap. Cooldown + mana stamp
+## on the RELEASE that actually fires it (Weapon.stamp_armed_override), not on the
+## arming press — an unfired arm costs nothing but its EXPIRY_S grace before it
+## fizzles. Armed state lives in Character.armed_shot, set identically on every peer
+## by the action echo; the consume happens in ChargeAbility.release_ability on every
+## peer too — deterministic, no sync.
 
 const EXPIRY_S: float = 6.0
 

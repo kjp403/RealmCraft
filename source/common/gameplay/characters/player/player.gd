@@ -124,6 +124,10 @@ func incoming_damage_factor(attacker: Character) -> float:
 ## targets) instead of trailing the corpse.
 func die(killer: Character) -> void:
 	_died_at_ms = Time.get_ticks_msec()
+	# RESPAWN_DELAY (3s) is shorter than ShotOverrideAbility.EXPIRY_S (6s), so an
+	# armed shot from THIS life could otherwise still be "fresh" when the next
+	# life starts and silently lock its Q/E slots for no visible reason.
+	ShotOverrideAbility.clear_armed(self)
 	# Prayers go out when you do (the OSRS rule). Done FIRST so the stat ledger
 	# unwinds while the player object is still intact — a respawn rebuilds stats
 	# from scratch and would otherwise strand the applied prayer modifiers.

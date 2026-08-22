@@ -12,10 +12,19 @@ const PICKUP: int = 1 << 3          ## layer 4 — coins / collectibles / doors 
 const FLAG: int = 1 << 4            ## layer 5 — territory objectives (attack target)
 const HARVESTABLE: int = 1 << 5     ## layer 6 — mineable nodes (pick / sickle target)
 const INTERACTABLE: int = 1 << 6    ## layer 7 — warpers / masters / stations
+## layer 8 — decorative-but-collidable tiles (trees, crates, fences): blocks
+## movement/spawns/blink same as WORLD, but deliberately excluded from
+## projectile wall-rays (see arrow.gd) so scenery a shot merely grazes doesn't
+## eat it the way an actual wall should.
+const SCENERY: int = 1 << 7
 
 ## A projectile / melee hitbox hits: hurtboxes (damage) + flags (capture) + world (block).
 ## Deliberately NOT character bodies — those are navigation only.
 const COMBAT_TARGET_MASK: int = WORLD | HURTBOX | FLAG
+## "Anything solid a body can't walk through" — movement, spawn placement, and
+## blink destination checks want BOTH real walls and decoration; only
+## projectile wall-detection stays WORLD-only.
+const SOLID_GROUND_MASK: int = WORLD | SCENERY
 ## Deprecated for gather arcs — historically PickArc used this and pulled NPC
 ## aggro via HurtBoxes. Gather swings must use HARVESTABLE only.
 const HARVEST_TARGET_MASK: int = COMBAT_TARGET_MASK | HARVESTABLE

@@ -273,6 +273,10 @@ func refresh_nameplate_color() -> void:
 ## (Guild Hall recall) skip the local snap — the server switches instance after the delay.
 func _on_player_died(data: Dictionary) -> void:
 	_dead = true
+	# Mirrors the server-side clear in Player.die() — the local client's own
+	# has_armed_shot() gate must drop the stale arm immediately too, or Q/E
+	# stay locked client-side until the (longer) EXPIRY_S timeout catches up.
+	ShotOverrideAbility.clear_armed(self)
 	_respawn_position = data.get("spawn", global_position)
 	var return_home: bool = bool(data.get("return_home", false))
 	var delay: float = float(data.get("respawn_in", 3.0))
@@ -422,12 +426,9 @@ func request_area_loot() -> void:
 			var reason: String = str(result.get("reason", ""))
 			if reason == "none" or reason.is_empty():
 				Toaster.toast("Nothing to loot nearby.")
-			return
-		var names: PackedStringArray = PackedStringArray(result.get("names", []))
-		if names.is_empty():
-			Toaster.toast("Looted %d pile%s." % [count, "s" if count != 1 else ""])
-		else:
-			Toaster.toast("Looted: %s" % ", ".join(names))
+		# Each item already reported itself through the left-side LootFeed via
+		# its own item.picked_up push (GroundItem.try_pickup, called per-item
+		# server-side) — a summary toast here just repeated the same names.
 	, {}, InstanceClient.current.name)
 
 
