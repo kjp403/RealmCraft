@@ -20,7 +20,7 @@ const REMAP_CATEGORIES: Array[Dictionary] = [
 		&"show_on": [&"MOUSE_KEYBOARD", &"GAMEPAD"],
 		&"actions": [
 			&"player_interact", &"player_chat", &"player_chat_dm", &"player_recall", &"player_map",
-			&"player_quickslot_1", &"player_quickslot_2", &"player_quickslot_3",
+			&"player_inventory", &"player_quickslot_1", &"player_quickslot_2", &"player_quickslot_3",
 		],
 	},
 	{
