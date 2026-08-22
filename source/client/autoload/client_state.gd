@@ -316,10 +316,16 @@ func _on_combat_reward(data: Dictionary) -> void:
 	var enemy_type: String = str(data.get("enemy_type", ""))
 	var title: String = "Defeated %s" % _readable_enemy_name(enemy_type) if not enemy_type.is_empty() else "Reward"
 
-	# Loot: inventory kills use the compact ICON feed; ground drops just name
-	# what landed so players know to click-pick it up. Boss Hunt kills bank
-	# straight into the Hunt Chest, so they say so — otherwise a farm session
-	# reads as "went to my bag" and the player never goes to collect.
+	# Loot: inventory kills use the compact ICON feed, right here, since the item
+	# is already in the bag. Ground drops used to spell out "Dropped X" lines on
+	# this same big center card, which is exactly what spattered the screen
+	# during area-loot farming (a card per enemy type, each listing every drop)
+	# — dropped entirely. Ground loot isn't granted yet at kill time (it's sitting
+	# on the ground for click-pickup), so it gets NO feedback here; the compact
+	# feed picks it up for real via _on_item_picked_up once the player actually
+	# collects it. Boss Hunt kills bank straight into the Hunt Chest, so they
+	# still say so — otherwise a farm session reads as "went to my bag" and the
+	# player never goes to collect.
 	var lines: PackedStringArray = PackedStringArray()
 	var ground_loot: bool = bool(data.get("ground", false))
 	var chest_loot: bool = bool(data.get("hunt_chest", false))
@@ -329,7 +335,7 @@ func _on_combat_reward(data: Dictionary) -> void:
 		var loot_name: String = str(entry.get("name", "item"))
 		var stack_text: String = "%s ×%d" % [loot_name, loot_amount] if loot_amount > 1 else loot_name
 		if ground_loot:
-			lines.append("Dropped %s" % stack_text)
+			continue
 		elif chest_loot:
 			# banked=false means the chest hit its stack cap and refused a new id.
 			if entry.get("banked", true):
