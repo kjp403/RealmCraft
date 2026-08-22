@@ -210,7 +210,7 @@ enemy_data = ExtResource("13_n7hu4")
 weapon = null
 
 [node name="SporeSwarm2" parent="ReplicatedPropsContainer" unique_id=54992207 instance=ExtResource("9_msvda")]
-position = Vector2(-180, -980)
+position = Vector2(-264, -1064)
 debug_draw_ranges = false
 enemy_data = ExtResource("13_n7hu4")
 weapon = null
@@ -222,7 +222,7 @@ enemy_data = ExtResource("13_n7hu4")
 weapon = null
 
 [node name="SporeSwarm4" parent="ReplicatedPropsContainer" unique_id=54992209 instance=ExtResource("9_msvda")]
-position = Vector2(-360, -1080)
+position = Vector2(-344, -1112)
 debug_draw_ranges = false
 enemy_data = ExtResource("13_n7hu4")
 weapon = null
@@ -324,7 +324,7 @@ offset_bottom = -1305.0
 text = "In construction"
 
 [node name="SporeTick1" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
-position = Vector2(-584, -184)
+position = Vector2(-552, -216)
 enemy_data = ExtResource("lv_sporetick")
 weapon = null
 
@@ -339,12 +339,12 @@ enemy_data = ExtResource("lv_sporetick")
 weapon = null
 
 [node name="SporeTick4" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
-position = Vector2(192, -832)
+position = Vector2(168, -856)
 enemy_data = ExtResource("lv_sporetick")
 weapon = null
 
 [node name="SporeTick5" parent="ReplicatedPropsContainer" instance=ExtResource("9_msvda")]
-position = Vector2(-600, -240)
+position = Vector2(-552, -280)
 enemy_data = ExtResource("lv_sporetick")
 weapon = null
 
