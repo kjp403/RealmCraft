@@ -49,7 +49,7 @@ func _ready() -> void:
 		func(peer_id: int):
 			if connected_peers.has(peer_id):
 				var player: Player = get_player(peer_id)
-				if player:
+				if player and player.global_position.is_finite():
 					player.player_resource.last_position = player.global_position
 				despawn_player(peer_id)
 	)
@@ -264,7 +264,7 @@ func spawn_player(peer_id: int) -> void:
 	
 	players_by_peer_id[peer_id] = player
 	
-	if spawn_position == Vector2.ZERO:
+	if spawn_position == Vector2.ZERO or not spawn_position.is_finite():
 		spawn_position = instance_map.get_spawn_position(0)
 
 	var syn: StateSynchronizer = player.state_synchronizer
