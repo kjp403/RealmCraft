@@ -19,6 +19,12 @@
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
 [ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/phantom_ore.tres" id="phantom_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/phantom_gem.tres" id="phantom_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/phantom_cloth.tres" id="phantom_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="ench_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="ench_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="ench_cloth"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
@@ -99,6 +105,48 @@ min_amount = 1
 max_amount = 1
 chance = 0.35
 
+[sub_resource type="Resource" id="Drop_phantom_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("phantom_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_phantom_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("phantom_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.24
+
+[sub_resource type="Resource" id="Drop_phantom_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("phantom_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.24
+
+[sub_resource type="Resource" id="Drop_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("ench_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_enchanted_gem"]
+script = ExtResource("2_loot")
+item = ExtResource("ench_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.24
+
+[sub_resource type="Resource" id="Drop_enchanted_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("ench_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.24
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"fungal_heart"
@@ -121,7 +169,7 @@ xp_reward = 700
 combat_skill_xp_override = 5500
 respawns = true
 respawn_delay = 90.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_phantom_ore"), SubResource("Drop_phantom_gem"), SubResource("Drop_phantom_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth")])
 slam_radius = 125.0
 slam_windup_s = 0.9
 slam_damage = 120.0

@@ -7,6 +7,7 @@
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_armored_skeleton.tres" id="5_skin"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/items/currencies/gold.tres" id="gold"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/ghostweave_jacket.tres" id="ghostweave_jacket"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_bar.tres" id="mithril_bar"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_bar.tres" id="adamant_bar"]
@@ -224,10 +225,15 @@ min_amount = 1
 max_amount = 2
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_ghostweave_jacket"]
+script = ExtResource("3_loot")
+item = ExtResource("ghostweave_jacket")
+chance = 0.05
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"sand_king"
-display_name = "Ankhemet, the Sand King"
+display_name = "Ankhemet Unbound"
 skin = ExtResource("5_skin")
 visual_scale = 1.9
 combat_level = 300
@@ -291,6 +297,6 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_sunsteel_bow"), SubResource("Drop_sunsteel_wand"), SubResource("Drop_sunsteel_book"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_dragon_bones")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_ghostweave_jacket"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_runite_bar"), SubResource("Drop_gold_ore"), SubResource("Drop_silver_ore"), SubResource("Drop_cloth_bandit"), SubResource("Drop_maple_log"), SubResource("Drop_yew_log"), SubResource("Drop_anglerfish"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_basilisk_sword"), SubResource("Drop_basilisk_hammer"), SubResource("Drop_sunsteel_bow"), SubResource("Drop_sunsteel_wand"), SubResource("Drop_sunsteel_book"), SubResource("Drop_basilisk_ore"), SubResource("Drop_hide_wraithsilk"), SubResource("Drop_basilisk_cloth"), SubResource("Drop_wraithsilk_leather"), SubResource("Drop_runewoven_cloth"), SubResource("Drop_runewoven_ore"), SubResource("Drop_basilisk_gem"), SubResource("Drop_wraithsilk_gem"), SubResource("Drop_runewoven_gem"), SubResource("Drop_wraithsilk_cloth"), SubResource("Drop_fiber_wraithsilk"), SubResource("Drop_fiber_runewoven"), SubResource("Drop_dragon_bones")])
 metadata/slug = &"sand_king"
 metadata/id = 83

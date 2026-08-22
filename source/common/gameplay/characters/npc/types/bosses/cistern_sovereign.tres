@@ -27,9 +27,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="sirenic_leather"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/sirenic_gem.tres" id="sirenic_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/sirenic_cloth.tres" id="sirenic_cloth"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="ench_ore"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="ench_gem"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="ench_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
@@ -142,24 +139,6 @@ item = ExtResource("sirenic_cloth")
 min_amount = 1
 max_amount = 2
 chance = 0.18
-[sub_resource type="Resource" id="Drop_enchanted_ore"]
-script = ExtResource("3_loot")
-item = ExtResource("ench_ore")
-min_amount = 1
-max_amount = 3
-chance = 0.22
-[sub_resource type="Resource" id="Drop_enchanted_gem"]
-script = ExtResource("3_loot")
-item = ExtResource("ench_gem")
-min_amount = 1
-max_amount = 2
-chance = 0.18
-[sub_resource type="Resource" id="Drop_enchanted_cloth"]
-script = ExtResource("3_loot")
-item = ExtResource("ench_cloth")
-min_amount = 1
-max_amount = 2
-chance = 0.18
 
 [sub_resource type="Resource" id="Drop_dragon_bones"]
 script = ExtResource("3_loot")
@@ -226,6 +205,6 @@ arm_shot_damage = 40.0
 arm_shot_speed = 220.0
 arm_shot_lifetime_s = 1.4
 enraged_arm_shot_interval_s = 0.0
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth"), SubResource("Drop_dragon_bones")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_dragon_bones")])
 metadata/slug = &"cistern_sovereign"
 metadata/id = 82

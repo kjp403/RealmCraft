@@ -155,7 +155,7 @@ chance = 1.0
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"mecha_stone_golem"
-display_name = "Mecha-stone Golem"
+display_name = "Unleashed Golem"
 skin = ExtResource("3_skin")
 visual_scale = 1.9
 is_boss = true
