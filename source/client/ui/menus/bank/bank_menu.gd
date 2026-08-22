@@ -1365,20 +1365,26 @@ func _upgrade_count() -> int:
 
 
 func _sync_upgrade_controls() -> void:
+	var maxed: bool = _bank_slots >= BankInteraction.MAX_BANK_SLOTS
 	var count: int = _upgrade_count()
 	var slots: int = BankInteraction.UPGRADE_SLOTS * count
 	var cost: int = BankInteraction.UPGRADE_COST * count
 	if _upgrade_button != null:
-		_upgrade_button.disabled = _busy
-		_upgrade_button.text = "Buy +%d" % slots
-		_upgrade_button.tooltip_text = "Expand your vault by %d slots for %s gold. No purchase limit." % [
-			slots,
-			_fmt_gold(cost),
-		]
+		_upgrade_button.disabled = _busy or maxed
+		_upgrade_button.text = "Vault maxed" if maxed else "Buy +%d" % slots
+		_upgrade_button.tooltip_text = (
+			"Your vault is already at the %d-slot maximum." % BankInteraction.MAX_BANK_SLOTS
+			if maxed
+			else "Expand your vault by %d slots for %s gold. Caps at %d slots total." % [
+				slots,
+				_fmt_gold(cost),
+				BankInteraction.MAX_BANK_SLOTS,
+			]
+		)
 	if _upgrade_count_spin != null:
-		_upgrade_count_spin.editable = not _busy
+		_upgrade_count_spin.editable = not _busy and not maxed
 	if _upgrade_x_button != null:
-		_upgrade_x_button.disabled = _busy
+		_upgrade_x_button.disabled = _busy or maxed
 
 
 func _on_upgrade_custom_amount_pressed() -> void:
@@ -1413,11 +1419,14 @@ func _on_upgrade_pressed() -> void:
 	var payload: Dictionary = result[0]
 	_apply_payload(payload)
 	if not bool(payload.get("ok", false)):
-		if str(payload.get("reason", "")) == "gold":
-			var needed: int = int(payload.get("cost", BankInteraction.UPGRADE_COST * count))
-			Toaster.toast("You need %s gold." % _fmt_gold(needed))
-		else:
-			Toaster.toast("Could not buy bank slots.")
+		match str(payload.get("reason", "")):
+			"gold":
+				var needed: int = int(payload.get("cost", BankInteraction.UPGRADE_COST * count))
+				Toaster.toast("You need %s gold." % _fmt_gold(needed))
+			"max_slots":
+				Toaster.toast("Your vault is already at the %d-slot maximum." % BankInteraction.MAX_BANK_SLOTS)
+			_:
+				Toaster.toast("Could not buy bank slots.")
 	else:
 		Toaster.toast("Bank expanded to %d slots." % _bank_slots)
 	_set_busy_chrome(false)
