@@ -109,13 +109,13 @@ func _init() -> void:
 	st.skills[&"slayer"] = {"level": 50, "xp": 0, "perks": {}}
 	st.slayer_streak = 7
 	st.slayer_points = 500
-	# Free (Turael-style) reassign — the one OSRS resets. Must NOT reset here.
+	# Turael's cheap reassign — the one OSRS resets. Must NOT reset here.
 	SlayerTaskService.assign_task(st, turael)
 	var reassigned: Dictionary = SlayerTaskService.skip_task(st, turael)
 	if st.slayer_streak != 7:
-		failures.append("free reassign reset streak to %d (expected 7 kept)" % st.slayer_streak)
+		failures.append("Turael reassign reset streak to %d (expected 7 kept)" % st.slayer_streak)
 	if bool(reassigned.get("streak_reset", false)):
-		failures.append("free reassign still reports streak_reset = true")
+		failures.append("Turael reassign still reports streak_reset = true")
 	# Switching masters mid-streak.
 	st.current_slayer_task = {}
 	SlayerTaskService.assign_task(st, durael)
@@ -129,6 +129,39 @@ func _init() -> void:
 	SlayerTaskService.block_task(st, &"rats")
 	if st.slayer_streak != 7:
 		failures.append("blocking reset streak to %d" % st.slayer_streak)
+
+	# --- Cluster tasks expose a player-facing monster roster ---------------
+	var beastkin: SlayerTaskDef = load("res://source/common/gameplay/slayer/tasks/beastkin.tres") as SlayerTaskDef
+	if beastkin == null:
+		failures.append("beastkin.tres failed to load")
+	else:
+		var roster: Array[String] = beastkin.monster_names()
+		# cave_bat.tres and trpg_bat.tres both display as "Bat" (distinct slugs,
+		# same player-facing name), so 9 enemy_types correctly dedups to 8 names —
+		# NOT a 1:1 mapping. Any other collapse here would be a real bug.
+		if roster.size() != 8:
+			failures.append("Beastkin roster has %d names, expected 8 (9 enemy_types, trpg_bat/cave_bat share 'Bat')" % roster.size())
+		if roster.has(""):
+			failures.append("Beastkin roster contains an empty name")
+		if not roster.has("Bat"):
+			failures.append("Beastkin roster missing 'Bat' display name — got %s" % str(roster))
+	# Dedup: the Undead Legion has no repeated display_name today, but the
+	# function must not choke on / must correctly collapse one if it existed —
+	# verify structurally by checking no duplicate STRINGS survive for any task.
+	var task_dir := DirAccess.open(TASK_DIR)
+	if task_dir != null:
+		for f3: String in task_dir.get_files():
+			if not f3.ends_with(".tres"):
+				continue
+			var t3: SlayerTaskDef = load(TASK_DIR + f3)
+			if t3 == null:
+				continue
+			var names3: Array[String] = t3.monster_names()
+			var seen: Dictionary = {}
+			for n3: String in names3:
+				if seen.has(n3):
+					failures.append("%s monster_names() has duplicate '%s'" % [f3, n3])
+				seen[n3] = true
 
 	# --- No task still carries the stale placeholder guide note -----------
 	var dir := DirAccess.open(TASK_DIR)

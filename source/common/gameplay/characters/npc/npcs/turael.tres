@@ -14,7 +14,7 @@ metadata/_custom_type_script = "uid://c8ngupitus0ko"
 
 [sub_resource type="Resource" id="Dialogue_turael_intro"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Every Slayer starts somewhere. I don't charge for a task, and I don't ask you to keep one you dislike — come back any time and I'll send you after something else.", "I keep no reward points for myself. What I give is a start, nothing more. When you're stronger, look for Durael — she keeps a harder list, and pays for it."])
+lines = Array[String](["Every Slayer starts somewhere. I don't charge for a task, and I don't ask you to keep one you dislike — come back any time and a couple points will get you something else.", "I keep no reward points for myself. What I give is a start, nothing more. When you're stronger, look for Durael — she keeps a harder list, and pays for it."])
 label_override = "What does a Slayer do?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
@@ -22,6 +22,6 @@ metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 script = ExtResource("6_npc")
 npc_name = "Turael"
 skin = ExtResource("5_skin")
-greeting = "No task is too small for me, and none too large that you must keep it. Ask, and I will send you after something new whenever you like — I ask nothing for it, and give nothing but the doing."
+greeting = "No task is too small for me, and none too large that you must keep it. Ask, and I will send you after something new whenever you like — it costs little, and gives nothing but the doing."
 interactions = Array[ExtResource("1_interaction")]([SubResource("SlayerInteraction_turael"), SubResource("Dialogue_turael_intro")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

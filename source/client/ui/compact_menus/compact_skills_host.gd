@@ -1092,6 +1092,21 @@ func _slayer_task_rows(
 		)
 		row.add_child(chance)
 		rows.append(row)
+
+		# A cluster name like "Beastkin" or "Aberrations" tells you nothing about
+		# what to actually kill — spell the roster out under it as "> Variations",
+		# so the guide is where a player learns what a cluster means, whether or
+		# not they've ever been assigned it. Resolved straight off the resource
+		# (no server round trip needed, this is content the client already has
+		# loaded for the guide).
+		var names: Array[String] = entry.task.monster_names()
+		if not names.is_empty():
+			var roster := _slayer_note(
+				"      > " + ", ".join(names),
+				Color(0.5, 0.52, 0.58) if locked else Color(0.65, 0.68, 0.74)
+			)
+			roster.add_theme_font_size_override(&"font_size", 9)
+			rows.append(roster)
 	return rows
 
 
@@ -1161,6 +1176,11 @@ func _render_slayer_task() -> void:
 		],
 		Color(0.7, 0.74, 0.8)
 	))
+	var monster_names: Array = _slayer_info.get("monster_names", [])
+	if not monster_names.is_empty():
+		_slayer_task_box.add_child(_slayer_note(
+			"Targets: %s" % ", ".join(monster_names), Color(0.75, 0.8, 0.86)
+		))
 	var notes: String = str(_slayer_info.get("guide_notes", ""))
 	if not notes.is_empty():
 		_slayer_task_box.add_child(_slayer_note(notes, Color(0.65, 0.7, 0.78)))

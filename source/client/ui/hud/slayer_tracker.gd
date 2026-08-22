@@ -232,6 +232,9 @@ func _on_web_gui_input(event: InputEvent) -> void:
 
 func _hover_text(data: Dictionary, killed: int, assigned: int, remaining: int) -> String:
 	var lines: PackedStringArray = PackedStringArray()
+	var monster_names: Array = data.get("monster_names", [])
+	if not monster_names.is_empty():
+		lines.append(", ".join(monster_names))
 	var where: String = str(data.get("location_hint", "")).strip_edges()
 	if not where.is_empty():
 		lines.append(where)

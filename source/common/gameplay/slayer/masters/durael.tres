@@ -115,5 +115,5 @@ min_slayer_level = 20
 location_hint = "DimWood"
 base_points_per_task = 6
 free_reassign = false
-reassign_point_cost = 30
+reassign_point_cost = 5
 pool = Array[ExtResource("2_entry")]([SubResource("Entry_rats"), SubResource("Entry_wolves"), SubResource("Entry_goblins"), SubResource("Entry_fungus"), SubResource("Entry_skeletons"), SubResource("Entry_bandits"), SubResource("Entry_orcs"), SubResource("Entry_golems"), SubResource("Entry_undead"), SubResource("Entry_beastkin"), SubResource("Entry_warband"), SubResource("Entry_mercs"), SubResource("Entry_aberrations")])

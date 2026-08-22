@@ -62,6 +62,24 @@ func matches(enemy_type: StringName) -> bool:
 	return false
 
 
+## Player-facing names of everything this task's [member enemy_types] covers, e.g.
+## Beastkin resolves to ["Bat", "Cave Bat", "Angry Bat", "Crag Yeti", ...] — a
+## cluster name like "Beastkin" or "Aberrations" tells you nothing about what you're
+## actually being sent after, so the Slayer panel and tracker show this roster
+## alongside it. Deduped (several slugs can share a display_name) and falls back to
+## the raw slug for content that failed to load rather than dropping it silently.
+func monster_names() -> Array[String]:
+	var names: Array[String] = []
+	for slug: StringName in enemy_types:
+		var enemy: EnemyTypeResource = ContentRegistryHub.load_by_slug(
+			&"enemy_types", slug
+		) as EnemyTypeResource
+		var label: String = enemy.display_name if enemy != null and not enemy.display_name.is_empty() else String(slug)
+		if not names.has(label):
+			names.append(label)
+	return names
+
+
 ## Base Slayer XP/kill across this task's roster, boss bonus included (perk
 ## multipliers applied by [method SlayerTaskService.status_payload]). A roster with
 ## a boss in it therefore advertises a wide range — which is the honest read: the

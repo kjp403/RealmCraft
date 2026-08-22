@@ -128,6 +128,14 @@ func _render(data: Dictionary) -> void:
 		task.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		task.add_theme_color_override(&"font_color", Color(0.95, 0.88, 0.6))
 		_content.add_child(task)
+		var monster_names: Array = data.get("monster_names", [])
+		if not monster_names.is_empty():
+			var targets := Label.new()
+			targets.text = "Targets: %s" % ", ".join(monster_names)
+			targets.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			targets.add_theme_font_size_override(&"font_size", 12)
+			targets.add_theme_color_override(&"font_color", Color(0.75, 0.8, 0.86))
+			_content.add_child(targets)
 		var notes: String = str(data.get("guide_notes", ""))
 		if not notes.is_empty():
 			var guide := Label.new()
@@ -157,7 +165,7 @@ func _render(data: Dictionary) -> void:
 	else:
 		var skip := Button.new()
 		if bool(data.get("free_reassign", false)):
-			skip.text = "New task (resets streak)"
+			skip.text = "New task (free)"
 		else:
 			skip.text = "Skip (%d pts)" % int(data.get("reassign_point_cost", 30))
 		skip.custom_minimum_size = Vector2(0, 40)
