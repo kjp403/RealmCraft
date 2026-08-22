@@ -12,14 +12,16 @@ const LIFETIME: float = 0.9
 ## blob.
 const JITTER_X: float = 12.0
 
-## White for physical damage.
-const DAMAGE_COLOR: Color = Color(1.0, 1.0, 1.0)
+## Orange for melee (physical, non-ranged) damage.
+const DAMAGE_COLOR: Color = Color(1.0, 0.55, 0.15)
+## Blue for ranged (bow) damage.
+const RANGED_COLOR: Color = Color(0.35, 0.65, 1.0)
 ## Purple for magic damage.
 const MAGIC_COLOR: Color = Color(0.75, 0.45, 1.0)
 ## Green for poison DoT.
 const POISON_COLOR: Color = Color(0.45, 0.95, 0.2)
-## Orange for burn DoT.
-const BURN_COLOR: Color = Color(1.0, 0.55, 0.15)
+## Red for burn DoT.
+const BURN_COLOR: Color = Color(0.95, 0.25, 0.2)
 ## Green for heals.
 const HEAL_COLOR: Color = Color(0.2, 0.9, 0.45)
 
@@ -57,6 +59,8 @@ func _color() -> Color:
 		return BURN_COLOR
 	if _damage_type == &"magic":
 		return MAGIC_COLOR
+	if _damage_type == &"ranged":
+		return RANGED_COLOR
 	return DAMAGE_COLOR
 
 

@@ -11,9 +11,12 @@ class_name CombatHit
 ## Projectiles read this; melee arcs set their mask from PhysicsLayers in their own _ready.
 const TARGET_MASK: int = PhysicsLayers.COMBAT_TARGET_MASK
 
-## Damage types. Physical is mitigated by ARMOR, magic by MR — pass the right
-## one to try_damage (melee/arrows default to physical; wand bolts send magic).
+## Damage types. Physical and ranged are both mitigated by ARMOR, magic by MR —
+## pass the right one to try_damage (melee defaults to physical; bow shots send
+## ranged; wand bolts send magic). Ranged exists only to color the hit splat
+## differently from melee — it is not resisted differently from physical.
 const DAMAGE_PHYSICAL: StringName = &"physical"
+const DAMAGE_RANGED: StringName = &"ranged"
 const DAMAGE_MAGIC: StringName = &"magic"
 
 enum Result {
