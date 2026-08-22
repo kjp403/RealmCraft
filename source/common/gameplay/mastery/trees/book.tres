@@ -205,6 +205,7 @@ icon = ExtResource("15_focus")
 description = "+6 mana regen per second."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_regen_focus2"]
 script = ExtResource("3_mod")
@@ -220,6 +221,7 @@ description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus2")])
+weapon_bound = true
 upgrades = &"book_focus"
 
 [sub_resource type="Resource" id="Mod_regen_focus3"]
@@ -236,6 +238,7 @@ description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus3")])
+weapon_bound = true
 upgrades = &"book_focus_2"
 
 [sub_resource type="Resource" id="Mod_regen_focus4"]
@@ -252,6 +255,7 @@ description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 4
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus4")])
+weapon_bound = true
 upgrades = &"book_focus_3"
 
 [sub_resource type="Resource" id="Mod_regen_focus5"]
@@ -268,6 +272,7 @@ description = "+3 more mana regen per second. Bottomless focus."
 branch = &"inspiration"
 tier = 5
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus5")])
+weapon_bound = true
 upgrades = &"book_focus_4"
 
 [resource]
@@ -275,4 +280,4 @@ script = ExtResource("1_tree")
 category = &"book"
 display_name = "Battlemage"
 category_icon = ExtResource("1_0ir41")
-nodes = Array[ExtResource("2_node")]([SubResource("Node_lash"), SubResource("Node_lash2"), SubResource("Node_lash3"), SubResource("Node_feast"), SubResource("Node_feast2"), SubResource("Node_feast3"), SubResource("Node_bform1"), SubResource("Node_bform"), SubResource("Node_bform2"), SubResource("Node_bform3"), SubResource("Node_tough"), SubResource("Node_tough2"), SubResource("Node_tough3"), SubResource("Node_blink"), SubResource("Node_blink2"), SubResource("Node_blink3"), SubResource("Node_blink4"), SubResource("Node_focus"), SubResource("Node_focus2"), SubResource("Node_focus3"), SubResource("Node_focus4")])
+nodes = Array[ExtResource("2_node")]([SubResource("Node_lash"), SubResource("Node_lash2"), SubResource("Node_lash3"), SubResource("Node_feast"), SubResource("Node_feast2"), SubResource("Node_feast3"), SubResource("Node_bform1"), SubResource("Node_bform"), SubResource("Node_bform2"), SubResource("Node_bform3"), SubResource("Node_tough"), SubResource("Node_tough2"), SubResource("Node_tough3"), SubResource("Node_blink"), SubResource("Node_blink2"), SubResource("Node_blink3"), SubResource("Node_blink4"), SubResource("Node_focus"), SubResource("Node_focus2"), SubResource("Node_focus3"), SubResource("Node_focus4"), SubResource("Node_focus5")])

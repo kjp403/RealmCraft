@@ -44,6 +44,7 @@ icon = ExtResource("8_sp")
 description = "+12 ability power."
 branch = &"domination"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ap_attunement")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_ap_attunement2"]
 script = ExtResource("3_mod")
@@ -59,6 +60,7 @@ description = "+10 more ability power."
 branch = &"domination"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ap_attunement2")])
+weapon_bound = true
 upgrades = &"wand_attunement"
 
 [sub_resource type="Resource" id="Mod_ap_attunement3"]
@@ -75,6 +77,7 @@ description = "+12 more ability power. Your bond with the arcane deepens."
 branch = &"domination"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ap_attunement3")])
+weapon_bound = true
 upgrades = &"wand_attunement_2"
 
 [sub_resource type="Resource" id="Node_fireball1"]
@@ -158,6 +161,7 @@ icon = ExtResource("9_ward")
 description = "+25 magic resistance."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mr_warding")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_mr_warding2"]
 script = ExtResource("3_mod")
@@ -173,6 +177,7 @@ description = "+15 more magic resistance."
 branch = &"resolve"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mr_warding2")])
+weapon_bound = true
 upgrades = &"wand_warding"
 
 [sub_resource type="Resource" id="Mod_mr_warding3"]
@@ -189,6 +194,7 @@ description = "+15 more magic resistance."
 branch = &"resolve"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mr_warding3")])
+weapon_bound = true
 upgrades = &"wand_warding_2"
 
 [sub_resource type="Resource" id="Node_wall1"]
@@ -264,6 +270,7 @@ icon = ExtResource("13_clarity")
 description = "+0.8 mana regen per second."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_clarity")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_regen_clarity2"]
 script = ExtResource("3_mod")
@@ -279,6 +286,7 @@ description = "+0.8 more mana regen per second."
 branch = &"inspiration"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_clarity2")])
+weapon_bound = true
 upgrades = &"wand_clarity"
 
 [sub_resource type="Resource" id="Node_heal"]
@@ -355,4 +363,4 @@ script = ExtResource("1_tree")
 category = &"wand"
 display_name = "Arcanist"
 category_icon = ExtResource("1_fursf")
-nodes = Array[ExtResource("2_node")]([SubResource("Node_attunement"), SubResource("Node_attunement2"), SubResource("Node_fireball1"), SubResource("Node_fireball"), SubResource("Node_fireball2"), SubResource("Node_meteor1"), SubResource("Node_meteor2"), SubResource("Node_meteor3"), SubResource("Node_warding"), SubResource("Node_warding2"), SubResource("Node_warding3"), SubResource("Node_wall1"), SubResource("Node_wall"), SubResource("Node_wall2"), SubResource("Node_frost"), SubResource("Node_frost2"), SubResource("Node_frost3"), SubResource("Node_clarity"), SubResource("Node_clarity2"), SubResource("Node_heal"), SubResource("Node_heal2"), SubResource("Node_heal3"), SubResource("Node_font1"), SubResource("Node_font2"), SubResource("Node_font")])
+nodes = Array[ExtResource("2_node")]([SubResource("Node_attunement"), SubResource("Node_attunement2"), SubResource("Node_attunement3"), SubResource("Node_fireball1"), SubResource("Node_fireball"), SubResource("Node_fireball2"), SubResource("Node_meteor1"), SubResource("Node_meteor2"), SubResource("Node_meteor3"), SubResource("Node_warding"), SubResource("Node_warding2"), SubResource("Node_warding3"), SubResource("Node_wall1"), SubResource("Node_wall"), SubResource("Node_wall2"), SubResource("Node_frost"), SubResource("Node_frost2"), SubResource("Node_frost3"), SubResource("Node_clarity"), SubResource("Node_clarity2"), SubResource("Node_heal"), SubResource("Node_heal2"), SubResource("Node_heal3"), SubResource("Node_font1"), SubResource("Node_font2"), SubResource("Node_font")])

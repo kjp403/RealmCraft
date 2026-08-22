@@ -104,6 +104,7 @@ description = "+18 armor. Stand firm against physical blows."
 branch = &"resolve"
 icon = ExtResource("12_bulwark")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_parry")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_hp_fortitude"]
 script = ExtResource("3_mod")
@@ -138,6 +139,7 @@ branch = &"resolve"
 tier = 3
 icon = ExtResource("16_jug")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_fortitude2"), SubResource("Mod_hp_fortitude2")])
+weapon_bound = true
 upgrades = &"sword_fortitude"
 
 [sub_resource type="Resource" id="Node_deflect"]
@@ -176,6 +178,7 @@ description = "+18 ability haste and +8 attack damage. Faster swings, harder hit
 branch = &"inspiration"
 icon = ExtResource("13_haste")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo"), SubResource("Mod_ad_tempo")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_haste_tempo2"]
 script = ExtResource("3_mod")
@@ -196,6 +199,7 @@ branch = &"inspiration"
 tier = 2
 icon = ExtResource("13_haste")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo2"), SubResource("Mod_ad_tempo2")])
+weapon_bound = true
 upgrades = &"sword_tempo"
 
 [sub_resource type="Resource" id="Mod_ms_bloodrush"]
@@ -212,6 +216,7 @@ branch = &"inspiration"
 tier = 3
 icon = ExtResource("17_mom")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ms_bloodrush")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Node_rally"]
 script = ExtResource("2_node")
