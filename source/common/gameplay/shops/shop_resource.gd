@@ -23,7 +23,7 @@ extends Resource
 @export var buys_vendor_priced: bool = true
 ## Gold shops pay this fraction of their listed buy price when the player sells
 ## that same item back (health / mana potions). Fallback is [member Item.vendor_value].
-const BUYBACK_RATE: float = 0.75
+const BUYBACK_RATE: float = 0.25
 
 
 ## Capabilities are DERIVED from the data (no parallel enum to contradict it —
@@ -84,7 +84,8 @@ static func _is_potion_buyback(item: Item) -> bool:
 	if potion == null:
 		return false
 	return potion.cooldown_category == &"health_potion" \
-			or potion.cooldown_category == &"mana_potion"
+			or potion.cooldown_category == &"mana_potion" \
+			or potion.cooldown_category == &"potion"
 
 
 ## { "price": int, "currency_id": int } for one item, or {} if not sold here.
