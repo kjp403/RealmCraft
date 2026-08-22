@@ -61,6 +61,15 @@ func create(role: Role, address: String, port: int, tls_options: TLSOptions = nu
 
 	var error: Error
 
+	# Default WebSocketPeer buffers are 65535 bytes each way. bank.get sends a
+	# player's whole bag + vault as one unchunked message, and vault size has no
+	# upper bound — a heavily-upgraded vault already exceeds the default alone,
+	# so the send silently drops (ERR_OUT_OF_MEMORY in the logs) and the bank UI
+	# renders empty with no error toast. 68 KB seen live; give real headroom.
+	const LARGE_MESSAGE_BUFFER: int = 4 * 1024 * 1024
+	peer.outbound_buffer_size = LARGE_MESSAGE_BUFFER
+	peer.inbound_buffer_size = LARGE_MESSAGE_BUFFER
+
 	match role:
 		Role.CLIENT:
 			# `address` may be either:
