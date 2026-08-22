@@ -161,6 +161,11 @@ func _build_bag_tabs() -> void:
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tab.add_theme_font_size_override(&"font_size", 11)
 		tab.pressed.connect(_on_bag_tab.bind(index))
+		tab.set_drag_forwarding(
+			_bag_get_drag_data_empty,
+			_tab_can_drop_data.bind(index),
+			_tab_drop_data.bind(index),
+		)
 		tabs.add_child(tab)
 		bag_tab_buttons.append(tab)
 
@@ -530,6 +535,55 @@ func _bag_drop_data_nearest(at_position: Vector2, data: Variant) -> void:
 			best = index
 	if best >= 0:
 		_bag_drop_data(at_position, data, best)
+
+
+## A tab only accepts a drop when it's an unlocked bag other than the one
+## already showing — dragging onto the active tab (or a locked/buyable one)
+## would either no-op or silently eat the item behind a purchase prompt.
+func _tab_can_drop_data(_at_position: Vector2, data: Variant, index: int) -> bool:
+	return (
+		data is Dictionary
+		and (data as Dictionary).has("bag_uid")
+		and index < bag_count
+		and index != active_bag
+	)
+
+
+## Drop an item onto a bag tab to relocate it there without switching tabs
+## first. Merges into a matching stack in that bag if one has room; otherwise
+## takes the first free square. Stays on the source bag's view — only the
+## grid refresh removes the moved item from what's on screen.
+func _tab_drop_data(_at_position: Vector2, data: Variant, index: int) -> void:
+	if data is not Dictionary or InstanceClient.current == null:
+		return
+	var uid: int = int((data as Dictionary).get("bag_uid", -1))
+	if uid < 0:
+		return
+	var result: Array = await Client.request_data_await(
+		&"inventory.move_to_bag",
+		{"uid": uid, "bag": index},
+		InstanceClient.current.name
+	)
+	if result.size() < 2 or result[1] != OK or result[0] is not Dictionary:
+		Toaster.toast("Could not move that item.")
+		return
+	var payload: Dictionary = result[0]
+	if not bool(payload.get("ok", false)):
+		match str(payload.get("reason", "")):
+			"full":
+				Toaster.toast("Bag %d is full." % (index + 1))
+			"missing":
+				# The uid went stale between drag-start and drop landing (banked,
+				# sold, salvaged, consumed elsewhere) -- same wording and refresh
+				# as every other "missing" case in this file (_perform_drop,
+				# _perform_primary_action), so the ghost slot clears instead of
+				# sitting there implying the drag silently failed.
+				Toaster.toast("That item is no longer in your inventory.")
+				_refresh_inventory()
+			_:
+				Toaster.toast("Could not move that item.")
+		return
+	_refresh_inventory()
 
 
 func _on_slot_gui_input(

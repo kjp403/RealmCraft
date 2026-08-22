@@ -393,6 +393,47 @@ static func _next_bag_with_space(
 	return start_bag
 
 
+## Relocate one whole stack to a different unlocked bag (drag a bag-dock slot
+## onto another bag's tab). Prefers merging into an existing stack of the same
+## item already sitting in [param dest_bag] when that stack has room for the
+## WHOLE amount — a partial merge would strand the rest behind in the source
+## bag, which is worse than just moving the stack outright. Falls back to
+## relocating the slot into a free square there. Returns false (no mutation)
+## when the destination bag is full and has no room to take the whole stack.
+static func move_slot_to_bag(
+	inventory: Dictionary,
+	slot_uid: int,
+	dest_bag: int,
+	bag_count: int = 1
+) -> bool:
+	if not inventory.has(slot_uid) or dest_bag < 0 or dest_bag >= maxi(1, bag_count):
+		return false
+	var slot: Dictionary = inventory[slot_uid]
+	if int(slot.get("bag", 0)) == dest_bag:
+		return true # already there
+	var item_id: int = int(slot.get("id", 0))
+	var amount: int = int(slot.get("a", 0))
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item != null and item.is_stackable():
+		var limit: int = stack_limit_for(item, false)
+		for other_uid in inventory:
+			if other_uid == slot_uid:
+				continue
+			var other: Dictionary = inventory[other_uid]
+			if int(other.get("bag", 0)) != dest_bag or int(other.get("id", 0)) != item_id:
+				continue
+			var have: int = int(other.get("a", 0))
+			var space: int = amount if limit <= 0 else maxi(0, limit - have)
+			if space >= amount:
+				other["a"] = have + amount
+				inventory.erase(slot_uid)
+				return true
+	if free_slots(inventory, MAX_SLOTS, dest_bag) <= 0:
+		return false
+	slot["bag"] = dest_bag
+	return true
+
+
 ## Move as much as possible from [param from_uid] onto [param to_uid] when both
 ## slots hold the same stackable item and the destination still has room.
 ## Returns the amount moved. Erases [param from_uid] if it empties. No-op (0)
