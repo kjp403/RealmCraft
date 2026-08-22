@@ -197,6 +197,42 @@ debug_draw_ranges = false
 enemy_data = ExtResource("20_bat")
 weapon = null
 
+[node name="CaveBat13" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(448.0, 960.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat14" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(704.0, 576.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat15" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(960.0, 768.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat16" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1216.0, 448.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat17" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1344.0, 1024.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
+[node name="CaveBat18" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(832.0, 1088.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("20_bat")
+weapon = null
+
 [node name="CaveSkeleton1" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
 position = Vector2(512.0, 896.0)
 debug_draw_ranges = false
@@ -267,6 +303,42 @@ weapon = null
 position = Vector2(1664.0, 928.0)
 debug_draw_ranges = false
 enemy_data = ExtResource("27_skelr")
+weapon = null
+
+[node name="CaveSkeleton8" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(512.0, 896.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("25_skel")
+weapon = null
+
+[node name="CaveSkeleton9" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(768.0, 640.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("25_skel")
+weapon = null
+
+[node name="CaveSkeletonWarrior4" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1024.0, 704.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("26_skelw")
+weapon = null
+
+[node name="CaveSkeleton10" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1280.0, 512.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("25_skel")
+weapon = null
+
+[node name="CaveSkeletonRogue3" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1408.0, 1088.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("27_skelr")
+weapon = null
+
+[node name="CaveSkeleton11" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(896.0, 1152.0)
+debug_draw_ranges = false
+enemy_data = ExtResource("25_skel")
 weapon = null
 
 [node name="MineableNodes" type="Node2D" parent="."]
@@ -728,6 +800,21 @@ position = Vector2(728, 1088)
 enemy_data = ExtResource("lv_duskbat")
 weapon = null
 
+[node name="DuskBat7" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(376, 904)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat8" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(768, 528)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
+[node name="DuskBat9" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(872, 840)
+enemy_data = ExtResource("lv_duskbat")
+weapon = null
+
 [node name="Bonepicker1" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
 position = Vector2(448, 960)
 enemy_data = ExtResource("lv_bonepicker")
@@ -755,5 +842,20 @@ weapon = null
 
 [node name="Bonepicker6" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
 position = Vector2(1632, 704)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker7" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(448, 960)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker8" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(848, 696)
+enemy_data = ExtResource("lv_bonepicker")
+weapon = null
+
+[node name="Bonepicker9" parent="ReplicatedPropsContainer" instance=ExtResource("19_npc")]
+position = Vector2(1200, 440)
 enemy_data = ExtResource("lv_bonepicker")
 weapon = null
