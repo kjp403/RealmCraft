@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/nova/nova_ability.gd" id="1_nova"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="2_arc"]
-[ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/static_ring.tres" id="3_ring"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/frost_nova.png" id="4_icon"]
 
 [resource]
@@ -13,8 +12,6 @@ damage_type = &"physical"
 radius = 75.0
 slow_amount = 15.0
 slow_duration_s = 1.0
-vfx = ExtResource("3_ring")
-vfx_color = Color(0.82, 0.62, 0.32, 1)
 name = "Aftershock III"
 icon = ExtResource("4_icon")
 cooldown = 5.0

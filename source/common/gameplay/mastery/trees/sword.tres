@@ -139,7 +139,6 @@ branch = &"resolve"
 tier = 3
 icon = ExtResource("16_jug")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_fortitude2"), SubResource("Mod_hp_fortitude2")])
-weapon_bound = true
 upgrades = &"sword_fortitude"
 
 [sub_resource type="Resource" id="Node_deflect"]
