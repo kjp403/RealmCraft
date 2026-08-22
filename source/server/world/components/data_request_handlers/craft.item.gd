@@ -143,8 +143,9 @@ func data_request_handler(
 
 	# Award crafting-profession xp (perk XP multiplier matches gathering / UI).
 	var progress: Dictionary = {}
+	var xp_gain: int = 0
 	if recipe.xp_reward > 0:
-		var xp_gain: int = recipe.xp_reward
+		xp_gain = recipe.xp_reward
 		if perks != null:
 			xp_gain = maxi(1, roundi(float(xp_gain) * perks.xp_multiplier(player_perks)))
 		progress = resource.add_skill_xp(station.profession, xp_gain)
@@ -162,6 +163,7 @@ func data_request_handler(
 		"output_id": output_id,
 		"amount": output_amount,
 		"profession": String(station.profession),
+		"xp": xp_gain,
 		"level": int(progress.get("level", level)),
 		"leveled_up": progress.get("leveled_up", false),
 	}

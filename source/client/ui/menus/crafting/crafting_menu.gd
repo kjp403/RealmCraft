@@ -876,7 +876,12 @@ func _craft_once() -> bool:
 
 	var data: Dictionary = result[0]
 	var verb: String = "Brewed" if _is_herblore_station() else ("Cooked" if _is_cooking_station() else "Crafted")
-	Toaster.toast("%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)])
+	var title: String = "%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)]
+	var xp_gain: int = int(data.get("xp", 0))
+	var lines: PackedStringArray = PackedStringArray()
+	if xp_gain > 0:
+		lines.append("+%d %s XP" % [xp_gain, JobRegistry.display_name(_station.profession)])
+	Toaster.toast_feed("craft:" + str(_station_key), title, lines)
 	var craft_level: int = int(data.get("level", 0))
 	if craft_level > 0 and _station != null:
 		ClientState.set_skill_level(_station.profession, craft_level)
