@@ -369,6 +369,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		display_menu(&"world_map", null)
 		get_viewport().set_input_as_handled()
 		return
+	# Inventory (I): same toggle the dock button already does, so I opens/closes
+	# it exactly like clicking the icon -- including the "fullscreen menu owns
+	# the screen" guard inside _toggle_compact_panel.
+	if event.is_action_pressed(&"player_inventory"):
+		_toggle_compact_panel($CompactMenuHost)
+		get_viewport().set_input_as_handled()
+		return
 	# ESC closes every open interface (menus, launcher overlay, trade).
 	if event.is_action_pressed(&"ui_cancel"):
 		var closed: bool = false
