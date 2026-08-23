@@ -189,7 +189,7 @@ chance = 1.0
 [sub_resource type="Resource" id="Drop_duskfeather_cloak"]
 script = ExtResource("3_ew0xl")
 item = ExtResource("duskfeather_cloak")
-chance = 0.05
+chance = 0.0015
 
 [resource]
 script = ExtResource("4_hwrei")

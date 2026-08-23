@@ -55,10 +55,9 @@ const HARD_DAMAGE_MULT: float = 2.0
 const DAILY_FREE_CHARGES: int = 3
 ## dungeon_lockouts blob key for {day, used, bonus} — avoids a schema migration.
 const DAILY_CHARGES_KEY: String = "_daily_charges"
-## Solo incentive: exclusive-pool chances ×2 (capped at 100%), rolled amounts ×1.5,
-## and one extra weighted loot roll on the main table.
-const SOLO_CHANCE_MULT: float = 2.0
-const SOLO_AMOUNT_MULT: float = 1.5
+## Solo reward bonus removed -- clears pay the same whether solo or partied.
+const SOLO_CHANCE_MULT: float = 1.0
+const SOLO_AMOUNT_MULT: float = 1.0
 
 
 ## Is the run living in [param instance] a Hard one? Read by RoomNode when it spawns
@@ -591,9 +590,8 @@ static func on_dungeon_cleared(instance: Node) -> void:
 ## Grant one player their completion reward, honoring the character daily charge
 ## pool, and return the recap summary: {gold, items, charges_left, solo} on a
 ## payout, or {locked: true, charges_left: 0} when charges are spent (still XP /
-## records / dailies). The main table draws 3–4 weighted entries (chest-style);
-## solo adds one extra draw and multiplies amounts by 1.5×. Exclusive-pool
-## chances still double on solo.
+## records / dailies). The main table draws 3–4 weighted entries (chest-style).
+## Same payout whether solo or partied -- no bonus either way.
 static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> Dictionary:
 	if player == null or player.player_resource == null or reward == null:
 		return {}
@@ -621,8 +619,6 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 	var lo: int = maxi(1, mini(reward.rolls_min, reward.rolls_max))
 	var hi: int = maxi(1, reward.rolls_max)
 	var draws: int = randi_range(lo, hi)
-	if solo:
-		draws += 1
 	for drop: LootDrop in ChestResource._draw_weighted(reward.loot, draws):
 		_grant_drawn_drop(resource, drop, amount_mult, items)
 
