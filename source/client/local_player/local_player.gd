@@ -816,7 +816,15 @@ func update_hand_pivot(delta: float) -> void:
 	var aim: Vector2 = aim_direction()
 	var to_flip: int = -1 if flipped else 1
 	var look_angle: float = atan2(aim.y, aim.x * to_flip)
-	hand_pivot.rotation = lerp_angle(hand_pivot.rotation, look_angle, delta * hand_pivot_speed)
+	if _channeling and _channel_mobile:
+		# A mobile channel (Rapid Fire) fires off THIS synced angle every
+		# tick_interval_s server-side (see rapid_fire_ability.gd) -- the lerp below
+		# is fine for cosmetic weapon sway, but during a held channel it leaves
+		# shots chasing a stale direction whenever the player turns to track a
+		# target. Snap instantly so what's synced matches the live cursor.
+		hand_pivot.rotation = look_angle
+	else:
+		hand_pivot.rotation = lerp_angle(hand_pivot.rotation, look_angle, delta * hand_pivot_speed)
 
 
 ## The aim vector every attack send and the swing's visual facing should use: the
