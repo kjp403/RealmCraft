@@ -94,10 +94,10 @@ max_amount = 25
 [resource]
 script = ExtResource("1_master")
 master_name = "Turael"
-greeting = "No task is too small for me, and none too large that you must keep it. Bats and bonepickers in the mining cave, cutpurses and whelps out along the forest road, ticks in the spore galleries — the woodland is not the only place with something worth killing. Ask, and I will send you after something new whenever you like; I ask nothing for it, and give nothing but the doing."
+greeting = "No task is too small for me, and none too large that you must keep it. Bats and bonepickers in the mining cave, cutpurses and whelps out along the forest road, ticks in the spore galleries — the woodland is not the only place with something worth killing. Ask, and I will send you after something new whenever you like; it costs little, and gives nothing but the doing."
 min_slayer_level = 1
 location_hint = "Slayer House, Goblin Woodland"
 base_points_per_task = 3
-free_reassign = true
-reassign_point_cost = 0
+free_reassign = false
+reassign_point_cost = 2
 pool = Array[ExtResource("2_entry")]([SubResource("Entry_rats"), SubResource("Entry_wolves"), SubResource("Entry_goblins"), SubResource("Entry_fungus"), SubResource("Entry_skeletons"), SubResource("Entry_bandits"), SubResource("Entry_dusk_bats"), SubResource("Entry_bonepickers"), SubResource("Entry_cutpurses"), SubResource("Entry_orc_whelps"), SubResource("Entry_spore_ticks")])

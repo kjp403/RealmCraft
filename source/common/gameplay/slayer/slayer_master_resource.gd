@@ -29,14 +29,19 @@ extends Resource
 ## worth finishing tasks for. Turael's half rate keeps Durael the better payout
 ## once her level-20 gate opens, matching her longer, higher-level task amounts.
 @export var base_points_per_task: int = 3
-## True = Turael-style "get a different task any time, free". Reassigning does NOT
-## touch the streak (nor does switching masters or blocking) — see the note on
-## SlayerTaskService.skip_task for why Arkenelle drops OSRS's Turael-reset rule.
+## True = "get a different task any time, free" — no master uses this today
+## (Turael charges a small point cost same as Durael, just a cheaper one).
+## Reassigning does NOT touch the streak either way (nor does switching masters or
+## blocking) — see the note on SlayerTaskService.skip_task for why Arkenelle drops
+## OSRS's Turael-reset rule. Kept as a real switch rather than deleted: a future
+## entry-level master (or a reward-shop perk) may want the true free path back.
 @export var free_reassign: bool = false
-## Points cost to reassign when [member free_reassign] is false (Durael). Matches
-## OSRS's flat 30-point "Cancel task" cost. Charged in full today: the &"slayer"
-## job has no skip_discount perk any more (SlayerTaskService._skip_cost still
-## honours the effect if something ever grants it again).
+## Points cost to reassign when [member free_reassign] is false — Turael 2,
+## Durael 5. Deliberately below OSRS's flat 30-point "Cancel task" cost so a
+## reroll isn't a bigger tax than the task itself pays out (Turael 3, Durael 6
+## base points per completion). Charged in full today: the &"slayer" job has no
+## skip_discount perk any more (SlayerTaskService._skip_cost still honours the
+## effect if something ever grants it again).
 @export var reassign_point_cost: int = 30
 
 @export_group("Task table")

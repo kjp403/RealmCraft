@@ -176,8 +176,10 @@ var active_inventory_bag: int = 0
 ## eventually the Slayer Shop — never an inventory item, same reasoning as
 ## lb_stats: it can't be traded, dropped, or duped.
 @export var slayer_points: int = 0
-## Consecutive tasks completed WITHOUT a Turael-style free reassignment breaking
-## the chain. Drives the OSRS streak-milestone point bonus (SlayerTaskService).
+## Consecutive tasks completed. Nothing resets it today — reassigning, blocking,
+## and switching masters all leave it alone (a deliberate Arkenelle divergence
+## from OSRS's Turael-reset rule, see the note on SlayerTaskService.skip_task) — it
+## only ever grows. Drives the OSRS streak-milestone point bonus.
 @export var slayer_streak: int = 0
 ## Lifetime completed-task counter. Unlike slayer_streak this never resets — kept
 ## for a future "Slayer log" / milestone titles, same role lb_stats' *_total

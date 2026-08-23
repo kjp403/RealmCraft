@@ -14,7 +14,7 @@ metadata/_custom_type_script = "uid://c8ngupitus0ko"
 
 [sub_resource type="Resource" id="Dialogue_durael_points"]
 script = ExtResource("4_dialogue")
-lines = Array[String](["Finish what I give you and I pay in Slayer points, not gold — spend them at the Slayer Shop in Turael's house. Keep a streak going and every tenth completion pays out heavier.", "Change your mind mid-task and it will cost you points, not your streak. Only Turael's free hand resets that count — mine doesn't."])
+lines = Array[String](["Finish what I give you and I pay in Slayer points, not gold — spend them at the Slayer Shop in Turael's house. Keep a streak going and every tenth completion pays out heavier.", "Change your mind mid-task and it will cost you a few points — mine more than Turael's, but neither of us touches your streak. Nothing does; it only ever grows."])
 label_override = "How do your rewards work?"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 

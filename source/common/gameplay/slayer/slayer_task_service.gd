@@ -125,6 +125,7 @@ static func status_payload(resource: PlayerResource) -> Dictionary:
 	if task != null:
 		out["task"] = String(task.task_slug())
 		out["display_name"] = task.display_name
+		out["monster_names"] = task.monster_names()
 		out["guide_notes"] = task.guide_notes
 		out["remaining"] = int(resource.current_slayer_task.get("remaining", 0))
 		out["assigned_amount"] = int(resource.current_slayer_task.get("assigned_amount", 0))
