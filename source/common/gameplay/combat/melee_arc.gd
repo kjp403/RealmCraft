@@ -128,7 +128,7 @@ func _on_body_entered(body: Node2D) -> void:
 		if heal_per_hit > 0.0:
 			var hmax: float = source.stats_component.get_stat(Stat.HEALTH_MAX)
 			source.stats_component.set_stat(Stat.HEALTH, minf(hmax, source.stats_component.get_stat(Stat.HEALTH) + heal_per_hit))
-		if mana_per_hit > 0.0:
+		if mana_per_hit > 0.0 and not source.is_in_combat():
 			var mmax: float = source.stats_component.get_stat(Stat.MANA_MAX)
 			source.stats_component.set_stat(Stat.MANA, minf(mmax, source.stats_component.get_stat(Stat.MANA) + mana_per_hit))
 

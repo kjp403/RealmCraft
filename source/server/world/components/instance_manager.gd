@@ -337,6 +337,8 @@ func unload_unused_instances() -> void:
 			continue
 		if instance.connected_peers:
 			continue
+		if QuestBossService.is_pinned_origin(instance):
+			continue
 		instance.instance_resource.charged_instances.erase(instance)
 		instance.queue_free()
 

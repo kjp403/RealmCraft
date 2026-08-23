@@ -22,6 +22,20 @@ static func is_quest_boss_instance(instance: Node) -> bool:
 	return instance != null and _instance_to_peer.has(str(instance.name))
 
 
+## True when [param instance] is still an active run's return point. Keeps
+## instance_manager.unload_unused_instances from freeing the open-world biome
+## shard a solo fight started in — that shard's connected_peers hits zero the
+## moment the player is switched into the private arena, so without this it
+## could be reaped mid-fight (its 20s idle timer is far shorter than most boss
+## fights). eject_to_origin then found origin invalid and dumped the player at
+## Guild Hall instead of back at the quest giver.
+static func is_pinned_origin(instance: Node) -> bool:
+	for run: Dictionary in _by_peer.values():
+		if run.get("origin_instance", null) == instance:
+			return true
+	return false
+
+
 ## Recall from a story fight should land at the giver, not Guild Hall.
 ## Returns true when this peer was in an arena and the eject was scheduled.
 static func redirect_recall(peer_id: int) -> bool:
