@@ -102,6 +102,14 @@ func _on_status_tick() -> void:
 		# so dropped buffs vanish from the strip the same second they end.
 		StatusService.sync(player)
 		_tick_player_hp_regen(peer_id, player)
+		# Out-of-combat only, mirroring HP regen right above -- this used to run
+		# at full rate mid-fight too, and stacked mastery/gear regen (up to and
+		# beyond what any spell costs per cast, see the mastery Focus/Clarity
+		# lines) meant the mana bar never meaningfully dropped in the one place
+		# it was supposed to matter. No player has needed a mana potion because
+		# combat itself never drained the pool faster than it refilled.
+		if player.is_in_combat():
+			continue
 		var mana_max: float = player.stats_component.get_stat(Stat.MANA_MAX)
 		if mana_max <= 0.0:
 			continue
