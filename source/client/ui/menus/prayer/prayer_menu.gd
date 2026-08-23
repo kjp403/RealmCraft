@@ -14,6 +14,7 @@ const MUTED: Color = Color(0.72, 0.76, 0.84)
 const CYAN: Color = Color(0.37, 0.83, 0.83)
 const LOCKED: Color = Color(0.62, 0.45, 0.45)
 const ON_TINT: Color = Color(0.55, 0.85, 0.55)
+const QUICK_TINT: Color = Color(0.93, 0.80, 0.35)
 
 ## Dock geometry, matching CompactSkillsHost so the panels line up.
 const PANEL_SIZE := Vector2(300.0, 340.0)
@@ -41,7 +42,18 @@ func _ready() -> void:
 	#
 	# visibility_changed still refreshes the data on REOPEN (hide → show).
 	visibility_changed.connect(_on_visibility_changed)
+	# The bar's Q button (prayer.quick_toggle) can flip prayers this book is
+	# currently displaying without this panel ever sending a request itself --
+	# Client pushes a response only to subscribers of that exact request type
+	# (see client.gd), so without this the book's row tints go stale the
+	# moment the player uses the bar instead of a row's own On/Off button.
+	Client.subscribe(&"prayer.quick_toggle", _on_external_prayer_change)
 	_refresh()
+
+
+func _on_external_prayer_change(payload: Dictionary) -> void:
+	if visible and bool(payload.get("ok", false)):
+		_build(payload)
 
 
 func _on_visibility_changed() -> void:
@@ -80,6 +92,18 @@ func _refresh() -> void:
 
 
 func _build(state: Dictionary) -> void:
+	# Toggling a prayer redraws the whole list (see the file header: the server
+	# snapshot is the only source of truth), which used to also silently reset
+	# the scroll to the top — flipping a prayer near the bottom of the book
+	# bounced the view away from what you were looking at. Capture the OLD
+	# scroll container's offset before _build_shell tears it down, then restore
+	# it on the new one once the fresh rows have laid out.
+	var prev_scroll: int = 0
+	if _content != null and is_instance_valid(_content):
+		var old_scroll: ScrollContainer = _content.get_parent() as ScrollContainer
+		if old_scroll != null:
+			prev_scroll = old_scroll.scroll_vertical
+
 	_build_shell()
 
 	var level: int = int(state.get("level", 1))
@@ -118,12 +142,27 @@ func _build(state: Dictionary) -> void:
 	list.add_theme_constant_override(&"separation", 4)
 	_content.add_child(list)
 
-	for prayer: PrayerResource in PrayerBook.PRAYERS:
+	# PrayerBook.PRAYERS is grouped by CATEGORY (book order), not by level — a
+	# player reading top to bottom saw Defence/Offence/Protection/Gathering
+	# blocks with required levels bouncing 1, 25, 60, 1, 15, 35... instead of
+	# unlocking in the order they actually earn each one. Sort a copy for
+	# display only; PrayerBook's own order stays intact for anything else that
+	# reads it by category.
+	var by_level: Array[PrayerResource] = PrayerBook.PRAYERS.duplicate()
+	by_level.sort_custom(func(a: PrayerResource, b: PrayerResource) -> bool:
+		return a.required_level < b.required_level)
+
+	for prayer: PrayerResource in by_level:
 		if prayer == null:
 			continue
 		list.add_child(_prayer_row(prayer, level, active.has(String(prayer.slug))))
 
 	_content.add_child(_button("Close", hide))
+
+	if prev_scroll > 0:
+		var new_scroll: ScrollContainer = _content.get_parent() as ScrollContainer
+		if new_scroll != null:
+			new_scroll.set_deferred(&"scroll_vertical", prev_scroll)
 
 
 func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
@@ -180,6 +219,23 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 		detail.text = "Requires Prayer %d" % prayer.required_level
 	text.add_child(detail)
 
+	# Star: marks this prayer for the bar's Q button (see prayer_bar.gd). Purely
+	# a local preference -- no server round trip, so it can't desync from a
+	# refused toggle the way the On/Off button has to guard against. Locked
+	# prayers can't be starred; there's nothing to bulk-activate yet.
+	if unlocked:
+		var star: Button = Button.new()
+		star.custom_minimum_size = Vector2(24, 24)
+		star.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		star.add_theme_font_size_override(&"font_size", 13)
+		star.flat = true
+		var starred: bool = QuickPrayers.is_quick(prayer.slug)
+		star.text = "★" if starred else "☆"
+		star.add_theme_color_override(&"font_color", QUICK_TINT if starred else MUTED)
+		star.tooltip_text = "Remove from quick prayers" if starred else "Add to quick prayers"
+		star.pressed.connect(_on_star.bind(prayer.slug, star))
+		line.add_child(star)
+
 	var toggle: Button = Button.new()
 	toggle.custom_minimum_size = Vector2(44, 24)
 	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -189,6 +245,15 @@ func _prayer_row(prayer: PrayerResource, level: int, is_on: bool) -> Control:
 	toggle.pressed.connect(_on_toggle.bind(prayer.slug, not is_on))
 	line.add_child(toggle)
 	return row
+
+
+## Flip local quick-prayer membership and repaint just this star -- no need to
+## re-fetch server state for a preference the server never sees.
+func _on_star(slug: StringName, star: Button) -> void:
+	var starred: bool = QuickPrayers.toggle_membership(slug)
+	star.text = "★" if starred else "☆"
+	star.add_theme_color_override(&"font_color", QUICK_TINT if starred else MUTED)
+	star.tooltip_text = "Remove from quick prayers" if starred else "Add to quick prayers"
 
 
 func _on_toggle(slug: StringName, want_on: bool) -> void:

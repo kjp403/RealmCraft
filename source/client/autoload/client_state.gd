@@ -22,6 +22,10 @@ signal gather_succeeded(result: Dictionary)
 ## Bag contents changed outside gather (e.g. picked up a ground drop). Inventory
 ## UIs listening to gather_succeeded also listen here for a refresh.
 signal inventory_changed(result: Dictionary)
+## Quick-prayer set membership changed (a star toggled in the prayer book —
+## see quick_prayers.gd). The prayer bar's Q button listens so it doesn't wait
+## for the next prayer.state push to notice it went from empty to usable.
+signal quick_prayers_changed
 ## The quest currently shown on the HUD tracker changed (0 = none).
 signal tracked_quest_changed(quest_id: int)
 ## An objective of [quest_id] ticked forward (server quest.update progress entry) —

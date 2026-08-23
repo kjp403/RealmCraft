@@ -291,13 +291,14 @@ extends Resource
 # Skill XP from a kill (weapon mastery + Slayer) — NOT character xp_reward.
 # ---------------------------------------------------------------------------
 
-## XP per point of effective HP, for the SkillXp 1–99 curve. 4.0 is OSRS's real
-## combat rate (XP scales with damage dealt), which lands mastery 1–99 at roughly
-## 12k–33k kills and Slayer at ~3× that — in line with this game's gathering
-## skills, already near OSRS parity on the same curve (adamant ore 58 XP ≈ 224k
-## actions to 99). This is THE pacing dial for all combat skilling: halve it to
-## double the grind, and Slayer follows automatically.
-const COMBAT_SKILL_XP_PER_HP: float = 4.0
+## XP per point of effective HP, for the SkillXp 1–99 curve. OSRS's real 4.0
+## combat rate let a single low-level mob's kill XP blow straight through the
+## front-loaded early levels (level 1→9 off one goblin) and let 1–99 finish in
+## about a week for a dedicated player. Cut to 1.0 (quarter rate, ~4x the grind
+## -- ~48k-132k kills to 99, Slayer follows automatically) so early levels feel
+## like progress instead of a single-kill jump. This is THE pacing dial for all
+## combat skilling: halve it to double the grind further.
+const COMBAT_SKILL_XP_PER_HP: float = 1.0
 
 ## Armor's assumed contribution to how long a kill takes. Armor [param armor]
 ## behaves like (1 + armor/ARMOR_EHP_DIVISOR)× the health bar, so a tankier mob

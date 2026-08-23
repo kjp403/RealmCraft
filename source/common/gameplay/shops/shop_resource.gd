@@ -22,8 +22,11 @@ extends Resource
 ## matching item ids. Default on so general merchants accept materials.
 @export var buys_vendor_priced: bool = true
 ## Gold shops pay this fraction of their listed buy price when the player sells
-## that same item back (health / mana potions). Fallback is [member Item.vendor_value].
-const BUYBACK_RATE: float = 0.25
+## that same item back (health / mana / prayer potions). Fallback is
+## [member Item.vendor_value]. Raised from 0.25 -- potions are being pulled from
+## chest loot so Farming/Herblore crafting is the intended supply, and 25% back
+## wasn't a real money-maker for the players who actually brew them.
+const BUYBACK_RATE: float = 0.5
 
 
 ## Capabilities are DERIVED from the data (no parallel enum to contradict it —
@@ -48,9 +51,9 @@ func has_trades() -> bool:
 	return false
 
 
-## Gold paid per unit when this vendor buys [param item]. Health / mana potions
-## sell for 75% of this shop's gold buy price when stocked, else their
-## [member Item.vendor_value]. Other goods stay on vendor_value.
+## Gold paid per unit when this vendor buys [param item]. Health / mana / prayer
+## potions sell for [constant BUYBACK_RATE] of this shop's gold buy price when
+## stocked, else their [member Item.vendor_value]. Other goods stay on vendor_value.
 func buyback_gold(item: Item) -> int:
 	if item == null or item.is_currency:
 		return 0
@@ -85,6 +88,7 @@ static func _is_potion_buyback(item: Item) -> bool:
 		return false
 	return potion.cooldown_category == &"health_potion" \
 			or potion.cooldown_category == &"mana_potion" \
+			or potion.cooldown_category == &"prayer_potion" \
 			or potion.cooldown_category == &"potion"
 
 

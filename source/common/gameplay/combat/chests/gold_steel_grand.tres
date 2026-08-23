@@ -3,8 +3,6 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
 [ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
 [ext_resource type="Texture2D" uid="uid://rqd4xdynqb7e" path="res://assets/sprites/environment/chests/gold_steel_grand.png" id="3_icon"]
-[ext_resource type="Resource" uid="uid://cd4yooe27ja23" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="item_0"]
-[ext_resource type="Resource" uid="uid://dfbcb377cc5d4" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="item_1"]
 [ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_2"]
 [ext_resource type="Resource" uid="uid://cxftijx4uktja" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="item_3"]
 [ext_resource type="Resource" uid="uid://c3echj2r4f0vu" path="res://source/common/gameplay/items/materials/metals/gold_bar.tres" id="item_4"]
@@ -20,20 +18,6 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astral_ore.tres" id="item_14"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/astral_cloth.tres" id="item_15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/astral_gem.tres" id="item_16"]
-
-[sub_resource type="Resource" id="Drop_0"]
-script = ExtResource("1_loot")
-item = ExtResource("item_0")
-min_amount = 30
-max_amount = 45
-chance = 1.0
-
-[sub_resource type="Resource" id="Drop_1"]
-script = ExtResource("1_loot")
-item = ExtResource("item_1")
-min_amount = 30
-max_amount = 45
-chance = 1.0
 
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
@@ -149,4 +133,4 @@ rolls_min = 2
 rolls_max = 4
 gold_min = 9000
 gold_max = 16000
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16")])
