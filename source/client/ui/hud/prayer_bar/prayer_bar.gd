@@ -43,6 +43,12 @@ func _ready() -> void:
 	_update_quick_button()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"player_quick_prayers"):
+		_on_quick_pressed()
+		get_viewport().set_input_as_handled()
+
+
 func _on_stat_changed(stat_name: StringName, value: float) -> void:
 	if stat_name == Stat.PRAYER:
 		if _tween != null and _tween.is_valid():
