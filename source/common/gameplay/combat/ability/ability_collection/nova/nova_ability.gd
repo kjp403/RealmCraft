@@ -12,6 +12,14 @@ extends AbilityResource
 
 ## Damage as a fraction of the caster's AP.
 @export var ap_ratio: float = 0.8
+## Damage as a fraction of the caster's AD. 0 = pure AP nova (every existing caster:
+## Frost Nova, Blood Feast, Static Field). Set this instead of ap_ratio for a physical
+## weapon's self-centered burst (e.g. hammer Aftershock) so it scales off the stat that
+## weapon actually builds — an AP-scaled nova on an AD-only wielder would hit for
+## almost nothing, the same trap Shockwave's missing ad_ratio was.
+@export var ad_ratio: float = 0.0
+## DAMAGE_MAGIC for every existing AP nova; set DAMAGE_PHYSICAL alongside ad_ratio.
+@export var damage_type: StringName = CombatHit.DAMAGE_MAGIC
 ## Burst radius (hit + the ring VFX size).
 @export var radius: float = 80.0
 ## On-hit slow handed to the arc (flat move-speed cut + duration). 0 = no slow.
@@ -64,7 +72,10 @@ func use_ability(user: Entity, _direction: Vector2) -> void:
 func _spawn_nova(caster: Character) -> void:
 	if not is_instance_valid(caster) or caster.is_dead or caster.get_parent() == null or arc_scene == null:
 		return
-	var dmg: float = caster.stats_component.get_stat(Stat.AP) * ap_ratio
+	var dmg: float = (
+		caster.stats_component.get_stat(Stat.AP) * ap_ratio
+		+ caster.stats_component.get_stat(Stat.AD) * ad_ratio
+	)
 	if duration_s > 0.0:
 		# Lingering field: a SpellField re-strikes every tick for the duration, riding us.
 		var field: SpellField = SpellField.new()
@@ -72,7 +83,7 @@ func _spawn_nova(caster: Character) -> void:
 		field.arc_scene = arc_scene
 		field.radius = radius
 		field.damage = dmg
-		field.damage_type = CombatHit.DAMAGE_MAGIC
+		field.damage_type = damage_type
 		field.slow_amount = slow_amount
 		field.slow_duration_s = slow_duration_s
 		field.heal_per_hit = heal_per_hit
@@ -90,7 +101,7 @@ func _spawn_nova(caster: Character) -> void:
 			circle.radius = radius
 			shape_node.shape = circle
 		arc.damage = dmg
-		arc.damage_type = CombatHit.DAMAGE_MAGIC
+		arc.damage_type = damage_type
 		arc.slow_amount = slow_amount
 		arc.slow_duration_s = slow_duration_s
 		arc.heal_per_hit = heal_per_hit
@@ -126,7 +137,10 @@ func _broadcast_ring(caster: Character) -> void:
 
 func extra_stat_lines() -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("%d%% AP" % int(round(ap_ratio * 100.0)))
+	if ap_ratio > 0.0:
+		lines.append("%d%% AP" % int(round(ap_ratio * 100.0)))
+	if ad_ratio > 0.0:
+		lines.append("%d%% AD" % int(round(ad_ratio * 100.0)))
 	if slow_amount > 0.0:
 		lines.append("-%s move speed for %ss" % [fmt_num(slow_amount), fmt_num(slow_duration_s)])
 	lines.append("%dpx radius" % int(radius))

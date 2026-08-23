@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BerserkAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/berserk/berserk_ability.gd" id="1_berserk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/berserk_1.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_berserk")
+lifesteal_percent = 55.0
+ad_bonus = 75.0
+buff_duration_s = 9.0
+aura_color = Color(0.82, 0.62, 0.32, 1)
+name = "Rampage IV"
+icon = ExtResource("2_icon")
+cooldown = 15.0
+mana_cost = 38
+impact_shake = 0.0
+impact_reach = 0.0
+impact_particles = 0
+impact_color = Color(1, 0.92, 0.55, 0.9)
+impact_rings = 1
+root_s = 0.0
+cast_time_s = 0.0
+metadata/slug = &"hammer_rampage_4"
+metadata/id = 110

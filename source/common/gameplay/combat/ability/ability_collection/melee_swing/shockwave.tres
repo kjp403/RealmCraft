@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("1_swing")
 arc_scene = ExtResource("2_arc")
+ad_ratio = 1.6
 slow_amount = 25.0
 slow_duration_s = 1.5
 name = "Shockwave"
