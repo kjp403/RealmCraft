@@ -13,6 +13,7 @@ script = ExtResource("1_charge")
 projectile_scene = ExtResource("2_arrow")
 min_speed = 200.0
 max_speed = 400.0
+min_ad_ratio = 0.6
 name = "Charged Shot"
 icon = SubResource("AtlasTexture_gjamw")
 cooldown = 0.8
