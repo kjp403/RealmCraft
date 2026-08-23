@@ -16,9 +16,10 @@ const UPGRADE_COST: int = 5000
 const MAX_UPGRADE_COUNT: int = 99
 ## Lifetime cap on total vault size. An unbounded vault can grow past the
 ## WebSocket message buffer and make bank.get silently fail to deliver — see
-## the buffer-size fix in base_multiplayer_endpoint.gd. Multiple of
-## UPGRADE_SLOTS so capacity always lands on it exactly.
-const MAX_BANK_SLOTS: int = 500
+## the buffer-size fix in base_multiplayer_endpoint.gd (now 4MB, and a fully
+## packed vault at this cap is only ~100KB, so there's ample headroom).
+## Multiple of UPGRADE_SLOTS so capacity always lands on it exactly.
+const MAX_BANK_SLOTS: int = 1500
 
 
 func menu_entry(_npc: Node) -> Dictionary:
