@@ -37,7 +37,15 @@ func is_active() -> bool:
 func start(npc: HostileNpc) -> void:
 	if _player == null or npc == null or not is_instance_valid(npc) or _target_is_dead(npc):
 		return
+	# Left-click re-fires this on every click, unlike Spacebar (which no-ops
+	# while already active). Re-clicking the same locked target mid-draw must
+	# not touch the charge in progress — bail before the resets below strand
+	# ChargeAbility.charging true forever (can_use() then refuses everything).
+	if _active and npc == _target:
+		return
 	_clear_target_nameplate()
+	if _charge_held:
+		_force_release_charge()
 	_target = npc
 	_last_target = npc
 	_active = true

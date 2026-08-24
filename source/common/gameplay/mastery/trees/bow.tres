@@ -147,30 +147,30 @@ upgrades = &"bow_arrowstorm_3"
 
 [sub_resource type="Resource" id="Mod_hp_survival"]
 script = ExtResource("3_mod")
-stat_name = "move_speed"
+stat_name = "armor"
 value = 10.0
 
 [sub_resource type="Resource" id="Node_survival"]
 script = ExtResource("2_node")
 id = &"bow_survival"
-node_name = "Fleet Footed"
+node_name = "Hardened Stance"
 icon = ExtResource("7_jug")
-description = "+10 move speed. An archer's edge is distance, not a bigger health bar."
+description = "+10 armor. An archer's edge is distance, not a bigger health bar."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival")])
 weapon_bound = true
 
 [sub_resource type="Resource" id="Mod_hp_survival2"]
 script = ExtResource("3_mod")
-stat_name = "move_speed"
+stat_name = "armor"
 value = 4.0
 
 [sub_resource type="Resource" id="Node_survival2"]
 script = ExtResource("2_node")
 id = &"bow_survival_2"
-node_name = "Fleet Footed II"
+node_name = "Hardened Stance II"
 icon = ExtResource("7_jug")
-description = "+4 more move speed."
+description = "+4 more armor."
 branch = &"resolve"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival2")])
@@ -179,15 +179,15 @@ upgrades = &"bow_survival"
 
 [sub_resource type="Resource" id="Mod_hp_survival3"]
 script = ExtResource("3_mod")
-stat_name = "move_speed"
+stat_name = "armor"
 value = 4.0
 
 [sub_resource type="Resource" id="Node_survival3"]
 script = ExtResource("2_node")
 id = &"bow_survival_3"
-node_name = "Fleet Footed III"
+node_name = "Hardened Stance III"
 icon = ExtResource("7_jug")
-description = "+4 more move speed. Nobody outruns a bow that keeps its distance."
+description = "+4 more armor. A hide thick enough to shrug off what gets past the distance."
 branch = &"resolve"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival3")])
