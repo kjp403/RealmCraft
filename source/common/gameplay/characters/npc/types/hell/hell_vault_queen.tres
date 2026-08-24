@@ -22,8 +22,9 @@ max_amount = 4200
 [sub_resource type="Resource" id="Resource_btboc"]
 script = ExtResource("3_jh6vt")
 item = ExtResource("5_rhabf")
-min_amount = 5
-max_amount = 10
+min_amount = 2
+max_amount = 4
+chance = 0.5
 
 [sub_resource type="Resource" id="Resource_6tf84"]
 script = ExtResource("3_jh6vt")
@@ -40,12 +41,12 @@ chance = 0.05
 [sub_resource type="Resource" id="Resource_fuory"]
 script = ExtResource("3_jh6vt")
 item = ExtResource("8_vv62r")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Resource_gswd"]
 script = ExtResource("3_jh6vt")
 item = ExtResource("11_gswd")
-chance = 0.01
+chance = 0.005
 
 
 [sub_resource type="Resource" id="Drop_big_bones"]

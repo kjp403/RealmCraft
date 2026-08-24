@@ -102,9 +102,9 @@ chance = 0.25
 [sub_resource type="Resource" id="Drop_11_wyrmguard_ore"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wyrmguard_ore")
-min_amount = 3
-max_amount = 6
-chance = 0.55
+min_amount = 1
+max_amount = 2
+chance = 0.2
 
 [sub_resource type="Resource" id="Drop_12_wyrmguard_cloth"]
 script = ExtResource("2_loot")
@@ -130,27 +130,27 @@ chance = 0.5
 [sub_resource type="Resource" id="Drop_15_sword_wyrmguard"]
 script = ExtResource("2_loot")
 item = ExtResource("item_sword_wyrmguard")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Drop_16_hammer_wyrmguard"]
 script = ExtResource("2_loot")
 item = ExtResource("item_hammer_wyrmguard")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Drop_17_nightglass_bow"]
 script = ExtResource("2_loot")
 item = ExtResource("item_nightglass_bow")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Drop_18_wand_astral"]
 script = ExtResource("2_loot")
 item = ExtResource("item_wand_astral")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Drop_19_book_astral"]
 script = ExtResource("2_loot")
 item = ExtResource("item_book_astral")
-chance = 0.03
+chance = 0.01
 
 [sub_resource type="Resource" id="Excl_0_enchanted_gem"]
 script = ExtResource("2_loot")

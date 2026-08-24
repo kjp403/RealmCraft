@@ -174,7 +174,9 @@ func _update_skill_tile(skill_name: String, info: Dictionary) -> void:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	cur.text = str(level)
 	base.text = str(level)
 	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
@@ -187,7 +189,9 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 
 	var tile := LiveTooltipButton.new()
 	tile.custom_minimum_size = TILE_SIZE
@@ -274,7 +278,9 @@ func _open_skill_detail(skill_name: String) -> void:
 	var raw_next: int = int(info.get("xp_to_next", 1))
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	var xp_line: String = (
 		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, _format_xp(total_xp)] if at_cap
 		else "%s / %s XP (%s to next) · Total XP: %s" % [

@@ -25,6 +25,22 @@ static func apply(player: Player, stat: StringName, amount: float, duration_s: f
 	player.stats_component.modify_stat(stat, amount)
 
 
+## Strips every active buff on [param stat] immediately (reverting its bonus),
+## regardless of remaining duration. For buffs that are supposed to belong to
+## the weapon that granted them — e.g. sword Berserk's lifesteal — so a swap
+## to another weapon mid-buff can't carry it over (Berserk lifesteal has no
+## business healing off a Book's Lightning Lash). Server-only, like the rest
+## of this service.
+static func clear_stat(player: Player, stat: StringName) -> void:
+	if player == null or player.player_resource == null:
+		return
+	var buffs: Array = player.player_resource.active_buffs
+	for i: int in range(buffs.size() - 1, -1, -1):
+		if StringName(buffs[i]["stat"]) == stat:
+			player.stats_component.modify_stat(stat, -float(buffs[i]["amount"]))
+			buffs.remove_at(i)
+
+
 ## Removes expired buffs (reverting their stat bonus). Called by the instance
 ## StatusTick once per second per player.
 static func tick(player: Player) -> void:
