@@ -195,14 +195,14 @@ upgrades = &"book_blink_3"
 [sub_resource type="Resource" id="Mod_regen_focus"]
 script = ExtResource("3_mod")
 stat_name = "mana_regen"
-value = 1.5
+value = 6.0
 
 [sub_resource type="Resource" id="Node_focus"]
 script = ExtResource("2_node")
 id = &"book_focus"
 node_name = "Focus"
 icon = ExtResource("15_focus")
-description = "+1.5 mana regen per second."
+description = "+6 mana regen per second."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus")])
 weapon_bound = true
@@ -210,14 +210,14 @@ weapon_bound = true
 [sub_resource type="Resource" id="Mod_regen_focus2"]
 script = ExtResource("3_mod")
 stat_name = "mana_regen"
-value = 1.0
+value = 3.0
 
 [sub_resource type="Resource" id="Node_focus2"]
 script = ExtResource("2_node")
 id = &"book_focus_2"
 node_name = "Focus II"
 icon = ExtResource("15_focus")
-description = "+1 more mana regen per second."
+description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 2
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus2")])
@@ -227,14 +227,14 @@ upgrades = &"book_focus"
 [sub_resource type="Resource" id="Mod_regen_focus3"]
 script = ExtResource("3_mod")
 stat_name = "mana_regen"
-value = 1.0
+value = 3.0
 
 [sub_resource type="Resource" id="Node_focus3"]
 script = ExtResource("2_node")
 id = &"book_focus_3"
 node_name = "Focus III"
 icon = ExtResource("15_focus")
-description = "+1 more mana regen per second."
+description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 3
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus3")])
@@ -244,14 +244,14 @@ upgrades = &"book_focus_2"
 [sub_resource type="Resource" id="Mod_regen_focus4"]
 script = ExtResource("3_mod")
 stat_name = "mana_regen"
-value = 1.0
+value = 3.0
 
 [sub_resource type="Resource" id="Node_focus4"]
 script = ExtResource("2_node")
 id = &"book_focus_4"
 node_name = "Focus IV"
 icon = ExtResource("15_focus")
-description = "+1 more mana regen per second."
+description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 4
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus4")])
@@ -261,14 +261,14 @@ upgrades = &"book_focus_3"
 [sub_resource type="Resource" id="Mod_regen_focus5"]
 script = ExtResource("3_mod")
 stat_name = "mana_regen"
-value = 1.0
+value = 3.0
 
 [sub_resource type="Resource" id="Node_focus5"]
 script = ExtResource("2_node")
 id = &"book_focus_5"
 node_name = "Focus V"
 icon = ExtResource("15_focus")
-description = "+1 more mana regen per second. Bottomless focus."
+description = "+3 more mana regen per second. Bottomless focus."
 branch = &"inspiration"
 tier = 5
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus5")])
