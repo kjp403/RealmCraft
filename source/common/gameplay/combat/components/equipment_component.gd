@@ -116,6 +116,14 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 		# slots (has_armed_shot() doesn't know which weapon armed it) for up
 		# to ShotOverrideAbility.EXPIRY_S with no UI feedback why.
 		ShotOverrideAbility.clear_armed(character)
+		# Sword Berserk's lifesteal is a timed Stat buff, not weapon-gated, so it
+		# kept healing off ANY damage for its duration — cast it on sword, swap
+		# to Book, and Lightning Lash's sustained multi-target beam turned it
+		# into a no-food heal-through-hardmode button. Lifesteal is Berserk-only
+		# (grep confirms no other source), so dropping it on every weapon swap
+		# is safe and keeps the buff scoped to the weapon that earned it.
+		if GameMode.is_world_server() and character is Player:
+			BuffService.clear_stat(character as Player, Stat.LIFESTEAL)
 
 	if item_id == 0:
 		if slot == &"weapon":
