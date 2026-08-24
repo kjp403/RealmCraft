@@ -218,6 +218,7 @@ static func _reward(
 	var resource: PlayerResource = player.player_resource
 	if resource == null:
 		return
+	var peer_id: int = int(resource.current_peer_id)
 
 	var level_before: int = resource.level
 	# Character level rides the small 1–20 curve, so it keeps the authored xp_reward.
@@ -234,6 +235,14 @@ static func _reward(
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
 			loot_gained.append(entry)
+	# A dungeon run's own daily charge gates ALL loot from it, not just the
+	# completion payout — otherwise a boss's untouched EnemyTypeResource table
+	# (make_dungeon_mob only strips trash) keeps paying out after charges hit 0.
+	# XP / mastery / Slayer / quest credit below are untouched — only the drop.
+	var dungeon_instance: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
+	if dungeon_instance != null and DungeonService.is_dungeon_instance(dungeon_instance) \
+			and DungeonService.charges_remaining(resource) <= 0:
+		loot_gained.clear()
 	# Ordinary drops land on the ground for click-pickup — not auto-bagged. Each
 	# peer's piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
 	# A Boss Hunt boss banks straight into each participant's Hunt Chest instead:
@@ -263,7 +272,6 @@ static func _reward(
 		npc.enemy_data != null and bool(npc.enemy_data.is_boss)
 	)
 
-	var peer_id: int = int(resource.current_peer_id)
 	# Only push when there is something to REPORT. A reward-suppressed body (dungeon
 	# trash, boss adds) pays nothing, and the client cards every combat.reward that
 	# names an enemy — so pushing here would spatter a "Defeated a Spore Swarm" toast
@@ -303,8 +311,7 @@ static func _reward(
 			"slayer": slayer_result,
 		})
 
-	var instance: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
-	var quest_updates: Array = QuestService.on_kill(resource, npc.enemy_type, peer_id, instance)
+	var quest_updates: Array = QuestService.on_kill(resource, npc.enemy_type, peer_id, dungeon_instance)
 	if peer_id > 0 and not quest_updates.is_empty():
 		WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": quest_updates})
 

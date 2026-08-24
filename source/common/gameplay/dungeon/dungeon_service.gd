@@ -68,6 +68,15 @@ static func is_hard_run(instance: Node) -> bool:
 	return _run_hard.get(_instance_to_group.get(str(instance.name), 0), false)
 
 
+## Is [param instance] a live dungeon run? Read by RewardService so mob-kill loot
+## (the boss's own EnemyTypeResource table, which make_dungeon_mob leaves intact)
+## can be gated by the killer's daily charge, same as the completion reward.
+static func is_dungeon_instance(instance: Node) -> bool:
+	if instance == null:
+		return false
+	return _instance_to_group.has(str(instance.name))
+
+
 # --- lobby (matchmaking at a DungeonMaster station) -------------------------
 
 ## Join / leave / start / solo a dungeon lobby (dungeon.queue handler). Mirrors
