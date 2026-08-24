@@ -493,14 +493,14 @@ func skill_xp_to_next(skill_level: int) -> int:
 	return SkillXp.xp_to_next(skill_level)
 
 
-## Adds xp to a profession skill, applying any level-ups. Caps at SkillXp.LEVEL_CAP
-## (99 / 13,034,431 total XP). Returns {"level", "xp", "leveled_up"}.
+## Adds xp to a profession skill, applying any level-ups up to SkillXp.LEVEL_CAP
+## (99 / 13,034,431 total XP). Past the cap, xp keeps accumulating as an
+## uncapped "grind past 99" counter instead of being discarded — total_xp_for_level
+## + this xp is what hiscores and the Total XP tooltip read. Returns
+## {"level", "xp", "leveled_up"}.
 func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	var skill: Dictionary = get_skill(skill_name)
 	var level: int = int(skill["level"])
-	if level >= SkillXp.LEVEL_CAP:
-		skill["xp"] = 0
-		return {"level": level, "xp": 0, "leveled_up": false}
 	if amount <= 0:
 		return {"level": level, "xp": int(skill["xp"]), "leveled_up": false}
 
@@ -514,8 +514,6 @@ func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 		level += 1
 		leveled_up = true
 	skill["level"] = level
-	if level >= SkillXp.LEVEL_CAP:
-		skill["xp"] = 0
 	# NOTE no combat-level resync here: character level comes from the five weapon
 	# masteries only (see COMBAT_STYLE_CATEGORIES). Slayer and the gathering jobs
 	# all flow through this function and none of them move it.
@@ -594,28 +592,18 @@ func mastery_xp_to_next(mastery_level: int) -> int:
 	return SkillXp.xp_to_next(mastery_level)
 
 
-## Adds weapon-mastery xp to a category, applying level-ups (frozen at the
-## 99 / 13,034,431 total-XP skill cap). Returns {"category", "level", "xp",
-## "xp_to_next", "leveled_up", "started"} so the kill-reward push can report
-## progress to the client — "started" marks the very first practice (entry
-## creation at level 1), which deserves its own toast even though no level-UP
-## happened.
+## Adds weapon-mastery xp to a category, applying level-ups up to
+## MASTERY_LEVEL_CAP. Past the cap, xp keeps accumulating as an uncapped
+## "grind past 99" counter instead of being discarded. Returns {"category",
+## "level", "xp", "xp_to_next", "leveled_up", "started"} so the kill-reward
+## push can report progress to the client — "started" marks the very first
+## practice (entry creation at level 1), which deserves its own toast even
+## though no level-UP happened.
 func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 	var started: bool = not masteries.has(category)
 	var entry: Dictionary = get_mastery(category)
 	var level: int = int(entry["level"])
 	var leveled_up: bool = false
-	if level >= MASTERY_LEVEL_CAP:
-		entry["xp"] = 0
-		return {
-			"category": String(category),
-			"level": level,
-			"xp": 0,
-			"xp_to_next": 0,
-			"gained": 0,
-			"leveled_up": false,
-			"started": started,
-		}
 	if amount <= 0:
 		return {
 			"category": String(category),
@@ -636,8 +624,6 @@ func add_mastery_xp(category: StringName, amount: int) -> Dictionary:
 		level += 1
 		leveled_up = true
 	entry["level"] = level
-	if level >= MASTERY_LEVEL_CAP:
-		entry["xp"] = 0
 	# Character level is derived from these — resync here rather than at each call
 	# site so no future mastery-XP source can silently skip it.
 	var combat_levels_gained: int = 0

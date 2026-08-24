@@ -387,7 +387,9 @@ func _update_detail_header_inplace() -> bool:
 	_detail_level_label.text = "Lv %d / %d" % [level, level]
 	_detail_xp_bar.max_value = xp_to_next
 	_detail_xp_bar.value = xp_to_next if at_cap else xp
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	_detail_xp_label.text = (
 		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
 		else "%s / %s XP · Total %s" % [
@@ -634,7 +636,9 @@ func _update_skill_tile(skill_name: String, info: Dictionary) -> void:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 
 	cur.text = str(level)
 	base.text = str(level)
@@ -648,7 +652,9 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	var at_cap: bool = raw_next <= 0 or level >= SkillXp.LEVEL_CAP
 	var xp_to_next: int = 1 if at_cap else maxi(1, raw_next)
 	var display: String = str(info.get("display_name", skill_name.capitalize()))
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 
 	var tile := LiveTooltipButton.new()
 	tile.custom_minimum_size = TILE_SIZE
@@ -803,7 +809,9 @@ func _rebuild_detail() -> void:
 	_detail_xp_bar = bar
 
 	var xp_label := Label.new()
-	var total_xp: int = SkillXp.total_xp_for_level(level) + (0 if at_cap else xp)
+	# xp keeps accumulating past the level cap now (server no longer discards it),
+	# so it's the real "grind past 99" total whether or not at_cap.
+	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	xp_label.text = (
 		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
 		else "%s / %s XP · Total %s" % [
