@@ -8,6 +8,7 @@ script = ExtResource("1_rapid")
 channel_duration_s = 3.0
 tick_interval_s = 0.35
 mana_per_tick = 3.0
+visual_kind = &"rapid_fire"
 mobile = true
 mobile_speed_mult = 0.6
 name = "Rapid Fire"

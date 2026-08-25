@@ -85,6 +85,12 @@ static func _on_channel_start(payload: Dictionary) -> void:
 		if burst != null:
 			SpriteEffect.spawn(player, burst, {"scale": Vector2(0.7, 0.7), "offset": Vector2(0.0, -8.0), "z_index": 1})
 		return
+	if kind == &"rapid_fire":
+		var rf: RapidFireVisual = RapidFireVisual.new()
+		rf.name = "ChannelVisual"
+		rf.tick_interval_s = float(payload.get("t", 0.35))
+		player.add_child(rf)
+		return
 	var visual: ChannelVisual = ChannelVisual.new()
 	visual.name = "ChannelVisual"
 	visual.duration = float(payload.get("d", 6.0))
