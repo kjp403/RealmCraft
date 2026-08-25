@@ -172,6 +172,14 @@ func is_fully_charged() -> bool:
 	return charging and charge_progress() >= 1.0
 
 
+## True while charging AND still standing where the draw began (same 6px
+## tolerance release_ability uses for its Steady Aim payoff). Exposed so
+## client visuals can show the bonus live as it builds, instead of the
+## player only finding out it landed after the shot's already gone.
+func is_planted(entity: Entity) -> bool:
+	return charging and entity != null and entity.global_position.distance_to(_charge_pos) <= 6.0
+
+
 func predict_release() -> void:
 	# Flip ONLY the flag — keep _charge_start so the server echo's
 	# release_ability still computes the right charge ratio for the local
