@@ -58,6 +58,12 @@ func data_request_handler(
 			"bank_slots": capacity,
 		}
 
+	# Credit the vault BEFORE touching the bag: add_item(in_bank=true) always
+	# places the item (an existing pile or one unconditional new slot — see its
+	# own docstring), so crediting first means a bug or crash on the removal
+	# side below can only DUPLICATE the stack, never erase it.
+	Inventory.add_item(bank, item_id, amount, true)
+
 	var remaining: int = amount
 	var total_removed: int = 0
 	# Prefer the selected slot first, then any other pile of the same item.
@@ -77,10 +83,15 @@ func data_request_handler(
 		remaining -= removed
 		total_removed += removed
 
-	if total_removed <= 0:
-		return {"ok": false, "reason": "missing"}
-
-	Inventory.add_item(bank, item_id, total_removed, true)
+	if total_removed != amount:
+		# Should be unreachable — amount was already capped to held_total — but
+		# if it ever fires, the vault credit above stands and the mismatch is
+		# a visible duplication instead of the silent bag-drains-vault-doesn't
+		# failure this ordering exists to rule out.
+		push_error(
+			"bank.deposit: removed %d of item %d from bag, expected %d (peer %d)"
+			% [total_removed, item_id, amount, peer_id]
+		)
 	instance.world_server.database.save_player(player.player_resource)
 	return {
 		"ok": true,

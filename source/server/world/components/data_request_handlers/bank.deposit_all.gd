@@ -41,13 +41,19 @@ func data_request_handler(
 		if amount <= 0:
 			skipped_full = true
 			continue
+		# Credit the vault BEFORE the bag removal — see bank.deposit.gd for why:
+		# add_item(in_bank=true) always places the item, so a bug on the removal
+		# side below can only duplicate the stack, never erase it.
+		Inventory.add_item(bank, item_id, amount, true)
 		var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
-		if removed <= 0:
-			continue
-		Inventory.add_item(bank, item_id, removed, true)
+		if removed != amount:
+			push_error(
+				"bank.deposit_all: removed %d of item %d from bag, expected %d (peer %d)"
+				% [removed, item_id, amount, peer_id]
+			)
 		stacks += 1
-		units += removed
-		if removed < have:
+		units += amount
+		if amount < have:
 			skipped_full = true
 
 	if stacks > 0:
