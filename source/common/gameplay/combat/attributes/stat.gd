@@ -51,6 +51,11 @@ const DAMAGE_VS_LOW_HP: StringName = &"damage_vs_low_hp"
 ## server-side in Character.take_damage on the attacker. See BuffService / Berserk.
 const LIFESTEAL: StringName = &"lifesteal"
 
+## Flat mana restored to the attacker on every landed hit they deal. 0 by default
+## (inert); bow's Venom Shot passive grants a small chunk. Applied server-side in
+## Character.take_damage on the attacker, mirroring LIFESTEAL.
+const MANA_ON_HIT: StringName = &"mana_on_hit"
+
 ## Gathering speed multiplier. 1.0 = normal, 1.2 = 20% faster, etc.
 const GATHER_SPEED: StringName = &"gather_speed"
 ## Gathering bonus yield chance. 0.15 = 15% chance of extra resources.
@@ -78,6 +83,7 @@ const DISPLAY_NAMES: Dictionary = {
 	ABILITY_HASTE: "Ability Haste",
 	DAMAGE_VS_LOW_HP: "Damage vs Low HP",
 	LIFESTEAL: "Lifesteal",
+	MANA_ON_HIT: "Mana per Hit",
 	GATHER_SPEED: "Gather Speed",
 	GATHER_YIELD: "Gather Yield",
 	GATHER_XP: "Gather XP",

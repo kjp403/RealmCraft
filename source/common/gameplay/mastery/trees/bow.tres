@@ -65,13 +65,20 @@ tier = 4
 ability = ExtResource("4_multi4")
 upgrades = &"bow_multishot_3"
 
+[sub_resource type="Resource" id="Mod_mana_siphon"]
+script = ExtResource("3_mod")
+stat_name = "mana_on_hit"
+value = 2.0
+
 [sub_resource type="Resource" id="Node_venom"]
 script = ExtResource("2_node")
 id = &"bow_venom_shot"
-node_name = "Venom Shot"
-description = "Replaces your draw with a poisoned arrow: full power, plus a lingering toxin. No cooldown beyond the draw itself — this is your new basic attack, not a burst window."
+node_name = "Mana Siphon"
+icon = ExtResource("7_jug")
+description = "+2 mana on every landed hit. A steady trickle to bridge into your next shot, not enough to fuel Rapid Fire on its own."
 branch = &"domination"
-ability = ExtResource("9_venom")
+passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mana_siphon")])
+weapon_bound = true
 
 [sub_resource type="Resource" id="Node_deadeye"]
 script = ExtResource("2_node")

@@ -15,6 +15,28 @@ extends ChannelAbility
 @export var projectile_scene: PackedScene = preload("res://source/common/gameplay/items/weapons/bow/arrow.tscn")
 @export var projectile_speed: float = 500.0
 
+## Deadeye pairing (docs/bow.md): charging Deadeye then opening Rapid Fire consumes
+## the armed shot to buff the WHOLE barrage instead of a single arrow — a real payoff
+## for setting it up first. Consumed once at channel start; reset every use_ability
+## so an un-armed Rapid Fire is unaffected. Per-weapon-instance (ability resources
+## are duplicated on equip), mirrors ChargeAbility's own instance state.
+var _armed_damage_mult: float = 1.0
+var _armed_pierce: int = 0
+var _armed_speed_mult: float = 1.0
+
+
+func use_ability(user: Entity, direction: Vector2) -> void:
+	_armed_damage_mult = 1.0
+	_armed_pierce = 0
+	_armed_speed_mult = 1.0
+	if user is Character:
+		var armed: Dictionary = ShotOverrideAbility.take_armed(user as Character)
+		if not armed.is_empty():
+			_armed_damage_mult = float(armed.get("mult", 1.0))
+			_armed_pierce = int(armed.get("pierce", 0))
+			_armed_speed_mult = float(armed.get("speed", 1.0))
+	super.use_ability(user, direction)
+
 
 func channel_tick(caster: Character) -> void:
 	if not GameMode.is_world_server() or not is_instance_valid(caster):
@@ -27,9 +49,12 @@ func channel_tick(caster: Character) -> void:
 	var projectile: Projectile = projectile_scene.instantiate()
 	projectile.top_level = true
 	projectile.direction = aim
-	projectile.speed = projectile_speed
+	projectile.speed = projectile_speed * _armed_speed_mult
 	projectile.source = caster
-	projectile.damage = caster.stats_component.get_stat(Stat.AD) * ad_ratio
+	projectile.damage = caster.stats_component.get_stat(Stat.AD) * ad_ratio * _armed_damage_mult
+	if _armed_pierce > 0:
+		projectile.piercing = true
+		projectile.pierce_left = _armed_pierce
 	projectile.global_position = AbilityResource.muzzle_position(caster, aim)
 	caster.add_child(projectile)
 
