@@ -388,6 +388,19 @@ var _channel_grace_until_ms: int = 0
 var channeling_ability_name: String = ""
 
 
+# --- Steady Aim planted glow (client-visual only) ---
+## A warm pillar of light under the archer while a Steady Aim bonus is live and
+## building — a planted charged draw, or a planted Rapid Fire barrage. Purely
+## cosmetic feedback so the payoff (see ChargeAbility.release_ability and
+## RapidFireAbility.channel_tick) reads instantly instead of only showing up in
+## the damage numbers after the fact.
+const STEADY_AIM_GLOW_VFX: SpriteFrames = preload("res://source/common/gameplay/combat/vfx/light_pillar.tres")
+const STEADY_AIM_GLOW_COLOR: Color = Color(1.0, 0.82, 0.35, 0.9)
+const STEADY_AIM_GLOW_FADE_S: float = 0.15
+var _steady_aim_glow: SpriteEffect
+var _steady_aim_glow_active: bool = false
+
+
 func _on_channel_start(payload: Dictionary) -> void:
 	if int(payload.get("p", -1)) != multiplayer.get_unique_id():
 		return # someone else's channel — InstanceClient draws their aura, we don't root
@@ -798,6 +811,7 @@ func process_animation(delta: float) -> void:
 		# other clients via the :anim field like any other animation.
 		if anim != Animations.DEATH:
 			anim = Animations.DEATH
+		_set_steady_aim_glow(false)
 		return
 	# Facing follows the COMMITTED aim, not the live cursor — that's what stops the
 	# sprite spinning through its own swing when the mouse keeps moving.
@@ -805,6 +819,53 @@ func process_animation(delta: float) -> void:
 	flipped = aim.x < 0
 	update_hand_pivot(delta)
 	anim = Animations.RUN if input_direction else Animations.IDLE
+	_set_steady_aim_glow(_steady_aim_planted())
+
+
+## True while a Steady Aim bonus is currently live and building: a planted
+## charged draw (the basic bow shot) or a planted Rapid Fire barrage. Purely a
+## read of existing ability state — see ChargeAbility.is_planted and
+## RapidFireAbility.is_planted for the matching damage-side checks.
+func _steady_aim_planted() -> bool:
+	if stats_component.get_stat(&"steady_aim") <= 0.0:
+		return false
+	var weapon: Weapon = equipment_component.mounted_nodes.get(&"weapon", null) as Weapon
+	if weapon == null or weapon.abilities.is_empty():
+		return false
+	var primary: AbilityResource = weapon.abilities[0]
+	if primary is ChargeAbility and (primary as ChargeAbility).is_planted(self):
+		return true
+	if _channeling and channeling_ability_name.begins_with("Rapid Fire"):
+		for ability: AbilityResource in weapon.abilities:
+			if ability is RapidFireAbility:
+				return (ability as RapidFireAbility).is_planted(self)
+	return false
+
+
+## Spawns/fades the planted-glow VFX on transitions only — cheap to call every
+## frame. A quick fade-out on drop (draw released, channel ends, moved off the
+## spot) instead of a hard cut, so it reads as a clean payoff either way.
+func _set_steady_aim_glow(active: bool) -> void:
+	if active == _steady_aim_glow_active:
+		return
+	_steady_aim_glow_active = active
+	if active:
+		if _steady_aim_glow != null and is_instance_valid(_steady_aim_glow):
+			_steady_aim_glow.queue_free()
+		_steady_aim_glow = SpriteEffect.spawn(self, STEADY_AIM_GLOW_VFX, {
+			"loop": true,
+			"modulate": STEADY_AIM_GLOW_COLOR,
+			"scale": Vector2(0.6, 0.6),
+			"z_index": -1,
+		})
+		return
+	if _steady_aim_glow == null or not is_instance_valid(_steady_aim_glow):
+		return
+	var fx: SpriteEffect = _steady_aim_glow
+	_steady_aim_glow = null
+	var tween: Tween = fx.create_tween()
+	tween.tween_property(fx, "modulate:a", 0.0, STEADY_AIM_GLOW_FADE_S)
+	tween.tween_callback(fx.queue_free)
 
 
 func update_hand_pivot(delta: float) -> void:

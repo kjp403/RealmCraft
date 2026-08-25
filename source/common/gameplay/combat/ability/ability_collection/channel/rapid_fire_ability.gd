@@ -31,6 +31,13 @@ func use_ability(user: Entity, direction: Vector2) -> void:
 	super.use_ability(user, direction)
 
 
+## Client-visual twin of the damage check in [method channel_tick] — callers must
+## also confirm the channel is actually running (e.g. LocalPlayer._channeling),
+## since a stale latched position alone can't tell an idle resource from a live one.
+func is_planted(entity: Entity) -> bool:
+	return entity != null and entity.global_position.distance_to(_channel_start_pos) <= 6.0
+
+
 func channel_tick(caster: Character) -> void:
 	if not GameMode.is_world_server() or not is_instance_valid(caster):
 		return
@@ -40,8 +47,7 @@ func channel_tick(caster: Character) -> void:
 	if caster.flipped:
 		aim.x = -aim.x
 	var damage: float = caster.stats_component.get_stat(Stat.AD) * ad_ratio
-	# Same 6px tolerance ChargeAbility uses for its planted-draw check.
-	if caster.global_position.distance_to(_channel_start_pos) <= 6.0:
+	if is_planted(caster):
 		var steady: float = caster.stats_component.get_stat(&"steady_aim")
 		if steady > 0.0:
 			damage *= 1.0 + steady / 100.0
