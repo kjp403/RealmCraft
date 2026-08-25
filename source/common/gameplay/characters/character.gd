@@ -491,11 +491,14 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 		var lifesteal: float = attacker.stats_component.get_stat(Stat.LIFESTEAL)
 		if lifesteal > 0.0:
 			attacker.apply_heal(mitigated * lifesteal / 100.0, attacker, true)
-			var mana_on_hit: float = attacker.stats_component.get_stat(Stat.MANA_ON_HIT)
-			if mana_on_hit > 0.0:
-				var mana: float = attacker.stats_component.get_stat(Stat.MANA)
-				var mana_max: float = attacker.stats_component.get_stat(Stat.MANA_MAX)
-				attacker.stats_component.set_stat(Stat.MANA, minf(mana_max, mana + mana_on_hit))
+		# Mana Siphon (bow) and any future mana-on-hit source. Independent of
+		# lifesteal — an archer has 0 lifesteal, so nesting this under the
+		# lifesteal check above silently zeroed it for every bow user.
+		var mana_on_hit: float = attacker.stats_component.get_stat(Stat.MANA_ON_HIT)
+		if mana_on_hit > 0.0:
+			var mana: float = attacker.stats_component.get_stat(Stat.MANA)
+			var mana_max: float = attacker.stats_component.get_stat(Stat.MANA_MAX)
+			attacker.stats_component.set_stat(Stat.MANA, minf(mana_max, mana + mana_on_hit))
 
 	# Broadcast a hit event so clients can render damage numbers, screen
 	# shake, hit pause, sound — anything game-feel piggybacks off the same

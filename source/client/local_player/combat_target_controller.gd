@@ -243,6 +243,17 @@ func _tick_charge_attack(ability: AbilityResource) -> void:
 	if _charge_held and charge != null and not charge.charging:
 		_charge_held = false
 		return
+	# The mirror desync: a PRESS echo (action.perform.gd echoes presses to
+	# every peer, including the sender) can land late — after our own local
+	# timer already ran that same draw to completion and moved on with
+	# _charge_held false. The echo's use_ability() call flips charging back to
+	# true on a draw nothing is tracking anymore, and nothing would ever
+	# release it: can_use() (`if charging: return false`) then refuses every
+	# future press forever, and re-clicking doesn't touch charging at all.
+	# Force it closed exactly like an interrupted draw at cancel().
+	if not _charge_held and charge != null and charge.charging:
+		_force_release_charge()
+		return
 
 	if not _charge_held:
 		if not _player.equipment_component.can_use(&"weapon", 0):
