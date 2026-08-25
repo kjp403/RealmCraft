@@ -67,11 +67,11 @@ station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 position = Vector2(0, -16)
+texture = ExtResource("8_cookart")
 
 [node name="Banker" parent="." instance=ExtResource("20_npc")]
 position = Vector2(560, 260)
 npc_resource = ExtResource("21_banker")
-texture = ExtResource("8_cookart")
 
 [node name="Dock" type="Sprite2D" parent="."]
 z_index = 1
