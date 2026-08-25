@@ -77,6 +77,9 @@ func channel_tick(caster: Character) -> void:
 ## AimAssist._is_eligible's "already committed to the fight" rule, just
 ## server-side and authoritative. Walks both buckets hostiles live in
 ## (CombatTargetController.find_nearest_hostile does the same client-side).
+## A boss always outranks its own adds: every boss spawns a pile of them on
+## enrage, and the swarm sitting closer to you would otherwise permanently
+## steal aim off the fight you're actually there for.
 func _engaged_hostile(caster: Character) -> HostileNpc:
 	var map: Node = caster.get_parent()
 	if map is not Map:
@@ -85,7 +88,9 @@ func _engaged_hostile(caster: Character) -> HostileNpc:
 	if container == null:
 		return null
 	var best: HostileNpc = null
+	var best_boss: HostileNpc = null
 	var best_dist: float = 260.0
+	var best_boss_dist: float = 260.0
 	var candidates: Array = container.get_children()
 	candidates.append_array(container.dynamic_nodes.values())
 	for node: Variant in candidates:
@@ -93,10 +98,14 @@ func _engaged_hostile(caster: Character) -> HostileNpc:
 		if npc == null or not is_instance_valid(npc) or npc.is_dead or npc.targeted_player != caster:
 			continue
 		var dist: float = caster.global_position.distance_to(npc.global_position)
-		if dist < best_dist:
+		if npc.enemy_data != null and npc.enemy_data.is_boss:
+			if dist < best_boss_dist:
+				best_boss_dist = dist
+				best_boss = npc
+		elif dist < best_dist:
 			best_dist = dist
 			best = npc
-	return best
+	return best_boss if best_boss != null else best
 
 
 func extra_stat_lines() -> PackedStringArray:
