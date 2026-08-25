@@ -15,26 +15,19 @@ extends ChannelAbility
 @export var projectile_scene: PackedScene = preload("res://source/common/gameplay/items/weapons/bow/arrow.tscn")
 @export var projectile_speed: float = 500.0
 
-## Deadeye pairing (docs/bow.md): charging Deadeye then opening Rapid Fire consumes
-## the armed shot to buff the WHOLE barrage instead of a single arrow — a real payoff
-## for setting it up first. Consumed once at channel start; reset every use_ability
-## so an un-armed Rapid Fire is unaffected. Per-weapon-instance (ability resources
-## are duplicated on equip), mirrors ChargeAbility's own instance state.
-var _armed_damage_mult: float = 1.0
-var _armed_pierce: int = 0
-var _armed_speed_mult: float = 1.0
+## Steady Aim pairing (docs/bow.md): the passive already rewards a full draw
+## released without moving (ChargeAbility.release_ability). Rapid Fire is a
+## MOBILE channel (you can walk at half speed), so it mirrors that same
+## reward: plant where you opened it and stay put for the whole barrage —
+## every arrow that tick gets the passive's bonus, not just a single shot.
+## Position is latched once at channel start; per-weapon-instance state
+## (ability resources are duplicated on equip), same pattern as ChargeAbility.
+var _channel_start_pos: Vector2
 
 
 func use_ability(user: Entity, direction: Vector2) -> void:
-	_armed_damage_mult = 1.0
-	_armed_pierce = 0
-	_armed_speed_mult = 1.0
 	if user is Character:
-		var armed: Dictionary = ShotOverrideAbility.take_armed(user as Character)
-		if not armed.is_empty():
-			_armed_damage_mult = float(armed.get("mult", 1.0))
-			_armed_pierce = int(armed.get("pierce", 0))
-			_armed_speed_mult = float(armed.get("speed", 1.0))
+		_channel_start_pos = (user as Character).global_position
 	super.use_ability(user, direction)
 
 
@@ -46,15 +39,18 @@ func channel_tick(caster: Character) -> void:
 	var aim: Vector2 = Vector2.from_angle(caster.pivot)
 	if caster.flipped:
 		aim.x = -aim.x
+	var damage: float = caster.stats_component.get_stat(Stat.AD) * ad_ratio
+	# Same 6px tolerance ChargeAbility uses for its planted-draw check.
+	if caster.global_position.distance_to(_channel_start_pos) <= 6.0:
+		var steady: float = caster.stats_component.get_stat(&"steady_aim")
+		if steady > 0.0:
+			damage *= 1.0 + steady / 100.0
 	var projectile: Projectile = projectile_scene.instantiate()
 	projectile.top_level = true
 	projectile.direction = aim
-	projectile.speed = projectile_speed * _armed_speed_mult
+	projectile.speed = projectile_speed
 	projectile.source = caster
-	projectile.damage = caster.stats_component.get_stat(Stat.AD) * ad_ratio * _armed_damage_mult
-	if _armed_pierce > 0:
-		projectile.piercing = true
-		projectile.pierce_left = _armed_pierce
+	projectile.damage = damage
 	projectile.global_position = AbilityResource.muzzle_position(caster, aim)
 	caster.add_child(projectile)
 
