@@ -41,7 +41,7 @@ script = ExtResource("99_col")
 ground_size = Vector2(832, 512)
 shoreline = PackedVector2Array(0, 266, 16, 266, 32, 266, 48, 266, 64, 266, 80, 266, 96, 266, 112, 266, 128, 266, 144, 266, 160, 266, 176, 266, 192, 266, 208, 266, 224, 266, 240, 266, 256, 266, 272, 266, 288, 298, 304, 298, 320, 298, 336, 298, 352, 330, 368, 330, 384, 330, 400, 330, 416, 330, 432, 330, 448, 362, 464, 362, 480, 362, 496, 362, 512, 394, 528, 394, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 394, 656, 394, 672, 394, 688, 394, 704, 394, 720, 394, 736, 394, 752, 394, 768, 362, 784, 362, 800, 362, 816, 362)
 dock_walk = Rect2(400, 236, 32, 120)
-boat_pad = Rect2(408, 296, 72, 56)
+boat_pad = Rect2(400, 320, 90, 70)
 solid_footprints = Array[Rect2]([Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
 rim_east = false
 rim_north = false
@@ -67,22 +67,20 @@ station = ExtResource("7_cook")
 
 [node name="Sprite2D" type="Sprite2D" parent="CookingStation"]
 position = Vector2(0, -16)
+texture = ExtResource("8_cookart")
 
 [node name="Banker" parent="." instance=ExtResource("20_npc")]
 position = Vector2(560, 260)
 npc_resource = ExtResource("21_banker")
-texture = ExtResource("8_cookart")
 
 [node name="Dock" type="Sprite2D" parent="."]
-z_index = 1
 centered = false
 position = Vector2(400, 236)
 texture = ExtResource("10_dock")
 
 [node name="FishingBoat" type="Sprite2D" parent="."]
-z_index = 2
 centered = false
-position = Vector2(452, 296)
+position = Vector2(434, 344)
 texture = ExtResource("12_boat")
 
 [node name="BoatLabel" type="Label" parent="."]
@@ -98,7 +96,7 @@ text = "Deep Cove"
 horizontal_alignment = 1
 
 [node name="BoatToDeepCove" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(440, 328)
+position = Vector2(454, 376)
 target = NodePath("../../WoodlandDeepCove/BoatToBeach")
 
 [node name="CollisionShape2D" parent="BoatToDeepCove" index="0"]

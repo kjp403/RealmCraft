@@ -11,6 +11,6 @@ description = "A cool blue bar smelted from mithril ore."
 vendor_value = 30
 can_trade = true
 metadata/_custom_type_script = "uid://nsr1timk430j"
-stack_limit = 50
+stack_limit = 10
 metadata/slug = &"mithril_bar"
 metadata/id = 256

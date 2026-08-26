@@ -46,6 +46,18 @@ func channel_tick(caster: Character) -> void:
 	var aim: Vector2 = Vector2.from_angle(caster.pivot)
 	if caster.flipped:
 		aim.x = -aim.x
+	# caster.pivot is the HAND socket rotation: it lerps toward the cursor at
+	# 17.5 rad/s and only reaches the server over a 20 Hz sync, so a real arrow
+	# fired straight down that vector visibly trails a moving target — the wide
+	# melee arcs (Lightning Lash) never show this because their hitbox eats the
+	# error. Snap onto whatever's ALREADY fighting us — authoritative, no lag,
+	# and safe: only a hostile that has targeted this caster, same rule
+	# AimAssist uses client-side, so this can't drag a stray mob into the fight.
+	var locked: HostileNpc = _engaged_hostile(caster)
+	if locked != null:
+		var to_target: Vector2 = locked.global_position - caster.global_position
+		if to_target != Vector2.ZERO and absf(aim.angle_to(to_target)) <= deg_to_rad(35.0):
+			aim = to_target.normalized()
 	var damage: float = caster.stats_component.get_stat(Stat.AD) * ad_ratio
 	if is_planted(caster):
 		var steady: float = caster.stats_component.get_stat(&"steady_aim")
@@ -59,6 +71,41 @@ func channel_tick(caster: Character) -> void:
 	projectile.damage = damage
 	projectile.global_position = AbilityResource.muzzle_position(caster, aim)
 	caster.add_child(projectile)
+
+
+## Nearest living hostile that has THIS caster as its target — mirrors
+## AimAssist._is_eligible's "already committed to the fight" rule, just
+## server-side and authoritative. Walks both buckets hostiles live in
+## (CombatTargetController.find_nearest_hostile does the same client-side).
+## A boss always outranks its own adds: every boss spawns a pile of them on
+## enrage, and the swarm sitting closer to you would otherwise permanently
+## steal aim off the fight you're actually there for.
+func _engaged_hostile(caster: Character) -> HostileNpc:
+	var map: Node = caster.get_parent()
+	if map is not Map:
+		return null
+	var container: ReplicatedPropsContainer = (map as Map).replicated_props_container
+	if container == null:
+		return null
+	var best: HostileNpc = null
+	var best_boss: HostileNpc = null
+	var best_dist: float = 260.0
+	var best_boss_dist: float = 260.0
+	var candidates: Array = container.get_children()
+	candidates.append_array(container.dynamic_nodes.values())
+	for node: Variant in candidates:
+		var npc: HostileNpc = node as HostileNpc
+		if npc == null or not is_instance_valid(npc) or npc.is_dead or npc.targeted_player != caster:
+			continue
+		var dist: float = caster.global_position.distance_to(npc.global_position)
+		if npc.enemy_data != null and npc.enemy_data.is_boss:
+			if dist < best_boss_dist:
+				best_boss_dist = dist
+				best_boss = npc
+		elif dist < best_dist:
+			best_dist = dist
+			best = npc
+	return best_boss if best_boss != null else best
 
 
 func extra_stat_lines() -> PackedStringArray:

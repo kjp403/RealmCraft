@@ -394,14 +394,20 @@ func is_equip_casting() -> bool:
 ## bar + ability lock, but move-free). On landing the hand slot becomes that item, so
 ## it MOUNTS (weapon, potion, anything) through _on_slot_changed -> item.equip. A newer
 ## draw abandons this one (token). Identical for every item type — the unified hand.
-func begin_hand_draw(item_id: int, duration_ms: int = WEAPON_DRAW_MS) -> void:
+## [param lock_abilities] is the anti-fast-swap protection weapon draws need (see
+## action.perform.gd); potions/consumables pass false so chugging one mid-fight
+## can't repeatedly stall Q/E for its whole draw window.
+func begin_hand_draw(
+	item_id: int, duration_ms: int = WEAPON_DRAW_MS, lock_abilities: bool = true
+) -> void:
 	if not GameMode.is_world_server():
 		return
 	# Leaving the tome (swap / drink draw) ends Battle Form immediately.
 	BattleFormState.cancel_on(self)
 	_equip_cast_token += 1
 	var token: int = _equip_cast_token
-	_equip_cast_until_ms = Time.get_ticks_msec() + duration_ms
+	if lock_abilities:
+		_equip_cast_until_ms = Time.get_ticks_msec() + duration_ms
 	var peer: int = int(player_resource.current_peer_id)
 	if peer > 0:
 		WorldServer.curr.data_push.rpc_id(peer, &"equip.cast", {"ms": duration_ms, "id": item_id})

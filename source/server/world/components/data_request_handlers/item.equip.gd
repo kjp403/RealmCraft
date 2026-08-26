@@ -99,7 +99,10 @@ func data_request_handler(
 		# draw it in the SAME way. A consumable mounts a node with a "drink" action; a
 		# plain item just shows in hand with no ability. Either way it STAYS in the bag
 		# (referenced), so no removal here. A non-holdable item simply does nothing.
-		player.begin_hand_draw(item_id)
+		# lock_abilities=false: the weapon-swap protection doesn't apply to potions —
+		# spamming HP pots in a boss fight was stalling Q/E for the whole draw window
+		# every single sip.
+		player.begin_hand_draw(item_id, Player.WEAPON_DRAW_MS, false)
 		return {"ok": true}
 	return {"ok": false, "reason": "cant_equip"}
 

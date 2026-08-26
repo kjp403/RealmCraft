@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_script")
 coating_kind = &"burn"
-coating_potency = 6.0
+coating_potency = 28.0
 coating_hit_duration_s = 5.0
 coating_duration_s = 300.0
 shared_cooldown_ms = 3000

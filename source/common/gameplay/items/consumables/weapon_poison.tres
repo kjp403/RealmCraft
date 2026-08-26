@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_script")
 coating_kind = &"poison"
-coating_potency = 4.0
+coating_potency = 18.0
 coating_hit_duration_s = 6.0
 coating_duration_s = 300.0
 shared_cooldown_ms = 3000

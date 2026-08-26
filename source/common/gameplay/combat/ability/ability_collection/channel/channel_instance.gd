@@ -30,6 +30,7 @@ func _ready() -> void:
 		"d": ability.channel_duration_s,
 		"r": ability.radius,
 		"k": ability.visual_kind,
+		"t": ability.tick_interval_s, # visuals that pulse per-tick (rapid_fire) match the real cadence
 		"an": ability.name, # so the caster's ability bar can light the matching tile
 		"mob": ability.mobile, # mobile channel: the wielder moves (slowed) instead of rooting
 		"msm": ability.mobile_speed_mult,

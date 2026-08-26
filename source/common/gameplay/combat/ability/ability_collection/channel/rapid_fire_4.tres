@@ -10,6 +10,7 @@ projectile_speed = 620.0
 channel_duration_s = 3.6
 tick_interval_s = 0.25
 mana_per_tick = 4.5
+visual_kind = &"rapid_fire"
 mobile = true
 mobile_speed_mult = 0.65
 name = "Rapid Fire IV"

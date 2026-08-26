@@ -41,16 +41,25 @@ func _add_water_colliders(body: StaticBody2D) -> void:
 	if shoreline.is_empty():
 		return
 	var walk := _walkable_union()
-	# Vertical strips between shoreline samples. Skip / split any strip that
-	# overlaps the dock or boat pad so those stay walkable.
-	for i: int in range(shoreline.size() - 1):
-		var a: Vector2 = shoreline[i]
-		var b: Vector2 = shoreline[i + 1]
-		var x0: float = minf(a.x, b.x)
-		var x1: float = maxf(a.x, b.x)
+	# One rect PER 16px shoreline sample used to mean one separate CollisionShape2D
+	# per step — hundreds of them on a long beach (Deep Shoals: ~150). Walking near
+	# the waterline meant constantly brushing the seam between two flush, same-height
+	# boxes, and move_and_slide snags on those internal box corners even though the
+	# combined surface is flat — it read as catching on a wall every few steps.
+	# Merge consecutive samples at the SAME shore height into one wide strip first;
+	# a seam only remains where the shoreline actually steps, which is the one place
+	# a collision edge is supposed to be.
+	var i: int = 0
+	while i < shoreline.size() - 1:
+		var x0: float = shoreline[i].x
+		var y_shore: float = maxf(shoreline[i].y, shoreline[i + 1].y)
+		var j: int = i + 1
+		while j < shoreline.size() - 1 and is_equal_approx(maxf(shoreline[j].y, shoreline[j + 1].y), y_shore):
+			j += 1
+		var x1: float = shoreline[j].x
+		i = j
 		if x1 <= x0:
 			continue
-		var y_shore: float = maxf(a.y, b.y)
 		var strip := Rect2(x0, y_shore, x1 - x0, ground_size.y - y_shore)
 		if strip.size.y <= 0.0:
 			continue
