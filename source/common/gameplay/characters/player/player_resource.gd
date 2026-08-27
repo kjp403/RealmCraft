@@ -12,6 +12,9 @@ const MAX_DISPLAYED_TROPHIES: int = 3
 
 const BASE_STATS: Dictionary[StringName, float] = {
 	Stat.HEALTH_MAX: 50.0,
+	# Out-of-combat healing, in HP per second (was a hardcoded 1 HP / 2s tick).
+	# Vitality and gear add to it; combat shuts it off.
+	Stat.HEALTH_REGEN: 0.5,
 	# Low innate attack power on purpose: most of your damage comes from your
 	# weapon's AD + the Strength attribute, so leveling and gear both matter and
 	# a fresh level-1 is meant to feel weak. See AttributeMap / the weapon items.

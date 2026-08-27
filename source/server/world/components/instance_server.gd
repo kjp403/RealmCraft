@@ -74,6 +74,7 @@ func _ready() -> void:
 
 ## peer_id → odd/even toggle so out-of-combat HP heals 1 every 2 seconds on the
 ## 1 Hz status tick (see [method _on_status_tick]).
+## peer_id -> carried fractional HP from the out-of-combat regen tick.
 var _hp_regen_tick: Dictionary = {}
 
 
@@ -133,12 +134,19 @@ func _tick_player_hp_regen(peer_id: int, player: Player) -> void:
 	if health >= health_max:
 		_hp_regen_tick.erase(peer_id)
 		return
-	var phase: int = int(_hp_regen_tick.get(peer_id, 0)) + 1
-	_hp_regen_tick[peer_id] = phase
-	# Heal on every 2nd out-of-combat tick → 1 HP / 2 seconds.
-	if phase % 2 != 0:
+	# HEALTH_REGEN is HP per second (base 0.5 = the old 1 HP / 2s), grown by
+	# Vitality and gear. Fractions are carried between ticks so a sub-1/s regen
+	# still heals steadily instead of rounding away to nothing.
+	var regen: float = player.stats_component.get_stat(Stat.HEALTH_REGEN)
+	if regen <= 0.0:
+		_hp_regen_tick.erase(peer_id)
 		return
-	player.stats_component.set_stat(Stat.HEALTH, minf(health_max, health + 1.0))
+	var carried: float = float(_hp_regen_tick.get(peer_id, 0.0)) + regen
+	var healed: float = floorf(carried)
+	_hp_regen_tick[peer_id] = carried - healed
+	if healed <= 0.0:
+		return
+	player.stats_component.set_stat(Stat.HEALTH, minf(health_max, health + healed))
 
 
 func load_map(map_path: String) -> void:
@@ -331,6 +339,10 @@ func instantiate_player(peer_id: int) -> Player:
 		# (docs/pvp_balance.md). Retroactive by construction: stats are rebuilt
 		# from scratch here on every spawn, so existing characters get it on login.
 		player_stats[Stat.HEALTH_MAX] += PlayerResource.HEALTH_PER_LEVEL * (player_resource.level - 1)
+
+		# Fold any legacy attribute key onto its canonical name before composing.
+		if AttributeMap.normalize_dict(player_resource.attributes):
+			world_server.database.save_player(player_resource)
 
 		var stats_from_attributes: Dictionary[StringName, float]
 		stats_from_attributes.assign(AttributeMap.attr_to_stats(player_resource.attributes))

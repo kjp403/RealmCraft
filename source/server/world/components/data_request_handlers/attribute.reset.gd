@@ -40,6 +40,13 @@ func data_request_handler(
 	if hp > hp_max:
 		player.stats_component.modify_stat(Stat.HEALTH, hp_max - hp)
 
+	# Same for mana: Spirit and Intelligence both grow the pool, so respeccing
+	# out of them can leave the bar sitting above its new maximum.
+	var mana_max: float = player.stats_component.get_stat(Stat.MANA_MAX)
+	var mana: float = player.stats_component.get_stat(Stat.MANA)
+	if mana > mana_max:
+		player.stats_component.modify_stat(Stat.MANA, mana_max - mana)
+
 	# Reset the build + hand the points back to spend.
 	pr.attributes.clear()
 	pr.available_attributes_points += refunded
