@@ -24,7 +24,16 @@ const PLAYER_SHAPE_OFFSET: Vector2 = Vector2(0.0, -3.0)
 ## clip the corner the grid had just routed it around.
 const WAYPOINT_REACHED_DISTANCE: float = 4.0
 const SEARCH_RADIUS_CELLS: int = 10
-const BUILD_BATCH_SIZE: int = 320
+## Time-budgeted instead of a fixed cell count: a physics shape query here
+## measures ~5us, so a flat 320-cell batch (the old value) spent under 2ms of
+## real work per yielded frame — on a biome sub-level map (~205k cells,
+## Gutterworks/drowned_cistern/sunspire_terraces/sunken_tombs/ossuary, all
+## ~5x a hub map like Sewers) that is 600+ frames, ~10s, of click-to-move
+## silently doing nothing with zero player feedback while WASD still works,
+## which reads as "click is just broken here." Budgeting real time instead
+## keeps every frame cheap while finishing in a few hundred ms regardless of
+## map size or hardware.
+const BUILD_FRAME_BUDGET_USEC: int = 8000
 const UNBOUNDED_LIMIT: int = 1000000
 
 var _player: LocalPlayer
@@ -177,7 +186,7 @@ func _build_grid(generation: int, map: Map) -> void:
 	query.collide_with_areas = false
 
 	var space: PhysicsDirectSpaceState2D = _player.get_world_2d().direct_space_state
-	var processed: int = 0
+	var batch_started_usec: int = Time.get_ticks_usec()
 	for y: int in range(grid.region.position.y, grid.region.end.y):
 		for x: int in range(grid.region.position.x, grid.region.end.x):
 			if not _build_is_current(generation, map):
@@ -191,9 +200,9 @@ func _build_grid(generation: int, map: Map) -> void:
 			if not space.intersect_shape(query, 1).is_empty():
 				grid.set_point_solid(point_id, true)
 
-			processed += 1
-			if processed % BUILD_BATCH_SIZE == 0:
+			if Time.get_ticks_usec() - batch_started_usec >= BUILD_FRAME_BUDGET_USEC:
 				await scene_tree.process_frame
+				batch_started_usec = Time.get_ticks_usec()
 
 	if not _build_is_current(generation, map):
 		return

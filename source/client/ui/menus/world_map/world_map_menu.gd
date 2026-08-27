@@ -11,6 +11,11 @@ const FALLBACK_ZOOM: float = 0.28
 const FIT_PADDING: float = 0.88
 ## Legend width — keep map+legend under 960×540 with shell margins.
 const LEGEND_WIDTH: float = 168.0
+## POI marker colors: NPCs (gold, matches the area label) vs. warps/portals
+## (violet, matches the sealed-portal UI elsewhere) so the two read apart at a
+## glance without needing separate icon art.
+const POI_NPC_COLOR: Color = Color(0.95, 0.82, 0.55)
+const POI_WARP_COLOR: Color = Color(0.72, 0.58, 0.98)
 
 
 var _sub_viewport: SubViewport
@@ -25,6 +30,14 @@ var _map_zoom: float = FALLBACK_ZOOM
 var _camera_center: Vector2 = Vector2.ZERO
 var _resolved_map: Node = null
 var _view_size: Vector2 = Vector2(VIEW_SIZE)
+
+## Points of interest on the current map: NPCs (shops, quest givers, slayer
+## masters, ...) and Warpers/Portals with a destination. Discovered by walking
+## the live map's tree (same source of truth the game itself uses) so the map
+## never drifts out of sync with hand-placed content — no separate POI list to
+## keep updated as zones change.
+var _poi_layer: Control
+var _poi_markers: Array[Dictionary] = [] # [{control, world_pos}]
 
 
 func _ready() -> void:
@@ -87,9 +100,11 @@ func _process(_delta: float) -> void:
 	if current_map != _resolved_map:
 		_resolved_map = current_map
 		_fit_camera_to_map(current_map)
+		_refresh_poi_markers(current_map)
 	_sync_viewport_size()
 	_map_camera.global_position = _camera_center
 	_update_player_marker(player)
+	_update_poi_markers()
 
 
 func _build_body() -> void:
@@ -158,6 +173,11 @@ func _build_body() -> void:
 	_map_texture.texture = _sub_viewport.get_texture()
 	_map_texture.gui_input.connect(_on_map_gui_input)
 	_map_host.add_child(_map_texture)
+
+	_poi_layer = Control.new()
+	_poi_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_poi_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_host.add_child(_poi_layer)
 
 	_player_marker = Label.new()
 	_player_marker.text = UiGlyphs.diamond()
@@ -230,6 +250,7 @@ func _attach_world() -> void:
 	)
 	_resolved_map = map
 	_fit_camera_to_map(map)
+	_refresh_poi_markers(map)
 	_area_label.text = (
 		String(map.name).replace("_", " ")
 		if map != null
@@ -356,6 +377,13 @@ func _on_map_gui_input(event: InputEvent) -> void:
 func _update_player_marker(player: LocalPlayer) -> void:
 	if _player_marker == null or _map_texture == null:
 		return
+	_player_marker.position = _world_to_map_local(player.global_position) - Vector2(8, 12)
+
+
+## Project a world-space position onto the letterboxed map texture's local
+## coordinate space. Shared by the player marker and the POI markers so both
+## agree on the same fit-to-frame math the click handler already relies on.
+func _world_to_map_local(world_pos: Vector2) -> Vector2:
 	var tex_size: Vector2 = _view_size
 	var draw_size: Vector2 = _map_texture.size if _map_texture.size.x > 0.0 else tex_size
 	var scale: float = minf(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
@@ -363,9 +391,66 @@ func _update_player_marker(player: LocalPlayer) -> void:
 	var origin := (draw_size - drawn) * 0.5
 	var screen_in_tex: Vector2 = (
 		tex_size * 0.5
-		+ (player.global_position - _camera_center) * _map_zoom
+		+ (world_pos - _camera_center) * _map_zoom
 	)
-	_player_marker.position = origin + screen_in_tex * scale - Vector2(8, 12)
+	return origin + screen_in_tex * scale
+
+
+## Rebuild the POI marker set for [param map] by walking its live node tree —
+## every interactive NPC (shopkeepers, quest givers, slayer masters, ...) and
+## every Warper/Portal with a destination becomes a labeled marker. Reusing the
+## actual placed nodes means the map can never point players at a stale
+## location: a moved NPC or a re-routed door updates the map the next time
+## it's opened.
+func _refresh_poi_markers(map: Node) -> void:
+	for entry: Dictionary in _poi_markers:
+		(entry["control"] as Control).queue_free()
+	_poi_markers.clear()
+	if map == null or _poi_layer == null:
+		return
+	var npcs: Array[NPC] = []
+	var warpers: Array[Warper] = []
+	_collect_pois(map, npcs, warpers)
+	for npc: NPC in npcs:
+		_add_poi_marker(npc.global_position, npc.npc_resource.npc_name, POI_NPC_COLOR, UiGlyphs.bullet())
+	for warper: Warper in warpers:
+		var label: String = warper.destination_label if warper is Portal and not (warper as Portal).destination_label.is_empty() \
+			else warper.target_instance.display_title()
+		_add_poi_marker(warper.global_position, label, POI_WARP_COLOR, UiGlyphs.right_arrow())
+
+
+func _collect_pois(node: Node, npcs: Array[NPC], warpers: Array[Warper]) -> void:
+	if node is NPC:
+		var npc: NPC = node
+		if npc.visible and npc.npc_resource != null and not npc.npc_resource.interactions.is_empty():
+			npcs.append(npc)
+	elif node is Warper:
+		var warper: Warper = node
+		if warper.target_instance != null:
+			warpers.append(warper)
+	for child: Node in node.get_children():
+		_collect_pois(child, npcs, warpers)
+
+
+func _add_poi_marker(world_pos: Vector2, text: String, color: Color, glyph: String) -> void:
+	var marker := Label.new()
+	marker.text = "%s %s" % [glyph, text]
+	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	marker.add_theme_font_size_override(&"font_size", 11)
+	marker.add_theme_color_override(&"font_color", color)
+	marker.add_theme_color_override(&"font_outline_color", Color(0.05, 0.06, 0.1, 0.95))
+	marker.add_theme_constant_override(&"outline_size", 3)
+	_poi_layer.add_child(marker)
+	_poi_markers.append({"control": marker, "world_pos": world_pos})
+
+
+func _update_poi_markers() -> void:
+	if _map_texture == null:
+		return
+	for entry: Dictionary in _poi_markers:
+		var control: Control = entry["control"]
+		var pos: Vector2 = _world_to_map_local(entry["world_pos"])
+		control.position = pos - Vector2(control.size.x * 0.5, control.size.y + 4.0)
 
 
 func _frame_style() -> StyleBoxFlat:
