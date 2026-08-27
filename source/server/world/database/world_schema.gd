@@ -69,6 +69,12 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 20:
 		_migration_v20(db)
 		_set_schema_version(db, 20)
+	if version < 21:
+		_migration_v21(db)
+		_set_schema_version(db, 21)
+	if version < 22:
+		_migration_v22(db)
+		_set_schema_version(db, 22)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -354,6 +360,63 @@ static func _migration_v19(db: SQLite) -> void:
 static func _migration_v20(db: SQLite) -> void:
 	if not _column_exists(db, "players", "inventory_bags"):
 		db.query("ALTER TABLE players ADD COLUMN inventory_bags INTEGER NOT NULL DEFAULT 1;")
+
+
+## v21: the player Trading Post (docs in source/common/gameplay/market/market.gd).
+## `market_stores` is one row per character (their stall); `market_listings` holds
+## the ESCROWED goods — a listed stack has already left the seller's bag, so the
+## row itself is the item's only home until it sells, is pulled, or expires. Two
+## tables so a store can be renamed / closed without touching its stock.
+static func _migration_v21(db: SQLite) -> void:
+	_create_table_if_missing(db, "market_stores", {
+		"store_id": {"data_type": "int", "primary_key": true, "not_null": true, "auto_increment": true},
+		"owner_id": {"data_type": "int", "not_null": true},
+		"store_name": {"data_type": "text", "not_null": true},
+		"is_open": {"data_type": "int", "not_null": true},
+		"updated_at_ms": {"data_type": "int", "not_null": true}
+	})
+	db.query("CREATE UNIQUE INDEX IF NOT EXISTS idx_market_stores_owner ON market_stores(owner_id);")
+
+	# state: 0 = active (escrowed, buyable), 1 = sold out, 2 = pulled by the seller.
+	# amount is decremented in place on a partial buy; a listing flips to state 1
+	# only when it hits 0, so one row serves an entire stack.
+	_create_table_if_missing(db, "market_listings", {
+		"listing_id": {"data_type": "int", "primary_key": true, "not_null": true, "auto_increment": true},
+		"store_id": {"data_type": "int", "not_null": true},
+		"seller_id": {"data_type": "int", "not_null": true},
+		"seller_name": {"data_type": "text", "not_null": true},
+		"item_id": {"data_type": "int", "not_null": true},
+		"amount": {"data_type": "int", "not_null": true},
+		"unit_price": {"data_type": "int", "not_null": true},
+		"state": {"data_type": "int", "not_null": true},
+		"created_at_ms": {"data_type": "int", "not_null": true}
+	})
+	db.query("CREATE INDEX IF NOT EXISTS idx_market_listings_store ON market_listings(store_id, state);")
+	db.query("CREATE INDEX IF NOT EXISTS idx_market_listings_seller ON market_listings(seller_id, state);")
+	db.query("CREATE INDEX IF NOT EXISTS idx_market_listings_item ON market_listings(item_id, state);")
+
+
+## v22: Trading Post sale history. One row per completed purchase, written inside
+## the same transaction as the sale itself, so the ticker can never show a trade
+## that was rolled back. This is what gives players a real price signal — a stall
+## owner prices against what things ACTUALLY sold for, not against a guess.
+## Names are snapshotted at write time, like guild_log, so the history stays a
+## historical record if someone renames.
+static func _migration_v22(db: SQLite) -> void:
+	_create_table_if_missing(db, "market_trades", {
+		"trade_id": {"data_type": "int", "primary_key": true, "not_null": true, "auto_increment": true},
+		"item_id": {"data_type": "int", "not_null": true},
+		"amount": {"data_type": "int", "not_null": true},
+		"unit_price": {"data_type": "int", "not_null": true},
+		"total": {"data_type": "int", "not_null": true},
+		"seller_id": {"data_type": "int", "not_null": true},
+		"seller_name": {"data_type": "text", "not_null": true},
+		"buyer_id": {"data_type": "int", "not_null": true},
+		"buyer_name": {"data_type": "text", "not_null": true},
+		"sold_at_ms": {"data_type": "int", "not_null": true}
+	})
+	db.query("CREATE INDEX IF NOT EXISTS idx_market_trades_item ON market_trades(item_id, trade_id DESC);")
+	db.query("CREATE INDEX IF NOT EXISTS idx_market_trades_recent ON market_trades(trade_id DESC);")
 
 
 static func _unique_display_name_candidate(base: String, claimed: Dictionary) -> String:

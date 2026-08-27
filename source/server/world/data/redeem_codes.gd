@@ -108,6 +108,34 @@ static func validate_grants(grants: Array) -> bool:
 	return true
 
 
+## Do the ITEM grants in [param grants] fit in the character's bags right now?
+## Currency / xp / titles / skins never need a bag square, so a bundle without
+## item grants always fits. [method apply_grants] adds items UNCAPPED (it has to
+## — a half-applied bundle would be worse), so callers that can refuse and retry
+## later (mail claims, market payouts) gate on this first instead of letting a
+## claim silently push a bag past [constant Inventory.MAX_SLOTS].
+static func grants_fit(pr: PlayerResource, grants: Array) -> bool:
+	# Simulate against a copy so a multi-item bundle accounts for its own earlier
+	# stacks — checking each grant against the untouched bag would pass a bundle
+	# of 40 distinct items into a bag with one free slot.
+	var probe: Dictionary = pr.inventory.duplicate(true)
+	for g: Variant in grants:
+		if not (g is Dictionary):
+			continue
+		var grant: Dictionary = g
+		if str(grant.get("type", "")) != "item":
+			continue
+		var item_id: int = int(grant.get("id", 0))
+		var amount: int = int(grant.get("amount", 0))
+		# capacity is PER BAG here — can_add multiplies it by bag_count itself.
+		if not Inventory.try_add_item(
+			probe, item_id, amount, Inventory.MAX_SLOTS, false,
+			pr.active_inventory_bag, pr.inventory_bags
+		):
+			return false
+	return true
+
+
 ## Applies a pre-validated bundle to the character, mutating PlayerResource in
 ## place. Returns reward descriptors for the client (see _grant_descriptor). No
 ## explicit save: the grants AND the redeemed-code record live on the same

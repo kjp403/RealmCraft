@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://cmailclerk00001"]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" uid="uid://dk2y0vafqc2ds" path="res://source/common/gameplay/characters/npc/interactions/menu_interaction.gd" id="2_menu"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
+[ext_resource type="SpriteFrames" uid="uid://bfer1b8yk1buk" path="res://source/common/gameplay/characters/sprite_frames/royal_archer.tres" id="4_skin"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+
+[sub_resource type="Resource" id="Menu_mailbox"]
+script = ExtResource("2_menu")
+menu = &"mail"
+label_override = "Open Mailbox"
+
+[sub_resource type="Resource" id="Dialogue_mail"]
+script = ExtResource("3_dialogue")
+lines = Array[String](["Every market payout comes through me. Sell something and the gold waits here; buy something and the goods do.", "Nothing in the mailbox expires or goes astray, so claim it whenever you have a free bag slot.", "You can open the same mailbox anywhere from the menu panel — I am only here to save you the trip."])
+label_override = "What is the mailbox for?"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Mail Clerk"
+location_hint = "Guild Hall, the upper gallery"
+skin = ExtResource("4_skin")
+greeting = "Post for you? Sales, purchases and returns all land in your mailbox."
+interactions = Array[ExtResource("1_interaction")]([SubResource("Menu_mailbox"), SubResource("Dialogue_mail")])

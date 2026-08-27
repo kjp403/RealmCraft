@@ -6,6 +6,7 @@ var database_path: String
 var db: SQLite
 var store: WorldStoreSqlite
 var mail_store: MailStore
+var market_store: MarketStore
 
 
 func start_database(world_info: Dictionary) -> void:
@@ -14,6 +15,7 @@ func start_database(world_info: Dictionary) -> void:
 	WorldSchema.ensure_schema(db)
 	store = WorldStoreSqlite.new(db)
 	mail_store = MailStore.new(db)
+	market_store = MarketStore.new(db)
 	if ServerEnvironment.is_live():
 		_live_security_scrub_roles()
 

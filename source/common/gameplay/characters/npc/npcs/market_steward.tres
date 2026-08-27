@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3 uid="uid://cmarketstall001"]
+
+[ext_resource type="Script" uid="uid://bg3vv3lo3vxog" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" uid="uid://dk2y0vafqc2ds" path="res://source/common/gameplay/characters/npc/interactions/menu_interaction.gd" id="2_menu"]
+[ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
+[ext_resource type="SpriteFrames" uid="uid://cguofoiw5svvs" path="res://source/common/gameplay/characters/sprite_frames/scholar_cataloguer.tres" id="4_skin"]
+[ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+
+[sub_resource type="Resource" id="Menu_view_shops"]
+script = ExtResource("2_menu")
+menu = &"market"
+arg = "browse"
+label_override = "View Shops"
+
+[sub_resource type="Resource" id="Menu_open_store"]
+script = ExtResource("2_menu")
+menu = &"market"
+arg = "mine"
+label_override = "Open Store"
+
+[sub_resource type="Resource" id="Dialogue_market"]
+script = ExtResource("3_dialogue")
+lines = Array[String](["Anything you own can go on a stall — except quest relics, which are bound to your own story, and gold, which is what buyers pay with.", "List a stack and it leaves your bag for the stall. Nothing is lost: pull it back any time and it returns through your mailbox.", "When something sells, the gold lands in your mailbox and the goods land in theirs. Your stall keeps trading even when you are not here."])
+label_override = "How does the Trading Post work?"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Market Stall"
+location_hint = "Guild Hall, the upper gallery"
+skin = ExtResource("4_skin")
+greeting = "Welcome to the Trading Post. Browse the open stalls, or set out a stall of your own."
+interactions = Array[ExtResource("1_interaction")]([SubResource("Menu_view_shops"), SubResource("Menu_open_store"), SubResource("Dialogue_market")])

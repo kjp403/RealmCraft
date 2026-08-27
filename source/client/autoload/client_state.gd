@@ -252,6 +252,11 @@ func _ready() -> void:
 	Client.subscribe(&"stats.get", func(data: Dictionary):
 		stats.data.merge(data, true)
 	)
+	# A stall sold something while its owner happened to be online. Purely a
+	# nudge — the gold is already sitting in their mailbox either way.
+	Client.subscribe(&"market.sold", func(data: Dictionary):
+		Toaster.toast(str(data.get("text", "Something sold at your stall.")), 4.0)
+	)
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
 	Client.subscribe(&"item.picked_up", _on_item_picked_up)
