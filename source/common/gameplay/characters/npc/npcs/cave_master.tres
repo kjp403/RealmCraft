@@ -20,5 +20,5 @@ label_override = "Ask about the caves"
 script = ExtResource("5_npc")
 npc_name = "Cave Master"
 skin = ExtResource("6_skin")
-greeting = "Welcome to the dark, traveler. Potions are dearer here, but spore steel fetches a fair price."
+greeting = "Welcome to the dark, traveler. I stopped stocking potions — the stalls at the Trading Post undercut me. Spore steel still fetches a fair price."
 interactions = Array[ExtResource("1_inter")]([SubResource("Shop"), SubResource("Talk")])

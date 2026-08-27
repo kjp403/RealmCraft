@@ -1,4 +1,33 @@
 extends Node
+
+## Mira's vial price. Every potion in the game is brewed from one, so this is the
+## floor under every potion price on the Trading Post — set to 500 so a brewed
+## potion always has real cost behind it.
+const VIAL_PRICE: int = 500
+## No potion may sell to a vendor for more than this.
+const VENDOR_VALUE_CAP: int = 100
+const POTION_VENDOR_VALUES: Dictionary = {
+	"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 25,
+	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 25,
+	"res://source/common/gameplay/items/consumables/health_potion.tres": 50,
+	"res://source/common/gameplay/items/consumables/mana_potion.tres": 50,
+	"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 100,
+	"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 100,
+	"res://source/common/gameplay/items/consumables/prayer_potion.tres": 100,
+}
+## The ONE shop still allowed to stock potions: the Lost Soul, who stands in all
+## three dungeons. Every other vendor was cleared out so players buy from players.
+const DUNGEON_SHOP: String = "res://source/common/gameplay/shops/resources/lost_soul_shop.tres"
+## What the Lost Soul charges: 2.5x the old town price. A potion down here is a
+## panic buy that costs you the run's profit, never a supply line — the whole
+## point is that restocking at the Trading Post before you go is the cheap play.
+const DUNGEON_POTION_PRICES: Dictionary = {
+	"res://source/common/gameplay/items/consumables/health_potion.tres": 2500,
+	"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 3750,
+	"res://source/common/gameplay/items/consumables/mana_potion.tres": 3750,
+	"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 5000,
+}
+const SHOP_DIR: String = "res://source/common/gameplay/shops/resources"
 ## Load-and-shape check for Farming herb ladder + Herblore alchemy station.
 ##
 ## Runs as a SCENE, not `-s`: under `-s` there are no autoloads, so
@@ -112,26 +141,30 @@ func _ready() -> void:
 				continue
 			if String(entry.item.get_meta(&"slug", &"")) == "vial_of_water":
 				vial_price = entry.price
-		if vial_price != 1000:
-			fails.append("Mira should sell vial of water for 1000, got %d" % vial_price)
+		if vial_price != VIAL_PRICE:
+			fails.append("Mira should sell vial of water for %d, got %d" % [
+				VIAL_PRICE, vial_price
+			])
 
-	var potion_buybacks: Dictionary = {
-		"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 375,
-		"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 563,
-		"res://source/common/gameplay/items/consumables/health_potion.tres": 750,
-		"res://source/common/gameplay/items/consumables/mana_potion.tres": 1125,
-		"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 1125,
-		"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 1500,
-	}
-	for path: String in potion_buybacks.keys():
+	# Potions are a PLAYER good: a vendor pays pocket change for one, so the only
+	# worthwhile place to sell is the Trading Post. The cap is the point — if a
+	# potion's vendor_value ever creeps back up, this fails.
+	for path: String in POTION_VENDOR_VALUES.keys():
 		var potion: Item = load(path)
-		var want: int = int(potion_buybacks[path])
+		var want: int = int(POTION_VENDOR_VALUES[path])
 		if potion == null:
 			fails.append("%s failed to load" % path.get_file())
 		elif potion.vendor_value != want:
-			fails.append("%s vendor_value %d, want %d (75%% buyback)" % [
+			fails.append("%s vendor_value %d, want %d" % [
 				path.get_file(), potion.vendor_value, want
 			])
+		elif potion.vendor_value > VENDOR_VALUE_CAP:
+			fails.append("%s vendor_value %d is over the %dg cap" % [
+				path.get_file(), potion.vendor_value, VENDOR_VALUE_CAP
+			])
+
+	fails.append_array(_check_no_potions_outside_dungeon())
+	fails.append_array(_check_dungeon_prices())
 
 	if fails.is_empty():
 		print("VERIFY_PASS herblore")
@@ -140,3 +173,56 @@ func _ready() -> void:
 		for f: String in fails:
 			print("VERIFY_FAIL ", f)
 		get_tree().quit(1)
+
+
+## Sweeps every shop resource for potion stock. A potion back on a town vendor's
+## shelf would quietly undercut the Trading Post, and it is one line in a .tres —
+## exactly the kind of change that lands without anyone noticing.
+func _check_dungeon_prices() -> Array[String]:
+	var fails: Array[String] = []
+	var shop: ShopResource = load(DUNGEON_SHOP) as ShopResource
+	if shop == null:
+		fails.append("lost_soul_shop.tres failed to load")
+		return fails
+	var seen: Dictionary = {}
+	for entry: ShopEntry in shop.entries:
+		if entry == null or entry.item == null:
+			continue
+		var path: String = entry.item.resource_path
+		if not DUNGEON_POTION_PRICES.has(path):
+			continue
+		seen[path] = true
+		var want: int = int(DUNGEON_POTION_PRICES[path])
+		if entry.price != want:
+			fails.append("Lost Soul %s costs %d, want %d" % [
+				entry.item.item_name, entry.price, want
+			])
+	for path: String in DUNGEON_POTION_PRICES.keys():
+		if not seen.has(path):
+			fails.append("Lost Soul no longer stocks %s" % String(path).get_file())
+	return fails
+
+
+func _check_no_potions_outside_dungeon() -> Array[String]:
+	var fails: Array[String] = []
+	var dir: DirAccess = DirAccess.open(SHOP_DIR)
+	if dir == null:
+		fails.append("could not open %s" % SHOP_DIR)
+		return fails
+	for file_name: String in dir.get_files():
+		if not file_name.ends_with(".tres"):
+			continue
+		var path: String = SHOP_DIR.path_join(file_name)
+		if path == DUNGEON_SHOP:
+			continue
+		var shop: ShopResource = load(path) as ShopResource
+		if shop == null or shop.entries == null:
+			continue
+		for entry: ShopEntry in shop.entries:
+			if entry == null or entry.item == null:
+				continue
+			if POTION_VENDOR_VALUES.has(entry.item.resource_path):
+				fails.append("%s still stocks %s — potions are dungeon-only" % [
+					file_name, entry.item.item_name
+				])
+	return fails

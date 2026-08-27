@@ -12,6 +12,6 @@ mana_amount = 100
 item_name = &"Mana Potion"
 item_icon = ExtResource("1_8k35l")
 description = "A swirl of blue, gone in one swallow."
-vendor_value = 1125
+vendor_value = 50
 metadata/slug = &"mana_potion"
 metadata/id = 75
