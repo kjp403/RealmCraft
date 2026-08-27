@@ -2,34 +2,10 @@
 
 [ext_resource type="Script" uid="uid://vvxt3lf10cxb" path="res://source/common/gameplay/shops/shop_entry.gd" id="1_entry"]
 [ext_resource type="Script" uid="uid://bsed5oxrf1q15" path="res://source/common/gameplay/shops/shop_resource.gd" id="2_shop"]
-[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="10_mhp"]
-[ext_resource type="Resource" uid="uid://ac0936bb83a74" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="11_mmp"]
-[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="12_hp"]
-[ext_resource type="Resource" uid="uid://ckwf1ifl3but0" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="13_mp"]
-
-[sub_resource type="Resource" id="Entry_mhp"]
-script = ExtResource("1_entry")
-item = ExtResource("10_mhp")
-price = 500
-
-[sub_resource type="Resource" id="Entry_mmp"]
-script = ExtResource("1_entry")
-item = ExtResource("11_mmp")
-price = 750
-
-[sub_resource type="Resource" id="Entry_hp"]
-script = ExtResource("1_entry")
-item = ExtResource("12_hp")
-price = 1000
-
-[sub_resource type="Resource" id="Entry_mp"]
-script = ExtResource("1_entry")
-item = ExtResource("13_mp")
-price = 1500
 
 [resource]
 script = ExtResource("2_shop")
 shop_name = "Cave Master's Cache"
-entries = Array[ExtResource("1_entry")]([SubResource("Entry_mhp"), SubResource("Entry_mmp"), SubResource("Entry_hp"), SubResource("Entry_mp")])
+entries = Array[ExtResource("1_entry")]([])
 buys_vendor_priced = false
 metadata/slug = &"cave_master_shop"

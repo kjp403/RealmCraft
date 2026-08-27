@@ -24,6 +24,11 @@ enum Tab { BROWSE, STALLS, MINE }
 ## or editing a listing that is already live.
 enum SidePanel { LIST, EDIT }
 
+## Square-edged, bordered chrome, local to this menu — the house theme's rounded
+## translucent widgets are wrong for a screen where players spend gold. See
+## market_style.gd.
+const Style := preload("res://source/client/ui/menus/market/market_style.gd")
+
 ## Detail pane width. Wide enough for a name, price block and sale history
 ## without squeezing the listing table, which is the part players scan.
 const DETAIL_WIDTH: float = 336.0
@@ -37,6 +42,9 @@ const COL_SELLER: float = 128.0
 ## Inset for a row's contents inside its Button / Panel. Without it the icon hugs
 ## the frame and a right-aligned price is clipped by the border.
 const ROW_PAD: int = 8
+## Fixed left column for form captions, so the Qty and Price boxes under it start
+## at the same x instead of stepping in and out with the label's length.
+const FIELD_LABEL_WIDTH: float = 60.0
 const ICON_SIZE: float = 28.0
 ## Coalescing window for live refreshes. A busy minute can push several changes;
 ## redrawing once at the end of them keeps the panel from strobing.
@@ -62,6 +70,9 @@ var _trades: Array = []
 ## item_id -> {"low", "avg", "high", "last", "units", "trades"} over the last day.
 var _stats: Dictionary = {}
 var _server_now_ms: int = 0
+## The board hit MAX_BROWSE_LISTINGS — the counter says "300+", never a number
+## that is quietly wrong.
+var _truncated: bool = false
 var _search: String = ""
 var _sort_mode: int = 0
 ## 0 = every stall; otherwise only this store's rows (set from the Stalls tab).
@@ -92,6 +103,7 @@ var _refresh_timer: SceneTreeTimer
 
 func _ready() -> void:
 	build_shell("Trading Post", null, true)
+	_apply_shell_chrome()
 	_build_header()
 	_page = MarginContainer.new()
 	_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -114,35 +126,75 @@ func open(arg: Variant) -> void:
 	_set_tab(Tab.MINE if wanted == "mine" else Tab.BROWSE)
 
 
+## Squares off the shared shell so the market doesn't wear half of one design and
+## half of another: a near-solid backdrop (a market is a place you go, not an
+## overlay you peek through), a hard rule under the header, and a bordered Close.
+func _apply_shell_chrome() -> void:
+	if backdrop != null:
+		backdrop.color = Color(0.020, 0.025, 0.038, 0.92)
+	var root: Control = content.get_parent() as Control
+	if root != null:
+		for child: Node in root.get_children():
+			if child is HSeparator:
+				var line: StyleBoxLine = StyleBoxLine.new()
+				line.color = Style.EDGE
+				line.thickness = 1
+				(child as HSeparator).add_theme_stylebox_override(&"separator", line)
+	for child: Node in header_right.get_children():
+		if child is Button:
+			Style.button(child as Button, Style.Kind.DEFAULT, 32)
+
+
 func _build_header() -> void:
 	var tabs: HBoxContainer = HBoxContainer.new()
-	tabs.add_theme_constant_override(&"separation", 6)
+	# Negative separation collapses each pair of touching 1px borders into one
+	# shared hairline, so the three tabs read as a single segmented control
+	# instead of three floating buttons.
+	tabs.add_theme_constant_override(&"separation", -1)
 	header_center.add_child(tabs)
 	for spec: Array in [[Tab.BROWSE, "Browse"], [Tab.STALLS, "Stalls"], [Tab.MINE, "My Stall"]]:
 		var button: Button = Button.new()
 		button.text = str(spec[1])
-		button.theme_type_variation = &"HeaderTab"
 		button.toggle_mode = true
-		button.custom_minimum_size = Vector2(104, 0)
+		button.custom_minimum_size = Vector2(112, 34)
 		button.pressed.connect(_set_tab.bind(spec[0] as Tab))
+		Style.button(button, Style.Kind.TAB)
 		tabs.add_child(button)
 		_tab_buttons[spec[0]] = button
+
+	# Wallet reads as an instrument panel, not a floating number: framed, fixed
+	# width, right-aligned digits, so a changing balance never shifts the layout.
+	var wallet: PanelContainer = PanelContainer.new()
+	wallet.add_theme_stylebox_override(&"panel", Style.frame(Style.BG_SUNK))
+	wallet.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var wallet_pad: MarginContainer = MarginContainer.new()
+	wallet_pad.add_theme_constant_override(&"margin_left", 10)
+	wallet_pad.add_theme_constant_override(&"margin_right", 10)
+	wallet_pad.add_theme_constant_override(&"margin_top", 5)
+	wallet_pad.add_theme_constant_override(&"margin_bottom", 5)
+	wallet.add_child(wallet_pad)
+	var wallet_line: HBoxContainer = HBoxContainer.new()
+	wallet_line.add_theme_constant_override(&"separation", 8)
+	wallet_pad.add_child(wallet_line)
 
 	var gold_icon: TextureRect = TextureRect.new()
 	gold_icon.custom_minimum_size = Vector2(20, 20)
 	gold_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	gold_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	gold_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var gold: Item = ContentRegistryHub.load_by_id(&"items", Economy.gold_id()) as Item
 	if gold != null:
 		gold_icon.texture = gold.item_icon
 	_gold_label = Label.new()
+	_gold_label.custom_minimum_size = Vector2(96, 0)
+	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_gold_label.add_theme_color_override(&"font_color", COLOR_GOLD)
 	_gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	header_right.add_child(gold_icon)
-	header_right.add_child(_gold_label)
-	header_right.move_child(gold_icon, 0)
-	header_right.move_child(_gold_label, 1)
+	wallet_line.add_child(gold_icon)
+	wallet_line.add_child(_gold_label)
+	header_right.add_child(wallet)
+	header_right.move_child(wallet, 0)
 
 
 func _set_tab(tab: Tab) -> void:
@@ -205,11 +257,13 @@ func _load_browse() -> void:
 		_stores = []
 		_trades = []
 		_stats = {}
+		_truncated = false
 		return
 	_listings = data.get("listings", [])
 	_stores = data.get("stores", [])
 	_trades = data.get("trades", [])
 	_stats = _normalize_stats(data.get("stats", {}))
+	_truncated = bool(data.get("truncated", false))
 	_server_now_ms = int(data.get("now_ms", 0))
 	_me = int(data.get("me", 0))
 	_set_gold(int(data.get("gold", 0)))
@@ -253,13 +307,92 @@ func _rebuild() -> void:
 		_page.remove_child(child)
 		child.queue_free()
 	_browse_root = null
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override(&"separation", 8)
+	_page.add_child(column)
+	# Browse and Stalls are where a player reads the market; My Stall is where they
+	# operate their own, and it needs the vertical space more than it needs the
+	# market-wide readout (its own header bar states the stall's state instead).
+	if _tab != Tab.MINE:
+		column.add_child(_build_market_bar())
+	var body: Control
 	match _tab:
 		Tab.BROWSE:
-			_page.add_child(_build_browse())
+			body = _build_browse()
 		Tab.STALLS:
-			_page.add_child(_build_stalls())
+			body = _build_stalls()
 		Tab.MINE:
-			_page.add_child(_build_mine())
+			body = _build_mine()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(body)
+
+
+## One strip across the top of every tab: the size of the market, and how a trade
+## here is actually settled. Both are trust signals — a player deciding whether to
+## put a week of drops on a stall wants to see that the place is busy and that the
+## payout path is not "hope the other guy is honest".
+func _build_market_bar() -> Control:
+	var bar: PanelContainer = PanelContainer.new()
+	bar.add_theme_stylebox_override(&"panel", Style.frame(Style.BG_STRIP))
+	var pad: MarginContainer = MarginContainer.new()
+	pad.add_theme_constant_override(&"margin_left", 12)
+	pad.add_theme_constant_override(&"margin_right", 12)
+	pad.add_theme_constant_override(&"margin_top", 4)
+	pad.add_theme_constant_override(&"margin_bottom", 4)
+	bar.add_child(pad)
+	var line: HBoxContainer = HBoxContainer.new()
+	line.add_theme_constant_override(&"separation", 0)
+	pad.add_child(line)
+
+	var sales: int = 0
+	for item_id: Variant in _stats:
+		sales += int((_stats[item_id] as Dictionary).get("trades", 0))
+	var listing_count: String = "%s+" % _format(_listings.size()) if _truncated else _format(_listings.size())
+
+	var first: bool = true
+	for stat: Array in [
+		["Stalls open", _format(_stores.size())],
+		["Listings live", listing_count],
+		["Sales · 24h", _format(sales)],
+	]:
+		if not first:
+			line.add_child(_divider())
+		first = false
+		var cell: HBoxContainer = HBoxContainer.new()
+		cell.add_theme_constant_override(&"separation", 6)
+		cell.add_child(Style.caption(str(stat[0])))
+		var value: Label = Label.new()
+		value.text = str(stat[1])
+		value.add_theme_color_override(&"font_color", COLOR_TEXT)
+		value.add_theme_font_size_override(&"font_size", 12)
+		cell.add_child(value)
+		line.add_child(cell)
+
+	var spacer: Control = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line.add_child(spacer)
+
+	var promise: Label = Label.new()
+	promise.text = "Stock is held in escrow · gold and goods are delivered by Mailbox"
+	promise.add_theme_color_override(&"font_color", COLOR_FAINT)
+	promise.add_theme_font_size_override(&"font_size", 11)
+	promise.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	line.add_child(promise)
+	return bar
+
+
+## Vertical hairline between two readouts on one line.
+func _divider() -> Control:
+	var wrap: MarginContainer = MarginContainer.new()
+	wrap.add_theme_constant_override(&"margin_left", 14)
+	wrap.add_theme_constant_override(&"margin_right", 14)
+	wrap.add_theme_constant_override(&"margin_top", 2)
+	wrap.add_theme_constant_override(&"margin_bottom", 2)
+	var line: ColorRect = ColorRect.new()
+	line.color = Style.EDGE
+	line.custom_minimum_size = Vector2(1, 0)
+	wrap.add_child(line)
+	return wrap
 
 
 # --- Browse -----------------------------------------------------------------
@@ -286,6 +419,7 @@ func _build_browse() -> Control:
 	search.text_changed.connect(func(text: String) -> void:
 		_search = text
 		_rebuild_rows())
+	Style.field(search)
 	bar.add_child(search)
 
 	var sort: OptionButton = OptionButton.new()
@@ -300,6 +434,7 @@ func _build_browse() -> Control:
 	sort.item_selected.connect(func(index: int) -> void:
 		_sort_mode = index
 		_rebuild_rows())
+	Style.field(sort)
 	bar.add_child(sort)
 
 	if _store_filter > 0:
@@ -308,26 +443,19 @@ func _build_browse() -> Control:
 		clear.pressed.connect(func() -> void:
 			_store_filter = 0
 			_rebuild())
+		Style.button(clear, Style.Kind.GHOST, 32)
 		bar.add_child(clear)
 
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	left.add_child(scroll)
+	var table: PanelContainer = _table_frame(_make_column_header())
+	left.add_child(table)
 
-	var rows: VBoxContainer = VBoxContainer.new()
-	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	rows.add_theme_constant_override(&"separation", 2)
-	scroll.add_child(rows)
-
-	var detail: PanelContainer = PanelContainer.new()
+	var detail: PanelContainer = _framed_panel("Purchase")
 	detail.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	split.add_child(detail)
 
-	split.set_meta(&"rows", rows)
-	split.set_meta(&"scroll", scroll)
+	split.set_meta(&"rows", table.get_meta(&"rows"))
+	split.set_meta(&"scroll", table.get_meta(&"scroll"))
 	split.set_meta(&"detail", detail)
 	_browse_root = split
 	_rebuild_rows()
@@ -348,7 +476,7 @@ func _rebuild_rows() -> void:
 
 	var visible_rows: Array = _filtered_listings()
 	if visible_rows.is_empty():
-		rows.add_child(_empty_note(
+		rows.add_child(_empty_state(
 			"No stalls are selling anything yet — open yours and be first."
 			if _listings.is_empty()
 			else "Nothing matches that search."
@@ -369,9 +497,10 @@ func _rebuild_rows() -> void:
 		keep = visible_rows[0]
 	_selected_listing = int(keep.get("listing_id", 0))
 
-	rows.add_child(_make_column_header())
+	var index: int = 0
 	for listing: Dictionary in visible_rows:
-		rows.add_child(_make_listing_row(listing))
+		rows.add_child(_make_listing_row(listing, index))
+		index += 1
 	DragScroll.enable(scroll)
 	_show_listing_detail(keep)
 
@@ -425,11 +554,11 @@ func _stats_for(item_id: int) -> Dictionary:
 
 
 func _make_column_header() -> Control:
-	# Same inset as a row, so the headings sit over their own columns.
+	# Same inset as a row, so the headings sit over their own columns. The strip
+	# behind them is drawn by the table frame.
 	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override(&"margin_left", ROW_PAD + 6)
-	margin.add_theme_constant_override(&"margin_right", ROW_PAD + 6)
-	margin.add_theme_constant_override(&"margin_bottom", 2)
+	margin.add_theme_constant_override(&"margin_left", ROW_PAD - 2)
+	margin.add_theme_constant_override(&"margin_right", ROW_PAD - 2)
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 10)
 	margin.add_child(row)
@@ -450,17 +579,16 @@ func _column_label(
 	width: float,
 	align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT
 ) -> Label:
-	var label: Label = Label.new()
-	label.text = text
+	# Upper case at a small size: a column heading should be legible as a heading
+	# without competing with the values under it for weight.
+	var label: Label = Style.caption(text)
 	label.size_flags_horizontal = flags
 	label.custom_minimum_size = Vector2(width, 0)
 	label.horizontal_alignment = align
-	label.add_theme_color_override(&"font_color", COLOR_FAINT)
-	label.add_theme_font_size_override(&"font_size", 11)
 	return label
 
 
-func _make_listing_row(listing: Dictionary) -> Button:
+func _make_listing_row(listing: Dictionary, index: int) -> Button:
 	var listing_id: int = int(listing.get("listing_id", 0))
 	var item_id: int = int(listing.get("item_id", 0))
 	var item: Item = _item(item_id)
@@ -472,12 +600,7 @@ func _make_listing_row(listing: Dictionary) -> Button:
 	row.toggle_mode = true
 	row.button_pressed = listing_id == _selected_listing
 	row.tooltip_text = ItemTooltip.hover_text(item)
-	if row.button_pressed:
-		# The theme's toggled-on state is nearly identical to the resting one, and
-		# the detail pane's Buy button spends real gold — which row it belongs to
-		# has to be unmistakable, so the selection gets its own gold edge.
-		for state: StringName in [&"normal", &"pressed", &"hover"]:
-			row.add_theme_stylebox_override(state, _selected_row_style())
+	_style_row(row, index, row.button_pressed)
 	row.pressed.connect(func() -> void:
 		_selected_listing = listing_id
 		_rebuild_rows())
@@ -508,14 +631,10 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	if _browse_root == null or not is_instance_valid(_browse_root):
 		return
 	var detail: PanelContainer = _browse_root.get_meta(&"detail") as PanelContainer
-	for child: Node in detail.get_children():
-		detail.remove_child(child)
-		child.queue_free()
-
-	var column: VBoxContainer = _padded_column(detail)
+	var column: VBoxContainer = _clear_panel(detail)
 
 	if listing.is_empty():
-		column.add_child(_empty_note("Pick a listing to buy."))
+		column.add_child(_empty_state("Pick a listing to buy."))
 		return
 
 	_selected_listing = int(listing.get("listing_id", 0))
@@ -528,7 +647,7 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	var head: HBoxContainer = HBoxContainer.new()
 	head.add_theme_constant_override(&"separation", 8)
 	column.add_child(head)
-	head.add_child(_icon_cell(item, 34.0))
+	head.add_child(_icon_cell(item, 30.0))
 	var titles: VBoxContainer = VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override(&"separation", 0)
@@ -548,16 +667,16 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	seller.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	titles.add_child(seller)
 
-	column.add_child(_rule())
-
 	# --- Scrolling middle: market prices, item stats, recent sales ---
+	# No rule under the head: the sunken price block below already draws the edge,
+	# and every pixel here is a sale row the buyer would otherwise scroll for.
 	var body: ScrollContainer = ScrollContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(body)
 	var body_column: VBoxContainer = VBoxContainer.new()
 	body_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body_column.add_theme_constant_override(&"separation", 8)
+	body_column.add_theme_constant_override(&"separation", 6)
 	body.add_child(body_column)
 
 	body_column.add_child(_price_block(item_id, unit_price))
@@ -593,8 +712,7 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	total_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(total_label)
 
-	var buy: Button = Button.new()
-	buy.custom_minimum_size = Vector2(0, 38)
+	var buy: Button = Style.button(Button.new(), Style.Kind.PRIMARY, 40)
 	column.add_child(buy)
 
 	var sync: Callable = func() -> void:
@@ -616,15 +734,13 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	sync.call()
 	buy.pressed.connect(func() -> void: _buy(int(listing.get("listing_id", 0)), int(qty.value)))
 
-	column.add_child(_footnote("Purchases arrive in your Mailbox."))
-
 
 ## Ask vs. what the item actually trades for. The single most useful thing on the
 ## panel: without it a price is just a number the seller made up.
 func _price_block(item_id: int, unit_price: int) -> Control:
 	var stats: Dictionary = _stats_for(item_id)
 	var panel: PanelContainer = PanelContainer.new()
-	panel.add_theme_stylebox_override(&"panel", _inset_style())
+	panel.add_theme_stylebox_override(&"panel", Style.sunken())
 
 	var pad: MarginContainer = MarginContainer.new()
 	for side: StringName in [&"margin_left", &"margin_right"]:
@@ -675,7 +791,8 @@ func _price_block(item_id: int, unit_price: int) -> Control:
 func _sales_block(item_id: int) -> Control:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 3)
-	column.add_child(_section_label("Recent sales"))
+	column.add_child(Style.caption("Recent sales", 11))
+	column.add_child(_rule())
 
 	var shown: int = 0
 	for trade: Dictionary in _trades:
@@ -783,31 +900,28 @@ func _build_stalls() -> Control:
 	var split: HBoxContainer = HBoxContainer.new()
 	split.add_theme_constant_override(&"separation", 12)
 
-	var left: VBoxContainer = VBoxContainer.new()
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.add_theme_constant_override(&"separation", 6)
-	split.add_child(left)
+	var header: HBoxContainer = HBoxContainer.new()
+	header.add_theme_constant_override(&"separation", 10)
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override(&"margin_left", ROW_PAD - 2)
+	margin.add_theme_constant_override(&"margin_right", ROW_PAD - 2)
+	margin.add_child(header)
+	header.add_child(_column_label("Stall", Control.SIZE_EXPAND_FILL, 0))
+	header.add_child(_column_label("Listings", Control.SIZE_FILL, 108, HORIZONTAL_ALIGNMENT_RIGHT))
+	header.add_child(_column_label("From", Control.SIZE_FILL, 124, HORIZONTAL_ALIGNMENT_RIGHT))
 
-	left.add_child(_section_label(
-		"%d stall%s open" % [_stores.size(), "" if _stores.size() == 1 else "s"]
-	))
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	left.add_child(scroll)
-
-	var column: VBoxContainer = VBoxContainer.new()
-	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override(&"separation", 4)
-	scroll.add_child(column)
+	var table: PanelContainer = _table_frame(margin)
+	split.add_child(table)
+	var column: VBoxContainer = table.get_meta(&"rows") as VBoxContainer
 
 	if _stores.is_empty():
-		column.add_child(_empty_note("No stalls are open right now. Open yours from My Stall."))
+		column.add_child(_empty_state("No stalls are open right now. Open yours from My Stall."))
 	else:
+		var index: int = 0
 		for store: Dictionary in _stores:
-			column.add_child(_make_store_card(store))
-		DragScroll.enable(scroll)
+			column.add_child(_make_store_card(store, index))
+			index += 1
+		DragScroll.enable(table.get_meta(&"scroll") as ScrollContainer)
 
 	split.add_child(_build_ticker())
 	return split
@@ -816,17 +930,23 @@ func _build_stalls() -> Control:
 ## Market-wide sale feed: everything that has actually changed hands lately, in
 ## one place — the reference players argue about prices with.
 func _build_ticker() -> Control:
-	var panel: PanelContainer = PanelContainer.new()
+	var panel: PanelContainer = _framed_panel("Recent sales")
 	panel.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var column: VBoxContainer = _padded_column(panel)
-
-	column.add_child(_section_label("Recent sales across the market"))
-	column.add_child(_rule())
+	var column: VBoxContainer = _panel_body(panel)
 
 	if _trades.is_empty():
-		column.add_child(_empty_note("Nothing has sold yet."))
+		column.add_child(_empty_state("Nothing has sold yet."))
 		return panel
+
+	# Headed like the tables next to it — the feed is data, and data gets columns.
+	var head: HBoxContainer = HBoxContainer.new()
+	head.add_theme_constant_override(&"separation", 8)
+	head.add_child(_column_label("Item", Control.SIZE_EXPAND_FILL, 0))
+	head.add_child(_column_label("Price", Control.SIZE_FILL, 78, HORIZONTAL_ALIGNMENT_RIGHT))
+	head.add_child(_column_label("When", Control.SIZE_FILL, 44, HORIZONTAL_ALIGNMENT_RIGHT))
+	column.add_child(head)
+	column.add_child(_rule())
 
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -842,11 +962,12 @@ func _build_ticker() -> Control:
 	return panel
 
 
-func _make_store_card(store: Dictionary) -> Button:
+func _make_store_card(store: Dictionary, index: int) -> Button:
 	var store_id: int = int(store.get("store_id", 0))
 	var card: Button = Button.new()
-	card.custom_minimum_size = Vector2(0, 50)
+	card.custom_minimum_size = Vector2(0, 46)
 	card.tooltip_text = "Show only this stall's listings"
+	_style_row(card, index, false)
 	card.pressed.connect(func() -> void:
 		_store_filter = store_id
 		_set_tab(Tab.BROWSE))
@@ -858,11 +979,10 @@ func _make_store_card(store: Dictionary) -> Button:
 	name_label.add_theme_font_size_override(&"font_size", 15)
 	line.add_child(name_label)
 	line.add_child(_cell(
-		"%d listing%s" % [count, "" if count == 1 else "s"],
-		Control.SIZE_FILL, 108, COLOR_MUTED, HORIZONTAL_ALIGNMENT_RIGHT
+		_format(count), Control.SIZE_FILL, 108, COLOR_MUTED, HORIZONTAL_ALIGNMENT_RIGHT
 	))
 	line.add_child(_cell(
-		"from %s g" % _format(int(store.get("cheapest", 0))),
+		"%s g" % _format(int(store.get("cheapest", 0))),
 		Control.SIZE_FILL, 124, COLOR_GOLD, HORIZONTAL_ALIGNMENT_RIGHT
 	))
 	return card
@@ -875,42 +995,57 @@ func _build_mine() -> Control:
 	column.add_theme_constant_override(&"separation", 8)
 
 	# --- Stall header: name, open/closed, one-press toggle ---
+	# Framed as one control bar rather than four loose widgets on black: this row
+	# IS the shopfront, and a seller should read it as a single piece of hardware.
+	var bar_frame: PanelContainer = PanelContainer.new()
+	bar_frame.add_theme_stylebox_override(&"panel", Style.frame())
+	column.add_child(bar_frame)
+	var bar_pad: MarginContainer = MarginContainer.new()
+	for side: StringName in [&"margin_left", &"margin_right"]:
+		bar_pad.add_theme_constant_override(side, 10)
+	for side: StringName in [&"margin_top", &"margin_bottom"]:
+		bar_pad.add_theme_constant_override(side, 8)
+	bar_frame.add_child(bar_pad)
 	var bar: HBoxContainer = HBoxContainer.new()
 	bar.add_theme_constant_override(&"separation", 8)
-	column.add_child(bar)
+	bar_pad.add_child(bar)
+
+	var name_caption: Label = Style.caption("Stall name")
+	name_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bar.add_child(name_caption)
 
 	var name_field: LineEdit = LineEdit.new()
 	name_field.text = _store_name
 	name_field.max_length = Market.MAX_STORE_NAME_LENGTH
 	name_field.placeholder_text = "Name your stall"
 	name_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_field.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	Style.field(name_field)
 	bar.add_child(name_field)
 
 	var save: Button = Button.new()
 	save.text = "Save name"
 	save.pressed.connect(func() -> void: _set_store(name_field.text, _store_open))
+	Style.button(save, Style.Kind.GHOST, 32)
 	bar.add_child(save)
+
+	bar.add_child(_divider())
 
 	# State reads as a chip rather than a sentence: the explanation belongs on the
 	# button's tooltip, and every row of prose here is a row the editor panel
 	# below loses.
 	var live: bool = _store_open and _has_store
-	var status: Label = Label.new()
-	status.text = "● Open" if live else "● Closed"
-	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	status.add_theme_color_override(&"font_color", COLOR_GOOD if live else COLOR_MUTED)
-	status.add_theme_font_size_override(&"font_size", 12)
-	bar.add_child(status)
+	bar.add_child(_status_chip(live))
 
 	var toggle: Button = Button.new()
-	toggle.custom_minimum_size = Vector2(140, 0)
-	toggle.text = "Close stall" if _store_open else "Open Store"
+	toggle.custom_minimum_size = Vector2(150, 0)
+	toggle.text = "Close stall" if _store_open else "Open stall"
 	toggle.tooltip_text = (
 		"Open: anyone at the Trading Post can buy from your stall.\nChange prices and stock any time — you never need to close it."
 		if live
 		else "Closed: your listings are safe and still yours, but nobody can buy until you open."
 	)
-	toggle.add_theme_color_override(&"font_color", COLOR_BAD if _store_open else COLOR_GOOD)
+	Style.button(toggle, Style.Kind.DANGER if _store_open else Style.Kind.PRIMARY, 32)
 	toggle.pressed.connect(func() -> void: _set_store(name_field.text, not _store_open))
 	bar.add_child(toggle)
 
@@ -931,43 +1066,42 @@ func _build_my_listings() -> Control:
 	var head: HBoxContainer = HBoxContainer.new()
 	head.add_theme_constant_override(&"separation", 8)
 	column.add_child(head)
-	var title: Label = _section_label("On sale  %d / %d" % [_my_listings.size(), _max_listings])
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(title)
+	head.add_child(Style.caption("On sale"))
+	var count: Label = Label.new()
+	count.text = "%d / %d" % [_my_listings.size(), _max_listings]
+	count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	count.add_theme_color_override(&"font_color", COLOR_TEXT)
+	count.add_theme_font_size_override(&"font_size", 13)
+	head.add_child(count)
 	if not _my_listings.is_empty():
 		var pull_all: Button = Button.new()
 		pull_all.text = "Pull everything"
 		pull_all.tooltip_text = "Take all stock off sale. It comes back through your Mailbox."
 		pull_all.pressed.connect(func() -> void: _unlist(0, 0, true))
+		pull_all.add_theme_font_size_override(&"font_size", 12)
+		Style.button(pull_all, Style.Kind.GHOST, 26)
 		head.add_child(pull_all)
 
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	column.add_child(scroll)
-
-	var rows: VBoxContainer = VBoxContainer.new()
-	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	rows.add_theme_constant_override(&"separation", 2)
-	scroll.add_child(rows)
+	var table: PanelContainer = _table_frame(_my_column_header())
+	column.add_child(table)
+	var rows: VBoxContainer = table.get_meta(&"rows") as VBoxContainer
 
 	if _my_listings.is_empty():
-		rows.add_child(_empty_note("Nothing listed yet. Pick something from your bag on the right."))
+		rows.add_child(_empty_state("Nothing listed yet. Pick something from your bag on the right."))
 		return column
 
-	rows.add_child(_my_column_header())
+	var index: int = 0
 	for listing: Dictionary in _my_listings:
-		rows.add_child(_make_my_listing_row(listing))
-	DragScroll.enable(scroll)
+		rows.add_child(_make_my_listing_row(listing, index))
+		index += 1
+	DragScroll.enable(table.get_meta(&"scroll") as ScrollContainer)
 	return column
 
 
 func _my_column_header() -> Control:
 	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override(&"margin_left", ROW_PAD + 6)
-	margin.add_theme_constant_override(&"margin_right", ROW_PAD + 6)
-	margin.add_theme_constant_override(&"margin_bottom", 2)
+	margin.add_theme_constant_override(&"margin_left", ROW_PAD - 2)
+	margin.add_theme_constant_override(&"margin_right", ROW_PAD - 2)
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 10)
 	margin.add_child(row)
@@ -978,7 +1112,7 @@ func _my_column_header() -> Control:
 	return margin
 
 
-func _make_my_listing_row(listing: Dictionary) -> Button:
+func _make_my_listing_row(listing: Dictionary, index: int) -> Button:
 	var listing_id: int = int(listing.get("listing_id", 0))
 	var item_id: int = int(listing.get("item_id", 0))
 	var item: Item = _item(item_id)
@@ -990,9 +1124,7 @@ func _make_my_listing_row(listing: Dictionary) -> Button:
 	row.toggle_mode = true
 	row.button_pressed = listing_id == _editing_listing and _side == SidePanel.EDIT
 	row.tooltip_text = "Edit price or pull stock"
-	if row.button_pressed:
-		for state: StringName in [&"normal", &"pressed", &"hover"]:
-			row.add_theme_stylebox_override(state, _selected_row_style())
+	_style_row(row, index, row.button_pressed)
 	row.pressed.connect(func() -> void:
 		_editing_listing = listing_id
 		_side = SidePanel.EDIT
@@ -1014,17 +1146,14 @@ func _make_my_listing_row(listing: Dictionary) -> Button:
 ## quantity + price for whatever is picked. Quest items and gold are filtered out
 ## here AND rejected server-side, so the two can never disagree.
 func _build_lister() -> Control:
-	var panel: PanelContainer = PanelContainer.new()
+	var panel: PanelContainer = _framed_panel("List an item")
 	panel.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var column: VBoxContainer = _padded_column(panel)
-
-	column.add_child(_section_label("List an item"))
-	column.add_child(_rule())
+	var column: VBoxContainer = _panel_body(panel)
 
 	var listable: Array = _listable_slots()
 	if listable.is_empty():
-		column.add_child(_empty_note(
+		column.add_child(_empty_state(
 			"Nothing in your bag can be listed. Quest items stay bound to you, and gold is what buyers pay with."
 		))
 		return panel
@@ -1037,7 +1166,8 @@ func _build_lister() -> Control:
 		picker.add_item("%s  (%s)" % [
 			_item_name(int(entry.get("id", 0))), _format(int(entry.get("a", 0)))
 		])
-	body.add_child(picker)
+	Style.field(picker)
+	body.add_child(_labelled_row("Item", picker))
 
 	var qty: SpinBox = _spin(1, 1, 1)
 	var qty_row: HBoxContainer = _quantity_row(qty, [1, 10, 100], 1, 0, "All")
@@ -1057,17 +1187,19 @@ func _build_lister() -> Control:
 	market_note.add_theme_font_size_override(&"font_size", 11)
 	body.add_child(market_note)
 
+	# Pinned, not scrolled: what the seller walks away with is the number they are
+	# deciding on, and it sat below the fold on a short window.
+	column.add_child(_rule())
 	var takeaway: Label = Label.new()
 	takeaway.add_theme_color_override(&"font_color", COLOR_GOLD)
 	takeaway.add_theme_font_size_override(&"font_size", 15)
 	takeaway.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	body.add_child(takeaway)
+	column.add_child(takeaway)
 
-	var submit: Button = Button.new()
+	var submit: Button = Style.button(Button.new(), Style.Kind.PRIMARY, 38)
 	submit.text = "Put on sale"
-	submit.custom_minimum_size = Vector2(0, 38)
 	column.add_child(submit)
-	column.add_child(_footnote("Listed stock leaves your bag. Sales pay out to your Mailbox."))
+	column.add_child(_footnote("Listed stock leaves your bag · paid out by Mailbox"))
 
 	var sync: Callable = func() -> void:
 		var index: int = picker.selected
@@ -1101,10 +1233,10 @@ func _build_lister() -> Control:
 ## Right pane of My Stall, mode EDIT: change a live listing's ask, or take some of
 ## its stock back — both without the stall ever closing.
 func _build_editor() -> Control:
-	var panel: PanelContainer = PanelContainer.new()
+	var panel: PanelContainer = _framed_panel("Edit listing", _back_button())
 	panel.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var column: VBoxContainer = _padded_column(panel)
+	var column: VBoxContainer = _panel_body(panel)
 
 	var listing: Dictionary = {}
 	for row: Dictionary in _my_listings:
@@ -1112,8 +1244,7 @@ func _build_editor() -> Control:
 			listing = row
 			break
 	if listing.is_empty():
-		column.add_child(_empty_note("That listing is no longer on your stall."))
-		column.add_child(_back_button())
+		column.add_child(_empty_state("That listing is no longer on your stall."))
 		return panel
 
 	var item_id: int = int(listing.get("item_id", 0))
@@ -1123,7 +1254,7 @@ func _build_editor() -> Control:
 	var head: HBoxContainer = HBoxContainer.new()
 	head.add_theme_constant_override(&"separation", 8)
 	column.add_child(head)
-	head.add_child(_icon_cell(item, 30.0))
+	head.add_child(_icon_cell(item, 26.0))
 	var title: Label = _cell(_item_name(item_id), Control.SIZE_EXPAND_FILL, 0, COLOR_TITLE)
 	title.add_theme_font_size_override(&"font_size", 16)
 	head.add_child(title)
@@ -1157,8 +1288,7 @@ func _build_editor() -> Control:
 	var actions: VBoxContainer = VBoxContainer.new()
 	actions.add_theme_constant_override(&"separation", 6)
 
-	var apply: Button = Button.new()
-	apply.custom_minimum_size = Vector2(0, 32)
+	var apply: Button = Style.button(Button.new(), Style.Kind.PRIMARY, 32)
 	actions.add_child(apply)
 	var sync: Callable = func() -> void:
 		var changed: bool = int(price.value) != int(listing.get("unit_price", 0))
@@ -1170,12 +1300,11 @@ func _build_editor() -> Control:
 
 	# --- Stock ---
 	actions.add_child(_rule())
-	actions.add_child(_section_label("Stock on sale: %s" % _format(stock)))
+	actions.add_child(_stat_line("Stock on sale", _format(stock), COLOR_TEXT, 13))
 	var qty: SpinBox = _spin(1, maxi(1, stock), 1)
 	actions.add_child(_quantity_row(qty, [1, 10, 100], stock, 0, "All"))
 
-	var pull: Button = Button.new()
-	pull.custom_minimum_size = Vector2(0, 32)
+	var pull: Button = Style.button(Button.new(), Style.Kind.DEFAULT, 32)
 	actions.add_child(pull)
 	var pull_sync: Callable = func() -> void:
 		var count: int = int(qty.value)
@@ -1193,13 +1322,13 @@ func _build_editor() -> Control:
 	pull.pressed.connect(func() -> void: _unlist(_editing_listing, int(qty.value), false))
 
 	column.add_child(actions)
-	column.add_child(_back_button())
 	return panel
 
 
 func _back_button() -> Button:
-	var back: Button = Button.new()
+	var back: Button = Style.button(Button.new(), Style.Kind.CHIP, 22)
 	back.text = "List something else"
+	back.add_theme_font_size_override(&"font_size", 11)
 	back.pressed.connect(func() -> void:
 		_side = SidePanel.LIST
 		_editing_listing = 0
@@ -1226,10 +1355,9 @@ func _fill_price_chips(host: HBoxContainer, price: SpinBox, item_id: int, floor_
 	if options.is_empty():
 		return
 	for option: Array in options:
-		var chip: Button = Button.new()
+		var chip: Button = Style.button(Button.new(), Style.Kind.CHIP, 24)
 		chip.text = str(option[0])
 		chip.add_theme_font_size_override(&"font_size", 11)
-		chip.custom_minimum_size = Vector2(0, 24)
 		chip.pressed.connect(func() -> void: price.value = maxi(floor_price, int(option[1])))
 		host.add_child(chip)
 
@@ -1398,7 +1526,8 @@ func _spin(minimum: int, maximum: int, value: int) -> SpinBox:
 	spin.value = clampi(value, minimum, maxi(minimum, maximum))
 	spin.step = 1
 	spin.select_all_on_focus = true
-	spin.custom_minimum_size = Vector2(108, 0)
+	spin.custom_minimum_size = Vector2(92, 0)
+	Style.field(spin)
 	return spin
 
 
@@ -1415,10 +1544,7 @@ func _quantity_row(
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 4)
 
-	var label: Label = Label.new()
-	label.text = "Qty"
-	label.add_theme_color_override(&"font_color", COLOR_MUTED)
-	row.add_child(label)
+	row.add_child(_field_caption("Qty"))
 	row.add_child(spin)
 
 	var chips: HBoxContainer = HBoxContainer.new()
@@ -1454,10 +1580,10 @@ func _retarget_quantity_row(row: HBoxContainer, maximum: int, affordable: int, m
 
 
 func _chip(text: String, action: Callable) -> Button:
-	var chip: Button = Button.new()
+	var chip: Button = Style.button(Button.new(), Style.Kind.CHIP, 24)
 	chip.text = text
 	chip.add_theme_font_size_override(&"font_size", 11)
-	chip.custom_minimum_size = Vector2(32, 24)
+	chip.custom_minimum_size.x = 32
 	chip.pressed.connect(action)
 	return chip
 
@@ -1465,13 +1591,25 @@ func _chip(text: String, action: Callable) -> Button:
 func _labelled_row(text: String, field: Control) -> HBoxContainer:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 8)
-	var label: Label = Label.new()
-	label.text = text
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_color_override(&"font_color", COLOR_MUTED)
-	row.add_child(label)
+	row.add_child(_field_caption(text))
 	row.add_child(field)
+	# A spinner keeps its own width so it lines up with the one above it; anything
+	# else (the item dropdown) takes the rest of the row.
+	if field is SpinBox:
+		var spacer: Control = Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(spacer)
+	else:
+		field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return row
+
+
+## Caption in the fixed left column of a form row.
+func _field_caption(text: String) -> Label:
+	var label: Label = Style.caption(text)
+	label.custom_minimum_size = Vector2(FIELD_LABEL_WIDTH, 0)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	return label
 
 
 func _stat_line(label_text: String, value_text: String, color: Color, size: int = 12) -> HBoxContainer:
@@ -1492,12 +1630,26 @@ func _stat_line(label_text: String, value_text: String, color: Color, size: int 
 	return row
 
 
-func _section_label(text: String) -> Label:
+## The open / closed light on a stall. A bordered chip, not a bare word: it is a
+## state readout, and it has to survive being glanced at.
+func _status_chip(live: bool) -> Control:
+	var chip: PanelContainer = PanelContainer.new()
+	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	chip.add_theme_stylebox_override(
+		&"panel", Style.frame(Style.BG_SUNK, COLOR_GOOD if live else Style.EDGE)
+	)
+	var pad: MarginContainer = MarginContainer.new()
+	pad.add_theme_constant_override(&"margin_left", 10)
+	pad.add_theme_constant_override(&"margin_right", 10)
+	pad.add_theme_constant_override(&"margin_top", 5)
+	pad.add_theme_constant_override(&"margin_bottom", 5)
+	chip.add_child(pad)
 	var label: Label = Label.new()
-	label.text = text
-	label.add_theme_color_override(&"font_color", COLOR_TITLE)
-	label.add_theme_font_size_override(&"font_size", 13)
-	return label
+	label.text = "● OPEN" if live else "● CLOSED"
+	label.add_theme_color_override(&"font_color", COLOR_GOOD if live else COLOR_MUTED)
+	label.add_theme_font_size_override(&"font_size", 11)
+	pad.add_child(label)
+	return chip
 
 
 func _footnote(text: String) -> Label:
@@ -1510,13 +1662,26 @@ func _footnote(text: String) -> Label:
 	return label
 
 
-func _empty_note(text: String) -> Label:
-	var label: Label = Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_color_override(&"font_color", COLOR_MUTED)
-	label.add_theme_font_size_override(&"font_size", 12)
-	return label
+## An empty list, centred in the space it would have filled. Left top-aligned in
+## an unframed area it read as a rendering failure rather than as "there is
+## nothing here yet".
+func _empty_state(text: String) -> Control:
+	var pad: MarginContainer = MarginContainer.new()
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side: StringName in [&"margin_left", &"margin_right"]:
+		pad.add_theme_constant_override(side, 24)
+	for side: StringName in [&"margin_top", &"margin_bottom"]:
+		pad.add_theme_constant_override(side, 28)
+	var note: Label = Label.new()
+	note.text = text
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override(&"font_color", COLOR_MUTED)
+	note.add_theme_font_size_override(&"font_size", 12)
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	note.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	note.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pad.add_child(note)
+	return pad
 
 
 ## Hairline divider. A full HSeparator draws heavier than this UI wants.
@@ -1542,15 +1707,98 @@ func _scroll_body(column: VBoxContainer) -> VBoxContainer:
 	return inner
 
 
-func _padded_column(host: Control) -> VBoxContainer:
+## A bordered side panel with a title strip across the top. Every pane in the
+## Trading Post is one of these, so a player always knows where one region of the
+## screen ends and the next begins — the thing loose text on a dim backdrop never
+## tells them. The body column is reachable with [method _panel_body].
+func _framed_panel(title: String, action: Control = null) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.add_theme_stylebox_override(&"panel", Style.frame())
+
+	var stack: VBoxContainer = VBoxContainer.new()
+	stack.add_theme_constant_override(&"separation", 0)
+	panel.add_child(stack)
+
+	var strip: PanelContainer = PanelContainer.new()
+	strip.add_theme_stylebox_override(&"panel", Style.strip())
+	stack.add_child(strip)
+	var strip_line: HBoxContainer = HBoxContainer.new()
+	strip_line.add_theme_constant_override(&"separation", 8)
+	strip.add_child(strip_line)
+	var caption: Label = Style.caption(title, 11)
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	strip_line.add_child(caption)
+	# A panel-level action belongs on the panel's own bar, not stacked under its
+	# content — it keeps a full button row out of the flow, which is the
+	# difference between the editor fitting a 540px window and being cut off.
+	if action != null:
+		action.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		strip_line.add_child(action)
+
 	var pad: MarginContainer = MarginContainer.new()
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	for side: StringName in [&"margin_left", &"margin_right", &"margin_top", &"margin_bottom"]:
 		pad.add_theme_constant_override(side, 12)
-	host.add_child(pad)
+	stack.add_child(pad)
+
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 8)
 	pad.add_child(column)
+	panel.set_meta(&"body", column)
+	return panel
+
+
+func _panel_body(panel: PanelContainer) -> VBoxContainer:
+	return panel.get_meta(&"body") as VBoxContainer
+
+
+## Empties a framed panel's body, leaving its frame and title strip in place —
+## the detail pane is redrawn on every selection, and rebuilding the frame with it
+## makes the whole right-hand side flicker.
+func _clear_panel(panel: PanelContainer) -> VBoxContainer:
+	var column: VBoxContainer = _panel_body(panel)
+	for child: Node in column.get_children():
+		column.remove_child(child)
+		child.queue_free()
 	return column
+
+
+## A bordered table: a fixed column-header strip over scrolling rows. Rows are
+## banded and hairline-separated inside it, which is what turns a list of prices
+## into something a player can actually compare down a column.
+func _table_frame(header: Control) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.add_theme_stylebox_override(&"panel", Style.frame())
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var stack: VBoxContainer = VBoxContainer.new()
+	stack.add_theme_constant_override(&"separation", 0)
+	panel.add_child(stack)
+
+	if header != null:
+		var strip: PanelContainer = PanelContainer.new()
+		strip.add_theme_stylebox_override(&"panel", Style.strip())
+		strip.add_child(header)
+		stack.add_child(strip)
+
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	stack.add_child(scroll)
+
+	var rows: VBoxContainer = VBoxContainer.new()
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# No gaps between rows: the banding and the hairline under each one do the
+	# separating, and a gap here would let the panel fill show through as stripes.
+	rows.add_theme_constant_override(&"separation", 0)
+	scroll.add_child(rows)
+
+	panel.set_meta(&"rows", rows)
+	panel.set_meta(&"scroll", scroll)
+	return panel
 
 
 func _cell(
@@ -1615,23 +1863,15 @@ func _icon_cell(item: Item, size: float = ICON_SIZE) -> Control:
 	return icon
 
 
-## Backing for a selected row: a gold left edge and a lifted fill.
-func _selected_row_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.13, 0.12, 0.09, 1.0)
-	style.border_color = COLOR_GOLD
-	style.border_width_left = 3
-	style.set_corner_radius_all(3)
-	return style
-
-
-## Recessed panel behind a stat block — separates data from chrome without adding
-## another hard border.
-func _inset_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.0, 0.0, 0.0, 0.22)
-	style.set_corner_radius_all(4)
-	return style
+## Dresses a row Button as a table row: banded fill, hairline under it, and — when
+## it is the selected one — a gold left edge. Every state is overridden, including
+## focus: the theme's own focus ring is rounded, and one rounded rectangle in a
+## square table is all it takes to make the whole panel look unfinished.
+func _style_row(row: Button, index: int, selected: bool) -> void:
+	row.add_theme_stylebox_override(&"normal", Style.row(index, selected))
+	row.add_theme_stylebox_override(&"focus", Style.row(index, selected))
+	for state: StringName in [&"hover", &"pressed", &"hover_pressed"]:
+		row.add_theme_stylebox_override(state, Style.row(index, selected, true))
 
 
 # --- Formatting -------------------------------------------------------------
