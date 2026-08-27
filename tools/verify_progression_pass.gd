@@ -68,14 +68,17 @@ func _slayer() -> void:
 
 # --- Turael can send a Slayer-1 player somewhere other than Goblin Woodland ----
 
-## The five low-level variants added so the entry master has a real table, each
+## The low-level variants added so the entry master has a real table, each
 ## paired with the map it was actually placed in. A task whose monster exists only
 ## as a .tres is a task you cannot complete.
+##
+## cutpurses/orc_whelps used to live here too, but bandit_cutpurse and orc_whelp
+## only ever spawn in forest.tscn (= DimWood, Slayer-20+ gated) — unreachable at
+## Slayer 1. Pulled from Turael's pool entirely; Durael's "Orcs" task already
+## covers orc_whelp at the level where DimWood is actually reachable.
 const LOW_TASKS: Array[Array] = [
 	["dusk_bats", &"dusk_bat", "res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn"],
 	["bonepickers", &"bonepicker", "res://source/common/gameplay/maps/maps/mining_cave/mining_cave.tscn"],
-	["cutpurses", &"bandit_cutpurse", "res://source/common/gameplay/maps/maps/forest/forest.tscn"],
-	["orc_whelps", &"orc_whelp", "res://source/common/gameplay/maps/maps/forest/forest.tscn"],
 	["spore_ticks", &"spore_tick", "res://source/common/gameplay/maps/maps/fungus_cave/fungus_cave.tscn"],
 ]
 ## Everything a Slayer-1 character could be sent after BEFORE this pass — all of it
@@ -97,7 +100,7 @@ func _turael_variety() -> void:
 	var slugs: PackedStringArray = PackedStringArray()
 	for entry: SlayerMasterTaskEntry in rollable:
 		slugs.append(String(entry.task.task_slug()))
-	_check(rollable.size() >= 8, "Slayer 1 can roll %d tasks (was %d)" % [
+	_check(rollable.size() >= 6, "Slayer 1 can roll %d tasks (was %d)" % [
 		rollable.size(), OLD_LOW_TASKS.size()
 	])
 

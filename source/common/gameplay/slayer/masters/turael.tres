@@ -10,8 +10,6 @@
 [ext_resource type="Resource" uid="uid://bb2g5t0x8hj8j" path="res://source/common/gameplay/slayer/tasks/bandits.tres" id="8_bandits"]
 [ext_resource type="Resource" path="res://source/common/gameplay/slayer/tasks/dusk_bats.tres" id="9_bats"]
 [ext_resource type="Resource" path="res://source/common/gameplay/slayer/tasks/bonepickers.tres" id="10_bonepick"]
-[ext_resource type="Resource" path="res://source/common/gameplay/slayer/tasks/cutpurses.tres" id="11_cutpurse"]
-[ext_resource type="Resource" path="res://source/common/gameplay/slayer/tasks/orc_whelps.tres" id="12_whelps"]
 [ext_resource type="Resource" path="res://source/common/gameplay/slayer/tasks/spore_ticks.tres" id="13_ticks"]
 
 [sub_resource type="Resource" id="Entry_rats"]
@@ -70,20 +68,6 @@ weight = 9
 min_amount = 15
 max_amount = 25
 
-[sub_resource type="Resource" id="Entry_cutpurses"]
-script = ExtResource("2_entry")
-task = ExtResource("11_cutpurse")
-weight = 8
-min_amount = 12
-max_amount = 22
-
-[sub_resource type="Resource" id="Entry_orc_whelps"]
-script = ExtResource("2_entry")
-task = ExtResource("12_whelps")
-weight = 8
-min_amount = 12
-max_amount = 20
-
 [sub_resource type="Resource" id="Entry_spore_ticks"]
 script = ExtResource("2_entry")
 task = ExtResource("13_ticks")
@@ -94,10 +78,10 @@ max_amount = 25
 [resource]
 script = ExtResource("1_master")
 master_name = "Turael"
-greeting = "No task is too small for me, and none too large that you must keep it. Bats and bonepickers in the mining cave, cutpurses and whelps out along the forest road, ticks in the spore galleries — the woodland is not the only place with something worth killing. Ask, and I will send you after something new whenever you like; it costs little, and gives nothing but the doing."
+greeting = "No task is too small for me, and none too large that you must keep it. Bats and bonepickers in the mining cave, ticks in the spore galleries — the woodland is not the only place with something worth killing. Ask, and I will send you after something new whenever you like; it costs little, and gives nothing but the doing."
 min_slayer_level = 1
 location_hint = "Slayer House, Goblin Woodland"
 base_points_per_task = 3
 free_reassign = false
 reassign_point_cost = 2
-pool = Array[ExtResource("2_entry")]([SubResource("Entry_rats"), SubResource("Entry_wolves"), SubResource("Entry_goblins"), SubResource("Entry_fungus"), SubResource("Entry_skeletons"), SubResource("Entry_bandits"), SubResource("Entry_dusk_bats"), SubResource("Entry_bonepickers"), SubResource("Entry_cutpurses"), SubResource("Entry_orc_whelps"), SubResource("Entry_spore_ticks")])
+pool = Array[ExtResource("2_entry")]([SubResource("Entry_rats"), SubResource("Entry_wolves"), SubResource("Entry_goblins"), SubResource("Entry_fungus"), SubResource("Entry_skeletons"), SubResource("Entry_bandits"), SubResource("Entry_dusk_bats"), SubResource("Entry_bonepickers"), SubResource("Entry_spore_ticks")])
