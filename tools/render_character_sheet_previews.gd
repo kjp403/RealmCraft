@@ -19,6 +19,7 @@ const H: int = 540
 var _sv: SubViewport
 var _menu: Control
 var _out_abs: String
+var _stats: StatsComponent.Stats
 
 
 func _ready() -> void:
@@ -64,6 +65,24 @@ func _go() -> void:
 
 	await _settle()
 	_save(_sv.get_texture().get_image(), "character-sheet.png")
+
+	# Second shot: the reason the breakdown exists — swap a chest piece for a
+	# hybrid one and watch every row it touches move at once.
+	_stats.set(Stat.ARMOR, _stats.values[Stat.ARMOR] - 4.0)
+	_stats.set(Stat.MR, _stats.values[Stat.MR] + 12.0)
+	_stats.set(Stat.HEALTH_MAX, _stats.values[Stat.HEALTH_MAX] + 15.0)
+	_stats.set(Stat.AD, _stats.values[Stat.AD] + 6.0)
+	await _settle()
+	_save(_sv.get_texture().get_image(), "character-sheet-gear-swap.png")
+
+	# Third shot: scrolled to Offense, where the "what do I hit a target with N
+	# armor for" line lives.
+	var scroll: ScrollContainer = _menu.find_child(
+		"StatsScroll", true, false) as ScrollContainer
+	if scroll != null:
+		scroll.scroll_vertical = 240
+	await _settle()
+	_save(_sv.get_texture().get_image(), "character-sheet-offense.png")
 	get_tree().quit(0)
 
 
@@ -88,6 +107,11 @@ func _feed_stats(attributes: Dictionary) -> void:
 		stats.values[stat_name] = values[stat_name]
 	var panel: Node = _menu.find_child("StatsPanel", true, false)
 	panel.watch_stats(stats)
+	# The Base/Gear/Points split normally comes from the server; there isn't one
+	# here, so hand the panel the same spread the attribute rows are using.
+	panel._attributes = attributes
+	panel.redraw()
+	_stats = stats
 
 
 func _feed_attributes(attributes: Dictionary, points: int) -> void:
