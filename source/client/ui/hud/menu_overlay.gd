@@ -3,6 +3,10 @@ extends Control
 
 const MENU_ENTRIES: Array = [
 	{"label": "Profile", "menu": ""},
+	# Mail lives here rather than on the dock: it is checked, not played with, and
+	# market payouts (sale gold, bought goods) all land in it. _refresh_mail_badge
+	# hangs the unread count off this entry's button.
+	{"label": "Mail", "menu": "mail"},
 ]
 
 const ICON_DIR := \

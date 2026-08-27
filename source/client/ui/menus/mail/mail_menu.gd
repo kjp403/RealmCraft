@@ -205,6 +205,8 @@ func _on_claim(mail_id: int) -> void:
 		for r: Variant in (data.get("rewards", []) as Array):
 			lines.append(RewardFormat.describe(r as Dictionary))
 		Toaster.toast_group("Claimed!", lines, 3.0)
+		# Gold / items landed in the bag — refresh the pouch + bag dock behind the menu.
+		ClientState.inventory_changed.emit({"quiet": true})
 		var mail: Dictionary = _find(mail_id)
 		if not mail.is_empty():
 			mail["claimed"] = true
@@ -212,7 +214,22 @@ func _on_claim(mail_id: int) -> void:
 			if _selected_id == mail_id:
 				_show_detail(mail) # Claim → "Claimed", preview heading flips
 	else:
-		Toaster.toast("Couldn't claim that mail.")
+		Toaster.toast(_claim_error(str(data.get("reason", ""))))
+
+
+## Claim failures the player can actually act on get their own line — a full bag
+## is the common one now that market payouts arrive by mail, and "couldn't claim"
+## reads like a bug when the fix is just to free a slot.
+func _claim_error(reason: String) -> String:
+	match reason:
+		"inventory_full":
+			return "Bag full — free a slot, then claim."
+		"claimed":
+			return "Already claimed."
+		"empty":
+			return "Nothing attached to that mail."
+		_:
+			return "Couldn't claim that mail."
 
 
 func _on_delete(mail_id: int, button: Button, has_unclaimed: bool) -> void:

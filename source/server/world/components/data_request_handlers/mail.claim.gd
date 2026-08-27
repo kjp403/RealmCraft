@@ -28,7 +28,17 @@ func data_request_handler(
 		ServerLog.error("Mail #%d has invalid attachments; refusing to claim." % mail_id)
 		return {"ok": false, "reason": "invalid"}
 
+	# Bag space is checked BEFORE anything is consumed: apply_grants adds items
+	# uncapped, and a market purchase claimed into a full bag has to stay in the
+	# mailbox rather than quietly overflow it. Nothing is mutated on this path.
+	if not RedeemCodes.grants_fit(pr, attachments):
+		return {"ok": false, "reason": "inventory_full"}
+
 	var rewards: Array = RedeemCodes.apply_grants(pr, attachments)
 	store.mark_claimed(pr.player_id, mail_id)
+	# Persist immediately. Waiting for the periodic save would leave a window where
+	# the mail reads "claimed" in SQLite while the gold/items live only in memory —
+	# a crash there would eat a market payout outright.
+	instance.world_server.database.save_player(pr)
 	ServerLog.info("Player #%d (%s) claimed mail #%d." % [pr.player_id, pr.display_name, mail_id])
 	return {"ok": true, "rewards": rewards}
