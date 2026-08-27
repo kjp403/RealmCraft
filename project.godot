@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.173"
+config/version="0.28.174"
 ; Oldest published Windows zip still allowed to log in. Keep this at the last
 ; play.arkenelle.com/desktop userversion until Release clients has caught up —
 ; exact-match alone soft-locks everyone when Deploy VPS lands before the zip.

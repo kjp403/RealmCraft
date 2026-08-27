@@ -133,108 +133,31 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
+theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 12
 
-[node name="Attributes" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad" unique_id=1539015317]
+[node name="Scroll" type="ScrollContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad" unique_id=1539015318]
 layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Attributes" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Scroll" unique_id=1539015317]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 script = ExtResource("4_attr")
 
-[node name="TitleLabel" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1174501795]
+[node name="TitleLabel" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Scroll/Attributes" unique_id=1174501795]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.55, 1)
 theme_override_font_sizes/font_size = 16
 text = "Attributes"
 
-[node name="AvailablePointsLabel" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1209105337]
+[node name="AvailablePointsLabel" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Scroll/Attributes" unique_id=1209105337]
 layout_mode = 2
 text = "Available points: 0"
 horizontal_alignment = 1
+autowrap_mode = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=794430182]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer" unique_id=93915371]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Vitality 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer" unique_id=1909351056]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=149482688]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer2" unique_id=1536117576]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Strength 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer2" unique_id=207070448]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1048798731]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer3" unique_id=1297436482]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Intelligence 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer3" unique_id=1699077642]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
-
-[node name="HBoxContainer4" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1310453702]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer4" unique_id=1433587394]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Spirit 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer4" unique_id=1439433845]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
-
-[node name="HBoxContainer5" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1553936970]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer5" unique_id=1780594447]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Agility 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer5" unique_id=233711618]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
-
-[node name="HBoxContainer6" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes" unique_id=1999000001]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Label" type="Label" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer6" unique_id=1999000002]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Defense 0"
-
-[node name="Button" type="Button" parent="Margin/Card/Pad/Root/Content/StatsContent/AttributesPanel/Pad/Attributes/HBoxContainer6" unique_id=1999000003]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-text = "+"
 
 [node name="JobsContent" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content" unique_id=1596733831]
 unique_name_in_owner = true

@@ -14,8 +14,11 @@ func data_request_handler(
 	if pr.available_attributes_points <= 0:
 		return {"ok": false, "points": pr.available_attributes_points}
 
-	var attr: StringName = StringName(str(args.get("attr", "")))
-	var gained_stats: Dictionary = AttributeMap.attr_to_stats({attr: 1})
+	# Normalize first: the client sends "strength" while the table used to be
+	# keyed "strenght", so unnormalized names failed silently here — the client
+	# had already applied the point locally, and the build vanished on respawn.
+	var attr: StringName = AttributeMap.normalize(StringName(str(args.get("attr", ""))))
+	var gained_stats: Dictionary = AttributeMap.stats_for(attr)
 	if gained_stats.is_empty():
 		# Unknown / invalid attribute name.
 		return {"ok": false, "points": pr.available_attributes_points}

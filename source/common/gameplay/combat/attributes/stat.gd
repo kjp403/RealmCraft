@@ -3,6 +3,9 @@ class_name Stat
 
 const HEALTH: StringName = &"health"
 const HEALTH_MAX: StringName = &"health_max"
+## Health restored per second by the out-of-combat regen tick (base + Vitality
+## + gear). Combat suppresses it entirely — see InstanceServer.
+const HEALTH_REGEN: StringName = &"health_regen"
 
 const MANA: StringName = &"mana"
 const MANA_MAX: StringName = &"mana_max"
@@ -68,6 +71,7 @@ const GATHER_XP: StringName = &"gather_xp"
 ## to a capitalized form of the raw key.
 const DISPLAY_NAMES: Dictionary = {
 	HEALTH_MAX: "Max Health",
+	HEALTH_REGEN: "Health Regen",
 	MANA_MAX: "Max Mana",
 	MANA_REGEN: "Mana Regen",
 	PRAYER_MAX: "Max Prayer",
