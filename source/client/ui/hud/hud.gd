@@ -17,6 +17,10 @@ const SLAYER_TRACKER_SCRIPT: Script = preload(
 ## can still compose a room code without closing the keeper UI.
 ## The prayer book, hosted in the dock rather than as a fullscreen shell.
 const PRAYER_PANEL_SCENE: String = "res://source/client/ui/menus/prayer/prayer_menu.tscn"
+## Guided onboarding lessons (Charter Intake tour, mastery, food). Preloaded by
+## path rather than by class name so a fresh clone runs it before the editor has
+## re-registered global classes.
+const ONBOARDING_COACH: GDScript = preload("res://source/client/ui/hud/onboarding_coach.gd")
 
 const CHAT_ABOVE_MENU_Z: int = 110
 const CHAT_DEFAULT_Z: int = 1
@@ -156,6 +160,9 @@ func _ready() -> void:
 	add_child(DungeonHud.new())
 	# Boss Hunt HUD (contract countdown + kill tally) — same deal on boss_hunt.hud.
 	add_child(BossHuntHud.new())
+	# Onboarding coach — the guided intake lessons and the first-mastery-point
+	# nudge. Inert until an NPC hands out a lesson or a point lands.
+	add_child(ONBOARDING_COACH.new())
 
 	var prayer_button := Button.new()
 	prayer_button.custom_minimum_size = Vector2(26, 26)
@@ -802,6 +809,30 @@ func _toggle_compact_panel(selected_panel: Control) -> void:
 	var should_open: bool = not selected_panel.visible
 	_hide_compact_panels()
 	selected_panel.visible = should_open
+	# Announce OPENS only (a close teaches nothing). The onboarding coach gates
+	# its lessons on these, so its tour reacts to the real panel, not a promise.
+	if should_open:
+		ClientState.compact_panel_opened.emit(_compact_panel_id(selected_panel))
+
+
+## Dock panel → the id the coach and any other listener match on. Unknown panels
+## report an empty name rather than guessing.
+func _compact_panel_id(panel: Control) -> StringName:
+	if panel == $CompactMenuHost:
+		return &"inventory"
+	if panel == $CompactEquipmentHost:
+		return &"equipment"
+	if panel == $CompactSkillsHost:
+		return &"skills"
+	if panel == $CompactMasteryHost:
+		return &"mastery"
+	if panel == $CompactQuestsHost:
+		return &"quests"
+	if panel == $CompactFriendsHost:
+		return &"friends"
+	if panel == $CompactSettingsHost:
+		return &"settings"
+	return &"prayer" if panel == _prayer_dock else &""
 
 
 func _on_inventory_dock_button_pressed() -> void:

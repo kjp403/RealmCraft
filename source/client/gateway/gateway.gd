@@ -546,7 +546,7 @@ func _on_login_login_button_pressed() -> void:
 	var account_name_edit: LineEdit = $LoginPanel/VBoxContainer/VBoxContainer/VBoxContainer/LineEdit
 	var password_edit: LineEdit = $LoginPanel/VBoxContainer/VBoxContainer/VBoxContainer2/LineEdit
 
-	var username: String = account_name_edit.text
+	var username: String = account_name_edit.text.strip_edges()
 	var password: String = password_edit.text
 
 	var login_button: Button = $LoginPanel/VBoxContainer/VBoxContainer/LoginButton
@@ -731,7 +731,8 @@ func _on_create_character_button_pressed() -> void:
 	$CharacterCreation.hide()
 
 	var result: Dictionary
-	result = CredentialsUtils.validate_username(username_edit.text)
+	var char_name: String = username_edit.text.strip_edges()
+	result = CredentialsUtils.validate_username(char_name)
 	if result.code != CredentialsUtils.UsernameError.OK:
 		await popup_panel.confirm_message(tr("USERNAME") + result.message)
 		create_button.disabled = false
@@ -746,7 +747,7 @@ func _on_create_character_button_pressed() -> void:
 		{
 			GatewayAPI.KEY_TOKEN_ID: session_id,
 			"data": {
-				"name": username_edit.text,
+				"name": char_name,
 				"skin": selected_skin_id,
 			},
 			GatewayAPI.KEY_ACCOUNT_USERNAME: account_name,
@@ -774,7 +775,8 @@ func create_account() -> void:
 		return
 	
 	var result: Dictionary
-	result = CredentialsUtils.validate_username(name_edit.text)
+	var new_account_name: String = name_edit.text.strip_edges()
+	result = CredentialsUtils.validate_username(new_account_name)
 	if result.code != CredentialsUtils.UsernameError.OK:
 		await popup_panel.confirm_message(tr("USERNAME") + result.message)
 		return
@@ -790,7 +792,7 @@ func create_account() -> void:
 		HTTPClient.Method.METHOD_POST,
 		GatewayAPI.account_create(),
 		{
-			GatewayAPI.KEY_ACCOUNT_USERNAME: name_edit.text,
+			GatewayAPI.KEY_ACCOUNT_USERNAME: new_account_name,
 			GatewayAPI.KEY_ACCOUNT_PASSWORD: password_edit.text,
 		}
 	)

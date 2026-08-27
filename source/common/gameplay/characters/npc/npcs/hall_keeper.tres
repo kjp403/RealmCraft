@@ -7,6 +7,8 @@
 [ext_resource type="SpriteFrames" uid="uid://b1gu2vklfnvb5" path="res://source/common/gameplay/characters/sprite_frames/scholar_director.tres" id="6_skin"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="7_npc"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/blood_in_the_meadow.tres" id="8_blood"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/hooks_and_coals.tres" id="8_hooks"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/tutorial_interaction.gd" id="8_tutorial"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_hole_in_the_wall.tres" id="9_hole"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/under_the_charter.tres" id="10_sewers"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/a_reader_of_wars.tres" id="11_reader"]
@@ -16,7 +18,7 @@
 
 [sub_resource type="Resource" id="QuestInteraction_welcome"]
 script = ExtResource("4_quest_interaction")
-quests = Array[ExtResource("2_quest")]([ExtResource("8_blood"), ExtResource("9_hole"), ExtResource("10_sewers"), ExtResource("11_reader"), ExtResource("12_foundry"), ExtResource("13_hollow")])
+quests = Array[ExtResource("2_quest")]([ExtResource("8_blood"), ExtResource("8_hooks"), ExtResource("9_hole"), ExtResource("10_sewers"), ExtResource("11_reader"), ExtResource("12_foundry"), ExtResource("13_hollow")])
 metadata/_custom_type_script = "uid://dka1daj2vrhn"
 
 [sub_resource type="Resource" id="Dialogue_progression"]
@@ -49,6 +51,11 @@ lines = Array[String](["I kept a gate once. Then a wall. Now I keep this hall an
 label_override = "Tell me about yourself"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
+[sub_resource type="Resource" id="Tutorial_food"]
+script = ExtResource("8_tutorial")
+topic = &"food"
+label_override = "Where do I get more healing?"
+
 [sub_resource type="Resource" id="QuestBoss_fight"]
 script = ExtResource("qboss")
 enemy_type = &"mecha_stone_golem"
@@ -59,5 +66,5 @@ npc_name = "Hall Keeper"
 location_hint = "Castle Garden, Charter Hall"
 skin = ExtResource("6_skin")
 greeting = "Registration complete? Good. Before you leave this hall, remember one thing: Arkenelle does not lock you into a class, weapon, or profession. Every Hero may train every path. I can explain the systems, then give you your first assignment."
-interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_welcome"), SubResource("Dialogue_progression"), SubResource("Dialogue_combat"), SubResource("Dialogue_professions"), SubResource("Dialogue_first_steps"), SubResource("Dialogue_keeper"), SubResource("QuestBoss_fight")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_welcome"), SubResource("Dialogue_progression"), SubResource("Dialogue_combat"), SubResource("Dialogue_professions"), SubResource("Tutorial_food"), SubResource("Dialogue_first_steps"), SubResource("Dialogue_keeper"), SubResource("QuestBoss_fight")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

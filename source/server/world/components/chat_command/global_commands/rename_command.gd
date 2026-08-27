@@ -17,10 +17,11 @@ func _init() -> void:
 
 
 func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInstance) -> String:
-	if args.size() != 3:
+	if args.size() < 3:
 		return "Usage: " + command_usage
 
-	var new_name: String = args[2].strip_edges()
+	# Names can contain spaces, so the new name is everything after the target.
+	var new_name: String = " ".join(args.slice(2)).strip_edges()
 	var check: Dictionary = CredentialsUtils.validate_username(new_name)
 	if check.get("code", CredentialsUtils.UsernameError.EMPTY) != CredentialsUtils.UsernameError.OK:
 		return str(check.get("message", "Invalid name."))

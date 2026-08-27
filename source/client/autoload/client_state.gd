@@ -16,6 +16,18 @@ signal player_context_requested(peer_id: int)
 signal hostile_context_requested(npc: HostileNpc)
 signal open_menu_requested(menu: StringName, arg: Variant)
 signal dm_requested(id: int)
+## A dock panel (inventory, equipment, mastery, quests, ...) was opened from the
+## bottom dock or its hotkey. The onboarding coach waits on these so a lesson can
+## require the player to open the real panel instead of just reading about it.
+signal compact_panel_opened(panel: StringName)
+## The local player opened an NPC's dialogue, keyed by that NPC's giver slug.
+## World markers (the Charter Clerk arrow) drop themselves once it fires.
+signal npc_talked(giver_key: StringName)
+## An NPC offered a guided lesson and the player took it (see TutorialInteraction).
+signal tutorial_requested(topic: StringName)
+## A mastery level-up crossed into a spendable point. The coach nudges the player
+## to the tree the first time it happens.
+signal mastery_point_earned(category: StringName, level: int)
 ## Emitted on the client after a successful gather (mining, ...). Carries the
 ## gather result so UI can refresh xp/inventory.
 signal gather_succeeded(result: Dictionary)
@@ -365,26 +377,34 @@ func _on_combat_reward(data: Dictionary) -> void:
 	# Keep the mastery mirror current off every kill — gear tooltips colour their
 	# wear-gates against it, so a stale mirror reads as "locked" on gear you just
 	# unlocked.
-	if not str(mastery.get("category", "")).is_empty():
-		set_mastery_level(
-			StringName(str(mastery.get("category", ""))),
-			int(mastery.get("level", 0)),
-		)
+	var mastery_category: StringName = StringName(str(mastery.get("category", "")))
+	var mastery_level: int = int(mastery.get("level", 0))
+	# Level BEFORE this kill, so we can tell a plain level-up from the one that
+	# actually hands over a spendable point (one per 3 levels, not one per level).
+	var mastery_level_was: int = int(mastery_levels.get(String(mastery_category), 0))
+	if not String(mastery_category).is_empty():
+		set_mastery_level(mastery_category, mastery_level)
 	if bool(mastery.get("started", false)):
-		big.append("%s Mastery begun! +1 mastery point (Character > Mastery)" % str(mastery.get("category", "")).capitalize())
+		big.append("%s Mastery begun! (Character > Mastery)" % String(mastery_category).capitalize())
 	elif bool(mastery.get("leveled_up", false)):
 		# Mastery level-ups get the same fireworks / jingle ceremony.
 		if local_player != null:
 			LevelUpFx.celebrate(
 				local_player,
-				"%s Mastery" % str(mastery.get("category", "")).capitalize(),
-				int(mastery.get("level", 1)),
+				"%s Mastery" % String(mastery_category).capitalize(),
+				maxi(mastery_level, 1),
 			)
 		else:
-			big.append("%s Mastery Lv %d! +1 mastery point" % [
-				str(mastery.get("category", "")).capitalize(),
-				int(mastery.get("level", 1)),
+			big.append("%s Mastery Lv %d!" % [
+				String(mastery_category).capitalize(),
+				maxi(mastery_level, 1),
 			])
+	if (
+		bool(mastery.get("leveled_up", false))
+		and MasteryService.point_budget(mastery_level) > MasteryService.point_budget(mastery_level_was)
+	):
+		big.append("+1 %s mastery point to spend" % String(mastery_category).capitalize())
+		mastery_point_earned.emit(mastery_category, mastery_level)
 	var slayer: Dictionary = data.get("slayer", {})
 	if bool(slayer.get("leveled_up", false)):
 		set_skill_level(&"slayer", int(slayer.get("level", 1)))
