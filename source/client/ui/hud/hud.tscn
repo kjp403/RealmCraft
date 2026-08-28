@@ -105,9 +105,9 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = -42.0
-offset_top = -54.0
+offset_top = -88.0
 offset_right = -8.0
-offset_bottom = 54.0
+offset_bottom = 88.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 4
@@ -116,7 +116,6 @@ theme_override_constants/separation = 4
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 focus_mode = 0
-theme_type_variation = &"SlotButton"
 theme_override_constants/icon_max_width = 28
 text = "1"
 icon_alignment = 1
@@ -125,7 +124,6 @@ icon_alignment = 1
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 focus_mode = 0
-theme_type_variation = &"SlotButton"
 theme_override_constants/icon_max_width = 28
 text = "2"
 icon_alignment = 1
@@ -134,9 +132,24 @@ icon_alignment = 1
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 focus_mode = 0
-theme_type_variation = &"SlotButton"
 theme_override_constants/icon_max_width = 28
 text = "3"
+icon_alignment = 1
+
+[node name="ItemSlotButton4" type="Button" parent="ItemSlots/VBoxContainer" unique_id=365109259]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_constants/icon_max_width = 28
+text = "4"
+icon_alignment = 1
+
+[node name="ItemSlotButton5" type="Button" parent="ItemSlots/VBoxContainer" unique_id=365109260]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_constants/icon_max_width = 28
+text = "5"
 icon_alignment = 1
 
 [node name="StatusBar" type="HBoxContainer" parent="." unique_id=1999000501]
@@ -160,14 +173,14 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -95.0
-offset_top = -130.0
-offset_right = 95.0
-offset_bottom = -78.0
+offset_left = -97.0
+offset_top = -104.0
+offset_right = 97.0
+offset_bottom = -60.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 alignment = 1
 script = ExtResource("10_abilitybar")
 

@@ -709,7 +709,8 @@ func process_input() -> void:
 		request_area_loot()
 
 	if Input.is_action_just_pressed(&"player_special") \
-			or Input.is_action_just_pressed(&"player_special_2"):
+			or Input.is_action_just_pressed(&"player_special_2") \
+			or Input.is_action_just_pressed(&"player_special_3"):
 		_note_input_activity()
 
 	# Channeling: rooted (process_movement zeroes velocity). A move key CANCELS
@@ -734,7 +735,8 @@ func process_input() -> void:
 			# rooted ones do. The start grace stops the launching press from self-cancelling.
 			if Time.get_ticks_msec() >= _channel_grace_until_ms and (
 					Input.is_action_just_pressed(&"player_special")
-					or Input.is_action_just_pressed(&"player_special_2")):
+					or Input.is_action_just_pressed(&"player_special_2")
+					or Input.is_action_just_pressed(&"player_special_3")):
 				_cancel_channel()
 			action_input = false
 			return

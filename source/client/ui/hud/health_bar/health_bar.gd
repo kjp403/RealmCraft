@@ -1,9 +1,11 @@
 extends Control
-## HUD health bar with a "damage chip": the green MainBar tweens to current HP while a
-## red ChipBar behind it LAGS on damage, leaving a red chunk that lingers a beat then
+## HUD health bar with a "damage chip": the green MainInk follows current HP while the
+## red ChipInk behind it LAGS on damage, leaving a red chunk that lingers a beat then
 ## drains — so a hit reads instantly. Heals / init move both together, so no red shows.
-## The red is the ChipBar's fill; the dark empty track is the ChipBar's themed (XPBar)
-## background, showing through MainBar's transparent background.
+##
+## Both ProgressBars are INVISIBLE value holders: the tweens below still animate their
+## `value`, and the two InkFill layers render them as ink in water (ink_fill.gdshader).
+## Keeping the ProgressBars means the damage-chip timing never had to change.
 
 const FILL_TIME: float = 0.18
 const CHIP_DELAY: float = 0.35
@@ -12,6 +14,11 @@ const LOW_HP_RATIO: float = 0.25
 const LOW_PULSE_TIME: float = 0.5
 const LOW_PULSE_BRIGHT: Color = Color(1.7, 1.7, 1.7)
 
+const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
+
+@onready var track: Panel = $Track
+@onready var chip_ink: ColorRect = $ChipInk
+@onready var main_ink: ColorRect = $MainInk
 @onready var chip_bar: ProgressBar = $ChipBar
 @onready var main_bar: ProgressBar = $MainBar
 @onready var label: Label = $MainBar/Label
@@ -23,6 +30,11 @@ var _pulse_tween: Tween
 
 
 func _ready() -> void:
+	SLOT_STYLE.apply_track(track)
+	SLOT_STYLE.clear_bar(chip_bar)
+	SLOT_STYLE.clear_bar(main_bar)
+	chip_ink.source = chip_bar
+	main_ink.source = main_bar
 	ClientState.local_player_ready.connect(
 		func(local_player: LocalPlayer) -> void:
 			local_player.stats_component.stats.stat_changed.connect(_on_stat_changed)
@@ -70,8 +82,9 @@ func _update_label(value: float) -> void:
 	label.text = "%d / %d" % [value, main_bar.max_value]
 
 
-## Below LOW_HP_RATIO the green fill throbs brighter as a danger cue. Uses self_modulate
-## (the node's own draw only) so the child readout label stays steady. Cleared on recovery.
+## Below LOW_HP_RATIO the green ink throbs brighter as a danger cue. Pulsing the INK
+## layer, not the ProgressBar: the bar draws nothing now, and the readout label lives on
+## the bar, so this also keeps the text steady while the fluid flares. Cleared on recovery.
 func _set_low(low: bool) -> void:
 	if low == _low:
 		return
@@ -80,7 +93,7 @@ func _set_low(low: bool) -> void:
 		_pulse_tween.kill()
 	if low:
 		_pulse_tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		_pulse_tween.tween_property(main_bar, ^"self_modulate", LOW_PULSE_BRIGHT, LOW_PULSE_TIME)
-		_pulse_tween.tween_property(main_bar, ^"self_modulate", Color.WHITE, LOW_PULSE_TIME)
+		_pulse_tween.tween_property(main_ink, ^"self_modulate", LOW_PULSE_BRIGHT, LOW_PULSE_TIME)
+		_pulse_tween.tween_property(main_ink, ^"self_modulate", Color.WHITE, LOW_PULSE_TIME)
 	else:
-		main_bar.self_modulate = Color.WHITE
+		main_ink.self_modulate = Color.WHITE

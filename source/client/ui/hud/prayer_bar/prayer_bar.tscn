@@ -1,13 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://source/client/ui/hud/prayer_bar/prayer_bar.gd" id="1_prayer"]
-
-[sub_resource type="StyleBoxFlat" id="SB_prayer_fill"]
-bg_color = Color(0.67, 0.35, 0.89, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[ext_resource type="Script" path="res://source/client/ui/hud/ink_fill.gd" id="2_ink"]
 
 [node name="PrayerBar" type="Control"]
 layout_mode = 3
@@ -19,6 +13,41 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_prayer")
+
+[node name="Track" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -18.0
+offset_right = 100.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Ink" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -18.0
+offset_right = 100.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_ink")
+ink_deep = Color(0.18, 0.05, 0.32, 1)
+ink_bright = Color(0.76, 0.46, 1, 1)
+edge_color = Color(0.96, 0.90, 1, 1)
+flow_speed = 0.16
 
 [node name="ProgressBar" type="ProgressBar" parent="."]
 custom_minimum_size = Vector2(200, 15)
@@ -36,8 +65,6 @@ grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_type_variation = &"XPBar"
-theme_override_styles/fill = SubResource("SB_prayer_fill")
 max_value = 50.0
 step = 0.5
 value = 50.0

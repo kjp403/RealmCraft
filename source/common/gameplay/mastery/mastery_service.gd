@@ -76,6 +76,10 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	var spent: Dictionary = entry["spent"]
 	if spent.has(String(node_id)):
 		return {"ok": false, "reason": "owned"}
+	# A maxed tree already granted every ability — buying one would burn points
+	# for nothing (the client hides the button; this is the authoritative guard).
+	if node.ability != null and has_full_unlock(entry):
+		return {"ok": false, "reason": "owned"}
 	if int(entry["level"]) < int(TIER_UNLOCK_LEVEL.get(node.tier, 1)):
 		return {"ok": false, "reason": "tier_locked"}
 	# Upgrade chains learn in order: you must own the tier this one replaces.
@@ -106,6 +110,48 @@ static func _has_mastery_entry(resource: PlayerResource, category: StringName) -
 	return false
 
 
+## MASTERY 99 PAYOFF: a maxed tree hands you its ENTIRE ability list at the top
+## tier of every chain, free of the point budget. Points still buy passives (and
+## still show as spent/available), but abilities stop competing for them — hitting
+## 99 means you have mastered the weapon, not that you can finally afford one more
+## node. Applies to ability nodes only; passives remain a spend.
+static func has_full_unlock(entry: Dictionary) -> bool:
+	return int(entry.get("level", 1)) >= PlayerResource.MASTERY_LEVEL_CAP
+
+
+## Does the player own [param node] — bought with points, or granted by the
+## level-99 full unlock (ability nodes only)?
+static func owns_node(entry: Dictionary, node: MasteryNode) -> bool:
+	if (entry.get("spent", {}) as Dictionary).has(String(node.id)):
+		return true
+	return node.ability != null and has_full_unlock(entry)
+
+
+## Every ability node id a maxed tree grants outright. Includes the lower ranks
+## of each chain, not just the tops, so a loadout saved pre-99 still resolves.
+static func full_unlock_ids(tree: MasteryTreeResource) -> Array[String]:
+	var out: Array[String] = []
+	if tree == null:
+		return out
+	for node: MasteryNode in tree.nodes:
+		if node.ability != null:
+			out.append(String(node.id))
+	return out
+
+
+## The highest-tier node of [param node]'s upgrade chain. What a full unlock
+## mounts — "every ability at its highest tier".
+static func top_of_chain(tree: MasteryTreeResource, node: MasteryNode) -> MasteryNode:
+	var root: StringName = _chain_root_id(tree, node)
+	var best: MasteryNode = node
+	for candidate: MasteryNode in tree.nodes:
+		if candidate.ability == null or candidate.tier <= best.tier:
+			continue
+		if _chain_root_id(tree, candidate) == root:
+			best = candidate
+	return best
+
+
 ## The "abilities" registry ids to mount in the weapon's special slots, ONE
 ## ENTRY PER LOADOUT SLOT POSITION (0 = that slot is empty), so a pick keeps
 ## the input key the player placed it on. Owned ability picks always channel
@@ -125,15 +171,20 @@ static func effective_special_ids(resource: PlayerResource, weapon_item: WeaponI
 			entry = resource.masteries[existing]
 			break
 	var spent: Dictionary = entry.get("spent", {})
+	var full_unlock: bool = has_full_unlock(entry)
 	var used_chains: Dictionary = {} # chain root id -> true (never mount a chain twice)
 	for pick in picks:
 		var resolved: int = 0
 		var node_id: String = str(pick)
-		if not node_id.is_empty() and spent.has(node_id):
+		if not node_id.is_empty() and (full_unlock or spent.has(node_id)):
 			var node: MasteryNode = tree.get_node_by_id(StringName(node_id))
 			if node != null and node.ability != null:
-				# Fire the EXACT tier the player slotted (no auto-bump to highest).
-				# One tier per chain so Q/E never double-mount the same move.
+				# Fire the EXACT tier the player slotted (no auto-bump to highest) —
+				# EXCEPT at the level-99 full unlock, where every rank is yours and
+				# slotting a stale lower rank would just be a worse version of it.
+				# One tier per chain so Q/E/R never double-mount the same move.
+				if full_unlock:
+					node = top_of_chain(tree, node)
 				var root: String = String(_chain_root_id(tree, node))
 				if not used_chains.has(root):
 					var ability_id: int = int(node.ability.get_meta(&"id", 0))
@@ -203,6 +254,7 @@ static func refresh(player: Player) -> void:
 		var tree: MasteryTreeResource = tree_for(category)
 		if tree == null:
 			continue
+		# Passives are NOT part of the level-99 ability unlock — they stay bought.
 		var spent: Dictionary = (resource.masteries[category] as Dictionary).get("spent", {})
 		var is_held: bool = category == equipped_category
 		for node: MasteryNode in tree.nodes:

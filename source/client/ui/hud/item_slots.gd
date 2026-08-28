@@ -1,22 +1,33 @@
 extends Control
-## HUD quick slots (keys 1 / 2 / 3): one-press access to bag items — weapons
+## HUD quick slots (keys 1-5): one-press access to bag items — weapons
 ## and tools EQUIP (with swap), consumables USE via item.consume so a potion
 ## never displaces the held weapon.
 ##
 ## Assignment:
-##  • Inventory / compact bag → Hotkey / Bind to 1-2-3
+##  • Inventory / compact bag → Hotkey / Bind to 1-5
 ##  • Drag an item from the bag onto a slot button
 ## Bindings persist client-side per character.
 
 
-const SLOT_COUNT: int = 3
+## Keep in step with the ItemSlotButtonN children in hud.tscn and the
+## player_quickslot_N actions in project.godot.
+const SLOT_COUNT: int = 5
 const SLOT_ACTIONS: Array[StringName] = [
 	&"player_quickslot_1", &"player_quickslot_2", &"player_quickslot_3",
+	&"player_quickslot_4", &"player_quickslot_5",
 ]
 const SETTINGS_SECTION: StringName = &"quick_slots"
 const SLOT_SIZE: Vector2 = Vector2(32, 32)
+const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
+## How long the green "input registered" face stays lit after a slot fires.
+## These keys arrive through _unhandled_input (so typing "3" in chat is already
+## filtered out), which means there is no held state to poll — the flash IS the
+## acknowledgement, and it has to outlast a single frame to be seen.
+const LIVE_FLASH_S: float = 0.18
 
 var item_shortcuts: Array[Item]
+## Per-slot Time.get_ticks_msec() deadline for the green flash; 0 = dark.
+var _live_until_ms: Array[int] = []
 ## Per-slot cooldown overlays (sweep + seconds), keyed by index.
 var _cd_overlays: Array[Dictionary] = []
 
@@ -26,8 +37,10 @@ var _cd_overlays: Array[Dictionary] = []
 func _ready() -> void:
 	item_shortcuts.resize(SLOT_COUNT)
 	_cd_overlays.resize(SLOT_COUNT)
+	_live_until_ms.resize(SLOT_COUNT)
 	for i: int in slot_container.get_child_count():
 		var button: Button = slot_container.get_child(i) as Button
+		SLOT_STYLE.apply(button) # chamfered keybind tile, matching the ability bar
 		button.pressed.connect(_trigger_slot.bind(i))
 		button.set_meta(&"quick_slot_index", i)
 		# Accept inventory / bag drag-drops of potions and gear.
@@ -37,7 +50,7 @@ func _ready() -> void:
 		key_label.text = str(i + 1)
 		key_label.add_theme_font_size_override(&"font_size", 8)
 		key_label.add_theme_color_override(&"font_color", Color(0.75, 0.78, 0.85))
-		key_label.position = Vector2(3, 1)
+		key_label.position = Vector2(5, 2) # clear of the top-left corner bracket
 		key_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		key_label.z_index = 1
 		button.add_child(key_label)
@@ -74,6 +87,26 @@ func _make_cd_overlay(button: Button) -> Dictionary:
 
 func _process(_delta: float) -> void:
 	_refresh_cooldown_overlays()
+	_refresh_live_flashes()
+
+
+## Expires the green faces lit by [method _flash_live].
+func _refresh_live_flashes() -> void:
+	var now: int = Time.get_ticks_msec()
+	for i: int in mini(SLOT_COUNT, slot_container.get_child_count()):
+		var button: Button = slot_container.get_child(i) as Button
+		if button == null:
+			continue
+		SLOT_STYLE.set_live(button, _live_until_ms[i] > now)
+
+
+## Lights slot [param index] green for LIVE_FLASH_S. Fired the moment the input
+## is accepted, NOT on the server's reply — the cue has to say "the game heard
+## you", which is true even when the action then bounces off a cooldown.
+func _flash_live(index: int) -> void:
+	if index < 0 or index >= _live_until_ms.size():
+		return
+	_live_until_ms[index] = Time.get_ticks_msec() + int(LIVE_FLASH_S * 1000.0)
 
 
 func _refresh_cooldown_overlays() -> void:
@@ -120,7 +153,7 @@ func button_height_for(index: int) -> float:
 	return maxf(SLOT_SIZE.y, button.size.y)
 
 
-## Keyboard 1/2/3. _unhandled_input on purpose: keys consumed by the GUI
+## Keyboard 1-5. _unhandled_input on purpose: keys consumed by the GUI
 ## (typing numbers in chat) never reach here. Ignore key-repeat echoes so
 ## holding a rebound hotkey (e.g. Space) can't fire the slot every OS repeat.
 func _unhandled_input(event: InputEvent) -> void:
@@ -134,6 +167,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _trigger_slot(index: int) -> void:
+	_flash_live(index)
 	var item: Item = item_shortcuts[index] if index < item_shortcuts.size() else null
 	if item == null:
 		return

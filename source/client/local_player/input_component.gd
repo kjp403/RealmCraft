@@ -364,6 +364,28 @@ func is_special2_just_released() -> bool:
 	return Input.is_action_just_released(&"player_special_2")
 
 
+## Fourth weapon ability slot (player_special_3, default R) — the third mastery
+## loadout pick (abilities[3]).
+func is_special3_pressed() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	if _ui_blocks_combat(): return false
+	return Input.is_action_pressed(&"player_special_3")
+
+
+func is_special3_just_pressed() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	if _ui_blocks_combat(): return false
+	return Input.is_action_just_pressed(&"player_special_3")
+
+
+func is_special3_just_released() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	return Input.is_action_just_released(&"player_special_3")
+
+
 ## Applies every saved keybind from settings to the InputMap. Called by
 ## [ClientState] right after settings load, so binds hold from boot (menus,
 ## gateway) instead of waiting for the local player's InputComponent to spawn.

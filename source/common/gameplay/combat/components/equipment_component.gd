@@ -8,6 +8,11 @@ extends Node
 ## specials on the weapon. Only the server writes them (MasteryService.refresh).
 const SPECIAL_SLOT: StringName = &"special_ability"
 const SPECIAL_SLOT_2: StringName = &"special_ability_2"
+const SPECIAL_SLOT_3: StringName = &"special_ability_3"
+
+## Loadout position -> pseudo-slot, in input order (Q / E / R). Index IS the
+## position, so adding a fourth key is one entry here plus one input action.
+const SPECIAL_SLOTS: Array[StringName] = [SPECIAL_SLOT, SPECIAL_SLOT_2, SPECIAL_SLOT_3]
 
 
 signal equipment_changed(
@@ -32,7 +37,7 @@ var mounted_nodes: Dictionary[StringName, Node]
 
 ## Last synced special-ability ids, kept so a weapon mounted AFTER the special
 ## pairs applied (baseline ordering isn't guaranteed) still picks them up.
-var _special_ability_ids: Array[int] = [0, 0]
+var _special_ability_ids: Array[int] = [0, 0, 0]
 
 ## Server-side ledger of gear modifiers currently applied to stats_component.
 ## Blind +/- on GearItem.equip/unequip could desync when a clear was skipped or
@@ -74,12 +79,10 @@ func unequip(slot: StringName) -> void:
 ## Server-side: publish the mastery special-ability ids; clients receive them
 ## through the regular state sync and remount via _on_slot_changed.
 func set_special_abilities(ability_ids: Array[int]) -> void:
-	var first: int = ability_ids[0] if ability_ids.size() > 0 else 0
-	var second: int = ability_ids[1] if ability_ids.size() > 1 else 0
-	if _special_ability_ids[0] != first:
-		synchronizer.set_by_path(slot_path(SPECIAL_SLOT), first)
-	if _special_ability_ids[1] != second:
-		synchronizer.set_by_path(slot_path(SPECIAL_SLOT_2), second)
+	for i: int in SPECIAL_SLOTS.size():
+		var ability_id: int = ability_ids[i] if i < ability_ids.size() else 0
+		if _special_ability_ids[i] != ability_id:
+			synchronizer.set_by_path(slot_path(SPECIAL_SLOTS[i]), ability_id)
 
 
 func can_use(slot: StringName, index: int, released: bool = false) -> bool:
@@ -99,8 +102,8 @@ func process_input(local_player: LocalPlayer) -> void:
 
 func _on_slot_changed(slot: StringName, item_id: int) -> void:
 	# Not gear: the value is an ability id for one of the weapon's special slots.
-	if slot == SPECIAL_SLOT or slot == SPECIAL_SLOT_2:
-		_special_ability_ids[0 if slot == SPECIAL_SLOT else 1] = item_id
+	if SPECIAL_SLOTS.has(slot):
+		_special_ability_ids[SPECIAL_SLOTS.find(slot)] = item_id
 		_apply_special_to_mounted()
 		# Emitted AFTER the remount so listeners (the HUD ability bar) read the
 		# weapon's final abilities. Server-side listeners filter on &"weapon".

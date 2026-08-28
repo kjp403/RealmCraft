@@ -5,6 +5,10 @@ extends Control
 
 const FILL_TIME: float = 0.18
 
+const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
+
+@onready var track: Panel = $Track
+@onready var ink: ColorRect = $Ink
 @onready var label: Label = $ProgressBar/Label
 @onready var progress_bar: ProgressBar = $ProgressBar
 
@@ -12,6 +16,11 @@ var _tween: Tween
 
 
 func _ready() -> void:
+	# The ProgressBar is an invisible value holder from here on — the tween below
+	# still drives its `value`, and the Ink layer renders it (ink_fill.gdshader).
+	SLOT_STYLE.apply_track(track)
+	SLOT_STYLE.clear_bar(progress_bar)
+	ink.source = progress_bar
 	ClientState.local_player_ready.connect(
 		func(local_player: LocalPlayer) -> void:
 			local_player.stats_component.stats.stat_changed.connect(_on_stat_changed)

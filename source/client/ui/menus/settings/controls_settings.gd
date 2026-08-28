@@ -13,7 +13,7 @@ const REMAP_CATEGORIES: Array[Dictionary] = [
 	{
 		&"title": "Combat",
 		&"show_on": [&"MOUSE_KEYBOARD", &"GAMEPAD"],
-		&"actions": [&"player_shoot", &"player_special", &"player_special_2"],
+		&"actions": [&"player_shoot", &"player_special", &"player_special_2", &"player_special_3"],
 	},
 	{
 		&"title": "Actions",
@@ -21,7 +21,7 @@ const REMAP_CATEGORIES: Array[Dictionary] = [
 		&"actions": [
 			&"player_interact", &"player_chat", &"player_chat_dm", &"player_recall", &"player_map",
 			&"player_inventory", &"player_quickslot_1", &"player_quickslot_2", &"player_quickslot_3",
-			&"player_quick_prayers",
+			&"player_quickslot_4", &"player_quickslot_5", &"player_quick_prayers",
 		],
 	},
 	{
