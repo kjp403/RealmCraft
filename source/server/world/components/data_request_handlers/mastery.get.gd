@@ -30,11 +30,11 @@ func data_request_handler(
 				entry = resource.masteries[existing]
 				break
 		var level: int = maxi(1, int(entry.get("level", 1)))
-		# At mastery 99 the tree's whole ability list is granted (see
-		# MasteryService.has_full_unlock). Fold those ids into "spent" so the tree
-		# UI paints them owned and equips them without a client-side special case —
-		# the POINT math still reads the stored spend only, so a maxed player keeps
-		# every point for passives.
+		# At mastery 99 the WHOLE tree is granted — abilities and passives alike
+		# (see MasteryService.has_full_unlock). Fold those ids into "spent" so the
+		# tree UI paints them owned and equips them without a client-side special
+		# case. The POINT math still reads the stored spend only, so the panel does
+		# not pretend a maxed player burned points they never spent.
 		var owned: Array = (entry.get("spent", {}) as Dictionary).keys()
 		var full_unlock: bool = MasteryService.has_full_unlock(entry)
 		if full_unlock:

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_ossuran_preview.gd" id="1_render"]
+
+[node name="OssuranPreview" type="Node"]
+script = ExtResource("1_render")

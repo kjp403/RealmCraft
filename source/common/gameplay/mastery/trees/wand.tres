@@ -7,15 +7,14 @@
 [ext_resource type="Resource" uid="uid://5g0cunnuw5g5" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/wand_heal.tres" id="4_heal"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/barrier/arcane_wall_1.tres" id="6_wall1"]
 [ext_resource type="Resource" uid="uid://cr8htn0a6gd12" path="res://source/common/gameplay/combat/ability/ability_collection/barrier/arcane_wall.tres" id="6_wall"]
-[ext_resource type="Texture2D" uid="uid://ccw5ys1m1a0s" path="res://assets/sprites/ui/ability_icons/spellpower.png" id="8_sp"]
-[ext_resource type="Texture2D" uid="uid://bicwmdlg38wf3" path="res://assets/sprites/ui/ability_icons/warding.png" id="9_ward"]
+
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/fireball_1.tres" id="10_fireball1"]
 [ext_resource type="Resource" uid="uid://c7i2vynws34cc" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/fireball.tres" id="10_fireball"]
 [ext_resource type="Resource" uid="uid://blwok67mxy1m7" path="res://source/common/gameplay/combat/ability/ability_collection/nova/frost_nova.tres" id="11_frost"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/nova/frost_nova_2.tres" id="11_frost2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/nova/frost_nova_3.tres" id="11_frost3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/nova/frost_nova_4.tres" id="11_frost4"]
-[ext_resource type="Texture2D" uid="uid://dn7h4f5c4175i" path="res://assets/sprites/ui/ability_icons/clarity.png" id="13_clarity"]
+
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/meteor_1.tres" id="14_meteor1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/meteor_2.tres" id="14_meteor2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/meteor_3.tres" id="14_meteor3"]
@@ -30,6 +29,14 @@
 [ext_resource type="Resource" uid="uid://0l8fw2nb3isk" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/wand_heal_2.tres" id="18_heal2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/wand_heal_3.tres" id="18_heal3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/bolt_shoot/wand_heal_4.tres" id="18_heal4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_attunement_1.png" id="ic0_p_attunement_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_attunement_2.png" id="ic1_p_attunement_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_attunement_3.png" id="ic2_p_attunement_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_clarity_1.png" id="ic3_p_clarity_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_clarity_2.png" id="ic4_p_clarity_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_warding_1.png" id="ic5_p_warding_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_warding_2.png" id="ic6_p_warding_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_warding_3.png" id="ic7_p_warding_3"]
 
 [sub_resource type="Resource" id="Mod_ap_attunement"]
 script = ExtResource("3_mod")
@@ -40,7 +47,7 @@ value = 12.0
 script = ExtResource("2_node")
 id = &"wand_attunement"
 node_name = "Attunement"
-icon = ExtResource("8_sp")
+icon = ExtResource("ic0_p_attunement_1")
 description = "+12 ability power."
 branch = &"domination"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ap_attunement")])
@@ -55,7 +62,7 @@ value = 10.0
 script = ExtResource("2_node")
 id = &"wand_attunement_2"
 node_name = "Attunement II"
-icon = ExtResource("8_sp")
+icon = ExtResource("ic1_p_attunement_2")
 description = "+10 more ability power."
 branch = &"domination"
 tier = 2
@@ -72,7 +79,7 @@ value = 12.0
 script = ExtResource("2_node")
 id = &"wand_attunement_3"
 node_name = "Attunement III"
-icon = ExtResource("8_sp")
+icon = ExtResource("ic2_p_attunement_3")
 description = "+12 more ability power. Your bond with the arcane deepens."
 branch = &"domination"
 tier = 3
@@ -157,7 +164,7 @@ value = 25.0
 script = ExtResource("2_node")
 id = &"wand_warding"
 node_name = "Warding"
-icon = ExtResource("9_ward")
+icon = ExtResource("ic5_p_warding_1")
 description = "+25 magic resistance."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mr_warding")])
@@ -172,7 +179,7 @@ value = 15.0
 script = ExtResource("2_node")
 id = &"wand_warding_2"
 node_name = "Warding II"
-icon = ExtResource("9_ward")
+icon = ExtResource("ic6_p_warding_2")
 description = "+15 more magic resistance."
 branch = &"resolve"
 tier = 2
@@ -189,7 +196,7 @@ value = 15.0
 script = ExtResource("2_node")
 id = &"wand_warding_3"
 node_name = "Warding III"
-icon = ExtResource("9_ward")
+icon = ExtResource("ic7_p_warding_3")
 description = "+15 more magic resistance."
 branch = &"resolve"
 tier = 3
@@ -266,7 +273,7 @@ value = 0.8
 script = ExtResource("2_node")
 id = &"wand_clarity"
 node_name = "Clarity"
-icon = ExtResource("13_clarity")
+icon = ExtResource("ic3_p_clarity_1")
 description = "+0.8 mana regen per second."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_clarity")])
@@ -281,7 +288,7 @@ value = 0.8
 script = ExtResource("2_node")
 id = &"wand_clarity_2"
 node_name = "Clarity II"
-icon = ExtResource("13_clarity")
+icon = ExtResource("ic4_p_clarity_2")
 description = "+0.8 more mana regen per second."
 branch = &"inspiration"
 tier = 2

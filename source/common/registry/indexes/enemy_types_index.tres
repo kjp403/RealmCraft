@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_b6pq3")
 content_name = &"enemy_types"
-version = 1787009606
-next_id = 121
+version = 1787898416
+next_id = 128
 entries = Array[Dictionary]([{
 &"hash": "6d50f92a83168ce4e753ce6357d845fa852278a30bb168b3f1919be3f915baa7",
 &"id": 1,
@@ -443,7 +443,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/rabid_wolf.tres",
 &"slug": &"rabid_wolf"
 }, {
-&"hash": "091aa0437dfc510e1c81ed19a979af2ab6b95f3026aeb57ce73d5205d94ac9ea",
+&"hash": "839ac18264d5a24d2791f18ff0a3f1822a44dbfc390ba14d316c14beb5075cf3",
 &"id": 92,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"ossuran"
@@ -508,7 +508,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
 &"slug": &"cistern_sovereign_world"
 }, {
-&"hash": "28c4ea2bd3fe71cb3b2f51eedeb44ce803b86b6c4a219c7edba68163692e9032",
+&"hash": "839ac18264d5a24d2791f18ff0a3f1822a44dbfc390ba14d316c14beb5075cf3",
 &"id": 107,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"cleetus"
@@ -577,6 +577,41 @@ entries = Array[Dictionary]([{
 &"id": 120,
 &"path": "res://source/common/gameplay/characters/npc/types/hell/hell_vault_queen.tres",
 &"slug": &"hell_vault_queen"
+}, {
+&"hash": "d0b3d03a59b584727ce082831d9d0ce4d024019679fe050beb4d76a65093b676",
+&"id": 121,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_bonepicker.tres",
+&"slug": &"ossuran_bonepicker"
+}, {
+&"hash": "88112925af95a4d84390f5399f272eef5a6d2d40b9718615024f8e1768ba5eac",
+&"id": 122,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_cinder_archer.tres",
+&"slug": &"ossuran_cinder_archer"
+}, {
+&"hash": "422d6220ec34c8a31a9c39a578a02d63e77a40d9207b9226ac5ae91fdef5e00f",
+&"id": 123,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_emberling.tres",
+&"slug": &"ossuran_emberling"
+}, {
+&"hash": "b8cf364dd99759c371c91a1d1680f134c8780c0988f1f183c27edee98129270b",
+&"id": 124,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_marrow_knight.tres",
+&"slug": &"ossuran_marrow_knight"
+}, {
+&"hash": "0288f6f7d8a8ea143d2089f973989f093be4c9e3bb01130a343d16c2c6c6edf7",
+&"id": 125,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_pillar_ember.tres",
+&"slug": &"ossuran_pillar_ember"
+}, {
+&"hash": "4842c7c03dba9f33e295e3df38f85beab924ec15e2d2cc58de372df5ace011e4",
+&"id": 126,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_pillar_hex.tres",
+&"slug": &"ossuran_pillar_hex"
+}, {
+&"hash": "05636dac5c5c7028119da001248fa91ccb8f8e7491888b2a1b2b2e7e7700c3f6",
+&"id": 127,
+&"path": "res://source/common/gameplay/characters/npc/types/ossuran/ossuran_pillar_thorn.tres",
+&"slug": &"ossuran_pillar_thorn"
 }])
 scan_path = "res://source/common/gameplay/characters/npc/types"
 filters = PackedStringArray("*.tres", "*.tscn")

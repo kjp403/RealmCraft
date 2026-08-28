@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="TauntAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/taunt/taunt_ability.gd" id="1_taunt"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/holy_nova.tres" id="2_vfx"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/mighty_roar_1.png" id="3_icon"]
+
+[resource]
+script = ExtResource("1_taunt")
+radius = 160.0
+taunt_duration_s = 6.0
+max_targets = 5
+armor_bonus = 20.0
+mr_bonus = 0.0
+self_buff_duration_s = 4.0
+vfx = ExtResource("2_vfx")
+vfx_color = Color(1, 0.72, 0.34, 0.95)
+vfx_frame_px = 128.0
+name = "Mighty Roar"
+icon = ExtResource("3_icon")
+cooldown = 18.0
+mana_cost = 12
+impact_shake = 0.45
+impact_reach = 160.0
+impact_particles = 0
+impact_color = Color(1, 0.72, 0.34, 0.9)
+root_s = 0.2
+metadata/slug = &"mighty_roar"
+metadata/id = 114

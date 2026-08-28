@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="ShotOverrideAbility" format=3 uid="uid://m8sb3unjvaqj"]
 
 [ext_resource type="Script" uid="uid://bme1yhv3y7stc" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/shot_override_ability.gd" id="1_override"]
-[ext_resource type="Texture2D" uid="uid://b6jtyfj816mrw" path="res://assets/sprites/ui/ability_icons/arrow_storm.png" id="9_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/arrow_storm_1.png" id="9_icon"]
 
 [resource]
 script = ExtResource("1_override")

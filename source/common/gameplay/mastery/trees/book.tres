@@ -19,8 +19,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/blink/blink_3.tres" id="12_blink3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/blink/blink_4.tres" id="12_blink4"]
 [ext_resource type="Resource" uid="uid://bx763hkwfxesr" path="res://source/common/gameplay/combat/ability/ability_collection/battle_form/battle_form_3.tres" id="13_bform3"]
-[ext_resource type="Texture2D" uid="uid://bg13js5fnm8wk" path="res://assets/sprites/ui/ability_icons/juggernaut.png" id="14_jug"]
-[ext_resource type="Texture2D" uid="uid://dlhq3mvrmc0x0" path="res://assets/sprites/ui/ability_icons/focus_mana.png" id="15_focus"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_focus_1.png" id="ic0_p_focus_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_focus_2.png" id="ic1_p_focus_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_focus_3.png" id="ic2_p_focus_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_focus_4.png" id="ic3_p_focus_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_focus_5.png" id="ic4_p_focus_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_toughness_1.png" id="ic5_p_toughness_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_toughness_2.png" id="ic6_p_toughness_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_toughness_3.png" id="ic7_p_toughness_3"]
 
 [sub_resource type="Resource" id="Node_lash"]
 script = ExtResource("2_node")
@@ -123,7 +129,7 @@ value = 35.0
 script = ExtResource("2_node")
 id = &"book_toughness"
 node_name = "Toughness"
-icon = ExtResource("14_jug")
+icon = ExtResource("ic5_p_toughness_1")
 description = "+35 max health. The battlemage fights up close."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_tough")])
@@ -136,7 +142,7 @@ value = 30.0
 script = ExtResource("2_node")
 id = &"book_toughness_2"
 node_name = "Toughness II"
-icon = ExtResource("14_jug")
+icon = ExtResource("ic6_p_toughness_2")
 description = "+30 more max health."
 branch = &"resolve"
 tier = 2
@@ -151,7 +157,7 @@ value = 35.0
 script = ExtResource("2_node")
 id = &"book_toughness_3"
 node_name = "Toughness III"
-icon = ExtResource("14_jug")
+icon = ExtResource("ic7_p_toughness_3")
 description = "+35 more max health."
 branch = &"resolve"
 tier = 3
@@ -201,7 +207,7 @@ value = 6.0
 script = ExtResource("2_node")
 id = &"book_focus"
 node_name = "Focus"
-icon = ExtResource("15_focus")
+icon = ExtResource("ic0_p_focus_1")
 description = "+6 mana regen per second."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_regen_focus")])
@@ -216,7 +222,7 @@ value = 3.0
 script = ExtResource("2_node")
 id = &"book_focus_2"
 node_name = "Focus II"
-icon = ExtResource("15_focus")
+icon = ExtResource("ic1_p_focus_2")
 description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 2
@@ -233,7 +239,7 @@ value = 3.0
 script = ExtResource("2_node")
 id = &"book_focus_3"
 node_name = "Focus III"
-icon = ExtResource("15_focus")
+icon = ExtResource("ic2_p_focus_3")
 description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 3
@@ -250,7 +256,7 @@ value = 3.0
 script = ExtResource("2_node")
 id = &"book_focus_4"
 node_name = "Focus IV"
-icon = ExtResource("15_focus")
+icon = ExtResource("ic3_p_focus_4")
 description = "+3 more mana regen per second."
 branch = &"inspiration"
 tier = 4
@@ -267,7 +273,7 @@ value = 3.0
 script = ExtResource("2_node")
 id = &"book_focus_5"
 node_name = "Focus V"
-icon = ExtResource("15_focus")
+icon = ExtResource("ic4_p_focus_5")
 description = "+3 more mana regen per second. Bottomless focus."
 branch = &"inspiration"
 tier = 5

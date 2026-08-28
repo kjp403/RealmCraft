@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bicwmdlg38wf3"
-path="res://.godot/imported/warding.png-9b2b01618b3982c2597d3737de475d05.ctex"
+uid="uid://cgv3ssfeme0up"
+path="res://.godot/imported/mending_bolt_2.png-6d5a6126eba0d17779efb587ba428911.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/ui/ability_icons/warding.png"
-dest_files=["res://.godot/imported/warding.png-9b2b01618b3982c2597d3737de475d05.ctex"]
+source_file="res://assets/sprites/ui/ability_icons/mending_bolt_2.png"
+dest_files=["res://.godot/imported/mending_bolt_2.png-6d5a6126eba0d17779efb587ba428911.ctex"]
 
 [params]
 

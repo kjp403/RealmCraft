@@ -11,8 +11,8 @@ extends MenuShell
 
 const BRANCHES: Array[StringName] = [&"domination", &"resolve", &"inspiration"]
 ## Input labels per special-slot position (slot 1 = player_special, 2 =
-## _special_2, 3 = _special_3). Mirrors mastery.loadout's MAX_PICKS.
-const SLOT_KEYS: Array[String] = ["Q", "E", "R"]
+## _special_2, 3 = _special_3, 4 = _special_4). Mirrors mastery.loadout's MAX_PICKS.
+const SLOT_KEYS: Array[String] = ["Q", "E", "R", "C"]
 const BRANCH_COLORS: Dictionary[StringName, Color] = {
 	&"domination": Color(1.0, 0.55, 0.42),
 	&"resolve": Color(0.55, 0.75, 1.0),
@@ -178,7 +178,7 @@ func _rebuild() -> void:
 	# say so where the point counter normally sits, so the tree full of green
 	# tiles reads as the reward it is rather than a bug.
 	if bool(info.get("full_unlock", false)):
-		_points_label.text = "MASTERED · all abilities unlocked"
+		_points_label.text = "MASTERED · every ability and passive unlocked"
 		_points_label.add_theme_color_override(&"font_color", COLOR_OWNED)
 	else:
 		_points_label.text = ("%d point%s" % [points, "" if points == 1 else "s"]) if points > 0 else ""

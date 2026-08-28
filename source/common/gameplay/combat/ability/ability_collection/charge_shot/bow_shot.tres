@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://byk0d74w4xe1n" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/charge_ability.gd" id="1_charge"]
 [ext_resource type="Texture2D" uid="uid://bogvbnwhxp5ej" path="res://assets/sprites/items/weapons/wood/wood.png" id="1_txdvv"]
 [ext_resource type="PackedScene" uid="uid://cckkklpa17vo" path="res://source/common/gameplay/items/weapons/bow/arrow.tscn" id="2_arrow"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/charged_shot.png" id="99_icon"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gjamw"]
 atlas = ExtResource("1_txdvv")
@@ -15,6 +16,7 @@ min_speed = 200.0
 max_speed = 400.0
 min_ad_ratio = 0.6
 name = "Charged Shot"
+icon = ExtResource("99_icon")
 icon = SubResource("AtlasTexture_gjamw")
 cooldown = 0.8
 metadata/slug = &"bow_shot"

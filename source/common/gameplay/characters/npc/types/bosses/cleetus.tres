@@ -100,7 +100,19 @@ respawn_delay = 300.0
 respawns = true
 loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow"), SubResource("Drop_dragon_bones")])
 combat_skill_xp_override = 16000
-enrage_health_fraction = 0.6
+; 0.6 -> 0.5 so the VISUAL enrage (BossController: kindled -> cold skin swap,
+; speed-up, frost telegraph tint) lands on the exact same health as the Ossuran
+; encounter's phase 3 (OssuranArena: the ice sheet, the cold aura, the switch to
+; ranged/magic only). Two systems, one threshold. At 0.6 the boss turned to ice
+; a tenth of a health bar before the room did, which reads as a bug.
+; NOTE: Ossuran is ALSO summonable as a world boss (/worldboss, see
+; EventService), and that fight inherits this change — it now enrages slightly
+; later. Deliberate, and the smaller of the two evils.
+enrage_health_fraction = 0.5
+; Phase gates, drawn as permanent notches on the boss health bar so the
+; encounter's structure is legible from the first second. UI only — the server
+; still owns when a gate fires (BossStateMachine).
+hp_thresholds = Array[float]([0.75, 0.5])
 slam_radius = 130.0
 slam_windup_s = 1.05
 slam_damage = 175.0

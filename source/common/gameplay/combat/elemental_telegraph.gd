@@ -22,7 +22,12 @@ extends Node2D
 ##
 ## Pure client visual; frees itself. Server-authoritative damage never consults it.
 
-enum Element { FIRE, FROST, STORM }
+## EARTH is APPENDED, never inserted: the element travels the wire as a raw int
+## (see [method HostileNpc.rp_elem_telegraph]) and is stored as one in
+## [member EnemyTypeResource.telegraph_element], so renumbering FIRE/FROST/STORM
+## would silently recolour every existing boss. Consumers that only know the
+## first three clamp into range rather than breaking.
+enum Element { FIRE, FROST, STORM, EARTH }
 enum Mode { DANGER, SAFE }
 
 ## Tints per element: [core fill, rim/detail]. The rim is the brighter read.
@@ -30,6 +35,10 @@ const PALETTE: Dictionary = {
 	Element.FIRE:  [Color(1.0, 0.35, 0.08), Color(1.0, 0.78, 0.28)],
 	Element.FROST: [Color(0.35, 0.72, 1.0), Color(0.78, 0.95, 1.0)],
 	Element.STORM: [Color(0.62, 0.36, 1.0), Color(0.85, 0.78, 1.0)],
+	# Deep moss core, bright sap rim. Kept clearly YELLOW-green so it cannot be
+	# confused with the blue-green SAFE ring below — a danger marker that reads
+	# as a safe spot is the worst possible failure for this class.
+	Element.EARTH: [Color(0.24, 0.62, 0.16), Color(0.72, 0.95, 0.34)],
 }
 ## SAFE overrides the palette — a safe ring must never be mistaken for a hot one.
 const SAFE_FILL: Color = Color(0.45, 0.95, 0.72)
@@ -97,6 +106,13 @@ func _spawn_motes() -> void:
 			p.initial_velocity_max = 70.0
 			p.spread = 180.0
 			p.lifetime = 0.28
+		Element.EARTH:  # grit is THROWN up and falls back — the pillar is
+			# tearing the floor open, so the motion has to arc, not drift.
+			p.gravity = Vector2(0.0, 92.0)
+			p.initial_velocity_min = 34.0
+			p.initial_velocity_max = 62.0
+			p.spread = 42.0
+			p.direction = Vector2.UP
 	var ramp: Gradient = Gradient.new()
 	ramp.set_color(0, Color(_rim_color(), 0.95))
 	ramp.set_color(1, Color(_fill_color(), 0.0))

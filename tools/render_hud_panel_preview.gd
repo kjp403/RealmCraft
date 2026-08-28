@@ -1,6 +1,6 @@
 extends Node
 ## Screenshot of the reworked HUD instrument panel: the keybind tiles (LMB / Q /
-## E / R plus the 1-5 quick rail) drawn with the REAL HudSlotStyle faces, and the
+## E / R / C plus the 1-5 quick rail) drawn with the REAL HudSlotStyle faces, and the
 ## REAL health / mana / prayer bar scenes with their ink-in-water fills.
 ##
 ## Runs as a SCENE, not a `-s` tool, and windowed (headless has no rasteriser):
@@ -20,8 +20,8 @@ const MANA: String = "res://source/client/ui/hud/mana_bar/mana_bar.tscn"
 const PRAYER: String = "res://source/client/ui/hud/prayer_bar/prayer_bar.tscn"
 const OUT: String = "res://previews/hud-panel.png"
 
-const TILE: Vector2 = Vector2(44, 44) # AbilityBar.TILE_SIZE
-const TILE_GAP: int = 6               # hud.tscn AbilityBar separation
+const TILE: Vector2 = Vector2(36, 44) # AbilityBar.TILE_SIZE
+const TILE_GAP: int = 5               # hud.tscn AbilityBar separation
 const QUICK: Vector2 = Vector2(32, 32)
 const QUICK_GAP: int = 4
 const BAR_WIDTH: float = 200.0
@@ -57,13 +57,13 @@ func _go() -> void:
 	await RenderingServer.frame_post_draw
 	var image: Image = get_viewport().get_texture().get_image()
 	image.save_png(ProjectSettings.globalize_path(OUT))
-	print("wrote ", OUT, "  ability row = ", 4 * TILE.x + 3 * TILE_GAP, "px vs ", BAR_WIDTH, "px bars")
+	print("wrote ", OUT, "  ability row = ", 5 * TILE.x + 4 * TILE_GAP, "px vs ", BAR_WIDTH, "px bars")
 	get_tree().quit()
 
 
 ## [param live_index] lights that tile with the key-held face (-1 = all idle).
 func _ability_row(root: Control, centre_x: float, top: float, live_index: int) -> void:
-	var keys: PackedStringArray = ["LMB", "Q", "E", "R"]
+	var keys: PackedStringArray = ["LMB", "Q", "E", "R", "C"]
 	var total: float = keys.size() * TILE.x + (keys.size() - 1) * TILE_GAP
 	var x: float = centre_x - total * 0.5
 	for i: int in keys.size():
@@ -71,7 +71,7 @@ func _ability_row(root: Control, centre_x: float, top: float, live_index: int) -
 		SLOT_STYLE.apply(tile)
 		tile.size = TILE
 		tile.position = Vector2(x, top)
-		tile.text = ["Bolt", "Ms", "De", "As"][i]
+		tile.text = ["Bolt", "MR", "Bw", "PB", "As"][i]
 		tile.add_theme_font_size_override(&"font_size", 12)
 		root.add_child(tile)
 		if i == live_index:

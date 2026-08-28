@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WardAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/ward/ward_ability.gd" id="1_ward"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/spectral_ward_2.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_ward")
+damage_reduction_pct = 0.45
+reflect_ratio = 1.0
+duration_s = 6.0
+armor_bonus = 20.0
+mr_bonus = 0.0
+shield_count = 2
+orbit_radius = 20.0
+ward_color = Color(0.62, 0.84, 1, 1)
+name = "Spectral Ward II"
+icon = ExtResource("2_icon")
+cooldown = 18.0
+mana_cost = 20
+impact_shake = 0.2
+impact_color = Color(0.55, 0.78, 1, 0.9)
+metadata/slug = &"spectral_ward_2"
+metadata/id = 118

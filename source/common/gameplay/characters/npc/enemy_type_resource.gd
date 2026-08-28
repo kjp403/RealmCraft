@@ -139,6 +139,12 @@ extends Resource
 ## summons adds, slams faster). Only read for an is_boss type that a dungeon
 ## RoomNode has given a BossController.
 @export var enrage_health_fraction: float = 0.5
+## HP fractions the encounter is GATED on, drawn as permanent notches on the
+## boss health bar (Ossuran: [0.75, 0.5]). Purely a UI declaration — the server
+## still owns when a gate actually fires — but declaring it here means a scripted
+## fight's structure is visible on the bar from the first second, so a player can
+## see the shape of the fight before anyone explains it. Empty = a plain bar.
+@export var hp_thresholds: Array[float] = []
 ## Telegraphed slam: danger-ring radius (px), the wind-up players get to step out
 ## of it, and the damage dealt to anyone still inside when it lands.
 @export var slam_radius: float = 110.0

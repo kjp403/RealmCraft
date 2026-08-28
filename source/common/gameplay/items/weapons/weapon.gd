@@ -2,7 +2,7 @@
 class_name Weapon
 extends Node2D
 ## Base weapon: a thin shell around its abilities array. Slot 0 = primary
-## (attack input), slots 1-3 = the mastery specials (Q / E / R). Single-phase
+## (attack input), slots 1-4 = the mastery specials (Q / E / R / C). Single-phase
 ## abilities fire on press;
 ## two-phase abilities (ChargeAbility — has_release) begin on press and fire on
 ## release, carried over the same action.perform wire with an "r" flag. Weapon
@@ -377,6 +377,7 @@ func process_input(local_player: LocalPlayer) -> void:
 	# special attack (player_special)    → abilities[1]
 	# special 2      (player_special_2)  → abilities[2]
 	# special 3      (player_special_3)  → abilities[3]
+	# special 4      (player_special_4)  → abilities[4]
 	# Single-phase: tap to fire (predictive local mark_used keeps the channel
 	# quiet while held). Two-phase: press sends the charge, release sends the
 	# fire — _held bridges the round-trip so a fast tap still releases.
@@ -391,6 +392,8 @@ func process_input(local_player: LocalPlayer) -> void:
 		_handle_slot_input(2, controller.is_special2_just_pressed(), controller.is_special2_just_released(), local_player)
 	if abilities.size() > 3:
 		_handle_slot_input(3, controller.is_special3_just_pressed(), controller.is_special3_just_released(), local_player)
+	if abilities.size() > 4:
+		_handle_slot_input(4, controller.is_special4_just_pressed(), controller.is_special4_just_released(), local_player)
 	if _ground_aim_slot >= 0:
 		_update_ground_aim(local_player)
 
@@ -547,6 +550,8 @@ func _clamped_ground_aim(local_player: LocalPlayer, ability: AbilityResource) ->
 func _ground_aim_blast_radius(ability: AbilityResource) -> float:
 	if ability is MeteorAbility:
 		return (ability as MeteorAbility).blast_radius
+	if ability is SanctuaryAbility:
+		return (ability as SanctuaryAbility).radius
 	return 48.0
 
 

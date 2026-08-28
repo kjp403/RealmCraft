@@ -228,6 +228,12 @@ func _apply_enemy_data() -> void:
 	distance_to_attack = enemy_data.distance_to_attack
 	max_distance_from_spawn = enemy_data.max_distance_from_spawn
 	respawns = enemy_data.respawns
+	# Boss bodies are discoverable by group, so the HUD boss bar can find the
+	# encounter's boss WITHOUT it being the player's combat target (a scripted
+	# fight has whole stages where nobody is hitting it). Runs on both peers —
+	# the bar that needs this is client-side.
+	if enemy_data.is_boss:
+		add_to_group(&"boss_bodies")
 	# A non-leashing mob (bosses; trash in bounded dungeon rooms) commits — an
 	# effectively-infinite leash so the distance check never walks it home.
 	if not enemy_data.leashes:
@@ -320,6 +326,15 @@ var enemy_state: EnemyState = EnemyState.IDLE:
 
 var possible_targets: Array[Player]
 var targeted_player: Player
+## TAUNT (Heavy Weapons' Mighty Roar): while this is live, our aggro belongs to
+## [member taunt_source] and nothing may re-target or drop it — see
+## [method is_taunted]. This is the whole point of a tank: without a hard lock,
+## a boss re-picks by proximity/damage the moment anyone out-threats the tank,
+## which is exactly what the roar exists to stop.
+var taunt_source: Player
+## Wall-clock ms the taunt expires at, or [constant TAUNT_UNTIL_DEATH] for a
+## capstone roar that holds until one of us dies.
+var taunt_until_ms: int = 0
 var spawn_position: Vector2
 ## Cache for [method body_scale] — measuring it decodes an image, so it is done
 ## once per body and never on the hot path.
@@ -634,6 +649,8 @@ func _on_body_exited(body: Node) -> void:
 func _on_ally_attacked(attacker: Character) -> void:
 	if is_dead:
 		return
+	if is_taunted():
+		return
 	if enemy_state == EnemyState.DEAD or enemy_state == EnemyState.RETURNING:
 		return
 	if targeted_player != null:
@@ -643,7 +660,77 @@ func _on_ally_attacked(attacker: Character) -> void:
 		enemy_state = EnemyState.CHASE
 
 
+## Sentinel [member taunt_until_ms] meaning "no timer — this taunt ends only when
+## the mob dies or the taunter does".
+const TAUNT_UNTIL_DEATH: int = -1
+## Distance at which a taunt snaps regardless of its timer — see [method is_taunted].
+## Comfortably past any arena, so it only ever fires on a teleport/respawn.
+const TAUNT_BREAK_PX: float = 700.0
+
+
+## Server: force this mob's aggro onto [param source] and HOLD it there for
+## [param duration_s] seconds (0 = until either of us dies). Re-roaring refreshes.
+## Sets chase_on_area so a passive/skiller-safe archetype answers a roar too — a
+## taunt the boss's trash ignores is not a taunt.
+func apply_taunt(source: Player, duration_s: float) -> void:
+	if not multiplayer.is_server() or is_dead or source == null:
+		return
+	if enemy_state == EnemyState.DEAD or not _is_target_valid(source) or not _is_hostile_to(source):
+		return
+	taunt_source = source
+	taunt_until_ms = (
+		TAUNT_UNTIL_DEATH if duration_s <= 0.0
+		else Time.get_ticks_msec() + int(duration_s * 1000.0)
+	)
+	chase_on_area = true
+	if not possible_targets.has(source):
+		possible_targets.append(source)
+	targeted_player = source
+	if enemy_state != EnemyState.ATTACK:
+		enemy_state = EnemyState.CHASE
+
+
+## True while a roar still owns our aggro. A dead / warped-out / disconnected
+## taunter clears it (via _is_target_valid), so the lock can never strand a mob
+## staring at a corpse — the roar is a leash on the mob, not on the fight.
+func is_taunted() -> bool:
+	if taunt_source == null or taunt_until_ms == 0:
+		return false
+	if taunt_until_ms != TAUNT_UNTIL_DEATH and Time.get_ticks_msec() >= taunt_until_ms:
+		_clear_taunt()
+		return false
+	if not _is_target_valid(taunt_source) or not _is_hostile_to(taunt_source):
+		_clear_taunt()
+		return false
+	# A respawn puts the taunter alive again on the other side of the map, and
+	# _is_target_valid cannot tell that from a tank who simply backed up. Without
+	# this the mob would march across the world holding a taunt on a corpse's
+	# replacement — the same "prey teleported" case _target_escaped exists for.
+	if global_position.distance_to(taunt_source.global_position) > TAUNT_BREAK_PX:
+		_clear_taunt()
+		return false
+	return true
+
+
+func _clear_taunt() -> void:
+	taunt_source = null
+	taunt_until_ms = 0
+
+
+## Re-lock onto the taunter if a roar is live. Called from every path that would
+## otherwise DROP or SWITCH the target (leash, ally-call, retaliation, target
+## loss); returns true when it took the target back, so the caller bails out.
+func _hold_taunt() -> bool:
+	if not is_taunted():
+		return false
+	targeted_player = taunt_source
+	if enemy_state != EnemyState.ATTACK:
+		enemy_state = EnemyState.CHASE
+	return true
+
+
 func _find_targets() -> void:
+	if _hold_taunt(): return
 	if targeted_player: return
 	# is_dead also covers REVIVING (down but not out) — a body on the ground
 	# doesn't acquire targets; its behavior re-targets when it stands up.
@@ -1840,6 +1927,7 @@ func die(killer: Character) -> void:
 	anim = Character.Animations.DEATH
 	velocity = Vector2.ZERO
 	targeted_player = null
+	_clear_taunt()
 	# Keep possible_targets so players still standing in the area are re-acquired on
 	# respawn (body_entered won't re-fire for someone who never left).
 	_respawn_at_ms = Time.get_ticks_msec() + int(respawn_delay * 1000.0)
@@ -1849,8 +1937,22 @@ func die(killer: Character) -> void:
 
 ## Style wards (world bosses): Physical Ward wants sword/hammer/bow, Arcane Ward
 ## wants wand/book. Wrong category is reduced, not zero.
-func incoming_damage_factor(attacker: Character) -> float:
-	var factor: float = super.incoming_damage_factor(attacker)
+func incoming_damage_factor(
+	attacker: Character,
+	damage_type: StringName = CombatHit.DAMAGE_PHYSICAL
+) -> float:
+	var factor: float = super.incoming_damage_factor(attacker, damage_type)
+
+	# Scripted encounters (Ossuran) gate damage by COMBAT STYLE and by phase
+	# invulnerability. Checked before the style ward and independently of it:
+	# the parser handles non-player damage itself (it passes styleless hits
+	# through untouched), so unlike the ward below it must not be short-circuited
+	# on `attacker is not Player` — a phase-immune boss has to be immune to a
+	# damage-over-time tick as well as to a sword.
+	var parser: AttackParser = _attack_parser()
+	if parser != null:
+		factor *= parser.damage_factor(attacker, 0.0, damage_type)
+
 	if attacker is not Player:
 		return factor
 	var brain: BossController = _boss_brain()
@@ -1863,6 +1965,16 @@ func _boss_brain() -> BossController:
 	for child: Node in get_children():
 		if child is BossController:
 			return child as BossController
+	return null
+
+
+## The scripted-encounter damage gate, if this body has one. Attached as a child
+## by [OssuranArena] on spawn — same pattern as [BossController] above, so a
+## plain mob pays one null child-scan and nothing else.
+func _attack_parser() -> AttackParser:
+	for child: Node in get_children():
+		if child is AttackParser:
+			return child as AttackParser
 	return null
 
 
@@ -1932,6 +2044,10 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 		return
 	if enemy_state == EnemyState.RETURNING or enemy_state == EnemyState.DEAD:
 		return
+	# A roar outranks retaliation: the whole point is that the DPS can hit the
+	# boss without pulling it off the tank.
+	if is_taunted():
+		return
 	if targeted_player != null:
 		return
 	if attacker is Player and not (attacker as Player).is_dead and _is_hostile_to(attacker as Player):
@@ -1999,6 +2115,8 @@ func engage_nearest_player() -> void:
 
 
 func _abandon_target() -> void:
+	if _hold_taunt():
+		return
 	targeted_player = null
 	enemy_state = EnemyState.IDLE if _is_committed() else EnemyState.RETURNING
 
@@ -2176,6 +2294,11 @@ func _on_client_right_clicked() -> void:
 ## possible_targets / target cleanup.
 func stop_chase() -> void:
 	if enemy_state != EnemyState.CHASE and enemy_state != EnemyState.ATTACK: return
+	# A roared mob does not leash off the tank. Kiting it out of its own leash
+	# ring was the cheapest way to shed a taunt, which would have made the roar
+	# strictly worse than walking backwards.
+	if _hold_taunt():
+		return
 	enemy_state = EnemyState.IDLE if _is_committed() else EnemyState.RETURNING
 	possible_targets.erase(targeted_player)
 	targeted_player = null

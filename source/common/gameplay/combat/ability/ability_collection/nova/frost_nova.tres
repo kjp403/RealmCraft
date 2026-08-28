@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://daxuj610o34a" path="res://source/common/gameplay/combat/ability/ability_collection/nova/nova_ability.gd" id="1_nova"]
 [ext_resource type="PackedScene" uid="uid://dwgkn4xkqlcfh" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="2_arc"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/combat/vfx/frost_spikes.tres" id="3_ring"]
-[ext_resource type="Texture2D" uid="uid://b2s1rjnb73j64" path="res://assets/sprites/ui/ability_icons/frost_nova.png" id="4_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/frost_nova_1.png" id="4_icon"]
 
 [resource]
 script = ExtResource("1_nova")

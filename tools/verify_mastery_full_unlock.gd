@@ -1,8 +1,8 @@
 @tool
 extends Node
 ## Gate for the level-99 mastery payoff: a maxed tree grants EVERY ability at
-## the top tier of its chain, free of the point budget, and all three loadout
-## slots (Q / E / R) resolve.
+## the top tier of its chain, free of the point budget, and every loadout slot
+## (Q / E / R / C) resolves.
 ##
 ## The three things that can silently break it: ownership still reading the
 ## stored spend (a maxed player couldn't equip what they never bought), the
@@ -53,16 +53,27 @@ func _check_top_of_chain(tree: MasteryTreeResource) -> void:
 		MasteryService.top_of_chain(tree, low).id == top.id,
 		"a chain's lowest rank resolves up to its top (got %s)" % MasteryService.top_of_chain(tree, low).id
 	)
-	# Ownership at the cap ignores the spend ledger for ABILITY nodes only.
+	# Ownership at the cap ignores the spend ledger ENTIRELY — abilities and
+	# passives alike. A partial unlock is the bug this asserts against: the tree
+	# said MASTERED while greyed-out passive tiles stared back at the player.
 	var maxed: Dictionary = {"level": PlayerResource.MASTERY_LEVEL_CAP, "spent": {}}
 	_check(MasteryService.owns_node(maxed, top), "a maxed tree owns an ability it never bought")
+	var passives: int = 0
 	for node: MasteryNode in tree.nodes:
-		if node.ability == null:
-			_check(
-				not MasteryService.owns_node(maxed, node),
-				"passives are still bought with points at the cap (%s)" % node.id
-			)
-			break
+		if node.ability != null:
+			continue
+		passives += 1
+		_check(
+			MasteryService.owns_node(maxed, node),
+			"a maxed tree owns passive %s it never bought" % node.id
+		)
+	_check(passives > 0, "the bow tree has passives for the cap to grant")
+	# Below the cap, nothing is free.
+	var below: Dictionary = {"level": PlayerResource.MASTERY_LEVEL_CAP - 1, "spent": {}}
+	_check(
+		not MasteryService.owns_node(below, top),
+		"one level short of the cap owns nothing it did not buy"
+	)
 
 
 ## Three picks, one of them a stale lower rank: all three slots come back, and

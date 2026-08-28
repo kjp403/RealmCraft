@@ -57,7 +57,7 @@ func open(arg: Variant) -> void:
 	var body: Label = Label.new()
 	body.text = (
 		"Pick a tree to refund its mastery points, or refund every tree at once.\n"
-		+ "Either way costs %d gold. Refunding a tree also clears its Q / E / R picks."
+		+ "Either way costs %d gold. Refunding a tree also clears its Q / E / R / C picks."
 	) % _cost
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_color_override(&"font_color", BODY_COLOR)

@@ -386,6 +386,30 @@ func is_special3_just_released() -> bool:
 	return Input.is_action_just_released(&"player_special_3")
 
 
+## Fifth weapon ability slot (player_special_4, default C) — the fourth mastery
+## loadout pick (abilities[4]). Added for the tank kit: Heavy Weapons wants a
+## roar, a ward, a heal circle AND a hitter live at the same time, which Q/E/R
+## could not hold.
+func is_special4_pressed() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	if _ui_blocks_combat(): return false
+	return Input.is_action_pressed(&"player_special_4")
+
+
+func is_special4_just_pressed() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	if _ui_blocks_combat(): return false
+	return Input.is_action_just_pressed(&"player_special_4")
+
+
+func is_special4_just_released() -> bool:
+	if not enabled: return false
+	if _mouse_aiming and not is_mouse_onscreen: return false
+	return Input.is_action_just_released(&"player_special_4")
+
+
 ## Applies every saved keybind from settings to the InputMap. Called by
 ## [ClientState] right after settings load, so binds hold from boot (menus,
 ## gateway) instead of waiting for the local player's InputComponent to spawn.

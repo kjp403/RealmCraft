@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="RallyAbility" format=3 uid="uid://lofkrosp3t4x"]
 
 [ext_resource type="Script" uid="uid://dcs3rejm1yurr" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rally_ability.gd" id="1_rally"]
-[ext_resource type="Texture2D" uid="uid://ub7uyvlnoekn" path="res://assets/sprites/ui/ability_icons/rally_2.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/rally_2.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_rally")
