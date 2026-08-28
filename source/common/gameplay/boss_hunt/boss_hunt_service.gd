@@ -296,20 +296,58 @@ static func _end_hunt(group_id: int) -> void:
 		func() -> void: _eject_hunt(group_id), CONNECT_ONE_SHOT)
 
 
-## Recall every remaining member to the hub. on_player_left dissolves the group
-## as they go, and the empty arena is reclaimed by unload_unused_instances.
+## Everyone a teardown has to move out: the group roster UNION the bodies actually
+## standing in the arena. Two sources on purpose — a peer whose GroupService seat
+## desynced from the room is in exactly one of them, and must not be missed by
+## either ending. Pure and static so the gate can exercise it for every party size.
+static func eject_roster(group_id: int, instance: Node) -> Array[int]:
+	var peers: Array[int] = []
+	for peer: Variant in GroupService.members_of(group_id):
+		if int(peer) > 0 and not peers.has(int(peer)):
+			peers.append(int(peer))
+	var in_room: Variant = instance.get(&"players_by_peer_id") if instance != null else null
+	if in_room is Dictionary:
+		for peer: Variant in (in_room as Dictionary).keys():
+			if int(peer) > 0 and not peers.has(int(peer)):
+				peers.append(int(peer))
+	return peers
+
+
+## Send everyone home to the Guild Hall and VOID the contract. Both endings land
+## here — the clock running out (_end_hunt) and the lives running out (_fail_hunt)
+## — so "nobody is left in the arena and the contract is gone" is guaranteed in
+## one place, for a solo hunter and a four-stack alike. The empty instance is
+## then reclaimed by unload_unused_instances.
 static func _eject_hunt(group_id: int) -> void:
 	if WorldServer.curr == null:
 		return
-	_ejecting[group_id] = true
-	var instance_manager: Node = WorldServer.curr.instance_manager
 	var instance: Node = _hunts.get(group_id, null)
-	for peer: int in GroupService.members_of(group_id).duplicate():
+	# Only flag a contract that still exists: a solo hunter's own recall can have
+	# dissolved the group (and run _forget) before this timer fires, and writing
+	# the flag back would resurrect a key nothing ever erases again.
+	if instance != null:
+		_ejecting[group_id] = true
+	var instance_key: String = str(instance.name) if instance != null else ""
+	var instance_manager: Node = WorldServer.curr.instance_manager
+	for peer: int in eject_roster(group_id, instance):
 		if instance != null:
 			var player: Player = instance.get_player(peer) as Player
 			if player != null:
-				player.restore_full()
+				# revive(), not restore_full(): a recall does not clear the dead
+				# flag, so topping HP alone can land a corpse in the Guild Hall.
+				player.revive()
 		instance_manager.recall_player(peer)
+
+	# Force the teardown instead of trusting every recall to come back through
+	# on_player_left. InstanceManager.recall_player silently no-ops for a peer it
+	# cannot place, and one such peer would leave the roster non-empty forever:
+	# the contract would never be forgotten, the arena instance would never be
+	# reclaimed, and — because both lobbies reject anyone whose group_of() is
+	# non-zero — that character could not start another contract OR dungeon for
+	# the rest of the session. Both are idempotent against the recalls that DID
+	# fire and already ran this.
+	GroupService.dissolve(group_id)
+	_forget(group_id, instance_key)
 
 
 ## A player left a hunt arena (exit door, recall, or the expiry eject). Drop them
