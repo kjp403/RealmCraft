@@ -3,8 +3,6 @@
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
 [ext_resource type="Script" uid="uid://c159c9abd44e92" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
 [ext_resource type="Texture2D" uid="uid://iif2200og8s2" path="res://assets/sprites/environment/chests/gold_red_large.png" id="3_icon"]
-[ext_resource type="Resource" uid="uid://cfb82bd722210b" path="res://source/common/gameplay/items/materials/fish/anglerfish.tres" id="item_0"]
-[ext_resource type="Resource" uid="uid://c2d1d8b13a1643" path="res://source/common/gameplay/items/materials/fish/turtle.tres" id="item_1"]
 [ext_resource type="Resource" uid="uid://crp8g14r50b4m" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="item_4"]
 [ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="item_5"]
 [ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="item_6"]
@@ -21,7 +19,6 @@
 [ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="item_17"]
 [ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_18"]
 [ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_19"]
-
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_oathband.tres" id="item_20"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_wayfarer.tres" id="item_21"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_heartfire.tres" id="item_22"]
@@ -29,18 +26,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_bulwark.tres" id="item_24"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_stormchase.tres" id="item_25"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_sovereign.tres" id="item_26"]
-
-[sub_resource type="Resource" id="Drop_0"]
-script = ExtResource("1_loot")
-item = ExtResource("item_0")
-min_amount = 9
-max_amount = 12
-
-[sub_resource type="Resource" id="Drop_1"]
-script = ExtResource("1_loot")
-item = ExtResource("item_1")
-min_amount = 9
-max_amount = 12
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="fish_vial_of_water"]
 
 [sub_resource type="Resource" id="Drop_4"]
 script = ExtResource("1_loot")
@@ -173,6 +159,12 @@ script = ExtResource("1_loot")
 item = ExtResource("item_26")
 chance = 0.0015
 
+[sub_resource type="Resource" id="Drop_fish_vial_of_water"]
+script = ExtResource("1_loot")
+item = ExtResource("fish_vial_of_water")
+min_amount = 5
+max_amount = 15
+chance = 1.0
 
 [resource]
 script = ExtResource("2_chest")
@@ -183,6 +175,6 @@ rolls_min = 2
 rolls_max = 4
 gold_min = 10000
 gold_max = 25000
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16"), SubResource("Drop_17"), SubResource("Drop_18"), SubResource("Drop_19")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16"), SubResource("Drop_17"), SubResource("Drop_18"), SubResource("Drop_19"), SubResource("Drop_fish_vial_of_water")])
 exclusive_loot = Array[ExtResource("1_loot")]([SubResource("Drop_ring_oathband"), SubResource("Drop_ring_wayfarer"), SubResource("Drop_ring_heartfire"), SubResource("Drop_ring_starweave"), SubResource("Drop_ring_bulwark"), SubResource("Drop_ring_stormchase"), SubResource("Drop_ring_sovereign")])
 exclusive_max = 1

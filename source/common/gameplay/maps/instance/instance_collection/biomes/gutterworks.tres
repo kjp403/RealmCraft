@@ -1,6 +1,15 @@
 [gd_resource type="Resource" script_class="InstanceResource" format=3]
 
 [ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="fish_loot"]
+[ext_resource type="Resource" uid="uid://c7704cedbdbb03" path="res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres" id="fish_cooked_anglerfish"]
+
+[sub_resource type="Resource" id="ZoneDrop_cooked_anglerfish"]
+script = ExtResource("fish_loot")
+item = ExtResource("fish_cooked_anglerfish")
+min_amount = 2
+max_amount = 4
+chance = 0.1
 
 [resource]
 script = ExtResource("1_script")
@@ -11,4 +20,5 @@ level_min = 15
 level_max = 18
 show_discovery = true
 required_wardstone = &"bandit_hideout"
+zone_kill_loot = Array[ExtResource("fish_loot")]([SubResource("ZoneDrop_cooked_anglerfish")])
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"

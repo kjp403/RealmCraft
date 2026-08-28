@@ -4,11 +4,19 @@
 [ext_resource type="Resource" uid="uid://c0m2t2hjlih2p" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/woodland.tres" id="2_woodland"]
 [ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="3_loot"]
 [ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="4_chest"]
+[ext_resource type="Resource" uid="uid://c67566de76e887" path="res://source/common/gameplay/items/consumables/food/cooked_lionfish.tres" id="fish_cooked_lionfish"]
 
 [sub_resource type="Resource" id="ZoneDrop_silver_medium"]
 script = ExtResource("3_loot")
 item = ExtResource("4_chest")
 chance = 0.02
+
+[sub_resource type="Resource" id="ZoneDrop_cooked_lionfish"]
+script = ExtResource("3_loot")
+item = ExtResource("fish_cooked_lionfish")
+min_amount = 1
+max_amount = 2
+chance = 0.1
 
 [resource]
 script = ExtResource("1_script")
@@ -20,5 +28,5 @@ level_max = 15
 show_discovery = true
 death_return_instance = ExtResource("2_woodland")
 death_return_warper_id = 60
-zone_kill_loot = Array[ExtResource("3_loot")]([SubResource("ZoneDrop_silver_medium")])
+zone_kill_loot = Array[ExtResource("3_loot")]([SubResource("ZoneDrop_silver_medium"), SubResource("ZoneDrop_cooked_lionfish")])
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"
