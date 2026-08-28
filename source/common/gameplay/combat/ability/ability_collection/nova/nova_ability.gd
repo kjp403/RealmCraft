@@ -18,6 +18,12 @@ extends AbilityResource
 ## weapon actually builds — an AP-scaled nova on an AD-only wielder would hit for
 ## almost nothing, the same trap Shockwave's missing ad_ratio was.
 @export var ad_ratio: float = 0.0
+## Damage as a fraction of the caster's MAX HEALTH. 0 for every caster nova. Set
+## it on a TANK's burst (hammer Aftershock) so the ability pays out for the stat a
+## tank actually stacks: a Heavy Weapons player builds armor and health, then
+## brings an AD-scaled nuke to a boss and watches it tickle. Keep the fraction
+## small — max health is a big number, so 0.10 is already a real chunk.
+@export var hp_ratio: float = 0.0
 ## DAMAGE_MAGIC for every existing AP nova; set DAMAGE_PHYSICAL alongside ad_ratio.
 @export var damage_type: StringName = CombatHit.DAMAGE_MAGIC
 ## Burst radius (hit + the ring VFX size).
@@ -75,6 +81,7 @@ func _spawn_nova(caster: Character) -> void:
 	var dmg: float = (
 		caster.stats_component.get_stat(Stat.AP) * ap_ratio
 		+ caster.stats_component.get_stat(Stat.AD) * ad_ratio
+		+ caster.stats_component.get_stat(Stat.HEALTH_MAX) * hp_ratio
 	)
 	if duration_s > 0.0:
 		# Lingering field: a SpellField re-strikes every tick for the duration, riding us.
@@ -141,6 +148,10 @@ func extra_stat_lines() -> PackedStringArray:
 		lines.append("%d%% AP" % int(round(ap_ratio * 100.0)))
 	if ad_ratio > 0.0:
 		lines.append("%d%% AD" % int(round(ad_ratio * 100.0)))
+	if hp_ratio > 0.0:
+		lines.append("%d%% max health" % int(round(hp_ratio * 100.0)))
+	if heal_per_hit > 0.0:
+		lines.append("+%s HP per enemy hit" % fmt_num(heal_per_hit))
 	if slow_amount > 0.0:
 		lines.append("-%s move speed for %ss" % [fmt_num(slow_amount), fmt_num(slow_duration_s)])
 	lines.append("%dpx radius" % int(radius))

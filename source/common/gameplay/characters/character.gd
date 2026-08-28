@@ -480,7 +480,13 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 	var resist_stat: StringName = Stat.MR if damage_type == CombatHit.DAMAGE_MAGIC else Stat.ARMOR
 	var resist: float = stats_component.get_stat(resist_stat)
 	var mitigated: float = amount * (100.0 / (100.0 + maxf(0.0, resist)))
-	mitigated *= incoming_damage_factor(attacker)
+	mitigated *= incoming_damage_factor(attacker, damage_type)
+	# Spectral Ward: what the ward just ate goes back to the sender. Computed
+	# here, from the post-mitigation number, so the reflect is the damage the ward
+	# actually PREVENTED — armor, resistances and every other ward have already
+	# had their say, and a reflect off the raw pre-armor number would pay a tank
+	# for mitigation they got from gear rather than from this cooldown.
+	var reflected: float = _ward_absorbed(mitigated)
 	var new_health: float = maxf(0.0, stats_component.get_stat(Stat.HEALTH) - mitigated)
 	stats_component.set_stat(Stat.HEALTH, new_health)
 
@@ -510,12 +516,93 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 		is_dead = true
 		die(attacker)
 
+	# LAST: after our own death resolves, so a killing blow still reflects (the
+	# ward held to the end) and a reflect that kills the attacker can never
+	# re-enter this call while our HP write is still in flight.
+	if reflected > 0.0:
+		_reflect_ward_damage(reflected, attacker, damage_type)
 
-## Extra multiplier on post-resistance damage, keyed off WHO is hitting us —
-## resistances only know the damage type. 1.0 here; Player overrides it for the
-## Slayer "Task Ward" perk (softer hits from the monsters it is hunting).
-func incoming_damage_factor(_attacker: Character) -> float:
-	return 1.0
+
+## How much of this hit the Spectral Ward absorbed, as a share of the damage that
+## still landed. [param mitigated] already has [member ward_damage_mult] folded
+## in, so the pre-ward number is mitigated / mult and the absorbed part is the
+## difference. Returns 0 with no ward, no reflect, or a ward at full strength.
+func _ward_absorbed(mitigated: float) -> float:
+	if ward_reflect_ratio <= 0.0 or ward_damage_mult >= 1.0 or ward_damage_mult <= 0.0:
+		return 0.0
+	return mitigated * (1.0 / ward_damage_mult - 1.0) * ward_reflect_ratio
+
+
+## Throw [param amount] back at [param attacker]. Credited to US, so the reflect
+## counts toward our damage tally and can take the kill.
+##
+## Player targets are gated on [method CombatHit.can_damage]: without that, a ward
+## would hit a party member who clipped us with an AoE, and would land in a town
+## where PvP is off entirely.
+func _reflect_ward_damage(
+	amount: float, attacker: Character, damage_type: StringName
+) -> void:
+	if _reflecting or attacker == null or attacker == self:
+		return
+	if not is_instance_valid(attacker) or attacker.is_dead:
+		return
+	if attacker is Player and self is Player:
+		if not CombatHit.can_damage(self as Player, attacker as Player):
+			return
+	_reflecting = true
+	attacker.take_damage(amount, self, damage_type, &"ward_reflect")
+	_reflecting = false
+
+
+## Blanket multiplier on every hit this body takes, independent of who threw it.
+## The mirror of [member HostileNpc.damage_dealt_mult], and the mechanism a
+## timed protection uses: the Ossuran Storm Pad drops it to 0.25 for players
+## standing in the ward and restores it to 1.0 on exit. 1.0 = no effect, so it
+## costs nothing for every body that never touches it.
+##
+## Deliberately a plain field and not a buff: [BuffService] only carries STAT
+## bonuses, and a damage-taken multiplier is not a stat — routing it through
+## there would mean inventing a fake one and reverting it by amount.
+var damage_taken_mult: float = 1.0
+
+## SECOND blanket multiplier, owned by self-cast protections (Heavy Weapons'
+## Spectral Ward). Deliberately separate from [member damage_taken_mult] rather
+## than sharing it: that one is written by ENVIRONMENT effects (the Ossuran Storm
+## Pad sets it on enter and restores 1.0 on exit), so a ward that also wrote it
+## would be wiped the instant the player stepped out of a pad it never set.
+## Multiplied together in [method blanket_damage_factor], so the two stack
+## without either clobbering the other. 1.0 = no ward.
+var ward_damage_mult: float = 1.0
+
+## Fraction of the damage the ward ABSORBED that is thrown back at whoever dealt
+## it (Spectral Ward). 0 = pure mitigation. 1.0 = every point the ward ate lands
+## on the attacker instead.
+var ward_reflect_ratio: float = 0.0
+
+## Re-entrancy guard for [method _reflect_ward_damage]. Two warded bodies hitting
+## each other would otherwise reflect into each other forever inside one
+## take_damage call and blow the stack — the reflected hit must never itself
+## reflect.
+var _reflecting: bool = false
+
+
+## The environment ward AND the self-cast ward, combined. Every
+## [method incoming_damage_factor] path folds this in — a protection has to
+## cover a boss slam, a pillar beam and a damage-over-time tick alike.
+func blanket_damage_factor() -> float:
+	return damage_taken_mult * ward_damage_mult
+
+
+## Extra multiplier on post-resistance damage, keyed off WHO is hitting us and
+## WITH WHAT — resistances only know how to split physical from magic, and
+## `physical` covers both a sword and a bow (see [DamageInfo] for why that
+## distinction cannot be recovered downstream). Overridden by Player for the
+## Slayer "Task Ward" perk, and by HostileNpc for boss style wards.
+func incoming_damage_factor(
+	_attacker: Character,
+	_damage_type: StringName = CombatHit.DAMAGE_PHYSICAL
+) -> float:
+	return blanket_damage_factor()
 
 
 ## Wraps the combat.hit push so child classes (Player / NPC / future

@@ -1,6 +1,6 @@
 extends DataRequestHandler
 ## Sets a category's special-ability loadout: an ORDERED array of owned
-## ability-node ids (max 3 — slot POSITION maps to the Q / E / R inputs; ""
+## ability-node ids (max 4 — slot POSITION maps to the Q / E / R / C inputs; ""
 ## marks a deliberately empty slot so a pick can sit on R with Q free). An empty
 ## array clears everything. Works from anywhere — the server is the
 ## authority, no NPC gatekeeper — EXCEPT mid-spar/duel, where swapping
@@ -9,9 +9,9 @@ extends DataRequestHandler
 ## No weapon-capacity budget: owned picks always channel when the matching
 ## weapon type is held. Storing intent beats erroring on it.
 
-## Q / E / R. Must stay in step with EquipmentComponent.SPECIAL_SLOTS and the
-## client SLOT_KEYS lists.
-const MAX_PICKS: int = 3
+## Q / E / R / C. Must stay in step with EquipmentComponent.SPECIAL_SLOTS and
+## the client SLOT_KEYS lists.
+const MAX_PICKS: int = 4
 
 
 func data_request_handler(

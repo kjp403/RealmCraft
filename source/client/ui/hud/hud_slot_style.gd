@@ -1,5 +1,5 @@
 extends RefCounted
-## Shared HUD keybind skin: the tile used by the ability bar (LMB / Q / E / R)
+## Shared HUD keybind skin: the tile used by the ability bar (LMB / Q / E / R / C)
 ## and the quick-slot rail (1-5). Preloaded as a const rather than registered as
 ## a class_name — it is pure styling with no scene presence.
 ##

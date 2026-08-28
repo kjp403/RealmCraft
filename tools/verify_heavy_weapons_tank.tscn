@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_heavy_weapons_tank.gd" id="1_vhwt"]
+
+[node name="VerifyHeavyWeaponsTank" type="Node"]
+script = ExtResource("1_vhwt")

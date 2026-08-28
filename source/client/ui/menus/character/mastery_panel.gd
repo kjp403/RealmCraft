@@ -2,7 +2,7 @@ extends VBoxContainer
 ## Weapon Mastery HUB (Character > Mastery tab): a split view —
 ##   - Left:  one row per weapon category that has a mastery tree.
 ##   - Right: the selected category's summary (level + XP, points available, its
-##            current Q/E/R loadout) and an "Open tree" button.
+##            current Q/E/R/C loadout) and an "Open tree" button.
 ##
 ## Learning nodes and equipping abilities happen in the full-screen mastery_tree
 ## menu (opened by "Open tree"); this hub is the overview + launch point, so it
@@ -12,7 +12,7 @@ extends VBoxContainer
 
 ## Input labels per special-slot position — purely cosmetic (binds live in the
 ## InputMap); mirrors the tree menu's SLOT_KEYS.
-const SLOT_KEYS: Array[String] = ["Q", "E", "R"]
+const SLOT_KEYS: Array[String] = ["Q", "E", "R", "C"]
 
 ## Per-category server state: category (String) -> {level, xp, xp_to_next,
 ## points, spent: Array, loadout: Array}.
@@ -187,7 +187,7 @@ func _rebuild_summary() -> void:
 		status.add_theme_font_size_override(&"font_size", 12)
 		_summary.add_child(status)
 
-	# Loadout — read-only Q/E/R summary; equipping happens in the tree.
+	# Loadout — read-only Q/E/R/C summary; equipping happens in the tree.
 	var loadout_label: Label = Label.new()
 	loadout_label.text = "Loadout"
 	loadout_label.add_theme_color_override(&"font_color", Color(0.8, 0.82, 0.9))
@@ -228,11 +228,11 @@ func _open_tree() -> void:
 	ClientState.open_menu_requested.emit(&"mastery_tree", _selected)
 
 
-## The category's three special slots (Q / E / R) at a glance — read-only here.
+## The category's four special slots (Q / E / R / C) at a glance — read-only here.
 func _make_loadout_strip(info: Dictionary) -> Control:
 	var loadout: Array = info.get("loadout", [])
 	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override(&"separation", 8)
+	row.add_theme_constant_override(&"separation", 6)
 	for i: int in SLOT_KEYS.size():
 		var node_id: String = str(loadout[i]) if i < loadout.size() else ""
 		row.add_child(_make_loadout_chip(SLOT_KEYS[i], node_id))
@@ -268,6 +268,10 @@ func _make_loadout_chip(key: String, node_id: String) -> Control:
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	name_label.text = _node_display_name(node_id) if filled else "Empty"
+	# Four chips share the strip now — clip so a long ability name shrinks its
+	# chip instead of widening the whole row past the panel.
+	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if not filled:
 		name_label.add_theme_color_override(&"font_color", Color(0.6, 0.62, 0.7))
 	hbox.add_child(name_label)

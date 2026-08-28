@@ -2,21 +2,24 @@
 
 [ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/nova/nova_ability.gd" id="1_nova"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="2_arc"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/frost_nova.png" id="4_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/aftershock_1.png" id="4_icon"]
 
 [resource]
 script = ExtResource("1_nova")
 ap_ratio = 0.0
-ad_ratio = 0.9
+ad_ratio = 1.6
+hp_ratio = 0.05
 damage_type = &"physical"
-radius = 50.0
+radius = 60.0
+heal_per_hit = 6.0
 name = "Aftershock"
 icon = ExtResource("4_icon")
 cooldown = 6.0
-mana_cost = 8
-impact_shake = 0.35
-impact_reach = 50.0
-impact_particles = 6
+mana_cost = 10
+impact_shake = 0.45
+impact_reach = 60.0
+impact_particles = 10
+impact_rings = 2
 impact_color = Color(0.82, 0.62, 0.32, 0.9)
 root_s = 0.15
 metadata/slug = &"hammer_aftershock"

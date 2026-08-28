@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="RecallAbility" format=3 uid="uid://bfebp0w62brg0"]
 
 [ext_resource type="Script" uid="uid://dnn3p4qno5xjk" path="res://source/common/gameplay/combat/ability/ability_collection/channel/recall_ability.gd" id="1_recall"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/recall.png" id="99_icon"]
 
 [resource]
 script = ExtResource("1_recall")
@@ -10,6 +11,7 @@ radius = 40.0
 cancel_on_damage = true
 visual_kind = &"recall"
 name = "Recall"
+icon = ExtResource("99_icon")
 cooldown = 0.0
 metadata/slug = &"recall"
 metadata/id = 24

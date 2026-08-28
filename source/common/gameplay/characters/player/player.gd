@@ -107,12 +107,19 @@ func is_in_npc_dialogue() -> bool:
 
 ## Slayer "Task Ward": hits from the monsters our ACTIVE task targets land softer.
 ## Server-only path (take_damage is), so player_resource is populated here.
-func incoming_damage_factor(attacker: Character) -> float:
+func incoming_damage_factor(
+	attacker: Character,
+	_damage_type: StringName = CombatHit.DAMAGE_PHYSICAL
+) -> float:
 	if attacker is HostileNpc and is_in_npc_dialogue():
 		return 0.0
+	# The blanket wards ride on EVERY branch below (the Storm Pad and a Spectral
+	# Ward both have to protect against a boss slam and a pillar beam alike), so
+	# they are folded in here rather than left to the base implementation this
+	# override replaces.
 	if player_resource == null or attacker is not HostileNpc:
-		return 1.0
-	return SlayerTaskService.task_damage_factor(
+		return blanket_damage_factor()
+	return blanket_damage_factor() * SlayerTaskService.task_damage_factor(
 		player_resource, (attacker as HostileNpc).enemy_type
 	)
 

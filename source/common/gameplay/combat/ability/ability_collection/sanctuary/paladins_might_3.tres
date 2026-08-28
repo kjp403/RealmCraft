@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SanctuaryAbility" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/sanctuary/sanctuary_ability.gd" id="1_sanctuary"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/paladins_might_3.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_sanctuary")
+heal_per_tick = 11.0
+tick_interval_s = 1.0
+duration_s = 12.0
+radius = 100.0
+cast_range = 140.0
+ring_color = Color(1, 0.94, 0.72, 1)
+name = "Paladin's Might III"
+icon = ExtResource("2_icon")
+cooldown = 20.0
+mana_cost = 40
+metadata/slug = &"paladins_might_3"
+metadata/id = 122

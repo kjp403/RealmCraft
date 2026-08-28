@@ -12,15 +12,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_2.tres" id="6_storm2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_3.tres" id="6_storm3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_4.tres" id="6_storm4"]
-[ext_resource type="Texture2D" uid="uid://bg13js5fnm8wk" path="res://assets/sprites/ui/ability_icons/juggernaut.png" id="7_jug"]
+
 [ext_resource type="Resource" uid="uid://b85pgtif6blf8" path="res://source/common/gameplay/combat/ability/ability_collection/charge_shot/venom_shot.tres" id="9_venom"]
-[ext_resource type="Texture2D" uid="uid://cb2s6s0f4vdny" path="res://assets/sprites/ui/ability_icons/momentum.png" id="8_mom"]
-[ext_resource type="Texture2D" uid="uid://b8qf7bum774bc" path="res://assets/sprites/ui/ability_icons/haste.png" id="9_haste"]
+
 [ext_resource type="Resource" uid="uid://djxvwss5v1ngk" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye.tres" id="10_deadeye"]
 [ext_resource type="Resource" uid="uid://b6a183jv33lb4" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye_2.tres" id="11_deadeye2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye_3.tres" id="11_deadeye3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/deadeye_4.tres" id="11_deadeye4"]
-[ext_resource type="Texture2D" uid="uid://cgvi1kpc4e40p" path="res://assets/sprites/ui/ability_icons/steady_aim.png" id="12_steady"]
+
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_1.tres" id="13_rain1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_2.tres" id="13_rain2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_3.tres" id="13_rain3"]
@@ -29,6 +28,16 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/pinning_arrow_2.tres" id="14_pin2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/pinning_arrow_3.tres" id="14_pin3"]
 [ext_resource type="Resource" uid="uid://c8qgc1f35wbc0" path="res://source/common/gameplay/combat/ability/ability_collection/shot_override/pinning_arrow.tres" id="14_pin"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_hardened_1.png" id="ic0_p_hardened_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_hardened_2.png" id="ic1_p_hardened_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_hardened_3.png" id="ic2_p_hardened_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_hawkeye_1.png" id="ic3_p_hawkeye_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_hawkeye_2.png" id="ic4_p_hawkeye_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_lightstep_1.png" id="ic5_p_lightstep_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_lightstep_2.png" id="ic6_p_lightstep_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_mana_siphon.png" id="ic7_p_mana_siphon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_steady_aim_1.png" id="ic8_p_steady_aim_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_steady_aim_2.png" id="ic9_p_steady_aim_2"]
 
 [sub_resource type="Resource" id="Node_multishot"]
 script = ExtResource("2_node")
@@ -74,7 +83,7 @@ value = 2.0
 script = ExtResource("2_node")
 id = &"bow_venom_shot"
 node_name = "Mana Siphon"
-icon = ExtResource("7_jug")
+icon = ExtResource("ic7_p_mana_siphon")
 description = "+2 mana on every landed hit. A steady trickle to bridge into your next shot, not enough to fuel Rapid Fire on its own."
 branch = &"domination"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_mana_siphon")])
@@ -161,7 +170,7 @@ value = 10.0
 script = ExtResource("2_node")
 id = &"bow_survival"
 node_name = "Hardened Stance"
-icon = ExtResource("7_jug")
+icon = ExtResource("ic0_p_hardened_1")
 description = "+10 armor. An archer's edge is distance, not a bigger health bar."
 branch = &"resolve"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_survival")])
@@ -176,7 +185,7 @@ value = 4.0
 script = ExtResource("2_node")
 id = &"bow_survival_2"
 node_name = "Hardened Stance II"
-icon = ExtResource("7_jug")
+icon = ExtResource("ic1_p_hardened_2")
 description = "+4 more armor."
 branch = &"resolve"
 tier = 2
@@ -193,7 +202,7 @@ value = 4.0
 script = ExtResource("2_node")
 id = &"bow_survival_3"
 node_name = "Hardened Stance III"
-icon = ExtResource("7_jug")
+icon = ExtResource("ic2_p_hardened_3")
 description = "+4 more armor. A hide thick enough to shrug off what gets past the distance."
 branch = &"resolve"
 tier = 3
@@ -278,7 +287,7 @@ value = 14.0
 script = ExtResource("2_node")
 id = &"bow_lightstep"
 node_name = "Light Step"
-icon = ExtResource("8_mom")
+icon = ExtResource("ic5_p_lightstep_1")
 description = "+14 move speed. Stay out of reach."
 branch = &"inspiration"
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ms_lightstep")])
@@ -293,7 +302,7 @@ value = 10.0
 script = ExtResource("2_node")
 id = &"bow_lightstep_2"
 node_name = "Light Step II"
-icon = ExtResource("8_mom")
+icon = ExtResource("ic6_p_lightstep_2")
 description = "+10 more move speed."
 branch = &"inspiration"
 tier = 2
@@ -310,7 +319,7 @@ value = 18.0
 script = ExtResource("2_node")
 id = &"bow_hawkeye"
 node_name = "Hawkeye"
-icon = ExtResource("9_haste")
+icon = ExtResource("ic3_p_hawkeye_1")
 description = "+18 ability haste. Draw and fire faster."
 branch = &"inspiration"
 tier = 2
@@ -326,7 +335,7 @@ value = 12.0
 script = ExtResource("2_node")
 id = &"bow_hawkeye_2"
 node_name = "Hawkeye II"
-icon = ExtResource("9_haste")
+icon = ExtResource("ic4_p_hawkeye_2")
 description = "+12 more ability haste."
 branch = &"inspiration"
 tier = 3
@@ -343,7 +352,7 @@ value = 40.0
 script = ExtResource("2_node")
 id = &"bow_steady_aim"
 node_name = "Steady Aim"
-icon = ExtResource("12_steady")
+icon = ExtResource("ic8_p_steady_aim_1")
 description = "Hold still while you draw: if you don't move at all between nocking and loosing a FULL charge, that shot deals 40% bonus damage. Moving even one step during the draw cancels it — this rewards planting and firing, not walking shots."
 branch = &"inspiration"
 tier = 2
@@ -359,7 +368,7 @@ value = 20.0
 script = ExtResource("2_node")
 id = &"bow_steady_aim_2"
 node_name = "Steady Aim II"
-icon = ExtResource("12_steady")
+icon = ExtResource("ic9_p_steady_aim_2")
 description = "Planted full draws hit 20% harder still."
 branch = &"inspiration"
 tier = 3
