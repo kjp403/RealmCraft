@@ -295,9 +295,10 @@ func _on_leave() -> void:
 
 
 func _on_start() -> void:
-	# The fee is spent the moment the contract opens and a death ends the run,
-	# so this is the last point where a player can back out. Confirm in the
-	# clearest terms the cost and the consequence.
+	# The fee is spent the moment the contract opens and the party only gets
+	# BossHuntService.CONTRACT_LIVES deaths, so this is the last point where a
+	# player can back out. Confirm in the clearest terms the cost and the
+	# consequence.
 	if _confirm != null and is_instance_valid(_confirm):
 		_confirm.queue_free()
 	_confirm = ConfirmationDialog.new()
@@ -309,13 +310,15 @@ func _on_start() -> void:
 		"Open this contract for %s gold?
 
 "
-		+ "If you die, or leave the arena for any reason, the hunt ends there.
+		+ "Your party shares %d lives, however many of you go in. Spend the
 "
-		+ "The gold is not refunded and the room closes behind you.
+		+ "last one and the contract fails. Leave the arena and you are out of
+"
+		+ "this hunt. The gold is not refunded either way.
 
 "
 		+ "Bring food."
-	) % _fmt_gold(cost)
+	) % [_fmt_gold(cost), BossHuntService.CONTRACT_LIVES]
 	_confirm.confirmed.connect(func() -> void: _send("start"))
 	add_child(_confirm)
 	_confirm.popup_centered()

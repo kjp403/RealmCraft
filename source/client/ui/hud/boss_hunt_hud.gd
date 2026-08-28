@@ -1,10 +1,12 @@
 class_name BossHuntHud
 extends PanelContainer
 ## Top-center Boss Hunt HUD: a live MM:SS clock counting DOWN to the end of the
-## contract, plus the boss's name and the running kill tally.
+## contract, plus the boss's name, the running kill tally, and the lives the
+## party has left (BossHuntService.CONTRACT_LIVES, shared however many hunters
+## are in the arena — losing the last one fails the contract).
 ##
 ## Driven entirely by &"boss_hunt.hud" pushes from BossHuntService:
-## {active, remaining_s, boss, kills}. Like DungeonHud, the clock ticks LOCALLY
+## {active, remaining_s, boss, kills, lives}. Like DungeonHud, the clock ticks LOCALLY
 ## from the baseline the server sends (on entry and on every kill), so there is
 ## no per-second network spam. Hidden whenever no contract is running.
 ##
@@ -17,6 +19,9 @@ const URGENT_S: int = 60
 
 var _boss: String = ""
 var _kills: int = 0
+## Shared lives left. -1 until the first push carries one, so an older server
+## that does not send the field shows the clock alone rather than "0 lives".
+var _lives: int = -1
 ## Local clock baseline: remaining seconds at the last push + the ticks_msec then.
 var _base_remaining_s: float = 0.0
 var _base_tick_ms: int = 0
@@ -45,6 +50,7 @@ func _on_hud(payload: Dictionary) -> void:
 		_base_tick_ms = Time.get_ticks_msec()
 	_boss = str(payload.get("boss", _boss))
 	_kills = int(payload.get("kills", _kills))
+	_lives = int(payload.get("lives", _lives))
 	_refresh_detail()
 	_last_shown_sec = -1 # force an immediate clock redraw
 	_update_clock()
@@ -70,11 +76,20 @@ func _update_clock() -> void:
 		&"font_color", Color(1.0, 0.42, 0.38) if total <= URGENT_S else Color(1, 1, 1))
 
 
+## "Fungal Heart · 3 killed · 2 lives". The lives segment goes red on the last
+## one — that death ends the contract, so it should read as a warning, not a
+## number. Omitted entirely until a push has actually carried the field.
 func _refresh_detail() -> void:
-	if _boss.is_empty():
-		_detail_label.text = "%d killed" % _kills
-		return
-	_detail_label.text = "%s  ·  %d killed" % [_boss, _kills]
+	var parts: PackedStringArray = PackedStringArray()
+	if not _boss.is_empty():
+		parts.append(_boss)
+	parts.append("%d killed" % _kills)
+	if _lives >= 0:
+		parts.append("%d %s" % [_lives, "life" if _lives == 1 else "lives"])
+	_detail_label.text = "  ·  ".join(parts)
+	_detail_label.add_theme_color_override(
+		&"font_color",
+		Color(1.0, 0.42, 0.38) if _lives == 1 else Color(1.0, 0.88, 0.6))
 
 
 ## Compact dark panel, top-center just below the status-effect strip — same slot
