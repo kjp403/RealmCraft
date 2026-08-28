@@ -9,6 +9,9 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="l1_bone"]
 [ext_resource type="Resource" uid="uid://vhgsmnbqslo6" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="l2_cloth_forest"]
 [ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="l3_hide_bandit"]
+[ext_resource type="Resource" uid="uid://dtb5bin7denb7" path="res://source/common/gameplay/items/materials/leather/leather_bandit.tres" id="dw_leather_bandit"]
+[ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="dw_silver_ore"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="dw_minor_health_potion"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_drop")
@@ -30,6 +33,30 @@ chance = 0.35
 script = ExtResource("3_drop")
 item = ExtResource("l3_hide_bandit")
 chance = 0.2
+
+
+[sub_resource type="Resource" id="Drop_dw_leather_bandit"]
+script = ExtResource("3_drop")
+item = ExtResource("dw_leather_bandit")
+min_amount = 1
+max_amount = 1
+chance = 0.1
+
+
+[sub_resource type="Resource" id="Drop_dw_silver_ore"]
+script = ExtResource("3_drop")
+item = ExtResource("dw_silver_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.22
+
+
+[sub_resource type="Resource" id="Drop_dw_minor_health_potion"]
+script = ExtResource("3_drop")
+item = ExtResource("dw_minor_health_potion")
+min_amount = 1
+max_amount = 1
+chance = 0.08
 
 [resource]
 script = ExtResource("4_type")
@@ -59,5 +86,5 @@ respawn_delay = 11.0
 respawns = true
 behaviors = Array[ExtResource("2_behavior")]([])
 attacks = Array[ExtResource("1_attack")]([])
-loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_forest"), SubResource("Drop_hide_bandit")])
+loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_cloth_forest"), SubResource("Drop_hide_bandit"), SubResource("Drop_dw_leather_bandit"), SubResource("Drop_dw_silver_ore"), SubResource("Drop_dw_minor_health_potion")])
 metadata/slug = &"bandit_cutpurse"

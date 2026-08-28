@@ -10,6 +10,13 @@
 [ext_resource type="Resource" uid="uid://f0urxop3y64l" path="res://source/common/gameplay/items/weapons/sword/sword.item.tres" id="6_wjqol"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="dw_gold"]
+[ext_resource type="Resource" uid="uid://bis5a66yw1pxp" path="res://source/common/gameplay/items/materials/leather/hide_bandit.tres" id="dw_hide_bandit"]
+[ext_resource type="Resource" uid="uid://dtb5bin7denb7" path="res://source/common/gameplay/items/materials/leather/leather_bandit.tres" id="dw_leather_bandit"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="dw_enchanted_ore"]
+[ext_resource type="Resource" uid="uid://d2dopgtbgmdii" path="res://source/common/gameplay/items/materials/herbs/healing_herb.tres" id="dw_healing_herb"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="dw_minor_health_potion"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="dw_chest_small"]
 
 [sub_resource type="Resource" id="Drop_leather"]
 script = ExtResource("2_loot")
@@ -35,6 +42,62 @@ min_amount = 1
 max_amount = 1
 chance = 0.35
 
+
+[sub_resource type="Resource" id="Drop_dw_gold"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_gold")
+min_amount = 45
+max_amount = 110
+chance = 1.0
+
+
+[sub_resource type="Resource" id="Drop_dw_hide_bandit"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_hide_bandit")
+min_amount = 1
+max_amount = 2
+chance = 0.45
+
+
+[sub_resource type="Resource" id="Drop_dw_leather_bandit"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_leather_bandit")
+min_amount = 1
+max_amount = 1
+chance = 0.18
+
+
+[sub_resource type="Resource" id="Drop_dw_enchanted_ore"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_enchanted_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.12
+
+
+[sub_resource type="Resource" id="Drop_dw_healing_herb"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_healing_herb")
+min_amount = 1
+max_amount = 1
+chance = 0.12
+
+
+[sub_resource type="Resource" id="Drop_dw_minor_health_potion"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_minor_health_potion")
+min_amount = 1
+max_amount = 1
+chance = 0.12
+
+
+[sub_resource type="Resource" id="Drop_dw_chest_small"]
+script = ExtResource("2_loot")
+item = ExtResource("dw_chest_small")
+min_amount = 1
+max_amount = 1
+chance = 0.015
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit"
@@ -52,6 +115,6 @@ max_distance_from_spawn = 200
 chase_on_area = true
 xp_reward = 40
 respawn_delay = 20.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_leather"), SubResource("Drop_copper"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_leather"), SubResource("Drop_copper"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_dw_gold"), SubResource("Drop_dw_hide_bandit"), SubResource("Drop_dw_leather_bandit"), SubResource("Drop_dw_enchanted_ore"), SubResource("Drop_dw_healing_herb"), SubResource("Drop_dw_minor_health_potion"), SubResource("Drop_dw_chest_small")])
 metadata/slug = &"bandit"
 metadata/id = 1

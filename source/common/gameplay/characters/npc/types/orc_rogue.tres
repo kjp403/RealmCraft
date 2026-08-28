@@ -8,6 +8,15 @@
 [ext_resource type="Resource" uid="uid://bob6a10f1tu10" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="4_xmfpj"]
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="bone_item"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" uid="uid://wj3mr4iqepu7" path="res://source/common/gameplay/items/currencies/gold.tres" id="dw_gold"]
+[ext_resource type="Resource" uid="uid://fac00b8b51c74" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="dw_enchanted_ore"]
+[ext_resource type="Resource" uid="uid://a0d9d687a07d4" path="res://source/common/gameplay/items/materials/metals/phantom_ore.tres" id="dw_phantom_ore"]
+[ext_resource type="Resource" uid="uid://1353f39cac7b4" path="res://source/common/gameplay/items/materials/gems/phantom_gem.tres" id="dw_phantom_gem"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="dw_iron_ore"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="dw_mithril_ore"]
+[ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="dw_maple_log"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="dw_minor_health_potion"]
+[ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="dw_chest_small"]
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("1_knvur")
@@ -21,6 +30,86 @@ item = ExtResource("loot_big_bones")
 min_amount = 1
 max_amount = 1
 chance = 0.35
+
+
+[sub_resource type="Resource" id="Drop_dw_gold"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_gold")
+min_amount = 60
+max_amount = 135
+chance = 1.0
+
+
+[sub_resource type="Resource" id="Drop_dw_enchanted_ore"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_enchanted_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.16
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_ore"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_phantom_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.16
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_gem"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_phantom_gem")
+min_amount = 1
+max_amount = 1
+chance = 0.1
+
+
+[sub_resource type="Resource" id="Drop_dw_iron_ore"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_iron_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.38
+
+
+[sub_resource type="Resource" id="Drop_dw_mithril_ore"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_mithril_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.14
+
+
+[sub_resource type="Resource" id="Drop_dw_maple_log"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_maple_log")
+min_amount = 1
+max_amount = 3
+chance = 0.28
+
+
+[sub_resource type="Resource" id="Drop_dw_hammer_rustic"]
+script = ExtResource("1_knvur")
+item = ExtResource("4_xmfpj")
+min_amount = 1
+max_amount = 1
+chance = 0.03
+
+
+[sub_resource type="Resource" id="Drop_dw_minor_health_potion"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_minor_health_potion")
+min_amount = 1
+max_amount = 1
+chance = 0.14
+
+
+[sub_resource type="Resource" id="Drop_dw_chest_small"]
+script = ExtResource("1_knvur")
+item = ExtResource("dw_chest_small")
+min_amount = 1
+max_amount = 1
+chance = 0.018
 
 [resource]
 script = ExtResource("2_xmfpj")
@@ -39,7 +128,7 @@ max_distance_from_spawn = 200
 chase_on_area = true
 xp_reward = 52
 respawn_delay = 20.0
-loot = Array[ExtResource("1_knvur")]([SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("1_knvur")]([SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_dw_gold"), SubResource("Drop_dw_enchanted_ore"), SubResource("Drop_dw_phantom_ore"), SubResource("Drop_dw_phantom_gem"), SubResource("Drop_dw_iron_ore"), SubResource("Drop_dw_mithril_ore"), SubResource("Drop_dw_maple_log"), SubResource("Drop_dw_hammer_rustic"), SubResource("Drop_dw_minor_health_potion"), SubResource("Drop_dw_chest_small")])
 metadata/_custom_type_script = "uid://swk8b8q32qv2"
 metadata/slug = &"orc_rogue"
 metadata/id = 14

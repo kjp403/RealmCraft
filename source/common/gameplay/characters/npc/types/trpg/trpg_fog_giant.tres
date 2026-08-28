@@ -8,13 +8,22 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_fog_giant.tres" id="5_toiot"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" uid="uid://a0d9d687a07d4" path="res://source/common/gameplay/items/materials/metals/phantom_ore.tres" id="dw_phantom_ore"]
+[ext_resource type="Resource" uid="uid://02631491a4034" path="res://source/common/gameplay/items/materials/cloth/phantom_cloth.tres" id="dw_phantom_cloth"]
+[ext_resource type="Resource" uid="uid://1353f39cac7b4" path="res://source/common/gameplay/items/materials/gems/phantom_gem.tres" id="dw_phantom_gem"]
+[ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="dw_enchanted_cloth"]
+[ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="dw_mithril_ore"]
+[ext_resource type="Resource" uid="uid://1zetmdb1keg9l" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="dw_steel_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/moonbloom.tres" id="dw_moonbloom"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="dw_health_potion"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="dw_chest_medium"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_010ao")
 item = ExtResource("loot_gold")
-min_amount = 2
-max_amount = 6
-chance = 0.85
+min_amount = 110
+max_amount = 220
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_010ao")
@@ -29,6 +38,78 @@ item = ExtResource("loot_big_bones")
 min_amount = 1
 max_amount = 1
 chance = 0.35
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_ore"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_phantom_ore")
+min_amount = 1
+max_amount = 4
+chance = 0.26
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_cloth"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_phantom_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_gem"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_phantom_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.18
+
+
+[sub_resource type="Resource" id="Drop_dw_enchanted_cloth"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_enchanted_cloth")
+min_amount = 1
+max_amount = 2
+chance = 0.16
+
+
+[sub_resource type="Resource" id="Drop_dw_mithril_ore"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_mithril_ore")
+min_amount = 1
+max_amount = 2
+chance = 0.16
+
+
+[sub_resource type="Resource" id="Drop_dw_steel_bar"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_steel_bar")
+min_amount = 1
+max_amount = 2
+chance = 0.12
+
+
+[sub_resource type="Resource" id="Drop_dw_moonbloom"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_moonbloom")
+min_amount = 1
+max_amount = 2
+chance = 0.22
+
+
+[sub_resource type="Resource" id="Drop_dw_health_potion"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_health_potion")
+min_amount = 1
+max_amount = 1
+chance = 0.12
+
+
+[sub_resource type="Resource" id="Drop_dw_chest_medium"]
+script = ExtResource("3_010ao")
+item = ExtResource("dw_chest_medium")
+min_amount = 1
+max_amount = 1
+chance = 0.025
 
 [resource]
 script = ExtResource("4_l4d7s")
@@ -58,7 +139,7 @@ wander_pause_max_s = 4.0
 xp_reward = 90
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_010ao")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("3_010ao")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_dw_phantom_ore"), SubResource("Drop_dw_phantom_cloth"), SubResource("Drop_dw_phantom_gem"), SubResource("Drop_dw_enchanted_cloth"), SubResource("Drop_dw_mithril_ore"), SubResource("Drop_dw_steel_bar"), SubResource("Drop_dw_moonbloom"), SubResource("Drop_dw_health_potion"), SubResource("Drop_dw_chest_medium")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1
