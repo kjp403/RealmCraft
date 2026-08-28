@@ -42,9 +42,11 @@ func can_use(user: Entity = null) -> bool:
 func use_ability(entity: Entity, _direction: Vector2) -> void:
 	# Client (owner only): root briefly so the sip reads as a committed action — the
 	# same movement lock a heavy weapon swing uses (see HammerWeapon). root_s was copied
-	# from the item's use_freeze.
+	# from the item's use_freeze. FEET ONLY (lock_actions false): a swing commits your
+	# whole body, but a drink must never swallow the abilities you're drinking to keep
+	# using — it plants you, it doesn't disarm you.
 	if GameMode.is_client() and entity == ClientState.local_player and ClientState.local_player != null:
-		ClientState.local_player.freeze_movement(root_s)
+		ClientState.local_player.freeze_movement(root_s, false)
 	# The effect + the spend are server-only; clients just replay this as a no-op and
 	# pick up the result via stat sync. ConsumableItem.on_use does heal/mana/buff and
 	# removes one from the bag.
