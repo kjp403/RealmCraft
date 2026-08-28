@@ -2,7 +2,7 @@ extends VBoxContainer
 ## Weapon Mastery HUB (Character > Mastery tab): a split view —
 ##   - Left:  one row per weapon category that has a mastery tree.
 ##   - Right: the selected category's summary (level + XP, points available, its
-##            current Q/E loadout) and an "Open tree" button.
+##            current Q/E/R loadout) and an "Open tree" button.
 ##
 ## Learning nodes and equipping abilities happen in the full-screen mastery_tree
 ## menu (opened by "Open tree"); this hub is the overview + launch point, so it
@@ -12,7 +12,7 @@ extends VBoxContainer
 
 ## Input labels per special-slot position — purely cosmetic (binds live in the
 ## InputMap); mirrors the tree menu's SLOT_KEYS.
-const SLOT_KEYS: Array[String] = ["Q", "E"]
+const SLOT_KEYS: Array[String] = ["Q", "E", "R"]
 
 ## Per-category server state: category (String) -> {level, xp, xp_to_next,
 ## points, spent: Array, loadout: Array}.
@@ -187,7 +187,7 @@ func _rebuild_summary() -> void:
 		status.add_theme_font_size_override(&"font_size", 12)
 		_summary.add_child(status)
 
-	# Loadout — read-only Q/E summary; equipping happens in the tree.
+	# Loadout — read-only Q/E/R summary; equipping happens in the tree.
 	var loadout_label: Label = Label.new()
 	loadout_label.text = "Loadout"
 	loadout_label.add_theme_color_override(&"font_color", Color(0.8, 0.82, 0.9))
@@ -228,7 +228,7 @@ func _open_tree() -> void:
 	ClientState.open_menu_requested.emit(&"mastery_tree", _selected)
 
 
-## The category's two special slots (Q / E) at a glance — read-only here.
+## The category's three special slots (Q / E / R) at a glance — read-only here.
 func _make_loadout_strip(info: Dictionary) -> Control:
 	var loadout: Array = info.get("loadout", [])
 	var row: HBoxContainer = HBoxContainer.new()

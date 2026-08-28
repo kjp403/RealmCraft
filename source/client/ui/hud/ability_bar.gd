@@ -1,6 +1,6 @@
 extends HBoxContainer
 ## MOBA-style ability bar: one tile per ability on the wielded weapon, in
-## input order (LMB / Q / E). Each tile shows the ability's initials (art
+## input order (LMB / Q / E / R). Each tile shows the ability's initials (art
 ## icons come later), its input key, its mana cost, a cooldown drain overlay
 ## with a seconds counter, and dims while mana is short. Pure display — every
 ## node is MOUSE_FILTER_IGNORE so the bar can never eat combat clicks.
@@ -10,13 +10,18 @@ extends HBoxContainer
 ## _process off the same AbilityResource instances the weapon fires with, so
 ## the bar can't drift from the truth.
 
-const SLOT_KEYS: Array[String] = ["LMB", "Q", "E"]
-const TILE_SIZE: Vector2 = Vector2(52, 52)
+const SLOT_KEYS: Array[String] = ["LMB", "Q", "E", "R"]
+## Sized so all four tiles plus separation sit inside the 200px resource bars
+## directly below (4 * 44 + 3 * 6 = 194) — see hud.tscn's AbilityBar offsets.
+const TILE_SIZE: Vector2 = Vector2(44, 44)
+const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
 const MANA_SHORT_TINT: Color = Color(0.55, 0.62, 0.85)
 const CHANNEL_GLOW: Color = Color(0.45, 1.0, 0.55)
 
 var _weapon: Weapon
-## Per-tile lookups: {"ability", "button", "sweep", "cd_label", "glow"}.
+## Per-tile lookups: {"ability", "index", "button", "sweep", "cd_label", "glow",
+## "key_label"}. "index" is the ability-array slot, NOT the position in here —
+## a skipped null primary makes the two diverge.
 var _tiles: Array[Dictionary] = []
 ## Touch makes tiles tappable (fire-on-tap); mouse/gamepad keep them click-through.
 var _touch_mode: bool = false
@@ -39,7 +44,7 @@ func _on_local_player_ready(local_player: LocalPlayer) -> void:
 
 
 func _on_equipment_changed(slot: StringName, _item_id: int) -> void:
-	if slot == &"weapon" or slot == EquipmentComponent.SPECIAL_SLOT or slot == EquipmentComponent.SPECIAL_SLOT_2:
+	if slot == &"weapon" or EquipmentComponent.SPECIAL_SLOTS.has(slot):
 		# Mounting happens in the same call stack — rebuild once it settles.
 		_rebuild.call_deferred()
 
@@ -82,7 +87,7 @@ func _rebuild() -> void:
 		return
 	for i: int in _weapon.abilities.size():
 		# A null PRIMARY (slot 0) = a held non-weapon item (potion) whose action sits on
-		# the special slot. Don't render a dim empty "LMB" tile for it; null Q/E holes
+		# the special slot. Don't render a dim empty "LMB" tile for it; null Q/E/R holes
 		# (truthful mastery labels) still show.
 		if i == 0 and _weapon.abilities[i] == null:
 			continue
@@ -91,7 +96,7 @@ func _rebuild() -> void:
 
 func _add_tile(index: int, ability: AbilityResource) -> void:
 	var tile: Button = Button.new()
-	tile.theme_type_variation = &"SlotButton" # match the consumable hotbar look
+	SLOT_STYLE.apply(tile) # chamfered keybind tile, matching the quick-slot rail
 	tile.custom_minimum_size = TILE_SIZE
 	tile.focus_mode = Control.FOCUS_NONE
 	_apply_tap_mode(tile)
@@ -101,7 +106,7 @@ func _add_tile(index: int, ability: AbilityResource) -> void:
 	tile.button_up.connect(_on_tile_up.bind(index))
 	if ability != null and ability.icon != null:
 		tile.icon = ability.icon
-		tile.add_theme_constant_override(&"icon_max_width", 44)
+		tile.add_theme_constant_override(&"icon_max_width", 36)
 		tile.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	elif ability != null:
 		tile.text = _initials(ability.name) # placeholder until the art pass
@@ -121,7 +126,7 @@ func _add_tile(index: int, ability: AbilityResource) -> void:
 	key_label.text = SLOT_KEYS[index] if index < SLOT_KEYS.size() else str(index + 1)
 	key_label.add_theme_font_size_override(&"font_size", 9)
 	key_label.add_theme_color_override(&"font_color", Color(0.75, 0.78, 0.85))
-	key_label.position = Vector2(4, 2)
+	key_label.position = Vector2(6, 3) # clear of the top-left corner bracket
 	key_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	key_label.visible = not _touch_mode # on touch the tap IS the input; the key hint is just noise
 	tile.add_child(key_label)
@@ -136,7 +141,7 @@ func _add_tile(index: int, ability: AbilityResource) -> void:
 	tile.add_child(sweep)
 
 	var cd_label: Label = Label.new()
-	cd_label.add_theme_font_size_override(&"font_size", 14)
+	cd_label.add_theme_font_size_override(&"font_size", 13)
 	cd_label.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
 	cd_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cd_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -150,11 +155,20 @@ func _add_tile(index: int, ability: AbilityResource) -> void:
 		mana_label.text = str(ability.mana_cost)
 		mana_label.add_theme_font_size_override(&"font_size", 10)
 		mana_label.add_theme_color_override(&"font_color", Color(0.45, 0.75, 1.0))
-		mana_label.position = Vector2(TILE_SIZE.x - 16, TILE_SIZE.y - 15)
+		# Anchored + right-aligned rather than positioned: a three-digit cost used
+		# to run off the tile, and it has to stay inside the bottom-right bracket.
+		mana_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		mana_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		mana_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tile.add_child(mana_label)
+		mana_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		mana_label.offset_right = -6.0
+		mana_label.offset_bottom = -3.0
 
-	_tiles.append({"ability": ability, "button": tile, "sweep": sweep, "cd_label": cd_label, "glow": glow, "key_label": key_label})
+	_tiles.append({
+		"ability": ability, "index": index, "button": tile, "sweep": sweep,
+		"cd_label": cd_label, "glow": glow, "key_label": key_label,
+	})
 
 
 ## Touch tap → fire the slot directly (press half). Empty loadout slots (null
@@ -193,7 +207,12 @@ func _process(_delta: float) -> void:
 	var armed_name: String = ""
 	if ClientState.local_player.has_armed_shot():
 		armed_name = String(ClientState.local_player.armed_shot.get("name", ""))
+	var controller: InputComponent = ClientState.local_player.controller
 	for tile_info: Dictionary in _tiles:
+		# The green key-down face is driven for EVERY tile, empty ones included —
+		# pressing R with nothing slotted should still show the key registering,
+		# or the player reads the dead press as a broken keybind.
+		_refresh_live(tile_info, controller)
 		var ability: AbilityResource = tile_info["ability"]
 		if ability == null:
 			continue
@@ -229,6 +248,28 @@ func _process(_delta: float) -> void:
 			button.modulate = MANA_SHORT_TINT
 		else:
 			button.modulate = Color.WHITE
+
+
+## Lights the tile green while its input is held. On touch the tile is a real
+## Button, so its own pressed state already covers it — polling a key there
+## would just fight the tap.
+func _refresh_live(tile_info: Dictionary, controller: InputComponent) -> void:
+	var button: Button = tile_info["button"]
+	if _touch_mode or controller == null:
+		return
+	SLOT_STYLE.set_live(button, _is_slot_held(int(tile_info["index"]), controller))
+
+
+## Is this slot's input down RIGHT NOW? Asked through the InputComponent rather
+## than Input directly, so the tile stays dark while a menu or the chat box owns
+## the keyboard — a lit tile has to mean the game would act on the press.
+func _is_slot_held(index: int, controller: InputComponent) -> bool:
+	match index:
+		0: return controller.is_attack_pressed()
+		1: return controller.is_special_pressed()
+		2: return controller.is_special2_pressed()
+		3: return controller.is_special3_pressed()
+	return false
 
 
 ## "Mending Bolt" -> "MB"; single-word names keep their first two letters.

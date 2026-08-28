@@ -67,6 +67,7 @@ var _xp_bar: ProgressBar
 var _status_label: Label
 var _q_name: Label
 var _e_name: Label
+var _r_name: Label
 var _power_label: Label
 var _manage_button: Button
 
@@ -271,6 +272,11 @@ func _build_weapons_layout(main_box: VBoxContainer) -> void:
 	e_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	loadout_row.add_child(e_chip)
 	_e_name = e_chip.get_node("Content/Name") as Label
+
+	var r_chip: PanelContainer = _make_loadout_chip("R")
+	r_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	loadout_row.add_child(r_chip)
+	_r_name = r_chip.get_node("Content/Name") as Label
 
 	_power_label = Label.new()
 	_power_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -617,6 +623,7 @@ func _render_selected_category() -> void:
 		_status_label.text = ""
 		_q_name.text = "Empty"
 		_e_name.text = "Empty"
+		_r_name.text = "Empty"
 		_power_label.text = ""
 		_manage_button.disabled = true
 		return
@@ -662,6 +669,7 @@ func _render_selected_category() -> void:
 	var loadout: Array = info.get("loadout", [])
 	_q_name.text = _loadout_name(loadout, 0, tree)
 	_e_name.text = _loadout_name(loadout, 1, tree)
+	_r_name.text = _loadout_name(loadout, 2, tree)
 
 	if _wielded_capacity() < 0:
 		_power_label.text = "Equip this weapon type to use its abilities."

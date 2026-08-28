@@ -15,6 +15,8 @@ const GRID_ROWS := 6
 ## Cells drawn == slots a bag holds. Keep it that way: any mismatch puts squares
 ## on screen that silently refuse items.
 const CELL_COUNT := GRID_COLUMNS * GRID_ROWS
+## The HUD quick-slot rail — one source of truth for how many keys exist.
+const ITEM_SLOTS: GDScript = preload("res://source/client/ui/hud/item_slots.gd")
 const MIN_SLOT_COUNT := CELL_COUNT
 const MAX_SLOT_COUNT := Inventory.MAX_SLOTS
 const SLOT_SIZE := Vector2(36.0, 36.0)
@@ -656,7 +658,7 @@ func _open_context_menu(entry: Dictionary) -> void:
 		or item is GearItem
 		or item.holdable
 	):
-		context_menu.add_item("Bind to 1-2-3", ACTION_HOTKEY)
+		context_menu.add_item("Bind to 1-5", ACTION_HOTKEY)
 
 	# Break down is the only route to salvage from the dock. Items the salvage
 	# table does not know still get the row, disabled, so players stop hunting
@@ -811,7 +813,7 @@ func _assign_hotkey(entry: Dictionary) -> void:
 	if item == null:
 		return
 	var entries: PackedStringArray = PackedStringArray()
-	for i: int in 3:
+	for i: int in ITEM_SLOTS.SLOT_COUNT:
 		var occupant: Item = ClientState.quick_slots.get_key(i) as Item
 		var occupant_name: String = String(occupant.item_name) if occupant != null else "empty"
 		entries.append("Slot %d (key %d)  —  %s" % [i + 1, i + 1, occupant_name])
@@ -821,7 +823,7 @@ func _assign_hotkey(entry: Dictionary) -> void:
 			if occupant == item:
 				ClientState.quick_slots.set_key(slot, null)
 				return
-			for i: int in 3:
+			for i: int in ITEM_SLOTS.SLOT_COUNT:
 				if (ClientState.quick_slots.get_key(i) as Item) == item:
 					ClientState.quick_slots.set_key(i, null)
 			ClientState.quick_slots.set_key(slot, item)

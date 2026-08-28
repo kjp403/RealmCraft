@@ -8,6 +8,10 @@ const FILL_TIME: float = 0.18
 const QUICK_ON: Color = Color(0.93, 0.80, 0.35)
 const QUICK_OFF: Color = Color(0.72, 0.76, 0.84)
 
+const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
+
+@onready var track: Panel = $Track
+@onready var ink: ColorRect = $Ink
 @onready var label: Label = $ProgressBar/Label
 @onready var progress_bar: ProgressBar = $ProgressBar
 @onready var drain_label: Label = $DrainLabel
@@ -20,6 +24,14 @@ var _busy: bool = false
 
 
 func _ready() -> void:
+	# The ProgressBar is an invisible value holder from here on — the tween below
+	# still drives its `value`, and the Ink layer renders it (ink_fill.gdshader).
+	SLOT_STYLE.apply_track(track)
+	SLOT_STYLE.clear_bar(progress_bar)
+	ink.source = progress_bar
+	# The quick-prayer toggle butts right up against the bars, so it wears the
+	# keybind tile face too rather than the rounded default button.
+	SLOT_STYLE.apply(quick_button)
 	ClientState.local_player_ready.connect(
 		func(local_player: LocalPlayer) -> void:
 			local_player.stats_component.stats.stat_changed.connect(_on_stat_changed)

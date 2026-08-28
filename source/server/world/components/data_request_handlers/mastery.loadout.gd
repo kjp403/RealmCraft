@@ -1,7 +1,7 @@
 extends DataRequestHandler
 ## Sets a category's special-ability loadout: an ORDERED array of owned
-## ability-node ids (max 2 — slot POSITION maps to the Q / E inputs; "" marks
-## a deliberately empty slot so a pick can sit on E with Q free). An empty
+## ability-node ids (max 3 — slot POSITION maps to the Q / E / R inputs; ""
+## marks a deliberately empty slot so a pick can sit on R with Q free). An empty
 ## array clears everything. Works from anywhere — the server is the
 ## authority, no NPC gatekeeper — EXCEPT mid-spar/duel, where swapping
 ## abilities would dodge the fight you signed up for.
@@ -9,7 +9,9 @@ extends DataRequestHandler
 ## No weapon-capacity budget: owned picks always channel when the matching
 ## weapon type is held. Storing intent beats erroring on it.
 
-const MAX_PICKS: int = 2
+## Q / E / R. Must stay in step with EquipmentComponent.SPECIAL_SLOTS and the
+## client SLOT_KEYS lists.
+const MAX_PICKS: int = 3
 
 
 func data_request_handler(
@@ -38,6 +40,9 @@ func data_request_handler(
 		return {"ok": false, "reason": "no_tree"}
 	var entry: Dictionary = resource.masteries.get(category, {})
 	var spent: Dictionary = entry.get("spent", {})
+	# A maxed tree grants every ability outright, so ownership is no longer
+	# "did you buy it" — see MasteryService.has_full_unlock.
+	var full_unlock: bool = MasteryService.has_full_unlock(entry)
 
 	var validated: Array = []
 	var seen_chains: Dictionary = {} # chain root -> true: one tier of a move max
@@ -60,7 +65,7 @@ func data_request_handler(
 			continue
 		if node.ability == null:
 			return {"ok": false, "reason": "unknown_node"}
-		if not spent.has(node_id):
+		if not full_unlock and not spent.has(node_id):
 			return {"ok": false, "reason": "not_owned"}
 		# A signature move occupies ONE slot — can't slot two tiers of it.
 		var root: String = String(MasteryService.chain_root_of(tree, node))

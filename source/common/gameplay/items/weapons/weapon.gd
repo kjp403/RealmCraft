@@ -2,7 +2,8 @@
 class_name Weapon
 extends Node2D
 ## Base weapon: a thin shell around its abilities array. Slot 0 = primary
-## (attack input), slot 1 = special. Single-phase abilities fire on press;
+## (attack input), slots 1-3 = the mastery specials (Q / E / R). Single-phase
+## abilities fire on press;
 ## two-phase abilities (ChargeAbility — has_release) begin on press and fire on
 ## release, carried over the same action.perform wire with an "r" flag. Weapon
 ## scripts only exist for VISUALS (bow draw frames, hammer slam tween) — all
@@ -375,6 +376,7 @@ func process_input(local_player: LocalPlayer) -> void:
 	# primary attack (player_shoot)      → abilities[0]
 	# special attack (player_special)    → abilities[1]
 	# special 2      (player_special_2)  → abilities[2]
+	# special 3      (player_special_3)  → abilities[3]
 	# Single-phase: tap to fire (predictive local mark_used keeps the channel
 	# quiet while held). Two-phase: press sends the charge, release sends the
 	# fire — _held bridges the round-trip so a fast tap still releases.
@@ -387,6 +389,8 @@ func process_input(local_player: LocalPlayer) -> void:
 		_handle_slot_input(1, controller.is_special_just_pressed(), controller.is_special_just_released(), local_player)
 	if abilities.size() > 2:
 		_handle_slot_input(2, controller.is_special2_just_pressed(), controller.is_special2_just_released(), local_player)
+	if abilities.size() > 3:
+		_handle_slot_input(3, controller.is_special3_just_pressed(), controller.is_special3_just_released(), local_player)
 	if _ground_aim_slot >= 0:
 		_update_ground_aim(local_player)
 
