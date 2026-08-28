@@ -6,8 +6,9 @@
 [resource]
 script = ExtResource("1_script")
 prayer_amount = 12
-shared_cooldown_ms = 3000
+shared_cooldown_ms = 0
 cooldown_category = &"prayer_potion"
+use_freeze_ms = 0
 item_name = &"Prayer Potion"
 item_icon = ExtResource("1_tex")
 description = "Ground bone in a bitter green base. Tastes like a church smells. Puts prayer points back."

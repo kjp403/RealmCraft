@@ -173,8 +173,10 @@ func _ready() -> void:
 	# swallows attacks, and the server refuses our actions regardless.
 	Client.subscribe(&"player.stunned", func(payload: Dictionary) -> void:
 		freeze_movement(float(payload.get("ms", 1000)) / 1000.0))
+	# DRINK root (item.consume): plants your feet for the sip, nothing more —
+	# lock_actions false so a heal never eats your abilities mid-fight.
 	Client.subscribe(&"player.rooted", func(payload: Dictionary) -> void:
-		freeze_movement(float(payload.get("ms", 700)) / 1000.0))
+		freeze_movement(float(payload.get("ms", 700)) / 1000.0, false))
 	Client.subscribe(&"player.sear_wound", func(payload: Dictionary) -> void:
 		Announcer.announce(
 			"Searing Wound",
@@ -319,6 +321,10 @@ func _sync_dead_lock() -> void:
 ## the new position; we apply it and freeze input briefly so the player
 ## doesn't immediately walk off the spot.
 var _movement_lock_until_ms: int = 0
+## Set alongside the movement lock by every root that takes your ACTIONS too (a
+## stun, a hammer slam, a boss wind-up, the sparring countdown). A DRINK root
+## leaves this clear — that is what lets abilities keep firing through the sip.
+var _action_lock_until_ms: int = 0
 
 func _on_sparring_match_state(payload: Dictionary) -> void:
 	var pos: Variant = payload.get("position", null)
@@ -326,7 +332,7 @@ func _on_sparring_match_state(payload: Dictionary) -> void:
 		global_position = pos
 		# Match START freezes for the whole countdown (3/2/1 must actually hold you on your spawn
 		# until FIGHT!); match END just settles you on the teleport back (500ms default).
-		_movement_lock_until_ms = Time.get_ticks_msec() + int(payload.get("countdown_ms", 500))
+		freeze_movement(float(payload.get("countdown_ms", 500)) / 1000.0)
 	# Spar-team tinting: remember allies/opponents for the match (cleared on end)
 	# and re-tint everyone in the map so health bars flip immediately.
 	if bool(payload.get("in_match", false)):
@@ -371,7 +377,7 @@ func _on_teleport(payload: Dictionary) -> void:
 	var pos: Variant = payload.get("position", null)
 	if pos is Vector2:
 		global_position = pos
-		_movement_lock_until_ms = Time.get_ticks_msec() + 500
+		freeze_movement(0.5)
 
 
 # --- Channeling (healing aura, future recall) ---
@@ -465,13 +471,20 @@ func _cancel_channel() -> void:
 
 
 ## Locally roots movement for [param seconds] — heavy attacks plant you while
-## you swing (commitment + readability). Reuses the same movement lock, so it
-## also blocks re-attacking for that window; fine because the weapons that use
-## it have long cooldowns. Called client-side from the weapon on the wielder.
-func freeze_movement(seconds: float) -> void:
+## you swing (commitment + readability). Called client-side from the weapon on
+## the wielder.
+##
+## [param lock_actions] says whether the root takes your HANDS along with your
+## feet. A committing swing, a stun or a boss wind-up does (the server refuses
+## those actions anyway). A DRINK does not: sipping is meant to cost you your
+## footing, not your kit, so the consume paths pass false.
+func freeze_movement(seconds: float, lock_actions: bool = true) -> void:
 	if seconds <= 0.0:
 		return
-	_movement_lock_until_ms = maxi(_movement_lock_until_ms, Time.get_ticks_msec() + int(seconds * 1000.0))
+	var until_ms: int = Time.get_ticks_msec() + int(seconds * 1000.0)
+	_movement_lock_until_ms = maxi(_movement_lock_until_ms, until_ms)
+	if lock_actions:
+		_action_lock_until_ms = maxi(_action_lock_until_ms, until_ms)
 
 
 ## True while a primary attack is available — a real weapon, or bare-hands punch.
@@ -663,6 +676,10 @@ func process_input() -> void:
 				return
 		return
 	if rooted:
+		# The feet are planted either way; whether the HANDS are depends on what
+		# rooted us (see freeze_movement). A drink leaves the action lock clear, so
+		# abilities and swings keep firing while you stand there and chug.
+		var actions_locked: bool = Time.get_ticks_msec() < _action_lock_until_ms
 		_click_navigation.cancel()
 		if _harvest_controller != null:
 			_harvest_controller.cancel()
@@ -671,11 +688,15 @@ func process_input() -> void:
 		if _interact_controller != null:
 			_interact_controller.cancel()
 		input_direction = Vector2.ZERO
+		action_input = not actions_locked and controller.is_attack_pressed()
 		if _combat_target_controller != null and _combat_target_controller.tick():
-			action_input = false
+			# A live Attack lock does its own firing — no free-aim hold-fire on top.
+			if not actions_locked:
+				equipment_component.process_input(self)
 			return
 		look_direction = controller.get_look_direction()
-		action_input = false
+		if not actions_locked:
+			_process_actions()
 		return
 
 	var manual_direction: Vector2 = controller.get_move_direction()
@@ -802,6 +823,13 @@ func process_input() -> void:
 			equipment_component.process_input(self)
 			return
 
+	_process_actions()
+
+
+## The ACTION half of [method process_input]: fire the hand item's abilities, then
+## repeat a held free-aim primary. Split out of process_input so a movement-only
+## root (a drink) can run it while the WASD half stays frozen.
+func _process_actions() -> void:
 	equipment_component.process_input(self)
 	# Free-aim hold-fire only when no hostile lock is active — and never while a
 	# gathering tool is equipped (tools only swing via HarvestController).
