@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_outfitting_xp.gd" id="1_verifyoutfitxp"]
+
+[node name="VerifyOutfittingXp" type="Node"]
+script = ExtResource("1_verifyoutfitxp")

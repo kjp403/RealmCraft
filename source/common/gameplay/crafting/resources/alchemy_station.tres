@@ -15,7 +15,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/mana_potion.tres" id="pot_3"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="pot_4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="pot_5"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/focus_tonic.tres" id="pot_6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/defense_tonic.tres" id="pot_6"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="vial_water"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/blightspore.tres" id="herb_blightspore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/weapon_poison.tres" id="pot_poison"]
@@ -53,7 +53,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_1")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_1")])
-required_level = 5
+required_level = 6
 xp_reward = 225
 [sub_resource type="Resource" id="I_2"]
 script = ExtResource("3_ingred")
@@ -63,7 +63,7 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_2")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_2")])
-required_level = 10
+required_level = 14
 xp_reward = 360
 [sub_resource type="Resource" id="I_3"]
 script = ExtResource("3_ingred")
@@ -73,8 +73,8 @@ amount = 2
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_3")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_3")])
-required_level = 20
-xp_reward = 495
+required_level = 24
+xp_reward = 520
 [sub_resource type="Resource" id="I_4"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_bloodcap")
@@ -83,7 +83,7 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_4")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_4")])
-required_level = 30
+required_level = 34
 xp_reward = 720
 [sub_resource type="Resource" id="I_5"]
 script = ExtResource("3_ingred")
@@ -93,8 +93,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_5")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_5")])
-required_level = 40
-xp_reward = 900
+required_level = 50
+xp_reward = 1080
 [sub_resource type="Resource" id="I_6"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_grimshade")
@@ -103,8 +103,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_6")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_6")])
-required_level = 50
-xp_reward = 1080
+required_level = 58
+xp_reward = 1300
 [sub_resource type="Resource" id="I_poison"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_blightspore")
@@ -113,8 +113,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_poison")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_poison")])
-required_level = 35
-xp_reward = 800
+required_level = 70
+xp_reward = 1650
 [sub_resource type="Resource" id="I_salve"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_fairy_dust")
@@ -123,8 +123,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_salve")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_salve")])
-required_level = 45
-xp_reward = 950
+required_level = 76
+xp_reward = 1900
 [sub_resource type="Resource" id="I_ember"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_ember_ash")
@@ -133,8 +133,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_ember")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_ember")])
-required_level = 55
-xp_reward = 1100
+required_level = 82
+xp_reward = 2200
 [sub_resource type="Resource" id="I_poison_plus"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_venom_sac")
@@ -143,8 +143,8 @@ amount = 3
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_poison_plus")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_poison_plus")])
-required_level = 65
-xp_reward = 1400
+required_level = 88
+xp_reward = 2600
 [sub_resource type="Resource" id="I_prayer_herb"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_moonbloom")
@@ -157,8 +157,8 @@ amount = 5
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_prayer")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_prayer_herb"), SubResource("I_prayer_bone")])
-required_level = 38
-xp_reward = 850
+required_level = 42
+xp_reward = 900
 [sub_resource type="Resource" id="I_seep_cap"]
 script = ExtResource("3_ingred")
 item = ExtResource("quest_cap")

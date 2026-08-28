@@ -15,6 +15,10 @@
 [ext_resource type="Resource" uid="uid://c4ab069be0cdf7" path="res://source/common/gameplay/items/consumables/food/cooked_turtle.tres" id="c9"]
 [ext_resource type="Resource" uid="uid://c15b2d57c00622" path="res://source/common/gameplay/items/consumables/food/cooked_parrot_fish.tres" id="c10"]
 [ext_resource type="Resource" uid="uid://c7704cedbdbb03" path="res://source/common/gameplay/items/consumables/food/cooked_anglerfish.tres" id="c11"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_halibut.tres" id="c12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_stingray.tres" id="c13"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_wolffish.tres" id="c14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/food/cooked_blue_lobster.tres" id="c15"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -42,6 +46,6 @@ perks = Array[Dictionary]([{
 "name": "Double Portion",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("1_item")]([ExtResource("c0"), ExtResource("c1"), ExtResource("c2"), ExtResource("c3"), ExtResource("c4"), ExtResource("c5"), ExtResource("c6"), ExtResource("c7"), ExtResource("c8"), ExtResource("c9"), ExtResource("c10"), ExtResource("c11")])
-recipe_levels = Array[int]([1, 5, 5, 10, 10, 20, 20, 25, 30, 30, 40, 50])
+recipe_items = Array[ExtResource("1_item")]([ExtResource("c0"), ExtResource("c1"), ExtResource("c2"), ExtResource("c3"), ExtResource("c4"), ExtResource("c5"), ExtResource("c6"), ExtResource("c7"), ExtResource("c8"), ExtResource("c9"), ExtResource("c10"), ExtResource("c11"), ExtResource("c12"), ExtResource("c13"), ExtResource("c14"), ExtResource("c15")])
+recipe_levels = Array[int]([1, 5, 5, 10, 10, 20, 20, 25, 30, 30, 40, 50, 60, 70, 80, 90])
 describe_lines = Array[String](["Cooking XP +{xp}%", "Material refund: {refund}%", "Extra portion: {extra_item}%"])

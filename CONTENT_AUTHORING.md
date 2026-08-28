@@ -488,10 +488,14 @@ Authored set — all four last **5 minutes**:
 
 | Potion | Kind | Effect per hit | Herblore |
 |---|---|---|---|
-| Weapon Poison | poison | 24 damage over 6s | 35 |
-| Weapon Salve | heal | heals you 3 | 45 |
-| Weapon Ember | burn | 30 damage over 5s | 55 |
-| Weapon Poison ++ | poison | 72 damage over 8s | 65 |
+| Weapon Poison | poison | 24 damage over 6s | 70 |
+| Weapon Salve | heal | heals you 3 | 76 |
+| Weapon Ember | burn | 30 damage over 5s | 82 |
+| Weapon Poison ++ | poison | 72 damage over 8s | 88 |
+
+These are **end-game** brews on purpose. Level 65 arrives fast, so when the
+whole potion list sat at or below it Herblore had nothing left above halfway;
+70/76/82/88 also leaves 89-99 clear for whatever gets brewed next.
 
 Leave a kind empty and the item is not treated as a coating at all (a
 half-filled set is an authoring slip, not a weak coating). While a coating
@@ -506,6 +510,15 @@ refused drink does **not** consume the vial. Coatings share the
 `&"weapon_coating"` cooldown category, deliberately separate from `&"potion"`,
 so coating a weapon can never block an emergency health potion.
 
+That one slot is the **combat draught** slot, and a coating is not the only
+thing that can hold it. A `ConsumableItem` with `exclusive_buff = true` — today
+just the **Defense Tonic** (`+25 armor for 5m`, Herblore 58) — takes the same
+slot through `BuffService`, so a tonic and a coating refuse each other in both
+directions. `ConsumableItem.draught_slot_busy()` is the single arbiter; the bag
+button, the held sip and `item.consume` all ask it, and each side bails before
+the vial is spent. Ordinary buff potions leave `exclusive_buff` false and stack
+as they always did.
+
 The coating is runtime-only state on `PlayerResource.weapon_coating` (like
 `active_buffs`): it survives an instance change within a session and is gone on
 logout. It is **not** persisted, so no save data changes shape.
@@ -519,6 +532,46 @@ Gates:
 ```bash
 godot --headless --path . --mode=client res://tools/verify_weapon_coatings.tscn
 godot --headless --path . --mode=client res://tools/verify_coating_behaviour.tscn
+```
+
+### Crafting XP is priced per unit of material
+
+Smithing set the rule and Outfitting now follows it: **a recipe's `xp_reward` is
+the tier's per-unit rate times the number of ingredient units it consumes.** The
+anvil's rate per bar is the tier's own smelt/arrowhead value (bronze 39, iron 58,
+steel 78, mithril 104, adamant 136, runite 195), so a 5-bar chest pays five
+times what a 1-bar batch of arrowheads does.
+
+The workbench rates, applied across every cloth and hide armour recipe:
+
+| Tier | Recipe level | XP per unit |
+|---|---:|---:|
+| Forest cloth / leather | 1 | 36 |
+| Cave cloth / leather (incl. Studded) | 5 | 54 |
+| Bandit cloth / leather | 10 | 72 |
+| Enchanted / Phantom | 15 | 180 |
+| Ancient / Sirenic | 30 | 200 |
+| Wraithsilk / Runewoven | 45 | 240 |
+| Nightglass / Astral | 50 | 290 |
+
+Every ingredient counts as a unit — ore and gem alongside the cloth, the same way
+the anvil's Dragon-and-up armour prices its ore + gem + cloth. Each rate is the
+material-weighted average of what that band already paid, so a tier's total XP
+throughput is unchanged and only the *distribution* inside it moved: a vest that
+eats five cloth is now worth more than a hood that eats three, which was not
+true before (a Studded Cap used to pay 180 XP per leather against an Apprentice
+Robe's 43, for gear of the same mastery tier).
+
+**Tanning and weaving are not rebased.** `hide -> leather` and `fibre -> cloth`
+are the "smelting" step: one output, one flat per-craft rate, already
+proportionate among themselves. They stay the efficient way to train, exactly as
+smelting does for Smithing.
+
+When you add an armour recipe, read the rate off this table and multiply. Do not
+eyeball an `xp_reward`. The gate re-derives every row from the same table:
+
+```bash
+godot --headless --path . --mode=client res://tools/verify_outfitting_xp.tscn
 ```
 
 ### Ascension gear (mastery 40–90)

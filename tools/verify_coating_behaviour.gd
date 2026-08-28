@@ -17,6 +17,7 @@ var _fail: int = 0
 func _ready() -> void:
 	_test_drinking()
 	_test_one_at_a_time()
+	_test_draught_slot()
 	_test_poison_on_hit()
 	_test_burn_on_hit()
 	_test_heal_on_hit()
@@ -108,6 +109,67 @@ func _test_one_at_a_time() -> void:
 	if health != null:
 		player.stats_component.set_stat(Stat.HEALTH, 1.0)
 		_check(health.can_use(player), "a coating does not block a health potion")
+
+
+## The Defense Tonic shares the coating's one slot, so the two must refuse each
+## other in BOTH directions — and neither refusal may eat a vial.
+func _test_draught_slot() -> void:
+	var player: Player = _make_player()
+	var tonic: ConsumableItem = _potion(&"defense_tonic")
+	var ember: ConsumableItem = _potion(&"weapon_ember")
+	_check(tonic != null, "the Defense Tonic is registered")
+	if tonic == null:
+		return
+	_check(tonic.exclusive_buff, "the Defense Tonic holds the draught slot")
+	_check(tonic.can_use(player), "an empty draught slot takes the tonic")
+
+	var armor_before: float = player.stats_component.get_stat(Stat.ARMOR)
+	_drink(player, tonic)
+	_check(
+		is_equal_approx(
+			player.stats_component.get_stat(Stat.ARMOR), armor_before + tonic.buff_amount
+		),
+		"drinking the tonic raises armor by %.0f" % tonic.buff_amount
+	)
+	_check(BuffService.exclusive_active(player), "the tonic holds the slot")
+	var left: int = BuffService.exclusive_remaining_seconds(player)
+	_check(left > 295 and left <= 300, "the tonic lasts ~5 minutes (got %ds)" % left)
+	_check(_held(player, tonic) == 0, "the vial is consumed")
+
+	# Tonic running -> a coating is refused, and keeps its vial.
+	_check(not ember.can_use(player), "a coating is refused while the tonic runs")
+	Inventory.add_item(player.player_resource.inventory, int(ember.get_meta(&"id", 0)), 1)
+	ember.on_use(player)
+	_check(_held(player, ember) == 1, "a refused coating does NOT consume the vial")
+	_check(not CoatingService.is_active(player), "the refused coating never landed")
+
+	# Coating running -> the tonic is refused, and keeps its vial.
+	var coated: Player = _make_player()
+	_drink(coated, _potion(&"weapon_poison"))
+	_check(not tonic.can_use(coated), "the tonic is refused while a coating runs")
+	Inventory.add_item(coated.player_resource.inventory, int(tonic.get_meta(&"id", 0)), 1)
+	var armor_coated: float = coated.stats_component.get_stat(Stat.ARMOR)
+	tonic.on_use(coated)
+	_check(_held(coated, tonic) == 1, "a refused tonic does NOT consume the vial")
+	_check(
+		is_equal_approx(coated.stats_component.get_stat(Stat.ARMOR), armor_coated),
+		"a refused tonic grants no armor"
+	)
+
+	# An ordinary (non-exclusive) buff is unaffected by the slot.
+	var busy: Player = _make_player()
+	_drink(busy, tonic)
+	BuffService.apply(busy, Stat.MOVE_SPEED, 10.0, 30.0)
+	_check(
+		is_equal_approx(busy.stats_component.get_stat(Stat.MOVE_SPEED), 10.0),
+		"a plain buff still stacks alongside the tonic"
+	)
+
+	# Once it expires the slot frees up again.
+	for buff: Dictionary in player.player_resource.active_buffs:
+		buff["expires_ms"] = Time.get_ticks_msec() - 1
+	_check(not BuffService.exclusive_active(player), "an elapsed tonic releases the slot")
+	_check(ember.can_use(player), "a coating is drinkable once the tonic lapses")
 
 
 func _test_poison_on_hit() -> void:

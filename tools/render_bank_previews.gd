@@ -143,7 +143,7 @@ func _load_fixture() -> void:
 	for slug: StringName in [
 		&"cooked_shrimp", &"cooked_trout", &"cooked_salmon", &"cooked_lobster",
 		&"cooked_tuna", &"health_potion", &"greater_health_potion", &"mana_potion",
-		&"greater_mana_potion", &"focus_tonic",
+		&"greater_mana_potion", &"defense_tonic",
 	]:
 		_stack(vault, slug, randi_range(8, 240))
 	# Quest + misc.

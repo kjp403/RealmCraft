@@ -12,6 +12,12 @@ extends Item
 @export var buff_stat: StringName = &""
 @export var buff_amount: float = 0.0
 @export var buff_duration_s: float = 0.0
+## True when this vial holds the ONE combat-draught slot — the same slot a
+## weapon coating takes. Ember, the poisons and the salve coat your weapon; the
+## Defense Tonic buffs the drinker instead. Both are "the draught you went in
+## with", so both ask [method draught_slot_busy] before they pour and neither
+## stacks on the other. Ordinary tonics leave this false and stack freely.
+@export var exclusive_buff: bool = false
 ## Weapon coating (via CoatingService): while it lasts, every hit the drinker
 ## LANDS does something extra. &"" = this consumable is not a coating. Kept
 ## separate from buff_* because "your hits poison" is not a stat.
@@ -66,6 +72,18 @@ static func stamp_client_cooldown(consumable: ConsumableItem) -> void:
 		return
 	var key: String = "consumable:" + str(consumable.cooldown_category)
 	ClientState.local_player.ability_cooldowns[key] = Time.get_ticks_msec() / 1000.0
+
+
+## Is [param player] already running a combat draught — a weapon coating OR an
+## exclusive tonic? ONE at a time, by design: which draught you carried in is a
+## real decision, and stacking a Defense Tonic on top of an Ember would make it
+## a checklist instead.
+##
+## Server-side truth. On the client [member Player.player_resource] is null, so
+## both services answer false and the sip goes out optimistically — the same
+## thing the coating-only gate did before, with the server as the authority.
+static func draught_slot_busy(player: Player) -> bool:
+	return CoatingService.is_active(player) or BuffService.exclusive_active(player)
 
 
 ## Does this vial coat the drinker's weapon? The fields its kind needs have to
@@ -129,6 +147,12 @@ func stat_lines() -> Array[Dictionary]:
 			"kind": &"poison",
 		})
 		lines.append({"text": _coating_effect_line(), "kind": &"poison"})
+	# One draught at a time (see draught_slot_busy). Saying so on the tooltip is
+	# what keeps the refusal from landing as a surprise at the door of a boss.
+	if is_coating() or exclusive_buff:
+		lines.append({
+			"text": "Does not stack with other combat draughts", "kind": &"charges",
+		})
 	if default_charges > 1:
 		lines.append({"text": "%d charges" % default_charges, "kind": &"charges"})
 	return lines
@@ -147,14 +171,18 @@ func can_use(character: Character) -> bool:
 		var player: Player = character as Player
 		if PrayerService.points(player) < PrayerService.max_points(player):
 			return true
-	# Buff potions always drinkable — re-drinking refreshes the duration.
+	# Buff potions always drinkable — re-drinking refreshes the duration. The
+	# exception is a draught-slot tonic, which refuses while any other draught
+	# is running rather than quietly failing to stack.
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0:
-		return true
-	# A coating is drinkable only on a CLEAN weapon — one at a time, by design
-	# (CoatingService.apply). Refusing here is what makes the bag button, the
-	# hotbar and the held sip all agree with the server.
+		if not exclusive_buff:
+			return true
+		return character is Player and not draught_slot_busy(character as Player)
+	# A coating is drinkable only on a CLEAN weapon and an EMPTY draught slot —
+	# one at a time, by design (CoatingService.apply). Refusing here is what makes
+	# the bag button, the hotbar and the held sip all agree with the server.
 	if is_coating():
-		return character is Player and not CoatingService.is_active(character as Player)
+		return character is Player and not draught_slot_busy(character as Player)
 	return false
 
 
@@ -173,11 +201,20 @@ func on_use(character: Character) -> void:
 	if prayer_amount > 0 and character is Player:
 		PrayerService.restore(character as Player, float(prayer_amount))
 	if buff_stat != &"" and buff_amount != 0.0 and buff_duration_s > 0.0 and character is Player:
-		BuffService.apply(character as Player, buff_stat, buff_amount, buff_duration_s)
+		# A refused tonic must NOT eat the vial, same rule the coating below
+		# follows — bail before the bag removal rather than charging for nothing.
+		if exclusive_buff and draught_slot_busy(character as Player):
+			return
+		BuffService.apply(
+			character as Player, buff_stat, buff_amount, buff_duration_s, exclusive_buff
+		)
 	if is_coating():
 		# A refused coating must NOT eat the vial — bail before the bag removal
-		# below rather than charging the player for nothing.
-		if character is not Player:
+		# below rather than charging the player for nothing. CoatingService only
+		# knows about other COATINGS, so the draught slot is checked here too:
+		# a Defense Tonic holds the same slot and must refuse an Ember as firmly
+		# as another Ember would.
+		if character is not Player or draught_slot_busy(character as Player):
 			return
 		var coated: bool = CoatingService.apply(
 			character as Player,
