@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/audit_click_nav_blind_spots.gd" id="1_audit"]
+
+[node name="ClickNavBlindSpotAudit" type="Node"]
+script = ExtResource("1_audit")

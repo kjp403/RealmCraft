@@ -198,13 +198,18 @@ func _on_player_entered_interaction_area(player: Player, interaction_area: Inter
 			player_entered_warper.emit.call_deferred(player, self, warper)
 	if interaction_area is Teleporter:
 		var teleporter: Teleporter = interaction_area
-		# No target = an unconfigured teleporter, or the landing end of a ONE-WAY pair (leave the
-		# destination teleporter's target empty to make it a plain arrival spot). No-op instead of
-		# crashing on a null deref.
-		if teleporter.target == null:
+		# `accepts` covers both "no target" (an unconfigured teleporter, or the landing end of a
+		# ONE-WAY pair — leave its target empty to make it a plain arrival spot) and "this player
+		# only just LANDED here", which is what used to bounce a party between two pads forever.
+		# See Teleporter's class comment.
+		if not teleporter.accepts(player):
 			return
-		player.mark_just_teleported()
-		var dest: Vector2 = teleporter.target.global_position
+		var destination: Teleporter = teleporter.target
+		player.mark_just_teleported(Teleporter.JUMP_LOCK_MS)
+		destination.mark_arrival(player)
+		# PAST the destination pad, not on top of it — landing inside the trigger is what made
+		# the next entry event throw the player straight back.
+		var dest: Vector2 = destination.arrival_point_from(teleporter)
 		player.state_synchronizer.set_by_path(^":position", dest)
 		# The teleported client OWNS its LocalPlayer position, so a state delta alone won't move it
 		# (it overwrites with its own input next frame). Push the explicit player.teleport that

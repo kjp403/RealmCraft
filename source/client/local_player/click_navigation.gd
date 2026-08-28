@@ -1,12 +1,20 @@
 class_name ClickNavigation
 extends Node
 ## Client-side collision-aware click navigation. A walkability grid is generated
-## from collision layer 2, the same layer the player already collides with.
+## from the same layers the player's own body collides with.
 
 const TRANSITION_FIX_VERSION: String = "2026-08-07-b"
 
 const CELL_SIZE: float = 16.0
-const COLLISION_MASK: int = 2
+## MUST equal character.tscn's collision_mask (world + scenery = 130). It used to be
+## a bare `2` — WORLD only — which left every SCENERY-layer collider invisible to
+## the grid: rocks, ore-vein clutter, stalagmites, trees, crates, fences. The route
+## was planned straight through them and the body (which does collide with layer 8)
+## then ground along the obstacle it had been routed into. That is the "players get
+## stuck on all the objects and ore veins instead of walking around them" report —
+## worst in the caves, whose tileset puts 168 tiles on the scenery layer, but the
+## forest, dungeon and building tilesets carry them too.
+const COLLISION_MASK: int = PhysicsLayers.SOLID_GROUND_MASK
 
 ## Must be >= the body in `character.tscn`, or the grid marks cells walkable that
 ## the player physically cannot enter and the walk ends as a grind along a wall.
