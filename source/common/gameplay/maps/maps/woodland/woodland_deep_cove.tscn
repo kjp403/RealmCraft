@@ -75,6 +75,7 @@ horizontal_alignment = 1
 [node name="BoatToBeach" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
 position = Vector2(376, 212)
 target = NodePath("../../WoodlandBeach/BoatToDeepCove")
+target_path = NodePath("../../WoodlandBeach/BoatToDeepCove")
 
 [node name="CollisionShape2D" parent="BoatToBeach" index="0"]
 shape = SubResource("BoatShape")
