@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cb4eeew5u1da1" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="2_dialogue"]
 [ext_resource type="Script" uid="uid://ddps5vwhnf048" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="3_npc"]
 [ext_resource type="Script" uid="uid://dka1daj2vrhn" path="res://source/common/gameplay/characters/npc/interactions/quest_interaction.gd" id="4_quest"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/tutorial_interaction.gd" id="7_tutorial"]
 [ext_resource type="Script" uid="uid://c5p53get4ikl6" path="res://source/common/gameplay/quests/quest_resource.gd" id="5_questres"]
 [ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_charter_seal.tres" id="6_seal"]
 
@@ -13,15 +14,19 @@ quests = Array[ExtResource("5_questres")]([ExtResource("6_seal")])
 
 [sub_resource type="Resource" id="Dialogue_register"]
 script = ExtResource("2_dialogue")
-lines = Array[String](["Let me see... name entered, Charter seal applied. You are now registered as a Hero of the Realm.", "Your starter allowance contains 25 gold and one health potion. It has been placed in your inventory.", "The allowance is issued once, so spend it carefully. You will earn more gold by completing quests, defeating enemies, gathering resources, and trading."])
+lines = Array[String](["Let me see... name entered, Charter seal applied. You are now registered as a Hero of the Realm.", "Your allowance is in your inventory: one thousand gold, five Health Potions and five Minor Health Potions.", "With them, one of every wooden weapon — sword, hammer, bow, wand and book — and one of every wooden tool: axe, pickaxe, sickle and fishing rod.", "The Charter does not assign you a weapon. It issues all five so the choice is yours and you can change it later. Each one trains its own Mastery, and the tools open the professions.", "The thousand gold is issued once. It is meant to cover your first repairs and supplies, not to make you rich. Quests, kills, gathering and trade earn the rest."])
 label_override = "Complete my registration"
 metadata/_custom_type_script = "uid://cb4eeew5u1da1"
 
-[sub_resource type="Resource" id="Dialogue_menus"]
-script = ExtResource("2_dialogue")
-lines = Array[String](["Use the bag button on your bottom menu bar to open your Inventory. It holds your items, materials, consumables, and gold.", "Use the equipment button to view everything you are wearing. Items normally begin in your inventory before you equip them.", "Use the quest button to view your active and completed quests. An active quest shows its objectives and what you need to do next.", "These menus can be opened and closed with the same buttons, so they will not permanently cover your view."])
-label_override = "Explain my Inventory, Equipment, and Quests"
-metadata/_custom_type_script = "uid://cb4eeew5u1da1"
+[sub_resource type="Resource" id="Tutorial_menus"]
+script = ExtResource("7_tutorial")
+topic = &"menus"
+label_override = "Show me my Inventory, Equipment and Quests"
+
+[sub_resource type="Resource" id="Tutorial_mastery"]
+script = ExtResource("7_tutorial")
+topic = &"mastery"
+label_override = "Explain Weapon Mastery"
 
 [sub_resource type="Resource" id="Dialogue_next"]
 script = ExtResource("2_dialogue")
@@ -34,5 +39,5 @@ script = ExtResource("3_npc")
 npc_name = "Charter Clerk"
 location_hint = "Castle Garden, Intake"
 greeting = "Approach the desk. Every new arrival must be entered into the Charter before leaving the Intake."
-interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_clerk"), SubResource("Dialogue_register"), SubResource("Dialogue_menus"), SubResource("Dialogue_next")])
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuestInteraction_clerk"), SubResource("Dialogue_register"), SubResource("Tutorial_menus"), SubResource("Tutorial_mastery"), SubResource("Dialogue_next")])
 metadata/_custom_type_script = "uid://ddps5vwhnf048"

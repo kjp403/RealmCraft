@@ -266,6 +266,13 @@ func _on_entry(entry: Dictionary) -> void:
 			req_args,
 			String(InstanceClient.current.name)
 		)
+	elif entry.has("tutorial"):
+		# A guided lesson (TutorialInteraction) — the coach takes over the screen,
+		# so the dialogue card gets out of the way first.
+		_close_dialogue()
+		ClientState.tutorial_requested.emit(
+			StringName(str(entry["tutorial"]))
+		)
 	elif entry.has("menu"):
 		_close_dialogue()
 		ClientState.open_menu_requested.emit(

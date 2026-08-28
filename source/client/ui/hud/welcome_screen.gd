@@ -7,7 +7,7 @@ extends Control
 
 const WELCOME_TEXT: String = """This is a hard, sandbox MMORPG. You are free to do whatever you want, and you will find most of your footing on your own. That is by design.
 
-If you want somewhere to start: step out of this cell and talk to the Hall Keeper. They can give you your first quest.
+If you want somewhere to start: talk to the Charter Clerk in this room — the arrow points at him. He registers you, hands over your kit, and explains the interface and Weapon Mastery. The Hall Keeper, in the chamber beyond, has your first quest.
 
 You can reopen this kind of guidance any time from the Help menu. Good luck."""
 

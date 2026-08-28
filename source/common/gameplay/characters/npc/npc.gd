@@ -138,7 +138,12 @@ func _set_interactable_hover(on: bool) -> void:
 
 
 ## Float a "DIALOG" glyph above the head so players know the NPC is talkable.
+## Skipped when this NPC already carries an ObjectiveArrow: that arrow says
+## "this one" far louder, and two glyphs over one head just read as clutter.
 func _spawn_marker() -> void:
+	for child: Node in get_children():
+		if child.is_in_group(&"objective_arrow"):
+			return
 	var marker: InteractableMarker = MARKER_SCENE.instantiate()
 	marker.kind = InteractableMarker.Kind.DIALOG
 	var top_y: float = animated_sprite.position.y - _sprite_size().y * 0.5
@@ -202,6 +207,9 @@ func _open_interactions() -> void:
 	# quest.update if anything changed). A no-quest NPC just no-ops server-side, so
 	# firing for any NPC that has a key is harmless.
 	var key: StringName = giver_key()
+	if not key.is_empty():
+		# World markers (the intake arrow) drop themselves off this.
+		ClientState.npc_talked.emit(key)
 	if not key.is_empty() and InstanceClient.current != null:
 		Client.request_data(&"npc.interact", func(_r: Dictionary) -> void: pass, {"npc": String(key)}, InstanceClient.current.name)
 	var entries: Array = []

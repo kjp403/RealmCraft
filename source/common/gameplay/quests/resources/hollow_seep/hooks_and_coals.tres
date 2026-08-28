@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_objective.gd" id="1_obj"]
+[ext_resource type="Script" path="res://source/common/gameplay/quests/quest_resource.gd" id="2_quest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/quests/resources/hollow_seep/the_charter_seal.tres" id="3_prereq"]
+[ext_resource type="Resource" uid="uid://cb400a04d53868" path="res://source/common/gameplay/items/consumables/food/cooked_shrimp.tres" id="4_cooked_shrimp"]
+
+[sub_resource type="Resource" id="Obj_cook_shrimp"]
+script = ExtResource("1_obj")
+type = 2
+item = ExtResource("4_cooked_shrimp")
+required_amount = 5
+location_hint = "Woodland shore, at the cooking fire"
+
+[resource]
+script = ExtResource("2_quest")
+quest_name = "Hooks and Coals"
+description = "Potions run out and nobody sells them cheaply. Food does not run out, because you make it. Your kit already holds a Fishing Rod: take it to the woodland shore, work a shrimp hole until you have raw shrimp, then cook them on the fire by the pier. Five Cooked Shrimp and you never need to buy healing again."
+objectives = Array[ExtResource("1_obj")]([SubResource("Obj_cook_shrimp")])
+auto_complete = true
+requires_quests = Array[ExtResource("2_quest")]([ExtResource("3_prereq")])
+unlock_message = "[Hall Keeper] Your potions are finite. Your fishing rod is not. Woodland shore, shrimp hole, cooking fire — five cooked shrimp and you have a healing supply you own."
+reward_xp = 60
+reward_gold = 300
+metadata/slug = &"hooks_and_coals"
+metadata/id = 72

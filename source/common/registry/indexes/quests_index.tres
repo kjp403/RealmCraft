@@ -6,7 +6,7 @@
 script = ExtResource("1_7gygy")
 content_name = &"quests"
 version = 1786769155
-next_id = 72
+next_id = 73
 entries = Array[Dictionary]([{
 &"hash": "c586a19d41bbd6cbe4a7ce24be21ee720f3b333458d97e5cad0b630d1693e05c",
 &"id": 33,
@@ -237,6 +237,11 @@ entries = Array[Dictionary]([{
 &"id": 71,
 &"path": "res://source/common/gameplay/quests/resources/hollow_seep/where_i_lost_it.tres",
 &"slug": &"where_i_lost_it"
+}, {
+&"hash": "36f7457a823985965128d8e6f70ccbd64ab92e583c57cb2d26000a8a2a22f2a9",
+&"id": 72,
+&"path": "res://source/common/gameplay/quests/resources/hollow_seep/hooks_and_coals.tres",
+&"slug": &"hooks_and_coals"
 }])
 scan_path = "res://source/common/gameplay/quests/resources"
 filters = PackedStringArray("*.tres", "*.tscn")
