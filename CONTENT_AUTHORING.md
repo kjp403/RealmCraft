@@ -539,6 +539,19 @@ Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / 
 - Anvil crafts metal armor + all five weapon types; workbench crafts leather + cloth sets.
 - Ascension materials shop (`shops/resources/ascension_shop.tres`) sells **materials only** — finished Ascension gear is never gold-buyable.
 - Slayer Shop (`shops/resources/slayer_shop.tres`, NPC `ascension_broker_vael.tres` → Slayer Quartermaster Vael) sells entry-ring gems for **Slayer Points only** (not gold): Low/Med/High/Pristine = **5 / 10 / 20 / 40** pts. Also stocks Wood Gold Small (15 pts) and Wood Gold Medium (30 pts). Crafted Slayer rings are mid-game deterministic gear — keep them **strictly below** Ornate jewelry (level-50 exclusive pool).
+- Drop material band (pre-Ascension): a zone drops the craft set matching **its crafting level**, not the set whose name matches its flavour. `Forest` hide/cloth is crafting **1** — Woodland wolf loot — so a post-sewers zone dropping it is a bug, not theming. The ladder in `crafting/resources/workbench.tres`:
+
+  | Crafting | Leather line | Cloth line | Dropped by |
+  |---------:|--------------|------------|------------|
+  | 1 | `hide_forest` → `leather_forest` | `cloth_forest` | Woodland: wolves, badgers, rats, goblins |
+  | 5 | `hide_cave` → `leather_cave` | `cloth_cave` | Fungus + mining caves |
+  | 10 | `hide_bandit` → `leather_bandit` | `cloth_bandit` | Bandit Hideout |
+  | 15 | `hide_sewer` → `leather_sewer` | `cloth_sewer` | Sewers trash |
+  | 15 | `phantom_ore` / `_gem` / `_cloth` | `enchanted_ore` / `_gem` / `_cloth` | Fungal Heart, **DimWood** |
+  | 30 | `sirenic_leather` / `_gem` / `_cloth` | — | Cistern Sovereign (combat 200), Ornate Gold chests |
+
+  The `{set}_ore/_gem/_cloth` rows are zone-neutral by name, which is what makes them safe to hang on a second zone. Check `metadata/id` against `registry/indexes/items_index.tres` if a name is ambiguous, and keep crafting-30 sets on genuine late bosses — Orc Leader is combat 70, the Cistern Sovereign is 200.
+
 - Zone-wide kill loot: set `zone_kill_loot` on the biome `InstanceResource` (`biomes/woodland.tres`, `biomes/woodland_east.tres`). Every hostile kill in that instance rolls those drops — new NPCs inherit them automatically. Wood Silver Small ≈1.5% in Goblin Woodland; Wood Silver Medium ≈2% in Woodlands East. Do **not** put shared enemy-type loot for zone rares (types are reused across maps).
 - Zone difficulty: set `enemy_health_mult` on the biome `InstanceResource` to scale the max HP of every non-boss hostile in that instance (Bandit Hideout = `0.5`). Use this instead of editing an `EnemyTypeResource` whenever the archetype is shared with another map — the bandit sorcerer/captain also live in the Forest and keep full HP there. `is_boss` mobs ignore it, and mob XP follows the scaled HP, so a softened zone can't become an XP-per-kill outlier.
 - Dungeon clear rewards: set `ornate_chest_count` on `DungeonReward` for guaranteed T3 Ornate Gold Chests (item 249). Normal = 1, Hard = 2. Still gated by the 3 daily charges.
