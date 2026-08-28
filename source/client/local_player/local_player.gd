@@ -216,7 +216,8 @@ func _ready() -> void:
 	Client.subscribe(&"boss_hunt.entered", func(payload: Dictionary) -> void:
 		Announcer.announce(
 			str(payload.get("boss", "The hunt")),
-			"%d minutes. It respawns until the clock runs out." % int(payload.get("minutes", 30)),
+			"%d minutes, %d shared lives. It respawns until the clock runs out."
+				% [int(payload.get("minutes", 30)), int(payload.get("lives", 3))],
 			{"delay": 0.6}))
 	Client.subscribe(&"quest_boss.entered", func(payload: Dictionary) -> void:
 		Announcer.announce(
@@ -238,6 +239,15 @@ func _ready() -> void:
 			"Contract complete",
 			"%d × %s. Loot is in your Hunt Chest." % [kills, str(payload.get("boss", "boss"))],
 			{}))
+	# Contract FAILED — the party spent all three shared lives. Same shape as the
+	# complete banner: what you keep is already in your Hunt Chest, what you lost
+	# is the rest of the clock and the fee.
+	Client.subscribe(&"boss_hunt.failed", func(payload: Dictionary) -> void:
+		Announcer.announce(
+			"Contract failed",
+			"The party is out of lives. %d × %s banked to your Hunt Chest."
+				% [int(payload.get("kills", 0)), str(payload.get("boss", "boss"))],
+			{"color": PVP_TOAST_COLOR}))
 	# Countdown warnings (10 / 5 / 1 minutes left) and the early-leave notice.
 	Client.subscribe(&"boss_hunt.warn", func(payload: Dictionary) -> void:
 		Toaster.toast(str(payload.get("message", ""))))

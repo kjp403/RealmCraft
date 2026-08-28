@@ -8,17 +8,21 @@ class_name BossHuntService
 ##
 ## Structurally this is DungeonService's sibling: same lobby-at-a-station shape,
 ## same private-instance lifecycle (prepare_instance -> player_switch_instance ->
-## unload_unused_instances reclaims it), same recall-to-hub eject. What differs
-## is that there is no clear condition — the contract ENDS on a timer — and the
-## arena keeps respawning its boss until it does.
+## unload_unused_instances reclaims it), same recall-to-hub eject, and the same
+## shared-lives idea as a HARD run. What differs is that there is no clear
+## condition — the arena keeps respawning its boss — so a contract ends only two
+## ways: the clock runs out (_end_hunt, the party keeps everything) or the party
+## burns all [constant CONTRACT_LIVES] lives (_fail_hunt). The pool is a flat 3
+## rather than DungeonService's per-member sizing; see the constant.
 ##
 ## Server-authoritative; common-side state with direct WorldServer access, like
 ## DungeonService and SparringService.
 
 ## Instance_name of the arena InstanceResource every hunt is run in.
 const ARENA_INSTANCE: StringName = &"boss_hunt_arena"
-## Contract length. The whole session is paid for up front, so this is the ONLY
-## thing that ends a hunt (short of everyone walking out).
+## Contract length. The whole session is paid for up front, so short of everyone
+## walking out this and [constant CONTRACT_LIVES] are the only things that end a
+## hunt.
 const HUNT_DURATION_S: float = 1800.0
 ## Max party per contract, matching a dungeon run.
 const PARTY_SIZE: int = 4
@@ -26,8 +30,17 @@ const PARTY_SIZE: int = 4
 const QUEUE_RANGE: float = 120.0
 ## Seconds the "contract complete" banner shows before the party is sent home.
 const EJECT_DELAY_S: float = 8.0
+## Seconds the "contract failed" banner shows before the party is sent home.
+## Shorter than EJECT_DELAY_S: there is nothing to read but the bad news.
+const FAIL_EJECT_DELAY_S: float = 6.0
 ## Remaining-time marks (seconds) that get a chat warning.
 const WARN_AT_S: Array[int] = [600, 300, 60]
+## Lives shared by the WHOLE party for the whole contract. Deliberately a flat
+## number and not one-per-member the way DungeonService.SOLO_REVIVES scales: a
+## contract buys three deaths whether one hunter or four walk through the door,
+## so bringing friends buys you damage, not durability. Each death spends one;
+## the death that spends the LAST one fails the contract on the spot.
+const CONTRACT_LIVES: int = 3
 
 # group_id -> the private arena ServerInstance running for that party.
 static var _hunts: Dictionary[int, Node] = {}
@@ -39,6 +52,8 @@ static var _end_at_ms: Dictionary[int, int] = {}
 static var _targets: Dictionary[int, BossHuntTarget] = {}
 # group_id -> bosses killed so far (for the wrap-up).
 static var _kills: Dictionary[int, int] = {}
+# group_id -> CONTRACT_LIVES left on the contract, shared by the whole party.
+static var _lives: Dictionary[int, int] = {}
 # group_ids being auto-ejected at expiry, so on_player_left can tell that from a
 # voluntary walk-out (which gets its own toast).
 static var _ejecting: Dictionary[int, bool] = {}
@@ -200,6 +215,7 @@ static func start_hunt(peers: Array, target: BossHuntTarget, payer: int) -> bool
 	var group_id: int = GroupService.create_group(members, payer if members.has(payer) else members[0])
 	_targets[group_id] = target
 	_kills[group_id] = 0
+	_lives[group_id] = CONTRACT_LIVES
 	_end_at_ms[group_id] = Time.get_ticks_msec() + int(HUNT_DURATION_S * 1000.0)
 
 	var instance_manager: Node = WorldServer.curr.instance_manager
@@ -240,6 +256,7 @@ static func _enter_hunt(group_id: int, members: Array) -> void:
 				WorldServer.curr.data_push.rpc_id(peer, &"boss_hunt.entered", {
 					"boss": target.title() if target != null else "the boss",
 					"minutes": int(HUNT_DURATION_S / 60.0),
+					"lives": CONTRACT_LIVES,
 				})
 			_push_hud(group_id),
 		CONNECT_ONE_SHOT
@@ -279,20 +296,58 @@ static func _end_hunt(group_id: int) -> void:
 		func() -> void: _eject_hunt(group_id), CONNECT_ONE_SHOT)
 
 
-## Recall every remaining member to the hub. on_player_left dissolves the group
-## as they go, and the empty arena is reclaimed by unload_unused_instances.
+## Everyone a teardown has to move out: the group roster UNION the bodies actually
+## standing in the arena. Two sources on purpose — a peer whose GroupService seat
+## desynced from the room is in exactly one of them, and must not be missed by
+## either ending. Pure and static so the gate can exercise it for every party size.
+static func eject_roster(group_id: int, instance: Node) -> Array[int]:
+	var peers: Array[int] = []
+	for peer: Variant in GroupService.members_of(group_id):
+		if int(peer) > 0 and not peers.has(int(peer)):
+			peers.append(int(peer))
+	var in_room: Variant = instance.get(&"players_by_peer_id") if instance != null else null
+	if in_room is Dictionary:
+		for peer: Variant in (in_room as Dictionary).keys():
+			if int(peer) > 0 and not peers.has(int(peer)):
+				peers.append(int(peer))
+	return peers
+
+
+## Send everyone home to the Guild Hall and VOID the contract. Both endings land
+## here — the clock running out (_end_hunt) and the lives running out (_fail_hunt)
+## — so "nobody is left in the arena and the contract is gone" is guaranteed in
+## one place, for a solo hunter and a four-stack alike. The empty instance is
+## then reclaimed by unload_unused_instances.
 static func _eject_hunt(group_id: int) -> void:
 	if WorldServer.curr == null:
 		return
-	_ejecting[group_id] = true
-	var instance_manager: Node = WorldServer.curr.instance_manager
 	var instance: Node = _hunts.get(group_id, null)
-	for peer: int in GroupService.members_of(group_id).duplicate():
+	# Only flag a contract that still exists: a solo hunter's own recall can have
+	# dissolved the group (and run _forget) before this timer fires, and writing
+	# the flag back would resurrect a key nothing ever erases again.
+	if instance != null:
+		_ejecting[group_id] = true
+	var instance_key: String = str(instance.name) if instance != null else ""
+	var instance_manager: Node = WorldServer.curr.instance_manager
+	for peer: int in eject_roster(group_id, instance):
 		if instance != null:
 			var player: Player = instance.get_player(peer) as Player
 			if player != null:
-				player.restore_full()
+				# revive(), not restore_full(): a recall does not clear the dead
+				# flag, so topping HP alone can land a corpse in the Guild Hall.
+				player.revive()
 		instance_manager.recall_player(peer)
+
+	# Force the teardown instead of trusting every recall to come back through
+	# on_player_left. InstanceManager.recall_player silently no-ops for a peer it
+	# cannot place, and one such peer would leave the roster non-empty forever:
+	# the contract would never be forgotten, the arena instance would never be
+	# reclaimed, and — because both lobbies reject anyone whose group_of() is
+	# non-zero — that character could not start another contract OR dungeon for
+	# the rest of the session. Both are idempotent against the recalls that DID
+	# fire and already ran this.
+	GroupService.dissolve(group_id)
+	_forget(group_id, instance_key)
 
 
 ## A player left a hunt arena (exit door, recall, or the expiry eject). Drop them
@@ -349,6 +404,7 @@ static func _forget(group_id: int, instance_key: String) -> void:
 	_end_at_ms.erase(group_id)
 	_targets.erase(group_id)
 	_kills.erase(group_id)
+	_lives.erase(group_id)
 	_ejecting.erase(group_id)
 
 
@@ -358,6 +414,80 @@ static func _forget(group_id: int, instance_key: String) -> void:
 ## keep a death inside the paid arena instead of recalling to the hub.
 static func is_hunt_instance(instance: Node) -> bool:
 	return instance != null and _instance_to_group.has(str(instance.name))
+
+
+## True while [param player] is on a contract that still has a life to spend.
+## The read-only twin of [method register_hunt_death], for the paths that need to
+## know where a death lands WITHOUT charging one — Player.maybe_unstick_death
+## stands up a body whose respawn coroutine never finished, and must not bill the
+## party a second time for the same death.
+static func has_life_left(player: Node) -> bool:
+	if player == null or player.player_resource == null:
+		return false
+	var group_id: int = GroupService.group_of(int(player.player_resource.current_peer_id))
+	if group_id == 0 or not _hunts.has(group_id) or _ejecting.get(group_id, false):
+		return false
+	return _lives.get(group_id, 0) > 0
+
+
+## A player died on a contract. Spends one of the party's CONTRACT_LIVES; the
+## death that spends the LAST one fails the contract for everyone (three lives
+## means three deaths, not three plus a free one).
+##
+## Returns true when the death STAYS in the arena — the caller (Player.die) then
+## skips its Guild Hall recall, so the hunter respawns on the entrance pad with
+## the clock still running and the party still together. False for a death this
+## service does not own, and false for the one that ends the contract: that
+## hunter goes home like everyone else, just via _fail_hunt's eject. Server-only.
+static func register_hunt_death(player: Node) -> bool:
+	if player == null or player.player_resource == null:
+		return false
+	var group_id: int = GroupService.group_of(int(player.player_resource.current_peer_id))
+	if group_id == 0 or not _hunts.has(group_id):
+		return false # not on a contract — ordinary open-world death
+	if _ejecting.get(group_id, false):
+		return false # already failing / wrapping up; a second death changes nothing
+	var left: int = maxi(0, _lives.get(group_id, 0) - 1)
+	_lives[group_id] = left
+	if left <= 0:
+		_fail_hunt(group_id)
+		return false
+	_toast(group_id, "A hunter has fallen. %d %s left on the contract."
+		% [left, "life" if left == 1 else "lives"])
+	_push_hud(group_id)
+	return true
+
+
+## The contract's lives are spent: it FAILS. Stop the farm loop, stand up anyone
+## still at 0 HP so they arrive home alive rather than as a corpse, then eject.
+## Whatever already banked into each Hunt Chest is theirs — what is lost is the
+## rest of the clock and the fee. Server-only.
+static func _fail_hunt(group_id: int) -> void:
+	if not _hunts.has(group_id) or WorldServer.curr == null:
+		return
+	if _ejecting.get(group_id, false):
+		return
+	_ejecting[group_id] = true # marks the eject non-voluntary (no "Left the hunt" toast)
+	var instance: Node = _hunts[group_id]
+	var arena_node: BossHuntArena = _arena_node(instance)
+	if arena_node != null:
+		arena_node.stop()
+	var target: BossHuntTarget = _targets.get(group_id, null)
+	var kills: int = _kills.get(group_id, 0)
+	for peer: int in GroupService.members_of(group_id):
+		# Always stand up a downed body: Player.die is mid-await here, and a
+		# second death while ejecting would otherwise leave a corpse in the arena.
+		var member: Player = instance.get_player(peer) as Player if instance != null else null
+		if member != null and member.stats_component.get_stat(Stat.HEALTH) <= 0.0:
+			member.revive()
+		WorldServer.curr.data_push.rpc_id(peer, &"boss_hunt.failed", {
+			"boss": target.title() if target != null else "the boss",
+			"kills": kills,
+			"eject_in": int(FAIL_EJECT_DELAY_S),
+		})
+	_hide_hud(group_id) # stop the countdown immediately, ahead of the eject
+	WorldServer.curr.get_tree().create_timer(FAIL_EJECT_DELAY_S).timeout.connect(
+		func() -> void: _eject_hunt(group_id), CONNECT_ONE_SHOT)
 
 
 ## The arena announced a fresh boss — refresh the party's HUD so the boss name
@@ -389,6 +519,7 @@ static func _push_hud(group_id: int) -> void:
 		"remaining_s": _remaining_s(group_id),
 		"boss": target.title() if target != null else "",
 		"kills": _kills.get(group_id, 0),
+		"lives": _lives.get(group_id, CONTRACT_LIVES),
 	}
 	for peer: int in GroupService.members_of(group_id):
 		WorldServer.curr.data_push.rpc_id(peer, &"boss_hunt.hud", payload)
@@ -402,14 +533,20 @@ static func _hide_hud(group_id: int) -> void:
 
 
 static func _warn(group_id: int, remaining: int) -> void:
-	if not _hunts.has(group_id) or WorldServer.curr == null:
-		return
 	var text: String = "%d seconds left on the contract." % remaining
 	if remaining >= 60:
 		var minutes: int = int(remaining / 60.0)
 		text = "%d minute%s left on the contract." % [minutes, "" if minutes == 1 else "s"]
+	_toast(group_id, text)
+
+
+## One toast line to every member still on the contract — the countdown marks
+## and the life-lost notice both ride this.
+static func _toast(group_id: int, message: String) -> void:
+	if not _hunts.has(group_id) or WorldServer.curr == null:
+		return
 	for peer: int in GroupService.members_of(group_id):
-		WorldServer.curr.data_push.rpc_id(peer, &"boss_hunt.warn", {"message": text})
+		WorldServer.curr.data_push.rpc_id(peer, &"boss_hunt.warn", {"message": message})
 
 
 static func _remaining_s(group_id: int) -> float:

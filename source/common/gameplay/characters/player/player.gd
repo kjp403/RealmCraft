@@ -155,6 +155,12 @@ func die(killer: Character) -> void:
 	# standing on the corpse until eject (or forever if eject missed).
 	DungeonService.register_dungeon_death(self)
 
+	# Boss Hunt: a death spends one of the contract's three shared lives and the
+	# hunter respawns on the arena's entrance pad, clock still running. The death
+	# that spends the LAST life fails the contract — BossHuntService then revives
+	# and ejects the whole party, so that one goes home like any other death.
+	var hunt_respawn: bool = BossHuntService.register_hunt_death(self)
+
 	# Default: Guild Hall (Hall Keeper). Sparring keeps the duel-master pad.
 	var spawn_position: Vector2 = Vector2.ZERO
 	var map: Map = get_parent() as Map
@@ -173,9 +179,10 @@ func die(killer: Character) -> void:
 		SparringService.on_player_died_in_match(self, killer)
 
 	# Open-world / dungeon / boss deaths: always eject to Guild Hall (Hall Keeper),
-	# not the local map pad. Sparring stays in-arena; Boss Hunt does not — a hunt
-	# death ends the contract and sends you home (matches _should_return_home()).
-	var return_home: bool = not sparring_death
+	# not the local map pad. Sparring stays in-arena, and so does a Boss Hunt death
+	# that still has a life to spend — a recall would drop that hunter out of the
+	# party and end their contract early (matches _should_return_home()).
+	var return_home: bool = not sparring_death and not hunt_respawn
 
 	var peer_id: int = _death_peer_id()
 	if peer_id > 0 and WorldServer.curr != null:
@@ -245,11 +252,14 @@ func _death_peer_id() -> int:
 	return 0
 
 
-## Death sends you home (Guild Hall) everywhere except an active match — a Boss
-## Hunt death used to be excluded here, which is what respawned players inside the
-## arena with the boss still up.
+## Death sends you home (Guild Hall) everywhere except an active match, or a Boss
+## Hunt contract that still has one of its three shared lives left. This is the
+## unstick path, so it asks BossHuntService read-only: die() already charged the
+## life for this death, and the party must not be billed twice for it.
 func _should_return_home() -> bool:
 	if player_resource != null and player_resource.in_match:
+		return false
+	if BossHuntService.has_life_left(self):
 		return false
 	return true
 

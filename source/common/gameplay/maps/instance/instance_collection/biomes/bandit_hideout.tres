@@ -1,6 +1,15 @@
 [gd_resource type="Resource" script_class="InstanceResource" format=3]
 
 [ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dyw7fn4hr7rbh" path="res://source/common/gameplay/combat/loot_drop.gd" id="fish_loot"]
+[ext_resource type="Resource" uid="uid://c15b2d57c00622" path="res://source/common/gameplay/items/consumables/food/cooked_parrot_fish.tres" id="fish_cooked_parrot_fish"]
+
+[sub_resource type="Resource" id="ZoneDrop_cooked_parrot_fish"]
+script = ExtResource("fish_loot")
+item = ExtResource("fish_cooked_parrot_fish")
+min_amount = 1
+max_amount = 2
+chance = 0.1
 
 [resource]
 script = ExtResource("1_script")
@@ -12,4 +21,5 @@ level_max = 18
 show_discovery = true
 required_wardstone = &"fungus_cave"
 enemy_health_mult = 0.5
+zone_kill_loot = Array[ExtResource("fish_loot")]([SubResource("ZoneDrop_cooked_parrot_fish")])
 metadata/_custom_type_script = "uid://deqjrbn7hm53u"
