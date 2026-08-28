@@ -8,13 +8,20 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="loot_bone"]
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/trpg_snow_yeti.tres" id="5_m3aut"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" uid="uid://a0d9d687a07d4" path="res://source/common/gameplay/items/materials/metals/phantom_ore.tres" id="dw_phantom_ore"]
+[ext_resource type="Resource" uid="uid://1353f39cac7b4" path="res://source/common/gameplay/items/materials/gems/phantom_gem.tres" id="dw_phantom_gem"]
+[ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="dw_enchanted_gem"]
+[ext_resource type="Resource" uid="uid://ddjaybrt21lpq" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="dw_iron_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/frostpetal.tres" id="dw_frostpetal"]
+[ext_resource type="Resource" uid="uid://onx5sxsctc6a" path="res://source/common/gameplay/items/consumables/health_potion.tres" id="dw_health_potion"]
+[ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="dw_chest_medium"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_xjeyw")
 item = ExtResource("loot_gold")
-min_amount = 2
-max_amount = 6
-chance = 0.85
+min_amount = 90
+max_amount = 180
+chance = 1.0
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_xjeyw")
@@ -29,6 +36,62 @@ item = ExtResource("loot_big_bones")
 min_amount = 1
 max_amount = 1
 chance = 0.35
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_ore"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_phantom_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.24
+
+
+[sub_resource type="Resource" id="Drop_dw_phantom_gem"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_phantom_gem")
+min_amount = 1
+max_amount = 2
+chance = 0.16
+
+
+[sub_resource type="Resource" id="Drop_dw_enchanted_gem"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_enchanted_gem")
+min_amount = 1
+max_amount = 1
+chance = 0.14
+
+
+[sub_resource type="Resource" id="Drop_dw_iron_ore"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_iron_ore")
+min_amount = 1
+max_amount = 3
+chance = 0.32
+
+
+[sub_resource type="Resource" id="Drop_dw_frostpetal"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_frostpetal")
+min_amount = 1
+max_amount = 2
+chance = 0.24
+
+
+[sub_resource type="Resource" id="Drop_dw_health_potion"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_health_potion")
+min_amount = 1
+max_amount = 1
+chance = 0.1
+
+
+[sub_resource type="Resource" id="Drop_dw_chest_medium"]
+script = ExtResource("3_xjeyw")
+item = ExtResource("dw_chest_medium")
+min_amount = 1
+max_amount = 1
+chance = 0.018
 
 [resource]
 script = ExtResource("4_hvuee")
@@ -58,7 +121,7 @@ wander_pause_max_s = 4.0
 xp_reward = 80
 respawn_delay = 12.0
 respawns = true
-loot = Array[ExtResource("3_xjeyw")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("3_xjeyw")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_dw_phantom_ore"), SubResource("Drop_dw_phantom_gem"), SubResource("Drop_dw_enchanted_gem"), SubResource("Drop_dw_iron_ore"), SubResource("Drop_dw_frostpetal"), SubResource("Drop_dw_health_potion"), SubResource("Drop_dw_chest_medium")])
 enrage_health_fraction = 0.5
 slam_radius = 110.0
 slam_windup_s = 1.1

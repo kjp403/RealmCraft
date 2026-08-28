@@ -9,6 +9,8 @@
 [ext_resource type="Resource" uid="uid://bme5xgselkbng" path="res://source/common/gameplay/items/materials/bone.tres" id="l1_bone"]
 [ext_resource type="Resource" uid="uid://2aygya3q5pvo" path="res://source/common/gameplay/items/materials/leather/hide_forest.tres" id="l2_hide_forest"]
 [ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="l3_potion"]
+[ext_resource type="Resource" uid="uid://coaklogmat001" path="res://source/common/gameplay/items/materials/wood/oak_log.tres" id="dw_oak_log"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="dw_big_bones"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_drop")
@@ -32,6 +34,22 @@ chance = 0.4
 script = ExtResource("3_drop")
 item = ExtResource("l3_potion")
 chance = 0.08
+
+
+[sub_resource type="Resource" id="Drop_dw_oak_log"]
+script = ExtResource("3_drop")
+item = ExtResource("dw_oak_log")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+
+
+[sub_resource type="Resource" id="Drop_dw_big_bones"]
+script = ExtResource("3_drop")
+item = ExtResource("dw_big_bones")
+min_amount = 1
+max_amount = 1
+chance = 0.15
 
 [resource]
 script = ExtResource("4_type")
@@ -61,5 +79,5 @@ respawn_delay = 12.0
 respawns = true
 behaviors = Array[ExtResource("2_behavior")]([])
 attacks = Array[ExtResource("1_attack")]([])
-loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_hide_forest"), SubResource("Drop_potion")])
+loot = Array[ExtResource("3_drop")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_hide_forest"), SubResource("Drop_potion"), SubResource("Drop_dw_oak_log"), SubResource("Drop_dw_big_bones")])
 metadata/slug = &"orc_whelp"
