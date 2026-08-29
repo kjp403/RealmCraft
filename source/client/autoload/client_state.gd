@@ -633,12 +633,17 @@ func _apply_node_visual_state(data: Dictionary) -> void:
 	var node: Node = InstanceClient.current.get_node_or_null(path)
 	if node == null or not (node is MineableNode):
 		return
-	(node as MineableNode).apply_visual_state(
+	var mineable: MineableNode = node as MineableNode
+	mineable.apply_visual_state(
 		int(data.get("progress_hp", 0)),
 		int(data.get("extraction_hp", 1)),
 		int(data.get("charges_left", 0)),
 		int(data.get("max_charges", 1)),
 	)
+	# Only a swing that actually connected earns a burst — a cooldown / wrong-tool
+	# reply would otherwise spray particles at a player who did nothing.
+	if data.get("ok", false):
+		mineable.play_chop_effect()
 
 
 ## "bandit_captain" → "a Bandit Captain". Article ("a"/"an") chosen by

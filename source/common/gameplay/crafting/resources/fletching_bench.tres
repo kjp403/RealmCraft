@@ -8,6 +8,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="12_willow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="13_maple"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="14_yew"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/wispwood_log.tres" id="15_wisp"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/nebula_palm_log.tres" id="16_nebula"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/glimmer_birch_log.tres" id="17_birch"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/rosewood_log.tres" id="18_rose"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/wispwood_bow_u.tres" id="50_wisp_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/nebula_palm_bow_u.tres" id="51_nebula_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/glimmer_birch_bow_u.tres" id="52_birch_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/rosewood_bow_u.tres" id="53_rose_bow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/headless_arrow.tres" id="20_headless"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/bronze_arrowheads.tres" id="30_br_head"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_arrowheads.tres" id="31_fe_head"]
@@ -195,9 +203,113 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ru_shafts"), SubRes
 required_level = 75
 xp_reward = 438
 
+[sub_resource type="Resource" id="I_shaft_wisp"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_wisp")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_wisp"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 60
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_wisp")])
+required_level = 65
+xp_reward = 216
+
+[sub_resource type="Resource" id="I_shaft_nebula"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_nebula")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_nebula"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 70
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_nebula")])
+required_level = 72
+xp_reward = 252
+
+[sub_resource type="Resource" id="I_shaft_birch"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_birch")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_birch"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 80
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_birch")])
+required_level = 80
+xp_reward = 288
+
+[sub_resource type="Resource" id="I_shaft_rose"]
+script = ExtResource("3_ingred")
+item = ExtResource("18_rose")
+amount = 1
+
+[sub_resource type="Resource" id="R_shaft_rose"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("20_headless")
+output_amount = 90
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_shaft_rose")])
+required_level = 85
+xp_reward = 324
+
+[sub_resource type="Resource" id="I_bow_wisp"]
+script = ExtResource("3_ingred")
+item = ExtResource("15_wisp")
+amount = 1
+
+[sub_resource type="Resource" id="R_bow_wisp"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("50_wisp_bow")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_bow_wisp")])
+required_level = 65
+xp_reward = 300
+
+[sub_resource type="Resource" id="I_bow_nebula"]
+script = ExtResource("3_ingred")
+item = ExtResource("16_nebula")
+amount = 1
+
+[sub_resource type="Resource" id="R_bow_nebula"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("51_nebula_bow")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_bow_nebula")])
+required_level = 72
+xp_reward = 420
+
+[sub_resource type="Resource" id="I_bow_birch"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_birch")
+amount = 1
+
+[sub_resource type="Resource" id="R_bow_birch"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("52_birch_bow")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_bow_birch")])
+required_level = 80
+xp_reward = 560
+
+[sub_resource type="Resource" id="I_bow_rose"]
+script = ExtResource("3_ingred")
+item = ExtResource("18_rose")
+amount = 1
+
+[sub_resource type="Resource" id="R_bow_rose"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("53_rose_bow")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_bow_rose")])
+required_level = 85
+xp_reward = 720
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Fletching Bench"
 profession = &"fletching"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_shaft_logs"), SubResource("R_shaft_oak"), SubResource("R_shaft_willow"), SubResource("R_shaft_maple"), SubResource("R_shaft_yew"), SubResource("R_br_arrow"), SubResource("R_fe_arrow"), SubResource("R_st_arrow"), SubResource("R_mi_arrow"), SubResource("R_ad_arrow"), SubResource("R_ru_arrow")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_shaft_logs"), SubResource("R_shaft_oak"), SubResource("R_shaft_willow"), SubResource("R_shaft_maple"), SubResource("R_shaft_yew"), SubResource("R_br_arrow"), SubResource("R_fe_arrow"), SubResource("R_st_arrow"), SubResource("R_mi_arrow"), SubResource("R_ad_arrow"), SubResource("R_ru_arrow"), SubResource("R_shaft_wisp"), SubResource("R_shaft_nebula"), SubResource("R_shaft_birch"), SubResource("R_shaft_rose"), SubResource("R_bow_wisp"), SubResource("R_bow_nebula"), SubResource("R_bow_birch"), SubResource("R_bow_rose")])

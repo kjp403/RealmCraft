@@ -26,6 +26,8 @@ const NPC := "res://source/common/gameplay/characters/npc/npc.tscn"
 const NPC_UID := "uid://dbrernsyt26qh"
 const CAMP := "res://source/common/gameplay/lighting/campfire.tscn"
 const GLOW := "res://source/common/gameplay/lighting/light_radial.tres"
+const MINEABLE := "res://source/common/gameplay/maps/components/mineable_node.tscn"
+const MINEABLE_UID := "uid://dqo57ux3v3lkq"
 const CRITTER := "res://source/common/gameplay/props/ambient_critter.tscn"
 const DECO := "res://source/common/gameplay/props/animated_deco.tscn"
 const CRITTER_FRAMES := "res://source/common/gameplay/characters/sprite_frames/%s.tres"
@@ -376,6 +378,28 @@ static func write_map(cfg: Dictionary) -> void:
 			body += "\n[node name=\"%s\" parent=\"NPCs\" instance=ExtResource(\"%s\")]\n" % [n["name"], npc_id]
 			body += "position = %s\n" % _vec(n["pos"])
 			body += "npc_resource = ExtResource(\"%s\")\n" % res_id
+
+	# --- Gathering nodes ---
+	# Kept in their own container so a later layout pass can rewrite the whole
+	# group by name, the way rebuild_woodland_nodes.py does for the Woodland.
+	var gather: Array = cfg.get("nodes", [])
+	if not gather.is_empty():
+		body += "
+[node name=\"GatherNodes\" type=\"Node2D\" parent=\".\"]
+y_sort_enabled = true
+"
+		for g: Dictionary in gather:
+			var node_id := ext.get_id("PackedScene", MINEABLE, MINEABLE_UID)
+			var data_id := ext.get_id("Resource", g["data"])
+			body += "
+[node name=\"%s\" parent=\"GatherNodes\" instance=ExtResource(\"%s\")]
+" % [
+				g["name"], node_id
+			]
+			body += "position = %s
+" % _vec(g["pos"])
+			body += "data = ExtResource(\"%s\")
+" % data_id
 
 	# --- Warpers: default spawn, arrival ids, and exits ---
 	var warper_id := ext.get_id("PackedScene", WARPER, WARPER_UID)

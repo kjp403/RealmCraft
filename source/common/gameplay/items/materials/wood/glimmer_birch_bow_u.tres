@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cbowmat000003"]
+
+[ext_resource type="Texture2D" uid="uid://dh620ig8cnw5r" path="res://assets/sprites/items/icons/glimmer_birch_bow_u.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Unstrung Glimmer Bow"
+item_icon = ExtResource("1_icon")
+description = "White birch cut to a stave; the blue current still runs the length of it."
+vendor_value = 160
+stack_limit = 10
+metadata/slug = &"glimmer_birch_bow_u"
+metadata/id = 611

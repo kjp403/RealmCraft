@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3 uid="uid://cbirchtree0011"]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://clogmat000007" path="res://source/common/gameplay/items/materials/wood/glimmer_birch_log.tres" id="2_log"]
+[ext_resource type="Texture2D" uid="uid://b4kuefsgjpdla" path="res://assets/sprites/environment/trees/tree_glimmer_birch.png" id="3_tree"]
+[ext_resource type="Texture2D" uid="uid://ccxknjgakluxb" path="res://assets/sprites/environment/trees/tree_glimmer_birch_stump.png" id="4_stump"]
+[ext_resource type="Texture2D" uid="uid://b7n2v7w7p0txk" path="res://assets/sprites/environment/trees/tree_glimmer_birch_1.png" id="5_f1"]
+[ext_resource type="Texture2D" uid="uid://bf6d4g20suyy6" path="res://assets/sprites/environment/trees/tree_glimmer_birch_2.png" id="6_f2"]
+[ext_resource type="Texture2D" uid="uid://bbg5iuo1vyoip" path="res://assets/sprites/environment/trees/tree_glimmer_birch_3.png" id="7_f3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/wood/headless_arrow.tres" id="9_headless"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Glimmer-birch"
+ore = ExtResource("2_log")
+yield_amount = 1
+job_xp = Dictionary[StringName, int]({
+&"woodcutting": 420
+})
+byproduct_item = ExtResource("9_headless")
+byproduct_amount = 80
+byproduct_job = &"fletching"
+required_level = 80
+required_tool = &"axe"
+extraction_hp = 9
+charge_regen_seconds = 22.0
+depleted_recharge_seconds = 180.0
+player_cooldown_seconds = 6.5
+texture = ExtResource("3_tree")
+depleted_texture = ExtResource("4_stump")
+visual_scale = 1.1
+idle_frames = Array[Texture2D]([ExtResource("5_f1"), ExtResource("6_f2"), ExtResource("7_f3")])
+idle_frame_seconds = 0.25
+chop_fx_style = &"spark_side"
+chop_fx_color = Color(0.024, 0.714, 0.831, 1)
+chop_fx_color_alt = Color(0.145, 0.388, 0.922, 1)
+chop_fx_amount = 10

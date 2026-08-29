@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1787251982
-next_id = 605
+version = 1787960710
+next_id = 613
 entries = Array[Dictionary]([{
 &"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
 &"id": 74,
@@ -2802,6 +2802,46 @@ entries = Array[Dictionary]([{
 &"id": 604,
 &"path": "res://source/common/gameplay/items/gears/leather/cindermantle.tres",
 &"slug": &"cindermantle"
+}, {
+&"hash": "c259edab9b346897208257452ffb7d2596914c9bc2128e0755a72d8b547d8089",
+&"id": 605,
+&"path": "res://source/common/gameplay/items/materials/wood/wispwood_log.tres",
+&"slug": &"wispwood_log"
+}, {
+&"hash": "c043a718d9b770c8c6f1d0ce46bf8323310df0e60fc13b83e1dfc83d9d0dfc23",
+&"id": 606,
+&"path": "res://source/common/gameplay/items/materials/wood/nebula_palm_log.tres",
+&"slug": &"nebula_palm_log"
+}, {
+&"hash": "fd923f92d08af2face94e409f367fac37a72929e1f3ce0959e2cee966df7bab4",
+&"id": 607,
+&"path": "res://source/common/gameplay/items/materials/wood/glimmer_birch_log.tres",
+&"slug": &"glimmer_birch_log"
+}, {
+&"hash": "dce7c6b791ff6f58b069bd41dae8d5c39ae4e394b97fe2a4820f76b11f41bb56",
+&"id": 608,
+&"path": "res://source/common/gameplay/items/materials/wood/rosewood_log.tres",
+&"slug": &"rosewood_log"
+}, {
+&"hash": "d671c0570369912a511c87afdefb343f8b1221b14bcc85495fc3226a6f574901",
+&"id": 609,
+&"path": "res://source/common/gameplay/items/materials/wood/wispwood_bow_u.tres",
+&"slug": &"wispwood_bow_u"
+}, {
+&"hash": "53089b2321fc56346ac1422cc9e771d91bab271af21f26bcbc3d6431cf304122",
+&"id": 610,
+&"path": "res://source/common/gameplay/items/materials/wood/nebula_palm_bow_u.tres",
+&"slug": &"nebula_palm_bow_u"
+}, {
+&"hash": "9fda2ef5a1606efcee4e3bac209b366491900cb1a5fb0e5082e66a538332258c",
+&"id": 611,
+&"path": "res://source/common/gameplay/items/materials/wood/glimmer_birch_bow_u.tres",
+&"slug": &"glimmer_birch_bow_u"
+}, {
+&"hash": "e29a67f3d0edd9e3ed546e251f255e9426c4321e71e6962b43df903e444bb68c",
+&"id": 612,
+&"path": "res://source/common/gameplay/items/materials/wood/rosewood_bow_u.tres",
+&"slug": &"rosewood_bow_u"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")
