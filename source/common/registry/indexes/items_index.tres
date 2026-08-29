@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1787960710
-next_id = 613
+next_id = 614
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -2842,6 +2842,11 @@ entries = Array[Dictionary]([{
 &"id": 612,
 &"path": "res://source/common/gameplay/items/materials/wood/rosewood_bow_u.tres",
 &"slug": &"rosewood_bow_u"
+}, {
+&"hash": "bc2c3b2cd3839cb9177e6128a38547ce28aad0532c808f63e434e53208c17aaf",
+&"id": 613,
+&"path": "res://source/common/gameplay/items/gears/relics/relic_emberfrost.tres",
+&"slug": &"relic_emberfrost"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")
