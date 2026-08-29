@@ -144,6 +144,7 @@ func _takeover_or_load_player(character_id: int) -> PlayerResource:
 	BossHuntService.on_peer_disconnected(existing_peer)
 	QuestBossService.on_peer_disconnected(existing_peer)
 	PartyService.on_peer_disconnected(existing_peer)
+	OssuranGateService.on_peer_disconnected(existing_peer)
 	RateLimiter.forget(existing_peer)
 	if world_manager != null:
 		world_manager.player_disconnected.rpc_id(1, live.account_name)
@@ -219,6 +220,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		BossHuntService.on_peer_disconnected(peer_id)
 		QuestBossService.on_peer_disconnected(peer_id)
 		PartyService.on_peer_disconnected(peer_id)
+		OssuranGateService.on_peer_disconnected(peer_id)
 		RateLimiter.forget(peer_id)
 		return
 
@@ -233,6 +235,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	BossHuntService.on_peer_disconnected(peer_id)
 	QuestBossService.on_peer_disconnected(peer_id)
 	PartyService.on_peer_disconnected(peer_id)
+	OssuranGateService.on_peer_disconnected(peer_id)
 	# Drop rate-limit counters so a reconnect starts with a clean window.
 	RateLimiter.forget(peer_id)
 

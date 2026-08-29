@@ -637,13 +637,14 @@ warper_id = 155
 target_id = 45
 
 [node name="OssuranLanding" parent="." instance=ExtResource("5_warper")]
-position = Vector2(1816.0, 504.0)
+position = Vector2(2040.0, 2328.0)
 warper_id = 57
 
 [node name="OssuranPortal" parent="." instance=ExtResource("6_portal")]
-position = Vector2(1816.0, 472.0)
+position = Vector2(2040.0, 2360.0)
 portal_color = Color(0.42, 0.62, 1, 1)
 destination_label = "Ossuran's Ruin"
 target_instance = ExtResource("portal_ossuran")
 warper_id = 157
 target_id = 58
+lobby_gate = true

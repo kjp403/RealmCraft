@@ -35,18 +35,31 @@ const KIND_ELEMENT: Dictionary = {
 ## near-identical methods, so retuning the phase is one table edit.
 const TUNING: Dictionary = {
 	Kind.EMBER: {
-		"windup_s": 1.15, "damage": 52.0, "radius": 76.0,
+		"windup_s": 1.15, "damage": 95.0, "radius": 76.0,
 		"interval_s": 4.6, "open_delay_s": 1.4, "targets": 1,
 	},
 	Kind.THORN: {
-		"windup_s": 1.35, "damage": 44.0, "radius": 58.0,
+		"windup_s": 1.35, "damage": 80.0, "radius": 58.0,
 		"interval_s": 3.8, "open_delay_s": 2.6, "targets": 2,
 	},
 	Kind.HEX: {
-		"windup_s": 1.5, "damage": 58.0, "radius": 30.0,
+		"windup_s": 1.5, "damage": 105.0, "radius": 30.0,
 		"interval_s": 5.4, "open_delay_s": 3.9, "targets": 1,
 	},
 }
+
+## Escalation. Every RAMP_STEP_S a pillar stays up, its casts get faster, harder
+## and wider — a stalled pillar run turns lethal, which is the heart-rate lever.
+## All three pillars spawn together, so keying off each brain's own spawn time
+## keeps them in step without arena coupling. Applied to a COPY of the TUNING
+## row at read time; the table above stays the authoring baseline.
+const RAMP_STEP_S: float = 8.0
+const RAMP_INTERVAL_MULT: float = 0.90   ## cadence shrinks per step
+const RAMP_INTERVAL_FLOOR: float = 0.45  ## ...but never below 45% of base
+const RAMP_DAMAGE_MULT: float = 1.15     ## damage grows per step
+const RAMP_DAMAGE_CAP: float = 2.2
+const RAMP_RADIUS_MULT: float = 1.05     ## reach grows per step
+const RAMP_RADIUS_CAP: float = 1.4
 
 ## Half-width of the HEX beam. A player within this of the pillar→target segment
 ## is clipped, so the dodge is "get off the line", not "outrun the endpoint".
@@ -60,15 +73,34 @@ var kind: Kind = Kind.EMBER
 
 var _next_ms: int = 0
 var _casting: bool = false
+## Set on spawn; the escalation ramp measures elapsed time from here.
+var _spawn_ms: int = 0
 
 
 func _ready() -> void:
 	if not GameMode.is_world_server():
 		queue_free()
 		return
+	_spawn_ms = Time.get_ticks_msec()
 	var spec: Dictionary = TUNING[kind]
-	_next_ms = Time.get_ticks_msec() + int(float(spec["open_delay_s"]) * 1000.0)
+	_next_ms = _spawn_ms + int(float(spec["open_delay_s"]) * 1000.0)
 	set_physics_process(true)
+
+
+## TUNING[kind] with the time-based escalation applied. A fresh copy each call so
+## the constant table is never mutated.
+func _ramped_spec() -> Dictionary:
+	var spec: Dictionary = (TUNING[kind] as Dictionary).duplicate()
+	var steps: int = int(floor(float(Time.get_ticks_msec() - _spawn_ms) / 1000.0 / RAMP_STEP_S))
+	if steps <= 0:
+		return spec
+	var interval_f: float = maxf(pow(RAMP_INTERVAL_MULT, steps), RAMP_INTERVAL_FLOOR)
+	var damage_f: float = minf(pow(RAMP_DAMAGE_MULT, steps), RAMP_DAMAGE_CAP)
+	var radius_f: float = minf(pow(RAMP_RADIUS_MULT, steps), RAMP_RADIUS_CAP)
+	spec["interval_s"] = float(spec["interval_s"]) * interval_f
+	spec["damage"] = float(spec["damage"]) * damage_f
+	spec["radius"] = float(spec["radius"]) * radius_f
+	return spec
 
 
 func _physics_process(_delta: float) -> void:
@@ -76,7 +108,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	if Time.get_ticks_msec() < _next_ms:
 		return
-	var spec: Dictionary = TUNING[kind]
+	var spec: Dictionary = _ramped_spec()
 	_next_ms = Time.get_ticks_msec() + int(float(spec["interval_s"]) * 1000.0)
 	match kind:
 		Kind.EMBER:
