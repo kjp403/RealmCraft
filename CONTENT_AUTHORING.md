@@ -529,8 +529,8 @@ Post-Dragon combat ladder. Soft archetypes match the existing metal / leather / 
 |--------:|---------------|-------------------|---------------|
 | 40 | Basilisk | Wraithsilk | Runewoven |
 | 50 | Wyrmguard | Nightglass | Astral |
-| 60 | Colossus | Tempest | Voidsilk |
-| 70 | Godsteel | Skyrender | Aetherborn |
+| 60 | Godsteel | Tempest | Voidsilk |
+| 70 | Colossus | Skyrender | Aetherborn |
 | 80 | Behemoth | Eclipse | Empyrean |
 | 90 | Worldbreaker | Starfall | Primordial |
 

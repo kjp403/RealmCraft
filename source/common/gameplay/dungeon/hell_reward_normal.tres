@@ -25,6 +25,7 @@
 [ext_resource type="Resource" uid="uid://f4f2a12d85e34" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="item_enchanted_gem"]
 [ext_resource type="Resource" uid="uid://f51d21a5ec844" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="item_enchanted_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres" id="item_wyrmguard_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/godsteel_cloth.tres" id="item_godsteel_cloth"]
 
 [sub_resource type="Resource" id="Drop_0_bone"]
 script = ExtResource("2_loot")
@@ -152,6 +153,13 @@ script = ExtResource("2_loot")
 item = ExtResource("item_book_astral")
 chance = 0.01
 
+[sub_resource type="Resource" id="Drop_20_godsteel_cloth"]
+script = ExtResource("2_loot")
+item = ExtResource("item_godsteel_cloth")
+min_amount = 1
+max_amount = 3
+chance = 0.2
+
 [sub_resource type="Resource" id="Excl_0_enchanted_gem"]
 script = ExtResource("2_loot")
 item = ExtResource("item_enchanted_gem")
@@ -179,7 +187,7 @@ gold_min = 9000
 gold_max = 15000
 rolls_min = 3
 rolls_max = 4
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_adamant_bar"), SubResource("Drop_2_runite_bar"), SubResource("Drop_3_coal_ore"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_dragon_ore"), SubResource("Drop_7_dragon_cloth"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_10_wood_gold_medium"), SubResource("Drop_11_wyrmguard_ore"), SubResource("Drop_12_wyrmguard_cloth"), SubResource("Drop_13_hide_nightglass"), SubResource("Drop_14_astral_cloth"), SubResource("Drop_15_sword_wyrmguard"), SubResource("Drop_16_hammer_wyrmguard"), SubResource("Drop_17_nightglass_bow"), SubResource("Drop_18_wand_astral"), SubResource("Drop_19_book_astral")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_0_bone"), SubResource("Drop_1_adamant_bar"), SubResource("Drop_2_runite_bar"), SubResource("Drop_3_coal_ore"), SubResource("Drop_4_maple_log"), SubResource("Drop_5_yew_log"), SubResource("Drop_6_dragon_ore"), SubResource("Drop_7_dragon_cloth"), SubResource("Drop_8_health_potion"), SubResource("Drop_9_mana_potion"), SubResource("Drop_10_wood_gold_medium"), SubResource("Drop_11_wyrmguard_ore"), SubResource("Drop_12_wyrmguard_cloth"), SubResource("Drop_13_hide_nightglass"), SubResource("Drop_14_astral_cloth"), SubResource("Drop_15_sword_wyrmguard"), SubResource("Drop_16_hammer_wyrmguard"), SubResource("Drop_17_nightglass_bow"), SubResource("Drop_18_wand_astral"), SubResource("Drop_19_book_astral"), SubResource("Drop_20_godsteel_cloth")])
 exclusive_loot = Array[ExtResource("2_loot")]([SubResource("Excl_0_enchanted_gem"), SubResource("Excl_1_enchanted_cloth"), SubResource("Excl_2_wyrmguard_gem")])
 exclusive_max = 2
 ornate_chest_count = 1
