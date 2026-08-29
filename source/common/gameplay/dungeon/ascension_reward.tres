@@ -13,9 +13,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/astral_gem.tres" id="11_as_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_astral.tres" id="12_as_fiber"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/astral_cloth.tres" id="13_as_cloth"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/colossus_ore.tres" id="14_co_ore"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/colossus_gem.tres" id="15_co_gem"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/colossus_cloth.tres" id="16_co_cloth"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/godsteel_ore.tres" id="14_gs_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/godsteel_gem.tres" id="15_gs_gem"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/godsteel_cloth.tres" id="16_gs_cloth"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/hide_tempest.tres" id="17_te_hide"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/tempest_leather.tres" id="18_te_leather"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/tempest_gem.tres" id="19_te_gem"]
@@ -30,8 +30,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres" id="28_ng_bow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres" id="29_as_wand"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_astral.item.tres" id="30_as_book"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_colossus.item.tres" id="31_co_sword"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres" id="32_co_hammer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres" id="31_gs_sword"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres" id="32_gs_hammer"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/tempest_bow.item.tres" id="33_te_bow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres" id="34_vs_wand"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_voidsilk.item.tres" id="35_vs_book"]
@@ -116,21 +116,21 @@ item = ExtResource("13_as_cloth")
 max_amount = 4
 chance = 0.45
 
-[sub_resource type="Resource" id="Drop_co_ore"]
+[sub_resource type="Resource" id="Drop_gs_ore"]
 script = ExtResource("1_loot")
-item = ExtResource("14_co_ore")
+item = ExtResource("14_gs_ore")
 max_amount = 4
 chance = 0.32
 
-[sub_resource type="Resource" id="Drop_co_gem"]
+[sub_resource type="Resource" id="Drop_gs_gem"]
 script = ExtResource("1_loot")
-item = ExtResource("15_co_gem")
+item = ExtResource("15_gs_gem")
 max_amount = 2
 chance = 0.22
 
-[sub_resource type="Resource" id="Drop_co_cloth"]
+[sub_resource type="Resource" id="Drop_gs_cloth"]
 script = ExtResource("1_loot")
-item = ExtResource("16_co_cloth")
+item = ExtResource("16_gs_cloth")
 max_amount = 3
 chance = 0.28
 
@@ -213,14 +213,14 @@ script = ExtResource("1_loot")
 item = ExtResource("30_as_book")
 chance = 0.1
 
-[sub_resource type="Resource" id="Drop_co_sword"]
+[sub_resource type="Resource" id="Drop_gs_sword"]
 script = ExtResource("1_loot")
-item = ExtResource("31_co_sword")
+item = ExtResource("31_gs_sword")
 chance = 0.06
 
-[sub_resource type="Resource" id="Drop_co_hammer"]
+[sub_resource type="Resource" id="Drop_gs_hammer"]
 script = ExtResource("1_loot")
-item = ExtResource("32_co_hammer")
+item = ExtResource("32_gs_hammer")
 chance = 0.06
 
 [sub_resource type="Resource" id="Drop_te_bow"]
@@ -254,4 +254,4 @@ gold_min = 2500
 gold_max = 6000
 rolls_min = 3
 rolls_max = 4
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_wg_ore"), SubResource("Drop_wg_gem"), SubResource("Drop_wg_cloth"), SubResource("Drop_ng_hide"), SubResource("Drop_ng_leather"), SubResource("Drop_ng_gem"), SubResource("Drop_ng_fiber"), SubResource("Drop_ng_cloth"), SubResource("Drop_as_ore"), SubResource("Drop_as_gem"), SubResource("Drop_as_fiber"), SubResource("Drop_as_cloth"), SubResource("Drop_co_ore"), SubResource("Drop_co_gem"), SubResource("Drop_co_cloth"), SubResource("Drop_te_hide"), SubResource("Drop_te_leather"), SubResource("Drop_te_gem"), SubResource("Drop_te_fiber"), SubResource("Drop_te_cloth"), SubResource("Drop_vs_ore"), SubResource("Drop_vs_gem"), SubResource("Drop_vs_fiber"), SubResource("Drop_vs_cloth"), SubResource("Drop_wg_sword"), SubResource("Drop_wg_hammer"), SubResource("Drop_ng_bow"), SubResource("Drop_as_wand"), SubResource("Drop_as_book"), SubResource("Drop_co_sword"), SubResource("Drop_co_hammer"), SubResource("Drop_te_bow"), SubResource("Drop_vs_wand"), SubResource("Drop_vs_book"), SubResource("Drop_reliquary"), SubResource("Drop_ring")])
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_wg_ore"), SubResource("Drop_wg_gem"), SubResource("Drop_wg_cloth"), SubResource("Drop_ng_hide"), SubResource("Drop_ng_leather"), SubResource("Drop_ng_gem"), SubResource("Drop_ng_fiber"), SubResource("Drop_ng_cloth"), SubResource("Drop_as_ore"), SubResource("Drop_as_gem"), SubResource("Drop_as_fiber"), SubResource("Drop_as_cloth"), SubResource("Drop_gs_ore"), SubResource("Drop_gs_gem"), SubResource("Drop_gs_cloth"), SubResource("Drop_te_hide"), SubResource("Drop_te_leather"), SubResource("Drop_te_gem"), SubResource("Drop_te_fiber"), SubResource("Drop_te_cloth"), SubResource("Drop_vs_ore"), SubResource("Drop_vs_gem"), SubResource("Drop_vs_fiber"), SubResource("Drop_vs_cloth"), SubResource("Drop_wg_sword"), SubResource("Drop_wg_hammer"), SubResource("Drop_ng_bow"), SubResource("Drop_as_wand"), SubResource("Drop_as_book"), SubResource("Drop_gs_sword"), SubResource("Drop_gs_hammer"), SubResource("Drop_te_bow"), SubResource("Drop_vs_wand"), SubResource("Drop_vs_book"), SubResource("Drop_reliquary"), SubResource("Drop_ring")])

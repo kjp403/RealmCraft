@@ -9,29 +9,29 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 218.0
+value = 158.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 6.0
+value = 4.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("4_item")
 category = &"sword"
-capacity = 6
+capacity = 5
 right_hand_scene = ExtResource("3_scene")
 required_mastery_categories = Array[StringName]([&"sword"])
-required_mastery_level = 70
+required_mastery_level = 60
 slot = ExtResource("5_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
 item_name = &"Godsteel Sword"
 item_icon = ExtResource("2_icon")
-description = "A godsteel blade forged for Ascension mastery 70."
+description = "A godsteel blade forged for Ascension mastery 60."
 can_trade = true
-vendor_value = 740
+vendor_value = 520
 stack_limit = 10
 tags = PackedStringArray("ascension")
 metadata/_custom_type_script = "uid://5hk0gl5ng64h"

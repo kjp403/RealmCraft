@@ -9,7 +9,7 @@
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 174.0
+value = 239.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [sub_resource type="Resource" id="Mod_1"]
@@ -21,23 +21,23 @@ metadata/_custom_type_script = "uid://cvggwjkht4km4"
 [sub_resource type="Resource" id="Mod_2"]
 script = ExtResource("1_mod")
 stat_name = "ability_haste"
-value = 3.0
+value = 5.0
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("4_item")
 category = &"hammer"
-capacity = 5
+capacity = 6
 right_hand_scene = ExtResource("3_scene")
 required_mastery_categories = Array[StringName]([&"hammer"])
-required_mastery_level = 60
+required_mastery_level = 70
 slot = ExtResource("5_slot")
 base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
 item_name = &"Colossus Hammer"
 item_icon = ExtResource("2_icon")
-description = "A crushing colossus warhammer. Mastery 60."
+description = "A crushing colossus warhammer. Mastery 70."
 can_trade = true
-vendor_value = 546
+vendor_value = 777
 stack_limit = 10
 tags = PackedStringArray("ascension")
 metadata/_custom_type_script = "uid://5hk0gl5ng64h"

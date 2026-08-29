@@ -12,8 +12,8 @@ const ASCENSION_REWARD := "res://source/common/gameplay/dungeon/ascension_reward
 
 const TIERS: Array[int] = [40, 50, 60, 70, 80, 90]
 const MELEE: Dictionary = {
-	40: "basilisk", 50: "wyrmguard", 60: "colossus",
-	70: "godsteel", 80: "behemoth", 90: "worldbreaker",
+	40: "basilisk", 50: "wyrmguard", 60: "godsteel",
+	70: "colossus", 80: "behemoth", 90: "worldbreaker",
 }
 const ARCHERY: Dictionary = {
 	40: "wraithsilk", 50: "nightglass", 60: "tempest",
@@ -309,7 +309,7 @@ func _build_reward() -> void:
 	reward.gold_max = 6000
 	var loot: Array[LootDrop] = []
 	# Third dungeon: Lv.50 baseline + Lv.60 at a lower (but not tiny) rate.
-	# No godsteel / 70+ — that band is not this table.
+	# No colossus / 70+ — that band is not this table.
 	for path_chance: Array in [
 		["res://source/common/gameplay/items/materials/metals/wyrmguard_ore.tres", 0.55, 2, 6],
 		["res://source/common/gameplay/items/materials/gems/wyrmguard_gem.tres", 0.4, 1, 2],
@@ -323,9 +323,9 @@ func _build_reward() -> void:
 		["res://source/common/gameplay/items/materials/gems/astral_gem.tres", 0.4, 1, 2],
 		["res://source/common/gameplay/items/materials/cloth/fiber_astral.tres", 0.5, 2, 5],
 		["res://source/common/gameplay/items/materials/cloth/astral_cloth.tres", 0.45, 1, 4],
-		["res://source/common/gameplay/items/materials/metals/colossus_ore.tres", 0.32, 1, 4],
-		["res://source/common/gameplay/items/materials/gems/colossus_gem.tres", 0.22, 1, 2],
-		["res://source/common/gameplay/items/materials/cloth/colossus_cloth.tres", 0.28, 1, 3],
+		["res://source/common/gameplay/items/materials/metals/godsteel_ore.tres", 0.32, 1, 4],
+		["res://source/common/gameplay/items/materials/gems/godsteel_gem.tres", 0.22, 1, 2],
+		["res://source/common/gameplay/items/materials/cloth/godsteel_cloth.tres", 0.28, 1, 3],
 		["res://source/common/gameplay/items/materials/leather/hide_tempest.tres", 0.3, 1, 4],
 		["res://source/common/gameplay/items/materials/leather/tempest_leather.tres", 0.26, 1, 3],
 		["res://source/common/gameplay/items/materials/gems/tempest_gem.tres", 0.22, 1, 2],
@@ -353,8 +353,8 @@ func _build_reward() -> void:
 		["res://source/common/gameplay/items/weapons/bow/nightglass_bow.item.tres", 0.1],
 		["res://source/common/gameplay/items/weapons/wand/wand_astral.item.tres", 0.1],
 		["res://source/common/gameplay/items/weapons/book/book_astral.item.tres", 0.1],
-		["res://source/common/gameplay/items/weapons/sword/sword_colossus.item.tres", 0.06],
-		["res://source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres", 0.06],
+		["res://source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres", 0.06],
 		["res://source/common/gameplay/items/weapons/bow/tempest_bow.item.tres", 0.06],
 		["res://source/common/gameplay/items/weapons/wand/wand_voidsilk.item.tres", 0.06],
 		["res://source/common/gameplay/items/weapons/book/book_voidsilk.item.tres", 0.06],

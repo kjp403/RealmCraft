@@ -182,19 +182,19 @@
       "slug": "colossus_helmet",
       "path": "source/common/gameplay/items/gears/metal/colossus_helmet.tres",
       "name": "Colossus Helmet",
-      "mastery": 60
+      "mastery": 70
     },
     {
       "slug": "colossus_chest",
       "path": "source/common/gameplay/items/gears/metal/colossus_chest.tres",
       "name": "Colossus Chestplate",
-      "mastery": 60
+      "mastery": 70
     },
     {
       "slug": "colossus_boots",
       "path": "source/common/gameplay/items/gears/metal/colossus_boots.tres",
       "name": "Colossus Boots",
-      "mastery": 60
+      "mastery": 70
     },
     {
       "slug": "tempest_hood",
@@ -236,14 +236,14 @@
       "slug": "sword_colossus.item",
       "path": "source/common/gameplay/items/weapons/sword/sword_colossus.item.tres",
       "name": "Colossus Sword",
-      "mastery": 60,
+      "mastery": 70,
       "category": "sword"
     },
     {
       "slug": "hammer_colossus.item",
       "path": "source/common/gameplay/items/weapons/hammer/hammer_colossus.item.tres",
       "name": "Colossus Hammer",
-      "mastery": 60,
+      "mastery": 70,
       "category": "hammer"
     },
     {
@@ -271,19 +271,19 @@
       "slug": "godsteel_helmet",
       "path": "source/common/gameplay/items/gears/metal/godsteel_helmet.tres",
       "name": "Godsteel Helmet",
-      "mastery": 70
+      "mastery": 60
     },
     {
       "slug": "godsteel_chest",
       "path": "source/common/gameplay/items/gears/metal/godsteel_chest.tres",
       "name": "Godsteel Chestplate",
-      "mastery": 70
+      "mastery": 60
     },
     {
       "slug": "godsteel_boots",
       "path": "source/common/gameplay/items/gears/metal/godsteel_boots.tres",
       "name": "Godsteel Boots",
-      "mastery": 70
+      "mastery": 60
     },
     {
       "slug": "skyrender_hood",
@@ -325,14 +325,14 @@
       "slug": "sword_godsteel.item",
       "path": "source/common/gameplay/items/weapons/sword/sword_godsteel.item.tres",
       "name": "Godsteel Sword",
-      "mastery": 70,
+      "mastery": 60,
       "category": "sword"
     },
     {
       "slug": "hammer_godsteel.item",
       "path": "source/common/gameplay/items/weapons/hammer/hammer_godsteel.item.tres",
       "name": "Godsteel Hammer",
-      "mastery": 70,
+      "mastery": 60,
       "category": "hammer"
     },
     {

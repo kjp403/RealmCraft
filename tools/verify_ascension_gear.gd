@@ -4,7 +4,7 @@ extends SceneTree
 ##   godot --headless --path . -s tools/verify_ascension_gear.gd
 
 const TIERS: Array[int] = [40, 50, 60, 70, 80, 90]
-const MELEE: Array[String] = ["basilisk", "wyrmguard", "colossus", "godsteel", "behemoth", "worldbreaker"]
+const MELEE: Array[String] = ["basilisk", "wyrmguard", "godsteel", "colossus", "behemoth", "worldbreaker"]
 const ARCHERY: Array[String] = ["wraithsilk", "nightglass", "tempest", "skyrender", "eclipse", "starfall"]
 const MAGIC: Array[String] = ["runewoven", "astral", "voidsilk", "aetherborn", "empyrean", "primordial"]
 
@@ -152,15 +152,15 @@ func _init() -> void:
 			if drop != null and drop.item != null:
 				names.append(str(drop.item.item_name))
 		for need: String in [
-			"Colossus Sword", "Colossus Hammer", "Nightglass Bow", "Tempest Bow",
+			"Godsteel Sword", "Godsteel Hammer", "Nightglass Bow", "Tempest Bow",
 			"Astral Wand", "Astral Tome", "Voidsilk Wand", "Voidsilk Tome",
 			"Wyrmguard Sword", "Wyrmguard Hammer",
-			"Colossus Ore", "Tempest Leather", "Voidsilk Cloth", "Astral Cloth",
+			"Godsteel Ore", "Tempest Leather", "Voidsilk Cloth", "Astral Cloth",
 			"Wyrmguard Ore", "Nightglass Leather",
 		]:
 			if need not in names:
 				errors.append("ascension_reward missing %s" % need)
-		for banned: String in ["Godsteel", "Worldbreaker", "Starfall", "Primordial", "Behemoth"]:
+		for banned: String in ["Colossus", "Worldbreaker", "Starfall", "Primordial", "Behemoth"]:
 			for seen: String in names:
 				if seen.find(banned) >= 0:
 					errors.append("ascension_reward still has %s" % seen)

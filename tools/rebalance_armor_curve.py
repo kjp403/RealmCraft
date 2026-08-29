@@ -148,7 +148,7 @@ COMPARE_CHESTS = [
     (15, "metal/mithril_chest.tres", "leather/shadow_vest.tres", "cloth/enchanted_robe.tres"),
     (40, "metal/basilisk_chest.tres", "leather/wraithsilk_vest.tres", "cloth/runewoven_robe.tres"),
     (50, "metal/wyrmguard_chest.tres", "leather/nightglass_vest.tres", "cloth/astral_robe.tres"),
-    (70, "metal/godsteel_chest.tres", "leather/skyrender_vest.tres", "cloth/aetherborn_robe.tres"),
+    (70, "metal/colossus_chest.tres", "leather/skyrender_vest.tres", "cloth/aetherborn_robe.tres"),
     (90, "metal/worldbreaker_chest.tres", "leather/starfall_vest.tres", "cloth/primordial_robe.tres"),
 ]
 

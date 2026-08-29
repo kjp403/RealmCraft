@@ -185,8 +185,8 @@ CAPACITY = {40: 5, 50: 5, 60: 5, 70: 6, 80: 6, 90: 7}
 MELEE_SETS = {
     40: "Basilisk",
     50: "Wyrmguard",
-    60: "Colossus",
-    70: "Godsteel",
+    60: "Godsteel",
+    70: "Colossus",
     80: "Behemoth",
     90: "Worldbreaker",
 }
@@ -211,8 +211,8 @@ MAGIC_SETS = {
 MELEE_ASSETS = {
     40: {"helm": "melee helm 1.png", "chest": "melee top 1.png", "boots": "melee boots 1.png"},
     50: {"helm": "melee helm 2.png", "chest": "melee top 2.png", "boots": "melee boots 2.png"},
-    60: {"helm": "melee helm 3.png", "chest": "melee top 3.png", "boots": "melee boots 3.png"},
-    70: {"helm": "melee helm 4.png", "chest": "melee top  4.png", "boots": "melee boots 5.png"},
+    60: {"helm": "melee helm 4.png", "chest": "melee top  4.png", "boots": "melee boots 5.png"},
+    70: {"helm": "melee helm 3.png", "chest": "melee top 3.png", "boots": "melee boots 3.png"},
     80: {"helm": "melee helm 2.png", "chest": "melee top  5.png", "boots": "melee boots 6.png", "helm_recolor": 1},
     90: {"helm": "melee helm 4.png", "chest": "melee top  6.png", "boots": "melee boots 8.png", "helm_recolor": 2},
 }
@@ -236,16 +236,16 @@ MAGIC_ASSETS = {
 SWORD_ASSETS = {
     40: "swordsmanship 1.png",
     50: "swordsmanship 2.png",
-    60: "swordsmanship 3.png",
-    70: "swordsmanship 4.png",
+    60: "swordsmanship 4.png",
+    70: "swordsmanship 3.png",
     80: "swordsmanship 6.png",
     90: "swordsmanship 8.png",
 }
 HAMMER_ASSETS = {
     40: "heavy weapon 1.png",
     50: "heavy weapon 4.png",
-    60: "heavy weapon 2.png",
-    70: "heavy weapon 6.png",
+    60: "heavy weapon 6.png",
+    70: "heavy weapon 2.png",
     80: "heavy weapon 7.png",
     90: "heavy weapon 3.png",
 }

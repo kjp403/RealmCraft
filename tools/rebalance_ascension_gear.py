@@ -25,8 +25,8 @@ BOOK_AP = {40: 121, 50: 165, 60: 221, 70: 289, 80: 369, 90: 473}
 # Unique identity bonuses kick in hard at m60+
 UNIQUE = {
     # melee plate piece extras applied on top of scaled baseline
-    "Colossus": {"helmet": {"health_max": 40}, "chest": {"health_max": 60, "armor": 8}, "boots": {"health_max": 30}},
-    "Godsteel": {"helmet": {"ability_haste": 4}, "chest": {"ability_haste": 6, "ad": 8}, "boots": {"ability_haste": 4}},
+    "Godsteel": {"helmet": {"health_max": 40}, "chest": {"health_max": 60, "armor": 8}, "boots": {"health_max": 30}},
+    "Colossus": {"helmet": {"ability_haste": 4}, "chest": {"ability_haste": 6, "ad": 8}, "boots": {"ability_haste": 4}},
     "Behemoth": {"helmet": {"armor": 10, "health_max": 35}, "chest": {"armor": 14, "health_max": 55}, "boots": {"armor": 8}},
     "Worldbreaker": {"helmet": {"ad": 10, "ability_haste": 4}, "chest": {"ad": 14, "ability_haste": 6}, "boots": {"ad": 8, "move_speed": 4}},
     "Tempest": {"helmet": {"ability_haste": 5}, "chest": {"ability_haste": 7, "move_speed": 4}, "boots": {"ability_haste": 5, "move_speed": 6}},
@@ -42,8 +42,8 @@ UNIQUE = {
 SETS = {
     40: ("Basilisk", "Wraithsilk", "Runewoven"),
     50: ("Wyrmguard", "Nightglass", "Astral"),
-    60: ("Colossus", "Tempest", "Voidsilk"),
-    70: ("Godsteel", "Skyrender", "Aetherborn"),
+    60: ("Godsteel", "Tempest", "Voidsilk"),
+    70: ("Colossus", "Skyrender", "Aetherborn"),
     80: ("Behemoth", "Eclipse", "Empyrean"),
     90: ("Worldbreaker", "Starfall", "Primordial"),
 }
