@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3 uid="uid://cbowmat000001"]
+
+[ext_resource type="Texture2D" uid="uid://bgmefr4cwecbd" path="res://assets/sprites/items/icons/wispwood_bow_u.png" id="1_icon"]
+[ext_resource type="Script" uid="uid://nsr1timk430j" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Unstrung Wispwood Bow"
+item_icon = ExtResource("1_icon")
+description = "A pale wisp-wood stave, nocked and unstrung. Traders pay well for the limb alone."
+vendor_value = 60
+stack_limit = 10
+metadata/slug = &"wispwood_bow_u"
+metadata/id = 609

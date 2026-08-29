@@ -8,6 +8,10 @@
 [ext_resource type="Resource" uid="uid://clogmat000002" path="res://source/common/gameplay/items/materials/wood/willow_log.tres" id="5_willow"]
 [ext_resource type="Resource" uid="uid://clogmat000003" path="res://source/common/gameplay/items/materials/wood/maple_log.tres" id="6_maple"]
 [ext_resource type="Resource" uid="uid://clogmat000004" path="res://source/common/gameplay/items/materials/wood/yew_log.tres" id="7_yew"]
+[ext_resource type="Resource" uid="uid://clogmat000005" path="res://source/common/gameplay/items/materials/wood/wispwood_log.tres" id="8_wisp"]
+[ext_resource type="Resource" uid="uid://clogmat000006" path="res://source/common/gameplay/items/materials/wood/nebula_palm_log.tres" id="8_nebula"]
+[ext_resource type="Resource" uid="uid://clogmat000007" path="res://source/common/gameplay/items/materials/wood/glimmer_birch_log.tres" id="8_birch"]
+[ext_resource type="Resource" uid="uid://clogmat000008" path="res://source/common/gameplay/items/materials/wood/rosewood_log.tres" id="8_rose"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -37,6 +41,6 @@ perks = Array[Dictionary]([{
 "name": "Seasoned",
 "per_rank": 0.1
 }])
-source_items = Array[ExtResource("1_item")]([ExtResource("3_logs"), ExtResource("4_oak"), ExtResource("5_willow"), ExtResource("6_maple"), ExtResource("7_yew")])
-source_levels = Array[int]([1, 10, 20, 35, 45])
+source_items = Array[ExtResource("1_item")]([ExtResource("3_logs"), ExtResource("4_oak"), ExtResource("5_willow"), ExtResource("6_maple"), ExtResource("7_yew"), ExtResource("8_wisp"), ExtResource("8_nebula"), ExtResource("8_birch"), ExtResource("8_rose")])
+source_levels = Array[int]([1, 10, 20, 35, 45, 60, 70, 80, 85])
 describe_lines = Array[String](["Chop speed +{cooldown}%", "Bonus logs +{bonus_yield}%", "Woodcutting XP +{xp}%"])

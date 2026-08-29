@@ -31,6 +31,7 @@
 [ext_resource type="Resource" uid="uid://cutpirmfqwx8b" path="res://source/common/gameplay/maps/components/mineable_nodes/iron_vein.tres" id="51_iron"]
 [ext_resource type="Resource" uid="uid://cnormtree001xx" path="res://source/common/gameplay/maps/components/mineable_nodes/normal_tree.tres" id="50_tree"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/the_hollow.tres" id="54_hollow"]
+[ext_resource type="Resource" uid="uid://cstarfallgrv01" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/starfall_grove.tres" id="55_grove"]
 [ext_resource type="AudioStream" uid="uid://b7j3i2egxdgkk" path="res://assets/audio/music/shop.ogg" id="mus_shop"]
 [ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
 [ext_resource type="AudioStream" uid="uid://7u20jhf0p1o8" path="res://assets/audio/music/adventure.ogg" id="mus_adventure"]
@@ -184,6 +185,14 @@ destination_label = "The Hollow"
 target_instance = ExtResource("54_hollow")
 warper_id = 27
 target_id = 27
+
+[node name="StarfallGrovePortal" parent="Warpers" instance=ExtResource("29_2sqao")]
+position = Vector2(992, 144)
+portal_color = Color(0.36, 0.86, 0.82, 1)
+destination_label = "Starfall Grove"
+target_instance = ExtResource("55_grove")
+warper_id = 33
+target_id = 33
 
 [node name="WoodlandPortal" parent="Warpers" unique_id=686472752 instance=ExtResource("29_2sqao")]
 position = Vector2(8, -336)

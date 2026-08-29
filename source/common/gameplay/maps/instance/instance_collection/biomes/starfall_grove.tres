@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3 uid="uid://cstarfallgrv01"]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://doc0umc2oovri" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="2_hub"]
+
+[resource]
+script = ExtResource("1_script")
+instance_name = &"starfall_grove"
+map_path = "res://source/common/gameplay/maps/maps/starfall_grove/starfall_grove.tscn"
+zone_title = "Starfall Grove"
+level_min = 60
+level_max = 85
+show_discovery = true
+death_return_instance = ExtResource("2_hub")
+death_return_warper_id = 0
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

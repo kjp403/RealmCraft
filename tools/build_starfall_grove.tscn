@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/build_starfall_grove.gd" id="1_build"]
+
+[node name="StarfallGroveBuild" type="Node"]
+script = ExtResource("1_build")

@@ -80,6 +80,19 @@ var _next_regen_ms: int
 ## Client-only: true while the cursor is over this node's click-area.
 var _interactable_hovered: bool = false
 
+# --- Client-only idle animation --------------------------------------------
+# `data.texture` is frame 0; `data.idle_frames` are frames 1..n. The node owns
+# the cycle rather than a SpriteFrames/AnimatedSprite2D because the sprite is
+# already driven by hand for the depleted swap, and a depleted stump must not
+# keep bobbing.
+var _idle_frame: int = 0
+var _idle_accum: float = 0.0
+## Set while [method _arm_regen_prediction] wants the charge countdown ticked.
+## `_process` now serves two clients, so neither may switch it off unilaterally.
+var _regen_armed: bool = false
+## Client-side view of "this player's pool is empty" — freezes the idle cycle.
+var _depleted_visual: bool = false
+
 
 func _ready() -> void:
 	collision_layer = PhysicsLayers.HARVESTABLE # pick/sickle arcs target this to gather
@@ -107,8 +120,9 @@ func _ready() -> void:
 
 	# --- Client only past here ---
 	_spawn_click_area()
-	# Charge prediction only runs once a client receives state and arms it.
-	set_process(false)
+	# Charge prediction only runs once a client receives state and arms it;
+	# an animated node still needs the frame cycle from the start.
+	_update_process()
 
 
 # ---------------------------------------------------------------------------
@@ -419,21 +433,52 @@ func _set_displayed_charges(charges: int, max_charges: int) -> void:
 ## single snap-refill to full from 0). Disables prediction when already full.
 func _arm_regen_prediction() -> void:
 	if data == null or _disp_charges < 0 or _disp_charges >= _disp_max:
-		set_process(false)
+		_set_regen_armed(false)
 		return
 	# Random pools don't trickle, so a partially mined vein has nothing to
 	# predict — only the post-depletion respawn is worth counting down to.
 	if _disp_charges > 0 and _has_random_pool():
-		set_process(false)
+		_set_regen_armed(false)
 		return
 	var interval_s: float = data.depleted_recharge_seconds if _disp_charges <= 0 else data.charge_regen_seconds
 	_next_regen_ms = Time.get_ticks_msec() + int(interval_s * 1000.0)
-	set_process(true)
+	_set_regen_armed(true)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_tick_idle(delta)
+	if _regen_armed:
+		_tick_regen_prediction()
+
+
+## Advances the idle frame cycle. A depleted node holds its stump art, so the
+## bob / twinkle stops the moment the player works the node out — the frozen
+## sprite is itself the "nothing left here" tell.
+func _tick_idle(delta: float) -> void:
+	if data == null or data.idle_frames.is_empty() or _depleted_visual or _sprite == null:
+		return
+	_idle_accum += delta
+	var interval: float = maxf(0.05, data.idle_frame_seconds)
+	if _idle_accum < interval:
+		return
+	while _idle_accum >= interval:
+		_idle_accum -= interval
+		_idle_frame = (_idle_frame + 1) % (data.idle_frames.size() + 1)
+	_sprite.texture = _idle_texture()
+
+
+func _idle_texture() -> Texture2D:
+	if data == null:
+		return null
+	if _idle_frame <= 0 or _idle_frame > data.idle_frames.size():
+		return data.texture
+	var frame: Texture2D = data.idle_frames[_idle_frame - 1]
+	return frame if frame != null else data.texture
+
+
+func _tick_regen_prediction() -> void:
 	if _disp_charges < 0 or _disp_charges >= _disp_max:
-		set_process(false)
+		_set_regen_armed(false)
 		return
 	if Time.get_ticks_msec() < _next_regen_ms:
 		return
@@ -443,6 +488,21 @@ func _process(_delta: float) -> void:
 		_disp_charges += 1
 	_arm_regen_prediction()
 	_refresh_charge_label()
+
+
+func _set_regen_armed(on: bool) -> void:
+	_regen_armed = on
+	_update_process()
+
+
+## `_process` is shared by the charge predictor and the idle cycle, so it runs
+## while EITHER wants it — an early `set_process(false)` from one silently
+## killed the other.
+func _update_process() -> void:
+	if multiplayer.is_server():
+		return
+	var animated: bool = data != null and not data.idle_frames.is_empty() and not _depleted_visual
+	set_process(_regen_armed or animated)
 
 
 func _refresh_charge_label() -> void:
@@ -589,6 +649,8 @@ func _layout_from_texture() -> void:
 func _apply_depleted_visual(depleted: bool) -> void:
 	if _sprite == null or data == null:
 		return
+	_depleted_visual = depleted
+	_update_process()
 	if depleted:
 		if data.depleted_texture != null:
 			_sprite.texture = data.depleted_texture
@@ -597,8 +659,119 @@ func _apply_depleted_visual(depleted: bool) -> void:
 			_sprite.texture = data.texture
 			_sprite.modulate = Color(0.55, 0.55, 0.55, 0.9)
 	else:
-		_sprite.texture = data.texture
+		_sprite.texture = _idle_texture()
 		_sprite.modulate = Color.WHITE
+
+
+# ---------------------------------------------------------------------------
+# Chop FX — a one-shot particle burst per landed swing, client-side only.
+# ---------------------------------------------------------------------------
+
+## Cached 1-particle textures, keyed by shape. Built once per client run: a
+## burst on every axe swing must not allocate an Image each time.
+static var _fx_textures: Dictionary[StringName, Texture2D] = {}
+
+
+## Client-only. Plays [member MineableNodeResource.chop_fx_style] once. Called
+## from ClientState when a gather result comes back OK, so it fires on the
+## swinging player's screen in time with the axe connecting.
+func play_chop_effect() -> void:
+	if data == null or data.chop_fx_style == &"" or _sprite == null:
+		return
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		return
+	# Burst at the axe's height on the trunk, not at the node origin (the feet)
+	# or the canopy — that is where the player is watching.
+	var at: Vector2 = Vector2(0.0, _sprite.position.y * 0.55 - 4.0)
+	match data.chop_fx_style:
+		&"spark_side":
+			# Sharp sparks fly BOTH ways off the hit point; CPUParticles2D emits
+			# inside one cone, so left and right are two emitters.
+			_spawn_burst(at, Vector2.RIGHT)
+			_spawn_burst(at, Vector2.LEFT)
+		_:
+			_spawn_burst(at, Vector2.UP)
+
+
+func _spawn_burst(at: Vector2, direction: Vector2) -> void:
+	var fx: CPUParticles2D = CPUParticles2D.new()
+	fx.position = at
+	fx.z_index = 60
+	fx.emitting = false
+	fx.one_shot = true
+	fx.explosiveness = 1.0
+	fx.local_coords = false
+	fx.amount = maxi(1, data.chop_fx_amount)
+	fx.direction = direction
+	fx.color = data.chop_fx_color
+	fx.texture = _fx_texture(&"cross" if data.chop_fx_style == &"sparkle" else &"dot")
+
+	# CPUParticles2D takes the Gradient itself (GPUParticles2D is the one that
+	# wants a GradientTexture1D) — a burst fading main colour -> alt -> clear.
+	var ramp: Gradient = Gradient.new()
+	ramp.set_color(0, data.chop_fx_color)
+	ramp.set_color(1, Color(data.chop_fx_color_alt, 0.0))
+	fx.color_ramp = ramp
+
+	match data.chop_fx_style:
+		&"drift_up":
+			# Motes released by the cut, rising and spreading as they go.
+			fx.lifetime = 1.1
+			fx.spread = 22.0
+			fx.gravity = Vector2(0.0, -26.0)
+			fx.initial_velocity_min = 14.0
+			fx.initial_velocity_max = 32.0
+			fx.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+			fx.emission_rect_extents = Vector2(10.0, 14.0)
+			fx.scale_amount_min = 1.0
+			fx.scale_amount_max = 2.0
+		&"sparkle":
+			fx.lifetime = 0.5
+			fx.spread = 180.0
+			fx.gravity = Vector2.ZERO
+			fx.initial_velocity_min = 20.0
+			fx.initial_velocity_max = 46.0
+			fx.scale_amount_min = 0.8
+			fx.scale_amount_max = 1.4
+		&"spark_side":
+			fx.lifetime = 0.32
+			fx.spread = 12.0
+			fx.gravity = Vector2(0.0, 40.0)
+			fx.initial_velocity_min = 70.0
+			fx.initial_velocity_max = 130.0
+			fx.scale_amount_min = 1.0
+			fx.scale_amount_max = 2.5
+		_: # starburst
+			fx.lifetime = 0.6
+			fx.spread = 180.0
+			fx.gravity = Vector2(0.0, 30.0)
+			fx.initial_velocity_min = 45.0
+			fx.initial_velocity_max = 120.0
+			fx.scale_amount_min = 1.0
+			fx.scale_amount_max = 2.5
+
+	add_child(fx)
+	fx.emitting = true
+	# One-shot emitters never free themselves; without this every swing leaks a node.
+	var timer: SceneTreeTimer = get_tree().create_timer(fx.lifetime + 0.25)
+	timer.timeout.connect(fx.queue_free)
+
+
+static func _fx_texture(shape: StringName) -> Texture2D:
+	if _fx_textures.has(shape):
+		return _fx_textures[shape]
+	var size: int = 5 if shape == &"cross" else 2
+	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	if shape == &"cross":
+		for i in size:
+			image.set_pixel(i, size / 2, Color.WHITE)
+			image.set_pixel(size / 2, i, Color.WHITE)
+	else:
+		image.fill(Color.WHITE)
+	var tex: ImageTexture = ImageTexture.create_from_image(image)
+	_fx_textures[shape] = tex
+	return tex
 
 
 func _apply_name_label() -> void:

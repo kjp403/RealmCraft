@@ -98,3 +98,26 @@ extends Resource
 ## Uniform sprite scale (1.0 = texture pixel size). Use >1 so higher-tier
 ## trees (Oak, etc.) read larger than the shared 64×96 woodcutting art.
 @export var visual_scale: float = 1.0
+
+## Extra idle frames, cycled client-side on top of [member texture] (which is
+## always frame 0). Two frames is a bob or a twinkle; four is a pulse ramp.
+## Empty = a still node, which is every ore vein and herb we ship.
+## Frames must be the same size as [member texture] or the node will jump.
+@export var idle_frames: Array[Texture2D] = []
+## Seconds each idle frame is held. 0.5 reads as a slow breath at 2 frames;
+## drop it toward 0.2 for a 4-frame pulse that should feel like energy.
+@export var idle_frame_seconds: float = 0.5
+
+@export_group("Chop FX")
+## Particle burst played on the gathering player's client each time a swing
+## lands. Empty = no burst (the default; ore veins and herbs stay quiet).
+## Supported: [code]drift_up[/code] (motes rising), [code]sparkle[/code]
+## (cross-shaped twinkles), [code]spark_side[/code] (sparks thrown left and
+## right off the hit point), [code]starburst[/code] (an outward explosion).
+@export var chop_fx_style: StringName = &""
+## Main particle colour.
+@export var chop_fx_color: Color = Color.WHITE
+## Second colour the burst fades toward, so a burst is never one flat hue.
+@export var chop_fx_color_alt: Color = Color.WHITE
+## Particles per swing. Keep it low — this fires on every axe hit.
+@export var chop_fx_amount: int = 10
