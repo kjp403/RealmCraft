@@ -69,6 +69,17 @@ var _warded: Array[Player] = []
 ## Cached so the client half can push the number into the shader every frame it
 ## changes without a node lookup.
 var _fill_material: ShaderMaterial = null
+## The ground scar under the pad (pad_decal.gdshader), which is what ties the pad
+## to the floor instead of leaving it sitting on top of the tiles.
+var _decal_material: ShaderMaterial = null
+## The pad's own light, brightened by charge — see [method _apply_visual].
+var _light: PointLight2D = null
+
+## Light energy at full charge. The pad is one of the room's real light sources
+## by the time it completes, which is the point: a dark arena visibly brightens
+## as the group channels, so progress is readable from anywhere on the floor and
+## not only from the fill bar over the pad.
+const LIGHT_ENERGY_FULL: float = 1.35
 
 
 func _ready() -> void:
@@ -80,6 +91,16 @@ func _ready() -> void:
 	var visual: Node = get_node_or_null(^"Fill")
 	if visual is CanvasItem:
 		_fill_material = (visual as CanvasItem).material as ShaderMaterial
+	var scar: Node = get_node_or_null(^"Decal")
+	if scar is CanvasItem:
+		_decal_material = (scar as CanvasItem).material as ShaderMaterial
+		if _decal_material != null:
+			# The scar is warm for the Ember pad and cold for the Storm pad; one
+			# shader, told which it is, rather than two near-identical files.
+			_decal_material.set_shader_parameter(
+				&"variant", 0.0 if variant == Variant.EMBER else 1.0
+			)
+	_light = get_node_or_null(^"Light") as PointLight2D
 	# The server owns charge; a client only renders what it is told.
 	set_physics_process(GameMode.is_world_server())
 	_apply_visual()
@@ -204,9 +225,15 @@ func _on_pad_push(payload: Dictionary) -> void:
 ## both sides: the server keeps its own visual honest for headless previews and
 ## for any observer tooling.
 func _apply_visual() -> void:
+	var lit_now: float = 1.0 if active or complete else 0.0
 	if _fill_material != null:
 		_fill_material.set_shader_parameter(&"charge", progress)
-		_fill_material.set_shader_parameter(&"active", 1.0 if active or complete else 0.0)
+		_fill_material.set_shader_parameter(&"active", lit_now)
+	if _decal_material != null:
+		# The scar is permanent — it stays after the pad closes, because the floor
+		# does not un-crack. Only the light inside the fissures goes out.
+		_decal_material.set_shader_parameter(&"charge", progress)
+		_decal_material.set_shader_parameter(&"active", lit_now)
 	var bar: Node = get_node_or_null(^"ChargeBar")
 	if bar is ProgressBar:
 		(bar as ProgressBar).value = progress * 100.0
@@ -214,6 +241,11 @@ func _apply_visual() -> void:
 	var visual: Node = get_node_or_null(^"Fill")
 	if visual is CanvasItem:
 		(visual as CanvasItem).visible = active or complete
+	if _light != null:
+		# A closed pad casts nothing; an open one glows faintly and brightens as
+		# it fills, so the room lights up with the channel.
+		var lit: bool = active or complete
+		_light.energy = (0.2 + 0.8 * progress) * LIGHT_ENERGY_FULL if lit else 0.0
 
 
 func _instance() -> Node:

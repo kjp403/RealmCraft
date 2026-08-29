@@ -45,15 +45,6 @@ const WARD_DURATION_S: float = 150.0
 
 ## Seconds the environment takes to turn from forge to ice.
 const FREEZE_LERP_S: float = 2.2
-## Final tint of the ice tile sheet. See [method _freeze_environment].
-##
-## Both the alpha AND the colour matter. The IceSet art is near-white, so at full
-## strength it erased the forge completely and the room read as an outdoor
-## snowfield rather than a foundry someone had just frozen. Knocking the value
-## down and pushing it blue keeps it unmistakably ice while letting the red slate
-## underneath show through — which is the whole point of the phase: this is the
-## SAME room, taken.
-const ICE_LAYER_TINT: Color = Color(0.72, 0.83, 0.98, 0.78)
 
 ## How often the arena asks "has anyone walked in / is the room empty".
 const ARM_POLL_S: float = 1.0
@@ -79,12 +70,13 @@ const RESET_AFTER_EMPTY_S: float = 20.0
 @export var wave_manager: MinionWaveManager
 
 @export_group("Phase 3 environment")
-## A DECORATIVE ice layer stacked over the forge floor. It carries no collision
-## and no navigation polygons — see [method _freeze_environment] for why that is
-## load-bearing rather than incidental.
-@export var ice_layer: TileMapLayer
-## Full-screen frost tint driven by the environment shader.
-@export var frost_overlay: CanvasItem
+## Owns the whole forge-to-ice shift: the floor material cross-fade, its
+## replication to clients, the ambient particle swap and the ice surface volume.
+##
+## A scene node rather than something built in [method _build_controllers],
+## because the controllers are server-only and the transition has to run on every
+## peer — that split is exactly the bug this manager was introduced to fix.
+@export var environment: EnvironmentTransitionManager
 
 ## Which enemy type the boss body is built from.
 @export var boss_slug: StringName = &"ossuran"
@@ -157,10 +149,8 @@ func _resolve_scene_refs() -> void:
 		storm_pad = get_node_or_null(^"StormPad") as ChargePad
 	if wave_manager == null:
 		wave_manager = get_node_or_null(^"WaveManager") as MinionWaveManager
-	if ice_layer == null:
-		ice_layer = get_node_or_null(^"../Tiles/Ice") as TileMapLayer
-	if frost_overlay == null:
-		frost_overlay = get_node_or_null(^"../FrostOverlay") as CanvasItem
+	if environment == null:
+		environment = get_node_or_null(^"../Environment") as EnvironmentTransitionManager
 	if pillar_markers.is_empty():
 		pillar_markers = _markers_under(^"PillarMarkers")
 	if fire_sources.is_empty():
@@ -280,6 +270,15 @@ func stop() -> void:
 	if is_instance_valid(boss):
 		_despawn(boss)
 	boss = null
+
+	# Put the room back to its unfrozen state. Instances are pooled, so a reset
+	# that skipped this would hand the next group a forge that is already dead:
+	# ice on the floor, snow in the air, and a slippery surface volume still
+	# registered under a room nobody is fighting in.
+	_frozen = false
+	if environment != null:
+		environment.reset_immediate()
+
 
 
 func _spawn_boss() -> void:
@@ -481,11 +480,16 @@ func _grant_ward() -> void:
 ##
 ## NAVIGATION SAFETY — the reason this fades a layer instead of swapping one:
 ## the Ground layer that carries the collision polygons and feeds the navigation
-## bake is never touched. [member ice_layer] is a decorative layer stacked above
-## it with no physics and no navigation, so the walkable world is byte-identical
-## before and after the shift and no agent's path is invalidated mid-fight.
-## Clearing or re-filling the Ground layer at runtime would rebuild its polygons
-## and strand every mob that was pathing across it.
+## bake is never touched. The frost is TWO FULL-RECT CanvasItems stacked over it
+## — a multiply pass and an additive one — with no physics and no navigation, so
+## the walkable world is byte-identical before and after the shift and no agent's
+## path is invalidated mid-fight. Clearing or re-filling the Ground layer at
+## runtime would rebuild its polygons and strand every mob pathing across it.
+##
+## An earlier version swapped in a second TILEMAP of bright ice art. That is what
+## made the room read as a white snowfield instead of a frozen foundry: a tile
+## sheet REPLACES the floor, where a multiply filter keeps the forge underneath
+## and merely takes the warmth out of it.
 func _freeze_environment() -> void:
 	if _frozen:
 		return
@@ -496,27 +500,11 @@ func _freeze_environment() -> void:
 		boss.damage_dealt_mult = DAMAGE_FROZEN
 		boss.replicate_visual(&"rp_frost_nova", [boss.global_position, 260.0])
 
-	if ice_layer != null:
-		ice_layer.visible = true
-		# Start transparent but already at the target COLOUR, so the tween only
-		# has to bring alpha up — fading the tint in as well makes the sheet pass
-		# through a washed-out white on the way, which is the exact look this
-		# tint exists to avoid.
-		ice_layer.modulate = Color(
-			ICE_LAYER_TINT.r, ICE_LAYER_TINT.g, ICE_LAYER_TINT.b, 0.0
-		)
-		var tween: Tween = create_tween()
-		tween.tween_property(ice_layer, ^"modulate:a", ICE_LAYER_TINT.a, FREEZE_LERP_S)
-	if frost_overlay != null:
-		frost_overlay.visible = true
-		var material: ShaderMaterial = frost_overlay.material as ShaderMaterial
-		if material != null:
-			var shift: Tween = create_tween()
-			shift.tween_method(
-				func(v: float) -> void:
-					material.set_shader_parameter(&"freeze", v),
-				0.0, 1.0, FREEZE_LERP_S
-			)
+	# The floor, the air and the footing are one transition owned by one node,
+	# and it announces itself to every client. See EnvironmentTransitionManager
+	# for why that announcement is not optional.
+	if environment != null:
+		environment.begin_freeze()
 
 	if cold != null:
 		cold.fire_sources = fire_sources

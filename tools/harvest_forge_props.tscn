@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/harvest_forge_props.gd" id="1_h"]
+
+[node name="HarvestForgeProps" type="Node"]
+script = ExtResource("1_h")

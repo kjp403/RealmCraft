@@ -627,7 +627,16 @@ func process_movement() -> void:
 		move_speed = speed
 	if _channeling and _channel_mobile:
 		move_speed *= _channel_speed_mult  # spinning slows you
-	velocity = input_direction * move_speed
+	# Surface handling. `desired` already carries every speed modifier — gear,
+	# AGILITY, a channel, and the Ossuran cold's MOVE_SPEED slow — so IceSlip only
+	# governs how fast we REACH it. Slip can never hand back speed a slow took
+	# away, and on every surface but ice it returns `desired` untouched, which is
+	# the instant response the rest of the game is tuned around.
+	var desired: Vector2 = input_direction * move_speed
+	var surface: StringName = SurfaceQuery.surface_at(global_position, get_parent())
+	velocity = IceSlip.step(
+		velocity, desired, surface, get_physics_process_delta_time()
+	)
 	move_and_slide()
 
 

@@ -46,7 +46,8 @@ const SUPPORT_SLUGS: Array[StringName] = [
 const SHADERS: Array[String] = [
 	"res://source/common/gameplay/ossuran/shaders/ember_pad.gdshader",
 	"res://source/common/gameplay/ossuran/shaders/storm_pad.gdshader",
-	"res://source/common/gameplay/ossuran/shaders/forge_to_ice.gdshader",
+	"res://source/common/gameplay/ossuran/shaders/floor_freeze.gdshader",
+	"res://source/common/gameplay/ossuran/shaders/pad_decal.gdshader",
 ]
 
 ## Visual hooks the pillar brain replicates onto its body. Each one must exist on
@@ -57,6 +58,27 @@ const PILLAR_RP_HOOKS: Array[String] = [
 
 ## The two phase gates, as authored on the boss and as enforced by the machine.
 const EXPECTED_THRESHOLDS: Array[float] = [0.75, 0.5]
+
+## The arena room in tile cells (the chamber is checked implicitly — its wave
+## platforms are flat and it has no solid props of its own).
+const ARENA_RECT := Rect2i(0, 0, 48, 34)
+## Matches build_ossuran_arena.gd.
+const WALL_THICKNESS: int = 2
+## Every cell a body must be able to STAND on, with the name to report if it
+## cannot. Derived from the placements in build_ossuran_scene.py.
+const ARENA_FIXTURES: Array = [
+	[Vector2i(9, 17), "the Ember Pad"],
+	[Vector2i(39, 17), "the Storm Pad"],
+	[Vector2i(24, 11), "the boss spawn"],
+	[Vector2i(24, 26), "the arena return point"],
+	[Vector2i(15, 8), "pillar pedestal 1"],
+	[Vector2i(33, 8), "pillar pedestal 2"],
+	[Vector2i(24, 28), "pillar pedestal 3"],
+	[Vector2i(6, 6), "brazier 1"],
+	[Vector2i(41, 6), "brazier 2"],
+	[Vector2i(6, 27), "brazier 3"],
+	[Vector2i(41, 27), "brazier 4"],
+]
 
 var _fails: Array[String] = []
 
@@ -77,6 +99,7 @@ func _ready() -> void:
 	_check_visuals()
 	_check_scene()
 	_check_portals()
+	_check_reachability()
 	_finish()
 
 
@@ -348,13 +371,18 @@ func _check_visuals() -> void:
 				names.append(str(u.get("name", "")))
 			if not names.has(uniform):
 				_fail("%s has no '%s' uniform" % [path.get_file(), uniform])
+	# The floor shader is driven by name from EnvironmentTransitionManager, and
+	# its room mask must travel with it or the chamber freezes alongside the arena.
 	var freeze: Shader = load(SHADERS[2]) as Shader
 	if freeze != null:
 		var names: Array = []
 		for u: Dictionary in freeze.get_shader_uniform_list():
 			names.append(str(u.get("name", "")))
-		if not names.has("freeze"):
-			_fail("forge_to_ice.gdshader has no 'freeze' uniform")
+		for needed: String in [
+			String(EnvironmentTransitionManager.PROGRESS_UNIFORM), "arena_rect"
+		]:
+			if not names.has(needed):
+				_fail("floor_freeze.gdshader has no '%s' uniform" % needed)
 
 	# The EARTH element the green pillar telegraphs with must exist AND be
 	# painted, or its wind-up draws in whatever colour index 0 happens to be.
@@ -413,8 +441,7 @@ func _check_scene() -> void:
 		[arena.ember_pad, "ember_pad"],
 		[arena.storm_pad, "storm_pad"],
 		[arena.wave_manager, "wave_manager"],
-		[arena.ice_layer, "ice_layer"],
-		[arena.frost_overlay, "frost_overlay"],
+		[arena.environment, "environment"],
 	]:
 		if spec[0] == null:
 			_fail("OssuranArena.%s did not resolve from the scene" % spec[1])
@@ -440,32 +467,71 @@ func _check_scene() -> void:
 
 	# Depth. A floor decal drawn ABOVE a character reads as the player standing
 	# under the floor, and y-sorting a full-width quad makes it flicker.
+	# The freeze is a material on the floor layers, not a layer stacked over them.
+	# Both must carry it, or the props stay summer-warm on an iced floor.
 	var ground: TileMapLayer = root.get_node_or_null(^"Tiles/Ground")
-	var ice: TileMapLayer = root.get_node_or_null(^"Tiles/Ice")
-	var frost: CanvasItem = root.get_node_or_null(^"FrostOverlay")
-	if ground != null and ice != null and frost != null:
-		if not (ground.z_index < ice.z_index and ice.z_index < frost.z_index and frost.z_index < 0):
-			_fail("depth order is wrong: ground %d, ice %d, frost %d (all must be < 0 and ascending)" % [
-				ground.z_index, ice.z_index, frost.z_index
+	var deco_layer: TileMapLayer = root.get_node_or_null(^"Tiles/Deco")
+	for layer: TileMapLayer in [ground, deco_layer]:
+		if layer == null:
+			_fail("arena scene is missing a floor layer for the freeze material")
+			continue
+		var mat: ShaderMaterial = layer.material as ShaderMaterial
+		if mat == null or mat.shader == null:
+			_fail("%s has no freeze ShaderMaterial" % layer.name)
+			continue
+		# It must OPEN unfrozen. A scene saved mid-tween would hand every group a
+		# forge that is already dead.
+		var at_start: Variant = mat.get_shader_parameter(
+			EnvironmentTransitionManager.PROGRESS_UNIFORM
+		)
+		if at_start != null and float(at_start) > 0.001:
+			_fail("%s starts at transition_progress %.2f — the forge opens frozen" % [
+				layer.name, float(at_start)
 			])
-		if ice.visible or frost.visible:
-			_fail("the phase-3 layers start visible — the forge would open frozen")
-		# The ice layer must carry NO physics, or fading it in changes what is
-		# walkable mid-fight and strands anything pathing across it.
-		if ice.tile_set != null and ice.tile_set.get_physics_layers_count() > 0:
-			_fail("the ice tileset has a physics layer — the freeze would alter collision")
-	else:
-		_fail("arena scene is missing Ground / Ice / FrostOverlay")
+	if ground != null and ground.z_index >= 0:
+		_fail("the ground layer is not behind characters (z %d)" % ground.z_index)
+
+	var env: EnvironmentTransitionManager = root.get_node_or_null(
+		^"Environment"
+	) as EnvironmentTransitionManager
+	if env == null:
+		_fail("arena scene has no Environment manager — the freeze would never replicate")
+	elif env.floor_layers.is_empty():
+		_fail("the Environment manager resolved no floor layers")
 
 	if not map.y_sort_enabled:
 		_fail("map root is not y-sorted — sprites would draw through each other")
 
-	print("scene : refs resolved, %d pillars, %d fires, %d wave spawns, depth ok" % [
+	print("scene : refs resolved, %d pillars, %d fires, %d wave spawns, %d frost layers" % [
 		arena.pillar_markers.size(),
 		arena.fire_sources.size(),
 		arena.wave_manager.spawn_markers.size() if arena.wave_manager != null else 0,
+		env.floor_layers.size() if env != null else 0,
 	])
 	root.queue_free()
+
+	# Each pad needs its ground scar, or it goes back to reading as a sticker.
+	for pad: ChargePad in [arena.ember_pad, arena.storm_pad]:
+		if pad == null:
+			continue
+		var scar: Node = pad.get_node_or_null(^"Decal")
+		if scar == null or (scar as CanvasItem) == null:
+			_fail("%s has no Decal — the pad would sit on the floor unblended" % pad.name)
+			continue
+		if (scar as CanvasItem).material as ShaderMaterial == null:
+			_fail("%s/Decal has no ShaderMaterial" % pad.name)
+		# The scar has to be WIDER than the pad; that overhang is the whole
+		# transition from pad art to bare floor.
+		var fill: Control = pad.get_node_or_null(^"Fill") as Control
+		var scar_ctrl: Control = scar as Control
+		if fill != null and scar_ctrl != null and scar_ctrl.size.x <= fill.size.x:
+			_fail("%s/Decal (%.0fpx) is not wider than its Fill (%.0fpx)" % [
+				pad.name, scar_ctrl.size.x, fill.size.x
+			])
+
+	if not map.y_sort_enabled:
+		_fail("map root is not y-sorted — sprites would draw through each other")
+
 
 
 ## The door in and the door back out.
@@ -515,6 +581,104 @@ func _check_portals() -> void:
 		if instance.death_return_warper_id != 57:
 			_fail("death return lands on warper %d, not the forge door (57)" % instance.death_return_warper_id)
 	print("doors : forge 157->58, arena 158->57, death return 57")
+
+
+
+# --- REACHABILITY -------------------------------------------------------------
+
+
+## Flood-fill the arena floor and assert every fixture is still walkable.
+##
+## The decoration pass added REAL collision — stone columns whose bases stand two
+## cells proud of the north wall, anvils and carts along the south, furnace idols
+## in the corners. Any of those could wall a player off from a pad, and none of it
+## would show up in a screenshot: a room can look perfect and still have a pad you
+## cannot walk onto. So this walks the floor the way a player would and checks
+## that every place the encounter needs a body to stand is connected to the door.
+func _check_reachability() -> void:
+	var packed: PackedScene = load(ARENA_SCENE) as PackedScene
+	if packed == null:
+		return
+	var root: Node = packed.instantiate()
+	add_child(root)
+
+	var walls: TileMapLayer = root.get_node_or_null(^"Tiles/Walls")
+	var deco: TileMapLayer = root.get_node_or_null(^"Tiles/Deco")
+	if walls == null or deco == null:
+		_fail("arena scene is missing Walls / Deco for the reachability check")
+		root.queue_free()
+		return
+
+	var blocked: Dictionary = {}
+	for layer: TileMapLayer in [walls, deco]:
+		for cell: Vector2i in layer.get_used_cells():
+			var data: TileData = layer.get_cell_tile_data(cell)
+			# A tile only blocks if it actually carries a collision polygon —
+			# banners, grates and floor slag are painted on the same layer as the
+			# columns and must NOT count as walls.
+			if data != null and data.get_collision_polygons_count(0) > 0:
+				blocked[cell] = true
+
+	# Flood from the arena door, UNCLAMPED. Clamping the fill to the room is what
+	# hides the two failures that actually matter: a hole in the perimeter (the
+	# fill would simply stop at the clamp and look fine) and a walk-in pocket
+	# inside the wall band.
+	var start := Vector2i(24, 30)
+	if blocked.has(start):
+		_fail("the arena entrance cell %s is blocked" % start)
+		root.queue_free()
+		return
+	var seen: Dictionary = {start: true}
+	var queue: Array[Vector2i] = [start]
+	var escaped: bool = false
+	while not queue.is_empty():
+		var at: Vector2i = queue.pop_back()
+		# Well outside the room: the fill got out, so a player can too.
+		if at.x < -6 or at.x > ARENA_RECT.size.x + 6 				or at.y < -6 or at.y > ARENA_RECT.size.y + 6:
+			escaped = true
+			continue
+		for step: Vector2i in [
+			Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+		]:
+			var next: Vector2i = at + step
+			if seen.has(next) or blocked.has(next):
+				continue
+			seen[next] = true
+			queue.append(next)
+
+	if escaped:
+		_fail("the arena perimeter leaks — a player can walk out of the room")
+
+	# Nothing walkable may lie inside the wall band. The forge wall ring is two
+	# cells thick and only ONE of those rows carries collision, so any prop
+	# painted on the open row that is not itself solid opens a pocket a player
+	# can stand in — inside the wall, outside the fight.
+	var pockets: int = 0
+	for cell: Vector2i in seen:
+		if not ARENA_RECT.has_point(cell):
+			continue
+		var in_band: bool = (
+			cell.x < ARENA_RECT.position.x + WALL_THICKNESS
+			or cell.y < ARENA_RECT.position.y + WALL_THICKNESS
+			or cell.x >= ARENA_RECT.end.x - WALL_THICKNESS
+			or cell.y >= ARENA_RECT.end.y - WALL_THICKNESS
+		)
+		if in_band:
+			pockets += 1
+	if pockets > 0:
+		_fail("%d walkable cells sit inside the arena wall band (walk-in pockets)" % pockets)
+
+	for entry: Array in ARENA_FIXTURES:
+		var cell: Vector2i = entry[0]
+		if blocked.has(cell):
+			_fail("%s sits inside a solid prop at %s" % [entry[1], cell])
+		elif not seen.has(cell):
+			_fail("%s at %s is walled off from the entrance" % [entry[1], cell])
+
+	print("reach : %d floor cells, sealed=%s, %d wall pockets, all fixtures reachable" % [
+		seen.size(), not escaped, pockets,
+	])
+	root.queue_free()
 
 
 func _finish() -> void:

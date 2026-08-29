@@ -100,34 +100,31 @@ func _ready() -> void:
 				var w: Array = wall_by_role[role]
 				walls.set_cell(Vector2i(x, y), w[0], w[1])
 
-	# --- Ice: the phase-3 overlay. Its own tileset, which carries NO physics
-	# layer and NO navigation, so fading it in cannot disturb a single path.
-	var ice_set: TileSet = load(
-		"res://source/common/gameplay/maps/tilesets/ossuran_ice_tileset.tres"
+	# --- Deco: architecture and floor detail, on its own tileset so the biome
+	# tileset regen can never clobber it (and so the props that must BLOCK can
+	# carry collision — source 4 of the shared forge tileset has none at all).
+	var deco_set: TileSet = load(
+		"res://source/common/gameplay/maps/tilesets/ossuran_props_tileset.tres"
 	)
-	var ice := TileMapLayer.new()
-	ice.tile_set = ice_set
-	if ice_set != null:
-		for y: int in range(_arena_floor.position.y, _arena_floor.end.y):
-			for x: int in range(_arena_floor.position.x, _arena_floor.end.x):
-				# Two smooth ice-slab variants, alternated on a coarse checker so
-				# the sheet has some grain without looking like a repeating tile.
-				var variant: int = ((x / 2) + (y / 2)) % 2
-				ice.set_cell(Vector2i(x, y), 0, Vector2i(variant, 0))
+	var deco := TileMapLayer.new()
+	deco.tile_set = deco_set
+	if deco_set != null:
+		_decorate_arena(deco)
+		_decorate_chamber(deco)
 
-	for layer: TileMapLayer in [ground, walls, ice]:
+	for layer: TileMapLayer in [ground, walls, deco]:
 		# The serialised blob lags set_cell until internals refresh; nothing
 		# pumps that in a tool run, so ask explicitly or you export the OLD data.
 		layer.update_internals()
 
-	print("cells: ground=%d walls=%d ice=%d" % [
+	print("cells: ground=%d walls=%d deco=%d" % [
 		ground.get_used_cells().size(),
 		walls.get_used_cells().size(),
-		ice.get_used_cells().size(),
+		deco.get_used_cells().size(),
 	])
 	print("LAYER Ground = %s" % Marshalls.raw_to_base64(ground.tile_map_data))
 	print("LAYER Walls = %s" % Marshalls.raw_to_base64(walls.tile_map_data))
-	print("LAYER Ice = %s" % Marshalls.raw_to_base64(ice.tile_map_data))
+	print("LAYER Deco = %s" % Marshalls.raw_to_base64(deco.tile_map_data))
 
 	# Where the portal INTO the encounter goes. Searched rather than eyeballed:
 	# the forge is 3000px wide and a coordinate picked off a screenshot lands
@@ -136,7 +133,7 @@ func _ready() -> void:
 
 	ground.free()
 	walls.free()
-	ice.free()
+	deco.free()
 	root.free()
 	get_tree().quit(0)
 
@@ -314,4 +311,228 @@ func _is_wall(x: int, y: int) -> bool:
 			or x >= room.end.x - WALL_THICKNESS
 			or y >= room.end.y - WALL_THICKNESS
 		)
+	return false
+
+
+# --- Decoration ---------------------------------------------------------------
+#
+# All coordinates below are cells in `ossuran_props_tileset` (fire_forge/tiles.png,
+# 25x25). Multi-cell props are STAMPED as whole rectangles: these are compositions,
+# and painting one cell of a 3x5 arch in isolation draws a fragment of masonry
+# floating in a room.
+#
+# THE PLACEMENT RULE that keeps this honest: anything that reads as a solid object
+# is placed IN OR AGAINST THE WALL BAND, never out in the open floor. Two reasons.
+# The encounter's geometry is tuned (a 132px slam, three pillars, a kite path) and
+# obstacles in the middle of it would change the fight, not decorate it. And a prop
+# standing in open floor that the player walks through is exactly the visual bug
+# this pass exists to remove — against the wall, the wall's own collision means the
+# question never comes up.
+
+## Column: shaft + base, 1x4. Source rows 1..4 of the arch's left leg.
+const S_COLUMN := Vector2i(14, 1)
+## Hanging chevron banner, 1x5. Flat cloth — deliberately NOT solid, so players
+## walk under it the way you would under a hanging standard.
+const S_BANNER := Vector2i(18, 0)
+## Stone idol furnace, 2x4, glowing mouth.
+const S_FURNACE := Vector2i(12, 9)
+## Anvil on a lit base, 2x3.
+const S_ANVIL := Vector2i(14, 10)
+## Crucible, 2x2.
+const S_CRUCIBLE := Vector2i(14, 13)
+## Ore carts, 2x4.
+const S_CART := Vector2i(15, 5)
+## Full archway, 3x5 — legs solid, centre column open.
+const S_ARCH := Vector2i(14, 0)
+## Solid molten fill, a single column of 3 rows.
+const S_LAVA := Vector2i(22, 13)
+## Iron grate (1x2) and railing (1x2) — flat wall furniture, never solid.
+const S_GRATE := Vector2i(13, 2)
+const S_RAILING := Vector2i(12, 15)
+## Glowing pipe frame, 3x3. Flat floor detail / summoning platform.
+const S_FRAME := Vector2i(8, 9)
+
+## Hazard chevrons — the dais edging. Eight interchangeable variants.
+const HAZARD: Array[Vector2i] = [
+	Vector2i(11, 6), Vector2i(12, 6), Vector2i(13, 6),
+	Vector2i(11, 7), Vector2i(13, 7),
+	Vector2i(11, 8), Vector2i(12, 8), Vector2i(13, 8),
+]
+## Small slag / debris, flat.
+const DEBRIS: Array[Vector2i] = [
+	Vector2i(4, 6), Vector2i(5, 6), Vector2i(6, 6), Vector2i(7, 6), Vector2i(7, 7),
+]
+## Dark cracked slab, for the chamber floor overlay.
+const CRACKED: Array[Vector2i] = [
+	Vector2i(0, 7), Vector2i(1, 7), Vector2i(2, 7), Vector2i(3, 7), Vector2i(0, 8),
+]
+## Brick facing, used to give the chamber a different border than the arena.
+const BRICK: Array[Vector2i] = [
+	Vector2i(5, 1), Vector2i(6, 1), Vector2i(7, 1), Vector2i(5, 2), Vector2i(6, 2),
+]
+
+## Cells the scatter must leave alone: the pads, the boss, the pillar pedestals,
+## the braziers, both landing points and the two doors. Debris under a charge pad
+## fights the pad shader; debris on a spawn point reads as the mob having broken
+## the floor on arrival.
+const KEEP_CLEAR_CELLS: Array[Vector2i] = [
+	Vector2i(9, 17), Vector2i(39, 17),                       # pads
+	Vector2i(24, 11), Vector2i(24, 26), Vector2i(24, 30),    # boss, return, entrance
+	Vector2i(15, 8), Vector2i(33, 8), Vector2i(24, 28),      # pillar pedestals
+	Vector2i(6, 6), Vector2i(41, 6), Vector2i(6, 27), Vector2i(41, 27),  # braziers
+	Vector2i(20, 30),                                        # exit portal
+	Vector2i(81, 25),                                        # chamber landing
+]
+
+
+## Paint a rectangular prop with its top-left at [param at].
+func _stamp(layer: TileMapLayer, at: Vector2i, src: Vector2i, w: int, h: int) -> void:
+	for dy: int in h:
+		for dx: int in w:
+			layer.set_cell(at + Vector2i(dx, dy), 0, src + Vector2i(dx, dy))
+
+
+func _decorate_arena(deco: TileMapLayer) -> void:
+	var x0: int = ARENA.position.x
+	var y0: int = ARENA.position.y
+	var x1: int = ARENA.end.x - 1
+	var y1: int = ARENA.end.y - 1
+	var inner_top: int = y0 + WALL_THICKNESS - 1     # last wall row at the top
+	var inner_bottom: int = y1 - WALL_THICKNESS + 1  # first wall row at the bottom
+
+	# MOLTEN CHANNELS north and south, painted ON the inner wall row. The wall
+	# beneath already blocks movement, so the lava is unreachable by construction
+	# — no new collision, no shrunk arena, and nobody can stand in it.
+	for x: int in range(x0 + WALL_THICKNESS, x1 - WALL_THICKNESS + 1):
+		deco.set_cell(Vector2i(x, inner_top), 0, S_LAVA + Vector2i(0, x % 3))
+		deco.set_cell(Vector2i(x, inner_bottom), 0, S_LAVA + Vector2i(0, (x + 1) % 3))
+
+	# IRON GRATING east and west, running the FULL height of the inner wall column.
+	#
+	# Continuous, not spaced at intervals, because of what the wall vocabulary
+	# underneath actually is: the forge ring is two cells thick and only one of
+	# those rows carries collision, and on the west wall it is the OUTER one — so
+	# the inner column is open floor that a player can stand in. Spacing the grates
+	# out left twenty such cells between them. Running the grating the whole way
+	# down seals the column (these tiles are solid) and gives the east/west walls
+	# their own material, against the molten channel north and south.
+	for y: int in range(y0 + WALL_THICKNESS, y1 - WALL_THICKNESS + 1):
+		deco.set_cell(Vector2i(x0 + 1, y), 0, S_GRATE + Vector2i(0, y % 2))
+		deco.set_cell(Vector2i(x1 - 1, y), 0, S_RAILING + Vector2i(0, (y + 1) % 2))
+
+	# COLUMNS along the top, breaking the straight run of wall. Their bases stand
+	# two cells proud of it, which is what gives the perimeter a silhouette.
+	for x: int in [7, 14, 21, 28, 35, 41]:
+		_stamp(deco, Vector2i(x, y0), S_COLUMN, 1, 4)
+	# BANNERS hang between them, starting BELOW the molten channel.
+	#
+	# They used to start at the wall's top row, which overwrote the channel — and
+	# because a banner is flat cloth (deliberately not solid) while the top wall's
+	# INNER row carries no collision of its own, each banner punched a walk-in
+	# pocket in the perimeter. Hanging them from the first interior row keeps the
+	# channel unbroken and solid the whole way across, and reads better anyway:
+	# the standards hang from under the molten sill.
+	for x: int in [10, 17, 24, 31, 38]:
+		_stamp(deco, Vector2i(x, y0 + 2), S_BANNER + Vector2i(0, 1), 1, 4)
+
+	# FURNACE IDOLS watching from the top corners.
+	_stamp(deco, Vector2i(x0 + 3, y0), S_FURNACE, 2, 4)
+	_stamp(deco, Vector2i(x1 - 4, y0), S_FURNACE, 2, 4)
+
+	# WORKSHOP CLUTTER along the bottom wall, so the south edge reads as a foundry
+	# floor rather than a blank line.
+	_stamp(deco, Vector2i(x0 + 8, inner_bottom - 2), S_ANVIL, 2, 3)
+	_stamp(deco, Vector2i(x1 - 10, inner_bottom - 2), S_ANVIL, 2, 3)
+	_stamp(deco, Vector2i(x0 + 16, inner_bottom - 1), S_CRUCIBLE, 2, 2)
+	_stamp(deco, Vector2i(x1 - 17, inner_bottom - 1), S_CRUCIBLE, 2, 2)
+	_stamp(deco, Vector2i(x0 + 12, inner_bottom - 3), S_CART, 2, 4)
+
+	# RAISED DAIS under each pad: a hazard-chevron ring one cell thick, four cells
+	# out from the pad centre. It marks the standable zone before the pad has any
+	# charge on it, which is the only cue a player gets that the pad is a PLACE.
+	for centre: Vector2i in [Vector2i(9, 17), Vector2i(39, 17)]:
+		_ring(deco, centre, 4, HAZARD)
+
+	# Scattered slag across the floor, avoiding everything that matters.
+	_scatter(deco, _arena_floor, DEBRIS, 0.035, 5)
+
+
+func _decorate_chamber(deco: TileMapLayer) -> void:
+	var x0: int = CHAMBER.position.x
+	var y0: int = CHAMBER.position.y
+	var x1: int = CHAMBER.end.x - 1
+	var y1: int = CHAMBER.end.y - 1
+
+	# A DIFFERENT BORDER. Both rooms are cut from one tilemap and share a wall
+	# tileset, so the way to make the chamber read as somewhere else is to face its
+	# inner ring in brick and give it no molten channel at all: cold masonry, not a
+	# working foundry.
+	for x: int in range(x0 + 1, x1):
+		deco.set_cell(Vector2i(x, y0 + 1), 0, BRICK[x % BRICK.size()])
+		deco.set_cell(Vector2i(x, y1 - 1), 0, BRICK[(x + 2) % BRICK.size()])
+	for y: int in range(y0 + 2, y1 - 1):
+		deco.set_cell(Vector2i(x0 + 1, y), 0, BRICK[y % BRICK.size()])
+		deco.set_cell(Vector2i(x1 - 1, y), 0, BRICK[(y + 3) % BRICK.size()])
+
+	# THE SUMMONING GATE — the chamber's one landmark, centred on the north wall.
+	# The arena deliberately gets no arch, so the two rooms cannot be confused.
+	_stamp(deco, Vector2i(x0 + 15, y0), S_ARCH, 3, 5)
+
+	# CRACKED FLOOR, heavier than the arena's slag: this room has had five waves
+	# torn out of it.
+	_scatter(deco, Rect2i(
+		Vector2i(x0 + 2, y0 + 2),
+		Vector2i(CHAMBER.size.x - 4, CHAMBER.size.y - 4)
+	), CRACKED, 0.10, 7)
+
+	# SUMMONING PLATFORMS under the six wave spawn markers: a glowing pipe frame on
+	# the floor, so a player can see WHERE the next wave arrives before it does.
+	# Coordinates mirror WAVE_SPAWNS in build_ossuran_scene.py.
+	for px: Vector2i in [
+		Vector2i(1120, 140), Vector2i(1296, 128), Vector2i(1472, 140),
+		Vector2i(1100, 300), Vector2i(1492, 300), Vector2i(1296, 200),
+	]:
+		var cell := Vector2i(px.x / 16, px.y / 16)
+		_stamp(deco, cell - Vector2i(1, 1), S_FRAME, 3, 3)
+
+
+## A one-cell-thick square ring of [param tiles] at [param radius] around
+## [param centre].
+func _ring(layer: TileMapLayer, centre: Vector2i, radius: int, tiles: Array[Vector2i]) -> void:
+	var i: int = 0
+	for d: int in range(-radius, radius + 1):
+		for cell: Vector2i in [
+			centre + Vector2i(d, -radius), centre + Vector2i(d, radius),
+			centre + Vector2i(-radius, d), centre + Vector2i(radius, d),
+		]:
+			layer.set_cell(cell, 0, tiles[i % tiles.size()])
+			i += 1
+
+
+## Sprinkle flat detail across [param area] at [param chance], skipping anything
+## within [param keep_clear] cells of a functional fixture. Hash-driven, so the
+## result is identical on every rebuild — a scatter that moves between runs makes
+## the map diff unreadable.
+func _scatter(
+	layer: TileMapLayer, area: Rect2i, tiles: Array[Vector2i],
+	chance: float, keep_clear: int
+) -> void:
+	for y: int in range(area.position.y, area.end.y):
+		for x: int in range(area.position.x, area.end.x):
+			var cell := Vector2i(x, y)
+			if layer.get_cell_source_id(cell) >= 0:
+				continue  # never paint over an existing prop
+			if _too_close(cell, keep_clear):
+				continue
+			var h: float = fmod(absf(sin(float(x) * 91.7 + float(y) * 47.3) * 28657.0), 1.0)
+			if h > chance:
+				continue
+			var pick: float = fmod(absf(sin(float(x) * 12.9 + float(y) * 78.2) * 43758.5), 1.0)
+			layer.set_cell(cell, 0, tiles[mini(int(pick * float(tiles.size())), tiles.size() - 1)])
+
+
+func _too_close(cell: Vector2i, keep_clear: int) -> bool:
+	for fixture: Vector2i in KEEP_CLEAR_CELLS:
+		if absi(cell.x - fixture.x) <= keep_clear and absi(cell.y - fixture.y) <= keep_clear:
+			return true
 	return false

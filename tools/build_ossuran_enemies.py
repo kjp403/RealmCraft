@@ -160,7 +160,10 @@ PILLAR_COMMON: dict[str, object] = {
     "respawns": False,
     "respawn_delay": 0.5,
     "xp_reward": 1200,
-    "visual_scale": 1.6,
+    # Smaller than Ossuran (1.4 on a 64px frame). At 1.6 the pillars rendered
+    # BIGGER than the boss standing between them, which reads as three bosses and
+    # one add. A phase-2 objective has to be substantial and clearly subordinate.
+    "visual_scale": 1.15,
 }
 
 # Wave trash. Short respawn_delay is load-bearing: for a single-life mob that

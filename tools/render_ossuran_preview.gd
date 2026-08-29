@@ -73,32 +73,41 @@ func _render(shot: String, centre: Vector2, size: Vector2i) -> void:
 ## Put the map into the state this shot is meant to show.
 func _stage(map: Node, shot: String) -> void:
 	var encounter: Node = map.get_node_or_null(^"Encounter")
-	var ice: CanvasItem = map.get_node_or_null(^"Tiles/Ice")
-	var frost: CanvasItem = map.get_node_or_null(^"FrostOverlay")
 
 	if shot == "charged" or shot == "frozen":
 		for pad_name: String in ["EmberPad", "StormPad"]:
 			var pad: Node = encounter.get_node_or_null(NodePath(pad_name))
 			if pad == null:
 				continue
-			var fill: CanvasItem = pad.get_node_or_null(^"Fill")
-			if fill == null:
-				continue
-			var mat: ShaderMaterial = fill.material as ShaderMaterial
-			if mat != null:
-				mat.set_shader_parameter(&"charge", 1.0)
-				mat.set_shader_parameter(&"active", 1.0)
-			fill.visible = true
+			# Fill AND Decal: the scar is half of what a charged pad looks like,
+			# and a preview that only lit the pad body would be showing a pad the
+			# game never draws.
+			for child: String in ["Fill", "Decal"]:
+				var part: CanvasItem = pad.get_node_or_null(NodePath(child))
+				if part == null:
+					continue
+				var mat: ShaderMaterial = part.material as ShaderMaterial
+				if mat != null:
+					mat.set_shader_parameter(&"charge", 1.0)
+					mat.set_shader_parameter(&"active", 1.0)
+				part.visible = true
 
 	if shot == "frozen":
-		if ice != null:
-			ice.visible = true
-			# The arena's own end-state tint, not white — a preview that stages
-			# the freeze differently from _freeze_environment is a preview of a
-			# room that does not exist.
-			ice.modulate = OssuranArena.ICE_LAYER_TINT
-		if frost != null:
-			frost.visible = true
-			var mat: ShaderMaterial = frost.material as ShaderMaterial
-			if mat != null:
-				mat.set_shader_parameter(&"freeze", 1.0)
+		# Drive the floor layers' shared material to the value the manager's tween
+		# would reach. Staging it any other way previews a room that never exists.
+		for path: NodePath in [^"Tiles/Ground", ^"Tiles/Deco"]:
+			var layer: TileMapLayer = map.get_node_or_null(path) as TileMapLayer
+			if layer == null:
+				continue
+			var floor_mat: ShaderMaterial = layer.material as ShaderMaterial
+			if floor_mat != null:
+				floor_mat.set_shader_parameter(
+					EnvironmentTransitionManager.PROGRESS_UNIFORM, 1.0
+				)
+		var frost_p: CPUParticles2D = map.get_node_or_null(^"ArenaFrost") as CPUParticles2D
+		var ember_p: CPUParticles2D = map.get_node_or_null(^"ArenaEmbers") as CPUParticles2D
+		if frost_p != null:
+			frost_p.visible = true
+			frost_p.emitting = true
+		if ember_p != null:
+			ember_p.emitting = false
