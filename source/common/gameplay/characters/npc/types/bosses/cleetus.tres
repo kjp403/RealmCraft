@@ -25,16 +25,22 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_emberfrost.tres" id="li_relic"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/chests/gold_red_large.tres" id="li_ornate_red"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/oathstone.tres" id="li_oathstone"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="li_big_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_health_potion.tres" id="li_gh_potion"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/greater_mana_potion.tres" id="li_gm_potion"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/runite_arrow.tres" id="li_runite_arrow"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("3_loot")
 item = ExtResource("li_gold")
-min_amount = 700
-max_amount = 1150
+min_amount = 8000
+max_amount = 14000
 
 [sub_resource type="Resource" id="Drop_bone"]
 script = ExtResource("3_loot")
 item = ExtResource("li_bone")
+min_amount = 20
+max_amount = 40
 
 [sub_resource type="Resource" id="Drop_key"]
 script = ExtResource("3_loot")
@@ -78,6 +84,34 @@ item = ExtResource("loot_dragon_bones")
 min_amount = 1
 max_amount = 2
 chance = 1.0
+
+[sub_resource type="Resource" id="Drop_big_bones"]
+script = ExtResource("3_loot")
+item = ExtResource("li_big_bones")
+min_amount = 5
+max_amount = 12
+chance = 1.0
+
+[sub_resource type="Resource" id="Drop_gh_potion"]
+script = ExtResource("3_loot")
+item = ExtResource("li_gh_potion")
+min_amount = 8
+max_amount = 16
+chance = 0.8
+
+[sub_resource type="Resource" id="Drop_gm_potion"]
+script = ExtResource("3_loot")
+item = ExtResource("li_gm_potion")
+min_amount = 8
+max_amount = 16
+chance = 0.8
+
+[sub_resource type="Resource" id="Drop_runite_arrow"]
+script = ExtResource("3_loot")
+item = ExtResource("li_runite_arrow")
+min_amount = 150
+max_amount = 350
+chance = 0.6
 
 [sub_resource type="Resource" id="Drop_ember_ash"]
 script = ExtResource("3_loot")
@@ -165,7 +199,7 @@ wander_pause_max_s = 4.0
 xp_reward = 11000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow"), SubResource("Drop_dragon_bones"), SubResource("Drop_ember_ash"), SubResource("Drop_coal_ore"), SubResource("Drop_blue_lobster"), SubResource("Drop_runite_ore"), SubResource("Drop_yew_log"), SubResource("Drop_runite_bar"), SubResource("Drop_ornate_red_chest"), SubResource("Drop_relic_emberfrost"), SubResource("Drop_oathstone")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_key"), SubResource("Drop_mat_chest"), SubResource("Drop_l70_w_sword"), SubResource("Drop_l70_w_hammer"), SubResource("Drop_l70_w_wand"), SubResource("Drop_l70_w_tome"), SubResource("Drop_l70_w_bow"), SubResource("Drop_dragon_bones"), SubResource("Drop_big_bones"), SubResource("Drop_gh_potion"), SubResource("Drop_gm_potion"), SubResource("Drop_runite_arrow"), SubResource("Drop_ember_ash"), SubResource("Drop_coal_ore"), SubResource("Drop_blue_lobster"), SubResource("Drop_runite_ore"), SubResource("Drop_yew_log"), SubResource("Drop_runite_bar"), SubResource("Drop_ornate_red_chest"), SubResource("Drop_relic_emberfrost"), SubResource("Drop_oathstone")])
 combat_skill_xp_override = 16000
 ; 0.6 -> 0.5 so the VISUAL enrage (BossController: kindled -> cold skin swap,
 ; speed-up, frost telegraph tint) lands on the exact same health as the Ossuran
