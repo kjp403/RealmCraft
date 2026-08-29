@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_instance"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="2_forge"]
+
+[resource]
+script = ExtResource("1_instance")
+instance_name = &"ossuran_arena"
+map_path = "res://source/common/gameplay/maps/maps/ossuran/ossuran_arena.tscn"
+load_at_startup = false
+zone_title = "Ossuran's Ruin"
+show_discovery = true
+required_wardstone = &"desert"
+death_return_instance = ExtResource("2_forge")
+death_return_warper_id = 57
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"
+metadata/slug = &"ossuran_arena"

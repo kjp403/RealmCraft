@@ -8,10 +8,10 @@ content_name = &"items"
 version = 1787960710
 next_id = 613
 entries = Array[Dictionary]([{
-&"hash": "7ad7739876ce965b1091449598b37e22feb4d7aac6cb5253f4049929b994c5d2",
+&"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
-&"path": "res://source/common/gameplay/items/consumables/focus_tonic.tres",
-&"slug": &"focus_tonic"
+&"path": "res://source/common/gameplay/items/consumables/defense_tonic.tres",
+&"slug": &"defense_tonic"
 }, {
 &"hash": "ddcd669d98abb135532a703bf4f82fab34d61a1d1c05447c09930e165b7828af",
 &"id": 203,

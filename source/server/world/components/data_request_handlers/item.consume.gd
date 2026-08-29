@@ -27,15 +27,24 @@ func data_request_handler(
 	if consumable == null:
 		return {"ok": false, "reason": "not_consumable"}
 
-	# One weapon coating at a time. Checked ahead of can_use (which also refuses,
-	# so the hotbar and the held sip agree) purely so the refusal can be NAMED —
-	# "no_effect" would read as "this potion is broken".
-	if consumable.is_coating() and CoatingService.is_active(player):
+	# One combat draught at a time — a weapon coating OR a draught-slot tonic,
+	# never both (ConsumableItem.draught_slot_busy). Checked ahead of can_use
+	# (which also refuses, so the hotbar and the held sip agree) purely so the
+	# refusal can be NAMED — "no_effect" would read as "this potion is broken".
+	var wants_slot: bool = consumable.is_coating() or consumable.exclusive_buff
+	if wants_slot and ConsumableItem.draught_slot_busy(player):
+		var coated: bool = CoatingService.is_active(player)
 		return {
 			"ok": false,
 			"reason": "coating_active",
-			"active_kind": String(CoatingService.active_kind(player)),
-			"remaining": CoatingService.remaining_seconds(player),
+			"active_kind": String(
+				CoatingService.active_kind(player) if coated
+				else BuffService.exclusive_stat(player)
+			),
+			"remaining": (
+				CoatingService.remaining_seconds(player) if coated
+				else BuffService.exclusive_remaining_seconds(player)
+			),
 		}
 
 	if not consumable.can_use(player):

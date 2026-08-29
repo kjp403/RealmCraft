@@ -30,6 +30,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/fire_forge/forgemaster_helka.tres" id="helka"]
 
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/bellows_gallery.tres" id="stair_bellows_gallery"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/ossuran_arena.tres" id="portal_ossuran"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/cinder_deeps.tres" id="stair_cinder_deeps"]
 [ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 [ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
@@ -634,3 +635,15 @@ destination_label = "The Cinder Deeps"
 target_instance = ExtResource("stair_cinder_deeps")
 warper_id = 155
 target_id = 45
+
+[node name="OssuranLanding" parent="." instance=ExtResource("5_warper")]
+position = Vector2(1816.0, 504.0)
+warper_id = 57
+
+[node name="OssuranPortal" parent="." instance=ExtResource("6_portal")]
+position = Vector2(1816.0, 472.0)
+portal_color = Color(0.42, 0.62, 1, 1)
+destination_label = "Ossuran's Ruin"
+target_instance = ExtResource("portal_ossuran")
+warper_id = 157
+target_id = 58

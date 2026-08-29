@@ -46,11 +46,16 @@ const EXPECTED_RANGES: Dictionary = {
 }
 
 ## potion slug -> [coating kind, brew level, herb slug]
+##
+## The coatings are END-GAME herblore, deliberately: level 65 arrives quickly,
+## and when every potion in the game sat at or below it the skill had nothing
+## left above the halfway mark. 70/76/82/88 also leaves 89-99 open for whatever
+## gets brewed next.
 const EXPECTED_POTIONS: Dictionary = {
-	"weapon_poison": ["poison", 35, "blightspore"],
-	"weapon_salve": ["heal", 45, "fairy_dust"],
-	"weapon_ember": ["burn", 55, "ember_ash"],
-	"weapon_poison_plus": ["poison", 65, "venom_sac"],
+	"weapon_poison": ["poison", 70, "blightspore"],
+	"weapon_salve": ["heal", 76, "fairy_dust"],
+	"weapon_ember": ["burn", 82, "ember_ash"],
+	"weapon_poison_plus": ["poison", 88, "venom_sac"],
 }
 
 const MATERIAL_SLUGS: Array[String] = [

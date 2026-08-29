@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ConsumableItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_yellow_vial.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+buff_stat = &"armor"
+buff_amount = 25.0
+buff_duration_s = 300.0
+exclusive_buff = true
+shared_cooldown_ms = 3000
+cooldown_category = &"defense_tonic"
+item_name = &"Defense Tonic"
+item_icon = ExtResource("1_tex")
+description = "Grimshade steeped down until it runs the colour of old brass. Drink it and your skin sets like a second coat of mail."
+vendor_value = 100
+metadata/slug = &"defense_tonic"
+metadata/id = 74

@@ -1,12 +1,28 @@
 #!/usr/bin/env python3
 """Generate Farming herb ladder + Herblore station content (v1).
 
-Run: python tools/build_herblore_foraging_v1.py
+STALE — DO NOT RUN WITHOUT READING THIS.
+
+herblore.tres and alchemy_station.tres have both moved a long way past what
+BREWS below describes: the four weapon coatings, the prayer potion, the Defense
+Tonic and the two Hollow Seep quest brews were all authored straight into the
+.tres afterwards, and the whole ladder has since been respread across levels
+1-88. Re-running this would silently delete every one of them and roll the
+levels back to the v1 seven. It is kept for the herb / node / sickle passes it
+still owns, and for the record of how the ladder started.
+
+To run the parts that ARE still current, pass --force and then check
+`git diff source/common/gameplay/jobs/herblore.tres
+        source/common/gameplay/crafting/resources/alchemy_station.tres`
+before committing anything.
+
+Run: python tools/build_herblore_foraging_v1.py --force
 Then: godot --headless --path . -s tools/update_items_index.gd
 """
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -120,7 +136,8 @@ BREWS = [
     ("mana_potion", "moonbloom", 2, 20, 165, "res://source/common/gameplay/items/consumables/mana_potion.tres"),
     ("greater_health_potion", "bloodcap", 3, 30, 240, "res://source/common/gameplay/items/consumables/greater_health_potion.tres"),
     ("greater_mana_potion", "starblossom", 3, 40, 300, "res://source/common/gameplay/items/consumables/greater_mana_potion.tres"),
-    ("focus_tonic", "grimshade", 3, 50, 360, "res://source/common/gameplay/items/consumables/focus_tonic.tres"),
+    # v1 brewed a Mana Tonic here; the slot is now the Defense Tonic at level 58.
+    ("defense_tonic", "grimshade", 3, 58, 1300, "res://source/common/gameplay/items/consumables/defense_tonic.tres"),
 ]
 
 SICKLES = [
@@ -228,6 +245,13 @@ metadata/slug = &"{slug}"
 
 
 def main() -> None:
+    if "--force" not in sys.argv:
+        sys.exit(
+            "refusing to run: this generator is STALE and would delete the weapon "
+            "coatings, the prayer potion, the Defense Tonic and the Hollow Seep "
+            "brews from herblore.tres / alchemy_station.tres. See the module "
+            "docstring, then re-run with --force if you really mean it."
+        )
     herb_paths: dict[str, str] = {}
     for h in HERBS:
         rel = f"res://source/common/gameplay/items/materials/herbs/{h['slug']}.tres"
