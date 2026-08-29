@@ -443,7 +443,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/rabid_wolf.tres",
 &"slug": &"rabid_wolf"
 }, {
-&"hash": "839ac18264d5a24d2791f18ff0a3f1822a44dbfc390ba14d316c14beb5075cf3",
+&"hash": "8ff3a1093f443c7d00b5cba227cd000241de30d3e6c2cdcdedf3d3d2d179555e",
 &"id": 92,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"ossuran"
@@ -508,7 +508,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
 &"slug": &"cistern_sovereign_world"
 }, {
-&"hash": "839ac18264d5a24d2791f18ff0a3f1822a44dbfc390ba14d316c14beb5075cf3",
+&"hash": "8ff3a1093f443c7d00b5cba227cd000241de30d3e6c2cdcdedf3d3d2d179555e",
 &"id": 107,
 &"path": "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres",
 &"slug": &"cleetus"
