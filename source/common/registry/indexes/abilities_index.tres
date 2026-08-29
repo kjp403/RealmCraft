@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_pce05")
 content_name = &"abilities"
-version = 1787421653
-next_id = 114
+version = 1787947202
+next_id = 123
 entries = Array[Dictionary]([{
 &"hash": "fb4a6a7491a0eacddb0d7b118f06f893acc74eafa6db4802bc89825ab2409b19",
 &"id": 12,
@@ -213,7 +213,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/bladestorm.tres",
 &"slug": &"bladestorm"
 }, {
-&"hash": "e509d6aada3cf2cf46a0230085e51e4f719be34c6a2a15301f558cf6d2211ad8",
+&"hash": "cc7feb9d1a985e763ae8d5e5b55c353aa908ebf7301b136e2f995f45d8ed4bba",
 &"id": 25,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/cataclysm.tres",
 &"slug": &"cataclysm"
@@ -223,12 +223,12 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/crippling_strike.tres",
 &"slug": &"crippling_strike"
 }, {
-&"hash": "2e32953d09c1f0869962ae2fdd1db6182e5a060d4729565bdaaebac84723dead",
+&"hash": "7d6a192479610aa7db23165b955d7f5d8af5308d6ff011b88f8f56d2eb40c596",
 &"id": 11,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/crushing_blow.tres",
 &"slug": &"crushing_blow"
 }, {
-&"hash": "22c2648132bfb839b4bd1016144a630db85c69d98ade361a0e60f2034dee326a",
+&"hash": "dac2f21a43006c46b3adf281bc1ec14d86f523ea98bd18cc7a877a7e203f0e36",
 &"id": 18,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/earthshatter.tres",
 &"slug": &"earthshatter"
@@ -238,7 +238,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/hammer_slam.tres",
 &"slug": &"hammer_slam"
 }, {
-&"hash": "88df4a9f1bcd03ed5b68845bb9a16149085f19b098e7272d7a6c9f4ed62af2ce",
+&"hash": "41794bfb2d52338b5db549c712568c7ad717b8e1989347902bce199717946a25",
 &"id": 19,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/melee_swing/shockwave.tres",
 &"slug": &"shockwave"
@@ -558,20 +558,65 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/berserk/hammer_rampage_4.tres",
 &"slug": &"hammer_rampage_4"
 }, {
-&"hash": "6138194317a91c7b800ec74e4b6b038c05a26276ef50914d22672556dda505bb",
+&"hash": "c014861a74aad8279137ca19b89209bb850941913a80f72381c36534bf68a82b",
 &"id": 111,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock.tres",
 &"slug": &"hammer_aftershock"
 }, {
-&"hash": "e60c29410760ce6f4737fa22a58a93cdc8a42ae6c6621ae3772f3c227586faa5",
+&"hash": "3c68e64968ec11efc66e6db97fc14ef2f9b5aa3a38be63a682e1e96238ce71c6",
 &"id": 112,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock_2.tres",
 &"slug": &"hammer_aftershock_2"
 }, {
-&"hash": "abdffb3870a1c3fa34542eaab87c0250c94de76eec3c12f0cb7f7499b99b8673",
+&"hash": "1127a8cc669000dcea2c7d0f6114d302a26e3b322002be7080b2cbd4be8c88dd",
 &"id": 113,
 &"path": "res://source/common/gameplay/combat/ability/ability_collection/nova/hammer_aftershock_3.tres",
 &"slug": &"hammer_aftershock_3"
+}, {
+&"hash": "daf40c00d4489da6bc62704b955971532e8cae2c1ece965a79e834a4f379bd9a",
+&"id": 114,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/taunt/mighty_roar.tres",
+&"slug": &"mighty_roar"
+}, {
+&"hash": "24ee8c9c28a267cea1b1e4551a529a7c31dce3b177e3fc15024a465ef6151f7d",
+&"id": 115,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/taunt/mighty_roar_2.tres",
+&"slug": &"mighty_roar_2"
+}, {
+&"hash": "7db27e423a8e7da5d3dfdb389e3e3e3ca4d12a2211fd6829542b1ab3963c9221",
+&"id": 116,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/taunt/mighty_roar_3.tres",
+&"slug": &"mighty_roar_3"
+}, {
+&"hash": "e76948278d9a8075cdc687c650d973ef5a89c1ecd9078f29d33598cdab476144",
+&"id": 117,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/ward/spectral_ward.tres",
+&"slug": &"spectral_ward"
+}, {
+&"hash": "5ad5347610bbdaa1a4eebb1ac314c3d3a1866479278888b64e262985759bf41f",
+&"id": 118,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/ward/spectral_ward_2.tres",
+&"slug": &"spectral_ward_2"
+}, {
+&"hash": "8c245ad24d153a709534be466060a85c32a216fd2e786cc370d11770afa52059",
+&"id": 119,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/ward/spectral_ward_3.tres",
+&"slug": &"spectral_ward_3"
+}, {
+&"hash": "c4ecb6c2089c986f1c755f3c70a14c236d16e86ec42f4e8ceca38e78729a0941",
+&"id": 120,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/sanctuary/paladins_might.tres",
+&"slug": &"paladins_might"
+}, {
+&"hash": "99d1fa561f21fb5c3413997ad42cfcb9373a1590045fbb3bbd883ba69d037679",
+&"id": 121,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/sanctuary/paladins_might_2.tres",
+&"slug": &"paladins_might_2"
+}, {
+&"hash": "07b0924deaaa7eaffd65990a5450bdc63f067d8abf05428b13051800e3a6cea0",
+&"id": 122,
+&"path": "res://source/common/gameplay/combat/ability/ability_collection/sanctuary/paladins_might_3.tres",
+&"slug": &"paladins_might_3"
 }])
 scan_path = "res://source/common/gameplay/combat/ability/ability_collection"
 filters = PackedStringArray("*.tres")

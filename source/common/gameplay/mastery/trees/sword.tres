@@ -14,12 +14,15 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/berserk/sword_berserk.tres" id="9_bsk1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/berserk/sword_berserk_2.tres" id="10_bsk2"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/berserk/sword_berserk_3.tres" id="11_bsk3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/bulwark.png" id="12_bulwark"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/haste.png" id="13_haste"]
+
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_rally.tres" id="14_rl1"]
 [ext_resource type="Resource" path="res://source/common/gameplay/combat/ability/ability_collection/channel/sword_rally_2.tres" id="15_rl2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/juggernaut.png" id="16_jug"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/momentum.png" id="17_mom"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_bloodrush.png" id="ic0_p_bloodrush"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_fortitude_1.png" id="ic1_p_fortitude_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_fortitude_2.png" id="ic2_p_fortitude_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_iron_guard.png" id="ic3_p_iron_guard"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_tempo_1.png" id="ic4_p_tempo_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/p_tempo_2.png" id="ic5_p_tempo_2"]
 
 [sub_resource type="Resource" id="Node_ww1"]
 script = ExtResource("2_node")
@@ -102,7 +105,7 @@ tier = 2
 node_name = "Iron Guard"
 description = "+18 armor. Stand firm against physical blows."
 branch = &"resolve"
-icon = ExtResource("12_bulwark")
+icon = ExtResource("ic3_p_iron_guard")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_parry")])
 weapon_bound = true
 
@@ -117,7 +120,7 @@ node_name = "Fortitude"
 description = "+40 max health. Survive the melee."
 branch = &"resolve"
 tier = 2
-icon = ExtResource("16_jug")
+icon = ExtResource("ic1_p_fortitude_1")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp_fortitude")])
 upgrades = &"sword_parry"
 
@@ -137,7 +140,7 @@ node_name = "Fortitude II"
 description = "+14 more armor and +30 more max health."
 branch = &"resolve"
 tier = 3
-icon = ExtResource("16_jug")
+icon = ExtResource("ic2_p_fortitude_2")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_armor_fortitude2"), SubResource("Mod_hp_fortitude2")])
 weapon_bound = true
 upgrades = &"sword_fortitude"
@@ -176,7 +179,7 @@ tier = 2
 node_name = "Duelist's Tempo"
 description = "+18 ability haste and +8 attack damage. Faster swings, harder hits."
 branch = &"inspiration"
-icon = ExtResource("13_haste")
+icon = ExtResource("ic4_p_tempo_1")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo"), SubResource("Mod_ad_tempo")])
 weapon_bound = true
 
@@ -197,7 +200,7 @@ node_name = "Duelist's Tempo II"
 description = "+12 more ability haste and +10 more attack damage."
 branch = &"inspiration"
 tier = 2
-icon = ExtResource("13_haste")
+icon = ExtResource("ic5_p_tempo_2")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_haste_tempo2"), SubResource("Mod_ad_tempo2")])
 weapon_bound = true
 upgrades = &"sword_tempo"
@@ -214,7 +217,7 @@ node_name = "Bloodrush"
 description = "+12 move speed. Close the gap and stay on them."
 branch = &"inspiration"
 tier = 3
-icon = ExtResource("17_mom")
+icon = ExtResource("ic0_p_bloodrush")
 passive_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_ms_bloodrush")])
 weapon_bound = true
 

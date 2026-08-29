@@ -37,6 +37,10 @@ const ELEMENT_FILL: Array[Color] = [
 @onready var main_bar: ProgressBar = $Panel/MainBar
 @onready var hp_label: Label = $Panel/MainBar/HpLabel
 @onready var name_label: Label = $Panel/NameLabel
+## Phase-gate notches (Ossuran's 75% / 50%). See boss_threshold_markers.gd.
+@onready var thresholds: Control = $Panel/Thresholds
+## Phase-3 freezing meter (Ossuran). Blank whenever the cold is not on you.
+@onready var chill_label: Label = $Panel/ChillLabel
 
 var _boss: HostileNpc = null
 var _main_tween: Tween
@@ -48,6 +52,17 @@ var _enraged: bool = false
 ## do not compete. Restored on unbind — never left hidden on a body we let go of.
 var _hid_overhead: bool = false
 var _ward_label: String = ""
+## A scripted encounter (Ossuran) is running in this instance. While true the bar
+## STAYS UP whether or not the boss is the player's current target: a fight whose
+## structure is drawn on the bar has to keep that bar visible through the stages
+## where nobody is hitting the boss at all — the wave chamber, the pad charges,
+## the pillar run — or the phase markers vanish exactly when they are the only
+## explanation of what is happening.
+var _encounter_active: bool = false
+## Current objective text from the server ("Melee Only"), shown beside the name.
+var _phase_label: String = ""
+## Throttle for the encounter-boss scan (see _resolve_target).
+var _scan_at_ms: int = 0
 
 
 func _ready() -> void:
@@ -55,6 +70,8 @@ func _ready() -> void:
 	hide()
 	set_process(true)
 	Client.subscribe(&"boss.ward", _on_ward)
+	Client.subscribe(&"ossuran.phase", _on_phase)
+	Client.subscribe(&"ossuran.chill", _on_chill)
 
 
 func _process(delta: float) -> void:
@@ -76,18 +93,39 @@ func _process(delta: float) -> void:
 		_linger_left = LINGER_S
 
 
-## The current combat target, if it is a living boss. Null for anything else.
+## The current combat target, if it is a living boss — falling back, during a
+## scripted encounter, to the encounter's boss regardless of targeting.
 func _resolve_target() -> HostileNpc:
 	var id: int = Character.combat_target_instance_id
-	if id == 0:
+	if id != 0:
+		var obj: Object = instance_from_id(id)
+		var npc: HostileNpc = obj as HostileNpc
+		if npc != null and is_instance_valid(npc) and not npc.is_dead \
+				and npc.enemy_data != null and npc.enemy_data.is_boss:
+			return npc
+	if not _encounter_active:
 		return null
-	var obj: Object = instance_from_id(id)
-	var npc: HostileNpc = obj as HostileNpc
-	if npc == null or not is_instance_valid(npc) or npc.is_dead:
+	# Keep the already-bound body rather than re-scanning every frame.
+	if _boss != null and is_instance_valid(_boss) and not _boss.is_dead:
+		return _boss
+	return _scan_for_encounter_boss()
+
+
+## Find the instance's boss body without a target. Only reached while a scripted
+## encounter is active, and throttled — a tree walk is cheap but it is not free,
+## and the body may legitimately be absent (the group is in the wave chamber and
+## the boss has not spawned yet, or it just died).
+func _scan_for_encounter_boss() -> HostileNpc:
+	var now: int = Time.get_ticks_msec()
+	if now < _scan_at_ms:
 		return null
-	if npc.enemy_data == null or not npc.enemy_data.is_boss:
-		return null
-	return npc
+	_scan_at_ms = now + 500
+	for node: Node in get_tree().get_nodes_in_group(&"boss_bodies"):
+		var npc: HostileNpc = node as HostileNpc
+		if npc != null and is_instance_valid(npc) and not npc.is_dead \
+				and npc.enemy_data != null and npc.enemy_data.is_boss:
+			return npc
+	return null
 
 
 func _bind(npc: HostileNpc) -> void:
@@ -114,6 +152,11 @@ func _bind(npc: HostileNpc) -> void:
 	main_bar.value = hp
 	_update_label(hp)
 	_check_phase(hp)
+	# Phase gates are declared on the type, so any boss that wants notches gets
+	# them by filling in hp_thresholds and touching no code here.
+	if thresholds != null:
+		thresholds.set_thresholds(data.hp_thresholds)
+		thresholds.set_fill_fraction(hp / hp_max if hp_max > 0.0 else 1.0)
 
 	# One bar per boss: mute the over-head one while this is up.
 	if npc.progress_bar != null and npc.progress_bar.visible:
@@ -133,6 +176,9 @@ func _unbind() -> void:
 			_boss.progress_bar.show()
 	_hid_overhead = false
 	_boss = null
+	# The bar is going away — nothing on it should survive to the next boss.
+	if chill_label != null:
+		chill_label.text = ""
 	_fade_to(0.0, true)
 
 
@@ -173,6 +219,8 @@ func _on_stat_changed(stat_name: StringName, value: float) -> void:
 
 	_update_label(value)
 	_check_phase(value)
+	if thresholds != null and main_bar.max_value > 0.0:
+		thresholds.set_fill_fraction(value / main_bar.max_value)
 
 
 ## Recolour to the enraged element when the boss crosses its own threshold.
@@ -203,6 +251,52 @@ func _update_label(value: float) -> void:
 	hp_label.text = "%d / %d" % [maxi(0, int(ceil(value))), int(main_bar.max_value)]
 
 
+## Ossuran phase push: keeps the bar pinned up for the whole encounter and shows
+## the current objective. A phase of 0 (or the DEFEATED push) stands it down.
+func _on_phase(payload: Dictionary) -> void:
+	var phase: int = int(payload.get("phase", 0))
+	_encounter_active = phase > 0
+	_phase_label = str(payload.get("label", ""))
+	# The cold only exists in phase 3; leaving it must clear the meter, or the
+	# last pushed value sits on the bar for the rest of the session.
+	if phase != 3 and chill_label != null:
+		chill_label.text = ""
+	_refresh_name()
+
+
+## Ossuran phase 3: the freezing meter. Pushed every half second per player by
+## ColdDebuffController, so this needs no state of its own and a client that
+## joined late or reconnected is correct within one tick.
+##
+## Three readings, because the mechanic has three states and only one of them is
+## an emergency: warming (you are at a fire and shedding stacks), chilling (the
+## clock is running, no damage yet), and freezing (it is hurting you now).
+func _on_chill(payload: Dictionary) -> void:
+	if chill_label == null:
+		return
+	var stacks: int = int(payload.get("stacks", 0))
+	if stacks <= 0:
+		chill_label.text = ""
+		return
+	var maximum: int = maxi(1, int(payload.get("max", 10)))
+	var warm: bool = bool(payload.get("warm", false))
+	var hurting: bool = bool(payload.get("hurting", false))
+
+	var color: Color
+	var lead: String
+	if warm:
+		color = Color(0.55, 0.85, 1.0)
+		lead = "Warming"
+	elif hurting:
+		color = Color(1.0, 0.45, 0.45)
+		lead = "FREEZING — get to a fire"
+	else:
+		color = Color(0.70, 0.90, 1.0)
+		lead = "The cold is setting in"
+	chill_label.add_theme_color_override(&"font_color", color)
+	chill_label.text = "%s   %d/%d" % [lead, stacks, maximum]
+
+
 func _on_ward(payload: Dictionary) -> void:
 	var ward: String = str(payload.get("ward", "")).strip_edges()
 	if ward.is_empty():
@@ -216,7 +310,12 @@ func _refresh_name() -> void:
 		return
 	var data: EnemyTypeResource = _boss.enemy_data
 	var base: String = data.display_name if not data.display_name.is_empty() else str(_boss.enemy_type)
-	if _ward_label.is_empty():
+	# The objective (a scripted encounter's current demand — "Melee Only") takes
+	# the suffix when there is one: during Ossuran it is the single most
+	# actionable thing on screen, and it is what stops a player wondering why
+	# their damage stopped working.
+	var suffix: String = _phase_label if not _phase_label.is_empty() else _ward_label
+	if suffix.is_empty():
 		name_label.text = "%s   (Lv %d)" % [base, data.resolved_combat_level()]
 	else:
-		name_label.text = "%s   (Lv %d)  ·  %s" % [base, data.resolved_combat_level(), _ward_label]
+		name_label.text = "%s   (Lv %d)  ·  %s" % [base, data.resolved_combat_level(), suffix]

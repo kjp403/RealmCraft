@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_ability.gd" id="1_rapid"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/items/weapons/bow/arrow.tscn" id="1_wsgmh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/rapid_fire_4.png" id="99_icon"]
 
 [resource]
 script = ExtResource("1_rapid")
@@ -14,6 +15,7 @@ visual_kind = &"rapid_fire"
 mobile = true
 mobile_speed_mult = 0.65
 name = "Rapid Fire IV"
+icon = ExtResource("99_icon")
 cooldown = 6.5
 metadata/slug = &"rapid_fire_4"
 metadata/id = 106

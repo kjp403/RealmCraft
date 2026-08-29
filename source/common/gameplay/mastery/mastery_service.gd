@@ -42,25 +42,29 @@ static func spent_cost(entry: Dictionary, tree: MasteryTreeResource) -> int:
 
 
 ## Mastery points: 1 point every LEVELS_PER_POINT mastery levels.
-## Level 99 → 33-point budget. That funds one full column/subclass
-## (heaviest branch today is Bow Domination at 30) but cannot clear any
-## complete tree (cheapest full tree is Hammer at 36). Tune this one number
-## to retune the whole budget.
+## Level 99 → 33-point budget. That funds roughly one full column/subclass but
+## cannot clear any complete tree — every tree costs well over 33 points in
+## total, so picking a role inside a weapon is a real choice. Tune this one
+## number to retune the whole budget.
 const LEVELS_PER_POINT: int = 3
 
-## Lifetime point budget for a mastery level (integer division).
-## Level 1–2: 0, 3–5: 1, …, 96–98: 32, 99: 33.
-static func point_budget(level: int) -> int:
+## Lifetime point budget for a mastery level (integer division), scaled by the
+## tree's own [member MasteryTreeResource.point_rate].
+## Level 1–2: 0, 3–5: 1, …, 96–98: 32, 99: 33 at rate 1; doubled at rate 2.
+## [param tree] may be null for callers that only need the shared baseline (the
+## "+1 point" level-up toast), which is why it is optional rather than required.
+static func point_budget(level: int, tree: MasteryTreeResource = null) -> int:
 	var capped: int = mini(maxi(level, 0), PlayerResource.MASTERY_LEVEL_CAP)
 	@warning_ignore("integer_division")
-	return capped / LEVELS_PER_POINT
+	var base: int = capped / LEVELS_PER_POINT
+	return base * (tree.point_rate if tree != null else 1)
 
 
 ## Clamped so players who spent under older (looser) budgets don't see a
 ## negative remaining total (respec clears the overhang).
 static func available_points(entry: Dictionary, tree: MasteryTreeResource) -> int:
 	var level: int = mini(int(entry.get("level", 1)), PlayerResource.MASTERY_LEVEL_CAP)
-	return maxi(0, point_budget(level) - spent_cost(entry, tree))
+	return maxi(0, point_budget(level, tree) - spent_cost(entry, tree))
 
 
 ## Buys a tree node. Point budget is point_budget(level); the first point
@@ -76,9 +80,9 @@ static func spend(resource: PlayerResource, category: StringName, node_id: Strin
 	var spent: Dictionary = entry["spent"]
 	if spent.has(String(node_id)):
 		return {"ok": false, "reason": "owned"}
-	# A maxed tree already granted every ability — buying one would burn points
-	# for nothing (the client hides the button; this is the authoritative guard).
-	if node.ability != null and has_full_unlock(entry):
+	# A maxed tree already granted every node — buying one would burn points for
+	# nothing (the client hides the button; this is the authoritative guard).
+	if has_full_unlock(entry):
 		return {"ok": false, "reason": "owned"}
 	if int(entry["level"]) < int(TIER_UNLOCK_LEVEL.get(node.tier, 1)):
 		return {"ok": false, "reason": "tier_locked"}
@@ -110,21 +114,25 @@ static func _has_mastery_entry(resource: PlayerResource, category: StringName) -
 	return false
 
 
-## MASTERY 99 PAYOFF: a maxed tree hands you its ENTIRE ability list at the top
-## tier of every chain, free of the point budget. Points still buy passives (and
-## still show as spent/available), but abilities stop competing for them — hitting
-## 99 means you have mastered the weapon, not that you can finally afford one more
-## node. Applies to ability nodes only; passives remain a spend.
+## MASTERY 99 PAYOFF: a maxed tree hands you the WHOLE tree — every ability at
+## the top tier of its chain AND every passive — free of the point budget.
+## Hitting 99 means you have mastered the weapon, not that you can finally afford
+## one more node.
+##
+## Passives used to be excluded, which made the payoff read as broken: a level-99
+## player opened the tree, saw "MASTERED", and still had greyed-out locked tiles
+## staring back at them with points they could not meaningfully spend. Partial
+## unlocks are worse than no unlock — the banner and the tiles have to agree.
 static func has_full_unlock(entry: Dictionary) -> bool:
 	return int(entry.get("level", 1)) >= PlayerResource.MASTERY_LEVEL_CAP
 
 
 ## Does the player own [param node] — bought with points, or granted by the
-## level-99 full unlock (ability nodes only)?
+## level-99 full unlock (which covers every node, passives included)?
 static func owns_node(entry: Dictionary, node: MasteryNode) -> bool:
 	if (entry.get("spent", {}) as Dictionary).has(String(node.id)):
 		return true
-	return node.ability != null and has_full_unlock(entry)
+	return node != null and has_full_unlock(entry)
 
 
 ## Every ability node id a maxed tree grants outright. Includes the lower ranks
@@ -134,8 +142,7 @@ static func full_unlock_ids(tree: MasteryTreeResource) -> Array[String]:
 	if tree == null:
 		return out
 	for node: MasteryNode in tree.nodes:
-		if node.ability != null:
-			out.append(String(node.id))
+		out.append(String(node.id))
 	return out
 
 
@@ -182,7 +189,7 @@ static func effective_special_ids(resource: PlayerResource, weapon_item: WeaponI
 				# Fire the EXACT tier the player slotted (no auto-bump to highest) —
 				# EXCEPT at the level-99 full unlock, where every rank is yours and
 				# slotting a stale lower rank would just be a worse version of it.
-				# One tier per chain so Q/E/R never double-mount the same move.
+				# One tier per chain so Q/E/R/C never double-mount the same move.
 				if full_unlock:
 					node = top_of_chain(tree, node)
 				var root: String = String(_chain_root_id(tree, node))
@@ -254,11 +261,13 @@ static func refresh(player: Player) -> void:
 		var tree: MasteryTreeResource = tree_for(category)
 		if tree == null:
 			continue
-		# Passives are NOT part of the level-99 ability unlock — they stay bought.
-		var spent: Dictionary = (resource.masteries[category] as Dictionary).get("spent", {})
+		# A maxed tree grants its passives too (see has_full_unlock), so ownership
+		# is owns_node, not a raw spent lookup — reading the ledger directly here
+		# was why a level-99 player kept the abilities but none of the stat nodes.
+		var entry: Dictionary = resource.masteries[category]
 		var is_held: bool = category == equipped_category
 		for node: MasteryNode in tree.nodes:
-			if node.ability != null or not spent.has(String(node.id)):
+			if node.ability != null or not owns_node(entry, node):
 				continue
 			if node.weapon_bound and not is_held:
 				continue

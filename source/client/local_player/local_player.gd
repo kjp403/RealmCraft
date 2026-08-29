@@ -741,7 +741,8 @@ func process_input() -> void:
 
 	if Input.is_action_just_pressed(&"player_special") \
 			or Input.is_action_just_pressed(&"player_special_2") \
-			or Input.is_action_just_pressed(&"player_special_3"):
+			or Input.is_action_just_pressed(&"player_special_3") \
+			or Input.is_action_just_pressed(&"player_special_4"):
 		_note_input_activity()
 
 	# Channeling: rooted (process_movement zeroes velocity). A move key CANCELS
@@ -767,7 +768,8 @@ func process_input() -> void:
 			if Time.get_ticks_msec() >= _channel_grace_until_ms and (
 					Input.is_action_just_pressed(&"player_special")
 					or Input.is_action_just_pressed(&"player_special_2")
-					or Input.is_action_just_pressed(&"player_special_3")):
+					or Input.is_action_just_pressed(&"player_special_3")
+					or Input.is_action_just_pressed(&"player_special_4")):
 				_cancel_channel()
 			action_input = false
 			return

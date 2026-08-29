@@ -1,6 +1,6 @@
 extends HBoxContainer
 ## MOBA-style ability bar: one tile per ability on the wielded weapon, in
-## input order (LMB / Q / E / R). Each tile shows the ability's initials (art
+## input order (LMB / Q / E / R / C). Each tile shows the ability's initials (art
 ## icons come later), its input key, its mana cost, a cooldown drain overlay
 ## with a seconds counter, and dims while mana is short. Pure display — every
 ## node is MOUSE_FILTER_IGNORE so the bar can never eat combat clicks.
@@ -10,10 +10,11 @@ extends HBoxContainer
 ## _process off the same AbilityResource instances the weapon fires with, so
 ## the bar can't drift from the truth.
 
-const SLOT_KEYS: Array[String] = ["LMB", "Q", "E", "R"]
-## Sized so all four tiles plus separation sit inside the 200px resource bars
-## directly below (4 * 44 + 3 * 6 = 194) — see hud.tscn's AbilityBar offsets.
-const TILE_SIZE: Vector2 = Vector2(44, 44)
+const SLOT_KEYS: Array[String] = ["LMB", "Q", "E", "R", "C"]
+## Sized so all five tiles plus separation sit inside the 200px resource bars
+## directly below (5 * 36 + 4 * 5 = 200) — see hud.tscn's AbilityBar offsets.
+## Tiles narrowed from 44 when the C slot landed; the row width is the constraint.
+const TILE_SIZE: Vector2 = Vector2(36, 44)
 const SLOT_STYLE: GDScript = preload("res://source/client/ui/hud/hud_slot_style.gd")
 const MANA_SHORT_TINT: Color = Color(0.55, 0.62, 0.85)
 const CHANNEL_GLOW: Color = Color(0.45, 1.0, 0.55)
@@ -87,7 +88,7 @@ func _rebuild() -> void:
 		return
 	for i: int in _weapon.abilities.size():
 		# A null PRIMARY (slot 0) = a held non-weapon item (potion) whose action sits on
-		# the special slot. Don't render a dim empty "LMB" tile for it; null Q/E/R holes
+		# the special slot. Don't render a dim empty "LMB" tile for it; null Q/E/R/C holes
 		# (truthful mastery labels) still show.
 		if i == 0 and _weapon.abilities[i] == null:
 			continue
@@ -105,9 +106,13 @@ func _add_tile(index: int, ability: AbilityResource) -> void:
 	tile.button_down.connect(_on_tile_down.bind(index))
 	tile.button_up.connect(_on_tile_up.bind(index))
 	if ability != null and ability.icon != null:
-		tile.icon = ability.icon
-		tile.add_theme_constant_override(&"icon_max_width", 36)
-		tile.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# PixelIcon, not Button.icon: the native icon path scales the art to
+		# icon_max_width with the default filter, and 32px pack art squeezed into
+		# a 30px box is a NON-INTEGER downscale — every icon came out slightly
+		# soft, which is most of what "the icons look rough" actually was. The
+		# mastery tree already mounts its tiles this way; the bar now matches, so
+		# 32px art lands 1:1 and crisp inside the 36px tile.
+		PixelIcon.mount(tile, ability.icon)
 	elif ability != null:
 		tile.text = _initials(ability.name) # placeholder until the art pass
 	if ability == null:

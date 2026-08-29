@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://01sxrebcprpu" path="res://source/common/gameplay/combat/ability/ability_collection/melee_swing/melee_swing_ability.gd" id="1_swing"]
 [ext_resource type="PackedScene" uid="uid://b8s7oak2vqlpx" path="res://source/common/gameplay/combat/melee_arc.tscn" id="2_arc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/crippling_strike.png" id="99_icon"]
 
 [resource]
 script = ExtResource("1_swing")
@@ -11,6 +12,7 @@ slow_amount = 30.0
 slow_duration_s = 2.0
 max_targets = 1
 name = "Crippling Strike"
+icon = ExtResource("99_icon")
 cooldown = 5.0
 mana_cost = 8
 metadata/slug = &"crippling_strike"

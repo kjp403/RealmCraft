@@ -7,6 +7,9 @@ const PANEL_SIZE_PERKS := Vector2(248.0, 320.0)
 const RIGHT_MARGIN := 12.0
 const BOTTOM_CLEARANCE := 48.0
 const TAB_SIZE := Vector2(29.0, 29.0)
+## Ability-loadout input labels, in slot order. Mirrors MasteryTreeMenu.SLOT_KEYS
+## and mastery.loadout's MAX_PICKS.
+const SLOT_KEYS: Array[String] = ["Q", "E", "R", "C"]
 
 const CATEGORY_ORDER: Array[StringName] = [
 	&"bow",
@@ -65,9 +68,9 @@ var _category_group := ButtonGroup.new()
 var _level_label: Label
 var _xp_bar: ProgressBar
 var _status_label: Label
-var _q_name: Label
-var _e_name: Label
-var _r_name: Label
+## One Label per loadout position, in SLOT_KEYS order (Q / E / R / C). An array
+## rather than named fields so a further input slot is one entry in SLOT_KEYS.
+var _slot_names: Array[Label] = []
 var _power_label: Label
 var _manage_button: Button
 
@@ -260,23 +263,15 @@ func _build_weapons_layout(main_box: VBoxContainer) -> void:
 
 	var loadout_row := HBoxContainer.new()
 	loadout_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loadout_row.add_theme_constant_override(&"separation", 4)
+	loadout_row.add_theme_constant_override(&"separation", 3)
 	main_box.add_child(loadout_row)
 
-	var q_chip: PanelContainer = _make_loadout_chip("Q")
-	q_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loadout_row.add_child(q_chip)
-	_q_name = q_chip.get_node("Content/Name") as Label
-
-	var e_chip: PanelContainer = _make_loadout_chip("E")
-	e_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loadout_row.add_child(e_chip)
-	_e_name = e_chip.get_node("Content/Name") as Label
-
-	var r_chip: PanelContainer = _make_loadout_chip("R")
-	r_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loadout_row.add_child(r_chip)
-	_r_name = r_chip.get_node("Content/Name") as Label
+	_slot_names.clear()
+	for key: String in SLOT_KEYS:
+		var chip: PanelContainer = _make_loadout_chip(key)
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		loadout_row.add_child(chip)
+		_slot_names.append(chip.get_node("Content/Name") as Label)
 
 	_power_label = Label.new()
 	_power_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -359,6 +354,11 @@ func _make_loadout_chip(key_text: String) -> PanelContainer:
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override(&"font_size", 7)
 	name_label.add_theme_color_override(&"font_color", Color(0.62, 0.64, 0.70))
+	# Clip rather than let the ability name set the chip's minimum width: four
+	# chips share a 180px dock, so an un-clipped "Paladin's Might III" would push
+	# the row wider than the panel it lives in.
+	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	box.add_child(name_label)
 
 	return panel
@@ -621,9 +621,8 @@ func _render_selected_category() -> void:
 		_level_label.text = "No mastery selected"
 		_xp_bar.visible = false
 		_status_label.text = ""
-		_q_name.text = "Empty"
-		_e_name.text = "Empty"
-		_r_name.text = "Empty"
+		for name_label: Label in _slot_names:
+			name_label.text = "Empty"
 		_power_label.text = ""
 		_manage_button.disabled = true
 		return
@@ -667,9 +666,8 @@ func _render_selected_category() -> void:
 	)
 
 	var loadout: Array = info.get("loadout", [])
-	_q_name.text = _loadout_name(loadout, 0, tree)
-	_e_name.text = _loadout_name(loadout, 1, tree)
-	_r_name.text = _loadout_name(loadout, 2, tree)
+	for i: int in _slot_names.size():
+		_slot_names[i].text = _loadout_name(loadout, i, tree)
 
 	if _wielded_capacity() < 0:
 		_power_label.text = "Equip this weapon type to use its abilities."

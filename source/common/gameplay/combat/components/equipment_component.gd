@@ -9,10 +9,13 @@ extends Node
 const SPECIAL_SLOT: StringName = &"special_ability"
 const SPECIAL_SLOT_2: StringName = &"special_ability_2"
 const SPECIAL_SLOT_3: StringName = &"special_ability_3"
+const SPECIAL_SLOT_4: StringName = &"special_ability_4"
 
-## Loadout position -> pseudo-slot, in input order (Q / E / R). Index IS the
-## position, so adding a fourth key is one entry here plus one input action.
-const SPECIAL_SLOTS: Array[StringName] = [SPECIAL_SLOT, SPECIAL_SLOT_2, SPECIAL_SLOT_3]
+## Loadout position -> pseudo-slot, in input order (Q / E / R / C). Index IS the
+## position, so adding a further key is one entry here plus one input action.
+const SPECIAL_SLOTS: Array[StringName] = [
+	SPECIAL_SLOT, SPECIAL_SLOT_2, SPECIAL_SLOT_3, SPECIAL_SLOT_4
+]
 
 
 signal equipment_changed(
@@ -37,7 +40,7 @@ var mounted_nodes: Dictionary[StringName, Node]
 
 ## Last synced special-ability ids, kept so a weapon mounted AFTER the special
 ## pairs applied (baseline ordering isn't guaranteed) still picks them up.
-var _special_ability_ids: Array[int] = [0, 0, 0]
+var _special_ability_ids: Array[int] = [0, 0, 0, 0]
 
 ## Server-side ledger of gear modifiers currently applied to stats_component.
 ## Blind +/- on GearItem.equip/unequip could desync when a clear was skipped or

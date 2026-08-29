@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://dwgkn4xkqlcfh" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="1_7djrj"]
 [ext_resource type="Script" uid="uid://jk5i0h66djrs" path="res://source/common/gameplay/combat/ability/ability_collection/channel/spin_ability.gd" id="1_spin"]
-[ext_resource type="Texture2D" uid="uid://bj7ivup1sgc3q" path="res://assets/sprites/ui/ability_icons/whirlwind_3.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/whirlwind_3.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_spin")

@@ -399,11 +399,19 @@ func _on_combat_reward(data: Dictionary) -> void:
 				String(mastery_category).capitalize(),
 				maxi(mastery_level, 1),
 			])
-	if (
-		bool(mastery.get("leveled_up", false))
-		and MasteryService.point_budget(mastery_level) > MasteryService.point_budget(mastery_level_was)
-	):
-		big.append("+1 %s mastery point to spend" % String(mastery_category).capitalize())
+	# Per-tree point rate: a 2x tree hands out 2 points on the same level, so the
+	# toast has to be counted against THAT tree's budget, not the shared baseline.
+	var mastery_tree: MasteryTreeResource = MasteryService.tree_for(mastery_category)
+	var points_gained: int = (
+		MasteryService.point_budget(mastery_level, mastery_tree)
+		- MasteryService.point_budget(mastery_level_was, mastery_tree)
+	)
+	if bool(mastery.get("leveled_up", false)) and points_gained > 0:
+		big.append("+%d %s mastery point%s to spend" % [
+			points_gained,
+			String(mastery_category).capitalize(),
+			"" if points_gained == 1 else "s",
+		])
 		mastery_point_earned.emit(mastery_category, mastery_level)
 	var slayer: Dictionary = data.get("slayer", {})
 	if bool(slayer.get("leveled_up", false)):

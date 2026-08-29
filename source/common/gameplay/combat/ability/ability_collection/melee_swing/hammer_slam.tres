@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://01sxrebcprpu" path="res://source/common/gameplay/combat/ability/ability_collection/melee_swing/melee_swing_ability.gd" id="1_swing"]
 [ext_resource type="PackedScene" uid="uid://dwgkn4xkqlcfh" path="res://source/common/gameplay/combat/melee_arc_centered.tscn" id="2_arc"]
 [ext_resource type="Texture2D" uid="uid://bogvbnwhxp5ej" path="res://assets/sprites/items/weapons/wood/wood.png" id="2_ku723"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/ground_slam.png" id="99_icon"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0d6ae"]
 atlas = ExtResource("2_ku723")
@@ -14,6 +15,7 @@ arc_scene = ExtResource("2_arc")
 ad_ratio = 1.9
 arc_radius = 38.0
 name = "Ground Slam"
+icon = ExtResource("99_icon")
 icon = SubResource("AtlasTexture_0d6ae")
 cooldown = 1.8
 impact_shake = 0.35

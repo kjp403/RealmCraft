@@ -24,6 +24,10 @@ const POISON_COLOR: Color = Color(0.45, 0.95, 0.2)
 const BURN_COLOR: Color = Color(0.95, 0.25, 0.2)
 ## Green for heals.
 const HEAL_COLOR: Color = Color(0.2, 0.9, 0.45)
+## Pale spectral blue for Spectral Ward reflect damage. Its own colour because a
+## reflect is the only damage number a player sees on an enemy that THEY did not
+## choose to deal — reading it as a normal melee hit hides the ward working.
+const REFLECT_COLOR: Color = Color(0.62, 0.88, 1.0)
 
 @onready var label: Label = $Label
 
@@ -57,6 +61,8 @@ func _color() -> Color:
 		return POISON_COLOR
 	if _effect_kind == &"burn":
 		return BURN_COLOR
+	if _effect_kind == &"ward_reflect":
+		return REFLECT_COLOR
 	if _damage_type == &"magic":
 		return MAGIC_COLOR
 	if _damage_type == &"ranged":

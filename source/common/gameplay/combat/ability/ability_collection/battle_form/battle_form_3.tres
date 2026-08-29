@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="BattleFormAbility" format=3 uid="uid://bx763hkwfxesr"]
 
-[ext_resource type="Texture2D" uid="uid://b8845u67sv6wi" path="res://assets/sprites/ui/ability_icons/battle_form_3.png" id="1_4v873"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/battle_form_4.png" id="1_4v873"]
 [ext_resource type="Script" uid="uid://blavokqxrda2d" path="res://source/common/gameplay/combat/ability/ability_collection/battle_form/battle_form_ability.gd" id="1_bf"]
 
 [resource]

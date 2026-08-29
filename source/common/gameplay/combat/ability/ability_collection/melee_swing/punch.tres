@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://01sxrebcprpu" path="res://source/common/gameplay/combat/ability/ability_collection/melee_swing/melee_swing_ability.gd" id="1_swing"]
 [ext_resource type="PackedScene" uid="uid://b8s7oak2vqlpx" path="res://source/common/gameplay/combat/melee_arc.tscn" id="2_arc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ability_icons/punch.png" id="99_icon"]
 
 [resource]
 script = ExtResource("1_swing")
@@ -9,6 +10,7 @@ ad_ratio = 0.55
 spawn_offset = 2.0
 arc_radius = 18.0
 name = "Punch"
+icon = ExtResource("99_icon")
 cooldown = 0.45
 max_targets = 1
 metadata/slug = &"punch"

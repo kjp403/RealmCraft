@@ -13,7 +13,10 @@ const REMAP_CATEGORIES: Array[Dictionary] = [
 	{
 		&"title": "Combat",
 		&"show_on": [&"MOUSE_KEYBOARD", &"GAMEPAD"],
-		&"actions": [&"player_shoot", &"player_special", &"player_special_2", &"player_special_3"],
+		&"actions": [
+			&"player_shoot", &"player_special", &"player_special_2", &"player_special_3",
+			&"player_special_4",
+		],
 	},
 	{
 		&"title": "Actions",
