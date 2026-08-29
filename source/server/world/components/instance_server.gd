@@ -183,7 +183,8 @@ func load_map(map_path: String) -> void:
 func _on_player_entered_interaction_area(player: Player, interaction_area: InteractionArea) -> void:
 	if player.has_recently_teleported():
 		return
-	if interaction_area is Warper and interaction_area.target_instance:
+	if interaction_area is Warper and interaction_area.target_instance \
+			and not (interaction_area is Portal and interaction_area.lobby_gate):
 		var warper: Warper = interaction_area
 		# Wardstone gate (docs/wardstones.md): the ONE hard access rule — no level
 		# or party bypass. Levels stay advisory (client-side warn + hesitation

@@ -116,7 +116,12 @@ var boss: HostileNpc = null
 var parser: AttackParser = null
 
 var state: State = State.DORMANT
-var _phase: int = 1
+## Starts at 0, not 1: the opening DORMANT -> EMBER_PAD transition is itself
+## phase 1, and transition_to() only emits phase_changed when the number moves.
+## Seeded at 1, that first emit was skipped and the arena never pushed
+## `ossuran.phase` for phase 1 — so the HUD boss bar (which turns on from that
+## push) stayed hidden for the whole first phase.
+var _phase: int = 0
 ## Latches so each threshold callout fires exactly once per run.
 var _fired_thresholds: Dictionary = {}
 

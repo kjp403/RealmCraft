@@ -785,3 +785,89 @@ func _set_display_name(new_name: String) -> void:
 	display_name = new_name
 	if not multiplayer.is_server():
 		display_name_changed.emit(new_name)
+
+
+#region Overhead bubble
+## A short-lived text bubble above the character's head. Players use it for
+## world chat and the typing indicator (see Player); scripted NPCs (Ossuran)
+## use it to speak. Client-only — the headless server never draws one.
+## How long a bubble stays fully visible before it starts to fade out.
+const OVERHEAD_HOLD_SEC: float = 5.0
+## Fade-out tween duration.
+const OVERHEAD_FADE_SEC: float = 0.8
+## Vertical offset above the character's origin where the bubble sits. Tuned for
+## a player-sized sprite; larger bodies override _overhead_offset_y().
+const OVERHEAD_OFFSET_Y: float = -58.0
+## Cap on displayed text so we don't get a screen-wide banner.
+const OVERHEAD_MAX_CHARS: int = 60
+
+var _overhead_label: Label
+var _overhead_tween: Tween
+
+
+## Shows a short-lived bubble above this character's head. A new message
+## replaces any currently displayed bubble — no queue.
+func show_overhead(text: String) -> void:
+	if multiplayer.is_server():
+		return  # Headless server doesn't draw bubbles.
+	if text.is_empty():
+		return
+
+	_ensure_overhead_label()
+	if _overhead_tween != null and _overhead_tween.is_running():
+		_overhead_tween.kill()
+
+	var display_text: String = text
+	if display_text.length() > OVERHEAD_MAX_CHARS:
+		display_text = display_text.substr(0, OVERHEAD_MAX_CHARS - 3) + "..."
+
+	_on_overhead_shown()
+	_set_overhead_text(display_text)
+
+	_overhead_tween = create_tween()
+	_overhead_tween.tween_interval(OVERHEAD_HOLD_SEC)
+	_overhead_tween.tween_property(_overhead_label, ^"modulate:a", 0.0, OVERHEAD_FADE_SEC)
+
+
+## Hook for subclasses to react when a real overhead line is shown. Player uses
+## it to yield the typing indicator to the message. No-op by default.
+func _on_overhead_shown() -> void:
+	pass
+
+
+## Vertical offset for the bubble. Overridable so a boss-sized sprite can push
+## its bubble clear of its head.
+func _overhead_offset_y() -> float:
+	return OVERHEAD_OFFSET_Y
+
+
+func _ensure_overhead_label() -> void:
+	if _overhead_label != null:
+		return
+	_overhead_label = Label.new()
+	_overhead_label.name = "OverheadLabel"
+	_overhead_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_overhead_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_overhead_label.z_index = 10
+	_overhead_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overhead_label.add_theme_font_size_override(&"font_size", 12)
+	_overhead_label.add_theme_color_override(&"font_color", Color.WHITE)
+	_overhead_label.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.9))
+	add_child(_overhead_label)
+
+
+## Sets the text and re-centres + re-shows the label. Called by both the
+## chat-message path and the typing-indicator path so position math stays in
+## one place.
+func _set_overhead_text(display_text: String) -> void:
+	_overhead_label.text = display_text
+	_overhead_label.modulate.a = 1.0
+	_overhead_label.show()
+	# Auto-size to text width, then translate so the label is horizontally
+	# centred above the origin. Round to an integer pixel offset so the glyphs
+	# stay on the same texel even while the body moves at fractional positions
+	# (subpixel labels blur badly under filtering).
+	_overhead_label.reset_size()
+	var half_w: int = int(round(_overhead_label.size.x * 0.5))
+	_overhead_label.position = Vector2(-half_w, _overhead_offset_y())
+#endregion

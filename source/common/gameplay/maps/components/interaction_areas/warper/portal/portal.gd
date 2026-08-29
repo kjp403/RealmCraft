@@ -33,6 +33,10 @@ const FADE_IN_S: float = 0.3
 	set(value):
 		destination_label = value
 		_apply()
+## When true this portal does NOT dwell-warp. Stepping in opens the Ossuran gate
+## ready-up panel instead, and the group is moved in by OssuranGateService. The
+## server drops the walk-in warp for a lobby_gate portal too (instance_server).
+@export var lobby_gate: bool = false
 
 ## Client-side: the screen fade covering the local player's pending warp, if any.
 var _fade: WarpFade
@@ -86,6 +90,11 @@ func _on_local_body_entered(body: Node2D) -> void:
 		return
 	_local_inside = true
 	_warn_token += 1
+	# Ready-up gate (Ossuran): no dwell-warp. Open the party lobby panel and let
+	# OssuranGateService move the group in. The wardstone seal below still wins.
+	if lobby_gate and not _is_sealed():
+		ClientState.open_menu_requested.emit(&"ossuran_gate", "")
+		return
 	# Wardstone seal (docs/wardstones.md): the hard gate. No charge, no dwell —
 	# just the explanation. The server refuses independently (can_join_instance +
 	# its target_instance check), so a modified client gains nothing. Placeholder

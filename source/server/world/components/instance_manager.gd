@@ -274,6 +274,9 @@ func player_switch_instance(
 	# locked the mode until relog. No-op for a switch out of any non-hunt map.
 	BossHuntService.on_player_left(peer_id, current_instance)
 	QuestBossService.on_player_left(peer_id, current_instance)
+	# Ossuran gate: drop the peer from the co-op group when they leave the private
+	# arena (exit warp, death return, recall). No-op for any other map.
+	OssuranGateService.on_player_left(peer_id, current_instance)
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
 		peer_id,

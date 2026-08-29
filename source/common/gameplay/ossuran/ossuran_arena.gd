@@ -53,6 +53,34 @@ const ARM_POLL_S: float = 1.0
 ## that follows, so a group is never reset out from under a recovery.
 const RESET_AFTER_EMPTY_S: float = 20.0
 
+## Phase-2 pillar run: Ossuran is immune but not idle. Every PULSE_INTERVAL_S he
+## telegraphs a ring centred on himself that everyone must clear (run to the rim
+## / the braziers). Escalates on the same 8s-step clock as OssuranPillar, so a
+## slow pillar run faces a bigger pulse too.
+const PULSE_INTERVAL_S: float = 9.0
+const PULSE_WINDUP_S: float = 1.6
+const PULSE_BASE_RADIUS: float = 190.0
+const PULSE_BASE_DAMAGE: float = 120.0
+const PULSE_RAMP_STEP_S: float = 8.0
+const PULSE_RADIUS_MULT: float = 1.05
+const PULSE_RADIUS_CAP: float = 1.4
+const PULSE_DAMAGE_MULT: float = 1.15
+const PULSE_DAMAGE_CAP: float = 2.2
+
+## Team-size scaling. The party count is snapshotted when the encounter arms (in
+## [method begin]) and drives boss HP, wave-minion HP and pillar HP for the whole
+## run — a latecomer to the shared instance fights the fight the group started.
+## HP grows PARTY_HP_PER_EXTRA per body past the first (solo 1.0 · duo 1.6 ·
+## trio 2.2 · 4 -> 2.8 · 5 -> 3.4), matching the boss-hunt party curve.
+const PARTY_HP_PER_EXTRA: float = 0.6
+## Absolute boss HP by living player count (index 0 = solo). Clamped to the ends.
+const OSSURAN_HP_BY_PARTY: Array[float] = [
+	120000.0, 200000.0, 280000.0, 360000.0, 440000.0,
+]
+## Solo baseline for wave-minion HP — a 2.5x tankier gauntlet so waves 1-5 are
+## their own ~3-4 minute phase. The party factor multiplies on top of this.
+const WAVE_HP_BASE: float = 2.5
+
 @export_group("Arena")
 @export var boss_spawn: Marker2D
 @export var ember_pad: ChargePad
@@ -97,6 +125,8 @@ var _authored_armor: float = 0.0
 ## Live pillar bodies for the current phase-2 run.
 var _pillars: Array[HostileNpc] = []
 var _running: bool = false
+## Living player count at the moment the encounter armed — the team-scaling input.
+var _party_size: int = 1
 ## Next tick (ms) the arm/reset poll is allowed to run.
 var _poll_at_ms: int = 0
 ## When the room first went empty while running (ms), or 0 while populated.
@@ -242,6 +272,12 @@ func begin() -> void:
 		return
 	_running = true
 	_frozen = false
+	# Snapshot the group NOW and hold it for the whole run — every scaled body
+	# (boss, waves, pillars) reads _party_hp_factor() off this.
+	var instance: Node = _instance()
+	_party_size = maxi(1, instance.players_by_peer_id.size()) if instance != null else 1
+	if wave_manager != null:
+		wave_manager.minion_health_mult = WAVE_HP_BASE * _party_hp_factor()
 	_spawn_boss()
 	if boss == null:
 		_running = false
@@ -250,6 +286,11 @@ func begin() -> void:
 	parser.boss = boss
 	cold.boss = boss
 	state_machine.begin()
+
+
+## HP multiplier for the snapshotted group size.
+func _party_hp_factor() -> float:
+	return 1.0 + PARTY_HP_PER_EXTRA * float(_party_size - 1)
 
 
 ## Tear the whole encounter down (wipe, last player left, instance recycling).
@@ -315,6 +356,14 @@ func _spawn_boss() -> void:
 	npc.died.connect(_on_boss_died, CONNECT_ONE_SHOT)
 	boss = npc
 
+	# Team-size HP. Bosses ignore the zone enemy_health_mult by design, so scale
+	# here off the snapshotted party count. Then PIN skill XP to the authored
+	# stat block — HostileNpc.combat_skill_xp() otherwise derives it from the
+	# now-inflated live max_health and a big group would farm 3x mastery/Slayer
+	# XP for the same kill (same fix as boss_hunt_arena).
+	npc.apply_max_health(OSSURAN_HP_BY_PARTY[clampi(_party_size, 1, OSSURAN_HP_BY_PARTY.size()) - 1])
+	npc.skill_xp_override = npc.enemy_data.combat_skill_xp()
+
 	# Capture BEFORE sealing, or the seal's own 4000 becomes "authored" and the
 	# boss stays effectively immune for the rest of the fight.
 	_authored_armor = npc.stats_component.get_stat(Stat.ARMOR)
@@ -339,7 +388,7 @@ func _seal_boss(sealed: bool) -> void:
 func _on_state_changed(_from: BossStateMachine.State, to: BossStateMachine.State) -> void:
 	match to:
 		BossStateMachine.State.EMBER_PAD:
-			_callout("Ossuran: \"Kindle it, then. Let me see you try.\"")
+			_say("Kindle it, then. Let me see you try.")
 			if ember_pad != null:
 				ember_pad.open()
 		BossStateMachine.State.GAUNTLET:
@@ -357,19 +406,21 @@ func _on_state_changed(_from: BossStateMachine.State, to: BossStateMachine.State
 		BossStateMachine.State.STORM_PAD:
 			if storm_pad != null:
 				storm_pad.open()
-			_callout("Ossuran: \"Conjure, then. I will break what you build.\"")
+			_say("Conjure, then. I will break what you build.")
 		BossStateMachine.State.PILLARS:
 			if storm_pad != null:
 				storm_pad.close()
 			_grant_ward()
 			_spawn_pillars()
 			_callout("Three pillars rise. Break them all.")
+			_pillar_pulse_loop()
 		BossStateMachine.State.OPEN_ASSAULT:
 			_clear_pillars()
 			_callout("The pillars fall. Ossuran is open — hit him with everything.")
 		BossStateMachine.State.FROZEN_END:
 			_freeze_environment()
-			_callout("Ossuran: \"Then FREEZE.\"  Keep to the fires. Ranged and magic only.")
+			_say("Then FREEZE.")
+			_callout("Keep to the fires. Ranged and magic only.")
 		BossStateMachine.State.DEFEATED:
 			_on_defeated()
 		_:
@@ -382,7 +433,7 @@ func _on_phase_changed(phase: int) -> void:
 
 func _on_threshold(fraction: float) -> void:
 	var pct: int = int(round(fraction * 100.0))
-	_callout("Ossuran staggers at %d%%." % pct)
+	_say("Is that your strength? %d%%, and I still stand." % pct)
 
 
 ## Both pads land here; the state machine's linear spine decides what that means,
@@ -428,6 +479,9 @@ func _spawn_pillars() -> void:
 			continue
 		npc.respawns = false
 		npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+		# Team-size HP on top of the authored 15k base; telegraph damage stays on
+		# the pillar brain's own escalation ramp.
+		npc.apply_difficulty(_party_hp_factor(), 1.0)
 		var brain: OssuranPillar = OssuranPillar.new()
 		brain.name = "PillarBrain"
 		brain.pillar = npc
@@ -460,6 +514,43 @@ func _clear_pillars() -> void:
 			npc.tree_exited.disconnect(_on_pillar_gone)
 		_despawn(npc)
 	_pillars.clear()
+
+
+## Ossuran's arena-wide pulse for the duration of the pillar phase. Started once
+## on entering PILLARS; it ends itself when the state leaves PILLARS, the boss
+## dies, or the encounter stops. The damage is dealt directly (not through the
+## boss's sealed weapon), the same way the pillars land theirs.
+func _pillar_pulse_loop() -> void:
+	var started_ms: int = Time.get_ticks_msec()
+	while _in_pillar_phase():
+		await get_tree().create_timer(PULSE_INTERVAL_S).timeout
+		if not _in_pillar_phase():
+			return
+		if boss == null or not is_instance_valid(boss) or boss.is_dead:
+			continue
+		var steps: int = int(floor(
+			float(Time.get_ticks_msec() - started_ms) / 1000.0 / PULSE_RAMP_STEP_S
+		))
+		var radius: float = PULSE_BASE_RADIUS * minf(pow(PULSE_RADIUS_MULT, steps), PULSE_RADIUS_CAP)
+		var damage: float = PULSE_BASE_DAMAGE * minf(pow(PULSE_DAMAGE_MULT, steps), PULSE_DAMAGE_CAP)
+		boss.replicate_visual(
+			&"rp_elem_telegraph", [boss.global_position, radius, PULSE_WINDUP_S, 0, 0]
+		)
+		await get_tree().create_timer(PULSE_WINDUP_S).timeout
+		if not _in_pillar_phase():
+			return
+		if boss == null or not is_instance_valid(boss) or boss.is_dead:
+			continue
+		var center: Vector2 = boss.global_position
+		boss.replicate_visual(&"rp_slam_impact", [center, radius])
+		for player: Player in _live_players():
+			if player.global_position.distance_to(center) <= radius:
+				player.take_damage(damage, boss, CombatHit.DAMAGE_PHYSICAL)
+
+
+func _in_pillar_phase() -> bool:
+	return _running and state_machine != null \
+		and state_machine.state == BossStateMachine.State.PILLARS
 
 
 # --- Phase 2 ward ------------------------------------------------------------
@@ -602,6 +693,17 @@ func _callout(text: String) -> void:
 		return
 	for peer_id: int in instance.players_by_peer_id:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"boss.callout", {"text": text})
+
+
+## Ossuran SPEAKS. Distinct from _callout: the client routes this into the chat
+## feed and to a bubble over his head, not the mechanic banner. Pass the bare
+## line — the client adds the "Ossuran:" attribution.
+func _say(line: String) -> void:
+	var instance: Node = _instance()
+	if instance == null or WorldServer.curr == null:
+		return
+	for peer_id: int in instance.players_by_peer_id:
+		WorldServer.curr.data_push.rpc_id(peer_id, &"boss.say", {"text": line})
 
 
 func _despawn(npc: HostileNpc) -> void:

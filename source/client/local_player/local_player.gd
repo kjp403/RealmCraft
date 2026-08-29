@@ -265,6 +265,30 @@ func _ready() -> void:
 	# time instead of just killing people. No shake: it must not read as damage.
 	Client.subscribe(&"boss.callout", func(payload: Dictionary) -> void:
 		Announcer.announce(str(payload.get("text", "")), "", {"color": PVP_TOAST_COLOR}))
+	# Boss SPEAKS (Ossuran). Not a mechanic warning — route it into the chat feed
+	# as a System line the whole party sees, and to a bubble over his head. No
+	# banner: his voice and his mechanic callouts must stay visually distinct.
+	Client.subscribe(&"boss.say", _on_boss_say)
+
+
+## Ossuran speaking: a System line in chat (the whole party sees it) plus a
+## bubble over his head. Deliberately NOT the mechanic banner — his voice and his
+## mechanic callouts stay visually distinct.
+func _on_boss_say(payload: Dictionary) -> void:
+	var line: String = str(payload.get("text", "")).strip_edges()
+	if line.is_empty():
+		return
+	var found: Array[Node] = get_tree().root.find_children("*", "ChatMenu", true, false)
+	if not found.is_empty():
+		var chat: ChatMenu = found[0] as ChatMenu
+		if chat != null:
+			chat.echo_system("Ossuran: \"%s\"" % line)
+	for node: Node in get_tree().get_nodes_in_group(&"boss_bodies"):
+		var npc: HostileNpc = node as HostileNpc
+		if npc != null and is_instance_valid(npc) and not npc.is_dead \
+				and npc.enemy_data != null and npc.enemy_data.is_boss:
+			npc.show_overhead(line)
+			return
 
 
 ## The local player's own over-head HP bar reads as "self" (green), never
