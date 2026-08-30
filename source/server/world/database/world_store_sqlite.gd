@@ -53,11 +53,9 @@ func save_player(player: PlayerResource) -> bool:
 		"display": player.display_title,
 		"trophies": player.displayed_trophies,
 	})
-	var dailies_json: String = JSON.stringify({
-		"quests": player.daily_quests,
-		"refresh_at_ms": player.dailies_refresh_at_ms,
-		"skips_used": player.dailies_skips_used,
-	})
+	# Shape owned by DailyQuestManager, not spelled out here — the reader below
+	# calls its load_state, so the two cannot drift apart when the board changes.
+	var dailies_json: String = JSON.stringify(DailyQuestManager.save_state(player))
 	var dungeon_lockouts_json: String = JSON.stringify(player.dungeon_lockouts)
 	var redeemed_codes_json: String = JSON.stringify(player.redeemed_codes)
 	var wardstones_json: String = JSON.stringify(player.wardstones)
@@ -627,12 +625,10 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		player.displayed_trophies = PackedStringArray(trophies_v if trophies_v is Array else [])
 		_drop_retired_titles(player)
 
-	var dailies_v: Variant = JSON.parse_string(str(row.get("dailies_json", "{}")))
-	if dailies_v is Dictionary:
-		var quests_v: Variant = (dailies_v as Dictionary).get("quests", [])
-		player.daily_quests = quests_v if quests_v is Array else []
-		player.dailies_refresh_at_ms = int((dailies_v as Dictionary).get("refresh_at_ms", 0))
-		player.dailies_skips_used = int((dailies_v as Dictionary).get("skips_used", 0))
+	# Same column as before the skilling overhaul — no migration. load_state drops
+	# pre-overhaul kill/collect rows and rows from an already-rolled-over day, so
+	# an old save loads as "board not yet accepted today" rather than as garbage.
+	DailyQuestManager.load_state(player, JSON.parse_string(str(row.get("dailies_json", "{}"))))
 
 	var lockouts_v: Variant = JSON.parse_string(str(row.get("dungeon_lockouts_json", "{}")))
 	player.dungeon_lockouts = lockouts_v if lockouts_v is Dictionary else {}

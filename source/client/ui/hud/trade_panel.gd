@@ -81,16 +81,10 @@ func _apply_solid_trade_card() -> void:
 		node = node.get_parent()
 	if card == null:
 		return
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.09, 0.1, 0.14, 0.96)
-	style.set_corner_radius_all(10)
-	style.set_border_width_all(1)
-	style.border_color = Color(0.28, 0.3, 0.38, 0.9)
-	style.content_margin_left = 4
-	style.content_margin_right = 4
-	style.content_margin_top = 2
-	style.content_margin_bottom = 4
-	card.add_theme_stylebox_override(&"panel", style)
+	# Carved stone, the same card every MenuShell menu now draws. The trade panel
+	# is a standalone overlay rather than a shell menu, so it has to ask for the
+	# frame itself instead of inheriting it.
+	PixelUI.panel(card, "frame_stone", 6)
 
 
 func _build_body() -> void:

@@ -184,16 +184,12 @@ func _trigger_slot(index: int) -> void:
 			InstanceClient.current.name
 		)
 		return
-	# Loot chests open from the bag (same payout as a world chest).
+	# Loot chests open from the bag (same payout as a world chest). Routed through
+	# UniversalChestManager rather than requesting chest.open_item directly, so the
+	# hotbar, the inventory and a world chest all land in the same reward window
+	# and the Open 5 / Open All buttons act on this stack.
 	if item is LootChestItem:
-		Client.request_data(
-			&"chest.open_item",
-			func(result: Dictionary) -> void:
-				_on_item_action_result(result)
-				_after_slot_used(result, index),
-			{"id": int(item.get_meta(&"id", 0))},
-			InstanceClient.current.name
-		)
+		UniversalChestManager.open(int(item.get_meta(&"id", 0)), 1)
 		return
 	if item is DungeonKeyItem:
 		Client.request_data(

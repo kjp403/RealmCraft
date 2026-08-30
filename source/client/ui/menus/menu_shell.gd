@@ -17,6 +17,12 @@ extends Control
 ## Reparenting an authored body keeps its `unique_name_in_owner` (`%Foo`)
 ## lookups working — unique names resolve via the scene owner, not the parent,
 ## so moving nodes within the same scene is safe.
+##
+## PIXEL CHROME IS BUILT IN. The card frame, the title type and the Close button
+## all come from [PixelUI] here, so the 26 menus that extend this get the carved
+## 9-slice look without a line of their own. Menus previously had to restyle the
+## header themselves to match a pixel body; that override is now redundant and
+## should be deleted wherever it still exists.
 
 ## Emitted when the Close button is pressed (the shell also hides itself).
 signal close_requested
@@ -40,6 +46,9 @@ var _title_label: Label
 ## Builds the shell as children of `self`. If [param body] is given it's
 ## reparented into the card's content area. Call once from the menu's `_ready`.
 func build_shell(title_text: String = "", body: Control = null, fullscreen: bool = false) -> void:
+	# Belt-and-braces over the project-wide nearest default: a menu that is ever
+	# reparented under something with its own filter still stays crisp.
+	PixelUI.make_pixel_perfect(self)
 	backdrop = ColorRect.new()
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	backdrop.color = Color(0.04, 0.05, 0.08, 0.5)
@@ -65,6 +74,10 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 		# Full-screen menus drop the card frame — content sits straight on the dim full-rect backdrop
 		# (world faint behind), not in an inset floating panel. The dim ColorRect IS the "background".
 		card.add_theme_stylebox_override(&"panel", StyleBoxEmpty.new())
+	else:
+		# Carved stone, not the rounded StyleBoxFlat the project theme used to
+		# hand every PanelContainer.
+		PixelUI.panel(card, "frame_stone", 10)
 	margin.add_child(card)
 
 	var pad: MarginContainer = MarginContainer.new()
@@ -83,11 +96,8 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 	header.add_theme_constant_override(&"separation", 10)
 	root.add_child(header)
 
-	_title_label = Label.new()
-	_title_label.text = title_text
+	_title_label = PixelUI.text(title_text, PixelUI.SIZE_HEADING, PixelUI.INK_GOLD)
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_title_label.add_theme_color_override(&"font_color", Color(1.0, 0.95, 0.8))
-	_title_label.add_theme_font_size_override(&"font_size", 20)
 	_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_title_label)
 
@@ -104,8 +114,10 @@ func build_shell(title_text: String = "", body: Control = null, fullscreen: bool
 
 	var close_button: Button = Button.new()
 	close_button.text = "Close"
-	close_button.custom_minimum_size = Vector2(72, 34)
+	close_button.custom_minimum_size = Vector2(78, 36)
 	close_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	PixelUI.button_frame(close_button, "frame_iron", 6)
+	PixelUI.button_font(close_button, PixelUI.SIZE_BODY, PixelUI.INK)
 	close_button.pressed.connect(_on_close_pressed)
 	header_right.add_child(close_button)
 

@@ -71,7 +71,6 @@ func add_item(item_id: int, amount: int, fallback_name: String = "") -> void:
 	row.modulate.a = 0.0
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.09, 0.12, 0.82)
-	style.set_corner_radius_all(5)
 	style.content_margin_left = 6
 	style.content_margin_right = 10
 	style.content_margin_top = 3

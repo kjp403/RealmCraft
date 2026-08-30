@@ -32,6 +32,19 @@ var vault_skin_id: int:
 ## actually have a cosmetic equipped.
 var cosmetic_vfx: CosmeticVfx
 
+## Aura granted by a complete Skilling Outfit ([SkillingOutfitManager]). 0 = none.
+##
+## A SEPARATE channel from [member cosmetic_id] on purpose, exactly like
+## [member weapon_cosmetic_id]: cosmetics are the paid VFX line, so a free set
+## bonus must never overwrite the aura a player actually chose to wear. The
+## server sets it from the equipment hook; the visual is client-only.
+var skilling_aura_id: int:
+	set = _set_skilling_aura_id
+
+## Lazily built by [method _set_skilling_aura_id], same as [member cosmetic_vfx]
+## and for the same reason — the overwhelming majority of characters wear no set.
+var skilling_aura_vfx: CosmeticVfx
+
 ## Equipped WEAPON cosmetic (the Ascended glow). A separate slot from
 ## [member cosmetic_id] so a player can wear an aura and a weapon effect at once.
 ## Synced identically; the visual is rebuilt on the mounted weapon.
@@ -736,6 +749,20 @@ func _set_cosmetic_id(id: int) -> void:
 	cosmetic_vfx.set_facing(flipped)
 
 
+func _set_skilling_aura_id(id: int) -> void:
+	skilling_aura_id = id
+	# Server holds the value for sync but renders nothing, same as _set_cosmetic_id.
+	if multiplayer.is_server():
+		return
+	if skilling_aura_vfx == null:
+		if id == 0:
+			return # never build the node for the common "no set worn" case
+		skilling_aura_vfx = CosmeticVfx.new()
+		add_child(skilling_aura_vfx)
+	skilling_aura_vfx.apply(id)
+	skilling_aura_vfx.set_facing(flipped)
+
+
 func _set_weapon_cosmetic_id(id: int) -> void:
 	weapon_cosmetic_id = id
 	if multiplayer.is_server():
@@ -774,6 +801,8 @@ func _set_flip(new_flip: bool) -> void:
 	# Directional cosmetics (trails) mirror with the body; radial ones must not.
 	if cosmetic_vfx != null:
 		cosmetic_vfx.set_facing(new_flip)
+	if skilling_aura_vfx != null:
+		skilling_aura_vfx.set_facing(new_flip)
 
 
 func _set_pivot(new_pivot: float) -> void:

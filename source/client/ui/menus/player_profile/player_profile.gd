@@ -129,10 +129,6 @@ func _configure_profile_layout() -> void:
 	card_style.border_width_right = 1
 	card_style.border_width_bottom = 1
 
-	card_style.corner_radius_top_left = 6
-	card_style.corner_radius_top_right = 6
-	card_style.corner_radius_bottom_left = 6
-	card_style.corner_radius_bottom_right = 6
 
 	card_style.shadow_color = Color(0.0, 0.0, 0.0, 0.55)
 	card_style.shadow_size = 8

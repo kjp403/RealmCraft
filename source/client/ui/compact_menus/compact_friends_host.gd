@@ -373,10 +373,6 @@ func _make_row_style(
 	style.border_width_right = 1
 	style.border_width_bottom = 1
 
-	style.corner_radius_top_left = 3
-	style.corner_radius_top_right = 3
-	style.corner_radius_bottom_left = 3
-	style.corner_radius_bottom_right = 3
 
 	style.content_margin_left = 7.0
 	style.content_margin_right = 5.0

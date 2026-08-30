@@ -111,6 +111,12 @@ func data_request_handler(
 			).get("perks", {})
 			xp_gain = maxi(1, roundi(float(xp_gain) * perks.xp_multiplier(player_perks)))
 		progress = resource.add_skill_xp(table.profession, xp_gain)
+		# Daily board progress. Salvaging pays XP into a profession, so it is a
+		# real action in that skill and has to count — a daily that tracked only
+		# craft.item would stall for a player who spent the session breaking
+		# items down. Gated on xp_gain so a zero-XP salvage stays uncounted.
+		# item_id 0 = "any output": a salvage yields several different items.
+		SkillingEvents.emit_crafted(resource, table.profession, 0, removed)
 
 	var granted: Array = []
 	for out_id: int in yields:

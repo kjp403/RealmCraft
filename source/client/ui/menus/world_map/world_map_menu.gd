@@ -458,7 +458,6 @@ func _frame_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.04, 0.05, 0.07, 0.95)
 	style.border_color = Color(0.53, 0.37, 0.22)
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
 	return style
 
 
@@ -467,5 +466,4 @@ func _legend_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.05, 0.055, 0.08, 0.96)
 	style.border_color = Color(0.35, 0.32, 0.28)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
 	return style

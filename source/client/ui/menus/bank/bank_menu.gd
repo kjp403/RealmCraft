@@ -165,16 +165,16 @@ func _style_card() -> void:
 			break
 
 
-func _panel_style(bg: Color, border: Color, radius: int, border_width: int = 1) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = bg
-	style.set_corner_radius_all(radius)
-	style.set_border_width_all(border_width)
-	style.border_color = border
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 6
-	style.content_margin_bottom = 6
+## Carved 9-slice, not a rounded flat panel. The signature is kept so the five
+## call sites read unchanged; `bg`/`radius`/`border_width` are now decorative
+## history — the frame texture carries all of that — and only the border COLOUR
+## still does anything, as a modulate over the iron frame.
+func _panel_style(_bg: Color, border: Color, _radius: int, _border_width: int = 1) -> StyleBoxTexture:
+	var style: StyleBoxTexture = PixelUI.frame("frame_iron", 8)
+	# COL_LINE and friends are near-neutral; modulating by them keeps each panel's
+	# existing tint relationship without reintroducing a vector border.
+	if border != Color.BLACK:
+		style.modulate_color = Color(border.r + 0.55, border.g + 0.55, border.b + 0.55, 1.0)
 	return style
 
 
@@ -434,28 +434,15 @@ func _build_tab_rail() -> Control:
 
 ## Flat chips with a coloured underline when active — the tab's colour is the same
 ## one its stacks are framed in, so the rail reads as a legend too.
+## Tab rail chrome, now the shared pixel tab style: transparent at rest, a filled
+## square on hover, an accent underline when active. The tab's colour is the same
+## one its stacks are framed in, so the rail reads as a legend too.
+##
+## Deliberately the LIGHT half of the chrome hierarchy rather than a carved
+## frame — eight carved boxes in a row above the grid would fight the panels
+## beneath them and read as clutter. See PixelUI.tab_button.
 func _style_tab_button(button: Button, accent: Color) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.13, 0.14, 0.19, 0.0)
-	normal.set_corner_radius_all(6)
-	normal.content_margin_left = 7
-	normal.content_margin_right = 7
-	normal.content_margin_top = 3
-	normal.content_margin_bottom = 3
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.18, 0.20, 0.27, 0.9)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.19, 0.21, 0.28, 1.0)
-	pressed.border_width_bottom = 2
-	pressed.border_color = accent
-	button.add_theme_stylebox_override(&"normal", normal)
-	button.add_theme_stylebox_override(&"hover", hover)
-	button.add_theme_stylebox_override(&"pressed", pressed)
-	button.add_theme_stylebox_override(&"focus", normal)
-	button.add_theme_color_override(&"font_color", COL_MUTED)
-	button.add_theme_color_override(&"font_hover_color", COL_TEXT)
-	button.add_theme_color_override(&"font_pressed_color", accent)
-	button.add_theme_color_override(&"font_hover_pressed_color", accent)
+	PixelUI.tab_button(button, accent)
 
 
 func _build_capacity_row() -> Control:
@@ -466,14 +453,7 @@ func _build_capacity_row() -> Control:
 	_capacity_bar.custom_minimum_size = Vector2(0, 8)
 	_capacity_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_capacity_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var back := StyleBoxFlat.new()
-	back.bg_color = Color(0.06, 0.07, 0.10)
-	back.set_corner_radius_all(4)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = COL_ACCENT
-	fill.set_corner_radius_all(4)
-	_capacity_bar.add_theme_stylebox_override(&"background", back)
-	_capacity_bar.add_theme_stylebox_override(&"fill", fill)
+	PixelUI.progress_bar(_capacity_bar, COL_ACCENT, 10)
 	row.add_child(_capacity_bar)
 	_capacity_label = Label.new()
 	_capacity_label.add_theme_color_override(&"font_color", COL_MUTED)
@@ -549,7 +529,6 @@ func _build_transfer_bar() -> Control:
 	spin_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var spin_box := StyleBoxFlat.new()
 	spin_box.bg_color = Color(0.085, 0.095, 0.125)
-	spin_box.set_corner_radius_all(6)
 	spin_box.set_border_width_all(1)
 	spin_box.border_color = Color(0.30, 0.33, 0.42)
 	spin_box.content_margin_left = 6
@@ -597,54 +576,15 @@ func _build_transfer_bar() -> Control:
 ## as bare numerals with nothing around them, so at rest the whole transfer row
 ## read as a caption and Deposit All looked like the menu's only button.
 func _style_chip_button(button: Button) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.115, 0.13, 0.175)
-	normal.set_corner_radius_all(6)
-	normal.set_border_width_all(1)
-	normal.border_color = Color(0.30, 0.33, 0.42)
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.19, 0.21, 0.27)
-	hover.border_color = Color(0.52, 0.58, 0.72)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.23, 0.21, 0.15)
-	pressed.border_color = COL_GOLD
-	var disabled := normal.duplicate() as StyleBoxFlat
-	disabled.bg_color = Color(0.085, 0.095, 0.125)
-	disabled.border_color = Color(0.20, 0.22, 0.28)
-	button.add_theme_stylebox_override(&"normal", normal)
-	button.add_theme_stylebox_override(&"hover", hover)
-	button.add_theme_stylebox_override(&"pressed", pressed)
-	button.add_theme_stylebox_override(&"disabled", disabled)
-	button.add_theme_stylebox_override(&"focus", normal)
-	button.add_theme_color_override(&"font_color", COL_TEXT)
-	button.add_theme_color_override(&"font_disabled_color", Color(0.40, 0.43, 0.51))
+	PixelUI.button_frame(button, "frame_iron", 6)
+	PixelUI.button_font(button, PixelUI.SIZE_CAPTION, PixelUI.INK)
 
 
+## The one gold button in the menu — Transfer. Gold is reserved for the action
+## that commits, exactly as it is on the daily board's Open Chest.
 func _style_primary_button(button: Button) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.24, 0.30, 0.42)
-	normal.set_corner_radius_all(7)
-	normal.set_border_width_all(1)
-	normal.border_color = Color(0.46, 0.58, 0.78)
-	normal.content_margin_left = 12
-	normal.content_margin_right = 12
-	normal.content_margin_top = 5
-	normal.content_margin_bottom = 5
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.31, 0.39, 0.54)
-	hover.border_color = Color(0.62, 0.74, 0.94)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.20, 0.25, 0.35)
-	var disabled := normal.duplicate() as StyleBoxFlat
-	disabled.bg_color = Color(0.14, 0.15, 0.19)
-	disabled.border_color = Color(0.22, 0.24, 0.30)
-	button.add_theme_stylebox_override(&"normal", normal)
-	button.add_theme_stylebox_override(&"hover", hover)
-	button.add_theme_stylebox_override(&"pressed", pressed)
-	button.add_theme_stylebox_override(&"disabled", disabled)
-	button.add_theme_stylebox_override(&"focus", normal)
-	button.add_theme_color_override(&"font_color", Color(0.95, 0.96, 1.0))
-	button.add_theme_color_override(&"font_disabled_color", Color(0.45, 0.47, 0.54))
+	PixelUI.button_frame(button, "frame_gold", 8)
+	PixelUI.button_font(button, PixelUI.SIZE_BODY, PixelUI.INK_GOLD)
 
 
 func _build_hint_bar() -> Control:
@@ -863,11 +803,12 @@ func _rebuild_grids() -> void:
 		_capacity_bar.max_value = maxf(1.0, float(_bank_slots))
 		_capacity_bar.value = float(vault_used)
 		var used_ratio: float = float(vault_used) / maxf(1.0, float(_bank_slots))
-		var fill: StyleBoxFlat = _capacity_bar.get_theme_stylebox(&"fill") as StyleBoxFlat
+		var fill: StyleBoxTexture = _capacity_bar.get_theme_stylebox(&"fill") as StyleBoxTexture
 		if fill != null:
 			# Amber past 80%, red when full: "your bank is full" should be visible
-			# before a deposit bounces off it.
-			fill.bg_color = (
+			# before a deposit bounces off it. The bar art is neutral grey, so the
+			# warning colour rides modulate_color instead of a flat bg_color.
+			fill.modulate_color = (
 				Color(0.87, 0.36, 0.33) if used_ratio >= 0.995
 				else (Color(0.93, 0.66, 0.32) if used_ratio >= 0.8 else COL_ACCENT)
 			)
@@ -926,12 +867,9 @@ func _fill_grid(grid: GridContainer, store: Dictionary, uids: Array, is_bag: boo
 func _build_empty_slot() -> Control:
 	var slot := Panel.new()
 	slot.custom_minimum_size = SLOT_SIZE
-	var style := StyleBoxFlat.new()
-	style.bg_color = COL_SLOT_EMPTY
-	style.set_corner_radius_all(5)
-	style.set_border_width_all(1)
-	style.border_color = Color(0.17, 0.18, 0.24)
-	slot.add_theme_stylebox_override(&"panel", style)
+	# The same recessed square the inventory grid, the equipment panel and the
+	# reward window use — an empty slot should not be a different shape here.
+	slot.add_theme_stylebox_override(&"panel", PixelUI.slot_style())
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return slot
 
@@ -983,19 +921,18 @@ func _build_slot(store: Dictionary, uid: int, is_bag: bool) -> Button:
 	return button
 
 
+## A filled stack's square. The same recessed pixel slot the empty squares use —
+## an occupied and an empty cell in one grid must not be different SHAPES — with
+## the category accent carried on modulate instead of a coloured vector border.
 func _style_slot_button(button: Button, accent: Color) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = COL_SLOT
-	normal.set_corner_radius_all(5)
-	normal.set_border_width_all(1)
-	normal.border_color = Color(accent.r, accent.g, accent.b, 0.40)
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.20, 0.22, 0.28)
-	hover.border_color = Color(accent.r, accent.g, accent.b, 0.95)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.24, 0.22, 0.16)
-	pressed.set_border_width_all(2)
-	pressed.border_color = COL_GOLD
+	var normal: StyleBoxTexture = PixelUI.slot_style()
+	normal.modulate_color = Color(0.55 + accent.r, 0.55 + accent.g, 0.55 + accent.b, 1.0)
+	var hover: StyleBoxTexture = PixelUI.slot_style()
+	# Hover lifts the same tint rather than swapping colours, so the accent keeps
+	# reading as the category legend it is.
+	hover.modulate_color = Color(0.85 + accent.r, 0.85 + accent.g, 0.85 + accent.b, 1.0)
+	var pressed: StyleBoxTexture = PixelUI.slot_style()
+	pressed.modulate_color = Color(COL_GOLD.r + 0.5, COL_GOLD.g + 0.5, COL_GOLD.b + 0.5, 1.0)
 	button.add_theme_stylebox_override(&"normal", normal)
 	button.add_theme_stylebox_override(&"hover", hover)
 	button.add_theme_stylebox_override(&"pressed", pressed)

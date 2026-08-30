@@ -476,8 +476,11 @@ func _on_chest_opened(data: Dictionary) -> void:
 	var chest_name: String = str(data.get("chest", "Loot Chest"))
 	Toaster.toast("Opened %s" % chest_name)
 	inventory_changed.emit(data)
-	# Staging claim UI — further opens refresh the same panel.
-	open_menu_requested.emit(&"chest_loot", data)
+	# The reward readout is UniversalChestManager's job — it subscribes to this
+	# same push and surfaces ChestRewardWindow. Deliberately NOT routed through
+	# open_menu_requested any more: that lands in HUD.display_menu, which hides
+	# every other menu, so opening a chest from the bag closed the inventory and
+	# forced the Bank All -> Close -> reopen cycle.
 
 
 ## Reopen the claim UI if the player still has staged chest loot from a prior
@@ -498,7 +501,9 @@ func _restore_pending_chest_loot(_player: LocalPlayer) -> void:
 	if pending.is_empty():
 		return
 	Toaster.toast("You have unclaimed chest loot.")
-	open_menu_requested.emit(&"chest_loot", payload)
+	# Same window as every other reward, opened without disturbing whatever the
+	# player already has on screen at login.
+	UniversalChestManager.present(payload)
 
 
 func _on_gather_result(data: Dictionary) -> void:

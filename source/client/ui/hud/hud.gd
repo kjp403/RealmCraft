@@ -54,6 +54,8 @@ var _party_hud: PartyHud
 @onready var quest_tracker: QuestTracker = $QuestTracker
 @onready var slayer_tracker: PanelContainer = $SlayerTracker
 @onready var trade_panel: Control = $TradePanel
+## Built in _mount_chest_reward_window, not authored in the scene — see there.
+var chest_reward_window: Control
 @onready var experience_bar: ProgressBar = $Resources/ExperienceBar
 @onready var experience_level_label: Label = $Resources/ExperienceBar/LevelLabel
 @onready var death_screen: ColorRect = $DeathScreen
@@ -136,6 +138,7 @@ func _ready() -> void:
 	# The trade panel is a standalone overlay (not a display_menu) — treat it like a menu too: hide
 	# the gameplay HUD + freeze movement while it's open, so HUD clicks can't bleed through behind it.
 	trade_panel.visibility_changed.connect(_refresh_hud_for_menus)
+	_mount_chest_reward_window()
 
 	ClientState.input_changed.connect(_on_input_type_changed)
 
@@ -394,6 +397,15 @@ func _on_input_type_changed(input_type: InputComponent.InputType) -> void:
 
 
 func _on_menu_requested(menu_name: StringName, arg: Variant) -> void:
+	# The Boss Hunt stash is a reward pile, not a menu. Routing it to the shared
+	# reward window instead of display_menu is what gives it the claim-all
+	# overflow cascade and stops it closing whatever the player already had open
+	# — the same reason bag chests stopped being a menu. Intercepted here rather
+	# than in the NPC interaction so the server-side content (HuntChestInteraction
+	# still returns menu: &"hunt_chest") needs no change.
+	if menu_name == &"hunt_chest":
+		UniversalChestManager.open_hunt_chest()
+		return
 	display_menu(menu_name, arg)
 
 
@@ -576,6 +588,26 @@ func _raise_chat_over_menu() -> void:
 	chat.move_to_front()
 
 
+## The chest reward readout. Built in code and parented straight to the HUD —
+## deliberately NOT registered in `menus`, so `display_menu` neither hides it nor
+## is hidden by it. That is the whole fix for the old "open a chest from the bag
+## and the inventory closes" loop.
+##
+## It is also NOT wired into [method _refresh_hud_for_menus] like the trade panel
+## is: this window is non-intrusive by design (no backdrop, click-through
+## everywhere but its own panel), so the HUD and player movement stay live under
+## it. z above sub_menu's 100 so it reads over an open inventory rather than
+## under it.
+func _mount_chest_reward_window() -> void:
+	var script: GDScript = load("res://source/client/ui/overlays/chest_reward_window.gd")
+	if script == null:
+		return
+	chest_reward_window = script.new() as Control
+	chest_reward_window.name = "ChestRewardWindow"
+	chest_reward_window.z_index = 110
+	add_child(chest_reward_window)
+
+
 func _restore_chat_layer() -> void:
 	if chat != null:
 		chat.z_index = CHAT_DEFAULT_Z
@@ -644,7 +676,6 @@ func _make_chat_unread_badge() -> PanelContainer:
 	panel.custom_minimum_size = Vector2(14, 14)
 	var bg := StyleBoxFlat.new()
 	bg.bg_color = Color(0.84, 0.16, 0.14)
-	bg.set_corner_radius_all(8)
 	bg.set_border_width_all(1)
 	bg.border_color = Color(0.12, 0.04, 0.04, 0.9)
 	bg.content_margin_left = 4

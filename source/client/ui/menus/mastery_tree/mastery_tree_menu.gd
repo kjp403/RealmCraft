@@ -229,7 +229,6 @@ func _make_branch_panel(branch: StringName, tree: MasteryTreeResource, info: Dic
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(color.r, color.g, color.b, 0.06)
-	box.set_corner_radius_all(8)
 	box.set_border_width_all(1)
 	box.border_color = Color(color.r, color.g, color.b, 0.4)
 	box.set_content_margin_all(8)
@@ -356,7 +355,6 @@ func _make_tile(node: MasteryNode, _tree: MasteryTreeResource, info: Dictionary,
 
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(0.10, 0.11, 0.14, 1.0)
-	box.set_corner_radius_all(6)
 	box.set_border_width_all(border_w)
 	box.border_color = border_col
 	for style_name: StringName in [&"normal", &"hover", &"pressed", &"focus", &"disabled"]:
@@ -423,7 +421,6 @@ func _badge(text: String, bg: Color, fg: Color) -> Control:
 	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var b: StyleBoxFlat = StyleBoxFlat.new()
 	b.bg_color = bg
-	b.set_corner_radius_all(4)
 	b.content_margin_left = 4
 	b.content_margin_right = 4
 	b.content_margin_top = 1
@@ -457,7 +454,6 @@ func _make_detail_panel(tree: MasteryTreeResource, info: Dictionary) -> Control:
 	panel.custom_minimum_size.y = 104
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(0.09, 0.10, 0.13, 0.92)
-	box.set_corner_radius_all(8)
 	box.set_border_width_all(1)
 	box.border_color = Color(0.30, 0.32, 0.40, 0.7)
 	box.set_content_margin_all(12)

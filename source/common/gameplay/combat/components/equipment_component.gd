@@ -55,6 +55,13 @@ const EMPTY_HAND_SCENE: PackedScene = preload(
 
 func _ready() -> void:
 	slots.slot_changed.connect(_on_slot_changed)
+	# Skilling Outfit aura. Hung off the signal rather than the individual
+	# equip/unequip branches because _on_slot_changed has four exits and a set
+	# bonus that silently fails to clear on ONE of them is the worst kind of bug:
+	# the aura persists on a player who took the hat off. refresh_aura no-ops
+	# when the resolved id has not changed, so the extra calls from the weapon
+	# special-ability slots cost nothing.
+	equipment_changed.connect(_on_equipment_changed_aura)
 	# Players with an empty weapon slot still need a punch so they can fight
 	# before buying/equipping a weapon. Deferred: right_hand_spot must exist.
 	call_deferred(&"_ensure_unarmed_if_empty")
@@ -197,6 +204,13 @@ func _clear_slot(slot: StringName) -> void:
 		_free_mounted(slot)
 	equipped_items.erase(slot)
 	_remove_gear_stats(slot)
+
+
+## Re-evaluate the player's Skilling Outfit set aura after any equipment change.
+## Server-only and player-only; NPCs wear no outfits.
+func _on_equipment_changed_aura(_slot: StringName, _item_id: int) -> void:
+	if character is Player:
+		SkillingOutfitManager.refresh_aura(character as Player)
 
 
 ## Apply GearItem base_modifiers for [param slot], tracking them in the ledger.

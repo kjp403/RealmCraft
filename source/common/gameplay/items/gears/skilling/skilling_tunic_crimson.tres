@@ -7,25 +7,14 @@
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
-value = 18.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_1"]
-script = ExtResource("1_mod")
-stat_name = "armor"
-value = 4.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_2"]
-script = ExtResource("1_mod")
-stat_name = "ad"
-value = 2.0
+stat_name = "gather_yield"
+value = 0.03
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1"), SubResource("Mod_2")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0")])
 item_name = &"Crimson Craft Coat"
 item_icon = ExtResource("2_icon")
 description = "Sturdy red coat of the master smiths' guild."

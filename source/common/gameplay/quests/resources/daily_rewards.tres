@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DailyRewardTable" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/quests/daily_reward_table.gd" id="1_drt"]
+
+[resource]
+script = ExtResource("1_drt")
+base_gold = 500
+base_adventure_xp = 30
+base_skill_xp_fraction = 0.025
+base_skill_xp_min = 120
+difficulty_multipliers = PackedFloat32Array(1, 4.5, 14)

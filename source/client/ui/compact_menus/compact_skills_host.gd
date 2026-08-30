@@ -240,7 +240,6 @@ func _ensure_shared_styles() -> void:
 	_style_compact_normal.bg_color = Color(0.12, 0.11, 0.10, 0.95)
 	_style_compact_normal.border_color = Color(0.48, 0.40, 0.28, 0.9)
 	_style_compact_normal.set_border_width_all(1)
-	_style_compact_normal.set_corner_radius_all(2)
 	_style_compact_normal.content_margin_left = 4
 	_style_compact_normal.content_margin_right = 4
 	_style_compact_normal.content_margin_top = 1
@@ -1328,7 +1327,6 @@ func _make_cell_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.035, 0.03, 0.055, 0.92)
 	style.border_color = Color(0.55, 0.36, 0.20, 0.95)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
 	style.content_margin_left = 2
 	style.content_margin_right = 2
 	style.content_margin_top = 2
@@ -1341,7 +1339,6 @@ func _make_total_bar_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.02, 0.02, 0.02, 0.95)
 	style.border_color = Color(0.42, 0.38, 0.32, 1.0)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(1)
 	style.content_margin_top = 2
 	style.content_margin_bottom = 2
 	return style
@@ -1350,14 +1347,12 @@ func _make_total_bar_style() -> StyleBoxFlat:
 func _make_bar_bg() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.07, 0.1, 0.95)
-	style.set_corner_radius_all(2)
 	return style
 
 
 func _make_bar_fill() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.95, 0.75, 0.28, 1.0)
-	style.set_corner_radius_all(2)
 	return style
 
 

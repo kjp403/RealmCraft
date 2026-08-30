@@ -94,6 +94,16 @@ func _ready() -> void:
 	hide()
 
 
+## The HUD's chest reward overlay, or null if the HUD hasn't built it yet.
+## Reached through the parent rather than held as a reference because this host
+## is parented to the HUD at runtime and has no exported link to it.
+func _chest_reward_window() -> Control:
+	var hud: Node = get_parent()
+	if hud == null or not (&"chest_reward_window" in hud):
+		return null
+	return hud.get(&"chest_reward_window") as Control
+
+
 func _place_panel() -> void:
 	var hud := get_parent() as Control
 	if hud == null:
@@ -910,11 +920,25 @@ func _perform_primary_action(entry: Dictionary) -> void:
 	):
 		return
 
+	# Chests take the UniversalChestManager route and return here — it owns the
+	# request, the batch buttons and the reward window. Critically it does NOT go
+	# through open_menu_requested/display_menu, so this compact inventory stays
+	# open behind the reward readout and the player can keep opening chests.
+	if item is LootChestItem:
+		# Point the window's Open 5 / Open All at THIS stack before opening, so the
+		# batch buttons are live the moment the readout appears. The count is this
+		# slot's own amount; the server reports the authoritative remainder on
+		# every batch response, so a stack split across slots still opens fully.
+		var slot_data: Dictionary = entry.get("data", {}) as Dictionary
+		var window: Control = _chest_reward_window()
+		if window != null:
+			window.set_target_chest(item_id, int(slot_data.get("a", 1)))
+		UniversalChestManager.open(item_id, 1)
+		return
+
 	var request_name: StringName = &"item.equip"
 
-	if item is LootChestItem:
-		request_name = &"chest.open_item"
-	elif item is DungeonKeyItem:
+	if item is DungeonKeyItem:
 		request_name = &"dungeon.key_use"
 	elif item is ConsumableItem:
 		request_name = &"item.consume"

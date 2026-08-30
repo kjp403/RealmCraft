@@ -580,8 +580,8 @@ static func on_dungeon_cleared(instance: Node) -> void:
 		# charges are spent (help runs / hard-record farming).
 		if hard and player != null:
 			LeaderboardService.record_dungeon_clear(player, board_key, seconds)
-		if player != null:
-			DailyQuestService.on_dungeon_clear(player.player_resource)
+		# No daily hook here any more — the daily board is skilling-only
+		# (see DailyQuestManager).
 		WorldServer.curr.data_push.rpc_id(peer, &"dungeon.cleared", {
 			"dungeon": label,
 			"seconds": seconds,

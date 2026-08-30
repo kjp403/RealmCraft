@@ -106,7 +106,6 @@ func _build_ui() -> void:
 
 	var panel: StyleBoxFlat = StyleBoxFlat.new()
 	panel.bg_color = Color(0.06, 0.06, 0.08, 0.55)
-	panel.set_corner_radius_all(10)
 	panel.content_margin_top = 5
 	panel.content_margin_bottom = 5
 	panel.content_margin_left = 20

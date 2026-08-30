@@ -355,8 +355,8 @@ static func _finalize_fighter(ws: Node, instance: Node, master: DuelMaster, peer
 		player_res.lb_stats["arena_wins"] = int(player_res.lb_stats.get("arena_wins", 0)) + 1
 	else:
 		player_res.lb_stats["arena_losses"] = int(player_res.lb_stats.get("arena_losses", 0)) + 1
-	# Daily "play N duels" progress — winner and loser both count (they fought).
-	DailyQuestService.on_spar(player_res)
+	# No daily hook here any more — the daily board is skilling-only
+	# (see DailyQuestManager).
 	ws.database.save_player(player_res)
 
 	if instance == null:

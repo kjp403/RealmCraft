@@ -48,6 +48,11 @@ static func _static_init() -> void:
 	register_field("StatsComponent:stats:%s" % Stat.MANA_MAX,  Wire.Type.F32)
 	register_field(":display_title", Wire.Type.VARIANT)
 	register_field(":vault_skin_id", Wire.Type.U32)
+	# Skilling Outfit set aura (SkillingOutfitManager). A cosmetics-registry id,
+	# so it lives in the same small range as :skin_id — U16. Baked rather than
+	# left to ensure_id for the reason on :anim above: a runtime registration can
+	# race the pairs stream, and this one flips whenever someone changes gear.
+	register_field(":skilling_aura_id", Wire.Type.U16)
 
 
 static func reset() -> void:

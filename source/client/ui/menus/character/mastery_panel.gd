@@ -246,7 +246,6 @@ func _make_loadout_chip(key: String, node_id: String) -> Control:
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(0.09, 0.10, 0.13, 0.85)
-	box.set_corner_radius_all(4)
 	box.set_border_width_all(1)
 	box.border_color = Color(0.5, 0.85, 0.55, 0.7) if filled else Color(0.28, 0.30, 0.38, 0.5)
 	box.set_content_margin_all(8)
