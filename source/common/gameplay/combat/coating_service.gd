@@ -103,6 +103,16 @@ static func remaining_seconds(player: Player) -> int:
 	return maxi(0, ceili(left_ms / 1000.0))
 
 
+## Wipes the coating outright, whatever is left on it. Death calls this beside
+## [method BuffService.clear_all]: the coating shares the one COMBAT DRAUGHT slot
+## with those buffs, so leaving it behind when they go would let a corpse walk
+## back holding a slot it no longer shows an icon for.
+static func clear(player: Player) -> void:
+	if player == null or player.player_resource == null:
+		return
+	player.player_resource.weapon_coating = {}
+
+
 ## Drops the coating once it has run out. Called from the instance's 1 Hz status
 ## tick alongside [method BuffService.tick] so the field is empty the same second
 ## the icon disappears — which also means the next vial is drinkable the moment

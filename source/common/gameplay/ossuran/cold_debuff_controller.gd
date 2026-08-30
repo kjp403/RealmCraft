@@ -145,6 +145,12 @@ func _distance_to_nearest_fire(player: Player) -> float:
 	for source: Node2D in fire_sources:
 		if source == null or not is_instance_valid(source):
 			continue
+		# An EXTINGUISHED brazier is not warmth. This is the whole point of the
+		# phase-3 cycle: the safe spots move, so a group cannot pick one fire at
+		# the start of the phase and stand on it until the boss dies. A fire that
+		# is out reads as absent here — the same way a destroyed one would.
+		if source is Campfire and not (source as Campfire).lit:
+			continue
 		var d: float = player.global_position.distance_to(source.global_position)
 		if d < best:
 			best = d
