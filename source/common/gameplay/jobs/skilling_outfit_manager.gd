@@ -339,6 +339,96 @@ static func pieces_of(set_slug: StringName) -> Array[StringName]:
 	return out
 
 
+# --- Ownership (duplicate protection) ----------------------------------------
+
+## True if [param resource] is STORING [param slug] anywhere the player can get
+## it back from: any of the three bags, the personal bank, the Boss Hunt stash,
+## or loot still staged in the chest-claim window.
+##
+## The staged list matters as much as the bag. Two chests opened in one sitting
+## must not both roll "you are missing the hat" before either has been claimed,
+## or the protection leaks a duplicate anyway.
+##
+## Takes the resource rather than the Player so the headless verify gate can
+## exercise it — constructing a Player pulls in the client autoloads, which do
+## not exist under `-s`.
+static func stores_piece(resource: PlayerResource, slug: StringName) -> bool:
+	if resource == null:
+		return false
+	var id: int = ContentRegistryHub.id_from_slug(&"items", slug)
+	if id <= 0:
+		# An unstamped piece can be neither owned nor granted. Reporting it as
+		# owned would drop it out of the missing pool and pay a fallback gem
+		# forever; validate() is what surfaces that content gap.
+		return false
+	if Inventory.has_item(resource.inventory, id):
+		return true
+	if Inventory.has_item(resource.bank, id):
+		return true
+	if PendingChestLoot.count(resource.pending_chest_loot, id) > 0:
+		return true
+	return PendingChestLoot.count(resource.hunt_chest, id) > 0
+
+
+## True if the player is WEARING [param slug] right now. Reads the live
+## EquipmentComponent first, like every other read here — the persisted map goes
+## stale mid-session, and a stale read is exactly how a worn piece would be
+## counted as missing and re-dropped.
+static func wears_piece(player: Player, slug: StringName) -> bool:
+	if player == null:
+		return false
+	_build_index()
+	var equipped: Dictionary = _equipped_items(player)
+	for slot: Variant in equipped:
+		if _piece_slug_of(equipped[slot]) == slug:
+			return true
+	return false
+
+
+## True if the player holds [param slug] anywhere at all — worn, bagged, banked,
+## stashed or staged.
+static func owns_piece(player: Player, slug: StringName) -> bool:
+	if player == null:
+		return false
+	return stores_piece(player.player_resource, slug) or wears_piece(player, slug)
+
+
+## Storage-only view of [method missing_pieces]: the same walk with worn gear
+## left out. Public so the verify gate can assert the prioritisation without a
+## live Player.
+static func missing_pieces_in_storage(
+	resource: PlayerResource, set_slug: StringName
+) -> Array[StringName]:
+	var out: Array[StringName] = []
+	for slug: StringName in pieces_of(set_slug):
+		if not stores_piece(resource, slug):
+			out.append(slug)
+	return out
+
+
+## Pieces of [param set_slug] the player does NOT own. The rare chest roll draws
+## from THIS rather than from the full set, so a 1-in-1000 hit is always
+## progress: a player holding 2 of 4 is guaranteed one of the other 2.
+##
+## An empty return means the set is already complete and the caller must pay
+## something else rather than a duplicate — see SkillingChestRewarder.
+static func missing_pieces(player: Player, set_slug: StringName) -> Array[StringName]:
+	if player == null:
+		return pieces_of(set_slug)
+	var out: Array[StringName] = []
+	for slug: StringName in pieces_of(set_slug):
+		if not owns_piece(player, slug):
+			out.append(slug)
+	return out
+
+
+## True when all four pieces are held somewhere. "Owns", not "wears": a set
+## sitting in the bank is still collected, and re-dropping it is still a
+## duplicate.
+static func owns_full_set(player: Player, set_slug: StringName) -> bool:
+	return SETS.has(set_slug) and missing_pieces(player, set_slug).is_empty()
+
+
 ## Boot-time content check: every set names a real job and four resolvable
 ## items. Reports rather than throws — a missing piece makes that set
 ## uncompletable, which is a content gap worth seeing in the log, not a crash.

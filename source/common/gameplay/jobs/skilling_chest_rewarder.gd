@@ -145,6 +145,11 @@ const GEM_POOL: Array[StringName] = [
 	&"gem_guard_low", &"gem_guard_medium", &"gem_guard_high",
 ]
 
+## Gem grade paid by the outfit fallback, indexed by chest tier: a T1 chest
+## consoles with a low gem, T3 with a high one. Matched by slug suffix against
+## [constant GEM_POOL] so adding a fifth attribute line needs no change here.
+const GEM_GRADES: Array[String] = ["_low", "_medium", "_high"]
+
 ## Slugs already warned about, so a missing item cannot flood the log on every
 ## claim of every player.
 static var _warned_slugs: Dictionary[StringName, bool] = {}
@@ -198,7 +203,7 @@ static func grant(player: Player, skill: StringName, difficulty: int) -> Diction
 		_stage(resource, GEM_POOL[randi() % GEM_POOL.size()], 1, items, float(spec["gem"]))
 
 	# --- Rare: Skilling Outfit piece ---
-	var outfit: Dictionary = _roll_outfit(player, skill, float(spec["outfit"]), items)
+	var outfit: Dictionary = _roll_outfit(player, skill, tier, float(spec["outfit"]), items)
 
 	return {
 		"ok": true,
@@ -241,12 +246,19 @@ static func validate() -> PackedStringArray:
 
 ## Roll for a Skilling Outfit piece and stage it if it hits.
 ##
-## Prefers a piece the player does NOT already have — at a 1-in-1000 to 1-in-100
-## roll, handing back a duplicate of the hat they are wearing is the difference
-## between a memorable drop and a dead one. Only when the set is fully collected
-## does it fall through to a duplicate (which still has vendor/trade value).
+## DUPLICATE PROTECTION. At a 1-in-1000 to 1-in-100 roll, handing back the hat
+## the player is already wearing is the difference between a memorable drop and
+## a dead one. The draw is therefore taken ONLY from the pieces
+## [SkillingOutfitManager] reports as missing — bag, bank, Boss Hunt stash,
+## staged claim loot and worn gear all count as owned — so a player holding 2 of
+## 4 is guaranteed one of the other 2.
+##
+## When there is nothing left to grant the roll pays a tier-appropriate gem
+## instead of a duplicate. A duplicate has vendor value, but it reads as the
+## game failing to notice what you already own; the gem reads as a reward and is
+## worth more at the tiers that roll it most often.
 static func _roll_outfit(
-	player: Player, skill: StringName, chance: float, items: Array
+	player: Player, skill: StringName, tier: int, chance: float, items: Array
 ) -> Dictionary:
 	if chance <= 0.0 or randf() >= chance:
 		return {}
@@ -254,48 +266,61 @@ static func _roll_outfit(
 	if set_slug == &"":
 		# Five of the nine skills have no set authored yet. Rather than silently
 		# eat the rare roll, pay a gem so the lucky roll is still worth something.
-		if not GEM_POOL.is_empty():
-			_stage(player.player_resource, GEM_POOL[randi() % GEM_POOL.size()], 1, items, chance)
-		return {}
+		return _gem_fallback(player, tier, chance, items, "no_set")
 
-	var pieces: Array[StringName] = SkillingOutfitManager.pieces_of(set_slug)
-	var missing: Array[StringName] = []
-	for slug: StringName in pieces:
-		if not _owns(player, slug):
-			missing.append(slug)
-	var pool: Array[StringName] = missing if not missing.is_empty() else pieces
-	if pool.is_empty():
-		return {}
-	var pick: StringName = pool[randi() % pool.size()]
+	var missing: Array[StringName] = SkillingOutfitManager.missing_pieces(player, set_slug)
+	if missing.is_empty():
+		return _gem_fallback(player, tier, chance, items, "set_complete", set_slug)
+	var pick: StringName = missing[randi() % missing.size()]
 	if not _stage(player.player_resource, pick, 1, items, chance):
-		return {}
+		# The piece is not stamped in the items index, so staging it pays
+		# nothing at all. Spend the roll on a gem rather than on silence — and
+		# SkillingOutfitManager.validate() is what reports the content gap.
+		return _gem_fallback(player, tier, chance, items, "unresolved_piece", set_slug)
 	return {
 		"set": String(set_slug),
 		"slug": String(pick),
-		"duplicate": missing.is_empty(),
+		"remaining": missing.size() - 1,
+		"duplicate": false,
 	}
 
 
-## True if the player already holds [param slug] in bag, bank, or equipped.
-## Pending chest loot counts too — two chests in one session must not both roll
-## "you are missing the hat" before either has been claimed into the bag.
-static func _owns(player: Player, slug: StringName) -> bool:
-	var id: int = _resolve_id(slug)
-	if id <= 0:
-		return false
-	var resource: PlayerResource = player.player_resource
-	if Inventory.has_item(resource.inventory, id):
-		return true
-	if Inventory.has_item(resource.bank, id):
-		return true
-	if PendingChestLoot.count(resource.pending_chest_loot, id) > 0:
-		return true
-	for slot: Variant in resource.equipment:
-		var entry: Variant = resource.equipment[slot]
-		var worn: int = int(entry.get_meta(&"id", 0)) if entry is Item else int(entry) if entry is int else 0
-		if worn == id:
-			return true
-	return false
+## Pay a rare roll out as a gem when no outfit piece can be granted.
+## [param reason] rides along in the payload so the reward window — and anyone
+## reading a bug report — can say WHY a 1-in-100 roll paid a gem.
+static func _gem_fallback(
+	player: Player, tier: int, chance: float, items: Array, reason: String,
+	set_slug: StringName = &""
+) -> Dictionary:
+	var slug: StringName = fallback_gem_for_tier(tier)
+	if slug == &"" or not _stage(player.player_resource, slug, 1, items, chance):
+		return {}
+	return {
+		"set": String(set_slug),
+		"slug": String(slug),
+		"fallback": reason,
+		"duplicate": false,
+	}
+
+
+## A gem of the grade matching [param tier]. The attribute line (vital / agile /
+## focus / guard) stays random — the GRADE is what makes the consolation feel
+## tier-appropriate rather than a flat trinket.
+##
+## Public so the board UI can name what a completed set now pays, and so the
+## verify gate can assert the tier mapping without rolling anything.
+static func fallback_gem_for_tier(tier: int) -> StringName:
+	if GEM_POOL.is_empty():
+		return &""
+	var grade: String = GEM_GRADES[clampi(tier, 0, GEM_GRADES.size() - 1)]
+	var candidates: Array[StringName] = []
+	for slug: StringName in GEM_POOL:
+		if String(slug).ends_with(grade):
+			candidates.append(slug)
+	if candidates.is_empty():
+		# The grade suffixes changed under us. Any gem beats eating the roll.
+		return GEM_POOL[randi() % GEM_POOL.size()]
+	return candidates[randi() % candidates.size()]
 
 
 ## Pick [param count] distinct slugs from [param pool] without replacement.

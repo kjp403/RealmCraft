@@ -28,6 +28,7 @@ func _init() -> void:
 	_chest_tuning()
 	_outfit_content()
 	_outfit_tuning()
+	_outfit_duplicates()
 	_precook()
 	print("")
 	if _fails.is_empty():
@@ -228,6 +229,98 @@ func _outfit_tuning() -> void:
 		wc_yield > 0.10 and wc_yield < 0.25,
 		"a full Lumberjack set pays %.0f%% bonus yield" % (wc_yield * 100.0)
 	)
+
+
+# --- Outfit duplicate protection ---------------------------------------------
+
+## The rare outfit roll must never hand back a piece the player already has.
+## Every check here runs on a bare [PlayerResource], which is a plain Resource —
+## the ownership walk was written to take one precisely so this gate can drive it
+## without a live Player.
+func _outfit_duplicates() -> void:
+	print("[outfit duplicate protection]")
+	var set_slug: StringName = &"miner"
+	var pieces: Array[StringName] = SkillingOutfitManager.pieces_of(set_slug)
+	if pieces.size() != SkillingOutfitManager.PIECES_PER_SET:
+		_check(false, "miner set has %d pieces to test with" % pieces.size())
+		return
+
+	var resource := PlayerResource.new()
+	_check(
+		SkillingOutfitManager.missing_pieces_in_storage(resource, set_slug).size() == 4,
+		"a player owning nothing is missing all 4 pieces"
+	)
+
+	# Each storage the protection has to see, added one piece at a time. If any
+	# one of them is not consulted, the count below stops falling and the roll
+	# would re-drop something the player already has.
+	var id_hat: int = ContentRegistryHub.id_from_slug(&"items", pieces[0])
+	var id_tunic: int = ContentRegistryHub.id_from_slug(&"items", pieces[1])
+	var id_boots: int = ContentRegistryHub.id_from_slug(&"items", pieces[2])
+	var id_charm: int = ContentRegistryHub.id_from_slug(&"items", pieces[3])
+
+	resource.inventory[1] = {"id": id_hat, "a": 1}
+	_check(
+		SkillingOutfitManager.stores_piece(resource, pieces[0]),
+		"a piece in the BAG counts as owned"
+	)
+	resource.bank[1] = {"id": id_tunic, "a": 1}
+	_check(
+		SkillingOutfitManager.stores_piece(resource, pieces[1]),
+		"a piece in the BANK counts as owned"
+	)
+	PendingChestLoot.add(resource.pending_chest_loot, id_boots, 1)
+	_check(
+		SkillingOutfitManager.stores_piece(resource, pieces[2]),
+		"a piece STAGED in the claim window counts as owned"
+	)
+	PendingChestLoot.add(resource.hunt_chest, id_charm, 1)
+	_check(
+		SkillingOutfitManager.stores_piece(resource, pieces[3]),
+		"a piece in the HUNT CHEST stash counts as owned"
+	)
+
+	# The prioritisation guarantee: owning 2 of 4 must leave exactly the other 2
+	# in the draw pool, and never a piece already held.
+	var half := PlayerResource.new()
+	half.inventory[1] = {"id": id_hat, "a": 1}
+	half.bank[1] = {"id": id_tunic, "a": 1}
+	var missing: Array[StringName] = SkillingOutfitManager.missing_pieces_in_storage(half, set_slug)
+	_check(missing.size() == 2, "owning 2 of 4 leaves exactly 2 in the pool (%d)" % missing.size())
+	_check(
+		not missing.has(pieces[0]) and not missing.has(pieces[1]),
+		"the 2 owned pieces are excluded from the pool"
+	)
+	_check(
+		missing.has(pieces[2]) and missing.has(pieces[3]),
+		"both unowned pieces stay in the pool"
+	)
+
+	# Full set: nothing left to grant, so the roll must fall through to a gem.
+	_check(
+		SkillingOutfitManager.missing_pieces_in_storage(resource, set_slug).is_empty(),
+		"a complete set leaves an empty draw pool"
+	)
+
+	# The fallback itself. One grade per chest tier, and each must be a real item
+	# — a fallback that resolves to nothing turns a 1-in-100 roll into silence.
+	_check(
+		SkillingChestRewarder.GEM_GRADES.size() == SkillingChestRewarder.TIERS.size(),
+		"one gem grade per chest tier (%d vs %d)" % [
+			SkillingChestRewarder.GEM_GRADES.size(), SkillingChestRewarder.TIERS.size()
+		]
+	)
+	for tier: int in SkillingChestRewarder.TIERS.size():
+		var gem: StringName = SkillingChestRewarder.fallback_gem_for_tier(tier)
+		var grade: String = SkillingChestRewarder.GEM_GRADES[tier]
+		_check(
+			String(gem).ends_with(grade),
+			"T%d fallback pays a '%s' gem (%s)" % [tier + 1, grade.trim_prefix("_"), gem]
+		)
+		_check(
+			ContentRegistryHub.id_from_slug(&"items", gem) > 0,
+			"T%d fallback gem '%s' is in the items index" % [tier + 1, gem]
+		)
 
 
 func _precook() -> void:
