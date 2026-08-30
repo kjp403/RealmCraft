@@ -224,7 +224,6 @@ func _make_panel_shell() -> PanelContainer:
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.1, 0.1, 0.12, 0.9)
-	style.set_corner_radius_all(6)
 	panel.add_theme_stylebox_override(&"panel", style)
 
 	var margin: MarginContainer = MarginContainer.new()

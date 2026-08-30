@@ -35,7 +35,6 @@ func _style_logout_button(button: Button) -> void:
 		)
 		box.set_border_width_all(1)
 		box.border_color = Color(1.0, 0.55, 0.5)
-		box.set_corner_radius_all(2)
 		box.content_margin_left = 8
 		box.content_margin_right = 8
 		box.content_margin_top = 4

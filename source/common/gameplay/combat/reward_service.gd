@@ -315,7 +315,8 @@ static func _reward(
 	if peer_id > 0 and not quest_updates.is_empty():
 		WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": quest_updates})
 
-	DailyQuestService.on_kill(resource, npc.enemy_type)
+	# No daily hook here any more: the daily board is skilling-only (see
+	# DailyQuestManager). Kills feed Slayer and the mainline quest tracker above.
 	LeaderboardService.record_pve_kill(player)
 
 	if peer_id > 0 and not slayer_result.is_empty():

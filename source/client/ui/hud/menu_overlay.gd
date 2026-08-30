@@ -236,7 +236,6 @@ func _make_panel_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.035, 0.04, 0.06, 0.97)
 	style.border_color = Color(0.53, 0.37, 0.22)
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
 	style.shadow_color = Color(0, 0, 0, 0.55)
 	style.shadow_size = 7
 	return style
@@ -250,7 +249,6 @@ func _make_button_style(
 	style.bg_color = background
 	style.border_color = border
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(3)
 
 	style.content_margin_left = 12
 	style.content_margin_right = 10

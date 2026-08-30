@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1787960710
-next_id = 614
+version = 1788028400
+next_id = 630
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -2847,6 +2847,86 @@ entries = Array[Dictionary]([{
 &"id": 613,
 &"path": "res://source/common/gameplay/items/gears/relics/relic_emberfrost.tres",
 &"slug": &"relic_emberfrost"
+}, {
+&"hash": "29b9145900b8f45ede47805bb0c9f67128fde5b3fc5261c019644ed8df01f970",
+&"id": 614,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_alchemist_boots.tres",
+&"slug": &"outfit_alchemist_boots"
+}, {
+&"hash": "f79233e39500aeb8a10be7960ba4c0c77e6c33a03e0061c8711a5a96f0757b87",
+&"id": 615,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_alchemist_charm.tres",
+&"slug": &"outfit_alchemist_charm"
+}, {
+&"hash": "5f971168f815728ba35df3f735c8a9e1e3181e4c538c4bcb413845b1d39c3509",
+&"id": 616,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_alchemist_hat.tres",
+&"slug": &"outfit_alchemist_hat"
+}, {
+&"hash": "54ee209ade2ca6a81dfef75a185cddba26d71c2456ead90fa549fb3afc1394bc",
+&"id": 617,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_alchemist_tunic.tres",
+&"slug": &"outfit_alchemist_tunic"
+}, {
+&"hash": "32c01f7918c49b6b573a39eceb2047d8c9b3f38b4af91c6c798cd116266516fb",
+&"id": 618,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_fisher_boots.tres",
+&"slug": &"outfit_fisher_boots"
+}, {
+&"hash": "278978d82c2136da07ac81ebc5fabfabe04b82b6d04e7d008e13688d46b47ff4",
+&"id": 619,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_fisher_charm.tres",
+&"slug": &"outfit_fisher_charm"
+}, {
+&"hash": "30e6e55e8d11614683c4d30b4ab6e962b105ca417833a2fb764f549e66762bbc",
+&"id": 620,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_fisher_hat.tres",
+&"slug": &"outfit_fisher_hat"
+}, {
+&"hash": "1e36a8b5c92d31df206bcc4239ad6cc32a01e0baae301355ced5f71b236ed4ec",
+&"id": 621,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_fisher_tunic.tres",
+&"slug": &"outfit_fisher_tunic"
+}, {
+&"hash": "7c72b5e2b03a5a860cba9283af3c8e8e38df00ffe0ecf14f005ccf1d481ba1e7",
+&"id": 622,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_miner_boots.tres",
+&"slug": &"outfit_miner_boots"
+}, {
+&"hash": "180356236f30396bf58e1e7c4b2b2b28a38a6659d5545c64e8b9518999fda9ad",
+&"id": 623,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_miner_charm.tres",
+&"slug": &"outfit_miner_charm"
+}, {
+&"hash": "269da1e5a6cbcc47c02808a09dfc2661e2c9fa1d4a461faf0e11db6a26ab9d02",
+&"id": 624,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_miner_hat.tres",
+&"slug": &"outfit_miner_hat"
+}, {
+&"hash": "f90ab0836815023c4c0228782bbe3c53aa61c3336659a8759b13986c1c7581d7",
+&"id": 625,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_miner_tunic.tres",
+&"slug": &"outfit_miner_tunic"
+}, {
+&"hash": "0e554e0eaa3907830bc658acdbb2d5d9b6ae7454f764fc4eba6d5bea1dce2077",
+&"id": 626,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_woodcutter_boots.tres",
+&"slug": &"outfit_woodcutter_boots"
+}, {
+&"hash": "82fe28d29db2cda08574efba8c775a45ae78dbab1fa64fae649056007fa24ac6",
+&"id": 627,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_woodcutter_charm.tres",
+&"slug": &"outfit_woodcutter_charm"
+}, {
+&"hash": "eda3b4505abcee348d5a77220ab9e605c994d6a76fc2138e4383f2325a07dad2",
+&"id": 628,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_woodcutter_hat.tres",
+&"slug": &"outfit_woodcutter_hat"
+}, {
+&"hash": "80bccd674699c71a33958a0a453c9df86cb6bfa2ab417d829f83c7e061ad399c",
+&"id": 629,
+&"path": "res://source/common/gameplay/items/gears/outfits/outfit_woodcutter_tunic.tres",
+&"slug": &"outfit_woodcutter_tunic"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

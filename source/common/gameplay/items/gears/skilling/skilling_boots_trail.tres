@@ -7,8 +7,8 @@
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 7.0
+stat_name = "gather_speed"
+value = 0.03
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]

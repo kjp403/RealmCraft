@@ -335,7 +335,6 @@ func _make_panel_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.184, 0.173, 0.157, 0.97)
 	style.border_color = Color(0.455, 0.416, 0.341)
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(2)
 	style.shadow_color = Color(0, 0, 0, 0.55)
 	style.shadow_size = 5
 	return style
@@ -346,7 +345,6 @@ func _make_tile_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
 	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(2)
 	return style
 
 
@@ -355,7 +353,6 @@ func _make_total_bar_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.02, 0.02, 0.02, 0.95)
 	style.border_color = Color(0.42, 0.38, 0.32, 1.0)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(1)
 	style.content_margin_top = 4
 	style.content_margin_bottom = 4
 	return style

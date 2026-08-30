@@ -236,24 +236,23 @@ func _apply_slot_styles(button: Button) -> void:
 	button.add_theme_stylebox_override(&"pressed", pressed_style)
 
 
+## Equipment slot chrome. The shared recessed pixel slot, tinted rather than
+## redrawn — the slot the inventory grid and the reward window use, so an item
+## square looks the same everywhere in the game.
+##
+## [param background_color] is now only a tint hint (an empty slot dims, a filled
+## one does not); the carved lip and keyline come from the texture.
 func _make_slot_style(
 	background_color: Color,
 	border_color: Color
-) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = background_color
-	style.border_color = border_color
-
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_left = 4
-	style.corner_radius_bottom_right = 4
-
+) -> StyleBoxTexture:
+	var style: StyleBoxTexture = PixelUI.slot_style()
+	# Lift the border colour into a modulate so the "this slot is gated / filled"
+	# signalling the panel already encodes survives the switch to a texture.
+	style.modulate_color = Color(
+		0.55 + border_color.r, 0.55 + border_color.g, 0.55 + border_color.b,
+		maxf(background_color.a, 0.85)
+	)
 	return style
 
 

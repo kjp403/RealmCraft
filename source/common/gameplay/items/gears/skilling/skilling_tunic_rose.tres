@@ -7,20 +7,14 @@
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
-stat_name = "mana_max"
-value = 18.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_1"]
-script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 3.0
+stat_name = "gather_yield"
+value = 0.02
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0")])
 item_name = &"Roseweave Smock"
 item_icon = ExtResource("2_icon")
 description = "Bright smock for herbalists and dye-workers."

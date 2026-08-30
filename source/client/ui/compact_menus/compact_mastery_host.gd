@@ -600,10 +600,6 @@ func _make_tab_style(background_color: Color, border_color: Color) -> StyleBoxFl
 	style.border_width_top = 1
 	style.border_width_right = 1
 	style.border_width_bottom = 1
-	style.corner_radius_top_left = 3
-	style.corner_radius_top_right = 3
-	style.corner_radius_bottom_left = 3
-	style.corner_radius_bottom_right = 3
 	return style
 
 

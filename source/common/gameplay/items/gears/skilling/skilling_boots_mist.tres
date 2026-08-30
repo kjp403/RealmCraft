@@ -7,20 +7,14 @@
 
 [sub_resource type="Resource" id="Mod_0"]
 script = ExtResource("1_mod")
-stat_name = "move_speed"
-value = 8.0
-metadata/_custom_type_script = "uid://cvggwjkht4km4"
-
-[sub_resource type="Resource" id="Mod_1"]
-script = ExtResource("1_mod")
-stat_name = "mr"
-value = 3.0
+stat_name = "gather_speed"
+value = 0.04
 metadata/_custom_type_script = "uid://cvggwjkht4km4"
 
 [resource]
 script = ExtResource("3_gear")
 slot = ExtResource("4_slot")
-base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0"), SubResource("Mod_1")])
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_0")])
 item_name = &"Miststride Boots"
 item_icon = ExtResource("2_icon")
 description = "Pale boots that quiet your steps through fog."

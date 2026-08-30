@@ -1,4 +1,18 @@
 class_name DailyQuestService
+## RETIRED — superseded by DailyQuestManager (the skilling-only daily board).
+## NOTHING CALLS THIS ANY MORE: the board handlers, the gather/craft hooks, and
+## the kill/spar/dungeon hooks were all repointed or removed in that overhaul.
+## It still compiles, which is exactly why this notice is here — do not wire new
+## code to it, and do not "fix" a bug in it.
+##
+## Left on disk rather than deleted because its content resource
+## (resources/daily_pool.tres) is registered in registry/indexes/quests_index.tres;
+## removing the pool means regenerating that index, which is a separate change.
+## Delete this file, daily_quest_pool.gd, daily_quest_template.gd and the pool
+## .tres together, then regenerate the index.
+##
+## --- Original documentation follows ---
+##
 ## Generates and tracks the player's daily quest board state. All methods are
 ## static; state lives on PlayerResource (daily_quests + dailies_refresh_at_ms).
 ##

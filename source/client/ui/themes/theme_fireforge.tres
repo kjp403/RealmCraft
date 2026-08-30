@@ -1,6 +1,9 @@
 [gd_resource type="Theme" format=3]
 
 [ext_resource type="Texture2D" uid="uid://dmtdcavfc5y51" path="res://assets/sprites/ui/gateway/frame_h_neutral.png" id="1_jxqpw"]
+[ext_resource type="FontFile" path="res://assets/fonts/kenney_mini.ttf" id="2_pixfont"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/frames/frame_stone.png" id="3_fstone"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/frames/frame_iron.png" id="4_firon"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3pd4s"]
 content_margin_left = 8.0
@@ -72,17 +75,17 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="SB_flat_active"]
+[sub_resource type="StyleBoxFlat" id="SB_flat_focus"]
 content_margin_left = 8.0
 content_margin_top = 6.0
 content_margin_right = 8.0
 content_margin_bottom = 6.0
-bg_color = Color(0.97, 0.56, 0.32, 0.12)
+bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.97, 0.56, 0.32, 0.95)
+border_color = Color(0.76, 0.42, 0.28, 0.55)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -99,27 +102,27 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="SB_flat_active"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+bg_color = Color(0.97, 0.56, 0.32, 0.12)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.97, 0.56, 0.32, 0.95)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxEmpty" id="SB_flat_normal"]
 content_margin_left = 8.0
 content_margin_top = 6.0
 content_margin_right = 8.0
 content_margin_bottom = 6.0
-
-[sub_resource type="StyleBoxFlat" id="SB_flat_focus"]
-content_margin_left = 8.0
-content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 6.0
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.76, 0.42, 0.28, 0.55)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rjn7w"]
 
@@ -317,15 +320,63 @@ content_margin_bottom = 6
 shadow_color = Color(0, 0, 0, 0.55)
 shadow_size = 4
 
+[sub_resource type="StyleBoxTexture" id="SBT_panel_stone"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+texture = ExtResource("3_fstone")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="SBT_btn_normal"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("4_firon")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="SBT_btn_hover"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("4_firon")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+modulate_color = Color(0.97, 0.56, 0.32, 1)
+
+[sub_resource type="StyleBoxTexture" id="SBT_btn_pressed"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("4_firon")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+modulate_color = Color(0.76, 0.42, 0.28, 1)
+
 [resource]
+default_font = ExtResource("2_pixfont")
+default_font_size = 14
 Button/colors/font_color = Color(0.929, 0.894, 0.82, 1)
 Button/colors/font_focus_color = Color(0.929, 0.894, 0.82, 1)
 Button/colors/font_hover_color = Color(0.929, 0.894, 0.82, 1)
 Button/colors/font_pressed_color = Color(0.929, 0.894, 0.82, 1)
-Button/styles/focus = SubResource("StyleBoxFlat_3pd4s")
-Button/styles/hover = SubResource("StyleBoxFlat_3pd4s")
-Button/styles/normal = SubResource("StyleBoxFlat_ciurs")
-Button/styles/pressed = SubResource("StyleBoxFlat_3pd4s")
+Button/styles/focus = SubResource("SBT_btn_hover")
+Button/styles/hover = SubResource("SBT_btn_hover")
+Button/styles/normal = SubResource("SBT_btn_normal")
+Button/styles/pressed = SubResource("SBT_btn_pressed")
 CheckBox/colors/font_color = Color(0.929, 0.894, 0.82, 1)
 CheckBox/colors/font_hover_color = Color(0.929, 0.894, 0.82, 1)
 CheckBox/colors/font_pressed_color = Color(0.929, 0.894, 0.82, 1)
@@ -392,7 +443,7 @@ OptionButton/styles/focus = SubResource("SB_flat_focus")
 OptionButton/styles/hover = SubResource("SB_flat_hover")
 OptionButton/styles/normal = SubResource("SB_flat_normal")
 OptionButton/styles/pressed = SubResource("SB_flat_active")
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_p3i7r")
+PanelContainer/styles/panel = SubResource("SBT_panel_stone")
 PopupMenu/colors/font_color = Color(0.929, 0.894, 0.82, 1)
 PopupMenu/colors/font_hover_color = Color(0.929, 0.894, 0.82, 1)
 PopupMenu/styles/hover = SubResource("SB_pophover")

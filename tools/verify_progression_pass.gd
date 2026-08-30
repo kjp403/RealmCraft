@@ -343,69 +343,249 @@ func _quest_locations() -> void:
 		_check(foundry.contains("entrance"), "Last Foundry says entrance (%s)" % foundry)
 
 
-# --- Daily board: buffed, location-hinted, skippable --------------------------
+# --- Daily board: skilling-only, deterministic, difficulty-scaled -------------
+
+## The board is an autoload (DailyQuestManager) but this tool runs under `-s`,
+## where autoloads are not instantiated. The manager deliberately holds no state,
+## so a bare `.new()` outside the tree exercises the real logic; `_ready` (the
+## only part that touches another autoload) never fires because the node is never
+## added to a tree.
+func _board() -> Node:
+	var script: GDScript = load("res://source/common/gameplay/quests/daily_quest_manager.gd")
+	return script.new() as Node
+
 
 func _dailies() -> void:
 	print("[dailies]")
-	var pool: DailyQuestPool = load(QUESTS_DIR + "daily_pool.tres") as DailyQuestPool
-	_check(pool != null, "daily_pool.tres loads")
-	if pool == null:
+	var mgr: Node = _board()
+	_check(mgr != null, "DailyQuestManager loads")
+	if mgr == null:
 		return
-	var thin: PackedStringArray = PackedStringArray()
-	var unlocated: PackedStringArray = PackedStringArray()
-	for t: DailyQuestTemplate in pool.templates:
-		if t == null:
-			continue
-		if t.reward_gold < 400 or t.reward_mastery_xp < 5000:
-			thin.append("%d (%dg / %d mxp)" % [t.template_id, t.reward_gold, t.reward_mastery_xp])
-		# Targeted kinds must say WHERE; the generic action kinds have no one place.
-		if (t.kind == DailyQuestTemplate.Kind.KILL or t.kind == DailyQuestTemplate.Kind.COLLECT) \
-				and t.location_hint.is_empty():
-			unlocated.append(t.describe())
-	_check(thin.is_empty(), "every daily pays real gold + mastery XP%s" % (
-		"" if thin.is_empty() else " — thin: " + ", ".join(thin)
+
+	# Every slug on the roster must be a real job, or the board offers a task no
+	# XP grant can ever advance. This is the check that catches someone authoring
+	# the DISPLAY names ("Crafting", "Farming") where the slugs (&"outfitting",
+	# &"harvesting") belong.
+	var unknown: PackedStringArray = PackedStringArray()
+	for slug: StringName in mgr.SKILLS:
+		if not JobRegistry.has_job(slug):
+			unknown.append(String(slug))
+	_check(unknown.is_empty(), "every rostered skill is a registered job%s" % (
+		"" if unknown.is_empty() else " - unknown: " + ", ".join(unknown)
 	))
-	_check(unlocated.is_empty(), "every targeted daily says where to go%s" % (
-		"" if unlocated.is_empty() else " — missing: " + ", ".join(unlocated)
-	))
-	_check(DailyQuestService.MAX_SKIPS_PER_DAY == 3, "3 skips a day")
+	_check(mgr.SKILLS.size() == 9, "nine skilling jobs on the roster (%d)" % mgr.SKILLS.size())
+
+	var table: DailyRewardTable = load(QUESTS_DIR + "daily_rewards.tres") as DailyRewardTable
+	_check(table != null, "daily_rewards.tres loads")
+	if table != null:
+		_check(
+			table.gold_for(DailyTaskResource.Difficulty.HARD)
+				> table.gold_for(DailyTaskResource.Difficulty.EASY),
+			"Hard pays more than Easy (%dg vs %dg)" % [
+				table.gold_for(DailyTaskResource.Difficulty.HARD),
+				table.gold_for(DailyTaskResource.Difficulty.EASY),
+			]
+		)
+		# Hard is a whole-session commitment against a ~10.7x bigger target, so it
+		# has to beat farming Easy three times over on a per-action basis.
+		var per_action_easy: float = float(table.gold_for(0)) / 37.5
+		var per_action_hard: float = float(table.gold_for(2)) / 400.0
+		_check(
+			per_action_hard > per_action_easy,
+			"Hard pays better PER ACTION than Easy (%.1fg vs %.1fg)" % [
+				per_action_hard, per_action_easy
+			]
+		)
 	_check(
-		DailyQuestService.BONUS_GOLD >= 2000,
-		"the all-3 bonus is worth finishing (%dg)" % DailyQuestService.BONUS_GOLD
+		mgr.BONUS_GOLD >= 2000,
+		"the all-3 bonus is worth finishing (%dg)" % mgr.BONUS_GOLD
 	)
-	_skip_flow()
+	_daily_determinism(mgr)
+	_daily_flow(mgr)
 
 
-## Exercises skip() end to end on a throwaway PlayerResource: a reroll replaces the
-## slot with a DIFFERENT template, spends exactly one skip, and the budget runs out
-## after three.
-func _skip_flow() -> void:
+## The whole desync story rests on the offer being a pure function of
+## (player_id, UTC day): a player who relogs, crashes, or loses a save must be
+## handed the identical three skills and the identical candidate targets.
+func _daily_determinism(mgr: Node) -> void:
+	var a: PlayerResource = PlayerResource.new()
+	a.player_id = 4242
+	var b: PlayerResource = PlayerResource.new()
+	b.player_id = 4242
+
+	var skills_a: PackedStringArray = PackedStringArray()
+	for task: DailyTaskResource in mgr.get_board(a):
+		skills_a.append(String(task.skill))
+	var skills_b: PackedStringArray = PackedStringArray()
+	for task: DailyTaskResource in mgr.get_board(b):
+		skills_b.append(String(task.skill))
+	_check(
+		skills_a == skills_b,
+		"the same character rerolls the same board (%s vs %s)" % [
+			", ".join(skills_a), ", ".join(skills_b)
+		]
+	)
+	_check(skills_a.size() == 3, "three slots offered (%d)" % skills_a.size())
+	var distinct: Dictionary = {}
+	for s: String in skills_a:
+		distinct[s] = true
+	_check(
+		distinct.size() == skills_a.size(),
+		"the three skills are distinct (%s)" % ", ".join(skills_a)
+	)
+
+	# A different character should get a different board; identical rolls for
+	# everyone would mean the seed quietly ignores player_id.
+	var other: PlayerResource = PlayerResource.new()
+	other.player_id = 99_001
+	var skills_other: PackedStringArray = PackedStringArray()
+	for task: DailyTaskResource in mgr.get_board(other):
+		skills_other.append(String(task.skill))
+	_check(
+		skills_other != skills_a,
+		"a different character gets a different board (%s)" % ", ".join(skills_other)
+	)
+
+	var opts_a: Array[Dictionary] = mgr.difficulty_options(a, 0)
+	var opts_b: Array[Dictionary] = mgr.difficulty_options(b, 0)
+	_check(opts_a.size() == 3, "three difficulties offered per slot (%d)" % opts_a.size())
+	var stable: bool = true
+	for i: int in opts_a.size():
+		if int(opts_a[i].get("target", -1)) != int(opts_b[i].get("target", -2)):
+			stable = false
+	_check(stable, "candidate targets are stable across reopens")
+	if opts_a.size() == 3:
+		_check(
+			int(opts_a[0]["target"]) < int(opts_a[1]["target"])
+				and int(opts_a[1]["target"]) < int(opts_a[2]["target"]),
+			"targets scale Easy < Medium < Hard (%d / %d / %d)" % [
+				int(opts_a[0]["target"]), int(opts_a[1]["target"]), int(opts_a[2]["target"])
+			]
+		)
+		for i: int in 3:
+			var band: Vector2i = DailyTaskResource.band_for(i)
+			var target: int = int(opts_a[i]["target"])
+			_check(
+				target >= band.x and target <= band.y,
+				"%s target %d sits inside its band %d-%d" % [
+					DailyTaskResource.difficulty_name(i), target, band.x, band.y
+				]
+			)
+
+
+## Accept to progress to auto-complete to claim, plus the three things that make
+## the board exploitable if they ever regress: re-picking a difficulty, claiming
+## twice, and one skill advancing another skill's task.
+func _daily_flow(mgr: Node) -> void:
 	var res: PlayerResource = PlayerResource.new()
-	res.level = 8
-	DailyQuestService.get_or_roll(res)
-	if res.daily_quests.is_empty():
-		_check(false, "a level-8 character rolls a daily set")
+	res.player_id = 777
+	var board: Array[DailyTaskResource] = mgr.get_board(res)
+	if board.is_empty():
+		_check(false, "a character is offered a board")
 		return
-	var before: int = int((res.daily_quests[0] as Dictionary).get("template_id", 0))
-	var result: Dictionary = DailyQuestService.skip(res, before)
-	_check(bool(result.get("ok", false)), "skip() rerolls a daily (%s)" % result.get("reason", "ok"))
-	var after: int = int((res.daily_quests[0] as Dictionary).get("template_id", 0))
-	_check(after != before, "the skipped slot holds a different task (%d -> %d)" % [before, after])
+	var skill: StringName = board[0].skill
+
 	_check(
-		DailyQuestService.skips_left(res) == 2,
-		"one skip spent, %d left" % DailyQuestService.skips_left(res)
+		not bool(mgr.claim(res, 0).get("ok", true)),
+		"an un-accepted slot cannot be claimed"
 	)
-	# Burn the rest, then confirm the cap actually bites.
-	for _i: int in 4:
-		DailyQuestService.skip(res, int((res.daily_quests[0] as Dictionary).get("template_id", 0)))
-	_check(DailyQuestService.skips_left(res) == 0, "the budget bottoms out at 0, never negative")
-	var refused: Dictionary = DailyQuestService.skip(
-		res, int((res.daily_quests[0] as Dictionary).get("template_id", 0))
+	# What the card offered must be exactly what the player is held to. These are
+	# two separate calls into the seeded stream, and if they ever diverge the
+	# player commits to "gather 40" and silently owes 180.
+	var offered: Array[Dictionary] = mgr.difficulty_options(res, 0)
+	var offered_easy: int = int(offered[DailyTaskResource.Difficulty.EASY]["target"])
+	var accepted: Dictionary = mgr.accept(res, 0, DailyTaskResource.Difficulty.EASY)
+	_check(
+		int(accepted.get("target", -1)) == offered_easy,
+		"the accepted target is the one the card offered (%d vs %d)" % [
+			int(accepted.get("target", -1)), offered_easy
+		]
 	)
 	_check(
-		not bool(refused.get("ok", false)) and str(refused.get("reason", "")) == "no_skips_left",
-		"a 4th skip is refused"
+		bool(accepted.get("ok", false)),
+		"accept() starts the task (%s)" % accepted.get("reason", "ok")
 	)
+	var target: int = int(accepted.get("target", 0))
+	_check(target > 0, "accepting stamps a target (%d)" % target)
+	_check(
+		not bool(mgr.accept(res, 0, DailyTaskResource.Difficulty.HARD).get("ok", true)),
+		"the difficulty cannot be re-picked once accepted"
+	)
+
+	# Progress arrives through the same signature the bus emitters use.
+	mgr._on_skill_action(res, skill, 0, target - 1)
+	var mid: Array[DailyTaskResource] = mgr.get_board(res)
+	_check(
+		mid[0].progress == target - 1,
+		"progress tracks actions (%d/%d)" % [mid[0].progress, target]
+	)
+	_check(not mid[0].is_complete(), "not complete one short of target")
+	_check(
+		not bool(mgr.claim(res, 0).get("ok", true)),
+		"an incomplete task cannot be claimed"
+	)
+
+	# Overshoot deliberately: the counter must clamp, not run past the target.
+	mgr._on_skill_action(res, skill, 0, 50)
+	var done: Array[DailyTaskResource] = mgr.get_board(res)
+	_check(done[0].is_complete(), "the task auto-completes at target")
+	_check(
+		done[0].progress == target,
+		"progress clamps at the target (%d/%d)" % [done[0].progress, target]
+	)
+
+	# A task in a DIFFERENT skill must not be advanced by this skill's actions.
+	var other_slot: int = -1
+	for i: int in board.size():
+		if board[i].skill != skill:
+			other_slot = i
+			break
+	if other_slot >= 0:
+		mgr.accept(res, other_slot, DailyTaskResource.Difficulty.EASY)
+		mgr._on_skill_action(res, skill, 0, 25)
+		_check(
+			mgr.get_board(res)[other_slot].progress == 0,
+			"actions only advance their own skill"
+		)
+
+	var claimed: Dictionary = mgr.claim(res, 0)
+	_check(
+		bool(claimed.get("ok", false)),
+		"a complete task claims (%s)" % claimed.get("reason", "ok")
+	)
+	_check(int(claimed.get("gold", 0)) > 0, "the claim pays gold (%dg)" % int(claimed.get("gold", 0)))
+	var paid_skill: bool = false
+	for row_v: Variant in (claimed.get("skill_xp", []) as Array):
+		if str((row_v as Dictionary).get("skill", "")) == String(skill):
+			paid_skill = int((row_v as Dictionary).get("xp", 0)) > 0
+	_check(paid_skill, "the claim pays XP into the assigned skill")
+	_check(
+		not bool(mgr.claim(res, 0).get("ok", true)),
+		"a claimed task cannot be claimed twice"
+	)
+
+	# Relog: state must survive a save/load round trip through JSON, which is
+	# where ints come back as floats and a naive reader silently loses progress.
+	var saved: String = JSON.stringify(mgr.save_state(res))
+	var reloaded: PlayerResource = PlayerResource.new()
+	reloaded.player_id = res.player_id
+	mgr.load_state(reloaded, JSON.parse_string(saved))
+	var after: Array[DailyTaskResource] = mgr.get_board(reloaded)
+	_check(
+		after[0].accepted and after[0].claimed and after[0].progress == target,
+		"accepted state survives a save/load round trip (%d/%d, claimed=%s)" % [
+			after[0].progress, after[0].target_amount, after[0].claimed
+		]
+	)
+	# Pre-overhaul rows carry template_id and no skill. They must be dropped, not
+	# resurrected as a broken slot.
+	var legacy: PlayerResource = PlayerResource.new()
+	legacy.player_id = res.player_id
+	mgr.load_state(legacy, {
+		"quests": [{"template_id": 4, "count_so_far": 2, "claimed": false}],
+		"refresh_at_ms": 0,
+	})
+	_check(legacy.daily_quests.is_empty(), "pre-overhaul daily rows are discarded on load")
 
 
 # --- Every slug in the new-character kit resolves -----------------------------

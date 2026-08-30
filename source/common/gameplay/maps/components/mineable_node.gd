@@ -238,6 +238,21 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	# Prayer gathering yield bonus stacks on top.
 	if player.stats_component != null:
 		bonus_chance += player.stats_component.get_stat(Stat.GATHER_YIELD)
+	# Skilling Outfit, scoped to THIS node's job — a Prospector kit adds nothing
+	# while you are chopping. Unlike the global GATHER_YIELD stat above, which is
+	# what the generic gatherer's wardrobe pays.
+	bonus_chance += SkillingOutfitManager.bonus_for(
+		player, primary_job, SkillingOutfitManager.Bonus.YIELD
+	)
+	# One clamp over everything (perks + tool + prayer + outfit). The tool bonus
+	# was already capped on its own above, but the stat and outfit terms were
+	# added after it, so without this the total could still walk past the perk
+	# tree's own ceiling.
+	if bonus_chance > 0.0:
+		var yield_cap: float = 0.5
+		if job_perks_resource != null:
+			yield_cap = job_perks_resource.abs_max_bonus_yield_chance
+		bonus_chance = minf(bonus_chance, yield_cap)
 	if bonus_chance > 0.0 and randf() < bonus_chance:
 		amount += 1
 
@@ -264,6 +279,16 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 				byproduct_id = int(data.byproduct_item.get_meta(&"id", 0))
 			else:
 				byproduct_amount = 0
+
+	# Angler set: the catch can come out of the water already cooked. Swapped on
+	# `caught` (not just the id) so the bag check, the daily counter and the
+	# "you caught X" toast all agree on what was actually landed.
+	if SkillingOutfitManager.rolls(player, primary_job, SkillingOutfitManager.Bonus.PRECOOK):
+		var cooked: Item = SkillingOutfitManager.precooked_for(
+			StringName(str(caught.get_meta(&"slug", &"")))
+		)
+		if cooked != null:
+			caught = cooked
 
 	var ore_id: int = int(caught.get_meta(&"id", 0))
 	var bag_count: int = player.player_resource.inventory_bags
@@ -292,7 +317,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		}
 
 	# Consume one of THIS player's charges now that the bag can take the yield.
-	_consume_charge(player_id, now_ms)
+	# The Prospector set can preserve the node instead: the yield is still paid,
+	# the charge is not spent. Capped well under 1.0 in SkillingOutfitManager.CAPS
+	# because a guaranteed bypass is an infinite ore vein.
+	var preserved_node: bool = SkillingOutfitManager.rolls(
+		player, primary_job, SkillingOutfitManager.Bonus.DURABILITY_BYPASS
+	)
+	if not preserved_node:
+		_consume_charge(player_id, now_ms)
 	_progress_hp_by_player.erase(player_id)
 	charges_left = _charges_for(player_id)
 
@@ -300,13 +332,11 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		player.player_resource.inventory, ore_id, amount, Inventory.MAX_SLOTS,
 		false, active_bag, bag_count
 	)
-	DailyQuestService.on_collect(player.player_resource, ore_id, amount)
 	if byproduct_amount > 0:
 		Inventory.try_add_item(
 			player.player_resource.inventory, byproduct_id, byproduct_amount,
 			Inventory.MAX_SLOTS, false, active_bag, bag_count
 		)
-		DailyQuestService.on_collect(player.player_resource, byproduct_id, byproduct_amount)
 
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
@@ -327,6 +357,13 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
 		grants.append({"job": String(job_name), "xp": xp_gain, "progress": prog})
+		# Daily board progress. Emitted per credited job (a node can feed more
+		# than one) and only here, after the yield is in the bag and the XP is
+		# banked — so a gather that bailed out on a full inventory above never
+		# advances a daily. The count is the PRIMARY yield; the byproduct is a
+		# bonus item off the same swing, not a second action, and crediting it
+		# would also pay a Fletching daily for mining.
+		SkillingEvents.emit_gathered(player.player_resource, job_name, ore_id, amount)
 
 	var cooldown_factor: float = 1.0
 	if job_perks_resource != null:
@@ -334,6 +371,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	# Prayer gathering haste reduces the cooldown further.
 	if player.stats_component != null:
 		cooldown_factor *= maxf(0.1, 1.0 - player.stats_component.get_stat(Stat.GATHER_SPEED))
+	# Lumberjack set: faster chop ticks, scoped to this node's job. Multiplied in
+	# alongside the global haste rather than added, so stacking sources shorten
+	# the remaining cooldown instead of racing each other to zero.
+	var outfit_haste: float = SkillingOutfitManager.bonus_for(
+		player, primary_job, SkillingOutfitManager.Bonus.SPEED
+	)
+	if outfit_haste > 0.0:
+		cooldown_factor *= maxf(0.1, 1.0 - outfit_haste)
 	_cooldown_until_ms_by_player[player_id] = now_ms + int(
 		data.player_cooldown_seconds * 1000.0 * cooldown_factor
 	)

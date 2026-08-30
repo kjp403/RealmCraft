@@ -137,13 +137,12 @@ func _build_row(attribute_name: StringName) -> void:
 	_refresh_row(attribute_name)
 
 
-func _row_stylebox(accent: Color) -> StyleBoxFlat:
-	var box: StyleBoxFlat = StyleBoxFlat.new()
-	box.bg_color = Color(1, 1, 1, 0.03)
-	box.border_color = Color(accent.r, accent.g, accent.b, 0.35)
-	box.set_border_width_all(1)
-	box.border_width_left = 3
-	box.set_corner_radius_all(4)
+## Attribute row chrome. The accent that used to be a 3px left border is now a
+## modulate over the iron frame — a pixel 9-slice has a fixed border, so the
+## per-attribute colour has to ride the tint instead of the width.
+func _row_stylebox(accent: Color) -> StyleBoxTexture:
+	var box: StyleBoxTexture = PixelUI.frame("frame_iron", 6)
+	box.modulate_color = Color(0.55 + accent.r, 0.55 + accent.g, 0.55 + accent.b, 1.0)
 	return box
 
 

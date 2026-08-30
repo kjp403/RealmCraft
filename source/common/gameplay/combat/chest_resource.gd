@@ -79,7 +79,10 @@ func roll_and_grant(player: Player) -> Dictionary:
 			hits.shuffle()
 			hits = hits.slice(0, cap)
 		for drop: LootDrop in hits:
-			_grant_drop(resource, drop, items)
+			# Exclusive entries roll independently, so drop.chance IS a real
+			# probability and can be tiered. The main pool above cannot — see
+			# LootRarity's header.
+			_grant_drop(resource, drop, items, drop.chance)
 
 	return {
 		"chest": display_name,
@@ -142,7 +145,12 @@ const COOKED_FISH_TO_RAW: Dictionary = {
 }
 
 
-static func _grant_drop(resource: PlayerResource, drop: LootDrop, items: Array) -> void:
+## [param roll_chance] is the independent probability that produced this drop, or
+## 0.0 when there wasn't one (a weighted draw from the main pool). It only ever
+## decides how loudly the reward window presents the item — see [LootRarity].
+static func _grant_drop(
+	resource: PlayerResource, drop: LootDrop, items: Array, roll_chance: float = 0.0
+) -> void:
 	var amount: int = randi_range(drop.min_amount, drop.max_amount)
 	if amount <= 0:
 		return
@@ -163,4 +171,5 @@ static func _grant_drop(resource: PlayerResource, drop: LootDrop, items: Array) 
 		"id": item_id,
 		"amount": amount,
 		"name": display_name,
+		"rarity": LootRarity.name_for(roll_chance),
 	})

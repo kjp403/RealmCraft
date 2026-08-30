@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="GearItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_frvp3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gear_skilling_hat_azure.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/gear_item.gd" id="2_gear"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/helmet.tres" id="3_slot"]
+
+[resource]
+script = ExtResource("2_gear")
+slot = ExtResource("3_slot")
+item_name = &"Angler\'s Hat"
+item_icon = ExtResource("1_icon")
+description = "Brim stitched with old flies. Part of the Angler outfit."
+can_trade = true
+vendor_value = 4000
+stack_limit = 10
+tags = PackedStringArray("skilling_outfit")
+metadata/slug = &"outfit_fisher_hat"
+metadata/id = 620

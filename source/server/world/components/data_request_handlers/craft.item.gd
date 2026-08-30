@@ -81,6 +81,17 @@ func data_request_handler(
 	# Consume ingredients, then the station fee. `refund` rolls PER INGREDIENT
 	# UNIT, so a 3-bar helmet can refund 0-3 bars rather than all-or-nothing.
 	var refund: float = 0.0 if perks == null else perks.refund_chance(player_perks)
+	# Herbalist set: ingredient preservation. Mechanically the same "you get the
+	# unit back" as the perk refund, so it folds into the same per-unit roll
+	# rather than adding a second pass — two independent rolls would compound
+	# into a far higher effective rate than either number suggests. Scoped to the
+	# station's profession, so the set does nothing at an anvil.
+	refund = minf(
+		refund + SkillingOutfitManager.bonus_for(
+			player, station.profession, SkillingOutfitManager.Bonus.PRESERVE
+		),
+		perks.abs_max_refund_chance if perks != null else 0.5
+	)
 	var refunded: Dictionary[int, int] = {}
 	for ingredient: CraftIngredient in recipe.ingredients:
 		if ingredient == null or ingredient.item == null:
@@ -155,8 +166,11 @@ func data_request_handler(
 	# objective reflects a freshly-crafted item live, not just on menu reopen.
 	var quest_updates: Array = QuestService.on_craft(resource, output_id, peer_id, instance)
 	WorldServer.curr.data_push.rpc_id(peer_id, &"quest.update", {"messages": quest_updates})
-	# Daily "craft N items" progress — count the items produced this craft.
-	DailyQuestService.on_craft(resource, output_amount)
+	# Daily board progress for the station's profession (smithing / cooking /
+	# herblore / fletching / outfitting). Counts items PRODUCED, so a batch
+	# recipe that makes 10 arrows advances a Fletching daily by 10 rather than
+	# by one — the same rule the old "craft N items" counter used.
+	SkillingEvents.emit_crafted(resource, station.profession, output_id, output_amount)
 
 	return {
 		"ok": true,

@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.180"
+config/version="0.28.182"
 ; Oldest published Windows zip still allowed to log in. Keep this at the last
 ; play.arkenelle.com/desktop userversion until Release clients has caught up —
 ; exact-match alone soft-locks everyone when Deploy VPS lands before the zip.
@@ -39,6 +39,8 @@ Toaster="*res://source/client/autoload/toaster.gd"
 Announcer="*res://source/client/autoload/announcer.gd"
 Transition="*res://source/client/autoload/transition.gd"
 LootFeed="*res://source/client/autoload/loot_feed.gd"
+UniversalChestManager="*res://source/client/autoload/universal_chest_manager.gd"
+DailyQuestManager="*res://source/common/gameplay/quests/daily_quest_manager.gd"
 
 [debug]
 

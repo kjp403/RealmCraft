@@ -123,7 +123,6 @@ func _card_style() -> StyleBoxFlat:
 	style.bg_color = Color(0.09, 0.1, 0.14, 0.96)
 	style.border_color = Color(0.78, 0.55, 0.28, 0.85)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
 	style.content_margin_left = 2
 	style.content_margin_right = 2
 	style.content_margin_top = 2
@@ -179,7 +178,6 @@ func _row(name_text: String, level_text: String, zone_text: String, color: Color
 		bg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var row_style: StyleBoxFlat = StyleBoxFlat.new()
 		row_style.bg_color = Color(1, 1, 1, 0.03)
-		row_style.set_corner_radius_all(4)
 		row_style.content_margin_left = 8
 		row_style.content_margin_right = 8
 		row_style.content_margin_top = 5

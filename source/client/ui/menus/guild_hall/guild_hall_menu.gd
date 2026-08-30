@@ -355,7 +355,6 @@ func _banner_swatch(hex: String, selected: bool, is_current: bool) -> Button:
 	swatch.custom_minimum_size = Vector2(40, 40)
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color.html(hex)
-	style.set_corner_radius_all(4)
 	if selected:
 		style.set_border_width_all(3)
 		style.border_color = Color(0.96, 0.74, 0.16)

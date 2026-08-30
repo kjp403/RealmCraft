@@ -159,16 +159,22 @@ var active_inventory_bag: int = 0
 ## one shown under their name) — these are the "achievement flex" picks.
 @export var displayed_trophies: PackedStringArray
 
-## Daily quest board state: the 3 rolled quests for today and when they expire.
-## Each entry is a Dictionary {template_id, count_so_far, claimed}.
-## dailies_refresh_at_ms is the unix-ms of the next UTC midnight;
-## DailyQuestService rerolls when now crosses it. Empty array = never rolled
-## (first board click generates).
+## Skilling daily board state — only the slots whose difficulty has been CHOSEN.
+## Each entry is a Dictionary {slot, skill, diff, target, progress, item, claimed,
+## day} (see DailyTaskResource.to_dict). An empty array is the normal state for
+## most of the day: the three OFFERED skills are a pure function of
+## (player_id, UTC day) and are re-derived rather than stored, so an un-accepted
+## board cannot be rerolled by relogging or lost to a failed save.
 @export var daily_quests: Array
+## Unix-ms of the next 00:00 UTC. Refreshed by DailyQuestManager.get_board; the
+## day rollover itself is driven by the `day` stamped on each entry, so this is
+## the client's countdown rather than the reset's source of truth.
 @export var dailies_refresh_at_ms: int
-## Board rerolls spent since the last daily refresh. Capped at
-## DailyQuestService.MAX_SKIPS_PER_DAY and zeroed by the same roll that stamps
-## dailies_refresh_at_ms, so it can never need its own expiry check.
+## RETIRED with the skilling overhaul — no longer read, written, or persisted.
+## Skips existed because the old board could roll a kill/collect target the
+## player had no way to reach; a skilling board cannot (every job trains from
+## level 1, and the player picks the size of the commitment). Kept as a field so
+## older saves deserialise without complaint.
 @export var dailies_skips_used: int
 
 ## Slayer: the currently assigned task, or {} for none. Shape:

@@ -1658,10 +1658,6 @@ func _build_name_color_swatches() -> void:
 		# faint "auto" diamond instead of a coloured square.
 		var sb: StyleBoxFlat = StyleBoxFlat.new()
 		sb.bg_color = Color(0.35, 0.35, 0.4, 0.5) if swatch_hex.is_empty() else Color(swatch_hex)
-		sb.corner_radius_top_left = 4
-		sb.corner_radius_top_right = 4
-		sb.corner_radius_bottom_right = 4
-		sb.corner_radius_bottom_left = 4
 		btn.add_theme_stylebox_override(&"normal", sb)
 		btn.add_theme_stylebox_override(&"hover", sb)
 		btn.add_theme_stylebox_override(&"pressed", sb)

@@ -210,14 +210,19 @@ jobs:
           # can segfault (Godot 4 CLI quirk).
           ./godot --headless --path . --import || true
 
-      - name: Verify Windows self-updater
+      - name: Verify headless gates
         run: |
           set -euo pipefail
-          # The updater is all static funcs; a stray tr() is a parse error that drops
-          # the class, so the client boots fine but never self-updates. That shipped
-          # once already — block the release instead of finding out from players.
-          ./godot --headless --path . -s tools/verify_client_updater.gd | tee verify.log
-          grep -q VERIFY_PASS verify.log
+          # Asserts on the literal VERIFY_PASS string per gate, never on the exit
+          # code: a gate run in the wrong mode prints nothing and still exits 0,
+          # which would read as green forever. The runner also picks scene vs -s
+          # per gate, which is the other half of that trap.
+          #
+          # Covers the Windows self-updater (all static funcs; a stray tr() is a
+          # parse error that drops the class, so the client boots fine but never
+          # self-updates — that shipped once already), plus Boss Hunt and the
+          # skilling reward tables.
+          bash tools/run_verify.sh ./godot
 
       - name: Export clients
         env:
