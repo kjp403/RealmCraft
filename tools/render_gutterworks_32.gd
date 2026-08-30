@@ -11,6 +11,7 @@ const SHOTS: Array[Dictionary] = [
 	{"name": "overview", "size": Vector2i(1200, 900), "at": Vector2(3328, 2496), "zoom": 0.175},
 	{"name": "junction", "size": Vector2i(1200, 450), "at": Vector2(3328, 2560), "zoom": 1.6},
 	{"name": "channel", "size": Vector2i(1200, 450), "at": Vector2(2200, 1280), "zoom": 1.6},
+	{"name": "wall", "size": Vector2i(1200, 380), "at": Vector2(3328, 856), "zoom": 3.2},
 ]
 
 var _out: String = "build/gutterworks_32px_preview.png"

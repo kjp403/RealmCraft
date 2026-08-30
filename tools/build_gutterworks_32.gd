@@ -66,6 +66,15 @@ func _slime_spec() -> MapKit.BlobSpec:
 	return spec
 const SEWAGE := Vector2i(0, 0)
 
+## Room half-extents and corridor half-width, in cells. Corridors are 4 tiles
+## wide, which is the widest the brief allows and the most forgiving for a
+## three-tile wall standing on their north edge.
+const ROOM_HW := 17
+const ROOM_HH := 12
+const CORR_H := 2
+## Half-height of a sewage channel, so channels are 6 tiles across.
+const CHANNEL_H := 3
+
 var W: int = 104 * S
 var H: int = 78 * S
 var _bounds := Rect2i(0, 0, 104 * S, 78 * S)
@@ -116,18 +125,12 @@ func _wall_spec() -> MapKit.WallSpec:
 	return spec
 
 
-func _carve(chambers: Array, links: Array, margin: int, anchor: Vector2i) -> Dictionary:
-	var mask: Dictionary = {}
-	for ch in chambers:
-		MapKit.blob(mask, ch[0], ch[1], ch[2], int(ch[3]), _bounds)
-	for link in links:
-		MapKit.tunnel(mask, link[0], link[1], link[2], link[3], int(link[4]), _bounds)
-	var trimmed: Dictionary = {}
-	for cell: Vector2i in mask.keys():
-		if cell.x >= margin and cell.y >= margin + 2 and cell.x < W - margin and cell.y < H - margin:
-			trimmed[cell] = true
-	var smoothed := MapKit.smooth(trimmed, _bounds, 2, 5, 4)
-	return MapKit.largest_region(smoothed, LevelKit.pick_open(smoothed, anchor))
+## Add an axis-aligned block of floor, clamped so nothing lands outside the map
+## or inside the two-row margin the wall painter needs above a north edge.
+func _fill_rect(mask: Dictionary, rect: Rect2i) -> void:
+	for y in range(maxi(rect.position.y, 3), mini(rect.end.y, H - 2)):
+		for x in range(maxi(rect.position.x, 2), mini(rect.end.x, W - 2)):
+			mask[Vector2i(x, y)] = true
 
 
 func _populate(walk: Dictionary, taken: Dictionary, spots: Array, gap: int = 3) -> Array[Vector2i]:
@@ -179,27 +182,32 @@ func _build() -> void:
 	var props := _new_layer(ts)
 	var overlay := _new_layer(ts)
 
-	# --- topology: a 3x3 grid of junctions joined by service runs -------------
-	var arrival := _L(52, 68)
+	# --- topology: rectangular rooms joined by straight corridors -------------
+	# Organic blobs are gone on purpose. A blob boundary stair-steps, which left
+	# the wall painter almost no straight north edge to build a three-tile wall
+	# on, and made the channels read as jagged blocks however good the bank tiles
+	# were. Rectilinear rooms give long clean wall runs and straight banks.
 	var cols := [_N(22), _N(52), _N(82)]
 	var rows := [_N(20), _N(40), _N(58)]
-	var chambers: Array = [[_L(52, 67), _R(7.0), 0.24, 401]]
-	var seed_i := 410
+	var floor_mask: Dictionary = {}
 	for cx in cols:
 		for ry in rows:
-			chambers.append([Vector2i(cx, ry), _R(7.0), 0.26, seed_i])
-			seed_i += 1
-	var links: Array = [[_L(52, 64), _L(52, 60), _R(2.6), _R(1.6), 430]]
-	var seed_j := 440
+			_fill_rect(floor_mask, Rect2i(cx - ROOM_HW, ry - ROOM_HH, ROOM_HW * 2, ROOM_HH * 2))
+	# Straight 4-tile corridors on both axes.
 	for ry in rows:
 		for i in range(cols.size() - 1):
-			links.append([Vector2i(cols[i], ry), Vector2i(cols[i + 1], ry), _R(2.2), _R(2.0), seed_j])
-			seed_j += 1
+			_fill_rect(floor_mask, Rect2i(
+				cols[i], ry - CORR_H, cols[i + 1] - cols[i], CORR_H * 2))
 	for cx in cols:
 		for i in range(rows.size() - 1):
-			links.append([Vector2i(cx, rows[i]), Vector2i(cx, rows[i + 1]), _R(2.2), _R(2.0), seed_j])
-			seed_j += 1
-	var floor_mask := _carve(chambers, links, _N(4), arrival)
+			_fill_rect(floor_mask, Rect2i(
+				cx - CORR_H, rows[i], CORR_H * 2, rows[i + 1] - rows[i]))
+	# Arrival hall below the grid, on its own spur.
+	var hall_top: int = rows[2] + ROOM_HH + 6
+	var hall := Rect2i(cols[1] - ROOM_HW, hall_top, ROOM_HW * 2, 20)
+	_fill_rect(floor_mask, hall)
+	_fill_rect(floor_mask, Rect2i(cols[1] - CORR_H, rows[2], CORR_H * 2, hall_top - rows[2] + 1))
+	var arrival := Vector2i(cols[1], hall_top + 10)
 
 	# --- Layer 0: walkway, then the toxic channels cut through it -------------
 	# Plain cobble walkway. Separation comes from value, not hue: the void below
@@ -210,54 +218,35 @@ func _build() -> void:
 	for cell: Vector2i in floor_mask.keys():
 		ground.set_cell(cell, SRC_TERRAIN, MapKit._pick(FLOOR, cell, 451))
 
-	# Slime runs along the horizontal service corridors, so the liquid reads as
-	# flowing between junctions rather than pooling in them.
-	# Meander the channels through waypoints instead of running them dead
-	# straight — a perfectly horizontal band reads as a painted stripe, not a
-	# flow of liquid.
-	var river: Dictionary = {}
-	var rseed := 470
-	var steps: int = 7
-	for ry in rows:
-		var pts: Array[Vector2i] = []
-		for i in steps + 1:
-			var x: int = cols[0] + int(float(cols[2] - cols[0]) * float(i) / float(steps))
-			var off: int = int(round(sin(float(i) * 1.15 + float(ry) * 0.4) * float(_N(2))))
-			pts.append(Vector2i(x, ry + off))
-		for i in steps:
-			MapKit.tunnel(river, pts[i], pts[i + 1], _R(0.9), _R(0.7), rseed, _bounds)
-			rseed += 1
+	# A straight channel runs the width of each room row. Straight is the point:
+	# the banks are authored for axis-aligned edges, so a rectilinear river is
+	# what makes them tile cleanly instead of stepping.
 	var slime_cells: Dictionary = {}
-	for cell: Vector2i in river.keys():
-		if floor_mask.has(cell):
-			slime_cells[cell] = true
-	# Banks, not a stamped rectangle: every channel cell picks its tile from
-	# which sides are dry, so the liquid meets the stone on an authored edge.
+	for ry in rows:
+		for y in range(ry - CHANNEL_H, ry + CHANNEL_H):
+			for x in range(cols[0] - ROOM_HW, cols[2] + ROOM_HW):
+				var cell := Vector2i(x, y)
+				if floor_mask.has(cell):
+					slime_cells[cell] = true
 	MapKit.paint_blob(ground, slime_cells, slime)
-	# A ribbon of the animated sewage tile down the middle of each channel. The
-	# centre is measured from the mask rather than assumed, because the channels
-	# now wander off their nominal row.
-	var column_rows: Dictionary = {}
-	for cell: Vector2i in slime_cells.keys():
-		if not column_rows.has(cell.x):
-			column_rows[cell.x] = []
-		column_rows[cell.x].append(cell.y)
+
+	# A ribbon of the animated sewage tile down the middle of each channel.
 	var flowing: int = 0
-	for x: int in column_rows.keys():
-		var ys: Array = column_rows[x]
-		ys.sort()
-		var mid: int = int(ys[ys.size() / 2])
-		for dy in [-1, 0]:
-			var cell := Vector2i(x, mid + dy)
-			# Interior only — an animated full tile over a bank cell would cover
-			# the authored edge and put a hard seam back in.
-			if not slime_cells.has(cell):
-				continue
-			if not (slime_cells.has(cell + Vector2i(0, -1)) and slime_cells.has(cell + Vector2i(0, 1))
-					and slime_cells.has(cell + Vector2i(-1, 0)) and slime_cells.has(cell + Vector2i(1, 0))):
-				continue
-			ground.set_cell(cell, SRC_SEWAGE, SEWAGE)
-			flowing += 1
+	for ry in rows:
+		for x in range(cols[0] - ROOM_HW, cols[2] + ROOM_HW):
+			for dy in [-1, 0]:
+				var cell := Vector2i(x, ry + dy)
+				# Interior only — an animated full tile over a bank cell would
+				# cover the authored edge and put a hard seam back in.
+				if not slime_cells.has(cell):
+					continue
+				if not (slime_cells.has(cell + Vector2i(0, -1))
+						and slime_cells.has(cell + Vector2i(0, 1))
+						and slime_cells.has(cell + Vector2i(-1, 0))
+						and slime_cells.has(cell + Vector2i(1, 0))):
+					continue
+				ground.set_cell(cell, SRC_SEWAGE, SEWAGE)
+				flowing += 1
 
 	# --- void fill: dark masonry everywhere the floor is not ------------------
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
@@ -322,8 +311,8 @@ func _build() -> void:
 				"name": "SlimeGlow%d" % li,
 				"pos": LevelKit.tile_pos_sized(cell, TILE),
 				"color": "Color(0.42, 1.0, 0.45, 1)",
-				"energy": 0.42,
-				"scale": 1.7,
+				"energy": 0.21,
+				"scale": 1.5,
 			})
 
 	var decos: Array = []
@@ -339,7 +328,7 @@ func _build() -> void:
 			"frames": "deco_torch" if ti % 3 != 0 else "deco_candle_a",
 			"pos": LevelKit.tile_pos_sized(LevelKit.pick_open(walk, spot), TILE),
 			"scale": 1.35,
-			"light": 0.9,
+			"light": 0.45,
 			"color": "Color(0.55, 0.95, 0.6, 1)" if ti % 3 == 0 else "Color(1, 0.74, 0.4, 1)",
 		})
 
@@ -395,9 +384,10 @@ func _build() -> void:
 		"out": OUT,
 		"tileset": TS,
 		"bg": "Color(0.02, 0.03, 0.02, 1)",
-		# Cooler and greener than the 16px build's blue-grey, so the ambient
-		# reads as sewer air rather than castle stone.
-		"modulate": "Color(0.62, 0.78, 0.64, 1)",
+		# Near-neutral. An earlier pass pushed green here as well as in the point
+		# lights, and the two compounded until the cobble, the banks and the void
+		# were all the same wash. The green now comes only from the channels.
+		"modulate": "Color(0.70, 0.74, 0.70, 1)",
 		"music": "res://assets/audio/music/alone.ogg",
 		"playlist": ["res://assets/audio/music/army_of_darkness.ogg"],
 		"layers": {

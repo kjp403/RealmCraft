@@ -626,18 +626,30 @@ class BlobSpec:
 	var ne: Vector2i
 	var sw: Vector2i
 	var se: Vector2i
+	## Concave corners: a cell surrounded on all four sides but with one diagonal
+	## outside the mask. Optional — leave [member has_inner] false and such cells
+	## take the fill, which is what a concave corner of a liquid body mostly is.
+	var has_inner: bool = false
+	var inner_nw: Vector2i
+	var inner_ne: Vector2i
+	var inner_sw: Vector2i
+	var inner_se: Vector2i
 
 
-## Paint `mask` with `spec`, choosing an edge tile per cell from which of its
-## four orthogonal neighbours are outside the mask. Cells with opposite sides
-## both open (a one-cell-wide neck) fall back to the fill, which reads better
-## than an arbitrary edge and keeps narrow channels continuous.
+## Paint `mask` with `spec`, choosing a tile per cell from its neighbourhood.
+## Orthogonals pick the outer edges and convex corners; a cell with all four
+## orthogonals inside the mask then checks its diagonals for a concave notch.
+## Cells with opposite sides both open (a one-cell-wide neck) fall back to the
+## fill, which reads better than an arbitrary edge and keeps channels continuous.
 static func paint_blob(layer: TileMapLayer, mask: Dictionary, spec: BlobSpec) -> void:
 	for cell: Vector2i in mask.keys():
 		var open_n: bool = not mask.has(cell + Vector2i(0, -1))
 		var open_s: bool = not mask.has(cell + Vector2i(0, 1))
 		var open_w: bool = not mask.has(cell + Vector2i(-1, 0))
 		var open_e: bool = not mask.has(cell + Vector2i(1, 0))
+		if not (open_n or open_s or open_w or open_e):
+			layer.set_cell(cell, spec.source, _inner_tile(mask, cell, spec))
+			continue
 		var tile: Vector2i = spec.fill
 		if open_n and open_s:
 			tile = spec.fill
@@ -660,3 +672,19 @@ static func paint_blob(layer: TileMapLayer, mask: Dictionary, spec: BlobSpec) ->
 		elif open_e:
 			tile = spec.e
 		layer.set_cell(cell, spec.source, tile)
+
+
+## Interior cell: fill unless a single diagonal is missing, which is a concave
+## corner the fill would render as a hard notch.
+static func _inner_tile(mask: Dictionary, cell: Vector2i, spec: BlobSpec) -> Vector2i:
+	if not spec.has_inner:
+		return spec.fill
+	if not mask.has(cell + Vector2i(-1, -1)):
+		return spec.inner_nw
+	if not mask.has(cell + Vector2i(1, -1)):
+		return spec.inner_ne
+	if not mask.has(cell + Vector2i(-1, 1)):
+		return spec.inner_sw
+	if not mask.has(cell + Vector2i(1, 1)):
+		return spec.inner_se
+	return spec.fill
