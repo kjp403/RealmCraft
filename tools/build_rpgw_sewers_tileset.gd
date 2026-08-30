@@ -27,7 +27,11 @@ const PROPS := PACK + "Props/atlas-props.png"
 ## Curated bands of Tileset-Terrain.png. Rows 44 and 50 are caption text and are
 ## skipped by construction. Rect2i is (col, row, cols, rows).
 const TERRAIN_REGIONS: Array[Rect2i] = [
-	Rect2i(25, 1, 8, 6),    # cobble floor bank + curved stone edges
+	# Nine columns, not eight. The raised stone slab the landmark builder paints
+	# is a rounded rect spanning cols 29..33, and an eight-wide band stopped at
+	# 32 — which took the slab's whole east edge and both its east corners out of
+	# the atlas, leaving the shape unpaintable from this side.
+	Rect2i(25, 1, 9, 6),    # cobble floor bank, curved stone edges, raised slab
 	Rect2i(0, 45, 6, 5),    # slime edge / spur pieces
 	Rect2i(0, 51, 6, 1),    # solid slime fill
 	Rect2i(26, 53, 8, 5),   # slime-on-stone channel blob (rounded corners + north bank)

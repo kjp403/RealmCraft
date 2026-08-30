@@ -10,10 +10,16 @@ extends SceneTree
 
 const MAPS := "res://source/common/gameplay/maps/maps/sewers/"
 
+## Each crop is aimed at the landmark that zone is built around, not at a
+## representative patch of floor — an empty stretch of river tells you nothing
+## the overview above it did not already show.
 const ZONES: Array[Dictionary] = [
-	{"map": "sewers.tscn", "world": Vector2(4480, 3360), "crop": Vector2(2240, 1900), "z": 1.0},
-	{"map": "gutterworks.tscn", "world": Vector2(6400, 4800), "crop": Vector2(3200, 1700), "z": 1.0},
-	{"map": "drowned_cistern.tscn", "world": Vector2(7040, 5280), "crop": Vector2(3520, 2640), "z": 1.0},
+	# The Cistern Sovereign's raised platform and its four drainage mouths.
+	{"map": "sewers.tscn", "world": Vector2(4480, 3360), "crop": Vector2(2240, 768), "z": 1.0},
+	# A plank crossing on the south channel, with a quay on either bank.
+	{"map": "gutterworks.tscn", "world": Vector2(6400, 4800), "crop": Vector2(2128, 3120), "z": 1.0},
+	# The densest stretch of pillar clusters and ruined foundations on the rim.
+	{"map": "drowned_cistern.tscn", "world": Vector2(7040, 5280), "crop": Vector2(5968, 3696), "z": 1.0},
 ]
 
 const OVER := Vector2i(1160, 420)

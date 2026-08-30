@@ -1,0 +1,67 @@
+[gd_resource type="SpriteFrames" load_steps=10 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rpgw_sewers/EPIC RPG World - Sewers V1.5/Props/Secret Lab - active capsule liquid-with creature.png" id="1_src"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu0"]
+atlas = ExtResource("1_src")
+region = Rect2(0, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu1"]
+atlas = ExtResource("1_src")
+region = Rect2(185, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu2"]
+atlas = ExtResource("1_src")
+region = Rect2(370, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu3"]
+atlas = ExtResource("1_src")
+region = Rect2(555, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu4"]
+atlas = ExtResource("1_src")
+region = Rect2(740, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu5"]
+atlas = ExtResource("1_src")
+region = Rect2(925, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu6"]
+atlas = ExtResource("1_src")
+region = Rect2(1110, 0, 185, 181)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_capsu7"]
+atlas = ExtResource("1_src")
+region = Rect2(1295, 0, 185, 181)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_capsu7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]

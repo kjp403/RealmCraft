@@ -162,6 +162,17 @@ unless their tile is marked. This is the trap to remember when picking new
 tiles: several banks that look like floor (the OutdoorHouseSet paving, for
 instance) are marked solid because they came from a platformer wall set.
 
+The second trap is the mirror of the first: **a tile that looks like floor but is
+mostly bare canvas**. The Epic RPG World packs draw their edge, rim and corner
+pieces to be composited *over* a ground tile, so an outer corner can be only a
+third opaque and a long edge about half. Painted onto the Ground layer it
+replaces the floor cell outright and the bare part becomes a hole through to
+`map_background_color` — grey notches around a raised slab, a hairline down a
+shoreline. Only the fully opaque interior tiles belong on Ground; caps, edges,
+corners, bank lips and drain covers go on a layer above it with the floor left
+intact underneath. `tools/audit_tile_opacity.gd` composites the real per-pixel
+alpha of all four layers and fails on any cell the stack does not cover.
+
 The stair portals joining each surface map to its two sub-levels are appended by
 `tools/add_biome_stairs.gd`. It inserts nodes as text and never touches a
 `tile_map_data` line, so the surface maps' art is untouched; re-running it is a
@@ -170,7 +181,7 @@ no-op once the stairs exist.
 Gates to run after any change here:
 
 ```bash
-godot --headless --path . -s tools/build_biome_levels.gd && godot --headless --path . -s tools/audit_biome_collision.gd && godot --headless --path . -s tools/verify_biome_levels.gd && godot --headless --path . -s tools/verify_stub_biomes.gd
+godot --headless --path . -s tools/build_biome_levels.gd && godot --headless --path . -s tools/audit_biome_collision.gd && godot --headless --path . -s tools/audit_tile_opacity.gd && godot --headless --path . -s tools/verify_biome_levels.gd && godot --headless --path . -s tools/verify_stub_biomes.gd
 ```
 
 Overview renders for eyeballing layout:

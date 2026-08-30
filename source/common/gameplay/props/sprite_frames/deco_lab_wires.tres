@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rpgw_sewers/EPIC RPG World - Sewers V1.5/Props/secret lab - wire ish.png" id="1_src"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wires0"]
+atlas = ExtResource("1_src")
+region = Rect2(0, 0, 98, 95)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wires0")
+}],
+"loop": true,
+"name": &"default",
+"speed": 1.0
+}]
