@@ -51,6 +51,24 @@ const FLOOR: Array[Vector2i] = [
 const DARK: Array[Vector2i] = [Vector2i(28, 37), Vector2i(29, 37), Vector2i(33, 37)]
 const VOID: Array[Vector2i] = [Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2)]
 const SEWAGE := Vector2i(0, 0)
+## Alternative 1 of the sewage and still-water tiles is the same art with the
+## collision polygon left off. It exists for one job: the cell under a bridge
+## deck, which has to read as open channel and still be walkable. Alternative 0
+## of both carries the polygon, which is what makes the sludge impassable.
+const WATER_WALK_ALT := 1
+## Widest channel a generated crossing will span. Beyond this the "gap" is open
+## water rather than a cut, and a plank run that long stops reading as a bridge.
+const BRIDGE_MAX_SPAN := 26
+## Shortest run a spare crossing may span. The connectivity pass takes the
+## narrowest cut it can find, which is the right rule when the alternative is a
+## severed map; for an extra crossing it just finds a one-cell pinch in the
+## ragged edge of the channel and drops a single plank in it, which reads as
+## litter rather than a bridge.
+const BRIDGE_MIN_SPARE_SPAN := 4
+## Islands smaller than this are left where they are. They are nooks a couple of
+## cells across, and a lone plank reaching one looks like a mistake; the walkable
+## set drops them instead.
+const BRIDGE_MIN_ISLAND := 12
 
 # --- landmark palette -------------------------------------------------------
 # The raised stone slab is the pack's rounded rect at terrain 29..33 x 1..5. Its
@@ -302,7 +320,7 @@ func _paint_ground(ground: TileMapLayer, floor_mask: Dictionary, void_mask: Dict
 ## then shows the map background — a hairline of it down every shoreline in the
 ## zone, running right beside the quays.
 func _paint_slime(ground: TileMapLayer, trim: TileMapLayer, slime: Dictionary,
-		flow: Dictionary) -> int:
+		flow: Dictionary, water_out: Dictionary) -> int:
 	MapKit.paint_blob(ground, slime, _slime_spec())
 	var fill: Vector2i = _slime_spec().fill
 	for cell: Vector2i in slime.keys():
@@ -328,6 +346,17 @@ func _paint_slime(ground: TileMapLayer, trim: TileMapLayer, slime: Dictionary,
 			continue
 		ground.set_cell(cell, SRC_SEWAGE, SEWAGE)
 		flowing += 1
+	# The sludge is impassable, so record exactly which cells carry a colliding
+	# water tile. Only the blob's fill and the animated channel do: the eight
+	# rounded edge pieces are the shoreline lip and stay walkable, so the player
+	# can still stand at the water's edge instead of being stopped a cell short
+	# of it by a tile that is drawn as bank.
+	for cell: Vector2i in slime.keys():
+		var sid := ground.get_cell_source_id(cell)
+		if sid == SRC_SEWAGE:
+			water_out[cell] = true
+		elif sid == SRC_TERRAIN and ground.get_cell_atlas_coords(cell) == _slime_spec().fill:
+			water_out[cell] = true
 	return flowing
 
 
@@ -345,6 +374,21 @@ func _require(ts: TileSet) -> void:
 		assert(src != null, "tileset missing source %d" % int(c[0]))
 		for coord: Vector2i in c[1]:
 			assert(src.has_tile(coord), "source %d has no tile %s" % [int(c[0]), coord])
+	# The sludge collides and the bridge underpass is the one hole in it. Both
+	# halves live in the tileset, so assert them here rather than discovering a
+	# severed map at run time: without the walkable alternative every deck this
+	# build lays down would be a wall across the channel it is meant to cross.
+	for pair in [[SRC_SEWAGE, SEWAGE], [SRC_TERRAIN, slime.fill]]:
+		var src := ts.get_source(int(pair[0])) as TileSetAtlasSource
+		var coord: Vector2i = pair[1]
+		var solid := src.get_tile_data(coord, 0)
+		assert(solid.get_collision_polygons_count(0) > 0,
+			"water tile %s is walkable; the sludge would not block" % coord)
+		assert(src.has_alternative_tile(coord, WATER_WALK_ALT),
+			"water tile %s has no walkable alternative for bridge decks" % coord)
+		var walkable := src.get_tile_data(coord, WATER_WALK_ALT)
+		assert(walkable.get_collision_polygons_count(0) == 0,
+			"bridge underpass alternative of %s still collides" % coord)
 
 
 func _populate(walk: Dictionary, taken: Dictionary, spots: Array, gap: int) -> Array[Vector2i]:
@@ -595,16 +639,47 @@ func _embankment_v(ground: TileMapLayer, trim: TileMapLayer, slime: Dictionary,
 	return out
 
 
+## Open the cell under a bridge deck so the crossing is actually walkable.
+##
+## The sludge collides, and a deck laid over it would otherwise be a wall painted
+## to look like a bridge. Both water tiles carry a no-collision alternative of
+## the same art, so the channel still reads as open water under the planks — the
+## hole is in the physics only, not in the picture.
+func _open_underpass(ground: TileMapLayer, cell: Vector2i) -> void:
+	var sid := ground.get_cell_source_id(cell)
+	if sid != SRC_SEWAGE and sid != SRC_TERRAIN:
+		return
+	var coord := ground.get_cell_atlas_coords(cell)
+	if sid == SRC_SEWAGE or coord == _slime_spec().fill:
+		ground.set_cell(cell, sid, coord, WATER_WALK_ALT)
+
+
+## Record a deck cell: planks on the deck layer, underpass opened, and the cell
+## put back into the walkable set the callers path over.
+func _lay_deck(deck: TileMapLayer, ground: TileMapLayer, cell: Vector2i, tile: Vector2i,
+		walk: Dictionary, taken: Dictionary, apron: bool) -> void:
+	deck.set_cell(cell, SRC_PROPS, tile)
+	_open_underpass(ground, cell)
+	walk[cell] = true
+	if apron:
+		# A two-cell apron either side, so a prop cannot crowd the landing.
+		for oy in range(-2, 3):
+			for ox in range(-2, 3):
+				taken[cell + Vector2i(ox, oy)] = true
+	else:
+		taken[cell] = true
+
+
 ## A plank bridge running north-south, [param width] columns wide, spanning the
 ## sewage on column [param x] with two cells of landing on each bank.
 ##
-## Painted onto the props layer and deliberately never recorded as solid. The
-## sewage underneath is already walkable, so a bridge that blocked would take
-## away crossings rather than add them.
-## Every cell is recorded in [param taken] — not to block movement, but so the
-## shore scatter that runs later cannot stamp a drainage mouth across the deck.
-func _bridge_v(props: TileMapLayer, slime: Dictionary, walk: Dictionary,
-		taken: Dictionary, x: int, near_y: int, width: int) -> int:
+## Laid on the deck layer, not on props. The sludge is impassable, so a bridge is
+## now load-bearing rather than decoration: it is the only way across a channel,
+## its cells are added to [param walk], and the water beneath each plank is
+## switched to the walkable alternative. The deck layer is what keeps the player
+## drawn on top of the planks they are standing on — see LevelKit.LAYER_ORDER.
+func _bridge_v(deck: TileMapLayer, ground: TileMapLayer, slime: Dictionary,
+		walk: Dictionary, taken: Dictionary, x: int, near_y: int, width: int) -> int:
 	var span := _slime_span_v(slime, x, near_y)
 	if span == NO_TILE:
 		return 0
@@ -620,19 +695,15 @@ func _bridge_v(props: TileMapLayer, slime: Dictionary, walk: Dictionary,
 			var cell := Vector2i(x + dx, y)
 			var tile := PLANK_V_N if y == y0 else (
 				PLANK_V_S if y == y1 else MapKit._pick(PLANK_V_MID, cell, 9902))
-			props.set_cell(cell, SRC_PROPS, tile)
-			# A two-cell apron either side, so a prop cannot crowd the landing.
-			for oy in range(-2, 3):
-				for ox in range(-2, 3):
-					taken[cell + Vector2i(ox, oy)] = true
+			_lay_deck(deck, ground, cell, tile, walk, taken, true)
 			n += 1
 	return n
 
 
 ## East-west counterpart. The art is two rows deep — a cap row of planks and the
 ## deck below it — so [param height] repeats the deck row to widen the crossing.
-func _bridge_h(props: TileMapLayer, slime: Dictionary, walk: Dictionary,
-		taken: Dictionary, y: int, near_x: int, height: int) -> int:
+func _bridge_h(deck: TileMapLayer, ground: TileMapLayer, slime: Dictionary,
+		walk: Dictionary, taken: Dictionary, y: int, near_x: int, height: int) -> int:
 	var span := _slime_span_h(slime, y, near_x)
 	if span == NO_TILE:
 		return 0
@@ -646,13 +717,248 @@ func _bridge_h(props: TileMapLayer, slime: Dictionary, walk: Dictionary,
 	for x in range(x0, x1 + 1):
 		var top := PLANK_H_W if x == x0 else (
 			PLANK_H_E if x == x1 else MapKit._pick(PLANK_H_MID, Vector2i(x, y), 9903))
-		props.set_cell(Vector2i(x, y), SRC_PROPS, top)
+		_lay_deck(deck, ground, Vector2i(x, y), top, walk, taken, true)
 		for dy in range(1, height):
-			props.set_cell(Vector2i(x, y + dy), SRC_PROPS, top + Vector2i(0, 1))
+			_lay_deck(deck, ground, Vector2i(x, y + dy), top + Vector2i(0, 1),
+				walk, taken, true)
 		for dy in range(-2, height + 2):
 			for ox in range(-2, 3):
 				taken[Vector2i(x + ox, y + dy)] = true
 		n += height
+	return n
+
+
+## Label every connected component of [param walk]. Returns cell -> region index.
+func _label(walk: Dictionary) -> Dictionary:
+	var label: Dictionary = {}
+	var next: int = 0
+	for start: Vector2i in walk.keys():
+		if label.has(start):
+			continue
+		var queue: Array[Vector2i] = [start]
+		label[start] = next
+		while not queue.is_empty():
+			var cur: Vector2i = queue.pop_back()
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nb: Vector2i = cur + d
+				if walk.has(nb) and not label.has(nb):
+					label[nb] = next
+					queue.append(nb)
+		next += 1
+	return label
+
+
+## Number of distinct regions in a label map.
+func _region_count(label: Dictionary) -> int:
+	var seen: Dictionary = {}
+	for cell: Vector2i in label.keys():
+		seen[label[cell]] = true
+	return seen.size()
+
+
+## Span every remaining cut in the zone with a plank deck, until the whole map is
+## one walkable region again.
+##
+## This is the pass that makes impassable sludge survivable. The rivers run the
+## full width and height of these zones, so the moment the water collides they
+## cut the floor into islands — four in the surface hub, six in the Gutterworks —
+## and the entrance, the boss arena and the stair landings end up on different
+## ones. The authored crossings run first because they sit at chosen places; this
+## closes whatever they miss.
+##
+## It works on the shortest cut first, which keeps the crossings at the narrows
+## where a plank run is plausible, and it re-labels after each bridge so two
+## islands are never bridged twice. Deterministic: candidates are ordered by span
+## length and then by cell, so a rebuild produces the same crossings.
+func _bridge_all(deck: TileMapLayer, ground: TileMapLayer, water: Dictionary,
+		walk: Dictionary, taken: Dictionary) -> int:
+	var built: int = 0
+	for _guard in 64:
+		var label := _label(walk)
+		if _region_count(label) <= 1:
+			break
+		var sizes: Dictionary = {}
+		for cell: Vector2i in label.keys():
+			var r: int = label[cell]
+			sizes[r] = int(sizes.get(r, 0)) + 1
+		var best_len: int = BRIDGE_MAX_SPAN + 1
+		var best_cell := NO_TILE
+		var best_dir := NO_TILE
+		for cell: Vector2i in walk.keys():
+			for dir in [Vector2i(1, 0), Vector2i(0, 1)]:
+				var step: int = 1
+				while step <= BRIDGE_MAX_SPAN and water.has(cell + dir * step):
+					step += 1
+				if step == 1 or step > BRIDGE_MAX_SPAN:
+					continue
+				var landing: Vector2i = cell + dir * step
+				if not walk.has(landing) or int(label[landing]) == int(label[cell]):
+					continue
+				# Not worth a plank: see BRIDGE_MIN_ISLAND.
+				if mini(int(sizes[label[cell]]), int(sizes[label[landing]])) < BRIDGE_MIN_ISLAND:
+					continue
+				var span: int = step - 1
+				# Ties broken on the cell so the choice does not depend on the
+				# order a Dictionary happens to hand back its keys.
+				var better: bool = span < best_len
+				if span == best_len and best_cell != NO_TILE:
+					better = cell.y < best_cell.y or (
+						cell.y == best_cell.y and cell.x < best_cell.x)
+				if better:
+					best_len = span
+					best_cell = cell
+					best_dir = dir
+		if best_cell == NO_TILE:
+			break
+		built += _span_cut(deck, ground, water, walk, taken, best_cell, best_dir, best_len)
+	return built
+
+
+## Drop every cell that any painted layer has given a collision polygon.
+##
+## Derived from the tiles actually on the map rather than from the bookkeeping
+## the painters kept, because the two now disagree. Grates, benches, outfalls,
+## crates and barrels all carry collision in the tileset, and most of them were
+## stamped through helpers that recorded a cell as "taken" — meaning no second
+## prop may share it — without ever recording it as blocking movement. Anything
+## then placed on such a cell, an NPC or a warper or the spawn point, would be
+## standing inside solid geometry.
+##
+## Does not filter to a single region on purpose: the caller still has to bridge
+## the water cuts, and picking the largest region first would silently throw the
+## other islands away instead of connecting them.
+func _prune_walk(layers: Array, walk: Dictionary) -> int:
+	var removed: int = 0
+	for layer: TileMapLayer in layers:
+		var ts: TileSet = layer.tile_set
+		for cell: Vector2i in layer.get_used_cells():
+			if not walk.has(cell):
+				continue
+			var src := ts.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+			if src == null:
+				continue
+			var td := src.get_tile_data(layer.get_cell_atlas_coords(cell),
+				layer.get_cell_alternative_tile(cell))
+			if td != null and td.get_collision_polygons_count(0) > 0:
+				walk.erase(cell)
+				removed += 1
+	return removed
+
+
+## Add crossings beyond the ones connectivity strictly needs.
+##
+## `_bridge_all` stops the moment the zone is a single region, which on the
+## surface hub means one 3x3 deck carrying every trip between the west bank and
+## the rest of the map — a 2,600-cell region behind a three-tile plank run, with
+## every player route and every mob path funnelled through it. Connected is not
+## the same as playable, and this is the difference.
+##
+## Same shortest-span rule as the connectivity pass, with one extra condition:
+## a spare crossing is only placed where it is [param min_gap] cells clear of
+## every deck already down, which spreads them along the channel rather than
+## widening the crossing that is already there.
+func _bridge_spare(deck: TileMapLayer, ground: TileMapLayer, water: Dictionary,
+		walk: Dictionary, taken: Dictionary, want: int, min_gap: int) -> int:
+	var built: int = 0
+	for _guard in want:
+		# Dilating the existing decks once per crossing is cheaper than measuring
+		# every candidate against every deck cell.
+		var near: Dictionary = {}
+		for cell: Vector2i in deck.get_used_cells():
+			for oy in range(-min_gap, min_gap + 1):
+				for ox in range(-min_gap, min_gap + 1):
+					near[cell + Vector2i(ox, oy)] = true
+		var best_len: int = BRIDGE_MAX_SPAN + 1
+		var best_cell := NO_TILE
+		var best_dir := NO_TILE
+		for cell: Vector2i in walk.keys():
+			if near.has(cell):
+				continue
+			for dir in [Vector2i(1, 0), Vector2i(0, 1)]:
+				var step: int = 1
+				while step <= BRIDGE_MAX_SPAN and water.has(cell + dir * step):
+					step += 1
+				if step == 1 or step > BRIDGE_MAX_SPAN:
+					continue
+				var landing: Vector2i = cell + dir * step
+				if not walk.has(landing) or near.has(landing):
+					continue
+				var span: int = step - 1
+				# A spare has to be an actual bridge over an actual channel.
+				if span < BRIDGE_MIN_SPARE_SPAN:
+					continue
+				if not _full_width(water, walk, cell, dir, span):
+					continue
+				var better: bool = span < best_len
+				if span == best_len and best_cell != NO_TILE:
+					better = cell.y < best_cell.y or (
+						cell.y == best_cell.y and cell.x < best_cell.x)
+				if better:
+					best_len = span
+					best_cell = cell
+					best_dir = dir
+		if best_cell == NO_TILE:
+			break
+		built += _span_cut(deck, ground, water, walk, taken, best_cell, best_dir, best_len)
+	return built
+
+
+## True when a crossing here can be laid at its full three-lane width: every lane
+## water the whole way over, and dry ground under both of its landings.
+func _full_width(water: Dictionary, walk: Dictionary, from: Vector2i, dir: Vector2i,
+		span: int) -> bool:
+	var perp := Vector2i(dir.y, dir.x)
+	var lanes: Array = [0, 1, 2] if dir == Vector2i(1, 0) else [0, -1, 1]
+	for lane: int in lanes:
+		var offset: Vector2i = perp * lane
+		if not walk.has(from + offset):
+			return false
+		if not walk.has(from + offset + dir * (span + 1)):
+			return false
+		for step in range(1, span + 1):
+			if not water.has(from + offset + dir * step):
+				return false
+	return true
+
+
+## Lay one crossing of [param span] water cells from [param from] in [param dir],
+## three lanes wide where the neighbouring lanes are water the whole way across.
+func _span_cut(deck: TileMapLayer, ground: TileMapLayer, water: Dictionary,
+		walk: Dictionary, taken: Dictionary, from: Vector2i, dir: Vector2i,
+		span: int) -> int:
+	var perp := Vector2i(dir.y, dir.x)
+	# An east-west deck grows southward, because its art is a cap row with deck
+	# rows under it; a north-south deck is a single column repeated either side.
+	var lanes: Array = [0, 1, 2] if dir == Vector2i(1, 0) else [0, -1, 1]
+	var n: int = 0
+	for lane: int in lanes:
+		var offset: Vector2i = perp * lane
+		# The centre lane is the one that has to work; the outer two only widen
+		# the crossing where the channel is water the whole way across.
+		if lane != 0:
+			var ok := true
+			for step in range(1, span + 1):
+				if not water.has(from + offset + dir * step):
+					ok = false
+					break
+			if not ok:
+				continue
+			if not walk.has(from + offset):
+				continue
+			if not walk.has(from + offset + dir * (span + 1)):
+				continue
+		for step in range(1, span + 1):
+			var cell: Vector2i = from + offset + dir * step
+			var tile: Vector2i
+			if dir == Vector2i(0, 1):
+				tile = PLANK_V_N if step == 1 else (
+					PLANK_V_S if step == span else MapKit._pick(PLANK_V_MID, cell, 9902))
+			else:
+				var top := PLANK_H_W if step == 1 else (
+					PLANK_H_E if step == span else MapKit._pick(PLANK_H_MID, cell, 9903))
+				tile = top if lane == 0 else top + Vector2i(0, 1)
+			_lay_deck(deck, ground, cell, tile, walk, taken, false)
+			n += 1
 	return n
 
 
@@ -711,6 +1017,43 @@ func _foundation(walls: TileMapLayer, start: Vector2i, run: int,
 			solid[cell] = true
 			allowed.erase(cell)
 	return true
+
+
+## Cap the rest of the zone boundary.
+##
+## `paint_wall3` only builds where void sits directly above floor, because that
+## is the single orientation the pack draws its three-row wall stack for. On an
+## open zone that leaves the south, east and west edges as floor meeting bare
+## void — two thirds of the boundary on all three of these maps — and the void
+## filler is a near-black #262E40, so the zone reads as stopping at a hard flat
+## cut into nothing. That is the "black void" the boundary was reported as.
+##
+## The tile used is the wall pack's base course — the mossy lip drawn for where
+## stone meets floor, and the row that already makes the north edge read as a
+## boundary. Its top cap was tried first and is nearly the same value as the void
+## behind it, so the edge stayed invisible. The base course is the one piece in
+## the set with a bright edge on it, and it is the perspectively honest choice
+## too: on every one of these sides what abuts the floor is the foot of a wall.
+## Nothing changes physically — every void cell already carries this source's
+## full-tile collision, which is why the zone was never actually walk-out-able —
+## this is the missing picture only.
+func _dress_boundary(walls: TileMapLayer, floor_mask: Dictionary, void_mask: Dictionary,
+		spec: MapKit.WallSpec, seed_v: int) -> int:
+	var n: int = 0
+	for cell: Vector2i in void_mask.keys():
+		# Anything paint_wall3 already built on is a real wall face; leave it.
+		if walls.get_cell_source_id(cell) != -1:
+			continue
+		var touches := false
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if floor_mask.has(cell + d):
+				touches = true
+				break
+		if not touches:
+			continue
+		walls.set_cell(cell, spec.source, MapKit._pick(spec.base, cell, seed_v))
+		n += 1
+	return n
 
 
 ## Cut a bay northward out of the zone's north boundary and return its centre.
@@ -939,6 +1282,7 @@ func _build_sewers() -> void:
 	var walls := _layer(ts)
 	var props := _layer(ts)
 	var overlay := _layer(ts)
+	var deck := _layer(ts)
 
 	var floor_mask := _seal_interior(_open_zone(6, 0.16, 7101))
 	var slime: Dictionary = {}
@@ -953,15 +1297,36 @@ func _build_sewers() -> void:
 
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
 	_paint_ground(ground, floor_mask, void_mask)
-	var flowing := _paint_slime(ground, props, slime, flow)
+	var water: Dictionary = {}
+	var flowing := _paint_slime(ground, props, slime, flow, water)
 
 	var blocked: Dictionary = {}
 	var runs := MapKit.paint_wall3(walls, overlay, floor_mask, void_mask, _wall_spec(),
 		_bounds, blocked, 8, 7120)
+	var capped := _dress_boundary(walls, floor_mask, void_mask, _wall_spec(), 7125)
+
+	# The sludge collides now, so it has to block pathing exactly as a wall
+	# does. Without this the placement helpers would still treat the channels
+	# as open ground and drop mobs and landings into the water.
+	for cell: Vector2i in water.keys():
+		blocked[cell] = true
 
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, Vector2i(W / 2, H - 12))
+	# Span the channels before the zone is reduced to one region. The other
+	# order lets the reduction stand in for the fix: largest_region always
+	# hands back something connected, by discarding every bank the water cut
+	# off — here the boss arena and two of the three stair landings — so the
+	# build reports a healthy walk count while a third of the level is gone.
+	# `placed` is opened here rather than at the dressing below because the
+	# decks have to be in it before the first prop is stamped.
+	var placed: Dictionary = {}
+	var spans := _bridge_all(deck, ground, water, walk, placed)
 	walk = MapKit.largest_region(walk, entrance)
+	# The hub is the one map the connectivity pass leaves on a single deck, and
+	# it is also the one every descent runs through. Three spare crossings, well
+	# separated, so the west bank is not reached through one three-tile gap.
+	spans += _bridge_spare(deck, ground, water, walk, placed, 3, 18)
 	var portal := LevelKit.pick_open(walk, entrance + Vector2i(0, 5))
 	# Pulled south off the north wall so the boss arena and the lab recesses are
 	# not competing for the same strip of ground, and so there is room to fight
@@ -978,7 +1343,6 @@ func _build_sewers() -> void:
 	# One dressing set for the whole zone, so the bank scatter and the lab fit-out
 	# below can see what the arena already claimed. The slab's trim goes into it
 	# too, which is what stops a later prop being stamped through the platform rim.
-	var placed: Dictionary = {}
 	var arena := _slab(ground, props, arena_origin, Vector2i(12, 12), dry, placed)
 	var outfalls: int = 0
 	# Clear of the slab rather than overhanging it. The rim now lives on the props
@@ -1008,6 +1372,22 @@ func _build_sewers() -> void:
 
 	var decos := _dress_labs(ground, props, overlay, labs, walk, placed)
 	var shore := _dress_banks(props, overlay, walk, slime, placed, 7140)
+
+	# The water is solid, so the rivers have cut the zone into islands, and the
+	# dressing may have sealed a pocket on top of that. Re-derive what is really
+	# walkable from the tiles that got painted, span whatever cuts are left, and
+	# only then reduce to a single region. The order is the point: reducing
+	# first would discard the far bank instead of bridging to it, taking the
+	# boss arena or a stair landing with it.
+	_prune_walk([ground, deck, walls, props, overlay], walk)
+	spans += _bridge_all(deck, ground, water, walk, placed)
+	var reachable_before: int = walk.size()
+	walk = MapKit.largest_region(walk, entrance)
+	# A few isolated cells behind a crate are tolerable; a quarter of the zone
+	# stranded on the wrong side of a channel is the severance this guards.
+	assert(float(walk.size()) / float(reachable_before) > 0.9,
+			"sludge severed the zone: %d of %d cells reach the entrance over %d decks"
+			% [walk.size(), reachable_before, spans])
 
 	var taken := LevelKit.keepout([entrance, portal], 9)
 	for cell: Vector2i in LevelKit.keepout([boss_cell], 12).keys():
@@ -1050,8 +1430,8 @@ func _build_sewers() -> void:
 	assert(walk.has(entrance) and walk.has(portal), "sewers spawn blocked")
 	assert(walk.size() > 4000, "sewers too small: %d" % walk.size())
 	assert(not arena.is_empty(), "sewers boss platform did not fit")
-	_report.append("  sewers        walk=%d walls=%d runs=%d slime=%d flow=%d mobs=%d" % [
-		walk.size(), walls.get_used_cells().size(), runs, slime.size(), flowing, hostiles.size()])
+	_report.append("  sewers        walk=%d walls=%d runs=%d cap=%d slime=%d flow=%d mobs=%d" % [
+		walk.size(), walls.get_used_cells().size(), runs, capped, slime.size(), flowing, hostiles.size()])
 	_report.append("                arena=%d outfalls=%d labs=%d %s" % [
 		arena.size(), outfalls, labs.size(), _counts(shore)])
 
@@ -1063,8 +1443,9 @@ func _build_sewers() -> void:
 		"modulate": "Color(0.50, 0.54, 0.50, 1)",
 		"music": "res://assets/audio/music/alone.ogg",
 		"layers": {
-			"Ground": LevelKit.b64(ground), "Walls": LevelKit.b64(walls),
-			"Props": LevelKit.b64(props), "Overlay": LevelKit.b64(overlay),
+			"Ground": LevelKit.b64(ground), "Deck": LevelKit.b64(deck),
+			"Walls": LevelKit.b64(walls), "Props": LevelKit.b64(props),
+			"Overlay": LevelKit.b64(overlay),
 		},
 		"cam_right": W * TILE + TILE, "cam_bottom": H * TILE + TILE,
 		"lights": _lights("SewerGlow", glow, "Color(0.45, 0.95, 0.5, 1)", 0.20, 1.6),
@@ -1107,6 +1488,7 @@ func _build_gutterworks() -> void:
 	var walls := _layer(ts)
 	var props := _layer(ts)
 	var overlay := _layer(ts)
+	var deck := _layer(ts)
 
 	var floor_mask := _seal_interior(_open_zone(7, 0.20, 8201))
 	var slime: Dictionary = {}
@@ -1124,14 +1506,31 @@ func _build_gutterworks() -> void:
 
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
 	_paint_ground(ground, floor_mask, void_mask)
-	var flowing := _paint_slime(ground, props, slime, flow)
+	var water: Dictionary = {}
+	var flowing := _paint_slime(ground, props, slime, flow, water)
 
 	var blocked: Dictionary = {}
 	var runs := MapKit.paint_wall3(walls, overlay, floor_mask, void_mask, _wall_spec(),
 		_bounds, blocked, 8, 8220)
+	var capped := _dress_boundary(walls, floor_mask, void_mask, _wall_spec(), 8225)
+
+	# The sludge collides now, so it has to block pathing exactly as a wall
+	# does. Without this the placement helpers would still treat the channels
+	# as open ground and drop mobs and landings into the water.
+	for cell: Vector2i in water.keys():
+		blocked[cell] = true
 
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, Vector2i(W / 2, H - 14))
+	# Span the channels before the zone is reduced to one region. The other
+	# order lets the reduction stand in for the fix: largest_region always
+	# hands back something connected, by discarding every bank the water cut
+	# off — here the boss arena and two of the three stair landings — so the
+	# build reports a healthy walk count while a third of the level is gone.
+	# `placed` is opened here rather than at the dressing below because the
+	# decks have to be in it before the first prop is stamped.
+	var placed: Dictionary = {}
+	var spans := _bridge_all(deck, ground, water, walk, placed)
 	walk = MapKit.largest_region(walk, entrance)
 	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 6))
 
@@ -1148,7 +1547,6 @@ func _build_gutterworks() -> void:
 	# not the whole quay: dressing is welcome on the walkway itself, but a crate
 	# or a drainage mouth stamped over the curved edge breaks the one silhouette
 	# the embankment has.
-	var placed: Dictionary = {}
 	var quay: Dictionary = {}
 	for run: Array in [
 		[north_y, -1], [north_y, 1], [south_y, -1], [south_y, 1],
@@ -1166,11 +1564,11 @@ func _build_gutterworks() -> void:
 	# crossings rather than add them.
 	var planks: int = 0
 	for x in [40, 150]:
-		planks += _bridge_v(props, slime, walk, placed, x, north_y, 3)
+		planks += _bridge_v(deck, ground, slime, walk, placed, x, north_y, 3)
 	for x in [56, 160]:
-		planks += _bridge_v(props, slime, walk, placed, x, south_y, 3)
+		planks += _bridge_v(deck, ground, slime, walk, placed, x, south_y, 3)
 	for y in [30, 78, 128]:
-		planks += _bridge_h(props, slime, walk, placed, y, cross_x, 3)
+		planks += _bridge_h(deck, ground, slime, walk, placed, y, cross_x, 3)
 
 	var no_build := LevelKit.keepout([entrance, exit_cell], 6)
 	var free: Dictionary = {}
@@ -1191,6 +1589,22 @@ func _build_gutterworks() -> void:
 	var decos := _dress_labs(ground, props, overlay, labs, walk, placed)
 	var shore := _dress_banks(props, overlay, walk, slime, placed, 8240)
 
+	# The water is solid, so the rivers have cut the zone into islands, and the
+	# dressing may have sealed a pocket on top of that. Re-derive what is really
+	# walkable from the tiles that got painted, span whatever cuts are left, and
+	# only then reduce to a single region. The order is the point: reducing
+	# first would discard the far bank instead of bridging to it, taking the
+	# boss arena or a stair landing with it.
+	_prune_walk([ground, deck, walls, props, overlay], walk)
+	spans += _bridge_all(deck, ground, water, walk, placed)
+	var reachable_before: int = walk.size()
+	walk = MapKit.largest_region(walk, entrance)
+	# A few isolated cells behind a crate are tolerable; a quarter of the zone
+	# stranded on the wrong side of a channel is the severance this guards.
+	assert(float(walk.size()) / float(reachable_before) > 0.9,
+			"sludge severed the zone: %d of %d cells reach the entrance over %d decks"
+			% [walk.size(), reachable_before, spans])
+
 	var taken := LevelKit.keepout([entrance, exit_cell], 9)
 	for cell: Vector2i in placed.keys():
 		taken[cell] = true
@@ -1210,8 +1624,8 @@ func _build_gutterworks() -> void:
 	assert(walk.size() > 6000, "gutterworks too small: %d" % walk.size())
 	assert(not quay.is_empty(), "gutterworks embankments did not fit")
 	assert(planks > 0, "gutterworks has no plank crossings")
-	_report.append("  gutterworks   walk=%d walls=%d runs=%d slime=%d flow=%d mobs=%d" % [
-		walk.size(), walls.get_used_cells().size(), runs, slime.size(), flowing, hostiles.size()])
+	_report.append("  gutterworks   walk=%d walls=%d runs=%d cap=%d slime=%d flow=%d mobs=%d" % [
+		walk.size(), walls.get_used_cells().size(), runs, capped, slime.size(), flowing, hostiles.size()])
 	_report.append("                quay=%d planks=%d labs=%d %s" % [
 		quay.size(), planks, labs.size(), _counts(shore)])
 
@@ -1224,8 +1638,9 @@ func _build_gutterworks() -> void:
 		"music": "res://assets/audio/music/alone.ogg",
 		"playlist": ["res://assets/audio/music/army_of_darkness.ogg"],
 		"layers": {
-			"Ground": LevelKit.b64(ground), "Walls": LevelKit.b64(walls),
-			"Props": LevelKit.b64(props), "Overlay": LevelKit.b64(overlay),
+			"Ground": LevelKit.b64(ground), "Deck": LevelKit.b64(deck),
+			"Walls": LevelKit.b64(walls), "Props": LevelKit.b64(props),
+			"Overlay": LevelKit.b64(overlay),
 		},
 		"cam_right": W * TILE + TILE, "cam_bottom": H * TILE + TILE,
 		"lights": _lights("SlimeGlow", glow, "Color(0.42, 1.0, 0.45, 1)", 0.21, 1.5),
@@ -1259,6 +1674,7 @@ func _build_cistern() -> void:
 	var walls := _layer(ts)
 	var props := _layer(ts)
 	var overlay := _layer(ts)
+	var deck := _layer(ts)
 
 	var floor_mask := _seal_interior(_open_zone(7, 0.18, 9301))
 
@@ -1285,14 +1701,31 @@ func _build_cistern() -> void:
 	var void_mask := LevelKit.void_of(floor_mask, W, H)
 	_paint_ground(ground, floor_mask, void_mask)
 	# A reservoir is still water; no current ribbon runs across it.
-	var flowing := _paint_slime(ground, props, slime, {})
+	var water: Dictionary = {}
+	var flowing := _paint_slime(ground, props, slime, {}, water)
 
 	var blocked: Dictionary = {}
 	var runs := MapKit.paint_wall3(walls, overlay, floor_mask, void_mask, _wall_spec(),
 		_bounds, blocked, 8, 9320)
+	var capped := _dress_boundary(walls, floor_mask, void_mask, _wall_spec(), 9325)
+
+	# The sludge collides now, so it has to block pathing exactly as a wall
+	# does. Without this the placement helpers would still treat the channels
+	# as open ground and drop mobs and landings into the water.
+	for cell: Vector2i in water.keys():
+		blocked[cell] = true
 
 	var walk := LevelKit.walkable(floor_mask, blocked)
 	var entrance := LevelKit.pick_open(walk, Vector2i(W / 2, H - 14))
+	# Span the channels before the zone is reduced to one region. The other
+	# order lets the reduction stand in for the fix: largest_region always
+	# hands back something connected, by discarding every bank the water cut
+	# off — here the boss arena and two of the three stair landings — so the
+	# build reports a healthy walk count while a third of the level is gone.
+	# `placed` is opened here rather than at the dressing below because the
+	# decks have to be in it before the first prop is stamped.
+	var placed: Dictionary = {}
+	var spans := _bridge_all(deck, ground, water, walk, placed)
 	walk = MapKit.largest_region(walk, entrance)
 	var exit_cell := LevelKit.pick_open(walk, entrance + Vector2i(0, 6))
 
@@ -1342,9 +1775,24 @@ func _build_cistern() -> void:
 	walk = MapKit.largest_region(walk, entrance)
 	LevelKit.scatter_flat(overlay, SRC_PROPS, edges, WEBS, 0.10, 4, 9332, solid)
 
-	var placed: Dictionary = {}
 	var decos := _dress_labs(ground, props, overlay, labs, walk, placed)
 	var shore := _dress_banks(props, overlay, walk, slime, placed, 9350)
+
+	# The water is solid, so the rivers have cut the zone into islands, and the
+	# dressing may have sealed a pocket on top of that. Re-derive what is really
+	# walkable from the tiles that got painted, span whatever cuts are left, and
+	# only then reduce to a single region. The order is the point: reducing
+	# first would discard the far bank instead of bridging to it, taking the
+	# boss arena or a stair landing with it.
+	_prune_walk([ground, deck, walls, props, overlay], walk)
+	spans += _bridge_all(deck, ground, water, walk, placed)
+	var reachable_before: int = walk.size()
+	walk = MapKit.largest_region(walk, entrance)
+	# A few isolated cells behind a crate are tolerable; a quarter of the zone
+	# stranded on the wrong side of a channel is the severance this guards.
+	assert(float(walk.size()) / float(reachable_before) > 0.9,
+			"sludge severed the zone: %d of %d cells reach the entrance over %d decks"
+			% [walk.size(), reachable_before, spans])
 
 	var taken := LevelKit.keepout([entrance, exit_cell], 9)
 	for cell: Vector2i in placed.keys():
@@ -1363,8 +1811,8 @@ func _build_cistern() -> void:
 	assert(walk.has(entrance) and walk.has(exit_cell), "cistern spawn blocked")
 	assert(walk.size() > 6000, "cistern too small: %d" % walk.size())
 	assert(pillars > 0 and foundations > 0, "cistern has no ruins")
-	_report.append("  cistern       walk=%d walls=%d runs=%d slime=%d flow=%d mobs=%d" % [
-		walk.size(), walls.get_used_cells().size(), runs, slime.size(), flowing, hostiles.size()])
+	_report.append("  cistern       walk=%d walls=%d runs=%d cap=%d slime=%d flow=%d mobs=%d" % [
+		walk.size(), walls.get_used_cells().size(), runs, capped, slime.size(), flowing, hostiles.size()])
 	_report.append("                pillars=%d foundations=%d labs=%d %s" % [
 		pillars, foundations, labs.size(), _counts(shore)])
 
@@ -1378,8 +1826,9 @@ func _build_cistern() -> void:
 		"music": "res://assets/audio/music/alone.ogg",
 		"playlist": ["res://assets/audio/music/fungus.ogg"],
 		"layers": {
-			"Ground": LevelKit.b64(ground), "Walls": LevelKit.b64(walls),
-			"Props": LevelKit.b64(props), "Overlay": LevelKit.b64(overlay),
+			"Ground": LevelKit.b64(ground), "Deck": LevelKit.b64(deck),
+			"Walls": LevelKit.b64(walls), "Props": LevelKit.b64(props),
+			"Overlay": LevelKit.b64(overlay),
 		},
 		"cam_right": W * TILE + TILE, "cam_bottom": H * TILE + TILE,
 		"lights": _lights("WaterGlow", glow, "Color(0.38, 0.86, 0.92, 1)", 0.22, 1.7),

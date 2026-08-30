@@ -35,7 +35,20 @@ const DECO_FRAMES := "res://source/common/gameplay/props/sprite_frames/%s.tres"
 
 ## Layer order in the emitted scene. `Overlay` sits above `Props` for detail that
 ## must draw over a prop it shares a cell with; `Walls` keeps the collision.
-const LAYER_ORDER: Array[String] = ["Ground", "Walls", "Props", "Overlay"]
+##
+## `Deck` is for walkable surfaces laid over the ground — bridge planks, and
+## anything else an entity must be able to stand ON. It is emitted at the same
+## z_index as `Ground` (-1) and immediately after it, which is what puts it above
+## the floor it covers and below every entity in the scene. That z group is the
+## whole point: `Tiles` is y-sorted, so a deck left on `Props` at z 0 sorts tile
+## against player by row, and the player vanishes behind the planks they are
+## standing on. z_index is resolved before y-sorting, so a deck at -1 can never
+## win that comparison. It stays y-sorted internally so its tiles interleave with
+## `Ground`'s the same way, and tree order then puts the deck on top.
+const LAYER_ORDER: Array[String] = ["Ground", "Deck", "Walls", "Props", "Overlay"]
+
+## Layers emitted below every entity. See [constant LAYER_ORDER].
+const UNDER_LAYERS: Array[String] = ["Ground", "Deck"]
 
 
 # --- Small geometry helpers --------------------------------------------------
@@ -86,6 +99,11 @@ static func pick_spread(mask: Dictionary, wanted: Array, min_gap: int = 3) -> Ar
 
 
 static func b64(layer: TileMapLayer) -> String:
+	# A layer the build had nothing to put on: raw_to_base64 logs an error on
+	# an empty array instead of returning the empty string. write_map skips
+	# the layer entirely when this comes back empty.
+	if layer.tile_map_data.is_empty():
+		return ""
 	return Marshalls.raw_to_base64(layer.tile_map_data)
 
 
@@ -308,8 +326,14 @@ static func write_map(cfg: Dictionary) -> void:
 	for layer_name: String in LAYER_ORDER:
 		if not layers.has(layer_name):
 			continue
+		# An optional layer a build had nothing to put on — a map with no
+		# bridges has no deck. Emitting it would add a TileMapLayer whose
+		# tile_map_data is an empty PackedByteArray, which Godot warns on
+		# every load.
+		if String(layers[layer_name]).is_empty():
+			continue
 		body += "\n[node name=\"%s\" type=\"TileMapLayer\" parent=\"Tiles\"]\n" % layer_name
-		if layer_name == "Ground":
+		if layer_name in UNDER_LAYERS:
 			body += "z_index = -1\n"
 		body += "y_sort_enabled = true\n"
 		body += "tile_map_data = PackedByteArray(\"%s\")\n" % layers[layer_name]
