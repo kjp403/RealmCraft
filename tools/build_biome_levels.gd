@@ -53,8 +53,48 @@ func _dense(rate: float) -> float:
 	return rate / float(S * S)
 
 
+## Sewer sub-levels only. `_dense` / `_N` thin props twice over: the rate is
+## divided by S*S *and* the spacing is multiplied by S, so holding the absolute
+## count fixed while area grew 25x left the three sewer maps at ~0.03% prop
+## coverage against 0.95% on the unscaled surface `sewers.tscn`. Sprites did not
+## grow with the layout, so a screen still shows the same tile count: props want
+## the original *tile* spacing, not a stretched one. `SEWER_PROPS` trims the
+## restored rate back to the surface map's look. Desert and Fire Forge still run
+## on the old pair and carry the same latent thinning.
+const SEWER_PROPS := 1.0
+
+
+func _sdense(rate: float) -> float:
+	return rate * SEWER_PROPS
+
+
+func _sps(n: int) -> int:
+	return n
+
+
 func _gap(n: int) -> int:
 	return maxi(n, int((n * S) / 2.0))
+
+
+## Stamp whole waterfalls from the `water.png` strip where a pool meets the wall
+## behind it, so the sheet reads as water falling into the reservoir. Each fall
+## is one 16x32 sprite: atlas (frame, 0) over (frame, 1). Overlay is the last
+## sibling under Tiles, so it draws above Walls and the fall shows on the face.
+func _stamp_spillways(
+	overlay: TileMapLayer, shallows: Dictionary, walk: Dictionary, seed_value: int
+) -> int:
+	var rim: Array[Vector2i] = []
+	for cell: Vector2i in shallows.keys():
+		var above := cell + Vector2i(0, -1)
+		if not walk.has(above) and not shallows.has(above):
+			rim.append(above)
+	var placed: int = 0
+	for cell: Vector2i in MapKit.scatter(rim, 0.45, 3, seed_value):
+		var frame: int = MapKit.hash2(cell.x, cell.y, seed_value + 1) % 8
+		overlay.set_cell(cell + Vector2i(0, -1), 4, Vector2i(frame, 0))
+		overlay.set_cell(cell, 4, Vector2i(frame, 1))
+		placed += 1
+	return placed
 
 
 func _initialize() -> void:
@@ -62,14 +102,19 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):
 			only = arg.substr("--only=".length())
+	# The Gutterworks and the Drowned Cistern moved to the 32px open-biome
+	# builder (`tools/build_sewer_biome_32.gd`) and are deliberately NOT built
+	# here any more — running both would silently overwrite them back to the
+	# 16px tileset. Their functions are kept below for reference. The Ossuary is
+	# still a 16px sub-level and still belongs to this tool.
 	if only.is_empty():
 		_build_desert_terraces()
 		_build_desert_tombs()
-		_build_sewers_gutterworks()
-		_build_sewers_cistern()
 		_build_sewers_ossuary()
 		_build_forge_gallery()
 		_build_forge_deeps()
+	elif only == "sewers":
+		_build_sewers_ossuary()
 	elif only == "ossuary":
 		_build_sewers_ossuary()
 	else:
@@ -781,29 +826,29 @@ func _build_sewers_gutterworks() -> void:
 	]:
 		LevelKit.stamp_landmark(props, 2, [3, 3, 1, 1], LevelKit.pick_open(free, spot), free, solid)
 	# Wooden beams and brick piers from the pixel-dungeon shell.
-	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.14), _N(4), 461, free, solid)
-	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _dense(0.05), _N(6), 462, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _sdense(0.14), _sps(4), 461, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _sdense(0.05), _sps(6), 462, free, solid)
 	# Stores left behind by the works crews: chests, crates and cauldrons.
-	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [2, 8, 1, 1], [3, 8, 1, 1], [4, 7, 1, 1]], _dense(0.05), _N(6), 463, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [2, 8, 1, 1], [3, 8, 1, 1], [4, 7, 1, 1]], _sdense(0.05), _sps(6), 463, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
 	# Drain grates and spilled stock on the cobbles.
-	LevelKit.scatter_flat(props, 2, inner, [Vector2i(2, 4)], _dense(0.035), _N(5), 464, solid)
+	LevelKit.scatter_flat(props, 2, inner, [Vector2i(2, 4)], _sdense(0.035), _sps(5), 464, solid)
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
 		Vector2i(6, 8), Vector2i(7, 8), Vector2i(9, 8),
-	], _dense(0.055), _N(3), 465, {})
+	], _sdense(0.055), _sps(3), 465, {})
 	# Banners hung on the wall faces flanking the runs.
-	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _dense(0.05), _N(5), 466, solid)
+	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _sdense(0.05), _sps(5), 466, solid)
 
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(22, 20), Vector2i(52, 20), Vector2i(82, 20),
-		Vector2i(22, 40), Vector2i(52, 40), Vector2i(82, 40),
-		Vector2i(22, 58), Vector2i(52, 58), Vector2i(82, 58), Vector2i(52, 67),
+		_L(22, 20), _L(52, 20), _L(82, 20),
+		_L(22, 40), _L(52, 40), _L(82, 40),
+		_L(22, 58), _L(52, 58), _L(82, 58), _L(52, 67),
 	]:
 		ti += 1
 		decos.append({
@@ -864,7 +909,9 @@ func _build_sewers_gutterworks() -> void:
 		"bg": "Color(0.02, 0.02, 0.03, 1)",
 		"modulate": "Color(0.68, 0.7, 0.8, 1)",
 		"music": "res://assets/audio/music/alone.ogg",
-		"playlist": [],
+		# 27543fe6 declared this track on the scene but never wired the playlist
+		# property, so the map looped one theme with a dangling ext_resource.
+		"playlist": ["res://assets/audio/music/army_of_darkness.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -974,11 +1021,14 @@ func _build_sewers_cistern() -> void:
 		for cell: Vector2i in pool.keys():
 			if walk.has(cell) and ground.get_cell_atlas_coords(cell).x < 21:
 				shallows[cell] = true
-	# Real water is a sparse-alpha sheet — paint it on Overlay over solid stone
-	# so transparent pixels never punch holes through the map (Mining Cave rule).
-	var water := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
-	for cell: Vector2i in shallows.keys():
-		overlay.set_cell(cell, 4, MapKit._pick(water, cell, 566))
+	# `water.png` is not an area-water bank. It is eight animation frames of one
+	# 16x32 waterfall — row 0 the top half, row 1 the bottom — so filling every
+	# `shallows` cell from row 0 scattered thousands of disembodied waterfall
+	# *tops* across the floor. That, not prop count, is what made the reservoir
+	# read as patterned wallpaper. The pools carry no sprite now; they are read
+	# through the WaterGlow lights seeded on these same cells below, under the
+	# map's cyan CanvasModulate. The strip goes where a whole one belongs.
+	_stamp_spillways(overlay, shallows, walk, 566)
 
 	var no_build := LevelKit.keepout([entrance, exit_cell], _gap(4))
 	for cell: Vector2i in LevelKit.keepout([dais], _gap(7)).keys():
@@ -999,25 +1049,25 @@ func _build_sewers_cistern() -> void:
 		LevelKit.stamp_landmark(props, 3, [16, 7, 3, 3], LevelKit.pick_open(free, spot), free, solid)
 	for spot in [_L(38, 40), _L(74, 40), _L(56, 28)]:
 		LevelKit.stamp_landmark(props, 3, [17, 10, 2, 4], LevelKit.pick_open(free, spot), free, solid)
-	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.12), _N(5), 571, free, solid)
-	LevelKit.scatter_props(props, 3, inner, [[2, 12, 1, 1]], _dense(0.04), _N(6), 572, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _sdense(0.12), _sps(5), 571, free, solid)
+	LevelKit.scatter_props(props, 3, inner, [[2, 12, 1, 1]], _sdense(0.04), _sps(6), 572, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
 	LevelKit.scatter_flat(overlay, 3, inner, [
 		Vector2i(19, 8), Vector2i(20, 8), Vector2i(21, 8),
-	], _dense(0.02), _N(8), 573, solid)
+	], _sdense(0.02), _sps(8), 573, solid)
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
-	], _dense(0.06), _N(3), 574, solid)
+	], _sdense(0.06), _sps(3), 574, solid)
 
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(56, 75), Vector2i(56, 64), Vector2i(30, 30), Vector2i(82, 30),
-		Vector2i(30, 52), Vector2i(82, 52), Vector2i(56, 20), Vector2i(40, 64),
-		Vector2i(72, 64), Vector2i(44, 44), Vector2i(68, 44),
+		_L(56, 75), _L(56, 64), _L(30, 30), _L(82, 30),
+		_L(30, 52), _L(82, 52), _L(56, 20), _L(40, 64),
+		_L(72, 64), _L(44, 44), _L(68, 44),
 	]:
 		ti += 1
 		decos.append({
@@ -1093,7 +1143,9 @@ func _build_sewers_cistern() -> void:
 		"bg": "Color(0.012, 0.022, 0.024, 1)",
 		"modulate": "Color(0.6, 0.74, 0.72, 1)",
 		"music": "res://assets/audio/music/alone.ogg",
-		"playlist": [],
+		# See gutterworks: the fungus theme was declared on the scene by 27543fe6
+		# but never reached `music_playlist`.
+		"playlist": ["res://assets/audio/music/fungus.ogg"],
 		"layers": {
 			"Ground": LevelKit.b64(ground),
 			"Walls": LevelKit.b64(walls),
@@ -1193,24 +1245,24 @@ func _build_sewers_ossuary() -> void:
 	var edges := MapKit.edge_cells(walk, blocked)
 	var inner := MapKit.interior_cells(walk, blocked, _gap(3))
 
-	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _dense(0.12), _N(4), 831, free, solid)
-	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _dense(0.04), _N(6), 832, free, solid)
-	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [4, 7, 1, 1]], _dense(0.04), _N(6), 833, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[6, 4, 1, 2], [7, 4, 1, 2], [8, 4, 1, 2]], _sdense(0.12), _sps(4), 831, free, solid)
+	LevelKit.scatter_props(props, 0, inner, [[6, 3, 1, 1], [7, 3, 1, 1], [8, 3, 1, 1]], _sdense(0.04), _sps(6), 832, free, solid)
+	LevelKit.scatter_props(props, 0, edges, [[0, 8, 1, 1], [1, 8, 1, 1], [4, 7, 1, 1]], _sdense(0.04), _sps(6), 833, free, solid)
 	for cell: Vector2i in solid.keys():
 		walk.erase(cell)
 	walk = MapKit.largest_region(walk, entrance)
 
 	LevelKit.scatter_flat(overlay, 0, inner, [
 		Vector2i(9, 4), Vector2i(9, 5), Vector2i(7, 7), Vector2i(8, 6),
-	], _dense(0.05), _N(3), 834, {})
-	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _dense(0.04), _N(5), 835, solid)
+	], _sdense(0.05), _sps(3), 834, {})
+	LevelKit.scatter_flat(overlay, 2, edges, [Vector2i(3, 0), Vector2i(4, 0)], _sdense(0.04), _sps(5), 835, solid)
 
 	var decos: Array = []
 	var ti := 0
 	for spot in [
-		Vector2i(40, 54), Vector2i(40, 44), Vector2i(40, 36),
-		Vector2i(22, 36), Vector2i(58, 36), Vector2i(40, 18),
-		Vector2i(24, 18), Vector2i(56, 18), Vector2i(32, 26), Vector2i(48, 26),
+		_L(40, 54), _L(40, 44), _L(40, 36),
+		_L(22, 36), _L(58, 36), _L(40, 18),
+		_L(24, 18), _L(56, 18), _L(32, 26), _L(48, 26),
 	]:
 		ti += 1
 		decos.append({

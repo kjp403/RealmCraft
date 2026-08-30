@@ -41,7 +41,15 @@ const LAYER_ORDER: Array[String] = ["Ground", "Walls", "Props", "Overlay"]
 # --- Small geometry helpers --------------------------------------------------
 
 static func tile_pos(cell: Vector2i) -> Vector2:
-	return Vector2(cell.x * 16 + 8, cell.y * 16 + 8)
+	return tile_pos_sized(cell, 16)
+
+
+## Centre of `cell` on a grid of `tile` pixels. The 16px form above stays the
+## default because every shipped map is built on it; the 32px sewer rebuild
+## passes its own size rather than silently re-scaling the older maps.
+static func tile_pos_sized(cell: Vector2i, tile: int) -> Vector2:
+	var half: float = float(tile) * 0.5
+	return Vector2(cell.x * tile + half, cell.y * tile + half)
 
 
 ## Nearest cell in `mask` to `wanted`. Used to snap authored landmark positions

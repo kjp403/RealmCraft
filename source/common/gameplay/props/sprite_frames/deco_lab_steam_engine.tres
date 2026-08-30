@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/rpgw_sewers/EPIC RPG World - Sewers V1.5/Props/Secret Lab-steam engine ish.png" id="1_src"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_steam0"]
+atlas = ExtResource("1_src")
+region = Rect2(0, 0, 149, 151)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_steam1"]
+atlas = ExtResource("1_src")
+region = Rect2(149, 0, 149, 151)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_steam2"]
+atlas = ExtResource("1_src")
+region = Rect2(298, 0, 149, 151)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_steam3"]
+atlas = ExtResource("1_src")
+region = Rect2(447, 0, 149, 151)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_steam0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_steam1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_steam2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_steam3")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
