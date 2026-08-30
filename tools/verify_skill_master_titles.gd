@@ -182,7 +182,10 @@ func _check_particles() -> void:
 		layer.free()
 	_check(emitters > 0, "every fx builds emitters (got %d)" % emitters)
 	_check(gpu.is_empty(), "CPUParticles2D only, web-safe %s" % str(gpu))
-	_check(over_budget.is_empty(), "amount 10-25 and life 0.5-1.2s %s" % str(over_budget))
+	_check(over_budget.is_empty(), "amount %d-%d and life %.1f-%.1fs %s" % [
+		TitleParticles.MIN_AMOUNT, TitleParticles.MAX_AMOUNT,
+		TitleParticles.MIN_LIFETIME, TitleParticles.MAX_LIFETIME, str(over_budget),
+	])
 	_check(wrong_depth.is_empty(), "particle layers sit at absolute z 5 %s" % str(wrong_depth))
 
 

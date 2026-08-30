@@ -63,11 +63,17 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 	# A mastery title carries an `fx` index; everything else does not. That one
 	# key is the whole branch - the two title families share this entire pipeline.
 	var mastery_fx: int = int(entry.get("fx", -1))
+	# Optional per-title outline. Only Slayer Master sets one; everything else
+	# falls back to the shared near-black. Whatever it resolves to has to reach
+	# BOTH the theme override and the shader uniform, or the shader stops
+	# recognising the outline and repaints it with the gradient.
+	var outline_hex: String = str(entry.get("outline", ""))
+	var outline_col: Color = Color(outline_hex) if not outline_hex.is_empty() else OUTLINE_COLOR
 	if host is Label:
 		var label: Label = host
 		label.self_modulate = tint if mastery_fx < 0 else Color.WHITE
 		label.add_theme_color_override(&"font_color", Color.WHITE)
-		label.add_theme_color_override(&"font_outline_color", OUTLINE_COLOR)
+		label.add_theme_color_override(&"font_outline_color", outline_col)
 		label.add_theme_constant_override(
 			&"outline_size", OUTLINE_SIZE_VIP if vip else OUTLINE_SIZE
 		)
@@ -78,21 +84,21 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 			mat.shader = MASTERY_SHADER
 			mat.set_shader_parameter(&"fx", mastery_fx)
 			mat.set_shader_parameter(&"base", tint)
-			mat.set_shader_parameter(&"outline", OUTLINE_COLOR)
+			mat.set_shader_parameter(&"outline", outline_col)
 		else:
 			mat.shader = SHADER
 			mat.set_shader_parameter(&"glow_color", tint)
 			mat.set_shader_parameter(&"vip", 1.0 if vip else 0.0)
 			mat.set_shader_parameter(&"gold", 1.0 if style == 1 or hex == SupporterTitles.COLOR_CUSTOM else 0.0)
 			mat.set_shader_parameter(&"style", float(style))
-			mat.set_shader_parameter(&"outline", OUTLINE_COLOR)
+			mat.set_shader_parameter(&"outline", outline_col)
 		label.material = mat
 	if existing == null:
 		existing = PULSE_SCRIPT.new()
 		existing.name = PULSE_NODE
 		host.add_child(existing)
 	if existing.has_method(&"configure"):
-		existing.configure(tint, vip, style, mastery_fx)
+		existing.configure(tint, vip, style, mastery_fx, outline_col)
 	_apply_particles(host, mastery_fx)
 
 

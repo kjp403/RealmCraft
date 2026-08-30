@@ -158,20 +158,36 @@ void fragment() {
 			float edge = smoothstep(0.30, 0.05, tex.a);
 			col = mix(col, vec3(0.45, 1.0, 0.35), edge * 0.85);
 		} else if (fx == 9) {
-			// SLAYER MASTER - bone white, with blood soaking UP from the bottom
-			// edge. The noise is on the boundary height, so the waterline is
-			// ragged and it looks absorbed rather than printed.
-			float line = 0.34 + vnoise(vec2(uv.x * 16.0, t * 0.35)) * 0.16;
-			float soak = smoothstep(line + 0.10, line - 0.06, 1.0 - uv.y);
-			col = mix(vec3(0.92, 0.90, 0.82), vec3(0.46, 0.03, 0.06), soak);
+			// SLAYER MASTER - a straight vertical gradient, bone at the top of the
+			// glyph band into dark blood at the bottom. uv.y is already remapped
+			// onto that band above, so the full range lands on the letters.
+			//
+			// The waterline noise only ragges the BOUNDARY, not the endpoints: the
+			// two colours are exact so the title matches its catalog swatch and its
+			// crimson outline, while the transition between them still looks
+			// absorbed rather than printed.
+			float edge = 0.55 + (vnoise(vec2(uv.x * 16.0, t * 0.35)) - 0.5) * 0.18;
+			col = mix(
+				vec3(0.878, 0.839, 0.765), // #E0D6C3
+				vec3(0.545, 0.0, 0.0),     // #8B0000
+				smoothstep(edge - 0.42, edge + 0.42, uv.y)
+			);
 		} else {
 			// HIGH PRIEST - divine white and gold, brightest at the centre line
 			// and blooming. Kept just under blowout: the dark outline is what
 			// holds this one together on a bright map, and if the glyph interior
 			// goes pure white the letterform is gone.
 			float halo = 1.0 - abs(uv.y - 0.5) * 2.0;
-			col = mix(vec3(1.0, 0.78, 0.32), vec3(1.0, 0.99, 0.92), pow(clamp(halo, 0.0, 1.0), 1.6));
-			col += vec3(1.0, 0.94, 0.70) * sweep(uv.x, 0.18, 0.16, 0.0) * 0.35;
+			// Radiant gold (#FFD700) at the edges of the glyph band, burning to a
+			// white core along its centre line. The core is pushed harder than the
+			// old cream mix (pow 2.4 rather than 1.6) so the white stays a narrow
+			// filament instead of flooding the letterform.
+			col = mix(
+				vec3(1.0, 0.843, 0.0),  // #FFD700
+				vec3(1.0, 1.0, 1.0),    // white core
+				pow(clamp(halo, 0.0, 1.0), 2.4)
+			);
+			col += vec3(1.0, 0.90, 0.50) * sweep(uv.x, 0.18, 0.16, 0.0) * 0.30;
 		}
 
 		// Shared gentle breath so no title is completely static, even the ones

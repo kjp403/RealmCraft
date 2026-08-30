@@ -24,13 +24,20 @@ var vip: bool = false
 var style: int = 0
 ## Mastery style index, or -1 for the legacy families.
 var mastery_fx: int = -1
+## Resolved outline colour for this title — the shared near-black unless the
+## catalog entry overrode it. Re-asserted every frame like the size is.
+var outline_color: Color = TitleVfx.OUTLINE_COLOR
 
 
-func configure(p_tint: Color, p_vip: bool, p_style: int, p_mastery_fx: int = -1) -> void:
+func configure(
+	p_tint: Color, p_vip: bool, p_style: int, p_mastery_fx: int = -1,
+	p_outline: Color = TitleVfx.OUTLINE_COLOR
+) -> void:
 	tint = p_tint
 	vip = p_vip
 	style = p_style
 	mastery_fx = p_mastery_fx
+	outline_color = p_outline
 	set_process(true)
 	_apply(0.0)
 
@@ -105,9 +112,9 @@ func _enforce_outline(host: CanvasItem) -> void:
 	var size: int = TitleVfx.OUTLINE_SIZE_VIP if vip else TitleVfx.OUTLINE_SIZE
 	if host is Label:
 		var label: Label = host
-		label.add_theme_color_override(&"font_outline_color", TitleVfx.OUTLINE_COLOR)
+		label.add_theme_color_override(&"font_outline_color", outline_color)
 		label.add_theme_constant_override(&"outline_size", size)
 	elif host is Button:
 		var btn: Button = host
-		btn.add_theme_color_override(&"font_outline_color", TitleVfx.OUTLINE_COLOR)
+		btn.add_theme_color_override(&"font_outline_color", outline_color)
 		btn.add_theme_constant_override(&"outline_size", maxi(1, size - 3))

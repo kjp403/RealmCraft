@@ -25,11 +25,14 @@ extends Node2D
 ## Emitter budget. See the class header.
 const MIN_AMOUNT: int = 10
 const MAX_AMOUNT: int = 25
-const MIN_LIFETIME: float = 0.5
+const MIN_LIFETIME: float = 0.3
 const MAX_LIFETIME: float = 1.2
 
 ## Above the player sprite and world props.
 const NAMEPLATE_Z: int = 5
+
+## HIGH PRIEST ray length, as a fraction of what it used to be.
+const RAY_SCALE: float = 0.4
 
 ## Nameplate label sizes are known only after layout, so the emitters are built
 ## against this and rescaled by [method fit_to]. Half-width, half-height.
@@ -397,15 +400,32 @@ func _slayer() -> void:
 	souls.color_ramp = _fade(Color(0.95, 0.18, 0.14), 0.85)
 	souls.material = _additive()
 
+	# Blood running off the base of the letters. Emitted from the bottom edge
+	# (span mode 2) and thrown DOWN with real weight, so it falls away beneath the
+	# text instead of hanging level with it - the drip has to read as leaving the
+	# glyphs, which is what separates it from the smoke pooling in the same place.
+	var drips: CPUParticles2D = _emitter(10, 0.9, VfxTextures.droplet(8), 2)
+	drips.direction = Vector2(0, 1)
+	drips.spread = 12.0
+	drips.gravity = Vector2(0, 260.0)
+	drips.initial_velocity_min = 6.0
+	drips.initial_velocity_max = 18.0
+	drips.scale_amount_min = 0.3
+	drips.scale_amount_max = 0.7
+	drips.color_ramp = _fade(Color(0.545, 0.0, 0.0), 0.95)
+
 
 ## HIGH PRIEST - light specks ascending, over a fan of rays drawn behind.
 func _prayer() -> void:
-	var specks: CPUParticles2D = _emitter(14, 1.2, VfxTextures.sparkle(9), 0)
+	# 0.3 s, and slow: lifetime is what actually bounds a rising particle. At the
+	# old 1.2 s these climbed clear of the nameplate and read as a separate effect
+	# floating above the player rather than as part of the title.
+	var specks: CPUParticles2D = _emitter(14, 0.3, VfxTextures.sparkle(9), 0)
 	specks.direction = Vector2(0, -1)
 	specks.spread = 18.0
-	specks.gravity = Vector2(0, -18.0)
-	specks.initial_velocity_min = 5.0
-	specks.initial_velocity_max = 16.0
+	specks.gravity = Vector2(0, -12.0)
+	specks.initial_velocity_min = 3.0
+	specks.initial_velocity_max = 9.0
 	specks.scale_amount_min = 0.3
 	specks.scale_amount_max = 0.75
 	specks.color_ramp = _fade(Color(1.0, 0.95, 0.72), 0.95)
@@ -438,7 +458,12 @@ func _paint_rays(layer: Node2D) -> void:
 	for i: int in 7:
 		var k: float = float(i) / 6.0
 		var angle: float = lerpf(-2.5, -0.65, k) + sin(t * 0.5) * 0.05
-		var reach: float = _extent.x * (0.75 + 0.35 * sin(t * 0.9 + k * 3.0))
+		# Scaled to 40% of the old length and then capped at the half-height, so
+		# the fan is strictly bounded by the title's own line rather than spraying
+		# out to the label's full width.
+		var reach: float = minf(
+			_extent.x * (0.75 + 0.35 * sin(t * 0.9 + k * 3.0)) * RAY_SCALE, _extent.y
+		)
 		var half: float = 0.09
 		var tip_a: Vector2 = Vector2.from_angle(angle - half) * reach
 		var tip_b: Vector2 = Vector2.from_angle(angle + half) * reach

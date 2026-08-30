@@ -88,13 +88,18 @@ const BY_JOB: Dictionary = {
 	},
 	&"slayer": {
 		"name": "Slayer Master",
-		"color": "#e9e2d2",
+		"color": "#e0d6c3",
+		# Per-title outline override. Everything else uses TitleVfx.OUTLINE_COLOR;
+		# this one backs its bone-to-blood gradient with dark crimson instead of
+		# near-black so the red half of the text keeps a coloured edge rather than
+		# a neutral one.
+		"outline": "#3a0000",
 		"fx": 9,
 		"blurb": "Bone-white, dripping, trailing smoke.",
 	},
 	&"prayer": {
 		"name": "High Priest",
-		"color": "#ffe9a8",
+		"color": "#ffd700",
 		"fx": 10,
 		"blurb": "Gold light with something behind it.",
 	},
