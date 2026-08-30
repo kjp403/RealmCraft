@@ -13,9 +13,21 @@ extends MenuShell
 ## STAFF ONLY, and the client does not enforce it: cosmetics.state returns an empty
 ## roster to non-staff and cosmetics.equip refuses them, so a forced-open menu shows
 ## nothing and changes nothing.
+##
+## The preview is a real [CosmeticVfx], the same node the world mounts, so a
+## cosmetic upgraded to a scripted [CosmeticPreset] previews as what it actually
+## is. A bare AnimatedSprite2D here would keep showing the old pre-rendered strip
+## for those eleven, and the wardrobe would be advertising art the game no longer
+## renders.
 
 const PREVIEW_BOX: float = 200.0
 const PREVIEW_SCALE: float = 1.6
+
+## A trail preset renders from real movement and shows NOTHING standing still, so
+## the preview walks in a small circle. Radial effects are left alone - orbiting an
+## aura would just make the wardrobe look like it is drifting.
+const WALK_RADIUS: float = 26.0
+const WALK_PERIOD_S: float = 2.2
 
 ## Tab labels, keyed by slot. Anything not listed falls back to a capitalized slug.
 const SLOT_LABELS: Dictionary = {
@@ -38,7 +50,12 @@ var _equipped_body: int = 0
 var _equipped_weapon: int = 0
 var _allowed: bool = false
 
-var _preview: AnimatedSprite2D
+var _preview: CosmeticVfx
+## Carries [member _preview] around the walk circle. Separate from the preview node
+## so the walk can be switched off per slot without touching the effect.
+var _preview_pivot: Node2D
+var _walking: bool = false
+var _walk_elapsed: float = 0.0
 var _tab_bar: HBoxContainer
 var _tab_buttons: Dictionary = {}
 var _name_label: Label
@@ -90,11 +107,17 @@ func _build_layout() -> void:
 	preview_box.custom_minimum_size = Vector2(PREVIEW_BOX, PREVIEW_BOX)
 	preview_center.add_child(preview_box)
 
-	_preview = AnimatedSprite2D.new()
-	_preview.position = Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.5)
-	_preview.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
-	_preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	preview_box.add_child(_preview)
+	_preview_pivot = Node2D.new()
+	_preview_pivot.position = _preview_home()
+	_preview_pivot.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
+	preview_box.add_child(_preview_pivot)
+
+	_preview = CosmeticVfx.new()
+	# The world mounts this under a Character, which puts it behind the body. There
+	# is no body here, so the preview must not sink behind the panel it sits on.
+	_preview.z_index = 0
+	_preview_pivot.add_child(_preview)
+	set_process(true)
 
 	var nav: HBoxContainer = HBoxContainer.new()
 	nav.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -239,15 +262,36 @@ func _cycle(delta: int) -> void:
 	_update_preview()
 
 
+## Where the preview sits when it is not walking. Slightly below centre: a preset
+## draws from the FEET, so centring it puts most of the effect in the lower half
+## of the box and the head-height layers off the top.
+func _preview_home() -> Vector2:
+	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.55)
+
+
+## Walk the preview so trail presets have movement to sample. A circle rather than
+## the back-and-forth the render tool uses: a wardrobe preview has no room to run,
+## and a circle keeps the whole trail inside the box at every moment.
+func _process(delta: float) -> void:
+	if not _walking or _preview_pivot == null:
+		return
+	_walk_elapsed += delta
+	var angle: float = _walk_elapsed * TAU / WALK_PERIOD_S
+	# Squashed vertically, so the walk reads as movement across a floor rather
+	# than as the effect being swung around on a string.
+	var orbit: Vector2 = Vector2(cos(angle), sin(angle) * 0.5) * WALK_RADIUS
+	_preview_pivot.position = _preview_home() + orbit
+
+
 func _update_preview() -> void:
 	var id: int = _current_id()
 	if id == 0:
 		return
-	var frames: SpriteFrames = Cosmetics.frames(id)
-	if _preview != null and frames != null:
-		_preview.sprite_frames = frames
-		if frames.has_animation(&"loop"):
-			_preview.play(&"loop")
+	if _preview != null:
+		_preview.apply(id)
+	_walking = Cosmetics.slot_of(id) == &"trail"
+	if not _walking and _preview_pivot != null:
+		_preview_pivot.position = _preview_home()
 	var ids: Array = _current_ids()
 	_name_label.text = "%s  (%d/%d)" % [
 		Cosmetics.display_name(id),

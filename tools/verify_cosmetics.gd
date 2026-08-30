@@ -2,8 +2,9 @@ extends SceneTree
 ## Verify the cosmetics vertical slice loads end to end.
 ##   godot --headless --path . -s tools/verify_cosmetics.gd
 ##
-## Checks the registry, every SpriteFrames, the Cosmetics facade, the admin-only
-## instance + its map scene, the Curator NPC, and that the gate constants line up.
+## Checks the registry, every SpriteFrames, the Cosmetics facade, the scripted
+## preset library, the admin-only instance + its map scene, the Curator NPC, and
+## that the gate constants line up.
 
 const VAULT_RES := "res://source/common/gameplay/maps/instance/instance_collection/vfx_vault.tres"
 const VAULT_MAP := "res://source/common/gameplay/maps/maps/vfx_vault/vfx_vault.tscn"
@@ -17,6 +18,17 @@ func _check(ok: bool, label: String) -> void:
 	print(("  PASS  " if ok else "  FAIL  "), label)
 	if not ok:
 		_fail += 1
+
+
+## True when [param script] inherits cosmetic_preset.gd somewhere up its chain.
+func _extends_preset(script: GDScript) -> bool:
+	const BASE := "res://source/common/gameplay/cosmetics/presets/cosmetic_preset.gd"
+	var walk: Script = script
+	while walk != null:
+		if walk.resource_path == BASE:
+			return true
+		walk = walk.get_base_script()
+	return false
 
 
 func _initialize() -> void:
@@ -72,6 +84,46 @@ func _initialize() -> void:
 	if plain != null:
 		_check(Cosmetics.weapon_fx_for(plain.item_icon) == null,
 			"a non-Ascended weapon resolves no effect")
+
+	print("-- scripted presets --")
+	# A preset is keyed by SLUG, and a slug that does not exist in the registry
+	# fails SILENTLY - CosmeticVfx just falls back to the old strip and nobody
+	# notices the upgrade never shipped. So every key is checked against the
+	# registry, not merely against the file system.
+	var unknown_slugs: PackedStringArray = []
+	var bad_scripts: PackedStringArray = []
+	for slug: StringName in CosmeticPresetLibrary.PRESETS:
+		if ContentRegistryHub.id_from_slug(&"cosmetics", slug) <= 0:
+			unknown_slugs.append(String(slug))
+		# Walk the base-script chain rather than instantiating: script.new() on a
+		# freshly loaded GDScript in a -s tool spams "implicit_initializer is null"
+		# for every preset, which would bury a real failure in CI output.
+		if not _extends_preset(CosmeticPresetLibrary.PRESETS[slug]):
+			bad_scripts.append(String(slug))
+	_check(unknown_slugs.is_empty(), "every preset slug is a real cosmetic %s" % str(unknown_slugs))
+	_check(bad_scripts.is_empty(), "every preset extends CosmeticPreset %s" % str(bad_scripts))
+	_check(CosmeticPresetLibrary.PRESETS.size() == 11, "11 presets registered (got %d)"
+		% CosmeticPresetLibrary.PRESETS.size())
+
+	# The two render paths must stay mutually exclusive and correctly routed.
+	var toxic_aura: int = ContentRegistryHub.id_from_slug(&"cosmetics", &"aura_toxic")
+	var rainbow_aura: int = ContentRegistryHub.id_from_slug(&"cosmetics", &"aura_rainbow")
+	_check(CosmeticPresetLibrary.script_for(toxic_aura) != null, "aura_toxic routes to a preset")
+	_check(CosmeticPresetLibrary.script_for(rainbow_aura) == null, "aura_rainbow keeps its strip")
+	_check(CosmeticPresetLibrary.script_for(0) == null, "id 0 routes nowhere")
+
+	# Presets are the only cosmetics carrying shaders; a missing one is a hard
+	# crash at equip time, not a fallback.
+	var shader_dir: String = "res://source/common/gameplay/cosmetics/presets/shaders/"
+	var shaders: PackedStringArray = PackedStringArray([
+		"toxic_sludge", "blood_pool", "accretion_disk",
+		"heat_haze", "heat_shimmer", "blood_vignette", "ground_decal",
+	])
+	var missing_shaders: PackedStringArray = []
+	for name: String in shaders:
+		if ResourceLoader.load(shader_dir + name + ".gdshader") == null:
+			missing_shaders.append(name)
+	_check(missing_shaders.is_empty(), "every preset shader compiles %s" % str(missing_shaders))
 
 	print("-- vault --")
 	var vault: Resource = ResourceLoader.load(VAULT_RES)

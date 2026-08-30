@@ -20,6 +20,20 @@ v1 looks are preserved exactly while hue-cycling and per-particle colour
 become one-liners.
 
 Adding a line to ROSTER is a new cosmetic SKU.
+
+ELEVEN OF THESE STRIPS ARE NO LONGER RENDERED. The six auras and five trails
+listed in CosmeticPresetLibrary (source/common/gameplay/cosmetics/presets/) are
+drawn at runtime as layered node trees instead -- floor shaders, particle
+emitters and world-space floor marks -- because a 12-frame 128x128 sprite cannot
+hold those layers or react to whether the wearer is moving. Retuning a palette
+here for aura_toxic/verdant/blood/emberfrost/galaxy/gold or for
+trail_toxic/blood/galaxy/gold/storm will regenerate the strip and change NOTHING
+in game; the preset script for that slug is what to edit.
+
+The strips are still generated for all of them on purpose -- the registry wants
+a SpriteFrames per cosmetic, and the strip is the fallback the moment a slug is
+dropped from the preset library. Everything else here (rainbow, chromatic, the
+halos, flourishes and departures) is still the real, shipping art.
 """
 
 from __future__ import annotations
