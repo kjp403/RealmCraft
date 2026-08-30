@@ -46,6 +46,32 @@ const WARD_DURATION_S: float = 150.0
 ## Seconds the environment takes to turn from forge to ice.
 const FREEZE_LERP_S: float = 2.2
 
+## Phase-3 brazier cycle. The cold makes players run to a fire; this is what
+## stops that being a one-time decision. Every CYCLE_S a rotating share of the
+## braziers gutters out for DARK_S, so the huddle has to break and re-form
+## somewhere else while the boss is still casting at them. Without it the group
+## picks a corner at 50% and never moves again, and the whole "Killing Cold" is a
+## walk taken once.
+##
+## The count is a SHARE, not a number: the arena authors four braziers today, and
+## a room with two must never be able to snuff both. At least one fire is lit at
+## every instant, always.
+const BRAZIER_CYCLE_S: float = 14.0
+const BRAZIER_DARK_S: float = 6.0
+## Fraction of the braziers that go out together, rounded down.
+const BRAZIER_DARK_SHARE: float = 0.5
+## Warning before they actually go out — long enough to start moving, short
+## enough that you cannot simply pre-empt the whole cycle.
+const BRAZIER_WARN_S: float = 1.6
+## Client push channel for the brazier states.
+const BRAZIER_CHANNEL: StringName = &"ossuran.fires"
+
+## Share of a player's MAX health taken by being caught outside Killing Frost's
+## safe circle, in THIS encounter only (see [method _spawn_boss]). Survivable
+## from full and fatal from anywhere below it — see BossController._punish for
+## why it is a fraction and why it stops short of an outright kill.
+const FROST_PUNISH_FRACTION: float = 0.85
+
 ## How often the arena asks "has anyone walked in / is the room empty".
 const ARM_POLL_S: float = 1.0
 ## How long the room must stay empty before the encounter resets. Long enough to
@@ -138,6 +164,8 @@ var _empty_since_ms: int = 0
 var _cleared: bool = false
 ## Latches the environment shift so a re-entry into phase 3 cannot re-run it.
 var _frozen: bool = false
+## Bumped on every phase-3 brazier loop start; only the newest owns the fires.
+var _brazier_gen: int = 0
 
 
 func _ready() -> void:
@@ -147,6 +175,11 @@ func _ready() -> void:
 	y_sort_enabled = true
 	_resolve_scene_refs()
 	if not GameMode.is_world_server():
+		# The client half of the brazier cycle. Same split, and same reason, as
+		# EnvironmentTransitionManager: the controllers below are server-only, so
+		# anything the players must SEE has to be pushed and replayed here or the
+		# server snuffs a fire nobody is looking at.
+		Client.subscribe(BRAZIER_CHANNEL, _on_braziers_push)
 		return
 	_build_controllers()
 	# Self-arming: the encounter starts when someone walks in and stands itself
@@ -154,6 +187,14 @@ func _ready() -> void:
 	# that only ever started (and never reset) would hand the next group a boss
 	# at 50% health with the cold already running.
 	set_process(true)
+
+
+func _exit_tree() -> void:
+	# Client-side subscriptions outlive the node they were made from unless they
+	# are dropped here — a map unloaded between fights would leave a callable
+	# bound to a freed arena on the Client's channel list.
+	if not GameMode.is_world_server() and is_instance_valid(Client):
+		Client.unsubscribe(BRAZIER_CHANNEL, _on_braziers_push)
 
 
 ## Fill any unset @export from a conventional child name.
@@ -296,7 +337,13 @@ func _party_hp_factor() -> float:
 ## Tear the whole encounter down (wipe, last player left, instance recycling).
 ## Every subsystem that can outlive the fight is stopped here.
 func stop() -> void:
+	var was_running: bool = _running
 	_running = false
+	if was_running:
+		# Same reason as _on_defeated: the HUD only learns the encounter ended
+		# because we say so.
+		_push_phase(0)
+	_relight_all_braziers()
 	if wave_manager != null:
 		wave_manager.stop()
 	if cold != null:
@@ -349,6 +396,14 @@ func _spawn_boss() -> void:
 	var brain: BossController = BossController.new()
 	brain.name = "BossController"
 	brain.boss = npc
+	# THE encounter-only escalation. Killing Frost's authored damage is a hit a
+	# geared group eats while continuing to attack, which is the same as the move
+	# not existing; here it takes most of your bar instead. Set on the BRAIN, not
+	# on the .tres, precisely so it does not follow the body: Ossuran is also
+	# summonable as an open-world boss (/worldboss, see EventService), and a
+	# near-fatal must-dodge aimed at a coordinated instanced group has no business
+	# landing on whoever happens to be passing through the forge.
+	brain.frost_punish_fraction = FROST_PUNISH_FRACTION
 	npc.add_child(brain)
 
 	npc.action_root_until_ms = Time.get_ticks_msec() + int(HostileNpc.SPAWN_FREEZE_S * 1000.0)
@@ -421,6 +476,7 @@ func _on_state_changed(_from: BossStateMachine.State, to: BossStateMachine.State
 			_freeze_environment()
 			_say("Then FREEZE.")
 			_callout("Keep to the fires. Ranged and magic only.")
+			_brazier_cycle_loop()
 		BossStateMachine.State.DEFEATED:
 			_on_defeated()
 		_:
@@ -602,6 +658,126 @@ func _freeze_environment() -> void:
 		cold.begin()
 
 
+# --- Phase 3 braziers --------------------------------------------------------
+
+
+## Rotate which braziers are burning for as long as the frozen phase lasts.
+##
+## Starts on entering FROZEN_END and ends itself when the state leaves it, the
+## boss dies or the encounter stops — the same self-terminating shape as
+## [method _pillar_pulse_loop], for the same reason: an await chain that outlives
+## its phase is a mechanic still running in a room that has moved on.
+##
+## The rotation is by INDEX, not random: the group can learn it, which is what
+## makes the phase a dance instead of a dice roll. Each cycle takes the next
+## contiguous block of braziers, so the safe corner walks around the room.
+func _brazier_cycle_loop() -> void:
+	# Generation guard. The loop sleeps for up to a full cycle at a time, so a
+	# teardown and a fresh run that both landed inside one of those sleeps would
+	# leave two loops snuffing the same braziers against each other. Only the
+	# newest invocation owns the fires.
+	_brazier_gen += 1
+	var gen: int = _brazier_gen
+	var next_first: int = 0
+	while _in_frozen_phase() and gen == _brazier_gen:
+		await get_tree().create_timer(BRAZIER_CYCLE_S).timeout
+		if not _in_frozen_phase() or gen != _brazier_gen:
+			break
+		var doomed: Array[int] = _brazier_block(next_first)
+		if doomed.is_empty():
+			continue
+		next_first = (next_first + doomed.size()) % maxi(1, fire_sources.size())
+
+		# Gutter first: the fires that are about to die dim for a beat before
+		# they go, so the move is a decision the player gets to make rather than
+		# a punishment for having stood in the wrong place.
+		_callout("The fires gutter — move!")
+		await get_tree().create_timer(BRAZIER_WARN_S).timeout
+		if not _in_frozen_phase() or gen != _brazier_gen:
+			break
+
+		_set_braziers_lit(doomed, false)
+		await get_tree().create_timer(BRAZIER_DARK_S).timeout
+		# Relight even if the phase ended while these were dark — breaking out
+		# here instead would leave the room permanently short of fires. A
+		# SUPERSEDED loop stays out of it: those fires belong to its replacement
+		# now, and relighting them would undo a snuff that just happened.
+		if gen == _brazier_gen:
+			_set_braziers_lit(doomed, true)
+	if gen == _brazier_gen:
+		_relight_all_braziers()
+
+
+func _in_frozen_phase() -> bool:
+	return _running and state_machine != null \
+		and state_machine.state == BossStateMachine.State.FROZEN_END
+
+
+## The block of brazier indices that goes out this cycle, starting at
+## [param first] and wrapping. Never every fire in the room: at least one stays
+## lit no matter how few braziers the map authored, so the phase always has an
+## answer.
+func _brazier_block(first: int) -> Array[int]:
+	var total: int = fire_sources.size()
+	var out: Array[int] = []
+	if total <= 1:
+		return out
+	var count: int = clampi(int(floor(float(total) * BRAZIER_DARK_SHARE)), 1, total - 1)
+	for i: int in count:
+		out.append((first + i) % total)
+	return out
+
+
+## Set the lit state of [param indices] on the server AND on every client.
+func _set_braziers_lit(indices: Array[int], lit: bool) -> void:
+	for index: int in indices:
+		_apply_brazier(index, lit)
+	_push_braziers(indices, lit)
+
+
+## Put every brazier back. Called on defeat, on teardown and on the way out of
+## the cycle — instances are pooled, and a room handed on with two dead fires is
+## a fight the next group cannot survive and cannot explain.
+func _relight_all_braziers() -> void:
+	var all: Array[int] = []
+	for i: int in fire_sources.size():
+		all.append(i)
+	if all.is_empty():
+		return
+	_set_braziers_lit(all, true)
+
+
+func _apply_brazier(index: int, lit: bool) -> void:
+	if index < 0 or index >= fire_sources.size():
+		return
+	var source: Node2D = fire_sources[index]
+	if source is Campfire and is_instance_valid(source):
+		(source as Campfire).set_lit(lit)
+
+
+func _push_braziers(indices: Array[int], lit: bool) -> void:
+	if not GameMode.is_world_server() or WorldServer.curr == null:
+		return
+	var instance: Node = _instance()
+	if instance == null:
+		return
+	for peer_id: int in instance.players_by_peer_id:
+		WorldServer.curr.data_push.rpc_id(peer_id, BRAZIER_CHANNEL, {
+			"indices": indices,
+			"lit": lit,
+		})
+
+
+## CLIENT: adopt the announced brazier states. Indices are positions in
+## [member fire_sources], which both peers resolve from the same scene by the
+## same rule (see [method _resolve_scene_refs]), so the two lists agree without
+## anything having to be named on the wire.
+func _on_braziers_push(payload: Dictionary) -> void:
+	var lit: bool = bool(payload.get("lit", true))
+	for raw: Variant in payload.get("indices", []):
+		_apply_brazier(int(raw), lit)
+
+
 # --- Teleport ----------------------------------------------------------------
 
 
@@ -669,7 +845,13 @@ func _on_defeated() -> void:
 	if wave_manager != null:
 		wave_manager.stop()
 	_clear_pillars()
+	_relight_all_braziers()
 	_callout("Ossuran falls. The forge goes quiet.")
+	# Stand the HUD down. DEFEATED shares phase 3 with FROZEN_END, so the state
+	# machine's phase_changed never fires for it and nothing else would tell the
+	# client the fight is over — which left the boss bar pinned up, wearing
+	# "Ranged and Magic Only", for the rest of the session.
+	_push_phase(0)
 
 
 # --- Shared helpers ----------------------------------------------------------
@@ -679,11 +861,21 @@ func _push_phase(phase: int) -> void:
 	var instance: Node = _instance()
 	if instance == null or WorldServer.curr == null:
 		return
-	var label: String = state_machine.label() if state_machine != null else ""
+	# Phase 0 is the STAND-DOWN: the encounter is over and the client should
+	# forget every part of it. It carries no label and no boss, so a client that
+	# only reads the phase number still lands in the right place.
+	var label: String = ""
+	var slug: String = ""
+	if phase > 0:
+		label = state_machine.label() if state_machine != null else ""
+		# Naming the body is what stops the HUD boss bar adopting an unrelated
+		# boss later and captioning it with this fight's objective.
+		slug = String(boss_slug)
 	for peer_id: int in instance.players_by_peer_id:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"ossuran.phase", {
 			"phase": phase,
 			"label": label,
+			"boss": slug,
 		})
 
 

@@ -33,6 +33,17 @@ const AURA_FADE_SPEED: float = 0.8
 
 @onready var _light: PointLight2D = $Light
 
+## Whether the fire is burning. An extinguished fire keeps its logs and its place
+## in the world but stops giving light, heat and rest — and stops counting as
+## warmth for anything that measures distance to a fire.
+##
+## Nothing here replicates it. A fire that goes out on a schedule is owned by
+## whatever set that schedule (see [OssuranArena]'s phase-3 brazier cycle), and
+## that owner pushes the state to clients and calls [method set_lit] on both
+## sides. Keeping the replication out of here is what lets an ordinary campfire
+## stay a scene node with no network cost.
+var lit: bool = true
+
 var _phase: float
 var _base_energy: float
 var _heal_area: Area2D
@@ -57,7 +68,26 @@ func _ready() -> void:
 		_build_glow() # client heal glow, shown by local inference
 
 
+## Light or snuff the fire. Safe on the headless server, where the sprites and
+## the light have already been freed and only the heal zone remains.
+func set_lit(value: bool) -> void:
+	if lit == value:
+		return
+	lit = value
+	var flame: CanvasItem = get_node_or_null(^"Fire") as CanvasItem
+	if flame != null:
+		flame.visible = lit
+	if _light != null and is_instance_valid(_light):
+		_light.visible = lit
+	if _aura != null and not lit:
+		# A dead fire cannot be rested at, so the green rest glow goes out with
+		# it rather than fading over the next second and a half.
+		_aura.modulate.a = 0.0
+
+
 func _process(delta: float) -> void:
+	if not lit:
+		return
 	# Firelight flicker.
 	_phase += delta * flicker_speed
 	var flicker: float = sin(_phase) * 0.6 + sin(_phase * 2.3 + 1.7) * 0.4
@@ -92,7 +122,7 @@ func _build_heal_aura() -> void:
 
 
 func _heal_tick() -> void:
-	if _heal_area == null:
+	if _heal_area == null or not lit:
 		return
 	for body: Node2D in _heal_area.get_overlapping_bodies():
 		if body is Player and not (body as Player).is_dead:

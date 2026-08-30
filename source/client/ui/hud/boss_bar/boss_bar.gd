@@ -59,10 +59,21 @@ var _ward_label: String = ""
 ## the pillar run — or the phase markers vanish exactly when they are the only
 ## explanation of what is happening.
 var _encounter_active: bool = false
+## The enemy_type the running encounter is about, from its own phase push. The
+## targetless scan below is keyed to THIS slug and nothing else.
+##
+## Without it the scan takes the first body in `boss_bodies` that happens to be a
+## boss — which, once a stale `_encounter_active` survived the fight, meant the
+## bar latching onto whatever boss the player walked past next and dressing it in
+## Ossuran's name plate and objective ("Vurthek, the Cinderborn · Ranged and
+## Magic Only"). A scripted encounter knows which body it is about; say so.
+var _encounter_slug: StringName = &""
 ## Current objective text from the server ("Melee Only"), shown beside the name.
 var _phase_label: String = ""
 ## Throttle for the encounter-boss scan (see _resolve_target).
 var _scan_at_ms: int = 0
+## The local player is dead and has not stood back up. See [method _local_is_down].
+var _down: bool = false
 
 
 func _ready() -> void:
@@ -72,6 +83,58 @@ func _ready() -> void:
 	Client.subscribe(&"boss.ward", _on_ward)
 	Client.subscribe(&"ossuran.phase", _on_phase)
 	Client.subscribe(&"ossuran.chill", _on_chill)
+	# Dying drops the bar. You are on a respawn timer, about to be somewhere else
+	# entirely, and a boss health bar pinned over the death screen is the clearest
+	# possible statement that the HUD has lost track of the fight. If the corpse
+	# stands back up inside the same encounter, the next frame's scan re-binds it.
+	Client.subscribe(&"player.died", _on_local_death)
+	# Leaving the instance ends any encounter this client believed it was in —
+	# the belt to the phase-0 push's braces. A client that misses the stand-down
+	# (disconnect, party leave, a wipe that recycled the instance) would otherwise
+	# carry `_encounter_active` for the rest of the session.
+	if Client.instance_manager != null:
+		Client.instance_manager.instance_changed.connect(_on_instance_changed)
+
+
+## Everything the running encounter told us, forgotten. The bar goes back to
+## being a plain "the boss I am fighting" readout.
+func _clear_encounter() -> void:
+	_encounter_active = false
+	_encounter_slug = &""
+	_phase_label = ""
+	if chill_label != null:
+		chill_label.text = ""
+
+
+## Is [param npc] the body the running encounter is about?
+func _is_encounter_boss(npc: HostileNpc) -> bool:
+	return _encounter_active and _encounter_slug != &"" \
+		and npc != null and is_instance_valid(npc) and npc.enemy_type == _encounter_slug
+
+
+func _on_instance_changed(_instance: Object) -> void:
+	_clear_encounter()
+	_unbind()
+
+
+func _on_local_death(_payload: Dictionary) -> void:
+	_down = true
+	_unbind()
+
+
+## True while the local player is a corpse. Latched by the `player.died` push and
+## released by their own replicated health coming back off zero — the push alone
+## is not enough (unbinding on it just lets the very next frame re-resolve the
+## still-targeted boss and put the bar straight back up), and health alone can
+## lag the push by a tick.
+func _local_is_down() -> bool:
+	if not _down:
+		return false
+	var local: Character = ClientState.local_player if is_instance_valid(ClientState) else null
+	if local != null and local.stats_component != null \
+			and local.stats_component.get_stat(Stat.HEALTH) > 0.0 and not local.is_dead:
+		_down = false
+	return _down
 
 
 func _process(delta: float) -> void:
@@ -96,6 +159,8 @@ func _process(delta: float) -> void:
 ## The current combat target, if it is a living boss — falling back, during a
 ## scripted encounter, to the encounter's boss regardless of targeting.
 func _resolve_target() -> HostileNpc:
+	if _local_is_down():
+		return null
 	var id: int = Character.combat_target_instance_id
 	if id != 0:
 		var obj: Object = instance_from_id(id)
@@ -105,8 +170,11 @@ func _resolve_target() -> HostileNpc:
 			return npc
 	if not _encounter_active:
 		return null
-	# Keep the already-bound body rather than re-scanning every frame.
-	if _boss != null and is_instance_valid(_boss) and not _boss.is_dead:
+	# Keep the already-bound body rather than re-scanning every frame — but only
+	# if it is THIS encounter's boss. Pinning is a privilege the encounter grants
+	# to its own body; extending it to whatever else the player happened to click
+	# is what left an unrelated boss's bar welded to the top of the screen.
+	if _is_encounter_boss(_boss) and not _boss.is_dead:
 		return _boss
 	return _scan_for_encounter_boss()
 
@@ -120,9 +188,12 @@ func _scan_for_encounter_boss() -> HostileNpc:
 	if now < _scan_at_ms:
 		return null
 	_scan_at_ms = now + 500
+	if _encounter_slug == &"":
+		return null
 	for node: Node in get_tree().get_nodes_in_group(&"boss_bodies"):
 		var npc: HostileNpc = node as HostileNpc
 		if npc != null and is_instance_valid(npc) and not npc.is_dead \
+				and npc.enemy_type == _encounter_slug \
 				and npc.enemy_data != null and npc.enemy_data.is_boss:
 			return npc
 	return null
@@ -255,7 +326,15 @@ func _update_label(value: float) -> void:
 ## the current objective. A phase of 0 (or the DEFEATED push) stands it down.
 func _on_phase(payload: Dictionary) -> void:
 	var phase: int = int(payload.get("phase", 0))
-	_encounter_active = phase > 0
+	if phase <= 0:
+		# The encounter is over (killed, wiped, reset). Everything it put on this
+		# bar goes with it — the pin, the objective, the chill meter and the slug
+		# the scan hunts by — or the next boss this client meets inherits them.
+		_clear_encounter()
+		_unbind()
+		return
+	_encounter_active = true
+	_encounter_slug = StringName(str(payload.get("boss", "")))
 	_phase_label = str(payload.get("label", ""))
 	# The cold only exists in phase 3; leaving it must clear the meter, or the
 	# last pushed value sits on the bar for the rest of the session.
@@ -314,7 +393,11 @@ func _refresh_name() -> void:
 	# the suffix when there is one: during Ossuran it is the single most
 	# actionable thing on screen, and it is what stops a player wondering why
 	# their damage stopped working.
-	var suffix: String = _phase_label if not _phase_label.is_empty() else _ward_label
+	# The objective belongs to the ENCOUNTER's boss, never to whatever body the
+	# bar happens to be bound to — a stray target during an Ossuran fight must
+	# not wear "Ranged and Magic Only", and neither must the next boss after it.
+	var objective: String = _phase_label if _is_encounter_boss(_boss) else ""
+	var suffix: String = objective if not objective.is_empty() else _ward_label
 	if suffix.is_empty():
 		name_label.text = "%s   (Lv %d)" % [base, data.resolved_combat_level()]
 	else:

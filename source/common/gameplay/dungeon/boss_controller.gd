@@ -74,6 +74,9 @@ var meteor_spread_px: float = 190.0
 var meteor_interval_s: float = 11.0
 var enraged_meteor_interval_s: float = 0.0
 var meteor_phase: int = 0
+## Burn the blast leaves behind — see EnemyTypeResource.meteor_burn_dps.
+var meteor_burn_dps: float = 0.0
+var meteor_burn_duration_s: float = 0.0
 ## CINDER LASH — sweeping beam.
 var sweep_arc_deg: float = 0.0
 var sweep_range: float = 300.0
@@ -92,6 +95,12 @@ var frost_offset_px: float = 150.0
 var frost_interval_s: float = 16.0
 var enraged_frost_interval_s: float = 0.0
 var frost_phase: int = 0
+## Fraction of a victim's MAX health taken by being caught outside the safe
+## circle. RUNTIME ONLY — no .tres export, deliberately: it is set by the
+## instanced Ossuran encounter and by nothing else (see OssuranArena), so the
+## same body summoned as an open-world boss keeps the flat [member frost_damage]
+## every other boss running this kit uses. 0 = off.
+var frost_punish_fraction: float = 0.0
 ## STATIC ARC — chain lightning.
 var chain_targets: int = 0
 var chain_range: float = 170.0
@@ -231,6 +240,8 @@ func _load_config() -> void:
 	meteor_interval_s = d.meteor_interval_s
 	enraged_meteor_interval_s = d.enraged_meteor_interval_s
 	meteor_phase = d.meteor_phase
+	meteor_burn_dps = d.meteor_burn_dps
+	meteor_burn_duration_s = d.meteor_burn_duration_s
 	sweep_arc_deg = d.sweep_arc_deg
 	sweep_range = d.sweep_range
 	sweep_width = d.sweep_width
@@ -571,8 +582,19 @@ func _meteor_blast(at: Vector2) -> void:
 	if not is_instance_valid(boss) or boss.is_dead:
 		return
 	for player: Player in _live_players():
-		if at.distance_to(player.global_position) <= meteor_radius:
-			_hurt(player, meteor_damage, true)
+		if at.distance_to(player.global_position) > meteor_radius:
+			continue
+		_hurt(player, meteor_damage, true)
+		# The rock sets you alight. This is the part that makes the circles worth
+		# leaving: the impact alone is a number a healthy player can face-tank
+		# through a whole volley, but a burn that refreshes on every rock you
+		# stand in turns "ignore it" into a bill that keeps arriving after the
+		# sky clears. Refreshes rather than stacks (DamageOverTime's own rule),
+		# so a volley cannot multiply into an unrecoverable spiral.
+		if meteor_burn_dps > 0.0 and meteor_burn_duration_s > 0.0:
+			DamageOverTime.apply(
+				player, boss, &"burn", meteor_burn_dps, meteor_burn_duration_s
+			)
 
 
 ## CINDER LASH — a beam that travels through an arc. The fixed laser corridor is
@@ -642,7 +664,10 @@ func _killing_frost() -> void:
 	# element 1 = frost, mode 1 = SAFE (the ring is the place to BE).
 	boss.replicate_visual(&"rp_elem_telegraph",
 		[safe_at, frost_safe_radius, frost_windup_s, 1, 1])
-	_callout("Killing Frost — get to the circle!")
+	_callout(
+		"Killing Frost — GET TO THE CIRCLE!" if frost_punish_fraction > 0.0
+		else "Killing Frost — get to the circle!"
+	)
 	await get_tree().create_timer(frost_windup_s).timeout
 	if not is_instance_valid(boss) or boss.is_dead:
 		_casting = false
@@ -650,7 +675,11 @@ func _killing_frost() -> void:
 	boss.replicate_visual(&"rp_ice_spikes", [safe_at, frost_safe_radius, 7])
 	boss.replicate_visual(&"rp_frost_nova", [origin, frost_safe_radius * 0.9])
 	for player: Player in _live_players():
-		if safe_at.distance_to(player.global_position) > frost_safe_radius:
+		if safe_at.distance_to(player.global_position) <= frost_safe_radius:
+			continue
+		if frost_punish_fraction > 0.0:
+			_punish(player, frost_punish_fraction)
+		else:
 			_hurt(player, frost_damage, true)
 	await _finish_cast(&"frost", 0.45)
 
@@ -820,6 +849,45 @@ func _hurt(player: Player, amount: float, magic: bool = false) -> void:
 	player.take_damage(
 		amount, boss, CombatHit.DAMAGE_MAGIC if magic else CombatHit.DAMAGE_PHYSICAL
 	)
+
+
+## Take exactly [param fraction] of [param player]'s MAX health, whatever they
+## are wearing.
+##
+## WHY A FRACTION AND NOT A BIGGER NUMBER. A flat hit cannot express "this is a
+## mechanic you must not eat" across the gear range: Killing Frost's authored 240
+## lands as ~70% of a plated bruiser's bar and as an outright kill on a caster in
+## the same group, so the same mistake is a scratch for one player and a corpse
+## for another. Scaling off the victim's own maximum makes the punish mean the
+## same thing to everyone, which is the only way a must-dodge mechanic teaches
+## anything.
+##
+## AND NOT AN EXECUTE. Phase 3 chill cuts move speed by up to ~62%, and the safe
+## circle lands [member frost_offset_px] away — at high stacks it is physically
+## unreachable inside the wind-up. A kill there is not a mistake being punished,
+## it is a wipe the group could not have prevented. At 85% a player who could not
+## make it lives on a sliver and gets to keep playing; a player who was already
+## chipped, or who eats a second one, dies. The mechanic keeps its teeth without
+## ever being unavoidable.
+##
+## The raw amount is the target divided back through everything take_damage is
+## about to apply — the boss's own damage multiplier, the victim's MR curve and
+## their incoming-damage factor — so the number that LANDS is the authored
+## fraction rather than whatever survives mitigation. Routed through take_damage
+## rather than written into HEALTH so every hook a normal killing blow fires
+## (death log, aggro drop, dungeon and Boss Hunt life accounting) fires here too.
+func _punish(player: Player, fraction: float) -> void:
+	if player == null or not is_instance_valid(player) or player.is_dead:
+		return
+	var target: float = maxf(player.stats_component.get_stat(Stat.HEALTH_MAX), 1.0) * fraction
+	var mr: float = maxf(0.0, player.stats_component.get_stat(Stat.MR))
+	var scale: float = 100.0 / (100.0 + mr)
+	scale *= player.incoming_damage_factor(boss, CombatHit.DAMAGE_MAGIC)
+	if is_instance_valid(boss):
+		scale *= boss.damage_dealt_mult
+	if scale <= 0.0:
+		return # fully warded / in dialogue — take_damage would land nothing anyway
+	player.take_damage(target / scale, boss, CombatHit.DAMAGE_MAGIC)
 
 
 ## Distance from [param point] to the closest point on segment [param a]→[param b].

@@ -87,6 +87,25 @@ static func clear_stat(player: Player, stat: StringName) -> void:
 			buffs.remove_at(i)
 
 
+## Strips EVERY active buff immediately, reverting each one's stat bonus. Death
+## calls this, next to [method PrayerService.deactivate_all] and for the same
+## reason: what you went into the fight with does not follow you out of it, and a
+## buff that survives a corpse is a buff the player cannot see the end of — the
+## status strip kept showing icons for effects the respawn had already unwound.
+##
+## Reverts BEFORE clearing so the stat ledger unwinds against the live stat
+## block, exactly like [method clear_stat].
+static func clear_all(player: Player) -> void:
+	if player == null or player.player_resource == null:
+		return
+	var buffs: Array = player.player_resource.active_buffs
+	for i: int in range(buffs.size() - 1, -1, -1):
+		player.stats_component.modify_stat(
+			StringName(buffs[i]["stat"]), -float(buffs[i]["amount"])
+		)
+	buffs.clear()
+
+
 ## Removes expired buffs (reverting their stat bonus). Called by the instance
 ## StatusTick once per second per player.
 static func tick(player: Player) -> void:

@@ -254,6 +254,13 @@ meteor_spread_px = 220.0
 meteor_interval_s = 12.0
 enraged_meteor_interval_s = 0.0
 meteor_phase = 1
+; Ember Rain now BURNS. The volley's 125 per rock was a number a level-70
+; group simply walked through: six overlapping circles, and standing in every
+; one of them cost less than the uptime of leaving. The burn is what makes the
+; ground worth reading — it refreshes rather than stacks, so a full volley is a
+; steady bleed you have to break off and out-heal, not a spiral.
+meteor_burn_dps = 26.0
+meteor_burn_duration_s = 8.0
 sweep_arc_deg = 165.0
 sweep_range = 340.0
 sweep_width = 38.0

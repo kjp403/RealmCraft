@@ -113,11 +113,18 @@ func _on_status_sync(payload: Dictionary) -> void:
 				info["deadline_ms"] = now + int(spec["remaining"]) * 1000
 		return
 
-	# Set changed → rebuild ONLY the tracked tile nodes (never the tap label).
-	for key: String in _tiles:
-		var node: Node = _tiles[key]["node"]
-		if is_instance_valid(node):
-			node.queue_free()
+	# Set changed → rebuild every tile, tracked or not (but never the tap label).
+	#
+	# Sweeping the CHILDREN rather than the _tiles dictionary is deliberate. The
+	# dictionary is keyed by status id, so a payload that ever carried the same
+	# id twice overwrote its own entry and orphaned the first tile — a node still
+	# parented here, still drawn, and now referenced by nothing that could ever
+	# free it. That is what turned a boss fight into a permanent row of buff
+	# icons that outlived the buffs and the player both. StatusService no longer
+	# sends duplicates; this makes an orphan impossible rather than unlikely.
+	for child: Node in get_children():
+		if child != _tap_label:
+			child.queue_free()
 	_tiles.clear()
 	_order = new_order
 	for spec: Dictionary in specs:
