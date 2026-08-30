@@ -539,11 +539,19 @@ func _on_claim_response(response: Dictionary) -> void:
 	if not bool(response.get("ok", false)):
 		Toaster.toast("Claim failed: %s" % response.get("reason", "unknown"))
 		return
-	# The chest rides back on the claim. Hand it to the one reward presentation
-	# in the game rather than building a second one here — and because that
-	# window is not a display_menu, showing it does NOT close this board.
+	# The chest rides back on the claim. Hand it to the one reward presentation in
+	# the game rather than building a second one here.
+	#
+	# STAND DOWN WHILE THE CHEST IS ON SCREEN. The reward window now owns its own
+	# CanvasLayer above every menu, so it is no longer trapped behind this board —
+	# but a full-screen board under a reward readout is still just noise over the
+	# one thing the player wants to look at, and its Close button sits a few pixels
+	# from the window's. Hiding is not closing: the board is a display_menu submenu
+	# and reopens from the dock with its state intact, and _refresh below keeps it
+	# current for when it does.
 	var chest: Variant = response.get("chest", {})
 	if chest is Dictionary and bool((chest as Dictionary).get("ok", false)):
+		hide()
 		UniversalChestManager.present(chest as Dictionary)
 	for grant_v: Variant in (response.get("skills", []) as Array):
 		var grant: Dictionary = grant_v
