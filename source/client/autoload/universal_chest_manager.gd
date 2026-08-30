@@ -110,12 +110,6 @@ func free_slots() -> int:
 	return _free_slots
 
 
-## True when there is staged loot that closing the reward window would leave
-## behind. HUNT is excluded on purpose — see [method sweep_pending].
-func has_unclaimed_rewards() -> bool:
-	return _source == Source.PENDING and not _pending.is_empty()
-
-
 # --- Opening -----------------------------------------------------------------
 
 ## Open [param count] of chest [param item_id] ([constant ALL] for the whole
@@ -321,31 +315,6 @@ func claim_all() -> void:
 			if _source == Source.HUNT
 			else "Bag and bank are both full."
 		)
-
-
-## Close-time safety net: run the [method claim_all] cascade over anything still
-## staged, so walking away from the reward window cannot strand a reward.
-##
-## Staged loot was never actually LOST — `pending_chest_loot` lives server-side
-## and auto-banks at logout — but "it will be in your bank tomorrow" is not what
-## a player who just closed a window over their loot believes, and a claim they
-## did not have to remember is strictly better than a rule they have to trust.
-##
-## SCOPED TO PENDING, DELIBERATELY. The Hunt Chest is permanent Guild Hall
-## storage that a player parks loot in ON PURPOSE; emptying it into their bag
-## because they closed a window would be the bug, not the fix. Skipped mid-batch
-## too: a run still opening chests would have its own tail staged behind the
-## sweep, and the pile is safe where it is until the run ends.
-##
-## Returns true only if the staged pile actually shrank — a sweep that ran into a
-## full bag AND a full bank moved nothing, and saying otherwise would let the
-## caller tell the player their loot is safe when it is still sitting here.
-func sweep_pending() -> bool:
-	if _busy or _claiming or not has_unclaimed_rewards():
-		return false
-	var staged_before: int = _pending.size()
-	await claim_all()
-	return _pending.size() < staged_before
 
 
 func take_all() -> void:

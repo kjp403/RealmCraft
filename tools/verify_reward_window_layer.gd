@@ -1,7 +1,6 @@
 @tool
 extends Node
-## Gate for the chest reward window's stacking, and for the close-time sweep that
-## backs it up.
+## Gate for the chest reward window's stacking.
 ##
 ##   godot --headless --path . tools/verify_reward_window_layer.tscn
 ##
@@ -25,12 +24,13 @@ extends Node
 ## Anyone who "simplifies" it back to a z_index fails here.
 
 const UI_SCENE: String = "res://source/client/ui/ui.tscn"
+const HUD_SCRIPT: String = "res://source/client/ui/hud/hud.gd"
 const BOARD_SCRIPT: String = "res://source/client/ui/menus/daily_board/daily_board_ui.gd"
-const WINDOW_SCRIPT: String = "res://source/client/ui/overlays/chest_reward_window.gd"
 
 ## Notification layers the reward window must stay UNDER, by autoload file name.
 const ABOVE: Array[String] = ["loot_feed", "announcer", "toaster", "transition"]
 
+var _reward_layer: int = 0
 var _fails: PackedStringArray = PackedStringArray()
 
 
@@ -45,9 +45,10 @@ func _ready() -> void:
 
 
 func _go() -> void:
+	_reward_layer = _reward_layer_in_source()
+	_check(_reward_layer > 0, "hud.gd declares REWARD_LAYER (%d)" % _reward_layer)
 	_check_stacking()
 	await _check_live_tree()
-	await _check_sweep()
 	_check_wiring()
 
 	print("")
@@ -71,7 +72,7 @@ func _go() -> void:
 ## gate no matter what anyone did to the numbers.
 func _check_stacking() -> void:
 	print("[layers]")
-	var reward: int = HUD.REWARD_LAYER
+	var reward: int = _reward_layer
 	var ui_layer: int = _layer_in(UI_SCENE)
 	_check(ui_layer > 0, "read the UI CanvasLayer's layer (%d)" % ui_layer)
 	_check(reward > ui_layer, "reward layer (%d) is above the UI layer (%d)" % [reward, ui_layer])
@@ -85,6 +86,20 @@ func _check_stacking() -> void:
 			reward < other,
 			"reward layer (%d) is below %s (%d)" % [reward, autoload_name, other]
 		)
+
+
+## REWARD_LAYER, read out of hud.gd's SOURCE rather than as `HUD.REWARD_LAYER`.
+##
+## A hard reference would make it a COMPILE-time dependency, and that fails in
+## the worst possible way: delete the constant and this script stops parsing,
+## the tool scene comes up with no script at all, nothing ever calls quit(), and
+## the run HANGS instead of failing. Parsing it means the same edit reports a
+## plain VERIFY_FAIL and the suite moves on.
+func _reward_layer_in_source() -> int:
+	var re := RegEx.new()
+	re.compile("(?m)^const REWARD_LAYER[^=]*= *([0-9]+)")
+	var m: RegExMatch = re.search(FileAccess.get_file_as_string(HUD_SCRIPT))
+	return int(m.get_string(1)) if m != null else 0
 
 
 ## First `layer = <int>` assignment in a script or scene file, or 0.
@@ -120,8 +135,8 @@ func _check_live_tree() -> void:
 	_check(host is CanvasLayer, "window's parent is a CanvasLayer, not a Control")
 	if host is CanvasLayer:
 		_check(
-			(host as CanvasLayer).layer == HUD.REWARD_LAYER,
-			"window's CanvasLayer is at REWARD_LAYER (%d)" % HUD.REWARD_LAYER
+			(host as CanvasLayer).layer == _reward_layer,
+			"window's CanvasLayer is at REWARD_LAYER (%d)" % _reward_layer
 		)
 	_check(not submenu.is_ancestor_of(window), "window is NOT under Submenu")
 	# The window now sits above every menu. If its ROOT took input it would
@@ -152,28 +167,9 @@ func _check_live_tree() -> void:
 	ui.free()
 
 
-## The close-time safety net. Only the no-op half is checkable offline — moving
-## loot needs a server — but the no-op half is the half that can silently empty
-## a player's Hunt Chest if the source guard is ever dropped.
-func _check_sweep() -> void:
-	print("[sweep]")
-	_check(
-		UniversalChestManager.has_method(&"sweep_pending")
-			and UniversalChestManager.has_method(&"has_unclaimed_rewards"),
-		"UniversalChestManager exposes has_unclaimed_rewards + sweep_pending"
-	)
-	_check(
-		not UniversalChestManager.has_unclaimed_rewards(),
-		"nothing staged reads as nothing to claim"
-	)
-	_check(
-		not await UniversalChestManager.sweep_pending(),
-		"sweep with nothing staged is a no-op (no stray claim request)"
-	)
-
-
-## Source-level, because both halves need a live server to exercise: the board
-## standing down when a chest is presented, and the window sweeping on close.
+## Source-level: exercising the board's stand-down for real needs a server to
+## answer quest.board.claim, but the ORDER of the two lines is the whole
+## behaviour, and that is readable without one.
 func _check_wiring() -> void:
 	print("[wiring]")
 	var board: String = FileAccess.get_file_as_string(BOARD_SCRIPT)
@@ -183,9 +179,4 @@ func _check_wiring() -> void:
 	_check(
 		hide_at > 0 and hide_at < present_at,
 		"daily board hides itself BEFORE presenting the chest"
-	)
-	var window: String = FileAccess.get_file_as_string(WINDOW_SCRIPT)
-	_check(
-		window.contains("await UniversalChestManager.sweep_pending()"),
-		"window close awaits the pending sweep"
 	)
