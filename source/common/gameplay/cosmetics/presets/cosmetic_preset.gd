@@ -40,6 +40,11 @@ const HEAD_Y: float = -38.0
 ## needs. Assigned by [CosmeticVfx.apply] before the node enters the tree.
 var wearer: Character
 
+## True when this preset is mounted in the wardrobe rather than on a live
+## character. Set by [CosmeticPresetLibrary.build] before the node enters the
+## tree; see the two gates below for what it changes.
+var is_preview: bool = false
+
 ## Seconds since this preset was mounted. Every animated value is a function of
 ## this rather than of engine time, so two wearers on screen are not locked in
 ## phase and the effect always starts at the beginning of its cycle.
@@ -62,6 +67,8 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	_tick(delta)
 	queue_redraw()
+	for layer: Node2D in _draw_layers:
+		layer.queue_redraw()
 
 
 ## Override for per-frame work beyond redrawing (movement sampling, retiming).
@@ -139,6 +146,43 @@ func _swell_ramp(birth: Color, peak: Color, peak_at: float = 0.35) -> Gradient:
 	return g
 
 
+## A child layer that draws with its OWN blend mode by calling back into this
+## preset. Returns the layer; [param painter] is handed the layer as its only
+## argument so the callback can use its draw_* methods.
+##
+## A CanvasItem gets exactly one blend mode, so a preset that needs both solid
+## geometry and additive light out of _draw() - carved stone under glowing runes -
+## physically cannot do it in one node. The alternatives were worse: making the
+## whole node additive turns the stone into a lamp, and leaving it mixed makes the
+## runes look painted on.
+##
+## [param layer_z] is RELATIVE to this preset, so a negative value stays under the
+## preset's own drawing and everything remains below the wearer.
+func _add_draw_layer(painter: Callable, additive: bool = false, layer_z: int = 0) -> Node2D:
+	var layer: DrawLayer = DrawLayer.new()
+	layer.painter = painter
+	layer.z_index = layer_z
+	if additive:
+		layer.material = _additive()
+	add_child(layer)
+	_draw_layers.append(layer)
+	return layer
+
+
+## Layers built by [method _add_draw_layer], redrawn with this preset.
+var _draw_layers: Array[Node2D] = []
+
+
+## Host for [method _add_draw_layer]. Owns no state of its own - it exists purely
+## to be a second CanvasItem with a different material.
+class DrawLayer extends Node2D:
+	var painter: Callable
+
+	func _draw() -> void:
+		if painter.is_valid():
+			painter.call(self)
+
+
 ## Additive blending, for anything that should read as LIGHT rather than as paint
 ## (gold bloom, star cores, electric arcs). Never use it on the dark effects —
 ## additive on a blood pool turns it pink.
@@ -173,9 +217,43 @@ func _add_floor_shader(shader: Shader, diameter: float) -> ColorRect:
 ## layers MUST gate on this: a full-screen overlay driven by a stranger's cosmetic
 ## would let anyone tint another player's screen.
 func _is_local_wearer() -> bool:
-	if wearer == null or not is_instance_valid(ClientState):
+	# A wardrobe preview borrows the local player as its wearer so the effect has
+	# a real body to work from, which would otherwise make every preview count as
+	# owner-worn and mount a second screen overlay on top of the equipped one.
+	if is_preview or wearer == null or not is_instance_valid(ClientState):
 		return false
 	return ClientState.local_player == wearer
+
+
+## Roughly a screen and a half at the game's zoom. Past this a wearer is off
+## camera for any realistic viewport, so producing for them is pure waste.
+const CULL_RADIUS_PX: float = 420.0
+
+
+## True when the local player is close enough to this wearer that expensive
+## layers are worth producing. The same distance test [SfxPool] uses to drop
+## out-of-earshot sounds.
+##
+## This gates PRODUCTION, never visibility. Hiding the preset would take its
+## world-space children with it - visibility is hierarchical even for top_level
+## nodes - so a player walking away would blink out the fissures and after-images
+## they already left on the floor behind them. Stopping the source instead lets
+## everything already in the world finish its own life normally.
+##
+## Fails OPEN when there is no local player: that is the vault preview and the
+## first frames after a map load, where rendering nothing would be the bug.
+func _viewer_in_range(radius_px: float = CULL_RADIUS_PX) -> bool:
+	# A preview sits in UI space, where its global_position is a screen coordinate
+	# and the distance to the local player is meaningless - and enormous, so the
+	# test would cull the whole wardrobe.
+	if is_preview:
+		return true
+	if not is_instance_valid(ClientState):
+		return true
+	var viewer: Node2D = ClientState.local_player
+	if not is_instance_valid(viewer):
+		return true
+	return viewer.global_position.distance_squared_to(global_position) <= radius_px * radius_px
 
 
 ## Emission points spread along an arc of the ground ellipse, for emitters that

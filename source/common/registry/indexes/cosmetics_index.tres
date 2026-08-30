@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1786586952
-next_id = 23
+version = 1788121281
+next_id = 27
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -117,4 +117,24 @@ entries = Array[Dictionary]([{
 &"id": 22,
 &"path": "res://source/common/gameplay/cosmetics/frames/weapon_ascended_radiance.tres",
 &"slug": &"weapon_ascended_radiance"
+}, {
+&"hash": "600f36b25c5dfec57bb21e53debb29ab2e4c37e7c1b3d96081097f87f54b0d26",
+&"id": 23,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_runebound_titan.tres",
+&"slug": &"aura_runebound_titan"
+}, {
+&"hash": "4089c183e45afd9bf516d08a5244d1862436095bdfdfd7c0d2b78f259c58b7a8",
+&"id": 24,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_solar_eclipse.tres",
+&"slug": &"aura_solar_eclipse"
+}, {
+&"hash": "9d82008658c8ee103e0b9cadb2db403223339c9ab68398e21075c5dbcf66d489",
+&"id": 25,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_chrono_echo.tres",
+&"slug": &"trail_chrono_echo"
+}, {
+&"hash": "e05bc703d2db4cf918914abf4c478e1a735f612d8e886e10e338f71ff14408fa",
+&"id": 26,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_infernal_chasm.tres",
+&"slug": &"trail_infernal_chasm"
 }])

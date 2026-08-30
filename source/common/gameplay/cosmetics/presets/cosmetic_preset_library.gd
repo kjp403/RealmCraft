@@ -26,6 +26,10 @@ const _TRAIL_BLOOD: GDScript = preload("res://source/common/gameplay/cosmetics/p
 const _TRAIL_GALAXY: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_galaxy_preset.gd")
 const _TRAIL_GOLD: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_gold_preset.gd")
 const _TRAIL_STORM: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_storm_preset.gd")
+const _AURA_SOLAR_ECLIPSE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_solar_eclipse_preset.gd")
+const _AURA_RUNEBOUND_TITAN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_runebound_titan_preset.gd")
+const _TRAIL_CHRONO_ECHO: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_chrono_echo_preset.gd")
+const _TRAIL_INFERNAL_CHASM: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_infernal_chasm_preset.gd")
 
 ## Adding a line here upgrades one cosmetic from its strip to a node tree.
 const PRESETS: Dictionary = {
@@ -40,6 +44,13 @@ const PRESETS: Dictionary = {
 	&"trail_galaxy": _TRAIL_GALAXY,
 	&"trail_gold": _TRAIL_GOLD,
 	&"trail_storm": _TRAIL_STORM,
+	# Mythic tier. These have no strip heritage at all - they were authored as
+	# presets from the start, and their generated strips exist only to hold a
+	# registry entry (see tools/gen_cosmetic_vfx.py).
+	&"aura_solar_eclipse": _AURA_SOLAR_ECLIPSE,
+	&"aura_runebound_titan": _AURA_RUNEBOUND_TITAN,
+	&"trail_chrono_echo": _TRAIL_CHRONO_ECHO,
+	&"trail_infernal_chasm": _TRAIL_INFERNAL_CHASM,
 }
 
 
@@ -51,13 +62,19 @@ static func script_for(cosmetic_id: int) -> GDScript:
 
 
 ## A ready-to-mount preset node, or null when this cosmetic has no preset.
-static func build(cosmetic_id: int, wearer: Character) -> CosmeticPreset:
+##
+## [param preview] marks a wardrobe mount rather than a live one, which changes
+## two things: screen-space layers are suppressed, and the viewer-distance cull is
+## bypassed (a preview lives in UI space, where a world-space distance test is
+## meaningless and would cull everything).
+static func build(cosmetic_id: int, wearer: Character, preview: bool = false) -> CosmeticPreset:
 	var script: GDScript = script_for(cosmetic_id)
 	if script == null:
 		return null
 	var preset: CosmeticPreset = script.new()
-	# Assigned BEFORE the node enters the tree: _build() runs from _ready and the
-	# Blood aura's owner-only vignette check needs the wearer already set.
+	# Assigned BEFORE the node enters the tree: _build() runs from _ready, and the
+	# Blood aura's owner-only vignette check reads both of these.
 	preset.wearer = wearer
+	preset.is_preview = preview
 	preset.name = "Preset"
 	return preset

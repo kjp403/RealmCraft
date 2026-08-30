@@ -116,6 +116,7 @@ func _build_layout() -> void:
 	# The world mounts this under a Character, which puts it behind the body. There
 	# is no body here, so the preview must not sink behind the panel it sits on.
 	_preview.z_index = 0
+	_preview.preview_mode = true
 	_preview_pivot.add_child(_preview)
 	set_process(true)
 
@@ -288,6 +289,12 @@ func _update_preview() -> void:
 	if id == 0:
 		return
 	if _preview != null:
+		# Lend the preview the player's own character, refreshed every browse
+		# because it may not have existed when this menu was built. Chrono Echo
+		# stamps the wearer's live sprite frame, so with nothing to read it
+		# previews as an empty box — and borrowing the local player means the
+		# wardrobe shows the effect on the skin the buyer is actually wearing.
+		_preview.preview_wearer = ClientState.local_player
 		_preview.apply(id)
 	_walking = Cosmetics.slot_of(id) == &"trail"
 	if not _walking and _preview_pivot != null:

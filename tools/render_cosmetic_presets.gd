@@ -20,11 +20,12 @@ const ZOOM: int = 3
 const VIEW: Vector2i = Vector2i(400, 150)
 
 const AURAS: Array[String] = [
-	"aura_toxic", "aura_verdant", "aura_blood",
-	"aura_emberfrost", "aura_galaxy", "aura_gold",
+	"aura_toxic", "aura_verdant", "aura_blood", "aura_emberfrost",
+	"aura_galaxy", "aura_gold", "aura_solar_eclipse", "aura_runebound_titan",
 ]
 const TRAILS: Array[String] = [
 	"trail_toxic", "trail_blood", "trail_galaxy", "trail_gold", "trail_storm",
+	"trail_chrono_echo", "trail_infernal_chasm",
 ]
 
 const PRESET_DIR: String = "res://source/common/gameplay/cosmetics/presets/%s_preset.gd"
@@ -76,10 +77,13 @@ func _pass(slugs: Array[String], out: String, walking: bool) -> void:
 	var cell: float = canvas.x / float(slugs.size())
 	for i: int in slugs.size():
 		var at: Vector2 = Vector2(cell * (float(i) + 0.5), canvas.y * 0.62)
-		if not walking:
-			_body(root, at)
 		_mount(root, slugs[i], at, walking)
-		_label(root, at + Vector2(-cell * 0.5 + 3.0, canvas.y * 0.26), slugs[i])
+		# Slot is already obvious from which sheet this is; showing it doubles the
+		# label length and the columns collide at eight across.
+		_label(
+			root, at + Vector2(-cell * 0.5 + 3.0, canvas.y * 0.26),
+			slugs[i].split("_", true, 1)[1]
+		)
 
 	# Real time has to pass: particles, shaders and the walk all need it.
 	var elapsed: float = 0.0
@@ -104,9 +108,55 @@ func _mount(root: Node2D, slug: String, at: Vector2, walking: bool) -> void:
 	var host: Node2D = Node2D.new()
 	host.position = at
 	root.add_child(host)
-	host.add_child(script.new())
+	var preset: Node2D = script.new()
+	host.add_child(preset)
+	# Chrono Echo echoes the WEARER, and a bare script mount has no Character to
+	# read. Hand it the stand-in body so it has frames to stamp; every other
+	# preset draws its own shapes and ignores this entirely.
+	var body: AnimatedSprite2D = _stand_in_body(host, walking)
+	if "sprite_source" in preset:
+		preset.sprite_source = body
 	if walking:
 		_walkers.append(host)
+
+
+## A real player sprite rather than a couple of coloured rectangles.
+##
+## Worth the extra few lines: these captures are the only look at the effects
+## before they ship, and an aura judged against a beige box tells you nothing
+## about whether it reads around an actual 64 px body. Falls back to blocks if the
+## sprite registry is unavailable.
+## Preferred stand-in animation, in order. Player SpriteFrames are authored
+## ["death", "idle", "run"], so taking the first name gets you a corpse lying
+## across the aura - which is both wrong and, for a walking trail, absurd.
+const BODY_ANIMS: Array[String] = ["run", "idle", "death"]
+
+
+func _stand_in_body(host: Node2D, walking: bool) -> AnimatedSprite2D:
+	var frames: SpriteFrames = ContentRegistryHub.load_by_id(
+		&"sprites", PlayerSkins.starter_skin_id()
+	) as SpriteFrames
+	if frames == null:
+		return null
+	var names: PackedStringArray = frames.get_animation_names()
+	if names.is_empty():
+		return null
+	var want: String = names[0]
+	for candidate: String in (BODY_ANIMS if walking else ["idle", "run", "death"]):
+		if names.has(candidate):
+			want = candidate
+			break
+	var body: AnimatedSprite2D = AnimatedSprite2D.new()
+	body.sprite_frames = frames
+	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# The character scene puts the body's feet on the node origin with this
+	# offset; the presets are all anchored to the feet, so the stand-in has to
+	# match it or every aura sits at the wrong height.
+	body.offset = Vector2(0, -30)
+	body.animation = StringName(want)
+	body.play()
+	host.add_child(body)
+	return body
 
 
 ## Walk every trail host back and forth. A triangle wave, not a sine: constant
@@ -121,21 +171,6 @@ func _walk(elapsed: float) -> void:
 		# Triangle wave in -1..1: out at constant speed, hard turn, back.
 		var swing: float = (phase * 2.0 if phase < 0.5 else 2.0 - phase * 2.0) * 2.0 - 1.0
 		_walkers[i].position.x = cell * (float(i) + 0.5) + swing * WALK_PX
-
-
-## A stand-in body: an aura has to read as pooling AROUND someone, and a bare
-## origin proves nothing about that.
-func _body(root: Node2D, at: Vector2) -> void:
-	var torso: ColorRect = ColorRect.new()
-	torso.color = Color(0.72, 0.66, 0.55)
-	torso.size = Vector2(10.0, 20.0)
-	torso.position = at + Vector2(-5.0, -20.0)
-	root.add_child(torso)
-	var head: ColorRect = ColorRect.new()
-	head.color = Color(0.84, 0.76, 0.64)
-	head.size = Vector2(8.0, 8.0)
-	head.position = at + Vector2(-4.0, -28.0)
-	root.add_child(head)
 
 
 func _label(root: Node2D, at: Vector2, text: String) -> void:

@@ -29,6 +29,22 @@ var _replay_timer: Timer
 ## The mounted scripted preset, or null when this cosmetic renders as a strip.
 var _preset: CosmeticPreset
 
+## Wardrobe use only. Set once by the Curator menu to mark this as a preview
+## mount: screen-space layers are suppressed and the viewer-distance cull is
+## bypassed, because a preview lives in UI space where a world distance test is
+## meaningless — see [CosmeticPresetLibrary.build].
+##
+## Deliberately independent of [member preview_wearer]: a preview with no
+## character to borrow is still a preview, and tying the two together would make
+## the whole wardrobe cull itself whenever the local player was not ready yet.
+var preview_mode: bool = false
+
+## Wardrobe use only: the character a preset reads from when this node is NOT
+## parented to one. Chrono Echo stamps the wearer's live sprite frame, so with
+## nothing to read it previews as an empty box. Refreshed on every browse, since
+## the local player may not exist yet when the menu is first built.
+var preview_wearer: Character
+
 
 func _init() -> void:
 	# Below the body but above the ground: an aura should pool around the feet, not
@@ -53,7 +69,8 @@ func apply(cosmetic_id: int) -> void:
 
 	# Scripted preset first: it replaces the strip entirely rather than layering
 	# over it, so a wearer never pays for both.
-	_preset = CosmeticPresetLibrary.build(cosmetic_id, get_parent() as Character)
+	var host: Character = preview_wearer if preview_wearer != null else get_parent() as Character
+	_preset = CosmeticPresetLibrary.build(cosmetic_id, host, preview_mode)
 	if _preset != null:
 		# Nothing for this sprite to draw — but it must stay VISIBLE, because
 		# hiding a parent hides the preset hanging off it too.

@@ -34,7 +34,7 @@ func _extends_preset(script: GDScript) -> bool:
 func _initialize() -> void:
 	print("-- registry --")
 	var ids: Array[int] = Cosmetics.ids()
-	_check(ids.size() == 22, "22 cosmetics registered (got %d)" % ids.size())
+	_check(ids.size() == 26, "26 cosmetics registered (got %d)" % ids.size())
 
 	var slots: Dictionary = {}
 	var bad_frames: PackedStringArray = []
@@ -102,7 +102,7 @@ func _initialize() -> void:
 			bad_scripts.append(String(slug))
 	_check(unknown_slugs.is_empty(), "every preset slug is a real cosmetic %s" % str(unknown_slugs))
 	_check(bad_scripts.is_empty(), "every preset extends CosmeticPreset %s" % str(bad_scripts))
-	_check(CosmeticPresetLibrary.PRESETS.size() == 11, "11 presets registered (got %d)"
+	_check(CosmeticPresetLibrary.PRESETS.size() == 15, "15 presets registered (got %d)"
 		% CosmeticPresetLibrary.PRESETS.size())
 
 	# The two render paths must stay mutually exclusive and correctly routed.
@@ -112,12 +112,22 @@ func _initialize() -> void:
 	_check(CosmeticPresetLibrary.script_for(rainbow_aura) == null, "aura_rainbow keeps its strip")
 	_check(CosmeticPresetLibrary.script_for(0) == null, "id 0 routes nowhere")
 
+	# The Solar Eclipse is drawn as two quads whose radii MUST agree, or the
+	# shadow and the light meet at different places and the disc gains a seam.
+	# Asserting it here because it is a single number in two files.
+	var eclipse: GDScript = CosmeticPresetLibrary.PRESETS[&"aura_solar_eclipse"]
+	_check(
+		absf(float(eclipse.get("RING_FRACTION")) - 0.58) < 0.0001,
+		"eclipse RING_FRACTION still matches the umbra shader's core"
+	)
+
 	# Presets are the only cosmetics carrying shaders; a missing one is a hard
 	# crash at equip time, not a fallback.
 	var shader_dir: String = "res://source/common/gameplay/cosmetics/presets/shaders/"
 	var shaders: PackedStringArray = PackedStringArray([
 		"toxic_sludge", "blood_pool", "accretion_disk",
 		"heat_haze", "heat_shimmer", "blood_vignette", "ground_decal",
+		"eclipse_umbra", "solar_corona", "pixel_dissolve",
 	])
 	var missing_shaders: PackedStringArray = []
 	for name: String in shaders:
