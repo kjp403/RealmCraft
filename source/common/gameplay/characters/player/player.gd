@@ -139,6 +139,16 @@ func die(killer: Character) -> void:
 	# unwinds while the player object is still intact — a respawn rebuilds stats
 	# from scratch and would otherwise strand the applied prayer modifiers.
 	PrayerService.deactivate_all(self)
+	# Timed buffs and damage-over-time go out with the prayers, for the same
+	# reason and in the same window: a corpse carries nothing forward. Without
+	# this the status strip kept a row of icons ticking over the death screen and
+	# into the next life, and a burn applied a moment before death kept counting
+	# down on a body that was already gone.
+	BuffService.clear_all(self)
+	CoatingService.clear(self)
+	for child: Node in get_children():
+		if child is DamageOverTime:
+			child.queue_free()
 	# Leaderboard: credit the killer for real open-world PvP only — never
 	# sparring/duels (those are tallied as arena wins/losses). in_match is still
 	# true here (on_player_died_in_match clears it below). NPC killers are

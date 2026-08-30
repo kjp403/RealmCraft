@@ -233,6 +233,12 @@ extends Resource
 @export var meteor_interval_s: float = 11.0
 @export var enraged_meteor_interval_s: float = 0.0
 @export_range(0, 2) var meteor_phase: int = 0
+## Burn left on anyone the blast catches: damage per second, for this long.
+## Without it a meteor is a one-off number a healthy player can simply stand in,
+## which is exactly how a telegraph stops being a telegraph — the rain has to
+## cost something that follows you off the circle. 0 on either = no burn.
+@export var meteor_burn_dps: float = 0.0
+@export var meteor_burn_duration_s: float = 0.0
 
 ## CINDER LASH — a beam that SWEEPS through an arc. Unlike the fixed laser
 ## corridor, standing still or sidestepping both fail; you have to move around

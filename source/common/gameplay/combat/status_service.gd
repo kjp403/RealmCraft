@@ -23,14 +23,31 @@ static func sync(player: Player) -> void:
 	# A timed stat buff with a NEGATIVE amount is a debuff (Crippling Strike's
 	# move_speed slow) — route it to the debuff strip with a friendly id so the
 	# HUD shows it red/down, not green/up.
+	# ONE ENTRY PER ID. Two live buffs on the same stat with different amounts —
+	# a Rally +22 AD landing on top of a Berserk +40 AD, say — are two rows in
+	# active_buffs but ONE icon: the strip has no way to draw them apart, and
+	# sending both made the HUD build two tiles under one key and lose track of
+	# the first, which is how a fight ended with a row of buff icons that no
+	# longer expired and survived death. Merged here, at the source, so the wire
+	# format itself cannot express the ambiguity. The longest remaining wins —
+	# the icon is gone when the LAST of them is.
+	var seen: Dictionary = {}
 	for buff: Dictionary in player.player_resource.active_buffs:
 		var stat: String = String(buff["stat"])
 		var remaining: int = int(ceil((int(buff["expires_ms"]) - now) / 1000.0))
-		if float(buff["amount"]) < 0.0:
-			var debuff_id: String = "slow" if stat == String(Stat.MOVE_SPEED) else stat
-			debuffs.append({"id": debuff_id, "remaining": remaining})
-		else:
-			buffs.append({"id": stat, "remaining": remaining})
+		var negative: bool = float(buff["amount"]) < 0.0
+		var id: String = stat
+		if negative:
+			id = "slow" if stat == String(Stat.MOVE_SPEED) else stat
+		var bucket: Array = debuffs if negative else buffs
+		var key: String = ("d:" if negative else "b:") + id
+		if seen.has(key):
+			var row: Dictionary = seen[key]
+			row["remaining"] = maxi(int(row["remaining"]), remaining)
+			continue
+		var entry: Dictionary = {"id": id, "remaining": remaining}
+		seen[key] = entry
+		bucket.append(entry)
 
 	# A weapon coating is a buff on YOU (your hits do something extra), not a
 	# debuff — it rides the buff strip even when its kind names a harmful effect.

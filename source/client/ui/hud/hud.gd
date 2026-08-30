@@ -142,6 +142,13 @@ func _ready() -> void:
 
 	ClientState.input_changed.connect(_on_input_type_changed)
 
+	# The status strip and the boss bar both want the top centre of the screen,
+	# and the strip is drawn LAST — so a row of buff icons sat on top of the boss
+	# health bar and its name plate. The strip yields: while a boss bar is up it
+	# docks underneath it, and it takes the top back the moment the bar goes.
+	$BossBar.visibility_changed.connect(_reflow_status_bar)
+	_reflow_status_bar()
+
 	# Character level / xp bar. The bar chrome starts hidden and only flashes
 	# on gains (see _flash_xp_bar); the level label stays visible throughout.
 	experience_bar.self_modulate.a = 0.0
@@ -236,6 +243,26 @@ func _maybe_show_web_notice() -> void:
 		return
 	ClientState.settings.set_value(&"onboarding", &"seen_web_notice", true)
 	add_child(WebNotice.new())
+
+
+## Where the status strip sits with, and without, a boss bar above it. The docked
+## value clears the boss bar's own bottom edge (offset_bottom 82 in boss_bar.tscn)
+## with a few pixels of air.
+const STATUS_BAR_TOP: float = 8.0
+const STATUS_BAR_TOP_DOCKED: float = 90.0
+const STATUS_BAR_HEIGHT: float = 32.0
+
+
+## Keep the status strip clear of the boss bar. Driven by the bar's own
+## visibility, so nothing has to know when a boss fight starts or ends.
+func _reflow_status_bar() -> void:
+	var strip: Control = $StatusBar
+	var boss_bar: Control = $BossBar
+	if strip == null or boss_bar == null:
+		return
+	var top: float = STATUS_BAR_TOP_DOCKED if boss_bar.visible else STATUS_BAR_TOP
+	strip.offset_top = top
+	strip.offset_bottom = top + STATUS_BAR_HEIGHT
 
 
 ## Shows the death overlay with a per-second countdown until the server respawns us.
