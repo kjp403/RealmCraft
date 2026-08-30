@@ -102,17 +102,18 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):
 			only = arg.substr("--only=".length())
+	# The Gutterworks and the Drowned Cistern moved to the 32px open-biome
+	# builder (`tools/build_sewer_biome_32.gd`) and are deliberately NOT built
+	# here any more — running both would silently overwrite them back to the
+	# 16px tileset. Their functions are kept below for reference. The Ossuary is
+	# still a 16px sub-level and still belongs to this tool.
 	if only.is_empty():
 		_build_desert_terraces()
 		_build_desert_tombs()
-		_build_sewers_gutterworks()
-		_build_sewers_cistern()
 		_build_sewers_ossuary()
 		_build_forge_gallery()
 		_build_forge_deeps()
 	elif only == "sewers":
-		_build_sewers_gutterworks()
-		_build_sewers_cistern()
 		_build_sewers_ossuary()
 	elif only == "ossuary":
 		_build_sewers_ossuary()
