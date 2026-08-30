@@ -6,11 +6,17 @@ uniform vec4 glow_color : source_color = vec4(0.49, 0.75, 1.0, 1.0);
 uniform float vip : hint_range(0.0, 1.0) = 0.0;
 uniform float gold : hint_range(0.0, 1.0) = 0.0;
 uniform float style : hint_range(0.0, 6.0) = 0.0;
+// TitleVfx.OUTLINE_COLOR. A Label's outline is drawn INSIDE this same canvas
+// item, so without this test the pulse and the shine band land on the dark
+// backing too - the band brightens it, the glow tints it, and the contrast the
+// outline exists to provide is gone. See skill_master_title.gdshader's header.
+uniform vec4 outline : source_color = vec4(0.043, 0.043, 0.063, 1.0);
+uniform float outline_tolerance : hint_range(0.0, 1.0) = 0.22;
 
 void fragment() {
 	vec4 tex = COLOR;
-	if (tex.a < 0.04) {
-		COLOR = tex;
+	if (tex.a < 0.04 || distance(tex.rgb, outline.rgb) < outline_tolerance) {
+		COLOR = tex; // transparent, or the dark outline - emit unchanged
 	} else {
 	float pulse_amt = mix(0.07, 0.16, vip);
 	float pulse_spd = mix(2.0, 3.2, vip);

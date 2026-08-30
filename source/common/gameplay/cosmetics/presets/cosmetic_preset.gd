@@ -67,7 +67,7 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	_tick(delta)
 	queue_redraw()
-	for layer: Node2D in _draw_layers:
+	for layer: VfxDrawLayer in _draw_layers:
 		layer.queue_redraw()
 
 
@@ -146,20 +146,13 @@ func _swell_ramp(birth: Color, peak: Color, peak_at: float = 0.35) -> Gradient:
 	return g
 
 
-## A child layer that draws with its OWN blend mode by calling back into this
-## preset. Returns the layer; [param painter] is handed the layer as its only
-## argument so the callback can use its draw_* methods.
-##
-## A CanvasItem gets exactly one blend mode, so a preset that needs both solid
-## geometry and additive light out of _draw() - carved stone under glowing runes -
-## physically cannot do it in one node. The alternatives were worse: making the
-## whole node additive turns the stone into a lamp, and leaving it mixed makes the
-## runes look painted on.
+## A [VfxDrawLayer] child, redrawn with this preset. See that class for why a
+## second canvas item is the only way to mix blend modes in one effect.
 ##
 ## [param layer_z] is RELATIVE to this preset, so a negative value stays under the
 ## preset's own drawing and everything remains below the wearer.
-func _add_draw_layer(painter: Callable, additive: bool = false, layer_z: int = 0) -> Node2D:
-	var layer: DrawLayer = DrawLayer.new()
+func _add_draw_layer(painter: Callable, additive: bool = false, layer_z: int = 0) -> VfxDrawLayer:
+	var layer: VfxDrawLayer = VfxDrawLayer.new()
 	layer.painter = painter
 	layer.z_index = layer_z
 	if additive:
@@ -170,17 +163,7 @@ func _add_draw_layer(painter: Callable, additive: bool = false, layer_z: int = 0
 
 
 ## Layers built by [method _add_draw_layer], redrawn with this preset.
-var _draw_layers: Array[Node2D] = []
-
-
-## Host for [method _add_draw_layer]. Owns no state of its own - it exists purely
-## to be a second CanvasItem with a different material.
-class DrawLayer extends Node2D:
-	var painter: Callable
-
-	func _draw() -> void:
-		if painter.is_valid():
-			painter.call(self)
+var _draw_layers: Array[VfxDrawLayer] = []
 
 
 ## Additive blending, for anything that should read as LIGHT rather than as paint

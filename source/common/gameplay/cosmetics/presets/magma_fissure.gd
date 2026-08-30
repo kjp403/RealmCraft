@@ -41,7 +41,7 @@ const OPEN_S: float = 0.16
 
 ## Main split first, then branches.
 var _cracks: Array[PackedVector2Array] = []
-var _glow: CosmeticPreset.DrawLayer
+var _glow: VfxDrawLayer
 var _elapsed: float = 0.0
 
 
@@ -49,8 +49,8 @@ func _ready() -> void:
 	_build_cracks()
 	# The molten core has to ADD light while the char has to DARKEN the floor, and
 	# one CanvasItem gets one blend mode. Same split the Runebound rings make, for
-	# the same reason - see CosmeticPreset._add_draw_layer.
-	_glow = CosmeticPreset.DrawLayer.new()
+	# the same reason - see VfxDrawLayer.
+	_glow = VfxDrawLayer.new()
 	_glow.painter = _paint_glow
 	var additive: CanvasItemMaterial = CanvasItemMaterial.new()
 	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
