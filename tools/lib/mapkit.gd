@@ -532,3 +532,131 @@ static func interior_cells(mask: Dictionary, blocked: Dictionary, margin: int) -
 
 static func to_base64(layer: TileMapLayer) -> String:
 	return Marshalls.raw_to_base64(layer.tile_map_data)
+
+
+## A wall drawn in front-facing perspective, three tiles tall: a base row that
+## meets the floor, a body row above it, and a rim row that caps the top.
+##
+## [RimSpec] cannot describe these. It models a single-row border with an
+## optional multi-row south face, and it has no way to express an opening cut
+## through the wall — so an arched alcove, which is the whole point of Rafael
+## Matos's sewer wall sheets, has nowhere to live in it.
+##
+## Rows are sampled from column variants, so a long run does not repeat one
+## brick pattern across the whole map.
+class WallSpec:
+	extends RefCounted
+	var source: int = 0
+	## Column variants for each row of a straight run.
+	var rim: Array[Vector2i] = []
+	var body: Array[Vector2i] = []
+	var base: Array[Vector2i] = []
+	## An arched alcove, top row first, substituted for a plain run segment.
+	## Must be the same height as the run (3) or it is ignored.
+	var alcove: Array[Vector2i] = []
+
+
+## Paint three-tile walls along every north-facing floor edge — the only edge
+## where a front-facing wall reads correctly, because the art is drawn as if the
+## camera were looking at its face. Other edges keep whatever the caller painted
+## as void fill.
+##
+## Only cells already in [param void_mask] are written, so a wall can never eat
+## into walkable floor, and every written cell is recorded in [param blocked].
+## Those cells were unreachable before this ran, so the walls add collision
+## without changing reachability.
+##
+## [param alcove_every] > 0 substitutes an arched alcove roughly every N runs.
+static func paint_wall3(
+	body_layer: TileMapLayer,
+	rim_layer: TileMapLayer,
+	floor_mask: Dictionary,
+	void_mask: Dictionary,
+	spec: WallSpec,
+	bounds: Rect2i,
+	blocked: Dictionary,
+	alcove_every: int = 0,
+	seed_value: int = 0
+) -> int:
+	if spec.base.is_empty() or spec.body.is_empty() or spec.rim.is_empty():
+		return 0
+	var runs: int = 0
+	var use_alcove: bool = alcove_every > 0 and spec.alcove.size() == 3
+	for cell: Vector2i in void_mask.keys():
+		# A wall stands where void sits directly above floor.
+		if not floor_mask.has(cell + Vector2i(0, 1)):
+			continue
+		var mid := cell + Vector2i(0, -1)
+		var top := cell + Vector2i(0, -2)
+		# Refuse the run unless all three rows are void; a partial stack would
+		# clip through a floor pocket above and read as a wall growing out of it.
+		if not void_mask.has(mid) or not void_mask.has(top):
+			continue
+		if not bounds.has_point(top):
+			continue
+		var alcove: bool = use_alcove and (hash2(cell.x, cell.y, seed_value) % alcove_every) == 0
+		if alcove:
+			body_layer.set_cell(cell, spec.source, spec.alcove[2])
+			body_layer.set_cell(mid, spec.source, spec.alcove[1])
+			rim_layer.set_cell(top, spec.source, spec.alcove[0])
+		else:
+			body_layer.set_cell(cell, spec.source, _pick(spec.base, cell, seed_value + 1))
+			body_layer.set_cell(mid, spec.source, _pick(spec.body, cell, seed_value + 2))
+			rim_layer.set_cell(top, spec.source, _pick(spec.rim, cell, seed_value + 3))
+		blocked[cell] = true
+		blocked[mid] = true
+		blocked[top] = true
+		runs += 1
+	return runs
+
+
+## A liquid or overlay region whose border tiles are authored as a rounded ring
+## around a fill — the shape Rafael Matos's sewage channels ship as. Cheaper
+## than a Godot terrain set and exact, because the eight edge roles are named
+## rather than inferred from peering bits.
+class BlobSpec:
+	extends RefCounted
+	var source: int = 0
+	var fill: Vector2i
+	var n: Vector2i
+	var s: Vector2i
+	var w: Vector2i
+	var e: Vector2i
+	var nw: Vector2i
+	var ne: Vector2i
+	var sw: Vector2i
+	var se: Vector2i
+
+
+## Paint `mask` with `spec`, choosing an edge tile per cell from which of its
+## four orthogonal neighbours are outside the mask. Cells with opposite sides
+## both open (a one-cell-wide neck) fall back to the fill, which reads better
+## than an arbitrary edge and keeps narrow channels continuous.
+static func paint_blob(layer: TileMapLayer, mask: Dictionary, spec: BlobSpec) -> void:
+	for cell: Vector2i in mask.keys():
+		var open_n: bool = not mask.has(cell + Vector2i(0, -1))
+		var open_s: bool = not mask.has(cell + Vector2i(0, 1))
+		var open_w: bool = not mask.has(cell + Vector2i(-1, 0))
+		var open_e: bool = not mask.has(cell + Vector2i(1, 0))
+		var tile: Vector2i = spec.fill
+		if open_n and open_s:
+			tile = spec.fill
+		elif open_w and open_e:
+			tile = spec.fill
+		elif open_n and open_w:
+			tile = spec.nw
+		elif open_n and open_e:
+			tile = spec.ne
+		elif open_s and open_w:
+			tile = spec.sw
+		elif open_s and open_e:
+			tile = spec.se
+		elif open_n:
+			tile = spec.n
+		elif open_s:
+			tile = spec.s
+		elif open_w:
+			tile = spec.w
+		elif open_e:
+			tile = spec.e
+		layer.set_cell(cell, spec.source, tile)

@@ -30,9 +30,10 @@ const TERRAIN_REGIONS: Array[Rect2i] = [
 	Rect2i(25, 1, 8, 6),    # cobble floor bank + curved stone edges
 	Rect2i(0, 45, 6, 5),    # slime edge / spur pieces
 	Rect2i(0, 51, 6, 1),    # solid slime fill
-	Rect2i(26, 54, 8, 4),   # slime-on-stone channel blob (rounded corners)
+	Rect2i(26, 53, 8, 5),   # slime-on-stone channel blob (rounded corners + north bank)
 	Rect2i(0, 58, 6, 5),    # deep slime + shore variants
 	Rect2i(52, 37, 7, 4),   # grates / drain covers
+	Rect2i(27, 36, 8, 5),   # flat dark masonry — void fill and dry walkway
 ]
 
 ## `atlas-props.png` is the same kind of documentation sheet: captions like
