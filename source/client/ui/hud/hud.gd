@@ -25,6 +25,11 @@ const ONBOARDING_COACH: GDScript = preload("res://source/client/ui/hud/onboardin
 const CHAT_ABOVE_MENU_Z: int = 110
 const CHAT_DEFAULT_Z: int = 1
 
+## CanvasLayer for the chest reward window. Above UI (10) so it clears every
+## menu for BOTH paint and click; below LootFeed (90), Announcer (110),
+## Toaster (128) and Transition (200). See [method _mount_chest_reward_window].
+const REWARD_LAYER: int = 20
+
 @export var sub_menu: Control
 
 var _prayer_dock: Control
@@ -588,24 +593,57 @@ func _raise_chat_over_menu() -> void:
 	chat.move_to_front()
 
 
-## The chest reward readout. Built in code and parented straight to the HUD —
-## deliberately NOT registered in `menus`, so `display_menu` neither hides it nor
-## is hidden by it. That is the whole fix for the old "open a chest from the bag
-## and the inventory closes" loop.
+## The chest reward readout. Built in code and deliberately NOT registered in
+## `menus`, so `display_menu` neither hides it nor is hidden by it. That is the
+## whole fix for the old "open a chest from the bag and the inventory closes"
+## loop.
 ##
 ## It is also NOT wired into [method _refresh_hud_for_menus] like the trade panel
 ## is: this window is non-intrusive by design (no backdrop, click-through
 ## everywhere but its own panel), so the HUD and player movement stay live under
-## it. z above sub_menu's 100 so it reads over an open inventory rather than
-## under it.
+## it.
+##
+## WHY ITS OWN CanvasLayer AND NOT A z_index ON THE HUD
+## It used to be a HUD child at z_index 110, one above sub_menu's 100. That wins
+## the PAINT and loses the CLICK. Godot picks GUI input by walking the scene tree
+## in REVERSE order and ignores z_index entirely; HUD and Submenu are siblings
+## under the same UI CanvasLayer with Submenu SECOND, so Submenu's subtree is
+## always offered the click first. A MenuShell menu opens with a full-rect dim
+## `backdrop` ColorRect at MOUSE_FILTER_STOP — so with the Daily Skilling Board
+## open, the reward window rendered on top of the board while every click on
+## Claim All / Bank All / X was swallowed by the board behind it.
+##
+## Canvas LAYERS are the one ordering Godot applies to BOTH paint and picking, so
+## the window gets its own. [constant REWARD_LAYER] sits above UI (10) and every
+## menu in it, and below LootFeed (90), Announcer (110), Toaster (128) and
+## Transition (200) — this window raises toasts of its own, and they have to stay
+## readable over it.
+##
+## The layer breaks Control theme inheritance (a CanvasLayer is not a Control, so
+## the window can no longer see the HUD's theme), which would drop it back to the
+## project master theme and ignore the player's palette. Assigning the HUD's own
+## theme across the break, and re-assigning it on `theme_changed`, keeps the live
+## palette switch in ui.gd working.
 func _mount_chest_reward_window() -> void:
 	var script: GDScript = load("res://source/client/ui/overlays/chest_reward_window.gd")
 	if script == null:
 		return
+	var layer := CanvasLayer.new()
+	layer.name = "RewardLayer"
+	layer.layer = REWARD_LAYER
+	add_child(layer)
 	chest_reward_window = script.new() as Control
 	chest_reward_window.name = "ChestRewardWindow"
-	chest_reward_window.z_index = 110
-	add_child(chest_reward_window)
+	chest_reward_window.theme = theme
+	layer.add_child(chest_reward_window)
+	theme_changed.connect(_sync_reward_window_theme)
+
+
+## Carry a live palette change across the CanvasLayer break — see
+## [method _mount_chest_reward_window].
+func _sync_reward_window_theme() -> void:
+	if chest_reward_window != null and is_instance_valid(chest_reward_window):
+		chest_reward_window.theme = theme
 
 
 func _restore_chat_layer() -> void:

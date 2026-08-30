@@ -136,7 +136,7 @@ func _build() -> void:
 	close.text = "X"
 	close.custom_minimum_size = Vector2(32, 32)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	close.tooltip_text = "Close (loot stays staged until you claim it)"
+	close.tooltip_text = "Close (claims anything still waiting)"
 	PixelUI.button_frame(close, "frame_iron", 4)
 	PixelUI.button_font(close, PixelUI.SIZE_BODY, PixelUI.INK_DIM)
 	close.pressed.connect(_on_close)
@@ -365,9 +365,27 @@ func _on_bank_all() -> void:
 	_set_claim_enabled(true)
 
 
-## Closing is presentation only — staged loot lives server-side until claimed (or
-## auto-banked at logout), so this can never lose a reward.
+## Closing sweeps first. Staged loot was never really lost — it lives server-side
+## until claimed and auto-banks at logout — but a player who closes a window over
+## a chest they just earned does not know that, and reads it as loot gone. So the
+## X runs the same cascade the Claim All button does (bag first, overflow to the
+## bank) and only then hides.
+##
+## The manager decides what is sweepable: nothing mid-batch, and never the Hunt
+## Chest, which is storage a player parks loot in on purpose. See
+## [method UniversalChestManager.sweep_pending].
 func _on_close() -> void:
+	if not UniversalChestManager.has_unclaimed_rewards():
+		hide()
+		return
+	_set_claim_enabled(false)
+	var swept: bool = await UniversalChestManager.sweep_pending()
+	_set_claim_enabled(true)
+	# claim_all already speaks up when it has to overflow to the bank or when it
+	# can place nothing at all; this covers the quiet case, where everything fit
+	# in the bag and the player would otherwise never learn the close claimed it.
+	if swept and UniversalChestManager.pending().is_empty():
+		Toaster.toast("Claimed your rewards on close.")
 	hide()
 
 
