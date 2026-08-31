@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/quick_travel_interaction.gd" id="2_quicktravel"]
+[ext_resource type="Script" path="res://source/common/gameplay/quick_travel/quick_travel_destination.gd" id="3_destination"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="4_dialogue"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/scholar_cataloguer.tres" id="6_skin"]
+[ext_resource type="Material" path="res://source/common/gameplay/characters/npc/wayfarer_pink.tres" id="7_pink"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/guild_house.tres" id="8_guild"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/building/smith_house.tres" id="9_smith"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sewers.tres" id="10_sewers"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/desert.tres" id="11_desert"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/fire_forge.tres" id="12_forge"]
+
+[sub_resource type="Resource" id="Dest_guild_hall"]
+script = ExtResource("3_destination")
+target_instance = ExtResource("8_guild")
+target_id = 0
+label = "Guild Hall"
+blurb = "The main hub — board, bank and brokers."
+fee = 15000
+
+[sub_resource type="Resource" id="Dest_smith_house"]
+script = ExtResource("3_destination")
+target_instance = ExtResource("9_smith")
+target_id = 0
+label = "Smith House"
+blurb = "The crafting hub — forge, anvil and benches."
+fee = 15000
+
+[sub_resource type="Resource" id="Dest_sewers"]
+script = ExtResource("3_destination")
+target_instance = ExtResource("10_sewers")
+target_id = 0
+label = "The Sewers"
+blurb = "Surface entrance to the undercity."
+fee = 25000
+
+[sub_resource type="Resource" id="Dest_desert"]
+script = ExtResource("3_destination")
+target_instance = ExtResource("11_desert")
+target_id = 0
+label = "The Desert"
+blurb = "Surface entrance to the open sands."
+fee = 35000
+
+[sub_resource type="Resource" id="Dest_fire_forge"]
+script = ExtResource("3_destination")
+target_instance = ExtResource("12_forge")
+target_id = 0
+label = "Fire Forge"
+blurb = "Surface entrance. High hazard — late-game ground."
+fee = 50000
+
+[sub_resource type="Resource" id="QuickTravel_desk"]
+script = ExtResource("2_quicktravel")
+destinations = Array[ExtResource("3_destination")]([SubResource("Dest_guild_hall"), SubResource("Dest_smith_house"), SubResource("Dest_sewers"), SubResource("Dest_desert"), SubResource("Dest_fire_forge")])
+label_override = "Quick travel"
+
+[sub_resource type="Resource" id="Dialogue_fares"]
+script = ExtResource("4_dialogue")
+lines = Array[String](["I keep the old road-stones lit. Name a place I know and I will put you on it — for the toll, mind.", "The toll pays for the lighting, and it climbs if you wear the stones out. Three trips in ten minutes is courtesy. The fourth is business: half again each time after that.", "Rest a spell and the stones cool, and my prices with them."])
+label_override = "How does the toll work?"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "Wayfarer"
+location_hint = "Guild Hall and Smith House"
+skin = ExtResource("6_skin")
+skin_material = ExtResource("7_pink")
+greeting = "Roads are long, friend. Mine are short. Where can I send you?"
+interactions = Array[ExtResource("1_interaction")]([SubResource("QuickTravel_desk"), SubResource("Dialogue_fares")])

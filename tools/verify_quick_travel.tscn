@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_quick_travel.gd" id="1_qtverify"]
+
+[node name="QuickTravelVerifyRig" type="Node"]
+script = ExtResource("1_qtverify")
