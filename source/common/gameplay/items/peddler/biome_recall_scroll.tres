@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_script")
-usable = false
+usable = true
 item_name = &"Biome Recall Scroll"
 item_icon = ExtResource("2_icon")
 description = "A road-map folded to the size of a palm, marked in a hand that clearly walked every line of it. The folds have not been worn in yet."

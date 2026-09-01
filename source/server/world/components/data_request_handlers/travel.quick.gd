@@ -45,11 +45,23 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 
 	# --- Fare. Priced now, at the moment of purchase, from live surge state. ---
 	var player_id: int = pr.player_id
-	var fee: int = QuickTravelService.fee_for(player_id, dest.fee)
+	var scroll: bool = bool(desk_ctx.get("scroll", false))
+	var fee: int = 0 if scroll else QuickTravelService.fee_for(player_id, dest.fee)
 	var gold_id: int = Economy.gold_id()
 	if gold_id <= 0:
 		return {"ok": false, "reason": "no_currency"}
-	if fee > 0 and not Inventory.remove_amount_by_id(pr.inventory, gold_id, fee):
+
+	if scroll:
+		# THE SCROLL IS THE FARE, and it is spent here rather than in peddler.use
+		# — that handler only opened the board. Every gate above has already
+		# passed, so a refused ride never costs a scroll, and the removal sits
+		# immediately before the transfer so nothing can fail in between.
+		if not Inventory.remove_amount_by_id(pr.inventory, int(desk_ctx.get("scroll_id", 0)), 1):
+			# Held at resolve, gone by now: two rides booked from one scroll in
+			# the same breath. Refuse the second rather than move for free.
+			return {"ok": false, "reason": "no_scroll"}
+		instance.world_server.database.save_player(pr)
+	elif fee > 0 and not Inventory.remove_amount_by_id(pr.inventory, gold_id, fee):
 		# Insufficient funds: nothing has been spent and nothing has moved.
 		return {
 			"ok": false,
@@ -60,7 +72,11 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 
 	if fee > 0:
 		instance.world_server.database.save_player(pr)
-	QuickTravelService.record_ride(player_id)
+	if not scroll:
+		# A scroll ride is deliberately outside the surge window: the toll exists
+		# to price rapid hopping bought with GOLD, and the scroll already paid a
+		# 25,000-gold sink to exist.
+		QuickTravelService.record_ride(player_id)
 
 	var target_res: InstanceResource = dest.target_instance
 	var target: ServerInstance = target_res.get_instance()
@@ -76,6 +92,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	return {
 		"ok": true,
 		"paid": fee,
+		"scroll": scroll,
 		"gold": Inventory.count(pr.inventory, gold_id),
 		"inventory": pr.inventory,
 		"destination": dest.display_label(),

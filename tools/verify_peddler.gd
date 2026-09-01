@@ -27,7 +27,6 @@ const HANDLERS: Array[String] = [
 ## player buying something that does nothing.
 const INERT: Dictionary = {
 	"peddler_vault_key": "spent at the Vault Chest, not used from the bag",
-	"biome_recall_scroll": "needs the quick-travel board (unmerged branch)",
 }
 const PEDDLER_NPC: String = "res://source/common/gameplay/characters/npc/npcs/traveling_peddler.tres"
 ## The Peddler must not wear another NPC's exact art. It was built by recolouring

@@ -1007,6 +1007,12 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		"no_dye":
 			Toaster.toast("The dye has gone flat.")
 			return
+		"no_scroll":
+			Toaster.toast("You are not carrying that scroll.")
+			return
+		"no_desk":
+			Toaster.toast("The road-map is illegible.")
+			return
 		"no_effect":
 			Toaster.toast("You do not currently need that potion.")
 			return
@@ -1050,6 +1056,14 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		# "Blessing active for 2h") — the effect is the whole reason it cost
 		# 75,000 gold, and a generic "used" line would say nothing about it.
 		Toaster.toast(str(payload.get("message", "Used.")))
+		# A good whose effect IS a window (the Biome Recall Scroll) names the one
+		# it wants. Routed through open_menu_requested like every other menu, so
+		# the HUD decides layering rather than this dock reaching into it.
+		var menu: String = str(payload.get("open_menu", ""))
+		if not menu.is_empty():
+			ClientState.open_menu_requested.emit(
+				StringName(menu), payload.get("menu_arg", null)
+			)
 	# LootChestItem loot toast rides the chest.opened push.
 
 	_refresh_inventory()

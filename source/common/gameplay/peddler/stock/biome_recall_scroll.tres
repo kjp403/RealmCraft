@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/biome_recall_scroll.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/actions/biome_recall_scroll_action.gd" id="3_action"]
 
 [resource]
 script = ExtResource("1_script")
@@ -11,3 +12,4 @@ description = "A road-map folded to the size of a palm, marked in a hand that cl
 price_gold = 25000
 tier = "B"
 icon = ExtResource("2_icon")
+action_script = ExtResource("3_action")

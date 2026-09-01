@@ -19,6 +19,10 @@ const DEPARTURE: GDScript = preload(
 )
 
 var _npc: String = ""
+## True when the board was opened by a Biome Recall Scroll instead of by walking
+## up to the Wayfarer. Sent with every request so the server resolves the same
+## way twice; never used to decide a price, which is the server's alone.
+var _scroll: bool = false
 var _gold: int = 0
 var _busy: bool = false # one ride at a time — blocks double-clicks mid-request
 var _rows: VBoxContainer
@@ -59,6 +63,7 @@ func _ready() -> void:
 func open(arg: Variant) -> void:
 	var data: Dictionary = arg if arg is Dictionary else {}
 	_npc = str(data.get("npc", ""))
+	_scroll = bool(data.get("scroll", false))
 	_busy = false
 	_set_status("Reading the board...", PixelUI.INK_DIM)
 	_clear_rows()
@@ -71,7 +76,7 @@ func _request_quote() -> void:
 		_set_status("Not connected.", Color(1.0, 0.45, 0.45))
 		return
 	var result: Array = await Client.request_data_await(
-		&"travel.quote", {"npc": _npc}, String(InstanceClient.current.name)
+		&"travel.quote", {"npc": _npc, "scroll": _scroll}, String(InstanceClient.current.name)
 	)
 	# The player can close the window or walk off while this is in flight.
 	if not is_inside_tree() or not visible:
@@ -79,6 +84,9 @@ func _request_quote() -> void:
 	if result[1] != OK or not result[0].get("ok", false):
 		_set_status(_quote_error(str(result[0].get("reason", ""))), Color(1.0, 0.45, 0.45))
 		return
+	# Trust the reply, not the arg we sent: if the server resolved this as a desk
+	# rather than a scroll, the rows must not draw as free.
+	_scroll = bool(result[0].get("scroll", false))
 	_render(result[0])
 
 
@@ -171,8 +179,9 @@ func _build_row(row: Dictionary) -> Control:
 	price.add_theme_constant_override(&"separation", 0)
 	line.add_child(price)
 
+	# A scroll ride is free, and saying "0 G" reads like a bug rather than a perk.
 	var fee_label: Label = PixelUI.text(
-		"%s G" % _commas(fee),
+		"Free" if _scroll else "%s G" % _commas(fee),
 		PixelUI.SIZE_BODY,
 		PixelUI.INK_COIN if affordable else Color(1.0, 0.45, 0.45)
 	)
@@ -224,7 +233,9 @@ func _book(index: int) -> void:
 		_busy = false
 		return
 	var result: Array = await Client.request_data_await(
-		&"travel.quick", {"npc": _npc, "index": index}, String(InstanceClient.current.name)
+		&"travel.quick",
+		{"npc": _npc, "index": index, "scroll": _scroll},
+		String(InstanceClient.current.name)
 	)
 	var data: Dictionary = result[0] if result[1] == OK else {}
 	if data.get("ok", false):
