@@ -29,9 +29,6 @@ extends Node
 
 const URL_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_URL"
 const KEY_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_KEY"
-## Seconds before a POST is abandoned. Short: this is telemetry, and a request
-## still in flight when the next event fires is worth less than the new one.
-const TIMEOUT_S: float = 8.0
 ## Payload schema version, so the gateway and the site can tell an old world
 ## server's snapshot from a new one after a field changes.
 const SCHEMA: int = 1
@@ -93,46 +90,20 @@ static func _zone_title(biome: StringName) -> String:
 
 
 ## POST [param payload] to the configured endpoint, parented under [param host].
-## Returns false when the exporter is off or could not start — never throws, and
-## never makes the caller wait.
+## Returns false when the exporter is off or the call could not be started —
+## never throws, and never makes the caller wait. The HTTP rules (threaded, no
+## leak, warn-only) live in [PeddlerHttp], shared with the Discord announcer.
 static func post(host: Node, payload: Dictionary) -> bool:
-	if host == null or not host.is_inside_tree():
-		return false
 	var url: String = OS.get_environment(URL_ENV)
 	var key: String = OS.get_environment(KEY_ENV)
 	if url.is_empty() or key.is_empty():
 		return false # not configured — the normal state on a dev machine
-
-	var request: HTTPRequest = HTTPRequest.new()
-	request.timeout = TIMEOUT_S
-	# Threaded so TLS negotiation and the round trip never touch the main loop.
-	# The world server ticks combat on that loop; a slow website must not be able
-	# to stutter a fight.
-	request.use_threads = true
-	host.add_child(request)
-	request.request_completed.connect(
-		func(result: int, code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
-			# Log a failure once, WITHOUT the payload or the key, then clean up.
-			if result != HTTPRequest.RESULT_SUCCESS or code < 200 or code >= 300:
-				ServerLog.warn(
-					"Peddler web export failed (result %d, HTTP %d)." % [result, code]
-				)
-			request.queue_free()
+	return PeddlerHttp.post_json(
+		host,
+		url,
+		payload,
+		"Peddler web export",
+		# Server-to-server bearer. The ONLY place the secret appears — never in
+		# the payload, never in a log line.
+		PackedStringArray(["Authorization: Bearer " + key])
 	)
-
-	var headers: PackedStringArray = PackedStringArray([
-		"Content-Type: application/json",
-		# Server-to-server bearer. The ONLY place the secret appears.
-		"Authorization: Bearer " + key,
-	])
-	var error: Error = request.request(
-		url, headers, HTTPClient.METHOD_POST, JSON.stringify(payload)
-	)
-	if error != OK:
-		# A malformed URL or an exhausted socket pool. Free the node here — the
-		# completion signal will never fire, and leaking one per event would grow
-		# the tree for the life of the process.
-		ServerLog.warn("Peddler web export could not start (error %d)." % error)
-		request.queue_free()
-		return false
-	return true

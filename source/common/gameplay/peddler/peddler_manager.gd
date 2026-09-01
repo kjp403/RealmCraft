@@ -222,13 +222,23 @@ func _teardown() -> void:
 ## appearing, the cart leaving, and the wares rolling over at UTC midnight.
 func _export(reason: String) -> void:
 	_exported_date = PeddlerSchedule.utc_date()
-	if not PeddlerWebExport.is_configured():
-		return # no webhook configured (every dev machine) — stay silent
+	# The two integrations are independent: a server may run the website tracker
+	# without Discord, or Discord without the tracker. Build the snapshot once,
+	# then let each decide for itself whether it is configured.
+	if not PeddlerWebExport.is_configured() and not PeddlerDiscord.is_configured():
+		return # nothing configured (every dev machine) — stay silent
 	var payload: Dictionary = PeddlerWebExport.build_payload(_active_biome, is_spawned())
+
 	if PeddlerWebExport.post(self, payload):
 		ServerLog.info("Peddler web export: %s (%s)." % [
 			reason, "active" if payload["is_active"] else "roaming"
 		])
+
+	# SPAWN ONLY. A despawn or a midnight stock roll is not something a player
+	# can act on, and a channel that pings for those is a channel people mute —
+	# taking the one message that mattered with it.
+	if reason == "spawn" and PeddlerDiscord.announce(self, payload):
+		ServerLog.info("Peddler Discord announce: %s." % str(payload.get("current_zone", "")))
 
 
 # --- Helpers ---
