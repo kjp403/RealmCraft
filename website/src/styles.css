@@ -24,6 +24,7 @@
   --cat-boards: #5ec8f0;
   --cat-play: #2ecc7a;
   --cat-donate: #e8c56a;
+  --cat-peddler: #ffd640;
   --theme: var(--accent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   --display: "Jersey 10", "Silkscreen", monospace;
@@ -391,6 +392,7 @@ nav.primary a:hover, nav.primary a.active { color: var(--text); text-decoration:
 .cat-boards { --cat: var(--cat-boards); }
 .cat-play { --cat: var(--cat-play); }
 .cat-donate { --cat: var(--cat-donate); }
+.cat-peddler { --cat: var(--cat-peddler); }
 a.cat-start { color: var(--cat-start); }
 a.cat-items { color: var(--cat-items); }
 a.cat-creatures { color: var(--cat-creatures); }
@@ -955,4 +957,32 @@ body.location-scene article.page {
 @media (max-width: 620px) {
   .pd-banner { flex-direction: column; align-items: flex-start; }
   .pd-clocks { gap: 1rem; }
+}
+
+/* The Peddler link is the only nav item whose contents change hour to hour: a
+   cart that exists in the world for 30 minutes out of every four. Rendered as
+   plain grey text mid-bar it read as one more wiki section, so nobody learned
+   it was there to click. A filled chip is the one treatment in this bar that
+   cannot be mistaken for the row of links around it.
+
+   Specificity is deliberate: `body[class^="theme-"] nav.primary a.active`
+   recolours the active link per page theme, and would otherwise repaint this
+   chip's text on the Peddler page itself. */
+.site-header nav.primary a.peddler,
+.site-header nav.primary a.peddler:hover,
+.site-header nav.primary a.peddler.active {
+  color: var(--bg);
+  background: var(--cat-peddler);
+  border: 2px solid var(--cat-peddler);
+  padding: 0 0.55rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.site-header nav.primary a.peddler:hover {
+  background: var(--text);
+  border-color: var(--text);
+}
+.site-header nav.primary a.peddler:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
