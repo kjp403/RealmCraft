@@ -142,6 +142,32 @@ sudo systemctl show arkenelle-world   -p Environment
 sudo systemctl show arkenelle-gateway -p Environment
 ```
 
+### Optional: Discord announcement
+
+Two more lines in the SAME file. Leave them blank and nothing is posted.
+
+```bash
+# In Discord: your server -> Edit Channel -> Integrations -> Webhooks -> New
+#   -> Copy Webhook URL. That URL IS a password: anyone who has it can post
+#   into that channel. If it leaks, delete the webhook and make a new one.
+#
+# For the opt-in ping: Discord Settings -> Advanced -> Developer Mode ON,
+#   then right-click the role -> Copy Role ID (a long number, not the name).
+sudo nano /etc/arkenelle/peddler.env
+#   ARKENELLE_PEDDLER_DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
+#   ARKENELLE_PEDDLER_DISCORD_ROLE_ID=1234567890123456789   # blank = ping nobody
+
+sudo systemctl restart arkenelle-world     # world only; the gateway is not involved
+```
+
+Posts once when the Peddler SPAWNS — never on despawn or the midnight roll, so
+it is at most six messages a day. The "packs up" line is a Discord timestamp, so
+it counts down live in every reader's client and is still correct for someone
+opening Discord twenty minutes later.
+
+An allowed_mentions whitelist means the opt-in role is the only thing the webhook can
+ever ping, even if an item name contained an @.
+
 A normal deploy needs none of this again: `update.sh` reinstalls the unit files
 and `daemon-reload`s, and `/etc/arkenelle/` is outside everything it touches.
 
