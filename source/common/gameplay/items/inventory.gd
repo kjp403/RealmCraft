@@ -39,6 +39,7 @@ const UNLIMITED_IN_BANK: Array[StringName] = [
 	&"minor_health_potion", &"health_potion", &"greater_health_potion",
 	&"minor_mana_potion", &"mana_potion", &"greater_mana_potion",
 	&"prayer_potion",
+	&"defense_tonic",
 ]
 
 

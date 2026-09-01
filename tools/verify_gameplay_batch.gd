@@ -114,6 +114,12 @@ func _check_bone_item() -> void:
 			Inventory.stack_limit_for(potion, true) == int(potion.stack_limit),
 			"potions must not inherit the cooked-food bank stack of 50"
 		)
+	var tonic: Item = load("res://source/common/gameplay/items/consumables/defense_tonic.tres")
+	if _expect(tonic != null, "defense_tonic.tres failed to load"):
+		_expect(
+			Inventory.stack_limit_for(tonic, true) == 0,
+			"defense tonic must bank as one unlimited stack, not cap at 50"
+		)
 	if not _expect(bone.item_icon != null, "bone has no icon"):
 		return
 	# Item.item_icon defaults to a leaf sprite, so an item that never assigns one
