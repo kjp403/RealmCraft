@@ -114,12 +114,22 @@ func _check_bone_item() -> void:
 			Inventory.stack_limit_for(potion, true) == int(potion.stack_limit),
 			"potions must not inherit the cooked-food bank stack of 50"
 		)
-	var tonic: Item = load("res://source/common/gameplay/items/consumables/defense_tonic.tres")
-	if _expect(tonic != null, "defense_tonic.tres failed to load"):
-		_expect(
-			Inventory.stack_limit_for(tonic, true) == 0,
-			"defense tonic must bank as one unlimited stack, not cap at 50"
+	# Every drinkable banks as one unlimited stack. None of them author a
+	# stack_limit, so a missing UNLIMITED_IN_BANK entry silently drops it to the
+	# 50 cap and shatters a brewer's vault into 50-count rows. Cooked food is
+	# the deliberate exception and is asserted at 50 above.
+	for slug: String in [
+		"defense_tonic",
+		"weapon_ember", "weapon_poison", "weapon_poison_plus", "weapon_salve",
+	]:
+		var draught: Item = load(
+			"res://source/common/gameplay/items/consumables/%s.tres" % slug
 		)
+		if _expect(draught != null, "%s.tres failed to load" % slug):
+			_expect(
+				Inventory.stack_limit_for(draught, true) == 0,
+				"%s must bank as one unlimited stack, not cap at 50" % slug
+			)
 	if not _expect(bone.item_icon != null, "bone has no icon"):
 		return
 	# Item.item_icon defaults to a leaf sprite, so an item that never assigns one
