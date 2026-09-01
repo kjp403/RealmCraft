@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "chronos_clock"
 item_name = "Chronos Clock"
 description = "A cased clock that runs a little ahead of the world. The Peddler will not say by how much, and will not be drawn on what that is worth."
+effect = "Adds 10 minutes to your party's live Boss Contract deadline. The whole party gets the time; the clock is spent by whoever uses it. With no live contract it refuses and stays in your bag, so it cannot be burned on a fight that is already over."
 price_gold = 250000
 tier = "S"
 icon = ExtResource("2_icon")

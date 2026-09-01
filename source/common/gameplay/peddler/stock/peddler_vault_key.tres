@@ -8,6 +8,7 @@ script = ExtResource("1_script")
 id = "peddler_vault_key"
 item_name = "Peddler's Vault Key"
 description = "A key the Peddler will sell you and will not use for you. It opens the strongbox beside their cart, once, and the lock keeps the key."
+effect = "Opens the strongbox standing beside the Peddler's cart, once, and is consumed doing it. The payout is fixed rather than rolled: 3 Boss Contract Keys and 30 Greater Health Potions, handed over through the usual chest reward window."
 price_gold = 500000
 tier = "S"
 icon = ExtResource("2_icon")

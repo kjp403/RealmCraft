@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "mystery_seed"
 item_name = "Mystery Seed"
 description = "Unlabelled, and the Peddler does not know either. Plant it and it is grown and harvested inside a breath — logs or herbs, never the same twice."
+effect = "Plants and harvests on the spot, paying out 2 different raw gatherables: logs, oak, willow, maple or yew logs, or healing herb, grimshade, sunwort, frostpetal or moonbloom, between 3 and 24 of each. Raw materials only — never bars or potions. Needs bag room for both stacks or it refuses and is not spent."
 price_gold = 50000
 tier = "A"
 icon = ExtResource("2_icon")

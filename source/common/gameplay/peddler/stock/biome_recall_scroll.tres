@@ -8,6 +8,7 @@ script = ExtResource("1_script")
 id = "biome_recall_scroll"
 item_name = "Biome Recall Scroll"
 description = "A road-map folded to the size of a palm, marked in a hand that clearly walked every line of it. The folds have not been worn in yet."
+effect = "Nothing yet. The scroll is sold but not wired to the quick-travel board, so using one does nothing today."
 price_gold = 25000
 tier = "B"
 icon = ExtResource("2_icon")

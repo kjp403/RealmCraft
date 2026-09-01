@@ -55,6 +55,22 @@ static var _fallback_cache: Dictionary[String, Texture2D] = {}
 @export var item_name: String = ""
 ## Shop-row body copy.
 @export_multiline var description: String = ""
+## What the good actually DOES, in plain terms, for the wiki and the shop card.
+##
+## Separate from [member description] because that is flavour and several goods
+## are deliberately coy in it -- the Chronos Clock "will not say by how much".
+## That is the right voice for a merchant and the wrong answer for a player
+## deciding whether to spend 250,000 gold, so the mechanics live in their own
+## field instead of the flavour being rewritten into a spec sheet.
+##
+## Authored, not derived. The numbers come from the action script's constants
+## (see the [code]peddler/actions/[/code] scripts), so a balance change means
+## editing this line too -- the same duty as any authored .tres number, and the
+## alternative is a website that parses GDScript.
+##
+## Blank is legitimate: brokered rows are existing items that document
+## themselves on their own wiki page.
+@export_multiline var effect: String = ""
 ## Price in gold. Charged server-side; this copy is for display.
 @export var price_gold: int = 0
 ## Which daily bucket this rolls in: [constant TIER_S] / [constant TIER_A] /

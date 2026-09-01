@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "hunter_charm"
 item_name = "Hunter's Charm"
 description = "A tooth on a wire, worn smooth. For two hours the rarest thing a great beast is carrying leans very slightly toward the person wearing it."
+effect = "2 hours of Hunter's Blessing: a boss drop whose authored chance is already Rare or Ultra rolls at 1.15x that chance. Common boss drops are untouched and ordinary mobs are unaffected. Using a second charm extends the timer instead of being wasted."
 price_gold = 350000
 tier = "S"
 icon = ExtResource("2_icon")

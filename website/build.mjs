@@ -59,6 +59,7 @@ const ITEM_KIND = {
   AmmoItem: "Ammo",
   QuestItem: "Quest item",
   LootChestItem: "Chest",
+  PeddlerGoodItem: "Peddler good",
   DungeonKeyItem: "Dungeon key",
   Item: "Item",
 };
@@ -1876,6 +1877,27 @@ function attachItemWiki(items, creatures, zones, shops, chestTables, stations, q
   }
 }
 
+// The Peddler's stock rows, keyed by id. That id is deliberately the same
+// string as the granted item's registry slug (see PeddlerItemData's class note),
+// so an item page can find its shop row without a second mapping table.
+function collectPeddlerStock() {
+  const dir = path.join(ROOT, "source/common/gameplay/peddler/stock");
+  const rows = new Map();
+  if (!fs.existsSync(dir)) return rows;
+  for (const file of walk(dir).filter((f) => f.endsWith(".tres"))) {
+    const doc = parseTres(fs.readFileSync(file, "utf8"));
+    if (doc.header.script_class !== "PeddlerItemData") continue;
+    const id = str(doc.resource.id);
+    if (!id) continue;
+    rows.set(slugify(id), {
+      tier: str(doc.resource.tier),
+      price: num(doc.resource.price_gold),
+      effect: str(doc.resource.effect),
+    });
+  }
+  return rows;
+}
+
 function listPage(title, intro, cardsHtml, active, cat) {
   return shell({
     title: `${title} — Arkenelle Wiki`,
@@ -1912,6 +1934,7 @@ function build() {
   const shops = collectShops();
   const stations = collectStations();
   const chestTables = collectChestTables();
+  const peddlerStock = collectPeddlerStock();
   attachItemWiki(items, creatures, zones, shops, chestTables, stations, quests);
   const itemSources = buildItemSources(
     items,
@@ -2270,6 +2293,11 @@ function build() {
     else if (it.requiredLevel) stats.push(["Requires level", String(it.requiredLevel)]);
     if (it.vendor) stats.push(["Vendor value", String(it.vendor)]);
     if (it.stack) stats.push(["Stack", it.stack === 1 ? "Not stackable" : String(it.stack)]);
+    const pd = peddlerStock.get(it.slug);
+    if (pd) {
+      if (pd.tier) stats.push(["Peddler tier", pd.tier]);
+      if (pd.price) stats.push(["Peddler price", fmtGold(pd.price) + " gold"]);
+    }
     if (it.table) {
       stats.push(["Tier", String(it.table.tier)]);
       if (it.table.goldMax) stats.push(["Gold", `${fmtGold(it.table.goldMin)}–${fmtGold(it.table.goldMax)}`]);
@@ -2296,6 +2324,8 @@ function build() {
             </div>
           </div>
           ${it.description ? `<p>${esc(it.description)}</p>` : ""}
+          ${pd && pd.effect ? `<h2>What it does</h2><p>${esc(pd.effect)}</p>` : ""}
+          ${pd ? `<p class="muted">Sold by the <a class="cat-peddler" href="/peddler/">Traveling Peddler</a> when the cart is carrying it — one per account per UTC day.</p>` : ""}
           ${stats.length ? `<div class="stats">${stats.map(([k, v]) => `<div><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join("")}</div>` : ""}
           ${inside}
           ${sources}
@@ -2599,7 +2629,7 @@ function build() {
   }
 
   const search = [
-    ...items.map((x) => ({ title: x.name, kind: "Item · " + x.kind, href: `/wiki/items/${x.slug}/`, haystack: (x.name + " " + x.kind + " " + x.description).toLowerCase() })),
+    ...items.map((x) => ({ title: x.name, kind: "Item · " + x.kind, href: `/wiki/items/${x.slug}/`, haystack: (x.name + " " + x.kind + " " + x.description + " " + (peddlerStock.get(x.slug)?.effect || "")).toLowerCase() })),
     ...npcs.map((x) => ({ title: x.name, kind: "NPC", href: `/wiki/npcs/${x.slug}/`, haystack: (x.name + " " + x.greeting + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...creatures.map((x) => ({ title: x.name, kind: x.boss ? "Boss" : "Enemy", href: `/wiki/creatures/${x.slug}/`, haystack: (x.name + " " + x.type + " " + (x.locations || []).map((z) => z.name).join(" ")).toLowerCase() })),
     ...zones.map((x) => ({ title: x.name, kind: x.isDungeon ? "Dungeon" : "Location", href: `/wiki/locations/${x.slug}/`, haystack: (x.name + " " + x.description).toLowerCase() })),

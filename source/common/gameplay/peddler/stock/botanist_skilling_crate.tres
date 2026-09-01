@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "botanist_skilling_crate"
 item_name = "Botanist's Skilling Crate"
 description = "A slatted crate that smells of cut stems. Sealed with a botanist's wax and sold on the Peddler's word about what is under it."
+effect = "Pays out 4 different mid-to-high tier Herblore ingredients straight into your bag: grimshade, sunwort, frostpetal, moonbloom, starblossom, bloodcap, blightspore, venom sacs, fairy dust or ember ash, between 5 and 26 of each. Low-level herbs are deliberately not in the pool. If your bag lacks room for the whole bundle it refuses and the crate is not spent."
 price_gold = 60000
 tier = "A"
 icon = ExtResource("2_icon")

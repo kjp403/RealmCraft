@@ -8,6 +8,7 @@ script = ExtResource("1_script")
 id = "noter_permit"
 item_name = "Noter's Permit"
 description = "A stamped writ, countersigned twice and legible only in good light. The clerks it would oblige have not been appointed yet."
+effect = "Nothing yet. The permit is sold but the item-noting system it would authorise does not exist, so using one does nothing today."
 price_gold = 150000
 tier = "S"
 icon = ExtResource("2_icon")
