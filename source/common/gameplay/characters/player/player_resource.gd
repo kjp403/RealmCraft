@@ -215,11 +215,13 @@ var active_inventory_bag: int = 0
 ## players table is another placeholder the INSERT has to keep aligned — a
 ## mismatch there makes save_player fail for EVERY field, silently.
 
-## Banked Anvil Stabilizer charges. While this is above zero a smelting run may
-## reach [constant AnvilBoost.BOOSTED_MAX_BARS] bars instead of the base cap, and
-## each bar smelted spends one. Uncapped: nothing stops a smith banking several
-## stabilizers, and the good is a convenience rather than a power gain.
-@export var anvil_boost_charges: int = 0
+## Unix MILLISECONDS the Anvil Stabilizer's forge boost expires at (0 = idle).
+## A wall-clock stamp like [member hunter_charm_until_ms], so the ten minutes
+## survive a relog and a server restart. While it is in the future, smelting and
+## smithing both run at [constant AnvilBoost.SPEED_MULTIPLIER] speed — see
+## [AnvilBoost]. Read through that class, never directly: a lapsed stamp is
+## still a number.
+@export var anvil_boost_until_ms: int = 0
 ## Unix MILLISECONDS the Hunter's Charm blessing expires at (0 = never blessed).
 ## A wall-clock stamp, not a countdown, so it keeps running while the character
 ## is logged out — see [HunterCharm].

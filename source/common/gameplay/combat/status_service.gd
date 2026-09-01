@@ -60,6 +60,13 @@ static func sync(player: Player) -> void:
 			"remaining": coating_left,
 		})
 
+	# The Anvil Stabilizer. A bought, timed buff with no other tell — peddler
+	# state is server-only, so this strip is the one place a smith can see the
+	# ten minutes they paid for running down.
+	var anvil_left: int = AnvilBoost.remaining_s(player.player_resource)
+	if anvil_left > 0:
+		buffs.append({"id": String(AnvilBoost.STATUS_ID), "remaining": anvil_left})
+
 	for child: Node in player.get_children():
 		if child is DamageOverTime:
 			debuffs.append({

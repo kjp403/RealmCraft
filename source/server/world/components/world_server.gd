@@ -265,11 +265,6 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 	player_id_to_peer_id.erase(player.player_id)
 	BlockList.clear_player(player.player_id)
-	# Smelting-run window is in-memory and keyed by player_id — drop it so the
-	# table does not grow by one entry per account seen this uptime. The idle
-	# window would expire it anyway; this is the sweep.
-	AnvilBoost.forget(player.player_id)
-
 	player.current_peer_id = 0
 	connected_players.erase(peer_id)
 	peer_client_ips.erase(peer_id)

@@ -838,11 +838,14 @@ func _start_craft_loop() -> void:
 			break
 		if _station.craft_fee > 0 and _golds < _station.craft_fee:
 			break
+		# Paced by the same shared multiplier the HUD loop uses, so an Anvil
+		# Stabilizer speeds this fallback path up identically.
+		var interval: float = CRAFT_INTERVAL / maxf(0.01, CraftController.known_speed)
 		var waited: float = 0.0
-		while waited < CRAFT_INTERVAL and _looping and gen == _loop_generation and visible:
+		while waited < interval and _looping and gen == _loop_generation and visible:
 			await get_tree().create_timer(0.05).timeout
 			waited += 0.05
-			_set_progress(waited / CRAFT_INTERVAL)
+			_set_progress(waited / interval)
 		if not _looping or gen != _loop_generation or not visible:
 			break
 		if not _has_ingredients(recipe):
@@ -875,6 +878,7 @@ func _craft_once() -> bool:
 		return false
 
 	var data: Dictionary = result[0]
+	CraftController.known_speed = maxf(0.01, float(data.get("craft_speed", 1.0)))
 	var verb: String = "Brewed" if _is_herblore_station() else ("Cooked" if _is_cooking_station() else "Crafted")
 	var title: String = "%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)]
 	var xp_gain: int = int(data.get("xp", 0))
@@ -910,20 +914,7 @@ func _toast_failure(data: Dictionary) -> void:
 			Toaster.toast("Move closer to the station.")
 		"inventory_full":
 			Toaster.toast("Your bag is full. Bank some items first.")
-		"bar_limit":
-			Toaster.toast(_bar_limit_text(data))
 		_:
 			Toaster.toast("Can't %s that right now." % verb)
 
 
-## The furnace run cap (AnvilBoost). Names the cap AND the way past it, because
-## "you smelted 10 bars" with no explanation reads as the furnace breaking.
-func _bar_limit_text(data: Dictionary) -> String:
-	var cap: int = int(data.get("cap", AnvilBoost.BASE_MAX_BARS))
-	@warning_ignore("integer_division")
-	var rest_s: int = int(data.get("cooldown_ms", AnvilBoost.RUN_IDLE_RESET_MS)) / 1000
-	if bool(data.get("boosted", false)):
-		return "The stabilizer is spent — %d bars this run. Rest %ds." % [cap, rest_s]
-	return "The furnace needs to cool — %d bars a run. Rest %ds, or use an Anvil Stabilizer." % [
-		cap, rest_s
-	]

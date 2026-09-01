@@ -8,8 +8,8 @@
 script = ExtResource("1_script")
 id = "anvil_stabilizer"
 item_name = "Anvil Stabilizer"
-description = "A weighted collar that stops a furnace drifting off heat. Fifty charges: each one holds a smelt steady, and a stabilised run can go fifty bars deep instead of ten."
-effect = "Banks 50 smelting charges. While you hold at least one, a smelting run may reach 50 bars instead of 10, and every bar smelted spends one charge — so one stabilizer is one full 50-bar run. A run is consecutive smelts less than 10 seconds apart."
+description = "A weighted collar that holds a furnace on heat and an anvil true. Ten minutes of steady iron: bars pour twice as fast, and hammered work keeps pace."
+effect = "Smelting and smithing run at double speed for 10 minutes — the furnace and the anvil both. Using a second stabilizer adds another 10 minutes rather than restarting the clock."
 price_gold = 75000
 tier = "A"
 icon = ExtResource("2_icon")
