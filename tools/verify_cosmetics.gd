@@ -298,5 +298,107 @@ func _initialize() -> void:
 	_check(nobody.weapon_cosmetic_id == 0, "players default to no weapon cosmetic")
 	_check(nobody.vault_skin_id == 0, "players default to no prestige skin")
 
+	print("-- doors --")
+	_check_no_stray_doors()
+
 	print("COSMETICS_VERIFY_%s failures=%d" % ["FAIL" if _fail else "PASS", _fail])
 	quit(1 if _fail else 0)
+
+
+## The staff menu names. Any client route naming one of these opens Vault content
+## (unreleased VFX, staff dyes, premium titles) from wherever it is wired.
+const STAFF_MENUS: Array[String] = ["cosmetics", "skins", "titles", "vault"]
+
+## Every file allowed to name a staff menu, and why. An ALLOWLIST on purpose: a
+## denylist of known-bad routes would not have caught the one this exists for.
+##
+## The Profile menu shipped a tab labelled "Skins" pointing at &"cosmetics" — a
+## second door onto the Curator's room, reachable from anywhere in the game. It
+## sat there for months because nothing asserted where these menus may be opened
+## from. Server-side gating held (cosmetics.state returns an empty roster to
+## non-staff, cosmetics.equip refuses them), so nothing leaked; the point is that
+## the gate was the ONLY thing standing in the way, and it should never be.
+##
+## Adding a file here means "this route is deliberate". Do not add one to make
+## the check pass — the Vault is reached through the Curator, and that is the
+## whole design.
+const DOOR_ALLOWLIST: Dictionary = {
+	# The three Curator interactions. Each routes to &"vault"; the Vault menu
+	# owns the Titles/Skins/Cosmetics tabs behind AdminOnlyInstanceResource.
+	"res://source/common/gameplay/characters/npc/interactions/cosmetics_interaction.gd": true,
+	"res://source/common/gameplay/characters/npc/interactions/skins_interaction.gd": true,
+	"res://source/common/gameplay/characters/npc/interactions/titles_interaction.gd": true,
+	# The menus themselves — they name their own tabs.
+	"res://source/client/ui/menus/vault/vault_menu.gd": true,
+	"res://source/client/ui/menus/cosmetics/cosmetics_menu.gd": true,
+	"res://source/client/ui/menus/skins/skins_menu.gd": true,
+	"res://source/client/ui/menus/titles/titles_menu.gd": true,
+	# The registry facade. Names &"cosmetics" as a ContentRegistry key, never a menu.
+	"res://source/common/gameplay/cosmetics/cosmetics.gd": true,
+	# Reads the `cosmetics` CONTENT REGISTRY for set-bonus auras, not the menu.
+	# Free skilling auras ride Character.skilling_aura_id, a separate channel.
+	"res://source/common/gameplay/jobs/skilling_outfit_manager.gd": true,
+}
+
+
+## Fail if any client or common script names a staff menu outside the allowlist.
+##
+## Deliberately matches the bare token &"cosmetics" rather than a call shape like
+## open_menu_requested.emit(&"cosmetics"). The regression that prompted this was
+## a TABLE ENTRY — ["Skins", &"cosmetics"] in a loop that built buttons — which
+## no call-shape pattern would have seen.
+func _check_no_stray_doors() -> void:
+	var strays: PackedStringArray = []
+	var scanned: int = 0
+	for root: String in ["res://source/client", "res://source/common"]:
+		scanned += _scan_dir(root, strays)
+	_check(scanned > 0, "door scan reached the source tree (%d files)" % scanned)
+	_check(
+		strays.is_empty(),
+		"no staff-menu route outside the Vault path %s" % str(strays)
+	)
+
+
+## Recurse [param dir], appending "path:line" for every off-allowlist hit.
+## Returns the number of .gd files read.
+func _scan_dir(dir_path: String, strays: PackedStringArray) -> int:
+	var count: int = 0
+	var dir: DirAccess = DirAccess.open(dir_path)
+	if dir == null:
+		return 0
+	dir.list_dir_begin()
+	var entry: String = dir.get_next()
+	while entry != "":
+		if entry.begins_with("."):
+			entry = dir.get_next()
+			continue
+		var full: String = dir_path.path_join(entry)
+		if dir.current_is_dir():
+			count += _scan_dir(full, strays)
+		elif entry.ends_with(".gd"):
+			count += 1
+			if not DOOR_ALLOWLIST.has(full):
+				_scan_file(full, strays)
+		entry = dir.get_next()
+	dir.list_dir_end()
+	return count
+
+
+func _scan_file(path: String, strays: PackedStringArray) -> void:
+	var text: String = FileAccess.get_file_as_string(path)
+	if text.is_empty():
+		return
+	var lines: PackedStringArray = text.split("
+")
+	for i: int in lines.size():
+		var line: String = lines[i]
+		# Comments and docstrings talk about the Vault constantly. Only code counts.
+		var bare: String = line.strip_edges()
+		if bare.begins_with("#"):
+			continue
+		for menu: String in STAFF_MENUS:
+			if line.contains('&"%s"' % menu):
+				strays.append("%s:%d &\"%s\"" % [path.trim_prefix("res://"), i + 1, menu])
+
+
+
