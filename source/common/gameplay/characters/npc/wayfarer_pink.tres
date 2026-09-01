@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://source/common/gameplay/characters/npc/wayfarer_recolor.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "Wayfarer Pink"
+shader = ExtResource("1_shader")
+shader_parameter/hue_center = 0.595
+shader_parameter/hue_width = 0.055
+shader_parameter/min_sat = 0.6
+shader_parameter/val_low = 0.26
+shader_parameter/val_high = 0.84
+shader_parameter/robe_shadow = Color(0.431, 0.043, 0.259, 1)
+shader_parameter/robe_mid = Color(0.761, 0.078, 0.435, 1)
+shader_parameter/robe_light = Color(1, 0.078, 0.576, 1)
+shader_parameter/robe_hi = Color(1, 0.412, 0.706, 1)
+shader_parameter/strength = 1.0

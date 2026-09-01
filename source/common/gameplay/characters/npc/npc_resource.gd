@@ -13,6 +13,13 @@ extends Resource
 @export var location_hint: String = ""
 ## Appearance — same kind of resource EnemyTypeResource.skin uses.
 @export var skin: SpriteFrames
+## Optional material applied to the sprite on top of [member skin] — the cheap way
+## to give one NPC its own colours without duplicating a four-sheet sprite set.
+## The Wayfarer is a Scholar recoloured pink this way (wayfarer_pink.tres); a
+## second copy of the PNGs would just be two things to keep in sync, and players
+## would have no way to tell which blue scholar they were looking at.
+## Null = the art as authored.
+@export var skin_material: Material
 ## Line shown above the options when greeted (Beedle/WoW-gossip style).
 @export_multiline var greeting: String = "What can I do for you?"
 ## What this NPC can do. Add ShopInteraction / QuestInteraction entries inline.

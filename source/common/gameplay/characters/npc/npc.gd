@@ -107,6 +107,11 @@ func _apply_resource() -> void:
 	if npc_resource.skin != null:
 		skin_id = 0 # disable id-based skin; drive it directly (mirrors HostileNpc)
 		animated_sprite.sprite_frames = npc_resource.skin
+	# Per-NPC recolor (see NPCResource.skin_material). Only assigned when the
+	# resource asks for one, so NPCs without it keep the sprite's own material
+	# rather than having it cleared out from under them.
+	if npc_resource.skin_material != null:
+		animated_sprite.material = npc_resource.skin_material
 
 
 func _spawn_click_area() -> void:
