@@ -47,8 +47,17 @@ static func is_configured() -> bool:
 ##
 ## [param biome] is the instance_name the cart is assigned to (&"" when closed),
 ## and [param active] whether it is actually standing. They are separate because
-## a window can be open with the cart not yet placed (its biome is not loaded),
-## and the site should say "roaming" rather than name a zone nobody can visit.
+## a window can be open with the cart not yet placed — its biome has no loaded
+## instance yet.
+##
+## THE ZONE IS SENT IN THAT CASE TOO, and this is the whole point of keeping the
+## two fields apart. Placement waits on a loaded instance, and an instance is
+## charged by players walking into it, so "assigned but not standing" is a state
+## a player can personally resolve — but only if they are told where to go. This
+## used to blank the zone whenever the cart was not up, which left the site
+## saying the Peddler was somewhere unknown at the exact moment naming the biome
+## would have made it appear. Consumers must read [code]is_active[/code] to tell
+## "standing here" from "due here"; the zone alone no longer implies either.
 static func build_payload(biome: StringName, active: bool) -> Dictionary:
 	var now_s: int = PeddlerSchedule.now_s()
 	var stock: Array = []
@@ -63,7 +72,7 @@ static func build_payload(biome: StringName, active: bool) -> Dictionary:
 	return {
 		"schema": SCHEMA,
 		"is_active": active,
-		"current_zone": _zone_title(biome) if active else "",
+		"current_zone": _zone_title(biome),
 		"time_remaining_seconds": PeddlerSchedule.seconds_remaining(now_s) if active else 0,
 		"next_spawn_utc_timestamp": PeddlerSchedule.next_spawn_s(now_s),
 		# The site derives its own countdowns from the timestamps above, but it

@@ -670,13 +670,23 @@ func _check_web_export() -> void:
 	if flat.contains(PeddlerWebExport.KEY_ENV) or flat.to_lower().contains("authorization"):
 		_fail("the payload mentions the auth key — it belongs in the header only")
 
-	# A CLOSED window must not advertise a zone, or the site would name a place
-	# nobody can go.
+	# AN INACTIVE SNAPSHOT STILL NAMES ITS BIOME. The cart is assigned the moment
+	# the window opens and placed only once that biome has a loaded instance, so
+	# "due here, not standing yet" is a state a player resolves by walking there —
+	# blanking the zone hid the one fact that would have ended the wait. is_active
+	# is what separates "standing here" from "due here"; the zone does not.
 	var closed: Dictionary = PeddlerWebExport.build_payload(&"desert", false)
-	if str(closed.get("current_zone", "")) != "":
-		_fail("an inactive snapshot still names a zone")
+	if str(closed.get("current_zone", "")).is_empty():
+		_fail("an inactive snapshot drops the assigned zone")
+	if bool(closed.get("is_active", true)):
+		_fail("an inactive snapshot reports is_active")
 	if int(closed.get("time_remaining_seconds", -1)) != 0:
 		_fail("an inactive snapshot reports time remaining")
+	# With no biome assigned at all there is genuinely nothing to name, and the
+	# site must get an empty string rather than the word "desert" or a stale one.
+	var unassigned: Dictionary = PeddlerWebExport.build_payload(&"", false)
+	if not str(unassigned.get("current_zone", "x")).is_empty():
+		_fail("a snapshot with no biome assigned still names a zone")
 	# next_spawn must always be in the future, in both states — it is what the
 	# site counts down to and a past timestamp would render as a stuck 0.
 	var now_s: int = PeddlerSchedule.now_s()

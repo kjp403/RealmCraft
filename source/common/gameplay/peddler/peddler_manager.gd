@@ -40,6 +40,9 @@ var _active_instance: ServerInstance = null
 ## True once this cycle's arrival has been announced, so a biome that loads late
 ## does not re-announce it.
 var _announced: bool = false
+## Cycle whose OPENING has been pushed to the website, so the "due but not
+## standing" snapshot goes out once rather than every five seconds.
+var _open_exported_cycle: int = -1
 ## UTC date of the last snapshot pushed to the website. The daily stock rolls at
 ## UTC midnight with no event of its own — nothing spawns, nothing despawns, the
 ## three wares simply become different ones — so the only way to notice is to
@@ -109,6 +112,18 @@ func _tick() -> void:
 
 	if not is_spawned():
 		_try_place()
+
+	# STILL NOTHING STANDING. The biome is decided but has no loaded instance, so
+	# the cart cannot be placed until somebody walks in. Say so once per cycle:
+	# the snapshot carries is_active = false AND the assigned zone, which is what
+	# lets the site read "due in The Desert" rather than describing the previous
+	# window for four hours. Deliberately AFTER _try_place, so a window that
+	# places on its first tick sends only the spawn — two POSTs racing in one
+	# frame could land out of order and leave the site saying "due" over a cart
+	# that is already up.
+	if not is_spawned() and _open_exported_cycle != _active_cycle:
+		_open_exported_cycle = _active_cycle
+		_export("window open, awaiting biome")
 
 	# The daily roll: same window, different wares. Checked after placement so a
 	# midnight spawn exports once with the cart already up rather than twice.
@@ -209,6 +224,7 @@ func _teardown() -> void:
 	_rotation = []
 	_rotation_index = 0
 	_announced = false
+	_open_exported_cycle = -1
 	# AFTER the state is cleared, so the snapshot says "gone" rather than
 	# describing a cart that has already been taken down.
 	_export("despawn")
