@@ -8,6 +8,16 @@
   const REFRESH_MS = 60000;
   const TIERS = { S: "s", A: "a", B: "b" };
 
+  // MIRRORS PeddlerSchedule ON THE WORLD SERVER. Windows open on the 4-hour
+  // boundary counted from the unix epoch (00:00, 04:00 ... 20:00 UTC) and stand
+  // for 30 minutes. Kept here as well as there because the schedule is the one
+  // thing about the cart that is knowable WITHOUT the world: a restart leaves
+  // the last snapshot sitting in the gateway's cache, and a page that trusts
+  // that snapshot alone reports "roaming" straight through an open window.
+  // If the constants below ever change, change them in both places.
+  const CYCLE_S = 4 * 60 * 60;
+  const ACTIVE_S = 30 * 60;
+
   const statusEl = root.querySelector("[data-pd-status]");
   const zoneEl = root.querySelector("[data-pd-zone]");
   const clocksEl = root.querySelector("[data-pd-clocks]");
@@ -17,11 +27,27 @@
   let payload = null;
   let poll = 0;
   let tick = 0;
-  // Wall-clock second the current zone window ends, and the next spawn. Both are
-  // absolute UTC, so the countdowns keep working between polls and survive the
-  // tab being backgrounded — a decrementing local counter would drift.
-  let endsAt = 0;
+  // Absolute UTC second the next window opens, as the world reported it. The
+  // window END is deliberately not stored: the snapshot's `time_remaining_seconds`
+  // was measured when the world sent it, and rebasing that onto "now" stretches
+  // the window every time the page reloads. It is derived from the cycle instead.
   let nextAt = 0;
+  // Whether the previous render fell inside an open window, so the page can
+  // notice the boundary passing between polls and re-read once.
+  let windowWasOpen = null;
+
+  // Unix second the window covering `nowS` opened at.
+  function cycleStart(nowS) {
+    return Math.floor(nowS / CYCLE_S) * CYCLE_S;
+  }
+
+  // True while the cart is DUE — which is not the same as standing. The world
+  // places it opportunistically: the biome is chosen the moment the window
+  // opens, but the cart only appears once that biome has a loaded instance,
+  // so "window open, nothing standing" is a real and reportable state.
+  function windowIsOpen(nowS) {
+    return nowS - cycleStart(nowS) < ACTIVE_S;
+  }
 
   function apiUrl() {
     const host = location.hostname;
@@ -103,37 +129,51 @@
   // second, so the numbers stay right across a sleeping tab, a slow poll, or a
   // clock the user changes mid-session.
   function renderClocks() {
-    if (!payload || !payload.ok) {
-      clocksEl.innerHTML = "";
-      return;
-    }
+    // Deliberately NOT gated on a live snapshot. The cycle is fixed UTC maths, so
+    // "next appearance" is answerable even while the tracker is down — and a page
+    // that goes blank the moment the world hiccups is exactly what sends players
+    // hunting for a cart that was never standing in the first place.
     const now = nowUtc();
+    const open = windowIsOpen(now);
     const parts = [];
-    if (payload.is_active && endsAt > now) {
+    if (open) {
       parts.push(
-        `<div class="pd-clock"><span class="pd-clock-label">Leaves in</span>` +
-          `<strong class="pd-clock-value">${clock(endsAt - now)}</strong></div>`
+        `<div class="pd-clock"><span class="pd-clock-label">Window closes in</span>` +
+          `<strong class="pd-clock-value">${clock(cycleStart(now) + ACTIVE_S - now)}</strong></div>`
       );
     }
-    if (nextAt > now) {
-      parts.push(
-        `<div class="pd-clock"><span class="pd-clock-label">Next appearance</span>` +
-          `<strong class="pd-clock-value">${clock(nextAt - now)}</strong></div>`
-      );
-    }
+    parts.push(
+      `<div class="pd-clock"><span class="pd-clock-label">Next appearance</span>` +
+        `<strong class="pd-clock-value">${clock(nextSpawnAt(now) - now)}</strong></div>`
+    );
     clocksEl.innerHTML = parts.join("");
 
-    // The window ran out between polls — flip to roaming rather than showing a
-    // cart that has already packed up, and pull a fresh snapshot.
-    if (payload.is_active && endsAt && now >= endsAt) {
-      payload.is_active = false;
-      endsAt = 0;
-      renderBanner();
+    // The window opened or closed between polls. Re-render off the new state and
+    // pull a fresh snapshot, rather than describing a cart that has packed up or
+    // sitting on "between appearances" through the first minute of a new window.
+    if (windowWasOpen !== null && windowWasOpen !== open) {
+      windowWasOpen = open;
+      render();
       load();
+      return;
     }
+    windowWasOpen = open;
+  }
+
+  // Prefer the world's own answer while it is still in the future, and fall back
+  // to the cycle when the snapshot predates the window that has just opened.
+  function nextSpawnAt(nowS) {
+    return nextAt > nowS ? nextAt : cycleStart(nowS) + CYCLE_S;
   }
 
   function renderBanner() {
+    // FOUR STATES, NOT THREE. The old banner collapsed "no cart exists right now"
+    // and "a cart is due and has not been placed yet" into one grey VANISHED /
+    // ROAMING, and players read that as a peddler hiding somewhere they had to
+    // search. Whether the window is open is local maths, so the page can draw
+    // that distinction even when the snapshot is old, or missing entirely.
+    const open = windowIsOpen(nowUtc());
+
     // Two different failures that must not wear the same label. The tracker being
     // UNREACHABLE is a fault worth reporting; the gateway answering "no snapshot
     // yet" is the ordinary state between the world starting and the cart's next
@@ -141,21 +181,33 @@
     // sends people looking for a break that isn't there.
     if (!payload || payload.unreachable) {
       setStatus("TRACKER OFFLINE", "off");
-      zoneEl.textContent = "Unknown (Roam Phase)";
+      zoneEl.textContent = open ? "Due now — zone unknown" : "Nowhere — between appearances";
       return;
     }
     if (!payload.ok) {
       setStatus("AWAITING WORLD", "wait");
-      zoneEl.textContent = "Unknown (Roam Phase)";
+      zoneEl.textContent = open ? "Due now — zone unknown" : "Nowhere — between appearances";
       return;
     }
     if (payload.is_active) {
       setStatus("ACTIVE IN-GAME", "on");
-      zoneEl.textContent = payload.current_zone || "Unknown (Roam Phase)";
-    } else {
-      setStatus("VANISHED / ROAMING", "off");
-      zoneEl.textContent = "Unknown (Roam Phase)";
+      zoneEl.textContent = payload.current_zone || "Standing — zone not reported";
+      return;
     }
+    if (open) {
+      // Due, but not standing. The world picks the biome the moment the window
+      // opens and places the cart on the first tick that biome has a loaded
+      // instance, so this state resolves itself as soon as somebody is there.
+      // `current_zone` is empty on a world that predates the export change — the
+      // page has to read correctly either way.
+      setStatus("DUE — NOT ARRIVED", "wait");
+      zoneEl.textContent = payload.current_zone
+        ? payload.current_zone + " (setting up)"
+        : "Zone not reported yet";
+      return;
+    }
+    setStatus("BETWEEN APPEARANCES", "off");
+    zoneEl.textContent = "Nowhere — the cart is packed up";
   }
 
   function render() {
@@ -169,7 +221,22 @@
       return;
     }
     renderStock(payload.daily_stock);
-    noteEl.textContent = payload.stale
+    noteEl.textContent = noteText();
+  }
+
+  // The line that answers "where is it, then?". Ordered by what a player can act
+  // on: a cart that is due but unplaced is worth explaining in full, while a
+  // stale reading is only worth mentioning when nothing more useful applies.
+  function noteText() {
+    if (!payload || !payload.ok) return "";
+    if (!payload.is_active && windowIsOpen(nowUtc())) {
+      return (
+        "The window is open, but the world has not reported the cart standing yet. " +
+        "It is placed on the first tick the biome it was assigned to has players in it, " +
+        "so it can arrive part-way through a window — especially just after a restart."
+      );
+    }
+    return payload.stale
       ? "This reading is over 15 minutes old — the world may be restarting."
       : "";
   }
@@ -186,11 +253,8 @@
         payload =
           data && typeof data === "object" ? data : { ok: false, unreachable: true };
         if (payload.ok) {
-          const now = nowUtc();
-          endsAt = payload.is_active ? now + Number(payload.time_remaining_seconds || 0) : 0;
           nextAt = Number(payload.next_spawn_utc_timestamp || 0);
         } else {
-          endsAt = 0;
           nextAt = 0;
         }
         render();
@@ -205,7 +269,6 @@
           unreachable: true,
           msg: "Could not reach the live world. The tracker returns when the server does.",
         };
-        endsAt = 0;
         nextAt = 0;
         render();
       });
