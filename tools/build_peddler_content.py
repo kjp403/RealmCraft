@@ -47,7 +47,10 @@ STOCK_SCRIPT = "res://source/common/gameplay/peddler/peddler_item_data.gd"
 ITEM_ID_BASE = 630
 
 # (slug, display name, tier, price, action script or None, usable, vendor_value,
-#  stack_limit, description)
+#  stack_limit, description, effect)
+#
+# EVERY good carries an effect: it is the shop's mechanical readout, and a
+# positional field is what stops a new good being added without one.
 #
 # vendor_value is 0 across the board: these are peddler goods, not junk, and a
 # 500,000-gold key that an NPC would buy back for anything at all is a gold
@@ -56,27 +59,53 @@ GOODS = [
     # --- S tier ---------------------------------------------------------------
     ("peddler_vault_key", "Peddler's Vault Key", "S", 500000, None, False, 1,
      "A key the Peddler will sell you and will not use for you. It opens the "
-     "strongbox beside their cart, once, and the lock keeps the key."),
+     "strongbox beside their cart, once, and the lock keeps the key.",
+     "Opens the strongbox standing beside the Peddler's cart, once, and is consumed "
+     "doing it. The payout is fixed rather than rolled: 3 Boss Contract Keys and 30 "
+     "Greater Health Potions, handed over through the usual chest reward window."),
     ("chronos_clock", "Chronos Clock", "S", 250000, "chronos_clock_action", True, 1,
      "A cased clock that runs a little ahead of the world. The Peddler will not "
-     "say by how much, and will not be drawn on what that is worth."),
+     "say by how much, and will not be drawn on what that is worth.",
+     "Adds 10 minutes to your party's live Boss Contract deadline. The whole party "
+     "gets the time; the clock is spent by whoever uses it. With no live contract it "
+     "refuses and stays in your bag, so it cannot be burned on a fight that is already "
+     "over."),
     ("hunter_charm", "Hunter's Charm", "S", 350000, "hunter_charm_action", True, 0,
      "A tooth on a wire, worn smooth. For two hours the rarest thing a great "
-     "beast is carrying leans very slightly toward the person wearing it."),
+     "beast is carrying leans very slightly toward the person wearing it.",
+     "2 hours of Hunter's Blessing: a boss drop whose authored chance is already Rare "
+     "or Ultra rolls at 1.15x that chance. Common boss drops are untouched and "
+     "ordinary mobs are unaffected. Using a second charm extends the timer instead of "
+     "being wasted."),
     # --- A tier ---------------------------------------------------------------
     ("anvil_stabilizer", "Anvil Stabilizer", "A", 75000, "anvil_stabilizer_action", True, 0,
      "A weighted collar that holds a furnace on heat and an anvil true. Ten "
      "minutes of steady iron: bars pour twice as fast, and hammered work keeps "
-     "pace."),
+     "pace.",
+     "Smelting and smithing run at double speed for 10 minutes — the furnace and the "
+     "anvil both. Using a second stabilizer adds another 10 minutes rather than "
+     "restarting the clock."),
     ("portable_deposit_box", "Portable Deposit Box", "A", 100000, "portable_deposit_box_action", True, 1,
      "A strapped case with a bank's mark burned into the lid. Heavier empty than "
-     "it has any right to be."),
+     "it has any right to be.",
+     "Sets a personal bank vault down at your feet for 120 seconds. You must be alive, "
+     "out of combat, and standing somewhere the map can host it. One box at a time, "
+     "and a refused placement does not spend the item."),
     ("mystery_seed", "Mystery Seed", "A", 50000, "mystery_seed_action", True, 0,
      "Unlabelled, and the Peddler does not know either. Plant it and it is grown "
-     "and harvested inside a breath — logs or herbs, never the same twice."),
+     "and harvested inside a breath — logs or herbs, never the same twice.",
+     "Plants and harvests on the spot, paying out 2 different raw gatherables: logs, "
+     "oak, willow, maple or yew logs, or healing herb, grimshade, sunwort, frostpetal "
+     "or moonbloom, between 3 and 24 of each. Raw materials only — never bars or "
+     "potions. Needs bag room for both stacks or it refuses and is not spent."),
     ("botanist_skilling_crate", "Botanist's Skilling Crate", "A", 60000, "botanists_crate_action", True, 1,
      "A slatted crate that smells of cut stems. Sealed with a botanist's wax and "
-     "sold on the Peddler's word about what is under it."),
+     "sold on the Peddler's word about what is under it.",
+     "Pays out 4 different mid-to-high tier Herblore ingredients straight into your "
+     "bag: grimshade, sunwort, frostpetal, moonbloom, starblossom, bloodcap, "
+     "blightspore, venom sacs, fairy dust or ember ash, between 5 and 26 of each. "
+     "Low-level herbs are deliberately not in the pool. If your bag lacks room for the "
+     "whole bundle it refuses and the crate is not spent."),
     # --- B tier ---------------------------------------------------------------
     # No action_script: the scroll is specified to open the Wayfarer's teleport
     # board, which lives entirely on the unmerged quick-travel branch. Building it
@@ -84,16 +113,29 @@ GOODS = [
     # wire it to the board once that PR lands.
     ("biome_recall_scroll", "Biome Recall Scroll", "B", 25000, "biome_recall_scroll_action", True, 5,
      "A road-map folded to the size of a palm, marked in a hand that clearly "
-     "walked every line of it. The folds have not been worn in yet."),
+     "walked every line of it. The folds have not been worn in yet.",
+     "Opens the Wayfarer's travel board wherever you are standing. Pick any of its "
+     "stops and the ride is free — no fare, and it does not count toward the frequency "
+     "surge. Wardstone requirements still apply, and the scroll is spent only when you "
+     "actually travel, not when you open the board."),
     ("prismatic_dye", "Prismatic Dye", "B", 20000, "prismatic_dye_action", True, 5,
      "A stoppered vial that shows a different colour depending on which eye you "
-     "close. The Peddler keeps it wrapped."),
+     "close. The Peddler keeps it wrapped.",
+     "Recolours your body for 2 hours, visible to everyone in the zone. The colour is "
+     "rolled, not chosen. Drinking another rerolls the colour and restarts the 2 "
+     "hours."),
     ("wandering_tonic", "Wandering Tonic", "B", 8000, "wandering_tonic_action", True, 10,
      "Bitter, warm, and faintly of road dust. Drunk by people who have somewhere "
-     "to be and a long way to go to be there."),
+     "to be and a long way to go to be there.",
+     "+15% movement speed for 5 minutes. Does not stack — a second tonic resets the 5 "
+     "minutes rather than doubling the speed."),
     ("hearth_stew", "Hearth Stew", "B", 10000, "hearth_stew_action", True, 10,
      "A sealed crock, still hot, from a fire that is nowhere near here. Nobody "
-     "has got the Peddler to explain this one."),
+     "has got the Peddler to explain this one.",
+     "15 minutes of +1.5 HP per second and +5% movement speed. The healing only ticks "
+     "out of combat. The speed lapses while you are fighting and returns when you "
+     "disengage, without the timer pausing. A second bowl refreshes the 15 minutes "
+     "rather than stacking."),
 ]
 
 # High-end PvM chests the Peddler brokers. (existing item slug, display name,
@@ -211,7 +253,7 @@ def write_plain_item(slug, name, item_id, vendor_value, stack_limit, desc):
     write(os.path.join(ITEM_DIR, slug + ".tres"), body)
 
 
-def write_stock(slug, name, tier, price, action, desc, brokered=False, icon=None):
+def write_stock(slug, name, tier, price, action, desc, effect, brokered=False, icon=None):
     # A brokered row has no peddler icon of its own -- the shop window falls back
     # to the item's real icon, which is the chest art players already recognise.
     icon_path = icon if icon else ("%s/%s.png" % (ICON_DIR, slug))
@@ -222,6 +264,16 @@ def write_stock(slug, name, tier, price, action, desc, brokered=False, icon=None
         'id = "%s"' % slug,
         'item_name = "%s"' % escape(name),
         'description = "%s"' % escape(desc),
+    ]
+    # DESCRIPTION is flavour; EFFECT is the mechanical readout the shop shows
+    # under it. Written from the table like everything else — it used to be
+    # hand-added to the .tres after generation, which meant every re-run of this
+    # script silently deleted the mechanical description off eleven goods while
+    # leaving the shop working perfectly. A brokered chest has no effect line:
+    # its contents are its loot table, not a rule.
+    if effect:
+        res.append('effect = "%s"' % escape(effect))
+    res += [
         "price_gold = %d" % price,
         'tier = "%s"' % tier,
     ]
@@ -250,14 +302,14 @@ def main():
     known = [existing_id(g[0]) for g in GOODS] + [existing_id(e[0]) for e in EXTRA_ITEMS]
     next_id = max([ITEM_ID_BASE] + [i + 1 for i in known if i is not None])
     fresh = 0
-    for slug, name, tier, price, action, usable, stack, desc in GOODS:
+    for slug, name, tier, price, action, usable, stack, desc, effect in GOODS:
         item_id = existing_id(slug)
         if item_id is None:
             item_id, next_id, fresh = next_id, next_id + 1, fresh + 1
         write_good_item(slug, name, item_id, usable, 0, stack, desc)
-        write_stock(slug, name, tier, price, action, desc)
+        write_stock(slug, name, tier, price, action, desc, effect)
     for slug, name, tier, price in BROKERED:
-        write_stock(slug, name, tier, price, None, BROKERED_BLURB, brokered=True)
+        write_stock(slug, name, tier, price, None, BROKERED_BLURB, "", brokered=True)
     for slug, name, vendor_value, stack, desc in EXTRA_ITEMS:
         item_id = existing_id(slug)
         if item_id is None:
