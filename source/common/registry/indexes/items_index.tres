@@ -2968,11 +2968,6 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/peddler/mystery_seed.tres",
 &"slug": &"mystery_seed"
 }, {
-&"hash": "f81bd1ca308f09b962fca97293baa63c780bb5aba79bc7b9adf35c8ebe1da7b5",
-&"id": 638,
-&"path": "res://source/common/gameplay/items/peddler/noter_permit.tres",
-&"slug": &"noter_permit"
-}, {
 &"hash": "480f67221c64328499fc281553f62d9ef351f5ee02a7fe85fd2bda008a3b1ffb",
 &"id": 639,
 &"path": "res://source/common/gameplay/items/peddler/peddler_vault_key.tres",
