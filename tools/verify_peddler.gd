@@ -341,49 +341,51 @@ func _check_ledger() -> void:
 	_ok("one per good per UTC day")
 
 
-## The smelting run cap, and that a stabilizer charge is what lifts it.
+## The stabilizer speeds up smithing, for ten minutes, and nothing else.
 func _check_anvil() -> void:
 	print("anvil stabilizer")
 	var pr: PlayerResource = PlayerResource.new()
 	pr.player_id = 4242
-	AnvilBoost.forget(pr.player_id)
-	if AnvilBoost.max_bars(pr) != AnvilBoost.BASE_MAX_BARS:
-		_fail("an unboosted smith is not capped at %d bars" % AnvilBoost.BASE_MAX_BARS)
-	var smelted: int = 0
-	while AnvilBoost.consume_bar(pr).get("ok", false):
-		smelted += 1
-		if smelted > AnvilBoost.BOOSTED_MAX_BARS * 2:
-			break
-	if smelted != AnvilBoost.BASE_MAX_BARS:
-		_fail("unboosted run smelted %d bars, expected %d" % [smelted, AnvilBoost.BASE_MAX_BARS])
 
-	AnvilBoost.forget(pr.player_id)
-	pr.anvil_boost_charges = 50
-	if AnvilBoost.max_bars(pr) != AnvilBoost.BOOSTED_MAX_BARS:
-		_fail("charges did not lift the cap to %d" % AnvilBoost.BOOSTED_MAX_BARS)
-	smelted = 0
-	while AnvilBoost.consume_bar(pr).get("ok", false):
-		smelted += 1
-		if smelted > AnvilBoost.BOOSTED_MAX_BARS * 2:
-			break
-	if smelted != AnvilBoost.BOOSTED_MAX_BARS:
-		_fail("boosted run smelted %d bars, expected %d" % [smelted, AnvilBoost.BOOSTED_MAX_BARS])
-	if pr.anvil_boost_charges != 0:
-		# One stabilizer is meant to be exactly one full run.
-		_fail("a %d-bar boosted run left %d charges, expected 0" % [
-			AnvilBoost.BOOSTED_MAX_BARS, pr.anvil_boost_charges
-		])
+	if AnvilBoost.is_active(pr):
+		_fail("an unstabilised smith reads as stabilised")
+	if not is_equal_approx(AnvilBoost.speed_multiplier(pr, AnvilBoost.PROFESSION), 1.0):
+		_fail("an unstabilised smith is not crafting at normal speed")
 
-	# A booked bar the craft then rolled back must give the charge and the slot
-	# back, or a full bag quietly steals 1/50th of a 75,000-gold good.
-	AnvilBoost.forget(pr.player_id)
-	pr.anvil_boost_charges = 3
-	var booked: Dictionary = AnvilBoost.consume_bar(pr)
-	AnvilBoost.refund_bar(pr, booked)
-	if pr.anvil_boost_charges != 3 or AnvilBoost.bars_this_run(pr.player_id) != 0:
-		_fail("refund_bar did not undo a booked bar")
-	AnvilBoost.forget(pr.player_id)
-	_ok("run cap", "%d bars, %d boosted" % [AnvilBoost.BASE_MAX_BARS, AnvilBoost.BOOSTED_MAX_BARS])
+	AnvilBoost.extend(pr)
+	if not AnvilBoost.is_active(pr):
+		_fail("a used stabilizer did not stabilise the forge")
+	var left: int = AnvilBoost.remaining_s(pr)
+	if absi(left - AnvilBoost.DURATION_S) > 2:
+		_fail("stabilizer ran %ds, expected %ds" % [left, AnvilBoost.DURATION_S])
+	if not is_equal_approx(
+		AnvilBoost.speed_multiplier(pr, AnvilBoost.PROFESSION), AnvilBoost.SPEED_MULTIPLIER
+	):
+		_fail("a stabilised smith is not crafting at %.1fx" % AnvilBoost.SPEED_MULTIPLIER)
+
+	# Scoped to smithing: the good is a smith's, and a stabilizer must not quietly
+	# speed up cooking, fletching or the outfitting benches.
+	for other: StringName in [&"cooking", &"fletching", &"herblore", &"outfitting"]:
+		if not is_equal_approx(AnvilBoost.speed_multiplier(pr, other), 1.0):
+			_fail("the stabilizer sped up %s" % other)
+
+	# A second one ADDS time. Restarting the clock would burn minutes already paid
+	# for, on a 75,000-gold good.
+	AnvilBoost.extend(pr)
+	left = AnvilBoost.remaining_s(pr)
+	if absi(left - AnvilBoost.DURATION_S * 2) > 2:
+		_fail("a second stabilizer left %ds, expected %ds" % [left, AnvilBoost.DURATION_S * 2])
+
+	# A lapsed stamp is inactive, back to normal speed, and cleared on request.
+	pr.anvil_boost_until_ms = 1
+	if AnvilBoost.is_active(pr) or AnvilBoost.remaining_s(pr) != 0:
+		_fail("a lapsed stabilizer still reads as running")
+	if not is_equal_approx(AnvilBoost.speed_multiplier(pr, AnvilBoost.PROFESSION), 1.0):
+		_fail("a lapsed stabilizer still speeds crafting up")
+	AnvilBoost.clear_if_expired(pr)
+	if pr.anvil_boost_until_ms != 0:
+		_fail("clear_if_expired left a lapsed stamp behind")
+	_ok("stabilizer", "%.1fx smithing for %ds" % [AnvilBoost.SPEED_MULTIPLIER, AnvilBoost.DURATION_S])
 
 
 ## The charm must touch only high-tier BOSS rolls, and only ever upward.

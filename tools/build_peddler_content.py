@@ -65,9 +65,9 @@ GOODS = [
      "beast is carrying leans very slightly toward the person wearing it."),
     # --- A tier ---------------------------------------------------------------
     ("anvil_stabilizer", "Anvil Stabilizer", "A", 75000, "anvil_stabilizer_action", True, 0,
-     "A weighted collar that stops a furnace drifting off heat. Fifty charges: "
-     "each one holds a smelt steady, and a stabilised run can go fifty bars deep "
-     "instead of ten."),
+     "A weighted collar that holds a furnace on heat and an anvil true. Ten "
+     "minutes of steady iron: bars pour twice as fast, and hammered work keeps "
+     "pace."),
     ("portable_deposit_box", "Portable Deposit Box", "A", 100000, "portable_deposit_box_action", True, 1,
      "A strapped case with a bank's mark burned into the lid. Heavier empty than "
      "it has any right to be."),

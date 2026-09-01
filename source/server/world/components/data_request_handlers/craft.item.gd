@@ -1,14 +1,23 @@
 extends DataRequestHandler
 
-## Minimum seconds between two crafts by the same player. The client paces its
-## craft loop at CraftController.CRAFT_INTERVAL (2s); this is the authoritative
-## floor so a hand-rolled client can't spam the request for free xp. Set a hair
-## under the client interval so network jitter never eats a legitimate craft.
+## Minimum milliseconds between two crafts by the same player, at normal speed.
+## The client paces its craft loop at CraftController.CRAFT_INTERVAL (2s); this
+## is the authoritative floor, a hair under it so network jitter never eats a
+## legitimate craft. An Anvil Stabilizer divides it — see the check below.
 const MIN_CRAFT_INTERVAL_MS: int = 1500
 
-## player_id -> ticks_msec of their last accepted craft. The handler is cached
-## per request type, so this survives between requests.
-var _last_craft_ms: Dictionary[int, int] = {}
+## player_id -> {"ms": ticks_msec, "speed": float} for their last accepted
+## craft. The handler is cached per request type, so this survives between
+## requests.
+##
+## The SPEED is remembered as well as the time because the client paces the
+## wait before its next craft on the speed the last one came back with. If an
+## Anvil Stabilizer lapses mid-batch, the client is already half way through a
+## fast wait it began in good faith; judging that wait by the new, slower floor
+## would refuse it as too_fast and break the batch at the exact moment the buff
+## ran out. The floor below therefore judges each craft by the pace the player
+## was told to keep, not the one that applies from now on.
+var _last_craft: Dictionary[int, Dictionary] = {}
 
 
 func data_request_handler(
@@ -25,8 +34,6 @@ func data_request_handler(
 
 	var player_id: int = int(player.player_resource.player_id)
 	var now_ms: int = Time.get_ticks_msec()
-	if now_ms - int(_last_craft_ms.get(player_id, -MIN_CRAFT_INTERVAL_MS)) < MIN_CRAFT_INTERVAL_MS:
-		return {"ok": false, "reason": "too_fast"}
 
 	# Resolve the station from the player's map (authoritative + verifies they're at it).
 	var station: CraftingStationResource = instance.instance_map.get_crafting_station(station_key)
@@ -45,6 +52,21 @@ func data_request_handler(
 		return {"ok": false}
 
 	var resource: PlayerResource = player.player_resource
+
+	# Craft pacing floor. The client paces its own loop at
+	# CraftController.CRAFT_INTERVAL; this is the authoritative floor, set a hair
+	# under it so network jitter never eats a legitimate craft, and so a
+	# hand-rolled client cannot spam the request for free xp. An Anvil Stabilizer
+	# divides both by AnvilBoost.SPEED_MULTIPLIER, which is why this sits AFTER
+	# the station is resolved: the buff is scoped to the station's profession,
+	# so the floor is not knowable until we know what is being crafted.
+	var speed: float = AnvilBoost.speed_multiplier(resource, station.profession)
+	var previous: Dictionary = _last_craft.get(player_id, {})
+	var paced_at: float = maxf(0.01, float(previous.get("speed", speed)))
+	var floor_ms: int = int(roundf(float(MIN_CRAFT_INTERVAL_MS) / paced_at))
+	if now_ms - int(previous.get("ms", -MIN_CRAFT_INTERVAL_MS)) < floor_ms:
+		return {"ok": false, "reason": "too_fast"}
+
 	var inventory: Dictionary = resource.inventory
 	var active_bag: int = resource.active_inventory_bag
 	var bag_count: int = resource.inventory_bags
@@ -68,25 +90,9 @@ func data_request_handler(
 		if Inventory.count(inventory, ing_id) < ingredient.amount:
 			return {"ok": false, "reason": "ingredients"}
 
-	# Smelting run cap. A furnace run is AnvilBoost.BASE_MAX_BARS bars unless the
-	# smith is holding Anvil Stabilizer charges, and each smelted bar burns one.
-	# Booked here — after every other gate, before anything is consumed — so a
-	# craft refused for level, gold or ingredients never spends a charge or
-	# advances the run. See AnvilBoost for what "a run" means.
-	var smelt: Dictionary = {}
-	if station.smelts_bars:
-		smelt = AnvilBoost.consume_bar(resource)
-		if not smelt.get("ok", false):
-			return {
-				"ok": false,
-				"reason": "bar_limit",
-				"cap": int(smelt.get("cap", AnvilBoost.BASE_MAX_BARS)),
-				"boosted": bool(smelt.get("boosted", false)),
-				"cooldown_ms": int(smelt.get("cooldown_ms", AnvilBoost.RUN_IDLE_RESET_MS)),
-			}
-
-	# Past every gate — this craft is happening, so start the next cooldown.
-	_last_craft_ms[player_id] = now_ms
+	# Past every gate — this craft is happening, so start the next cooldown at
+	# the pace this one ran at.
+	_last_craft[player_id] = {"ms": now_ms, "speed": speed}
 
 	# Perks for this station's profession, resolved once — they drive the refund
 	# and extra-item rolls below as well as the XP multiplier further down.
@@ -148,11 +154,7 @@ func data_request_handler(
 			Inventory.add_item(inventory, ing_id, ingredient.amount, false, active_bag, bag_count)
 		if fee > 0:
 			Inventory.add_item(inventory, gold_id, fee, false, active_bag, bag_count)
-		_last_craft_ms.erase(player_id)
-		# The bar was booked against the run before the bag was checked — give the
-		# charge and the run slot back, or a full bag would quietly eat both.
-		if not smelt.is_empty():
-			AnvilBoost.refund_bar(resource, smelt)
+		_last_craft.erase(player_id)
 		return {"ok": false, "reason": "inventory_full"}
 	for _i: int in output_amount:
 		Inventory.try_add_item(
@@ -201,8 +203,7 @@ func data_request_handler(
 		"xp": xp_gain,
 		"level": int(progress.get("level", level)),
 		"leveled_up": progress.get("leveled_up", false),
-		# Only present for a smelt — the crafting menu reads them to show the run
-		# counter and the stabilizer charges ticking down.
-		"bars_left": int(smelt.get("remaining", -1)) if not smelt.is_empty() else -1,
-		"anvil_charges": int(smelt.get("charges", -1)) if not smelt.is_empty() else -1,
+		# The pace the NEXT craft may run at, so the client loop follows an Anvil
+		# Stabilizer starting or lapsing mid-batch without polling for it.
+		"craft_speed": speed,
 	}

@@ -79,7 +79,7 @@ func save_player(player: PlayerResource) -> bool:
 	# purchase ledger's shape is owned by PeddlerLedger, not spelled out here, so
 	# the writer and the reader below cannot drift when the ledger changes.
 	var peddler_json: String = JSON.stringify({
-		"anvil": player.anvil_boost_charges,
+		"anvil_until_ms": player.anvil_boost_until_ms,
 		"charm_until_ms": player.hunter_charm_until_ms,
 		"dye_id": player.prismatic_dye_id,
 		"dye_until_ms": player.prismatic_dye_until_ms,
@@ -265,6 +265,9 @@ const RETIRED_TITLES: Array[String] = ["Alpha tester"]
 ## 20 (the_bandit_captain) was rewritten in place as the hideout finale — keep it.
 const RETIRED_QUEST_ID_MAX: int = 27
 const KEPT_PRE_REWORK_QUEST_ID: int = 20
+## Charges one retired Anvil Stabilizer used to bank, before the good became a
+## timed speed buff. Only the load-time conversion below reads it.
+const LEGACY_ANVIL_CHARGES: int = 50
 
 
 static func _drop_retired_titles(player: PlayerResource) -> void:
@@ -667,7 +670,20 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	# midnight loads with a fresh allowance rather than yesterday's spent one.
 	var peddler_v: Variant = JSON.parse_string(str(row.get("peddler_json", "{}")))
 	if peddler_v is Dictionary:
-		player.anvil_boost_charges = maxi(0, int((peddler_v as Dictionary).get("anvil", 0)))
+		player.anvil_boost_until_ms = maxi(
+			0, int((peddler_v as Dictionary).get("anvil_until_ms", 0))
+		)
+		# MIGRATION. The stabilizer used to bank 50 per-bar smelting charges that
+		# lifted a furnace run cap; it is now a timed speed buff and the cap is
+		# gone. Unspent charges are converted here, at load, rounded UP to whole
+		# stabilizers so nobody is shorted the tail of one they paid for. Written
+		# as a one-way read of the retired key: the save above no longer writes
+		# "anvil", so the first save after this login drops it for good.
+		var legacy_charges: int = maxi(0, int((peddler_v as Dictionary).get("anvil", 0)))
+		if legacy_charges > 0:
+			for _i: int in int(ceil(float(legacy_charges) / float(LEGACY_ANVIL_CHARGES))):
+				AnvilBoost.extend(player)
+		AnvilBoost.clear_if_expired(player)
 		player.hunter_charm_until_ms = maxi(0, int((peddler_v as Dictionary).get("charm_until_ms", 0)))
 		player.prismatic_dye_id = maxi(0, int((peddler_v as Dictionary).get("dye_id", 0)))
 		player.prismatic_dye_until_ms = maxi(0, int((peddler_v as Dictionary).get("dye_until_ms", 0)))

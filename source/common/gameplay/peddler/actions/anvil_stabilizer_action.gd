@@ -1,24 +1,23 @@
 extends PeddlerAction
-## Anvil Stabilizer: bank [constant CHARGES] smelting charges on the user.
+## Anvil Stabilizer: stabilise the user's forge for
+## [constant AnvilBoost.DURATION_S] seconds.
 ##
-## While the player holds any charge, a smelting run may reach
-## [constant AnvilBoost.BOOSTED_MAX_BARS] bars instead of
-## [constant AnvilBoost.BASE_MAX_BARS], and each bar smelted burns one charge —
-## so one stabilizer is exactly one long run. See [AnvilBoost].
-
-
-## Charges one stabilizer grants. Matches the boosted run length on purpose: the
-## good's whole promise is "one uninterrupted 50-bar run".
-const CHARGES: int = 50
+## While it runs, smelting at the furnace and smithing at the anvil both go at
+## [constant AnvilBoost.SPEED_MULTIPLIER] speed. Buying a second one extends the
+## clock rather than replacing it. See [AnvilBoost].
 
 
 func apply(player: Player, _instance: ServerInstance) -> Dictionary:
 	var resource: PlayerResource = player.player_resource
 	if resource == null:
 		return {"ok": false, "reason": "no_player"}
-	resource.anvil_boost_charges += CHARGES
+	var until_ms: int = AnvilBoost.extend(resource)
+	var remaining_s: int = AnvilBoost.remaining_s(resource)
 	return {
 		"ok": true,
-		"charges": resource.anvil_boost_charges,
-		"message": "Anvil stabilised — %d smelting charges banked." % resource.anvil_boost_charges,
+		"until_ms": until_ms,
+		"remaining_s": remaining_s,
+		"message": "Forge stabilised — smithing at double speed for %s." % (
+			PeddlerSchedule.clock(remaining_s)
+		),
 	}

@@ -23,6 +23,9 @@ const BUFF_ICONS: Dictionary = {
 	&"coating_poison": "poison.png",
 	&"coating_burn": "burn.png",
 	&"coating_heal": "buff.png",
+	# Anvil Stabilizer. No bespoke art yet, so the generic up-arrow rather than
+	# an unrelated icon.
+	&"anvil_stabilizer": "buff.png",
 }
 const DEBUFF_ICONS: Dictionary = {
 	&"burn": "burn.png",
@@ -57,6 +60,7 @@ const DESCRIPTIONS: Dictionary = {
 	&"coating_poison": "Envenomed weapon. Your hits poison what they land on.",
 	&"coating_burn": "Burning weapon. Your hits set what they land on alight.",
 	&"coating_heal": "Blessed weapon. Your hits heal you.",
+	&"anvil_stabilizer": "Forge stabilised. You smelt and smith at double speed.",
 }
 
 ## How long the tap-to-read label lingers on mobile (no hover there).
