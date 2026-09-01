@@ -82,6 +82,7 @@ func _run() -> void:
 	_check_dye()
 	_check_npc()
 	_check_web_export()
+	_check_discord()
 	_check_sites()
 	_check_vault_payout()
 	await _check_placement()
@@ -687,6 +688,104 @@ func _check_web_export() -> void:
 		stock.size(), PeddlerSchedule.clock(
 			int(payload["next_spawn_utc_timestamp"]) - now_s
 		)
+	])
+
+
+## The Discord announcement: the exact message body, and the mention whitelist.
+func _check_discord() -> void:
+	print("discord announce")
+	if OS.get_environment(PeddlerDiscord.WEBHOOK_ENV).is_empty():
+		if PeddlerDiscord.is_configured():
+			_fail("Discord reads as configured with the environment unset")
+		if PeddlerDiscord.announce(self, {"is_active": true}):
+			_fail("Discord announced with no webhook configured")
+		_ok("disabled without env", PeddlerDiscord.WEBHOOK_ENV)
+
+	var payload: Dictionary = PeddlerWebExport.build_payload(&"desert", true)
+	var msg: Dictionary = PeddlerDiscord.build_message(payload, "123456789")
+
+	# The mention whitelist is the safety property: without it a stock item whose
+	# name contained an @ could ping a real user or role. With it, the opt-in role
+	# is the only thing this webhook can ever ping.
+	var allowed: Dictionary = msg.get("allowed_mentions", {}) as Dictionary
+	if allowed.is_empty():
+		_fail("the message carries no allowed_mentions whitelist")
+	elif not (allowed.get("parse", null) is Array) or not (allowed["parse"] as Array).is_empty():
+		_fail("allowed_mentions.parse must be an EMPTY array (it disables @everyone)")
+	elif (allowed.get("roles", []) as Array) != ["123456789"]:
+		_fail("allowed_mentions.roles does not name only the opt-in role")
+	if str(msg.get("content", "")) != "<@&123456789>":
+		_fail("the role ping is missing or malformed")
+
+	# No role configured must mean NOTHING is pinged — not a stray empty mention.
+	var silent: Dictionary = PeddlerDiscord.build_message(payload, "")
+	if silent.has("content"):
+		_fail("an unconfigured role still produced a ping")
+	if not (silent.get("allowed_mentions", {}) as Dictionary).get("roles", []).is_empty():
+		_fail("an unconfigured role still whitelisted a mention")
+
+	var embed: Dictionary = (msg.get("embeds", []) as Array)[0]
+	if (embed.get("fields", []) as Array).size() != (payload["daily_stock"] as Array).size():
+		_fail("the embed does not list every stocked good")
+	# The live countdown is the whole reason this is one message and not two: a
+	# baked "30 minutes left" string is wrong for everyone who reads it later.
+	# Required only when there IS time left — with the window closed (which is
+	# the usual state when this gate runs) the honest output is prose, and
+	# demanding a stamp here would be demanding a countdown to the past.
+	var has_time: bool = int(payload.get("time_remaining_seconds", 0)) > 0
+	if has_time and not str(embed.get("description", "")).contains("<t:"):
+		_fail("a live snapshot produced no Discord timestamp — the countdown would go stale")
+	# Whatever zone the snapshot carries must reach the message. Compared against
+	# the payload rather than a hardcoded title: with no world server running,
+	# _zone_title falls back to the raw instance_name, and asserting the pretty
+	# form here would only be testing the harness.
+	var zone: String = str(payload.get("current_zone", ""))
+	if zone.is_empty() or not str(embed.get("description", "")).contains(zone):
+		_fail("the embed does not name the zone ('%s')" % zone)
+	# Exercise the live branch explicitly, so the stamp is covered even when this
+	# gate happens to run between windows.
+	var live: Dictionary = payload.duplicate(true)
+	live["generated_utc_timestamp"] = PeddlerSchedule.now_s()
+	live["time_remaining_seconds"] = 1500
+	var live_desc: String = str(
+		((PeddlerDiscord.build_message(live, "") .get("embeds", []) as Array)[0]
+		as Dictionary).get("description", "")
+	)
+	if not live_desc.contains("<t:"):
+		_fail("a snapshot with time left produced no live timestamp")
+	else:
+		var lat: int = int(live_desc.substr(
+			live_desc.find("<t:") + 3,
+			live_desc.find(":R>") - live_desc.find("<t:") - 3
+		))
+		if lat <= PeddlerSchedule.now_s():
+			_fail("the live timestamp is not in the future")
+
+	# A timestamp must never point at the past: Discord renders that as "just
+	# now", which reads as "do not bother going". Caught by testing against a
+	# real webhook while the window happened to be closed.
+	var now_s2: int = PeddlerSchedule.now_s()
+	var stamp: String = str(embed.get("description", ""))
+	var at: int = stamp.find("<t:")
+	if at != -1:
+		var ts: int = int(stamp.substr(at + 3, stamp.find(":R>", at) - at - 3))
+		if ts <= now_s2:
+			_fail("the embed timestamp is in the past (%d <= %d)" % [ts, now_s2])
+	# The zero-remaining snapshot must fall back to prose, not a stale stamp.
+	var spent: Dictionary = payload.duplicate(true)
+	spent["time_remaining_seconds"] = 0
+	var spent_desc: String = str(
+		((PeddlerDiscord.build_message(spent, "") .get("embeds", []) as Array)[0]
+		as Dictionary).get("description", "")
+	)
+	if spent_desc.contains("<t:"):
+		_fail("a zero-remaining snapshot still emitted a live timestamp")
+
+	# A snapshot with nothing standing must not be announced.
+	if PeddlerDiscord.announce(self, PeddlerWebExport.build_payload(&"desert", false)):
+		_fail("announced a spawn for an inactive snapshot")
+	_ok("message", "%d fields, live timestamp, whitelisted mention" % [
+		(embed.get("fields", []) as Array).size()
 	])
 
 
