@@ -31,6 +31,12 @@ const BANK_RESOURCE_STACK: int = 50
 ## [constant BANK_RESOURCE_STACK] there, including items that never authored a
 ## stack_limit: 0 means "pseudo-infinite", so those sat in single 1.8k piles
 ## beside 50-capped ores and read as a duplication glitch.
+##
+## Every drinkable is on this list — potions, the Defense Tonic and the weapon
+## coatings. None of them author a stack_limit, so without an entry here they
+## fall to the 50 cap below and a brewer's vault shatters into 50-count rows.
+## Cooked food is the deliberate exception: it is bulk, and _bank_bulk_item
+## keeps it at [constant BANK_RESOURCE_STACK].
 const UNLIMITED_IN_BANK: Array[StringName] = [
 	&"bone", &"vial_of_water",
 	&"bronze_arrowheads", &"iron_arrowheads", &"steel_arrowheads",
@@ -39,6 +45,8 @@ const UNLIMITED_IN_BANK: Array[StringName] = [
 	&"minor_health_potion", &"health_potion", &"greater_health_potion",
 	&"minor_mana_potion", &"mana_potion", &"greater_mana_potion",
 	&"prayer_potion",
+	&"defense_tonic",
+	&"weapon_ember", &"weapon_poison", &"weapon_poison_plus", &"weapon_salve",
 ]
 
 
