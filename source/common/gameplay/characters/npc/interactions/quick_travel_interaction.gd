@@ -40,6 +40,18 @@ static func of(npc: Node) -> QuickTravelInteraction:
 	var resource: NPCResource = npc.get(&"npc_resource") as NPCResource
 	if resource == null:
 		return null
+	return in_resource(resource)
+
+
+## The quick-travel desk authored on [param resource], or null.
+##
+## Split out of [method of] so the Biome Recall Scroll can read the SAME route
+## list without an NPC node to read it off — the scroll is used out in the world,
+## where no Wayfarer is standing. One list, authored once, means adding a stop
+## reaches the scroll for free.
+static func in_resource(resource: NPCResource) -> QuickTravelInteraction:
+	if resource == null:
+		return null
 	for interaction: NPCInteraction in resource.interactions:
 		if interaction is QuickTravelInteraction:
 			return interaction as QuickTravelInteraction

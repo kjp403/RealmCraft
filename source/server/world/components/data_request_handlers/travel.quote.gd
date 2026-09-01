@@ -16,6 +16,10 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 	var desk: QuickTravelInteraction = desk_ctx["desk"]
 	var pr: PlayerResource = player.player_resource
 	var player_id: int = pr.player_id
+	# A scroll ride is free and does not touch the surge window, so every fare on
+	# this board is zero and every row is affordable. Priced here rather than in
+	# the window: the client has never computed a fare and must not start now.
+	var scroll: bool = bool(desk_ctx.get("scroll", false))
 	var gold_id: int = Economy.gold_id()
 	var gold: int = Inventory.count(pr.inventory, gold_id) if gold_id > 0 else 0
 
@@ -24,7 +28,7 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		var dest: QuickTravelDestination = desk.destinations[i]
 		if dest == null or dest.target_instance == null:
 			continue # empty array slot authored by mistake — don't sell a ticket to nowhere
-		var fee: int = QuickTravelService.fee_for(player_id, dest.fee)
+		var fee: int = 0 if scroll else QuickTravelService.fee_for(player_id, dest.fee)
 		rows.append({
 			"index": i,
 			"label": dest.display_label(),
@@ -33,15 +37,18 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 			"fee": fee,
 			# True when the surge pushed this fare into the price ceiling, so the
 			# board can say "fare cap" instead of showing a rise that isn't there.
-			"capped": QuickTravelService.uncapped_fee_for(player_id, dest.fee) > fee,
+			"capped": (not scroll) and QuickTravelService.uncapped_fee_for(player_id, dest.fee) > fee,
 			"lock": QuickTravelDesk.lock_reason(player, instance, dest),
-			"affordable": gold >= fee,
+			"affordable": scroll or gold >= fee,
 		})
 
 	return {
 		"ok": true,
 		"gold": gold,
 		"destinations": rows,
+		# The window labels itself off this rather than off the arg it sent, so a
+		# board that opened as a scroll but resolved as a desk cannot draw "free".
+		"scroll": scroll,
 		# Surge readout for the window's header.
 		"surge": QuickTravelService.multiplier(player_id),
 		"rides": QuickTravelService.rides_in_window(player_id),

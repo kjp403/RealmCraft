@@ -27,8 +27,6 @@ const HANDLERS: Array[String] = [
 ## player buying something that does nothing.
 const INERT: Dictionary = {
 	"peddler_vault_key": "spent at the Vault Chest, not used from the bag",
-	"noter_permit": "needs an item-noting system that does not exist",
-	"biome_recall_scroll": "needs the quick-travel board (unmerged branch)",
 }
 const PEDDLER_NPC: String = "res://source/common/gameplay/characters/npc/npcs/traveling_peddler.tres"
 ## The Peddler must not wear another NPC's exact art. It was built by recolouring
@@ -40,7 +38,6 @@ const HERMIT_SKIN: String = "res://source/common/gameplay/characters/sprite_fram
 const EXPECTED: Dictionary = {
 	"peddler_vault_key": ["S", 500000],
 	"chronos_clock": ["S", 250000],
-	"noter_permit": ["S", 150000],
 	"hunter_charm": ["S", 350000],
 	"anvil_stabilizer": ["A", 75000],
 	"portable_deposit_box": ["A", 100000],
