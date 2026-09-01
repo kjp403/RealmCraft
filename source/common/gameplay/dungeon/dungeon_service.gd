@@ -664,6 +664,11 @@ static func _grant_reward(player: Player, reward: DungeonReward, solo: bool) -> 
 			Inventory.add_item(resource.inventory, chest_id, ornate_n, false, resource.active_inventory_bag, resource.inventory_bags)
 			items.append({"name": str(chest_item.item_name), "amount": ornate_n})
 
+	# The Character > Jobs daily tracker reads its charge count off the daily
+	# board payload, so a spent charge has to re-push that board too — otherwise
+	# an open tracker keeps showing the pre-run number until the menu is reopened.
+	DailyQuestManager.push_board(resource)
+
 	return {
 		"gold": gold,
 		"items": items,
@@ -725,6 +730,24 @@ static func charges_remaining(resource: PlayerResource) -> int:
 	var blob: Dictionary = _ensure_charges(resource)
 	var free_left: int = maxi(0, DAILY_FREE_CHARGES - int(blob.get("used", 0)))
 	return free_left + int(blob.get("bonus", 0))
+
+
+## Charge breakdown for a UI that has to render "2 / 3" AND explain a number
+## bigger than 3. Banked Dungeon Keys are uncapped, so `total` can exceed
+## `free_max` — a caller that prints `total / free_max` alone would show "5 / 3".
+## Returns {free_left, free_max, bonus, total}.
+static func charge_status(resource: PlayerResource) -> Dictionary:
+	if resource == null:
+		return {"free_left": 0, "free_max": DAILY_FREE_CHARGES, "bonus": 0, "total": 0}
+	var blob: Dictionary = _ensure_charges(resource)
+	var free_left: int = maxi(0, DAILY_FREE_CHARGES - int(blob.get("used", 0)))
+	var bonus: int = int(blob.get("bonus", 0))
+	return {
+		"free_left": free_left,
+		"free_max": DAILY_FREE_CHARGES,
+		"bonus": bonus,
+		"total": free_left + bonus,
+	}
 
 
 ## Spend one rewarded-clear charge. Prefer the daily free pool, then bonus keys.

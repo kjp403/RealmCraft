@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://blh63bbqvk7pv" path="res://source/client/ui/menus/inventory/attributes_panel.gd" id="4_attr"]
 [ext_resource type="Script" uid="uid://d1q3d0rf4tsle" path="res://source/client/ui/menus/character/jobs_panel.gd" id="5_jobs"]
 [ext_resource type="Script" path="res://source/client/ui/menus/character/mastery_panel.gd" id="7_mastery"]
+[ext_resource type="Script" path="res://source/client/ui/menus/character/daily_tracker_panel.gd" id="8_daily"]
 
 [sub_resource type="StyleBoxEmpty" id="SBE_card"]
 
@@ -165,7 +166,76 @@ visible = false
 layout_mode = 2
 script = ExtResource("5_jobs")
 
-[node name="SkillList" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent" unique_id=1924344970]
+[node name="JobsRow" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent" unique_id=1596733832]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="DailyTracker" type="PanelContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow" unique_id=1596733833]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("8_daily")
+
+[node name="TrackerPad" type="MarginContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker" unique_id=1596733844]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="TrackerBody" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad" unique_id=1596733834]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TrackerHeader" type="HBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733835]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TrackerTitle" type="Label" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody/TrackerHeader" unique_id=1596733836]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Today"
+vertical_alignment = 1
+
+[node name="TrackerResetPill" type="Label" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody/TrackerHeader" unique_id=1596733837]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "  Resets 00:00 UTC  "
+vertical_alignment = 1
+
+[node name="TrackerHeaderRule" type="HSeparator" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733838]
+layout_mode = 2
+
+[node name="TrackerTasksHeading" type="Label" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733839]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Skilling Board"
+
+[node name="TrackerTaskList" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733840]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TrackerSpacer" type="Control" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733841]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TrackerFooterRule" type="HSeparator" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733842]
+layout_mode = 2
+
+[node name="TrackerChargesLabel" type="Label" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow/DailyTracker/TrackerPad/TrackerBody" unique_id=1596733843]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Dungeon Charges: —"
+
+[node name="SkillList" type="VBoxContainer" parent="Margin/Card/Pad/Root/Content/JobsContent/JobsRow" unique_id=1924344970]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3

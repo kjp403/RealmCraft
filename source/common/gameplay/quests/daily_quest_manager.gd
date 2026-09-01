@@ -353,10 +353,17 @@ func build_board_payload(player_res: PlayerResource) -> Dictionary:
 			# real target and payout for each before the player commits.
 			entry["options"] = difficulty_options(player_res, task.slot)
 		entries.append(entry)
+	# Dungeon charges ride along on the daily board rather than on `dungeon.info`.
+	# They ARE daily state and they reset on the same 00:00 UTC boundary, but
+	# `dungeon.info` is station-gated (you must be stood at a dungeon keeper), so
+	# it cannot answer a Character-menu panel. Carrying them here also means the
+	# live `daily.progress` push keeps them current for free.
+	var charges: Dictionary = DungeonService.charge_status(player_res)
 	return {
 		"ok": true,
 		"entries": entries,
 		"refresh_at_ms": player_res.dailies_refresh_at_ms,
+		"dungeon_charges": charges,
 		"all_claimed": _all_claimed(board),
 		"bonus_gold": BONUS_GOLD,
 		"bonus_xp": BONUS_ADVENTURE_XP,
