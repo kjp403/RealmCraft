@@ -136,6 +136,30 @@ var _shimmer_material: ShaderMaterial = null
 ## Particles per swing. Keep it low — this fires on every axe hit.
 @export var chop_fx_amount: int = 10
 
+## How much BRIGHTER the node goes on the frame a swing lands, as a fraction
+## above normal — 0.5 peaks at 1.5x. 0 = no flash, which is every node that
+## shipped before the high ore tiers. This is the cue that says "that hit
+## counted": the particle burst reads as decoration, but a flash on the struck
+## body itself is what makes a swing feel connected.
+##
+## It is an overbright multiplier, not a blend toward a colour, because
+## [code]modulate[/code] multiplies — a flash authored at or below white can
+## only darken the sprite. 0.35-0.5 is the useful band; pale art (Celestial)
+## saturates sooner, dark rock (Obsidian) can take more before it reads.
+@export_range(0.0, 1.0, 0.05) var hit_flash_strength: float = 0.0
+## Colour of the flash, scaled up by [member hit_flash_strength]. White for a
+## plain physical impact; tint it toward the metal for a hit that should feel
+## like it woke something up (Astralite flashes violet-white). Alpha is ignored.
+@export var hit_flash_color: Color = Color.WHITE
+## Flash duration. Longer than ~0.2 stops reading as an impact and starts
+## reading as a glow, and swings land every ~0.3s at the top tiers.
+@export_range(0.02, 0.5, 0.01) var hit_flash_seconds: float = 0.12
+## Peak sprite kick, in texture pixels, on a landed swing. The node jolts along
+## this and settles back with a damped bounce inside [member hit_flash_seconds]
+## x2. 0 = a rock that does not move, which is the old behaviour.
+## 2-4 is a chip; past ~6 the rock reads as wobbling rather than being struck.
+@export_range(0.0, 8.0, 0.5) var hit_recoil_pixels: float = 0.0
+
 
 ## Shared material for [member shimmer_strength] > 0, else null. Client-only.
 func shimmer_material() -> ShaderMaterial:

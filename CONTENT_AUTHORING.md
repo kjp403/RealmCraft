@@ -707,7 +707,196 @@ The server finds them via the NPC on the current map (`giver_key` from the NPC `
 
 ---
 
-## 5. Deploy reminder (important)
+## 5. High-tier gathering nodes & custom smelting
+
+Everything below is authored **in the Inspector on a `.tres`** — there is no new
+scene work. The node scene, the shader and the particle emitter are all built at
+runtime from these fields, so a new tier is a resource, not a prefab.
+
+### 5.1 Node hierarchy — what you do and do NOT build
+
+`MineableNode` (`source/common/gameplay/maps/components/mineable_node.tscn`) is
+placed in the map and pointed at a `MineableNodeResource` via its `data` export.
+That is the whole setup. Its children are:
+
+| Child | Who owns it | Notes |
+|-------|-------------|-------|
+| `Sprite2D` | script | texture, scale, shimmer material, idle frames, flash + recoil all applied from `data` |
+| `CollisionShape2D` | script | resized from the texture by `_layout_from_texture()` |
+| `NameLabel`, `VisualState` | script | repositioned from the texture height |
+| *(particles)* | script | `CPUParticles2D` is **created per swing and freed**; do not add one in the editor |
+
+> **Do not** add an `AnimatedSprite2D`, a `ShaderMaterial` on the sprite, or a
+> `GPUParticles2D` by hand. The script drives `Sprite2D.texture` directly for the
+> depleted swap, and an `AnimationPlayer` or editor-set material fights it — the
+> node ends up frozen on one frame or stuck grey after it refills.
+
+### 5.2 Idle frames (sprite animation)
+
+`texture` is frame 0; `idle_frames` are frames 1..n, cycled at
+`idle_frame_seconds`. A depleted node freezes on its stump art.
+
+* Frames **must be the same size as `texture`** or the node jumps every cycle.
+* Generate them with `python tools/build_ore_vein_idle_frames.py`, which derives
+  each frame from the shipped vein sprite so registration is exact. Hand-drawn
+  frames are fine, but check the silhouette pixel-for-pixel.
+* 2 frames + `0.5s` reads as a slow breath; 3 frames + `0.25s` reads as energy.
+
+### 5.3 Shimmer shader
+
+Set `shimmer_strength > 0` and the script builds the `ShaderMaterial` itself from
+`shimmer.gdshader` — leave the sprite's material **empty** in the editor.
+
+| Field | Guidance |
+|-------|----------|
+| `shimmer_strength` | `0.3`–`0.6`. Past `~0.8` pale art blows out to white |
+| `shimmer_tint` | the metal's highlight, not its body colour |
+| `shimmer_speed` | `0.7` slow gleam → `1.3` restless |
+| `shimmer_iridescent` | hue-cycles as well; Astralite only, it is loud |
+
+`Item.shimmer_*` mirrors these for the icon / in-hand sprite, so a shimmering
+vein and its bar are set up the same way.
+
+### 5.4 Strike feedback (flash, recoil, particles)
+
+Fired from `ClientState` only when a swing actually connects, so a cooldown or
+wrong-tool reply never plays.
+
+| Field | Guidance |
+|-------|----------|
+| `hit_flash_strength` | how much **brighter**, as a fraction: `0.5` peaks at 1.5x. `0.35` on pale art (Celestial), `0.55` on near-black (Obsidian) |
+| `hit_flash_color` | the flash's hue; white for a plain impact, tinted toward the metal to feel "woken up". Alpha ignored |
+| `hit_flash_seconds` | keep `≤ 0.2` — longer reads as a glow, and swings land every ~0.3s |
+| `hit_recoil_pixels` | `2`–`4`. Past ~6 the rock wobbles instead of being struck |
+| `chop_fx_style` | `drift_up`, `sparkle`, `spark_side`, `starburst` |
+| `chop_fx_amount` | keep low; this fires on **every** hit |
+
+Flash and particles are independent — either can be used alone.
+
+> The flash is an **overbright**: the sprite is driven toward
+> `hit_flash_color * (1 + hit_flash_strength)`. `modulate` multiplies, so a
+> flash authored at or below white can only darken — and a white flash on an
+> unmodulated (white) sprite is a silent no-op. That is not a knob you can turn
+> off by choosing a dim colour; set `hit_flash_strength` to `0` instead.
+
+### 5.5 Custom smelting (`SmeltingRecipe`)
+
+Post-Runite metals do not use `N x Coal + 1 x Ore`. Author them in
+`furnace.tres` as `SmeltingRecipe` (not `CraftingRecipe`); the station holds a
+mixed list and the server branches on the type.
+
+| Field | Meaning |
+|-------|---------|
+| `ingredients` | consumed every craft — ore, additive, and the **previous tier's bar** |
+| `catalysts` | must be **held**, consumed only on a roll |
+| `catalyst_consume_chance` | per-unit erosion. `0.04` ships; `0.0` = a permanent tool |
+| `flavor` | one line shown above the material list |
+
+**Rules that bite:**
+
+* Availability checks and the crafting UI read `required_inputs()`, never
+  `ingredients`. A new kind of input must be added there or it will be invisible
+  in the UI and ungated on the client.
+* Do **not** list the same item as both an ingredient and a catalyst — each is
+  counted independently, so the craft can pass the check and then overdraw.
+* Every additive needs a source. The four shipped ones are a `secondary_ore`
+  catch on their own vein at `secondary_chance = 0.34`, which matches the 2 ore :
+  1 additive the recipes ask for. Change one and change the other.
+* Perk / outfit refunds deliberately do not apply to catalysts.
+
+### 5.6 Regenerating the art
+
+| Script | Produces |
+|--------|----------|
+| `tools/build_ore_vein_idle_frames.py` | `vein_<tier>_f1/f2.png` idle frames |
+| `tools/build_high_tier_tool_art.py` | `high_tier/tools_<tier>.png` + the Dragon rod |
+| `tools/build_smelting_catalysts.py` | the five catalyst / additive icons |
+
+**Tool silhouettes are fixed per tool TYPE, not per tier.** The pickaxe, sickle
+and axe shapes in `build_high_tier_tool_art.py` are ASCII pixel grids shared by
+all four tiers and matched to the Bronze–Runite shapes players already read. A
+tier is identified by its ramp, a 2–3 pixel ornament inset inside the head, and
+two accent bands on the haft — never by changing the head's outline.
+
+> An earlier pass gave every tier its own head geometry. It was rejected: the
+> tiers were distinguishable and the TOOL TYPE was not, which is the only thing
+> the silhouette has to carry. If you add a tier, add a ramp and a motif — do
+> **not** add a shape. Prove it with the silhouette band of
+> `render_high_ore_tiers.tscn`, which strips the colour out.
+
+Sheets are laid out on the same `192x112` grid as the base weapon sheets, so
+tool items keep the canonical regions — `Rect2(0, 48, 16, 32)` pickaxe,
+`Rect2(32, 48, 16, 32)` sickle, `Rect2(112, 48, 16, 32)` axe. `weapon.gd` drives
+the in-hand sprite from `item_icon`, so repointing the AtlasTexture updates the
+player model and the UI together.
+
+Two traps when repointing a tool's texture:
+
+* Drop the `uid=` from the `ext_resource` line. It resolves ahead of `path`, so
+  leaving it silently keeps loading the old sheet.
+* The shipped Bronze–Runite `axe_*` items point at a cell that is drawn as a
+  **hoe**, not an axe. The high tiers deliberately diverge from that reference
+  and draw a real weighted bit; the silhouette sheet labels the row so the
+  mismatch does not read as a regression.
+
+`build_higher_ore_tiers.py` still owns tier ARMOUR by recolouring the Runite
+set — that is correct there, where the silhouette is shared anyway. Do not route
+a tool through it.
+
+### 5.7 Gates
+
+```
+godot --headless --path . -s tools/verify_high_ore_tiers.gd      # bad=0
+godot --path . --mode=client res://tools/check_ore_alcove.tscn   # ore alcove OK
+godot --path . --mode=client res://tools/verify_vein_fx.tscn     # VEIN_FX bad=0
+godot --path . --mode=client res://tools/render_shimmer_proof.tscn
+godot --path . --mode=client res://tools/render_high_ore_tiers.tscn
+```
+
+`verify_vein_fx.tscn` is a RUNTIME gate: it instances a real `MineableNode`,
+swings at it, and asserts the flash actually changes the sprite, the recoil
+settles back to rest, and the one-shot emitters free themselves. It stretches
+`hit_flash_seconds` on a copy of the resource first, because at the shipped
+0.12s a slow frame can step over the whole strike and observe nothing.
+
+> It earned its keep immediately: Celestial was authored with a white flash on a
+> white base, and `modulate` multiplies, so `WHITE.lerp(WHITE, t)` did nothing.
+> The flash is now an **overbright** — `hit_flash_color * (1 + strength)` — so a
+> white flash brightens instead of being a no-op. A flash authored at or below
+> white can only ever darken a sprite.
+
+`render_high_ore_tiers.tscn` writes two sheets: the tier contact sheet, and
+`previews/tool-legibility.png` — rejected vs revised tool art plus a
+colour-stripped silhouette band against the Bronze reference.
+
+#### Blocking rule: merge order
+
+`verify_high_ore_tiers.gd` reports an `XP_ORDER` section.
+
+| Counter | Must be | Meaning |
+|---------|---------|---------|
+| `new_tier_inversions` | `0` always | a higher new tier pays less than a lower one — an authoring bug |
+| `cross_ladder_inversions` | `1` for now | the new tiers are costed on the rescaled curve; the old ladder is not |
+
+**As of 2026-09-01 `rework/skill-xp-rates` is still NOT merged into `main`** —
+`main` pays a Runite Bar 254 XP against this branch's Dragon Bar at 35. Merging
+this branch first makes the new tier a 7x XP *downgrade*. Git will not catch it:
+the branches touch different lines and merge cleanly in either order.
+
+Re-check with `git merge-base --is-ancestor origin/rework/skill-xp-rates
+origin/main`. Once that is true, rebase and `cross_ladder_inversions` drops to
+`0`; if it does not, the rescale and these recipes have diverged.
+
+> The `steel_bar` (lv15, was 78 XP) vs `silver_bar` (lv10, 98 XP) inversion that
+> this gate also surfaced was pre-existing on `main` and is patched here: steel
+> now pays 105, between silver and gold. **That patch touches a line
+> `rework/skill-xp-rates` also rewrites** (to 10, as part of its full rescale),
+> so expect a conflict on `furnace.tres` when the two meet — take the rework's
+> value, which fixes the inversion its own way.
+
+---
+
+## 6. Deploy reminder (important)
 
 World/server content is **authoritative**. Editing maps, NPCs, shops, items, or portals in git does nothing live until the VPS pulls and restarts.
 

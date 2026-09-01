@@ -12,3 +12,15 @@ extends Resource
 ## Reserved for a future "learned recipes" system. v1 treats every recipe as known,
 ## so this is currently ignored — kept so recipes can become unlockable later.
 @export var learnable: bool = false
+
+
+## Every input the player must HOLD for this craft to be allowed: the plain
+## [member ingredients], plus any inputs a subclass gates on without always
+## consuming (see [SmeltingRecipe] catalysts).
+##
+## Availability checks and the crafting UI read THIS, not [member ingredients],
+## so a subclass that adds a new kind of input is shown and gated correctly
+## without touching every call site. Only the consumption path distinguishes
+## the two, because only it needs to.
+func required_inputs() -> Array[CraftIngredient]:
+	return ingredients

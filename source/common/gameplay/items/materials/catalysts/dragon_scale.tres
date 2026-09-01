@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/catalyst_dragon_scale.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Dragon Scale"
+item_icon = ExtResource("1_icon")
+description = "A shed scale that never cooled. Fluxes Dragon Ore into bar without coal."
+holdable = false
+can_trade = true
+vendor_value = 34
+stack_limit = 10
+tags = PackedStringArray()
+metadata/_custom_type_script = "uid://nsr1timk430j"
+metadata/slug = &"dragon_scale"
+metadata/id = 665

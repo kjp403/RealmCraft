@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788300797
-next_id = 663
+version = 1788301783
+next_id = 668
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3087,6 +3087,31 @@ entries = Array[Dictionary]([{
 &"id": 662,
 &"path": "res://source/common/gameplay/items/weapons/tools/sickle_obsidian.tres",
 &"slug": &"sickle_obsidian"
+}, {
+&"hash": "0f900cfd106efa1e7b57d80b3888873e19866d11904679fd24c979797781332a",
+&"id": 663,
+&"path": "res://source/common/gameplay/items/materials/catalysts/astralite_mote.tres",
+&"slug": &"astralite_mote"
+}, {
+&"hash": "2b54c0c626d98b8096a761657f6b164d02644995bf2f5db99bc1f8197fbc6088",
+&"id": 664,
+&"path": "res://source/common/gameplay/items/materials/catalysts/celestial_dust.tres",
+&"slug": &"celestial_dust"
+}, {
+&"hash": "787b3fc90d6333462d82c613d8b4d1a2cbca18cb92c413dd402621f7ee3d1c05",
+&"id": 665,
+&"path": "res://source/common/gameplay/items/materials/catalysts/dragon_scale.tres",
+&"slug": &"dragon_scale"
+}, {
+&"hash": "7f721fe653c2c834ee53c98471e9dbba275777a0ca56432c9eae2a974bce7844",
+&"id": 666,
+&"path": "res://source/common/gameplay/items/materials/catalysts/everburning_crucible.tres",
+&"slug": &"everburning_crucible"
+}, {
+&"hash": "ef22aaca39de42b8ab6c1369e26b683d254756225e5ad01eeeb62c6d4b74c74f",
+&"id": 667,
+&"path": "res://source/common/gameplay/items/materials/catalysts/obsidian_flux.tres",
+&"slug": &"obsidian_flux"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

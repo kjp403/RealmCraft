@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="ToolItem" format=3]
 
 [ext_resource type="Script" uid="uid://cvggwjkht4km4" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_jfsn1"]
-[ext_resource type="Texture2D" uid="uid://dumhemoha7y5p" path="res://assets/sprites/items/weapons/obsidian/obsidian.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/weapons/tools/high_tier/tools_obsidian.png" id="1_tex"]
 [ext_resource type="Script" uid="uid://b5hsnu4140fky" path="res://source/common/gameplay/items/weapons/tool_item.gd" id="2_tool"]
 [ext_resource type="Resource" uid="uid://qav4p12rsbn3" path="res://source/common/gameplay/items/item_slot/slots/weapon.tres" id="3_slot"]
 [ext_resource type="PackedScene" uid="uid://6iow1vrv0iq7" path="res://source/common/gameplay/items/weapons/tools/sickle.tscn" id="4_scene"]

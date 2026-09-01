@@ -180,7 +180,7 @@ func _recompute_owned(inventory: Dictionary) -> void:
 
 
 func _has_ingredients(recipe: CraftingRecipe) -> bool:
-	for ingredient: CraftIngredient in recipe.ingredients:
+	for ingredient: CraftIngredient in recipe.required_inputs():
 		if ingredient == null or ingredient.item == null:
 			continue
 		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))

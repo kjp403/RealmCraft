@@ -660,10 +660,20 @@ func _render_detail() -> void:
 	)
 
 	var has_mats: bool = _has_ingredients(recipe)
-	for ingredient: CraftIngredient in recipe.ingredients:
+	# A smelt names its process above the material list ("Quenched in dragon
+	# scale."), so an alloy recipe reads as a method and not just a longer bill.
+	var smelt_recipe: SmeltingRecipe = recipe as SmeltingRecipe
+	if smelt_recipe != null and not smelt_recipe.flavor.is_empty():
+		var flavor_label: Label = Label.new()
+		flavor_label.text = smelt_recipe.flavor
+		flavor_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		flavor_label.add_theme_font_size_override(&"font_size", 12)
+		flavor_label.add_theme_color_override(&"font_color", COLOR_MUTED)
+		materials_list.add_child(flavor_label)
+	for ingredient: CraftIngredient in recipe.required_inputs():
 		if ingredient == null or ingredient.item == null:
 			continue
-		materials_list.add_child(_make_material_row(ingredient))
+		materials_list.add_child(_make_material_row(ingredient, recipe))
 
 	var meets_level: bool = _profession_level >= recipe.required_level
 	if recipe.required_level > 0:
@@ -750,8 +760,10 @@ func _equipped_ids() -> Array:
 	return ClientState.local_player.equipment_component.slots.values.values()
 
 
-## One "name  have/need" row; gear ingredients read as "Consumes:" (ring upgrades).
-func _make_material_row(ingredient: CraftIngredient) -> HBoxContainer:
+## One "name  have/need" row; gear ingredients read as "Consumes:" (ring
+## upgrades) and a smelting catalyst as "Requires:", because it is held for the
+## craft rather than spent by it and a plain row would read as a lie.
+func _make_material_row(ingredient: CraftIngredient, recipe: CraftingRecipe) -> HBoxContainer:
 	var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
 	var have: int = _owned.get(ing_id, 0)
 	var enough: bool = have >= ingredient.amount
@@ -767,7 +779,12 @@ func _make_material_row(ingredient: CraftIngredient) -> HBoxContainer:
 	row.add_child(icon)
 
 	var name_label: Label = Label.new()
-	var prefix: String = "Consumes: " if ingredient.item is GearItem else ""
+	var smelt: SmeltingRecipe = recipe as SmeltingRecipe
+	var prefix: String = ""
+	if smelt != null and smelt.is_catalyst(ing_id):
+		prefix = "Requires: "
+	elif ingredient.item is GearItem:
+		prefix = "Consumes: "
 	name_label.text = prefix + str(ingredient.item.item_name)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.add_theme_font_size_override(&"font_size", 13)
@@ -782,7 +799,7 @@ func _make_material_row(ingredient: CraftIngredient) -> HBoxContainer:
 
 
 func _has_ingredients(recipe: CraftingRecipe) -> bool:
-	for ingredient: CraftIngredient in recipe.ingredients:
+	for ingredient: CraftIngredient in recipe.required_inputs():
 		if ingredient == null or ingredient.item == null:
 			continue
 		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
