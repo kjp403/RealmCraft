@@ -282,6 +282,32 @@ static func _on_level_up(payload: Dictionary) -> void:
 	LevelUpFx.celebrate(player, skill, level)
 
 
+## A level-99 mastery title was granted (SkillMasterTitleService). Centre-screen
+## banner rather than a corner toast: eleven of these exist per account and each
+## one is the end of a very long grind, so it earns the big lane.
+static func _on_title_unlocked(payload: Dictionary) -> void:
+	var title: String = str(payload.get("title", ""))
+	if title.is_empty():
+		return
+	var skill: String = str(payload.get("skill_name", ""))
+	var tint: String = TitleCatalog.color_hex(title)
+	Announcer.announce(
+		"Skill Master Title Unlocked!",
+		"« %s »" % title,
+		{
+			"eyebrow": "%s 99" % skill if not skill.is_empty() else "",
+			"color": Color(tint) if not tint.is_empty() else Announcer.TITLE_COLOR,
+			"duration": 4.0,
+			# Deliberately NO key. In Announcer a key marks a banner as a
+			# POSITIONAL HINT: keyed banners are replaced by same-key siblings and
+			# outranked outright by any keyless ceremony, so a level-up firing in
+			# the same breath would cancel this one mid-show. Keyless is the
+			# ceremony lane, where two titles earned in one tick queue and each
+			# gets its full moment.
+		}
+	)
+
+
 ## Guard so we only subscribe ONCE per process — Client lives in the
 ## autoload and outlives any InstanceClient, so re-subscribing on every
 ## instance switch would either pile up callables or churn unsubscribe
@@ -302,6 +328,7 @@ func _ready() -> void:
 		Client.subscribe(&"dungeon.room", _on_dungeon_room)
 		Client.subscribe(&"dungeon.left", _on_dungeon_left)
 		Client.subscribe(&"level.up", _on_level_up)
+		Client.subscribe(&"title.unlocked", _on_title_unlocked)
 		_subscribed = true
 
 	synchronizer_manager = StateSynchronizerManagerClient.new()

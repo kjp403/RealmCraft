@@ -75,6 +75,15 @@ func _apply_title(title: String) -> void:
 		_title_label.add_theme_font_size_override(&"font_size", 28)
 		_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_title_label.scale = scale
+		# Nameplate depth. The title hangs off the Character, which draws at world
+		# z, so at the default 0 it ties with the body sprite and loses to
+		# anything drawn later - the player's own sprite, foliage, a prop. The
+		# mastery titles made that visible because their particle layer sits above
+		# the glyphs and was getting clipped by the head it was floating over.
+		# z_as_relative off so the depth is absolute and does not drift with
+		# whatever the character is parented under.
+		_title_label.z_as_relative = false
+		_title_label.z_index = TitleParticles.NAMEPLATE_Z
 		var host: Node = get_parent()
 		if host != null:
 			host.add_child(_title_label)

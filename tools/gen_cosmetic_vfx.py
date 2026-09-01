@@ -20,6 +20,20 @@ v1 looks are preserved exactly while hue-cycling and per-particle colour
 become one-liners.
 
 Adding a line to ROSTER is a new cosmetic SKU.
+
+MOST OF THESE STRIPS ARE NO LONGER RENDERED. Every aura and trail slug
+listed in CosmeticPresetLibrary (source/common/gameplay/cosmetics/presets/) are
+drawn at runtime as layered node trees instead -- floor shaders, particle
+emitters and world-space floor marks -- because a 12-frame 128x128 sprite cannot
+hold those layers or react to whether the wearer is moving. Retuning a palette
+here for any preset-backed slug will regenerate the strip and change NOTHING in
+game; the preset script for that slug is what to edit. See
+CosmeticPresetLibrary.PRESETS for the current list.
+
+The strips are still generated for all of them on purpose -- the registry wants
+a SpriteFrames per cosmetic, and the strip is the fallback the moment a slug is
+dropped from the preset library. Everything else here (rainbow, chromatic, the
+halos, flourishes and departures) is still the real, shipping art.
 """
 
 from __future__ import annotations
@@ -93,6 +107,14 @@ STATIC = {
     "gold":    ((255, 250, 222), (255, 204, 88),  (188, 118, 18)),
     "blood":   ((255, 226, 226), (232, 54, 62),   (120, 8, 20)),
     "toxic":   ((238, 255, 210), (176, 255, 60),  (78, 140, 10)),
+    # The four MYTHIC-tier looks. These are fallback strips only -- each of them
+    # is rendered in game by a preset (see the note at the top of this file), so
+    # what matters here is that the palette reads as the right cosmetic in a
+    # roster listing, not that the strip is a faithful preview of the effect.
+    "eclipse": ((255, 250, 225), (255, 176, 38),  (74, 30, 4)),
+    "rune":    ((255, 236, 190), (214, 158, 66),  (68, 58, 46)),
+    "chrono":  ((232, 248, 255), (120, 205, 255), (66, 58, 178)),
+    "infernal":((255, 240, 190), (255, 108, 18),  (138, 14, 6)),
 }
 
 
@@ -431,6 +453,8 @@ ROSTER = [
     ("aura_blood",          fx_aura,            const("blood")),
     ("aura_toxic",          fx_aura,            const("toxic")),
     ("aura_emberfrost",     fx_aura,            duotone("ember", "frost")),
+    ("aura_solar_eclipse",  fx_aura,            const("eclipse")),
+    ("aura_runebound_titan", fx_aura,           const("rune")),
     # Trails
     ("trail_rainbow",       fx_ribbon_trail,    rainbow(spread=1.1, speed=0.9)),
     ("trail_galaxy",        fx_galaxy_trail,    galaxy()),
@@ -439,6 +463,8 @@ ROSTER = [
     ("trail_blood",         fx_trail,           const("blood")),
     ("trail_toxic",         fx_trail,           const("toxic")),
     ("trail_gold",          fx_trail,           const("gold")),
+    ("trail_chrono_echo",   fx_ribbon_trail,    const("chrono")),
+    ("trail_infernal_chasm", fx_trail,          const("infernal")),
     # Halos
     ("halo_rainbow",        fx_halo,            rainbow(spread=1.0, speed=0.8)),
     ("halo_galaxy",         fx_halo,            galaxy()),

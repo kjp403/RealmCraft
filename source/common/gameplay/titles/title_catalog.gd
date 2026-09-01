@@ -136,7 +136,8 @@ static func premium_roster() -> Array:
 	return out
 
 
-## Donator titles first (the ones that must have VFX), then premium shop candidates.
+## Donator titles first (the ones that must have VFX), then the earned level-99
+## mastery set, then premium shop candidates.
 static func vault_roster() -> Array:
 	var out: Array = []
 	for slug: String in SupporterTitles.ORDER:
@@ -144,15 +145,23 @@ static func vault_roster() -> Array:
 		var row: Dictionary = entry.duplicate()
 		row["slug"] = slug
 		out.append(row)
+	out.append_array(SkillMasterTitles.roster())
 	out.append_array(premium_roster())
 	return out
 
 
-## Supporter first, then premium. Empty = no title VFX.
+## Supporter, then earned mastery, then premium. Empty = no title VFX.
+##
+## Mastery titles resolve HERE but are deliberately absent from PREMIUM, so
+## is_premium_name() stays false for them and strip_unreleased_vfx never deletes
+## a title somebody ground to 99 for. See SkillMasterTitleService.
 static func spec(title: String) -> Dictionary:
 	var from_supporter: Dictionary = SupporterTitles.spec(title)
 	if not from_supporter.is_empty():
 		return from_supporter
+	var from_mastery: Dictionary = SkillMasterTitles.spec(title)
+	if not from_mastery.is_empty():
+		return from_mastery
 	var needle: String = title.strip_edges()
 	if needle.is_empty():
 		return {}

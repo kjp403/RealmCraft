@@ -223,6 +223,14 @@ var active_inventory_bag: int = 0
 ## leveled_up as a local, and the signal would be shadowed.)
 signal level_gained
 
+## A profession skill gained a level. Emitted once per level from
+## [method add_skill_xp], which every profession XP path in the game funnels
+## through — so one connection here covers mining, slayer, prayer and the rest
+## without touching a single call site.
+##
+## Server-side only in practice: this resource is null on the client.
+signal skill_leveled(skill_name: StringName, level: int)
+
 ## Current Network ID
 var current_peer_id: int
 
@@ -526,6 +534,10 @@ func add_skill_xp(skill_name: StringName, amount: int) -> Dictionary:
 	# NOTE no combat-level resync here: character level comes from the five weapon
 	# masteries only (see COMBAT_STYLE_CATEGORIES). Slayer and the gathering jobs
 	# all flow through this function and none of them move it.
+	if leveled_up:
+		# Emitted AFTER the level is written back, so a listener that reads the
+		# skill sees the new value rather than the one being replaced.
+		skill_leveled.emit(skill_name, level)
 	return {"level": level, "xp": int(skill["xp"]), "leveled_up": leveled_up}
 
 

@@ -1,17 +1,43 @@
 extends Node
-## Drives title-text VFX on a Label or Button every frame. ShaderMaterial on a
-## Label does not animate (the control never redraws), so this is the actual
-## visible gem/gold pulse.
+## Drives title-text VFX on a Label or Button every frame. A ShaderMaterial on a
+## Label does not animate on its own (the control never redraws), so this node is
+## what actually makes any of it move.
+##
+## It does two different jobs depending on the title family:
+##
+##   LEGACY (supporter / premium)  animates the label's own colour and outline in
+##       script - the pulse and flash you can see on a Gilded or Sovereign title.
+##   MASTERY (the eleven level-99 titles)  leaves the colour alone entirely and
+##       feeds the shader a clock instead. Those looks paint their own gradients
+##       per fragment, so tinting the label on top of them would wash the gradient
+##       out - and TIME inside the shader does not advance a control that is not
+##       redrawing, which is the whole reason the uniform exists.
+##
+## In BOTH cases the outline stays [constant TitleVfx.OUTLINE_COLOR]. That is the
+## load-bearing legibility fix: this script used to re-tint the outline with the
+## title's own colour every single frame, which silently undid any dark outline
+## set elsewhere and left the brightest titles with the least contrast against
+## bright ground. Nothing here may write font_outline_color any other colour.
 
 var tint: Color = Color(0.49, 0.75, 1.0)
 var vip: bool = false
 var style: int = 0
+## Mastery style index, or -1 for the legacy families.
+var mastery_fx: int = -1
+## Resolved outline colour for this title — the shared near-black unless the
+## catalog entry overrode it. Re-asserted every frame like the size is.
+var outline_color: Color = TitleVfx.OUTLINE_COLOR
 
 
-func configure(p_tint: Color, p_vip: bool, p_style: int) -> void:
+func configure(
+	p_tint: Color, p_vip: bool, p_style: int, p_mastery_fx: int = -1,
+	p_outline: Color = TitleVfx.OUTLINE_COLOR
+) -> void:
 	tint = p_tint
 	vip = p_vip
 	style = p_style
+	mastery_fx = p_mastery_fx
+	outline_color = p_outline
 	set_process(true)
 	_apply(0.0)
 
@@ -24,6 +50,25 @@ func _apply(t: float) -> void:
 	var host: CanvasItem = get_parent() as CanvasItem
 	if host == null:
 		return
+	if mastery_fx >= 0:
+		_apply_mastery(host, t)
+		return
+	_apply_legacy(host, t)
+
+
+## Mastery titles: hand the shader the clock and otherwise keep out of its way.
+func _apply_mastery(host: CanvasItem, t: float) -> void:
+	var mat: ShaderMaterial = host.material as ShaderMaterial
+	if mat != null:
+		mat.set_shader_parameter(&"t", t)
+	# White, so the shader's gradient arrives unmultiplied. Anything else here
+	# tints eleven carefully chosen palettes toward one colour.
+	host.self_modulate = Color.WHITE
+	_enforce_outline(host)
+	host.queue_redraw()
+
+
+func _apply_legacy(host: CanvasItem, t: float) -> void:
 	var speed: float = 3.4 if vip else 2.2
 	var pulse: float = 0.72 + (0.38 if vip else 0.26) * (0.5 + 0.5 * sin(t * speed))
 	var flash: float = 0.0
@@ -44,18 +89,32 @@ func _apply(t: float) -> void:
 	if host is Label:
 		var label: Label = host
 		label.self_modulate = lit
-		label.add_theme_color_override(&"font_outline_color", tint.darkened(0.15).lerp(shine, flash * 0.6))
-		label.add_theme_constant_override(&"outline_size", 10 if vip else 6)
-		label.queue_redraw()
 	elif host is Button:
 		var btn: Button = host
 		btn.add_theme_color_override(&"font_color", lit)
 		btn.add_theme_color_override(&"font_disabled_color", lit)
 		btn.add_theme_color_override(&"font_hover_color", lit)
 		btn.add_theme_color_override(&"font_pressed_color", lit)
-		btn.add_theme_color_override(&"font_outline_color", tint.darkened(0.15))
-		btn.add_theme_constant_override(&"outline_size", 8 if vip else 5)
-		btn.queue_redraw()
 	else:
 		host.self_modulate = lit
-		host.queue_redraw()
+	_enforce_outline(host)
+	host.queue_redraw()
+
+
+## Re-assert the dark outline every frame.
+##
+## Re-asserting rather than setting once looks redundant and is not: theme
+## overrides on these labels are also written by the nameplate, the profile and
+## the vault row as they rebuild, and whichever of them runs last would otherwise
+## decide the outline. Pinning it here means the contrast guarantee holds no
+## matter what else touched the label.
+func _enforce_outline(host: CanvasItem) -> void:
+	var size: int = TitleVfx.OUTLINE_SIZE_VIP if vip else TitleVfx.OUTLINE_SIZE
+	if host is Label:
+		var label: Label = host
+		label.add_theme_color_override(&"font_outline_color", outline_color)
+		label.add_theme_constant_override(&"outline_size", size)
+	elif host is Button:
+		var btn: Button = host
+		btn.add_theme_color_override(&"font_outline_color", outline_color)
+		btn.add_theme_constant_override(&"outline_size", maxi(1, size - 3))
