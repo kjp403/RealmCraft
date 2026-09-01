@@ -89,7 +89,7 @@ GOODS = [
     # board, which lives entirely on the unmerged quick-travel branch. Building it
     # here would mean duplicating that feature onto origin/main. Sold and owned;
     # wire it to the board once that PR lands.
-    ("biome_recall_scroll", "Biome Recall Scroll", "B", 25000, None, False, 5,
+    ("biome_recall_scroll", "Biome Recall Scroll", "B", 25000, "biome_recall_scroll_action", True, 5,
      "A road-map folded to the size of a palm, marked in a hand that clearly "
      "walked every line of it. The folds have not been worn in yet."),
     ("prismatic_dye", "Prismatic Dye", "B", 20000, "prismatic_dye_action", True, 5,

@@ -12,6 +12,13 @@ class_name QuickTravelDesk
 const LOCK_HERE: String = "You are already here."
 const LOCK_DEAD: String = "You cannot travel while dead."
 
+## Registry slug of the good that opens this board remotely.
+const SCROLL_SLUG: StringName = &"biome_recall_scroll"
+## Where the scroll reads its routes from. It sells the WAYFARER'S board, so the
+## stops stay authored in exactly one place; a second list on the scroll would be
+## one to forget the next time a destination is added.
+const WAYFARER_RES: String = "res://source/common/gameplay/characters/npc/npcs/wayfarer.tres"
+
 
 ## Resolves {player, npc, desk} from a request, or {reason} on failure. Failure
 ## dicts still carry "player" once it is known, so a caller can message the person
@@ -26,6 +33,11 @@ static func resolve(peer_id: int, instance: ServerInstance, args: Dictionary) ->
 		return {"reason": "dead", "player": player}
 	if JailList.is_jailed(player.player_resource.account_name):
 		return {"reason": "jailed", "player": player}
+
+	# A Biome Recall Scroll carries the desk with it: no NPC node to find, and no
+	# walk-up range to check, because the whole good is "book a ride from here".
+	if bool(args.get("scroll", false)):
+		return _resolve_scroll(player)
 
 	var station: String = str(args.get("npc", ""))
 	if station.is_empty() or instance.instance_map == null:
@@ -48,6 +60,34 @@ static func resolve(peer_id: int, instance: ServerInstance, args: Dictionary) ->
 	if desk == null:
 		return {"reason": "no_desk", "player": player}
 	return {"player": player, "npc": npc, "desk": desk}
+
+
+## Resolution for a scroll ride. Returns the same {player, desk} shape plus the
+## scroll's item id, so the booking handler can spend the exact stack it verified.
+##
+## HOLDING THE SCROLL IS THE CREDENTIAL, and it is checked HERE rather than trusted
+## from the client. Both handlers route through this function, so a forged
+## scroll:true buys nothing: without a scroll in the bag it is refused before a
+## fare is waived or a route is quoted.
+static func _resolve_scroll(player: Player) -> Dictionary:
+	var scroll_id: int = ContentRegistryHub.id_from_slug(&"items", SCROLL_SLUG)
+	if scroll_id <= 0:
+		# The slug does not resolve — a stale items index, not a missing scroll.
+		return {"reason": "no_scroll", "player": player}
+	if not Inventory.has_item(player.player_resource.inventory, scroll_id):
+		return {"reason": "no_scroll", "player": player}
+
+	var wayfarer: NPCResource = load(WAYFARER_RES) as NPCResource
+	var desk: QuickTravelInteraction = QuickTravelInteraction.in_resource(wayfarer)
+	if desk == null:
+		return {"reason": "no_desk", "player": player}
+	return {
+		"player": player,
+		"npc": null,
+		"desk": desk,
+		"scroll": true,
+		"scroll_id": scroll_id,
+	}
 
 
 ## Why [param dest] is unavailable to [param player] standing in [param instance],
