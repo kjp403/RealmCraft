@@ -52,6 +52,25 @@ func _check(tier: String) -> void:
 	var rest_offset: Vector2 = sprite.offset
 	var problems: PackedStringArray = []
 
+	# Snapshot everything the recoil must NOT disturb. The recoil drives the
+	# sprite's `offset` precisely so these stay put — `_layout_from_texture`,
+	# the click area and the chop-burst origin all read `_sprite.position`, so a
+	# recoil applied there would drag the gather hitbox around under the cursor
+	# on every swing. Snapshot rather than trust the comment.
+	var hitbox: CollisionShape2D = node.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var rest_sprite_pos: Vector2 = sprite.position
+	var rest_hitbox_pos: Vector2 = hitbox.position if hitbox != null else Vector2.ZERO
+	var rest_hitbox_size: Vector2 = Vector2.ZERO
+	if hitbox != null and hitbox.shape is RectangleShape2D:
+		rest_hitbox_size = (hitbox.shape as RectangleShape2D).size
+	var click_areas: Array[Node] = []
+	for child: Node in node.get_children():
+		if child is Area2D:
+			click_areas.append(child)
+	var rest_click_pos: Array[Vector2] = []
+	for area: Node in click_areas:
+		rest_click_pos.append((area as Node2D).global_position)
+
 	# --- authoring the runtime depends on ---
 	if data.idle_frames.size() < 1:
 		problems.append("no idle_frames")
@@ -92,13 +111,31 @@ func _check(tier: String) -> void:
 	# mid-flight and a single "is it moved yet" probe is a coin toss.
 	var saw_flash: bool = false
 	var saw_recoil: bool = false
+	var hitbox_moved: bool = false
+	var click_moved: bool = false
 	var waited: float = 0.0
 	while waited < 0.7:
 		if not sprite.modulate.is_equal_approx(rest_modulate):
 			saw_flash = true
 		if not sprite.offset.is_equal_approx(rest_offset):
 			saw_recoil = true
+		# Sampled DURING the bounce, not just after it: a hitbox that drifts and
+		# returns is still a hitbox that moved under the player mid-swing.
+		if not sprite.position.is_equal_approx(rest_sprite_pos):
+			hitbox_moved = true
+		if hitbox != null:
+			if not hitbox.position.is_equal_approx(rest_hitbox_pos):
+				hitbox_moved = true
+			if hitbox.shape is RectangleShape2D 					and not (hitbox.shape as RectangleShape2D).size.is_equal_approx(rest_hitbox_size):
+				hitbox_moved = true
+		for i: int in click_areas.size():
+			if not (click_areas[i] as Node2D).global_position.is_equal_approx(rest_click_pos[i]):
+				click_moved = true
 		waited += await _tick()
+	if hitbox_moved:
+		problems.append("recoil displaced the gather hitbox / sprite position")
+	if click_moved:
+		problems.append("recoil displaced the click area")
 	if not saw_flash:
 		problems.append("flash never changed modulate")
 	if not saw_recoil:
@@ -125,7 +162,7 @@ func _check(tier: String) -> void:
 		problems.append("%d particle emitter(s) leaked after the burst" % leaked)
 
 	if problems.is_empty():
-		print("ok %-10s flash %.2f, recoil %.1fpx, %s x%d, %d idle frame(s), %d burst(s)" % [
+		print("ok %-10s flash %.2f, recoil %.1fpx, %s x%d, %d idle frame(s), %d burst(s), hitbox fixed" % [
 			tier, data.hit_flash_strength, data.hit_recoil_pixels,
 			data.chop_fx_style, data.chop_fx_amount, data.idle_frames.size(), bursts,
 		])

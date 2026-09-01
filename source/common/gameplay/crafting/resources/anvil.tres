@@ -2678,17 +2678,12 @@ xp_reward = 45
 [sub_resource type="Resource" id="I_crucible_bar"]
 script = ExtResource("3_ingred")
 item = ExtResource("17_ru_bar")
-amount = 3
-
-[sub_resource type="Resource" id="I_crucible_coal"]
-script = ExtResource("3_ingred")
-item = ExtResource("63_coal")
-amount = 6
+amount = 10
 
 [sub_resource type="Resource" id="R_crucible"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("64_crucible")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_crucible_bar"), SubResource("I_crucible_coal")])
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_crucible_bar")])
 required_level = 66
 xp_reward = 40
 

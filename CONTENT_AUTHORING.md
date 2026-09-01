@@ -802,6 +802,17 @@ mixed list and the server branches on the type.
 * Every additive needs a source. The four shipped ones are a `secondary_ore`
   catch on their own vein at `secondary_chance = 0.34`, which matches the 2 ore :
   1 additive the recipes ask for. Change one and change the other.
+* The **Everburning Crucible** is an anvil recipe at Smithing 66 costing
+  **10x Runite Bar** — deliberately a mid-tier sink, so Runite mining stays
+  worth doing after a player is smelting Astralite. At `catalyst_consume_chance
+  = 0.04` a crucible survives ~25 smelts, which amortises to **0.4 Runite Bar
+  per high-tier bar**; because each tier alloys in the bar below it, an
+  Astralite Bar transitively costs ~2.6 Runite Bars. Retuning either the recipe
+  or the erosion rate moves that number — `verify_high_ore_tiers.gd` prints it
+  on every run so a change is visible rather than silent.
+* Crafting the Crucible must stay a net LOSS against vendoring its inputs
+  (1000g of bars in, 400g out). The gate fails if that ever inverts, because a
+  craftable item worth more than its parts is a gold printer.
 * Perk / outfit refunds deliberately do not apply to catalysts.
 
 ### 5.6 Regenerating the art
@@ -883,9 +894,23 @@ colour-stripped silhouette band against the Bronze reference.
 this branch first makes the new tier a 7x XP *downgrade*. Git will not catch it:
 the branches touch different lines and merge cleanly in either order.
 
-Re-check with `git merge-base --is-ancestor origin/rework/skill-xp-rates
-origin/main`. Once that is true, rebase and `cross_ladder_inversions` drops to
-`0`; if it does not, the rescale and these recipes have diverged.
+**Do not merge this branch while that check fails.** `--is-ancestor` exits `0`
+when the rework has landed and `1` when it has not, so it drops straight into
+CI as a hard gate:
+
+```bash
+git fetch origin
+if git merge-base --is-ancestor origin/rework/skill-xp-rates origin/main; then
+  echo "rework landed - safe to merge content/high-ore-tiers"
+else
+  echo "BLOCKED: merge rework/skill-xp-rates first" >&2
+  exit 1
+fi
+```
+
+Once it passes, rebase and re-run the gate: `cross_ladder_inversions` must drop
+to `0`. If it does not, the rescale and these recipes have diverged and the
+factor needs recomputing — do not merge on the assumption that it will settle.
 
 > The `steel_bar` (lv15, was 78 XP) vs `silver_bar` (lv10, 98 XP) inversion that
 > this gate also surfaced was pre-existing on `main` and is patched here: steel
