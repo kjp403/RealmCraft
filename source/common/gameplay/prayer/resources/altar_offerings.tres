@@ -9,19 +9,19 @@
 [sub_resource type="Resource" id="O_bone"]
 script = ExtResource("2_offering")
 item = ExtResource("mat_bone")
-xp = 550
+xp = 109
 required_level = 0
 
 [sub_resource type="Resource" id="O_big_bones"]
 script = ExtResource("2_offering")
 item = ExtResource("mat_big_bones")
-xp = 1650
+xp = 326
 required_level = 0
 
 [sub_resource type="Resource" id="O_dragon_bones"]
 script = ExtResource("2_offering")
 item = ExtResource("mat_dragon_bones")
-xp = 4400
+xp = 869
 required_level = 0
 
 [resource]
