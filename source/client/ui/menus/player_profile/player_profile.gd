@@ -249,9 +249,14 @@ func _build_handoff_buttons(tab_bar: HBoxContainer) -> void:
 	_titles_button.hide()
 	tab_bar.add_child(_titles_button)
 
+	# "Skins" is the Horizon wardrobe (&"wardrobe"), NOT &"cosmetics". The
+	# cosmetics menu is the Vault's Cosmetics tab: unreleased VFX, admin+ only,
+	# and reachable solely through the Curator. Routing a profile tab at it put a
+	# second door on a staff room — non-staff only ever saw "Nothing to show.",
+	# so it also meant the Skins button did nothing for the players it is for.
 	for entry: Array in [
 		["Character", &"character"],
-		["Skins", &"cosmetics"],
+		["Skins", &"wardrobe"],
 		["Guild", &"guild"],
 	]:
 		var button := Button.new()
