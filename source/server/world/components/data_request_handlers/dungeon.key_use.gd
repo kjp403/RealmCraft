@@ -32,6 +32,9 @@ func data_request_handler(
 		return {"ok": false, "reason": "missing"}
 
 	var left: int = DungeonService.add_bonus_charge(player.player_resource, 1)
+	# Charges ship on the daily board payload too (Character > Jobs tracker), so
+	# banking a key has to re-push it or that panel stays a charge behind.
+	DailyQuestManager.push_board(player.player_resource)
 	if peer_id > 0 and WorldServer.curr != null:
 		WorldServer.curr.data_push.rpc_id(peer_id, &"dungeon.key_used", {
 			"charges_left": left,

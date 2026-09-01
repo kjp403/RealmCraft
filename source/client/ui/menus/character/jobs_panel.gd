@@ -90,7 +90,7 @@ func _build_skills_grid(force_rebuild: bool = true) -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(280, 280)
 	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	panel.add_theme_stylebox_override(&"panel", _make_panel_style())
+	panel.add_theme_stylebox_override(&"panel", make_panel_style())
 	outer_row.add_child(panel)
 
 	var margin := MarginContainer.new()
@@ -200,9 +200,9 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	tile.flat = true
 	tile.tooltip_text = _skill_tooltip(display, level, xp, xp_to_next, at_cap, total_xp)
 	tile.pressed.connect(_open_skill_detail.bind(skill_name))
-	tile.add_theme_stylebox_override(&"normal", _make_tile_style())
-	tile.add_theme_stylebox_override(&"hover", _make_tile_style())
-	tile.add_theme_stylebox_override(&"pressed", _make_tile_style())
+	tile.add_theme_stylebox_override(&"normal", make_tile_style())
+	tile.add_theme_stylebox_override(&"hover", make_tile_style())
+	tile.add_theme_stylebox_override(&"pressed", make_tile_style())
 
 	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -330,7 +330,10 @@ func _get_skill_icon(skill_name: String) -> Texture2D:
 	return null
 
 
-func _make_panel_style() -> StyleBoxFlat:
+## Public + static so the Daily Tracker sharing this tab can dress itself from
+## the SAME source. Two panels sitting side by side with hand-copied colours
+## drift the first time one of them is retouched.
+static func make_panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.184, 0.173, 0.157, 0.97)
 	style.border_color = Color(0.455, 0.416, 0.341)
@@ -340,7 +343,8 @@ func _make_panel_style() -> StyleBoxFlat:
 	return style
 
 
-func _make_tile_style() -> StyleBoxFlat:
+## Public + static for the same reason as [method make_panel_style].
+static func make_tile_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.16, 0.15, 0.14, 0.97)
 	style.border_color = Color(0.48, 0.44, 0.38, 1.0)
