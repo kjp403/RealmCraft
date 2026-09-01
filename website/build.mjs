@@ -565,6 +565,7 @@ function catIcon(id) {
     boards: `<path d="M7.2 20V10.2h3.2V20H7.2zm6.4 0V6.2h3.2V20h-3.2zM4.4 20h15.2"/><path d="M8.6 7.2 12 4.4l3.4 2.8"/>`,
     play: `<path d="M8 6.4v11.2L19 12z"/>`,
     donate: `<path d="M12 20.4L4.8 12.2 8.2 5.6h7.6l3.4 6.6z"/><path d="M4.8 12.2h14.4M8.2 5.6 12 12.2 15.8 5.6"/>`,
+    peddler: `<path d="M4.6 15.4h14.8"/><path d="M6.4 15.4V9.8a5.6 5.6 0 0 1 11.2 0v5.6"/><path d="M12 9.1v6.3"/><circle cx="8.6" cy="18.1" r="1.8"/><circle cx="15.4" cy="18.1" r="1.8"/>`,
     boss: `<path d="M4.8 16.6h14.4v2.1H4.8z"/><path d="M5.2 8.1l3.1 2.5L12 5.4l3.7 5.2 3.1-2.5v8.2H5.2z"/>`,
     enemy: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
   };
@@ -580,6 +581,16 @@ function pageHeading(cat, title) {
 function wikiCard(cat, href, title, bodyHtml) {
   return `<a class="card wiki-card cat-${cat}" href="${href}">${catIcon(cat)}<div><h3>${esc(title)}</h3><p>${bodyHtml}</p></div></a>`;
 }
+
+// Which `active` values light the single Wiki link. The bar used to carry five
+// wiki sub-links, but /wiki/ indexes TWELVE sections -- so the bar was an
+// arbitrary partial copy of a list that already exists one click away, and the
+// five it happened to show pushed everything else, Peddler included, into an
+// undifferentiated row nobody reads. Sub-pages keep their breadcrumb.
+const WIKI_SECTIONS = new Set([
+  "wiki", "start", "items", "creatures", "locations",
+  "npcs", "skills", "slayer", "quests", "guilds",
+]);
 
 function shell({ title, active, body, scripts = [], theme = "", extraClass = "" }) {
   const home = "/";
@@ -604,18 +615,13 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
   <header class="site-header">
     <a class="brand" href="${home}"><img src="/media/project_icon/arkenelle_icon.png" alt="">Arkenelle</a>
     <nav class="primary">
-      <a href="${wiki}" class="${active === "wiki" ? "active" : ""}">Wiki</a>
+      <a href="${wiki}" class="${WIKI_SECTIONS.has(active) ? "active" : ""}">Wiki</a>
       <a href="/leaderboards/" class="${active === "boards" ? "active" : ""}">Leaderboards</a>
-      <a href="/peddler/" class="${active === "peddler" ? "active" : ""}">Peddler</a>
-      <a href="/wiki/getting-started/" class="${active === "start" ? "active" : ""}">Getting started</a>
-      <a href="/wiki/items/" class="${active === "items" ? "active" : ""}">Items</a>
-      <a href="/wiki/creatures/" class="${active === "creatures" ? "active" : ""}">Creatures</a>
-      <a href="/wiki/locations/" class="${active === "locations" ? "active" : ""}">Locations</a>
-      <a href="/wiki/npcs/" class="${active === "npcs" ? "active" : ""}">NPCs</a>
       <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
       <a href="${PLAY_DESKTOP}">Download</a>
       <a href="/donate/" class="${active === "donate" ? "active" : ""}">Donate</a>
       <a href="${DISCORD}">Discord</a>
+      <a href="/peddler/" class="peddler ${active === "peddler" ? "active" : ""}">Peddler</a>
     </nav>
     <div class="search-wrap">
       <input data-search data-index="/wiki/search.json" type="search" placeholder="Search wiki…" aria-label="Search wiki">
@@ -2115,7 +2121,7 @@ function build() {
           ${wikiCard("quests", "/wiki/quests/", "Quests", `The Hollow Seep campaign and <strong>${quests.length}</strong> authored quests.`)}
           ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
           ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
-          ${wikiCard("boards", "/peddler/", "Traveling Peddler", "Where the cart is right now, and what it is selling today.")}
+          ${wikiCard("peddler", "/peddler/", "Traveling Peddler", "Where the cart is right now, and what it is selling today.")}
         </div>
       </main>`,
     })
