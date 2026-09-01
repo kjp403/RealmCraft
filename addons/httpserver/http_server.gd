@@ -122,6 +122,12 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	# Caddy stamps with the real client (header_up overwrites any client-sent value,
 	# so it can't be spoofed). Falls back to the socket host for direct / local dev.
 	payload["__ip__"] = _header_value(headers, "x-real-ip", connection.get_connected_host())
+	# Authorization header, for routes that authenticate a SERVER rather than a
+	# player session (the world server posting its peddler snapshot). Stamped the
+	# same way as __ip__ so a handler never has to parse the raw request, and
+	# under a reserved key so a client cannot forge it through the body or the
+	# query string — those are merged above, this is written after.
+	payload["__auth__"] = _header_value(headers, "authorization", "")
 
 	# Try a registered route first. Static fallback only fires when no route
 	# matched, so API paths can use any prefix without colliding with the

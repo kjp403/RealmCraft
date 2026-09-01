@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/anvil_stabilizer.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = true
+item_name = &"Anvil Stabilizer"
+item_icon = ExtResource("2_icon")
+description = "A weighted collar that stops a furnace drifting off heat. Fifty charges: each one holds a smelt steady, and a stabilised run can go fifty bars deep instead of ten."
+holdable = false
+stack_limit = 0
+vendor_value = 0
+metadata/slug = &"anvil_stabilizer"
+metadata/id = 630

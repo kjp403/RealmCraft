@@ -23,10 +23,21 @@ const STATIC_MAX: int = 32767
 const SCENE_HOSTILE_NPC: int = 0
 const SCENE_GROUND_ITEM: int = 1
 const SCENE_LOOT_CHEST: int = 2
+## The friendly NPC scene, spawned dynamically for the Traveling Peddler. Which
+## NPC it IS rides along as the `npc_slug` spawn init (a Resource cannot cross
+## the wire, so the slug does) — see [member NPC.npc_slug].
+const SCENE_NPC: int = 3
+const SCENE_PEDDLER_VAULT: int = 4
+const SCENE_MYSTERY_SEED_BLOOM: int = 5
+const SCENE_DEPOSIT_BOX: int = 6
 const DYNAMIC_SCENE_PATHS: Dictionary = {
 	SCENE_HOSTILE_NPC: "res://source/common/gameplay/characters/npc/hostile_npc.tscn",
 	SCENE_GROUND_ITEM: "res://source/common/gameplay/maps/props/collectibles/ground_item.tscn",
 	SCENE_LOOT_CHEST: "res://source/common/gameplay/maps/props/collectibles/loot_chest.tscn",
+	SCENE_NPC: "res://source/common/gameplay/characters/npc/npc.tscn",
+	SCENE_PEDDLER_VAULT: "res://source/common/gameplay/peddler/peddler_vault_chest.tscn",
+	SCENE_MYSTERY_SEED_BLOOM: "res://source/common/gameplay/peddler/mystery_seed_bloom.tscn",
+	SCENE_DEPOSIT_BOX: "res://source/common/gameplay/peddler/portable_deposit_box.tscn",
 }
 
 

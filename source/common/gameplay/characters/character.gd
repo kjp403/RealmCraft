@@ -28,6 +28,13 @@ var cosmetic_id: int:
 var vault_skin_id: int:
 	set = _set_vault_skin_id
 
+## Active Prismatic Dye id (0 = none), synced so everyone in the zone sees the
+## same recoloured body. Server pushes it on spawn and on use; the value is
+## already expiry-checked by [method PrismaticDye.visible_id] before it is sent,
+## so a client never has to know when someone else's dye runs out.
+var prismatic_dye_id: int:
+	set = _set_prismatic_dye_id
+
 ## Lazily built by [method _set_cosmetic_id] on the client, only for characters that
 ## actually have a cosmetic equipped.
 var cosmetic_vfx: CosmeticVfx
@@ -718,6 +725,11 @@ func _set_vault_skin_id(id: int) -> void:
 	_refresh_body_visual()
 
 
+func _set_prismatic_dye_id(id: int) -> void:
+	prismatic_dye_id = id
+	_refresh_body_visual()
+
+
 ## Prestige vault skins pack a wardrobe sprite + a dye. The sprite id is
 ## unpacked so Take-off restores the Horizon look.
 func _refresh_body_visual() -> void:
@@ -732,7 +744,14 @@ func _refresh_body_visual() -> void:
 	var sprite_frames: SpriteFrames = ContentRegistryHub.load_by_id(&"sprites", visual_id) as SpriteFrames
 	if sprite_frames:
 		animated_sprite.sprite_frames = sprite_frames
-	VaultSkinVfx.apply_to_sprite(animated_sprite, vault_skin_id)
+	# ONE material slot, so exactly one of these may own it. A vault skin wins:
+	# it is staff-only prestige with its own sprite swap, and a bought dye must
+	# not be able to paint over it. Taking the vault skin off brings the dye back
+	# — this runs again on either id changing.
+	if vault_skin_id > 0:
+		VaultSkinVfx.apply_to_sprite(animated_sprite, vault_skin_id)
+	else:
+		VaultSkinVfx.apply_dye_to_sprite(animated_sprite, prismatic_dye_id)
 
 
 func _set_cosmetic_id(id: int) -> void:

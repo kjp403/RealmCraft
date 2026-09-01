@@ -13,6 +13,21 @@ var _lb_cache: Dictionary = {}
 var _lb_cache_ms: int = 0
 const LB_CACHE_TTL_MS: int = 8000
 
+## Last peddler snapshot the world server pushed, and when it arrived.
+##
+## The website's tracker reads this. Held in MEMORY rather than written to disk
+## for the same reason the leaderboard cache is: it is a few hundred bytes that
+## the world re-sends on its next event, so a restart losing it costs one cycle
+## of accuracy and buys no file handling, no permissions and no partial writes.
+## A GET is answered straight out of this dict — no RPC, no database, no work.
+var _peddler_cache: Dictionary = {}
+var _peddler_cache_ms: int = 0
+## Env var holding the shared server-to-server secret. Never in the repo.
+const PEDDLER_KEY_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_KEY"
+## A snapshot older than this is served with stale=true so the page can say the
+## world has gone quiet instead of counting down a cart that is long gone.
+const PEDDLER_STALE_MS: int = 15 * 60 * 1000
+
 @onready var gateway_manager_client: GatewayManagerClient = $"../GatewayManagerClient"
 
 
@@ -62,6 +77,19 @@ func _ready() -> void:
 		HTTPClient.Method.METHOD_GET,
 		&"/v1/leaderboards",
 		handle_leaderboards
+	)
+	# The world server POSTs its peddler snapshot here; the website GETs it.
+	# Two routes rather than one so the write is authenticated and the read is
+	# public — the only asymmetry that matters for a widget nobody logs in to see.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/peddler/update",
+		handle_peddler_update
+	)
+	router.register_route(
+		HTTPClient.Method.METHOD_GET,
+		&"/v1/peddler",
+		handle_peddler
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -202,6 +230,101 @@ func handle_leaderboards(payload: Dictionary) -> Dictionary:
 	if result.get("ok") == false:
 		return result
 	return {"ok": false, "error": "unavailable", "msg": "Leaderboards are temporarily unavailable."}
+
+
+## Server-to-server. The world server posts its peddler snapshot here.
+##
+## FAILS CLOSED. With no secret configured on this gateway the route rejects
+## everything — an unconfigured endpoint that accepted writes would let anyone
+## who found the URL publish whatever they liked to the front page. It also means
+## an operator who sets the key on the world but forgets the gateway gets a clean
+## 401 in the world's log rather than a silently ignored POST.
+##
+## Comparison is constant-time-ish and length-checked before the compare so a
+## short key cannot be probed a character at a time.
+func handle_peddler_update(payload: Dictionary) -> Dictionary:
+	var expected: String = OS.get_environment(PEDDLER_KEY_ENV)
+	if expected.is_empty():
+		return {"ok": false, "error": "not_configured"}
+	# Rate-limited even though it is authenticated: a leaked key should cost the
+	# gateway nothing, and the world only posts a handful of times an hour.
+	if not _rate_ok(payload, &"peddler_update", 60, 60000):
+		return {"ok": false, "error": "rate_limited"}
+	var offered: String = str(payload.get("__auth__", ""))
+	const PREFIX: String = "Bearer "
+	if not offered.begins_with(PREFIX):
+		return {"ok": false, "error": "unauthorized"}
+	if not _secret_equals(offered.substr(PREFIX.length()), expected):
+		return {"ok": false, "error": "unauthorized"}
+
+	# Store only the fields the site renders. Copying field-by-field rather than
+	# caching the raw body is what stops the transport keys (__auth__, __ip__)
+	# and anything a future world version adds from being echoed to the public.
+	_peddler_cache = {
+		"schema": int(payload.get("schema", 0)),
+		"is_active": bool(payload.get("is_active", false)),
+		"current_zone": str(payload.get("current_zone", "")),
+		"time_remaining_seconds": maxi(0, int(payload.get("time_remaining_seconds", 0))),
+		"next_spawn_utc_timestamp": maxi(0, int(payload.get("next_spawn_utc_timestamp", 0))),
+		"generated_utc_timestamp": maxi(0, int(payload.get("generated_utc_timestamp", 0))),
+		"daily_stock": _clean_stock(payload.get("daily_stock", [])),
+	}
+	_peddler_cache_ms = Time.get_ticks_msec()
+	return {"ok": true}
+
+
+## Public, unauthenticated, and free to serve — it is a dict lookup. Mirrors the
+## leaderboards route's contract so the site's two live widgets fail the same way.
+func handle_peddler(payload: Dictionary) -> Dictionary:
+	if not _rate_ok(payload, &"peddler", 120, 60000):
+		return {"ok": false, "error": "rate_limited"}
+	if _peddler_cache.is_empty():
+		return {
+			"ok": false,
+			"error": "unavailable",
+			"msg": "The Peddler tracker is waiting on the live world.",
+		}
+	var out: Dictionary = _peddler_cache.duplicate(true)
+	out["ok"] = true
+	# Age, not a timestamp, so a browser with a wrong clock still reads it right.
+	out["age_seconds"] = int((Time.get_ticks_msec() - _peddler_cache_ms) / 1000.0)
+	out["stale"] = Time.get_ticks_msec() - _peddler_cache_ms > PEDDLER_STALE_MS
+	return out
+
+
+## Length-checked, full-pass comparison. Returns early ONLY on a length
+## mismatch (which the attacker already knows from the key they sent); the byte
+## loop never short-circuits, so a correct prefix takes the same time as a wrong
+## one.
+func _secret_equals(offered: String, expected: String) -> bool:
+	if offered.length() != expected.length():
+		return false
+	var diff: int = 0
+	for i: int in expected.length():
+		diff |= offered.unicode_at(i) ^ expected.unicode_at(i)
+	return diff == 0
+
+
+## Whitelist the stock rows down to the five display fields, with caps, so a
+## compromised or buggy world server cannot push unbounded text onto the site.
+func _clean_stock(raw: Variant) -> Array:
+	var out: Array = []
+	if raw is not Array:
+		return out
+	for entry: Variant in (raw as Array):
+		if entry is not Dictionary:
+			continue
+		var row: Dictionary = entry as Dictionary
+		out.append({
+			"id": str(row.get("id", "")).substr(0, 64),
+			"name": str(row.get("name", "")).substr(0, 96),
+			"price": maxi(0, int(row.get("price", 0))),
+			"tier": str(row.get("tier", "")).substr(0, 4),
+			"description": str(row.get("description", "")).substr(0, 400),
+		})
+		if out.size() >= 12:
+			break
+	return out
 
 
 func handle_login(payload: Dictionary) -> Dictionary:

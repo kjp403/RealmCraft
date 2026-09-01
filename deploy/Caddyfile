@@ -12,6 +12,14 @@
 # exposed to the internet. Copy this to /etc/caddy/Caddyfile on the VPS.
 
 api.arkenelle.com {
+	# The Peddler WRITE endpoint is server-to-server only: the world server posts
+	# to it over loopback, so nothing on the internet has any business reaching
+	# it. Blocked here as well as bearer-checked in the gateway — the auth is the
+	# guarantee, this just removes the attack surface entirely.
+	# GET /v1/peddler (the public read the website polls) is untouched.
+	@peddler_write path /v1/peddler/update
+	respond @peddler_write 404
+
 	# The gateway rate-limiter reads the real client IP from this header
 	# (see source/server/gateway/http_server.gd).
 	reverse_proxy 127.0.0.1:8088 {

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/biome_recall_scroll.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = false
+item_name = &"Biome Recall Scroll"
+item_icon = ExtResource("2_icon")
+description = "A road-map folded to the size of a palm, marked in a hand that clearly walked every line of it. The folds have not been worn in yet."
+holdable = false
+stack_limit = 5
+vendor_value = 0
+metadata/slug = &"biome_recall_scroll"
+metadata/id = 631

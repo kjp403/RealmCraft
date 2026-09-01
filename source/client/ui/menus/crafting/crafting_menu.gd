@@ -910,5 +910,20 @@ func _toast_failure(data: Dictionary) -> void:
 			Toaster.toast("Move closer to the station.")
 		"inventory_full":
 			Toaster.toast("Your bag is full. Bank some items first.")
+		"bar_limit":
+			Toaster.toast(_bar_limit_text(data))
 		_:
 			Toaster.toast("Can't %s that right now." % verb)
+
+
+## The furnace run cap (AnvilBoost). Names the cap AND the way past it, because
+## "you smelted 10 bars" with no explanation reads as the furnace breaking.
+func _bar_limit_text(data: Dictionary) -> String:
+	var cap: int = int(data.get("cap", AnvilBoost.BASE_MAX_BARS))
+	@warning_ignore("integer_division")
+	var rest_s: int = int(data.get("cooldown_ms", AnvilBoost.RUN_IDLE_RESET_MS)) / 1000
+	if bool(data.get("boosted", false)):
+		return "The stabilizer is spent — %d bars this run. Rest %ds." % [cap, rest_s]
+	return "The furnace needs to cool — %d bars a run. Rest %ds, or use an Anvil Stabilizer." % [
+		cap, rest_s
+	]

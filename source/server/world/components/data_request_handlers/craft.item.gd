@@ -68,6 +68,23 @@ func data_request_handler(
 		if Inventory.count(inventory, ing_id) < ingredient.amount:
 			return {"ok": false, "reason": "ingredients"}
 
+	# Smelting run cap. A furnace run is AnvilBoost.BASE_MAX_BARS bars unless the
+	# smith is holding Anvil Stabilizer charges, and each smelted bar burns one.
+	# Booked here — after every other gate, before anything is consumed — so a
+	# craft refused for level, gold or ingredients never spends a charge or
+	# advances the run. See AnvilBoost for what "a run" means.
+	var smelt: Dictionary = {}
+	if station.smelts_bars:
+		smelt = AnvilBoost.consume_bar(resource)
+		if not smelt.get("ok", false):
+			return {
+				"ok": false,
+				"reason": "bar_limit",
+				"cap": int(smelt.get("cap", AnvilBoost.BASE_MAX_BARS)),
+				"boosted": bool(smelt.get("boosted", false)),
+				"cooldown_ms": int(smelt.get("cooldown_ms", AnvilBoost.RUN_IDLE_RESET_MS)),
+			}
+
 	# Past every gate — this craft is happening, so start the next cooldown.
 	_last_craft_ms[player_id] = now_ms
 
@@ -132,6 +149,10 @@ func data_request_handler(
 		if fee > 0:
 			Inventory.add_item(inventory, gold_id, fee, false, active_bag, bag_count)
 		_last_craft_ms.erase(player_id)
+		# The bar was booked against the run before the bag was checked — give the
+		# charge and the run slot back, or a full bag would quietly eat both.
+		if not smelt.is_empty():
+			AnvilBoost.refund_bar(resource, smelt)
 		return {"ok": false, "reason": "inventory_full"}
 	for _i: int in output_amount:
 		Inventory.try_add_item(
@@ -180,4 +201,8 @@ func data_request_handler(
 		"xp": xp_gain,
 		"level": int(progress.get("level", level)),
 		"leveled_up": progress.get("leveled_up", false),
+		# Only present for a smelt — the crafting menu reads them to show the run
+		# counter and the stabilizer charges ticking down.
+		"bars_left": int(smelt.get("remaining", -1)) if not smelt.is_empty() else -1,
+		"anvil_charges": int(smelt.get("charges", -1)) if not smelt.is_empty() else -1,
 	}

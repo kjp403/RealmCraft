@@ -102,6 +102,7 @@ func _on_status_tick() -> void:
 		# Status HUD snapshot (buffs / DoTs / in-combat) — after the expiry pass
 		# so dropped buffs vanish from the strip the same second they end.
 		StatusService.sync(player)
+		_tick_prismatic_dye(player)
 		_tick_player_hp_regen(peer_id, player)
 		# Out-of-combat only, mirroring HP regen right above -- this used to run
 		# at full rate mid-fight too, and stacked mastery/gear regen (up to and
@@ -121,6 +122,21 @@ func _on_status_tick() -> void:
 		if regen <= 0.0:
 			continue
 		player.stats_component.set_stat(Stat.MANA, minf(mana_max, mana + regen))
+
+
+## Drop a lapsed Prismatic Dye and tell the zone. The dye is a broadcast id, not
+## a timer clients hold, so SOMETHING has to notice it ran out — this is the only
+## per-second pass a player is already on. Nothing happens on the overwhelmingly
+## common "no dye" path.
+func _tick_prismatic_dye(player: Player) -> void:
+	if player.player_resource == null or player.player_resource.prismatic_dye_id <= 0:
+		return
+	if not PrismaticDye.clear_if_expired(player.player_resource):
+		return
+	if player.state_synchronizer != null:
+		player.state_synchronizer.set_by_path(^":prismatic_dye_id", 0)
+	if world_server != null and world_server.database != null:
+		world_server.database.save_player(player.player_resource)
 
 
 func _tick_player_hp_regen(peer_id: int, player: Player) -> void:
@@ -328,6 +344,12 @@ func instantiate_player(peer_id: int) -> Player:
 		syn.set_by_path(^":cosmetic_id", new_player.player_resource.cosmetic_id)
 		syn.set_by_path(^":weapon_cosmetic_id", new_player.player_resource.weapon_cosmetic_id)
 		syn.set_by_path(^":vault_skin_id", new_player.player_resource.vault_skin_id)
+		# Expiry-checked at the source: a lapsed dye is broadcast as 0, so no
+		# client ever has to hold another player's timer to know when to stop
+		# painting them.
+		syn.set_by_path(
+			^":prismatic_dye_id", PrismaticDye.visible_id(new_player.player_resource)
+		)
 		syn.set_by_path(^":display_name", new_player.player_resource.display_name)
 		syn.set_by_path(^":display_title", new_player.player_resource.display_title)
 		# Mastery titles granted by the login sweep announce themselves HERE, not

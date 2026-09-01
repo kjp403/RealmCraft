@@ -13,8 +13,28 @@ const MARKER_SCENE: PackedScene = preload("res://source/common/gameplay/maps/com
 ## Max distance (px) the local player can be from the NPC and still interact.
 ## Out-of-range clicks walk the player in via [method LocalPlayer.start_auto_interact].
 const INTERACT_RANGE: float = 90.0
+## Where [member npc_slug] resolves its resources from.
+const NPCS_DIR: String = "res://source/common/gameplay/characters/npc/npcs/"
 
 @export var npc_resource: NPCResource
+## Filename slug of an NPCResource under [constant NPCS_DIR], for an NPC spawned
+## as a DYNAMIC prop (the Traveling Peddler). A spawn init crosses the wire as a
+## plain Dictionary, so it cannot carry the resource itself — it carries the
+## slug, and both ends load the same .tres from it. Setting this assigns
+## [member npc_resource]; leave it empty for map-placed NPCs, which are authored
+## with the resource directly.
+var npc_slug: StringName = &"":
+	set(value):
+		npc_slug = value
+		if value == &"":
+			return
+		var path: String = NPCS_DIR + String(value) + ".tres"
+		if not ResourceLoader.exists(path):
+			push_error("NPC: no NPCResource at %s" % path)
+			return
+		var loaded: NPCResource = ResourceLoader.load(path) as NPCResource
+		if loaded != null:
+			npc_resource = loaded
 ## Show this NPC only after the local player has this story flag. Empty = always
 ## eligible (still respects [member hidden_if_flag]).
 @export var visible_if_flag: StringName = &""

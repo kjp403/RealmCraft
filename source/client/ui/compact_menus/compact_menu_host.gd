@@ -640,6 +640,7 @@ func _on_slot_gui_input(
 			or item is LootChestItem
 			or item is DungeonKeyItem
 			or item is GearItem
+			or _is_usable_peddler_good(item)
 			or item.holdable
 		):
 			slot.accept_event()
@@ -654,6 +655,11 @@ func _open_context_menu(entry: Dictionary) -> void:
 
 	if item is LootChestItem:
 		context_menu.add_item("Open", ACTION_PRIMARY)
+	elif item is PeddlerGoodItem:
+		# Only the goods that DO something get a Use row. A permit or a trophy
+		# offering "Use" and then being refused by name reads as a broken item.
+		if (item as PeddlerGoodItem).usable:
+			context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is ConsumableItem or item is DungeonKeyItem:
 		context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is GearItem:
@@ -666,6 +672,7 @@ func _open_context_menu(entry: Dictionary) -> void:
 		or item is LootChestItem
 		or item is DungeonKeyItem
 		or item is GearItem
+		or _is_usable_peddler_good(item)
 		or item.holdable
 	):
 		context_menu.add_item("Bind to 1-5", ACTION_HOTKEY)
@@ -900,6 +907,12 @@ func _is_armor_gear(item: Item) -> bool:
 	return gear.slot != null and gear.slot.key != &"weapon"
 
 
+## True for a peddler good that has a use action. Non-usable goods (permits,
+## trophies) are bag objects only and must not offer Use / double-click / hotbar.
+func _is_usable_peddler_good(item: Item) -> bool:
+	return item is PeddlerGoodItem and (item as PeddlerGoodItem).usable
+
+
 func _perform_primary_action(entry: Dictionary) -> void:
 	if primary_action_in_progress or InstanceClient.current == null:
 		return
@@ -916,6 +929,7 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		or item is LootChestItem
 		or item is DungeonKeyItem
 		or item is GearItem
+		or _is_usable_peddler_good(item)
 		or item.holdable
 	):
 		return
@@ -940,6 +954,11 @@ func _perform_primary_action(entry: Dictionary) -> void:
 
 	if item is DungeonKeyItem:
 		request_name = &"dungeon.key_use"
+	elif item is PeddlerGoodItem:
+		# NOT item.consume: peddler goods are not ConsumableItems, so that
+		# handler would refuse them as "not_consumable" before reaching their
+		# effect. Their action lives on the peddler catalog row.
+		request_name = &"peddler.use"
 	elif item is ConsumableItem:
 		request_name = &"item.consume"
 
@@ -969,6 +988,24 @@ func _perform_primary_action(entry: Dictionary) -> void:
 			return
 		"not_consumable":
 			Toaster.toast("That item cannot be consumed.")
+			return
+		"not_peddler_good", "no_action":
+			Toaster.toast("That has no use of its own.")
+			return
+		"no_pool":
+			Toaster.toast("Nothing usable is left inside it.")
+			return
+		"no_contract":
+			Toaster.toast("There is no live contract to extend.")
+			return
+		"already_placed":
+			Toaster.toast("Your deposit box is already set down.")
+			return
+		"no_room":
+			Toaster.toast("There is no room to set that down here.")
+			return
+		"no_dye":
+			Toaster.toast("The dye has gone flat.")
 			return
 		"no_effect":
 			Toaster.toast("You do not currently need that potion.")
@@ -1008,6 +1045,11 @@ func _perform_primary_action(entry: Dictionary) -> void:
 	if item is ConsumableItem:
 		ConsumableItem.stamp_client_cooldown(item as ConsumableItem)
 		Toaster.toast("Potion consumed.")
+	elif item is PeddlerGoodItem:
+		# Each peddler good says its own piece ("50 smelting charges banked",
+		# "Blessing active for 2h") — the effect is the whole reason it cost
+		# 75,000 gold, and a generic "used" line would say nothing about it.
+		Toaster.toast(str(payload.get("message", "Used.")))
 	# LootChestItem loot toast rides the chest.opened push.
 
 	_refresh_inventory()

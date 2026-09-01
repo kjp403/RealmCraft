@@ -9,6 +9,11 @@ User=arkenelle
 WorkingDirectory=/opt/arkenelle
 # Wait for the master's gateway-manager port before starting so we connect cleanly.
 ExecStartPre=/bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8064) 2>/dev/null; do sleep 1; done'
+# Same file as the world reads: the gateway needs ARKENELLE_PEDDLER_WEBHOOK_KEY
+# to validate the bearer the world sends. One file, so the two halves of the
+# shared secret cannot drift apart. Optional (leading dash) — with no key the
+# update route fails closed and rejects everything, which is the safe default.
+EnvironmentFile=-/etc/arkenelle/peddler.env
 # --env=live is REQUIRED on the VPS (editor binary would otherwise look like "editor").
 ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=gateway-server --env=live
 Restart=always

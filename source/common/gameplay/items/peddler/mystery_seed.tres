@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/mystery_seed.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = true
+item_name = &"Mystery Seed"
+item_icon = ExtResource("2_icon")
+description = "Unlabelled, and the Peddler does not know either. Plant it and it is grown and harvested inside a breath — logs or herbs, never the same twice."
+holdable = false
+stack_limit = 0
+vendor_value = 0
+metadata/slug = &"mystery_seed"
+metadata/id = 637

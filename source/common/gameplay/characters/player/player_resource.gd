@@ -209,6 +209,36 @@ var active_inventory_bag: int = 0
 ## redeemed_codes_json. Stops re-claiming the same code on this character.
 @export var redeemed_codes: PackedStringArray
 
+## --- Traveling Peddler ---
+## All three persist in ONE peddler_json column rather than three of their own.
+## They arrived together, they are read together, and every extra column on the
+## players table is another placeholder the INSERT has to keep aligned — a
+## mismatch there makes save_player fail for EVERY field, silently.
+
+## Banked Anvil Stabilizer charges. While this is above zero a smelting run may
+## reach [constant AnvilBoost.BOOSTED_MAX_BARS] bars instead of the base cap, and
+## each bar smelted spends one. Uncapped: nothing stops a smith banking several
+## stabilizers, and the good is a convenience rather than a power gain.
+@export var anvil_boost_charges: int = 0
+## Unix MILLISECONDS the Hunter's Charm blessing expires at (0 = never blessed).
+## A wall-clock stamp, not a countdown, so it keeps running while the character
+## is logged out — see [HunterCharm].
+@export var hunter_charm_until_ms: int = 0
+## Peddler stock ids bought today: stock_id (String) -> true. One of each per
+## account per UTC day. Read through [PeddlerLedger], never directly — the day
+## has to be compared before this dictionary means anything.
+@export var daily_peddler_purchases: Dictionary = {}
+## Active Prismatic Dye id (0 = none) and the unix MILLISECONDS it lapses at.
+## Wall-clock stamps like [member hunter_charm_until_ms], so a two-hour cosmetic
+## keeps running while the character is logged out rather than banking time.
+## Read through [PrismaticDye], never directly — an expired id must not paint.
+@export var prismatic_dye_id: int = 0
+@export var prismatic_dye_until_ms: int = 0
+## The UTC date ("YYYY-MM-DD") [member daily_peddler_purchases] was written for.
+## A different date means the allowance has reset; the comparison IS the reset,
+## so nothing has to run at midnight.
+@export var peddler_purchase_day: String = ""
+
 # Profile
 @export var profile_status: String = "Hello I'am new!"
 @export var profile_animation: String = "idle"

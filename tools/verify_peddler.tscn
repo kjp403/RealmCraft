@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_peddler.gd" id="1_pedverify"]
+
+[node name="PeddlerVerifyRig" type="Node"]
+script = ExtResource("1_pedverify")

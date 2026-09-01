@@ -75,6 +75,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 22:
 		_migration_v22(db)
 		_set_schema_version(db, 22)
+	if version < 23:
+		_migration_v23(db)
+		_set_schema_version(db, 23)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -467,3 +470,13 @@ static func _set_schema_version(db: SQLite, v: int) -> void:
 		"INSERT OR REPLACE INTO meta(key, value) VALUES(?, ?);",
 		["schema_version", str(v)]
 	)
+
+
+## v23: Traveling Peddler state — {"anvil": int, "charm_until_ms": int,
+## "purchases": {"day": "YYYY-MM-DD", "bought": {stock_id: true}}}. ONE column
+## for all three: they are written and read as a unit, and every extra column is
+## another INSERT placeholder to keep aligned. ADD COLUMN — no DB wipe; existing
+## players migrate to no charges, no blessing and a fresh daily allowance.
+static func _migration_v23(db: SQLite) -> void:
+	if not _column_exists(db, "players", "peddler_json"):
+		db.query("ALTER TABLE players ADD COLUMN peddler_json TEXT NOT NULL DEFAULT '{}';")

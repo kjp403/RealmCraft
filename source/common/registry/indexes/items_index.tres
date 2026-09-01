@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788028400
-next_id = 630
+version = 1788146051
+next_id = 643
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -2927,6 +2927,71 @@ entries = Array[Dictionary]([{
 &"id": 629,
 &"path": "res://source/common/gameplay/items/gears/outfits/outfit_woodcutter_tunic.tres",
 &"slug": &"outfit_woodcutter_tunic"
+}, {
+&"hash": "2f2aad49a17beb2fc2d129c80f947a2cf0d78dcdf737b3ea4491700daf27034a",
+&"id": 630,
+&"path": "res://source/common/gameplay/items/peddler/anvil_stabilizer.tres",
+&"slug": &"anvil_stabilizer"
+}, {
+&"hash": "c96917f261e58bb3b36cb29b663fc93654ba9dce638407c85f1b81e8cfc52609",
+&"id": 631,
+&"path": "res://source/common/gameplay/items/peddler/biome_recall_scroll.tres",
+&"slug": &"biome_recall_scroll"
+}, {
+&"hash": "11a6be77a30432c9c33f1fa06a6fe54f08aeb3219c64af6bab5db15ba42e7a35",
+&"id": 632,
+&"path": "res://source/common/gameplay/items/peddler/boss_contract_key.tres",
+&"slug": &"boss_contract_key"
+}, {
+&"hash": "a0e68aca519252f11f6df84089901e19fbd5b3a611e489335abe91a1024880c5",
+&"id": 633,
+&"path": "res://source/common/gameplay/items/peddler/botanist_skilling_crate.tres",
+&"slug": &"botanist_skilling_crate"
+}, {
+&"hash": "3e3570e5bff207a5d010fdfb3cb5825e9fc7f7ebfb59e10075870a3896e8fea9",
+&"id": 634,
+&"path": "res://source/common/gameplay/items/peddler/chronos_clock.tres",
+&"slug": &"chronos_clock"
+}, {
+&"hash": "6e203229d0a458e80e037f8fcc29e23999b87b2aab3f6edcc5a254634cd69d21",
+&"id": 635,
+&"path": "res://source/common/gameplay/items/peddler/hearth_stew.tres",
+&"slug": &"hearth_stew"
+}, {
+&"hash": "d1960324db4ec818521db3814760aad893b94c7a302598c430ffcfda02d5e468",
+&"id": 636,
+&"path": "res://source/common/gameplay/items/peddler/hunter_charm.tres",
+&"slug": &"hunter_charm"
+}, {
+&"hash": "a988c7d1ebf8c3108cfc065619fca2f616d0fdde26d54a27d2e1b8bb75793231",
+&"id": 637,
+&"path": "res://source/common/gameplay/items/peddler/mystery_seed.tres",
+&"slug": &"mystery_seed"
+}, {
+&"hash": "f81bd1ca308f09b962fca97293baa63c780bb5aba79bc7b9adf35c8ebe1da7b5",
+&"id": 638,
+&"path": "res://source/common/gameplay/items/peddler/noter_permit.tres",
+&"slug": &"noter_permit"
+}, {
+&"hash": "480f67221c64328499fc281553f62d9ef351f5ee02a7fe85fd2bda008a3b1ffb",
+&"id": 639,
+&"path": "res://source/common/gameplay/items/peddler/peddler_vault_key.tres",
+&"slug": &"peddler_vault_key"
+}, {
+&"hash": "017db0f84c27235157f68a8db397693ae47add156a2cd92452c2a2a74351bf41",
+&"id": 640,
+&"path": "res://source/common/gameplay/items/peddler/portable_deposit_box.tres",
+&"slug": &"portable_deposit_box"
+}, {
+&"hash": "a3996f12f9772c6b8ceeb041ddfffc84a638e958dfba377f26ec36f8ac0e46cc",
+&"id": 641,
+&"path": "res://source/common/gameplay/items/peddler/prismatic_dye.tres",
+&"slug": &"prismatic_dye"
+}, {
+&"hash": "d97acde37b08b4151cf6e3055103eb635899f5b493ce68406d9e2b0880ccc0fd",
+&"id": 642,
+&"path": "res://source/common/gameplay/items/peddler/wandering_tonic.tres",
+&"slug": &"wandering_tonic"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

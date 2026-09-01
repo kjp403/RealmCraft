@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/hearth_stew.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = true
+item_name = &"Hearth Stew"
+item_icon = ExtResource("2_icon")
+description = "A sealed crock, still hot, from a fire that is nowhere near here. Nobody has got the Peddler to explain this one."
+holdable = false
+stack_limit = 10
+vendor_value = 0
+metadata/slug = &"hearth_stew"
+metadata/id = 635

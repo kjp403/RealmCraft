@@ -12,6 +12,9 @@ var _target: Node2D
 var _active: bool = false
 var _prop_id: int = -1
 var _request: StringName = &"item.pickup"
+## What the in-flight request was, kept across cancel() so the reply can be
+## routed (a deposit box opens a window; a pickup does not).
+var _request_was: StringName = &""
 
 
 func setup(player: LocalPlayer) -> void:
@@ -66,6 +69,9 @@ func tick() -> bool:
 
 	var prop_id: int = _prop_id
 	var request: StringName = _request
+	# cancel() clears _request, and the reply lands after it — keep what this
+	# round trip was for so the response handler can route it.
+	_request_was = request
 	cancel()
 	Client.request_data(
 		request,
@@ -78,6 +84,10 @@ func tick() -> bool:
 
 func _on_pickup_response(data: Dictionary) -> void:
 	if data.get("ok", false):
+		# A deposit box answers with a bank payload; hand it to the bank window,
+		# which is the same window a banker NPC opens.
+		if _request_was == &"deposit_box.open":
+			ClientState.open_menu_requested.emit(&"bank", null)
 		return
 	match str(data.get("reason", "")):
 		"too_far":
@@ -86,6 +96,25 @@ func _on_pickup_response(data: Dictionary) -> void:
 			Toaster.toast("That loot is gone.")
 		"reserved":
 			Toaster.toast("That loot is reserved for another player.")
+		# Peddler's Vault (peddler.vault) rides this same walk-up-then-request
+		# path, so its refusals are answered here rather than silently.
+		"no_key":
+			Toaster.toast("The vault is locked. You need a Peddler's Vault Key.")
+		"no_key_item", "no_payout":
+			Toaster.toast("The vault will not open.")
+		"closed":
+			Toaster.toast("The Peddler has packed up and gone.")
+		# Portable Deposit Box (deposit_box.open) rides this same path. On success
+		# the box opens the ordinary bank window — the reply is already shaped
+		# like bank.get's, so the menu needs no special case.
+		"not_owner":
+			Toaster.toast(
+				"That deposit box belongs to %s." % str(data.get("owner", "someone else"))
+				if not str(data.get("owner", "")).is_empty()
+				else "That deposit box is not yours."
+			)
+		"expired":
+			Toaster.toast("The deposit box has packed itself up.")
 		"inventory_full":
 			Toaster.toast("Your bag is full (%d/%d). Bank some items." % [
 				Inventory.MAX_SLOTS, Inventory.MAX_SLOTS

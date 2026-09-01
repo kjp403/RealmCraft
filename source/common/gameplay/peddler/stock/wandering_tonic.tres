@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PeddlerItemData" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/wandering_tonic.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/actions/wandering_tonic_action.gd" id="3_action"]
+
+[resource]
+script = ExtResource("1_script")
+id = "wandering_tonic"
+item_name = "Wandering Tonic"
+description = "Bitter, warm, and faintly of road dust. Drunk by people who have somewhere to be and a long way to go to be there."
+price_gold = 8000
+tier = "B"
+icon = ExtResource("2_icon")
+action_script = ExtResource("3_action")
