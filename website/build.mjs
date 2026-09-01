@@ -1957,9 +1957,16 @@ function build() {
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   copyFonts();
-  fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
-  fs.copyFileSync(path.join(SRC, "leaderboards.js"), path.join(DIST, "leaderboards.js"));
-  fs.copyFileSync(path.join(SRC, "peddler.js"), path.join(DIST, "peddler.js"));
+  // One list, used for BOTH the copy and the cache rule below, so a script added
+  // here cannot end up shipped without a header. Cloudflare Pages' default for an
+  // unmatched asset is max-age=14400 — four hours in which returning visitors run
+  // the previous build. That already bit once: a live fix to peddler.js looked
+  // like it had never deployed, because the browser was still holding the old
+  // script from before the merge.
+  const SCRIPTS = ["search.js", "leaderboards.js", "peddler.js"];
+  for (const name of SCRIPTS) {
+    fs.copyFileSync(path.join(SRC, name), path.join(DIST, name));
+  }
   write(
     "_headers",
     `/*
@@ -1967,6 +1974,7 @@ function build() {
   Referrer-Policy: strict-origin-when-cross-origin
 /styles.css
   Cache-Control: public, max-age=60, must-revalidate
+${SCRIPTS.map((n) => `/${n}\n  Cache-Control: public, max-age=60, must-revalidate`).join("\n")}
 /media/*
   Cache-Control: public, max-age=604800
 `
@@ -2166,7 +2174,7 @@ function build() {
         <section class="pd-banner">
           <div class="pd-zone-wrap">
             <span class="pd-zone-label">Current zone</span>
-            <strong class="pd-zone" data-pd-zone>Unknown (Roam Phase)</strong>
+            <strong class="pd-zone" data-pd-zone>Checking the world…</strong>
           </div>
           <div class="pd-clocks" data-pd-clocks></div>
         </section>
