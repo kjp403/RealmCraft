@@ -137,9 +137,26 @@ sudo nano /etc/arkenelle/peddler.env
 sudo systemctl daemon-reload
 sudo systemctl restart arkenelle-gateway arkenelle-world
 
-# 6. Confirm both processes actually have the variables
-sudo systemctl show arkenelle-world   -p Environment
-sudo systemctl show arkenelle-gateway -p Environment
+# 6. Confirm both processes actually have the variables.
+#
+#    NOT `systemctl show -p Environment`. That reports only Environment= lines
+#    written into the unit itself and never expands an EnvironmentFile=, so it
+#    prints an empty `Environment=` whether this worked or not -- it reads as a
+#    failure when everything is fine, which is worse than no check at all.
+#
+#    First: the units are pointed at the file. Expect
+#    `EnvironmentFiles=/etc/arkenelle/peddler.env (ignore_errors=yes)`.
+systemctl show arkenelle-world   -p EnvironmentFiles
+systemctl show arkenelle-gateway -p EnvironmentFiles
+
+#    Then: the running process really has them. Expect four names.
+#    Prints NAMES ONLY, so the key and the webhook URL never reach the screen.
+#
+#    `sudo cat`, not `sudo tr ... < /proc/.../environ`: with a redirect the
+#    SHELL opens the file as your own user before sudo ever runs, and it fails
+#    with Permission denied on a file owned by the service user.
+sudo cat /proc/$(systemctl show -p MainPID --value arkenelle-world)/environ \
+  | tr '\0' '\n' | grep -o '^ARKENELLE_[A-Z_]*'
 ```
 
 ### Optional: Discord announcement
