@@ -134,8 +134,18 @@
   }
 
   function renderBanner() {
-    if (!payload || !payload.ok) {
+    // Two different failures that must not wear the same label. The tracker being
+    // UNREACHABLE is a fault worth reporting; the gateway answering "no snapshot
+    // yet" is the ordinary state between the world starting and the cart's next
+    // spawn, and calling that "offline" both contradicts the line underneath and
+    // sends people looking for a break that isn't there.
+    if (!payload || payload.unreachable) {
       setStatus("TRACKER OFFLINE", "off");
+      zoneEl.textContent = "Unknown (Roam Phase)";
+      return;
+    }
+    if (!payload.ok) {
+      setStatus("AWAITING WORLD", "wait");
       zoneEl.textContent = "Unknown (Roam Phase)";
       return;
     }
@@ -173,7 +183,8 @@
         return r.json();
       })
       .then((data) => {
-        payload = data && typeof data === "object" ? data : { ok: false };
+        payload =
+          data && typeof data === "object" ? data : { ok: false, unreachable: true };
         if (payload.ok) {
           const now = nowUtc();
           endsAt = payload.is_active ? now + Number(payload.time_remaining_seconds || 0) : 0;
@@ -190,6 +201,8 @@
         // must not take the page down with it.
         payload = {
           ok: false,
+          // The flag, not the absence of ok, is what earns the OFFLINE badge.
+          unreachable: true,
           msg: "Could not reach the live world. The tracker returns when the server does.",
         };
         endsAt = 0;
