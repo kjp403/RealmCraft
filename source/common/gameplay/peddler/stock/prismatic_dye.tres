@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "prismatic_dye"
 item_name = "Prismatic Dye"
 description = "A stoppered vial that shows a different colour depending on which eye you close. The Peddler keeps it wrapped."
+effect = "Recolours your body for 2 hours, visible to everyone in the zone. The colour is rolled, not chosen. Drinking another rerolls the colour and restarts the 2 hours."
 price_gold = 20000
 tier = "B"
 icon = ExtResource("2_icon")

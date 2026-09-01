@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "portable_deposit_box"
 item_name = "Portable Deposit Box"
 description = "A strapped case with a bank's mark burned into the lid. Heavier empty than it has any right to be."
+effect = "Sets a personal bank vault down at your feet for 120 seconds. You must be alive, out of combat, and standing somewhere the map can host it. One box at a time, and a refused placement does not spend the item."
 price_gold = 100000
 tier = "A"
 icon = ExtResource("2_icon")

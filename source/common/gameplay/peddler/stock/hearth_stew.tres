@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 id = "hearth_stew"
 item_name = "Hearth Stew"
 description = "A sealed crock, still hot, from a fire that is nowhere near here. Nobody has got the Peddler to explain this one."
+effect = "15 minutes of +1.5 HP per second and +5% movement speed. The healing only ticks out of combat. The speed lapses while you are fighting and returns when you disengage, without the timer pausing. A second bowl refreshes the 15 minutes rather than stacking."
 price_gold = 10000
 tier = "B"
 icon = ExtResource("2_icon")
