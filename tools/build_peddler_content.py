@@ -60,13 +60,6 @@ GOODS = [
     ("chronos_clock", "Chronos Clock", "S", 250000, "chronos_clock_action", True, 1,
      "A cased clock that runs a little ahead of the world. The Peddler will not "
      "say by how much, and will not be drawn on what that is worth."),
-    # No action_script: the writ needs an item-NOTING system, which this game does
-    # not have -- there is no noted counterpart for any gatherable, and inventing
-    # ~34 of them plus un-noting at the bank is a feature, not an action script.
-    # Sold and owned; does nothing until that lands.
-    ("noter_permit", "Noter's Permit", "S", 150000, None, False, 1,
-     "A stamped writ, countersigned twice and legible only in good light. The "
-     "clerks it would oblige have not been appointed yet."),
     ("hunter_charm", "Hunter's Charm", "S", 350000, "hunter_charm_action", True, 0,
      "A tooth on a wire, worn smooth. For two hours the rarest thing a great "
      "beast is carrying leans very slightly toward the person wearing it."),
