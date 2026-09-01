@@ -9,6 +9,11 @@ User=arkenelle
 WorkingDirectory=/opt/arkenelle
 # Wait for the master's world-manager port before starting so we connect cleanly.
 ExecStartPre=/bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/8062) 2>/dev/null; do sleep 1; done'
+# Traveling Peddler web export (ARKENELLE_PEDDLER_WEBHOOK_URL / _KEY). The
+# leading dash makes it OPTIONAL: with no file the exporter stays silent and the
+# world still starts. A website widget must never be able to keep the game down.
+# Template + install instructions: deploy/config/peddler.env.example
+EnvironmentFile=-/etc/arkenelle/peddler.env
 # --env=live is REQUIRED on the VPS (editor binary would otherwise look like "editor").
 ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=world-server --env=live --config=res://deploy/config/world_config.cfg
 Restart=always

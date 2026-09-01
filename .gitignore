@@ -58,3 +58,9 @@ assets/sprites/environment/hell_pack/
 # Python tool bytecode
 __pycache__/
 *.pyc
+
+# Secrets. The real peddler env lives at /etc/arkenelle/peddler.env on the VPS,
+# never in the checkout — but ignore any stray .env here so a local copy made for
+# testing can't be committed. The .example template is deliberately allowed.
+*.env
+!*.env.example

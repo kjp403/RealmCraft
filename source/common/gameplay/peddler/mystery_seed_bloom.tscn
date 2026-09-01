@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/mystery_seed_bloom.gd" id="1_bloom"]
+
+[node name="MysterySeedBloom" type="Node2D"]
+script = ExtResource("1_bloom")

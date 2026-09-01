@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PeddlerItemData" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/prismatic_dye.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/actions/prismatic_dye_action.gd" id="3_action"]
+
+[resource]
+script = ExtResource("1_script")
+id = "prismatic_dye"
+item_name = "Prismatic Dye"
+description = "A stoppered vial that shows a different colour depending on which eye you close. The Peddler keeps it wrapped."
+price_gold = 20000
+tier = "B"
+icon = ExtResource("2_icon")
+action_script = ExtResource("3_action")

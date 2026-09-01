@@ -853,3 +853,106 @@ body.location-scene article.page {
   unicode-range: U+0030-0039;
   size-adjust: 95%;
 }
+
+
+/* --- Traveling Peddler tracker ------------------------------------------- */
+/* Tier colours are the cart's own: gold / purple / blue, matching
+   PeddlerItemData.TIER_COLORS in the game so a card reads the same on the site
+   as the shop row does in-game. */
+:root {
+  --pd-s: #ffd640;
+  --pd-a: #a86bf2;
+  --pd-b: #599eff;
+}
+.pd-head { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: baseline; justify-content: space-between; margin-bottom: 0.8rem; }
+.pd-status {
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.28rem 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.pd-status[data-kind="on"] { color: var(--ok); border-color: var(--ok); }
+.pd-status[data-kind="off"] { color: var(--muted); }
+.pd-status[data-kind="wait"] { color: var(--accent-2); border-color: var(--accent-2); }
+
+.pd-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin: 1rem 0 1.4rem;
+}
+.pd-zone-label, .pd-clock-label {
+  display: block;
+  font-family: var(--ui);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+.pd-zone { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--text); }
+.pd-clocks { display: flex; flex-wrap: wrap; gap: 1.4rem; }
+.pd-clock-value { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--accent-2); font-variant-numeric: tabular-nums; }
+
+.pd-stock-title { margin: 0 0 0.8rem; }
+/* auto-fit rather than a fixed count: the cart sells three, but the grid must
+   not break if that ever changes, and it collapses cleanly on a phone. */
+.pd-stock { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.9rem; }
+.pd-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
+  border-radius: 10px;
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pd-tier-s { border-top-color: var(--pd-s); }
+.pd-tier-a { border-top-color: var(--pd-a); }
+.pd-tier-b { border-top-color: var(--pd-b); }
+.pd-card-head { display: flex; gap: 0.6rem; align-items: flex-start; justify-content: space-between; }
+.pd-card-head h3 { font-family: var(--serif); font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--text); }
+.pd-badge {
+  font-family: var(--ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.16rem 0.44rem;
+  flex: none;
+}
+.pd-badge-s { color: var(--pd-s); }
+.pd-badge-a { color: var(--pd-a); }
+.pd-badge-b { color: var(--pd-b); }
+.pd-desc { color: var(--muted); font-size: 0.88rem; margin: 0; flex: 1; }
+.pd-price { font-family: var(--serif); font-size: 1.25rem; color: var(--accent-2); margin: 0; }
+.pd-price span { font-size: 0.8rem; color: var(--muted); }
+.pd-note:empty { display: none; }
+.pd-foot { font-size: 0.8rem; margin-top: 1.2rem; }
+
+/* Loading skeleton. Shaped like a real card so the layout does not jump when
+   the data lands, and animation-free under reduced-motion. */
+.pd-skel { border-top-color: var(--line); }
+.pd-skel-line { height: 0.75rem; border-radius: 4px; background: var(--panel-2); animation: pd-pulse 1.4s ease-in-out infinite; }
+.pd-skel-title { height: 1.1rem; width: 70%; }
+.pd-skel-short { width: 40%; }
+@keyframes pd-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.9; } }
+@media (prefers-reduced-motion: reduce) {
+  .pd-skel-line { animation: none; }
+}
+@media (max-width: 620px) {
+  .pd-banner { flex-direction: column; align-items: flex-start; }
+  .pd-clocks { gap: 1rem; }
+}

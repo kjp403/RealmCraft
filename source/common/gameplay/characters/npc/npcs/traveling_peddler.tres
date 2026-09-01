@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="NPCResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/peddler_interaction.gd" id="2_peddler"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="4_npc"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/traveling_peddler.tres" id="5_skin"]
+
+[sub_resource type="Resource" id="Peddler_cart"]
+script = ExtResource("2_peddler")
+label_override = "Browse the cart"
+
+[sub_resource type="Resource" id="Dialogue_wares"]
+script = ExtResource("3_dialogue")
+lines = Array[String](["Three things today. Three things tomorrow, and not the same three. I do not take orders and I do not hold stock.", "One of each to a name, per day. Ask twice and you will get the same answer twice.", "The strongbox is mine and the key is yours, if you buy it. I do not open it for you and I do not tell you twice what is inside."])
+label_override = "How does the cart work?"
+
+[resource]
+script = ExtResource("4_npc")
+npc_name = "Traveling Peddler"
+location_hint = "Wherever the road takes them"
+skin = ExtResource("5_skin")
+greeting = "Half an hour, then I am gone. Three things — look now or look tomorrow."
+interactions = Array[ExtResource("1_interaction")]([SubResource("Peddler_cart"), SubResource("Dialogue_wares")])

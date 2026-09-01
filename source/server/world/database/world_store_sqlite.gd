@@ -75,14 +75,25 @@ func save_player(player: PlayerResource) -> bool:
 	var character_flags_json: String = JSON.stringify(flags_out)
 
 	var joined_guild_ids_json: String = JSON.stringify(player.joined_guild_ids)
+	# Traveling Peddler state, one column for the three fields (schema v23). The
+	# purchase ledger's shape is owned by PeddlerLedger, not spelled out here, so
+	# the writer and the reader below cannot drift when the ledger changes.
+	var peddler_json: String = JSON.stringify({
+		"anvil": player.anvil_boost_charges,
+		"charm_until_ms": player.hunter_charm_until_ms,
+		"dye_id": player.prismatic_dye_id,
+		"dye_until_ms": player.prismatic_dye_until_ms,
+		"purchases": PeddlerLedger.save_state(player),
+	})
 
 	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, inventory_bags, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
+		+ "peddler_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -121,6 +132,7 @@ func save_player(player: PlayerResource) -> bool:
 			pending_chest_loot_json,
 			hunt_chest_json,
 			character_flags_json,
+			peddler_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -649,6 +661,26 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.joined_guild_ids = PackedInt64Array(joined_v if joined_v is Array else [])
 
 	player.led_guild_id = int(row.get("led_guild_id", 0))
+
+	# Traveling Peddler state (schema v23). load_state compares the stored UTC date
+	# against today's and drops a stale ledger, so a character who was offline over
+	# midnight loads with a fresh allowance rather than yesterday's spent one.
+	var peddler_v: Variant = JSON.parse_string(str(row.get("peddler_json", "{}")))
+	if peddler_v is Dictionary:
+		player.anvil_boost_charges = maxi(0, int((peddler_v as Dictionary).get("anvil", 0)))
+		player.hunter_charm_until_ms = maxi(0, int((peddler_v as Dictionary).get("charm_until_ms", 0)))
+		player.prismatic_dye_id = maxi(0, int((peddler_v as Dictionary).get("dye_id", 0)))
+		player.prismatic_dye_until_ms = maxi(0, int((peddler_v as Dictionary).get("dye_until_ms", 0)))
+		# A dye that lapsed while the character was offline is dropped on load,
+		# so the spawn broadcast never paints a body the timer has already freed.
+		PrismaticDye.clear_if_expired(player)
+		PeddlerLedger.load_state(
+			player,
+			(peddler_v as Dictionary).get("purchases", {}),
+			PeddlerSchedule.utc_date()
+		)
+	else:
+		PeddlerLedger.load_state(player, {}, PeddlerSchedule.utc_date())
 
 	var flags_v: Variant = JSON.parse_string(str(row.get("character_flags_json", "{}")))
 	player.character_flags = {}

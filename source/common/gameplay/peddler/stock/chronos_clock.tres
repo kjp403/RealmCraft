@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PeddlerItemData" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/chronos_clock.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/actions/chronos_clock_action.gd" id="3_action"]
+
+[resource]
+script = ExtResource("1_script")
+id = "chronos_clock"
+item_name = "Chronos Clock"
+description = "A cased clock that runs a little ahead of the world. The Peddler will not say by how much, and will not be drawn on what that is worth."
+price_gold = 250000
+tier = "S"
+icon = ExtResource("2_icon")
+action_script = ExtResource("3_action")

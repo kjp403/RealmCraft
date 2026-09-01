@@ -16,12 +16,22 @@ class_name BuffService
 ## same slot a weapon coating takes (see [method exclusive_active]). Everything
 ## else — gear procs, ability buffs, the campfire — leaves it false and is
 ## unaffected.
+## [param suppress_in_combat] makes the bonus lapse while the holder is fighting
+## and come back when they disengage, WITHOUT the timer stopping. That is the
+## Hearth Stew's "travel buff": it is worth something on the road and nothing in
+## a fight, which is a different thing from a buff that simply ends.
+##
+## A suppressed buff keeps its seat in the list (so re-drinking still refreshes
+## rather than stacking) and carries an "applied" flag saying whether its bonus
+## is currently ON the stat block. Every path that reverts a bonus must consult
+## that flag — reverting a bonus that was never applied silently drains the stat.
 static func apply(
 	player: Player,
 	stat: StringName,
 	amount: float,
 	duration_s: float,
-	exclusive: bool = false
+	exclusive: bool = false,
+	suppress_in_combat: bool = false
 ) -> void:
 	if player == null or player.player_resource == null or amount == 0.0 or duration_s <= 0.0:
 		return
@@ -30,10 +40,19 @@ static func apply(
 		if buff["stat"] == stat and is_equal_approx(float(buff["amount"]), amount):
 			buff["expires_ms"] = maxi(int(buff["expires_ms"]), expires_ms)
 			return
-	player.player_resource.active_buffs.append(
-		{"stat": stat, "amount": amount, "expires_ms": expires_ms, "exclusive": exclusive}
-	)
-	player.stats_component.modify_stat(stat, amount)
+	# A suppressed-on-arrival buff must not be added to the stat block, or the
+	# first tick would revert a bonus that was never granted.
+	var active_now: bool = not (suppress_in_combat and player.is_in_combat())
+	player.player_resource.active_buffs.append({
+		"stat": stat,
+		"amount": amount,
+		"expires_ms": expires_ms,
+		"exclusive": exclusive,
+		"suppress_in_combat": suppress_in_combat,
+		"applied": active_now,
+	})
+	if active_now:
+		player.stats_component.modify_stat(stat, amount)
 
 
 ## True while a buff that holds the one COMBAT DRAUGHT slot is still running.
@@ -83,7 +102,11 @@ static func clear_stat(player: Player, stat: StringName) -> void:
 	var buffs: Array = player.player_resource.active_buffs
 	for i: int in range(buffs.size() - 1, -1, -1):
 		if StringName(buffs[i]["stat"]) == stat:
-			player.stats_component.modify_stat(stat, -float(buffs[i]["amount"]))
+			# Only unwind a bonus that is actually on the block — a combat-
+			# suppressed buff is sitting at zero and reverting it would subtract
+			# an amount nothing ever added.
+			if bool(buffs[i].get("applied", true)):
+				player.stats_component.modify_stat(stat, -float(buffs[i]["amount"]))
 			buffs.remove_at(i)
 
 
@@ -100,9 +123,10 @@ static func clear_all(player: Player) -> void:
 		return
 	var buffs: Array = player.player_resource.active_buffs
 	for i: int in range(buffs.size() - 1, -1, -1):
-		player.stats_component.modify_stat(
-			StringName(buffs[i]["stat"]), -float(buffs[i]["amount"])
-		)
+		if bool(buffs[i].get("applied", true)):
+			player.stats_component.modify_stat(
+				StringName(buffs[i]["stat"]), -float(buffs[i]["amount"])
+			)
 	buffs.clear()
 
 
@@ -113,10 +137,27 @@ static func tick(player: Player) -> void:
 		return
 	var buffs: Array = player.player_resource.active_buffs
 	var now: int = Time.get_ticks_msec()
+	var fighting: bool = player.is_in_combat()
 	for i: int in range(buffs.size() - 1, -1, -1):
-		if now >= int(buffs[i]["expires_ms"]):
-			player.stats_component.modify_stat(StringName(buffs[i]["stat"]), -float(buffs[i]["amount"]))
+		var buff: Dictionary = buffs[i]
+		var applied: bool = bool(buff.get("applied", true))
+		if now >= int(buff["expires_ms"]):
+			if applied:
+				player.stats_component.modify_stat(
+					StringName(buff["stat"]), -float(buff["amount"])
+				)
 			buffs.remove_at(i)
+			continue
+		if not bool(buff.get("suppress_in_combat", false)):
+			continue
+		# Still running, but its bonus should lapse for the duration of a fight
+		# and come back after. The timer is untouched either way.
+		if fighting and applied:
+			player.stats_component.modify_stat(StringName(buff["stat"]), -float(buff["amount"]))
+			buff["applied"] = false
+		elif not fighting and not applied:
+			player.stats_component.modify_stat(StringName(buff["stat"]), float(buff["amount"]))
+			buff["applied"] = true
 
 
 ## Puts live buffs back on top of a FRESHLY REBUILT stat block (spawn after an
@@ -128,8 +169,18 @@ static func reapply(player: Player) -> void:
 		return
 	var buffs: Array = player.player_resource.active_buffs
 	var now: int = Time.get_ticks_msec()
+	var fighting: bool = player.is_in_combat()
 	for i: int in range(buffs.size() - 1, -1, -1):
-		if now >= int(buffs[i]["expires_ms"]):
+		var buff: Dictionary = buffs[i]
+		if now >= int(buff["expires_ms"]):
 			buffs.remove_at(i)
-		else:
-			player.stats_component.modify_stat(StringName(buffs[i]["stat"]), float(buffs[i]["amount"]))
+			continue
+		# The rebuild wiped every bonus, so "applied" has to be re-derived rather
+		# than trusted: a buff suppressed before the instance change must come
+		# back suppressed, and one that was live must come back live.
+		var active_now: bool = not (
+			bool(buff.get("suppress_in_combat", false)) and fighting
+		)
+		buff["applied"] = active_now
+		if active_now:
+			player.stats_component.modify_stat(StringName(buff["stat"]), float(buff["amount"]))

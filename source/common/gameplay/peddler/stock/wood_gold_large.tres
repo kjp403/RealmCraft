@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PeddlerItemData" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "wood_gold_large"
+item_name = "Wood Chest (Gold, Large)"
+description = "Bought off a hunting party that needed the coin more than the contents. The Peddler has not opened it and will not be drawn on what is inside."
+price_gold = 120000
+tier = "A"
+brokered = true

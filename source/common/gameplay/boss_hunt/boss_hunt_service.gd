@@ -132,10 +132,17 @@ static func handle_lobby_request(
 			_lobby_choice.erase(key)
 			_broadcast_lobby(instance, station, [], &"")
 			if not start_hunt(party, target, peer_id):
-				_refund(player, target.cost)
+				_refund(player, target.cost, charged)
 				return {"ok": false, "reason": "no_arena",
 					"message": "The broker couldn't open a room. You weren't charged."}
-			return {"ok": true, "started": true, "paid": target.cost}
+			return {
+				"ok": true,
+				"started": true,
+				# A key-paid contract cost no gold — reporting the fee anyway
+				# would print "paid 250,000" over a purse that did not move.
+				"paid": 0 if bool(charged.get("paid_with_key", false)) else target.cost,
+				"paid_with_key": bool(charged.get("paid_with_key", false)),
+			}
 		_:
 			return {"ok": false, "reason": "bad_action"}
 
@@ -165,6 +172,11 @@ static func lobby_status(instance: Node, peer_id: int, station: String) -> Dicti
 
 ## Charge [param cost] gold to [param player]. Returns {"ok": true} or a reason
 ## the caller can hand straight back to the client.
+## Registry slug of the pre-paid writ that covers a contract fee. Dropped by the
+## Peddler's Vault Chest; see PeddlerVaultChest.PAYOUT.
+const CONTRACT_KEY_SLUG: StringName = &"boss_contract_key"
+
+
 static func _charge(player: Player, cost: int) -> Dictionary:
 	if cost <= 0:
 		return {"ok": true}
@@ -172,6 +184,14 @@ static func _charge(player: Player, cost: int) -> Dictionary:
 	var gold_id: int = Economy.gold_id()
 	if resource == null or gold_id <= 0:
 		return {"ok": false, "reason": "no_gold"}
+	# A Boss Contract Key is a fee already paid. Spent BEFORE gold is considered,
+	# so a player holding one is never charged for a contract they can cover with
+	# the writ — the alternative (gold first, key as fallback) would burn gold
+	# while the key sat in the bag and read as the key not working.
+	var key_id: int = ContentRegistryHub.id_from_slug(&"items", CONTRACT_KEY_SLUG)
+	if key_id > 0 and Inventory.has_item(resource.inventory, key_id):
+		if Inventory.remove_amount_by_id(resource.inventory, key_id, 1):
+			return {"ok": true, "paid_with_key": true}
 	if Inventory.count(resource.inventory, gold_id) < cost:
 		return {"ok": false, "reason": "poor", "message": "You need %d gold for that contract." % cost}
 	if not Inventory.remove_amount_by_id(resource.inventory, gold_id, cost):
@@ -181,12 +201,25 @@ static func _charge(player: Player, cost: int) -> Dictionary:
 
 ## Hand the fee back when a charged contract fails to open. Gold is a currency
 ## item, so it always fits — no capacity check needed.
-static func _refund(player: Player, cost: int) -> void:
-	if cost <= 0 or player == null or player.player_resource == null:
+##
+## [param charged] is the dict [method _charge] returned: a contract paid with a
+## Boss Contract Key gets the KEY back, not its gold equivalent. Refunding gold
+## for a writ would turn the Peddler's vault into a gold faucet run by failing to
+## open contracts.
+static func _refund(player: Player, cost: int, charged: Dictionary = {}) -> void:
+	if player == null or player.player_resource == null:
+		return
+	var resource: PlayerResource = player.player_resource
+	if bool(charged.get("paid_with_key", false)):
+		var key_id: int = ContentRegistryHub.id_from_slug(&"items", CONTRACT_KEY_SLUG)
+		if key_id > 0:
+			Inventory.add_item(resource.inventory, key_id, 1, false, resource.active_inventory_bag, resource.inventory_bags)
+		return
+	if cost <= 0:
 		return
 	var gold_id: int = Economy.gold_id()
 	if gold_id > 0:
-		Inventory.add_item(player.player_resource.inventory, gold_id, cost, false, player.player_resource.active_inventory_bag, player.player_resource.inventory_bags)
+		Inventory.add_item(resource.inventory, gold_id, cost, false, resource.active_inventory_bag, resource.inventory_bags)
 
 
 # --- run lifecycle -----------------------------------------------------------
@@ -274,11 +307,56 @@ static func _enter_hunt(group_id: int, members: Array) -> void:
 			func() -> void: _warn(group_id, mark), CONNECT_ONE_SHOT)
 
 
+## Push [param group_id]'s contract deadline out by [param seconds] (Chronos
+## Clock). Returns {} when the group is not on a live contract — the caller must
+## treat that as a refusal and NOT consume anything.
+##
+## [member _end_at_ms] is the single source of truth for the clock: the HUD reads
+## it and [method _end_hunt] re-checks it before ending, so moving it here is the
+## whole extension. The one-shot timer that was scheduled at start still fires on
+## the original deadline; it finds the clock moved and reschedules itself.
+static func extend_contract(group_id: int, seconds: float) -> Dictionary:
+	if seconds <= 0.0 or not _hunts.has(group_id) or not _end_at_ms.has(group_id):
+		return {}
+	# An expired-but-not-yet-torn-down contract must not be revivable: the arena
+	# has already stopped spawning and the party is mid-eject.
+	if _remaining_s(group_id) <= 0.0 or _ejecting.get(group_id, false):
+		return {}
+	_end_at_ms[group_id] = _end_at_ms[group_id] + int(seconds * 1000.0)
+	_push_hud(group_id)
+	var minutes: int = int(seconds / 60.0)
+	_toast(group_id, "The contract has been extended by %d minute%s." % [
+		minutes, "" if minutes == 1 else "s"
+	])
+	return {"remaining_s": _remaining_s(group_id), "group_id": group_id}
+
+
+## The live contract [param player] is standing on, or 0. Used by the Chronos
+## Clock to decide whether there is anything to extend before it is spent.
+static func live_contract_of(player: Node) -> int:
+	if player == null or player.player_resource == null:
+		return 0
+	var group_id: int = GroupService.group_of(int(player.player_resource.current_peer_id))
+	if group_id == 0 or not _hunts.has(group_id):
+		return 0
+	if _remaining_s(group_id) <= 0.0 or _ejecting.get(group_id, false):
+		return 0
+	return group_id
+
+
 ## The contract clock ran out: tell the party what they earned, then send them
 ## home to the Guild Hall (where their Hunt Chest is waiting).
 static func _end_hunt(group_id: int) -> void:
 	if not _hunts.has(group_id) or WorldServer.curr == null:
 		return # already dissolved (everyone walked out early)
+	# The deadline may have been pushed out since this timer was scheduled (see
+	# extend_contract). Re-arm for whatever is left rather than ending early —
+	# _end_at_ms is the clock, this timer is only a wake-up.
+	var left_s: float = _remaining_s(group_id)
+	if left_s > 0.0:
+		WorldServer.curr.get_tree().create_timer(left_s).timeout.connect(
+			func() -> void: _end_hunt(group_id), CONNECT_ONE_SHOT)
+		return
 	var instance: Node = _hunts[group_id]
 	var arena_node: BossHuntArena = _arena_node(instance)
 	if arena_node != null:

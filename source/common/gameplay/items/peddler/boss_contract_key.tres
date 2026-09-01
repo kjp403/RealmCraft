@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Item" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/boss_contract_key.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+item_name = &"Boss Contract Key"
+item_icon = ExtResource("2_icon")
+description = "A sealed writ of engagement, pre-paid. The contract board takes one in place of a contract's fee and asks nothing else."
+holdable = false
+stack_limit = 5
+vendor_value = 0
+metadata/slug = &"boss_contract_key"
+metadata/id = 632

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/portable_deposit_box.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = true
+item_name = &"Portable Deposit Box"
+item_icon = ExtResource("2_icon")
+description = "A strapped case with a bank's mark burned into the lid. Heavier empty than it has any right to be."
+holdable = false
+stack_limit = 1
+vendor_value = 0
+metadata/slug = &"portable_deposit_box"
+metadata/id = 640

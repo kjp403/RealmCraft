@@ -107,6 +107,71 @@ cd /opt/arkenelle
 sudo bash deploy/setup-vps.sh
 ```
 
+## Traveling Peddler web export (one-time secret setup)
+
+The world server POSTs the Peddler's live state to the gateway, which caches it
+for `arkenelle.com/peddler/`. Both services read ONE file for the shared secret,
+so the two halves can never drift apart.
+
+The file lives at `/etc/arkenelle/peddler.env` — **not** in `/opt/arkenelle`.
+That is the git checkout: `update.sh` reinstalls over it, and a secret in a
+working tree is one `git add -A` from being public forever.
+
+```bash
+# 1. Connect
+ssh -i $env:USERPROFILE\.ssh\arkenelle_ovh ubuntu@144.217.91.100
+
+# 2. Generate a key. Copy the output — it is not stored anywhere yet.
+openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c 48; echo
+
+# 3. Install the template, readable only by root and the service user
+sudo install -d -m 0750 -o root -g arkenelle /etc/arkenelle
+sudo install -m 0640 -o root -g arkenelle      /opt/arkenelle/deploy/config/peddler.env.example /etc/arkenelle/peddler.env
+
+# 4. Paste the key in, replacing REPLACE_ME_WITH_A_GENERATED_KEY
+sudo nano /etc/arkenelle/peddler.env
+
+# 5. Pick up the new EnvironmentFile= lines and restart the two services.
+#    daemon-reload is REQUIRED: without it systemd keeps the old unit in memory
+#    and the restart silently starts with no environment at all.
+sudo systemctl daemon-reload
+sudo systemctl restart arkenelle-gateway arkenelle-world
+
+# 6. Confirm both processes actually have the variables
+sudo systemctl show arkenelle-world   -p Environment
+sudo systemctl show arkenelle-gateway -p Environment
+```
+
+A normal deploy needs none of this again: `update.sh` reinstalls the unit files
+and `daemon-reload`s, and `/etc/arkenelle/` is outside everything it touches.
+
+**Verify end to end** — the write path is loopback-only, so this must be run ON
+the VPS. The public read is what the website polls.
+
+```bash
+# On the VPS: rejected without the bearer (fail-closed proof)
+curl -s -X POST http://127.0.0.1:8088/v1/peddler/update -d '{}'
+# -> {"ok":false,"error":"unauthorized"}
+
+# From anywhere: the public read. "unavailable" until the world posts —
+# it does that on the next spawn, despawn, or UTC stock roll.
+curl -s https://api.arkenelle.com/v1/peddler
+
+# From anywhere: the write endpoint must NOT be reachable publicly (404 from Caddy)
+curl -s -o /dev/null -w '%{http_code}
+' -X POST https://api.arkenelle.com/v1/peddler/update
+# -> 404
+```
+
+If the tracker stays empty, check the world's log for the export line:
+
+```bash
+sudo journalctl -u arkenelle-world -n 100 --no-pager | grep -i peddler
+```
+
+No line at all means the variables are not reaching the process (step 5), not
+that the POST failed — the exporter is silent by design when unconfigured.
+
 ## Verify
 
 ```bash

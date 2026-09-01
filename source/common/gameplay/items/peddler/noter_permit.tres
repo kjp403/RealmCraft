@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/noter_permit.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = false
+item_name = &"Noter's Permit"
+item_icon = ExtResource("2_icon")
+description = "A stamped writ, countersigned twice and legible only in good light. The clerks it would oblige have not been appointed yet."
+holdable = false
+stack_limit = 1
+vendor_value = 0
+metadata/slug = &"noter_permit"
+metadata/id = 638

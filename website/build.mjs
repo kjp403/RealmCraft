@@ -606,6 +606,7 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
     <nav class="primary">
       <a href="${wiki}" class="${active === "wiki" ? "active" : ""}">Wiki</a>
       <a href="/leaderboards/" class="${active === "boards" ? "active" : ""}">Leaderboards</a>
+      <a href="/peddler/" class="${active === "peddler" ? "active" : ""}">Peddler</a>
       <a href="/wiki/getting-started/" class="${active === "start" ? "active" : ""}">Getting started</a>
       <a href="/wiki/items/" class="${active === "items" ? "active" : ""}">Items</a>
       <a href="/wiki/creatures/" class="${active === "creatures" ? "active" : ""}">Creatures</a>
@@ -1929,6 +1930,7 @@ function build() {
   copyFonts();
   fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
   fs.copyFileSync(path.join(SRC, "leaderboards.js"), path.join(DIST, "leaderboards.js"));
+  fs.copyFileSync(path.join(SRC, "peddler.js"), path.join(DIST, "peddler.js"));
   write(
     "_headers",
     `/*
@@ -2113,7 +2115,36 @@ function build() {
           ${wikiCard("quests", "/wiki/quests/", "Quests", `The Hollow Seep campaign and <strong>${quests.length}</strong> authored quests.`)}
           ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
           ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
+          ${wikiCard("boards", "/peddler/", "Traveling Peddler", "Where the cart is right now, and what it is selling today.")}
         </div>
+      </main>`,
+    })
+  );
+
+  write(
+    "peddler/index.html",
+    shell({
+      title: "Traveling Peddler — Arkenelle",
+      active: "peddler",
+      theme: "items",
+      scripts: ["/peddler.js"],
+      body: `<main class="wrap" data-peddler>
+        <div class="pd-head">
+          ${pageHeading("items", "Traveling Peddler")}
+          <p class="pd-status" data-pd-status data-kind="wait">CHECKING…</p>
+        </div>
+        <p class="muted">A wandering merchant who appears in a random biome for 30 minutes every four hours, sells three things, and leaves. Everyone in the world sees the same three on any given day, and every account may buy each of them once per day.</p>
+        <section class="pd-banner">
+          <div class="pd-zone-wrap">
+            <span class="pd-zone-label">Current zone</span>
+            <strong class="pd-zone" data-pd-zone>Unknown (Roam Phase)</strong>
+          </div>
+          <div class="pd-clocks" data-pd-clocks></div>
+        </section>
+        <h2 class="section-title pd-stock-title"><span>Today's stock</span></h2>
+        <div class="pd-stock" data-pd-stock></div>
+        <p class="muted pd-note" data-pd-note></p>
+        <p class="muted pd-foot">Times are read from the live world and counted down in your browser. The cart's schedule is UTC, so it appears at the same hours everywhere.</p>
       </main>`,
     })
   );
@@ -2598,6 +2629,7 @@ function build() {
     { title: "Gear path", kind: "Guide", href: "/wiki/getting-started/gear/", haystack: "gear path weapon armor armour progression tier mastery unique bone spore sunsteel basilisk bronze iron steel mithril adamant runite how to get" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
     { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
+    { title: "Traveling Peddler", kind: "Live", href: "/peddler/", haystack: "traveling peddler cart merchant daily stock rotation shop vault key chest tracker where is the peddler" },
     { title: "Slayer", kind: "Guide", href: "/wiki/slayer/", haystack: "slayer turael durael tasks" },
   ];
   write("wiki/search.json", JSON.stringify(search));

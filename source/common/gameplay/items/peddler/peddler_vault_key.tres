@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/peddler_vault_key.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = false
+item_name = &"Peddler's Vault Key"
+item_icon = ExtResource("2_icon")
+description = "A key the Peddler will sell you and will not use for you. It opens the strongbox beside their cart, once, and the lock keeps the key."
+holdable = false
+stack_limit = 1
+vendor_value = 0
+metadata/slug = &"peddler_vault_key"
+metadata/id = 639

@@ -230,7 +230,7 @@ static func _reward(
 	# body (dungeon trash / boss adds) reports 0, which zeroes mastery and drops Slayer
 	# to its task's authored fallback rate — see HostileNpc.grants_skill_xp.
 	var skill_xp: int = npc.combat_skill_xp() if npc.grants_skill_xp else 0
-	var loot_gained: Array = _roll_loot(npc)
+	var loot_gained: Array = _roll_loot(npc, player)
 	_append_zone_kill_loot(player, loot_gained)
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
@@ -384,20 +384,50 @@ static func _best_mastery_category(resource: PlayerResource) -> StringName:
 
 
 ## Rolls each loot entry; returns [{ "id", "amount", "name" }, ...].
-static func _roll_loot(npc: HostileNpc) -> Array:
+##
+## [param player] is the person being rewarded, needed because the Hunter's Charm
+## nudges HIGH-TIER BOSS rolls for a blessed killer (see [HunterCharm]). The roll
+## is taken ONCE and compared against both the base and the blessed chance, so
+## the charm can only ever turn a miss into a hit — never re-roll a miss, and
+## never lose a drop the base chance had already earned.
+static func _roll_loot(npc: HostileNpc, player: Player) -> Array:
 	var out: Array = []
+	var resource: PlayerResource = player.player_resource if player != null else null
+	var is_boss: bool = npc.enemy_data != null and npc.enemy_data.is_boss
+	var blessed_hits: int = 0
 	for drop: LootDrop in npc.loot:
 		if drop == null or drop.item == null:
 			continue
-		if randf() <= drop.chance:
-			var amount: int = randi_range(drop.min_amount, drop.max_amount)
-			if amount > 0:
-				out.append({
-					"id": int(drop.item.get_meta(&"id", 0)),
-					"amount": amount,
-					"name": str(drop.item.item_name),
-				})
+		var roll: float = randf()
+		var chance: float = HunterCharm.adjusted_chance(resource, is_boss, drop.chance)
+		if roll > chance:
+			continue
+		if HunterCharm.was_decisive(resource, is_boss, drop.chance, roll):
+			blessed_hits += 1
+		var amount: int = randi_range(drop.min_amount, drop.max_amount)
+		if amount > 0:
+			out.append({
+				"id": int(drop.item.get_meta(&"id", 0)),
+				"amount": amount,
+				"name": str(drop.item.item_name),
+			})
+	if blessed_hits > 0:
+		_toast_hunters_blessing(player)
 	return out
+
+
+## Float "Hunter's Blessing Triggered!" over the blessed killer. Fired only when
+## the charm was what landed the drop, so the toast is a claim the player can
+## trust rather than ambient noise on every rare.
+static func _toast_hunters_blessing(player: Player) -> void:
+	if player == null or player.player_resource == null or WorldServer.curr == null:
+		return
+	var peer_id: int = int(player.player_resource.current_peer_id)
+	if peer_id <= 0:
+		return
+	WorldServer.curr.data_push.rpc_id(
+		peer_id, &"peddler.toast", {"text": HunterCharm.TOAST_TEXT}
+	)
 
 
 ## Zone-wide rares from [member InstanceResource.zone_kill_loot] — any hostile

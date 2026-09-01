@@ -41,6 +41,7 @@ Transition="*res://source/client/autoload/transition.gd"
 LootFeed="*res://source/client/autoload/loot_feed.gd"
 UniversalChestManager="*res://source/client/autoload/universal_chest_manager.gd"
 DailyQuestManager="*res://source/common/gameplay/quests/daily_quest_manager.gd"
+PeddlerManager="*res://source/common/gameplay/peddler/peddler_manager.gd"
 
 [debug]
 

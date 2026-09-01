@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PeddlerItemData" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/peddler_item_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/hunter_charm.png" id="2_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/peddler/actions/hunter_charm_action.gd" id="3_action"]
+
+[resource]
+script = ExtResource("1_script")
+id = "hunter_charm"
+item_name = "Hunter's Charm"
+description = "A tooth on a wire, worn smooth. For two hours the rarest thing a great beast is carrying leans very slightly toward the person wearing it."
+price_gold = 350000
+tier = "S"
+icon = ExtResource("2_icon")
+action_script = ExtResource("3_action")

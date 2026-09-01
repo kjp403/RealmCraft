@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PeddlerGoodItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/items/peddler_good_item.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/peddler/botanist_skilling_crate.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_script")
+usable = true
+item_name = &"Botanist's Skilling Crate"
+item_icon = ExtResource("2_icon")
+description = "A slatted crate that smells of cut stems. Sealed with a botanist's wax and sold on the Peddler's word about what is under it."
+holdable = false
+stack_limit = 1
+vendor_value = 0
+metadata/slug = &"botanist_skilling_crate"
+metadata/id = 633

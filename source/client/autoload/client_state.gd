@@ -269,6 +269,14 @@ func _ready() -> void:
 	Client.subscribe(&"market.sold", func(data: Dictionary):
 		Toaster.toast(str(data.get("text", "Something sold at your stall.")), 4.0)
 	)
+	# Server-authored float for a Traveling Peddler good that fired on its own
+	# (the Hunter's Charm landing a boss drop). Pushed rather than derived: only
+	# the server knows whether the blessing was what made the roll.
+	Client.subscribe(&"peddler.toast", func(payload: Dictionary) -> void:
+		var text: String = str(payload.get("text", ""))
+		if not text.is_empty():
+			Toaster.toast(text, 3.0, PixelUI.INK_GOLD)
+	)
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
 	Client.subscribe(&"item.picked_up", _on_item_picked_up)
