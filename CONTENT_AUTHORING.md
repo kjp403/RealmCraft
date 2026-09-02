@@ -1045,7 +1045,102 @@ Portals fade the screen and reposition through the shared
 
 ---
 
-## 7. Deploy reminder (important)
+## 7. Ammunition procs (high-tier arrows)
+
+Four arrow tiers carry an on-hit effect. The chain is
+**1 bar -> 10 arrowheads** (Smithing, anvil) then
+**10 shafts + 10 arrowheads -> 10 arrows** (Fletching, bench).
+
+```
+godot --path . --mode=client res://tools/verify_high_tier_arrows.tscn  # bad=0
+godot --path . --mode=client res://tools/verify_ammo_equip.tscn
+```
+
+### 7.1 Authoring a proc
+
+Four fields on the `AmmoItem` .tres. Leave `proc_chance` at 0 and the arrow is
+an ordinary one, which is every tier up to Runite.
+
+| Field | Meaning |
+|-------|---------|
+| `proc_chance` | 0-1, rolled per landed **ranged** hit |
+| `effect_type` | must be one of the `AmmoProcService.EFFECT_*` constants |
+| `proc_magnitude` | per-effect: DPS, a 0-1 fraction, or flat splash damage |
+| `proc_duration_s` | duration effects only; ignored by instant ones |
+
+| Tier | Chance | Effect | Magnitude | Splat |
+|------|--------|--------|-----------|-------|
+| Dragon | 15% | `thermal_burn` | 8 dps / 4s, +50% of that as armour shred | fiery orange |
+| Obsidian | 12% | `life_siphon` | 0.35 of the hit, healed to the shooter | crimson |
+| Celestial | 20% | `holy_splash` | 14 damage in 72px, victim excluded | radiant gold |
+| Astralite | 10% | `gravity_slow` | 0.35 move, half that attack speed, 3s | electric cyan |
+
+> **A half-authored proc is an authoring slip, not a weak arrow.** A chance with
+> no effect, or an effect with no chance, ships as a plain arrow and nothing
+> complains. Worse, an `effect_type` TYPO is dispatched to `_: pass` — the arrow
+> looks like it has a proc, rolls it, and does nothing. Both fail the gate.
+
+### 7.2 Where the proc runs
+
+`AmmoProcService.on_hit` is called from `CombatHit.try_damage`, beside
+`CoatingService.on_hit` — the one place every melee arc and projectile resolves
+a hit. That means no per-weapon or per-ability code, and a proc can never be
+reached by a path that skipped the target rules.
+
+* **`randf()` runs on the server**, against a chance read from the item on disk.
+  The client does not roll, cannot report a proc and cannot re-roll a miss; it
+  learns a proc happened only from the damage payload that comes back.
+* **Only bow shots proc.** The gate is `damage_type == DAMAGE_RANGED` — melee
+  sends physical, wands send magic. Without it a quiver would proc off swords.
+* **The splash re-enters `try_damage`** so each splash target gets the full zone
+  and allegiance rules (a burst next to a guildmate must not hit them). That
+  makes the service re-entrant, so a static `_resolving` flag stops a splash
+  procing a splash: at 20% in a packed camp that is an exponential chain, and it
+  would surface as a server hang rather than as anything a player could report.
+
+### 7.3 Slows and shreds do NOT go through BuffService
+
+`BuffService` stores its entries on `PlayerResource`, so it can only touch a
+Player. Arrows are mostly shot at NPCs, and a slow that silently does nothing to
+a mob is a bug that looks like balance.
+
+`TimedDebuff` attaches to any `Character` as a child node, the same shape as
+`DamageOverTime`. Two of the three things it weakens are not stats at all on an
+NPC — `HostileNpc.move_speed` and `attack_cooldown` are plain fields, so they
+are scaled and restored directly; ARMOR is a real stat and goes through
+`modify_stat`. It records **what it actually applied** and gives back exactly
+that: reverting a change that was never applied silently drains the victim's
+stat block. Re-applying refreshes the clock and keeps the original magnitudes,
+so arrow spam cannot stack a mob to zero armour.
+
+### 7.4 Hit splat colours
+
+Server and client are joined by a **string**, not a symbol:
+`AmmoProcService.SPLAT_*` must appear verbatim in
+`FloatingDamageNumber._color()`. Rename one side and it compiles fine while the
+splat silently falls back to default orange — the gate checks for exactly this.
+
+Effect identity is matched **before** the heal colour, so an Obsidian siphon
+pays out in crimson instead of reading as a generic green heal.
+
+### 7.5 XP scale and the positional mirrors
+
+Arrowhead and arrow XP are on the **post-#388 scale**, like everything else on
+this branch: Smithing 28/31/36/42 at levels 68/72/80/88, Fletching
+270/320/380/450 at 80/84/88/92. Ranged Attack stays on the established +1 per
+tier ladder (17/18/19/20) — the power jump is the PROC, not an inflated stat,
+which is what keeps these from disrupting the existing arrow ladder.
+
+`jobs/smithing.tres` and `jobs/fletching.tres` mirror these recipes, and
+`recipe_items` / `recipe_levels` are read **positionally**. A length drift does
+not error — it silently mislabels every recipe after the insertion point. The
+gate checks both lists are parallel. Arrowheads are `MaterialItem`s so they are
+safe in `recipe_items`; only weapon/tool items must use
+`recipe_deferred_paths` (see the cycle warning in §5).
+
+---
+
+## 8. Deploy reminder (important)
 
 World/server content is **authoritative**. Editing maps, NPCs, shops, items, or portals in git does nothing live until the VPS pulls and restarts.
 

@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788301783
-next_id = 668
+version = 1788308782
+next_id = 676
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3112,6 +3112,46 @@ entries = Array[Dictionary]([{
 &"id": 667,
 &"path": "res://source/common/gameplay/items/materials/catalysts/obsidian_flux.tres",
 &"slug": &"obsidian_flux"
+}, {
+&"hash": "4bbc2252a5e5d946df3284ebe9dff1777793b1bec63e068b83a6d81505df9ec0",
+&"id": 668,
+&"path": "res://source/common/gameplay/items/ammo/astralite_arrow.tres",
+&"slug": &"astralite_arrow"
+}, {
+&"hash": "9e5427ec259d786e2ce04a675314f31a7bc319bde81c0ce0fd978ea66aee10e8",
+&"id": 669,
+&"path": "res://source/common/gameplay/items/ammo/celestial_arrow.tres",
+&"slug": &"celestial_arrow"
+}, {
+&"hash": "7be9b5b605367505841d22775d92d031d493d6e0b1a9e511165ff4fd5a4295c7",
+&"id": 670,
+&"path": "res://source/common/gameplay/items/ammo/dragon_arrow.tres",
+&"slug": &"dragon_arrow"
+}, {
+&"hash": "1b771c498b302296f9a8c1096e9af56c5f96bf64873aaff91d2139fd05280de7",
+&"id": 671,
+&"path": "res://source/common/gameplay/items/ammo/obsidian_arrow.tres",
+&"slug": &"obsidian_arrow"
+}, {
+&"hash": "13f1596c1b5fd429d33833fb4d64efd558f46ea2a319dabf93538d476fadb597",
+&"id": 672,
+&"path": "res://source/common/gameplay/items/materials/metals/astralite_arrowheads.tres",
+&"slug": &"astralite_arrowheads"
+}, {
+&"hash": "e6ae123ce1af15fb5034adeb599a26899069945c7453664b5c0b0fd21deabd69",
+&"id": 673,
+&"path": "res://source/common/gameplay/items/materials/metals/celestial_arrowheads.tres",
+&"slug": &"celestial_arrowheads"
+}, {
+&"hash": "39ac5461bd803b62e27331c1f5493489a3eedc71c93469947134bf63344bc8a3",
+&"id": 674,
+&"path": "res://source/common/gameplay/items/materials/metals/dragon_arrowheads.tres",
+&"slug": &"dragon_arrowheads"
+}, {
+&"hash": "7d9b8e00cb454f18b965be8b9c2fed3bac2c2089d339c7e21b59d57f2bb134a8",
+&"id": 675,
+&"path": "res://source/common/gameplay/items/materials/metals/obsidian_arrowheads.tres",
+&"slug": &"obsidian_arrowheads"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

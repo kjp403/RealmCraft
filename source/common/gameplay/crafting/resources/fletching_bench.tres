@@ -23,6 +23,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/mithril_arrowheads.tres" id="33_mi_head"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/adamant_arrowheads.tres" id="34_ad_head"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/runite_arrowheads.tres" id="35_ru_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_arrowheads.tres" id="50_dragon_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/dragon_arrow.tres" id="60_dragon_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_arrowheads.tres" id="50_obsidian_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/obsidian_arrow.tres" id="60_obsidian_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/celestial_arrowheads.tres" id="50_celestial_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/celestial_arrow.tres" id="60_celestial_arrow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_arrowheads.tres" id="50_astralite_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/astralite_arrow.tres" id="60_astralite_arrow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/bronze_arrow.tres" id="40_br_arrow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/iron_arrow.tres" id="41_fe_arrow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/steel_arrow.tres" id="42_st_arrow"]
@@ -307,9 +315,81 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_bow_rose")])
 required_level = 85
 xp_reward = 720
 
+[sub_resource type="Resource" id="I_dragon_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_dragon_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_dragon_head")
+amount = 10
+
+[sub_resource type="Resource" id="R_dragon_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("60_dragon_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_dragon_shafts"), SubResource("I_dragon_heads")])
+required_level = 80
+xp_reward = 270
+
+[sub_resource type="Resource" id="I_obsidian_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_obsidian_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_obsidian_head")
+amount = 10
+
+[sub_resource type="Resource" id="R_obsidian_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("60_obsidian_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_obsidian_shafts"), SubResource("I_obsidian_heads")])
+required_level = 84
+xp_reward = 320
+
+[sub_resource type="Resource" id="I_celestial_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_celestial_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_celestial_head")
+amount = 10
+
+[sub_resource type="Resource" id="R_celestial_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("60_celestial_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_celestial_shafts"), SubResource("I_celestial_heads")])
+required_level = 88
+xp_reward = 380
+
+[sub_resource type="Resource" id="I_astralite_shafts"]
+script = ExtResource("3_ingred")
+item = ExtResource("20_headless")
+amount = 10
+
+[sub_resource type="Resource" id="I_astralite_heads"]
+script = ExtResource("3_ingred")
+item = ExtResource("50_astralite_head")
+amount = 10
+
+[sub_resource type="Resource" id="R_astralite_arrow"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("60_astralite_arrow")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_astralite_shafts"), SubResource("I_astralite_heads")])
+required_level = 92
+xp_reward = 450
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Fletching Bench"
 profession = &"fletching"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_shaft_logs"), SubResource("R_shaft_oak"), SubResource("R_shaft_willow"), SubResource("R_shaft_maple"), SubResource("R_shaft_yew"), SubResource("R_br_arrow"), SubResource("R_fe_arrow"), SubResource("R_st_arrow"), SubResource("R_mi_arrow"), SubResource("R_ad_arrow"), SubResource("R_ru_arrow"), SubResource("R_shaft_wisp"), SubResource("R_shaft_nebula"), SubResource("R_shaft_birch"), SubResource("R_shaft_rose"), SubResource("R_bow_wisp"), SubResource("R_bow_nebula"), SubResource("R_bow_birch"), SubResource("R_bow_rose")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_shaft_logs"), SubResource("R_shaft_oak"), SubResource("R_shaft_willow"), SubResource("R_shaft_maple"), SubResource("R_shaft_yew"), SubResource("R_br_arrow"), SubResource("R_fe_arrow"), SubResource("R_st_arrow"), SubResource("R_mi_arrow"), SubResource("R_ad_arrow"), SubResource("R_ru_arrow"), SubResource("R_shaft_wisp"), SubResource("R_shaft_nebula"), SubResource("R_shaft_birch"), SubResource("R_shaft_rose"), SubResource("R_bow_wisp"), SubResource("R_bow_nebula"), SubResource("R_bow_birch"), SubResource("R_bow_rose"), SubResource("R_dragon_arrow"), SubResource("R_obsidian_arrow"), SubResource("R_celestial_arrow"), SubResource("R_astralite_arrow")])

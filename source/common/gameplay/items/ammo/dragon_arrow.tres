@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="AmmoItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/ammo_item.gd" id="2_ammo"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/ammo.tres" id="3_slot"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_dragon_arrow.png" id="4_icon"]
+
+[sub_resource type="Resource" id="Mod_ad"]
+script = ExtResource("1_mod")
+stat_name = "ad"
+value = 17.0
+
+[resource]
+script = ExtResource("2_ammo")
+proc_chance = 0.15
+effect_type = &"thermal_burn"
+proc_magnitude = 8.0
+proc_duration_s = 4.0
+required_mastery_categories = Array[StringName]([&"bow"])
+required_mastery_level = 30
+slot = ExtResource("3_slot")
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ad")])
+item_name = &"Dragon Arrow"
+item_icon = ExtResource("4_icon")
+description = "Forged from superheated dragon metal. Has a chance on hit to ignite the target in a searing thermal burn that shreds armor."
+holdable = false
+can_trade = true
+vendor_value = 65
+tags = PackedStringArray()
+metadata/slug = &"dragon_arrow"
+metadata/id = 670
