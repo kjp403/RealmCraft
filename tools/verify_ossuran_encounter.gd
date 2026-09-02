@@ -24,16 +24,28 @@ extends Node
 ##  VISUALS  Shaders and rp_ hooks fail SILENTLY in a live fight: the server
 ##           still deals the damage while the client draws nothing.
 ##
+##  RECOVERY The encounter's bodies must not heal themselves back to full when a
+##           phase sends the group away from them. One dropped flag on a spawn
+##           path erases a group's whole run, and nothing logs it.
+##
+##  PLACING  Killing Frost's safe circle is the only ground worth standing on
+##           while it lands, so the picker is driven against the real arena
+##           colliders from every wall-adjacent boss position: a circle inside
+##           the wall is an unanswerable 85% of everyone's health.
+##
 ## Run as a SCENE, not with -s. The encounter's classes reach HostileNpc and
 ## Character, which reference the Client / ClientState autoloads — under -s those
 ## do not exist and the whole dependency graph fails to compile before a single
-## check runs. Every object built here is still exercised through pure methods
-## only: nothing touches WorldServer or a live Map.
+## check runs. Nothing here touches WorldServer: the checks are pure methods over
+## loaded resources, plus the arena scene instanced into this tool's own tree for
+## the floor and physics passes at the end.
 
 const INDEX := "res://source/common/registry/indexes/enemy_types_index.tres"
 const BOSS_SLUG := &"ossuran"
 const BOSS_PATH := "res://source/common/gameplay/characters/npc/types/bosses/cleetus.tres"
 const ARENA_SCENE := "res://source/common/gameplay/maps/maps/ossuran/ossuran_arena.tscn"
+const ARENA_SCRIPT := "res://source/common/gameplay/ossuran/ossuran_arena.gd"
+const NPC_SCRIPT := "res://source/common/gameplay/characters/npc/hostile_npc.gd"
 
 ## The support roster this encounter adds. The boss is NOT here: it already
 ## shipped, and this encounter spawns the existing body.
@@ -64,6 +76,13 @@ const EXPECTED_THRESHOLDS: Array[float] = [0.75, 0.5]
 const ARENA_RECT := Rect2i(0, 0, 48, 34)
 ## Matches build_ossuran_arena.gd.
 const WALL_THICKNESS: int = 2
+## The arena door — where a group walks in, and so the cell every floor check
+## floods out from.
+const ARENA_ENTRANCE := Vector2i(24, 30)
+## Killing Frost casts sampled per boss position. The picker starts from a random
+## angle, so more than one draw per cell is what stops a lucky direction reading
+## as a pass.
+const FROST_PICKS_PER_CELL: int = 3
 ## Every cell a body must be able to STAND on, with the name to report if it
 ## cannot. Derived from the placements in build_ossuran_scene.py.
 const ARENA_FIXTURES: Array = [
@@ -100,6 +119,8 @@ func _ready() -> void:
 	_check_scene()
 	_check_portals()
 	_check_reachability()
+	_check_no_regen()
+	await _check_frost_placement()
 	_finish()
 
 
@@ -609,42 +630,18 @@ func _check_reachability() -> void:
 		root.queue_free()
 		return
 
-	var blocked: Dictionary = {}
-	for layer: TileMapLayer in [walls, deco]:
-		for cell: Vector2i in layer.get_used_cells():
-			var data: TileData = layer.get_cell_tile_data(cell)
-			# A tile only blocks if it actually carries a collision polygon —
-			# banners, grates and floor slag are painted on the same layer as the
-			# columns and must NOT count as walls.
-			if data != null and data.get_collision_polygons_count(0) > 0:
-				blocked[cell] = true
-
+	var layers: Array[TileMapLayer] = [walls, deco]
+	var blocked: Dictionary = _blocked_cells(layers)
+	if blocked.has(ARENA_ENTRANCE):
+		_fail("the arena entrance cell %s is blocked" % ARENA_ENTRANCE)
+		root.queue_free()
+		return
 	# Flood from the arena door, UNCLAMPED. Clamping the fill to the room is what
 	# hides the two failures that actually matter: a hole in the perimeter (the
 	# fill would simply stop at the clamp and look fine) and a walk-in pocket
 	# inside the wall band.
-	var start := Vector2i(24, 30)
-	if blocked.has(start):
-		_fail("the arena entrance cell %s is blocked" % start)
-		root.queue_free()
-		return
-	var seen: Dictionary = {start: true}
-	var queue: Array[Vector2i] = [start]
-	var escaped: bool = false
-	while not queue.is_empty():
-		var at: Vector2i = queue.pop_back()
-		# Well outside the room: the fill got out, so a player can too.
-		if at.x < -6 or at.x > ARENA_RECT.size.x + 6 				or at.y < -6 or at.y > ARENA_RECT.size.y + 6:
-			escaped = true
-			continue
-		for step: Vector2i in [
-			Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
-		]:
-			var next: Vector2i = at + step
-			if seen.has(next) or blocked.has(next):
-				continue
-			seen[next] = true
-			queue.append(next)
+	var seen: Dictionary = _flood_from(ARENA_ENTRANCE, blocked)
+	var escaped: bool = _fill_escaped(seen)
 
 	if escaped:
 		_fail("the arena perimeter leaks — a player can walk out of the room")
@@ -679,6 +676,195 @@ func _check_reachability() -> void:
 		seen.size(), not escaped, pockets,
 	])
 	root.queue_free()
+
+
+## Every body the encounter spawns must have the out-of-combat heal switched off.
+## The stock rule reads ten quiet seconds as a disengage and refills the bar,
+## which inside a staged fight is a phase working as designed — the frozen phase
+## sends the group to a brazier while Ossuran, rooted mid-cast, does not follow —
+## and it costs the group the entire run with no message and no combat log entry.
+##
+## Asserted against the SOURCE because the alternative is standing up a live
+## instance: this is a one-line flag on a spawn path, and a refactor that drops
+## it brings the bug back silently, which is exactly what this file is for.
+func _check_no_regen() -> void:
+	var src: String = FileAccess.get_file_as_string(ARENA_SCRIPT)
+	if src.is_empty():
+		_fail("could not read %s" % ARENA_SCRIPT)
+		return
+	var clears: int = src.count("regenerates_out_of_combat = false")
+	if clears < 2:
+		_fail("OssuranArena clears regenerates_out_of_combat %d times — the boss AND the pillars need it" % clears)
+	var npc_src: String = FileAccess.get_file_as_string(NPC_SCRIPT)
+	if not npc_src.contains("if not regenerates_out_of_combat:"):
+		_fail("HostileNpc._can_out_of_combat_regen no longer honours the opt-out flag")
+	print("regen : encounter bodies opt out of the out-of-combat heal (%d spawn paths)" % clears)
+
+
+## KILLING FROST lands the only safe ground on the field, so a circle a player
+## cannot stand in is not a hard mechanic, it is 85% of everyone's health with no
+## answer. The old placement was `boss + random angle * offset`, which puts that
+## circle inside the forge wall (or in the void behind it) every time Ossuran is
+## pushed to an edge — and he is pushed to an edge constantly, by his own charge
+## and by a melee group's positioning.
+##
+## This drives the SHIPPING picker (BossController.pick_frost_spot) against the
+## REAL arena colliders, from every walkable cell that has a wall for a
+## neighbour — the whole set of positions the bug needed — and asserts the circle
+## always lands on floor the flood-fill above can reach from the door.
+##
+## Runs last because it is the only check that needs live physics: tile
+## collision only exists once the scene is in the tree and a physics frame has
+## been stepped.
+func _check_frost_placement() -> void:
+	var packed: PackedScene = load(ARENA_SCENE) as PackedScene
+	if packed == null:
+		return
+	var root: Node = packed.instantiate()
+	add_child(root)
+
+	var walls: TileMapLayer = root.get_node_or_null(^"Tiles/Walls")
+	var deco: TileMapLayer = root.get_node_or_null(^"Tiles/Deco")
+	if walls == null or deco == null:
+		_fail("arena scene is missing Walls / Deco for the frost placement check")
+		root.queue_free()
+		return
+
+	var layers: Array[TileMapLayer] = [walls, deco]
+	var blocked: Dictionary = _blocked_cells(layers)
+	var floor_cells: Dictionary = _flood_from(ARENA_ENTRANCE, blocked)
+
+	# Physics is not live until the tree has stepped. Without this the queries
+	# below hit an empty space and every candidate looks open — the check would
+	# pass on a build with no collision at all.
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var space: PhysicsDirectSpaceState2D = walls.get_world_2d().direct_space_state
+	if space == null:
+		_fail("no physics space — the frost placement check cannot run")
+		root.queue_free()
+		return
+
+	# Control probe: the cells the tile data calls solid must READ as solid
+	# through the physics mask the picker uses. If they do not — a tileset whose
+	# physics layer moved off PhysicsLayers.WORLD, or collision that never
+	# registered — every assertion below passes vacuously.
+	var probe := PhysicsPointQueryParameters2D.new()
+	probe.collision_mask = PhysicsLayers.SOLID_GROUND_MASK
+	probe.collide_with_areas = false
+	var solid_reads: int = 0
+	for cell: Vector2i in blocked:
+		probe.position = _cell_to_world(walls, cell)
+		if not space.intersect_point(probe, 1).is_empty():
+			solid_reads += 1
+	print("probe : %d/%d blocked cells read solid" % [solid_reads, blocked.size()])
+	if solid_reads * 2 < blocked.size():
+		_fail("only %d of %d solid cells read solid through the physics mask" % [
+			solid_reads, blocked.size()
+		])
+		root.queue_free()
+		return
+
+	var boss_res: EnemyTypeResource = load(BOSS_PATH) as EnemyTypeResource
+	var brain := BossController.new()
+	if boss_res != null:
+		brain.frost_offset_px = boss_res.frost_offset_px
+
+	var origins: Array[Vector2i] = _wall_adjacent_cells(floor_cells, blocked)
+	if origins.size() < 20:
+		_fail("only %d wall-adjacent floor cells to test frost placement from" % origins.size())
+
+	var pulled_in: int = 0
+	var bad: int = 0
+	for cell: Vector2i in origins:
+		var origin: Vector2 = _cell_to_world(walls, cell)
+		for _attempt: int in FROST_PICKS_PER_CELL:
+			var at: Vector2 = brain.pick_frost_spot(space, origin, [])
+			var landed: Vector2i = walls.local_to_map(walls.to_local(at))
+			if not floor_cells.has(landed):
+				bad += 1
+				if bad <= 5:
+					_fail("Killing Frost circle at %s (cell %s) is off the walkable floor, cast from %s" % [
+						at, landed, cell
+					])
+			if not is_equal_approx(origin.distance_to(at), brain.frost_offset_px):
+				pulled_in += 1
+
+	brain.free()
+	print("frost : %d wall-adjacent origins x %d picks, %d circles pulled in, %d unreachable" % [
+		origins.size(), FROST_PICKS_PER_CELL, pulled_in, bad,
+	])
+	root.queue_free()
+
+
+## Cells carrying real collision on any of [param layers]. A tile only blocks if
+## it actually has a collision polygon — banners, grates and floor slag share a
+## layer with the columns and must not count as walls.
+func _blocked_cells(layers: Array[TileMapLayer]) -> Dictionary:
+	var blocked: Dictionary = {}
+	for layer: TileMapLayer in layers:
+		for cell: Vector2i in layer.get_used_cells():
+			var data: TileData = layer.get_cell_tile_data(cell)
+			if data != null and data.get_collision_polygons_count(0) > 0:
+				blocked[cell] = true
+	return blocked
+
+
+## True when the fill reached well outside the room — the perimeter leaks, so a
+## player can walk out of the fight.
+func _fill_escaped(seen: Dictionary) -> bool:
+	for cell: Vector2i in seen:
+		if cell.x < -6 or cell.x > ARENA_RECT.size.x + 6 				or cell.y < -6 or cell.y > ARENA_RECT.size.y + 6:
+			return true
+	return false
+
+
+## Four-way flood of open cells from [param start]. UNCLAMPED on purpose — see
+## [method _check_reachability]; a fill that escapes the room is itself a finding.
+func _flood_from(start: Vector2i, blocked: Dictionary) -> Dictionary:
+	var seen: Dictionary = {start: true}
+	if blocked.has(start):
+		return seen
+	var queue: Array[Vector2i] = [start]
+	while not queue.is_empty():
+		var at: Vector2i = queue.pop_back()
+		if at.x < -6 or at.x > ARENA_RECT.size.x + 6 				or at.y < -6 or at.y > ARENA_RECT.size.y + 6:
+			continue
+		for step: Vector2i in [
+			Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+		]:
+			var next: Vector2i = at + step
+			if seen.has(next) or blocked.has(next):
+				continue
+			seen[next] = true
+			queue.append(next)
+	return seen
+
+
+## Every open cell inside the room with a solid for a neighbour — "the boss has
+## his back to something", which is the only situation the old placement broke in.
+func _wall_adjacent_cells(floor_cells: Dictionary, blocked: Dictionary) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for cell: Vector2i in floor_cells:
+		if not ARENA_RECT.has_point(cell):
+			continue
+		if _touches_solid(cell, blocked):
+			out.append(cell)
+	return out
+
+
+## Any of the eight neighbours of [param cell] solid?
+func _touches_solid(cell: Vector2i, blocked: Dictionary) -> bool:
+	for dx: int in [-1, 0, 1]:
+		for dy: int in [-1, 0, 1]:
+			if blocked.has(cell + Vector2i(dx, dy)):
+				return true
+	return false
+
+
+## Centre of [param cell] in world space.
+func _cell_to_world(layer: TileMapLayer, cell: Vector2i) -> Vector2:
+	return layer.to_global(layer.map_to_local(cell))
 
 
 func _finish() -> void:
