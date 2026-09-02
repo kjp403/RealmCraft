@@ -260,19 +260,22 @@ func ready_to_enter_instance() -> void:
 	spawn_player(peer_id)
 
 
-#region spawn/despawn
-@rpc("authority", "call_remote", "reliable", 0)
-func spawn_player(peer_id: int) -> void:
-	var player: Player
-	var spawn_index: int = 0
-	var spawn_position: Vector2
-
-	# Warpers self-register from their OWN _ready, so on a big tiled map (the
-	# woodland) a join that lands in the same frame as the map load finds
-	# Map.warpers empty. get_spawn_position then falls through to the map's
-	# global_position — (0, 0), the top-left border wall — and the player spawns
-	# wedged in it: no movement, camera parked on whatever sits up there (the
-	# goblin chief). Waiting for the map settles it before anything reads spawns.
+## Block until the map is in the tree AND its warpers have registered.
+##
+## Warpers self-register from their OWN _ready, and the map is added with
+## add_child.call_deferred — so anything that reads a spawn in the same frame as
+## the map load finds Map.warpers empty. get_spawn_position then falls through to
+## the map's global_position: (0, 0), the top-left corner, which on a tiled map
+## is border wall and on a cave is unlit rock. The player lands wedged there with
+## the camera parked on whatever sits in the corner.
+##
+## Awaited by BOTH readers, because they race the same load from different
+## directions: spawn_player (a join) and InstanceManagerServer.player_switch_
+## instance (a warp into a biome being charged for the first time — the first
+## player into a brand-new zone, which is exactly when nobody has charged it yet).
+func await_map_ready() -> void:
+	if instance_map == null:
+		return
 	if not instance_map.is_node_ready():
 		await instance_map.ready
 	if instance_map.warpers.is_empty():
@@ -282,6 +285,16 @@ func spawn_player(peer_id: int) -> void:
 			"Instance '%s': no warpers registered at spawn — falling back to map origin."
 			% instance_resource.instance_name
 		)
+
+
+#region spawn/despawn
+@rpc("authority", "call_remote", "reliable", 0)
+func spawn_player(peer_id: int) -> void:
+	var player: Player
+	var spawn_index: int = 0
+	var spawn_position: Vector2
+
+	await await_map_ready()
 
 	if awaiting_peers.has(peer_id):
 		var player_info: Dictionary = awaiting_peers[peer_id]
