@@ -8,13 +8,13 @@
 [sub_resource type="Resource" id="Mod_ad"]
 script = ExtResource("1_mod")
 stat_name = "ad"
-value = 20.0
+value = 38.0
 
 [resource]
 script = ExtResource("2_ammo")
-proc_chance = 0.1
+proc_chance = 0.22
 effect_type = &"gravity_slow"
-proc_magnitude = 0.35
+proc_magnitude = 0.45
 proc_duration_s = 3.0
 required_mastery_categories = Array[StringName]([&"bow"])
 required_mastery_level = 45
