@@ -25,6 +25,14 @@ var _profession_xp: int
 var _profession_xp_to_next: int = 100
 ## Multiplier from xp-effect perks (Apprentice ranks), for the predicted gain.
 var _xp_multiplier: float = 1.0
+
+## Level and XP multiplier PER PROFESSION present at this station, not just the
+## station's own. A bench can host a second trade's recipes (the Ascended
+## Workbench holds the metal ascension sets, which stay Smithing), and those
+## rows must gate on the skill that actually unlocks them. Keyed by profession;
+## the station's own is always present.
+var _skill_levels: Dictionary[StringName, int] = {}
+var _skill_xp_multipliers: Dictionary[StringName, float] = {}
 ## Recipe indices in display order (sorted by gate, then name).
 var _order: Array[int] = []
 var _selected: int = -1
@@ -354,6 +362,14 @@ func _refresh() -> void:
 		_profession_xp = int(entry.get("xp", 0))
 		_profession_xp_to_next = maxi(1, int(entry.get("xp_to_next", 100)))
 		_xp_multiplier = _xp_multiplier_from(entry.get("choices", []))
+		# Cache every profession this station's recipes gate on, so an
+		# override row reads its own skill rather than the bench's.
+		_skill_levels.clear()
+		_skill_xp_multipliers.clear()
+		for prof: StringName in _professions_present():
+			var row: Dictionary = skills.get(String(prof), {})
+			_skill_levels[prof] = int(row.get("level", 1))
+			_skill_xp_multipliers[prof] = _xp_multiplier_from(row.get("choices", []))
 
 	_update_header()
 	_build_tabs()
@@ -372,6 +388,41 @@ func _recompute_owned(inventory: Dictionary) -> void:
 
 
 ## 1.0 + every rank of every xp-effect perk (Apprentice), for predicted gains.
+## Every distinct profession the station's recipes gate on, its own included.
+func _professions_present() -> Array[StringName]:
+	var out: Array[StringName] = []
+	if _station == null:
+		return out
+	out.append(_station.profession)
+	for recipe: CraftingRecipe in _station.recipes:
+		if recipe == null:
+			continue
+		var prof: StringName = recipe.profession_for(_station)
+		if not out.has(prof):
+			out.append(prof)
+	return out
+
+
+## The player's level in the skill THIS recipe gates on.
+func _level_for(recipe: CraftingRecipe) -> int:
+	if recipe == null:
+		return _profession_level
+	var prof: StringName = recipe.profession_for(_station)
+	if prof == _station.profession:
+		return _profession_level
+	return int(_skill_levels.get(prof, 1))
+
+
+## The XP multiplier for the skill THIS recipe pays.
+func _xp_multiplier_for(recipe: CraftingRecipe) -> float:
+	if recipe == null:
+		return _xp_multiplier
+	var prof: StringName = recipe.profession_for(_station)
+	if prof == _station.profession:
+		return _xp_multiplier
+	return float(_skill_xp_multipliers.get(prof, 1.0))
+
+
 func _xp_multiplier_from(choices: Variant) -> float:
 	var mult: float = 1.0
 	for choice: Variant in (choices if choices is Array else []):
@@ -391,87 +442,22 @@ func _update_header() -> void:
 
 # --- Category tabs -----------------------------------------------------------
 
-## Smithing Table metal tiers shown as dedicated tabs. Lv.50+ (Dragon and
-## Ascension gear) collapses into Ascended so the list stays short.
-const _SMITHING_TIERS: Array[StringName] = [
-	&"bronze", &"iron", &"steel", &"mithril", &"adamant", &"runite", &"ascended",
-]
-const _ASCENDED_CRAFT_LEVEL: int = 50
-
-
-## Which tab a recipe belongs to. Smithing Table uses metal-tier + Tools +
-## Jewelry + Materials tabs; Workbench / other stations keep cloth / leather /
-## materials. No "all" tab — mixing categories interleaves unrelated rows.
+## Tab assignment and ordering live in [CraftingCategory], in `common/`, so the
+## bench verifier can assert the real rule rather than a copy of it — the tab a
+## recipe lands in is derived, never authored, so a duplicated rule would drift
+## silently and put recipes back in the wrong tab.
 func _category(recipe: CraftingRecipe) -> StringName:
-	if recipe.output_item is MaterialItem:
-		return &"materials"
-	if _is_jewelry(recipe.output_item):
-		return &"jewelry"
-	if _is_smithing_station():
-		# Gathering tools get their own tab instead of scattering one pickaxe,
-		# axe and sickle across six metal tabs. This has to beat the tier check
-		# below: tools are gated well above _ASCENDED_CRAFT_LEVEL at the top
-		# end, so adamant/runite tools would otherwise land under Ascended.
-		if recipe.output_item is ToolItem:
-			return &"tools"
-		return _smithing_tier(recipe)
-	var path: String = recipe.output_item.resource_path
-	if path.contains("/cloth/"):
-		return &"cloth"
-	if path.contains("/leather/"):
-		return &"leather"
-	return &"armor"
+	return CraftingCategory.of(recipe, _station)
 
 
 func _is_smithing_station() -> bool:
 	return _station != null and _station.profession == &"smithing"
 
 
-## Rings + necklaces / amulets / relics under gears/jewelry (or ring slot).
-func _is_jewelry(item: Item) -> bool:
-	if item == null:
-		return false
-	var path: String = item.resource_path
-	if path.contains("/jewelry/") or path.contains("/rings/"):
-		return true
-	var gear: GearItem = item as GearItem
-	if gear == null or gear.slot == null:
-		return false
-	var slot_file: String = gear.slot.resource_path.get_file()
-	return (
-		slot_file.begins_with("ring")
-		or slot_file.begins_with("amulet")
-		or slot_file.begins_with("relic")
-	)
-
-
-## Bronze…Runite from the output name / path; Lv.50+ → Ascended.
-func _smithing_tier(recipe: CraftingRecipe) -> StringName:
-	if recipe.required_level >= _ASCENDED_CRAFT_LEVEL:
-		return &"ascended"
-	var haystack: String = (
-		String(recipe.output_item.item_name) + " " + recipe.output_item.resource_path
-	).to_lower()
-	# Longer / more specific tokens first so "adamant" beats a stray "adan…".
-	for tier: StringName in [
-		&"mithril", &"adamant", &"runite", &"bronze", &"steel", &"iron",
-	]:
-		if haystack.contains(String(tier)):
-			return tier
-	# Unmatched metal (tools named oddly, copper leftovers) — still smithable.
-	return &"bronze"
-
-
 func _tab_label(cat: StringName) -> String:
-	match cat:
-		&"jewelry":
-			return "Jewelry"
-		&"ascended":
-			return "Ascended"
-		&"materials":
-			return "Materials"
-		_:
-			return String(cat).capitalize()
+	return CraftingCategory.label(cat)
+
+
 
 
 func _build_tabs() -> void:
@@ -496,12 +482,7 @@ func _build_tabs() -> void:
 		return
 
 	var tabs: Array[StringName] = []
-	var preferred: Array[StringName] = []
-	if _is_smithing_station():
-		preferred.append_array(_SMITHING_TIERS)
-		preferred.append_array([&"tools", &"jewelry", &"materials"])
-	else:
-		preferred.append_array([&"armor", &"cloth", &"leather", &"jewelry", &"materials"])
+	var preferred: Array[StringName] = CraftingCategory.preferred_order(_station)
 	for cat: StringName in preferred:
 		if present.has(cat):
 			tabs.append(cat)
@@ -565,7 +546,7 @@ func _build_list() -> void:
 
 
 func _make_row(index: int, recipe: CraftingRecipe) -> Button:
-	var locked: bool = _profession_level < recipe.required_level
+	var locked: bool = _level_for(recipe) < recipe.required_level
 	var row: Button = Button.new()
 	row.toggle_mode = true
 	row.button_group = _row_group
@@ -654,9 +635,9 @@ func _render_detail() -> void:
 	stats_text.text = ItemTooltip.body(
 		item,
 		null,
-		_station.profession,
+		recipe.profession_for(_station),
 		recipe.required_level,
-		_profession_level,
+		_level_for(recipe),
 	)
 
 	var has_mats: bool = _has_ingredients(recipe)
@@ -675,10 +656,10 @@ func _render_detail() -> void:
 			continue
 		materials_list.add_child(_make_material_row(ingredient, recipe))
 
-	var meets_level: bool = _profession_level >= recipe.required_level
+	var meets_level: bool = _level_for(recipe) >= recipe.required_level
 	if recipe.required_level > 0:
 		gate_label.text = "%s Lv %d %s" % [
-			JobRegistry.display_name(_station.profession),
+			JobRegistry.display_name(recipe.profession_for(_station)),
 			recipe.required_level,
 			"met" if meets_level else "required",
 		]
@@ -694,8 +675,8 @@ func _render_detail() -> void:
 	else:
 		fee_label.text = ""
 	xp_label.text = "+%d %s xp" % [
-		roundi(recipe.xp_reward * _xp_multiplier),
-		JobRegistry.display_name(_station.profession),
+		roundi(recipe.xp_reward * _xp_multiplier_for(recipe)),
+		JobRegistry.display_name(recipe.profession_for(_station)),
 	]
 
 	if _looping:
@@ -827,7 +808,7 @@ func _on_craft_pressed() -> void:
 		_start_craft_loop()
 		return
 	var recipe: CraftingRecipe = _station.recipes[_selected]
-	if _profession_level < recipe.required_level or not _has_ingredients(recipe):
+	if _level_for(recipe) < recipe.required_level or not _has_ingredients(recipe):
 		return
 	if _station.craft_fee > 0 and _golds < _station.craft_fee:
 		return
@@ -851,7 +832,7 @@ func _start_craft_loop() -> void:
 	_render_detail()
 	while _looping and gen == _loop_generation and visible and _selected >= 0:
 		var recipe: CraftingRecipe = _station.recipes[_selected]
-		if _profession_level < recipe.required_level or not _has_ingredients(recipe):
+		if _level_for(recipe) < recipe.required_level or not _has_ingredients(recipe):
 			break
 		if _station.craft_fee > 0 and _golds < _station.craft_fee:
 			break
@@ -899,17 +880,21 @@ func _craft_once() -> bool:
 	var verb: String = "Brewed" if _is_herblore_station() else ("Cooked" if _is_cooking_station() else "Crafted")
 	var title: String = "%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)]
 	var xp_gain: int = int(data.get("xp", 0))
+	# Which skill was actually paid comes back in the payload rather than being
+	# assumed from the station: a recipe can override it (the Ascended Workbench
+	# hosts Smithing rows), and the server is the one that decided.
+	var paid: StringName = StringName(str(data.get("profession", _station.profession)))
 	var lines: PackedStringArray = PackedStringArray()
 	if xp_gain > 0:
-		lines.append("+%d %s XP" % [xp_gain, JobRegistry.display_name(_station.profession)])
+		lines.append("+%d %s XP" % [xp_gain, JobRegistry.display_name(paid)])
 	Toaster.toast_feed("craft:" + str(_station_key), title, lines)
 	var craft_level: int = int(data.get("level", 0))
 	if craft_level > 0 and _station != null:
-		ClientState.set_skill_level(_station.profession, craft_level)
+		ClientState.set_skill_level(paid, craft_level)
 	if data.get("leveled_up", false) and ClientState.local_player != null:
 		LevelUpFx.celebrate_skill(
 			ClientState.local_player,
-			_station.profession,
+			paid,
 			craft_level,
 		)
 	await _refresh()

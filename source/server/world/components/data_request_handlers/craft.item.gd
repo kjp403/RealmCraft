@@ -52,6 +52,11 @@ func data_request_handler(
 		return {"ok": false}
 
 	var resource: PlayerResource = player.player_resource
+	# The profession this ONE craft gates on and pays. Usually the station's, but
+	# a bench can host another trade's recipes (the Ascended Workbench holds the
+	# metal ascension sets, which stay Smithing). Every check below reads this,
+	# never station.profession, or a moved recipe silently trains the wrong skill.
+	var prof: StringName = recipe.profession_for(station)
 
 	# Craft pacing floor. The client paces its own loop at
 	# CraftController.CRAFT_INTERVAL; this is the authoritative floor, set a hair
@@ -60,7 +65,7 @@ func data_request_handler(
 	# divides both by AnvilBoost.SPEED_MULTIPLIER, which is why this sits AFTER
 	# the station is resolved: the buff is scoped to the station's profession,
 	# so the floor is not knowable until we know what is being crafted.
-	var speed: float = AnvilBoost.speed_multiplier(resource, station.profession)
+	var speed: float = AnvilBoost.speed_multiplier(resource, prof)
 	var previous: Dictionary = _last_craft.get(player_id, {})
 	var paced_at: float = maxf(0.01, float(previous.get("speed", speed)))
 	var floor_ms: int = int(roundf(float(MIN_CRAFT_INTERVAL_MS) / paced_at))
@@ -72,7 +77,7 @@ func data_request_handler(
 	var bag_count: int = resource.inventory_bags
 
 	# Crafting-profession level gate.
-	var level: int = int((resource.skills.get(station.profession, {}) as Dictionary).get("level", 1))
+	var level: int = int((resource.skills.get(prof, {}) as Dictionary).get("level", 1))
 	if level < recipe.required_level:
 		return {"ok": false, "reason": "level", "required_level": recipe.required_level}
 
@@ -99,10 +104,10 @@ func data_request_handler(
 
 	# Perks for this station's profession, resolved once — they drive the refund
 	# and extra-item rolls below as well as the XP multiplier further down.
-	var perks: JobPerks = JobRegistry.perks_for(station.profession)
+	var perks: JobPerks = JobRegistry.perks_for(prof)
 	var player_perks: Dictionary = {}
 	if perks != null:
-		player_perks = (resource.skills.get(station.profession, {}) as Dictionary).get("perks", {})
+		player_perks = (resource.skills.get(prof, {}) as Dictionary).get("perks", {})
 
 	# Consume ingredients, then the station fee. `refund` rolls PER INGREDIENT
 	# UNIT, so a 3-bar helmet can refund 0-3 bars rather than all-or-nothing.
@@ -114,7 +119,7 @@ func data_request_handler(
 	# station's profession, so the set does nothing at an anvil.
 	refund = minf(
 		refund + SkillingOutfitManager.bonus_for(
-			player, station.profession, SkillingOutfitManager.Bonus.PRESERVE
+			player, prof, SkillingOutfitManager.Bonus.PRESERVE
 		),
 		perks.abs_max_refund_chance if perks != null else 0.5
 	)
@@ -211,7 +216,7 @@ func data_request_handler(
 		xp_gain = recipe.xp_reward
 		if perks != null:
 			xp_gain = maxi(1, roundi(float(xp_gain) * perks.xp_multiplier(player_perks)))
-		progress = resource.add_skill_xp(station.profession, xp_gain)
+		progress = resource.add_skill_xp(prof, xp_gain)
 
 	# Quest CRAFT progress for this output item. Push unconditionally: an empty
 	# messages array is a silent tracker refresh, so a "Bring N item" (COLLECT)
@@ -222,13 +227,13 @@ func data_request_handler(
 	# herblore / fletching / outfitting). Counts items PRODUCED, so a batch
 	# recipe that makes 10 arrows advances a Fletching daily by 10 rather than
 	# by one — the same rule the old "craft N items" counter used.
-	SkillingEvents.emit_crafted(resource, station.profession, output_id, output_amount)
+	SkillingEvents.emit_crafted(resource, prof, output_id, output_amount)
 
 	return {
 		"ok": true,
 		"output_id": output_id,
 		"amount": output_amount,
-		"profession": String(station.profession),
+		"profession": String(prof),
 		"xp": xp_gain,
 		"level": int(progress.get("level", level)),
 		"leveled_up": progress.get("leveled_up", false),
