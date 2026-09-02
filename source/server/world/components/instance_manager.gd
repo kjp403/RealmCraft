@@ -342,6 +342,11 @@ func unload_unused_instances() -> void:
 			continue
 		if QuestBossService.is_pinned_origin(instance):
 			continue
+		# The Traveling Peddler charges its own biome and holds it for the
+		# 30-minute window. Without this the sweeper would reclaim the empty map
+		# on its next pass and the cart would never get placed in it.
+		if PeddlerManager.holds_instance(instance):
+			continue
 		instance.instance_resource.charged_instances.erase(instance)
 		instance.queue_free()
 

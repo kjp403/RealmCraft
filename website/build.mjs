@@ -2171,7 +2171,7 @@ function build() {
           ${wikiCard("quests", "/wiki/quests/", "Quests", `The Hollow Seep campaign and <strong>${quests.length}</strong> authored quests.`)}
           ${wikiCard("guilds", "/wiki/guilds/", "Guilds", "Territory, banners, and Glory.")}
           ${wikiCard("boards", "/leaderboards/", "Leaderboards", "Live ranks from the running world.")}
-          ${wikiCard("peddler", "/peddler/", "Traveling Peddler", "Where the cart is right now, and what it is selling today.")}
+          ${wikiCard("peddler", "/peddler/", "Traveling Peddler", "Where the cart is now, where it goes next, and what it is selling today.")}
         </div>
       </main>`,
     })
@@ -2189,11 +2189,15 @@ function build() {
           ${pageHeading("items", "Traveling Peddler")}
           <p class="pd-status" data-pd-status data-kind="wait">CHECKING…</p>
         </div>
-        <p class="muted">A wandering merchant who appears in a random biome for 30 minutes every four hours, sells three things, and leaves. Everyone in the world sees the same three on any given day, and every account may buy each of them once per day.</p>
+        <p class="muted">A wandering merchant who appears in a random biome for 30 minutes every four hours, sells three things, and leaves. Everyone in the world sees the same three on any given day, and every account may buy each of them once per day. The tracker below names the <strong>zone</strong> the cart is in and the zone it turns up in next — never the spot, so you still have to walk the map and find it.</p>
         <section class="pd-banner">
           <div class="pd-zone-wrap">
             <span class="pd-zone-label">Current zone</span>
             <strong class="pd-zone" data-pd-zone>Checking the world…</strong>
+          </div>
+          <div class="pd-zone-wrap" data-pd-next-wrap hidden>
+            <span class="pd-zone-label">Next zone</span>
+            <strong class="pd-zone pd-zone-next" data-pd-next-zone></strong>
           </div>
           <div class="pd-clocks" data-pd-clocks></div>
         </section>

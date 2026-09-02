@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://7mbux4mybta0" path="res://source/common/gameplay/maps/map.gd" id="1_map"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/deep_shoals_ground.png" id="2_ground"]
 [ext_resource type="Script" uid="uid://xsu31n0s2wvcg" path="res://source/common/gameplay/maps/maps/woodland/beach_area_colliders.gd" id="3_col"]
+[ext_resource type="Script" uid="uid://wq8klpndipnu" path="res://source/common/network/sync/replicated_props.gd" id="rp_container"]
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="4_warper"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
@@ -68,6 +69,7 @@ solid_footprints = Array[Rect2]([Rect2(51, 288, 430, 80), Rect2(490, 356, 480, 9
 rim_east = true
 
 [node name="ReplicatedPropsContainer" type="Node2D" parent="."]
+script = ExtResource("rp_container")
 
 [node name="CookingStation" parent="." instance=ExtResource("6_craft")]
 position = Vector2(930, 544)

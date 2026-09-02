@@ -904,6 +904,9 @@ body.location-scene article.page {
   margin-bottom: 0.25rem;
 }
 .pd-zone { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--text); }
+/* The forecast, not the fact: same type, quieter colour, so a glance at the
+   banner reads "here now" before it reads "there next". */
+.pd-zone-next { color: var(--muted); }
 .pd-clocks { display: flex; flex-wrap: wrap; gap: 1.4rem; }
 .pd-clock-value { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--accent-2); font-variant-numeric: tabular-nums; }
 

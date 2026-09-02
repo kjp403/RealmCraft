@@ -264,6 +264,9 @@ func handle_peddler_update(payload: Dictionary) -> Dictionary:
 		"schema": int(payload.get("schema", 0)),
 		"is_active": bool(payload.get("is_active", false)),
 		"current_zone": str(payload.get("current_zone", "")),
+		# Schema 2. Absent from an older world server's snapshot, in which case
+		# this stays "" and the site simply does not draw the hint.
+		"next_zone": str(payload.get("next_zone", "")),
 		"time_remaining_seconds": maxi(0, int(payload.get("time_remaining_seconds", 0))),
 		"next_spawn_utc_timestamp": maxi(0, int(payload.get("next_spawn_utc_timestamp", 0))),
 		"generated_utc_timestamp": maxi(0, int(payload.get("generated_utc_timestamp", 0))),

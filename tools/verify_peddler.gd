@@ -81,6 +81,7 @@ func _run() -> void:
 	_check_web_export()
 	_check_discord()
 	_check_sites()
+	_check_hostable()
 	_check_vault_payout()
 	await _check_placement()
 	print("")
@@ -648,7 +649,7 @@ func _check_web_export() -> void:
 	# banner or a stuck countdown, so every one is asserted by name.
 	var payload: Dictionary = PeddlerWebExport.build_payload(&"desert", true)
 	for key: String in [
-		"is_active", "current_zone", "time_remaining_seconds",
+		"is_active", "current_zone", "next_zone", "time_remaining_seconds",
 		"next_spawn_utc_timestamp", "daily_stock",
 	]:
 		if not payload.has(key):
@@ -670,13 +671,37 @@ func _check_web_export() -> void:
 	if flat.contains(PeddlerWebExport.KEY_ENV) or flat.to_lower().contains("authorization"):
 		_fail("the payload mentions the auth key — it belongs in the header only")
 
-	# A CLOSED window must not advertise a zone, or the site would name a place
-	# nobody can go.
-	var closed: Dictionary = PeddlerWebExport.build_payload(&"desert", false)
+	# A window with a biome names it whether or not the cart is standing yet —
+	# that is the site's "due, not arrived" line. What must NOT name a zone is a
+	# snapshot with no window at all, which the manager reports as an empty biome.
+	var setting_up: Dictionary = PeddlerWebExport.build_payload(&"desert", false)
+	if str(setting_up.get("current_zone", "")).is_empty():
+		_fail("a window that has not placed its cart yet reports no zone")
+	var closed: Dictionary = PeddlerWebExport.build_payload(&"", false)
 	if str(closed.get("current_zone", "")) != "":
-		_fail("an inactive snapshot still names a zone")
+		_fail("a snapshot with no window still names a zone")
 	if int(closed.get("time_remaining_seconds", -1)) != 0:
 		_fail("an inactive snapshot reports time remaining")
+
+	# The hint the website draws. It must be present in EVERY state — including
+	# between windows, which is exactly when a player is looking at the page to
+	# find out where to be — and must name the biome the next cycle resolves to.
+	var expected_next: String = String(
+		PeddlerSites.biome_for_cycle(PeddlerSchedule.cycle_index() + 1)
+	)
+	# Off a world server there is no instance collection to prettify names with,
+	# so the exporter falls back to the raw instance_name and the hint compares
+	# exactly. That is the case this tool always runs in.
+	for snapshot: Dictionary in [payload, setting_up, closed]:
+		var hint: String = str(snapshot.get("next_zone", ""))
+		if hint.is_empty():
+			_fail("a snapshot carries no next_zone hint")
+			break
+		if hint != expected_next:
+			_fail("next_zone says '%s', the next cycle resolves to '%s'" % [
+				hint, expected_next
+			])
+			break
 	# next_spawn must always be in the future, in both states — it is what the
 	# site counts down to and a past timestamp would render as a stuck 0.
 	var now_s: int = PeddlerSchedule.now_s()
@@ -855,6 +880,51 @@ func _check_vault_payout() -> void:
 ## init), which is the only thing that proves the slug hop works: the init crosses
 ## the wire as a plain dictionary, so a typo there is an NPC with no resource,
 ## no click area and no cart — and no error anywhere.
+## EVERY biome must be able to carry the cart. The cycle can send it to any one
+## of them, and a biome that cannot host is a whole 30-minute window nobody can
+## attend — silently, because the manager walks on to the next biome while the
+## website has already named the first one.
+##
+## Read off the PACKED scene rather than by standing nineteen maps up. The only
+## question is whether the container node carries replicated_props.gd: map.gd
+## looks the node up by name and CASTS it, so an unscripted Node2D with the right
+## name reads as no container at all. deep_shoals was exactly that for months.
+func _check_hostable() -> void:
+	print("biome hosting")
+	var biomes: Array[StringName] = PeddlerSites.biome_names()
+	var missing: PackedStringArray = []
+	for name: StringName in biomes:
+		var res: InstanceResource = _find_instance(
+			name, "%s%s.tres" % [PeddlerSites.BIOMES_DIR, name]
+		)
+		if res == null:
+			_fail("no instance resource for biome '%s'" % name)
+			continue
+		if not _scene_hosts_props(res.map_path):
+			missing.append(String(name))
+	if missing.is_empty():
+		_ok("every biome can host the cart", "%d biomes" % biomes.size())
+	else:
+		_fail("cannot carry a dynamic prop, so the cart skips: %s" % ", ".join(missing))
+
+
+func _scene_hosts_props(map_path: String) -> bool:
+	var scene: PackedScene = load(map_path) as PackedScene
+	if scene == null:
+		return false
+	var state: SceneState = scene.get_state()
+	for i: int in state.get_node_count():
+		if state.get_node_name(i) != &"ReplicatedPropsContainer":
+			continue
+		for prop: int in state.get_node_property_count(i):
+			if state.get_node_property_name(i, prop) != &"script":
+				continue
+			var script: Script = state.get_node_property_value(i, prop) as Script
+			if script != null and script.resource_path.ends_with("replicated_props.gd"):
+				return true
+	return false
+
+
 func _check_placement() -> void:
 	print("placement")
 	var biome: StringName = PeddlerSites.biome_for_cycle(PeddlerSchedule.cycle_index())
@@ -896,6 +966,38 @@ func _check_placement() -> void:
 		_fail("the spot probe is not deterministic for one cycle")
 	_ok("spot in %s" % biome, "(%.0f, %.0f)" % [peddler_at.x, peddler_at.y])
 
+	# THE EMPTY-BIOME CASE, which is now the ordinary one: the window charges its
+	# own biome, so in the usual run nobody is standing there when the cart is
+	# placed and EVERY player who sees it arrives afterwards. Late joiners are
+	# served capture_bootstrap_block(), not the spawn op that went out at
+	# placement — a cart missing from that block exists on the server and is
+	# invisible to every player who walks in, which looks exactly like it never
+	# spawned at all.
+	var container: ReplicatedPropsContainer = map.replicated_props_container
+	if container != null:
+		var placed: Node = container.spawn_dynamic(
+			ReplicatedPropsContainer.SCENE_NPC,
+			container.to_local(peddler_at),
+			{"name": PeddlerNames.NODE_NAME, "npc_slug": PeddlerNames.NPC_SLUG}
+		)
+		if placed == null:
+			_fail("the cart could not be spawned into %s" % biome)
+		else:
+			var carried: bool = false
+			for entry: Variant in (container.capture_bootstrap_block()["spawns"] as Array):
+				var row: Array = entry as Array
+				if int(row[1]) != ReplicatedPropsContainer.SCENE_NPC:
+					continue
+				# The NAME has to ride the bootstrap too, not just the scene: the
+				# shop window sends it back for the server's range check, and a
+				# late joiner whose copy is called "NPC" is answered "closed".
+				if str((row[2] as Dictionary).get("name", "")) == PeddlerNames.NODE_NAME:
+					carried = true
+			if carried:
+				_ok("late joiner", "an empty biome's cart rides the bootstrap, named")
+			else:
+				_fail("a cart placed with nobody watching is missing from the bootstrap")
+
 	var npc_scene: PackedScene = load(
 		ReplicatedPropsContainer.DYNAMIC_SCENE_PATHS[ReplicatedPropsContainer.SCENE_NPC]
 	) as PackedScene
@@ -930,7 +1032,13 @@ func _check_placement() -> void:
 
 
 func _find_instance(biome: StringName, guess: String) -> InstanceResource:
-	if ResourceLoader.exists(guess):
+	# FileAccess first: ResourceLoader.exists() still logs an engine-level "cannot
+	# open file" for a path that is not there, and four biomes are named
+	# differently from their .tres (Forest/forest, FungusArea1/fungus_cave,
+	# pirates_cove/deep_shoals). Falling back to the scan is the NORMAL path for
+	# those, and a gate that prints ERROR lines on its happy path teaches people
+	# to skim past the ones that matter.
+	if FileAccess.file_exists(guess) and ResourceLoader.exists(guess):
 		var direct: InstanceResource = load(guess) as InstanceResource
 		if direct != null and direct.instance_name == biome:
 			return direct

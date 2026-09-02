@@ -20,6 +20,10 @@
 
   const statusEl = root.querySelector("[data-pd-status]");
   const zoneEl = root.querySelector("[data-pd-zone]");
+  // Schema 2 additions. Looked up defensively: a browser holding a cached copy
+  // of the previous page would otherwise take the whole widget down on a null.
+  const nextWrapEl = root.querySelector("[data-pd-next-wrap]");
+  const nextZoneEl = root.querySelector("[data-pd-next-zone]");
   const clocksEl = root.querySelector("[data-pd-clocks]");
   const stockEl = root.querySelector("[data-pd-stock]");
   const noteEl = root.querySelector("[data-pd-note]");
@@ -166,7 +170,26 @@
     return nextAt > nowS ? nextAt : cycleStart(nowS) + CYCLE_S;
   }
 
+  // The forecast half of the banner: the ZONE the next cart sets up in, and
+  // nothing more precise. A zone is a whole map, so this says which map to be
+  // standing in when the window opens and leaves the cart itself to be found —
+  // the missing piece was the hint, not the search.
+  //
+  // Drawn only while the snapshot's own next-spawn timestamp is still in the
+  // future. A snapshot goes stale the instant the window it was forecasting
+  // opens, and a line reading "next zone" about the window you are already in is
+  // worse than no line at all. Hidden rather than blanked, so the banner never
+  // shows a label with nothing under it (an older world sends no next_zone).
+  function renderNextZone() {
+    if (!nextWrapEl || !nextZoneEl) return;
+    const zone = payload && payload.ok ? payload.next_zone : "";
+    const fresh = nextAt > nowUtc();
+    nextZoneEl.textContent = zone || "";
+    nextWrapEl.hidden = !zone || !fresh;
+  }
+
   function renderBanner() {
+    renderNextZone();
     // FOUR STATES, NOT THREE. The old banner collapsed "no cart exists right now"
     // and "a cart is due and has not been placed yet" into one grey VANISHED /
     // ROAMING, and players read that as a peddler hiding somewhere they had to
