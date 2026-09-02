@@ -277,6 +277,11 @@ func player_switch_instance(
 	# Ossuran gate: drop the peer from the co-op group when they leave the private
 	# arena (exit warp, death return, recall). No-op for any other map.
 	OssuranGateService.on_player_left(peer_id, current_instance)
+	# The map may not be in the tree yet: queue_charge_instance fires this off
+	# ServerInstance.ready, and the map is added deferred, so the warper registry
+	# can still be empty. Without the wait, the first player into a freshly
+	# charged biome reads (0, 0) instead of the warper they aimed at.
+	await target_instance.await_map_ready()
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
 		peer_id,
