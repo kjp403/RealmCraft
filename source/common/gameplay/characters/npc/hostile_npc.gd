@@ -154,9 +154,9 @@ var respawns: bool = true
 ## out-of-combat window is a good rule for an open-world mob: stop fighting a
 ## boar for ten seconds and you have disengaged. Inside a staged fight it reads
 ## the room wrong — a phase can legitimately send the whole group away from the
-## boss (Ossuran's frozen phase sends them to a brazier, and his own cast root
-## means he does not follow), and ten seconds of that is not a disengage, it is
-## the mechanic working. Refilling the bar there erases twenty minutes of a
+## boss (Ossuran's frozen phase drives them onto braziers that sit outside his
+## detection radius, where he re-acquires nobody), and ten seconds of that is
+## not a disengage, it is the mechanic working. Refilling the bar there erases twenty minutes of a
 ## group's run for playing the phase correctly.
 ##
 ## Safe to leave off for the whole run because a staged encounter owns the body's

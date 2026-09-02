@@ -30,7 +30,7 @@ extends Node
 ##
 ##  PLACING  Killing Frost's safe circle is the only ground worth standing on
 ##           while it lands, so the picker is driven against the real arena
-##           colliders from every wall-adjacent boss position: a circle inside
+##           colliders from every cell the boss can stand on: a circle inside
 ##           the wall is an unanswerable 85% of everyone's health.
 ##
 ## Run as a SCENE, not with -s. The encounter's classes reach HostileNpc and
@@ -770,9 +770,12 @@ func _check_frost_placement() -> void:
 	if boss_res != null:
 		brain.frost_offset_px = boss_res.frost_offset_px
 
-	var origins: Array[Vector2i] = _wall_adjacent_cells(floor_cells, blocked)
-	if origins.size() < 20:
-		_fail("only %d wall-adjacent floor cells to test frost placement from" % origins.size())
+	# EVERY cell the boss can stand on, not just the ones with their back to a
+	# wall: the whole floor costs about a second here, and "which positions are
+	# safe to cast from" is exactly the judgement call that let this ship broken.
+	var origins: Array[Vector2i] = _room_cells(floor_cells)
+	if origins.size() < 500:
+		_fail("only %d arena floor cells to cast frost from — the sweep is not covering the room" % origins.size())
 
 	var pulled_in: int = 0
 	var bad: int = 0
@@ -791,7 +794,7 @@ func _check_frost_placement() -> void:
 				pulled_in += 1
 
 	brain.free()
-	print("frost : %d wall-adjacent origins x %d picks, %d circles pulled in, %d unreachable" % [
+	print("frost : %d floor origins x %d picks, %d circles pulled in, %d unreachable" % [
 		origins.size(), FROST_PICKS_PER_CELL, pulled_in, bad,
 	])
 	root.queue_free()
@@ -841,25 +844,14 @@ func _flood_from(start: Vector2i, blocked: Dictionary) -> Dictionary:
 	return seen
 
 
-## Every open cell inside the room with a solid for a neighbour — "the boss has
-## his back to something", which is the only situation the old placement broke in.
-func _wall_adjacent_cells(floor_cells: Dictionary, blocked: Dictionary) -> Array[Vector2i]:
+## The walkable cells that are actually in the arena room — the fill also covers
+## the corridor and the chamber, which the boss never stands in.
+func _room_cells(floor_cells: Dictionary) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for cell: Vector2i in floor_cells:
-		if not ARENA_RECT.has_point(cell):
-			continue
-		if _touches_solid(cell, blocked):
+		if ARENA_RECT.has_point(cell):
 			out.append(cell)
 	return out
-
-
-## Any of the eight neighbours of [param cell] solid?
-func _touches_solid(cell: Vector2i, blocked: Dictionary) -> bool:
-	for dx: int in [-1, 0, 1]:
-		for dy: int in [-1, 0, 1]:
-			if blocked.has(cell + Vector2i(dx, dy)):
-				return true
-	return false
 
 
 ## Centre of [param cell] in world space.

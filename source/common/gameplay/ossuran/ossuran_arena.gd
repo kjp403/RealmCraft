@@ -385,14 +385,16 @@ func _spawn_boss() -> void:
 		return
 	npc.respawns = false
 	npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
-	# NO OUT-OF-COMBAT HEAL for the whole run. A staged fight legitimately sends
-	# the group away from the boss: phase 3 marches them between braziers and
-	# Killing Frost circles while Ossuran, rooted by his own casts, does not
-	# follow. Ten seconds of that is the phase being played correctly, and the
-	# stock rule read it as a disengage and handed him a full bar — a group could
-	# lose an hour's progress to the mechanic working as designed. The encounter
-	# already owns the reset (see [method stop]: the body is despawned and
-	# rebuilt), so nothing here relies on the heal to clean up after a wipe.
+	# NO OUT-OF-COMBAT HEAL for the whole run. Phase 3 spreads the group onto the
+	# braziers, and every brazier in this room sits 280-370px from the boss
+	# spawn — outside his authored 260px detection radius. Lose the current
+	# target out there (a frost punish kills them; a stage teleport breaks the
+	# chase) and he re-acquires nobody, drops to IDLE, and ten seconds later the
+	# stock rule reads that as a disengage and refills the bar at 25%/s. The
+	# group was being charged a full boss heal for playing the cold correctly.
+	# The encounter already owns the reset (see [method stop]: the body is
+	# despawned and rebuilt), so nothing here relies on the heal to clean up
+	# after a wipe.
 	npc.regenerates_out_of_combat = false
 
 	# The damage gate rides on the BODY, where HostileNpc.incoming_damage_factor
