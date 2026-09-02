@@ -49,7 +49,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("10_bronze_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_br_cu"), SubResource("I_br_sn")])
 required_level = 1
-xp_reward = 10
+xp_reward = 13
 
 [sub_resource type="Resource" id="I_fe_ore"]
 script = ExtResource("3_ingred")
@@ -60,7 +60,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("11_iron_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_fe_ore")])
 required_level = 5
-xp_reward = 10
+xp_reward = 19
 
 [sub_resource type="Resource" id="I_st_ore"]
 script = ExtResource("3_ingred")
@@ -75,7 +75,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("12_steel_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_st_ore"), SubResource("I_st_coal")])
 required_level = 15
-xp_reward = 10
+xp_reward = 26
 
 [sub_resource type="Resource" id="I_ag_ore"]
 script = ExtResource("3_ingred")
@@ -86,7 +86,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("13_silver_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_ag_ore")])
 required_level = 10
-xp_reward = 10
+xp_reward = 33
 
 [sub_resource type="Resource" id="I_au_ore"]
 script = ExtResource("3_ingred")
@@ -97,7 +97,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("14_gold_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_au_ore")])
 required_level = 15
-xp_reward = 11
+xp_reward = 45
 
 [sub_resource type="Resource" id="I_mith_ore"]
 script = ExtResource("3_ingred")
@@ -113,7 +113,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("18_mith_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mith_ore"), SubResource("I_mith_coal")])
 required_level = 35
-xp_reward = 11
+xp_reward = 45
 
 [sub_resource type="Resource" id="I_adam_ore"]
 script = ExtResource("3_ingred")
@@ -129,7 +129,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("19_adam_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_adam_ore"), SubResource("I_adam_coal")])
 required_level = 50
-xp_reward = 15
+xp_reward = 62
 
 [sub_resource type="Resource" id="I_rune_ore"]
 script = ExtResource("3_ingred")
@@ -145,7 +145,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("20_rune_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_rune_ore"), SubResource("I_rune_coal")])
 required_level = 65
-xp_reward = 20
+xp_reward = 85
 
 [sub_resource type="Resource" id="I_dragon_ore"]
 script = ExtResource("3_ingred")
@@ -169,7 +169,7 @@ script = ExtResource("40_smelt")
 output_item = ExtResource("31_dragon_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_dragon_ore"), SubResource("I_dragon_scale"), SubResource("I_dragon_alloy")])
 required_level = 68
-xp_reward = 35
+xp_reward = 144
 catalysts = Array[ExtResource("3_ingred")]([SubResource("C_dragon_crucible")])
 catalyst_consume_chance = 0.04
 flavor = "Quenched in dragon scale; the fire it was shed from does the rest."
@@ -196,7 +196,7 @@ script = ExtResource("40_smelt")
 output_item = ExtResource("31_obsidian_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_obsidian_ore"), SubResource("I_obsidian_flux"), SubResource("I_obsidian_alloy")])
 required_level = 72
-xp_reward = 39
+xp_reward = 160
 catalysts = Array[ExtResource("3_ingred")]([SubResource("C_obsidian_crucible")])
 catalyst_consume_chance = 0.04
 flavor = "Glass flux drops the melt low enough to pour over a dragon-bar core."
@@ -223,7 +223,7 @@ script = ExtResource("40_smelt")
 output_item = ExtResource("31_celestial_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_celestial_ore"), SubResource("I_celestial_dust"), SubResource("I_celestial_alloy")])
 required_level = 80
-xp_reward = 45
+xp_reward = 185
 catalysts = Array[ExtResource("3_ingred")]([SubResource("C_celestial_crucible")])
 catalyst_consume_chance = 0.04
 flavor = "Fed starlight by the pinch so the pour never dims."
@@ -250,7 +250,7 @@ script = ExtResource("40_smelt")
 output_item = ExtResource("31_astralite_bar")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_astralite_ore"), SubResource("I_astralite_mote"), SubResource("I_astralite_alloy")])
 required_level = 88
-xp_reward = 53
+xp_reward = 218
 catalysts = Array[ExtResource("3_ingred")]([SubResource("C_astralite_crucible")])
 catalyst_consume_chance = 0.04
 flavor = "A falling mote binds the alloy in the instant before it sets."
