@@ -75,17 +75,25 @@ func _scan_crafting_stations(out: Dictionary[StringName, Dictionary]) -> void:
 		if not (res is CraftingStationResource):
 			continue
 		var station: CraftingStationResource = res
-		var job: StringName = station.profession
-		if job == &"":
+		if station.profession == &"":
 			push_warning("CraftingStationResource %s has no profession — skipping." % path)
 			continue
-		var added: Array[String] = []
+		# Per RECIPE, not per station: a bench can host another trade's work (the
+		# Ascended Workbench is `outfitting` but holds the metal ascension sets,
+		# which stay Smithing). Bucketing by the station would file all 48 of
+		# them under Crafting in the skill guide, pointing players at the wrong
+		# skill for gear they can only make by levelling Smithing.
+		var added: Dictionary[StringName, Array] = {}
 		for recipe: CraftingRecipe in station.recipes:
 			if recipe == null or recipe.output_item == null:
 				continue
+			var job: StringName = recipe.profession_for(station)
 			_record_min(out, job, recipe.output_item, recipe.required_level)
-			added.append(recipe.output_item.resource_path.get_file())
-		print("  recipes (%s): %s" % [String(job), str(added)])
+			if not added.has(job):
+				added[job] = []
+			added[job].append(recipe.output_item.resource_path.get_file())
+		for job: StringName in added:
+			print("  recipes (%s): %s" % [String(job), str(added[job])])
 
 
 # ---------------------------------------------------------------------------

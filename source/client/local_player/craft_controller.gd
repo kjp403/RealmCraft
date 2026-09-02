@@ -32,6 +32,10 @@ var _owned: Dictionary[int, int] = {}
 var _golds: int = 0
 var _gold_id: int = 0
 var _profession_level: int = 1
+## Level per profession the station's recipes gate on, for benches that host a
+## second trade (the Ascended Workbench holds Smithing rows). The station's own
+## profession stays in [member _profession_level]; this covers the overrides.
+var _skill_levels: Dictionary[StringName, int] = {}
 
 var _panel: PanelContainer
 var _title_label: Label
@@ -92,7 +96,7 @@ func _run_loop(gen: int) -> void:
 		var recipe: CraftingRecipe = _station.recipes[_recipe_index]
 		if recipe == null:
 			break
-		if _profession_level < recipe.required_level or not _has_ingredients(recipe):
+		if _level_for(recipe) < recipe.required_level or not _has_ingredients(recipe):
 			break
 		if _station.craft_fee > 0 and _golds < _station.craft_fee:
 			break
@@ -139,10 +143,16 @@ func _craft_once() -> bool:
 	var verb: String = _done_verb()
 	Toaster.toast("%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)])
 	var craft_level: int = int(data.get("level", 0))
+	# The paid skill comes from the payload, not the station: a recipe may
+	# override it (Ascended Workbench hosts Smithing rows), and the server owns
+	# that decision.
+	var paid: StringName = StringName(str(
+		data.get("profession", _station.profession if _station != null else &"")
+	))
 	if craft_level > 0 and _station != null:
-		ClientState.set_skill_level(_station.profession, craft_level)
+		ClientState.set_skill_level(paid, craft_level)
 	if data.get("leveled_up", false) and _player != null:
-		LevelUpFx.celebrate_skill(_player, _station.profession, craft_level)
+		LevelUpFx.celebrate_skill(_player, paid, craft_level)
 	# Keep compact inventory / gold pouch in sync while the fullscreen menu is closed.
 	ClientState.inventory_changed.emit({"quiet": true})
 	await _refresh_state()
@@ -167,6 +177,24 @@ func _refresh_state() -> void:
 		var skills: Dictionary = skills_result[0].get("skills", {})
 		var entry: Dictionary = skills.get(String(_station.profession), {})
 		_profession_level = int(entry.get("level", 1))
+		_skill_levels.clear()
+		for r: CraftingRecipe in _station.recipes:
+			if r == null:
+				continue
+			var prof: StringName = r.profession_for(_station)
+			if not _skill_levels.has(prof):
+				_skill_levels[prof] = int(skills.get(String(prof), {}).get("level", 1))
+
+
+## The player's level in the skill THIS recipe gates on, which is the station's
+## profession for everything except an override row.
+func _level_for(recipe: CraftingRecipe) -> int:
+	if recipe == null or _station == null:
+		return _profession_level
+	var prof: StringName = recipe.profession_for(_station)
+	if prof == _station.profession:
+		return _profession_level
+	return int(_skill_levels.get(prof, 1))
 
 
 func _recompute_owned(inventory: Dictionary) -> void:
