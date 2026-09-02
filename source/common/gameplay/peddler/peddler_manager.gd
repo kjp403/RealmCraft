@@ -14,12 +14,22 @@ extends Node
 ## than starting a fresh half hour — players plan around "the four-o'clock
 ## peddler", and that promise has to survive a deploy.
 ##
-## SPAWNING IS OPPORTUNISTIC. Biome instances are charged on demand, so the map
-## the Peddler is due in may not be loaded when the window opens. The biome is
-## still DECIDED at that moment (so the window can say where they are), and the
-## cart is placed on the first tick the instance exists. The alternative —
-## charging the instance ourselves — would keep an empty biome resident for half
-## an hour every four hours purely to host an NPC nobody is looking at.
+## THE WINDOW CHARGES ITS OWN BIOME. Biome instances are otherwise charged on
+## demand — i.e. only while somebody is standing in them — and no biome sets
+## load_at_startup. This used to make the cart opportunistic: it was placed on
+## the first tick the assigned instance happened to exist, and if nobody walked
+## into that biome during the half hour, the window produced NOTHING. No cart, no
+## announcement, and a website reading "roaming" for the whole slot. With twenty
+## biomes in the pool that was the normal outcome, not the edge case, and it is
+## the answer to "we looked everywhere and could not find him".
+##
+## So the manager now charges the assigned biome itself and holds it for the
+## window ([method holds_instance], honoured by
+## [method InstanceManagerServer.unload_unused_instances], which would otherwise
+## reclaim the empty map within 20 seconds). The cost is one biome resident for
+## 30 minutes every 4 hours. That was the objection to doing this; the price of
+## not doing it was the event mostly not happening, and the whole point of the
+## cart is that it is somewhere specific and people travel to it.
 
 ## How often the window state is re-evaluated. Coarse on purpose: nothing here is
 ## time-critical, and a 30-minute window makes a few seconds of slop invisible.
@@ -77,6 +87,24 @@ func is_spawned() -> bool:
 		and _active_instance != null
 		and is_instance_valid(_active_instance)
 	)
+
+
+## True while this window is holding [param instance]'s biome open, so the
+## instance sweeper leaves the map alone even with nobody standing in it. Asked
+## by [method InstanceManagerServer.unload_unused_instances], which runs every 20
+## seconds and reclaims any instance with no connected peers.
+##
+## Matched on the BIOME rather than on the instance the cart was placed into: the
+## map is charged EMPTY and placement only happens on the next 5-second tick, so
+## there is a gap in which the instance exists and the cart does not. Pinning by
+## instance would let the sweeper collect the very map we just asked for.
+func holds_instance(instance: Node) -> bool:
+	if _active_cycle < 0 or _active_biome == &"":
+		return false
+	var server_instance: ServerInstance = instance as ServerInstance
+	if server_instance == null or server_instance.instance_resource == null:
+		return false
+	return server_instance.instance_resource.instance_name == _active_biome
 
 
 ## The live Peddler NPC node, or null.
@@ -152,13 +180,19 @@ func _try_place() -> void:
 		return
 	var instance: ServerInstance = _first_charged(_active_biome)
 	if instance == null or instance.instance_map == null:
+		# Nobody is in the biome the cart is due in (or it is still loading).
+		# Ask for it, and try again on the next tick — _charge_biome is a no-op
+		# once the load is under way, so this retries without stacking requests.
+		_charge_biome()
 		return
 	var container: ReplicatedPropsContainer = _container(instance)
 	if container == null:
 		# The map is loaded and genuinely cannot carry a dynamic prop — its
-		# container was never scripted or wired (deep_shoals is one today). Move
-		# to the next biome rather than spending the whole window failing here,
-		# and keep shouting so the map bug gets found.
+		# container node exists but was never given the script, so map.gd's
+		# lookup casts it to null (deep_shoals was the last one, fixed with this
+		# change). Move to the next biome rather than spending the whole window
+		# failing here, and keep shouting so the map bug gets found: a skip means
+		# the cart is NOT where the website said it would be.
 		_skip_biome("no replicated props container")
 		return
 
@@ -260,6 +294,32 @@ func _first_charged(instance_name: StringName) -> ServerInstance:
 		):
 			return node as ServerInstance
 	return null
+
+
+## Load this cycle's biome so the cart has somewhere to stand. Called from
+## [method _try_place] on every tick the assigned biome is not up yet, so it must
+## be safe to call repeatedly: it does nothing once an instance exists or one is
+## already on its way, and only ever asks for ONE.
+##
+## The instance is charged empty and stays up for the window ([method
+## holds_instance]); the sweeper reclaims it on the tick after teardown clears
+## the biome.
+func _charge_biome() -> void:
+	var ws: WorldServer = WorldServer.curr
+	if ws == null or ws.instance_manager == null:
+		return
+	var res: InstanceResource = ws.instance_manager.instance_collection.get(
+		String(_active_biome), null
+	)
+	if res == null:
+		push_error("PeddlerManager: %s is not in the instance collection." % _active_biome)
+		return
+	# Already charged (the map is up, placement just has not caught it yet) or
+	# already loading. Either way, asking again would build a SECOND copy of the
+	# biome and split its players across two worlds of the same place.
+	if not res.charged_instances.is_empty() or ws.instance_manager.loading_instances.has(res):
+		return
+	ws.instance_manager.charge_instance(res)
 
 
 func _container(instance: ServerInstance) -> ReplicatedPropsContainer:
