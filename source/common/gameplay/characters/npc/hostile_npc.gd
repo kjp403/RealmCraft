@@ -35,7 +35,9 @@ const RETURN_REGEN_RATE: float = 0.25
 ## Monsters only regenerate after this long with no chase/attack/damage activity.
 ## THE one gate on every heal a hostile gets: no mob and no boss recovers a single
 ## point while a fight is live (or was live within the window) — stepping out of a
-## mechanic, kiting past the leash, or dying to a boss no longer refills it.
+## mechanic, kiting past the leash, or dying to a boss no longer refills it. A
+## scripted encounter can switch the heal off outright with
+## [member regenerates_out_of_combat], for the phases this window still misreads.
 const OUT_OF_COMBAT_REGEN_DELAY_MS: int = 10000
 
 # Regen is a RESET, not a passive trickle: the ONLY place a hostile heals is the
@@ -145,6 +147,23 @@ var _contributors: Dictionary[int, float] = {}
 ## Whether this mob respawns after death (driven by enemy_data.respawns). False =
 ## single-life: the body is removed, no return (dungeon mobs, one-off bosses).
 var respawns: bool = true
+## False switches off BOTH out-of-combat heals — the walk home and the top-off on
+## arrival — for this body only, leaving its bar wherever the fight left it.
+##
+## For SCRIPTED encounters, where the fight is not "is anyone hitting me". The
+## out-of-combat window is a good rule for an open-world mob: stop fighting a
+## boar for ten seconds and you have disengaged. Inside a staged fight it reads
+## the room wrong — a phase can legitimately send the whole group away from the
+## boss (Ossuran's frozen phase drives them onto braziers that sit outside his
+## detection radius, where he re-acquires nobody), and ten seconds of that is
+## not a disengage, it is the mechanic working. Refilling the bar there erases twenty minutes of a
+## group's run for playing the phase correctly.
+##
+## Safe to leave off for the whole run because a staged encounter owns the body's
+## lifetime: it despawns and respawns the boss on reset (see OssuranArena.stop),
+## so nothing is left standing at 4% for the next group — which is the case the
+## out-of-combat reset exists for.
+var regenerates_out_of_combat: bool = true
 
 ## Emitted on death, server-side. The CONTEXT that spawned the mob wires the
 ## consequence — a dungeon connects its boss's `died` → clear; a world-boss event
@@ -1458,7 +1477,9 @@ func _face_target() -> void:
 ## for OUT_OF_COMBAT_REGEN_DELAY_MS it walks home and recovers there. Applies to
 ## EVERY hostile, committed bosses included: a boss that wipes a party resets like
 ## any other mob instead of sitting at 4% HP forever (or, worse, topping itself up
-## while a player is still hitting it). Returns true when it took over the state.
+## while a player is still hitting it) — unless the body has opted out entirely
+## via [member regenerates_out_of_combat]. Returns true when it took over the
+## state.
 func _process_idle_recovery() -> bool:
 	if not _can_out_of_combat_regen():
 		return false
@@ -1477,6 +1498,8 @@ func _mark_combat_activity() -> void:
 
 
 func _can_out_of_combat_regen() -> bool:
+	if not regenerates_out_of_combat:
+		return false
 	return Time.get_ticks_msec() - _last_combat_activity_ms >= OUT_OF_COMBAT_REGEN_DELAY_MS
 
 

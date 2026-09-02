@@ -385,6 +385,17 @@ func _spawn_boss() -> void:
 		return
 	npc.respawns = false
 	npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+	# NO OUT-OF-COMBAT HEAL for the whole run. Phase 3 spreads the group onto the
+	# braziers, and every brazier in this room sits 280-370px from the boss
+	# spawn — outside his authored 260px detection radius. Lose the current
+	# target out there (a frost punish kills them; a stage teleport breaks the
+	# chase) and he re-acquires nobody, drops to IDLE, and ten seconds later the
+	# stock rule reads that as a disengage and refills the bar at 25%/s. The
+	# group was being charged a full boss heal for playing the cold correctly.
+	# The encounter already owns the reset (see [method stop]: the body is
+	# despawned and rebuilt), so nothing here relies on the heal to clean up
+	# after a wipe.
+	npc.regenerates_out_of_combat = false
 
 	# The damage gate rides on the BODY, where HostileNpc.incoming_damage_factor
 	# can find it (see _attack_parser there).
@@ -535,6 +546,10 @@ func _spawn_pillars() -> void:
 			continue
 		npc.respawns = false
 		npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+		# Same reason as the boss: the pillar run is a dodging phase, and a group
+		# spending ten seconds clearing telegraphs before it can swing again must
+		# not find the pillar back at full.
+		npc.regenerates_out_of_combat = false
 		# Team-size HP on top of the authored 15k base; telegraph damage stays on
 		# the pillar brain's own escalation ramp.
 		npc.apply_difficulty(_party_hp_factor(), 1.0)

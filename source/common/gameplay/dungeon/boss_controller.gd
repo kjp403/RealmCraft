@@ -101,6 +101,16 @@ var frost_phase: int = 0
 ## same body summoned as an open-world boss keeps the flat [member frost_damage]
 ## every other boss running this kit uses. 0 = off.
 var frost_punish_fraction: float = 0.0
+## Angles sampled around the boss per ring when placing the safe circle (see
+## [method _frost_safe_spot]). Twelve is a 30-degree sweep — fine enough to find
+## the open side of a room the boss has its back to, cheap enough to run inside
+## one cast.
+const FROST_SPOT_TRIES: int = 12
+## Fractions of [member frost_offset_px] tried, in order. The authored distance
+## is exhausted before the circle is allowed to creep toward the boss, so a move
+## built around breaking off from him only stops costing that in rooms where
+## nothing else fits.
+const FROST_SPOT_RINGS: Array[float] = [1.0, 0.7, 0.45]
 ## STATIC ARC — chain lightning.
 var chain_targets: int = 0
 var chain_range: float = 170.0
@@ -658,7 +668,7 @@ func _cinder_lash() -> void:
 func _killing_frost() -> void:
 	_casting = true
 	var origin: Vector2 = boss.global_position
-	var safe_at: Vector2 = origin + Vector2.from_angle(randf() * TAU) * frost_offset_px
+	var safe_at: Vector2 = _frost_safe_spot(origin)
 	boss.action_root_until_ms = Time.get_ticks_msec() + int((frost_windup_s + 0.3) * 1000.0)
 	boss.replicate_visual(&"rp_play_skin_anim", [&"special", frost_windup_s])
 	# element 1 = frost, mode 1 = SAFE (the ring is the place to BE).
@@ -682,6 +692,79 @@ func _killing_frost() -> void:
 		else:
 			_hurt(player, frost_damage, true)
 	await _finish_cast(&"frost", 0.45)
+
+
+## Where THIS cast's safe circle lands.
+##
+## The ring used to be a bare `origin + from_angle(randf() * TAU) * offset`,
+## which is fine in the middle of a room and a death sentence anywhere else: with
+## the boss backed against a wall, a random angle drops the ONLY safe ground
+## inside that wall or in the void behind it, and the whole group eats the punish
+## with no answer available. Killing Frost is the one telegraph that cannot be
+## solved by running away from it, so its circle has to be somewhere a player can
+## actually stand.
+##
+## A candidate has to pass BOTH halves of "reachable", because either alone lies:
+##
+##   * the point is open floor — not inside a wall, water, void or scenery, and
+##   * the straight line boss -> point is clear, so the circle is on THIS side of
+##     the geometry. A spot one tile past a wall is open floor too, and just as
+##     unreachable inside the wind-up.
+##
+## Angles are sampled at the AUTHORED offset first and the offset only shortens
+## when a whole ring fails, so the move keeps its "break off from the boss" cost
+## everywhere the room allows it and collapses inward only in a corner too tight
+## for anything else. The last resort is the boss's own feet: open floor by
+## definition (he is standing on it) and reachable by definition (everyone
+## fighting him is already there) — a generous cast, but a real mechanic instead
+## of an unavoidable near-kill.
+func _frost_safe_spot(origin: Vector2) -> Vector2:
+	if not is_instance_valid(boss):
+		return origin
+	var space: PhysicsDirectSpaceState2D = boss.get_world_2d().direct_space_state
+	if space == null:
+		return origin
+	return pick_frost_spot(space, origin, [boss.get_rid()])
+
+
+## The picker itself, taking its world rather than reading it off the boss, so
+## tools/verify_ossuran_encounter.gd can drive the SHIPPING code against the real
+## arena geometry — a room the placement rule has to hold in is exactly the thing
+## a re-implementation in a test would stop proving.
+func pick_frost_spot(
+	space: PhysicsDirectSpaceState2D, origin: Vector2, exclude: Array[RID]
+) -> Vector2:
+	# One random base angle per cast, then even steps around it: the direction
+	# still cannot be memorised, but a room with one open side is found in a
+	# handful of tries instead of by chance.
+	var base: float = randf() * TAU
+	for ring: float in FROST_SPOT_RINGS:
+		var dist: float = frost_offset_px * ring
+		for step: int in FROST_SPOT_TRIES:
+			var angle: float = base + TAU * float(step) / float(FROST_SPOT_TRIES)
+			var candidate: Vector2 = origin + Vector2.from_angle(angle) * dist
+			if _frost_spot_reachable(space, origin, candidate, exclude):
+				return candidate
+	return origin
+
+
+## Both halves of the reachability test above, against the same solid mask the
+## rest of the game uses for "a body cannot walk through this".
+func _frost_spot_reachable(
+	space: PhysicsDirectSpaceState2D, origin: Vector2, candidate: Vector2,
+	exclude: Array[RID]
+) -> bool:
+	var ray := PhysicsRayQueryParameters2D.create(origin, candidate)
+	ray.collision_mask = PhysicsLayers.SOLID_GROUND_MASK # world solids + decoration (walls / water / void / scenery)
+	ray.exclude = exclude
+	if not space.intersect_ray(ray).is_empty():
+		return false
+	var point := PhysicsPointQueryParameters2D.new()
+	point.position = candidate
+	point.collision_mask = PhysicsLayers.SOLID_GROUND_MASK
+	point.collide_with_areas = false
+	point.exclude = exclude
+	return space.intersect_point(point, 1).is_empty()
 
 
 ## STATIC ARC — jumps from the boss to its mark, then to whoever stands nearest
