@@ -41,6 +41,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="61_tin_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/iron_ore.tres" id="62_iron_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="63_coal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/catalysts/everburning_crucible.tres" id="64_crucible"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="64_silver_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/gold_ore.tres" id="65_gold_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/adamant_bow.item.tres" id="70_ad_bw"]
@@ -235,6 +236,28 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_vital_silver.tres" id="r_vital_silver"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_pristine.tres" id="g_vital_pristine"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_vital_gold.tres" id="r_vital_gold"]
+
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_arrowheads.tres" id="210_dragon_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_arrowheads.tres" id="210_obsidian_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/celestial_arrowheads.tres" id="210_celestial_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_arrowheads.tres" id="210_astralite_head"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/dragon_bar.tres" id="200_dragon_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_dragon.tres" id="201_pickaxe_dragon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_dragon.tres" id="201_axe_dragon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/sickle_dragon.tres" id="201_sickle_dragon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_bar.tres" id="200_obsidian_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_obsidian.tres" id="201_pickaxe_obsidian"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_obsidian.tres" id="201_axe_obsidian"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/sickle_obsidian.tres" id="201_sickle_obsidian"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/celestial_bar.tres" id="200_celestial_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_celestial.tres" id="201_pickaxe_celestial"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_celestial.tres" id="201_axe_celestial"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/sickle_celestial.tres" id="201_sickle_celestial"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/astralite_bar.tres" id="200_astralite_bar"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/pickaxe_astralite.tres" id="201_pickaxe_astralite"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/axe_astralite.tres" id="201_axe_astralite"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/sickle_astralite.tres" id="201_sickle_astralite"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_dragon.tres" id="201_rod_dragon"]
 
 [sub_resource type="Resource" id="I_sm_br_cu"]
 script = ExtResource("3_ingred")
@@ -2500,7 +2523,223 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vital_gold_bar"), S
 required_level = 15
 xp_reward = 157
 
+[sub_resource type="Resource" id="I_tool_pickaxe_dragon"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_dragon_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_pickaxe_dragon"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_pickaxe_dragon")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pickaxe_dragon")])
+required_level = 70
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_tool_axe_dragon"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_dragon_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_axe_dragon"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_axe_dragon")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_dragon")])
+required_level = 70
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_tool_sickle_dragon"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_dragon_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_sickle_dragon"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_sickle_dragon")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_dragon")])
+required_level = 70
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_tool_pickaxe_obsidian"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_obsidian_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_pickaxe_obsidian"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_pickaxe_obsidian")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pickaxe_obsidian")])
+required_level = 78
+xp_reward = 51
+
+[sub_resource type="Resource" id="I_tool_axe_obsidian"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_obsidian_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_axe_obsidian"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_axe_obsidian")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_obsidian")])
+required_level = 78
+xp_reward = 51
+
+[sub_resource type="Resource" id="I_tool_sickle_obsidian"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_obsidian_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_sickle_obsidian"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_sickle_obsidian")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_obsidian")])
+required_level = 78
+xp_reward = 51
+
+[sub_resource type="Resource" id="I_tool_pickaxe_celestial"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_celestial_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_pickaxe_celestial"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_pickaxe_celestial")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pickaxe_celestial")])
+required_level = 86
+xp_reward = 59
+
+[sub_resource type="Resource" id="I_tool_axe_celestial"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_celestial_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_axe_celestial"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_axe_celestial")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_celestial")])
+required_level = 86
+xp_reward = 59
+
+[sub_resource type="Resource" id="I_tool_sickle_celestial"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_celestial_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_sickle_celestial"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_sickle_celestial")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_celestial")])
+required_level = 86
+xp_reward = 59
+
+[sub_resource type="Resource" id="I_tool_pickaxe_astralite"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_astralite_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_pickaxe_astralite"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_pickaxe_astralite")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_pickaxe_astralite")])
+required_level = 92
+xp_reward = 71
+
+[sub_resource type="Resource" id="I_tool_axe_astralite"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_astralite_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_axe_astralite"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_axe_astralite")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_axe_astralite")])
+required_level = 92
+xp_reward = 71
+
+[sub_resource type="Resource" id="I_tool_sickle_astralite"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_astralite_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_sickle_astralite"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_sickle_astralite")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_sickle_astralite")])
+required_level = 92
+xp_reward = 71
+
+[sub_resource type="Resource" id="I_tool_rod_dragon"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_dragon_bar")
+amount = 2
+
+[sub_resource type="Resource" id="R_tool_rod_dragon"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("201_rod_dragon")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_tool_rod_dragon")])
+required_level = 70
+xp_reward = 45
+
+[sub_resource type="Resource" id="I_crucible_bar"]
+script = ExtResource("3_ingred")
+item = ExtResource("17_ru_bar")
+amount = 10
+
+[sub_resource type="Resource" id="R_crucible"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("64_crucible")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_crucible_bar")])
+required_level = 66
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_dragon_head"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_dragon_bar")
+
+[sub_resource type="Resource" id="R_dragon_head"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("210_dragon_head")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_dragon_head")])
+required_level = 68
+xp_reward = 28
+
+[sub_resource type="Resource" id="I_obsidian_head"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_obsidian_bar")
+
+[sub_resource type="Resource" id="R_obsidian_head"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("210_obsidian_head")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_obsidian_head")])
+required_level = 72
+xp_reward = 31
+
+[sub_resource type="Resource" id="I_celestial_head"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_celestial_bar")
+
+[sub_resource type="Resource" id="R_celestial_head"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("210_celestial_head")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_celestial_head")])
+required_level = 80
+xp_reward = 36
+
+[sub_resource type="Resource" id="I_astralite_head"]
+script = ExtResource("3_ingred")
+item = ExtResource("200_astralite_bar")
+
+[sub_resource type="Resource" id="R_astralite_head"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("210_astralite_head")
+output_amount = 10
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_astralite_head")])
+required_level = 88
+xp_reward = 42
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Smithing Table"
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_sickle_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_sickle_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_sickle_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_sickle_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_sickle_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru"), SubResource("R_tool_sickle_ru"), SubResource("Resource_8rxl3"), SubResource("Resource_a5hfw"), SubResource("Resource_2jebw"), SubResource("Resource_csi67"), SubResource("Resource_a3qax"), SubResource("Resource_axytv"), SubResource("Resource_hsuoi"), SubResource("Resource_rbgp3"), SubResource("Resource_uybih"), SubResource("Resource_1fe81"), SubResource("Resource_tfg02"), SubResource("Resource_xuo4v"), SubResource("Resource_fuwsa"), SubResource("Resource_rj68b"), SubResource("Resource_hy8bh"), SubResource("Resource_34ys7"), SubResource("Resource_bmawy"), SubResource("Resource_8o0n1"), SubResource("Resource_k7wbn"), SubResource("Resource_5nw8n"), SubResource("Resource_7i5s1"), SubResource("Resource_oc6ao"), SubResource("Resource_ix534"), SubResource("Resource_812vq"), SubResource("Resource_tcup4"), SubResource("Resource_geiv3"), SubResource("Resource_aa0yj"), SubResource("Resource_68cqq"), SubResource("Resource_6t70i"), SubResource("Resource_rbx8h"), SubResource("Resource_01j6p"), SubResource("Resource_sigp8"), SubResource("Resource_jwuo6"), SubResource("Resource_qmsn4"), SubResource("Resource_it84n"), SubResource("Resource_2xusi"), SubResource("Resource_pf78e"), SubResource("Resource_j4gtm"), SubResource("Resource_dvmrm"), SubResource("Resource_kjoqn"), SubResource("Resource_dlmqp"), SubResource("Resource_66pd4"), SubResource("Resource_dsqmh"), SubResource("Resource_mbpcn"), SubResource("Resource_l4qqf"), SubResource("Resource_8gw11"), SubResource("Resource_uwqqc"), SubResource("Resource_vkexn"), SubResource("Resource_1e8l7"), SubResource("Resource_8mlec"), SubResource("Resource_if04n"), SubResource("Resource_7upco"), SubResource("Resource_fvt4r"), SubResource("Resource_2ea3t"), SubResource("R_ring_guard_copper"), SubResource("R_ring_guard_iron"), SubResource("R_ring_guard_silver"), SubResource("R_ring_guard_gold"), SubResource("R_ring_agile_copper"), SubResource("R_ring_agile_iron"), SubResource("R_ring_agile_silver"), SubResource("R_ring_agile_gold"), SubResource("R_ring_focus_copper"), SubResource("R_ring_focus_iron"), SubResource("R_ring_focus_silver"), SubResource("R_ring_focus_gold"), SubResource("R_ring_vital_copper"), SubResource("R_ring_vital_iron"), SubResource("R_ring_vital_silver"), SubResource("R_ring_vital_gold")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_sickle_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_sickle_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_sickle_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_sickle_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_sickle_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru"), SubResource("R_tool_sickle_ru"), SubResource("Resource_8rxl3"), SubResource("Resource_a5hfw"), SubResource("Resource_2jebw"), SubResource("Resource_csi67"), SubResource("Resource_a3qax"), SubResource("Resource_axytv"), SubResource("Resource_hsuoi"), SubResource("Resource_rbgp3"), SubResource("Resource_uybih"), SubResource("Resource_1fe81"), SubResource("Resource_tfg02"), SubResource("Resource_xuo4v"), SubResource("Resource_fuwsa"), SubResource("Resource_rj68b"), SubResource("Resource_hy8bh"), SubResource("Resource_34ys7"), SubResource("Resource_bmawy"), SubResource("Resource_8o0n1"), SubResource("Resource_k7wbn"), SubResource("Resource_5nw8n"), SubResource("Resource_7i5s1"), SubResource("Resource_oc6ao"), SubResource("Resource_ix534"), SubResource("Resource_812vq"), SubResource("Resource_tcup4"), SubResource("Resource_geiv3"), SubResource("Resource_aa0yj"), SubResource("Resource_68cqq"), SubResource("Resource_6t70i"), SubResource("Resource_rbx8h"), SubResource("Resource_01j6p"), SubResource("Resource_sigp8"), SubResource("Resource_jwuo6"), SubResource("Resource_qmsn4"), SubResource("Resource_it84n"), SubResource("Resource_2xusi"), SubResource("Resource_pf78e"), SubResource("Resource_j4gtm"), SubResource("Resource_dvmrm"), SubResource("Resource_kjoqn"), SubResource("Resource_dlmqp"), SubResource("Resource_66pd4"), SubResource("Resource_dsqmh"), SubResource("Resource_mbpcn"), SubResource("Resource_l4qqf"), SubResource("Resource_8gw11"), SubResource("Resource_uwqqc"), SubResource("Resource_vkexn"), SubResource("Resource_1e8l7"), SubResource("Resource_8mlec"), SubResource("Resource_if04n"), SubResource("Resource_7upco"), SubResource("Resource_fvt4r"), SubResource("Resource_2ea3t"), SubResource("R_ring_guard_copper"), SubResource("R_ring_guard_iron"), SubResource("R_ring_guard_silver"), SubResource("R_ring_guard_gold"), SubResource("R_ring_agile_copper"), SubResource("R_ring_agile_iron"), SubResource("R_ring_agile_silver"), SubResource("R_ring_agile_gold"), SubResource("R_ring_focus_copper"), SubResource("R_ring_focus_iron"), SubResource("R_ring_focus_silver"), SubResource("R_ring_focus_gold"), SubResource("R_ring_vital_copper"), SubResource("R_ring_vital_iron"), SubResource("R_ring_vital_silver"), SubResource("R_ring_vital_gold"), SubResource("R_tool_pickaxe_dragon"), SubResource("R_tool_axe_dragon"), SubResource("R_tool_sickle_dragon"), SubResource("R_tool_pickaxe_obsidian"), SubResource("R_tool_axe_obsidian"), SubResource("R_tool_sickle_obsidian"), SubResource("R_tool_pickaxe_celestial"), SubResource("R_tool_axe_celestial"), SubResource("R_tool_sickle_celestial"), SubResource("R_tool_pickaxe_astralite"), SubResource("R_tool_axe_astralite"), SubResource("R_tool_sickle_astralite"), SubResource("R_tool_rod_dragon"), SubResource("R_crucible"), SubResource("R_dragon_head"), SubResource("R_obsidian_head"), SubResource("R_celestial_head"), SubResource("R_astralite_head")])

@@ -82,8 +82,11 @@ func data_request_handler(
 	if fee > 0 and Inventory.count(inventory, gold_id) < fee:
 		return {"ok": false, "reason": "gold", "fee": fee}
 
-	# Verify every ingredient is available before consuming any (atomic craft).
-	for ingredient: CraftIngredient in recipe.ingredients:
+	# Verify every input is available before consuming any (atomic craft).
+	# `required_inputs()` — not `ingredients` — so a SmeltingRecipe's catalysts
+	# are gated here too: a smelt with no crucible must be refused BEFORE the
+	# ore is taken, not after.
+	for ingredient: CraftIngredient in recipe.required_inputs():
 		if ingredient == null or ingredient.item == null:
 			continue
 		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
@@ -132,6 +135,26 @@ func data_request_handler(
 	if fee > 0:
 		Inventory.remove_amount_by_id(inventory, gold_id, fee)
 
+	# Catalyst erosion (SmeltingRecipe only). Rolled per unit, and deliberately
+	# NOT folded into the refund pass above: a catalyst's cost IS this roll, so
+	# letting a refund perk also apply would quietly halve an authored erosion
+	# rate. Tracked so the inventory_full rollback below can put them back.
+	var consumed_catalysts: Dictionary[int, int] = {}
+	var smelt: SmeltingRecipe = recipe as SmeltingRecipe
+	if smelt != null and smelt.catalyst_consume_chance > 0.0:
+		for catalyst: CraftIngredient in smelt.catalysts:
+			if catalyst == null or catalyst.item == null:
+				continue
+			var burned: int = 0
+			for _u: int in catalyst.amount:
+				if randf() < smelt.catalyst_consume_chance:
+					burned += 1
+			if burned <= 0:
+				continue
+			var cat_id: int = int(catalyst.item.get_meta(&"id", 0))
+			Inventory.remove_amount_by_id(inventory, cat_id, burned)
+			consumed_catalysts[cat_id] = consumed_catalysts.get(cat_id, 0) + burned
+
 	# Grant the output (one at a time so stackables merge / non-stackables get slots).
 	var output_id: int = int(recipe.output_item.get_meta(&"id", 0))
 	# `extra_item` pays one bonus unit of the SAME output — for a batch recipe
@@ -152,6 +175,12 @@ func data_request_handler(
 				continue
 			var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
 			Inventory.add_item(inventory, ing_id, ingredient.amount, false, active_bag, bag_count)
+		# Catalysts eroded by this craft are restored too, or a smelt that fails
+		# on a full bag would still quietly eat the crucible.
+		for cat_id: int in consumed_catalysts:
+			Inventory.add_item(
+				inventory, cat_id, consumed_catalysts[cat_id], false, active_bag, bag_count
+			)
 		if fee > 0:
 			Inventory.add_item(inventory, gold_id, fee, false, active_bag, bag_count)
 		_last_craft.erase(player_id)

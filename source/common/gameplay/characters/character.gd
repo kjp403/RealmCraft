@@ -420,7 +420,12 @@ func is_deflecting() -> bool:
 ## actually landed. Combat heals (food, potions, Mending Bolt, Berserk lifesteal,
 ## hammer aura) pass [param counts_as_combat_heal] true so a live Searing Wound
 ## detonates; campfire / idle regen pass false.
-func apply_heal(amount: float, source: Character = null, counts_as_combat_heal: bool = true) -> float:
+func apply_heal(
+	amount: float,
+	source: Character = null,
+	counts_as_combat_heal: bool = true,
+	effect_kind: StringName = &""
+) -> float:
 	if not multiplayer.is_server() or is_dead or amount <= 0.0:
 		return 0.0
 	var hp: float = stats_component.get_stat(Stat.HEALTH)
@@ -428,7 +433,7 @@ func apply_heal(amount: float, source: Character = null, counts_as_combat_heal: 
 	var healed: float = minf(hp_max, hp + amount) - hp
 	if healed > 0.0:
 		stats_component.set_stat(Stat.HEALTH, hp + healed)
-		_broadcast_heal_feedback(healed)
+		_broadcast_heal_feedback(healed, effect_kind)
 	if counts_as_combat_heal:
 		_detonate_sear_wound(source)
 	return healed
@@ -661,7 +666,7 @@ func _broadcast_hit_feedback(mitigated_amount: float) -> void:
 	)
 
 
-func _broadcast_heal_feedback(healed: float) -> void:
+func _broadcast_heal_feedback(healed: float, effect_kind: StringName = &"") -> void:
 	if healed <= 0.0 or WorldServer.curr == null:
 		return
 	var heal_instance: String = WorldServer.curr.instance_name_for(self)
@@ -672,6 +677,9 @@ func _broadcast_heal_feedback(healed: float) -> void:
 			"amount": int(round(healed)),
 			"position": global_position,
 			"heal": true,
+			# A heal with an identity of its own (an arrow siphon) keeps its
+			# colour instead of reading as a generic green heal number.
+			"effect_kind": String(effect_kind),
 		}),
 		heal_instance
 	)

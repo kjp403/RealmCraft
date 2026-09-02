@@ -16,6 +16,10 @@ enum InventoryTab {
 }
 
 
+const SHIMMER_SHADER: Shader = preload("res://source/common/gameplay/items/shimmer.gdshader")
+
+var _shimmer_material: ShaderMaterial = null
+
 # Definition
 @export var item_name: StringName = &"ItemDefault"
 @export var item_icon: Texture2D = preload("res://assets/sprites/items/icons/Icon271.png")
@@ -51,6 +55,34 @@ enum InventoryTab {
 @export_range(0, 999, 1.0) var stack_limit: int = 0
 ## Optional free-form tags for filters/crafting
 @export var tags: PackedStringArray = []
+
+
+# Shimmer
+## Animated shine drawn over this item's sprite IN THE WORLD (held weapon, ground
+## prop) — never over the inventory icon, which stays flat so the bag grid keeps
+## its contrast. 0 = no shimmer. Celestial and Astralite tools set this.
+@export_range(0.0, 2.0, 0.05) var shimmer_strength: float = 0.0
+## Colour of the highlight sweep and twinkle.
+@export var shimmer_tint: Color = Color(1.0, 0.95, 0.72)
+## Sweep / twinkle rate.
+@export_range(0.1, 4.0, 0.05) var shimmer_speed: float = 1.0
+## Cycle the sprite's hues as well (Astralite's cosmic pulse).
+@export var shimmer_iridescent: bool = false
+
+
+## Shared material for [member shimmer_strength] > 0, or null when the item does
+## not shimmer. Client-only — one ShaderMaterial per item resource.
+func shimmer_material() -> ShaderMaterial:
+	if shimmer_strength <= 0.0:
+		return null
+	if _shimmer_material == null:
+		_shimmer_material = ShaderMaterial.new()
+		_shimmer_material.shader = SHIMMER_SHADER
+		_shimmer_material.set_shader_parameter(&"shimmer_strength", shimmer_strength)
+		_shimmer_material.set_shader_parameter(&"shimmer_tint", shimmer_tint)
+		_shimmer_material.set_shader_parameter(&"shimmer_speed", shimmer_speed)
+		_shimmer_material.set_shader_parameter(&"shimmer_iridescent", shimmer_iridescent)
+	return _shimmer_material
 
 
 ## Can this item be discarded onto the ground from the bag? Currency and quest

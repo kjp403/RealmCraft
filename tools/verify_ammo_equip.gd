@@ -8,6 +8,7 @@ extends Node
 const ARROWS: Array[String] = [
 	"bronze_arrow", "iron_arrow", "steel_arrow",
 	"mithril_arrow", "adamant_arrow", "runite_arrow",
+	"dragon_arrow", "obsidian_arrow", "celestial_arrow", "astralite_arrow",
 ]
 
 
@@ -15,7 +16,10 @@ func _ready() -> void:
 	var player: Player = Player.new()
 	var resource: PlayerResource = PlayerResource.new()
 	resource.level = 99
-	resource.masteries[&"bow"] = {"level": 40, "spent": {}}
+	# Maxed bow mastery: the useful assertion is "no authored arrow is
+	# unreachable", so any false below is a real gate failure rather than this
+	# fixture simply being too low. The high tiers gate at 30-45.
+	resource.masteries[&"bow"] = {"level": 99, "spent": {}}
 	player.player_resource = resource
 
 	for slug: String in ARROWS:

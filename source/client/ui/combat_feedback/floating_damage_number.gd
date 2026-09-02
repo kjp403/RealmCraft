@@ -24,6 +24,18 @@ const POISON_COLOR: Color = Color(0.45, 0.95, 0.2)
 const BURN_COLOR: Color = Color(0.95, 0.25, 0.2)
 ## Green for heals.
 const HEAL_COLOR: Color = Color(0.2, 0.9, 0.45)
+## High-tier arrow procs. Each tier owns a colour so a player reading a busy
+## fight can tell WHICH quiver just fired without watching the log. These match
+## the AmmoProcService.SPLAT_* constants by string — rename one without the
+## other and the splat silently falls back to default orange.
+## Dragon: fiery orange-red thermal burn.
+const ARROW_THERMAL_COLOR: Color = Color(1.0, 0.42, 0.12)
+## Obsidian: deep crimson-purple life siphon.
+const ARROW_SIPHON_COLOR: Color = Color(0.85, 0.16, 0.42)
+## Celestial: radiant gold-white holy splash.
+const ARROW_SPLASH_COLOR: Color = Color(1.0, 0.9, 0.55)
+## Astralite: electric starfield cyan gravity slow.
+const ARROW_GRAVITY_COLOR: Color = Color(0.35, 0.95, 1.0)
 ## Pale spectral blue for Spectral Ward reflect damage. Its own colour because a
 ## reflect is the only damage number a player sees on an enemy that THEY did not
 ## choose to deal — reading it as a normal melee hit hides the ward working.
@@ -55,6 +67,16 @@ func _apply_label() -> void:
 
 
 func _color() -> Color:
+	# Effect identity is checked BEFORE the heal colour: an arrow siphon is a
+	# heal, but showing it as a generic green number hides which quiver paid it.
+	if _effect_kind == &"arrow_thermal":
+		return ARROW_THERMAL_COLOR
+	if _effect_kind == &"arrow_siphon":
+		return ARROW_SIPHON_COLOR
+	if _effect_kind == &"arrow_splash":
+		return ARROW_SPLASH_COLOR
+	if _effect_kind == &"arrow_gravity":
+		return ARROW_GRAVITY_COLOR
 	if _is_heal:
 		return HEAL_COLOR
 	if _effect_kind == &"poison":

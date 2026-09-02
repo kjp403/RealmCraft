@@ -707,7 +707,440 @@ The server finds them via the NPC on the current map (`giver_key` from the NPC `
 
 ---
 
-## 5. Deploy reminder (important)
+## 5. High-tier gathering nodes & custom smelting
+
+Everything below is authored **in the Inspector on a `.tres`** — there is no new
+scene work. The node scene, the shader and the particle emitter are all built at
+runtime from these fields, so a new tier is a resource, not a prefab.
+
+### 5.1 Node hierarchy — what you do and do NOT build
+
+`MineableNode` (`source/common/gameplay/maps/components/mineable_node.tscn`) is
+placed in the map and pointed at a `MineableNodeResource` via its `data` export.
+That is the whole setup. Its children are:
+
+| Child | Who owns it | Notes |
+|-------|-------------|-------|
+| `Sprite2D` | script | texture, scale, shimmer material, idle frames, flash + recoil all applied from `data` |
+| `CollisionShape2D` | script | resized from the texture by `_layout_from_texture()` |
+| `NameLabel`, `VisualState` | script | repositioned from the texture height |
+| *(particles)* | script | `CPUParticles2D` is **created per swing and freed**; do not add one in the editor |
+
+> **Do not** add an `AnimatedSprite2D`, a `ShaderMaterial` on the sprite, or a
+> `GPUParticles2D` by hand. The script drives `Sprite2D.texture` directly for the
+> depleted swap, and an `AnimationPlayer` or editor-set material fights it — the
+> node ends up frozen on one frame or stuck grey after it refills.
+
+### 5.2 Idle frames (sprite animation)
+
+`texture` is frame 0; `idle_frames` are frames 1..n, cycled at
+`idle_frame_seconds`. A depleted node freezes on its stump art.
+
+* Frames **must be the same size as `texture`** or the node jumps every cycle.
+* Generate them with `python tools/build_ore_vein_idle_frames.py`, which derives
+  each frame from the shipped vein sprite so registration is exact. Hand-drawn
+  frames are fine, but check the silhouette pixel-for-pixel.
+* 2 frames + `0.5s` reads as a slow breath; 3 frames + `0.25s` reads as energy.
+
+### 5.3 Shimmer shader
+
+Set `shimmer_strength > 0` and the script builds the `ShaderMaterial` itself from
+`shimmer.gdshader` — leave the sprite's material **empty** in the editor.
+
+| Field | Guidance |
+|-------|----------|
+| `shimmer_strength` | `0.3`–`0.6`. Past `~0.8` pale art blows out to white |
+| `shimmer_tint` | the metal's highlight, not its body colour |
+| `shimmer_speed` | `0.7` slow gleam → `1.3` restless |
+| `shimmer_iridescent` | hue-cycles as well; Astralite only, it is loud |
+
+`Item.shimmer_*` mirrors these for the icon / in-hand sprite, so a shimmering
+vein and its bar are set up the same way.
+
+### 5.4 Strike feedback (flash, recoil, particles)
+
+Fired from `ClientState` only when a swing actually connects, so a cooldown or
+wrong-tool reply never plays.
+
+| Field | Guidance |
+|-------|----------|
+| `hit_flash_strength` | how much **brighter**, as a fraction: `0.5` peaks at 1.5x. `0.35` on pale art (Celestial), `0.55` on near-black (Obsidian) |
+| `hit_flash_color` | the flash's hue; white for a plain impact, tinted toward the metal to feel "woken up". Alpha ignored |
+| `hit_flash_seconds` | keep `≤ 0.2` — longer reads as a glow, and swings land every ~0.3s |
+| `hit_recoil_pixels` | `2`–`4`. Past ~6 the rock wobbles instead of being struck |
+| `chop_fx_style` | `drift_up`, `sparkle`, `spark_side`, `starburst` |
+| `chop_fx_amount` | keep low; this fires on **every** hit |
+
+Flash and particles are independent — either can be used alone.
+
+> The flash is an **overbright**: the sprite is driven toward
+> `hit_flash_color * (1 + hit_flash_strength)`. `modulate` multiplies, so a
+> flash authored at or below white can only darken — and a white flash on an
+> unmodulated (white) sprite is a silent no-op. That is not a knob you can turn
+> off by choosing a dim colour; set `hit_flash_strength` to `0` instead.
+
+### 5.5 Custom smelting (`SmeltingRecipe`)
+
+Post-Runite metals do not use `N x Coal + 1 x Ore`. Author them in
+`furnace.tres` as `SmeltingRecipe` (not `CraftingRecipe`); the station holds a
+mixed list and the server branches on the type.
+
+| Field | Meaning |
+|-------|---------|
+| `ingredients` | consumed every craft — ore, additive, and the **previous tier's bar** |
+| `catalysts` | must be **held**, consumed only on a roll |
+| `catalyst_consume_chance` | per-unit erosion. `0.04` ships; `0.0` = a permanent tool |
+| `flavor` | one line shown above the material list |
+
+**Rules that bite:**
+
+* Availability checks and the crafting UI read `required_inputs()`, never
+  `ingredients`. A new kind of input must be added there or it will be invisible
+  in the UI and ungated on the client.
+* Do **not** list the same item as both an ingredient and a catalyst — each is
+  counted independently, so the craft can pass the check and then overdraw.
+* Every additive needs a source. The four shipped ones are a `secondary_ore`
+  catch on their own vein at `secondary_chance = 0.34`, which matches the 2 ore :
+  1 additive the recipes ask for. Change one and change the other.
+* The **Everburning Crucible** is an anvil recipe at Smithing 66 costing
+  **10x Runite Bar** — deliberately a mid-tier sink, so Runite mining stays
+  worth doing after a player is smelting Astralite. At `catalyst_consume_chance
+  = 0.04` a crucible survives ~25 smelts, which amortises to **0.4 Runite Bar
+  per high-tier bar**; because each tier alloys in the bar below it, an
+  Astralite Bar transitively costs ~2.6 Runite Bars. Retuning either the recipe
+  or the erosion rate moves that number — `verify_high_ore_tiers.gd` prints it
+  on every run so a change is visible rather than silent.
+* Crafting the Crucible must stay a net LOSS against vendoring its inputs
+  (1000g of bars in, 400g out). The gate fails if that ever inverts, because a
+  craftable item worth more than its parts is a gold printer.
+* Perk / outfit refunds deliberately do not apply to catalysts.
+
+### 5.6 Regenerating the art
+
+| Script | Produces |
+|--------|----------|
+| `tools/build_ore_vein_idle_frames.py` | `vein_<tier>_f1/f2.png` idle frames |
+| `tools/build_high_tier_tool_art.py` | `high_tier/tools_<tier>.png` + the Dragon rod |
+| `tools/build_smelting_catalysts.py` | the five catalyst / additive icons |
+
+**Tool silhouettes are fixed per tool TYPE, not per tier.** The pickaxe, sickle
+and axe shapes in `build_high_tier_tool_art.py` are ASCII pixel grids shared by
+all four tiers and matched to the Bronze–Runite shapes players already read. A
+tier is identified by its ramp, a 2–3 pixel ornament inset inside the head, and
+two accent bands on the haft — never by changing the head's outline.
+
+> An earlier pass gave every tier its own head geometry. It was rejected: the
+> tiers were distinguishable and the TOOL TYPE was not, which is the only thing
+> the silhouette has to carry. If you add a tier, add a ramp and a motif — do
+> **not** add a shape. Prove it with the silhouette band of
+> `render_high_ore_tiers.tscn`, which strips the colour out.
+
+Sheets are laid out on the same `192x112` grid as the base weapon sheets, so
+tool items keep the canonical regions — `Rect2(0, 48, 16, 32)` pickaxe,
+`Rect2(32, 48, 16, 32)` sickle, `Rect2(112, 48, 16, 32)` axe. `weapon.gd` drives
+the in-hand sprite from `item_icon`, so repointing the AtlasTexture updates the
+player model and the UI together.
+
+Two traps when repointing a tool's texture:
+
+* Drop the `uid=` from the `ext_resource` line. It resolves ahead of `path`, so
+  leaving it silently keeps loading the old sheet.
+* The shipped Bronze–Runite `axe_*` items point at a cell that is drawn as a
+  **hoe**, not an axe. The high tiers deliberately diverge from that reference
+  and draw a real weighted bit; the silhouette sheet labels the row so the
+  mismatch does not read as a regression.
+
+`build_higher_ore_tiers.py` still owns tier ARMOUR by recolouring the Runite
+set — that is correct there, where the silhouette is shared anyway. Do not route
+a tool through it.
+
+### 5.7 Gates
+
+```
+godot --headless --path . -s tools/verify_high_ore_tiers.gd      # bad=0
+godot --path . --mode=client res://tools/check_ore_alcove.tscn   # ore alcove OK
+godot --path . --mode=client res://tools/verify_vein_fx.tscn     # VEIN_FX bad=0
+godot --path . --mode=client res://tools/render_shimmer_proof.tscn
+godot --path . --mode=client res://tools/render_high_ore_tiers.tscn
+```
+
+`verify_vein_fx.tscn` is a RUNTIME gate: it instances a real `MineableNode`,
+swings at it, and asserts the flash actually changes the sprite, the recoil
+settles back to rest, and the one-shot emitters free themselves. It stretches
+`hit_flash_seconds` on a copy of the resource first, because at the shipped
+0.12s a slow frame can step over the whole strike and observe nothing.
+
+> It earned its keep immediately: Celestial was authored with a white flash on a
+> white base, and `modulate` multiplies, so `WHITE.lerp(WHITE, t)` did nothing.
+> The flash is now an **overbright** — `hit_flash_color * (1 + strength)` — so a
+> white flash brightens instead of being a no-op. A flash authored at or below
+> white can only ever darken a sprite.
+
+`render_high_ore_tiers.tscn` writes two sheets: the tier contact sheet, and
+`previews/tool-legibility.png` — rejected vs revised tool art plus a
+colour-stripped silhouette band against the Bronze reference.
+
+#### Blocking rule: merge order
+
+`verify_high_ore_tiers.gd` reports an `XP_ORDER` section.
+
+| Counter | Must be | Meaning |
+|---------|---------|---------|
+| `new_tier_inversions` | `0` always | a higher new tier pays less than a lower one — an authoring bug |
+| `cross_ladder_inversions` | `1` for now | the new tiers are costed on the rescaled curve; the old ladder is not |
+
+**As of 2026-09-01 `rework/skill-xp-rates` is still NOT merged into `main`** —
+`main` pays a Runite Bar 254 XP against this branch's Dragon Bar at 35. Merging
+this branch first makes the new tier a 7x XP *downgrade*. Git will not catch it:
+the branches touch different lines and merge cleanly in either order.
+
+**Do not merge this branch while that check fails.** `--is-ancestor` exits `0`
+when the rework has landed and `1` when it has not, so it drops straight into
+CI as a hard gate:
+
+```bash
+git fetch origin
+if git merge-base --is-ancestor origin/rework/skill-xp-rates origin/main; then
+  echo "rework landed - safe to merge content/high-ore-tiers"
+else
+  echo "BLOCKED: merge rework/skill-xp-rates first" >&2
+  exit 1
+fi
+```
+
+Once it passes, rebase and re-run the gate: `cross_ladder_inversions` must drop
+to `0`. If it does not, the rescale and these recipes have diverged and the
+factor needs recomputing — do not merge on the assumption that it will settle.
+
+> The `steel_bar` (lv15, was 78 XP) vs `silver_bar` (lv10, 98 XP) inversion that
+> this gate also surfaced was pre-existing on `main` and is patched here: steel
+> now pays 105, between silver and gold. **That patch touches a line
+> `rework/skill-xp-rates` also rewrites** (to 10, as part of its full rescale),
+> so expect a conflict on `furnace.tres` when the two meet — take the rework's
+> value, which fixes the inversion its own way.
+
+---
+
+## 6. Cave maps: layers, collision and the Starfall Mining Cave
+
+`starfall_mining_cave.tscn` is **generated**. Hand edits are lost the next time
+`tools/build_starfall_mining_cave.gd` runs — change the generator, then re-run
+and re-verify. Same rule as the biome maps in §2.
+
+```
+godot --headless --path . -s tools/build_starfall_mining_cave.gd
+godot --path . --mode=client res://tools/verify_starfall_cave.tscn   # bad=0
+godot --headless --path . -s tools/verify_warp_links.gd              # VERIFY_PASS
+```
+
+### 6.1 Layer order — what each one is for
+
+Everything hangs off a `Tiles` Node2D with `y_sort_enabled`. Order and
+`z_index` are the whole "no overlap, no bleeding" story:
+
+| Node | z_index | y_sort | Carries collision | Purpose |
+|------|---------|--------|-------------------|---------|
+| `Tiles/Ground` | `-3` | no | no | floor, **and a dark fill under every void cell** |
+| `Tiles/GroundDetail` | `-2` | no | no | per-alcove floor material, autotiled |
+| `Tiles/Walls` | default | **yes** | **yes** | rim + cliff face; the only solid layer |
+| `Tiles/Props` | default | **yes** | some | boulders and formations |
+| `Tiles/Ceiling` | `200` | no | **never** | overhang drawn ABOVE the player |
+| `MineableNodes` | — | **yes** | per-node | ore veins |
+| `ReplicatedPropsContainer` | — | **yes** | per-node | NPCs |
+
+Rules that produce the clean result:
+
+* **Y-sort on the map root, `Tiles`, `Walls`, `Props`, `MineableNodes` and
+  `ReplicatedPropsContainer`.** A player must sort against a wall and a vein by
+  their feet. `Ground`/`GroundDetail`/`Ceiling` are flat and use `z_index`
+  instead — y-sorting a full-map floor layer is wasted sorting.
+* **Ground is painted under the VOID as well as the floor.** The rim corner art
+  is only ~70% opaque; without a dark fill behind it the corners punch through
+  to the background and read as flat grey squares. This is the single most
+  common cause of "tile bleeding" in this pack.
+* **The Ceiling layer must never carry collision.** It draws at `z_index 200`,
+  above the player, so a solid tile there is an invisible wall. The audit fails
+  the build if any tile on it has a collision polygon.
+
+### 6.2 Collision is a property of the TILESET, not the layer
+
+In `rpgw_caves_tileset.tres` exactly one block of atlas cells — `(0,0)` to
+`(9,8)`, the rim bank — carries collision polygons. 82 tiles. Everything else in
+the 2448-tile sheet is decorative and walkable.
+
+That has two consequences worth internalising:
+
+* A wall drawn from anywhere else in the sheet **looks like rock and walks like
+  floor.** `MapKit.paint_rim` only ever paints from the rim bank, which is why
+  the generator's walkability model and the physics engine agree.
+* Collision sits at the **visual base** of the wall, not its top edge. The south
+  cliff face is three tiles tall in the art, so `paint_rim` blocks the void cell
+  plus the **two rows beneath it** (`face_rows = 2`). Skip that and players walk
+  into the painted rock face.
+
+`verify_starfall_cave.gd` re-derives solidity from
+`TileData.get_collision_polygons_count(0)` on the built scene rather than
+trusting any of the above, then floods from the entrance. It refuses a vein
+inside rock, an unreachable pocket, a floating wall cell with no wall neighbour,
+a walkable cell with no ground under it, and a vein whose only approach is a
+1-tile pinch.
+
+### 6.3 Zonal layout
+
+Six rooms, joined by ~5-tile corridors so two players pass without shoving each
+other into the rock:
+
+| Room | Tier | Floor material | Light |
+|------|------|----------------|-------|
+| Lantern Landing | — | earth | warm, campfire + grove portal |
+| The Crossing | — | grey stone | neutral; every alcove hangs off it |
+| Emberthroat | Dragon, Mining 65 | earth | hot orange |
+| Geode Hollow | Obsidian, Mining 70 | grey stone | violet |
+| The Skylight | Celestial, Mining 80 | mossy | pale gold, brightest room |
+| Astral Vault | Astralite, Mining 90 | grey stone | cold violet, behind a throat |
+
+> **What actually separates zones is the FLOOR and the LIGHT, not the rock.**
+> Corridors wide enough for multiplayer inevitably read as openings at map
+> scale, so thinning the rock between rooms does not buy distinctness. Each
+> alcove gets its own autotiled ground material via `MapKit.paint_corner_patch`.
+> An early pass painted those patches with the *same* tiles as the base ground —
+> the layer filled with 800+ cells and nothing changed on screen.
+
+### 6.4 Vein placement rules
+
+Veins are placed by the generator, never by hand. `ZONES` in the generator is
+the authoring surface: centre, radius, count, colour, floor material.
+
+* A vein goes on a floor cell that **touches rock** (`MapKit.edge_cells`) — that
+  is where an embedded seam belongs.
+* `ore_r` must be **>= the chamber radius**, because that touching-rock ring
+  lives at the chamber wall. Set it lower and the search only sees the open
+  middle of the room and silently places nothing.
+* Minimum spacing is `MapKit.scatter(..., spacing: 2)`. `spacing` is a Chebyshev
+  +/-N box, so 2 already guarantees 3 tiles / 96px — comfortably past the 72px
+  (1.5x `HarvestController.GATHER_RANGE`) a click needs to resolve to one vein.
+  3 reserves a 7x7 and starves the smaller chambers.
+* Every vein needs **>= 3 open sides**, or two players block each other on it.
+
+### 6.5 Zone transition
+
+Bidirectional, and both halves are generated:
+
+| Side | Node | warper_id | target_id |
+|------|------|-----------|-----------|
+| Starfall Grove | `CaveMouth` (arrival) | 35 | — |
+| Starfall Grove | `MiningCavePortal` | 134 | 34 |
+| Mining Cave | `Entrance` (arrival) | 34 | — |
+| Mining Cave | `GrovePortal` | 135 | 35 |
+
+The grove half lives in `tools/build_starfall_grove.gd` and sits on the
+**Unquarried Shelf**, the paved, lit, road-connected clearing that map has
+always reserved for the high ore tiers. `verify_warp_links.gd` proves both
+`(target_instance, target_id)` pairs resolve to a real warper in the
+destination map — a link pointing at a missing id used to drop players into the
+top-left border wall.
+
+Portals fade the screen and reposition through the shared
+`warper/portal.tscn`; there is no per-map transition code to write.
+
+---
+
+## 7. Ammunition procs (high-tier arrows)
+
+Four arrow tiers carry an on-hit effect. The chain is
+**1 bar -> 10 arrowheads** (Smithing, anvil) then
+**10 shafts + 10 arrowheads -> 10 arrows** (Fletching, bench).
+
+```
+godot --path . --mode=client res://tools/verify_high_tier_arrows.tscn  # bad=0
+godot --path . --mode=client res://tools/verify_ammo_equip.tscn
+```
+
+### 7.1 Authoring a proc
+
+Four fields on the `AmmoItem` .tres. Leave `proc_chance` at 0 and the arrow is
+an ordinary one, which is every tier up to Runite.
+
+| Field | Meaning |
+|-------|---------|
+| `proc_chance` | 0-1, rolled per landed **ranged** hit |
+| `effect_type` | must be one of the `AmmoProcService.EFFECT_*` constants |
+| `proc_magnitude` | per-effect: DPS, a 0-1 fraction, or flat splash damage |
+| `proc_duration_s` | duration effects only; ignored by instant ones |
+
+| Tier | Chance | Effect | Magnitude | Splat |
+|------|--------|--------|-----------|-------|
+| Dragon | 15% | `thermal_burn` | 8 dps / 4s, +50% of that as armour shred | fiery orange |
+| Obsidian | 12% | `life_siphon` | 0.35 of the hit, healed to the shooter | crimson |
+| Celestial | 20% | `holy_splash` | 14 damage in 72px, victim excluded | radiant gold |
+| Astralite | 10% | `gravity_slow` | 0.35 move, half that attack speed, 3s | electric cyan |
+
+> **A half-authored proc is an authoring slip, not a weak arrow.** A chance with
+> no effect, or an effect with no chance, ships as a plain arrow and nothing
+> complains. Worse, an `effect_type` TYPO is dispatched to `_: pass` — the arrow
+> looks like it has a proc, rolls it, and does nothing. Both fail the gate.
+
+### 7.2 Where the proc runs
+
+`AmmoProcService.on_hit` is called from `CombatHit.try_damage`, beside
+`CoatingService.on_hit` — the one place every melee arc and projectile resolves
+a hit. That means no per-weapon or per-ability code, and a proc can never be
+reached by a path that skipped the target rules.
+
+* **`randf()` runs on the server**, against a chance read from the item on disk.
+  The client does not roll, cannot report a proc and cannot re-roll a miss; it
+  learns a proc happened only from the damage payload that comes back.
+* **Only bow shots proc.** The gate is `damage_type == DAMAGE_RANGED` — melee
+  sends physical, wands send magic. Without it a quiver would proc off swords.
+* **The splash re-enters `try_damage`** so each splash target gets the full zone
+  and allegiance rules (a burst next to a guildmate must not hit them). That
+  makes the service re-entrant, so a static `_resolving` flag stops a splash
+  procing a splash: at 20% in a packed camp that is an exponential chain, and it
+  would surface as a server hang rather than as anything a player could report.
+
+### 7.3 Slows and shreds do NOT go through BuffService
+
+`BuffService` stores its entries on `PlayerResource`, so it can only touch a
+Player. Arrows are mostly shot at NPCs, and a slow that silently does nothing to
+a mob is a bug that looks like balance.
+
+`TimedDebuff` attaches to any `Character` as a child node, the same shape as
+`DamageOverTime`. Two of the three things it weakens are not stats at all on an
+NPC — `HostileNpc.move_speed` and `attack_cooldown` are plain fields, so they
+are scaled and restored directly; ARMOR is a real stat and goes through
+`modify_stat`. It records **what it actually applied** and gives back exactly
+that: reverting a change that was never applied silently drains the victim's
+stat block. Re-applying refreshes the clock and keeps the original magnitudes,
+so arrow spam cannot stack a mob to zero armour.
+
+### 7.4 Hit splat colours
+
+Server and client are joined by a **string**, not a symbol:
+`AmmoProcService.SPLAT_*` must appear verbatim in
+`FloatingDamageNumber._color()`. Rename one side and it compiles fine while the
+splat silently falls back to default orange — the gate checks for exactly this.
+
+Effect identity is matched **before** the heal colour, so an Obsidian siphon
+pays out in crimson instead of reading as a generic green heal.
+
+### 7.5 XP scale and the positional mirrors
+
+Arrowhead and arrow XP are on the **post-#388 scale**, like everything else on
+this branch: Smithing 28/31/36/42 at levels 68/72/80/88, Fletching
+270/320/380/450 at 80/84/88/92. Ranged Attack stays on the established +1 per
+tier ladder (17/18/19/20) — the power jump is the PROC, not an inflated stat,
+which is what keeps these from disrupting the existing arrow ladder.
+
+`jobs/smithing.tres` and `jobs/fletching.tres` mirror these recipes, and
+`recipe_items` / `recipe_levels` are read **positionally**. A length drift does
+not error — it silently mislabels every recipe after the insertion point. The
+gate checks both lists are parallel. Arrowheads are `MaterialItem`s so they are
+safe in `recipe_items`; only weapon/tool items must use
+`recipe_deferred_paths` (see the cycle warning in §5).
+
+---
+
+## 8. Deploy reminder (important)
 
 World/server content is **authoritative**. Editing maps, NPCs, shops, items, or portals in git does nothing live until the VPS pulls and restarts.
 

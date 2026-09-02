@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://b2ckixon7ryh6" path="res://source/common/gameplay/maps/components/interaction_areas/warper/warper.tscn" id="e18"]
 [ext_resource type="PackedScene" uid="uid://0m5eq6iylq26" path="res://source/common/gameplay/maps/components/interaction_areas/warper/portal/portal.tscn" id="e19"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/overworld.tres" id="e20"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/starfall_mining_cave.tres" id="e21"]
 [ext_resource type="AudioStream" uid="uid://lx71aecmr0ks" path="res://assets/audio/music/alone.ogg" id="mus_alone"]
 
 [node name="starfall_grove" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
@@ -350,6 +351,10 @@ position = Vector2(296.0, 1256.0)
 position = Vector2(296.0, 1256.0)
 warper_id = 33
 
+[node name="CaveMouth" parent="." instance=ExtResource("e18")]
+position = Vector2(1960.0, 1288.0)
+warper_id = 35
+
 [node name="HubPortal" parent="." instance=ExtResource("e19")]
 position = Vector2(344.0, 1288.0)
 portal_color = Color(0.36, 0.86, 0.82, 1)
@@ -357,3 +362,11 @@ destination_label = "Castle Garden"
 target_instance = ExtResource("e20")
 warper_id = 133
 target_id = 33
+
+[node name="MiningCavePortal" parent="." instance=ExtResource("e19")]
+position = Vector2(2008.0, 1256.0)
+portal_color = Color(0.82, 0.55, 1, 1)
+destination_label = "Starfall Mining Cave"
+target_instance = ExtResource("e21")
+warper_id = 134
+target_id = 34

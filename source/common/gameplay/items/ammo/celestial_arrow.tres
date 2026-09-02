@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="AmmoItem" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/attributes/stat_modifier.gd" id="1_mod"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/ammo_item.gd" id="2_ammo"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/item_slot/slots/ammo.tres" id="3_slot"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_celestial_arrow.png" id="4_icon"]
+
+[sub_resource type="Resource" id="Mod_ad"]
+script = ExtResource("1_mod")
+stat_name = "ad"
+value = 19.0
+
+[resource]
+script = ExtResource("2_ammo")
+proc_chance = 0.2
+effect_type = &"holy_splash"
+proc_magnitude = 14.0
+required_mastery_categories = Array[StringName]([&"bow"])
+required_mastery_level = 40
+slot = ExtResource("3_slot")
+base_modifiers = Array[ExtResource("1_mod")]([SubResource("Mod_ad")])
+item_name = &"Celestial Arrow"
+item_icon = ExtResource("4_icon")
+description = "Infused with starlight. Has a chance on hit to trigger a radiant burst of holy light, splashing minor area damage to adjacent enemies."
+holdable = false
+can_trade = true
+vendor_value = 170
+tags = PackedStringArray()
+metadata/slug = &"celestial_arrow"
+metadata/id = 669

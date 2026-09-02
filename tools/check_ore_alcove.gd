@@ -19,7 +19,7 @@ func _go() -> void:
 	var walls: TileMapLayer = root.get_node("Tiles/Walls") as TileMapLayer
 	var veins: Array[Node] = []
 	for node: Node in root.get_node("MineableNodes").get_children():
-		if String(node.name).begins_with("Adamant") or String(node.name).begins_with("Runite"):
+		if (node as Node2D).position.x >= 52 * TILE:
 			veins.append(node)
 
 	var bad: int = 0

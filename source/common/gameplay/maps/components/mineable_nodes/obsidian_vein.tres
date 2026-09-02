@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3]
+
+[ext_resource type="Script" uid="uid://w4s2ld2v5xdq" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/obsidian_ore.tres" id="2_ore"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/catalysts/obsidian_flux.tres" id="4_add"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_obsidian.png" id="3_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_obsidian_f1.png" id="5_f1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_obsidian_f2.png" id="6_f2"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Obsidian Vein"
+ore = ExtResource("2_ore")
+job_xp = Dictionary[StringName, int]({
+&"mining": 140
+})
+secondary_ore = ExtResource("4_add")
+secondary_chance = 0.34
+required_level = 70
+required_tool = &"pickaxe"
+extraction_hp = 9
+min_charges = 3
+max_charges = 20
+charge_regen_seconds = 26.0
+depleted_recharge_seconds = 130.0
+texture = ExtResource("3_tex")
+idle_frames = Array[Texture2D]([ExtResource("5_f1"), ExtResource("6_f2")])
+idle_frame_seconds = 0.55
+shimmer_strength = 0.3
+shimmer_tint = Color(0.788, 0.549, 1, 1)
+shimmer_speed = 0.7
+chop_fx_style = &"starburst"
+chop_fx_color = Color(0.729, 0.322, 0.925, 1)
+chop_fx_color_alt = Color(0.114, 0.02, 0.184, 1)
+chop_fx_amount = 16
+hit_flash_strength = 0.55
+hit_flash_color = Color(0.933, 0.851, 1, 1)
+hit_flash_seconds = 0.12
+hit_recoil_pixels = 3.5

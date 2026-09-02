@@ -93,6 +93,16 @@ var _regen_armed: bool = false
 ## Client-side view of "this player's pool is empty" — freezes the idle cycle.
 var _depleted_visual: bool = false
 
+# --- Client-only strike feedback -------------------------------------------
+# Seconds left in the flash/recoil kicked off by a landed swing, and the length
+# it started at so the tick can work in normalised time. The recoil is applied
+# to the sprite's OFFSET rather than its position: `_layout_from_texture`, the
+# click-area and the chop-burst origin all read `_sprite.position`, and a
+# moving position would drag the hitbox and the particles around with it.
+var _strike_t: float = 0.0
+var _strike_len: float = 0.0
+var _strike_kick: Vector2 = Vector2.ZERO
+
 
 func _ready() -> void:
 	collision_layer = PhysicsLayers.HARVESTABLE # pick/sickle arcs target this to gather
@@ -492,6 +502,7 @@ func _arm_regen_prediction() -> void:
 
 func _process(delta: float) -> void:
 	_tick_idle(delta)
+	_tick_strike(delta)
 	if _regen_armed:
 		_tick_regen_prediction()
 
@@ -544,10 +555,16 @@ func _set_regen_armed(on: bool) -> void:
 ## while EITHER wants it — an early `set_process(false)` from one silently
 ## killed the other.
 func _update_process() -> void:
-	if multiplayer.is_server():
+	# Guarded the same way play_chop_effect() is: a bare is_server() pushes an
+	# error on every call when there is no peer at all, which is the editor
+	# preview and every tool scene.
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		return
 	var animated: bool = data != null and not data.idle_frames.is_empty() and not _depleted_visual
-	set_process(_regen_armed or animated)
+	# A strike in flight keeps _process alive on its own: a still, full node has
+	# neither an idle cycle nor a regen countdown, and would otherwise never get
+	# the frames it needs to finish the flash and settle the recoil.
+	set_process(_regen_armed or animated or _strike_t > 0.0)
 
 
 func _refresh_charge_label() -> void:
@@ -652,6 +669,8 @@ func _apply_sprite() -> void:
 	# AtlasTexture is itself a Texture2D and carries its own region.
 	_sprite.texture = data.texture
 	_sprite.modulate = Color.WHITE
+	# Celestial / Astralite veins shine; everything else keeps a null material.
+	_sprite.material = data.shimmer_material()
 	var s: float = maxf(0.1, data.visual_scale)
 	_sprite.scale = Vector2(s, s)
 
@@ -697,15 +716,70 @@ func _apply_depleted_visual(depleted: bool) -> void:
 	_depleted_visual = depleted
 	_update_process()
 	if depleted:
-		if data.depleted_texture != null:
-			_sprite.texture = data.depleted_texture
-			_sprite.modulate = Color.WHITE
-		else:
-			_sprite.texture = data.texture
-			_sprite.modulate = Color(0.55, 0.55, 0.55, 0.9)
+		_sprite.texture = data.depleted_texture if data.depleted_texture != null else data.texture
 	else:
 		_sprite.texture = _idle_texture()
-		_sprite.modulate = Color.WHITE
+	# A strike in flight owns the modulate until it finishes, and would be cut
+	# off mid-flash by writing it here — it restores this same base itself.
+	if _strike_t <= 0.0:
+		_sprite.modulate = _base_modulate()
+
+
+# ---------------------------------------------------------------------------
+# Strike feedback — flash + recoil on the struck body, client-side only.
+# ---------------------------------------------------------------------------
+
+## Grey a depleted node with no stump art of its own; everything else renders
+## at full colour. Single source of truth for the sprite's RESTING tint, so the
+## flash has something honest to return to on a node that emptied mid-swing.
+const DEPLETED_TINT: Color = Color(0.55, 0.55, 0.55, 0.9)
+
+
+func _base_modulate() -> Color:
+	if _depleted_visual and (data == null or data.depleted_texture == null):
+		return DEPLETED_TINT
+	return Color.WHITE
+
+
+## Arms the flash / recoil for one landed swing. Cheap enough to call on every
+## hit: no allocation, no node spawn, just three floats.
+func _begin_strike() -> void:
+	if data == null or _sprite == null:
+		return
+	if data.hit_flash_strength <= 0.0 and data.hit_recoil_pixels <= 0.0:
+		return
+	_strike_len = maxf(0.02, data.hit_flash_seconds)
+	_strike_t = _strike_len
+	# Kick mostly upward — a struck rock jolts in its socket — with a little
+	# side-to-side scatter so a batch of swings doesn't look metronomic.
+	_strike_kick = Vector2(randf_range(-0.4, 0.4), -1.0) * data.hit_recoil_pixels
+	_update_process()
+
+
+## Decays the flash and settles the recoil. Runs on the frames `_update_process`
+## keeps alive for it, and hands the sprite back to `_base_modulate()` when done.
+func _tick_strike(delta: float) -> void:
+	if _strike_t <= 0.0 or _sprite == null or data == null:
+		return
+	_strike_t = maxf(0.0, _strike_t - delta)
+	var t: float = _strike_t / maxf(0.01, _strike_len) # 1 at impact -> 0 at rest
+	if _strike_t <= 0.0:
+		_sprite.modulate = _base_modulate()
+		_sprite.offset = Vector2.ZERO
+		_update_process()
+		return
+	# OVERBRIGHT, not a plain tint. `modulate` multiplies, so lerping toward a
+	# colour at or below white can only ever darken the sprite — and lerping a
+	# white base toward pure white is a no-op, which is exactly how Celestial
+	# ended up configured for a flash it could never show. Scaling the tint past
+	# 1.0 by the strength makes it brighten, and keeps `hit_flash_color` meaning
+	# "what colour is the flash" rather than "how bright is it".
+	var flash: Color = data.hit_flash_color * (1.0 + data.hit_flash_strength)
+	flash.a = 1.0
+	_sprite.modulate = _base_modulate().lerp(flash, t)
+	# Damped bounce: amplitude falls off as t^2 while the cosine carries it
+	# back through rest and a little past, so it settles instead of snapping.
+	_sprite.offset = _strike_kick * (t * t) * cos((1.0 - t) * PI * 2.2)
 
 
 # ---------------------------------------------------------------------------
@@ -721,9 +795,14 @@ static var _fx_textures: Dictionary[StringName, Texture2D] = {}
 ## from ClientState when a gather result comes back OK, so it fires on the
 ## swinging player's screen in time with the axe connecting.
 func play_chop_effect() -> void:
-	if data == null or data.chop_fx_style == &"" or _sprite == null:
+	if data == null or _sprite == null:
 		return
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		return
+	# Flash / recoil first: they are configured independently of the particle
+	# style, so a node can jolt without a burst and vice versa.
+	_begin_strike()
+	if data.chop_fx_style == &"":
 		return
 	# Burst at the axe's height on the trunk, not at the node origin (the feet)
 	# or the canopy — that is where the player is watching.

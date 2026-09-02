@@ -31,7 +31,14 @@ enum Result {
 ## queue_frees on DAMAGED/BLOCKED and passes through on IGNORED; a melee arc just
 ## ignores the result and lets the damage land. Server-authoritative — call only
 ## where damage is owned (the hitboxes already gate on multiplayer.is_server()).
-static func try_damage(source: Character, body: Node2D, damage: float, damage_type: StringName = DAMAGE_PHYSICAL, deflectable: bool = false) -> Result:
+static func try_damage(
+	source: Character,
+	body: Node2D,
+	damage: float,
+	damage_type: StringName = DAMAGE_PHYSICAL,
+	deflectable: bool = false,
+	effect_kind: StringName = &""
+) -> Result:
 	# Combat hitboxes detect a character's HurtBox area (not its navigation body) — resolve
 	# the hurtbox to its owning Character so the target rules below work unchanged.
 	if body is HurtBox:
@@ -81,11 +88,14 @@ static func try_damage(source: Character, body: Node2D, damage: float, damage_ty
 	if damage <= 0.0:
 		return Result.IGNORED
 
-	body.take_damage(damage, source, damage_type)
+	body.take_damage(damage, source, damage_type, effect_kind)
 	# A weapon coating rides on top of a landed hit. Placed HERE, past every
 	# target rule, so one hook covers every weapon type at once — a melee arc and
 	# an arrow both arrive through this line.
 	CoatingService.on_hit(source, body as Character)
+	# Ammunition procs ride the same landed hit. Gated to ranged damage inside
+	# the service so a quiver cannot proc off a sword swing.
+	AmmoProcService.on_hit(source, body as Character, damage, damage_type)
 	return Result.DAMAGED
 
 
@@ -115,6 +125,35 @@ static func overlapping_bodies(hitbox: Area2D, max_results: int = 48) -> Array[N
 	params.collision_mask = hitbox.collision_mask
 	params.collide_with_bodies = true
 	params.collide_with_areas = true # also catch HurtBox areas (the hit target), not just bodies
+	for hit: Dictionary in space.intersect_shape(params, max_results):
+		var collider: Object = hit.get("collider")
+		if collider is Node2D:
+			out.append(collider as Node2D)
+	return out
+
+
+## Bodies inside a circle centred on [param at]. The position-based twin of
+## [method overlapping_bodies], for effects that burst around a POINT rather
+## than around a spawned hitbox (the Celestial arrow splash). Server-only, and
+## like its twin it must run during physics — direct_space_state is only valid
+## there.
+static func bodies_in_circle(
+	from: Node2D, at: Vector2, radius: float, max_results: int = 16
+) -> Array[Node2D]:
+	var out: Array[Node2D] = []
+	if from == null or radius <= 0.0:
+		return out
+	var space: PhysicsDirectSpaceState2D = from.get_world_2d().direct_space_state
+	if space == null:
+		return out
+	var circle := CircleShape2D.new()
+	circle.radius = radius
+	var params := PhysicsShapeQueryParameters2D.new()
+	params.shape = circle
+	params.transform = Transform2D(0.0, at)
+	params.collision_mask = TARGET_MASK
+	params.collide_with_bodies = true
+	params.collide_with_areas = true # HurtBox areas are the hit targets
 	for hit: Dictionary in space.intersect_shape(params, max_results):
 		var collider: Object = hit.get("collider")
 		if collider is Node2D:

@@ -10,6 +10,10 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/mithril_arrow.tres" id="r_4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/adamant_arrow.tres" id="r_5"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/runite_arrow.tres" id="r_6"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/dragon_arrow.tres" id="ar_dragon"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/obsidian_arrow.tres" id="ar_obsidian"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/celestial_arrow.tres" id="ar_celestial"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/ammo/astralite_arrow.tres" id="ar_astralite"]
 
 [resource]
 script = ExtResource("1_jp")
@@ -37,6 +41,6 @@ perks = Array[Dictionary]([{
 "name": "Bulk Nocking",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("2_item")]([ExtResource("r_0"), ExtResource("r_1"), ExtResource("r_2"), ExtResource("r_3"), ExtResource("r_4"), ExtResource("r_5"), ExtResource("r_6")])
-recipe_levels = Array[int]([1, 1, 15, 30, 45, 60, 75])
+recipe_items = Array[ExtResource("2_item")]([ExtResource("r_0"), ExtResource("r_1"), ExtResource("r_2"), ExtResource("r_3"), ExtResource("r_4"), ExtResource("r_5"), ExtResource("r_6"), ExtResource("ar_dragon"), ExtResource("ar_obsidian"), ExtResource("ar_celestial"), ExtResource("ar_astralite")])
+recipe_levels = Array[int]([1, 1, 15, 30, 45, 60, 75, 80, 84, 88, 92])
 describe_lines = Array[String](["Fletching XP +{xp}%", "Shafts while chopping: {shaft_yield}% of a log", "Extra arrow: {extra_item}%"])
