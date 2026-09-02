@@ -273,9 +273,14 @@ func ready_to_enter_instance() -> void:
 ## directions: spawn_player (a join) and InstanceManagerServer.player_switch_
 ## instance (a warp into a biome being charged for the first time — the first
 ## player into a brand-new zone, which is exactly when nobody has charged it yet).
-func await_map_ready() -> void:
+## Returns FALSE when this instance has no map at all — [method load_map] bails
+## early (missing path, a dependency that fails to parse) and leaves instance_map
+## null. Callers used to get a bare `return` here and then dereference it on the
+## very next line, so the spawn died mid-coroutine with a null-instance error and
+## the peer was simply never spawned: parked client, invisible avatar, relog.
+func await_map_ready() -> bool:
 	if instance_map == null:
-		return
+		return false
 	if not instance_map.is_node_ready():
 		await instance_map.ready
 	if instance_map.warpers.is_empty():
@@ -285,6 +290,7 @@ func await_map_ready() -> void:
 			"Instance '%s': no warpers registered at spawn — falling back to map origin."
 			% instance_resource.instance_name
 		)
+	return true
 
 
 #region spawn/despawn
@@ -294,7 +300,12 @@ func spawn_player(peer_id: int) -> void:
 	var spawn_index: int = 0
 	var spawn_position: Vector2
 
-	await await_map_ready()
+	if not await await_map_ready():
+		ServerLog.warn(
+			"Instance '%s': spawn_player(%d) aborted — the instance has no map."
+			% [instance_resource.instance_name, peer_id]
+		)
+		return
 
 	if awaiting_peers.has(peer_id):
 		var player_info: Dictionary = awaiting_peers[peer_id]
