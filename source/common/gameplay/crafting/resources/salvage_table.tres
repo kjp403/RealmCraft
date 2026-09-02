@@ -80,203 +80,203 @@ script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_spore")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
 required_level = 1
-xp_reward = 60
+xp_reward = 6
 
 [sub_resource type="Resource" id="S_hammer_spore"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_spore")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
 required_level = 1
-xp_reward = 60
+xp_reward = 6
 
 [sub_resource type="Resource" id="S_spore_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_spore_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
 required_level = 1
-xp_reward = 60
+xp_reward = 6
 
 [sub_resource type="Resource" id="S_wand_spore"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_wand_spore")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
 required_level = 1
-xp_reward = 60
+xp_reward = 6
 
 [sub_resource type="Resource" id="S_book_spore"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_spore")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_spore")])
 required_level = 1
-xp_reward = 60
+xp_reward = 6
 
 [sub_resource type="Resource" id="S_sword_poison"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_poison")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
 required_level = 20
-xp_reward = 140
+xp_reward = 14
 
 [sub_resource type="Resource" id="S_hammer_poison"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_poison")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
 required_level = 20
-xp_reward = 140
+xp_reward = 14
 
 [sub_resource type="Resource" id="S_poison_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_poison_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
 required_level = 20
-xp_reward = 140
+xp_reward = 14
 
 [sub_resource type="Resource" id="S_wand_poison"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_wand_poison")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
 required_level = 20
-xp_reward = 140
+xp_reward = 14
 
 [sub_resource type="Resource" id="S_book_poison"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_poison")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_poison")])
 required_level = 20
-xp_reward = 140
+xp_reward = 14
 
 [sub_resource type="Resource" id="S_sword_fairy"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_fairy")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
 required_level = 25
-xp_reward = 170
+xp_reward = 17
 
 [sub_resource type="Resource" id="S_hammer_fairy"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_fairy")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
 required_level = 25
-xp_reward = 170
+xp_reward = 17
 
 [sub_resource type="Resource" id="S_fairy_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_fairy_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
 required_level = 25
-xp_reward = 170
+xp_reward = 17
 
 [sub_resource type="Resource" id="S_wand_fairy"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_wand_fairy")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
 required_level = 25
-xp_reward = 170
+xp_reward = 17
 
 [sub_resource type="Resource" id="S_book_fairy"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_fairy")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fairy")])
 required_level = 25
-xp_reward = 170
+xp_reward = 17
 
 [sub_resource type="Resource" id="S_sword_fire"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_fire")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
 required_level = 30
-xp_reward = 220
+xp_reward = 22
 
 [sub_resource type="Resource" id="S_hammer_fire"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_fire")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
 required_level = 30
-xp_reward = 220
+xp_reward = 22
 
 [sub_resource type="Resource" id="S_fire_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_fire_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
 required_level = 30
-xp_reward = 220
+xp_reward = 22
 
 [sub_resource type="Resource" id="S_fire_wand"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_fire_wand")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
 required_level = 30
-xp_reward = 220
+xp_reward = 22
 
 [sub_resource type="Resource" id="S_book_fire"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_fire")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_fire")])
 required_level = 30
-xp_reward = 220
+xp_reward = 22
 
 [sub_resource type="Resource" id="S_sword_bone"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_bone")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
 required_level = 1
-xp_reward = 25
+xp_reward = 3
 
 [sub_resource type="Resource" id="S_hammer_bone"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_bone")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
 required_level = 1
-xp_reward = 25
+xp_reward = 3
 
 [sub_resource type="Resource" id="S_bone_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_bone_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
 required_level = 1
-xp_reward = 25
+xp_reward = 3
 
 [sub_resource type="Resource" id="S_wand_bone"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_wand_bone")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
 required_level = 1
-xp_reward = 25
+xp_reward = 3
 
 [sub_resource type="Resource" id="S_book_bone"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_bone")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_bone")])
 required_level = 1
-xp_reward = 25
+xp_reward = 3
 
 [sub_resource type="Resource" id="S_sword_rustic"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_sword_rustic")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
 required_level = 1
-xp_reward = 90
+xp_reward = 9
 
 [sub_resource type="Resource" id="S_hammer_rustic"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_hammer_rustic")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
 required_level = 1
-xp_reward = 90
+xp_reward = 9
 
 [sub_resource type="Resource" id="S_rustic_bow"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_rustic_bow")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
 required_level = 1
-xp_reward = 90
+xp_reward = 9
 
 [sub_resource type="Resource" id="S_book_rustic"]
 script = ExtResource("2_recipe")
 source_item = ExtResource("w_book_rustic")
 outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
 required_level = 1
-xp_reward = 90
+xp_reward = 9
 
 [resource]
 script = ExtResource("1_table")

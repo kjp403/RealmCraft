@@ -7,6 +7,32 @@ name: Deploy VPS
 on:
   push:
     branches: [main]
+    # A WEBSITE OR DOCS PUSH MUST NOT RESTART THE WORLD. deploy/update.sh always
+    # ends in `systemctl restart arkenelle-master arkenelle-gateway
+    # arkenelle-world`, so before this filter a CSS tweak disconnected every
+    # player — and if it landed inside a Traveling Peddler window it took the
+    # cart with it, because the cart is only re-placed once a player is standing
+    # in its biome again. Cloudflare Pages builds website/ from the same push, so
+    # the site still ships; only the VPS deploy is skipped.
+    #
+    # AN IGNORE LIST, NOT AN ALLOW LIST. Anything new defaults to deploying,
+    # which is the safe direction to be wrong in — a missed deploy is a bug
+    # report, a missed path in an allow list is a server silently running old
+    # code. Only add a path here if it cannot change what the server runs.
+    #
+    # `.github/**` IS ON THE LIST ON PURPOSE, and it is what lets this filter
+    # apply to its own arrival. A push event runs the workflow file as it exists
+    # in the pushed commit, so the commit that adds these lines is already
+    # filtered by them — a push carrying only website and workflow changes skips
+    # the deploy instead of costing one last restart to install the fix. Nothing
+    # under .github/ is read by deploy/update.sh or by any game service; it runs
+    # on GitHub's runners only.
+    paths-ignore:
+      - "website/**"
+      - ".github/**"
+      - "previews/**"
+      - "**/*.md"
+  # Always available, and the way to force a deploy after a skipped push.
   workflow_dispatch:
 
 concurrency:

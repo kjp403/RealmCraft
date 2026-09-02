@@ -11,11 +11,25 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "website", "dist");
 const SRC = path.join(ROOT, "website", "src");
-const CSS_V = crypto
-  .createHash("sha1")
-  .update(fs.readFileSync(path.join(SRC, "styles.css")))
-  .digest("hex")
-  .slice(0, 10);
+// Content hash appended to every asset URL, so a changed file is a changed URL
+// and the browser cannot serve the previous build from cache.
+//
+// THIS IS THE ONLY CACHE CONTROL THAT WORKS HERE. Cloudflare Pages serves every
+// static asset at `max-age=14400` and overrides the Cache-Control lines in
+// `_headers` — verified live, where /styles.css sent 14400 while a max-age=60
+// rule for it sat in that file. The file's OTHER headers do apply, which is
+// exactly what makes a dead Cache-Control rule there look alive. Four hours of
+// returning visitors on the previous build reads as a deploy that never
+// happened, so every asset URL carries its content hash instead.
+function assetV(name) {
+  return crypto
+    .createHash("sha1")
+    .update(fs.readFileSync(path.join(SRC, name)))
+    .digest("hex")
+    .slice(0, 10);
+}
+
+const CSS_V = assetV("styles.css");
 
 const ITCH = "https://kjp403.itch.io/arkenelle";
 const PLAY_WEB = "https://play.arkenelle.com/";
@@ -596,7 +610,11 @@ const WIKI_SECTIONS = new Set([
 function shell({ title, active, body, scripts = [], theme = "", extraClass = "" }) {
   const home = "/";
   const wiki = "/wiki/";
-  const extraScripts = scripts.map((src) => `  <script src="${src}"></script>`).join("\n");
+  // Stamped the same way as the stylesheet — a page script that ships without a
+  // hash is one a returning visitor keeps running for four hours after a fix.
+  const extraScripts = scripts
+    .map((src) => `  <script src="${src}?v=${assetV(path.basename(src))}"></script>`)
+    .join("\n");
   const classes = [theme ? `theme-${theme}` : "", extraClass].filter(Boolean).join(" ");
   const bodyClass = classes ? ` class="${classes}"` : "";
   return `<!doctype html>
@@ -631,7 +649,7 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
   </header>
   ${body}
   <footer class="footer">Arkenelle is in alpha. Wiki pages are generated from the game files.</footer>
-  <script src="/search.js"></script>
+  <script src="/search.js?v=${assetV("search.js")}"></script>
 ${extraScripts}
 </body>
 </html>`;
@@ -1957,18 +1975,27 @@ function build() {
 
   fs.copyFileSync(path.join(SRC, "styles.css"), path.join(DIST, "styles.css"));
   copyFonts();
-  fs.copyFileSync(path.join(SRC, "search.js"), path.join(DIST, "search.js"));
-  fs.copyFileSync(path.join(SRC, "leaderboards.js"), path.join(DIST, "leaderboards.js"));
-  fs.copyFileSync(path.join(SRC, "peddler.js"), path.join(DIST, "peddler.js"));
+  // One list, used for BOTH the copy and the cache rule below, so a script added
+  // here cannot end up shipped without a header. Cloudflare Pages' default for an
+  // unmatched asset is max-age=14400 — four hours in which returning visitors run
+  // the previous build. That already bit once: a live fix to peddler.js looked
+  // like it had never deployed, because the browser was still holding the old
+  // script from before the merge.
+  const SCRIPTS = ["search.js", "leaderboards.js", "peddler.js"];
+  for (const name of SCRIPTS) {
+    fs.copyFileSync(path.join(SRC, name), path.join(DIST, name));
+  }
+  // NO Cache-Control RULES HERE ON PURPOSE. Cloudflare Pages overrides
+  // Cache-Control for static assets and serves everything at max-age=14400
+  // regardless of what this file says — verified against the live site, where
+  // /styles.css sent 14400 while a max-age=60 rule for it sat in this file. The
+  // other headers below DO apply, which is what made the dead ones look alive.
+  // Cache busting is the ?v=<content hash> on each asset URL instead.
   write(
     "_headers",
     `/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-/styles.css
-  Cache-Control: public, max-age=60, must-revalidate
-/media/*
-  Cache-Control: public, max-age=604800
 `
   );
   write("robots.txt", "User-agent: *\nAllow: /\n");
@@ -2166,7 +2193,7 @@ function build() {
         <section class="pd-banner">
           <div class="pd-zone-wrap">
             <span class="pd-zone-label">Current zone</span>
-            <strong class="pd-zone" data-pd-zone>Unknown (Roam Phase)</strong>
+            <strong class="pd-zone" data-pd-zone>Checking the world…</strong>
           </div>
           <div class="pd-clocks" data-pd-clocks></div>
         </section>
