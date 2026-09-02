@@ -648,7 +648,7 @@ func _check_web_export() -> void:
 	# banner or a stuck countdown, so every one is asserted by name.
 	var payload: Dictionary = PeddlerWebExport.build_payload(&"desert", true)
 	for key: String in [
-		"is_active", "current_zone", "time_remaining_seconds",
+		"is_active", "current_zone", "next_zone", "time_remaining_seconds",
 		"next_spawn_utc_timestamp", "daily_stock",
 	]:
 		if not payload.has(key):
@@ -670,13 +670,37 @@ func _check_web_export() -> void:
 	if flat.contains(PeddlerWebExport.KEY_ENV) or flat.to_lower().contains("authorization"):
 		_fail("the payload mentions the auth key — it belongs in the header only")
 
-	# A CLOSED window must not advertise a zone, or the site would name a place
-	# nobody can go.
-	var closed: Dictionary = PeddlerWebExport.build_payload(&"desert", false)
+	# A window with a biome names it whether or not the cart is standing yet —
+	# that is the site's "due, not arrived" line. What must NOT name a zone is a
+	# snapshot with no window at all, which the manager reports as an empty biome.
+	var setting_up: Dictionary = PeddlerWebExport.build_payload(&"desert", false)
+	if str(setting_up.get("current_zone", "")).is_empty():
+		_fail("a window that has not placed its cart yet reports no zone")
+	var closed: Dictionary = PeddlerWebExport.build_payload(&"", false)
 	if str(closed.get("current_zone", "")) != "":
-		_fail("an inactive snapshot still names a zone")
+		_fail("a snapshot with no window still names a zone")
 	if int(closed.get("time_remaining_seconds", -1)) != 0:
 		_fail("an inactive snapshot reports time remaining")
+
+	# The hint the website draws. It must be present in EVERY state — including
+	# between windows, which is exactly when a player is looking at the page to
+	# find out where to be — and must name the biome the next cycle resolves to.
+	var expected_next: String = String(
+		PeddlerSites.biome_for_cycle(PeddlerSchedule.cycle_index() + 1)
+	)
+	# Off a world server there is no instance collection to prettify names with,
+	# so the exporter falls back to the raw instance_name and the hint compares
+	# exactly. That is the case this tool always runs in.
+	for snapshot: Dictionary in [payload, setting_up, closed]:
+		var hint: String = str(snapshot.get("next_zone", ""))
+		if hint.is_empty():
+			_fail("a snapshot carries no next_zone hint")
+			break
+		if hint != expected_next:
+			_fail("next_zone says '%s', the next cycle resolves to '%s'" % [
+				hint, expected_next
+			])
+			break
 	# next_spawn must always be in the future, in both states — it is what the
 	# site counts down to and a past timestamp would render as a stuck 0.
 	var now_s: int = PeddlerSchedule.now_s()

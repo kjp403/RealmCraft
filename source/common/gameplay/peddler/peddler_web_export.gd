@@ -31,7 +31,9 @@ const URL_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_URL"
 const KEY_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_KEY"
 ## Payload schema version, so the gateway and the site can tell an old world
 ## server's snapshot from a new one after a field changes.
-const SCHEMA: int = 1
+##
+## 2 — added next_zone.
+const SCHEMA: int = 2
 
 
 ## True when both environment variables are present. Read live rather than
@@ -42,8 +44,10 @@ static func is_configured() -> bool:
 		and not OS.get_environment(KEY_ENV).is_empty()
 
 
-## Build the snapshot the website renders. Pure — takes no I/O and no node — so
-## the verify gate can assert its shape without standing up a server.
+## Build the snapshot the website renders. Takes no node and makes no network
+## call, so the verify gate can assert its shape without standing up a server.
+## (It does read the biome pool off disk the first time, via [PeddlerSites], and
+## that result is cached for the life of the process.)
 ##
 ## [param biome] is the instance_name the cart is assigned to (&"" when closed),
 ## and [param active] whether it is actually standing. They are separate because
@@ -63,7 +67,26 @@ static func build_payload(biome: StringName, active: bool) -> Dictionary:
 	return {
 		"schema": SCHEMA,
 		"is_active": active,
-		"current_zone": _zone_title(biome) if active else "",
+		# The zone this window is ASSIGNED to, standing or not — it is &"" (and so
+		# "") only when no window is open. It used to be blanked unless the cart
+		# was actually placed, because an assigned biome was not necessarily one
+		# anybody could visit; now that the window charges its own biome
+		# ([PeddlerManager]), naming it while the cart sets up is a promise the
+		# server keeps, and it is what the site's "due, not arrived" state needs.
+		"current_zone": _zone_title(biome),
+		# WHERE THE NEXT CART WILL BE, as a zone name and nothing else. This is
+		# deliberately a hint and not a location: a zone is a whole map, so
+		# knowing it still leaves you to walk it and find the cart, which is the
+		# part of the event worth keeping. It is published ahead of time on
+		# purpose — the alternative is players who log in mid-window with no way
+		# to learn where the cart is, and give up.
+		#
+		# Always populated, including while a cart is standing, so the site can
+		# show "here now / there next" rather than going blank the moment the
+		# current window closes.
+		"next_zone": _zone_title(
+			PeddlerSites.biome_for_cycle(PeddlerSchedule.cycle_index(now_s) + 1)
+		),
 		"time_remaining_seconds": PeddlerSchedule.seconds_remaining(now_s) if active else 0,
 		"next_spawn_utc_timestamp": PeddlerSchedule.next_spawn_s(now_s),
 		# The site derives its own countdowns from the timestamps above, but it
