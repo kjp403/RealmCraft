@@ -81,6 +81,7 @@ func _run() -> void:
 	_check_web_export()
 	_check_discord()
 	_check_sites()
+	_check_hostable()
 	_check_vault_payout()
 	await _check_placement()
 	print("")
@@ -879,6 +880,51 @@ func _check_vault_payout() -> void:
 ## init), which is the only thing that proves the slug hop works: the init crosses
 ## the wire as a plain dictionary, so a typo there is an NPC with no resource,
 ## no click area and no cart — and no error anywhere.
+## EVERY biome must be able to carry the cart. The cycle can send it to any one
+## of them, and a biome that cannot host is a whole 30-minute window nobody can
+## attend — silently, because the manager walks on to the next biome while the
+## website has already named the first one.
+##
+## Read off the PACKED scene rather than by standing nineteen maps up. The only
+## question is whether the container node carries replicated_props.gd: map.gd
+## looks the node up by name and CASTS it, so an unscripted Node2D with the right
+## name reads as no container at all. deep_shoals was exactly that for months.
+func _check_hostable() -> void:
+	print("biome hosting")
+	var biomes: Array[StringName] = PeddlerSites.biome_names()
+	var missing: PackedStringArray = []
+	for name: StringName in biomes:
+		var res: InstanceResource = _find_instance(
+			name, "%s%s.tres" % [PeddlerSites.BIOMES_DIR, name]
+		)
+		if res == null:
+			_fail("no instance resource for biome '%s'" % name)
+			continue
+		if not _scene_hosts_props(res.map_path):
+			missing.append(String(name))
+	if missing.is_empty():
+		_ok("every biome can host the cart", "%d biomes" % biomes.size())
+	else:
+		_fail("cannot carry a dynamic prop, so the cart skips: %s" % ", ".join(missing))
+
+
+func _scene_hosts_props(map_path: String) -> bool:
+	var scene: PackedScene = load(map_path) as PackedScene
+	if scene == null:
+		return false
+	var state: SceneState = scene.get_state()
+	for i: int in state.get_node_count():
+		if state.get_node_name(i) != &"ReplicatedPropsContainer":
+			continue
+		for prop: int in state.get_node_property_count(i):
+			if state.get_node_property_name(i, prop) != &"script":
+				continue
+			var script: Script = state.get_node_property_value(i, prop) as Script
+			if script != null and script.resource_path.ends_with("replicated_props.gd"):
+				return true
+	return false
+
+
 func _check_placement() -> void:
 	print("placement")
 	var biome: StringName = PeddlerSites.biome_for_cycle(PeddlerSchedule.cycle_index())
@@ -920,6 +966,38 @@ func _check_placement() -> void:
 		_fail("the spot probe is not deterministic for one cycle")
 	_ok("spot in %s" % biome, "(%.0f, %.0f)" % [peddler_at.x, peddler_at.y])
 
+	# THE EMPTY-BIOME CASE, which is now the ordinary one: the window charges its
+	# own biome, so in the usual run nobody is standing there when the cart is
+	# placed and EVERY player who sees it arrives afterwards. Late joiners are
+	# served capture_bootstrap_block(), not the spawn op that went out at
+	# placement — a cart missing from that block exists on the server and is
+	# invisible to every player who walks in, which looks exactly like it never
+	# spawned at all.
+	var container: ReplicatedPropsContainer = map.replicated_props_container
+	if container != null:
+		var placed: Node = container.spawn_dynamic(
+			ReplicatedPropsContainer.SCENE_NPC,
+			container.to_local(peddler_at),
+			{"name": PeddlerNames.NODE_NAME, "npc_slug": PeddlerNames.NPC_SLUG}
+		)
+		if placed == null:
+			_fail("the cart could not be spawned into %s" % biome)
+		else:
+			var carried: bool = false
+			for entry: Variant in (container.capture_bootstrap_block()["spawns"] as Array):
+				var row: Array = entry as Array
+				if int(row[1]) != ReplicatedPropsContainer.SCENE_NPC:
+					continue
+				# The NAME has to ride the bootstrap too, not just the scene: the
+				# shop window sends it back for the server's range check, and a
+				# late joiner whose copy is called "NPC" is answered "closed".
+				if str((row[2] as Dictionary).get("name", "")) == PeddlerNames.NODE_NAME:
+					carried = true
+			if carried:
+				_ok("late joiner", "an empty biome's cart rides the bootstrap, named")
+			else:
+				_fail("a cart placed with nobody watching is missing from the bootstrap")
+
 	var npc_scene: PackedScene = load(
 		ReplicatedPropsContainer.DYNAMIC_SCENE_PATHS[ReplicatedPropsContainer.SCENE_NPC]
 	) as PackedScene
@@ -954,7 +1032,13 @@ func _check_placement() -> void:
 
 
 func _find_instance(biome: StringName, guess: String) -> InstanceResource:
-	if ResourceLoader.exists(guess):
+	# FileAccess first: ResourceLoader.exists() still logs an engine-level "cannot
+	# open file" for a path that is not there, and four biomes are named
+	# differently from their .tres (Forest/forest, FungusArea1/fungus_cave,
+	# pirates_cove/deep_shoals). Falling back to the scan is the NORMAL path for
+	# those, and a gate that prints ERROR lines on its happy path teaches people
+	# to skim past the ones that matter.
+	if FileAccess.file_exists(guess) and ResourceLoader.exists(guess):
 		var direct: InstanceResource = load(guess) as InstanceResource
 		if direct != null and direct.instance_name == biome:
 			return direct
