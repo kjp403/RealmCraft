@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InstanceResource" format=3]
+
+[ext_resource type="Script" uid="uid://deqjrbn7hm53u" path="res://source/common/gameplay/maps/instance/instance_resource.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://cstarfallgrv01" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/starfall_grove.tres" id="2_grove"]
+
+[resource]
+script = ExtResource("1_script")
+instance_name = &"starfall_mining_cave"
+map_path = "res://source/common/gameplay/maps/maps/starfall_mining_cave/starfall_mining_cave.tscn"
+zone_title = "Starfall Mining Cave"
+level_min = 65
+level_max = 90
+show_discovery = true
+death_return_instance = ExtResource("2_grove")
+death_return_warper_id = 35
+metadata/_custom_type_script = "uid://deqjrbn7hm53u"

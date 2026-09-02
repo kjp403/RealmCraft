@@ -921,7 +921,131 @@ factor needs recomputing — do not merge on the assumption that it will settle.
 
 ---
 
-## 6. Deploy reminder (important)
+## 6. Cave maps: layers, collision and the Starfall Mining Cave
+
+`starfall_mining_cave.tscn` is **generated**. Hand edits are lost the next time
+`tools/build_starfall_mining_cave.gd` runs — change the generator, then re-run
+and re-verify. Same rule as the biome maps in §2.
+
+```
+godot --headless --path . -s tools/build_starfall_mining_cave.gd
+godot --path . --mode=client res://tools/verify_starfall_cave.tscn   # bad=0
+godot --headless --path . -s tools/verify_warp_links.gd              # VERIFY_PASS
+```
+
+### 6.1 Layer order — what each one is for
+
+Everything hangs off a `Tiles` Node2D with `y_sort_enabled`. Order and
+`z_index` are the whole "no overlap, no bleeding" story:
+
+| Node | z_index | y_sort | Carries collision | Purpose |
+|------|---------|--------|-------------------|---------|
+| `Tiles/Ground` | `-3` | no | no | floor, **and a dark fill under every void cell** |
+| `Tiles/GroundDetail` | `-2` | no | no | per-alcove floor material, autotiled |
+| `Tiles/Walls` | default | **yes** | **yes** | rim + cliff face; the only solid layer |
+| `Tiles/Props` | default | **yes** | some | boulders and formations |
+| `Tiles/Ceiling` | `200` | no | **never** | overhang drawn ABOVE the player |
+| `MineableNodes` | — | **yes** | per-node | ore veins |
+| `ReplicatedPropsContainer` | — | **yes** | per-node | NPCs |
+
+Rules that produce the clean result:
+
+* **Y-sort on the map root, `Tiles`, `Walls`, `Props`, `MineableNodes` and
+  `ReplicatedPropsContainer`.** A player must sort against a wall and a vein by
+  their feet. `Ground`/`GroundDetail`/`Ceiling` are flat and use `z_index`
+  instead — y-sorting a full-map floor layer is wasted sorting.
+* **Ground is painted under the VOID as well as the floor.** The rim corner art
+  is only ~70% opaque; without a dark fill behind it the corners punch through
+  to the background and read as flat grey squares. This is the single most
+  common cause of "tile bleeding" in this pack.
+* **The Ceiling layer must never carry collision.** It draws at `z_index 200`,
+  above the player, so a solid tile there is an invisible wall. The audit fails
+  the build if any tile on it has a collision polygon.
+
+### 6.2 Collision is a property of the TILESET, not the layer
+
+In `rpgw_caves_tileset.tres` exactly one block of atlas cells — `(0,0)` to
+`(9,8)`, the rim bank — carries collision polygons. 82 tiles. Everything else in
+the 2448-tile sheet is decorative and walkable.
+
+That has two consequences worth internalising:
+
+* A wall drawn from anywhere else in the sheet **looks like rock and walks like
+  floor.** `MapKit.paint_rim` only ever paints from the rim bank, which is why
+  the generator's walkability model and the physics engine agree.
+* Collision sits at the **visual base** of the wall, not its top edge. The south
+  cliff face is three tiles tall in the art, so `paint_rim` blocks the void cell
+  plus the **two rows beneath it** (`face_rows = 2`). Skip that and players walk
+  into the painted rock face.
+
+`verify_starfall_cave.gd` re-derives solidity from
+`TileData.get_collision_polygons_count(0)` on the built scene rather than
+trusting any of the above, then floods from the entrance. It refuses a vein
+inside rock, an unreachable pocket, a floating wall cell with no wall neighbour,
+a walkable cell with no ground under it, and a vein whose only approach is a
+1-tile pinch.
+
+### 6.3 Zonal layout
+
+Six rooms, joined by ~5-tile corridors so two players pass without shoving each
+other into the rock:
+
+| Room | Tier | Floor material | Light |
+|------|------|----------------|-------|
+| Lantern Landing | — | earth | warm, campfire + grove portal |
+| The Crossing | — | grey stone | neutral; every alcove hangs off it |
+| Emberthroat | Dragon, Mining 65 | earth | hot orange |
+| Geode Hollow | Obsidian, Mining 70 | grey stone | violet |
+| The Skylight | Celestial, Mining 80 | mossy | pale gold, brightest room |
+| Astral Vault | Astralite, Mining 90 | grey stone | cold violet, behind a throat |
+
+> **What actually separates zones is the FLOOR and the LIGHT, not the rock.**
+> Corridors wide enough for multiplayer inevitably read as openings at map
+> scale, so thinning the rock between rooms does not buy distinctness. Each
+> alcove gets its own autotiled ground material via `MapKit.paint_corner_patch`.
+> An early pass painted those patches with the *same* tiles as the base ground —
+> the layer filled with 800+ cells and nothing changed on screen.
+
+### 6.4 Vein placement rules
+
+Veins are placed by the generator, never by hand. `ZONES` in the generator is
+the authoring surface: centre, radius, count, colour, floor material.
+
+* A vein goes on a floor cell that **touches rock** (`MapKit.edge_cells`) — that
+  is where an embedded seam belongs.
+* `ore_r` must be **>= the chamber radius**, because that touching-rock ring
+  lives at the chamber wall. Set it lower and the search only sees the open
+  middle of the room and silently places nothing.
+* Minimum spacing is `MapKit.scatter(..., spacing: 2)`. `spacing` is a Chebyshev
+  +/-N box, so 2 already guarantees 3 tiles / 96px — comfortably past the 72px
+  (1.5x `HarvestController.GATHER_RANGE`) a click needs to resolve to one vein.
+  3 reserves a 7x7 and starves the smaller chambers.
+* Every vein needs **>= 3 open sides**, or two players block each other on it.
+
+### 6.5 Zone transition
+
+Bidirectional, and both halves are generated:
+
+| Side | Node | warper_id | target_id |
+|------|------|-----------|-----------|
+| Starfall Grove | `CaveMouth` (arrival) | 35 | — |
+| Starfall Grove | `MiningCavePortal` | 134 | 34 |
+| Mining Cave | `Entrance` (arrival) | 34 | — |
+| Mining Cave | `GrovePortal` | 135 | 35 |
+
+The grove half lives in `tools/build_starfall_grove.gd` and sits on the
+**Unquarried Shelf**, the paved, lit, road-connected clearing that map has
+always reserved for the high ore tiers. `verify_warp_links.gd` proves both
+`(target_instance, target_id)` pairs resolve to a real warper in the
+destination map — a link pointing at a missing id used to drop players into the
+top-left border wall.
+
+Portals fade the screen and reposition through the shared
+`warper/portal.tscn`; there is no per-map transition code to write.
+
+---
+
+## 7. Deploy reminder (important)
 
 World/server content is **authoritative**. Editing maps, NPCs, shops, items, or portals in git does nothing live until the VPS pulls and restarts.
 

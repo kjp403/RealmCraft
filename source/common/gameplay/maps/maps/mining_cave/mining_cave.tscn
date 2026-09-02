@@ -14,10 +14,6 @@
 [ext_resource type="Resource" uid="uid://dtpviov364y0b" path="res://source/common/gameplay/maps/components/mineable_nodes/coal_vein.tres" id="14_coal"]
 [ext_resource type="Resource" uid="uid://cmithrilvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/mithril_vein.tres" id="15_mith"]
 [ext_resource type="Resource" uid="uid://cadamantvein01" path="res://source/common/gameplay/maps/components/mineable_nodes/adamant_vein.tres" id="16_adam"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/dragon_vein.tres" id="30_dragonvein"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/obsidian_vein.tres" id="30_obsidianvein"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/celestial_vein.tres" id="30_celestialvein"]
-[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/astralite_vein.tres" id="30_astralitevein"]
 [ext_resource type="Resource" uid="uid://crunitevein001" path="res://source/common/gameplay/maps/components/mineable_nodes/runite_vein.tres" id="17_rune"]
 [ext_resource type="PackedScene" uid="uid://v32667qwpj2l" path="res://source/common/gameplay/characters/npc/hostile_npc.tscn" id="19_npc"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/types/cave_bat.tres" id="20_bat"]
@@ -753,71 +749,6 @@ y_sort_enabled = true
 position = Vector2(1712, 592)
 data = ExtResource("17_rune")
 
-
-[node name="DragonVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1904, 592)
-data = ExtResource("30_dragonvein")
-
-[node name="DragonVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1808, 656)
-data = ExtResource("30_dragonvein")
-
-[node name="DragonVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1712, 816)
-data = ExtResource("30_dragonvein")
-
-[node name="ObsidianVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1776, 880)
-data = ExtResource("30_obsidianvein")
-
-[node name="ObsidianVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1680, 912)
-data = ExtResource("30_obsidianvein")
-
-[node name="ObsidianVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1840, 944)
-data = ExtResource("30_obsidianvein")
-
-[node name="CelestialVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1744, 976)
-data = ExtResource("30_celestialvein")
-
-[node name="CelestialVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1904, 1008)
-data = ExtResource("30_celestialvein")
-
-[node name="CelestialVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1808, 1040)
-data = ExtResource("30_celestialvein")
-
-[node name="AstraliteVein1" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1712, 1072)
-data = ExtResource("30_astralitevein")
-
-[node name="AstraliteVein2" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1872, 1104)
-data = ExtResource("30_astralitevein")
-
-[node name="AstraliteVein3" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1776, 1136)
-data = ExtResource("30_astralitevein")
-
-[node name="AstraliteVein4" parent="MineableNodes" instance=ExtResource("10_mine")]
-y_sort_enabled = true
-position = Vector2(1744, 1232)
-data = ExtResource("30_astralitevein")
 
 [node name="RespawnPoint" parent="." instance=ExtResource("5_warper")]
 position = Vector2(368.0, 1200.0)

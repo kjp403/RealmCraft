@@ -320,10 +320,11 @@ func _build(ts: TileSet) -> void:
 			dirt.erase(cell)
 	_paint_roles(overlay, dirt, _dirt_roles)
 
-	# _shelf_note: the Unquarried Shelf is paved bare stone and left empty. The
-	# four parked high ore tiers (Dragon / Obsidian / Celestial / Astralite, on
-	# content/high-ore-tiers) drop in here as one more `stands` entry below —
-	# the ground, the road from Rosewood Heart and the lighting already exist.
+	# _shelf_note: the Unquarried Shelf is paved bare stone and deliberately has
+	# no trees on it. The four high ore tiers (Dragon / Obsidian / Celestial /
+	# Astralite) landed as a CAVE reached from here rather than as a stand on it
+	# — see MiningCavePortal below and build_starfall_mining_cave.gd. The ground,
+	# the road from Rosewood Heart and ShelfGlow were already waiting for them.
 	var shelf: Dictionary = {}
 	MapKit.blob(shelf, places["shelf"], 11.0, 0.24, 726, _bounds)
 	for cell: Vector2i in shelf.keys():
@@ -487,12 +488,27 @@ func _build(ts: TileSet) -> void:
 		"critters": critters,
 		"nodes": gather_nodes,
 		"spawn": LevelKit.tile_pos(home),
-		"warpers": [{"name": "Entrance", "pos": LevelKit.tile_pos(home), "id": 33}],
-		"portals": [{
-			"name": "HubPortal", "pos": LevelKit.tile_pos(home + Vector2i(3, 2)),
-			"id": 133, "target_id": 33, "instance": INST + "overworld.tres",
-			"label": "Castle Garden", "color": "Color(0.36, 0.86, 0.82, 1)",
-		}],
+		"warpers": [
+			{"name": "Entrance", "pos": LevelKit.tile_pos(home), "id": 33},
+			# Where a player lands coming back UP out of the mine. Sits on the
+			# Unquarried Shelf, which this map has always paved and lit for the
+			# high ore tiers — they are a cave off it rather than a stand on it.
+			{"name": "CaveMouth", "pos": LevelKit.tile_pos(places["shelf"]), "id": 35},
+		],
+		"portals": [
+			{
+				"name": "HubPortal", "pos": LevelKit.tile_pos(home + Vector2i(3, 2)),
+				"id": 133, "target_id": 33, "instance": INST + "overworld.tres",
+				"label": "Castle Garden", "color": "Color(0.36, 0.86, 0.82, 1)",
+			},
+			{
+				"name": "MiningCavePortal",
+				"pos": LevelKit.tile_pos(places["shelf"] + Vector2i(3, -2)),
+				"id": 134, "target_id": 34,
+				"instance": INST + "biomes/starfall_mining_cave.tres",
+				"label": "Starfall Mining Cave", "color": "Color(0.82, 0.55, 1, 1)",
+			},
+		],
 	})
 	print("wrote ", OUT)
 
