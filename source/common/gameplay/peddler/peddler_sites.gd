@@ -201,4 +201,14 @@ static func _scan() -> void:
 		var name: StringName = (loaded as InstanceResource).instance_name
 		if name != &"" and not _biomes.has(name):
 			_biomes.append(name)
-	_biomes.sort()
+	# BY TEXT, not Array.sort(). StringName's `<` compares the interned pointer,
+	# not the characters, so a plain sort() orders the pool by whatever address
+	# the engine happened to hand each name — an order that changes with the
+	# interning order of the whole process. That silently broke the promise this
+	# file is built on: the same cycle index resolved to a DIFFERENT biome in a
+	# world server, in a tool, and in the same world server after an unrelated
+	# script started interning names earlier. Comparing the text is the only
+	# ordering that is the same everywhere.
+	_biomes.sort_custom(func(a: StringName, b: StringName) -> bool:
+		return String(a) < String(b)
+	)
