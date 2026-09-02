@@ -94,7 +94,7 @@ chance = 0.001
 script = ExtResource("1_4uukv")
 item = ExtResource("loot_dragon_bones")
 min_amount = 1
-max_amount = 2
+max_amount = 1
 chance = 1.0
 
 [resource]
