@@ -183,7 +183,7 @@ chance = 0.4
 script = ExtResource("3_ew0xl")
 item = ExtResource("loot_dragon_bones")
 min_amount = 1
-max_amount = 2
+max_amount = 1
 chance = 1.0
 
 [sub_resource type="Resource" id="Drop_duskfeather_cloak"]

@@ -21,7 +21,7 @@ required_level = 0
 [sub_resource type="Resource" id="O_dragon_bones"]
 script = ExtResource("2_offering")
 item = ExtResource("mat_dragon_bones")
-xp = 869
+xp = 9000
 required_level = 0
 
 [resource]
