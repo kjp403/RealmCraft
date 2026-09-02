@@ -42,6 +42,7 @@ func _fail(msg: String) -> void:
 func _go() -> void:
 	_check_items()
 	_check_splat_colors()
+	_check_bow_damage_types()
 	_check_recipes()
 	_check_job_mirrors()
 	print("HIGH_TIER_ARROWS bad=", _bad)
@@ -142,6 +143,48 @@ func _check_splat_colors() -> void:
 			_fail("FloatingDamageNumber has no colour for '%s' — the splat falls back to orange"
 				% splat)
 	print("ok splat colours: 4 arrow effects matched in FloatingDamageNumber")
+
+
+## Every bow ability must stamp RANGED on the damage it deals.
+##
+## [method AmmoProcService.on_hit] gates on `damage_type == DAMAGE_RANGED`, but
+## both [member Projectile.damage_type] and [member MeleeArc.damage_type]
+## default to PHYSICAL — because most projectiles are bolts and most arcs are
+## sword swings. A bow path that never assigns it therefore disables the
+## quiver's proc for that entire ability, and nothing anywhere complains: the
+## arrows fly, the damage lands, the proc simply never rolls.
+##
+## Rapid Fire and Rain of Arrows both shipped that way, which is why this check
+## exists rather than a comment asking the next author to remember.
+func _check_bow_damage_types() -> void:
+	for entry: Array in [
+		["res://source/common/gameplay/combat/ability/ability_collection/charge_shot/bow_shot.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/charge_shot/venom_shot.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_1.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_2.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_3.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/channel/rapid_fire_4.tres", &"projectile_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows.tres", &"arc_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_1.tres", &"arc_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_2.tres", &"arc_damage_type"],
+		["res://source/common/gameplay/combat/ability/ability_collection/meteor/rain_of_arrows_3.tres", &"arc_damage_type"],
+	]:
+		var path: String = entry[0]
+		var prop: StringName = entry[1]
+		var ability: Resource = load(path)
+		if ability == null:
+			_fail("could not load " + path)
+			continue
+		var value: Variant = ability.get(prop)
+		if value == null:
+			_fail("%s has no `%s` — its damage stays PHYSICAL and never procs ammo"
+				% [path.get_file(), prop])
+			continue
+		if StringName(value) != CombatHit.DAMAGE_RANGED:
+			_fail("%s %s is '%s', not '%s' — ammo procs are skipped on this ability"
+				% [path.get_file(), prop, value, CombatHit.DAMAGE_RANGED])
+			continue
+		print("ok %-22s %s = %s" % [path.get_file(), prop, value])
 
 
 func _check_recipes() -> void:

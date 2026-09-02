@@ -13,6 +13,10 @@ extends MeteorAbility
 @export var field_tick_s: float = 0.5
 ## Falling/stuck arrow visuals per cast.
 @export var arrow_count: int = 7
+## Mitigation/identity type stamped on the impact arc. See the note at the
+## assignment in [method _impact] for why leaving this at MeleeArc's PHYSICAL
+## default silently disables the quiver's proc on this ability.
+@export var arc_damage_type: StringName = CombatHit.DAMAGE_RANGED
 
 const ARROW_TEX: Texture2D = preload("res://assets/sprites/items/weapons/wood/wood.png")
 const ARROW_REGION: Rect2 = Rect2(32, 0, 16, 16)
@@ -76,6 +80,11 @@ func _impact(caster: Character, target: Vector2) -> void:
 		circle.radius = blast_radius
 		shape_node.shape = circle
 	arc.damage = caster.stats_component.get_stat(Stat.AD) * ap_ratio
+	# A volley of arrows is RANGED, but MeleeArc defaults to PHYSICAL because
+	# most arcs are sword swings. Left unstamped this reads as melee — which
+	# mis-colours the splat and, more importantly, makes [AmmoProcService] skip
+	# the shot entirely, so the quiver never procs off this ability.
+	arc.damage_type = arc_damage_type
 	map.add_child(arc)
 	arc.global_position = target
 	# The stuck arrows' slow zone, planted at the point (not riding the archer).

@@ -14,6 +14,12 @@ extends ChannelAbility
 @export var ad_ratio: float = 0.45
 @export var projectile_scene: PackedScene = preload("res://source/common/gameplay/items/weapons/bow/arrow.tscn")
 @export var projectile_speed: float = 500.0
+## Mitigation/identity type stamped on each arrow. RANGED, matching
+## [member ChargeAbility.projectile_damage_type] — Projectile defaults to
+## PHYSICAL, so a bow path that forgets this stamps its arrows as melee. That is
+## not cosmetic: [AmmoProcService] gates on RANGED, so an unstamped arrow can
+## never fire the quiver's proc no matter what is in the ammo slot.
+@export var projectile_damage_type: StringName = CombatHit.DAMAGE_RANGED
 
 ## Steady Aim pairing (docs/bow.md): the passive already rewards a full draw
 ## released without moving (ChargeAbility.release_ability). Rapid Fire is a
@@ -69,6 +75,7 @@ func channel_tick(caster: Character) -> void:
 	projectile.speed = projectile_speed
 	projectile.source = caster
 	projectile.damage = damage
+	projectile.damage_type = projectile_damage_type
 	projectile.global_position = AbilityResource.muzzle_position(caster, aim)
 	caster.add_child(projectile)
 
