@@ -5,9 +5,6 @@
 [ext_resource type="PackedScene" path="res://source/common/gameplay/crafting/crafting_station.tscn" id="6_craft"]
 [ext_resource type="Resource" uid="uid://c7bc2b3bd11a32" path="res://source/common/gameplay/crafting/resources/cooking_station.tres" id="7_cook"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/structures/stations/cooking_station/cooker/cooker_01.png" id="8_cookart"]
-[ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_tp"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
 [ext_resource type="Resource" uid="uid://cda7f206562b2b" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_shrimp.tres" id="h0"]
 [ext_resource type="Resource" uid="uid://ca1a2c6ce3fae3" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_herring.tres" id="h1"]
@@ -20,7 +17,6 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/palm_2.png" id="p_palm_2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/stranded_boat.png" id="p_stranded_boat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_basket.png" id="p_fish_basket"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/barricade.png" id="p_barricade"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/fish_crate.png" id="p_fish_crate"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/barrels.png" id="p_barrels"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_a.png" id="p_dry_fish_a"]
@@ -32,17 +28,12 @@
 [ext_resource type="PackedScene" uid="uid://dbrernsyt26qh" path="res://source/common/gameplay/characters/npc/npc.tscn" id="20_npc"]
 [ext_resource type="Resource" uid="uid://459f48bf51264" path="res://source/common/gameplay/characters/npc/npcs/banker.tres" id="21_banker"]
 
-[sub_resource type="RectangleShape2D" id="BoatShape"]
-size = Vector2(64, 64)
-
 [node name="WoodlandBeach" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("99_col")
 ground_size = Vector2(832, 512)
 shoreline = PackedVector2Array(0, 266, 16, 266, 32, 266, 48, 266, 64, 266, 80, 266, 96, 266, 112, 266, 128, 266, 144, 266, 160, 266, 176, 266, 192, 266, 208, 266, 224, 266, 240, 266, 256, 266, 272, 266, 288, 298, 304, 298, 320, 298, 336, 298, 352, 330, 368, 330, 384, 330, 400, 330, 416, 330, 432, 330, 448, 362, 464, 362, 480, 362, 496, 362, 512, 394, 528, 394, 544, 394, 560, 394, 576, 394, 592, 394, 608, 394, 624, 394, 640, 394, 656, 394, 672, 394, 688, 394, 704, 394, 720, 394, 736, 394, 752, 394, 768, 362, 784, 362, 800, 362, 816, 362)
-dock_walk = Rect2(400, 236, 32, 120)
-boat_pad = Rect2(400, 320, 90, 70)
-solid_footprints = Array[Rect2]([Rect2(43, 160, 24, 16), Rect2(508, 248, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(490, 274, 110, 30), Rect2(338, 210, 84, 30), Rect2(450, 236, 56, 36), Rect2(366, 154, 28, 26), Rect2(508, 188, 28, 26), Rect2(76, 66, 64, 34)])
+solid_footprints = Array[Rect2]([Rect2(43, 160, 24, 16), Rect2(418, 236, 24, 16), Rect2(692, 250, 110, 54), Rect2(320, 164, 20, 14), Rect2(687, 218, 20, 14), Rect2(130, 162, 20, 14), Rect2(630, 290, 20, 14), Rect2(645, 332, 110, 30), Rect2(133, 227, 84, 30), Rect2(231, 156, 28, 26), Rect2(761, 306, 28, 26), Rect2(583, 245, 64, 34)])
 rim_east = false
 rim_north = false
 
@@ -72,36 +63,6 @@ texture = ExtResource("8_cookart")
 [node name="Banker" parent="." instance=ExtResource("20_npc")]
 position = Vector2(560, 260)
 npc_resource = ExtResource("21_banker")
-
-[node name="Dock" type="Sprite2D" parent="."]
-centered = false
-position = Vector2(400, 236)
-texture = ExtResource("10_dock")
-
-[node name="FishingBoat" type="Sprite2D" parent="."]
-centered = false
-position = Vector2(434, 344)
-texture = ExtResource("12_boat")
-
-[node name="BoatLabel" type="Label" parent="."]
-offset_left = 444
-offset_top = 180
-offset_right = 524
-offset_bottom = 196
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 10
-text = "Deep Cove"
-horizontal_alignment = 1
-
-[node name="BoatToDeepCove" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(454, 376)
-target = NodePath("../../WoodlandDeepCove/BoatToBeach")
-target_path = NodePath("../../WoodlandDeepCove/BoatToBeach")
-
-[node name="CollisionShape2D" parent="BoatToDeepCove" index="0"]
-shape = SubResource("BoatShape")
 
 [node name="Scenery" type="Node2D" parent="."]
 y_sort_enabled = true

@@ -2,9 +2,6 @@
 
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/woodland_deep_cove_ground.png" id="1_ground"]
 [ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="5_node"]
-[ext_resource type="PackedScene" uid="uid://dbg8y8if4vv5p" path="res://source/common/gameplay/maps/components/interaction_areas/teleporter/teleporter.tscn" id="9_tp"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/pier_long.png" id="10_dock"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/fishing_boat_side.png" id="12_boat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/fishing/beach/torch.png" id="p5"]
 [ext_resource type="Resource" uid="uid://c9d71fdd6d025a" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_lionfish.tres" id="h0"]
 [ext_resource type="Resource" uid="uid://c9af9405ce45a6" path="res://source/common/gameplay/maps/components/mineable_nodes/fishing_hole_crab.tres" id="h1"]
@@ -23,17 +20,12 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/coconut.png" id="p_coconut"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/sea/props/dry_fish_a.png" id="p_dry_fish"]
 
-[sub_resource type="RectangleShape2D" id="BoatShape"]
-size = Vector2(64, 64)
-
 [node name="WoodlandDeepCove" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("99_col")
 ground_size = Vector2(704, 480)
 shoreline = PackedVector2Array(0, 332, 16, 313, 32, 316, 48, 268, 64, 265, 80, 268, 96, 236, 112, 252, 128, 236, 144, 217, 160, 220, 176, 204, 192, 188, 208, 172, 224, 153, 240, 153, 256, 153, 272, 140, 288, 153, 304, 153, 320, 140, 336, 153, 352, 140, 368, 153, 384, 153, 400, 153, 416, 153, 432, 140, 448, 153, 464, 153, 480, 169, 496, 185, 512, 185, 528, 201, 544, 217, 560, 217, 576, 233, 592, 249, 608, 249, 624, 265, 640, 281, 656, 300, 672, 329, 688, 329, 703, 329)
-dock_walk = Rect2(336, 120, 32, 120)
-boat_pad = Rect2(344, 180, 72, 56)
-solid_footprints = Array[Rect2]([Rect2(144, 124, 12, 12)])
+solid_footprints = Array[Rect2]([Rect2(28, 308, 24, 16), Rect2(548, 248, 24, 16), Rect2(20, 200, 110, 54), Rect2(390, 172, 20, 14), Rect2(240, 160, 20, 14), Rect2(144, 124, 12, 12)])
 rim_west = false
 rim_east = false
 rim_north = false
@@ -47,38 +39,6 @@ texture = ExtResource("1_ground")
 position = Vector2(150, 130)
 texture = ExtResource("p5")
 offset = Vector2(0, -8)
-
-[node name="Dock" type="Sprite2D" parent="."]
-z_index = 1
-centered = false
-position = Vector2(336, 120)
-texture = ExtResource("10_dock")
-
-[node name="FishingBoat" type="Sprite2D" parent="."]
-z_index = 2
-centered = false
-position = Vector2(388, 180)
-texture = ExtResource("12_boat")
-
-[node name="BoatLabel" type="Label" parent="."]
-offset_left = 380
-offset_top = 160
-offset_right = 460
-offset_bottom = 176
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 10
-text = "Beach"
-horizontal_alignment = 1
-
-[node name="BoatToBeach" parent="." node_paths=PackedStringArray("target") instance=ExtResource("9_tp")]
-position = Vector2(376, 212)
-target = NodePath("../../WoodlandBeach/BoatToDeepCove")
-target_path = NodePath("../../WoodlandBeach/BoatToDeepCove")
-
-[node name="CollisionShape2D" parent="BoatToBeach" index="0"]
-shape = SubResource("BoatShape")
 
 [node name="MineableNodes" type="Node2D" parent="."]
 
