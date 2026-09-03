@@ -6,6 +6,24 @@ class_name TitleCatalog
 ## Lookups are by display name (and slug). Empty = no VFX (quest titles, etc.).
 
 ## style: 0 gem, 1 gold, 2 ember, 3 void, 4 star, 5 moon, 6 ink
+##
+## A `vip_tier` key marks one of the four DONATION LADDER rungs and switches the
+## whole render path: vip_title.gdshader plus a [VipTitleEffect] emitter stack
+## loaded from the [VipTierProfile] of that name, instead of the `style` branch in
+## title_vfx.gdshader. Those four sit in PREMIUM rather than in [SupporterTitles]
+## deliberately, and the difference is not cosmetic:
+##
+##   * PREMIUM is what [CommandPermissions.strip_unreleased_vfx] deletes from
+##     every non-staff player on each instance spawn. That is the GATE. Nothing
+##     short of staff rank can wear one for longer than a zone change, however it
+##     got onto the account.
+##   * /supporter only accepts [SupporterTitles] slugs, so the ladder has no grant
+##     path at all - not even a senior_admin one. Staff test from the Vault shelf.
+##
+## In other words the ladder is built and previewable and NOT sellable yet, which
+## is the same footing as every other premium name here. Moving a rung out of this
+## table is the deliberate act that puts it on sale; tools/verify_vip_titles.gd
+## fails if one drifts out on its own.
 const PREMIUM: Dictionary = {
 	"gilded": {
 		"name": "Gilded",
@@ -98,6 +116,41 @@ const PREMIUM: Dictionary = {
 		"vip": true,
 		"blurb": "Deep crimson. Not the Ruby donor pink — older, meaner.",
 	},
+	# THE DONATION LADDER, low rung to high. Read against each other rather than
+	# on their own - a donor stepping up has to SEE the step - so these four are
+	# meant to be tuned as a set, in source/common/gameplay/titles/profiles/.
+	"silver-contributor": {
+		"name": "Silver Contributor",
+		"color": "#a9a29b",
+		"style": 5,
+		"vip": false,
+		"vip_tier": &"silver",
+		"blurb": "Tarnished silver over crimson smoke. Something is standing behind it.",
+	},
+	"golden-contributor": {
+		"name": "Golden Contributor",
+		"color": "#f0c65a",
+		"style": 1,
+		"vip": false,
+		"vip_tier": &"golden",
+		"blurb": "Warm gold with leaf drifting up off the letters.",
+	},
+	"platinum-contributor": {
+		"name": "Platinum Contributor",
+		"color": "#93b8ff",
+		"style": 0,
+		"vip": true,
+		"vip_tier": &"platinum",
+		"blurb": "Cold white metal, arcing. You hear it before you read it.",
+	},
+	"diamond-donator": {
+		"name": "Diamond Donator",
+		"color": "#bfe9ff",
+		"style": 0,
+		"vip": true,
+		"vip_tier": &"diamond",
+		"blurb": "Cut stone in a drifting field of diamond dust. The top of the ladder.",
+	},
 }
 
 const ORDER: PackedStringArray = [
@@ -114,6 +167,10 @@ const ORDER: PackedStringArray = [
 	"voidtouched",
 	"eclipse",
 	"wyrmblood",
+	"silver-contributor",
+	"golden-contributor",
+	"platinum-contributor",
+	"diamond-donator",
 ]
 
 
@@ -181,6 +238,25 @@ static func color_hex(title: String) -> String:
 
 static func is_vip(title: String) -> bool:
 	return bool(spec(title).get("vip", false))
+
+
+## The [VipTierProfile] key for a title, or &"" when it is not one of the four
+## donation-ladder rungs. The single call the VFX pipeline branches on - see
+## [TitleVfx] - so nothing downstream has to know which title family a name came
+## from.
+static func vip_tier(title: String) -> StringName:
+	return StringName(str(spec(title).get("vip_tier", "")))
+
+
+## The four ladder slugs, low rung to high, in [constant ORDER]. Derived rather
+## than typed a second time so the ladder cannot end up listed in two places that
+## disagree about its membership or its order.
+static func vip_tier_slugs() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for slug: String in ORDER:
+		if not str((PREMIUM[slug] as Dictionary).get("vip_tier", "")).is_empty():
+			out.append(slug)
+	return out
 
 
 static func has_vfx(title: String) -> bool:

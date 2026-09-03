@@ -154,6 +154,17 @@ var active_inventory_bag: int = 0
 ## like "woodland"; granted the moment a biome's finale-quest climax completes,
 ## checked by InstanceResource.can_join_instance. Character-wide by design.
 @export var wardstones: PackedStringArray
+## Vault cosmetics a staff member has deliberately GIVEN this character - the
+## premium title ladder, the vault recolours. See [VaultGrants] for the token
+## format and for why this exists at all: without it,
+## [CommandPermissions.strip_unreleased_vfx] cannot tell a gift from a leak and
+## takes both back on the next zone change.
+##
+## Persisted inside titles_json under "granted", not as its own column - see
+## [VaultGrants]. Empty for almost every character; only donors and staff test
+## accounts have anything in here.
+@export var granted_vfx: PackedStringArray
+
 ## Up to 3 trophies the player pins to their profile's right-side chip strip.
 ## Each entry must also be in titles_unlocked. Separate from display_title (the
 ## one shown under their name) — these are the "achievement flex" picks.

@@ -1,0 +1,120 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" uid="uid://dkw46drf4y4qb" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" uid="uid://bgb4n8ock8ya6" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_stars"]
+script = ExtResource("1_layer")
+id = &"stars"
+shape = 2
+shape_px = 11
+span = 0
+span_scale = 1.4
+amount = 22
+lifetime = 0.7
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 180.0
+gravity = Vector2(0.0, -9.0)
+velocity_min = 0.5
+velocity_max = 5.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.75
+scale_max = 1.6
+scale_start = 1.0
+scale_end = 0.6
+color_in = Color(1.0, 1.0, 1.0, 1.0)
+color_mid = Color(1.0, 1.0, 1.0, 1.0)
+color_out = Color(1.0, 1.0, 1.0, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_dust"]
+script = ExtResource("1_layer")
+id = &"dust"
+shape = 3
+shape_px = 7
+span = 0
+span_scale = 1.55
+amount = 22
+lifetime = 1.4
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, 1.0)
+spread = 85.0
+gravity = Vector2(0.0, 5.0)
+velocity_min = 1.5
+velocity_max = 9.0
+damping = 0.0
+angular_velocity = 45.0
+scale_min = 0.45
+scale_max = 1.25
+scale_start = 0.55
+scale_end = 1.0
+color_in = Color(1.0, 1.0, 1.0, 1.0)
+color_mid = Color(1.0, 1.0, 1.0, 1.0)
+color_out = Color(1.0, 1.0, 1.0, 1.0)
+late_stop = 0.62
+color_late = Color(0.91764706, 0.95686275, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_shards"]
+script = ExtResource("1_layer")
+id = &"shards"
+shape = 7
+shape_px = 9
+span = 3
+span_scale = 1.0
+amount = 16
+lifetime = 0.8
+explosiveness = 0.55
+detail = true
+direction = Vector2(0.0, -1.0)
+spread = 180.0
+gravity = Vector2(0.0, -18.0)
+velocity_min = 8.0
+velocity_max = 26.0
+damping = 0.0
+angular_velocity = 90.0
+scale_min = 0.45
+scale_max = 1.1
+scale_start = 1.0
+scale_end = 0.35
+color_in = Color(1.0, 1.0, 1.0, 1.0)
+color_mid = Color(1.0, 1.0, 1.0, 1.0)
+color_out = Color(1.0, 1.0, 1.0, 1.0)
+late_stop = 0.55
+color_late = Color(0.90980392, 0.96470588, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"diamond"
+display_name = "Diamond Donator"
+accent = Color(0.74901961, 0.91372549, 1.0, 1.0)
+metal_high = Color(1.0, 1.0, 1.0, 1.0)
+metal_mid = Color(0.94901961, 0.96862745, 0.98431373, 1.0)
+metal_low = Color(0.65882353, 0.7372549, 0.78823529, 1.0)
+sheen = Color(1.0, 1.0, 1.0, 1.0)
+shadow = Color(0.0, 0.0, 0.0, 0.62)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 1.0)
+outline_size = 17
+sweep_speed = 0.3
+sweep_width = 0.09
+sheen_amount = 0.8
+pulse_amount = 0.07
+pulse_speed = 2.6
+grain = 0.0
+prism = 0.9
+facets = 7.0
+fire = 0.7
+sweep_speed2 = 0.62
+ray_color = Color(1.0, 1.0, 1.0, 0.42)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_stars"), SubResource("Layer_dust"), SubResource("Layer_shards")])

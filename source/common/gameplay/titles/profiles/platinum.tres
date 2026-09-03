@@ -1,0 +1,120 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" uid="uid://dkw46drf4y4qb" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" uid="uid://bgb4n8ock8ya6" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_arcs"]
+script = ExtResource("1_layer")
+id = &"arcs"
+shape = 7
+shape_px = 7
+span = 0
+span_scale = 1.0
+amount = 12
+lifetime = 0.35
+explosiveness = 1.0
+detail = false
+direction = Vector2(1.0, 0.0)
+spread = 180.0
+gravity = Vector2(0.0, 0.0)
+velocity_min = 40.0
+velocity_max = 110.0
+damping = 60.0
+angular_velocity = 240.0
+scale_min = 0.4
+scale_max = 0.9
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(1.0, 1.0, 1.0, 1.0)
+color_mid = Color(0.56078431, 0.83137255, 1.0, 1.0)
+color_out = Color(0.24705882, 0.49803922, 1.0, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_static"]
+script = ExtResource("1_layer")
+id = &"static"
+shape = 0
+shape_px = 6
+span = 3
+span_scale = 1.0
+amount = 14
+lifetime = 0.3
+explosiveness = 0.9
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 180.0
+gravity = Vector2(0.0, 0.0)
+velocity_min = 6.0
+velocity_max = 30.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.25
+scale_max = 0.6
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(0.91764706, 0.95686275, 1.0, 1.0)
+color_mid = Color(0.91764706, 0.95686275, 1.0, 1.0)
+color_out = Color(0.7254902, 0.8627451, 1.0, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_wisps"]
+script = ExtResource("1_layer")
+id = &"wisps"
+shape = 6
+shape_px = 16
+span = 1
+span_scale = 1.0
+amount = 8
+lifetime = 1.3
+explosiveness = 0.0
+detail = true
+direction = Vector2(0.0, -1.0)
+spread = 30.0
+gravity = Vector2(0.0, -16.0)
+velocity_min = 4.0
+velocity_max = 12.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.5
+scale_max = 1.1
+scale_start = 0.4
+scale_end = 1.3
+color_in = Color(0.78431373, 0.8627451, 1.0, 1.0)
+color_mid = Color(0.78431373, 0.8627451, 1.0, 1.0)
+color_out = Color(0.56078431, 0.69019608, 0.90980392, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.28
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"platinum"
+display_name = "Platinum Contributor"
+accent = Color(0.57647059, 0.72156863, 1.0, 1.0)
+metal_high = Color(0.90980392, 0.93333333, 0.98823529, 1.0)
+metal_mid = Color(0.61568627, 0.69019608, 0.81568627, 1.0)
+metal_low = Color(0.18431373, 0.26666667, 0.47058824, 1.0)
+sheen = Color(0.8745098, 0.91372549, 1.0, 1.0)
+shadow = Color(0.03137255, 0.05098039, 0.14117647, 0.55)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
+sweep_speed = 0.42
+sweep_width = 0.07
+sheen_amount = 0.7
+pulse_amount = 0.1
+pulse_speed = 3.4
+grain = 0.05
+prism = 0.25
+facets = 0.0
+fire = 0.0
+sweep_speed2 = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_arcs"), SubResource("Layer_static"), SubResource("Layer_wisps")])

@@ -1,0 +1,120 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" uid="uid://dkw46drf4y4qb" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" uid="uid://bgb4n8ock8ya6" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_smoke"]
+script = ExtResource("1_layer")
+id = &"smoke"
+shape = 6
+shape_px = 16
+span = 2
+span_scale = 1.0
+amount = 12
+lifetime = 1.4
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, 1.0)
+spread = 75.0
+gravity = Vector2(0.0, 7.0)
+velocity_min = 3.0
+velocity_max = 12.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.8
+scale_max = 1.7
+scale_start = 0.6
+scale_end = 1.5
+color_in = Color(0.22745098, 0.09411765, 0.1254902, 1.0)
+color_mid = Color(0.10196078, 0.05490196, 0.07058824, 1.0)
+color_out = Color(0.03921569, 0.02352941, 0.03137255, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.55
+additive = false
+
+[sub_resource type="Resource" id="Layer_fog"]
+script = ExtResource("1_layer")
+id = &"fog"
+shape = 6
+shape_px = 16
+span = 0
+span_scale = 1.0
+amount = 10
+lifetime = 1.4
+explosiveness = 0.0
+detail = true
+direction = Vector2(1.0, 0.0)
+spread = 20.0
+gravity = Vector2(0.0, 0.0)
+velocity_min = 4.0
+velocity_max = 14.0
+damping = 8.0
+angular_velocity = 0.0
+scale_min = 1.1
+scale_max = 2.0
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(0.29019608, 0.16470588, 0.18823529, 1.0)
+color_mid = Color(0.14117647, 0.07843137, 0.09411765, 1.0)
+color_out = Color(0.03921569, 0.02352941, 0.03137255, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.38
+additive = false
+
+[sub_resource type="Resource" id="Layer_embers"]
+script = ExtResource("1_layer")
+id = &"embers"
+shape = 0
+shape_px = 6
+span = 0
+span_scale = 1.0
+amount = 10
+lifetime = 1.2
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 40.0
+gravity = Vector2(0.0, -20.0)
+velocity_min = 5.0
+velocity_max = 16.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.25
+scale_max = 0.6
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(1.0, 0.69019608, 0.56470588, 1.0)
+color_mid = Color(0.87843137, 0.25098039, 0.17254902, 1.0)
+color_out = Color(0.37647059, 0.0627451, 0.0627451, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.9
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"silver"
+display_name = "Silver Contributor"
+accent = Color(0.6627451, 0.63529412, 0.60784314, 1.0)
+metal_high = Color(0.89411765, 0.8745098, 0.83921569, 1.0)
+metal_mid = Color(0.62745098, 0.59607843, 0.56470588, 1.0)
+metal_low = Color(0.22745098, 0.20784314, 0.18823529, 1.0)
+sheen = Color(0.94901961, 0.93333333, 0.90196078, 1.0)
+shadow = Color(0.10196078, 0.0, 0.01960784, 0.6)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.07058824, 0.03137255, 0.03921569, 1.0)
+outline_size = 0
+sweep_speed = 0.14
+sweep_width = 0.14
+sheen_amount = 0.3
+pulse_amount = 0.06
+pulse_speed = 1.4
+grain = 0.55
+prism = 0.0
+facets = 0.0
+fire = 0.0
+sweep_speed2 = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_smoke"), SubResource("Layer_fog"), SubResource("Layer_embers")])

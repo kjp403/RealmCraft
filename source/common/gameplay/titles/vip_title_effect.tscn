@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://c6wscvrpkquuc" path="res://source/common/gameplay/titles/vip_title_effect.gd" id="1_vipfx"]
+
+[node name="VipTitleFx" type="Node2D"]
+z_index = 5
+z_as_relative = false
+script = ExtResource("1_vipfx")
