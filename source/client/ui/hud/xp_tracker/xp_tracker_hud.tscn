@@ -1,0 +1,82 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" uid="uid://bo7v6vk14ugpt" path="res://source/client/ui/hud/xp_tracker/xp_tracker_hud.gd" id="1_hud"]
+[ext_resource type="Texture2D" uid="uid://wk8ljri6d3xu" path="res://assets/sprites/ui/frames/xp_casing.png" id="2_casing"]
+[ext_resource type="Texture2D" uid="uid://kcar88ui146h" path="res://assets/sprites/ui/frames/xp_arc_fill.png" id="3_fill"]
+[ext_resource type="Texture2D" uid="uid://k3dennidacxm" path="res://assets/sprites/ui/frames/xp_spark.png" id="4_spark"]
+[ext_resource type="Script" uid="uid://dhrhtaw2xx6bg" path="res://source/client/ui/hud/xp_tracker/xp_floating_text_manager.gd" id="5_drops"]
+
+[node name="XpTrackerHud" type="Control"]
+custom_minimum_size = Vector2(48, 48)
+anchors_preset = 0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 0
+texture_filter = 1
+script = ExtResource("1_hud")
+
+[node name="Gauge" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 48.0
+offset_bottom = 48.0
+pivot_offset = Vector2(24, 24)
+mouse_filter = 2
+
+[node name="Burst" type="CPUParticles2D" parent="Gauge"]
+position = Vector2(24, 24)
+emitting = false
+amount = 16
+texture = ExtResource("4_spark")
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+texture_filter = 1
+emission_shape = 0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 26.0
+initial_velocity_max = 46.0
+damping_min = 30.0
+damping_max = 50.0
+scale_amount_min = 1.0
+scale_amount_max = 2.0
+
+[node name="Arc" type="TextureProgressBar" parent="Gauge"]
+anchors_preset = 0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture_filter = 1
+max_value = 1.0
+step = 0.0
+value = 0.0
+fill_mode = 4
+nine_patch_stretch = false
+texture_under = ExtResource("2_casing")
+texture_progress = ExtResource("3_fill")
+tint_progress = Color(0.55, 0.78, 1, 1)
+
+[node name="Icon" type="TextureRect" parent="Gauge"]
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 36.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture_filter = 1
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Spark" type="Sprite2D" parent="Gauge"]
+position = Vector2(24, 4)
+texture = ExtResource("4_spark")
+texture_filter = 1
+visible = false
+
+[node name="Drops" type="Control" parent="."]
+anchors_preset = 0
+position = Vector2(24, -16)
+mouse_filter = 2
+script = ExtResource("5_drops")

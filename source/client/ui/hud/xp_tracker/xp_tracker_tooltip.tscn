@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://csil14q7rf5eb" path="res://source/client/ui/hud/xp_tracker/xp_tracker_tooltip.gd" id="1_tip"]
+
+[node name="XpTrackerTooltip" type="PanelContainer"]
+mouse_filter = 2
+texture_filter = 1
+script = ExtResource("1_tip")
+
+[node name="Margin" type="MarginContainer" parent="."]
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="Rows" type="VBoxContainer" parent="Margin"]
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="Head" type="HBoxContainer" parent="Margin/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Margin/Rows/Head"]
+custom_minimum_size = Vector2(20, 20)
+mouse_filter = 2
+texture_filter = 1
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Margin/Rows/Head"]
+mouse_filter = 2
+vertical_alignment = 1
+text = "Skill · Lv 1"
+
+[node name="Detail" type="Label" parent="Margin/Rows"]
+mouse_filter = 2
+text = "0 / 0 XP (0.0%)"
+
+[node name="Remaining" type="Label" parent="Margin/Rows"]
+mouse_filter = 2
+text = "0 XP to level 2"

@@ -61,3 +61,30 @@ static func category(job_slug: StringName) -> StringName:
 	if p == null:
 		return &""
 	return p.category
+
+
+## Icon for [param job_slug], or null if the job is unknown and nothing stands
+## in for it.
+##
+## Three-step fallback, because not every job resource carries its own icon yet:
+## the authored `icon` first, then the first source item (what you gather), then
+## the first recipe item (what you make). A Fletching entry with no icon still
+## shows an arrow rather than an empty square.
+##
+## Lives here rather than in a panel so the skills grid, the HUD tracker and its
+## hover card can't end up showing three different pictures for one skill.
+static func icon_for(job_slug: StringName) -> Texture2D:
+	var p: JobPerks = perks_for(job_slug)
+	if p == null:
+		return null
+	if p.icon != null:
+		return p.icon
+	if not p.source_items.is_empty():
+		var source_item: Item = p.source_items[0]
+		if source_item != null:
+			return source_item.item_icon
+	if not p.recipe_items.is_empty():
+		var recipe_item: Item = p.recipe_items[0]
+		if recipe_item != null:
+			return recipe_item.item_icon
+	return null

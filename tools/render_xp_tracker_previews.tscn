@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_xp_tracker_previews.gd" id="1_xptrack"]
+
+[node name="XpTrackerPreviews" type="Node"]
+script = ExtResource("1_xptrack")

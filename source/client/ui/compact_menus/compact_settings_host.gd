@@ -58,6 +58,7 @@ var _sound_slider: HSlider
 var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
 var _slayer_tracker_toggle: CheckButton
+var _xp_tracker_toggle: CheckButton
 var _combat_toggles: Dictionary[StringName, CheckButton] = {}
 var _music_value: Label
 var _sound_value: Label
@@ -235,6 +236,16 @@ func _build_toggles_view(toggles_box: VBoxContainer) -> void:
 	)
 	_slayer_tracker_toggle.toggled.connect(_on_slayer_tracker_toggled)
 	toggles_box.add_child(_slayer_tracker_toggle)
+
+	_xp_tracker_toggle = CheckButton.new()
+	_xp_tracker_toggle.text = "XP tracker"
+	_xp_tracker_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_xp_tracker_toggle.add_theme_font_size_override(&"font_size", 10)
+	_xp_tracker_toggle.tooltip_text = (
+		"Show a ring of progress to your next level while you train."
+	)
+	_xp_tracker_toggle.toggled.connect(_on_xp_tracker_toggled)
+	toggles_box.add_child(_xp_tracker_toggle)
 
 	for entry: Dictionary in COMBAT_TOGGLES:
 		var property: StringName = entry["property"]
@@ -442,6 +453,12 @@ func _on_slayer_tracker_toggled(enabled: bool) -> void:
 	SlayerTracker.set_enabled(enabled)
 
 
+func _on_xp_tracker_toggled(enabled: bool) -> void:
+	if _syncing:
+		return
+	XpTrackerHud.set_enabled(enabled)
+
+
 func _on_combat_toggled(enabled: bool, property: StringName) -> void:
 	if _syncing:
 		return
@@ -481,6 +498,7 @@ func _sync_controls() -> void:
 		_setting_value(&"weather_effects", true)
 	)
 	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
+	_xp_tracker_toggle.button_pressed = XpTrackerHud.is_enabled()
 	for property: StringName in _combat_toggles:
 		_combat_toggles[property].button_pressed = bool(
 			_section_value(COMBAT_SECTION, property, true)

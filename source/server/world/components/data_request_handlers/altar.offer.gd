@@ -79,6 +79,8 @@ func data_request_handler(
 		"xp": xp_gain,
 		"profession": String(table.profession),
 		"level": int(progress.get("level", level)),
+		# See craft.item — meaningful only when "xp" > 0.
+		"xp_into_level": int(progress.get("xp", 0)),
 		"leveled_up": progress.get("leveled_up", false),
 		"prayer": PrayerService.status(player),
 	}
