@@ -232,12 +232,16 @@ func _emitter(layer: VipParticleLayer) -> CPUParticles2D:
 		p.angular_velocity_min = -layer.angular_velocity
 		p.angular_velocity_max = layer.angular_velocity
 	p.color_ramp = layer.ramp()
-	# GLOBAL space, so particles stay where they were born while the nameplate
-	# walks on and the layer reads as a trail rather than as a rigid halo bolted
-	# to the letters. This is the engine default in 4.x and is set explicitly
-	# anyway: it is a look decision, not an inherited one, and a future default
-	# flip would turn every tier into a halo with nothing here to explain why.
-	p.local_coords = false
+	# LOCAL space, and this is not optional. The nameplate scales its title label
+	# to 0.2, and particles in GLOBAL space ignore the emitter's transform - so
+	# every mote rendered at full label-space size, five times too big, as white
+	# slabs the size of the player. Every proof render in tools/ draws the label
+	# unscaled, which is exactly why none of them caught it.
+	#
+	# The cost is the trail: particles now follow the nameplate instead of staying
+	# where they were born. Worth it. A rigid halo at the right size beats a
+	# trailing one that is unreadable in the only place it actually ships.
+	p.local_coords = true
 	if layer.additive:
 		p.material = _shared_additive()
 	p.emitting = true
