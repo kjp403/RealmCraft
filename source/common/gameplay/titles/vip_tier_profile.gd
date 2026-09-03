@@ -86,6 +86,15 @@ static var _cache: Dictionary = {}
 @export_range(0.0, 1.0, 0.01) var fire: float = 0.0
 ## A second polish band at this speed, crossing the first. 0 = off.
 @export_range(0.0, 1.5, 0.01) var sweep_speed2: float = 0.0
+## Light-ray fan drawn BEHIND the glyphs, the same seven-triangle burst HIGH
+## PRIEST uses. Fully transparent = no fan, which is every tier but Diamond; the
+## alpha here is the fan's peak opacity, so one field both switches it on and
+## sets how loud it is.
+##
+## Drawn rather than particled because a ray is a long triangle anchored at one
+## point, and a particle system can only place sprites - a fan of sprites reads
+## as a row of streaks, not as light from a single source.
+@export var ray_color: Color = Color(1.0, 1.0, 1.0, 0.0)
 
 @export_group("Emitters")
 ## Built in order, so a layer meant to sit behind the others goes first.

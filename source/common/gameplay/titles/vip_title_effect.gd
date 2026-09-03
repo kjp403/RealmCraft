@@ -92,6 +92,14 @@ const LOD_INTERVAL: float = 0.25
 ## outside the text are not clipped away a frame before the label is.
 const CULL_MARGIN: float = 1.6
 
+## Ray-fan length, as a fraction of the label's half-width, before the cap below.
+## Matches [constant TitleParticles.RAY_SCALE] so Diamond's fan and High Priest's
+## are the same burst at the same size - they are meant to read as the same
+## effect in two colours.
+const RAY_SCALE: float = TitleParticles.RAY_SCALE
+## Triangles in the fan.
+const RAY_COUNT: int = 7
+
 ## Additive blending, shared by every additive emitter of every wearer on screen.
 ## One material rather than one per emitter: a CanvasItemMaterial is a resource
 ## and thirty players x three layers is ninety identical ones otherwise.
@@ -115,6 +123,9 @@ var _all: Array[CPUParticles2D] = []
 ## Widest span_scale any layer asked for, so the cull rect can cover the whole
 ## drifting field rather than just the text it hangs off.
 var _span_reach: float = 1.0
+## Ray fan, or null for a tier without one. The ONLY thing here that costs a
+## _process call, which is why it gates one - see [method build].
+var _rays: VfxDrawLayer = null
 var _notifier: VisibleOnScreenNotifier2D = null
 var _lod_timer: Timer = null
 ## Starts TRUE and is only ever lowered by the notifier. Fail-visible on purpose:
@@ -153,7 +164,11 @@ func build() -> void:
 		if layer != null:
 			_span_reach = maxf(_span_reach, _clamped_span(layer))
 			_emitter(layer)
+	_build_rays()
 	_build_lod()
+	# A tier without a fan is a pure emitter set and must not pay for a _process
+	# call over every head in a busy town. Same gate TitleParticles uses.
+	set_process(_rays != null)
 
 
 ## Resize to the label this hangs off. Called after the label lays out, and again
@@ -271,6 +286,53 @@ func _apply_span(p: CPUParticles2D, mode: int, scale: float = 1.0) -> void:
 			p.position = Vector2.ZERO
 
 
+## The fan sits BEHIND the glyphs but still above the world, so it gets its own
+## layer one step under the nameplate depth rather than being drawn by this node
+## (which is above the label, where it would wash the text out).
+func _build_rays() -> void:
+	if _profile == null or _profile.ray_color.a <= 0.0:
+		return
+	_rays = VfxDrawLayer.new()
+	_rays.name = "Rays"
+	_rays.painter = _paint_rays
+	_rays.z_as_relative = false
+	_rays.z_index = NAMEPLATE_Z - 1
+	_rays.material = _shared_additive()
+	add_child(_rays)
+
+
+func _process(_delta: float) -> void:
+	if _rays != null:
+		_rays.queue_redraw()
+
+
+## Seven triangles fanning up from the centre of the title, breathing slowly.
+##
+## Reach is scaled to [constant RAY_SCALE] and then CAPPED AT THE HALF-HEIGHT, so
+## the fan is strictly bounded by the title's own line rather than spraying out to
+## the label's full width. That cap is what keeps this a title effect and not a
+## character aura, and it is the reason a fan is allowed here at all.
+func _paint_rays(layer: Node2D) -> void:
+	var t: float = Time.get_ticks_msec() * 0.001
+	var tint: Color = _profile.ray_color
+	for i: int in RAY_COUNT:
+		var k: float = float(i) / float(RAY_COUNT - 1)
+		var angle: float = lerpf(-2.5, -0.65, k) + sin(t * 0.5) * 0.05
+		var reach: float = minf(
+			_extent.x * (0.75 + 0.35 * sin(t * 0.9 + k * 3.0)) * RAY_SCALE, _extent.y
+		)
+		var half: float = 0.09
+		var alpha: float = tint.a * (0.72 + 0.28 * sin(t * 1.6 + k * 2.2))
+		layer.draw_colored_polygon(
+			PackedVector2Array([
+				Vector2.ZERO,
+				Vector2.from_angle(angle - half) * reach,
+				Vector2.from_angle(angle + half) * reach,
+			]),
+			Color(tint.r, tint.g, tint.b, alpha)
+		)
+
+
 static func _shared_additive() -> CanvasItemMaterial:
 	if _additive == null:
 		_additive = CanvasItemMaterial.new()
@@ -340,6 +402,7 @@ func _on_screen_entered() -> void:
 		_counted = true
 		_on_screen += 1
 	_start_lod()
+	set_process(_rays != null)
 	_tick_lod()
 
 
@@ -350,6 +413,9 @@ func _on_screen_exited() -> void:
 		_lod_timer.stop()
 	for p: CPUParticles2D in _all:
 		p.emitting = false
+	# The fan redraws every frame, so culling it matters more than culling an
+	# emitter that has merely stopped spawning.
+	set_process(false)
 
 
 func _release_count() -> void:

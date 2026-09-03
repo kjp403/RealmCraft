@@ -116,4 +116,5 @@ prism = 0.0
 facets = 0.0
 fire = 0.0
 sweep_speed2 = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
 layers = Array[ExtResource("1_layer")]([SubResource("Layer_embers"), SubResource("Layer_leaf"), SubResource("Layer_motes")])

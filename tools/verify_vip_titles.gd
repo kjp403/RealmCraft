@@ -30,7 +30,7 @@ extends SceneTree
 ## section that dies half way through simply prints fewer lines and the tool
 ## still reports green. Counting is the guard. Same reason
 ## tools/verify_skill_master_titles.gd counts.
-const EXPECTED_CHECKS: int = 48
+const EXPECTED_CHECKS: int = 49
 
 ## An outline has to be dark enough to back bright letters over pale ground.
 ## Slayer Master's crimson override sits around 0.04; anything past this is not
@@ -248,6 +248,28 @@ func _check_emitters() -> void:
 	_check(wrong_depth.is_empty(), "particle layers sit at absolute z %d %s"
 		% [VipTitleEffect.NAMEPLATE_Z, str(wrong_depth)])
 	_check(no_cull.is_empty(), "every tier builds its cull notifier and LOD timer %s" % str(no_cull))
+
+	# The ray fan is the one part of this that costs a _process call per wearer,
+	# so a tier that builds one must have it gated on actually having one - and a
+	# tier that asks for one in its .tres must actually get it.
+	var fan_tiers: PackedStringArray = []
+	var fan_built: PackedStringArray = []
+	for slug: String in TitleCatalog.vip_tier_slugs():
+		var tier: StringName = StringName(str((TitleCatalog.PREMIUM[slug] as Dictionary).get("vip_tier", "")))
+		var profile: VipTierProfile = VipTierProfile.for_tier(tier)
+		if profile != null and profile.ray_color.a > 0.0:
+			fan_tiers.append(slug)
+		var layer: VipTitleEffect = VipTitleEffect.new()
+		layer.tier = tier
+		layer.build()
+		if layer.get_node_or_null("Rays") != null:
+			fan_built.append(slug)
+		layer.free()
+	_check(
+		fan_tiers == fan_built,
+		"a fan is built for exactly the tiers that ask for one (want %s, got %s)"
+			% [str(fan_tiers), str(fan_built)]
+	)
 
 
 ## The pipeline, against a real Label - the same entry point the nameplate, the

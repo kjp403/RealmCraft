@@ -116,4 +116,5 @@ prism = 0.9
 facets = 7.0
 fire = 0.7
 sweep_speed2 = 0.62
+ray_color = Color(1.0, 1.0, 1.0, 0.42)
 layers = Array[ExtResource("1_layer")]([SubResource("Layer_stars"), SubResource("Layer_dust"), SubResource("Layer_shards")])
