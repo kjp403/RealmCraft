@@ -115,7 +115,7 @@ NODES = {
     "node_magma_root.png": ((144, 272), MAGMA, 1.5, ((0.10, 0.14), 1.8, 0.62, SATURATION_FLOOR)),
     "node_sun_lit_lotus.png": ((80, 240), GOLD, 1.25, None),
     "node_gloom_spore_cap.png": ((0, 352), GLOOM, 1.2, ((0.47, 0.52), 1.5, 0.74, SATURATION_FLOOR)),
-    "node_iron_spike_thorn.png": ((144, 224), SLATE, 0.22, (CRIMSON, 2.2, 0.68, 0.0)),
+    "node_iron_spike_thorn.png": ((144, 224), SLATE, 0.34, (CRIMSON, 2.4, 0.93, 0.0)),
 }
 
 EMPTY_VIAL_SOURCE = "Icon309.png"
@@ -208,6 +208,40 @@ def _clean(image: Image.Image, keep_ratio: float = 0.30) -> Image.Image:
     centred = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     centred.paste(kept, offset, kept)
     return centred
+
+
+# Sprites that need their SHADOWS lifted, not just their hue rotated.
+# name -> (value scale, value offset)
+#
+# The Iron-Spike Thorn's WORLD PLANT only. It is the one herb desaturated to bare
+# slate, and it
+# grows in the Starfall Mining Cave, which is unlit — a dark grey plant on a dark
+# cave floor is a patch players walk past. The offset is what does the work: a
+# plain multiply leaves black pixels black, so the shadows have to be raised off
+# the floor rather than scaled.
+#
+# Its accent floor rises to match (see ACCENTS). Brightening the body without
+# also raising that floor pushes every pixel over the accent threshold and paints
+# the whole plant crimson, which is a red plant, not a steel one with red barbs.
+LIFT = {
+    "node_iron_spike_thorn.png": (1.5, 0.25),
+}
+
+
+def _lift(image: Image.Image, scale: float, offset: float) -> Image.Image:
+    """Raise every visible pixel's brightness, shadows included."""
+    out = image.copy()
+    pixels = out.load()
+    width, height = out.size
+    for y in range(height):
+        for x in range(width):
+            r, g, b, a = pixels[x, y]
+            if a == 0:
+                continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+            r2, g2, b2 = colorsys.hsv_to_rgb(h, s, min(1.0, v * scale + offset))
+            pixels[x, y] = (int(r2 * 255), int(g2 * 255), int(b2 * 255), a)
+    return out
 
 
 def _cell(atlas: Image.Image, origin: tuple[int, int]) -> Image.Image:
@@ -347,6 +381,8 @@ def main() -> None:
 
     for name, (origin, band, sat) in HERBS.items():
         icon = _recolour(_cell(atlas, origin), band, sat)
+        if name in LIFT:
+            icon = _lift(icon, *LIFT[name])
         if name in ACCENTS:
             a_band, a_sat, a_floor, a_min_sat = ACCENTS[name]
             icon = _recolour(icon, a_band, a_sat, a_floor, a_min_sat)
@@ -363,6 +399,8 @@ def main() -> None:
         x, y = origin
         node = _clean(atlas.crop((x, y, x + 32, y + 32)))
         node = _recolour(node, band, sat)
+        if name in LIFT:
+            node = _lift(node, *LIFT[name])
         if accent is not None:
             a_band, a_sat, a_floor, a_min_sat = accent
             node = _recolour(node, a_band, a_sat, a_floor, a_min_sat)
