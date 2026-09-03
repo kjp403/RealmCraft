@@ -90,6 +90,30 @@ var player_level: int = 1
 ## skill checks (craft UI, skill gates) — the server still owns progression.
 signal skill_levels_changed
 var skill_levels: Dictionary = {}
+## One client-side door for "the local character just banked profession XP",
+## whatever paid it. Server-side every path already funnels through
+## [method PlayerResource.add_skill_xp], but each handler answers on its OWN
+## response type — so the funnel is rebuilt here rather than left to each HUD
+## piece to reassemble from six payload shapes.
+##
+## [param xp_into_level] is XP banked toward the NEXT level, not lifetime XP:
+## add_skill_xp subtracts each threshold as it crosses it. The denominator is
+## [method SkillXp.xp_to_next], a static curve the client already carries, so
+## it never has to travel.
+##
+## [param job] is always the SLUG (`outfitting`, `harvesting`), never a display
+## name — run it through [method JobRegistry.display_name] before showing it.
+## Only ever emitted with amount > 0; see [method _emit_skill_xp].
+##
+## [param leveled_up] is the SERVER's answer, forwarded rather than inferred.
+## Every payload already carries it, and a client that instead compared levels
+## between events would be wrong in exactly the cases that matter: the first
+## tick of a session (nothing to compare against), a level-up that arrives in
+## the same frame as a skill switch, and any tick that reaches a listener after
+## something else has already written the level mirror.
+signal skill_xp_gained(
+	job: StringName, amount: int, xp_into_level: int, level: int, leveled_up: bool
+)
 ## Weapon-mastery levels for the local character (category slug → int), mirrored
 ## from mastery.get on spawn + the combat.reward mastery payload. The CLIENT has
 ## no PlayerResource (it is server-only — see InstanceServer), so every tooltip /
@@ -279,6 +303,15 @@ func _ready() -> void:
 	)
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
+	# Profession XP from the non-gathering skills. These are request/RESPONSE
+	# types, not server pushes — Client._data_response fans every response back
+	# through data_push, so subscribing here catches them without touching the
+	# five menus that issue the requests (crafting has two call sites alone).
+	# Gathering and Slayer are NOT listed: they carry extra payload the funnel
+	# would have to re-parse, and are emitted from their own handlers below.
+	for xp_response: StringName in [&"craft.item", &"item.salvage", &"altar.offer"]:
+		Client.subscribe(xp_response, _on_skill_xp_response)
+	Client.subscribe(&"quest.board.claim", _on_board_claim_xp)
 	Client.subscribe(&"item.picked_up", _on_item_picked_up)
 	Client.subscribe(&"chest.opened", _on_chest_opened)
 	Client.subscribe(&"quest.update", func(data: Dictionary):
@@ -334,6 +367,58 @@ func _ready() -> void:
 	# Saved keybinds must hold from boot (gateway, menus) — not only once the
 	# local player's InputComponent spawns.
 	InputComponent.apply_saved_binds()
+
+
+## Profession XP off a craft / salvage / altar offering. All three answer with
+## the same three fields, so one handler covers them.
+func _on_skill_xp_response(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	_emit_skill_xp(
+		StringName(str(data.get("profession", ""))),
+		int(data.get("xp", 0)),
+		int(data.get("xp_into_level", 0)),
+		int(data.get("level", 0)),
+		bool(data.get("leveled_up", false)),
+	)
+
+
+## Daily board claim. Its own handler because one claim can pay several skills
+## at once, under "skill" rather than "profession".
+func _on_board_claim_xp(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	var grants: Variant = data.get("skills", [])
+	if grants is not Array:
+		return
+	for grant: Dictionary in (grants as Array):
+		_emit_skill_xp(
+			StringName(str(grant.get("skill", ""))),
+			int(grant.get("xp", 0)),
+			int(grant.get("xp_into_level", 0)),
+			int(grant.get("level", 0)),
+			bool(grant.get("leveled_up", false)),
+		)
+
+
+## Single gate in front of [signal skill_xp_gained].
+##
+## A zero amount is dropped rather than forwarded: it means no XP was actually
+## paid (a zero-XP recipe, a salvage that yielded nothing), and on those paths
+## the server leaves `progress` empty, so xp_into_level is a 0 PLACEHOLDER and
+## not a genuinely empty bar. Forwarding it would snap the radial gauge to zero
+## on an action that changed nothing. Gating once here keeps every consumer from
+## having to know that.
+func _emit_skill_xp(
+	job: StringName,
+	amount: int,
+	xp_into_level: int,
+	level: int,
+	leveled_up: bool,
+) -> void:
+	if job == &"" or amount <= 0 or level <= 0:
+		return
+	skill_xp_gained.emit(job, amount, maxi(xp_into_level, 0), level, leveled_up)
 
 
 ## Server-pushed kill rewards: surface them as ONE grouped toast card
@@ -422,6 +507,15 @@ func _on_combat_reward(data: Dictionary) -> void:
 		])
 		mastery_point_earned.emit(mastery_category, mastery_level)
 	var slayer: Dictionary = data.get("slayer", {})
+	# Slayer already shipped its own xp / xp_to_next on this push (the kill card
+	# draws a bar from them), so it needs no server change to feed the tracker.
+	_emit_skill_xp(
+		&"slayer",
+		int(slayer.get("xp_gained", 0)),
+		int(slayer.get("xp", 0)),
+		int(slayer.get("level", 0)),
+		bool(slayer.get("leveled_up", false)),
+	)
 	if bool(slayer.get("leveled_up", false)):
 		set_skill_level(&"slayer", int(slayer.get("level", 1)))
 		if local_player != null:
@@ -581,6 +675,15 @@ func _on_gather_result(data: Dictionary) -> void:
 			var g_job: String = str(grant.get("job", ""))
 			if g_level > 0 and not g_job.is_empty():
 				set_skill_level(StringName(g_job), g_level)
+				# Per grant, not per swing: a node crediting herb + medicine
+				# pays two skills, and the tracker has to see both.
+				_emit_skill_xp(
+					StringName(g_job),
+					int(grant.get("xp", 0)),
+					int(prog.get("xp", 0)),
+					g_level,
+					bool(prog.get("leveled_up", false)),
+				)
 
 	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.
 	var job_slug: String = str(data.get("job", "mining"))

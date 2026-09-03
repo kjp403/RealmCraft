@@ -262,6 +262,11 @@ func data_request_handler(
 		"profession": String(prof),
 		"xp": xp_gain,
 		"level": int(progress.get("level", level)),
+		# XP banked INTO the current level, for the HUD's radial gauge. Only
+		# meaningful when "xp" > 0 — a zero-XP recipe leaves progress empty and
+		# this reads 0 without the player's real bar being empty, so the client
+		# gates on the amount before touching the arc.
+		"xp_into_level": int(progress.get("xp", 0)),
 		"leveled_up": progress.get("leveled_up", false),
 		# The pace the NEXT craft may run at, so the client loop follows an Anvil
 		# Stabilizer starting or lapsing mid-batch without polling for it.

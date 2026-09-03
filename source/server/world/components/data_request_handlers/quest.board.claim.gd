@@ -50,6 +50,9 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 			"name": JobRegistry.display_name(slug),
 			"xp": totals[slug],
 			"level": int(progress.get("level", 1)),
+			# See craft.item — every grant here has xp > 0 (zero totals are
+			# filtered above), so this is always the real banked figure.
+			"xp_into_level": int(progress.get("xp", 0)),
 			"leveled_up": bool(progress.get("leveled_up", false)),
 		})
 

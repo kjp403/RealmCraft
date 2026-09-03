@@ -67,3 +67,20 @@ static func total_xp_for_level(level: int) -> int:
 	for i: int in range(1, capped):
 		total += int(XP_TO_NEXT[i - 1])
 	return total
+
+
+## Thousands-separated XP for display ("14,250"). Lives here because every
+## surface that prints an XP figure — skills grid, compact skills host, the HUD
+## tracker and its hover card — has to group digits the same way, and the two
+## hand-rolled copies that predate this were already free to drift apart.
+## Negative values clamp to 0: no XP readout in the game is meaningfully signed.
+static func format_xp(value: int) -> String:
+	var digits: String = str(maxi(0, value))
+	var out: String = ""
+	var count: int = 0
+	for i: int in range(digits.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = digits[i] + out
+		count += 1
+	return out

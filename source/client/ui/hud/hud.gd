@@ -56,6 +56,12 @@ var _party_hud: PartyHud
 @onready var chat_button: Button = $MenuButtons/ButtonRail/ChatButton
 @onready var chat: ChatMenu = $Chat
 @onready var twin_sticks: Control = $TwinSticks
+## Radial XP orb. Instanced here rather than authored into hud.tscn so the
+## whole feature lives in one folder and can be switched off without leaving a
+## dead node in the scene.
+const XP_TRACKER_SCENE: PackedScene = preload("res://source/client/ui/hud/xp_tracker/xp_tracker_hud.tscn")
+var _xp_tracker: XpTrackerHud
+
 @onready var quest_tracker: QuestTracker = $QuestTracker
 @onready var slayer_tracker: PanelContainer = $SlayerTracker
 @onready var trade_panel: Control = $TradePanel
@@ -100,6 +106,21 @@ func _ready() -> void:
 		tracker.anchor_bottom = 0.0
 		tracker.offset_left = -RIGHT_RAIL_WIDTH
 		tracker.offset_right = -RIGHT_RAIL_MARGIN
+	# The XP orb joins the same rail but keeps its own width: it is a 48px circle,
+	# and stretching it to the rail's 224 would put its hit-box (and its centre,
+	# which the spark's maths is measured from) somewhere other than the art.
+	_xp_tracker = XP_TRACKER_SCENE.instantiate()
+	_xp_tracker.anchor_left = 1.0
+	_xp_tracker.anchor_top = 0.0
+	_xp_tracker.anchor_right = 1.0
+	_xp_tracker.anchor_bottom = 0.0
+	_xp_tracker.offset_left = -RIGHT_RAIL_MARGIN - XpTrackerHud.CASING_DIAMETER
+	_xp_tracker.offset_right = -RIGHT_RAIL_MARGIN
+	add_child(_xp_tracker)
+	# Re-place when the orb is switched on or off in Settings — that is the only
+	# thing that changes the rail's shape (see _place_right_rail on why its slot
+	# is NOT tied to visibility).
+	ClientState.settings.setting_changed.connect(_on_xp_tracker_setting_changed)
 	_place_slayer_tracker()
 	quest_tracker.resized.connect(_place_right_rail)
 	quest_tracker.visibility_changed.connect(_place_right_rail)
@@ -535,6 +556,14 @@ func _place_right_rail() -> void:
 	if quest_tracker == null:
 		return
 	var top: float = RIGHT_RAIL_TOP
+	# The orb heads the rail, and its slot is reserved whenever the player has it
+	# switched ON — not merely while it happens to be visible. It auto-hides four
+	# seconds after every tick, so keying the layout to visibility would shunt the
+	# quest tracker up and down all the way through a gathering session.
+	if _xp_tracker != null and XpTrackerHud.is_enabled():
+		_xp_tracker.offset_top = top
+		_xp_tracker.offset_bottom = top + XpTrackerHud.CASING_DIAMETER
+		top += XpTrackerHud.CASING_DIAMETER + RIGHT_RAIL_GAP
 	for tracker: Control in [quest_tracker]:
 		if not tracker.visible:
 			continue
@@ -542,6 +571,16 @@ func _place_right_rail() -> void:
 		tracker.offset_top = top
 		tracker.offset_bottom = top + panel_height
 		top += panel_height + RIGHT_RAIL_GAP
+
+
+func _on_xp_tracker_setting_changed(
+	section: StringName,
+	property: StringName,
+	_value: Variant
+) -> void:
+	if section != XpTrackerHud.SETTING_SECTION or property != XpTrackerHud.SETTING_PROPERTY:
+		return
+	_place_right_rail()
 
 
 ## Pin the compact Slayer badge to the top-left corner. It sizes itself to its
