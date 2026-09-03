@@ -3,11 +3,43 @@
 Scenery and fishing holes are regenerated wholesale rather than patched, so the
 composition is described in one place and the collision footprints are derived
 from the same table that positions the art.
+
+!! THIS TOOL NO LONGER REPRODUCES EITHER SHIPPED BEACH. Both scenes have been
+hand-edited since it last ran, and a re-run on 2026-09-02 (with the table below
+already reconciled to the current prop positions) came out WORSE than what ships:
+
+  woodland_beach  drops Barrels entirely ("no room", blocked by PointRocks),
+                  pulls BeachedBoat from (700,330) back to (572,170) — undoing
+                  the spread dcfbd929 did by hand — and relocates the cooking
+                  station from (615,265) to (332,90). The station probe only
+                  knows about prop footprints, so it cannot see that a Banker was
+                  hand-placed beside the cooker at (560,260) afterwards, and
+                  happily separates them.
+  deep_shoals     re-adds StallWide/StallSmall/StallAlt, three market stalls the
+                  shipped map does not have, and moves its station (930,544) ->
+                  (828,650).
+
+So the scenes are the source of truth now, not this file. The footprints in both
+are correct as they ship — they were rewritten from the props actually drawn —
+and tools/verify_beach_walkable.tscn gates that they stay that way.
+
+Running is therefore OPT-IN: pass --rewrite-maps. Before you do, be ready to
+re-place the station/banker pairing and to diff the prop list, and re-run the
+verifier afterwards.
 """
 import json
 import re
 import subprocess
+import sys
 from scene_edit import split_nodes, node_name, join
+
+if "--rewrite-maps" not in sys.argv:
+    sys.exit("""
+build_beach_layout: refusing to rewrite the beach scenes.
+This tool no longer reproduces either shipped map (see the module docstring) --
+an unguarded run drops props and moves the cooking stations away from their
+bankers. Pass --rewrite-maps if you really mean it, then re-run
+tools/verify_beach_walkable.tscn.""")
 
 GODOT = r"C:/Users/kjpee/Godot/Godot_v4.7.1-stable_win64_console.exe"
 
@@ -322,16 +354,21 @@ SHOALS_HOLES = [
     ("BlueLobsterHole3", "h3", 1880, 30),
 ]
 
+# Kept in step with the scene by hand (2026-09-02): these x/sink pairs are where
+# dcfbd929 hand-placed the props. `sink` is pixels UP from the waterline to the
+# prop's base, read back as
+#   sink = shoreline_y(x) - (sprite.y + ceil(height / 2))
+# It is a record of the composition, not something the packer will reproduce —
+# see the module docstring. FishStall is gone on purpose (c6d310a6 took the market
+# stalls off this beach) and Barricade with it (e073c719 — it hid the cooker).
 BEACH = [
-    ("FishStall", "stall_small", 230, 90),
-    ("CatchBaskets", "fish_basket", 380, 90),
-    ("FishCrate", "fish_crate", 420, 90), ("Barrels", "barrels", 450, 90),
-    ("DryFish", "dry_fish_a", 300, 3), ("Bucket", "bucket", 400, 3),
-    ("Barricade", "barricade", 590, 90),
-    ("BeachedBoat", "stranded_boat", 545, 90),
+    ("CatchBaskets", "fish_basket", 175, 9),
+    ("FishCrate", "fish_crate", 245, 84), ("Barrels", "barrels", 775, 30),
+    ("DryFish", "dry_fish_a", 95, 12), ("Bucket", "bucket", 560, 48),
+    ("BeachedBoat", "stranded_boat", 700, 32),
     ("PointRocks", "rocky_skull", 795, 90),
     ("PalmW1", "palm_1", 55, 90), ("PalmW2", "palm_2", 140, 90),
-    ("PalmM1", "palm_3", 330, 120), ("PalmM2", "palm_1", 520, 130),
+    ("PalmM1", "palm_3", 330, 120), ("PalmM2", "palm_1", 430, 78),
     ("PalmE1", "palm_2", 640, 90), ("PalmE2", "palm_3", 745, 90),
     ("Rocks1", "rock_small", 110, 4), ("Rocks2", "rock_small2", 640, 4),
     ("ShellsA", "shells_a", 200, 3), ("ShellsB", "shells_b", 480, 3),
