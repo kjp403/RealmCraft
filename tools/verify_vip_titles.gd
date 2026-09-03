@@ -140,7 +140,7 @@ func _check_ladder() -> void:
 	_check(in_roster == 4, "all four appear on the vault shelf (got %d)" % in_roster)
 
 	_check(
-		TitleCatalog.spec("Donator").get("vip_tier", &"") == &"diamond",
+		TitleCatalog.spec("Diamond Donator").get("vip_tier", &"") == &"diamond",
 		"the catalog finds a tier by display name"
 	)
 
@@ -280,7 +280,7 @@ func _check_pipeline() -> void:
 	print("-- pipeline --")
 	var label: Label = Label.new()
 	label.text = "« Diamond Donator »"
-	TitleVfx.apply_to_label(label, "Donator")
+	TitleVfx.apply_to_label(label, "Diamond Donator")
 
 	var mat: ShaderMaterial = label.material as ShaderMaterial
 	_check(mat != null and mat.shader == TitleVfx.VIP_SHADER, "a ladder title gets vip_title.gdshader")
@@ -380,14 +380,14 @@ func _check_pipeline() -> void:
 func _check_grants() -> void:
 	print("-- grants --")
 	var pr: PlayerResource = PlayerResource.new()
-	_check(not VaultGrants.has_title(pr, "Donator"), "a fresh character has no grants")
-	_check(VaultGrants.grant_title(pr, "Donator"), "granting a title reports the change")
+	_check(not VaultGrants.has_title(pr, "Diamond Donator"), "a fresh character has no grants")
+	_check(VaultGrants.grant_title(pr, "Diamond Donator"), "granting a title reports the change")
 	_check(
-		VaultGrants.has_title(pr, "donator"),
+		VaultGrants.has_title(pr, "diamond donator"),
 		"grants are case-insensitive (admins type in a hurry)"
 	)
 	_check(
-		not VaultGrants.grant_title(pr, "Donator"),
+		not VaultGrants.grant_title(pr, "Diamond Donator"),
 		"re-granting is a no-op, not a duplicate"
 	)
 	var packed: int = VaultSkins.pack(PlayerSkins.starter_skin_id(), VaultSkins.STYLE_GOLD)
@@ -397,8 +397,8 @@ func _check_grants() -> void:
 	# THE WHOLE POINT. Same title, same character, one with the entitlement and
 	# one without - the strip must treat them differently.
 	var leaked: PlayerResource = PlayerResource.new()
-	leaked.display_title = "Donator"
-	leaked.titles_unlocked = PackedStringArray(["Donator"])
+	leaked.display_title = "Diamond Donator"
+	leaked.titles_unlocked = PackedStringArray(["Diamond Donator"])
 	leaked.vault_skin_id = packed
 	CommandPermissions.strip_unreleased_vfx(leaked, null)
 	_check(
@@ -408,14 +408,14 @@ func _check_grants() -> void:
 	_check(leaked.vault_skin_id == 0, "an UNGRANTED vault skin is stripped")
 
 	var donor: PlayerResource = PlayerResource.new()
-	donor.display_title = "Donator"
-	donor.titles_unlocked = PackedStringArray(["Donator"])
+	donor.display_title = "Diamond Donator"
+	donor.titles_unlocked = PackedStringArray(["Diamond Donator"])
 	donor.vault_skin_id = packed
-	VaultGrants.grant_title(donor, "Donator")
+	VaultGrants.grant_title(donor, "Diamond Donator")
 	VaultGrants.grant_skin(donor, packed)
 	CommandPermissions.strip_unreleased_vfx(donor, null)
 	_check(
-		donor.display_title == "Donator" and donor.titles_unlocked.has("Donator"),
+		donor.display_title == "Diamond Donator" and donor.titles_unlocked.has("Diamond Donator"),
 		"a GRANTED rung survives the strip"
 	)
 	_check(donor.vault_skin_id == packed, "a GRANTED vault skin survives the strip")

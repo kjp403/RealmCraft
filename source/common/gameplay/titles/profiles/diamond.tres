@@ -96,7 +96,7 @@ additive = true
 [resource]
 script = ExtResource("2_profile")
 tier = &"diamond"
-display_name = "Donator"
+display_name = "Diamond Donator"
 accent = Color(0.74901961, 0.91372549, 1.0, 1.0)
 metal_high = Color(1.0, 1.0, 1.0, 1.0)
 metal_mid = Color(0.94901961, 0.96862745, 0.98431373, 1.0)
