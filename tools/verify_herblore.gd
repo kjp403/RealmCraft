@@ -43,8 +43,8 @@ func _ready() -> void:
 	var farm: JobPerks = JobRegistry.perks_for(&"harvesting")
 	if farm == null:
 		fails.append("JobRegistry missing harvesting")
-	elif farm.source_items.size() < 8:
-		fails.append("Farming sources expected >= 8, got %d" % farm.source_items.size())
+	elif farm.source_items.size() < 14:
+		fails.append("Farming sources expected >= 14, got %d" % farm.source_items.size())
 	else:
 		print("farming sources=", farm.source_items.size(), " levels=", farm.source_levels)
 
@@ -53,9 +53,10 @@ func _ready() -> void:
 		fails.append("JobRegistry missing herblore")
 	else:
 		print("herblore=", herb.display_name, " recipes=", herb.recipe_items.size())
-		# 7 potion ladder + 4 weapon coatings + prayer potion + 2 Hollow Seep brews.
-		if herb.recipe_items.size() != 14:
-			fails.append("Herblore recipe_items expected 14, got %d" % herb.recipe_items.size())
+		# 7 potion ladder + 4 weapon coatings + prayer potion + 2 Hollow Seep brews
+		# + 6 high-tier combination draughts.
+		if herb.recipe_items.size() != 20:
+			fails.append("Herblore recipe_items expected 20, got %d" % herb.recipe_items.size())
 
 	if not JobRegistry.JOBS.has(&"herblore"):
 		fails.append("JOBS dict missing herblore")
@@ -70,32 +71,58 @@ func _ready() -> void:
 			" recipes=", station.recipes.size())
 		if station.profession != &"herblore":
 			fails.append("alchemy station profession should be herblore")
-		if station.recipes.size() != 14:
-			fails.append("expected 14 brew recipes, got %d" % station.recipes.size())
+		if station.recipes.size() != 20:
+			fails.append("expected 20 brew recipes, got %d" % station.recipes.size())
 		for r: CraftingRecipe in station.recipes:
 			if r == null or r.output_item == null:
 				fails.append("null brew recipe")
 				continue
 			print("  brew ", r.output_item.item_name, " lv", r.required_level, " xp", r.xp_reward)
-			var has_vial := false
+			# THE VIAL FLOOR. Every potion must have a 500g vial behind it, which is
+			# what keeps the Trading Post price of a brew off the floor.
+			#
+			# A COMBINATION draught pays that floor TRANSITIVELY: it is brewed from
+			# finished potions, and each of those already bought its own vial. A
+			# Corrosive Ember Draught consumes an Ember and a Tonic, so two vials'
+			# worth of cost is already inside it, and demanding a third Vial of
+			# Water would charge for glass the recipe never uses — and would break
+			# the reclaim ledger, which hands the leftover glass back as an Empty
+			# Vial. So the rule is "one vial per output, from somewhere", not
+			# "a Vial of Water ingredient".
+			var vials_in: int = 0
 			for ing: CraftIngredient in r.ingredients:
 				if ing == null or ing.item == null:
 					fails.append("null ingredient on %s" % r.output_item.item_name)
 					continue
-				if String(ing.item.get_meta(&"slug", &"")) == "vial_of_water":
-					has_vial = true
-					if ing.amount != 1:
-						fails.append("%s vial amount %d != 1" % [r.output_item.item_name, ing.amount])
-			if not has_vial:
-				fails.append("%s missing 1x vial of water" % r.output_item.item_name)
+				vials_in += PotionMixer.vial_count(ing.item) * ing.amount
+				if String(ing.item.get_meta(&"slug", &"")) == "vial_of_water" and ing.amount != 1:
+					fails.append("%s vial amount %d != 1" % [r.output_item.item_name, ing.amount])
+			if vials_in < 1:
+				fails.append("%s has no vial behind it" % r.output_item.item_name)
+			# Glass in must equal glass out plus glass returned, or brewing is
+			# quietly creating or destroying vials.
+			var vials_out: int = PotionMixer.vial_count(r.output_item) * r.output_amount
+			var reclaimed: int = PotionMixer.reclaimed_glass(r)
+			if vials_in != vials_out + reclaimed:
+				fails.append("%s glass ledger: %d in, %d out, %d back" % [
+					r.output_item.item_name, vials_in, vials_out, reclaimed
+				])
 
 	var herb_slugs: Array[String] = [
 		"healing_herb", "frostpetal", "sunwort", "moonbloom",
 		"bloodcap", "starblossom", "grimshade",
 	]
+	# The high-tier patches continue the same ladder; they are checked by the
+	# same loop so a new herb cannot be added with the tool or the level wrong.
+	herb_slugs.append_array([
+		"rust_spore_cap", "nightshade_bramble", "magma_root",
+		"sun_lit_lotus", "gloom_spore_cap", "iron_spike_thorn",
+	])
 	var expected_levels: Dictionary = {
 		"healing_herb": 1, "frostpetal": 5, "sunwort": 10, "moonbloom": 20,
 		"bloodcap": 30, "starblossom": 40, "grimshade": 50,
+		"rust_spore_cap": 70, "nightshade_bramble": 74, "magma_root": 78,
+		"sun_lit_lotus": 82, "gloom_spore_cap": 85, "iron_spike_thorn": 92,
 	}
 	for slug: String in herb_slugs:
 		var node_res: MineableNodeResource = load(
@@ -111,6 +138,15 @@ func _ready() -> void:
 			fails.append("%s level %d != %d" % [slug, node_res.required_level, expected_levels[slug]])
 		if not node_res.job_xp.has(&"harvesting"):
 			fails.append("%s missing harvesting xp" % slug)
+		# HerbalismItem copies its patch's level onto the ITEM so a bag tooltip can
+		# say where the herb comes from without loading the node resource. A copy
+		# drifts; this is the check that keeps it honest, and it is why the copy is
+		# safe to have at all.
+		var herb_item: HerbalismItem = node_res.ore as HerbalismItem
+		if herb_item != null and herb_item.harvest_level != node_res.required_level:
+			fails.append("%s item harvest_level %d != node %d" % [
+				slug, herb_item.harvest_level, node_res.required_level
+			])
 		print("  node ", slug, " lv", node_res.required_level, " xp", node_res.job_xp.get(&"harvesting", 0))
 
 	for sickle_slug: String in ["sickle", "sickle_iron", "sickle_steel", "sickle_mithril"]:

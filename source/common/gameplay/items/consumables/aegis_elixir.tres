@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_aegis_elixir.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_buff.gd" id="3_buff"]
+[sub_resource type="Resource" id="Buff_ad"]
+script = ExtResource("3_buff")
+stat = &"ad"
+amount = 45.0
+duration_s = 180.0
+
+[sub_resource type="Resource" id="Buff_ap"]
+script = ExtResource("3_buff")
+stat = &"ap"
+amount = 45.0
+duration_s = 180.0
+
+[resource]
+script = ExtResource("2_script")
+buff_stat = &"armor"
+buff_amount = 30.0
+buff_duration_s = 180.0
+exclusive_buff = true
+extra_buffs = Array[ExtResource("3_buff")]([SubResource("Buff_ad"), SubResource("Buff_ap")])
+shared_cooldown_ms = 3000
+cooldown_category = &"defense_tonic"
+item_name = &"Aegis Elixir"
+item_icon = ExtResource("1_tex")
+description = "Lotus core, cut with a mana draught and a defence tonic. The guard holds for a good while. The edge it lends you does not."
+vendor_value = 4400
+tags = PackedStringArray("vial")
+metadata/slug = &"aegis_elixir"
+metadata/id = 676

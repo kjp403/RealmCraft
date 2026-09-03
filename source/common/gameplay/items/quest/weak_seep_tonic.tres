@@ -10,6 +10,6 @@ item_icon = ExtResource("1_icon")
 description = "A small green flask. Untradeable. Wren's first draught against the fungus roots."
 holdable = false
 stack_limit = 1
-tags = PackedStringArray()
+tags = PackedStringArray("vial")
 metadata/slug = &"weak_seep_tonic"
 metadata/id = 584

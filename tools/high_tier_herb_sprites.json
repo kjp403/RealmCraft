@@ -1,0 +1,95 @@
+{
+  "rust_spore_cap": {
+    "size": "16x16",
+    "read": "upright mushroom, cap wider than the stalk, cracked",
+    "silhouette": "cap occupies rows 3-8 spanning 10px; stalk 3px wide, rows 9-13",
+    "palette": {
+      "outline": "#2a1710",
+      "cap_shadow": "#6b3a1c",
+      "cap_mid": "#a35a24",
+      "cap_light": "#c8762f",
+      "crack": "#ff8c1a",
+      "crack_hot": "#ffc65c",
+      "stalk": "#8a6a4e"
+    },
+    "detail": "3-4 hazard-orange cracks radiating from the cap crown; brightest pixel at each crack mouth, never more than 6 accent pixels total",
+    "anim": "none (still node art doubles the icon)"
+  },
+  "nightshade_bramble": {
+    "size": "16x16",
+    "read": "thorny vine arcing bottom-left to top-right, berries reading first",
+    "silhouette": "vine 2px wide with 4 outward barbs; 3 berries clustered upper right",
+    "palette": {
+      "outline": "#1b1024",
+      "vine_dark": "#3d2352",
+      "vine_mid": "#5c3579",
+      "thorn": "#7a4a9c",
+      "berry_dark": "#3f7a24",
+      "berry_mid": "#63c22e",
+      "berry_glow": "#a6ff5e"
+    },
+    "detail": "berries pulse: 2-frame idle swapping berry_mid and berry_glow, 0.5s per frame",
+    "anim": "2 frames, berry pulse"
+  },
+  "magma_root": {
+    "size": "16x16",
+    "read": "gnarled forked root, dark, lit from inside",
+    "silhouette": "thick vertical root rows 2-14, two side forks, never symmetric",
+    "palette": {
+      "outline": "#141214",
+      "root_dark": "#2e2b2e",
+      "root_mid": "#454045",
+      "vein_dull": "#8a3d0d",
+      "vein_mid": "#e0721a",
+      "vein_hot": "#ffc23d"
+    },
+    "detail": "veins run ALONG the root's length, never across it; hottest pixels deepest in the crevices so the light reads as internal",
+    "anim": "2 frames, vein glow breathing"
+  },
+  "sun_lit_lotus": {
+    "size": "16x16",
+    "read": "symmetrical 8-petal flower seen from directly above",
+    "silhouette": "petals on the 8 compass points, tips at the 16px edge, core 4x4 centred",
+    "palette": {
+      "outline": "#6b4a06",
+      "petal_shadow": "#c9960f",
+      "petal_mid": "#f0c02a",
+      "petal_light": "#ffe066",
+      "core_glow": "#fffbe6",
+      "core_pure": "#ffffff"
+    },
+    "detail": "the ONLY radially symmetric herb in the set \u2014 symmetry is its read, so mirror all four quadrants exactly; core is pure white with a 1px glow ring",
+    "anim": "2 frames, core glow swell"
+  },
+  "gloom_spore_cap": {
+    "size": "16x16",
+    "read": "broad flat mushroom cap, dark, with spores drifting off it",
+    "silhouette": "wide low cap rows 5-9 spanning 12px, short 2px stalk rows 10-13",
+    "palette": {
+      "outline": "#0b1024",
+      "cap_dark": "#182347",
+      "cap_mid": "#26386b",
+      "cap_light": "#38508f",
+      "spore_dim": "#3fb8c4",
+      "spore_bright": "#8ff6ff"
+    },
+    "detail": "4-6 loose spore pixels above the cap, unattached to the silhouette; they are the read, so give them the brightest value on the sprite",
+    "anim": "4 frames, spores rising and looping"
+  },
+  "iron_spike_thorn": {
+    "size": "16x16",
+    "read": "low succulent rosette of straight rigid blades",
+    "silhouette": "5 blades fanning from a 3px base, each 1-2px wide, all straight (no curves \u2014 curves read as grass)",
+    "palette": {
+      "outline": "#16181c",
+      "blade_dark": "#3a4048",
+      "blade_mid": "#5b636e",
+      "blade_light": "#8d97a4",
+      "barb_dark": "#7a1220",
+      "barb_mid": "#c31f33",
+      "barb_shine": "#ff5c6e"
+    },
+    "detail": "one crimson barb at each blade TIP, with a single barb_shine pixel \u2014 the metal read comes from the hard light/dark step on the blades, not from a gradient",
+    "anim": "none"
+  }
+}

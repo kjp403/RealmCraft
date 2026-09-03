@@ -12,5 +12,6 @@ item_name = &"Minor Health Potion"
 item_icon = ExtResource("1_p8ujo")
 description = "A small draught. Cheap and handy your first days out."
 vendor_value = 25
+tags = PackedStringArray("vial")
 metadata/slug = &"minor_health_potion"
 metadata/id = 68

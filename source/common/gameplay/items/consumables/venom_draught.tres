@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_venom_draught.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+coating_kind = &"venom"
+coating_potency = 42.0
+coating_hit_duration_s = 10.0
+coating_duration_s = 90.0
+venom_per_source = true
+venom_max_lifespan_s = 30.0
+shared_cooldown_ms = 3000
+cooldown_category = &"weapon_coating"
+item_name = &"Venom Draught"
+item_icon = ExtResource("1_tex")
+description = "Bramble berries wrung into a bottle of the concentrated stuff. It does not need you to keep hitting; it only needs to be in the wound."
+vendor_value = 4800
+tags = PackedStringArray("vial")
+metadata/slug = &"venom_draught"
+metadata/id = 681

@@ -15,5 +15,6 @@ item_name = &"Weapon Ember"
 item_icon = ExtResource("1_tex")
 description = "Bottled heat off a forge-grown blade. Your edge lights whatever it opens."
 vendor_value = 2000
+tags = PackedStringArray("vial")
 metadata/slug = &"weapon_ember"
 metadata/id = 591

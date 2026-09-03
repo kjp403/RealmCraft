@@ -14,5 +14,6 @@ item_name = &"Weapon Salve"
 item_icon = ExtResource("1_tex")
 description = "Fae residue worked into a balm. The blade takes a little back for you every time it lands."
 vendor_value = 2200
+tags = PackedStringArray("vial")
 metadata/slug = &"weapon_salve"
 metadata/id = 590

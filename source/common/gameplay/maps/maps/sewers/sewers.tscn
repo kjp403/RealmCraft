@@ -29,6 +29,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/gutterworks.tres" id="e26"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/drowned_cistern.tres" id="e27"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/ossuary.tres" id="e28"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="hth_node_scn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/gloom_spore_cap.tres" id="hth_gloom_spore_cap"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/nightshade_bramble.tres" id="hth_nightshade_bramble"]
 
 [node name="sewers" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
@@ -657,3 +660,76 @@ destination_label = "The Ossuary"
 target_instance = ExtResource("e28")
 warper_id = 156
 target_id = 46
+
+[node name="MineableNodes" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="SewerGloomSpore1" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(240, 3120)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore2" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(4240, 3120)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore3" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2736, 3120)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore4" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(3824, 1680)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore5" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1584, 2672)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore6" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(3088, 2256)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerGloomSpore7" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1136, 720)
+data = ExtResource("hth_gloom_spore_cap")
+
+[node name="SewerNightshade1" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2352, 1680)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade2" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(336, 304)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade3" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(4240, 272)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade4" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1904, 272)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade5" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(944, 1584)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade6" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(3088, 688)
+data = ExtResource("hth_nightshade_bramble")
+
+[node name="SewerNightshade7" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(304, 2224)
+data = ExtResource("hth_nightshade_bramble")

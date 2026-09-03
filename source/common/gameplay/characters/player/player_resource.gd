@@ -299,6 +299,19 @@ var active_buffs: Array[Dictionary] = []
 ## cannot live in active_buffs; runtime only for the same reason those are.
 var weapon_coating: Dictionary = {}
 
+## Live StatusEffectManager auras on this player ({family: aura dict} — see
+## StatusEffectManager.arm_aura), empty when none are running. Runtime only for
+## the same reason active_buffs and weapon_coating are.
+##
+## The auras themselves live on a node CHILD of the Player, which does not
+## survive an instance change — the spawn builds a fresh Player. Without this
+## mirror a Cinder-Guard survived a portal as +40 armor with no retaliation
+## behind it, and a five-minute Shadowveil was destroyed outright by walking
+## through a door. Stacking debuffs (Corroding Heat) are deliberately NOT
+## mirrored: they belong to a fight, and dropping them when you leave the map is
+## the right behaviour.
+var active_auras: Dictionary = {}
+
 ## Prayer points left in the pool. Runtime only — the pool SIZE is a composed
 ## stat (rebuilt every spawn from the Prayer level), but the current value must
 ## not be, or entering any building would refill it. PrayerService.UNINITIALISED

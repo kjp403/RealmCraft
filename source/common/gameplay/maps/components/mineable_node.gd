@@ -178,6 +178,13 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	if int(_cooldown_until_ms_by_player.get(player_id, 0)) > now_ms:
 		return {"ok": false, "reason": "cooldown"}
 
+	# A Shadowveil'd gatherer gives themselves away by working the node — but only
+	# if their draught was authored to break on it. Placed past the tool and
+	# cooldown gates so a refused swing (wrong tool, still cooling) does not cost
+	# the veil, and before the yield roll so it costs the veil whether or not the
+	# swing actually produced anything.
+	StatusEffectManager.on_gather(player)
+
 	# Primary job drives the level gate + gathering perk bonuses (cooldown /
 	# bonus yield). Herbs with required_level 0 skip the gate naturally.
 	var primary_job: StringName = _primary_job()

@@ -15,5 +15,6 @@ item_name = &"Weapon Poison"
 item_icon = ExtResource("1_tex")
 description = "Smear it along the edge before a fight. Everything you cut keeps bleeding green for a while after."
 vendor_value = 1300
+tags = PackedStringArray("vial")
 metadata/slug = &"weapon_poison"
 metadata/id = 586

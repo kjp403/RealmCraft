@@ -76,27 +76,24 @@ func data_request_handler(
 	var active_bag: int = resource.active_inventory_bag
 	var bag_count: int = resource.inventory_bags
 
-	# Crafting-profession level gate.
 	var level: int = int((resource.skills.get(prof, {}) as Dictionary).get("level", 1))
-	if level < recipe.required_level:
-		return {"ok": false, "reason": "level", "required_level": recipe.required_level}
+
+	# Profession level gate + "every input is held before any is taken" (the
+	# atomic-craft rule), both from PotionMixer so there is ONE definition of what
+	# a craft requires. It answers in this handler's own {"ok", "reason"} shape,
+	# so a refusal is forwarded unchanged and the crafting UI needs no new cases.
+	# It reads required_inputs() rather than ingredients, which is what keeps a
+	# SmeltingRecipe's catalysts gated here too — a smelt with no crucible is
+	# refused BEFORE the ore is taken, not after.
+	var verdict: Dictionary = PotionMixer.verify(recipe, station, resource)
+	if not bool(verdict.get("ok", false)):
+		return verdict
 
 	# Station fee: a flat per-craft gold sink (docs/crafting.md economy guards).
 	var fee: int = station.craft_fee
 	var gold_id: int = Economy.gold_id()
 	if fee > 0 and Inventory.count(inventory, gold_id) < fee:
 		return {"ok": false, "reason": "gold", "fee": fee}
-
-	# Verify every input is available before consuming any (atomic craft).
-	# `required_inputs()` — not `ingredients` — so a SmeltingRecipe's catalysts
-	# are gated here too: a smelt with no crucible must be refused BEFORE the
-	# ore is taken, not after.
-	for ingredient: CraftIngredient in recipe.required_inputs():
-		if ingredient == null or ingredient.item == null:
-			continue
-		var ing_id: int = int(ingredient.item.get_meta(&"id", 0))
-		if Inventory.count(inventory, ing_id) < ingredient.amount:
-			return {"ok": false, "reason": "ingredients"}
 
 	# Past every gate — this craft is happening, so start the next cooldown at
 	# the pace this one ran at.
@@ -167,12 +164,28 @@ func data_request_handler(
 	var output_amount: int = recipe.output_amount
 	if perks != null and randf() < perks.extra_item_chance(player_perks):
 		output_amount += 1
+	# Guaranteed extras this craft hands back beyond its output — today that is
+	# the glassware a combination draught frees (see PotionMixer). Resolved BEFORE
+	# the space gate so a mix cannot succeed on a nearly-full bag and then quietly
+	# evaporate the vial it owed the player. Empty for every ordinary recipe, so
+	# this costs one dictionary allocation and nothing else.
+	var byproducts: Dictionary[int, int] = PotionMixer.byproducts_for(recipe)
+
 	# Ingredients already freed space; still gate so a full bag of unrelated gear
 	# can't absorb a craft that needs a new square.
-	if not Inventory.can_add(
+	var space_ok: bool = Inventory.can_add(
 		inventory, output_id, output_amount, Inventory.MAX_SLOTS,
 		false, active_bag, bag_count
-	):
+	)
+	if space_ok:
+		for by_id: int in byproducts:
+			if not Inventory.can_add(
+				inventory, by_id, byproducts[by_id], Inventory.MAX_SLOTS,
+				false, active_bag, bag_count
+			):
+				space_ok = false
+				break
+	if not space_ok:
 		# Rollback ingredients + fee so the craft stays atomic. Refunds are only
 		# granted below, so there is nothing of theirs to undo here.
 		for ingredient: CraftIngredient in recipe.ingredients:
@@ -193,6 +206,15 @@ func data_request_handler(
 	for _i: int in output_amount:
 		Inventory.try_add_item(
 			inventory, output_id, 1, Inventory.MAX_SLOTS,
+			false, active_bag, bag_count
+		)
+	# Byproducts next, while the space the gate above reserved is still free.
+	# Deliberately NOT rolled against the refund perk: a refund is a chance to
+	# keep an INPUT, a byproduct is a guaranteed second PRODUCT, and folding them
+	# together would let a Herblore perk quietly multiply the world's glass.
+	for by_id: int in byproducts:
+		Inventory.try_add_item(
+			inventory, by_id, byproducts[by_id], Inventory.MAX_SLOTS,
 			false, active_bag, bag_count
 		)
 	# Refunded ingredients go back last. They came out of the bag moments ago so
@@ -233,6 +255,10 @@ func data_request_handler(
 		"ok": true,
 		"output_id": output_id,
 		"amount": output_amount,
+		# What else landed in the bag, so the craft toast can say "+1 Empty Vial"
+		# rather than leaving the player to notice it on their own. Empty for every
+		# ordinary recipe; the client shows nothing when it is.
+		"byproducts": byproducts,
 		"profession": String(prof),
 		"xp": xp_gain,
 		"level": int(progress.get("level", level)),

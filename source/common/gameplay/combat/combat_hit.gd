@@ -93,6 +93,11 @@ static func try_damage(
 	# target rule, so one hook covers every weapon type at once — a melee arc and
 	# an arrow both arrive through this line.
 	CoatingService.on_hit(source, body as Character)
+	# Landing a hit gives away a hidden player. Placed on the same line of the
+	# same choke point as the coating so every weapon type breaks stealth at
+	# once — a veil that survived one weapon's attack path would be an
+	# invisibility exploit found within a day of shipping.
+	StatusEffectManager.break_stealth(source, StatusEffectManager.BREAK_ATTACK)
 	# Ammunition procs ride the same landed hit. Gated to ranged damage inside
 	# the service so a quiver cannot proc off a sword swing.
 	AmmoProcService.on_hit(source, body as Character, damage, damage_type)

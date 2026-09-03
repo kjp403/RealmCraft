@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_iron_spike_thorn.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 92
+herblore_level = 99
+catalyst_for = &"provocation_brew"
+patch_biome = "Starfall Mining Cave"
+item_name = &"Iron-Spike Thorn"
+item_icon = ExtResource("1_tex")
+description = "Slate-grey blades with a red barb on every tip. It has no predators left, which tells you most of what the barbs do."
+holdable = false
+can_trade = true
+vendor_value = 42
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"iron_spike_thorn"
+metadata/id = 684

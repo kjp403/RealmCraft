@@ -13,5 +13,6 @@ item_name = &"Prayer Potion"
 item_icon = ExtResource("1_tex")
 description = "Ground bone in a bitter green base. Tastes like a church smells. Puts prayer points back."
 vendor_value = 100
+tags = PackedStringArray("vial")
 metadata/slug = &"prayer_potion"
 metadata/id = 595

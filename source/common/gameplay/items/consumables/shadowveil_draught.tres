@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_shadowveil.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+exclusive_buff = true
+aura_effect = &"shadowveil"
+aura_duration_s = 300.0
+aura_breaks_on_gather = false
+shared_cooldown_ms = 10000
+cooldown_category = &"shadowveil"
+use_freeze_ms = 600
+item_name = &"Shadowveil Draught"
+item_icon = ExtResource("1_tex")
+description = "Grimshade thinned with cave spores. Nothing hunting can hold you in its eye — until you give it a reason to look again."
+vendor_value = 5200
+tags = PackedStringArray("vial")
+metadata/slug = &"shadowveil_draught"
+metadata/id = 680

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_provocation.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+buff_stat = &"armor"
+buff_amount = 20.0
+buff_duration_s = 300.0
+exclusive_buff = true
+aura_effect = &"provocation"
+aura_duration_s = 300.0
+aura_radius = 200.0
+aura_pulse_s = 2.0
+aura_max_targets = 8
+shared_cooldown_ms = 3000
+cooldown_category = &"defense_tonic"
+item_name = &"Provocation Brew"
+item_icon = ExtResource("1_tex")
+description = "Thorn barbs boiled down into a defence tonic. Everything in the room decides you are the problem, which is the entire point."
+vendor_value = 5600
+tags = PackedStringArray("vial")
+metadata/slug = &"provocation_brew"
+metadata/id = 679

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_sun_lit_lotus.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 82
+herblore_level = 95
+catalyst_for = &"aegis_elixir"
+patch_biome = "Desert"
+item_name = &"Sun-Lit Lotus"
+item_icon = ExtResource("1_tex")
+description = "Eight petals, dead even, around a white core that keeps giving light back after dusk. It only opens on water that has not moved in a year."
+holdable = false
+can_trade = true
+vendor_value = 34
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"sun_lit_lotus"
+metadata/id = 688

@@ -10,6 +10,12 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/starblossom.tres" id="h5"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/grimshade.tres" id="h6"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/cloth_forest.tres" id="flax"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/rust_spore_cap.tres" id="h7"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/nightshade_bramble.tres" id="h8"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/magma_root.tres" id="h9"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sun_lit_lotus.tres" id="h10"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/gloom_spore_cap.tres" id="h11"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/iron_spike_thorn.tres" id="h12"]
 [resource]
 script = ExtResource("1_jp")
 icon = ExtResource("icon_tex")
@@ -38,6 +44,6 @@ perks = Array[Dictionary]([{
 "name": "Patient",
 "per_rank": 0.1
 }])
-source_items = Array[ExtResource("1_item")]([ExtResource("h0"), ExtResource("h1"), ExtResource("h2"), ExtResource("h3"), ExtResource("h4"), ExtResource("h5"), ExtResource("h6"), ExtResource("flax")])
-source_levels = Array[int]([1, 5, 10, 20, 30, 40, 50, 1])
+source_items = Array[ExtResource("1_item")]([ExtResource("h0"), ExtResource("h1"), ExtResource("h2"), ExtResource("h3"), ExtResource("h4"), ExtResource("h5"), ExtResource("h6"), ExtResource("flax"), ExtResource("h7"), ExtResource("h8"), ExtResource("h9"), ExtResource("h10"), ExtResource("h11"), ExtResource("h12")])
+source_levels = Array[int]([1, 5, 10, 20, 30, 40, 50, 1, 70, 74, 78, 82, 85, 92])
 describe_lines = Array[String](["Gather speed +{cooldown}%", "Bonus herb +{bonus_yield}%", "Farming XP +{xp}%"])

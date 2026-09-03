@@ -31,6 +31,19 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/weak_seep_tonic.tres" id="quest_tonic"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/true_seep_root.tres" id="quest_root"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/seepbreakers_draught.tres" id="quest_draught"]
+[ext_resource type="Script" path="res://source/common/gameplay/crafting/mixing_recipe.gd" id="4_mixing"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/rust_spore_cap.tres" id="herb_rust_spore_cap"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/nightshade_bramble.tres" id="herb_nightshade_bramble"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/magma_root.tres" id="herb_magma_root"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sun_lit_lotus.tres" id="herb_sun_lit_lotus"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/gloom_spore_cap.tres" id="herb_gloom_spore_cap"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/iron_spike_thorn.tres" id="herb_iron_spike_thorn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/corrosive_ember_draught.tres" id="mix_corrosive"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/venom_draught.tres" id="mix_venom"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/cinder_guard_brew.tres" id="mix_cinder"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/aegis_elixir.tres" id="mix_aegis"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/shadowveil_draught.tres" id="mix_shadowveil"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/provocation_brew.tres" id="mix_provocation"]
 [sub_resource type="Resource" id="I_vial"]
 script = ExtResource("3_ingred")
 item = ExtResource("vial_water")
@@ -179,9 +192,132 @@ output_item = ExtResource("quest_draught")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_seep_root")])
 required_level = 1
 xp_reward = 40
+[sub_resource type="Resource" id="I_mix_ember"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_ember")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_tonic_a"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_6")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_rust"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_rust_spore_cap")
+amount = 3
+
+[sub_resource type="Resource" id="R_mix_corrosive"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_corrosive")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_ember"), SubResource("I_mix_tonic_a"), SubResource("I_mix_rust")])
+required_level = 90
+xp_reward = 950
+reclaim_glass = true
+
+[sub_resource type="Resource" id="I_mix_poison_plus"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_poison_plus")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_bramble"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_nightshade_bramble")
+amount = 3
+
+[sub_resource type="Resource" id="R_mix_venom"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_venom")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_poison_plus"), SubResource("I_mix_bramble")])
+required_level = 91
+xp_reward = 1000
+reclaim_glass = true
+
+[sub_resource type="Resource" id="I_mix_tonic_b"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_6")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_magma"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_magma_root")
+amount = 3
+
+[sub_resource type="Resource" id="R_mix_cinder"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_cinder")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_tonic_b"), SubResource("I_mix_magma")])
+required_level = 93
+xp_reward = 1100
+reclaim_glass = true
+
+[sub_resource type="Resource" id="I_mix_tonic_c"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_6")
+amount = 3
+
+[sub_resource type="Resource" id="I_mix_mana"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_3")
+amount = 3
+
+[sub_resource type="Resource" id="I_mix_lotus"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_sun_lit_lotus")
+amount = 3
+
+[sub_resource type="Resource" id="R_mix_aegis"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_aegis")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_tonic_c"), SubResource("I_mix_mana"), SubResource("I_mix_lotus")])
+required_level = 95
+xp_reward = 2400
+reclaim_glass = true
+
+[sub_resource type="Resource" id="I_mix_tonic_e"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_6")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_grimshade"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_grimshade")
+amount = 4
+
+[sub_resource type="Resource" id="I_mix_gloom"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_gloom_spore_cap")
+amount = 6
+
+[sub_resource type="Resource" id="R_mix_shadowveil"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_shadowveil")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_tonic_e"), SubResource("I_mix_grimshade"), SubResource("I_mix_gloom")])
+required_level = 97
+xp_reward = 2200
+reclaim_glass = true
+
+[sub_resource type="Resource" id="I_mix_tonic_d"]
+script = ExtResource("3_ingred")
+item = ExtResource("pot_6")
+amount = 1
+
+[sub_resource type="Resource" id="I_mix_thorn"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_iron_spike_thorn")
+amount = 8
+
+[sub_resource type="Resource" id="R_mix_provocation"]
+script = ExtResource("4_mixing")
+output_item = ExtResource("mix_provocation")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_mix_tonic_d"), SubResource("I_mix_thorn")])
+required_level = 99
+xp_reward = 2600
+reclaim_glass = true
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Alchemy Table"
 profession = &"herblore"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_seep_tonic"), SubResource("R_seep_draught")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_seep_tonic"), SubResource("R_seep_draught"), SubResource("R_mix_corrosive"), SubResource("R_mix_venom"), SubResource("R_mix_cinder"), SubResource("R_mix_aegis"), SubResource("R_mix_shadowveil"), SubResource("R_mix_provocation")])

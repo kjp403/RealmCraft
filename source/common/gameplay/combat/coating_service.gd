@@ -24,10 +24,26 @@ class_name CoatingService
 const KIND_POISON: StringName = &"poison"
 const KIND_BURN: StringName = &"burn"
 const KIND_HEAL: StringName = &"heal"
+## Corrosive Ember Draught: a capped, stacking, percentage armor strip plus a
+## minor burn. Not a DOT_KIND — its damage is only half of what it does, and the
+## stack ledger lives on [StatusEffectManager], so it is routed separately in
+## [method on_hit].
+const KIND_CORRODE: StringName = &"corrode"
+## Venom Draught: a true damage-over-time keyed by the PLAYER who applied it, so
+## two players' venoms tick independently instead of overwriting one another.
+## Also not a DOT_KIND, because a plain [DamageOverTime] is exactly the
+## source-blind behaviour it exists to replace.
+const KIND_VENOM: StringName = &"venom"
 
 ## Kinds whose effect is a damage-over-time on the victim. Everything else is
 ## resolved on the attacker.
 const DOT_KINDS: Array[StringName] = [KIND_POISON, KIND_BURN]
+
+## Kinds that need per-victim tuning beyond {potency, hit_duration_s} and are
+## therefore carried in the coating's [code]extras[/code] bag. Listed so
+## [method ConsumableItem.is_coating] can accept them without treating a missing
+## hit_duration_s as an authoring slip.
+const EXTRA_KINDS: Array[StringName] = [KIND_CORRODE, KIND_VENOM]
 
 ## Status-strip ids are prefixed so a coating can never collide with the DEBUFF
 ## of the same name — "poison" on the victim's strip means they are poisoned,
@@ -52,12 +68,16 @@ static func status_id(kind: StringName) -> String:
 ## caller must not consume the vial in that case. Callers that want to explain
 ## the refusal should check [method is_active] first so they can name the
 ## coating already on the weapon.
+## [param extras] carries the per-kind tuning that does not fit {potency,
+## hit_duration_s} — the corrosion stack budget, the venom's source-keying rule.
+## An untouched dictionary is the default, so every existing caller is unchanged.
 static func apply(
 	player: Player,
 	kind: StringName,
 	potency: float,
 	hit_duration_s: float,
-	duration_s: float
+	duration_s: float,
+	extras: Dictionary = {}
 ) -> bool:
 	if player == null or player.player_resource == null:
 		return false
@@ -72,6 +92,7 @@ static func apply(
 		"potency": potency,
 		"hit_duration_s": hit_duration_s,
 		"expires_ms": Time.get_ticks_msec() + int(duration_s * 1000.0),
+		"extras": extras,
 	}
 	return true
 
@@ -139,11 +160,32 @@ static func on_hit(source: Character, victim: Character) -> void:
 	var coating: Dictionary = player.player_resource.weapon_coating
 	var kind: StringName = StringName(str(coating.get("kind", "")))
 	var potency: float = float(coating.get("potency", 0.0))
+	var hit_duration_s: float = float(coating.get("hit_duration_s", 0.0))
+	var extras: Dictionary = coating.get("extras", {})
 	if is_dot_kind(kind):
-		DamageOverTime.apply(
-			victim, player, kind, potency, float(coating.get("hit_duration_s", 0.0))
-		)
+		DamageOverTime.apply(victim, player, kind, potency, hit_duration_s)
 	elif kind == KIND_HEAL:
 		# Pays the ATTACKER, not the victim. counts_as_combat_heal stays true so
 		# the sear-wound interaction sees it like any other in-combat heal.
 		player.apply_heal(potency, player, true)
+	elif kind == KIND_CORRODE:
+		# Two payloads off one hit: the stack ledger (capped, refresh-only) and a
+		# deliberately minor burn. The strip is the draught's value; paying full
+		# damage on top would make it strictly better than an Ember.
+		var manager: StatusEffectManager = StatusEffectManager.for_character(victim)
+		if manager != null:
+			manager.apply_stack(
+				StatusEffectManager.EFFECT_CORRODING_HEAT,
+				float(extras.get("armor_per_stack", 0.0)),
+				int(extras.get("max_stacks", 0)),
+				float(extras.get("stack_duration_s", 0.0))
+			)
+		if potency > 0.0 and hit_duration_s > 0.0:
+			DamageOverTime.apply(victim, player, KIND_BURN, potency, hit_duration_s)
+	elif kind == KIND_VENOM:
+		StatusEffectManager.apply_source_dot(
+			victim, player, KIND_VENOM, potency, hit_duration_s,
+			bool(extras.get("per_source", true)),
+			CombatHit.DAMAGE_MAGIC,
+			float(extras.get("max_lifespan_s", 0.0))
+		)

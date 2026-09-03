@@ -83,7 +83,15 @@ static func stamp_client_cooldown(consumable: ConsumableItem) -> void:
 ## both services answer false and the sip goes out optimistically — the same
 ## thing the coating-only gate did before, with the server as the authority.
 static func draught_slot_busy(player: Player) -> bool:
-	return CoatingService.is_active(player) or BuffService.exclusive_active(player)
+	# THREE services can hold the slot, not two. A coating lives on the
+	# PlayerResource, an exclusive stat buff lives in BuffService, and an
+	# aura-only draught (Shadowveil grants no stat and no coating) lives on
+	# StatusEffectManager and is invisible to the other two.
+	return (
+		CoatingService.is_active(player)
+		or BuffService.exclusive_active(player)
+		or StatusEffectManager.exclusive_aura_active(player)
+	)
 
 
 ## Does this vial coat the drinker's weapon? The fields its kind needs have to
@@ -93,13 +101,38 @@ static func draught_slot_busy(player: Player) -> bool:
 func is_coating() -> bool:
 	if coating_kind.is_empty() or coating_potency <= 0.0 or coating_duration_s <= 0.0:
 		return false
-	# Only the damage-over-time kinds need a per-victim duration.
-	return coating_hit_duration_s > 0.0 or not CoatingService.is_dot_kind(coating_kind)
+	if coating_hit_duration_s > 0.0:
+		return true
+	# Every kind that lands something lasting on the VICTIM needs a per-victim
+	# duration; only the attacker-side kinds (heal) may omit it. Corrode and venom
+	# are not DOT_KINDS — their payloads are routed separately — but they are still
+	# victim-side, so a missing duration is an authoring slip for them too.
+	return not (
+		CoatingService.is_dot_kind(coating_kind)
+		or CoatingService.EXTRA_KINDS.has(coating_kind)
+	)
 
 
-## "5m" / "45s". Shared by every timed line so they read the same way.
+## Per-kind tuning handed to [method CoatingService.apply] on top of {potency,
+## hit_duration_s}. Empty here — see [method PotionItem.coating_extras], which is
+## the only override, for the corrosion stack budget and the venom source rule.
+func coating_extras() -> Dictionary:
+	return {}
+
+
+## "5m" / "1m 30s" / "45s". Shared by every timed line so they read the same way.
+##
+## The remainder is NOT dropped. Truncating it printed a 90-second draught as
+## "1m", which is a third of its duration missing from the only place the player
+## can read it — and it went unnoticed while every potion happened to run on a
+## whole number of minutes.
 static func _format_duration(seconds: float) -> String:
-	return ("%dm" % int(seconds / 60.0)) if seconds >= 60.0 else ("%ds" % int(seconds))
+	var whole: int = int(seconds)
+	if whole < 60:
+		return "%ds" % whole
+	var minutes: int = whole / 60
+	var rest: int = whole % 60
+	return "%dm" % minutes if rest == 0 else "%dm %ds" % [minutes, rest]
 
 
 ## Whole when whole, one decimal otherwise — matches GearItem's modifier format.
@@ -124,6 +157,15 @@ func _coating_effect_line() -> String:
 			]
 		CoatingService.KIND_HEAL:
 			return "Your hits heal you for %s" % _format_amount(coating_potency)
+		CoatingService.KIND_CORRODE:
+			return "Your hits sear for %s damage over %s and corrode armor" % [
+				_format_amount(coating_potency * coating_hit_duration_s),
+				_format_duration(coating_hit_duration_s),
+			]
+		CoatingService.KIND_VENOM:
+			# The stacking rule and the exact number are on [PotionItem]'s own
+			# lines; this one only has to say what KIND of thing lands.
+			return "Your hits leave a lingering venom"
 	return "Your hits carry %s" % String(coating_kind).capitalize()
 
 
@@ -221,7 +263,8 @@ func on_use(character: Character) -> void:
 			coating_kind,
 			coating_potency,
 			coating_hit_duration_s,
-			coating_duration_s
+			coating_duration_s,
+			coating_extras()
 		)
 		if not coated:
 			return

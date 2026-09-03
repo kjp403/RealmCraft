@@ -34,6 +34,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/cinder_deeps.tres" id="stair_cinder_deeps"]
 [ext_resource type="AudioStream" uid="uid://rwyjyqq4vmoj" path="res://assets/audio/music/attack_3.ogg" id="mus_attack_3"]
 [ext_resource type="AudioStream" uid="uid://lakm3wo2urk3" path="res://assets/audio/music/army_of_darkness.ogg" id="mus_army_of_darkness"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="hth_node_scn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/magma_root.tres" id="hth_magma_root"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/rust_spore_cap.tres" id="hth_rust_spore_cap"]
 [node name="fire_forge" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
@@ -648,3 +651,76 @@ target_instance = ExtResource("portal_ossuran")
 warper_id = 157
 target_id = 58
 lobby_gate = true
+
+[node name="MineableNodes" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="ForgeMagmaRoot1" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1704, 2536)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot2" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(3048, 1704)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot3" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(696, 1864)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot4" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1528, 1816)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot5" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1176, 920)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot6" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2328, 552)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeMagmaRoot7" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2072, 2200)
+data = ExtResource("hth_magma_root")
+
+[node name="ForgeRustSpore1" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1832, 1144)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore2" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(536, 664)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore3" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2872, 488)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore4" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1816, 344)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore5" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2312, 1704)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore6" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2776, 1128)
+data = ExtResource("hth_rust_spore_cap")
+
+[node name="ForgeRustSpore7" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(856, 1352)
+data = ExtResource("hth_rust_spore_cap")
