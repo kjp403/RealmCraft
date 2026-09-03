@@ -13,6 +13,9 @@ extends SceneTree
 ##     membership IS the vault gate; nothing else here enforces it.
 ##   * A layer's span_scale creeping past the cap turns a title into a character
 ##     aura, which this game deliberately does not have.
+##   * A rung GIVEN to a donor without a VaultGrants entitlement is worn until
+##     their next zone change and then silently is not - the strip takes it back,
+##     nothing is logged, and the only symptom is an angry paying customer.
 ##   * A smoke or fog layer left additive renders as nothing at all: additive
 ##     black is invisible. The tier looks like it simply has fewer layers.
 ##   * An emitter over budget costs frame time only in a crowd, which is exactly
@@ -27,7 +30,7 @@ extends SceneTree
 ## section that dies half way through simply prints fewer lines and the tool
 ## still reports green. Counting is the guard. Same reason
 ## tools/verify_skill_master_titles.gd counts.
-const EXPECTED_CHECKS: int = 37
+const EXPECTED_CHECKS: int = 46
 
 ## An outline has to be dark enough to back bright letters over pale ground.
 ## Slayer Master's crimson override sits around 0.04; anything past this is not
@@ -54,6 +57,7 @@ func _initialize() -> void:
 	_check_profiles()
 	_check_emitters()
 	_check_pipeline()
+	_check_grants()
 	if _ran != EXPECTED_CHECKS:
 		print("  FAIL  ran %d checks, expected %d - a section aborted early"
 			% [_ran, EXPECTED_CHECKS])
@@ -318,3 +322,59 @@ func _check_pipeline() -> void:
 		"clearing the title drops the drop shadow")
 	_check(label.material == null, "clearing the title drops the shader")
 	label.free()
+
+
+## The grant path, against the REAL strip.
+##
+## strip_unreleased_vfx is what makes the ladder vault-only, and it is also the
+## thing most likely to quietly eat a donor's title: it runs on EVERY instance
+## spawn, it says nothing when it fires, and the difference between "leak" and
+## "gift" is one lookup that a future edit could drop without any test noticing.
+## So these checks call the actual function rather than re-implementing its
+## predicate - a copy of the rule here would keep passing after the rule changed.
+##
+## A bare PlayerResource has no server_roles and AdminConfig has no entry for it,
+## so effective_priority() returns 0 without ever dereferencing the instance,
+## which is why null is a safe argument here.
+func _check_grants() -> void:
+	print("-- grants --")
+	var pr: PlayerResource = PlayerResource.new()
+	_check(not VaultGrants.has_title(pr, "Diamond Donator"), "a fresh character has no grants")
+	_check(VaultGrants.grant_title(pr, "Diamond Donator"), "granting a title reports the change")
+	_check(
+		VaultGrants.has_title(pr, "diamond donator"),
+		"grants are case-insensitive (admins type in a hurry)"
+	)
+	_check(
+		not VaultGrants.grant_title(pr, "Diamond Donator"),
+		"re-granting is a no-op, not a duplicate"
+	)
+	var packed: int = VaultSkins.pack(PlayerSkins.starter_skin_id(), VaultSkins.STYLE_GOLD)
+	VaultGrants.grant_skin(pr, packed)
+	_check(VaultGrants.has_skin(pr, packed), "skin grants round-trip through their token")
+
+	# THE WHOLE POINT. Same title, same character, one with the entitlement and
+	# one without - the strip must treat them differently.
+	var leaked: PlayerResource = PlayerResource.new()
+	leaked.display_title = "Diamond Donator"
+	leaked.titles_unlocked = PackedStringArray(["Diamond Donator"])
+	leaked.vault_skin_id = packed
+	CommandPermissions.strip_unreleased_vfx(leaked, null)
+	_check(
+		leaked.display_title.is_empty() and leaked.titles_unlocked.is_empty(),
+		"an UNGRANTED rung is stripped (the vault gate still holds)"
+	)
+	_check(leaked.vault_skin_id == 0, "an UNGRANTED vault skin is stripped")
+
+	var donor: PlayerResource = PlayerResource.new()
+	donor.display_title = "Diamond Donator"
+	donor.titles_unlocked = PackedStringArray(["Diamond Donator"])
+	donor.vault_skin_id = packed
+	VaultGrants.grant_title(donor, "Diamond Donator")
+	VaultGrants.grant_skin(donor, packed)
+	CommandPermissions.strip_unreleased_vfx(donor, null)
+	_check(
+		donor.display_title == "Diamond Donator" and donor.titles_unlocked.has("Diamond Donator"),
+		"a GRANTED rung survives the strip"
+	)
+	_check(donor.vault_skin_id == packed, "a GRANTED vault skin survives the strip")

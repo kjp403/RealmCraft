@@ -273,7 +273,13 @@ static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstanc
 	if effective_priority(player, instance) >= STAFF_PROTECT_PRIORITY:
 		return false
 	var changed: bool = false
-	if player.vault_skin_id != 0:
+	# GRANTED cosmetics survive. Everything else here is a leak by definition -
+	# this set is unreleased - but a vault skin or a ladder title handed to a donor
+	# by an admin is not a leak, and wiping it on their next zone change is how a
+	# gift silently becomes a support ticket. See [VaultGrants]; that list is
+	# written by admin-gated commands and by nothing else, which is what makes it
+	# safe to trust here.
+	if player.vault_skin_id != 0 and not VaultGrants.has_skin(player, player.vault_skin_id):
 		player.vault_skin_id = 0
 		changed = true
 	if player.cosmetic_id != 0:
@@ -282,13 +288,14 @@ static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstanc
 	if player.weapon_cosmetic_id != 0:
 		player.weapon_cosmetic_id = 0
 		changed = true
-	if TitleCatalog.is_premium_name(player.display_title):
+	if TitleCatalog.is_premium_name(player.display_title) \
+			and not VaultGrants.has_title(player, player.display_title):
 		player.display_title = ""
 		changed = true
 	var kept_titles: PackedStringArray = PackedStringArray()
 	var dropped_premium: bool = false
 	for t: String in player.titles_unlocked:
-		if TitleCatalog.is_premium_name(t):
+		if TitleCatalog.is_premium_name(t) and not VaultGrants.has_title(player, t):
 			dropped_premium = true
 			continue
 		kept_titles.append(t)
@@ -298,7 +305,7 @@ static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstanc
 	var kept_trophies: PackedStringArray = PackedStringArray()
 	var dropped_trophy: bool = false
 	for t: String in player.displayed_trophies:
-		if TitleCatalog.is_premium_name(t):
+		if TitleCatalog.is_premium_name(t) and not VaultGrants.has_title(player, t):
 			dropped_trophy = true
 			continue
 		kept_trophies.append(t)

@@ -52,6 +52,12 @@ func save_player(player: PlayerResource) -> bool:
 		"unlocked": player.titles_unlocked,
 		"display": player.display_title,
 		"trophies": player.displayed_trophies,
+		# A NEW KEY IN AN EXISTING BLOB, deliberately, rather than a new players
+		# column: a column needs a matching placeholder in the INSERT below, and a
+		# mismatched pair makes every save_player() fail silently for every player.
+		# Rows written before this key existed parse as no grants, which is the
+		# correct default.
+		"granted": player.granted_vfx,
 	})
 	# Shape owned by DailyQuestManager, not spelled out here — the reader below
 	# calls its load_state, so the two cannot drift apart when the board changes.
@@ -638,6 +644,8 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		player.display_title = str((titles_v as Dictionary).get("display", ""))
 		var trophies_v: Variant = (titles_v as Dictionary).get("trophies", [])
 		player.displayed_trophies = PackedStringArray(trophies_v if trophies_v is Array else [])
+		var granted_v: Variant = (titles_v as Dictionary).get("granted", [])
+		player.granted_vfx = PackedStringArray(granted_v if granted_v is Array else [])
 		_drop_retired_titles(player)
 
 	# Same column as before the skilling overhaul — no migration. load_state drops
