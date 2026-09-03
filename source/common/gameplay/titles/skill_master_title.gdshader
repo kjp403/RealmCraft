@@ -23,10 +23,30 @@ render_mode blend_mix;
 // emitted unchanged. Robust because both ends are set by TitleVfx from the same
 // constants this uniform is fed from.
 //
-// UV IS THE LABEL RECT, not the glyph. So a gradient down UV.y runs across the
-// whole line of text (what "white-hot fading to red" wants) and a sweep along
-// UV.x travels through the word left to right (what a shine or a wind streak
-// wants). Neither is per-letter, and at nameplate size that reads better anyway.
+// **UV IS NOT THE LABEL RECT.** This file used to say it was, and every one of
+// the eleven looks below was written against that. It is wrong: a Label draws
+// each glyph as its own quad textured from the FONT ATLAS, so `UV` is a
+// coordinate into that atlas. UV.y measures near zero over every glyph of every
+// title - verified by rendering it straight to screen - and UV.x tracks where a
+// character sits in the atlas rather than where it sits in the word.
+//
+// What that cost: every vertical gradient here was DEAD, clamped to one end of
+// its range, and every `sweep(uv.x, ...)` was travelling through atlas positions
+// instead of through the word. The looks still read as deliberate, because
+// per-glyph atlas variation passes for texture - which is exactly why this
+// survived. It does not announce itself as a bug.
+//
+// `local` is the fix: a varying carrying VERTEX, the fragment's position in the
+// LABEL's own coordinate space in pixels, divided by the label's size - which
+// only GDScript knows, so it arrives as `rect_size`. TitleVfxPulse refreshes that
+// uniform every frame because a Label resizes whenever its text changes.
+//
+// So NOW the header's original promise is true: a gradient down uv.y runs across
+// the whole line of text (what "white-hot fading to red" wants) and a sweep along
+// uv.x travels through the word left to right. Neither is per-letter, and at
+// nameplate size that reads better anyway. Same treatment, same constants, as
+// vip_title.gdshader - the two families sit on one nameplate and must not
+// disagree about where the letters are.
 
 uniform int fx : hint_range(0, 10) = 0;
 // The catalog colour for this title. Every branch blends toward or away from it,
@@ -43,6 +63,11 @@ uniform vec4 outline : source_color = vec4(0.043, 0.043, 0.063, 1.0);
 // glyph. Wide enough to survive font anti-aliasing on the outline's own edge,
 // far narrower than the distance to any title's palette.
 uniform float outline_tolerance : hint_range(0.0, 1.0) = 0.22;
+// The label's laid-out size in its own units. Fed by TitleVfxPulse; see header.
+uniform vec2 rect_size = vec2(1.0, 1.0);
+
+// Position within the label, in the label's own pixels. See the header.
+varying vec2 local;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -66,20 +91,24 @@ float sweep(float x, float speed, float width, float phase) {
 	return 1.0 - smoothstep(0.0, width, abs(x - head));
 }
 
+void vertex() {
+	local = VERTEX;
+}
+
 void fragment() {
 	vec4 tex = COLOR;
 	if (tex.a < 0.04 || distance(tex.rgb, outline.rgb) < outline_tolerance) {
 		// Transparent, or the dark outline backing the glyph. Straight through.
 		COLOR = tex;
 	} else {
-		vec2 uv = UV;
+		vec2 uv = local / max(rect_size, vec2(1.0, 1.0));
 		// Vertical gradients are remapped onto the GLYPH BAND rather than the
 		// label rect. A Label centres its line vertically with padding above and
-		// below, so the letters only occupy the middle ~45% of UV.y - running a
-		// gradient over the full 0..1 spends most of its range on empty space and
+		// below, so the letters only occupy the middle of its height - running a
+		// gradient over the full 0..1 spends part of its range on empty space and
 		// delivers a washed-out sliver of itself to the text. This stretches the
 		// interesting part over the rows that actually have glyphs in them.
-		uv.y = clamp((uv.y - 0.28) / 0.44, 0.0, 1.0);
+		uv.y = clamp((uv.y - 0.22) / 0.56, 0.0, 1.0);
 		vec3 col = tex.rgb * base.rgb;
 		float alpha = tex.a;
 
