@@ -17,6 +17,9 @@ var damage_type: StringName = CombatHit.DAMAGE_MAGIC
 ## refresh lookups, this exposes it for the status HUD.
 var kind: StringName
 var _remaining_ticks: int
+## Wall-clock ms this APPLICATION dies at no matter how often it is refreshed.
+## 0 = uncapped (every DoT except venom).
+var _expires_at_ms: int = 0
 
 
 ## Whole seconds left, for the status-icon countdown.
@@ -26,13 +29,25 @@ func remaining_seconds() -> int:
 
 ## Attach (or refresh) a DoT on [param victim]. Server-side only; clients see
 ## the health drain through the regular stat sync.
+## [param max_lifespan_s] caps how long ONE APPLICATION may be kept alive by
+## refreshes. 0 (the default) means uncapped, which is how every existing caller
+## behaves and must keep behaving.
+##
+## Without a cap, "a hit refreshes the timer" means a player who keeps landing
+## hits holds the DoT forever — the damage is no longer a burst you set up and
+## then have to re-earn, it is a second, permanent damage stat. The cap is a
+## deadline set when the effect FIRST lands and never moved afterwards, so
+## refreshes can top the timer back up but can never push past it. When it
+## lapses the node frees, and the next landed hit starts a fresh application with
+## a fresh deadline.
 static func apply(
 	victim: Character,
 	from: Character,
 	effect_kind: StringName,
 	dps: float,
 	duration_s: float,
-	type: StringName = CombatHit.DAMAGE_MAGIC
+	type: StringName = CombatHit.DAMAGE_MAGIC,
+	max_lifespan_s: float = 0.0
 ) -> void:
 	if victim == null or not victim.multiplayer.is_server() or dps <= 0.0:
 		return
@@ -42,6 +57,9 @@ static func apply(
 		existing.source = from
 		existing.damage_per_tick = dps
 		existing._remaining_ticks = maxi(existing._remaining_ticks, ceili(duration_s))
+		# The deadline is deliberately NOT re-armed here — re-arming it on every
+		# hit is exactly the infinite uptime this exists to stop.
+		existing._clamp_to_deadline()
 		return
 	var dot: DamageOverTime = DamageOverTime.new()
 	dot.name = node_name
@@ -50,7 +68,19 @@ static func apply(
 	dot.damage_per_tick = dps
 	dot.damage_type = type
 	dot._remaining_ticks = ceili(duration_s)
+	if max_lifespan_s > 0.0:
+		dot._expires_at_ms = Time.get_ticks_msec() + int(max_lifespan_s * 1000.0)
+		dot._clamp_to_deadline()
 	victim.add_child(dot)
+
+
+## Trim the countdown so it can never run past [member _expires_at_ms]. No-op for
+## an uncapped DoT, which is every one that existed before venom.
+func _clamp_to_deadline() -> void:
+	if _expires_at_ms <= 0:
+		return
+	var left: int = maxi(0, ceili((_expires_at_ms - Time.get_ticks_msec()) / 1000.0))
+	_remaining_ticks = mini(_remaining_ticks, left)
 
 
 func _ready() -> void:
@@ -63,6 +93,12 @@ func _ready() -> void:
 
 func _tick() -> void:
 	var victim: Character = get_parent() as Character
+	# The deadline is checked HERE as well as on refresh, so a capped DoT ends on
+	# time even if nothing ever hits the victim again — the clamp on refresh only
+	# runs when a refresh happens.
+	if _expires_at_ms > 0 and Time.get_ticks_msec() >= _expires_at_ms:
+		queue_free()
+		return
 	if victim == null or victim.is_dead or _remaining_ticks <= 0:
 		queue_free()
 		return

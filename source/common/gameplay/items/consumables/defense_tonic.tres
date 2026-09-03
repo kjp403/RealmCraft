@@ -15,5 +15,6 @@ item_name = &"Defense Tonic"
 item_icon = ExtResource("1_tex")
 description = "Grimshade steeped down until it runs the colour of old brass. Drink it and your skin sets like a second coat of mail."
 vendor_value = 100
+tags = PackedStringArray("vial")
 metadata/slug = &"defense_tonic"
 metadata/id = 74

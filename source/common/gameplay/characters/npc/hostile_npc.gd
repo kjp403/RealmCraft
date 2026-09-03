@@ -785,6 +785,13 @@ func _resync_possible_targets() -> void:
 	if detection_area == null:
 		return
 	for body: Node2D in detection_area.get_overlapping_bodies():
+		# A Shadowveil'd player is folded back in the moment their veil drops,
+		# because this resync runs every frame we are hunting. That is the whole
+		# reason the stealth check belongs here as well as in _is_target_valid:
+		# without it we would cache a hidden player into possible_targets and
+		# _find_targets would pick them up on its very next pass.
+		if body is Player and StatusEffectManager.is_stealthed(body as Player):
+			continue
 		if body is Player and _is_hostile_to(body) and not possible_targets.has(body):
 			possible_targets.append(body)
 
@@ -806,7 +813,8 @@ func _is_hostile_to(player: Player) -> bool:
 func _is_target_valid(player: Player) -> bool:
 	return is_instance_valid(player) and player.is_inside_tree() \
 			and not player.is_dead and player.get_viewport() == get_viewport() \
-			and not player.is_in_npc_dialogue()
+			and not player.is_in_npc_dialogue() \
+			and not StatusEffectManager.is_stealthed(player)
 
 
 func abandon_current_target() -> void:

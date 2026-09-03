@@ -15,5 +15,6 @@ item_name = &"Weapon Poison ++"
 item_icon = ExtResource("1_tex")
 description = "A full bottle of the concentrated stuff. Whatever you cut does not stop bleeding green."
 vendor_value = 2600
+tags = PackedStringArray("vial")
 metadata/slug = &"weapon_poison_plus"
 metadata/id = 592

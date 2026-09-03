@@ -69,10 +69,37 @@ static func sync(player: Player) -> void:
 
 	for child: Node in player.get_children():
 		if child is DamageOverTime:
-			debuffs.append({
-				"id": String((child as DamageOverTime).kind),
-				"remaining": (child as DamageOverTime).remaining_seconds(),
-			})
+			# A source-keyed DoT (StatusEffectManager.apply_source_dot) carries its
+			# applier's instance id after a "#" so two players' venoms can coexist
+			# on one victim. The STRIP must not: the player being poisoned does not
+			# care who by, and an id of "venom#137" would miss its icon and its
+			# tooltip and show a raw instance number under a generic arrow.
+			var kind: String = String((child as DamageOverTime).kind)
+			var hash_at: int = kind.find("#")
+			if hash_at > 0:
+				kind = kind.substr(0, hash_at)
+			# ONE ENTRY PER ID, same rule and same reason as the buff merge above.
+			# Stripping the source key means two players' venoms both arrive here as
+			# "venom"; sending both would put two tiles under one HUD key. The
+			# longest remaining wins — the icon is gone when the LAST of them is.
+			var dot_left: int = (child as DamageOverTime).remaining_seconds()
+			var dot_key: String = "d:" + kind
+			if seen.has(dot_key):
+				var row: Dictionary = seen[dot_key]
+				row["remaining"] = maxi(int(row["remaining"]), dot_left)
+				continue
+			var dot_entry: Dictionary = {"id": kind, "remaining": dot_left}
+			seen[dot_key] = dot_entry
+			debuffs.append(dot_entry)
+
+	# Effects owned by StatusEffectManager — the drinker's auras (Cinder-Guard,
+	# Shadowveil, Provocation) on the buff strip, and any stacking debuff riding
+	# the player on the other. The manager is absent on a player who has never
+	# carried one of these, which is most of them, so this costs a node lookup.
+	var manager: StatusEffectManager = StatusEffectManager.find(player)
+	if manager != null:
+		buffs.append_array(manager.status_rows(false))
+		debuffs.append_array(manager.status_rows(true))
 
 	WorldServer.curr.data_push.rpc_id(peer_id, &"status.sync", {
 		"buffs": buffs,

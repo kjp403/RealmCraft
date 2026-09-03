@@ -146,6 +146,9 @@ func die(killer: Character) -> void:
 	# down on a body that was already gone.
 	BuffService.clear_all(self)
 	CoatingService.clear(self)
+	var status: StatusEffectManager = StatusEffectManager.find(self)
+	if status != null:
+		status.clear_all()
 	for child: Node in get_children():
 		if child is DamageOverTime:
 			child.queue_free()

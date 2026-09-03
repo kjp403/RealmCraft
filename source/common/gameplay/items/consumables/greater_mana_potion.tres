@@ -13,5 +13,6 @@ item_name = &"Greater Mana Potion"
 item_icon = ExtResource("1_icon")
 description = "A deep blue draught for prolonged casting."
 vendor_value = 100
+tags = PackedStringArray("vial")
 metadata/slug = &"greater_mana_potion"
 metadata/id = 205

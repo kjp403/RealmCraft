@@ -76,6 +76,7 @@ static func restore(player: Player) -> void:
 	if player.equipment_component != null:
 		player.equipment_component.reapply_all_gear_stats()
 	BuffService.reapply(player)
+	StatusEffectManager.reapply(player)
 	var hmax: float = comp.get_stat(Stat.HEALTH_MAX)
 	comp.set_stat(Stat.HEALTH, hmax)
 	var mmax: float = comp.get_stat(Stat.MANA_MAX)

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_nightshade_bramble.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 74
+herblore_level = 91
+catalyst_for = &"venom_draught"
+patch_biome = "The Sewers"
+item_name = &"Nightshade Bramble"
+item_icon = ExtResource("1_tex")
+description = "Black-purple vine, barbed the whole way along. The green berries are the part that kills; the thorns are only there to make you drop them."
+holdable = false
+can_trade = true
+vendor_value = 26
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"nightshade_bramble"
+metadata/id = 686

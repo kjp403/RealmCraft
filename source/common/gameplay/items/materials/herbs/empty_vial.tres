@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/empty_vial.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Empty Vial"
+item_icon = ExtResource("1_tex")
+description = "Clean glass with nothing in it. Combining two draughts always leaves one over — Mira takes them back, and she is the only one who does."
+holdable = false
+can_trade = true
+vendor_value = 60
+stack_limit = 0
+tags = PackedStringArray()
+metadata/slug = &"empty_vial"
+metadata/id = 682

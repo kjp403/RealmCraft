@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_gloom_spore_cap.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 85
+herblore_level = 97
+catalyst_for = &"shadowveil_draught"
+patch_biome = "The Sewers"
+item_name = &"Gloom-Spore Cap"
+item_icon = ExtResource("1_tex")
+description = "Grows where no light reaches and makes its own instead. The cyan spores drift off it for hours after it is cut."
+holdable = false
+can_trade = true
+vendor_value = 38
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"gloom_spore_cap"
+metadata/id = 683

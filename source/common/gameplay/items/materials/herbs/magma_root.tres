@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_magma_root.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 78
+herblore_level = 93
+catalyst_for = &"cinder_guard_brew"
+patch_biome = "Fire Forge"
+item_name = &"Magma Root"
+item_icon = ExtResource("1_tex")
+description = "Pulled from ground that never cooled. The grey shell is dead wood and the light inside it is not."
+holdable = false
+can_trade = true
+vendor_value = 30
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"magma_root"
+metadata/id = 685

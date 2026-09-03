@@ -16,6 +16,12 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/prayer_potion.tres" id="p11"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/weak_seep_tonic.tres" id="p_seep_tonic"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/quest/seepbreakers_draught.tres" id="p_seep_draught"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/corrosive_ember_draught.tres" id="p12"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/venom_draught.tres" id="p13"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/cinder_guard_brew.tres" id="p14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/aegis_elixir.tres" id="p15"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/shadowveil_draught.tres" id="p16"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/provocation_brew.tres" id="p17"]
 [resource]
 script = ExtResource("1_jp")
 icon = ExtResource("icon_tex")
@@ -42,6 +48,6 @@ perks = Array[Dictionary]([{
 "name": "Extra Dose",
 "per_rank": 0.04
 }])
-recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6"), ExtResource("p7"), ExtResource("p8"), ExtResource("p9"), ExtResource("p10"), ExtResource("p11"), ExtResource("p_seep_tonic"), ExtResource("p_seep_draught")])
-recipe_levels = Array[int]([1, 6, 14, 24, 34, 50, 58, 70, 76, 82, 88, 42, 1, 1])
+recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6"), ExtResource("p7"), ExtResource("p8"), ExtResource("p9"), ExtResource("p10"), ExtResource("p11"), ExtResource("p_seep_tonic"), ExtResource("p_seep_draught"), ExtResource("p12"), ExtResource("p13"), ExtResource("p14"), ExtResource("p15"), ExtResource("p16"), ExtResource("p17")])
+recipe_levels = Array[int]([1, 6, 14, 24, 34, 50, 58, 70, 76, 82, 88, 42, 1, 1, 90, 91, 93, 95, 97, 99])
 describe_lines = Array[String](["Herblore XP +{xp}%", "Material refund: {refund}%", "Extra dose: {extra_item}%"])

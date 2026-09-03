@@ -23,6 +23,17 @@ const BUFF_ICONS: Dictionary = {
 	&"coating_poison": "poison.png",
 	&"coating_burn": "burn.png",
 	&"coating_heal": "buff.png",
+	# The two combination-draught coatings. Corrosion borrows the burn art (it
+	# does set the target alight) and venom the poison art, deliberately rather
+	# than borrowing an unrelated icon: a wrong-but-familiar icon reads as a lie,
+	# a related one reads as a family member without bespoke art yet.
+	&"coating_corrode": "burn.png",
+	&"coating_venom": "poison.png",
+	# StatusEffectManager auras. Generic up-arrow until each gets its own art —
+	# same rule the Defense Tonic's armor buff has followed since it shipped.
+	&"cinder_guard": "buff.png",
+	&"shadowveil": "buff.png",
+	&"provocation": "buff.png",
 	# Anvil Stabilizer. No bespoke art yet, so the generic up-arrow rather than
 	# an unrelated icon.
 	&"anvil_stabilizer": "buff.png",
@@ -31,6 +42,8 @@ const DEBUFF_ICONS: Dictionary = {
 	&"burn": "burn.png",
 	&"poison": "poison.png",
 	&"slow": "debuff.png",
+	&"venom": "poison.png",
+	&"corroding_heat": "debuff.png",
 }
 const BUFF_FALLBACK: String = "buff.png"
 const DEBUFF_FALLBACK: String = "debuff.png"
@@ -61,6 +74,13 @@ const DESCRIPTIONS: Dictionary = {
 	&"coating_burn": "Burning weapon. Your hits set what they land on alight.",
 	&"coating_heal": "Blessed weapon. Your hits heal you.",
 	&"anvil_stabilizer": "Forge stabilised. You smelt and smith at double speed.",
+	&"coating_corrode": "Corroding weapon. Your hits burn and strip armor.",
+	&"coating_venom": "Envenomed weapon. Your hits leave a lasting venom.",
+	&"venom": "Envenomed. Taking damage every second until it runs out.",
+	&"corroding_heat": "Corroding. Your armor is being eaten away.",
+	&"cinder_guard": "Cinder-guarded. Melee attackers catch fire.",
+	&"shadowveil": "Veiled. Hostiles cannot see you until you act.",
+	&"provocation": "Provoking. Nearby enemies are locked onto you.",
 }
 
 ## How long the tap-to-read label lingers on mobile (no hover there).

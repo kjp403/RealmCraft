@@ -13,5 +13,6 @@ item_icon = ExtResource("3_35wr3")
 description = "A reliable brew, standard issue for the watch."
 vendor_value = 50
 metadata/_custom_type_script = "uid://bprsise4rcsak"
+tags = PackedStringArray("vial")
 metadata/slug = &"health_potion"
 metadata/id = 1

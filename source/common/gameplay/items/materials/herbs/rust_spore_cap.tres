@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HerbalismItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/herb_rust_spore_cap.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/herbalism_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+tier = 3
+harvest_level = 70
+herblore_level = 90
+catalyst_for = &"corrosive_ember_draught"
+patch_biome = "Fire Forge"
+item_name = &"Rust-Spore Cap"
+item_icon = ExtResource("1_tex")
+description = "A copper-coloured cap that oxidised where it grew. The orange runs in the cracks are still hot enough to sting a bare hand."
+holdable = false
+can_trade = true
+vendor_value = 22
+stack_limit = 10
+tags = PackedStringArray("herb")
+metadata/slug = &"rust_spore_cap"
+metadata/id = 687

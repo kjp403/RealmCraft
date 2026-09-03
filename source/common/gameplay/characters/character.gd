@@ -541,6 +541,15 @@ func take_damage(amount: float, attacker: Character = null, damage_type: StringN
 		is_dead = true
 		die(attacker)
 
+	# Reactive status effects (Cinder-Guard's retaliatory burn, and the "being hit
+	# gives you away" half of Shadowveil). Hooked HERE and not in
+	# CombatHit.try_damage: NPC melee behaviours call take_damage on their target
+	# DIRECTLY and never pass through CombatHit, so a retaliation wired into that
+	# choke point would do nothing against the exact enemies a tanking draught
+	# exists for — and would do nothing silently. Placed after the death branch
+	# for the same reason the ward reflect is: the draught held to the end.
+	StatusEffectManager.on_damaged(self, attacker, damage_type)
+
 	# LAST: after our own death resolves, so a killing blow still reflects (the
 	# ward held to the end) and a reflect that kills the attacker can never
 	# re-enter this call while our HP write is still in flight.

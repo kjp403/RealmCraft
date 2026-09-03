@@ -39,6 +39,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/instance/instance_collection/biomes/sunken_tombs.tres" id="stair_sunken_tombs"]
 [ext_resource type="AudioStream" uid="uid://d1xje47hs00d" path="res://assets/audio/music/al_kharid.ogg" id="mus_al_kharid"]
 [ext_resource type="AudioStream" uid="uid://1lmp70um360p" path="res://assets/audio/music/arabian_2.ogg" id="mus_arabian_2"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="hth_node_scn"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/sun_lit_lotus.tres" id="hth_sun_lit_lotus"]
 [node name="desert" type="Node2D" node_paths=PackedStringArray("replicated_props_container")]
 y_sort_enabled = true
 script = ExtResource("1_map")
@@ -704,3 +706,46 @@ destination_label = "The Sunken Tombs"
 target_instance = ExtResource("stair_sunken_tombs")
 warper_id = 151
 target_id = 41
+
+[node name="MineableNodes" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="DesertSunLotus1" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1768, 1128)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus2" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(440, 712)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus3" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2872, 584)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus4" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1432, 2248)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus5" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(2696, 1624)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus6" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(712, 1624)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus7" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1576, 264)
+data = ExtResource("hth_sun_lit_lotus")
+
+[node name="DesertSunLotus8" parent="MineableNodes" instance=ExtResource("hth_node_scn")]
+y_sort_enabled = true
+position = Vector2(1960, 1800)
+data = ExtResource("hth_sun_lit_lotus")

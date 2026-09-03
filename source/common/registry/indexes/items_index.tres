@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788308782
-next_id = 676
+version = 1788405047
+next_id = 689
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3152,6 +3152,71 @@ entries = Array[Dictionary]([{
 &"id": 675,
 &"path": "res://source/common/gameplay/items/materials/metals/obsidian_arrowheads.tres",
 &"slug": &"obsidian_arrowheads"
+}, {
+&"hash": "263d7e3604dccf47a1a5e118fdb9f3e632f7e73de7f96c518805e8f41b068a93",
+&"id": 676,
+&"path": "res://source/common/gameplay/items/consumables/aegis_elixir.tres",
+&"slug": &"aegis_elixir"
+}, {
+&"hash": "5c12d1c2d6a6c00a6f9e31ff6d4a9adb23602f5ad0296b8ad1e4ad25704d3599",
+&"id": 677,
+&"path": "res://source/common/gameplay/items/consumables/cinder_guard_brew.tres",
+&"slug": &"cinder_guard_brew"
+}, {
+&"hash": "355d568be990fafff6a20449a6f5218b097804ebf0707fec125e90d977abec98",
+&"id": 678,
+&"path": "res://source/common/gameplay/items/consumables/corrosive_ember_draught.tres",
+&"slug": &"corrosive_ember_draught"
+}, {
+&"hash": "d44575e4db8a9034b26c03da99e6ff89a27c198699f7f7c817a778ae4bfd554e",
+&"id": 679,
+&"path": "res://source/common/gameplay/items/consumables/provocation_brew.tres",
+&"slug": &"provocation_brew"
+}, {
+&"hash": "d81544f17f53ea72abec68bf23f5d9fc716756f592f802c4d96ccb06909ff9e7",
+&"id": 680,
+&"path": "res://source/common/gameplay/items/consumables/shadowveil_draught.tres",
+&"slug": &"shadowveil_draught"
+}, {
+&"hash": "2836d7a8656c534fa461d1a86a66b55e06c815d250d78ffb18b774e24966b377",
+&"id": 681,
+&"path": "res://source/common/gameplay/items/consumables/venom_draught.tres",
+&"slug": &"venom_draught"
+}, {
+&"hash": "3b2da0fc5c7c657d9142ba90ebf411fd9acd3a18376a7286bb5635b62a82b75c",
+&"id": 682,
+&"path": "res://source/common/gameplay/items/materials/herbs/empty_vial.tres",
+&"slug": &"empty_vial"
+}, {
+&"hash": "f6f70d0510c90551266c2c15198a6f78e6e056659005a08dcdaeac638303c39f",
+&"id": 683,
+&"path": "res://source/common/gameplay/items/materials/herbs/gloom_spore_cap.tres",
+&"slug": &"gloom_spore_cap"
+}, {
+&"hash": "1a0712b8929d1b507e5645f8ad842953bace8bfee72fcefe7bace43ca44e4424",
+&"id": 684,
+&"path": "res://source/common/gameplay/items/materials/herbs/iron_spike_thorn.tres",
+&"slug": &"iron_spike_thorn"
+}, {
+&"hash": "fd02d102951f868ff7d87fe60ac17be833e879fe22571e5ab118e3d0eadd349d",
+&"id": 685,
+&"path": "res://source/common/gameplay/items/materials/herbs/magma_root.tres",
+&"slug": &"magma_root"
+}, {
+&"hash": "58c091812bff786897d28b83da8c01244294ba9972bd0d6b262b2fee7220a4d4",
+&"id": 686,
+&"path": "res://source/common/gameplay/items/materials/herbs/nightshade_bramble.tres",
+&"slug": &"nightshade_bramble"
+}, {
+&"hash": "2d9643e9310e9f9d1a39f912303b0c90b79d9ce6ee7536afda9d0bc9a27fda49",
+&"id": 687,
+&"path": "res://source/common/gameplay/items/materials/herbs/rust_spore_cap.tres",
+&"slug": &"rust_spore_cap"
+}, {
+&"hash": "7e0d454ca6f17a2cf7eac304d4609ddce07ac00196d4c8561f9928e1789fae77",
+&"id": 688,
+&"path": "res://source/common/gameplay/items/materials/herbs/sun_lit_lotus.tres",
+&"slug": &"sun_lit_lotus"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_high_tier_patches.gd" id="1_vhtp"]
+
+[node name="VerifyHighTierPatches" type="Node"]
+script = ExtResource("1_vhtp")

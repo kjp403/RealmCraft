@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_corrosive_ember.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+coating_kind = &"corrode"
+coating_potency = 22.0
+coating_hit_duration_s = 5.0
+coating_duration_s = 90.0
+corrode_armor_per_stack = 0.025
+corrode_max_stacks = 5
+corrode_duration_s = 8.0
+shared_cooldown_ms = 3000
+cooldown_category = &"weapon_coating"
+item_name = &"Corrosive Ember Draught"
+item_icon = ExtResource("1_tex")
+description = "Ember heat held in a brass tonic until it turned on the bottle. What it touches keeps rusting after the fire is out."
+vendor_value = 4200
+tags = PackedStringArray("vial")
+metadata/slug = &"corrosive_ember_draught"
+metadata/id = 678
