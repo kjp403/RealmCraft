@@ -1,0 +1,118 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" uid="uid://dkw46drf4y4qb" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" uid="uid://bgb4n8ock8ya6" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_embers"]
+script = ExtResource("1_layer")
+id = &"embers"
+shape = 0
+shape_px = 6
+span = 2
+span_scale = 1.0
+amount = 12
+lifetime = 1.1
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 34.0
+gravity = Vector2(0.0, -26.0)
+velocity_min = 8.0
+velocity_max = 22.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.3
+scale_max = 0.75
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(1.0, 0.94117647, 0.75294118, 1.0)
+color_mid = Color(1.0, 0.70588235, 0.23529412, 1.0)
+color_out = Color(0.81568627, 0.41568627, 0.0627451, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_leaf"]
+script = ExtResource("1_layer")
+id = &"leaf"
+shape = 3
+shape_px = 7
+span = 0
+span_scale = 1.0
+amount = 12
+lifetime = 1.2
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 55.0
+gravity = Vector2(0.0, -34.0)
+velocity_min = 3.0
+velocity_max = 14.0
+damping = 0.0
+angular_velocity = 120.0
+scale_min = 0.35
+scale_max = 0.9
+scale_start = 1.0
+scale_end = 0.5
+color_in = Color(1.0, 0.91372549, 0.62745098, 1.0)
+color_mid = Color(0.94117647, 0.77647059, 0.35294118, 1.0)
+color_out = Color(0.7254902, 0.54117647, 0.1254902, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.9
+additive = true
+
+[sub_resource type="Resource" id="Layer_motes"]
+script = ExtResource("1_layer")
+id = &"motes"
+shape = 2
+shape_px = 9
+span = 3
+span_scale = 1.0
+amount = 10
+lifetime = 0.9
+explosiveness = 0.0
+detail = true
+direction = Vector2(0.0, -1.0)
+spread = 180.0
+gravity = Vector2(0.0, 0.0)
+velocity_min = 0.0
+velocity_max = 5.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.35
+scale_max = 0.85
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(1.0, 0.98431373, 0.87843137, 1.0)
+color_mid = Color(1.0, 0.98431373, 0.87843137, 1.0)
+color_out = Color(1.0, 0.84313725, 0.47843137, 1.0)
+late_stop = 0.0
+color_late = Color(1.0, 1.0, 1.0, 1.0)
+peak_alpha = 0.85
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"golden"
+display_name = "Golden Contributor"
+accent = Color(0.94117647, 0.77647059, 0.35294118, 1.0)
+metal_high = Color(1.0, 0.96470588, 0.82352941, 1.0)
+metal_mid = Color(0.90980392, 0.7254902, 0.23529412, 1.0)
+metal_low = Color(0.41568627, 0.25882353, 0.03137255, 1.0)
+sheen = Color(1.0, 0.94117647, 0.69019608, 1.0)
+shadow = Color(0.11764706, 0.05882353, 0.0, 0.5)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+sweep_speed = 0.2
+sweep_width = 0.12
+sheen_amount = 0.55
+pulse_amount = 0.09
+pulse_speed = 1.8
+grain = 0.0
+prism = 0.0
+facets = 0.0
+fire = 0.0
+sweep_speed2 = 0.0
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_embers"), SubResource("Layer_leaf"), SubResource("Layer_motes")])

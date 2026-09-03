@@ -7,11 +7,16 @@ extends Node
 ##
 ##   LEGACY (supporter / premium)  animates the label's own colour and outline in
 ##       script - the pulse and flash you can see on a Gilded or Sovereign title.
-##   MASTERY (the eleven level-99 titles)  leaves the colour alone entirely and
-##       feeds the shader a clock instead. Those looks paint their own gradients
-##       per fragment, so tinting the label on top of them would wash the gradient
-##       out - and TIME inside the shader does not advance a control that is not
-##       redrawing, which is the whole reason the uniform exists.
+##   SHADER-DRIVEN (the eleven level-99 mastery titles, and the four VIP donation
+##       tiers)  leaves the colour alone entirely and feeds the shader a clock
+##       instead. Those looks paint their own gradients per fragment, so tinting
+##       the label on top of them would wash the gradient out - and TIME inside
+##       the shader does not advance a control that is not redrawing, which is the
+##       whole reason the uniform exists.
+##
+## The two shader families are one case here on purpose. They need exactly the
+## same thing from this node - `t`, a white modulate and the outline pinned - and
+## splitting them would mean a third branch that differs in nothing.
 ##
 ## In BOTH cases the outline stays [constant TitleVfx.OUTLINE_COLOR]. That is the
 ## load-bearing legibility fix: this script used to re-tint the outline with the
@@ -24,6 +29,10 @@ var vip: bool = false
 var style: int = 0
 ## Mastery style index, or -1 for the legacy families.
 var mastery_fx: int = -1
+## Set for a VIP ladder title. Same treatment as a mastery one - see the header -
+## but there is no index to carry, because vip_title.gdshader has no branches:
+## a tier is a set of uniforms, applied once by TitleVfx.
+var clock_driven: bool = false
 ## Resolved outline colour for this title — the shared near-black unless the
 ## catalog entry overrode it. Re-asserted every frame like the size is.
 var outline_color: Color = TitleVfx.OUTLINE_COLOR
@@ -31,13 +40,14 @@ var outline_color: Color = TitleVfx.OUTLINE_COLOR
 
 func configure(
 	p_tint: Color, p_vip: bool, p_style: int, p_mastery_fx: int = -1,
-	p_outline: Color = TitleVfx.OUTLINE_COLOR
+	p_outline: Color = TitleVfx.OUTLINE_COLOR, p_clock_driven: bool = false
 ) -> void:
 	tint = p_tint
 	vip = p_vip
 	style = p_style
 	mastery_fx = p_mastery_fx
 	outline_color = p_outline
+	clock_driven = p_clock_driven
 	set_process(true)
 	_apply(0.0)
 
@@ -50,19 +60,45 @@ func _apply(t: float) -> void:
 	var host: CanvasItem = get_parent() as CanvasItem
 	if host == null:
 		return
-	if mastery_fx >= 0:
-		_apply_mastery(host, t)
+	_feed_rect_size(host)
+	if mastery_fx >= 0 or clock_driven:
+		_apply_shader_clock(host, t)
 		return
 	_apply_legacy(host, t)
 
 
-## Mastery titles: hand the shader the clock and otherwise keep out of its way.
-func _apply_mastery(host: CanvasItem, t: float) -> void:
+## Tell whichever title shader is mounted how big its label is.
+##
+## ALL THREE shaders work in LABEL space, not in UV, because a Label's UV is a
+## font-atlas coordinate and is useless as a position in the word - see any of
+## their headers. Label space needs the label's size to normalise against, and
+## only GDScript knows it, so it has to arrive as a uniform.
+##
+## Hoisted above the family branch rather than repeated inside each one: this is
+## the piece the legacy shine band was missing when the other two were fixed, and
+## a per-branch copy is exactly how that happens again. Every title shader wants
+## it, so every title gets it.
+##
+## Refreshed every frame rather than set once because a Label resizes whenever its
+## text changes, and the nameplate re-fits on every display_name or title sync. A
+## stale size does not fail loudly - the gradient just slides off the letters,
+## which reads as a tuning problem rather than as a bug.
+func _feed_rect_size(host: CanvasItem) -> void:
+	var mat: ShaderMaterial = host.material as ShaderMaterial
+	var control: Control = host as Control
+	if mat == null or control == null:
+		return
+	mat.set_shader_parameter(&"rect_size", control.size)
+
+
+## Mastery and VIP titles: hand the shader the clock and otherwise keep out of
+## its way.
+func _apply_shader_clock(host: CanvasItem, t: float) -> void:
 	var mat: ShaderMaterial = host.material as ShaderMaterial
 	if mat != null:
 		mat.set_shader_parameter(&"t", t)
 	# White, so the shader's gradient arrives unmultiplied. Anything else here
-	# tints eleven carefully chosen palettes toward one colour.
+	# tints eleven mastery palettes and four tier metals toward one colour.
 	host.self_modulate = Color.WHITE
 	_enforce_outline(host)
 	host.queue_redraw()
