@@ -97,8 +97,11 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 	# it with the gradient.
 	var outline_hex: String = str(entry.get("outline", ""))
 	var outline_col: Color = Color(outline_hex) if not outline_hex.is_empty() else OUTLINE_COLOR
+	var outline_px: int = OUTLINE_SIZE_VIP if vip else OUTLINE_SIZE
 	if profile != null:
 		outline_col = profile.outline_color(outline_col)
+		if profile.outline_size > 0:
+			outline_px = profile.outline_size
 	if host is Label:
 		var label: Label = host
 		# Both shader families paint their own colour per fragment, so the label
@@ -107,9 +110,7 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 		label.self_modulate = tint if (mastery_fx < 0 and profile == null) else Color.WHITE
 		label.add_theme_color_override(&"font_color", Color.WHITE)
 		label.add_theme_color_override(&"font_outline_color", outline_col)
-		label.add_theme_constant_override(
-			&"outline_size", OUTLINE_SIZE_VIP if vip else OUTLINE_SIZE
-		)
+		label.add_theme_constant_override(&"outline_size", outline_px)
 		# Pixel-crisp glyphs. The project already defaults canvas textures to
 		# nearest, so this is an assertion rather than a change: these labels are
 		# built in code and handed between the nameplate, the profile and the
@@ -167,7 +168,7 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 		# instead gives the chip the tier's accent colour, which is the right
 		# degradation for a control that cannot carry the full look.
 		var clock_driven: bool = profile != null and host is Label
-		existing.configure(tint, vip, style, mastery_fx, outline_col, clock_driven)
+		existing.configure(tint, vip, style, mastery_fx, outline_col, clock_driven, outline_px)
 	_apply_particles(host, mastery_fx)
 	_apply_vip_effect(host, tier)
 

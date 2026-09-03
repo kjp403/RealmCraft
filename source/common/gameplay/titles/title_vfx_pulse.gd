@@ -36,11 +36,17 @@ var clock_driven: bool = false
 ## Resolved outline colour for this title — the shared near-black unless the
 ## catalog entry overrode it. Re-asserted every frame like the size is.
 var outline_color: Color = TitleVfx.OUTLINE_COLOR
+## Resolved outline WEIGHT for this title. 0 falls back to the shared pair, which
+## is what every title without a VipTierProfile override gets. Carried here for
+## the same reason the colour is: this node re-asserts the outline every frame,
+## so whatever it believes wins over whatever was set at mount time.
+var outline_size: int = 0
 
 
 func configure(
 	p_tint: Color, p_vip: bool, p_style: int, p_mastery_fx: int = -1,
-	p_outline: Color = TitleVfx.OUTLINE_COLOR, p_clock_driven: bool = false
+	p_outline: Color = TitleVfx.OUTLINE_COLOR, p_clock_driven: bool = false,
+	p_outline_size: int = 0
 ) -> void:
 	tint = p_tint
 	vip = p_vip
@@ -48,6 +54,7 @@ func configure(
 	mastery_fx = p_mastery_fx
 	outline_color = p_outline
 	clock_driven = p_clock_driven
+	outline_size = p_outline_size
 	set_process(true)
 	_apply(0.0)
 
@@ -145,7 +152,9 @@ func _apply_legacy(host: CanvasItem, t: float) -> void:
 ## decide the outline. Pinning it here means the contrast guarantee holds no
 ## matter what else touched the label.
 func _enforce_outline(host: CanvasItem) -> void:
-	var size: int = TitleVfx.OUTLINE_SIZE_VIP if vip else TitleVfx.OUTLINE_SIZE
+	var size: int = outline_size
+	if size <= 0:
+		size = TitleVfx.OUTLINE_SIZE_VIP if vip else TitleVfx.OUTLINE_SIZE
 	if host is Label:
 		var label: Label = host
 		label.add_theme_color_override(&"font_outline_color", outline_color)

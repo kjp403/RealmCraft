@@ -30,7 +30,7 @@ extends SceneTree
 ## section that dies half way through simply prints fewer lines and the tool
 ## still reports green. Counting is the guard. Same reason
 ## tools/verify_skill_master_titles.gd counts.
-const EXPECTED_CHECKS: int = 46
+const EXPECTED_CHECKS: int = 48
 
 ## An outline has to be dark enough to back bright letters over pale ground.
 ## Slayer Master's crimson override sits around 0.04; anything past this is not
@@ -263,6 +263,7 @@ func _check_pipeline() -> void:
 	var mat: ShaderMaterial = label.material as ShaderMaterial
 	_check(mat != null and mat.shader == TitleVfx.VIP_SHADER, "a ladder title gets vip_title.gdshader")
 	var profile: VipTierProfile = VipTierProfile.for_tier(&"diamond")
+	var pulse: Node = label.get_node_or_null(TitleVfx.PULSE_NODE)
 	var uniform_outline: Variant = mat.get_shader_parameter(&"outline") if mat != null else null
 	_check(
 		uniform_outline is Color
@@ -278,6 +279,25 @@ func _check_pipeline() -> void:
 	_check(
 		label.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
 		"title text is filtered nearest"
+	)
+
+	# The per-tier outline WEIGHT, checked twice on purpose - once as mounted and
+	# once after the pulse has ticked. TitleVfxPulse re-asserts the outline every
+	# single frame, so a size applied only at mount time is replaced by the shared
+	# constant one frame later and the tier silently loses the heavy black border
+	# that is most of what it was bought for. Checking only the first would pass
+	# with the bug present.
+	var want_px: int = profile.outline_size
+	_check(
+		want_px > 0 and label.get_theme_constant(&"outline_size") == want_px,
+		"the tier's outline weight is mounted (want %d, got %d)"
+			% [want_px, label.get_theme_constant(&"outline_size")]
+	)
+	if pulse != null and pulse.has_method(&"_apply"):
+		pulse.call(&"_apply", 1.0)
+	_check(
+		label.get_theme_constant(&"outline_size") == want_px,
+		"...and the pulse re-asserts THAT size, not the shared one"
 	)
 
 	# EVERY uniform the shader declares must actually be fed. A uniform added to
@@ -298,7 +318,6 @@ func _check_pipeline() -> void:
 
 	var fx: Node = label.get_node_or_null(TitleVfx.VIP_NODE)
 	_check(fx != null and StringName(fx.get(&"tier")) == &"diamond", "the VIP layer is mounted")
-	var pulse: Node = label.get_node_or_null(TitleVfx.PULSE_NODE)
 	_check(pulse != null and bool(pulse.get(&"clock_driven")), "the pulse node drives the shader clock")
 
 	# Switching tiers must REBUILD, not reconfigure: the emitter set is built once

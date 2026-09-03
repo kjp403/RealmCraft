@@ -50,6 +50,16 @@ static var _cache: Dictionary = {}
 ## TitleVfx.OUTLINE_COLOR] is used - which is what every tier should do unless it
 ## has a specific reason, because that constant IS the contrast guarantee.
 @export var outline_override: Color = Color(0.0, 0.0, 0.0, 0.0)
+## Per-tier outline WEIGHT, in the label's own units. 0 = the shared
+## [constant TitleVfx.OUTLINE_SIZE_VIP] / [constant TitleVfx.OUTLINE_SIZE].
+##
+## Diamond is the reason this exists: a heavy black border around white letters
+## is the look, not merely legibility insurance, so the border is part of the
+## tier's design rather than a constant it inherits. Anything set here must reach
+## the pulse node as well as the theme override - that node re-asserts the
+## outline EVERY frame, so a size applied only at mount time is silently replaced
+## by the shared one a frame later.
+@export_range(0, 24, 1) var outline_size: int = 0
 
 @export_group("Animation")
 ## Sweeps per second across the word. Slow reads as expensive; fast reads cheap.

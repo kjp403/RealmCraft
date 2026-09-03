@@ -105,6 +105,7 @@ sheen = Color(0.8745098, 0.91372549, 1.0, 1.0)
 shadow = Color(0.03137255, 0.05098039, 0.14117647, 0.55)
 shadow_offset = Vector2i(0, 3)
 outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
 sweep_speed = 0.42
 sweep_width = 0.07
 sheen_amount = 0.7
