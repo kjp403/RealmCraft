@@ -141,11 +141,13 @@ func _build_skills_grid(force_rebuild: bool = true) -> void:
 func _skill_tooltip(display: String, level: int, xp: int, xp_to_next: int, at_cap: bool, total_xp: int) -> String:
 	if at_cap:
 		return "%s\nLv %d — Max level\nTotal XP: %s\nClick for sources" % [
-			display, level, _format_xp(total_xp)
+			display, level, SkillXp.format_xp(total_xp)
 		]
 	var remaining: int = maxi(0, xp_to_next - xp)
 	return "%s\nLv %d — %s / %s XP\n%s XP to next\nTotal XP: %s\nClick for sources" % [
-		display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+		display, level,
+		SkillXp.format_xp(xp), SkillXp.format_xp(xp_to_next),
+		SkillXp.format_xp(remaining), SkillXp.format_xp(total_xp),
 	]
 
 
@@ -209,7 +211,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Control:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.texture = _get_skill_icon(skill_name)
+	icon.texture = JobRegistry.icon_for(StringName(skill_name))
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	icon.offset_left = 4
 	icon.offset_top = 4
@@ -282,9 +284,10 @@ func _open_skill_detail(skill_name: String) -> void:
 	# so it's the real "grind past 99" total whether or not at_cap.
 	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	var xp_line: String = (
-		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, _format_xp(total_xp)] if at_cap
+		"Max level (%d) · Total XP: %s" % [SkillXp.LEVEL_CAP, SkillXp.format_xp(total_xp)] if at_cap
 		else "%s / %s XP (%s to next) · Total XP: %s" % [
-			_format_xp(xp), _format_xp(xp_to_next), _format_xp(maxi(0, xp_to_next - xp)), _format_xp(total_xp)
+			SkillXp.format_xp(xp), SkillXp.format_xp(xp_to_next),
+			SkillXp.format_xp(maxi(0, xp_to_next - xp)), SkillXp.format_xp(total_xp),
 		]
 	)
 	var lines: PackedStringArray = [xp_line]
@@ -311,23 +314,6 @@ func _open_skill_detail(skill_name: String) -> void:
 	else:
 		lines.append("No source list authored for this skill yet.")
 	Toaster.toast_group("%s — Lv %d" % [display, level], lines, 4.5)
-
-
-func _get_skill_icon(skill_name: String) -> Texture2D:
-	var job := JobRegistry.perks_for(StringName(skill_name))
-	if job == null:
-		return null
-	if job.icon != null:
-		return job.icon
-	if not job.source_items.is_empty():
-		var source_item: Item = job.source_items[0]
-		if source_item != null:
-			return source_item.item_icon
-	if not job.recipe_items.is_empty():
-		var recipe_item: Item = job.recipe_items[0]
-		if recipe_item != null:
-			return recipe_item.item_icon
-	return null
 
 
 ## Public + static so the Daily Tracker sharing this tab can dress itself from
@@ -360,15 +346,3 @@ func _make_total_bar_style() -> StyleBoxFlat:
 	style.content_margin_top = 4
 	style.content_margin_bottom = 4
 	return style
-
-
-func _format_xp(value: int) -> String:
-	var text := str(maxi(0, value))
-	var out := ""
-	var count: int = 0
-	for i: int in range(text.length() - 1, -1, -1):
-		if count > 0 and count % 3 == 0:
-			out = "," + out
-		out = text[i] + out
-		count += 1
-	return out

@@ -18,10 +18,13 @@ extends Control
 ## the quarter notches into mush, which is the entire reason they are notches
 ## and not painted ticks.
 ##
-## Level-ups here are LOCAL only: the icon flashes, particles burst behind the
-## casing, the arc wraps to zero. The fireworks, the jingle and the "your Mining
-## level has achieved N" line all belong to [LevelUpFx], which already fires off
-## the same server payload — doubling them puts two celebrations on one event.
+## Level-ups are flagged by the SERVER on the same event that pays the XP, so
+## the orb never has to guess from the level moving — switching skills moves it
+## further than any level-up does. They are LOCAL only: the icon flashes,
+## particles burst behind the casing, the arc wraps to zero. The fireworks, the
+## jingle and the "your Mining level has achieved N" line all belong to
+## [LevelUpFx], which already fires off the same server payload — doubling them
+## puts two celebrations on one event.
 
 const TOOLTIP_SCENE: String = "res://source/client/ui/hud/xp_tracker/xp_tracker_tooltip.tscn"
 
@@ -85,10 +88,6 @@ var _job: StringName = &""
 var _level: int = 1
 var _xp_into_level: int = 0
 var _xp_to_next: int = 1
-## Last level seen PER SKILL. A level-up is only a level-up when the same skill
-## goes up: switching from Mining 40 to Fletching 12 is a bigger jump than any
-## level-up and must not set off the fireworks.
-var _level_by_job: Dictionary = {}
 
 var _hide_timer: Timer
 var _fill_tween: Tween
@@ -149,23 +148,8 @@ func _ready() -> void:
 		# displayed: the override replaces it wholesale.
 		tooltip_text = " "
 
-	_seed_levels()
 	ClientState.skill_xp_gained.connect(_on_skill_xp_gained)
 	ClientState.settings.setting_changed.connect(_on_setting_changed)
-
-
-## Snapshot the level mirror before any XP arrives, so the first tick of a
-## session can tell a level-up from a first sighting.
-##
-## Taken ONCE, here, and never refreshed: several XP paths write the mirror
-## before the signal reaches this node, so re-seeding later would read back the
-## level we are about to be told about and conclude nothing happened. If login
-## data has not landed yet the snapshot is empty and the session's very first
-## tick cannot celebrate locally — [LevelUpFx] still fires the world-level
-## fireworks either way, so the cost is one missed icon flash.
-func _seed_levels() -> void:
-	for slug: Variant in ClientState.skill_levels.keys():
-		_level_by_job[StringName(str(slug))] = int(ClientState.skill_levels[slug])
 
 
 ## Orb-only hit testing. The control's rect is a square and the gauge is a
@@ -187,19 +171,19 @@ func _process(_delta: float) -> void:
 # XP intake
 # ---------------------------------------------------------------------------
 
-func _on_skill_xp_gained(job: StringName, amount: int, xp_into_level: int, level: int) -> void:
+func _on_skill_xp_gained(
+	job: StringName,
+	amount: int,
+	xp_into_level: int,
+	level: int,
+	leveled_up: bool,
+) -> void:
 	if not is_enabled():
 		return
 	var tint: Color = tint_for(job)
 	# The number floats whatever the orb does, so a skill that pays out while
 	# the orb is mid-fade still reads.
 	_drops.push(job, amount, tint)
-
-	# A level-up is only a level-up when the SAME skill goes up. Switching from
-	# Mining 40 to Fletching 12 is a bigger number change than any level-up.
-	var previous: int = int(_level_by_job.get(job, 0))
-	var leveled: bool = previous > 0 and level > previous
-	_level_by_job[job] = level
 
 	var switched: bool = job != _job
 	_job = job
@@ -214,7 +198,10 @@ func _on_skill_xp_gained(job: StringName, amount: int, xp_into_level: int, level
 		_dress_for_job(job, tint)
 	_show()
 	_pulse()
-	if leveled:
+	# Taken from the server, never inferred from the level moving: on the first
+	# tick of a session there is nothing to compare against, and a level-up that
+	# lands on the same event as a skill switch would read as neither.
+	if leveled_up:
 		_play_level_up(tint)
 	else:
 		_fill_to(_target_ratio(), FILL_TIME)

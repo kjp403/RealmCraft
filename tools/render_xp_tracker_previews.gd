@@ -166,7 +166,12 @@ func _drive(tracker: Control, case: Array) -> void:
 	var level: int = case[1]
 	var ratio: float = case[2]
 	var to_next: int = SkillXp.xp_to_next(level)
-	tracker.call(&"_on_skill_xp_gained", job, 120, int(round(ratio * float(to_next))), level)
+	# leveled_up false for every cell: the level-up CELL is posed separately by
+	# calling the wrap's peak directly, because driving it for real would put the
+	# burst 0.22s away and the capture would miss it.
+	tracker.call(
+		&"_on_skill_xp_gained", job, 120, int(round(ratio * float(to_next))), level, false
+	)
 	tracker.modulate.a = 1.0
 
 

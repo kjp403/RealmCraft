@@ -104,7 +104,16 @@ var skill_levels: Dictionary = {}
 ## [param job] is always the SLUG (`outfitting`, `harvesting`), never a display
 ## name — run it through [method JobRegistry.display_name] before showing it.
 ## Only ever emitted with amount > 0; see [method _emit_skill_xp].
-signal skill_xp_gained(job: StringName, amount: int, xp_into_level: int, level: int)
+##
+## [param leveled_up] is the SERVER's answer, forwarded rather than inferred.
+## Every payload already carries it, and a client that instead compared levels
+## between events would be wrong in exactly the cases that matter: the first
+## tick of a session (nothing to compare against), a level-up that arrives in
+## the same frame as a skill switch, and any tick that reaches a listener after
+## something else has already written the level mirror.
+signal skill_xp_gained(
+	job: StringName, amount: int, xp_into_level: int, level: int, leveled_up: bool
+)
 ## Weapon-mastery levels for the local character (category slug → int), mirrored
 ## from mastery.get on spawn + the combat.reward mastery payload. The CLIENT has
 ## no PlayerResource (it is server-only — see InstanceServer), so every tooltip /
@@ -370,6 +379,7 @@ func _on_skill_xp_response(data: Dictionary) -> void:
 		int(data.get("xp", 0)),
 		int(data.get("xp_into_level", 0)),
 		int(data.get("level", 0)),
+		bool(data.get("leveled_up", false)),
 	)
 
 
@@ -387,6 +397,7 @@ func _on_board_claim_xp(data: Dictionary) -> void:
 			int(grant.get("xp", 0)),
 			int(grant.get("xp_into_level", 0)),
 			int(grant.get("level", 0)),
+			bool(grant.get("leveled_up", false)),
 		)
 
 
@@ -398,10 +409,16 @@ func _on_board_claim_xp(data: Dictionary) -> void:
 ## not a genuinely empty bar. Forwarding it would snap the radial gauge to zero
 ## on an action that changed nothing. Gating once here keeps every consumer from
 ## having to know that.
-func _emit_skill_xp(job: StringName, amount: int, xp_into_level: int, level: int) -> void:
+func _emit_skill_xp(
+	job: StringName,
+	amount: int,
+	xp_into_level: int,
+	level: int,
+	leveled_up: bool,
+) -> void:
 	if job == &"" or amount <= 0 or level <= 0:
 		return
-	skill_xp_gained.emit(job, amount, maxi(xp_into_level, 0), level)
+	skill_xp_gained.emit(job, amount, maxi(xp_into_level, 0), level, leveled_up)
 
 
 ## Server-pushed kill rewards: surface them as ONE grouped toast card
@@ -497,6 +514,7 @@ func _on_combat_reward(data: Dictionary) -> void:
 		int(slayer.get("xp_gained", 0)),
 		int(slayer.get("xp", 0)),
 		int(slayer.get("level", 0)),
+		bool(slayer.get("leveled_up", false)),
 	)
 	if bool(slayer.get("leveled_up", false)):
 		set_skill_level(&"slayer", int(slayer.get("level", 1)))
@@ -664,6 +682,7 @@ func _on_gather_result(data: Dictionary) -> void:
 					int(grant.get("xp", 0)),
 					int(prog.get("xp", 0)),
 					g_level,
+					bool(prog.get("leveled_up", false)),
 				)
 
 	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.

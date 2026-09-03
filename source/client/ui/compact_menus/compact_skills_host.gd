@@ -390,9 +390,9 @@ func _update_detail_header_inplace() -> bool:
 	# so it's the real "grind past 99" total whether or not at_cap.
 	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	_detail_xp_label.text = (
-		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
+		"Max · Total XP: %s" % SkillXp.format_xp(total_xp) if at_cap
 		else "%s / %s XP · Total %s" % [
-			_format_xp(xp), _format_xp(xp_to_next), _format_xp(total_xp)
+			SkillXp.format_xp(xp), SkillXp.format_xp(xp_to_next), SkillXp.format_xp(total_xp)
 		]
 	)
 	return true
@@ -610,11 +610,13 @@ func _build_skills_grid(force_rebuild: bool = true) -> void:
 func _skill_tooltip(display: String, level: int, xp: int, xp_to_next: int, at_cap: bool, total_xp: int) -> String:
 	if at_cap:
 		return "%s\nLv %d — Max level\nTotal XP: %s\nClick for details" % [
-			display, level, _format_xp(total_xp)
+			display, level, SkillXp.format_xp(total_xp)
 		]
 	var remaining: int = maxi(0, xp_to_next - xp)
 	return "%s\nLv %d — %s / %s XP\n%s XP to next level\nTotal XP: %s\nClick for details" % [
-		display, level, _format_xp(xp), _format_xp(xp_to_next), _format_xp(remaining), _format_xp(total_xp)
+		display, level,
+		SkillXp.format_xp(xp), SkillXp.format_xp(xp_to_next),
+		SkillXp.format_xp(remaining), SkillXp.format_xp(total_xp),
 	]
 
 
@@ -672,7 +674,7 @@ func _create_skill_tile(skill_name: String, info: Dictionary) -> Button:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.texture = _get_skill_icon(skill_name)
+	icon.texture = JobRegistry.icon_for(StringName(skill_name))
 	icon.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	icon.offset_left = 4
 	icon.offset_top = 4
@@ -784,7 +786,7 @@ func _rebuild_detail() -> void:
 	detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	detail_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	detail_icon.texture = _get_skill_icon(_selected_slug)
+	detail_icon.texture = JobRegistry.icon_for(StringName(_selected_slug))
 	header_row.add_child(detail_icon)
 
 	var header := Label.new()
@@ -812,9 +814,9 @@ func _rebuild_detail() -> void:
 	# so it's the real "grind past 99" total whether or not at_cap.
 	var total_xp: int = SkillXp.total_xp_for_level(level) + xp
 	xp_label.text = (
-		"Max · Total XP: %s" % _format_xp(total_xp) if at_cap
+		"Max · Total XP: %s" % SkillXp.format_xp(total_xp) if at_cap
 		else "%s / %s XP · Total %s" % [
-			_format_xp(xp), _format_xp(xp_to_next), _format_xp(total_xp)
+			SkillXp.format_xp(xp), SkillXp.format_xp(xp_to_next), SkillXp.format_xp(total_xp)
 		]
 	)
 	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1300,19 +1302,6 @@ func _make_tool_row(tool: ToolItem, required_level: int, player_level: int) -> C
 	return box
 
 
-func _get_skill_icon(skill_name: String) -> Texture2D:
-	var job := JobRegistry.perks_for(StringName(skill_name))
-	if job == null:
-		return null
-	if job.icon != null:
-		return job.icon
-	if not job.source_items.is_empty() and job.source_items[0] != null:
-		return job.source_items[0].item_icon
-	if not job.recipe_items.is_empty() and job.recipe_items[0] != null:
-		return job.recipe_items[0].item_icon
-	return null
-
-
 func _apply_tile_styles(tile: Button) -> void:
 	_ensure_shared_styles()
 	tile.add_theme_stylebox_override(&"normal", _style_tile_normal)
@@ -1354,18 +1343,6 @@ func _make_bar_fill() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.95, 0.75, 0.28, 1.0)
 	return style
-
-
-func _format_xp(value: int) -> String:
-	var text := str(maxi(0, value))
-	var out := ""
-	var count: int = 0
-	for i: int in range(text.length() - 1, -1, -1):
-		if count > 0 and count % 3 == 0:
-			out = "," + out
-		out = text[i] + out
-		count += 1
-	return out
 
 
 func _place_panel() -> void:
