@@ -144,7 +144,7 @@ const PREMIUM: Dictionary = {
 		"blurb": "Cold white metal, arcing. You hear it before you read it.",
 	},
 	"diamond-donator": {
-		"name": "Diamond Donator",
+		"name": "Donator",
 		"color": "#bfe9ff",
 		"style": 0,
 		"vip": true,
