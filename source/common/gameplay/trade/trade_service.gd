@@ -269,7 +269,16 @@ static func _complete_after_countdown(
 	var second_inventory: Dictionary = second.player_resource.inventory
 	var first_snapshot: Dictionary = first_inventory.duplicate(true)
 	var second_snapshot: Dictionary = second_inventory.duplicate(true)
-	var store: WorldStoreSqlite = instance.world_server.database.store
+	# Deliberately UNTYPED. This is the world's WorldStoreSqlite, but that class
+	# lives in source/server and types against SQLite, which the client export
+	# strips (export_presets.cfg: `addons/godot-sqlite/*`). Naming it here made
+	# trade_service.gd fail to COMPILE on the client, and because map.gd holds a
+	# Dictionary[int, TradeTable] the failure cascaded down every client map load:
+	# trade_table -> map -> npc -> hostile_npc -> combat_hit -> melee_arc, ending
+	# in "Failed to load script melee_arc.gd". Trading itself is server-only and
+	# unchanged -- the client only ever had to PARSE this file, and couldn't.
+	# Same rule HostileNpc.respawn already follows for ServerLog.
+	var store: Variant = instance.world_server.database.store
 	if not store.begin():
 		push_error(
 			"Trade %d could not begin persistence: %s" % [
