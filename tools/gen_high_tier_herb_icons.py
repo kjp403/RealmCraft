@@ -30,6 +30,9 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ICON_DIR = os.path.join(ROOT, "assets", "sprites", "items", "icons")
+NODE_DIR = os.path.join(
+    ROOT, "assets", "sprites", "environment", "props", "herbs"
+)
 # tools/, NOT assets/_import/ — that whole tree is gitignored, so a spec
 # written there is a spec that never reaches anyone else.
 SPEC_DIR = os.path.join(ROOT, "tools")
@@ -93,6 +96,28 @@ POTIONS = {
 # The Empty Vial is the Vial of Water with its liquid taken out: the same glass,
 # the same outline, nothing inside. Drained rather than redrawn so the pair read
 # as the same object in two states.
+# The WORLD PLANT for each patch, as a true 32x32 sprite.
+#
+# These are NOT the bag icon scaled up, and they are NOT a raw atlas region.
+# Pointing a node at a raw region did two bad things at once: the plant kept the
+# pack's original green/tan colours while the bag icon was recoloured, so you
+# walked up to a green bush and received a grey metal thorn; and a 32x32 region
+# anchored on a 16x16 icon cell dragged in three NEIGHBOURING cells, which is why
+# a patch showed two mushrooms, or a completely unrelated plant.
+#
+# Cells here are picked from the 32x32 grid as SELF-CONTAINED plants, then run
+# through the same recolour as their icon so world and bag agree, then cleaned of
+# any fragment of a neighbour that still crept in.
+# name -> (cell, hue band, saturation scale, accent or None)
+NODES = {
+    "node_rust_spore_cap.png": ((0, 336), RUST, 1.35, ((0.06, 0.09), 1.6, 0.72, SATURATION_FLOOR)),
+    "node_nightshade_bramble.png": ((192, 160), NIGHTSHADE, 1.15, ((0.25, 0.33), 1.5, 0.66, SATURATION_FLOOR)),
+    "node_magma_root.png": ((144, 272), MAGMA, 1.5, ((0.10, 0.14), 1.8, 0.62, SATURATION_FLOOR)),
+    "node_sun_lit_lotus.png": ((80, 240), GOLD, 1.25, None),
+    "node_gloom_spore_cap.png": ((0, 352), GLOOM, 1.2, ((0.47, 0.52), 1.5, 0.74, SATURATION_FLOOR)),
+    "node_iron_spike_thorn.png": ((144, 224), SLATE, 0.22, (CRIMSON, 2.2, 0.68, 0.0)),
+}
+
 EMPTY_VIAL_SOURCE = "Icon309.png"
 EMPTY_VIAL_NAME = "empty_vial.png"
 
@@ -134,6 +159,55 @@ def _recolour(
             r2, g2, b2 = colorsys.hsv_to_rgb(h2, s2, v)
             pixels[x, y] = (int(r2 * 255), int(g2 * 255), int(b2 * 255), a)
     return out
+
+
+def _clean(image: Image.Image, keep_ratio: float = 0.30) -> Image.Image:
+    """Drop disconnected fragments and centre what is left.
+
+    Even a well-chosen 32x32 cell can clip a corner of the plant next door, and
+    a stray two-pixel blob floating beside a herb reads as a rendering fault
+    rather than as art. Anything smaller than [keep_ratio] of the largest blob
+    is a fragment, not the plant.
+    """
+    pixels = image.load()
+    width, height = image.size
+    seen = [[False] * height for _ in range(width)]
+    blobs: list[list[tuple[int, int]]] = []
+    for x in range(width):
+        for y in range(height):
+            if seen[x][y] or pixels[x, y][3] <= 40:
+                continue
+            stack = [(x, y)]
+            seen[x][y] = True
+            blob = []
+            while stack:
+                cx, cy = stack.pop()
+                blob.append((cx, cy))
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        nx, ny = cx + dx, cy + dy
+                        if (0 <= nx < width and 0 <= ny < height
+                                and not seen[nx][ny] and pixels[nx, ny][3] > 40):
+                            seen[nx][ny] = True
+                            stack.append((nx, ny))
+            blobs.append(blob)
+    if not blobs:
+        return image
+    largest = max(len(b) for b in blobs)
+    keep = [p for b in blobs if len(b) >= largest * keep_ratio for p in b]
+    kept = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    kp = kept.load()
+    for x, y in keep:
+        kp[x, y] = pixels[x, y]
+    xs = [p[0] for p in keep]
+    ys = [p[1] for p in keep]
+    offset = (
+        (width - (max(xs) - min(xs) + 1)) // 2 - min(xs),
+        (height - (max(ys) - min(ys) + 1)) // 2 - min(ys),
+    )
+    centred = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    centred.paste(kept, offset, kept)
+    return centred
 
 
 def _cell(atlas: Image.Image, origin: tuple[int, int]) -> Image.Image:
@@ -282,6 +356,17 @@ def main() -> None:
     for name, (source, band, sat) in POTIONS.items():
         src = Image.open(os.path.join(ICON_DIR, source)).convert("RGBA")
         _recolour(src, band, sat).save(os.path.join(ICON_DIR, name))
+        print("wrote", name)
+
+    os.makedirs(NODE_DIR, exist_ok=True)
+    for name, (origin, band, sat, accent) in NODES.items():
+        x, y = origin
+        node = _clean(atlas.crop((x, y, x + 32, y + 32)))
+        node = _recolour(node, band, sat)
+        if accent is not None:
+            a_band, a_sat, a_floor, a_min_sat = accent
+            node = _recolour(node, a_band, a_sat, a_floor, a_min_sat)
+        node.save(os.path.join(NODE_DIR, name))
         print("wrote", name)
 
     src = Image.open(os.path.join(ICON_DIR, EMPTY_VIAL_SOURCE)).convert("RGBA")
