@@ -20,8 +20,18 @@ func _init() -> void:
 	var inst: String = FileAccess.get_file_as_string(INSTANCE)
 	var mgr: String = FileAccess.get_file_as_string(MANAGER)
 
-	if not inst.contains("func await_map_ready() -> void:"):
+	if not inst.contains("func await_map_ready() -> bool:"):
 		fails.append("ServerInstance.await_map_ready is gone — nothing gates the spawn readers")
+	# A null instance_map must be REPORTED, not silently returned past: both readers
+	# dereference instance_map on the next line, and a spawn that dies there leaves
+	# the peer in no map at all (parked client, invisible avatar, relog to escape).
+	if not inst.contains("if not await await_map_ready():"):
+		fails.append("spawn_player ignores await_map_ready's result — a mapless instance drops the spawn")
+	if not mgr.contains("if not await target_instance.await_map_ready():"):
+		fails.append("player_switch_instance ignores await_map_ready's result")
+	# ...and it must decide BEFORE despawning, or the abort strands the player.
+	if not _awaits_before_spawn(mgr, "func player_switch_instance", "despawn_player"):
+		fails.append("player_switch_instance despawns before awaiting await_map_ready — a failed switch strands the player")
 	if not inst.contains("await instance_map.ready"):
 		fails.append("await_map_ready no longer waits for the map to enter the tree")
 	if not inst.contains("await get_tree().process_frame"):

@@ -257,6 +257,23 @@ func player_switch_instance(
 	current_instance: ServerInstance,
 ) -> void:
 	var peer_id: int = player.name.to_int()
+	# Settle the DESTINATION before taking the player out of the map they are in.
+	# The map may not be in the tree yet: queue_charge_instance fires this off
+	# ServerInstance.ready, and the map is added deferred, so the warper registry
+	# can still be empty. Without the wait, the first player into a freshly charged
+	# biome reads (0, 0) instead of the warper they aimed at.
+	#
+	# The wait used to sit AFTER the despawn below, which made a failed destination
+	# unrecoverable: the player was already out of their old instance, so the abort
+	# left them belonging to no map at all — the client sits parked, the avatar
+	# never appears, and only a relog clears it. Deciding first means a bad
+	# destination is a no-op and the player simply stays where they are.
+	if not await target_instance.await_map_ready():
+		ServerLog.warn(
+			"Switch to '%s' aborted for peer %d — the instance has no map; staying put."
+			% [target_instance.instance_resource.instance_name, peer_id]
+		)
+		return
 	if current_instance.connected_peers.has(peer_id):
 		current_instance.despawn_player(peer_id, false)
 	else:
@@ -277,11 +294,6 @@ func player_switch_instance(
 	# Ossuran gate: drop the peer from the co-op group when they leave the private
 	# arena (exit warp, death return, recall). No-op for any other map.
 	OssuranGateService.on_player_left(peer_id, current_instance)
-	# The map may not be in the tree yet: queue_charge_instance fires this off
-	# ServerInstance.ready, and the map is added deferred, so the warper registry
-	# can still be empty. Without the wait, the first player into a freshly
-	# charged biome reads (0, 0) instead of the warper they aimed at.
-	await target_instance.await_map_ready()
 	var spawn_pos: Vector2 = target_instance.instance_map.get_spawn_position(warper_target_id)
 	_rpc_charge(
 		peer_id,

@@ -338,11 +338,52 @@ func _ready() -> void:
 		synchronizer_manager.add_container(1_000_000, instance_map.replicated_props_container)
 
 	add_child(synchronizer_manager, true)
+	_watch_for_arrival()
 
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func ready_to_enter_instance() -> void:
 	pass
+
+
+## Seconds between re-asks, and how many times we ask, when the server never
+## answers our first "I'm loaded, spawn me".
+const ENTER_RETRY_S: float = 2.0
+const ENTER_MAX_RETRIES: int = 5
+
+
+## Re-ask the server to spawn us if our arrival never lands.
+##
+## [method InstanceManagerClient.charge_new_instance] fires ready_to_enter_instance
+## exactly ONCE, off map.ready, with CONNECT_ONE_SHOT. Nothing retried it, so every
+## way the server can drop that request ended identically: the reused LocalPlayer
+## stays PARKED on the instance manager — hidden, PROCESS_MODE_DISABLED — while the
+## map, the mobs and the HUD all render normally around a character that isn't
+## there. The only exit was a relog, and it read to players as a random "null spawn"
+## that moved between zones because nothing about it is zone-specific.
+##
+## The server side is idempotent (ServerInstance.ready_to_enter_instance returns
+## early once the peer has a Player), so a re-ask can never produce a ghost copy —
+## it either lands on a server that genuinely never spawned us, or it no-ops.
+func _watch_for_arrival() -> void:
+	for _attempt: int in ENTER_MAX_RETRIES:
+		await get_tree().create_timer(ENTER_RETRY_S).timeout
+		if not is_instance_valid(self) or InstanceClient.current != self:
+			return  # charged into a different instance meanwhile — not our problem
+		if _local_player_arrived():
+			return
+		push_warning(
+			"InstanceClient '%s': no spawn %ds after map load — re-asking the server."
+			% [name, int(ENTER_RETRY_S * (_attempt + 1))]
+		)
+		ready_to_enter_instance.rpc_id(1)
+
+
+## True once OUR avatar is actually parented into this instance's map — the one
+## state that means the arrival completed. Deliberately not "is it in the tree":
+## a parked player is in the tree too, sitting on the instance manager.
+func _local_player_arrived() -> bool:
+	return local_player != null 		and is_instance_valid(local_player) 		and local_player.get_parent() == instance_map
 
 
 #region spawn/despawn
@@ -380,16 +421,23 @@ func spawn_player(player_id: int) -> void:
 	# PARKED on the instance manager (InstanceManagerClient._park_local_player), so
 	# in-tree no longer implies in-THIS-map. Ask about the parent instead, or the
 	# arriving player is left sitting on the manager, invisible and frozen.
+	# Undo the park BEFORE the re-parent test, not inside it. This used to live in
+	# the branch below, so it only ran when the node actually changed parents — and
+	# any arrival that found the player ALREADY under this map (a second
+	# spawn_player for the same peer, a re-charge that reused the node) skipped it
+	# and left _park_local_player's hidden + PROCESS_MODE_DISABLED state on. That is
+	# the "I'm in the zone but there's no character and I can't move" report: you are
+	# spawned, positioned and synced, just invisible and not processing, with relog
+	# the only way out. Both values are the scene defaults, so this is a no-op for a
+	# freshly instantiated player and both arrival paths land in the same state.
+	new_player.process_mode = Node.PROCESS_MODE_INHERIT
+	if new_player is CanvasItem:
+		(new_player as CanvasItem).show()
 	if new_player.get_parent() != instance_map:
 		var previous: Node = new_player.get_parent()
 		if previous != null:
 			previous.remove_child(new_player)
 		instance_map.add_child(new_player)
-		# Undo the park. No-ops for a freshly instantiated player (these are its
-		# defaults), so both arrival paths land in the same state.
-		new_player.process_mode = Node.PROCESS_MODE_INHERIT
-		if new_player is CanvasItem:
-			(new_player as CanvasItem).show()
 		# Click-to-inspect: the player scene carries a ClickableArea (ProfileClickArea).
 		# Wire its `clicked` to open the profile — the GATE (holster-mode) lives in the
 		# handler, in CLIENT code, because Player.gd must not reference ClientState (cycle).
