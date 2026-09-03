@@ -100,7 +100,7 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 ## Skin by slug ("royal_knight"), by display name ("Royal Knight"), or by raw id.
 func _resolve_skin(token: String) -> int:
 	var clean: String = token.strip_edges()
-	if clean.is_int():
+	if clean.is_valid_int():
 		var as_id: int = int(clean)
 		return as_id if PlayerSkins.is_horizon_listed(as_id) else 0
 	var slug: String = clean.to_lower().replace(" ", "_").replace("-", "_")
@@ -116,7 +116,7 @@ func _resolve_skin(token: String) -> int:
 ## Dye by label ("Gilded"), or by its style number.
 func _resolve_dye(token: String) -> int:
 	var clean: String = token.strip_edges()
-	if clean.is_int():
+	if clean.is_valid_int():
 		var as_style: int = int(clean)
 		return as_style if VaultSkins.STYLE_ORDER.has(as_style) else 0
 	for style: int in VaultSkins.STYLE_ORDER:
