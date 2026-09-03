@@ -149,9 +149,9 @@ func _on_offer(slot_uid: int) -> void:
 	if not bool(payload.get("ok", false)):
 		_toast_rejection(payload)
 		return
-	Toaster.toast("Offered %d — +%d Prayer xp." % [
-		int(payload.get("amount", 0)), int(payload.get("xp", 0))
-	])
+	# The XP half of this line is the tracker's job now ([XpTrackerHud], fed off
+	# the same altar.offer response) — the toast only confirms the stack went.
+	Toaster.toast("Offered %d." % int(payload.get("amount", 0)))
 	if bool(payload.get("leveled_up", false)):
 		Announcer.announce("Prayer level %d" % int(payload.get("level", 0)))
 	# The stack is gone from the bag now — refetch instead of redrawing rows
