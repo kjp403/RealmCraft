@@ -142,6 +142,7 @@ var _rich: bool = true
 
 func _ready() -> void:
 	build()
+	_apply_world_scale()
 	_start_lod()
 
 
@@ -180,7 +181,29 @@ func fit_to(label_size: Vector2) -> void:
 	_extent = label_size * 0.5
 	for p: CPUParticles2D in _all:
 		_apply_span(p, int(p.get_meta(&"span_mode", 0)), float(p.get_meta(&"span_scale", 1.0)))
+	_apply_world_scale()
 	_fit_cull_rect()
+
+
+## Re-express the world-unit properties in the nameplate's scale.
+##
+## With local_coords off, scale_amount, velocity and gravity are all in WORLD
+## units while _extent and the emission box are in label units that the node's
+## transform still applies. Left alone the two disagree by the label's scale
+## factor - 0.2 on a nameplate, 1.0 in every tools/ proof render, which is
+## exactly why no capture ever showed the problem.
+func _apply_world_scale() -> void:
+	if not is_inside_tree():
+		return
+	var s: float = maxf(global_scale.x, 0.01)
+	for p: CPUParticles2D in _all:
+		var sc: Vector2 = p.get_meta(&"base_scale", Vector2(0.3, 0.8))
+		var vel: Vector2 = p.get_meta(&"base_vel", Vector2(0.0, 20.0))
+		p.scale_amount_min = sc.x * s
+		p.scale_amount_max = sc.y * s
+		p.initial_velocity_min = vel.x * s
+		p.initial_velocity_max = vel.y * s
+		p.gravity = (p.get_meta(&"base_grav", Vector2.ZERO) as Vector2) * s
 
 
 ## The cull rect has to cover the widest layer's field, not the text. Diamond's
@@ -232,16 +255,19 @@ func _emitter(layer: VipParticleLayer) -> CPUParticles2D:
 		p.angular_velocity_min = -layer.angular_velocity
 		p.angular_velocity_max = layer.angular_velocity
 	p.color_ramp = layer.ramp()
-	# LOCAL space, and this is not optional. The nameplate scales its title label
-	# to 0.2, and particles in GLOBAL space ignore the emitter's transform - so
-	# every mote rendered at full label-space size, five times too big, as white
-	# slabs the size of the player. Every proof render in tools/ draws the label
-	# unscaled, which is exactly why none of them caught it.
+	# GLOBAL space, so particles stay where they were born and the layer TRAILS
+	# behind a walking nameplate instead of being bolted to it.
 	#
-	# The cost is the trail: particles now follow the nameplate instead of staying
-	# where they were born. Worth it. A rigid halo at the right size beats a
-	# trailing one that is unreadable in the only place it actually ships.
-	p.local_coords = true
+	# The catch, and the bug this shipped with once already: global-space
+	# particles ignore the emitter's transform, and the nameplate scales its title
+	# label to 0.2 - so every mote drew at full label-space size, five times too
+	# big. Setting local_coords = true fixed the size and killed the trail. The
+	# answer is to keep global space and pre-multiply the values that are now in
+	# WORLD units by that same scale; see _apply_world_scale().
+	p.local_coords = false
+	p.set_meta(&"base_scale", Vector2(layer.scale_min, layer.scale_max))
+	p.set_meta(&"base_vel", Vector2(layer.velocity_min, layer.velocity_max))
+	p.set_meta(&"base_grav", layer.gravity)
 	if layer.additive:
 		p.material = _shared_additive()
 	p.emitting = true
