@@ -7,6 +7,14 @@ const MENU_ENTRIES: Array = [
 	# market payouts (sale gold, bought goods) all land in it. _refresh_mail_badge
 	# hangs the unread count off this entry's button.
 	{"label": "Mail", "menu": "mail"},
+	# Boss Collection Log. Explicit icon: the fallback derives a path from the
+	# label, and "collection log.png" does not exist — the button would silently
+	# render text-only next to two iconned rows.
+	{
+		"label": "Collection Log",
+		"menu": "collection_log",
+		"icon": ICON_DIR + "achievements.png",
+	},
 ]
 
 const ICON_DIR := \

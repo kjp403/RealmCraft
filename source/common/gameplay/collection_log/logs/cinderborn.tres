@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; Vurthek, the Cinderborn — foundry world boss, combat level 90 (Boss Hunt
+; contract "cinderborn", recommended level 88).
+;
+; Seven entries. relic_cinderheart (1/1000) and cindermantle (1/50) are dropped
+; by NOTHING else in the game; the five Fire weapons are 1/6.25 each here, but
+; also appear in dungeon_reward_v1, fungus_reward_hard, salvage_table and the
+; Hollow Seep quest "The Fuel Lock" — which is exactly why the log is filled from
+; the boss's own loot roll and never from an inventory change.
+;
+; Excluded as generic: gold, bone, dragon_bones, mithril/iron/coal, dungeon_key,
+; and the wood/silver chests.
+
+;
+; Expanded 2026-09-03: the Slagborn set (helm 1/33, sabatons ~1/29) and
+; Everburning Coal (~1/11) are new and drop from NOTHING else, so the log no
+; longer completes off shared weapon drops alone. 10 entries.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_unbanked_coal.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"cinderborn"
+boss_name = "Vurthek, the Cinderborn"
+log_items = Array[StringName]([&"relic_cinderheart", &"cindermantle", &"sword_fire.item", &"hammer_fire.item", &"fire_bow.item", &"fire_wand.item", &"book_fire.item", &"slagborn_helm", &"slagborn_sabatons", &"everburning_coal"])
+green_log_title_text = "The Unbanked Coal"
+green_log_vfx = ExtResource("2_vfx")
+green_log_title_style = 2
+green_log_title_color = Color(0.88, 0.35, 0.13, 1)

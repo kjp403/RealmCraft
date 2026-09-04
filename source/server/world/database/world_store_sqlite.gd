@@ -62,6 +62,10 @@ func save_player(player: PlayerResource) -> bool:
 	# Shape owned by DailyQuestManager, not spelled out here — the reader below
 	# calls its load_state, so the two cannot drift apart when the board changes.
 	var dailies_json: String = JSON.stringify(DailyQuestManager.save_state(player))
+	# Shape owned by CollectionLogManager for the same reason as dailies_json —
+	# the reader below calls its deserialize_log_data, so writer and reader move
+	# together when the log changes.
+	var collection_log_json: String = JSON.stringify(CollectionLogManager.serialize_log_data(player))
 	var dungeon_lockouts_json: String = JSON.stringify(player.dungeon_lockouts)
 	var redeemed_codes_json: String = JSON.stringify(player.redeemed_codes)
 	var wardstones_json: String = JSON.stringify(player.wardstones)
@@ -97,9 +101,9 @@ func save_player(player: PlayerResource) -> bool:
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, inventory_bags, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
-		+ "peddler_json, "
+		+ "peddler_json, collection_log_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -139,6 +143,7 @@ func save_player(player: PlayerResource) -> bool:
 			hunt_chest_json,
 			character_flags_json,
 			peddler_json,
+			collection_log_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -652,6 +657,13 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	# pre-overhaul kill/collect rows and rows from an already-rolled-over day, so
 	# an old save loads as "board not yet accepted today" rather than as garbage.
 	DailyQuestManager.load_state(player, JSON.parse_string(str(row.get("dailies_json", "{}"))))
+
+	# Missing column / pre-v24 row reads as "{}" -> an empty log, which is the
+	# correct migration: nothing retroactively credits kills made before the log
+	# existed, and deserialize_log_data emits nothing, so no title re-awards.
+	CollectionLogManager.deserialize_log_data(
+		player, JSON.parse_string(str(row.get("collection_log_json", "{}")))
+	)
 
 	var lockouts_v: Variant = JSON.parse_string(str(row.get("dungeon_lockouts_json", "{}")))
 	player.dungeon_lockouts = lockouts_v if lockouts_v is Dictionary else {}

@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_green_flask.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_buff.gd" id="3_buff"]
+
+[sub_resource type="Resource" id="Buff_hp"]
+script = ExtResource("3_buff")
+stat = &"health_max"
+amount = 40.0
+duration_s = 180.0
+
+[resource]
+script = ExtResource("2_script")
+extra_buffs = Array[ExtResource("3_buff")]([SubResource("Buff_hp")])
+corrode_armor_per_stack = 0.0
+corrode_max_stacks = 5
+corrode_duration_s = 0.0
+venom_per_source = true
+venom_max_lifespan_s = 30.0
+aura_effect = &""
+aura_duration_s = 0.0
+aura_radius = 0.0
+aura_pulse_s = 0.0
+aura_max_targets = 8
+aura_internal_cooldown_s = 0.0
+aura_potency = 0.0
+aura_payload_duration_s = 0.0
+aura_breaks_on_gather = true
+heal_amount = null
+mana_amount = null
+buff_stat = &"mr"
+buff_amount = 30.0
+buff_duration_s = 180.0
+exclusive_buff = true
+coating_kind = null
+coating_potency = null
+coating_hit_duration_s = null
+coating_duration_s = null
+prayer_amount = null
+shared_cooldown_ms = 3000
+cooldown_category = &"siltward_draught"
+use_freeze_ms = null
+default_charges = null
+item_name = &"Siltward Draught"
+item_icon = ExtResource("1_tex")
+description = "Bloom pressed in standing water. The silt settles into you and turns a spell aside."
+holdable = true
+is_currency = false
+can_trade = false
+market_minimum_price = 0
+vendor_value = 2800
+stack_limit = 0
+tags = PackedStringArray("vial")
+shimmer_strength = 0.0
+shimmer_tint = Color(1, 0.95, 0.72, 1)
+shimmer_speed = 1.0
+shimmer_iridescent = false
+metadata/slug = &"siltward_draught"
+metadata/id = 700

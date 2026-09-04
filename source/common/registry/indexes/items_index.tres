@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788405047
-next_id = 689
+version = 1788493767
+next_id = 701
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3217,6 +3217,66 @@ entries = Array[Dictionary]([{
 &"id": 688,
 &"path": "res://source/common/gameplay/items/materials/herbs/sun_lit_lotus.tres",
 &"slug": &"sun_lit_lotus"
+}, {
+&"hash": "2c677c77da656a3c5a9710cf4457df6dd44f96e6d824b017abd901c66f010d53",
+&"id": 689,
+&"path": "res://source/common/gameplay/items/gears/cloth/ankhemet_mask.tres",
+&"slug": &"ankhemet_mask"
+}, {
+&"hash": "d4a58fb210b44a700b59cd07cf105e90fa78740bf3da5ce6e6cf8bffd7226ab1",
+&"id": 690,
+&"path": "res://source/common/gameplay/items/gears/cloth/ankhemet_wrappings.tres",
+&"slug": &"ankhemet_wrappings"
+}, {
+&"hash": "40033f3334f2bd69b969d7618a6655b29e6fa4739897116935d009e12abafb99",
+&"id": 691,
+&"path": "res://source/common/gameplay/items/gears/leather/slagborn_sabatons.tres",
+&"slug": &"slagborn_sabatons"
+}, {
+&"hash": "7e681a0a3968f8000491135da970f7b4d29b735a4b305b42c1fe642bf781828d",
+&"id": 692,
+&"path": "res://source/common/gameplay/items/gears/metal/siltbound_coronet.tres",
+&"slug": &"siltbound_coronet"
+}, {
+&"hash": "9c421a08be269d8025e4ac17bd8a0d2f257ae60f1f91bcbb008beb01fa735cac",
+&"id": 693,
+&"path": "res://source/common/gameplay/items/gears/metal/siltbound_plate.tres",
+&"slug": &"siltbound_plate"
+}, {
+&"hash": "28228f7dfc39e4407de004c69d62e44c41a6f6210f332d66b7c0fc20dba6a93a",
+&"id": 694,
+&"path": "res://source/common/gameplay/items/gears/metal/slagborn_helm.tres",
+&"slug": &"slagborn_helm"
+}, {
+&"hash": "a2c70f3db23b4819455db0c8d3ab7cc7221dec9129121a6a5a299c53dd0343e2",
+&"id": 695,
+&"path": "res://source/common/gameplay/items/gears/rings/ankhemet_signet.tres",
+&"slug": &"ankhemet_signet"
+}, {
+&"hash": "74130efa50685223e4a19617dd961709f719a843589c65f82adfd578e1f3c365",
+&"id": 696,
+&"path": "res://source/common/gameplay/items/materials/everburning_coal.tres",
+&"slug": &"everburning_coal"
+}, {
+&"hash": "3cc46cd7d68249e0b9bd6e38a35f0da81713da549cb789b15eb767d4d6575902",
+&"id": 697,
+&"path": "res://source/common/gameplay/items/materials/sovereigns_bloom.tres",
+&"slug": &"sovereigns_bloom"
+}, {
+&"hash": "52a38e10cd9771ca27bf9ec4fb0b87513b661845fb2491141bfce990b4ad9d2e",
+&"id": 698,
+&"path": "res://source/common/gameplay/items/consumables/hourglass_draught.tres",
+&"slug": &"hourglass_draught"
+}, {
+&"hash": "96054ac0a1e636da6e4c2e40190fcb42b83b529b26d88b46c961bec00493772e",
+&"id": 699,
+&"path": "res://source/common/gameplay/items/materials/herbs/sunscale_flake.tres",
+&"slug": &"sunscale_flake"
+}, {
+&"hash": "7431f3f4893e1272546a02f0b0ee4f4b73b5985ee7e9259a62784abbd119e49c",
+&"id": 700,
+&"path": "res://source/common/gameplay/items/consumables/siltward_draught.tres",
+&"slug": &"siltward_draught"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

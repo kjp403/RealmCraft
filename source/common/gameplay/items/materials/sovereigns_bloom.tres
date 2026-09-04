@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/Icon274.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Sovereign\'s Bloom"
+item_icon = ExtResource("1_tex")
+description = "It only opens underwater, and only where something large has been lying a long time."
+holdable = false
+can_trade = true
+vendor_value = 150
+stack_limit = 100
+tags = PackedStringArray()
+metadata/slug = &"sovereigns_bloom"
+metadata/id = 697

@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; Ankhemet, the Sand King — the desert's crowned dead, combat level 75 (Boss Hunt
+; contract "sand_king", recommended level 72).
+;
+; Six entries. relic_scarabheart (1/1000) is boss-exclusive; the five Sunsteel
+; weapons are 1/12.5 each and also come off fungus_reward_hard and the Hollow
+; Seep quest "Leave the Crown".
+;
+; Basilisk Ore, Wraithsilk and Runewoven materials are NOT in the log: they are
+; gatherable, sit in the Ascended Workbench recipes, in gold_steel_large chests
+; and on the Fire shop's stock list, so none of them proves a kill.
+
+;
+; Expanded 2026-09-03: the Ankhemet set (mask ~1/29, wrappings 1/33) and the
+; Ankhemet Signet (1/50) are new and boss-exclusive. 9 entries.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_crowned_dead.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"sand_king"
+boss_name = "Ankhemet, the Sand King"
+log_items = Array[StringName]([&"relic_scarabheart", &"sword_sunsteel.item", &"hammer_sunsteel.item", &"sunsteel_bow.item", &"wand_sunsteel.item", &"book_sunsteel.item", &"ankhemet_mask", &"ankhemet_wrappings", &"ankhemet_signet"])
+green_log_title_text = "Keeper of the Crowned Dead"
+green_log_vfx = ExtResource("2_vfx")
+green_log_title_style = 1
+green_log_title_color = Color(0.91, 0.76, 0.35, 1)

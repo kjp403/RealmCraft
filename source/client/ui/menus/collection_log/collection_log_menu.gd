@@ -1,0 +1,303 @@
+extends MenuShell
+## The Boss Collection Log. Opened from the bottom-right nav panel, or with
+## ClientState.open_menu_requested(&"collection_log", null).
+##
+## LEFT: one row per boss with a progress bar — the ladder, so a player can see
+## at a glance which log is closest to green.
+## RIGHT: the selected boss's items as a slot grid. Obtained entries show the
+## real icon; missing ones show a dimmed silhouette, because a collection log
+## that hides what you have not found yet is not a checklist, it is a surprise.
+##
+## PURE VIEW. It asks the server for a payload and draws it. It never writes:
+## nothing on the client may credit a log (see collection_log.state.gd), so
+## there is no button here that could.
+##
+## Item names and icons are resolved CLIENT-SIDE from the slug, through
+## ContentRegistryHub — the same lookup loot_feed and the chest window use. The
+## server sends slugs rather than names so the payload stays small and the client
+## keeps using the localised/authored item data it already has.
+
+## Grid columns in the item panel. Six 64px cells fit the right-hand pane at the
+## narrowest supported window without the grid scrolling sideways.
+const GRID_COLUMNS: int = 6
+const CELL_SIZE: Vector2 = Vector2(64, 64)
+
+const COLOR_MUTED: Color = Color(0.75, 0.78, 0.85)
+## Locked cells keep the icon but drop to near-silhouette. Not fully black: the
+## shape is the hint that makes a collection log worth opening twice.
+const LOCKED_MODULATE: Color = Color(0.12, 0.13, 0.17, 0.92)
+
+var _logs: Array = []
+var _selected: String = ""
+
+var _list_host: VBoxContainer
+var _detail_host: VBoxContainer
+## Rebuilt per refresh; kept so selection can restyle rows without a full redraw.
+var _rows: Dictionary = {}
+
+
+func _ready() -> void:
+	build_shell("Collection Log", null, true)
+	_build_layout()
+	visibility_changed.connect(func() -> void:
+		if visible:
+			_refresh())
+
+
+# --- layout ------------------------------------------------------------------
+
+func _build_layout() -> void:
+	var hbox: HBoxContainer = HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	hbox.add_theme_constant_override(&"separation", 14)
+	content.add_child(hbox)
+
+	var left_scroll: ScrollContainer = ScrollContainer.new()
+	left_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left_scroll.size_flags_stretch_ratio = 1.0
+	left_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	hbox.add_child(left_scroll)
+
+	_list_host = VBoxContainer.new()
+	_list_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list_host.add_theme_constant_override(&"separation", 8)
+	left_scroll.add_child(_list_host)
+
+	var right_panel: PanelContainer = PanelContainer.new()
+	right_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_panel.size_flags_stretch_ratio = 1.5
+	PixelUI.panel(right_panel, "frame_stone", 12)
+	hbox.add_child(right_panel)
+
+	var right_scroll: ScrollContainer = ScrollContainer.new()
+	right_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right_panel.add_child(right_scroll)
+
+	_detail_host = VBoxContainer.new()
+	_detail_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail_host.add_theme_constant_override(&"separation", 10)
+	right_scroll.add_child(_detail_host)
+
+
+# --- data --------------------------------------------------------------------
+
+func _refresh() -> void:
+	if _list_host == null:
+		return
+	Client.request_data(
+		&"collection_log.state", _apply_state, {},
+		String(InstanceClient.current.name) if InstanceClient.current else ""
+	)
+
+
+func _apply_state(response: Dictionary) -> void:
+	if not bool(response.get("ok", false)):
+		Toaster.toast("Could not read your collection log.")
+		return
+	_logs = response.get("logs", [])
+	# Closest to green first, so the log a player is actually chasing is the one
+	# under the cursor. Completed logs sink to the bottom — they are trophies now,
+	# not to-do items.
+	_logs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_done: bool = bool(a.get("completed", false))
+		var b_done: bool = bool(b.get("completed", false))
+		if a_done != b_done:
+			return b_done
+		return _ratio(a) > _ratio(b)
+	)
+	if _selected.is_empty() or _find(_selected).is_empty():
+		_selected = str(_logs[0].get("boss_id", "")) if not _logs.is_empty() else ""
+	_build_list()
+	_build_detail()
+
+
+func _ratio(row: Dictionary) -> float:
+	var total: int = int(row.get("total", 0))
+	return 0.0 if total <= 0 else float(int(row.get("unlocked", 0))) / float(total)
+
+
+func _find(boss_id: String) -> Dictionary:
+	for row: Variant in _logs:
+		if row is Dictionary and str((row as Dictionary).get("boss_id", "")) == boss_id:
+			return row
+	return {}
+
+
+# --- boss list ---------------------------------------------------------------
+
+func _build_list() -> void:
+	for child: Node in _list_host.get_children():
+		child.queue_free()
+	_rows.clear()
+	for row: Variant in _logs:
+		if row is Dictionary:
+			_add_list_row(row)
+
+
+func _add_list_row(row: Dictionary) -> void:
+	var boss_id: String = str(row.get("boss_id", ""))
+	var completed: bool = bool(row.get("completed", false))
+
+	var button: Button = Button.new()
+	button.custom_minimum_size = Vector2(0, 76)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# The FRAME carries completion, not selection — a green log gets the gold
+	# frame, the same visual promotion the rarity table gives an ultra drop, so
+	# "finished" reads without any text.
+	PixelUI.button_frame(button, "frame_gold" if completed else "frame_iron", 8)
+	button.pressed.connect(func() -> void:
+		_selected = boss_id
+		_build_list()
+		_build_detail())
+	_list_host.add_child(button)
+	_rows[boss_id] = button
+
+	# SELECTION is a separate channel from completion, and it has to be: the two
+	# coincide often enough (a finished log is the one you just clicked) that
+	# folding them into the frame makes selection invisible on every row that is
+	# not complete. An accent bar down the left edge reads at a glance and does
+	# not fight the gold.
+	if boss_id == _selected:
+		var accent: ColorRect = ColorRect.new()
+		accent.color = PixelUI.INK_GREEN if completed else PixelUI.INK_GOLD
+		accent.custom_minimum_size = Vector2(4, 0)
+		accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		accent.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+		accent.offset_left = 5
+		accent.offset_right = 9
+		accent.offset_top = 9
+		accent.offset_bottom = -9
+		button.add_child(accent)
+
+	# The label stack is a non-interactive child so the whole card stays one
+	# click target — a row of separate Labels would eat the press.
+	var pad: MarginContainer = MarginContainer.new()
+	pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right"]:
+		pad.add_theme_constant_override(StringName("margin_" + side), 12)
+	for side: String in ["top", "bottom"]:
+		pad.add_theme_constant_override(StringName("margin_" + side), 8)
+	button.add_child(pad)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_theme_constant_override(&"separation", 3)
+	pad.add_child(vbox)
+
+	var top: HBoxContainer = HBoxContainer.new()
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(top)
+
+	var name_label: Label = PixelUI.text(
+		str(row.get("boss_name", "?")), PixelUI.SIZE_BODY,
+		PixelUI.INK_GOLD if completed else PixelUI.INK
+	)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(name_label)
+
+	var count: Label = PixelUI.text(
+		"%d / %d" % [int(row.get("unlocked", 0)), int(row.get("total", 0))],
+		PixelUI.SIZE_CAPTION, PixelUI.INK_GREEN if completed else COLOR_MUTED
+	)
+	top.add_child(count)
+
+	var bar: ProgressBar = ProgressBar.new()
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.show_percentage = false
+	bar.max_value = maxf(1.0, float(int(row.get("total", 1))))
+	bar.value = float(int(row.get("unlocked", 0)))
+	PixelUI.progress_bar(bar, PixelUI.INK_GREEN if completed else PixelUI.INK_GOLD, 10)
+	vbox.add_child(bar)
+
+	# Kills and the dry streak are the reason the log tracks kills at all, so
+	# they belong on the ladder row rather than buried in the detail pane.
+	var kills: int = int(row.get("kills", 0))
+	var sub: String = "%d kill%s" % [kills, "" if kills == 1 else "s"]
+	if completed:
+		sub += "  ·  %s" % str(row.get("title", ""))
+	elif int(row.get("dry", 0)) > 0:
+		sub += "  ·  %d dry" % int(row.get("dry", 0))
+	vbox.add_child(PixelUI.text(sub, PixelUI.SIZE_TINY, COLOR_MUTED))
+
+
+# --- item grid ---------------------------------------------------------------
+
+func _build_detail() -> void:
+	for child: Node in _detail_host.get_children():
+		child.queue_free()
+	var row: Dictionary = _find(_selected)
+	if row.is_empty():
+		_detail_host.add_child(PixelUI.text(
+			"No collection logs yet.", PixelUI.SIZE_BODY, COLOR_MUTED))
+		return
+
+	_detail_host.add_child(PixelUI.text(
+		str(row.get("boss_name", "?")), PixelUI.SIZE_HEADING, PixelUI.INK_GOLD))
+
+	var kills: int = int(row.get("kills", 0))
+	var summary: String = "%d / %d collected  ·  %d kill%s" % [
+		int(row.get("unlocked", 0)), int(row.get("total", 0)),
+		kills, "" if kills == 1 else "s",
+	]
+	if not bool(row.get("completed", false)) and int(row.get("dry", 0)) > 0:
+		summary += "  ·  %d since the last new drop" % int(row.get("dry", 0))
+	_detail_host.add_child(PixelUI.text(summary, PixelUI.SIZE_CAPTION, COLOR_MUTED))
+
+	# The reward line. Stated whether or not it is earned — an unearned title the
+	# player can read is the thing that makes the log worth filling.
+	var reward: Label = PixelUI.text(
+		("Earned: %s" if bool(row.get("completed", false)) else "Completion reward: %s")
+			% str(row.get("title", "")),
+		PixelUI.SIZE_CAPTION,
+		PixelUI.INK_GREEN if bool(row.get("completed", false)) else PixelUI.INK_GOLD
+	)
+	_detail_host.add_child(reward)
+	_detail_host.add_child(HSeparator.new())
+
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = GRID_COLUMNS
+	grid.add_theme_constant_override(&"h_separation", 6)
+	grid.add_theme_constant_override(&"v_separation", 6)
+	_detail_host.add_child(grid)
+	for entry: Variant in row.get("items", []):
+		if entry is Dictionary:
+			grid.add_child(_make_cell(entry))
+
+
+func _make_cell(entry: Dictionary) -> Control:
+	var slug: StringName = StringName(str(entry.get("slug", "")))
+	var owned: bool = bool(entry.get("owned", false))
+	var item: Item = ContentRegistryHub.load_by_slug(&"items", slug) as Item
+
+	var cell: PanelContainer = PanelContainer.new()
+	cell.custom_minimum_size = CELL_SIZE
+	cell.add_theme_stylebox_override(&"panel", PixelUI.slot_style())
+
+	# Inset so the slot's carved frame stays visible around the art — an icon
+	# stretched to the full cell covers the border and the grid reads as a
+	# contact sheet rather than as a row of slots.
+	var inset: MarginContainer = MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		inset.add_theme_constant_override(StringName("margin_" + side), 8)
+	cell.add_child(inset)
+
+	var icon: TextureRect = TextureRect.new()
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST # pixel art: no smoothing
+	if item != null:
+		icon.texture = item.item_icon
+	if not owned:
+		icon.modulate = LOCKED_MODULATE
+	inset.add_child(icon)
+
+	# An item the registry cannot resolve still gets a cell. Dropping it would
+	# make a 9/10 log look like 9/9 and the missing title inexplicable.
+	var display_name: String = str(item.item_name) if item != null \
+		else "Unknown (%s)" % slug
+	cell.tooltip_text = display_name if owned else "%s — not yet collected" % display_name
+	return cell
