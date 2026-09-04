@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/vfx/green_log_title_fx.gd" id="1_fx"]
+
+[node name="GreenLogFxUnquietHour" type="Node2D"]
+z_index = 5
+z_as_relative = false
+script = ExtResource("1_fx")
+shape = 1
+primary_tint = Color(0.52, 0.42, 0.78, 1)
+accent_tint = Color(0.80, 0.72, 0.95, 1)
+primary_amount = 15
+accent_amount = 10

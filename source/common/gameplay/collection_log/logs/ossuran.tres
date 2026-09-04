@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; Ossuran, Kindled and Cold — Warm primary against a cold accent, for a boss that is both. Its weapons are mastery 70+ KEEPERS, so there is no salvage material entry here — that is correct, not an omission.
+;
+; Built entirely from existing drops: the boss's exclusive relic plus the weapon
+; family off its own table. No new items, so nothing here needs balancing against
+; the endgame ceiling.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_twice_burned.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"ossuran"
+boss_name = "Ossuran, Kindled and Cold"
+log_items = Array[StringName]([&"relic_emberfrost", &"oathstone", &"sword_colossus.item", &"hammer_colossus.item", &"wand_aetherborn.item", &"book_aetherborn.item", &"skyrender_bow.item"])
+green_log_title_text = "The Twice-Burned"
+green_log_vfx = ExtResource("2_vfx")
+green_log_title_style = 4
+green_log_title_color = Color(0.92, 0.80, 0.62, 1)

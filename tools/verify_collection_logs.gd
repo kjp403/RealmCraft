@@ -25,7 +25,11 @@ extends SceneTree
 const LOGS_PATH: String = "res://source/common/gameplay/collection_log/logs/"
 const ITEMS_INDEX: String = "res://source/common/registry/indexes/items_index.tres"
 const ENEMY_INDEX: String = "res://source/common/registry/indexes/enemy_types_index.tres"
-const BOSS_PATH: String = "res://source/common/gameplay/characters/npc/types/bosses/"
+## The WHOLE enemy-type tree, not just types/bosses/. Only Ossuran and the three
+## first logs live in that folder; goblin_chief, fungal_heart, bandit_captain,
+## orc_leader, mecha_stone_golem and trpg_necromancer are scattered across
+## types/, types/goblins/, types/fungus/ and types/trpg/.
+const BOSS_PATH: String = "res://source/common/gameplay/characters/npc/types/"
 const REWARD_SERVICE: String = "res://source/common/gameplay/combat/reward_service.gd"
 const MANAGER: String = "res://source/common/gameplay/collection_log/collection_log_manager.gd"
 
@@ -76,11 +80,18 @@ func _load_logs() -> Array[BossCollectionLog]:
 ## at runtime and never matches a drop.
 func _check_slugs(logs: Array[BossCollectionLog]) -> void:
 	var item_slugs: Dictionary = _index_slugs(ITEMS_INDEX)
-	var enemy_slugs: Dictionary = _index_slugs(ENEMY_INDEX)
+	# Real enemy_type VALUES, not enemy-index slugs. Index slugs are derived from
+	# the FILE name, and Ossuran's file is cleetus.tres — checking boss_id against
+	# the index would demand the wrong key, the one the runtime never uses.
+	var enemy_types: Dictionary = {}
+	for path: String in FileUtils.get_all_file_at(BOSS_PATH, "*.tres"):
+		var enemy: EnemyTypeResource = ResourceLoader.load(path) as EnemyTypeResource
+		if enemy != null and not enemy.enemy_type.is_empty():
+			enemy_types[enemy.enemy_type] = true
 	for boss_log: BossCollectionLog in logs:
 		_checks += 1
-		if not enemy_slugs.has(boss_log.boss_id):
-			_f("%s: boss_id '%s' is not in the enemy index"
+		if not enemy_types.has(boss_log.boss_id):
+			_f("%s: boss_id '%s' matches no EnemyTypeResource.enemy_type"
 				% [boss_log.boss_name, boss_log.boss_id])
 		for slug: StringName in boss_log.log_items:
 			_checks += 1
