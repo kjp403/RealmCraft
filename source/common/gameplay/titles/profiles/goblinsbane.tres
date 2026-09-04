@@ -1,0 +1,94 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_shrapnel"]
+script = ExtResource("1_layer")
+id = &"shrapnel"
+shape = 7
+shape_px = 7
+span = 0
+span_scale = 1.0
+amount = 12
+lifetime = 0.6
+explosiveness = 0.85
+detail = false
+direction = Vector2(0.0, -0.35)
+spread = 180.0
+gravity = Vector2(0.0, 210.0)
+velocity_min = 40.0
+velocity_max = 110.0
+damping = 0.0
+angular_velocity = 200.0
+scale_min = 0.22
+scale_max = 0.6
+scale_start = 1.0
+scale_end = 0.35
+color_in = Color(1.00000000, 0.90980392, 0.80784314, 1.00000000)
+color_mid = Color(0.76862745, 0.41568627, 0.24313725, 1.00000000)
+color_out = Color(0.36078431, 0.20392157, 0.15686275, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_rust"]
+script = ExtResource("1_layer")
+id = &"rust"
+shape = 1
+shape_px = 5
+span = 2
+span_scale = 1.0
+amount = 9
+lifetime = 0.95
+explosiveness = 0.0
+detail = true
+direction = Vector2(0.0, 1.0)
+spread = 40.0
+gravity = Vector2(0.0, 96.0)
+velocity_min = 4.0
+velocity_max = 16.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.2
+scale_max = 0.5
+scale_start = 1.0
+scale_end = 0.4
+color_in = Color(0.72156863, 0.37647059, 0.21960784, 1.00000000)
+color_mid = Color(0.49411765, 0.24313725, 0.14901961, 1.00000000)
+color_out = Color(0.22745098, 0.13333333, 0.10196078, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.9
+additive = false
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"goblinsbane"
+display_name = "Goblinsbane"
+accent = Color(0.77647059, 0.39215686, 0.24313725, 1.00000000)
+metal_high = Color(0.95686275, 0.90196078, 0.84705882, 1.00000000)
+metal_mid = Color(0.77647059, 0.39215686, 0.24313725, 1.00000000)
+metal_low = Color(0.17254902, 0.14117647, 0.13333333, 1.00000000)
+sheen = Color(0.92549020, 0.88627451, 0.83921569, 1.00000000)
+shadow = Color(0.07843137, 0.04705882, 0.03921569, 0.55000000)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
+sweep_speed = 0.44
+sweep_width = 0.06
+sheen_amount = 0.52
+pulse_amount = 0.05
+pulse_speed = 3.2
+grain = 0.46
+prism = 0.0
+facets = 4.0
+fire = 0.0
+sweep_speed2 = 0.0
+split_color = Color(0.0, 0.0, 0.0, 0.0)
+split_at = 0.5
+split_soft = 0.05
+split_amount = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_shrapnel"), SubResource("Layer_rust")])

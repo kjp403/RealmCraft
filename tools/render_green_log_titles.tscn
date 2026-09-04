@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_green_log_titles.gd" id="1_glt"]
+
+[node name="GreenLogTitleRig" type="Node"]
+script = ExtResource("1_glt")

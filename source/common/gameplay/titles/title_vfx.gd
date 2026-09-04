@@ -196,6 +196,10 @@ static func _apply_vip_uniforms(
 	mat.set_shader_parameter(&"facets", profile.facets)
 	mat.set_shader_parameter(&"fire", profile.fire)
 	mat.set_shader_parameter(&"sweep_speed2", profile.sweep_speed2)
+	mat.set_shader_parameter(&"split_color", profile.split_color)
+	mat.set_shader_parameter(&"split_at", profile.split_at)
+	mat.set_shader_parameter(&"split_soft", profile.split_soft)
+	mat.set_shader_parameter(&"split_amount", profile.split_amount)
 
 
 ## Drop shadow under a ladder title. A theme override rather than part of the

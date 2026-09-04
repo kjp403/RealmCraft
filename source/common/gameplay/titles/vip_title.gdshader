@@ -70,6 +70,21 @@ uniform float fire : hint_range(0.0, 1.0) = 0.0;
 // different speeds stop the sweep reading as a metronome, which is exactly how a
 // single band on a short word reads once you have watched it for a few seconds.
 uniform float sweep_speed2 = 0.0;
+
+// HORIZONTAL SPLIT. Inert at the default 0 amount, which is every tier but
+// Emberfrost — the boss that is literally kindled on one side and cold on the
+// other. Kept as uniforms on THIS shader rather than as a second shader file,
+// because the whole design of this file is "no branches, every tier is a set of
+// uniforms"; a second shader would mean the render path has to know which one a
+// title wants, and that knowledge would live somewhere new.
+//
+// The split runs on uv.x (full label width) and is applied AFTER the vertical
+// metal ramp, tinting it rather than replacing it — so the chiselled crown, body
+// and rim survive on both sides instead of the seam flattening one half.
+uniform vec4 split_color : source_color = vec4(0.0, 0.0, 0.0, 0.0);
+uniform float split_at : hint_range(0.0, 1.0) = 0.5;
+uniform float split_soft : hint_range(0.002, 0.5) = 0.05;
+uniform float split_amount : hint_range(0.0, 1.0) = 0.0;
 // Seconds, driven from TitleVfxPulse rather than TIME. A Label does not redraw
 // on its own, so TIME advances while the visible result does not.
 uniform float t = 0.0;
@@ -134,6 +149,17 @@ void fragment() {
 		// The rim is narrow for the mirrored reason: widening it eats back into the
 		// run of metal_low above and the ramp collapses to a flat mid tone.
 		metal = mix(metal, metal_high.rgb, smoothstep(0.93, 1.0, mv) * 0.55);
+
+		// Two temperatures, one word. Luminance-preserving so the right half is
+		// the same cast metal in a different colour, not a flat colour block:
+		// tinting by the ramp's own brightness keeps the crown bright and the
+		// base dark on BOTH sides of the seam.
+		if (split_amount > 0.001) {
+			float seam = smoothstep(split_at - split_soft, split_at + split_soft, uv.x);
+			float lum = dot(metal, vec3(0.299, 0.587, 0.114));
+			vec3 other = split_color.rgb * (0.35 + 1.30 * lum);
+			metal = mix(metal, other, seam * split_amount);
+		}
 
 		// Tarnish. Quantised to whole label pixels rather than sampled per fragment
 		// so it reads as pitting in the metal at pixel-art scale instead of as

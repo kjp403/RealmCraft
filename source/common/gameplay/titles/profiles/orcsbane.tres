@@ -1,0 +1,94 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_sparks"]
+script = ExtResource("1_layer")
+id = &"sparks"
+shape = 1
+shape_px = 4
+span = 2
+span_scale = 1.0
+amount = 14
+lifetime = 0.45
+explosiveness = 0.0
+detail = false
+direction = Vector2(-1.0, -0.5)
+spread = 24.0
+gravity = Vector2(0.0, 240.0)
+velocity_min = 90.0
+velocity_max = 190.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.18
+scale_max = 0.42
+scale_start = 1.0
+scale_end = 0.25
+color_in = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+color_mid = Color(0.88627451, 0.91764706, 0.95686275, 1.00000000)
+color_out = Color(0.54901961, 0.59607843, 0.65098039, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 1.0
+additive = true
+
+[sub_resource type="Resource" id="Layer_grind"]
+script = ExtResource("1_layer")
+id = &"grind"
+shape = 1
+shape_px = 4
+span = 2
+span_scale = 1.0
+amount = 9
+lifetime = 0.35
+explosiveness = 0.0
+detail = true
+direction = Vector2(1.0, -0.6)
+spread = 20.0
+gravity = Vector2(0.0, 240.0)
+velocity_min = 80.0
+velocity_max = 165.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.16
+scale_max = 0.36
+scale_start = 1.0
+scale_end = 0.25
+color_in = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+color_mid = Color(0.80784314, 0.84705882, 0.89411765, 1.00000000)
+color_out = Color(0.47058824, 0.51764706, 0.57254902, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.9
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"orcsbane"
+display_name = "Orcsbane"
+accent = Color(0.72941176, 0.76078431, 0.79215686, 1.00000000)
+metal_high = Color(0.96470588, 0.98039216, 1.00000000, 1.00000000)
+metal_mid = Color(0.54117647, 0.58039216, 0.61960784, 1.00000000)
+metal_low = Color(0.13333333, 0.14901961, 0.17254902, 1.00000000)
+sheen = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+shadow = Color(0.03137255, 0.03921569, 0.05490196, 0.60000000)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
+sweep_speed = 0.62
+sweep_width = 0.05
+sheen_amount = 1.05
+pulse_amount = 0.04
+pulse_speed = 2.6
+grain = 0.28
+prism = 0.0
+facets = 0.0
+fire = 0.0
+sweep_speed2 = 0.0
+split_color = Color(0.0, 0.0, 0.0, 0.0)
+split_at = 0.5
+split_soft = 0.05
+split_amount = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_sparks"), SubResource("Layer_grind")])

@@ -59,6 +59,16 @@ extends Resource
 ## the nameplate budget so thirty of these over a boss lobby stay affordable.
 @export var green_log_vfx: PackedScene = null
 
+## The [VipTierProfile] key for this title's look — the .tres of the same name
+## under titles/profiles/. This is what gives a green-log title the full metal
+## ramp, specular sweep and bespoke emitter stack rather than the flat `style`
+## branch below.
+##
+## Resolved through [CollectionLogTitles], which [TitleCatalog.spec] consults
+## BEFORE its PREMIUM table — so these titles carry a profile without ever
+## matching is_premium_name, and strip_unreleased_vfx leaves them alone.
+@export var green_log_profile: StringName = &""
+
 ## Which branch of title_vfx.gdshader tints the TEXT: 0 gem, 1 gold, 2 ember,
 ## 3 void, 4 star, 5 moon, 6 ink — the same `style` int [TitleCatalog] uses.
 ##
