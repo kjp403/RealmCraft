@@ -12,14 +12,14 @@ display_name = "Crab Hole"
 ore = ExtResource("2_ore")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 33
+&"fishing": 120
 })
 required_level = 30
 required_tool = &"fishing_rod"
 secondary_ore = ExtResource("5_sec")
 secondary_chance = 0.22
 secondary_job_xp = Dictionary[StringName, int]({
-&"fishing": 43
+&"fishing": 150
 })
 extraction_hp = 5
 max_charges = 50
