@@ -91,15 +91,19 @@ func save_player(player: PlayerResource) -> bool:
 		"dye_until_ms": player.prismatic_dye_until_ms,
 		"purchases": PeddlerLedger.save_state(player),
 	})
+	# Per-node gather pools. Shape owned by GatherNodeLedger, which also prunes
+	# anything already back to full — an untouched node and a fully regenerated
+	# one are the same state, so only drained pools reach the row.
+	var gather_nodes_json: String = JSON.stringify(GatherNodeLedger.save_state(player))
 
 	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, inventory_bags, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
-		+ "peddler_json, "
+		+ "peddler_json, gather_nodes_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -139,6 +143,7 @@ func save_player(player: PlayerResource) -> bool:
 			hunt_chest_json,
 			character_flags_json,
 			peddler_json,
+			gather_nodes_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -705,6 +710,13 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		)
 	else:
 		PeddlerLedger.load_state(player, {}, PeddlerSchedule.utc_date())
+
+	# Drained gather pools. A row written before schema v24 parses as an empty
+	# ledger, i.e. every node full — the same state those characters already log
+	# in to, so there is nothing to backfill.
+	GatherNodeLedger.load_state(
+		player, JSON.parse_string(str(row.get("gather_nodes_json", "{}")))
+	)
 
 	var flags_v: Variant = JSON.parse_string(str(row.get("character_flags_json", "{}")))
 	player.character_flags = {}

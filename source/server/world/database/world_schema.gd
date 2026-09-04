@@ -78,6 +78,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 23:
 		_migration_v23(db)
 		_set_schema_version(db, 23)
+	if version < 24:
+		_migration_v24(db)
+		_set_schema_version(db, 24)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -480,3 +483,15 @@ static func _set_schema_version(db: SQLite, v: int) -> void:
 static func _migration_v23(db: SQLite) -> void:
 	if not _column_exists(db, "players", "peddler_json"):
 		db.query("ALTER TABLE players ADD COLUMN peddler_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## Per-node gather pools, keyed "<instance name>|<node path>" -> {"c","p","t"}.
+## Shape owned by [GatherNodeLedger], not spelled out here, so the writer and
+## reader cannot drift. It has to be persisted because a ServerInstance is freed
+## ~20s after its last player leaves, and node charges used to die with it —
+## relogging refilled every vein, tree and fishing hole the player had drained.
+## ADD COLUMN, no wipe; existing rows migrate to an empty ledger, which reads as
+## all-full and is exactly what those characters log in to today.
+static func _migration_v24(db: SQLite) -> void:
+	if not _column_exists(db, "players", "gather_nodes_json"):
+		db.query("ALTER TABLE players ADD COLUMN gather_nodes_json TEXT NOT NULL DEFAULT '{}';")
