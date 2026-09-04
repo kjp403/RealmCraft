@@ -41,6 +41,18 @@ const CASING_DIAMETER: float = 48.0
 ## XP_R_OUT 23).
 const SPARK_RADIUS: float = 20.0
 
+## Where the floating numbers hang from, in orb-local pixels: the LEFT edge,
+## low in the casing. Both halves matter and both are about the minimap
+## ([NavigationMinimap] ends at y=120, z_index 80, opaque) sitting directly
+## above the orb at y=128:
+##   x = -6  — just off the casing, with the text growing further left into
+##             open play area rather than back under the rail.
+##   y = 30  — low enough that the whole 26px rise ([constant
+##             XpFloatingTextManager.DRIFT_PX]) tops out at y=132, clear of the
+##             minimap. Anchored above the orb instead, every number was drawn
+##             behind the minimap panel and no player ever saw one.
+const DROPS_ANCHOR: Vector2 = Vector2(-6.0, 30.0)
+
 ## How long the orb stays up after the last XP tick.
 const AUTO_HIDE_SECONDS: float = 4.0
 ## Fade used when the orb comes and goes.
@@ -124,6 +136,9 @@ func _ready() -> void:
 	# and the spark are the two that would actually show the blur, so they say so
 	# for themselves in the scene as well.
 	_gauge.pivot_offset = Vector2(CASING_DIAMETER, CASING_DIAMETER) * 0.5
+	# Set here rather than trusted from the scene: the number that decides whether
+	# a drop is visible at all belongs next to the comment explaining it.
+	_drops.position = DROPS_ANCHOR
 
 	_hide_timer = Timer.new()
 	_hide_timer.one_shot = true
