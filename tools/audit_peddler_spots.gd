@@ -1,12 +1,21 @@
 extends Node
 ## Diagnostic: is the square PeddlerSites picks one a PLAYER can actually stand on?
 ##
-## The site probe accepts a point when nothing solid overlaps it and a straight
-## ray from the home spawn reaches it. This asks the stronger question the probe
-## does not: flood-fill the map's open cells outward from the home spawn, and see
-## whether the chosen point is in that component. A point that is clear, ray-
-## visible, and OUTSIDE the flood fill is the cart-in-the-wall bug: a pocket of
-## unpainted nothing behind a wall run, seen through a diagonal seam.
+## TWO questions, because the cart has been wrong in two different ways:
+##
+##   REACHABLE — flood-fill the map's open cells outward from the home spawn and
+##     check the chosen point is in that component. A point that is clear and
+##     ray-visible but OUTSIDE the fill is the cart-in-the-wall bug: a pocket of
+##     unpainted nothing behind a wall run, seen through a diagonal seam.
+##
+##   ON A FLOOR — ask [method PeddlerSites.is_valid_spot] whether a tile is
+##     actually painted under it. This audit used to run its OWN fill with the
+##     same "nothing solid here" test the placement used, so when the placement
+##     walked out into the void the audit walked out with it and called the void
+##     reachable. It reported a clean sweep while fungus_cave was putting the
+##     cart in unpainted black on half its cycles. An audit that shares the bug
+##     it is auditing for is worse than no audit, so this half deliberately asks
+##     a question the fill cannot answer for itself.
 ##   godot --headless --path . --mode=client res://tools/audit_peddler_spots.tscn
 
 const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_collection/biomes/"
@@ -32,7 +41,7 @@ func _go() -> void:
 		if not file_name.ends_with(".tres"):
 			continue
 		bad_total += await _audit(BIOMES_DIR + file_name)
-	print("TOTAL unreachable placements: %d" % bad_total)
+	print("TOTAL bad placements (unreachable or floorless): %d" % bad_total)
 	get_tree().quit(0)
 
 
@@ -63,6 +72,7 @@ func _audit(res_path: String) -> int:
 		bounds = Rect2()
 	var open: Dictionary = _flood(space, home, bounds)
 	var bad: int = 0
+	var floorless: int = 0
 	var lines: Array[String] = []
 	for c: int in CYCLES:
 		var p: Vector2 = PeddlerSites.pick_spot(m, c)["peddler"]
@@ -72,8 +82,17 @@ func _audit(res_path: String) -> int:
 			if lines.size() < 6:
 				lines.append("    cycle %2d  (%6d,%6d)  %5dpx from home  UNREACHABLE" % [
 				c, p.x, p.y, p.distance_to(home)])
-	print("%-22s home=(%d,%d) open_cells=%d  unreachable=%d/%d" % [
-		biome.instance_name, home.x, home.y, open.size(), bad, CYCLES])
+		# The anchor is the deliberate fallback, not a placement, and on a map
+		# with no tile layers there is no paint for it to stand on by design.
+		if p != PeddlerSites.failsafe_anchor(m) and not PeddlerSites.is_valid_spot(m, p):
+			floorless += 1
+			if lines.size() < 6:
+				lines.append("    cycle %2d  (%6d,%6d)  NO FLOOR PAINTED UNDER IT" % [
+				c, p.x, p.y])
+	print("%-22s home=(%d,%d) open_cells=%d  unreachable=%d/%d  floorless=%d/%d" % [
+		biome.instance_name, home.x, home.y, open.size(), bad, CYCLES,
+		floorless, CYCLES])
+	bad += floorless
 	var live: int = PeddlerSchedule.cycle_index()
 	for i: int in range(-LIVE_WINDOW, LIVE_WINDOW + 1):
 		var cycle: int = live + i

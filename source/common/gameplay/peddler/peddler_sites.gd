@@ -17,6 +17,19 @@ class_name PeddlerSites
 ## the sewers, measured worst in the_hollow, where a third of all cycles put the
 ## cart somewhere no one could reach it (tools/audit_peddler_spots.tscn).
 ##
+## A CLEAR SQUARE IS NOT A FLOOR. The probe's per-cell test used to be "does
+## anything solid overlap this point", and unpainted nothing passes that test
+## perfectly: there is no collider out there to hit. So the walk could leave the
+## painted map entirely and set the cart down in the black — 100px off the island
+## in deep_shoals, and in the unpainted top-left corner of fungus_cave on 62 of
+## 120 cycles (measured, not guessed). Every cell now has to be PAINTED as well
+## as clear (see [method _has_paint]), which is the only test that tells floor
+## from void on a tile map.
+##
+## A map with no tile layers at all (deep_shoals is one ground Sprite2D) has
+## nothing to validate against, so it gets no random square: it goes straight to
+## [method failsafe_anchor], and so does any cycle whose walk turns up nothing.
+##
 ## Probing needs the map's live physics space, so the square can only be chosen
 ## once the instance is actually loaded. The BIOME choice does not, which is why
 ## the two are separate calls.
@@ -44,6 +57,10 @@ const _NEIGHBOURS: Array[Vector2i] = [
 ]
 ## Where the Vault Chest stands relative to the Peddler.
 const VAULT_OFFSET: Vector2 = Vector2(40.0, 6.0)
+## An author can drop a Node2D with this name into a map to say "park the cart
+## HERE when the probe cannot place it". Optional: a map without one falls back
+## to its own spawn point, which is reachable by definition.
+const ANCHOR_NODE: String = "PeddlerAnchor"
 
 ## instance_name -> InstanceResource for every biome, name-sorted. Empty until
 ## _scan(). Sorted for the same reason [PeddlerCatalog] sorts: the cycle hash
@@ -93,20 +110,59 @@ static func rotation_for_cycle(cycle_index: int) -> Array[StringName]:
 ## Falls back to the home spawn when nothing qualifies — a cart on the spawn pad
 ## is worse placement, not a broken window.
 static func pick_spot(map: Map, cycle_index: int) -> Dictionary:
+	var anchor: Vector2 = failsafe_anchor(map)
+	# No paint anywhere means no way to tell floor from void, and a walk with
+	# nothing to stop it is how the cart ended up off the island. Such a map gets
+	# the anchor every cycle rather than a square nobody can vouch for.
+	if _tile_layers(map).is_empty():
+		return {"peddler": anchor, "vault": _vault_spot(map, {}, anchor)}
 	var home: Vector2 = map.get_spawn_position(0)
 	var walkable: Dictionary = walkable_cells(map, home)
-	var spot: Vector2 = _choose(map, walkable, home, cycle_index)
+	var spot: Vector2 = _choose(map, walkable, home, cycle_index, anchor)
+	# Last gate before a cart exists in the world. _choose only offers cells that
+	# already passed, so this catching anything means a rule above it stopped
+	# agreeing with itself — cheap insurance on the one code path whose failures
+	# are visible to every player in the biome.
+	if spot != anchor and not is_valid_spot(map, spot):
+		push_warning("PeddlerSites: rejected an invalid square at %s; using the anchor." % spot)
+		spot = anchor
 	return {"peddler": spot, "vault": _vault_spot(map, walkable, spot)}
+
+
+## Where the cart goes when the probe cannot place it: the map's own
+## [constant ANCHOR_NODE] if an author placed one, else the home spawn.
+##
+## The spawn is a poor SITE — it is where everyone arrives, so the cart is not
+## somewhere to walk to — but it is the one point in any map guaranteed to exist,
+## be clear and be reachable, which is what a failsafe has to be. Author an
+## [constant ANCHOR_NODE] in a map to do better than it.
+static func failsafe_anchor(map: Map) -> Vector2:
+	if map == null:
+		return Vector2.ZERO
+	var node: Node2D = map.find_child(ANCHOR_NODE, true, false) as Node2D
+	if node != null:
+		return node.global_position
+	return map.get_spawn_position(0)
+
+
+## Everything a square must be before a cart may stand on it: painted floor, and
+## nothing solid on it or within [constant CLEARANCE] of it. Public so a tool can
+## ask the question in the same words the placement does.
+static func is_valid_spot(map: Map, point: Vector2) -> bool:
+	var space: PhysicsDirectSpaceState2D = _space(map)
+	if space == null:
+		return false
+	return _has_paint(_tile_layers(map), point) and _is_standable(space, point)
 
 
 ## Pick this cycle's square out of [param walkable]: far enough from the spawn to
 ## be somewhere to go, near enough to be found, with room around it.
 static func _choose(
-	map: Map, walkable: Dictionary, home: Vector2, cycle_index: int
+	map: Map, walkable: Dictionary, home: Vector2, cycle_index: int, anchor: Vector2
 ) -> Vector2:
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
-		return home
+		return anchor
 	var candidates: Array[Vector2i] = []
 	for cell: Vector2i in walkable:
 		var point: Vector2 = _cell_center(cell)
@@ -123,7 +179,7 @@ static func _choose(
 			continue
 		candidates.append(cell)
 	if candidates.is_empty():
-		return home
+		return anchor
 	# BY COORDINATE, not in whatever order the fill happened to reach cells in.
 	# The cycle hash indexes into this array, so two world servers hosting the
 	# same biome have to agree on it — the same promise the biome pool's sort
@@ -158,6 +214,8 @@ static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
 		return cells
+	var layers: Array[TileMapLayer] = _tile_layers(map)
+	var check_paint: bool = not layers.is_empty()
 	var bounds: Rect2 = playable_rect(map)
 	# A map built without tile layers (deep_shoals) has no painted rect, and one
 	# whose spawn sits outside it is telling us the rect is not the play area.
@@ -184,6 +242,15 @@ static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
 			if bounded and not bounds.has_point(point):
 				continue
 			if not _clear_at(space, point):
+				continue
+			# The test that keeps the walk on the map. Clear-but-unpainted is the
+			# void, and the rect bound above cannot catch it: that rect merges EVERY
+			# layer, so a hole in the floor of a painted map sits well inside it.
+			# Skipped on a map with no tile layers at all, where it would reject
+			# every cell and hand back a one-cell "walk". Nothing places a cart
+			# from that answer (pick_spot sends those maps to the anchor), but a
+			# caller asking what is walkable deserves a real answer.
+			if check_paint and not _has_paint(layers, point):
 				continue
 			cells[next] = true
 			queue.append(next)
@@ -235,9 +302,14 @@ static func _vault_spot(map: Map, walkable: Dictionary, peddler: Vector2) -> Vec
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
 		return peddler + VAULT_OFFSET
+	var layers: Array[TileMapLayer] = _tile_layers(map)
 	for offset: Vector2 in [VAULT_OFFSET, Vector2(-VAULT_OFFSET.x, VAULT_OFFSET.y)]:
 		var candidate: Vector2 = peddler + offset
-		if _is_standable(space, candidate) and walkable.has(_cell_of(candidate)):
+		# walkable is empty on the anchor path (no fill was run) — the chest then
+		# rides the same paint + clearance test the anchor itself passed.
+		if not layers.is_empty() and not _has_paint(layers, candidate):
+			continue
+		if _is_standable(space, candidate) and (walkable.is_empty() or walkable.has(_cell_of(candidate))):
 			return candidate
 	return peddler + VAULT_OFFSET
 
@@ -284,6 +356,22 @@ static func _is_standable(space: PhysicsDirectSpaceState2D, point: Vector2) -> b
 		if not _clear_at(space, probe):
 			return false
 	return true
+
+
+## True when SOME tile layer paints a tile over [param point].
+##
+## Any layer counts, deliberately: floor is painted on "Ground" in most maps but
+## also on GroundDetail / Ground2 / Deck / Floor depending on who built the map,
+## and a name list would drop the cart back into the void the first time somebody
+## named a layer something new. Walls and props are painted too — but they are
+## solid, and [method _is_standable] has already rejected those points, so the
+## pair together reads as "painted, and not painted with something you would walk
+## into".
+static func _has_paint(layers: Array[TileMapLayer], point: Vector2) -> bool:
+	for layer: TileMapLayer in layers:
+		if layer.get_cell_source_id(layer.local_to_map(layer.to_local(point))) != -1:
+			return true
+	return false
 
 
 static func _clear_at(space: PhysicsDirectSpaceState2D, point: Vector2) -> bool:
