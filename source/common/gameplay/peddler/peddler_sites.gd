@@ -8,11 +8,14 @@ class_name PeddlerSites
 ##
 ## THE SQUARE is probed live against the map's own collision, because there is no
 ## authored "peddler stands here" marker and inventing one for nineteen maps
-## would be nineteen chances to place a cart inside a wall. The probe walks out
-## from the map's home spawn and keeps the first candidate that is BOTH clear
-## underfoot and reachable in a straight line from the spawn — the second half is
-## what stops the cart landing in a sealed side-room (the arena_1 failure mode:
-## authored geometry a player can see and never walk to).
+## would be nineteen chances to place a cart inside a wall. It is chosen from the
+## squares a player could WALK to from the map's home spawn — a flood fill, not
+## the straight-line ray this used to trust. A ray is one pixel wide: it slips
+## through the diagonal seam where two wall tiles meet at a corner, through gaps
+## no body fits down, and out into the unpainted nothing behind a wall run. Every
+## one of those reads to a player as a cart parked inside the wall — reported in
+## the sewers, measured worst in the_hollow, where a third of all cycles put the
+## cart somewhere no one could reach it (tools/audit_peddler_spots.tscn).
 ##
 ## Probing needs the map's live physics space, so the square can only be chosen
 ## once the instance is actually loaded. The BIOME choice does not, which is why
@@ -22,10 +25,23 @@ const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_
 ## How far from the home spawn the cart may set up.
 const MIN_RADIUS: float = 90.0
 const MAX_RADIUS: float = 260.0
-## Probes before giving up and using the spawn point itself.
-const PROBE_ATTEMPTS: int = 48
 ## Clearance required around the chosen point, so the cart is not flush to a wall.
 const CLEARANCE: float = 20.0
+## Reachability-fill resolution: half a 32px tile, so a wall is two cells thick
+## in every direction and the fill cannot leak through a corner the way a ray
+## can. Also the lattice the cart ends up standing on.
+const FILL_STEP: float = 16.0
+## How far the fill may wander past [constant MAX_RADIUS] to reach a square, as a
+## multiple of it. Any square the cart may use is at most MAX_RADIUS from the
+## spawn; a walk to one that needs a longer detour than this is not worth the
+## point queries it costs to prove.
+const FILL_DETOUR: float = 3.0
+## Hard stop on fill size, so a map with an unwalled edge cannot cost a world
+## server an unbounded loop.
+const FILL_CELL_CAP: int = 20000
+const _NEIGHBOURS: Array[Vector2i] = [
+	Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+]
 ## Where the Vault Chest stands relative to the Peddler.
 const VAULT_OFFSET: Vector2 = Vector2(40.0, 6.0)
 
@@ -74,41 +90,154 @@ static func rotation_for_cycle(cycle_index: int) -> Array[StringName]:
 ## beside it for the Vault Chest, as {"peddler": Vector2, "vault": Vector2} in
 ## GLOBAL coordinates.
 ##
-## Falls back to the home spawn when nothing probes clear — a cart on the spawn
-## pad is worse placement, not a broken window.
+## Falls back to the home spawn when nothing qualifies — a cart on the spawn pad
+## is worse placement, not a broken window.
 static func pick_spot(map: Map, cycle_index: int) -> Dictionary:
 	var home: Vector2 = map.get_spawn_position(0)
-	var spot: Vector2 = _probe(map, home, cycle_index)
-	return {"peddler": spot, "vault": _vault_spot(map, spot)}
+	var walkable: Dictionary = walkable_cells(map, home)
+	var spot: Vector2 = _choose(map, walkable, home, cycle_index)
+	return {"peddler": spot, "vault": _vault_spot(map, walkable, spot)}
 
 
-## Walk out from [param origin] looking for a clear, reachable square.
-static func _probe(map: Map, origin: Vector2, cycle_index: int) -> Vector2:
+## Pick this cycle's square out of [param walkable]: far enough from the spawn to
+## be somewhere to go, near enough to be found, with room around it.
+static func _choose(
+	map: Map, walkable: Dictionary, home: Vector2, cycle_index: int
+) -> Vector2:
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
-		return origin
-	# Seeded so the same cycle probes the same candidates in the same order —
-	# two world servers hosting the same biome put the cart in the same place.
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = _cycle_hash(cycle_index)
-	for _attempt: int in PROBE_ATTEMPTS:
-		var angle: float = rng.randf() * TAU
-		var dist: float = rng.randf_range(MIN_RADIUS, MAX_RADIUS)
-		var candidate: Vector2 = origin + Vector2.from_angle(angle) * dist
-		if _is_standable(space, candidate) and _is_reachable(space, origin, candidate):
-			return candidate
-	return origin
+		return home
+	var candidates: Array[Vector2i] = []
+	for cell: Vector2i in walkable:
+		var point: Vector2 = _cell_center(cell)
+		var away: float = home.distance_to(point)
+		if away < MIN_RADIUS or away > MAX_RADIUS:
+			continue
+		if not _is_standable(space, point):
+			continue
+		# Open on all eight sides, in FILL_STEP cells: a 48px box of floor the
+		# player can actually walk around the cart in. Clearance alone still
+		# accepts a one-tile dead-end nook, and a cart wedged in one reads as
+		# being in the wall even though the probe can prove you can reach it.
+		if not _has_elbow_room(walkable, cell):
+			continue
+		candidates.append(cell)
+	if candidates.is_empty():
+		return home
+	# BY COORDINATE, not in whatever order the fill happened to reach cells in.
+	# The cycle hash indexes into this array, so two world servers hosting the
+	# same biome have to agree on it — the same promise the biome pool's sort
+	# keeps, and the same way to break it.
+	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.x < b.x if a.y == b.y else a.y < b.y
+	)
+	return _cell_center(candidates[_cycle_hash(cycle_index) % candidates.size()])
 
 
-## The chest's square: beside the Peddler if that is clear, otherwise mirrored to
-## the other side, otherwise on top of them (visually tight, still clickable).
-static func _vault_spot(map: Map, peddler: Vector2) -> Vector2:
+## True when every cell touching [param cell] is walkable too.
+static func _has_elbow_room(walkable: Dictionary, cell: Vector2i) -> bool:
+	for dx: int in [-1, 0, 1]:
+		for dy: int in [-1, 0, 1]:
+			if not walkable.has(cell + Vector2i(dx, dy)):
+				return false
+	return true
+
+
+## Every square a player could WALK to from [param origin], as a set of cell
+## keys. This is the placement rule: a square in here is one somebody can reach
+## on foot, which a clear point with a clear sightline is not.
+##
+## Bounded twice, because it runs inside a live world server. To the map's
+## PAINTED rect — past it there are no colliders at all, so an unbounded fill
+## runs around the outside of the map and re-enters every sealed pocket that
+## touches an edge, calling the whole lot reachable. And to a detour budget
+## around the origin. Together they keep the walk to a few thousand point
+## queries, once per 30-minute window.
+static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
+	var cells: Dictionary = {}
+	var space: PhysicsDirectSpaceState2D = _space(map)
+	if space == null:
+		return cells
+	var bounds: Rect2 = playable_rect(map)
+	# A map built without tile layers (deep_shoals) has no painted rect, and one
+	# whose spawn sits outside it is telling us the rect is not the play area.
+	# Either way, fall back to the detour budget alone rather than to a fill that
+	# cannot leave its first cell.
+	var bounded: bool = bounds.has_area() and bounds.has_point(origin)
+	var budget: float = MAX_RADIUS * FILL_DETOUR
+	var start: Vector2i = _cell_of(origin)
+	cells[start] = true
+	var queue: Array[Vector2i] = [start]
+	# Walked with an index rather than pop_front(): the fill is thousands of cells
+	# and Array.pop_front() is O(n), which would make the walk quadratic.
+	var head: int = 0
+	while head < queue.size() and cells.size() < FILL_CELL_CAP:
+		var cell: Vector2i = queue[head]
+		head += 1
+		for offset: Vector2i in _NEIGHBOURS:
+			var next: Vector2i = cell + offset
+			if cells.has(next):
+				continue
+			var point: Vector2 = _cell_center(next)
+			if origin.distance_to(point) > budget:
+				continue
+			if bounded and not bounds.has_point(point):
+				continue
+			if not _clear_at(space, point):
+				continue
+			cells[next] = true
+			queue.append(next)
+	return cells
+
+
+## The world rect [param map] actually has tiles in, or an empty rect for a map
+## built without tile layers.
+##
+## NOT the camera limits: on most maps those sit a tile OUTSIDE the tiles, and
+## that ring is unpainted, uncollided space — exactly the gap a fill would run
+## around the map in. On some maps they are TIGHTER than the tiles instead, which
+## would wall the fill out of ground players can walk on.
+static func playable_rect(map: Map) -> Rect2:
+	var rect := Rect2()
+	for layer: TileMapLayer in _tile_layers(map):
+		var used: Rect2i = layer.get_used_rect()
+		if used.size == Vector2i.ZERO or layer.tile_set == null:
+			continue
+		var tile: Vector2 = Vector2(layer.tile_set.tile_size)
+		var world := Rect2(
+			layer.to_global(layer.map_to_local(used.position) - tile * 0.5),
+			Vector2(used.size) * tile
+		)
+		rect = world if not rect.has_area() else rect.merge(world)
+	return rect
+
+
+static func _tile_layers(node: Node, out: Array[TileMapLayer] = []) -> Array[TileMapLayer]:
+	for child: Node in node.get_children():
+		if child is TileMapLayer:
+			out.append(child as TileMapLayer)
+		_tile_layers(child, out)
+	return out
+
+
+static func _cell_of(point: Vector2) -> Vector2i:
+	return Vector2i(floori(point.x / FILL_STEP), floori(point.y / FILL_STEP))
+
+
+static func _cell_center(cell: Vector2i) -> Vector2:
+	return Vector2(cell) * FILL_STEP + Vector2.ONE * (FILL_STEP * 0.5)
+
+
+## The chest's square: beside the Peddler if that is clear and walk-reachable,
+## otherwise mirrored to the other side, otherwise on top of them (visually
+## tight, still clickable).
+static func _vault_spot(map: Map, walkable: Dictionary, peddler: Vector2) -> Vector2:
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
 		return peddler + VAULT_OFFSET
 	for offset: Vector2 in [VAULT_OFFSET, Vector2(-VAULT_OFFSET.x, VAULT_OFFSET.y)]:
 		var candidate: Vector2 = peddler + offset
-		if _is_standable(space, candidate) and _is_reachable(space, peddler, candidate):
+		if _is_standable(space, candidate) and walkable.has(_cell_of(candidate)):
 			return candidate
 	return peddler + VAULT_OFFSET
 
@@ -147,8 +276,11 @@ static func nearest_standable(
 static func _is_standable(space: PhysicsDirectSpaceState2D, point: Vector2) -> bool:
 	if not _clear_at(space, point):
 		return false
-	for i: int in 4:
-		var probe: Vector2 = point + Vector2.from_angle(float(i) * TAU / 4.0) * CLEARANCE
+	# EIGHT points around the ring, not four: on a 32px tile grid the axial probes
+	# straddle a corner tile without touching it, so the cart could be set down
+	# with a wall block cutting diagonally into its square.
+	for i: int in 8:
+		var probe: Vector2 = point + Vector2.from_angle(float(i) * TAU / 8.0) * CLEARANCE
 		if not _clear_at(space, probe):
 			return false
 	return true
