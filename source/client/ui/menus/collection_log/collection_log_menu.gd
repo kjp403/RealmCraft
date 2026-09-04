@@ -21,10 +21,19 @@ extends MenuShell
 ## narrowest supported window without the grid scrolling sideways.
 const GRID_COLUMNS: int = 6
 const CELL_SIZE: Vector2 = Vector2(64, 64)
-## Flat banner, not a box. One line of title plus its caption needs this and
-## no more; the old preview was tall enough to leave a cavern under a short
-## grid.
-const PLAQUE_HEIGHT: float = 46.0
+## Headroom for the title itself. The VIP emitter stack is mounted ON the title
+## label and fitted to its rect, so this is the room those particles get to
+## travel in — a label sized to its glyphs alone gives the emitters a few pixels
+## and the effect reads as a smudge on the text.
+##
+## The plaque takes its height from THIS plus the margins, rather than carrying a
+## fixed height of its own. A hardcoded banner height either starves the emitters
+## or, once it is tall enough for them, stops being a number anyone can reason
+## about — and it is the spacer above that controls where the plaque sits, not
+## how tall it is.
+const PLAQUE_TITLE_HEIGHT: float = 44.0
+## Breathing room between the plaque border and its text.
+const PLAQUE_MARGIN: int = 12
 
 const COLOR_MUTED: Color = Color(0.75, 0.78, 0.85)
 ## Locked cells keep the icon but drop to near-silhouette. Not fully black: the
@@ -90,6 +99,15 @@ func _build_layout() -> void:
 		pad.add_theme_constant_override(StringName("margin_" + side), 8)
 	right_panel.add_child(pad)
 
+	# INVARIANT: exactly one CHILD of this box expands vertically — the spacer in
+	# _build_detail. Everything above it hugs its content and the plaque below it
+	# is SHRINK_BEGIN, which is what pins the plaque to the bottom margin. A
+	# second expanding child anywhere in here splits the leftover space with the
+	# spacer and the plaque drifts back up into the middle of the panel.
+	#
+	# The chain ABOVE this node (hbox -> right_panel -> pad -> here) expands on
+	# purpose and must keep doing so: those are ancestors passing the panel's
+	# height down, not siblings competing for it.
 	_detail_host = VBoxContainer.new()
 	_detail_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -312,7 +330,7 @@ func _make_grid(row: Dictionary) -> Control:
 	return grid
 
 
-## The reward plaque: a flat banner pinned to the bottom of the panel.
+## The reward plaque: a banner pinned to the bottom of the panel.
 ##
 ## Rendered through TitleVfx.apply_to_label — the SAME entry point the in-world
 ## nameplate uses — so the metal ramp, the specular sweep, Emberfrost's split and
@@ -320,10 +338,19 @@ func _make_grid(row: Dictionary) -> Control:
 ## A hand-tinted reimplementation showed a plainer title than the one actually
 ## earned, which made the preview a lie in the direction that matters most.
 ##
-## clip_contents stays OFF on purpose. The emitters are Node2Ds mounted on the
-## label and several of them travel upward; clipping to the plaque would shear
-## them off mid-flight. They spill into the spacer above, which is empty by
-## construction, so there is nothing up there for them to collide with.
+## The plaque HUGS ITS CONTENT: size_flags_vertical is SHRINK_BEGIN, so it claims
+## only the margins plus its two labels and the spacer above owns everything
+## else. Give it SIZE_EXPAND_FILL and it splits the leftover space with the
+## spacer instead of being pushed by it, which is what left the caption floating
+## in the middle of an oversized banner with the title sunk to the floor.
+##
+## clip_contents stays OFF the whole way down — plaque, margin, stack, stage and
+## label.
+## The shader displaces vertices and the emitters are Node2Ds mounted on the
+## label, several of which travel upward; any ancestor that clips shears the
+## glyphs and kills the particles outright. It is already the Control default on
+## all four, but it is pinned explicitly because a single stray clip anywhere on
+## this chain silently guts the effect this whole panel exists to show off.
 func _make_title_plaque(row: Dictionary) -> Control:
 	var completed: bool = bool(row.get("completed", false))
 	var title: String = str(row.get("title", ""))
@@ -331,46 +358,61 @@ func _make_title_plaque(row: Dictionary) -> Control:
 
 	var plaque: PanelContainer = PanelContainer.new()
 	plaque.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	plaque.custom_minimum_size = Vector2(0, PLAQUE_HEIGHT)
+	plaque.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	plaque.clip_contents = false
 	plaque.add_theme_stylebox_override(&"panel", _plaque_style(edge))
 
 	# PANELCONTAINER RESIZES EVERY CHILD to its content rect — it is a Container,
-	# so anchors and offsets on a direct child are simply overwritten. A decorative
-	# overlay added straight to the plaque gets stretched across the whole banner,
-	# which is what turned a 1px bevel into a solid olive slab and, before it, a
+	# so anchors and offsets on a direct child are simply overwritten, and a
+	# decorative overlay added alongside the text gets stretched across the whole
+	# banner. That turned a 1px bevel into a solid olive slab and, before it, a
 	# subtle gradient into what looked like a rendering bug. So the plaque gets
-	# exactly ONE child, and the decoration hangs off a plain Control inside it.
-	var inner: Control = Control.new()
-	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	plaque.add_child(inner)
-
-	# A 1px lip along the inside of the top edge, not a gradient wash. A bevel is
-	# what reads as struck metal at this scale, it cannot band under the NEAREST
-	# filtering build_shell applies to this whole menu, and it needs no filtering
-	# exception to stay crisp.
-	var lip: ColorRect = ColorRect.new()
-	lip.color = Color(edge, 0.22)
-	lip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lip.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	lip.offset_top = 0.0
-	lip.offset_bottom = 1.0
-	inner.add_child(lip)
+	# exactly ONE child and the struck-metal top edge now comes from the stylebox
+	# border instead of a node — which also means the child is a real container
+	# and its minimum size reaches the plaque, letting the banner hug its content.
+	var margin: MarginContainer = MarginContainer.new()
+	margin.clip_contents = false
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override(
+			StringName("margin_" + side), PLAQUE_MARGIN)
+	plaque.add_child(margin)
 
 	var stack: VBoxContainer = VBoxContainer.new()
-	stack.add_theme_constant_override(&"separation", 0)
+	stack.clip_contents = false
 	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	inner.add_child(stack)
+	stack.add_theme_constant_override(&"separation", 2)
+	margin.add_child(stack)
 
+	# Left-aligned: this is a field label for the thing under it, not a heading
+	# for the plaque. Centring it made two centred lines that competed.
 	var caption: Label = PixelUI.text(
 		"EARNED TITLE" if completed else "COMPLETION REWARD",
 		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	caption.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	stack.add_child(caption)
 
-	var stage: Control = Control.new()
-	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# THE TITLE MUST NOT BE THE NODE THAT EXPANDS.
+	#
+	# TitleVfx.apply_to_label calls label.reset_size() \u2014 it has to, because a Label
+	# whose text was just set still reports its PREVIOUS size, and both the
+	# shader's rect_size uniform and the emitter fit_to() read label.size. That is
+	# right for a nameplate, which is a free-floating Label. Inside a container it
+	# is destructive: reset_size() shrinks the label to its own minimum and the
+	# container does not re-sort afterwards, so an EXPAND_FILL title collapses to
+	# its text width and strands itself at the top-left of its slot \u2014 glyphs
+	# against the left margin, and the whole emitter stack piled up there with
+	# them, because the emitters are centred on label.size * 0.5.
+	#
+	# So the CenterContainer expands and the label shrinks. reset_size() then
+	# lands on the size the label already has and is harmless, the emitters wrap
+	# the glyphs exactly as they do on a nameplate, and centring belongs to the
+	# container rather than to an alignment flag a later reset_size can undo.
+	var stage: CenterContainer = CenterContainer.new()
+	stage.clip_contents = false
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	stack.add_child(stage)
 
 	var label: Label = Label.new()
@@ -378,14 +420,23 @@ func _make_title_plaque(row: Dictionary) -> Control:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override(&"font_size", PixelUI.SIZE_BODY)
+	label.clip_contents = false
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Survives reset_size(), which sets the label to its COMBINED minimum \u2014 so
+	# this is the one way to guarantee the emitters keep their headroom.
+	label.custom_minimum_size = Vector2(0, PLAQUE_TITLE_HEIGHT)
+	label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	stage.add_child(label)
 
-	# Applied after the label is in the tree AND laid out: TitleVfx feeds the
-	# shader a rect_size uniform, and a zero rect there collapses the whole
-	# gradient to one flat colour.
+	# Applied only once the containers have SORTED, not merely once the label is
+	# in the tree. TitleVfx feeds the shader a rect_size uniform and fits the
+	# emitter stack to label.size, and container sizing is itself resolved in a
+	# deferred pass — so a plain call_deferred here can land while the label is
+	# still zero-sized, which collapses the gradient to one flat colour and piles
+	# every particle on a single point.
 	var apply: Callable = func() -> void:
+		await get_tree().process_frame
 		if is_instance_valid(label):
 			TitleVfx.apply_to_label(label, title)
 	apply.call_deferred()
@@ -396,14 +447,18 @@ func _plaque_style(edge: Color) -> StyleBoxFlat:
 	var box: StyleBoxFlat = StyleBoxFlat.new()
 	box.bg_color = Color(0.055, 0.062, 0.085, 0.96)
 	box.set_border_width_all(1)
+	# A heavier top edge is what reads as struck metal at this scale. It used to
+	# be a 1px ColorRect anchored inside the plaque; as a border width it needs no
+	# extra node, so it cannot be caught by PanelContainer's resize-every-child
+	# rule and cannot band under the NEAREST filtering this menu runs under.
+	box.border_width_top = 2
 	box.border_color = Color(edge, 0.85)
 	# Square corners: everything else in this menu is 9-sliced pixel chrome, and
 	# a rounded rectangle beside it reads as a different application.
 	box.set_corner_radius_all(0)
-	box.content_margin_left = 10.0
-	box.content_margin_right = 10.0
-	box.content_margin_top = 4.0
-	box.content_margin_bottom = 5.0
+	# Zero: the MarginContainer inside owns the padding now, so that the plaque's
+	# text inset is one number in one place instead of two that quietly add up.
+	box.set_content_margin_all(0.0)
 	return box
 
 
