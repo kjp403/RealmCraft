@@ -12,14 +12,14 @@ display_name = "Trout Hole"
 ore = ExtResource("2_ore")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 50
+&"fishing": 45
 })
 required_level = 10
 required_tool = &"fishing_rod"
 secondary_ore = ExtResource("5_sec")
 secondary_chance = 0.25
 secondary_job_xp = Dictionary[StringName, int]({
-&"fishing": 70
+&"fishing": 62
 })
 extraction_hp = 4
 max_charges = 50
