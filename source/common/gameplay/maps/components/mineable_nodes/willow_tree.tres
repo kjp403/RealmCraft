@@ -12,7 +12,7 @@ display_name = "Willow Tree"
 ore = ExtResource("2_log")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"woodcutting": 67
+&"woodcutting": 35
 })
 byproduct_item = ExtResource("9_headless")
 byproduct_amount = 30
