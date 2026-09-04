@@ -39,6 +39,17 @@ static func notify_inventory_changed(
 	})
 
 
+## Tell the target's client to re-read its bag, with no LootFeed pill.
+##
+## [method notify_inventory_changed]'s payload is shaped like a PICKUP, and the
+## client turns any non-zero id/amount pair into a "+N item" pill — which would
+## announce a wipe as a gain. Zeroes clear that gate on the client
+## ([method ClientState._on_item_picked_up]) while still emitting
+## inventory_changed, so an open bag redraws and nothing is claimed.
+static func notify_inventory_refreshed(peer_id: int) -> void:
+	notify_inventory_changed(peer_id, 0, 0, "")
+
+
 ## Parse a duration token like "30s", "10m", "2h", "1d" into milliseconds.
 ## Returns 0 if the input is empty or has no valid unit suffix — callers use
 ## that as the "no duration / treat as reason instead" sentinel. Bare numbers
