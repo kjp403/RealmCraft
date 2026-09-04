@@ -330,6 +330,13 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		var earned_titles: PackedStringArray = SkillMasterTitleService.sync(
 			connected_players[peer_id]
 		)
+		# Green-log titles, same two paths and the same reasoning — see
+		# CollectionLogTitleService. Appended to the same array so one save
+		# covers both.
+		CollectionLogTitleService.attach(connected_players[peer_id])
+		earned_titles.append_array(
+			CollectionLogTitleService.sync(connected_players[peer_id])
+		)
 		if not earned_titles.is_empty():
 			# The banners wait for instantiate_player — the client has not
 			# subscribed to pushes yet at auth time.

@@ -247,15 +247,11 @@ func _build_detail() -> void:
 		summary += "  ·  %d since the last new drop" % int(row.get("dry", 0))
 	_detail_host.add_child(PixelUI.text(summary, PixelUI.SIZE_CAPTION, COLOR_MUTED))
 
-	# The reward line. Stated whether or not it is earned — an unearned title the
-	# player can read is the thing that makes the log worth filling.
-	var reward: Label = PixelUI.text(
-		("Earned: %s" if bool(row.get("completed", false)) else "Completion reward: %s")
-			% str(row.get("title", "")),
-		PixelUI.SIZE_CAPTION,
-		PixelUI.INK_GREEN if bool(row.get("completed", false)) else PixelUI.INK_GOLD
-	)
-	_detail_host.add_child(reward)
+	# The reward, shown as the title ACTUALLY LOOKS — tinted, and with its
+	# nameplate particles running. Stated whether or not it is earned: an
+	# unearned title the player can see is the thing that makes the log worth
+	# filling, and a name in plain grey text undersells it badly.
+	_detail_host.add_child(_make_title_preview(row))
 	_detail_host.add_child(HSeparator.new())
 
 	var grid: GridContainer = GridContainer.new()
@@ -266,6 +262,61 @@ func _build_detail() -> void:
 	for entry: Variant in row.get("items", []):
 		if entry is Dictionary:
 			grid.add_child(_make_cell(entry))
+
+
+## A framed showcase of the green-log title: the real text, in the real colour,
+## with the real GreenLogTitleFx emitters running behind it.
+##
+## The FX is a Node2D, not a Control, so it does not participate in layout — it
+## is positioned onto the label's centre once the label has actually been sized.
+## Doing that before layout would park every emitter at (0, 0).
+func _make_title_preview(row: Dictionary) -> Control:
+	var completed: bool = bool(row.get("completed", false))
+	var tint: Color = Color.from_string(str(row.get("title_color", "")), PixelUI.INK_GOLD)
+
+	var panel: PanelContainer = PanelContainer.new()
+	PixelUI.panel(panel, "frame_gold" if completed else "frame_iron", 8)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 2)
+	panel.add_child(box)
+
+	box.add_child(PixelUI.text(
+		"EARNED TITLE" if completed else "COMPLETION REWARD",
+		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED))
+
+	# The nameplate is drawn the way it reads in world.
+	var stage: Control = Control.new()
+	stage.custom_minimum_size = Vector2(0, 34)
+	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(stage)
+
+	var label: Label = PixelUI.text(
+		"« %s »" % str(row.get("title", "")), PixelUI.SIZE_HEADING, tint)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	stage.add_child(label)
+
+	var vfx_path: String = str(row.get("title_vfx", ""))
+	if not vfx_path.is_empty() and ResourceLoader.exists(vfx_path):
+		var scene: PackedScene = load(vfx_path) as PackedScene
+		if scene != null:
+			var fx: Node2D = scene.instantiate() as Node2D
+			if fx != null:
+				# Behind the glyphs, like the real nameplate.
+				stage.add_child(fx)
+				stage.move_child(fx, 0)
+				var place: Callable = func() -> void:
+					fx.position = stage.size * 0.5
+					if fx.has_method(&"fit_to"):
+						fx.call(&"fit_to", Vector2(
+							minf(stage.size.x, label.get_minimum_size().x + 24.0),
+							stage.size.y))
+				stage.resized.connect(place)
+				place.call_deferred()
+	return panel
 
 
 func _make_cell(entry: Dictionary) -> Control:
@@ -295,9 +346,28 @@ func _make_cell(entry: Dictionary) -> Control:
 		icon.modulate = LOCKED_MODULATE
 	inset.add_child(icon)
 
+	# Quantity. Shown only past the first copy: an "x1" on every owned cell is
+	# noise, and the number only starts meaning something once it is telling you
+	# the boss has paid this out more than once.
+	var count: int = int(entry.get("count", 0))
+	if count > 1:
+		var badge: Label = PixelUI.text("x%d" % count, PixelUI.SIZE_TINY, PixelUI.INK_GOLD)
+		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		badge.offset_left = -28.0
+		badge.offset_top = -15.0
+		badge.offset_right = -3.0
+		badge.offset_bottom = -2.0
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		badge.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.9))
+		badge.add_theme_constant_override(&"outline_size", 4)
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(badge)
+
 	# An item the registry cannot resolve still gets a cell. Dropping it would
 	# make a 9/10 log look like 9/9 and the missing title inexplicable.
 	var display_name: String = str(item.item_name) if item != null \
 		else "Unknown (%s)" % slug
-	cell.tooltip_text = display_name if owned else "%s — not yet collected" % display_name
+	var qty: String = "" if count <= 1 else "  (x%d)" % count
+	cell.tooltip_text = (display_name + qty) if owned \
+		else "%s — not yet collected" % display_name
 	return cell

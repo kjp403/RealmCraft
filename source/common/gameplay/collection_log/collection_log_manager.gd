@@ -54,6 +54,11 @@ const KEY_KILLS: String = "kills"
 const KEY_ITEMS: String = "items"
 const KEY_COMPLETED: String = "completed"
 const KEY_LAST_UNLOCK_KILL: String = "last_unlock_kill"
+## slug -> how many of that item this boss has ever paid out. Kept ALONGSIDE
+## KEY_ITEMS rather than replacing it: the array carries first-seen ORDER and is
+## what the green check walks, the dictionary carries quantity. Collapsing the
+## two into one dictionary would lose the order the player earned things in.
+const KEY_COUNTS: String = "counts"
 
 ## boss_id -> BossCollectionLog. Content, not player state — safe to cache here.
 static var _by_boss: Dictionary[StringName, BossCollectionLog] = {}
@@ -157,8 +162,12 @@ func add_item_to_log(
 		return
 	var entry: Dictionary = _entry(player_res, boss_id)
 	var items: Array[StringName] = entry[KEY_ITEMS]
+	# The tally counts EVERY payout, duplicates included — that is the whole
+	# point of it. Only the first copy advances the log itself.
+	var counts: Dictionary = entry[KEY_COUNTS]
+	counts[item_id] = int(counts.get(item_id, 0)) + 1
 	if items.has(item_id):
-		return # already logged — a duplicate drop
+		return # already logged — a duplicate drop, but the tally moved
 	items.append(item_id)
 	# Stamped before the signal so a listener reading dry_streak() sees 0, not
 	# the streak this drop just ended.
@@ -222,6 +231,17 @@ func unlocked_count(player_res: PlayerResource, boss_id: StringName) -> int:
 	return items.size()
 
 
+## How many of [param item_id] this boss has paid out to this character. 0 when
+## it has never dropped. Duplicates count, so this is the "x3" on the log cell.
+func item_count(
+	player_res: PlayerResource, boss_id: StringName, item_id: StringName
+) -> int:
+	if player_res == null:
+		return 0
+	var counts: Dictionary = _entry(player_res, boss_id)[KEY_COUNTS]
+	return int(counts.get(item_id, 0))
+
+
 ## Kills recorded for a boss.
 func kill_count(player_res: PlayerResource, boss_id: StringName) -> int:
 	if player_res == null:
@@ -265,9 +285,14 @@ func build_payload(player_res: PlayerResource) -> Dictionary:
 	var rows: Array = []
 	for boss_log: BossCollectionLog in all_logs():
 		var items: Array[StringName] = _entry(player_res, boss_log.boss_id)[KEY_ITEMS]
+		var counts: Dictionary = _entry(player_res, boss_log.boss_id)[KEY_COUNTS]
 		var entries: Array = []
 		for slug: StringName in boss_log.log_items:
-			entries.append({"slug": String(slug), "owned": items.has(slug)})
+			entries.append({
+				"slug": String(slug),
+				"owned": items.has(slug),
+				"count": int(counts.get(slug, 0)),
+			})
 		rows.append({
 			"boss_id": String(boss_log.boss_id),
 			"boss_name": boss_log.boss_name,
@@ -277,6 +302,11 @@ func build_payload(player_res: PlayerResource) -> Dictionary:
 			"total": boss_log.total_items(),
 			"completed": has_green_log(player_res, boss_log.boss_id),
 			"title": boss_log.green_log_title_text,
+			# The title's LOOK, so the menu can show what the reward actually
+			# renders as rather than just naming it.
+			"title_color": boss_log.green_log_title_color.to_html(false),
+			"title_style": boss_log.green_log_title_style,
+			"title_vfx": boss_log.green_log_vfx.resource_path if boss_log.green_log_vfx else "",
 			"items": entries,
 		})
 	return {"logs": rows}
@@ -308,9 +338,13 @@ func serialize_log_data(player_res: PlayerResource) -> Dictionary:
 		var items: Array[String] = []
 		for item_id: Variant in entry.get(KEY_ITEMS, []):
 			items.append(String(item_id))
+		var counts: Dictionary = {}
+		for slug: Variant in (entry.get(KEY_COUNTS, {}) as Dictionary):
+			counts[String(slug)] = int((entry[KEY_COUNTS] as Dictionary)[slug])
 		out[String(boss_id)] = {
 			KEY_KILLS: int(entry.get(KEY_KILLS, 0)),
 			KEY_ITEMS: items,
+			KEY_COUNTS: counts,
 			KEY_COMPLETED: bool(entry.get(KEY_COMPLETED, false)),
 			KEY_LAST_UNLOCK_KILL: int(entry.get(KEY_LAST_UNLOCK_KILL, 0)),
 		}
@@ -340,10 +374,21 @@ func deserialize_log_data(player_res: PlayerResource, data: Variant) -> void:
 			var item_id: StringName = StringName(str(raw_item))
 			if not items.has(item_id):
 				items.append(item_id)
+		var counts: Dictionary = {}
+		for raw_slug: Variant in (saved.get(KEY_COUNTS, {}) as Dictionary):
+			counts[StringName(str(raw_slug))] = int(
+				(saved[KEY_COUNTS] as Dictionary)[raw_slug])
+		# A blob written before quantities existed has no counts at all. Seed
+		# every already-logged item at 1 rather than 0: the player demonstrably
+		# owns one, and 0 would render an owned cell as "x0".
+		for item_id: StringName in items:
+			if not counts.has(item_id):
+				counts[item_id] = 1
 		var kills: int = int(saved.get(KEY_KILLS, 0))
 		player_res.collection_log[StringName(str(raw_boss_id))] = {
 			KEY_KILLS: kills,
 			KEY_ITEMS: items,
+			KEY_COUNTS: counts,
 			KEY_COMPLETED: bool(saved.get(KEY_COMPLETED, false)),
 			# Clamped: a blob written before this key existed reads back as the
 			# kill count, not 0, so an old save does not report every kill ever
@@ -362,6 +407,7 @@ func _entry(player_res: PlayerResource, boss_id: StringName) -> Dictionary:
 		player_res.collection_log[boss_id] = {
 			KEY_KILLS: 0,
 			KEY_ITEMS: items,
+			KEY_COUNTS: {},
 			KEY_COMPLETED: false,
 			KEY_LAST_UNLOCK_KILL: 0,
 		}

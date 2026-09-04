@@ -95,7 +95,12 @@ func _fixture() -> Dictionary:
 		for k: int in 40 + i * 33:
 			CollectionLogManager.increment_boss_kill(pr, boss_log.boss_id)
 		for j: int in fill:
-			CollectionLogManager.add_item_to_log(pr, boss_log.boss_id, boss_log.log_items[j])
+			# Duplicates on purpose: the quantity badge only renders past the
+			# first copy, so a fixture that grants exactly one of everything
+			# would screenshot a feature that looks absent.
+			for _dupe: int in 1 + (j % 3):
+				CollectionLogManager.add_item_to_log(
+					pr, boss_log.boss_id, boss_log.log_items[j])
 		# A few more dry kills after the last unlock, so the streak readout has
 		# something to show rather than always sitting at 0.
 		for k: int in 7 + i * 4:

@@ -48,6 +48,7 @@ func _initialize() -> void:
 	_check_runtime(logs)
 	_check_call_sites()
 	_check_entries_have_a_use()
+	_check_title_grant()
 
 	print("")
 	if _failures.is_empty():
@@ -409,6 +410,32 @@ func _check_entries_have_a_use() -> void:
 				_f("%s: '%s' is a log entry that nothing consumes and nothing "
 					% [boss_log.boss_name, slug]
 					+ "breaks down — it is filler, not a reward")
+
+
+## The title reward must survive the premium strip.
+##
+## Only the DATA half lives here. The grant itself calls
+## CollectionLogTitleService.sync, which reaches CollectionLogManager — an
+## autoload identifier that does not resolve in a `-s` run, so the call throws
+## and every assertion after it is silently skipped. That is exactly how the
+## first version of this check passed while testing nothing: the check counter
+## was the only thing that noticed. The round trip lives in
+## tools/check_collection_log_title.tscn, which runs with autoloads.
+func _check_title_grant() -> void:
+	for path: String in FileUtils.get_all_file_at(LOGS_PATH, "*.tres"):
+		var boss_log: BossCollectionLog = ResourceLoader.load(path) as BossCollectionLog
+		if boss_log == null:
+			continue
+		_checks += 1
+		# THE STRIP TRAP. CommandPermissions.strip_unreleased_vfx deletes any
+		# title TitleCatalog.is_premium_name matches, from every non-staff player,
+		# on every instance spawn. A green-log title colliding with a PREMIUM name
+		# would vanish from the player who earned it at their next zone change,
+		# with no error anywhere.
+		if TitleCatalog.is_premium_name(boss_log.green_log_title_text):
+			_f("%s: title '%s' collides with a PREMIUM name — it would be "
+				% [boss_log.boss_name, boss_log.green_log_title_text]
+				+ "stripped from everyone who earned it on their next zone change")
 
 
 ## The integrity model, asserted against the source rather than trusted: the ONLY
