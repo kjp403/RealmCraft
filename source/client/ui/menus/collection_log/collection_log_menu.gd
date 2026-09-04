@@ -264,15 +264,18 @@ func _build_detail() -> void:
 			grid.add_child(_make_cell(entry))
 
 
-## A framed showcase of the green-log title: the real text, in the real colour,
-## with the real GreenLogTitleFx emitters running behind it.
+## A framed showcase of the green-log title, rendered through TitleVfx — the
+## SAME entry point the in-world nameplate uses.
 ##
-## The FX is a Node2D, not a Control, so it does not participate in layout — it
-## is positioned onto the label's centre once the label has actually been sized.
-## Doing that before layout would park every emitter at (0, 0).
+## Not a reimplementation with the log's colour and a hand-instanced emitter:
+## that is what this did first, and it showed a plainer title than the one the
+## player actually earns, which makes the preview a lie in the direction that
+## matters. Going through TitleVfx means the metal ramp, the specular sweep,
+## Emberfrost's fire|ice split and the bespoke emitter stack are all exactly
+## what will appear over their head.
 func _make_title_preview(row: Dictionary) -> Control:
 	var completed: bool = bool(row.get("completed", false))
-	var tint: Color = Color.from_string(str(row.get("title_color", "")), PixelUI.INK_GOLD)
+	var title: String = str(row.get("title", ""))
 
 	var panel: PanelContainer = PanelContainer.new()
 	PixelUI.panel(panel, "frame_gold" if completed else "frame_iron", 8)
@@ -286,36 +289,30 @@ func _make_title_preview(row: Dictionary) -> Control:
 		"EARNED TITLE" if completed else "COMPLETION REWARD",
 		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED))
 
-	# The nameplate is drawn the way it reads in world.
+	# The particles are Node2Ds mounted on the label and drawn at nameplate depth,
+	# so the stage needs real height for them to live in rather than being clipped
+	# to the text line.
 	var stage: Control = Control.new()
-	stage.custom_minimum_size = Vector2(0, 34)
+	stage.custom_minimum_size = Vector2(0, 38)
 	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stage.clip_contents = true
 	box.add_child(stage)
 
-	var label: Label = PixelUI.text(
-		"« %s »" % str(row.get("title", "")), PixelUI.SIZE_HEADING, tint)
+	var label: Label = Label.new()
+	label.text = "« %s »" % title
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override(&"font_size", PixelUI.SIZE_HEADING)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(label)
-
-	var vfx_path: String = str(row.get("title_vfx", ""))
-	if not vfx_path.is_empty() and ResourceLoader.exists(vfx_path):
-		var scene: PackedScene = load(vfx_path) as PackedScene
-		if scene != null:
-			var fx: Node2D = scene.instantiate() as Node2D
-			if fx != null:
-				# Behind the glyphs, like the real nameplate.
-				stage.add_child(fx)
-				stage.move_child(fx, 0)
-				var place: Callable = func() -> void:
-					fx.position = stage.size * 0.5
-					if fx.has_method(&"fit_to"):
-						fx.call(&"fit_to", Vector2(
-							minf(stage.size.x, label.get_minimum_size().x + 24.0),
-							stage.size.y))
-				stage.resized.connect(place)
-				place.call_deferred()
+	# Applied after the label is in the tree and sized: TitleVfx feeds the shader
+	# a rect_size uniform, and a zero rect there collapses the gradient to a
+	# single flat colour.
+	var apply: Callable = func() -> void:
+		if is_instance_valid(label):
+			TitleVfx.apply_to_label(label, title)
+	apply.call_deferred()
 	return panel
 
 

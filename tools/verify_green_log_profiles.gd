@@ -22,6 +22,12 @@ const LOGS_PATH: String = "res://source/common/gameplay/collection_log/logs/"
 const BUDGET_TOTAL: int = 30
 ## Two ramps closer than this in summed RGB distance read as the same metal.
 const MIN_RAMP_DISTANCE: float = 0.45
+## ...but the BODY colour is what a reader actually sees: the crown is a narrow
+## band and the base is mostly in shadow, so two titles can pass the whole-ramp
+## distance while looking like twins. Golembreaker and Orcsbane shipped that way
+## — both near-white over grey — and only a human looking at the render caught
+## it. This is that catch, encoded.
+const MIN_MID_DISTANCE: float = 0.30
 ## Below this luminance a colour cannot carry an additive layer.
 const DARK_LUMA: float = 0.22
 
@@ -122,11 +128,17 @@ func _check_distinct(profiles: Dictionary) -> void:
 			_f("%s: metal_high is no brighter than metal_low — the ramp reads flat"
 				% keys[i])
 		for j: int in range(i + 1, keys.size()):
-			_checks += 1
-			var d: float = _ramp_distance(a, profiles[keys[j]])
+			_checks += 2
+			var b: VipTierProfile = profiles[keys[j]]
+			var d: float = _ramp_distance(a, b)
 			if d < MIN_RAMP_DISTANCE:
 				_f("%s and %s share a metal ramp (distance %.2f, min %.2f)"
 					% [keys[i], keys[j], d, MIN_RAMP_DISTANCE])
+			var dm: float = _body_distance(a, b)
+			if dm < MIN_MID_DISTANCE:
+				_f("%s and %s share a BODY colour (mid distance %.2f, min %.2f) — "
+					% [keys[i], keys[j], dm, MIN_MID_DISTANCE]
+					+ "they will read as the same title however different the ramps are")
 		# ...and against the four donation tiers.
 		for slug: String in TitleCatalog.vip_tier_slugs():
 			var tier: StringName = StringName(str(
@@ -134,10 +146,37 @@ func _check_distinct(profiles: Dictionary) -> void:
 			var other: VipTierProfile = VipTierProfile.for_tier(tier)
 			if other == null:
 				continue
-			_checks += 1
+			_checks += 2
 			if _ramp_distance(a, other) < MIN_RAMP_DISTANCE:
 				_f("%s looks like the %s donation tier (distance %.2f)"
 					% [keys[i], tier, _ramp_distance(a, other)])
+			if _body_distance(a, other) < MIN_MID_DISTANCE:
+				_f("%s shares a body colour with the %s donation tier (%.2f)"
+					% [keys[i], tier, _body_distance(a, other)])
+
+
+## Every colour a reader perceives as the body — one for a normal profile, two
+## for a split one.
+##
+## Averaging the two was the obvious move and it is wrong: Emberfrost's orange
+## and cyan average to a neutral grey it never displays anywhere, which then
+## collides with the silver donation tier for entirely imaginary reasons.
+func _bodies(p: VipTierProfile) -> Array[Color]:
+	var out: Array[Color] = [p.metal_mid]
+	if p.split_amount > 0.001:
+		out.append(p.metal_mid.lerp(p.split_color, p.split_amount))
+	return out
+
+
+## How far apart two titles read. Two titles are only confusable when EVERY part
+## of one is close to some part of the other, so this takes the widest gap: a
+## half that is unmistakably different is enough to tell them apart.
+func _body_distance(a: VipTierProfile, b: VipTierProfile) -> float:
+	var widest: float = 0.0
+	for ca: Color in _bodies(a):
+		for cb: Color in _bodies(b):
+			widest = maxf(widest, _dist(ca, cb))
+	return widest
 
 
 func _ramp_distance(a: VipTierProfile, b: VipTierProfile) -> float:
