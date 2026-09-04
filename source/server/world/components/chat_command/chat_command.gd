@@ -39,6 +39,81 @@ static func notify_inventory_changed(
 	})
 
 
+## How many stacks a wipe preview names before it summarises the rest.
+const WIPE_PREVIEW_STACKS: int = 5
+
+
+## Decide what wiping [param container] (a bag or a bank, both the same
+## { slot_uid: {id, a, ...} } shape) would take, without taking it.
+##
+## Shared by /empty and /emptybank, and separate from the wipe itself, so that
+## the dry run and the deletion can never disagree about what "empty" means and
+## so the rule can be exercised against a synthetic container without standing
+## up a server.
+##
+## Currency is KEPT: gold belongs to the pouch, not a slot (see
+## [method Inventory.counts_toward_capacity]), and bank.get moves any stray
+## currency stack back there on the next open anyway. An item whose registry
+## entry has gone away is exactly the junk these commands are for, so a null
+## lookup is destroyed rather than kept.
+##
+## Returns {doomed: Array[slot_uid], stacks: int, items: int,
+## kept_currency: int, preview: PackedStringArray}.
+static func plan_container_wipe(container: Dictionary) -> Dictionary:
+	var doomed: Array = []
+	var stacks: int = 0
+	var items: int = 0
+	var kept_currency: int = 0
+	var preview: PackedStringArray = PackedStringArray()
+	for slot_uid: Variant in container:
+		var slot: Dictionary = container[slot_uid]
+		var amount: int = int(slot.get("a", 0))
+		var item: Item = ContentRegistryHub.load_by_id(&"items", int(slot.get("id", 0))) as Item
+		if item != null and item.is_currency:
+			kept_currency += amount
+			continue
+		doomed.append(slot_uid)
+		stacks += 1
+		items += amount
+		if preview.size() < WIPE_PREVIEW_STACKS:
+			preview.append("%s x%d" % [
+				str(item.item_name) if item != null else "Unknown item", amount
+			])
+	return {
+		"doomed": doomed,
+		"stacks": stacks,
+		"items": items,
+		"kept_currency": kept_currency,
+		"preview": preview,
+	}
+
+
+## One line describing a finished or proposed wipe: "7 stacks (30 items):
+## Copper Ore x5, ... and 2 more". Shared so /empty and /emptybank read
+## identically in chat.
+static func describe_wipe(plan: Dictionary) -> String:
+	var stacks: int = int(plan.get("stacks", 0))
+	var items: int = int(plan.get("items", 0))
+	var preview: PackedStringArray = plan.get("preview", PackedStringArray())
+	var summary: String = ", ".join(preview)
+	if stacks > preview.size():
+		summary += " and %d more" % (stacks - preview.size())
+	return "%d stack%s (%d item%s): %s" % [
+		stacks, "" if stacks == 1 else "s",
+		items, "" if items == 1 else "s",
+		summary,
+	]
+
+
+## " Kept 4,210 currency in the pouch." — or nothing when there is none, so the
+## common case doesn't carry a sentence about zero gold.
+static func pouch_note(plan: Dictionary) -> String:
+	var kept: int = int(plan.get("kept_currency", 0))
+	if kept <= 0:
+		return ""
+	return " Kept %d currency in the pouch." % kept
+
+
 ## Tell the target's client to re-read its bag, with no LootFeed pill.
 ##
 ## [method notify_inventory_changed]'s payload is shaped like a PICKUP, and the
