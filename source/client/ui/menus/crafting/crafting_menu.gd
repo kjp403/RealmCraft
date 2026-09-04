@@ -879,15 +879,15 @@ func _craft_once() -> bool:
 	CraftController.known_speed = maxf(0.01, float(data.get("craft_speed", 1.0)))
 	var verb: String = "Brewed" if _is_herblore_station() else ("Cooked" if _is_cooking_station() else "Crafted")
 	var title: String = "%s %d %s" % [verb, int(data.get("amount", 1)), str(recipe.output_item.item_name)]
-	var xp_gain: int = int(data.get("xp", 0))
 	# Which skill was actually paid comes back in the payload rather than being
 	# assumed from the station: a recipe can override it (the Ascended Workbench
 	# hosts Smithing rows), and the server is the one that decided.
 	var paid: StringName = StringName(str(data.get("profession", _station.profession)))
-	var lines: PackedStringArray = PackedStringArray()
-	if xp_gain > 0:
-		lines.append("+%d %s XP" % [xp_gain, JobRegistry.display_name(paid)])
-	Toaster.toast_feed("craft:" + str(_station_key), title, lines)
+	# Card title only. The XP itself is shown by the radial tracker's floating
+	# numbers ([XpTrackerHud]), which this response already feeds through
+	# ClientState's craft.item subscription — printing it here too put the same
+	# number on screen twice, once per craft, all the way through a bulk run.
+	Toaster.toast_feed("craft:" + str(_station_key), title, PackedStringArray())
 	var craft_level: int = int(data.get("level", 0))
 	if craft_level > 0 and _station != null:
 		ClientState.set_skill_level(paid, craft_level)

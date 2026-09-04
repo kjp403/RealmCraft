@@ -685,15 +685,12 @@ func _on_gather_result(data: Dictionary) -> void:
 					bool(prog.get("leveled_up", false)),
 				)
 
-	# The yield itself rides the icon feed; the card keeps only job XP + level-ups.
+	# The yield rides the icon feed and the XP rides the radial tracker's floating
+	# numbers ([XpTrackerHud]) — a gather card would only repeat both, which is
+	# what put a "Mined ×5 / +62 Mining XP" panel in the middle of the screen on
+	# every swing. Nothing is toasted here now except the level-up ceremony and
+	# the perk point, which the tracker deliberately does not own.
 	var job_slug: String = str(data.get("job", "mining"))
-	var title: String = "Caught" if job_slug == "fishing" else (
-		"Chopped" if job_slug == "woodcutting" else (
-			"Farmed" if job_slug == "harvesting" else "Mined"
-		)
-	)
-
-	var lines: PackedStringArray = PackedStringArray()
 	var amount: int = int(data.get("amount", 0))
 	if amount > 0:
 		LootFeed.add_item(int(data.get("ore_id", 0)), amount, str(data.get("ore_name", "ore")))
@@ -706,17 +703,7 @@ func _on_gather_result(data: Dictionary) -> void:
 			byproduct_amount,
 			str(data.get("byproduct_name", "")),
 		)
-	# XP entries — primary job first (verbose), additional grants compact.
 	var grants_v: Variant = data.get("grants", [])
-	if grants_v is Array:
-		for grant: Dictionary in grants_v:
-			# JobRegistry, not capitalize(): the harvesting job DISPLAYS as
-			# Farming, so a capitalized slug printed "Harvesting XP" beside a
-			# Farming skill bar.
-			lines.append("+%d %s XP" % [
-				int(grant.get("xp", 0)),
-				JobRegistry.display_name(StringName(str(grant.get("job", "")))),
-			])
 	# Profession level-up: fireworks + jingle + "Your Mining level has achieved N".
 	# Check every grant so multi-job nodes (e.g. herb + medicine) each celebrate.
 	var leveled_jobs: Dictionary = {}
@@ -739,8 +726,6 @@ func _on_gather_result(data: Dictionary) -> void:
 			LevelUpFx.celebrate_skill(local_player, StringName(slug), new_lv)
 	if int(data.get("perk_points_gained", 0)) > 0:
 		Toaster.toast("Perk point available. Spend in Mastery → Perks.")
-
-	Toaster.toast_feed("gather:" + str(data.get("ore_name", "ore")), title, lines)
 
 
 ## Look up the MineableNode the result is about and push the new progress +

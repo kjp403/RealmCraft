@@ -15,11 +15,20 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.194"
-; Oldest published Windows zip still allowed to log in. Keep this at the last
-; play.arkenelle.com/desktop userversion until Release clients has caught up —
-; exact-match alone soft-locks everyone when Deploy VPS lands before the zip.
-config/min_client_version="0.28.191"
+config/version="0.28.195"
+; Oldest published Windows zip still allowed to log in. The usual rule is to
+; keep this at the last play.arkenelle.com/desktop userversion until Release
+; clients has caught up — exact-match alone soft-locks everyone when Deploy VPS
+; lands before the zip.
+;
+; Raised to the CURRENT version on purpose this time: 0.28.194 crashes the
+; client outright on any hover of the XP orb, so there is no version of it worth
+; letting in. That makes this a forced update — every 0.28.194 player gets the
+; non-dismissable update loop (Gateway._block_outdated) until they take the new
+; build. Deploy VPS lands in well under a minute and Release clients publishes
+; the zip about four minutes later, so expect a few minutes in which the loop
+; has nothing to download yet.
+config/min_client_version="0.28.195"
 run/main_scene="res://source/common/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="slayhorizon"
