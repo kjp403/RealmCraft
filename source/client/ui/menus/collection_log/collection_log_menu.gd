@@ -21,6 +21,10 @@ extends MenuShell
 ## narrowest supported window without the grid scrolling sideways.
 const GRID_COLUMNS: int = 6
 const CELL_SIZE: Vector2 = Vector2(64, 64)
+## Flat banner, not a box. One line of title plus its caption needs this and
+## no more; the old preview was tall enough to leave a cavern under a short
+## grid.
+const PLAQUE_HEIGHT: float = 46.0
 
 const COLOR_MUTED: Color = Color(0.75, 0.78, 0.85)
 ## Locked cells keep the icon but drop to near-silhouette. Not fully black: the
@@ -72,14 +76,25 @@ func _build_layout() -> void:
 	PixelUI.panel(right_panel, "frame_stone", 12)
 	hbox.add_child(right_panel)
 
-	var right_scroll: ScrollContainer = ScrollContainer.new()
-	right_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	right_panel.add_child(right_scroll)
+	# NO ScrollContainer here, deliberately. A ScrollContainer sizes itself to its
+	# CONTENT, so a SIZE_EXPAND_FILL spacer inside one resolves to zero height and
+	# cannot push anything to the bottom — the reward plaque would float directly
+	# under the grid again. The panel is a fixed height and the largest log is ten
+	# items (two rows), so there is nothing to scroll.
+	var pad: MarginContainer = MarginContainer.new()
+	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side: String in ["left", "right"]:
+		pad.add_theme_constant_override(StringName("margin_" + side), 10)
+	for side: String in ["top", "bottom"]:
+		pad.add_theme_constant_override(StringName("margin_" + side), 8)
+	right_panel.add_child(pad)
 
 	_detail_host = VBoxContainer.new()
 	_detail_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_detail_host.add_theme_constant_override(&"separation", 10)
-	right_scroll.add_child(_detail_host)
+	_detail_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail_host.add_theme_constant_override(&"separation", 8)
+	pad.add_child(_detail_host)
 
 
 # --- data --------------------------------------------------------------------
@@ -235,85 +250,161 @@ func _build_detail() -> void:
 			"No collection logs yet.", PixelUI.SIZE_BODY, COLOR_MUTED))
 		return
 
-	_detail_host.add_child(PixelUI.text(
-		str(row.get("boss_name", "?")), PixelUI.SIZE_HEADING, PixelUI.INK_GOLD))
+	# TOP: who, how you are doing, and what you have — the three things a player
+	# opened this panel to read, in that order and with nothing between them.
+	var header: Label = PixelUI.text(
+		str(row.get("boss_name", "?")), PixelUI.SIZE_HEADING, PixelUI.INK_GOLD)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_detail_host.add_child(header)
+	_detail_host.add_child(_make_stats(row))
+	_detail_host.add_child(_make_grid(row))
+
+	# The dynamic spacer, and the whole layout fix: it eats every pixel the grid
+	# does not, so a six-item log and a ten-item log both put the plaque on the
+	# bottom margin instead of leaving a cavern under a short grid.
+	var spacer: Control = Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_detail_host.add_child(spacer)
+
+	# BOTTOM: the reward, anchored to the floor of the panel.
+	_detail_host.add_child(_make_title_plaque(row))
+
+
+## The stat line as a centred row of value/label pairs rather than one long
+## sentence: the numbers are what the player scans for, so they carry the bright
+## ink and the words behind them stay muted.
+func _make_stats(row: Dictionary) -> Control:
+	var bar: HBoxContainer = HBoxContainer.new()
+	bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	bar.add_theme_constant_override(&"separation", 5)
 
 	var kills: int = int(row.get("kills", 0))
-	var summary: String = "%d / %d collected  ·  %d kill%s" % [
-		int(row.get("unlocked", 0)), int(row.get("total", 0)),
-		kills, "" if kills == 1 else "s",
+	var pairs: Array = [
+		["%d / %d" % [int(row.get("unlocked", 0)), int(row.get("total", 0))],
+			"collected", PixelUI.INK_GOLD],
+		["%d" % kills, "kill" if kills == 1 else "kills", PixelUI.INK],
 	]
+	# Dry streak only while it means something — once green every kill is dry by
+	# definition and the number is noise.
 	if not bool(row.get("completed", false)) and int(row.get("dry", 0)) > 0:
-		summary += "  ·  %d since the last new drop" % int(row.get("dry", 0))
-	_detail_host.add_child(PixelUI.text(summary, PixelUI.SIZE_CAPTION, COLOR_MUTED))
+		pairs.append(["%d" % int(row.get("dry", 0)), "dry", COLOR_MUTED])
 
-	# The reward, shown as the title ACTUALLY LOOKS — tinted, and with its
-	# nameplate particles running. Stated whether or not it is earned: an
-	# unearned title the player can see is the thing that makes the log worth
-	# filling, and a name in plain grey text undersells it badly.
-	_detail_host.add_child(_make_title_preview(row))
-	_detail_host.add_child(HSeparator.new())
+	for i: int in pairs.size():
+		if i > 0:
+			bar.add_child(PixelUI.text("\u00b7", PixelUI.SIZE_CAPTION, COLOR_MUTED))
+		bar.add_child(PixelUI.text(str(pairs[i][0]), PixelUI.SIZE_CAPTION, pairs[i][2]))
+		bar.add_child(PixelUI.text(str(pairs[i][1]), PixelUI.SIZE_CAPTION, COLOR_MUTED))
+	return bar
 
+
+## The item grid, shrink-centred so a partial last row sits under the middle of
+## the panel rather than hugging the left edge.
+func _make_grid(row: Dictionary) -> Control:
 	var grid: GridContainer = GridContainer.new()
 	grid.columns = GRID_COLUMNS
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 6)
-	_detail_host.add_child(grid)
 	for entry: Variant in row.get("items", []):
 		if entry is Dictionary:
 			grid.add_child(_make_cell(entry))
+	return grid
 
 
-## A framed showcase of the green-log title, rendered through TitleVfx — the
-## SAME entry point the in-world nameplate uses.
+## The reward plaque: a flat banner pinned to the bottom of the panel.
 ##
-## Not a reimplementation with the log's colour and a hand-instanced emitter:
-## that is what this did first, and it showed a plainer title than the one the
-## player actually earns, which makes the preview a lie in the direction that
-## matters. Going through TitleVfx means the metal ramp, the specular sweep,
-## Emberfrost's fire|ice split and the bespoke emitter stack are all exactly
-## what will appear over their head.
-func _make_title_preview(row: Dictionary) -> Control:
+## Rendered through TitleVfx.apply_to_label — the SAME entry point the in-world
+## nameplate uses — so the metal ramp, the specular sweep, Emberfrost's split and
+## the bespoke emitter stack are exactly what will appear over the player's head.
+## A hand-tinted reimplementation showed a plainer title than the one actually
+## earned, which made the preview a lie in the direction that matters most.
+##
+## clip_contents stays OFF on purpose. The emitters are Node2Ds mounted on the
+## label and several of them travel upward; clipping to the plaque would shear
+## them off mid-flight. They spill into the spacer above, which is empty by
+## construction, so there is nothing up there for them to collide with.
+func _make_title_plaque(row: Dictionary) -> Control:
 	var completed: bool = bool(row.get("completed", false))
 	var title: String = str(row.get("title", ""))
+	var edge: Color = PixelUI.INK_GOLD if completed else Color(0.34, 0.36, 0.42)
 
-	var panel: PanelContainer = PanelContainer.new()
-	PixelUI.panel(panel, "frame_gold" if completed else "frame_iron", 8)
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var plaque: PanelContainer = PanelContainer.new()
+	plaque.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	plaque.custom_minimum_size = Vector2(0, PLAQUE_HEIGHT)
+	plaque.add_theme_stylebox_override(&"panel", _plaque_style(edge))
 
-	var box: VBoxContainer = VBoxContainer.new()
-	box.add_theme_constant_override(&"separation", 2)
-	panel.add_child(box)
+	# PANELCONTAINER RESIZES EVERY CHILD to its content rect — it is a Container,
+	# so anchors and offsets on a direct child are simply overwritten. A decorative
+	# overlay added straight to the plaque gets stretched across the whole banner,
+	# which is what turned a 1px bevel into a solid olive slab and, before it, a
+	# subtle gradient into what looked like a rendering bug. So the plaque gets
+	# exactly ONE child, and the decoration hangs off a plain Control inside it.
+	var inner: Control = Control.new()
+	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plaque.add_child(inner)
 
-	box.add_child(PixelUI.text(
+	# A 1px lip along the inside of the top edge, not a gradient wash. A bevel is
+	# what reads as struck metal at this scale, it cannot band under the NEAREST
+	# filtering build_shell applies to this whole menu, and it needs no filtering
+	# exception to stay crisp.
+	var lip: ColorRect = ColorRect.new()
+	lip.color = Color(edge, 0.22)
+	lip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lip.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	lip.offset_top = 0.0
+	lip.offset_bottom = 1.0
+	inner.add_child(lip)
+
+	var stack: VBoxContainer = VBoxContainer.new()
+	stack.add_theme_constant_override(&"separation", 0)
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	inner.add_child(stack)
+
+	var caption: Label = PixelUI.text(
 		"EARNED TITLE" if completed else "COMPLETION REWARD",
-		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED))
+		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED)
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stack.add_child(caption)
 
-	# The particles are Node2Ds mounted on the label and drawn at nameplate depth,
-	# so the stage needs real height for them to live in rather than being clipped
-	# to the text line.
 	var stage: Control = Control.new()
-	stage.custom_minimum_size = Vector2(0, 38)
-	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	stage.clip_contents = true
-	box.add_child(stage)
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(stage)
 
 	var label: Label = Label.new()
-	label.text = "« %s »" % title
+	label.text = "\u00ab %s \u00bb" % title
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override(&"font_size", PixelUI.SIZE_HEADING)
+	label.add_theme_font_size_override(&"font_size", PixelUI.SIZE_BODY)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(label)
-	# Applied after the label is in the tree and sized: TitleVfx feeds the shader
-	# a rect_size uniform, and a zero rect there collapses the gradient to a
-	# single flat colour.
+
+	# Applied after the label is in the tree AND laid out: TitleVfx feeds the
+	# shader a rect_size uniform, and a zero rect there collapses the whole
+	# gradient to one flat colour.
 	var apply: Callable = func() -> void:
 		if is_instance_valid(label):
 			TitleVfx.apply_to_label(label, title)
 	apply.call_deferred()
-	return panel
+	return plaque
+
+
+func _plaque_style(edge: Color) -> StyleBoxFlat:
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = Color(0.055, 0.062, 0.085, 0.96)
+	box.set_border_width_all(1)
+	box.border_color = Color(edge, 0.85)
+	# Square corners: everything else in this menu is 9-sliced pixel chrome, and
+	# a rounded rectangle beside it reads as a different application.
+	box.set_corner_radius_all(0)
+	box.content_margin_left = 10.0
+	box.content_margin_right = 10.0
+	box.content_margin_top = 4.0
+	box.content_margin_bottom = 5.0
+	return box
 
 
 func _make_cell(entry: Dictionary) -> Control:
