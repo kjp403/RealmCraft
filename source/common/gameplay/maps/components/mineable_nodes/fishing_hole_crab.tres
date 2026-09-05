@@ -19,7 +19,7 @@ required_tool = &"fishing_rod"
 secondary_ore = ExtResource("5_sec")
 secondary_chance = 0.22
 secondary_job_xp = Dictionary[StringName, int]({
-&"fishing": 18
+&"fishing": 17
 })
 extraction_hp = 5
 max_charges = 50
