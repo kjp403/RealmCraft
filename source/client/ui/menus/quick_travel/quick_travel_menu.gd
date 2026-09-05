@@ -42,6 +42,11 @@ func _ready() -> void:
 
 	_gold_label = PixelUI.text("", PixelUI.SIZE_BODY, PixelUI.INK_COIN)
 	_gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_gold_label.clip_text = false
+	_gold_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	# A Label ignores the mouse by default; the purse needs to be hoverable so
+	# the exact figure in its tooltip is reachable.
+	_gold_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	header_right.add_child(_gold_label)
 	header_right.move_child(_gold_label, 0) # sit before the Close button
 
@@ -105,7 +110,7 @@ func _quote_error(reason: String) -> String:
 
 func _render(quote: Dictionary) -> void:
 	_gold = int(quote.get("gold", 0))
-	_gold_label.text = "%s G" % _commas(_gold)
+	_set_gold_display(_gold)
 	_clear_rows()
 
 	var surge: float = float(quote.get("surge", 1.0))
@@ -303,18 +308,22 @@ func _clear_rows() -> void:
 		child.queue_free()
 
 
+## Paints the purse chip. [member _gold] keeps the RAW total the price checks
+## read; only this readout abbreviates, and the exact figure stays on the
+## label's tooltip so the player can see the last coin before paying.
+func _set_gold_display(gold: int) -> void:
+	if _gold_label == null:
+		return
+	var purse: Dictionary = NumberFormat.format_stack_size(gold)
+	var purse_color: Color = purse["color"]
+	_gold_label.text = "%s G" % purse["text"]
+	_gold_label.add_theme_color_override(&"font_color", purse_color)
+	_gold_label.tooltip_text = "%s gold" % purse["exact_text"]
+
+
 ## 12345 -> "12,345".
 func _commas(amount: int) -> String:
-	var digits: String = str(absi(amount))
-	var out: String = ""
-	var i: int = digits.length()
-	while i > 0:
-		var start: int = maxi(0, i - 3)
-		if not out.is_empty():
-			out = "," + out
-		out = digits.substr(start, i - start) + out
-		i = start
-	return ("-" + out) if amount < 0 else out
+	return NumberFormat.with_commas(amount)
 
 
 ## Seconds -> "M:SS".
