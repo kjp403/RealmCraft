@@ -12,7 +12,7 @@ display_name = "Maple Tree"
 ore = ExtResource("2_log")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"woodcutting": 100
+&"woodcutting": 13
 })
 byproduct_item = ExtResource("9_headless")
 byproduct_amount = 40
@@ -20,6 +20,8 @@ byproduct_job = &"fletching"
 required_level = 35
 required_tool = &"axe"
 extraction_hp = 5
+max_charges = 50
+min_charges = 10
 charge_regen_seconds = 18.0
 depleted_recharge_seconds = 90.0
 player_cooldown_seconds = 5.0

@@ -12,17 +12,17 @@ script = ExtResource("1_script")
 display_name = "Dragon Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 115
+&"mining": 27
 })
 secondary_ore = ExtResource("4_add")
 secondary_chance = 0.34
 required_level = 65
 required_tool = &"pickaxe"
-extraction_hp = 8
-min_charges = 3
-max_charges = 22
+extraction_hp = 24
+min_charges = 10
+max_charges = 50
 charge_regen_seconds = 24.0
-depleted_recharge_seconds = 120.0
+depleted_recharge_seconds = 180.0
 texture = ExtResource("3_tex")
 idle_frames = Array[Texture2D]([ExtResource("5_f1"), ExtResource("6_f2")])
 idle_frame_seconds = 0.45

@@ -13,20 +13,24 @@ const CHURCH_MAP: String = "res://source/common/gameplay/maps/maps/church/inside
 const CHURCH_INSTANCE: String = "res://source/common/gameplay/maps/instance/instance_collection/building/church.tres"
 
 ## slug -> [level, drain/min, exclusive groups]
+## The three skilling prayers drain in the same band as the combat ones on
+## purpose (2026-09-04): at 2-3/min a 99 pool ran for 20-33 minutes and a
+## skiller never had to carry potions. Wisdom + Haste is now 14/min, i.e. a
+## full pool every ~7 minutes.
 const EXPECTED_PRAYERS: Dictionary = {
 	"earthen_ward": [1, 1.0, ["defence"]],
 	"hawk_talon": [1, 1.0, ["offence"]],
-	"gatherer_haste": [10, 2.0, ["gathering_speed"]],
+	"gatherer_haste": [10, 5.0, ["gathering_speed"]],
 	"wolf_rage": [15, 1.0, ["offence"]],
 	"ironheart": [25, 3.0, ["defence"]],
 	"bear_might": [35, 3.0, ["offence"]],
-	"prosperity": [40, 3.0, ["gathering_yield"]],
+	"prosperity": [40, 7.0, ["gathering_yield"]],
 	"blood_tithe": [45, 5.0, ["lifesteal"]],
 	"ward_blades": [50, 12.0, ["protection"]],
 	"mind_seer": [55, 3.0, ["offence"]],
 	"bulwark_mountain": [60, 6.0, ["defence"]],
 	"ward_arcane": [70, 12.0, ["protection"]],
-	"wisdom_light": [75, 3.0, ["gathering_xp"]],
+	"wisdom_light": [75, 9.0, ["gathering_xp"]],
 	"oath_slayer": [85, 24.0, ["offence", "defence"]],
 }
 

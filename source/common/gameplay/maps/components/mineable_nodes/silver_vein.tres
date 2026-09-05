@@ -12,12 +12,12 @@ region = Rect2(97.57414, 18.388435, 30.283089, 44.766308)
 script = ExtResource("1_script")
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 38
+&"mining": 16
 })
 required_level = 20
 extraction_hp = 5
-min_charges = 3
-max_charges = 25
+min_charges = 10
+max_charges = 50
 charge_regen_seconds = 18.0
 depleted_recharge_seconds = 88.0
 texture = SubResource("AtlasTexture_silver")
