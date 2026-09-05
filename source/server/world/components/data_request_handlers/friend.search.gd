@@ -32,6 +32,13 @@ func data_request_handler(
 
 	var rows: Array = store.search_players(query, RESULT_LIMIT, by_account)
 
+	# Same redaction as profile.get: the account handle is a login identifier and
+	# is not echoed to ordinary players. Two exceptions that give nothing away —
+	# staff, and a by_account search, where the caller typed the handle in the
+	# first place. Adding a friend keys off "id", so nothing here is load-bearing.
+	var show_account: bool = (
+		by_account or CommandPermissions.effective_priority(from_player, instance) >= 1
+	)
 	var results: Array = []
 	for row: Dictionary in rows:
 		var pid: int = int(row.get("player_id", 0))
@@ -41,7 +48,7 @@ func data_request_handler(
 		results.append({
 			"id": pid,
 			"name": str(row.get("display_name", "")),
-			"account": str(row.get("account_name", "")),
+			"account": str(row.get("account_name", "")) if show_account else "",
 			"online": online_peer_id > 0,
 			"friend": from_player.friends.has(pid),
 		})
