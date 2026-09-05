@@ -63,7 +63,8 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request_id,
 				request[GatewayAPI.KEY_ACCOUNT_USERNAME],
 				request["data"],
-				request[GatewayAPI.KEY_WORLD_ID]
+				request[GatewayAPI.KEY_WORLD_ID],
+				str(request.get("__ip__", "")),
 			)
 		"get_characters":
 			request_player_characters(
@@ -161,7 +162,8 @@ func create_player_character_request(
 	request_id: int,
 	username: String,
 	character_data: Dictionary,
-	world_id: int
+	world_id: int,
+	client_ip: String = ""
 ) -> void:
 	var account: AccountResource = authentication_manager.account_collection.collection.get(username)
 	if not account:
@@ -171,7 +173,7 @@ func create_player_character_request(
 		gateway_response.rpc_id(gateway_id, request_id, {"error": GatewayAPI.ERR_BAD_CREDENTIALS, "msg": "world not found."})
 		return
 	world_manager.create_player_character_request.rpc_id(
-		world_id, gateway_id, request_id, account.username, character_data
+		world_id, gateway_id, request_id, account.username, character_data, client_ip
 	)
 
 
