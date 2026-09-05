@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/audit_peddler_ground_rule.gd" id="1_audit"]
+
+[node name="PeddlerGroundRuleAudit" type="Node"]
+script = ExtResource("1_audit")
