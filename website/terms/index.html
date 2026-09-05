@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arkenelle &mdash; Terms of Service</title>
+<meta name="description" content="Terms of Service for Arkenelle, a 2D pixel art MMORPG. Code of conduct, account rules, enforcement, and payment policy.">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #1a1a1a;
+    --bg-deep:   #141414;
+    --panel:     #212121;
+    --panel-alt: #262626;
+    --line:      #343434;
+    --text:      #e0e0e0;
+    --muted:     #9a9a9a;
+    --gold:      #e8c56a;
+    --gold-dim:  #b9973f;
+    --cyan:      #9fd4f7;
+    --danger:    #e07070;
+    --display: "Jersey 10", "Trebuchet MS", monospace;
+    --body: "Pixelify Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    min-height: 100vh;
+  }
+
+  a {
+    color: var(--cyan);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(159, 212, 247, 0.35);
+  }
+  a:hover,
+  a:focus-visible {
+    color: #cbe8ff;
+    border-bottom-color: currentColor;
+  }
+
+  ::selection {
+    background: rgba(232, 197, 106, 0.25);
+    color: #ffffff;
+  }
+
+  /* ---------- Header ---------- */
+
+  .site-header {
+    background: var(--bg-deep);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    padding: 3.25rem 1.5rem 2.5rem;
+    text-align: center;
+  }
+
+  .site-header h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(2.1rem, 7vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+  }
+
+  .site-header .rule {
+    width: 120px;
+    height: 2px;
+    margin: 1.15rem auto 1rem;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .site-header .updated {
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- Layout ---------- */
+
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2.75rem 1.5rem 1rem;
+  }
+
+  .intro {
+    color: var(--muted);
+    font-size: 1.02rem;
+    border-left: 3px solid var(--line);
+    padding-left: 1.1rem;
+    margin: 0 0 2.75rem;
+  }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 1.6rem 1.75rem 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  section h2 {
+    margin: 0 0 1rem;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: var(--cyan);
+  }
+
+  section h2 .num {
+    color: var(--gold);
+    margin-right: 0.5rem;
+  }
+
+  h3 {
+    margin: 1.6rem 0 0.5rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--gold);
+  }
+
+  p { margin: 0 0 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  ul {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+  }
+
+  ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.7rem;
+  }
+
+  ul li::before {
+    content: "\25AA";
+    position: absolute;
+    left: 0.15rem;
+    top: -0.05rem;
+    color: var(--gold-dim);
+    font-size: 0.95rem;
+  }
+
+  ul li:last-child { margin-bottom: 0; }
+
+  ul li strong {
+    color: #f2f2f2;
+    font-weight: 700;
+  }
+
+  .callout {
+    margin: 1.25rem 0 0;
+    padding: 1rem 1.15rem;
+    background: var(--panel-alt);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--danger);
+    border-radius: 3px;
+    font-size: 0.97rem;
+    color: #d6d6d6;
+  }
+
+  .callout strong { color: var(--danger); }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  footer p { margin: 0 0 0.5rem; }
+  footer p:last-child { margin-bottom: 0; }
+
+  footer .support {
+    max-width: 560px;
+    margin: 0 auto 1.5rem;
+    padding: 1rem 1.15rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  footer .support-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-family: var(--display);
+    font-size: 1.25rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; line-height: 1.65; }
+    .site-header { padding: 2.25rem 1.15rem 1.75rem; }
+    main { padding: 1.75rem 1.15rem 0.5rem; }
+    section { padding: 1.25rem 1.15rem 1.35rem; margin-bottom: 1.25rem; }
+    .intro { margin-bottom: 2rem; padding-left: 0.9rem; }
+    footer { padding: 1.75rem 1.15rem 3rem; }
+  }
+
+  @media (max-width: 380px) {
+    ul li { padding-left: 1.25rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Arkenelle &mdash; Terms of Service</h1>
+  <div class="rule"></div>
+  <p class="updated">Last Updated: September 5, 2026</p>
+</header>
+
+<main>
+
+  <p class="intro">
+    These Terms of Service govern your access to and use of Arkenelle, including the game client,
+    the game servers, the website, and any in-game purchases. Please read them carefully &mdash;
+    they set out the rules every player is expected to follow and the terms under which purchases
+    are made.
+  </p>
+
+  <section id="acceptance">
+    <h2><span class="num">1.</span>Acceptance of Terms</h2>
+    <p>
+      By registering an account, logging in, or otherwise playing Arkenelle, you confirm that you
+      have read, understood, and agreed to these Terms of Service. If you do not agree with any
+      part of these terms, you must not create an account or play the game.
+    </p>
+    <p>
+      Continued play after a change to these terms constitutes acceptance of the updated version.
+      The &ldquo;Last Updated&rdquo; date above is revised whenever a substantive change is made.
+    </p>
+    <p>Breaking the rules set out below may result in any of the following, at our discretion:</p>
+    <ul>
+      <li><strong>Temporary suspension</strong> of your account for a fixed period.</li>
+      <li><strong>A chat mute</strong>, removing your ability to use public or private chat channels.</li>
+      <li><strong>Rollback or removal</strong> of items, currency, or progress obtained in breach of these terms.</li>
+      <li><strong>A permanent ban</strong> of your account, with no restoration of purchases, items, or progress.</li>
+    </ul>
+  </section>
+
+  <section id="conduct">
+    <h2><span class="num">2.</span>Code of Conduct &amp; Fair Play</h2>
+    <p>
+      Arkenelle is a shared, persistent world. The rules below exist to keep it fair and welcoming
+      for everyone playing on it.
+    </p>
+
+    <h3>No Harassment or Toxicity</h3>
+    <ul>
+      <li>No flaming, targeted abuse, threats, or sustained harassment of other players or staff.</li>
+      <li>No doxxing &mdash; do not share or attempt to obtain another person&rsquo;s real-world identity, location, or contact details.</li>
+      <li>No hate speech, slurs, or content attacking people on the basis of race, ethnicity, religion, gender, gender identity, sexual orientation, disability, or nationality.</li>
+      <li>No sexually explicit, graphically violent, or otherwise inappropriate content in names, chat, or player-created text.</li>
+    </ul>
+
+    <h3>No Third-Party Software or Macroing</h3>
+    <ul>
+      <li>No bots, scripts, or automation of any part of gameplay, including AFK combat, gathering, or crafting.</li>
+      <li>No auto-clickers, key remappers used to automate actions, or hardware macros that repeat inputs on your behalf.</li>
+      <li>No overlays, packet tools, or third-party programs that read from or write to the game process.</li>
+      <li>You are responsible for every action taken on your account, whether or not you were at the keyboard.</li>
+    </ul>
+
+    <h3>No Client Modification or Hacking</h3>
+    <ul>
+      <li>Do not modify, decompile, repackage, or reverse engineer the game client.</li>
+      <li>Do not craft, replay, or tamper with network traffic between the client and our servers.</li>
+      <li>Do not attempt to gain unauthorised access to servers, staff tools, other players&rsquo; accounts, or any part of our infrastructure.</li>
+      <li>Do not run denial-of-service attacks or any other activity that degrades service for other players.</li>
+    </ul>
+
+    <h3>No Exploiting</h3>
+    <ul>
+      <li>If you find a bug, duplication method, or unintended mechanic, report it to the team immediately by opening a support ticket in our Discord server.</li>
+      <li>Do not use, repeat, or share an exploit, and do not distribute gains obtained from one.</li>
+      <li>Items, currency, and progression derived from an exploit will be removed, and the accounts involved may be banned.</li>
+      <li>Reporting a bug in good faith will never be punished.</li>
+    </ul>
+
+    <h3>No Real-World Trading (RWT)</h3>
+    <ul>
+      <li>Do not buy, sell, or exchange in-game currency, items, services, or accounts for real-world money or goods.</li>
+      <li>Do not advertise, broker, or solicit such trades in game, on our website, or in our community spaces.</li>
+      <li>Both sides of a real-world trade are treated as being in breach of these terms.</li>
+    </ul>
+
+    <h3>No Impersonating Staff</h3>
+    <ul>
+      <li>Do not use names, titles, or cosmetics chosen to suggest you are a developer, moderator, or member of the Arkenelle team.</li>
+      <li>Do not claim staff authority, offer moderation action, or request account details from other players.</li>
+      <li>Staff will never ask you for your password.</li>
+    </ul>
+  </section>
+
+  <section id="account">
+    <h2><span class="num">3.</span>Account Ownership and Security</h2>
+    <p>
+      Your Arkenelle account is licensed to you personally and is <strong>strictly
+      non-transferable</strong>. You may not sell, gift, rent, trade, or share access to it.
+    </p>
+    <ul>
+      <li>You are responsible for keeping your password secure and for all activity that occurs on your account.</li>
+      <li>Account sharing is not permitted. If you share access, you accept the consequences of anything done on your account.</li>
+      <li><strong>Staff will not restore items, currency, or progress lost through account sharing or a compromised password.</strong></li>
+      <li>We may reclaim or reset account names that impersonate others, breach the code of conduct, or are used to evade a ban.</li>
+      <li>If you believe your account has been accessed without your permission, change your password and open a support ticket in our Discord server immediately.</li>
+    </ul>
+  </section>
+
+  <section id="enforcement">
+    <h2><span class="num">4.</span>Enforcement</h2>
+    <p>
+      The development team reserves the right to review server logs, chat history, trade records,
+      transaction records, and gameplay telemetry in order to investigate suspected breaches of
+      these terms.
+    </p>
+    <ul>
+      <li>Penalties may be issued <strong>without prior warning</strong> where the evidence is clear.</li>
+      <li>The severity of a penalty is at the team&rsquo;s discretion and reflects the nature and history of the breach.</li>
+      <li>We are not obliged to disclose the detection methods or the specific log entries behind an enforcement action.</li>
+      <li>Attempting to evade a penalty &mdash; including creating new accounts while banned &mdash; will extend the penalty to any associated accounts.</li>
+      <li>Appeals may be submitted by opening a support ticket in our <a href="https://discord.gg/kSs3hxByV">Discord server</a>. Appeals are reviewed on their merits, and the outcome of a review is final.</li>
+    </ul>
+  </section>
+
+  <section id="payments">
+    <h2><span class="num">5.</span>Refund and Payment Policy</h2>
+    <p>
+      All purchases in Arkenelle are for digital goods and services delivered to your account.
+      Payments are processed by Stripe; we do not store your card details.
+    </p>
+
+    <h3>Immediate Delivery &amp; Consent</h3>
+    <ul>
+      <li>Purchases are digital goods, delivered to your account immediately upon successful payment.</li>
+      <li>By completing a purchase you expressly request immediate delivery and <strong>waive any standard right of withdrawal or cooling-off period</strong> that would otherwise apply once delivery has begun.</li>
+      <li>It is your responsibility to confirm what a purchase includes before you buy it.</li>
+    </ul>
+
+    <h3>Strictly Non-Refundable</h3>
+    <ul>
+      <li>Purchases are <strong>strictly non-refundable</strong>.</li>
+      <li>No refunds will be issued for accounts suspended or banned for breaching these terms.</li>
+      <li>No refunds will be issued for server downtime, maintenance, latency, patch changes, or content rebalancing.</li>
+      <li>No refunds will be issued for buyer&rsquo;s remorse, accidental purchases, purchases made by another person with access to your account, or a change in how much you play.</li>
+    </ul>
+
+    <h3>Chargebacks and Fraud Protocol</h3>
+    <ul>
+      <li>Initiating an unauthorised chargeback or payment dispute will result in a <strong>permanent ban</strong> of the associated account or accounts.</li>
+      <li>We will contest friendly fraud. Server logs, delivery records, and login history evidencing delivery and use of the purchased goods will be provided to Stripe as part of the dispute response.</li>
+      <li>Accounts banned for chargebacks are not eligible for appeal until the disputed amount is settled in full.</li>
+      <li>If you believe a charge was genuinely unauthorised, open a support ticket in our Discord server first &mdash; we would rather resolve it directly than through a dispute.</li>
+    </ul>
+
+    <h3>Technical Error Exceptions</h3>
+    <ul>
+      <li>The only exception to the above is a verified technical error, such as duplicate billing or a payment taken where nothing was delivered.</li>
+      <li>Open a support ticket in our Discord server including your <strong>Stripe Receipt ID</strong> within <strong>7 days</strong> of the transaction date.</li>
+      <li>We will verify the transaction against our delivery logs and, where a duplicate charge or failed delivery is confirmed, refund the affected charge.</li>
+      <li>Requests submitted after 7 days, or without a valid Stripe Receipt ID, cannot be verified and will not be actioned.</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Before you dispute a charge:</strong> open a support ticket in our
+      <a href="https://discord.gg/kSs3hxByV">Discord</a>. Almost every payment
+      problem we see is a duplicate charge or a delivery that needs re-triggering, and both are
+      resolved far faster by ticket than by chargeback &mdash; without a permanent ban attached.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p class="support">
+    <span class="support-label">Support</span>
+    All support tickets &mdash; bug reports, appeals, and payment issues &mdash; are handled in the
+    official <a href="https://discord.gg/kSs3hxByV">Arkenelle Discord server</a>.
+    The invite is also available in-game.
+  </p>
+  <p>&copy; 2026 Arkenelle. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
