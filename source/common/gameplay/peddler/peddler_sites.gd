@@ -30,16 +30,93 @@ class_name PeddlerSites
 ## nothing to validate against, so it gets no random square: it goes straight to
 ## [method failsafe_anchor], and so does any cycle whose walk turns up nothing.
 ##
+## PAINT IS NOT FLOOR EITHER. The paint test above was "does ANY layer have a
+## tile here", and a wall is painted. Wherever a wall's tiles reach further than
+## its collider — an overhanging top row, a decorative run past the end of a
+## block — the square out there is clear (nothing to hit) AND painted (the Walls
+## layer), both halves true and both halves wrong. Measured, the old walk
+## accepted 1397 such cells in sunken_tombs, 1156 in sunspire_terraces, 466 in
+## desert and 260 in Forest. Only a layer that PAINTS FLOOR votes for floor now,
+## and a wall / roof / cliff tile over the same square vetoes it outright — the
+## veto being the half that matters at a boundary, where the ground layer usually
+## runs on underneath the wall ring (see [method _has_paint]).
+##
+## AND THE CART IS NOT A POINT. Clearance used to be the centre plus eight
+## samples on a 20px circle, and nine samples is nine samples: a wall corner sits
+## between two of them and the square still reads clear. The cart's centre is
+## then genuinely on floor while its body is inside the wall — and its sprite is
+## four times the size of its 12x8 collision box, so that reads to a player as a
+## cart in the wall just as much as being out of bounds does. The probe now
+## sweeps the real body grown by [constant CLEARANCE] (see
+## [method _is_standable]); that alone drops 191 of the_hollow's 2262 squares,
+## 110 of Forest's and 44 of fungus_cave's.
+##
+## SOME MAPS ARE NOT SITES AT ALL. A boss arena is one sealed pad built around
+## one fight — nobody passes through it and dying in it ejects you — so it is
+## barred from the pool by name ([constant EXCLUDED_BIOMES]) rather than left to
+## the geometry tests to make unattractive.
+##
+## Both geometry rules are gated by tools/audit_peddler_ground_rule.tscn, which
+## runs the old rules beside the live ones over every biome and fails EITHER way:
+## a wall-painted cell still in the pool, or a map so over-rejected that every
+## cycle falls back to the anchor.
+##
 ## Probing needs the map's live physics space, so the square can only be chosen
 ## once the instance is actually loaded. The BIOME choice does not, which is why
 ## the two are separate calls.
 
 const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_collection/biomes/"
+
+## Biomes the cart never visits, whatever the cycle hashes to. The pool is
+## SCANNED rather than listed so a new zone joins the rotation by existing, which
+## is right for a zone and wrong for a boss arena: an arena is a single sealed
+## pad around a single fight, with no through-traffic to find a cart in it and a
+## death return that ejects you out of it. the_hollow is the whole current list:
+## it is the only entry in the biomes folder built as an arena (ArenaWalls, a
+## BossPad and a golem parked on it), and it is where the cart was reported
+## standing on the boundary.
+##
+## Matched case-insensitively against instance_name, which is not consistently
+## cased across the pool (Forest, FungusArea1, pirates_cove), and against the
+## biome file's own stem, so a rename of either one cannot quietly re-admit an
+## arena.
+const EXCLUDED_BIOMES: PackedStringArray = ["the_hollow", "hollow"]
+
+## Layer-name fragments that mean "this layer paints FLOOR". Matched
+## case-insensitively as substrings, so Ground / Ground2 / GroundDetail /
+## UpperGround / Floor / Deck / Terrain all qualify without being listed.
+const GROUND_LAYERS: PackedStringArray = ["ground", "floor", "terrain", "deck"]
+## ...and the fragments that mean "this layer paints STRUCTURE" — the tiles a
+## square is under rather than on. Tested FIRST, so a name that reads both ways
+## resolves as structure.
+##
+## Structure only, and that line is drawn where it is on evidence. A layer earns
+## a veto by being one whose paint routinely OVERHANGS its collider — a wall's
+## top row, a mountain's cliff face, a roof, a cave ceiling. Scenery does not:
+## Props here is a decoration layer painted straight over walkable floor
+## (gutterworks runs a band of it down the middle of a corridor, fungus_cave
+## paints GroundProps across its whole floor), and vetoing it rejected both maps
+## outright and sent the cart to the spawn pad on all 200 sampled cycles. A crate
+## you cannot walk through carries a SCENERY collider, and
+## [method _is_standable] is what that collider is for.
+const BLOCKING_LAYERS: PackedStringArray = [
+	"wall", "collider", "collision", "obstacle", "roof", "ceiling",
+	"mountain", "tree",
+]
+
 ## How far from the home spawn the cart may set up.
 const MIN_RADIUS: float = 90.0
 const MAX_RADIUS: float = 260.0
-## Clearance required around the chosen point, so the cart is not flush to a wall.
-const CLEARANCE: float = 20.0
+## The cart's own body, from the shared character scene the Peddler is built out
+## of (character.tscn's CollisionShape2D): a 12x8 box sitting 3px above the node
+## origin. The probe uses the REAL footprint, because "this pixel is clear" and
+## "the cart fits here" are different questions and only the second one may place
+## a cart.
+const BODY_SIZE: Vector2 = Vector2(12.0, 8.0)
+const BODY_OFFSET: Vector2 = Vector2(0.0, -3.0)
+## Breathing room grown onto every side of the body before it is swept. A wall
+## collider this close to the cart rejects the square.
+const CLEARANCE: float = 16.0
 ## Reachability-fill resolution: half a 32px tile, so a wall is two cells thick
 ## in every direction and the fill cannot leak through a corner the way a ray
 ## can. Also the lattice the cart ends up standing on.
@@ -67,6 +144,8 @@ const ANCHOR_NODE: String = "PeddlerAnchor"
 ## indexes into it, and directory order is not a guarantee.
 static var _biomes: Array[StringName] = []
 static var _scanned: bool = false
+## The clearance-grown body, built once — see [method _body_probe].
+static var _probe_shape: RectangleShape2D = null
 
 
 ## Every biome instance name, sorted. The rotation pool.
@@ -111,10 +190,12 @@ static func rotation_for_cycle(cycle_index: int) -> Array[StringName]:
 ## is worse placement, not a broken window.
 static func pick_spot(map: Map, cycle_index: int) -> Dictionary:
 	var anchor: Vector2 = failsafe_anchor(map)
-	# No paint anywhere means no way to tell floor from void, and a walk with
-	# nothing to stop it is how the cart ended up off the island. Such a map gets
-	# the anchor every cycle rather than a square nobody can vouch for.
-	if _tile_layers(map).is_empty():
+	# No FLOOR PAINT means no way to tell floor from void, and a walk with nothing
+	# to stop it is how the cart ended up off the island. That covers a map with
+	# no tile layers at all (deep_shoals is one ground Sprite2D) and, now, one
+	# whose layers are all walls and props — either way there is nothing here to
+	# vouch for a square, so it gets the anchor every cycle.
+	if ground_layers(map).is_empty():
 		return {"peddler": anchor, "vault": _vault_spot(map, {}, anchor)}
 	var home: Vector2 = map.get_spawn_position(0)
 	var walkable: Dictionary = walkable_cells(map, home)
@@ -153,6 +234,13 @@ static func is_valid_spot(map: Map, point: Vector2) -> bool:
 	if space == null:
 		return false
 	return _has_paint(_tile_layers(map), point) and _is_standable(space, point)
+
+
+## True when [param biome] is barred from the rotation — see
+## [constant EXCLUDED_BIOMES]. Public so a tool auditing the biomes folder can
+## tell "this map places the cart badly" from "the cart never goes here".
+static func is_excluded(biome: StringName) -> bool:
+	return EXCLUDED_BIOMES.has(String(biome).to_lower())
 
 
 ## Pick this cycle's square out of [param walkable]: far enough from the spawn to
@@ -215,7 +303,11 @@ static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
 	if space == null:
 		return cells
 	var layers: Array[TileMapLayer] = _tile_layers(map)
-	var check_paint: bool = not layers.is_empty()
+	# Checked whenever the map has floor paint to check AGAINST. A map with no
+	# ground layer would have every cell rejected, so it is left unchecked and
+	# answers with a plain open-space walk — pick_spot sends those maps to the
+	# anchor anyway, but a caller asking what is walkable deserves a real answer.
+	var check_paint: bool = not ground_layers(map).is_empty()
 	var bounds: Rect2 = playable_rect(map)
 	# A map built without tile layers (deep_shoals) has no painted rect, and one
 	# whose spawn sits outside it is telling us the rect is not the play area.
@@ -243,17 +335,23 @@ static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
 				continue
 			if not _clear_at(space, point):
 				continue
-			# The test that keeps the walk on the map. Clear-but-unpainted is the
-			# void, and the rect bound above cannot catch it: that rect merges EVERY
-			# layer, so a hole in the floor of a painted map sits well inside it.
-			# Skipped on a map with no tile layers at all, where it would reject
-			# every cell and hand back a one-cell "walk". Nothing places a cart
-			# from that answer (pick_spot sends those maps to the anchor), but a
-			# caller asking what is walkable deserves a real answer.
+			# The test that keeps the walk on the map, and off the walls.
+			# Clear-but-unpainted is the void, and the rect bound above cannot catch
+			# it: that rect merges EVERY layer, so a hole in the floor of a painted
+			# map sits well inside it — as does the painted wall ring at the map's
+			# edge, whose collider is narrower than its tiles. Both are excluded
+			# here, which is what keeps boundary wall tops out of the cell pool
+			# entirely rather than out of the final square only.
 			if check_paint and not _has_paint(layers, point):
 				continue
 			cells[next] = true
 			queue.append(next)
+	# The seed went in unchecked, because the walk needs somewhere to start and
+	# the origin is where a player is standing. It is not a RESULT, though, and a
+	# spawn pad tucked under a wall tile (fungus_cave) would otherwise hand back
+	# the one cell this whole test exists to exclude.
+	if check_paint and not _has_paint(layers, origin):
+		cells.erase(start)
 	return cells
 
 
@@ -303,11 +401,12 @@ static func _vault_spot(map: Map, walkable: Dictionary, peddler: Vector2) -> Vec
 	if space == null:
 		return peddler + VAULT_OFFSET
 	var layers: Array[TileMapLayer] = _tile_layers(map)
+	var check_paint: bool = not ground_layers(map).is_empty()
 	for offset: Vector2 in [VAULT_OFFSET, Vector2(-VAULT_OFFSET.x, VAULT_OFFSET.y)]:
 		var candidate: Vector2 = peddler + offset
 		# walkable is empty on the anchor path (no fill was run) — the chest then
 		# rides the same paint + clearance test the anchor itself passed.
-		if not layers.is_empty() and not _has_paint(layers, candidate):
+		if check_paint and not _has_paint(layers, candidate):
 			continue
 		if _is_standable(space, candidate) and (walkable.is_empty() or walkable.has(_cell_of(candidate))):
 			return candidate
@@ -342,38 +441,100 @@ static func nearest_standable(
 	return origin
 
 
-## True when nothing solid occupies [param point] or the ring of clearance around
-## it. The ring matters: a bare point test passes in the one-pixel gap between two
-## wall tiles, and a cart wedged there is unreachable.
-static func _is_standable(space: PhysicsDirectSpaceState2D, point: Vector2) -> bool:
-	if not _clear_at(space, point):
-		return false
-	# EIGHT points around the ring, not four: on a 32px tile grid the axial probes
-	# straddle a corner tile without touching it, so the cart could be set down
-	# with a wall block cutting diagonally into its square.
-	for i: int in 8:
-		var probe: Vector2 = point + Vector2.from_angle(float(i) * TAU / 8.0) * CLEARANCE
-		if not _clear_at(space, probe):
-			return false
-	return true
-
-
-## True when SOME tile layer paints a tile over [param point].
+## True when the cart's own body FITS at [param point], with [constant CLEARANCE]
+## to spare on every side of it.
 ##
-## Any layer counts, deliberately: floor is painted on "Ground" in most maps but
-## also on GroundDetail / Ground2 / Deck / Floor depending on who built the map,
-## and a name list would drop the cart back into the void the first time somebody
-## named a layer something new. Walls and props are painted too — but they are
-## solid, and [method _is_standable] has already rejected those points, so the
-## pair together reads as "painted, and not painted with something you would walk
-## into".
+## A SHAPE SWEEP, not a ring of sample points. The ring was the centre plus eight
+## points on a 20px circle, and nine samples is nine samples: a wall corner fits
+## between two of them, a pillar fits inside them, and the square still read
+## clear. Sweeping the actual body grown by the clearance has no gaps to slip
+## through and asks the question placement actually cares about — is there room
+## for the cart — instead of a proxy for it.
+static func _is_standable(space: PhysicsDirectSpaceState2D, point: Vector2) -> bool:
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = _body_probe()
+	query.transform = Transform2D(0.0, point + BODY_OFFSET)
+	query.collision_mask = PhysicsLayers.SOLID_GROUND_MASK
+	query.collide_with_areas = false
+	# One hit is all the answer there is; asking for more is wasted broadphase.
+	return space.intersect_shape(query, 1).is_empty()
+
+
+## The cart's footprint grown by [constant CLEARANCE] on every side.
+##
+## Built once and reused: a RectangleShape2D holds no per-query state, and
+## placement sweeps it a few thousand times per window.
+static func _body_probe() -> RectangleShape2D:
+	if _probe_shape == null:
+		_probe_shape = RectangleShape2D.new()
+		_probe_shape.size = BODY_SIZE + Vector2.ONE * (CLEARANCE * 2.0)
+	return _probe_shape
+
+
+## True when [param point] stands on painted FLOOR: a ground layer has a tile
+## over it, and no structural layer does.
+##
+## "Some layer has a tile here" used to be the whole test, on the reasoning that
+## walls are painted too but [method _is_standable] would reject them for being
+## solid. That holds only where a wall's collider covers every tile the wall
+## paints, and it frequently does not — a top row drawn above the collider, a run
+## of blocks continued past the end of one. The square out there is clear and
+## painted at the same time, which is a wall top the walk is happy to stand a
+## cart on: 1397 such cells in sunken_tombs, 1156 in sunspire_terraces, 466 in
+## desert, 260 in Forest, all of them now excluded.
+##
+## So paint only counts from a layer that paints floor, and a structural tile is
+## a VETO rather than merely a non-vote. The veto is the half that does the work
+## at a boundary, where the ground layer usually runs on underneath the wall
+## ring: "is there ground here" is true up there too. "Is there also a wall" is not.
 static func _has_paint(layers: Array[TileMapLayer], point: Vector2) -> bool:
+	var on_floor: bool = false
 	for layer: TileMapLayer in layers:
-		if layer.get_cell_source_id(layer.local_to_map(layer.to_local(point))) != -1:
+		if layer.get_cell_source_id(layer.local_to_map(layer.to_local(point))) == -1:
+			continue
+		if _layer_matches(layer, BLOCKING_LAYERS):
+			return false
+		if _layer_matches(layer, GROUND_LAYERS):
+			on_floor = true
+	return on_floor
+
+
+## True when [param layer]'s name contains any of [param hints], case-insensitively.
+static func _layer_matches(layer: TileMapLayer, hints: PackedStringArray) -> bool:
+	var lower: String = String(layer.name).to_lower()
+	for hint: String in hints:
+		if lower.contains(hint):
 			return true
 	return false
 
 
+## The layers of [param map] that paint floor. Empty means the map cannot be
+## validated at all — there is nothing in it that tells floor from void — and
+## such a map gets its anchor rather than a square nobody can vouch for.
+##
+## Named "Ground" in every biome in the pool today (gutterworks and sewers add
+## "Deck", mining_cave "GroundDetail"). Checked by HINT rather than by exact name
+## because the failure mode of a name rule is silent — a map whose floor layer is
+## called something unlisted does not error, it just stops offering squares and
+## quietly puts the cart on the spawn pad forever. That is the case
+## tools/audit_peddler_ground_rule.tscn exists to fail on.
+static func ground_layers(map: Map) -> Array[TileMapLayer]:
+	var out: Array[TileMapLayer] = []
+	for layer: TileMapLayer in _tile_layers(map):
+		if _layer_matches(layer, BLOCKING_LAYERS):
+			continue
+		if _layer_matches(layer, GROUND_LAYERS):
+			out.append(layer)
+	return out
+
+
+## True when nothing solid sits exactly on [param point].
+##
+## Still a POINT test, and only used by the flood fill: the fill visits thousands
+## of cells and a shape sweep on each would be a five-figure broadphase bill
+## every window. It does not have to be exact there — it decides which cells the
+## walk may pass through, and every cell it hands on as a CANDIDATE is then swept
+## properly by [method _is_standable].
 static func _clear_at(space: PhysicsDirectSpaceState2D, point: Vector2) -> bool:
 	var query := PhysicsPointQueryParameters2D.new()
 	query.position = point
@@ -419,6 +580,12 @@ static func _scan() -> void:
 		if loaded == null or not (loaded is InstanceResource):
 			continue
 		var name: StringName = (loaded as InstanceResource).instance_name
+		# Barred by instance_name OR by file stem: four biomes are named
+		# differently from their .tres (Forest/forest, FungusArea1/fungus_cave,
+		# pirates_cove/deep_shoals), so keying off one alone would let a rename of
+		# the other quietly re-admit an arena to the rotation.
+		if is_excluded(name) or is_excluded(StringName(file_name.get_basename())):
+			continue
 		if name != &"" and not _biomes.has(name):
 			_biomes.append(name)
 	# BY TEXT, not Array.sort(). StringName's `<` compares the interned pointer,
