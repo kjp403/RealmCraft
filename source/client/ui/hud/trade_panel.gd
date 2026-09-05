@@ -424,6 +424,10 @@ func _make_slot(item_id: int, amount: int, mine: bool) -> Button:
 	if item != null:
 		PixelIcon.mount(slot, item.item_icon)
 		slot.tooltip_text = ItemTooltip.hover_text(item)
+	# The badge abbreviates past 100k, so the exact figure rides the slot
+	# tooltip - unconditionally, including the unknown-item case. A trade is
+	# the one screen where a player must never be guessing at a count.
+	slot.tooltip_text += "\n\nOffered: %s" % NumberFormat.with_commas(amount)
 	slot.add_child(_count_badge(amount))
 	if mine and not _locked:
 		slot.pressed.connect(_remove_from_offer.bind(item_id))
@@ -442,11 +446,21 @@ func _make_empty_slot(mine: bool) -> Button:
 	return slot
 
 
+## Display only - [param amount] is the raw count the offer dictionary and the
+## server-side escrow both work from, and nothing writes the badge string back.
+## The badge ignores the mouse, so callers put the exact figure on the parent
+## slot's tooltip: a trade is exactly where a player must not be guessing.
 func _count_badge(amount: int) -> Label:
+	var stack: Dictionary = NumberFormat.format_stack_size(amount)
+	var stack_color: Color = stack["color"]
 	var badge := Label.new()
-	badge.text = "x%d" % amount
+	badge.text = "x%s" % stack["text"]
+	badge.add_theme_color_override(&"font_color", stack_color)
 	badge.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.85))
 	badge.add_theme_constant_override(&"outline_size", 4)
+	# Short by design - never wrap or ellipsize the abbreviation.
+	badge.clip_text = false
+	badge.autowrap_mode = TextServer.AUTOWRAP_OFF
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	return badge
@@ -588,9 +602,9 @@ func _rebuild_picker() -> void:
 		var owned: int = int(_owned[item_id])
 		if item != null:
 			PixelIcon.mount(button, item.item_icon)
-			button.tooltip_text = "%s\n(have %d — click to offer an amount)" % [
+			button.tooltip_text = "%s\n(have %s — click to offer an amount)" % [
 				ItemTooltip.hover_text(item),
-				owned,
+				NumberFormat.with_commas(owned),
 			]
 			button.add_child(_count_badge(owned))
 		if owned > 1:
@@ -613,7 +627,9 @@ func _make_picker_gold_button() -> Button:
 	var gold_item: Item = ContentRegistryHub.load_by_id(&"items", Economy.gold_id()) as Item
 	if gold_item != null:
 		PixelIcon.mount(button, gold_item.item_icon)
-	button.tooltip_text = "Gold\n(have %d — click to offer an amount)" % _owned_gold
+	button.tooltip_text = "Gold\n(have %s — click to offer an amount)" % (
+		NumberFormat.with_commas(_owned_gold)
+	)
 	button.add_child(_count_badge(_owned_gold))
 	button.pressed.connect(_open_qty.bind(0, true))
 	return button
@@ -684,12 +700,12 @@ func _open_qty(item_id: int, is_gold: bool) -> void:
 	if owned <= 0:
 		return
 	if is_gold:
-		_qty_title.text = "Offer gold (have %d)" % owned
+		_qty_title.text = "Offer gold (have %s)" % NumberFormat.with_commas(owned)
 		_qty_spin.min_value = 0
 	else:
 		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 		var name: String = String(item.item_name) if item != null else "item"
-		_qty_title.text = "Offer %s (have %d)" % [name, owned]
+		_qty_title.text = "Offer %s (have %s)" % [name, NumberFormat.with_commas(owned)]
 		_qty_spin.min_value = 1
 	_qty_spin.max_value = owned
 	var current: int = _my_gold if is_gold else int(_my_items.get(item_id, 0))

@@ -79,6 +79,8 @@ var _vault_count: Label
 var _capacity_bar: ProgressBar
 var _capacity_label: Label
 var _gold_label: Label
+## Hoverable shell around [member _gold_label] — holds the exact-balance tooltip.
+var _gold_pouch: Control
 var _upgrade_button: Button
 var _upgrade_count_spin: SpinBox
 var _upgrade_x_button: Button
@@ -195,6 +197,10 @@ func _build_header_extras() -> void:
 	var pouch := PanelContainer.new()
 	pouch.add_theme_stylebox_override(&"panel", _panel_style(COL_INNER, COL_LINE, 8))
 	pouch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# The Label ignores the mouse, so the pouch shell carries the exact-balance
+	# tooltip — see _set_gold_display().
+	pouch.mouse_filter = Control.MOUSE_FILTER_STOP
+	_gold_pouch = pouch
 	var pouch_row := HBoxContainer.new()
 	pouch_row.add_theme_constant_override(&"separation", 6)
 	pouch.add_child(pouch_row)
@@ -212,11 +218,13 @@ func _build_header_extras() -> void:
 		gold_icon.texture = gold.item_icon
 	pouch_row.add_child(gold_icon)
 	_gold_label = Label.new()
-	_gold_label.text = "0"
-	_gold_label.add_theme_color_override(&"font_color", COL_GOLD)
+	# font_color is owned by _set_gold_display() — it grades with the balance.
 	_gold_label.add_theme_font_size_override(&"font_size", 14)
 	_gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_gold_label.clip_text = false
+	_gold_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	pouch_row.add_child(_gold_label)
+	_set_gold_display(0)
 	header_right.add_child(pouch)
 	header_right.move_child(pouch, 0)
 
@@ -798,7 +806,7 @@ func _rebuild_grids() -> void:
 	_bag_count.text = "%d / %d" % [bag_used, Inventory.MAX_SLOTS * maxi(1, _inventory_bags)]
 	_vault_count.text = "%d / %d" % [vault_used, _bank_slots]
 	if _gold_label != null:
-		_gold_label.text = _fmt_gold(Inventory.count(_inventory, _gold_id))
+		_set_gold_display(Inventory.count(_inventory, _gold_id))
 	if _capacity_bar != null:
 		_capacity_bar.max_value = maxf(1.0, float(_bank_slots))
 		_capacity_bar.value = float(vault_used)
@@ -901,11 +909,22 @@ func _build_slot(store: Dictionary, uid: int, is_bag: bool) -> Button:
 		button.tooltip_text = "Unknown item"
 
 	if amount > 1:
+		# Display only: `amount` stays the raw count the transfer spinbox and
+		# the server both work from. Past 100k the badge abbreviates, so the
+		# exact figure moves into the slot tooltip.
+		var stack: Dictionary = NumberFormat.format_stack_size(amount)
+		var stack_color: Color = stack["color"]
+		if amount >= NumberFormat.ABBREVIATE_FROM:
+			button.tooltip_text += "\n\nYou have %s." % stack["exact_text"]
+
 		var badge := Label.new()
-		badge.text = _fmt_stack(amount)
+		badge.text = stack["text"]
+		# Short by design — never wrap or ellipsize the abbreviation.
+		badge.clip_text = false
+		badge.autowrap_mode = TextServer.AUTOWRAP_OFF
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		badge.add_theme_font_size_override(&"font_size", 11)
-		badge.add_theme_color_override(&"font_color", Color(0.98, 0.98, 1.0))
+		badge.add_theme_color_override(&"font_color", stack_color)
 		badge.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.9))
 		badge.add_theme_constant_override(&"outline_size", 5)
 		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -1374,33 +1393,23 @@ func _on_upgrade_pressed() -> void:
 # --- Formatting -------------------------------------------------------------
 
 
+## Exact figures for prose — toasts, the selection line, prices. The badge
+## abbreviation is [NumberFormat.format_stack_size]'s job; a sentence has room
+## for the whole number and reads wrong without it.
 func _fmt_gold(amount: int) -> String:
-	var s: String = str(amount)
-	var out: String = ""
-	var i: int = s.length()
-	while i > 0:
-		var start: int = maxi(0, i - 3)
-		if not out.is_empty():
-			out = "," + out
-		out = s.substr(start, i - start) + out
-		i = start
-	return out
+	return NumberFormat.with_commas(amount)
 
 
-## Stack badges live in a 44px square, so big vault piles compact to 12.4k /
-## 3.1m rather than overflowing the tile. The exact count is in the tooltip and
-## in the selection line under the transfer bar.
-func _fmt_stack(amount: int) -> String:
-	if amount < 1000:
-		return str(amount)
-	if amount < 1_000_000:
-		@warning_ignore("integer_division")
-		return "%d%sk" % [amount / 1000, _tenth(amount, 1000)]
-	@warning_ignore("integer_division")
-	return "%d%sm" % [amount / 1_000_000, _tenth(amount, 1_000_000)]
-
-
-func _tenth(amount: int, unit: int) -> String:
-	@warning_ignore("integer_division")
-	var tenths: int = (amount % unit) / (unit / 10)
-	return "" if tenths == 0 else ".%d" % tenths
+## Paints the purse. Read-only: the balance itself is the server's inventory
+## count and is never written back from here. The readout abbreviates past 100k
+## so a seven-figure vault cannot push the header apart, and the pouch shell
+## keeps the exact figure in its tooltip for anyone pricing a transfer.
+func _set_gold_display(gold: int) -> void:
+	if _gold_label == null:
+		return
+	var purse: Dictionary = NumberFormat.format_stack_size(gold)
+	var purse_color: Color = purse["color"]
+	_gold_label.text = purse["text"]
+	_gold_label.add_theme_color_override(&"font_color", purse_color)
+	if _gold_pouch != null:
+		_gold_pouch.tooltip_text = "%s gold" % purse["exact_text"]
