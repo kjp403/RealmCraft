@@ -12,14 +12,14 @@ display_name = "Herring Hole"
 ore = ExtResource("2_ore")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 20
+&"fishing": 9
 })
 required_level = 5
 required_tool = &"fishing_rod"
 secondary_ore = ExtResource("5_sec")
 secondary_chance = 0.25
 secondary_job_xp = Dictionary[StringName, int]({
-&"fishing": 45
+&"fishing": 16
 })
 extraction_hp = 3
 max_charges = 50

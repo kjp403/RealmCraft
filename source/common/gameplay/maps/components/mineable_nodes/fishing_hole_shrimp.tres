@@ -11,7 +11,7 @@ display_name = "Shrimp Hole"
 ore = ExtResource("2_ore")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 10
+&"fishing": 8
 })
 required_level = 1
 required_tool = &"fishing_rod"

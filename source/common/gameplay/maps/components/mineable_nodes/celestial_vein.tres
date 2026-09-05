@@ -12,7 +12,7 @@ script = ExtResource("1_script")
 display_name = "Celestial Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 228
+&"mining": 58
 })
 secondary_ore = ExtResource("4_add")
 secondary_chance = 0.34
