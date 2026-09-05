@@ -12,14 +12,14 @@ display_name = "Tuna Hole"
 ore = ExtResource("2_ore")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 80
+&"fishing": 13
 })
 required_level = 20
 required_tool = &"fishing_rod"
 secondary_ore = ExtResource("5_sec")
 secondary_chance = 0.22
 secondary_job_xp = Dictionary[StringName, int]({
-&"fishing": 90
+&"fishing": 14
 })
 extraction_hp = 4
 max_charges = 50

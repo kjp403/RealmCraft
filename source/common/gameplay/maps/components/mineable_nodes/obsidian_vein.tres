@@ -12,17 +12,17 @@ script = ExtResource("1_script")
 display_name = "Obsidian Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 140
+&"mining": 38
 })
 secondary_ore = ExtResource("4_add")
 secondary_chance = 0.34
 required_level = 70
 required_tool = &"pickaxe"
-extraction_hp = 9
-min_charges = 3
-max_charges = 20
+extraction_hp = 42
+min_charges = 10
+max_charges = 50
 charge_regen_seconds = 26.0
-depleted_recharge_seconds = 130.0
+depleted_recharge_seconds = 195.0
 texture = ExtResource("3_tex")
 idle_frames = Array[Texture2D]([ExtResource("5_f1"), ExtResource("6_f2")])
 idle_frame_seconds = 0.55

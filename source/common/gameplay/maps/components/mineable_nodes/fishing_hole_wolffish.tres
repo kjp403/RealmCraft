@@ -11,11 +11,11 @@ display_name = "Wolffish Hole"
 ore = ExtResource("2_fish")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 410
+&"fishing": 74
 })
 required_level = 80
 required_tool = &"fishing_rod"
-extraction_hp = 10
+extraction_hp = 48
 max_charges = 50
 min_charges = 10
 charge_regen_seconds = 18.0

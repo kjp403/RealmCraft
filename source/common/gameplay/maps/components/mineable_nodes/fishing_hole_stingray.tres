@@ -11,11 +11,11 @@ display_name = "Stingray Hole"
 ore = ExtResource("2_fish")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 330
+&"fishing": 47
 })
 required_level = 70
 required_tool = &"fishing_rod"
-extraction_hp = 9
+extraction_hp = 36
 max_charges = 50
 min_charges = 10
 charge_regen_seconds = 16.0

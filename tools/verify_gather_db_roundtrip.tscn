@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_gather_db_roundtrip.gd" id="1_gatherdb"]
+
+[node name="VerifyGatherDbRoundtrip" type="Node"]
+script = ExtResource("1_gatherdb")

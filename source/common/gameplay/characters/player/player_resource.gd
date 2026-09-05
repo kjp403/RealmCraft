@@ -251,6 +251,13 @@ var active_inventory_bag: int = 0
 ## A different date means the allowance has reset; the comparison IS the reset,
 ## so nothing has to run at midnight.
 @export var peddler_purchase_day: String = ""
+## Per-node gather pools: "<instance name>|<node path>" -> {"c","p","t"}.
+## Lives on the character, not on the [MineableNode], because a ServerInstance
+## is freed within 20 seconds of its last player leaving and used to take every
+## node's charge state with it — which made a relog a free respawn. Read and
+## written only through [GatherNodeLedger]; the stamps are wall clock, so a
+## drained vein keeps regenerating while its owner is offline.
+@export var gather_nodes: Dictionary = {}
 
 # Profile
 @export var profile_status: String = "Hello I'am new!"
