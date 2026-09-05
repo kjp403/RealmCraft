@@ -40,19 +40,26 @@ static func looks_like_ip(token: String) -> bool:
 	return false
 
 
-static func is_banned(ip: String) -> bool:
+## The live ban entry for [param ip], or an empty Dictionary when that IP isn't
+## banned. Mirrors [method BanList.ban_info]: expiry is purged here, and the
+## login path reads reason/expiry off the result to explain the rejection.
+static func ban_info(ip: String) -> Dictionary:
 	if not _loaded:
 		_load()
 	var key: String = normalize_ip(ip)
 	if key.is_empty() or not _entries.has(key):
-		return false
+		return {}
 	var entry: Dictionary = _entries[key]
 	var expires_at: int = int(entry.get("expires_at_ms", 0))
 	if expires_at > 0 and int(Time.get_unix_time_from_system() * 1000.0) >= expires_at:
 		_entries.erase(key)
 		_save()
-		return false
-	return true
+		return {}
+	return entry.duplicate()
+
+
+static func is_banned(ip: String) -> bool:
+	return not ban_info(ip).is_empty()
 
 
 static func ban(ip: String, reason: String, by_id: int, duration_ms: int = 0) -> String:

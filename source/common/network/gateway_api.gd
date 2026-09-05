@@ -27,6 +27,13 @@ const ERR_GUEST_DISABLED: int = 61
 ## server). The boot handshake (and login) return this so the client can show a
 ## hard "please update" instead of letting them in.
 const ERR_OUTDATED_VERSION: int = 70
+## The account, or the IP it is connecting from, is banned on the target world.
+## Unlike every other code here the client does NOT show canned text for this —
+## the world composes the real reason and remaining duration (BanNotice) and
+## sends it in the response's "msg", because a ban a player can't read is just a
+## silent disconnect. ERR_BANNED's translation is only the fallback for an
+## empty msg.
+const ERR_BANNED: int = 80
 
 
 ## This build's version, from project.godot's application/config/version. Same

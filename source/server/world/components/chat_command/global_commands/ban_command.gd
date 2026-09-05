@@ -45,9 +45,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	BanList.ban(target.account_name, reason, admin_id, duration_ms)
 
 	if target.online:
-		var notice: String = "You have been banned (%s)." % duration_label
-		if not reason.is_empty():
-			notice += "\nReason: " + reason
+		# Same formatter the login gate uses, so the line they read now and the
+		# one they get on their next login attempt are word for word identical.
+		var notice: String = BanNotice.account_message(
+			BanList.ban_info(target.account_name)
+		)
 		ws.chat_service.push_system_to_player(server_instance, target.player_id, notice)
 		ws.peer.disconnect_peer.call_deferred(target.peer_id)
 		return "Banned %s for %s." % [target.label(), duration_label]

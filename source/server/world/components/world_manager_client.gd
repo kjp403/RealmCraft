@@ -364,20 +364,33 @@ func player_disconnected(_username: String) -> void:
 
 
 @rpc("authority")
-func create_player_character_request(gateway_id: int, peer_id: int, username: String, character_data: Dictionary) -> void:
+func create_player_character_request(gateway_id: int, peer_id: int, username: String, character_data: Dictionary, client_ip: String = "") -> void:
+	# Same gate as request_login, and for the same reason: creating a character
+	# hands back a world token directly, so without this a banned account walks
+	# in through "new character" and only meets the silent handshake drop.
+	var ban_notice: String = _login_ban_notice(username, client_ip)
+	if not ban_notice.is_empty():
+		print("Character creation refused for %s — %s" % [username, ban_notice.replace("\n", " ")])
+		player_character_creation_result.rpc_id(
+			1, gateway_id, peer_id, username, 0, client_ip, ban_notice
+		)
+		return
+
 	var character_id: int = database.create_player_character(username, character_data)
-	
+
 	player_character_creation_result.rpc_id(
 		1,
 		gateway_id,
 		peer_id,
 		username,
-		character_id
+		character_id,
+		client_ip,
+		"",
 	)
 
 
 @rpc("any_peer")
-func player_character_creation_result(_gateway_id: int, _peer_id: int, _username: String, _result_code: int) -> void:
+func player_character_creation_result(_gateway_id: int, _peer_id: int, _username: String, _result_code: int, _client_ip: String = "", _notice: String = "") -> void:
 	pass
 
 
@@ -412,6 +425,12 @@ func request_login(
 
 	if player.account_name != username:
 		return
+
+	var ban_notice: String = _login_ban_notice(player.account_name, client_ip)
+	if not ban_notice.is_empty():
+		_reject_login(gateway_id, peer_id, username, character_id, client_ip, ban_notice)
+		return
+
 	result_login.rpc_id(
 		1,
 		OK,
@@ -420,6 +439,46 @@ func request_login(
 		username,
 		character_id,
 		client_ip,
+		"",
+	)
+
+
+## The player-facing reason this login must be refused, or "" to let it through.
+##
+## Checked here rather than on the master because the ban lists are the world's
+## own files — the master is a separate process and would serve a stale cache of
+## them. This is also the last point where a refusal can still reach the player:
+## the world auth handshake (WorldServer._authentication_callback) can only drop
+## the socket, which the client can't tell apart from a connection failure.
+## Account ban wins over IP ban when both apply — it's the more specific fact.
+func _login_ban_notice(account_name: String, client_ip: String) -> String:
+	var ban_entry: Dictionary = BanList.ban_info(account_name)
+	if not ban_entry.is_empty():
+		return BanNotice.account_message(ban_entry)
+	var ip_ban_entry: Dictionary = IpBanList.ban_info(client_ip)
+	if not ip_ban_entry.is_empty():
+		return BanNotice.ip_message(ip_ban_entry)
+	return ""
+
+
+func _reject_login(
+	gateway_id: int,
+	peer_id: int,
+	username: String,
+	character_id: int,
+	client_ip: String,
+	notice: String
+) -> void:
+	print("Login refused for %s (char %d) — %s" % [username, character_id, notice.replace("\n", " ")])
+	result_login.rpc_id(
+		1,
+		GatewayAPI.ERR_BANNED,
+		gateway_id,
+		peer_id,
+		username,
+		character_id,
+		client_ip,
+		notice,
 	)
 
 
@@ -430,6 +489,7 @@ func result_login(
 	_peer_id: int,
 	_username: String,
 	_character_id: int,
-	_client_ip: String = ""
+	_client_ip: String = "",
+	_notice: String = ""
 ) -> void:
 	pass
