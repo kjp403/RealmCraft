@@ -31,9 +31,10 @@ const TOOL_DIR := "res://source/common/gameplay/items/weapons/tools/"
 const SWING_DIR := "res://source/common/gameplay/combat/ability/ability_collection/pick_swing/"
 
 ## Ceiling on swings per yield with the best tool the node's own level gate
-## allows. Rosewood at 12 is what this exists to catch; the pre-expansion tiers
-## sit at 2-3 and the reworked expansion tiers at 4-6.
-const MAX_SWINGS: int = 8
+## allows. Rosewood at 12 is what this exists to catch. Everything shipping now
+## sits at 2-3, and the two worst nodes in the game (Halibut, Blue Lobster) at 5
+## — both on the Dragon rod, which is the last rod in the ladder.
+const MAX_SWINGS: int = 6
 
 ## Per-yield cooldown multipliers to report xp/hr at. 0.5 is the level-only
 ## floor (JobPerks.min_cooldown_factor) — a player who just hit the gate and has
