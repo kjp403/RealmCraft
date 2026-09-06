@@ -44,9 +44,27 @@ func _ready() -> void:
 	# Servers carry no visuals; a marker there is pure overhead. GameMode, not
 	# multiplayer.is_server(): a client whose peer is not up yet reads as a server
 	# and would silently skip its own marker.
-	if GameMode.is_any_server():
+	#
+	# The second half of this guard is not redundant. GameMode.mode() falls back
+	# to OS.has_feature and returns "" when a process is launched with no
+	# --mode= and no baked role — is_any_server() is then FALSE on a world
+	# server, this line runs, and ClientState has already queue_free()d itself
+	# (it frees whenever not GameMode.is_client()). The result is
+	# "Invalid access to property 'npc_talked' on a previously freed object" at
+	# map load. Production launches pass --mode=world-server so it never fires
+	# there, but every editor "Play Scene" on a server map does.
+	#
+	# Asking whether ClientState is ALIVE is the honest question here; asking
+	# what role we are is a proxy for it that is wrong in exactly this case.
+	if GameMode.is_any_server() or not is_instance_valid(ClientState):
 		hide()
 		return
+	# No matching disconnect anywhere in this file, deliberately: Godot removes
+	# every connection an Object owns when it is freed, in both directions. A
+	# hand-written disconnect in _exit_tree would be dead code on a normal free
+	# and an active hazard at shutdown, where it would dereference ClientState
+	# again after the autoload may already be gone — reintroducing the very error
+	# it looks like it is preventing.
 	ClientState.npc_talked.connect(_on_npc_talked)
 	# Deferred, and in this order: children are ready BEFORE their parent, so the
 	# NPC's @onready animated_sprite is still null right now — and the bob tween
