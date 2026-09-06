@@ -109,32 +109,137 @@ SILT = [
 ]
 
 
-def build_signet() -> None:
-    """Ankhemet Signet, from the Bulwark band.
+"""A SIGNET IS NOT A GEM RING.
 
-    Two ramps, split by SATURATION rather than by luminance: the band is the
-    pack's near-neutral metal and the gem is the one saturated element, so a
-    single luminance ramp would paint the stone the same gold as the shank and
-    lose the seal entirely.
+Every other ring in the game is a band carrying a raised cabochon, and the first
+pass at Ankhemet was a straight recolour of the Bulwark band — which left the
+game's only two signets reading as the same object in two colours. Recolouring
+one of them again would not have fixed that; they need different SHAPES.
+
+So signets get their own silhouette: a broad flat seal face, engraved, sitting
+squarely on the band. That is what a signet physically is — a thing you press
+into wax — and at 32x32 a wide flat plate reads apart from a small raised stone
+immediately, which no palette change can achieve.
+
+Drawn here rather than recoloured, because there is no flat-faced ring anywhere
+in the pack to derive one from.
+"""
+
+# The band, front to back. Index 0 is the outline.
+GOLD = ["#141006", "#5c3d10", "#8f6318", "#c08f2a", "#e8bf5c", "#ffe9a8"]
+STEEL = ["#0d1016", "#2c3542", "#4a5768", "#6f7d90", "#9aa7b8", "#d6dee8"]
+# The seal face: dark stone with an engraved mark cut into it.
+CARNELIAN = ["#3a0d05", "#6b1a0d", "#9c3117", "#c8572f"]
+IRONSEAL = ["#0f141c", "#33425a", "#4d6180", "#6e83a4"]
+
+
+def _ellipse(x, y, cx, cy, rx, ry) -> float:
+    """Normalised radius: <1 inside, 1 on the edge."""
+    return ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
+
+
+def draw_signet(out_name: str, band, seal, mark: str) -> None:
+    """A 32x32 signet: oval band below, flat engraved seal plate above.
+
+    Shading runs from the upper-left, matching every other ring in the pack, so
+    these still sit in the same light even though the shapes are new.
     """
-    band = [(0.00, "#1e1206"), (0.20, "#4a2f0d"), (0.38, "#7c5615"),
-            (0.52, "#ab7c22"), (0.66, "#dcac41"), (1.00, "#f7e0a2")]
-    seal = [(0.30, "#5e1710"), (0.45, "#8d2a18"), (0.65, "#c05230")]
+    S = 32
+    grid = [[None] * S for _ in range(S)]
 
-    im = Image.open(os.path.join(ICONS, "ring_ring_bulwark.png")).convert("RGBA")
-    px = im.load()
-    for y in range(im.height):
-        for x in range(im.width):
-            r, g, b, a = px[x, y]
-            if a == 0:
+    # --- band: an oval ring, open in the middle -----------------------------
+    bcx, bcy, brx, bry = 15.5, 20.0, 8.0, 7.4
+    for y in range(S):
+        for x in range(S):
+            outer = _ellipse(x, y, bcx, bcy, brx, bry)
+            inner = _ellipse(x, y, bcx, bcy, brx - 3.6, bry - 3.4)
+            if outer <= 1.0 and inner >= 1.0:
+                # Light from the upper left, plus a darker underside so the band
+                # reads as round rather than as a flat washer.
+                t = 0.5 - (x - bcx) / (brx * 2.6) - (y - bcy) / (bry * 2.2)
+                grid[y][x] = band[max(1, min(len(band) - 1,
+                                             1 + int(t * (len(band) - 1))))]
+
+    # --- seal plate: a flat octagon sitting ON the band ----------------------
+    # NARROWER than the band, and overlapping it. A plate the same width as the
+    # band reads as two stacked discs — a figure 8 — rather than as one object,
+    # which is how the first version of these came out. The width difference is
+    # what says "plate on top of ring".
+    px0, px1, py0, py1 = 10, 21, 3, 15
+    for y in range(py0, py1 + 1):
+        for x in range(px0, px1 + 1):
+            # Cut the corners: an octagon reads as a struck plate, a rectangle
+            # reads as a UI element.
+            cut = (min(x - px0, px1 - x) + min(y - py0, py1 - y)) < 2
+            if cut:
                 continue
-            _, _, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
-            t = luma((r, g, b))
-            px[x, y] = ramp_at(seal if s >= 0.55 else band, t) + (a,)
-    im.save(os.path.join(ICONS, "everburn_signet_tmp.png"))
-    os.replace(os.path.join(ICONS, "everburn_signet_tmp.png"),
-               os.path.join(ICONS, "ankhemet_signet.png"))
-    print("  %-28s <- ring_ring_bulwark (band + seal)" % "ankhemet_signet.png")
+            edge = (x in (px0, px0 + 1, px1 - 1, px1)
+                    or y in (py0, py1))
+            if edge:
+                # The plate keeps a metal rim, so the stone looks set INTO it.
+                t = 0.55 - (x - 15.5) / 30.0 - (y - 9.0) / 22.0
+                grid[y][x] = band[max(1, min(len(band) - 1,
+                                             1 + int(t * (len(band) - 1))))]
+            else:
+                t = 0.6 - (x - 15.5) / 26.0 - (y - 9.0) / 20.0
+                # Index 0 is RESERVED for the engraving. Letting the plate's own
+                # shadow reach it makes the cut invisible wherever the plate is
+                # already dark, which is exactly how the first Bulwark plate came
+                # out as a featureless black box.
+                grid[y][x] = seal[max(1, min(len(seal) - 1,
+                                             int(t * len(seal))))]
+
+    # --- the engraving ------------------------------------------------------
+    # Cut in the darkest seal tone, one pixel wide. This is the only part that
+    # differs between the two signets beyond palette, and it is what a player
+    # actually reads at a glance once they know both exist.
+    for x, y in MARKS[mark]:
+        if grid[y][x] is not None:
+            grid[y][x] = seal[0]
+
+    # --- outline ------------------------------------------------------------
+    for y in range(S):
+        for x in range(S):
+            if grid[y][x] is not None:
+                continue
+            if any(0 <= x + dx < S and 0 <= y + dy < S
+                   and grid[y + dy][x + dx] is not None
+                   and (x + dx, y + dy) not in OUTLINED
+                   for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))):
+                OUTLINED.add((x, y))
+    for x, y in OUTLINED:
+        grid[y][x] = band[0]
+    OUTLINED.clear()
+
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    px = im.load()
+    for y in range(S):
+        for x in range(S):
+            if grid[y][x] is not None:
+                px[x, y] = hexc(grid[y][x]) + (255,)
+    im.save(os.path.join(ICONS, out_name + ".png"))
+    print("  %-28s drawn (band + flat seal, %s)" % (out_name + ".png", mark))
+
+
+OUTLINED: set = set()
+
+# Engravings, in plate coordinates. Ankhemet is the ankh the dunes were promised
+# under; Bulwark is a tower mark.
+MARKS = {
+    "ankh": [(15, 6), (16, 6), (14, 7), (17, 7), (15, 8), (16, 8),
+             (13, 9), (14, 9), (15, 9), (16, 9), (17, 9), (18, 9),
+             (15, 10), (16, 10), (15, 11), (16, 11)],
+    "tower": [(13, 6), (15, 6), (17, 6), (18, 6),
+              (13, 7), (14, 7), (15, 7), (16, 7), (17, 7), (18, 7),
+              (14, 8), (15, 8), (16, 8), (17, 8),
+              (14, 9), (15, 9), (16, 9), (17, 9),
+              (13, 10), (14, 10), (15, 10), (16, 10), (17, 10), (18, 10)],
+}
+
+
+def build_signets() -> None:
+    draw_signet("ankhemet_signet", GOLD, CARNELIAN, "ankh")
+    draw_signet("bulwark_signet", STEEL, IRONSEAL, "tower")
 
 
 def build_coal() -> None:
@@ -200,7 +305,7 @@ def main() -> None:
     remap("gear_fire_boots", "slagborn_sabatons", SLAG)
     remap("gear_enchanted_helm", "siltbound_coronet", SILT)
     remap("gear_enchanted_torso_heavy", "siltbound_plate", SILT)
-    build_signet()
+    build_signets()
     build_coal()
     print("done — run the editor once to import, then repoint the .tres files")
 
