@@ -39,6 +39,8 @@ const ACTION_SALVAGE := 3
 @onready var inventory_grid: GridContainer = $MarginContainer/MainColumn/Content/InventoryScroll/InventoryGrid
 
 var gold_label: Label
+## Hoverable parent of [member gold_label] — holds the exact-balance tooltip.
+var gold_pouch: Control
 ## Current active inventory bag (0-2) and unlocked count (1-3), mirrored from
 ## the server by inventory.bags. The grid below shows ONE bag at a time.
 var active_bag: int = 0
@@ -139,22 +141,40 @@ func _build_currency_pouch() -> void:
 		gold_icon.texture = gold_item.item_icon
 
 	gold_label = Label.new()
-	gold_label.text = "0"
 	gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	gold_label.add_theme_font_size_override(&"font_size", 11)
-	gold_label.add_theme_color_override(
-		&"font_color",
-		Color(1.0, 0.85, 0.45)
-	)
+	# font_color is owned by _set_gold_display() — it grades with the balance.
 	gold_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gold_label.clip_text = false
+	gold_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 
 	pouch.add_child(gold_icon)
 	pouch.add_child(gold_label)
+	# The label ignores the mouse so the pouch row carries the exact-balance
+	# tooltip — see _set_gold_display().
+	gold_pouch = pouch
+	_set_gold_display(0)
 
 	header.add_child(pouch)
 
 	# Move the pouch immediately before the X button.
 	header.move_child(pouch, close_button.get_index())
+
+
+## Paints the header purse. The raw total is only ever READ here — it is the
+## server's inventory count, and nothing writes an abbreviated value back.
+## The badge abbreviates past 100k so a seven-figure purse stops shoving the
+## close button off the header, and the pouch row keeps the exact figure in its
+## tooltip because a player pricing a trade needs the last coin, not "7.4M".
+func _set_gold_display(gold: int) -> void:
+	if gold_label == null:
+		return
+	var purse: Dictionary = NumberFormat.format_stack_size(gold)
+	var purse_color: Color = purse["color"]
+	gold_label.text = purse["text"]
+	gold_label.add_theme_color_override(&"font_color", purse_color)
+	if gold_pouch != null:
+		gold_pouch.tooltip_text = "%s gold" % purse["exact_text"]
 
 
 ## Bag 1/2/3 selector directly under the header, above the grid. The grid, the
@@ -361,9 +381,7 @@ func _refresh_inventory() -> void:
 	var inventory: Dictionary = result[0]
 	var entries: Array[Dictionary] = []
 
-	gold_label.text = str(
-		Inventory.count(inventory, Economy.gold_id())
-	)
+	_set_gold_display(Inventory.count(inventory, Economy.gold_id()))
 
 	var bag_result: Array = await Client.request_data_await(
 		&"inventory.bags",
@@ -452,11 +470,23 @@ func _display_entries(entries: Array[Dictionary], order: Array) -> void:
 
 		var amount: int = int(data.get("a", 1))
 		if amount > 1:
+			# Presentation only — `amount` itself is never rewritten, so the
+			# stack the server holds and the stack the drag code moves stay the
+			# raw integer. Once the badge abbreviates, the exact count moves
+			# into the slot tooltip so it is still one hover away.
+			var stack: Dictionary = NumberFormat.format_stack_size(amount)
+			var stack_color: Color = stack["color"]
+			if amount >= NumberFormat.ABBREVIATE_FROM:
+				slot.tooltip_text += "\n\nYou have %s." % stack["exact_text"]
+
 			var quantity := Label.new()
-			quantity.text = str(amount)
+			quantity.text = stack["text"]
+			# The abbreviation is short by design; never wrap or ellipsize it.
+			quantity.clip_text = false
+			quantity.autowrap_mode = TextServer.AUTOWRAP_OFF
 			quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			quantity.add_theme_font_size_override(&"font_size", 10)
-			quantity.add_theme_color_override(&"font_color", Color.WHITE)
+			quantity.add_theme_color_override(&"font_color", stack_color)
 			quantity.add_theme_color_override(
 				&"font_outline_color",
 				Color(0.0, 0.0, 0.0, 0.9)

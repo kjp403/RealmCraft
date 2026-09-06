@@ -9,13 +9,13 @@ script = ExtResource("1_script")
 display_name = "Runite Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 95
+&"mining": 20
 })
 required_level = 60
 required_tool = &"pickaxe"
 extraction_hp = 7
 min_charges = 10
-max_charges = 30
+max_charges = 50
 charge_regen_seconds = 22.0
 depleted_recharge_seconds = 110.0
 texture = ExtResource("3_tex")

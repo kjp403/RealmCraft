@@ -418,7 +418,9 @@ func handle_world_enter(payload: Dictionary) -> Dictionary:
 	var response: Dictionary = await send_request("enter_world", payload)
 	var error: Error = response.get("error", 0)
 	if error != OK:
-		return {"error": error}
+		# Keep "msg" — a ban rejection carries its reason there, and stripping it
+		# would leave the client with a bare code and nothing to show the player.
+		return {"error": error, "msg": str(response.get("msg", ""))}
 
 	return response
 

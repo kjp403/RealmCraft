@@ -81,6 +81,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 24:
 		_migration_v24(db)
 		_set_schema_version(db, 24)
+	if version < 25:
+		_migration_v25(db)
+		_set_schema_version(db, 25)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -485,12 +488,24 @@ static func _migration_v23(db: SQLite) -> void:
 		db.query("ALTER TABLE players ADD COLUMN peddler_json TEXT NOT NULL DEFAULT '{}';")
 
 
-## v24: Boss Collection Log — boss_id -> {"kills", "items", "completed",
+## Per-node gather pools, keyed "<instance name>|<node path>" -> {"c","p","t"}.
+## Shape owned by [GatherNodeLedger], not spelled out here, so the writer and
+## reader cannot drift. It has to be persisted because a ServerInstance is freed
+## ~20s after its last player leaves, and node charges used to die with it —
+## relogging refilled every vein, tree and fishing hole the player had drained.
+## ADD COLUMN, no wipe; existing rows migrate to an empty ledger, which reads as
+## all-full and is exactly what those characters log in to today.
+static func _migration_v24(db: SQLite) -> void:
+	if not _column_exists(db, "players", "gather_nodes_json"):
+		db.query("ALTER TABLE players ADD COLUMN gather_nodes_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v25: Boss Collection Log — boss_id -> {"kills", "items", "completed",
 ## "last_unlock_kill"}. ONE column for the whole roster: adding a boss must be a
 ## .tres drop, not a migration, and every extra column is another INSERT
 ## placeholder to keep aligned. ADD COLUMN — no DB wipe; existing players migrate
 ## to an empty log, which is correct (nothing retroactively credits kills they
 ## made before the log existed).
-static func _migration_v24(db: SQLite) -> void:
+static func _migration_v25(db: SQLite) -> void:
 	if not _column_exists(db, "players", "collection_log_json"):
 		db.query("ALTER TABLE players ADD COLUMN collection_log_json TEXT NOT NULL DEFAULT '{}';")

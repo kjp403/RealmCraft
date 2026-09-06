@@ -564,7 +564,9 @@ func _on_login_login_button_pressed() -> void:
 	var response: Dictionary = await request_login(username, password)
 	if response.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(response))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(response), GatewayError.title_for(response)
+		)
 		login_panel.show()
 		login_button.disabled = false
 		return
@@ -591,7 +593,9 @@ func _on_guest_button_pressed() -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		main_panel.show()
 		return
 
@@ -618,7 +622,9 @@ func _on_world_selected(world_id: int) -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		$WorldSelection.show()
 		return
 
@@ -675,7 +681,9 @@ func _on_character_selected(world_id: int, character_id: int) -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		$CharacterSelection.show()
 		$BackButton.show()
 		return
@@ -756,7 +764,9 @@ func _on_create_character_button_pressed() -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		create_button.disabled = false
 		$CharacterCreation.show()
 		return
@@ -798,7 +808,9 @@ func create_account() -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		$CreateAccountPanel.show()
 		return
 	
@@ -964,7 +976,9 @@ func _on_continue_button_pressed() -> void:
 	)
 	if d.has("error"):
 		_hide_connecting()
-		await popup_panel.confirm_message(GatewayError.humanize(d))
+		await popup_panel.confirm_message(
+			GatewayError.humanize(d), GatewayError.title_for(d)
+		)
 		$AlreadyConnectedPanel.show()
 		return
 

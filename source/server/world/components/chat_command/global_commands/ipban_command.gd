@@ -64,8 +64,11 @@ func execute(args: PackedStringArray, peer_id: int, server_instance: ServerInsta
 	if banned_ip.is_empty():
 		return "Refusing to ban unusable/loopback IP '%s'." % ip
 
-	# Kick everyone currently connected from that IP.
-	var kicked: int = ws.disconnect_peers_with_ip(banned_ip, "You have been IP-banned (%s)." % duration_label)
+	# Kick everyone currently connected from that IP, with the same wording the
+	# login gate will give them when they try to come back.
+	var kicked: int = ws.disconnect_peers_with_ip(
+		banned_ip, BanNotice.ip_message(IpBanList.ban_info(banned_ip))
+	)
 	if kick_peer_id != 0 and ws.connected_players.has(kick_peer_id):
 		ws.peer.disconnect_peer.call_deferred(kick_peer_id)
 		kicked = maxi(kicked, 1)

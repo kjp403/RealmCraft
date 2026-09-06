@@ -22,6 +22,18 @@ extends Control
 ## the play area, where LMB is click-to-move. Every node here is
 ## MOUSE_FILTER_IGNORE — a label that ate a movement click would feel like the
 ## game dropped input.
+##
+## DIRECTION IS NOT A STYLE CHOICE. The orb heads the upper-right rail at
+## y=128, and the navigation minimap ends at y=120 with z_index 80 and an opaque
+## panel ([NavigationMinimap]) — so a number that rises off the TOP of the orb is
+## drawn inside the minimap's rect, underneath it, and no player ever sees it.
+## That is exactly what shipped: the drops worked, and were invisible in game
+## while the preview tool (a bare canvas, no minimap) showed them fine.
+##
+## So numbers grow LEFT of the anchor into open play area and extra rows stack
+## DOWNWARD, away from the minimap. [constant DRIFT_PX] then has to stay small
+## enough that the top of the rise clears y=120 from wherever the orb places
+## this node ([constant XpTrackerHud.DROPS_ANCHOR]).
 
 ## How far one drop rises across its life, in whole pixels.
 const DRIFT_PX: int = 26
@@ -114,10 +126,11 @@ func _spawn(job: StringName, amount: int, tint: Color, now_ms: int) -> void:
 	var drop := Drop.new()
 	drop.total = amount
 	drop.born_ms = now_ms
-	# Stack above whatever is already on screen. Rows are assigned at spawn and
-	# never reflowed: shuffling live numbers downward as an older one expires
-	# reads as a glitch, and the drops are gone in about a second anyway.
-	drop.base_y = -float(_live_count() * ROW_GAP)
+	# Stack BELOW whatever is already on screen — downward, because upward is the
+	# minimap (see the class doc). Rows are assigned at spawn and never reflowed:
+	# shuffling live numbers as an older one expires reads as a glitch, and the
+	# drops are gone in about a second anyway.
+	drop.base_y = float(_live_count() * ROW_GAP)
 
 	var label: Label = PixelUI.text("", FONT_SIZE, tint)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -130,12 +143,14 @@ func _spawn(job: StringName, amount: int, tint: Color, now_ms: int) -> void:
 	_animate(drop)
 
 
-## Rewrite the label and re-centre it on this node's origin.
+## Rewrite the label and re-hang it from this node's origin.
 ##
-## Re-measuring on every tick matters: "+90 xp" and "+1,250 xp" are different
-## widths, and a label that keeps its old width drifts off-centre as the number
-## grows. Positions are rounded to whole pixels — a label on a half pixel is
-## exactly the blur the pixel font is chosen to avoid.
+## RIGHT-aligned: the anchor sits at the orb's left edge and the text grows away
+## from the rail, so a four-digit number cannot creep back under the orb (or the
+## minimap above it) the way a centred one does. Re-measuring on every tick
+## matters for the same reason — "+90 xp" and "+1,250 xp" are different widths.
+## Positions are rounded to whole pixels: a label on a half pixel is exactly the
+## blur the pixel font is chosen to avoid.
 func _apply_text(drop: Drop, tint: Color) -> void:
 	if not is_instance_valid(drop.label):
 		return
@@ -145,7 +160,7 @@ func _apply_text(drop: Drop, tint: Color) -> void:
 	drop.label.size = wanted
 	# Pivot at the centre so the pop scales about the number, not its top-left.
 	drop.label.pivot_offset = wanted * 0.5
-	drop.label.position = Vector2(roundf(-wanted.x * 0.5), roundf(drop.base_y))
+	drop.label.position = Vector2(roundf(-wanted.x), roundf(drop.base_y))
 
 
 ## (Re)start the drop's animation from the top: pop the scale, restart the rise,

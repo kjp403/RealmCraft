@@ -42,12 +42,30 @@ static func humanize(response: Dictionary) -> String:
 				return TranslationServer.translate("ERR_ACCOUNT_CREATE_FAILED")
 			GatewayAPI.ERR_OUTDATED_VERSION:
 				return TranslationServer.translate("ERR_OUTDATED")
+			GatewayAPI.ERR_BANNED:
+				# The only code whose text comes from the server: the world knows
+				# the reason and the remaining duration, the client can't. Canned
+				# text is the fallback for a ban recorded with no reason.
+				var ban_notice: String = str(response.get("msg", "")).strip_edges()
+				if ban_notice.is_empty():
+					return TranslationServer.translate("ERR_BANNED")
+				return ban_notice
 			Error.ERR_TIMEOUT:
 				return TranslationServer.translate("ERR_CONNECTION")
 			_:
 				return TranslationServer.translate("ERR_GENERIC")
 
 	return TranslationServer.translate("ERR_GENERIC")
+
+
+## Popup title for an error response. Everything keeps the generic confirm title
+## it has always had; a ban gets its own, because "Please Confirm" over "this
+## account is permanently banned" reads like the game is asking permission.
+static func title_for(response: Dictionary) -> StringName:
+	var code: Variant = response.get("error", null)
+	if (code is int or code is float) and int(code) == GatewayAPI.ERR_BANNED:
+		return &"BANNED_TITLE"
+	return &"PLEASE_CONFIRM"
 
 
 ## True when the error looks like the gateway simply wasn't reachable (worth a

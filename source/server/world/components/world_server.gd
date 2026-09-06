@@ -288,7 +288,11 @@ func _authentication_callback(peer_id: int, data: PackedByteArray) -> void:
 		var pending: PlayerResource = token_list[auth_token]
 		var client_ip: String = _resolve_client_ip(peer_id, str(token_client_ips.get(auth_token, "")))
 		token_client_ips.erase(auth_token)
-		# Account bans block world entry entirely (character switch can't dodge).
+		# Backstop only. Both ban checks now run earlier, in
+		# WorldManagerClient._login_ban_notice, because a refusal there can still
+		# tell the player why. All this can do is drop the socket, which the
+		# client reports as a connection failure — so anything caught here means
+		# a token was issued to a banned account and the earlier gate was missed.
 		if pending != null and BanList.is_banned(pending.account_name):
 			print("Peer: %d rejected — account banned (%s)." % [peer_id, pending.account_name])
 			token_list.erase(auth_token)

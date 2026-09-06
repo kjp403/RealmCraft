@@ -25,6 +25,7 @@
   --cat-play: #2ecc7a;
   --cat-donate: #e8c56a;
   --cat-peddler: #ffd640;
+  --cat-terms: #e8c56a;
   --theme: var(--accent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   --display: "Jersey 10", "Silkscreen", monospace;
@@ -480,6 +481,7 @@ a.cat-donate { color: var(--cat-donate); }
 .theme-guilds { --theme: var(--cat-guilds); }
 .theme-boards { --theme: var(--cat-boards); }
 .theme-donate { --theme: var(--cat-donate); }
+.theme-terms { --theme: var(--cat-terms); }
 body[class^="theme-"] nav.primary a.active { color: var(--theme); }
 body[class^="theme-"] .filters a.active,
 body[class^="theme-"] .filters button.active,
@@ -502,7 +504,8 @@ body[class^="theme-"] article.page {
 .theme-quests article.page > h2,
 .theme-npcs article.page > h2,
 .theme-items article.page > h2,
-.theme-donate .prose h2 {
+.theme-donate .prose h2,
+.theme-terms .prose h2 {
   color: var(--theme);
 }
 .theme-boards .lb-panel { border-top: 3px solid var(--theme); }
@@ -989,3 +992,56 @@ body.location-scene article.page {
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
+
+/* Terms of Service. The page rides the shared `.page.prose` card, so only the
+   bits with no equivalent elsewhere on the site are defined here: the section
+   numbering, the two callouts, and a list marker that survives the reset. */
+.terms-updated {
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 1.4rem;
+}
+.terms-page h2 { margin: 2rem 0 0.6rem; }
+.terms-page > h2:first-of-type { margin-top: 0.6rem; }
+.terms-page h3 {
+  color: var(--accent-2);
+  margin: 1.3rem 0 0.3rem;
+}
+.terms-num { color: var(--accent-2); margin-right: 0.45rem; }
+.terms-page ul { margin: 0.5rem 0 1rem; }
+.terms-page li { margin-bottom: 0.35rem; }
+.terms-page li strong { color: var(--text); }
+.terms-callout {
+  margin: 1.4rem 0 0;
+  padding: 0.9rem 1.05rem;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--danger);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+.terms-callout strong { color: var(--danger); }
+.terms-support {
+  margin: 1.6rem 0 0;
+  padding: 0.9rem 1.05rem;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+.terms-support-label {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin-bottom: 0.2rem;
+}
+/* Footer legal links, alongside the alpha notice. */
+.footer-links { margin-top: 0.4rem; }
+.footer-links a { color: var(--muted); }
+.footer-links a:hover { color: var(--text); }

@@ -582,6 +582,7 @@ function catIcon(id) {
     donate: `<path d="M12 20.4L4.8 12.2 8.2 5.6h7.6l3.4 6.6z"/><path d="M4.8 12.2h14.4M8.2 5.6 12 12.2 15.8 5.6"/>`,
     peddler: `<path d="M4.6 15.4h14.8"/><path d="M6.4 15.4V9.8a5.6 5.6 0 0 1 11.2 0v5.6"/><path d="M12 9.1v6.3"/><circle cx="8.6" cy="18.1" r="1.8"/><circle cx="15.4" cy="18.1" r="1.8"/>`,
     boss: `<path d="M4.8 16.6h14.4v2.1H4.8z"/><path d="M5.2 8.1l3.1 2.5L12 5.4l3.7 5.2 3.1-2.5v8.2H5.2z"/>`,
+    terms: `<path d="M6.6 4.6h7.8L18 8.2v11.2H6.6z"/><path d="M14.2 4.6v3.8H18"/><path d="M9.2 11.8h5.6M9.2 15h5.6"/>`,
     enemy: `<path d="M8.2 10.4c0-3 1.7-5.4 3.8-5.4s3.8 2.4 3.8 5.4v1.3H8.2z"/><path d="M8.2 11.7c-1.8.4-3 1.6-3 3.3 0 1.1.7 2 2.1 2.3"/><path d="M15.8 11.7c1.8.4 3 1.6 3 3.3 0 1.1-.7 2-2.1 2.3"/><path d="M9.3 19c.8-1.3 1.6-1.9 2.7-1.9s1.9.6 2.7 1.9"/><circle cx="10.3" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.2" r=".7" fill="currentColor" stroke="none"/>`,
   };
   const inner = d[id];
@@ -640,6 +641,7 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
       <a href="${PLAY_DESKTOP}">Download</a>
       <a href="/donate/" class="${active === "donate" ? "active" : ""}">Donate</a>
       <a href="${DISCORD}">Discord</a>
+      <a href="/terms/" class="${active === "terms" ? "active" : ""}">Terms</a>
       <a href="/peddler/" class="peddler ${active === "peddler" ? "active" : ""}">Peddler</a>
     </nav>
     <div class="search-wrap">
@@ -648,7 +650,10 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
     </div>
   </header>
   ${body}
-  <footer class="footer">Arkenelle is in alpha. Wiki pages are generated from the game files.</footer>
+  <footer class="footer">
+    <div>Arkenelle is in alpha. Wiki pages are generated from the game files.</div>
+    <div class="footer-links"><a href="/terms/">Terms of Service</a> · <a href="${DISCORD}">Discord</a></div>
+  </footer>
   <script src="/search.js?v=${assetV("search.js")}"></script>
 ${extraScripts}
 </body>
@@ -1936,6 +1941,149 @@ function listPage(title, intro, cardsHtml, active, cat) {
   });
 }
 
+// Last substantive edit to the terms below. Bump it whenever the wording
+// changes in a way a player would need to re-read — not for a typo or a style
+// tweak, and not automatically from the build date, which would reset the date
+// on every unrelated deploy and make a real change impossible to spot.
+const TERMS_UPDATED = "September 5, 2026";
+
+function termsPage() {
+  const li = (items) => `<ul>${items.map((t) => `<li>${t}</li>`).join("")}</ul>`;
+  return shell({
+    title: "Terms of Service — Arkenelle",
+    active: "terms",
+    theme: "terms",
+    body: `<main class="wrap">
+      <article class="page prose terms-page">
+        ${pageHeading("terms", "Terms of Service")}
+        <p class="terms-updated">Last updated: ${TERMS_UPDATED}</p>
+        <p class="muted">These terms govern your access to and use of Arkenelle, including the game client, the game servers, this website, and any purchases. They set out the rules every player is expected to follow and the terms under which purchases are made.</p>
+
+        <h2><span class="terms-num">1.</span>Acceptance of Terms</h2>
+        <p>By registering an account, logging in, or otherwise playing Arkenelle, you confirm that you have read, understood, and agreed to these Terms of Service. If you do not agree with any part of them, you must not create an account or play the game.</p>
+        <p>Continued play after a change to these terms constitutes acceptance of the updated version. The "last updated" date above is revised whenever a substantive change is made.</p>
+        <p>Breaking the rules set out below may result in any of the following, at our discretion:</p>
+        ${li([
+          "<strong>Temporary suspension</strong> of your account for a fixed period.",
+          "<strong>A chat mute</strong>, removing your ability to use public or private chat channels.",
+          "<strong>Rollback or removal</strong> of items, currency, or progress obtained in breach of these terms.",
+          "<strong>A permanent ban</strong> of your account, with no restoration of purchases, items, or progress.",
+        ])}
+
+        <h2><span class="terms-num">2.</span>Code of Conduct &amp; Fair Play</h2>
+        <p>Arkenelle is a shared, persistent world. The rules below exist to keep it fair and welcoming for everyone playing on it.</p>
+
+        <h3>No harassment or toxicity</h3>
+        ${li([
+          "No flaming, targeted abuse, threats, or sustained harassment of other players or staff.",
+          "No doxxing — do not share or attempt to obtain another person's real-world identity, location, or contact details.",
+          "No hate speech, slurs, or content attacking people on the basis of race, ethnicity, religion, gender, gender identity, sexual orientation, disability, or nationality.",
+          "No sexually explicit, graphically violent, or otherwise inappropriate content in names, chat, or player-created text.",
+        ])}
+
+        <h3>No third-party software or macroing</h3>
+        ${li([
+          "No bots, scripts, or automation of any part of gameplay, including AFK combat, gathering, or crafting.",
+          "No auto-clickers, key remappers used to automate actions, or hardware macros that repeat inputs on your behalf.",
+          "No overlays, packet tools, or third-party programs that read from or write to the game process.",
+          "You are responsible for every action taken on your account, whether or not you were at the keyboard.",
+        ])}
+
+        <h3>No client modification or hacking</h3>
+        ${li([
+          "Do not modify, decompile, repackage, or reverse engineer the game client.",
+          "Do not craft, replay, or tamper with network traffic between the client and our servers.",
+          "Do not attempt to gain unauthorised access to servers, staff tools, other players' accounts, or any part of our infrastructure.",
+          "Do not run denial-of-service attacks or any other activity that degrades service for other players.",
+        ])}
+
+        <h3>No exploiting</h3>
+        ${li([
+          `If you find a bug, duplication method, or unintended mechanic, report it immediately by opening a support ticket in our <a href="${DISCORD}">Discord server</a>.`,
+          "Do not use, repeat, or share an exploit, and do not distribute gains obtained from one.",
+          "Items, currency, and progression derived from an exploit will be removed, and the accounts involved may be banned.",
+          "Reporting a bug in good faith will never be punished.",
+        ])}
+
+        <h3>No real-world trading (RWT)</h3>
+        ${li([
+          "Do not buy, sell, or exchange in-game currency, items, services, or accounts for real-world money or goods.",
+          "Do not advertise, broker, or solicit such trades in game, on this website, or in our community spaces.",
+          "Both sides of a real-world trade are treated as being in breach of these terms.",
+        ])}
+
+        <h3>No impersonating staff</h3>
+        ${li([
+          "Do not use names, titles, or cosmetics chosen to suggest you are a developer, moderator, or member of the Arkenelle team.",
+          "Do not claim staff authority, offer moderation action, or request account details from other players.",
+          "Staff will never ask you for your password.",
+        ])}
+
+        <h2><span class="terms-num">3.</span>Account Ownership and Security</h2>
+        <p>Your Arkenelle account is licensed to you personally and is <strong>strictly non-transferable</strong>. You may not sell, gift, rent, trade, or share access to it.</p>
+        ${li([
+          "You are responsible for keeping your password secure and for all activity that occurs on your account.",
+          "Account sharing is not permitted. If you share access, you accept the consequences of anything done on your account.",
+          "<strong>Staff will not restore items, currency, or progress lost through account sharing or a compromised password.</strong>",
+          "We may reclaim or reset account names that impersonate others, breach the code of conduct, or are used to evade a ban.",
+          `If you believe your account has been accessed without your permission, change your password and open a support ticket in our <a href="${DISCORD}">Discord server</a> immediately.`,
+        ])}
+
+        <h2><span class="terms-num">4.</span>Enforcement</h2>
+        <p>The development team reserves the right to review server logs, chat history, trade records, transaction records, and gameplay telemetry in order to investigate suspected breaches of these terms.</p>
+        ${li([
+          "Penalties may be issued <strong>without prior warning</strong> where the evidence is clear.",
+          "The severity of a penalty is at the team's discretion and reflects the nature and history of the breach.",
+          "We are not obliged to disclose the detection methods or the specific log entries behind an enforcement action.",
+          "Attempting to evade a penalty — including creating new accounts while banned — will extend the penalty to any associated accounts.",
+          `Appeals may be submitted by opening a support ticket in our <a href="${DISCORD}">Discord server</a>. Appeals are reviewed on their merits, and the outcome of a review is final.`,
+        ])}
+
+        <h2><span class="terms-num">5.</span>Refund and Payment Policy</h2>
+        <p>All purchases are for digital goods and services delivered to your account. Payments are processed by Stripe; we do not store your card details.</p>
+
+        <h3>Immediate delivery &amp; consent</h3>
+        ${li([
+          "Purchases are digital goods, delivered to your account immediately upon successful payment.",
+          "By completing a purchase you expressly request immediate delivery and <strong>waive any standard right of withdrawal or cooling-off period</strong> that would otherwise apply once delivery has begun.",
+          "It is your responsibility to confirm what a purchase includes before you buy it.",
+        ])}
+
+        <h3>Strictly non-refundable</h3>
+        ${li([
+          "Purchases are <strong>strictly non-refundable</strong>.",
+          "No refunds will be issued for accounts suspended or banned for breaching these terms.",
+          "No refunds will be issued for server downtime, maintenance, latency, patch changes, or content rebalancing.",
+          "No refunds will be issued for buyer's remorse, accidental purchases, purchases made by another person with access to your account, or a change in how much you play.",
+        ])}
+
+        <h3>Chargebacks and fraud protocol</h3>
+        ${li([
+          "Initiating an unauthorised chargeback or payment dispute will result in a <strong>permanent ban</strong> of the associated account or accounts.",
+          "We will contest friendly fraud. Server logs, delivery records, and login history evidencing delivery and use of the purchased goods will be provided to Stripe as part of the dispute response.",
+          "Accounts banned for chargebacks are not eligible for appeal until the disputed amount is settled in full.",
+          `If you believe a charge was genuinely unauthorised, open a support ticket in our <a href="${DISCORD}">Discord server</a> first — we would rather resolve it directly than through a dispute.`,
+        ])}
+
+        <h3>Technical error exceptions</h3>
+        ${li([
+          "The only exception to the above is a verified technical error, such as duplicate billing or a payment taken where nothing was delivered.",
+          `Open a support ticket in our <a href="${DISCORD}">Discord server</a> including your <strong>Stripe Receipt ID</strong> within <strong>7 days</strong> of the transaction date.`,
+          "We will verify the transaction against our delivery logs and, where a duplicate charge or failed delivery is confirmed, refund the affected charge.",
+          "Requests submitted after 7 days, or without a valid Stripe Receipt ID, cannot be verified and will not be actioned.",
+        ])}
+
+        <p class="terms-callout"><strong>Before you dispute a charge:</strong> open a support ticket. Almost every payment problem we see is a duplicate charge or a delivery that needs re-triggering, and both are resolved far faster by ticket than by chargeback — without a permanent ban attached.</p>
+
+        <p class="terms-support">
+          <span class="terms-support-label">Support</span>
+          All support tickets — bug reports, appeals, and payment issues — are handled in the official <a href="${DISCORD}">Arkenelle Discord server</a>. The invite is also available in-game.
+        </p>
+      </article>
+    </main>`,
+  });
+}
+
 function build() {
   rmDist();
   const iconAbs = path.join(ROOT, "assets/project_icon/arkenelle_icon.png");
@@ -2145,10 +2293,13 @@ function build() {
             })}
           </div>
           <p class="donate-foot">Choose-your-amount gifts receive the gold <strong>Arkenelle Supporter</strong> title. One-time and VIP gifts use the matching Sapphire, Emerald, or Ruby title.</p>
+          <p class="donate-foot">Gifts are digital goods delivered immediately and are non-refundable. See the <a href="/terms/">Terms of Service</a> before you buy.</p>
         </article>
       </main>`,
     })
   );
+
+  write("terms/index.html", termsPage());
 
   write(
     "wiki/index.html",

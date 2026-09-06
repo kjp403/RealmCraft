@@ -93,6 +93,8 @@ var _editing_listing: int = 0
 # Widgets
 var _tab_buttons: Dictionary = {}
 var _gold_label: Label
+## Hoverable shell around [member _gold_label] — holds the exact-balance tooltip.
+var _gold_wallet: Control
 var _page: MarginContainer
 ## Root of the Browse tab, kept so the search box can redraw just the table
 ## instead of the whole tab (a full rebuild would steal focus every keystroke).
@@ -167,6 +169,10 @@ func _build_header() -> void:
 	var wallet: PanelContainer = PanelContainer.new()
 	wallet.add_theme_stylebox_override(&"panel", Style.frame(Style.BG_SUNK))
 	wallet.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# The Label ignores the mouse, so the wallet shell carries the exact-balance
+	# tooltip — see _set_gold().
+	wallet.mouse_filter = Control.MOUSE_FILTER_STOP
+	_gold_wallet = wallet
 	var wallet_pad: MarginContainer = MarginContainer.new()
 	wallet_pad.add_theme_constant_override(&"margin_left", 10)
 	wallet_pad.add_theme_constant_override(&"margin_right", 10)
@@ -189,8 +195,10 @@ func _build_header() -> void:
 	_gold_label = Label.new()
 	_gold_label.custom_minimum_size = Vector2(96, 0)
 	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_gold_label.add_theme_color_override(&"font_color", COLOR_GOLD)
+	# font_color is owned by _set_gold() — it grades with the balance.
 	_gold_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_gold_label.clip_text = false
+	_gold_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	wallet_line.add_child(gold_icon)
 	wallet_line.add_child(_gold_label)
 	header_right.add_child(wallet)
@@ -296,10 +304,19 @@ func _load_mine() -> void:
 	_set_gold(int(data.get("gold", 0)))
 
 
+## [param amount] is stored RAW in [member _gold] — every affordability check
+## and every listing price reads that int, never the display string. Only the
+## readout abbreviates, with the exact figure kept on the wallet's tooltip so a
+## trader can always see the last coin before pricing a listing.
 func _set_gold(amount: int) -> void:
 	_gold = amount
 	if _gold_label != null:
-		_gold_label.text = _format(amount)
+		var purse: Dictionary = NumberFormat.format_stack_size(amount)
+		var purse_color: Color = purse["color"]
+		_gold_label.text = purse["text"]
+		_gold_label.add_theme_color_override(&"font_color", purse_color)
+		if _gold_wallet != null:
+			_gold_wallet.tooltip_text = "%s gold" % purse["exact_text"]
 
 
 func _rebuild() -> void:
@@ -1892,15 +1909,7 @@ func _stack_label(item_id: int, amount: int) -> String:
 ## 1234567 -> "1,234,567". Prices are compared at a glance here; raw digit runs
 ## are exactly where a 10x misread happens.
 func _format(amount: int) -> String:
-	var digits: String = str(absi(amount))
-	var out: String = ""
-	var count: int = 0
-	for i: int in range(digits.length() - 1, -1, -1):
-		out = digits[i] + out
-		count += 1
-		if count % 3 == 0 and i > 0:
-			out = "," + out
-	return ("-" if amount < 0 else "") + out
+	return NumberFormat.with_commas(amount)
 
 
 ## Compact "how long ago", measured against the SERVER's clock (shipped with the

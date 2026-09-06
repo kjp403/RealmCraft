@@ -52,15 +52,11 @@ const GATHER_XP_RATE: Dictionary[StringName, float] = {
 @onready var _visual_state: Control = $VisualState
 
 # --- Server-only state ------------------------------------------------------
-## player_id → remaining yields for that player on this node.
-var _charges_by_player: Dictionary[int, int]
-## player_id → stamp of last regen tick. Meaning depends on that player's charges:
-##   charges > 0  → time of last continuous regen
-##   charges == 0 → time they hit empty (waits depleted_recharge_seconds)
-var _last_regen_ms_by_player: Dictionary[int, int]
-## player_id → the pool size rolled for their current fill. Equals
-## data.max_charges on fixed-pool nodes; a fresh roll each refill on random ones.
-var _pool_size_by_player: Dictionary[int, int]
+# Charges, pool size and the regen stamp are NOT held here. They live on the
+# player via [GatherNodeLedger], because this node dies with its ServerInstance
+# roughly 20 seconds after the last player leaves the zone, and a relog used to
+# hand everyone a full pool again. What is left below is genuinely per-session:
+# losing it on a relog costs the player progress rather than granting it.
 ## player_id → remaining extraction HP for that player's current yield.
 var _progress_hp_by_player: Dictionary[int, int]
 ## player_id → ticks_msec at which their cooldown ends.
@@ -159,6 +155,10 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 	var player_id: int = int(player.player_resource.player_id)
 	var now_ms: int = Time.get_ticks_msec()
 	var node_path: NodePath = instance.get_path_to(self)
+	# Pool state is read off the character, so it survives this instance being
+	# swept and follows the player into any other live copy of the same biome.
+	var pr: PlayerResource = player.player_resource
+	var key: String = _ledger_key(instance)
 
 	# Wrong-tool gate: a node worked by the wrong tool (e.g. a pickaxe on a herb
 	# that needs a sickle) yields nothing and tells the client which tool to
@@ -204,14 +204,10 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 				"job_display": JobRegistry.display_name(primary_job),
 			}
 
-	# Lazy-regen first so a swing on a depleted pool that just timed out
-	# refills before we ask for a charge.
-	_regen(player_id)
-
 	# This player's depleted pool rejects the swing — drain nothing so the
 	# client never shows a teasing progress bar. Other players keep their own
 	# charge pools and can still harvest.
-	var charges_left: int = _charges_for(player_id)
+	var charges_left: int = _charges_for(pr, key)
 	if charges_left <= 0:
 		_progress_hp_by_player.erase(player_id)
 		return {
@@ -219,7 +215,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"extracted": false,
 			"reason": "depleted",
 			"charges_left": 0,
-			"max_charges": _pool_for(player_id),
+			"max_charges": _pool_for(pr, key),
 			"node_path": node_path,
 		}
 
@@ -236,7 +232,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"progress_hp": progress,
 			"extraction_hp": data.extraction_hp,
 			"charges_left": charges_left,
-			"max_charges": _pool_for(player_id),
+			"max_charges": _pool_for(pr, key),
 			"node_path": node_path,
 		}
 
@@ -329,7 +325,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"progress_hp": 1,
 			"extraction_hp": data.extraction_hp,
 			"charges_left": charges_left,
-			"max_charges": _pool_for(player_id),
+			"max_charges": _pool_for(pr, key),
 			"node_path": node_path,
 		}
 
@@ -341,9 +337,9 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		player, primary_job, SkillingOutfitManager.Bonus.DURABILITY_BYPASS
 	)
 	if not preserved_node:
-		_consume_charge(player_id, now_ms)
+		_consume_charge(pr, key)
 	_progress_hp_by_player.erase(player_id)
-	charges_left = _charges_for(player_id)
+	charges_left = _charges_for(pr, key)
 
 	Inventory.try_add_item(
 		player.player_resource.inventory, ore_id, amount, Inventory.MAX_SLOTS,
@@ -427,7 +423,7 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"progress_hp": 0,
 		"extraction_hp": data.extraction_hp,
 		"charges_left": charges_left,
-		"max_charges": _pool_for(player_id),
+		"max_charges": _pool_for(pr, key),
 		"node_path": node_path,
 	}
 
@@ -595,73 +591,28 @@ func _has_random_pool() -> bool:
 	return data.min_charges > 0 and data.min_charges < data.max_charges
 
 
-## Pool size for a fresh fill: a roll for random-pool nodes, the flat
-## max_charges otherwise.
-func _roll_pool_size() -> int:
-	if not _has_random_pool():
-		return data.max_charges
-	return randi_range(data.min_charges, data.max_charges)
+## Identity of this node for [GatherNodeLedger], stable across an instance
+## reload and shared by two live copies of the same biome.
+func _ledger_key(instance: ServerInstance) -> String:
+	return GatherNodeLedger.node_key(
+		instance.instance_resource.instance_name, instance.get_path_to(self)
+	)
 
 
 ## The pool size this player's current fill was rolled at — the denominator the
-## client shows and the ceiling trickle regen tops out at.
-func _pool_for(player_id: int) -> int:
-	_charges_for(player_id)
-	return int(_pool_size_by_player.get(player_id, data.max_charges))
+## client shows and the ceiling trickle regen tops out at. Regen is applied on
+## read inside the ledger, so callers never have to sequence it themselves.
+func _pool_for(resource: PlayerResource, key: String) -> int:
+	return GatherNodeLedger.pool(resource, key, data)
 
 
-func _charges_for(player_id: int) -> int:
-	if not _charges_by_player.has(player_id):
-		var pool: int = _roll_pool_size()
-		_pool_size_by_player[player_id] = pool
-		_charges_by_player[player_id] = pool
-		_last_regen_ms_by_player[player_id] = Time.get_ticks_msec()
-	return int(_charges_by_player[player_id])
+func _charges_for(resource: PlayerResource, key: String) -> int:
+	return GatherNodeLedger.charges(resource, key, data)
 
 
-func _consume_charge(player_id: int, now_ms: int) -> void:
-	var pool: int = _pool_for(player_id)
-	var charges: int = _charges_for(player_id) - 1
-	_charges_by_player[player_id] = charges
-	if charges == 0:
-		# Mark the depletion time so the longer recharge window starts here.
-		_last_regen_ms_by_player[player_id] = now_ms
-	elif charges == pool - 1:
-		# Just dropped from full → start the continuous regen clock.
-		_last_regen_ms_by_player[player_id] = now_ms
-
-
-## Continuous regen while > 0, snap-refill at == 0. Lazy: only updates on
-## access so depleted pools don't burn CPU on a timer. Per-player.
-func _regen(player_id: int) -> void:
-	var charges: int = _charges_for(player_id)
-	var pool: int = _pool_for(player_id)
-	if charges >= pool:
-		return
-	var now_ms: int = Time.get_ticks_msec()
-	var last_ms: int = int(_last_regen_ms_by_player.get(player_id, now_ms))
-	if charges == 0:
-		# Depleted state: wait the longer interval, then refill — random-pool
-		# nodes roll a new size, so the next visit is worth a different haul.
-		if now_ms - last_ms >= int(data.depleted_recharge_seconds * 1000.0):
-			var fresh: int = _roll_pool_size()
-			_pool_size_by_player[player_id] = fresh
-			_charges_by_player[player_id] = fresh
-			_last_regen_ms_by_player[player_id] = now_ms
-		return
-	# Random pools are all-or-nothing: mine it out, wait for the respawn. No
-	# trickle, or a big vein would refill faster than a player can drain it.
-	if _has_random_pool():
-		return
-	# Continuous: tick +1 per interval elapsed (handles long-idle catch-up).
-	var regen_ms: int = int(data.charge_regen_seconds * 1000.0)
-	if regen_ms <= 0:
-		return
-	@warning_ignore("integer_division")
-	var gained: int = (now_ms - last_ms) / regen_ms
-	if gained > 0:
-		_charges_by_player[player_id] = mini(pool, charges + gained)
-		_last_regen_ms_by_player[player_id] = last_ms + gained * regen_ms
+func _consume_charge(resource: PlayerResource, key: String) -> void:
+	GatherNodeLedger.consume(resource, key, data)
+	GatherNodeLedger.trim(resource)
 
 
 # ---------------------------------------------------------------------------

@@ -19,8 +19,11 @@ extends Node
 const TRACKER_SCENE: String = "res://source/client/ui/hud/xp_tracker/xp_tracker_hud.tscn"
 const OUT_DIR: String = "res://previews"
 ## Cell is comfortably larger than the 48px orb so the floating numbers and the
-## particle burst have somewhere to go without clipping into the next cell.
-const CELL: int = 104
+## particle burst have somewhere to go without clipping into the next cell. The
+## numbers hang to the LEFT of the orb (they have to clear the minimap in the
+## real HUD — see [XpFloatingTextManager]), so the orb sits right of centre in
+## its cell and the room is on that side.
+const CELL: int = 132
 const COLS: int = 4
 const ROWS: int = 2
 ## Previews are captured at 1x and upscaled with NEAREST afterwards — the whole
@@ -76,9 +79,10 @@ func _go() -> void:
 	for i: int in range(CASES.size()):
 		var case: Array = CASES[i]
 		var tracker: Control = scene.instantiate() as Control
-		# Centre the 48px orb in its cell, leaving room above for the numbers.
+		# Right of centre in its cell, so the numbers hanging off the orb's left
+		# edge have room instead of spilling into the previous cell.
 		tracker.position = Vector2(
-			float((i % COLS) * CELL + (CELL - 48) / 2),
+			float((i % COLS) * CELL + (CELL - 48) / 2 + 26),
 			float((i / COLS) * CELL + (CELL - 48) / 2 + 12),
 		)
 		_sv.add_child(tracker)

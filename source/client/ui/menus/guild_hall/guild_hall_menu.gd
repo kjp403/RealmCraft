@@ -137,7 +137,7 @@ func _build_left() -> void:
 	_left_host.add_child(_section_header("Deposit gold"))
 	var gold: int = int(_guild.get("viewer_gold", 0))
 	var gold_label: Label = Label.new()
-	gold_label.text = "You have %d gold" % gold
+	gold_label.text = "You have %s gold" % NumberFormat.with_commas(gold)
 	gold_label.add_theme_color_override(&"font_color", COLOR_MUTED)
 	gold_label.add_theme_font_size_override(&"font_size", 12)
 	_left_host.add_child(gold_label)

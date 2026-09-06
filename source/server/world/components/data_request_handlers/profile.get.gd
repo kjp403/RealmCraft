@@ -87,10 +87,23 @@ func data_request_handler(peer_id: int, instance: ServerInstance, args: Dictiona
 		>= mod_priority
 	)
 
+	# The account handle is the login identifier, so it is REDACTED for everyone
+	# except the owner and staff. It used to ride along on every profile fetch,
+	# which meant any player could harvest the account name behind any character
+	# just by opening their profile — half of a credential, handed out for a
+	# click. Moderators (priority 1) and above keep it because reports and bans
+	# are filed against the account, not the character.
+	#
+	# Redacted HERE rather than hidden in the client: the payload reaches every
+	# viewer's machine, so a client-side check protects nobody who is willing to
+	# read their own packets.
+	var may_see_account: bool = (
+		is_self or CommandPermissions.effective_priority(from_player, instance) >= 1
+	)
 	var profile: Dictionary = {
 		"name": str(profile_row.get("display_name", "Unknown")),
 		"title": str(profile_row.get("display_title", "")),
-		"account_name": str(profile_row.get("account_name", "")),
+		"account_name": str(profile_row.get("account_name", "")) if may_see_account else "",
 		"skin_id": int(profile_row.get("skin_id", 1)),
 		"vault_skin_id": int(profile_row.get("vault_skin_id", 0)),
 		"equipment": public_equipment,

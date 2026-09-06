@@ -80,8 +80,13 @@ func _build_header() -> void:
 	if gold:
 		golds_icon.texture = gold.item_icon
 	golds_label = Label.new()
-	golds_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.45))
+	# font_color is owned by _set_golds() — it grades with the balance.
 	golds_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	golds_label.clip_text = false
+	golds_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	# A Label ignores the mouse by default; the balance needs to be hoverable so
+	# the exact figure in its tooltip is reachable.
+	golds_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	# Insert before the Close button (added by build_shell at index 0).
 	header_right.add_child(golds_icon)
 	header_right.add_child(golds_label)
@@ -242,9 +247,9 @@ func _build_trade_rows() -> void:
 		var price: int = _shop.buyback_gold(item)
 		if price <= 0:
 			continue
-		var middle: String = "owned %d" % owned
+		var middle: String = "owned %s" % NumberFormat.with_commas(owned)
 		if item_id in _equipped_ids and int(_owned.get(item_id, 0)) < owned:
-			middle = "owned %d (equipped)" % owned
+			middle = "owned %s (equipped)" % NumberFormat.with_commas(owned)
 		sellables.append({
 			"item": item,
 			"id": item_id,
@@ -440,9 +445,29 @@ func _refresh_affordability() -> void:
 			slot.button.modulate = Color(1.0, 1.0, 1.0, 0.45) if dim else Color.WHITE
 
 
+## What the header chip's balance is counted in. A fair stall trades in event
+## tokens, not gold, so the tooltip must not hardcode "gold".
+func _currency_name() -> String:
+	var currency: Item = ContentRegistryHub.load_by_id(&"items", _currency_id) as Item
+	if currency != null and not String(currency.item_name).is_empty():
+		return String(currency.item_name)
+	return "gold"
+
+
+## [param value] is stored RAW in [member _golds] — affordability, the quantity
+## cap and every price check read that int, never the display string. Only the
+## header chip abbreviates, and it keeps the exact figure in its tooltip so a
+## player can see the last coin before committing to a purchase.
 func _set_golds(value: int) -> void:
 	_golds = value
-	golds_label.text = "%d" % _golds
+	var purse: Dictionary = NumberFormat.format_stack_size(_golds)
+	var purse_color: Color = purse["color"]
+	golds_label.text = purse["text"]
+	golds_label.add_theme_color_override(&"font_color", purse_color)
+	golds_label.tooltip_text = "%s %s" % [
+		purse["exact_text"],
+		_currency_name(),
+	]
 
 
 ## Authorize opening the shop (gold + contents come from elsewhere).

@@ -255,12 +255,12 @@ func player_disconnected(username: String) -> void:
 
 
 @rpc("authority")
-func create_player_character_request(_gateway_id: int, _peer_id: int, _username: String, _character_data: Dictionary) -> void:
+func create_player_character_request(_gateway_id: int, _peer_id: int, _username: String, _character_data: Dictionary, _client_ip: String = "") -> void:
 	pass
 
 
 @rpc("any_peer")
-func player_character_creation_result(gateway_id: int, peer_id: int, username: String, result_code: int) -> void:
+func player_character_creation_result(gateway_id: int, peer_id: int, username: String, result_code: int, client_ip: String = "", notice: String = "") -> void:
 	var world_id: int = multiplayer_api.get_remote_sender_id()
 	if result_code:
 		var account: AccountResource = authentication_manager.account_collection.collection.get(username)
@@ -274,8 +274,7 @@ func player_character_creation_result(gateway_id: int, peer_id: int, username: S
 		# release build. (Was gated on "debug", which masked this on the debug server.)
 		authentication_manager.save_account_collection()
 		var auth_token: String = authentication_manager.generate_random_token()
-		fetch_token.rpc_id(world_id, auth_token, username, result_code, "")
-		
+		fetch_token.rpc_id(world_id, auth_token, username, result_code, client_ip)
 		gateway_manager.gateway_response.rpc_id(
 			gateway_id,
 			peer_id,
@@ -284,6 +283,14 @@ func player_character_creation_result(gateway_id: int, peer_id: int, username: S
 				"address": connected_worlds[world_id]["address"],
 				"port": connected_worlds[world_id]["port"]
 			}
+		)
+	elif not notice.is_empty():
+		# The world refused the account itself, not the name — a ban. Send the
+		# code so the client shows the world's reason rather than blaming the name.
+		gateway_manager.gateway_response.rpc_id(
+			gateway_id,
+			peer_id,
+			{"error": GatewayAPI.ERR_BANNED, "msg": notice}
 		)
 	else:
 		# result_code 0 = create refused (today: display name already taken).
@@ -307,26 +314,37 @@ func request_login(_gateway_id: int, _peer_id: int, _username: String, _characte
 
 
 @rpc("any_peer")
-func result_login(result_code: int, gateway_id: int, peer_id: int, username: String, character_id: int, client_ip: String = "") -> void:
+func result_login(result_code: int, gateway_id: int, peer_id: int, username: String, character_id: int, client_ip: String = "", notice: String = "") -> void:
 	var world_id: int = multiplayer_api.get_remote_sender_id()
-	if result_code == OK:
-		# Mark the account connected so login_request refuses a second login;
-		# player_disconnected clears it on world disconnect.
-		var account: AccountResource = authentication_manager.account_collection.collection.get(username)
-		if account != null:
-			account.peer_id = peer_id
-		var auth_token: String = authentication_manager.generate_random_token()
-		fetch_token.rpc_id(world_id, auth_token, username, character_id, client_ip)
-		await get_tree().create_timer(0.5).timeout
+	if result_code != OK:
+		# The world refused this login (a ban, today). Forward the code and the
+		# world's human-readable reason so the client can say why — dropping it
+		# here is what used to leave the player waiting on a request that never
+		# answered. No account state to unwind: peer_id is only claimed below.
 		gateway_manager.gateway_response.rpc_id(
 			gateway_id,
 			peer_id,
-			{
-				"auth-token": auth_token,
-				"address": connected_worlds[world_id]["address"],
-				"port": connected_worlds[world_id]["port"]
-			}
+			{"error": result_code, "msg": notice}
 		)
+		return
+
+	# Mark the account connected so login_request refuses a second login;
+	# player_disconnected clears it on world disconnect.
+	var account: AccountResource = authentication_manager.account_collection.collection.get(username)
+	if account != null:
+		account.peer_id = peer_id
+	var auth_token: String = authentication_manager.generate_random_token()
+	fetch_token.rpc_id(world_id, auth_token, username, character_id, client_ip)
+	await get_tree().create_timer(0.5).timeout
+	gateway_manager.gateway_response.rpc_id(
+		gateway_id,
+		peer_id,
+		{
+			"auth-token": auth_token,
+			"address": connected_worlds[world_id]["address"],
+			"port": connected_worlds[world_id]["port"]
+		}
+	)
 
 
 @rpc("any_peer")

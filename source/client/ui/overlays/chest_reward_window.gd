@@ -608,10 +608,4 @@ func _empty_note() -> void:
 # ---------------------------------------------------------------------------
 
 func _fmt(value: int) -> String:
-	var digits: String = str(absi(value))
-	var out: String = ""
-	for i: int in digits.length():
-		if i > 0 and (digits.length() - i) % 3 == 0:
-			out += ","
-		out += digits[i]
-	return ("-" + out) if value < 0 else out
+	return NumberFormat.with_commas(value)

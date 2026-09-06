@@ -11,11 +11,11 @@ display_name = "Halibut Hole"
 ore = ExtResource("2_fish")
 yield_amount = 1
 job_xp = Dictionary[StringName, int]({
-&"fishing": 260
+&"fishing": 29
 })
 required_level = 60
 required_tool = &"fishing_rod"
-extraction_hp = 8
+extraction_hp = 24
 max_charges = 50
 min_charges = 10
 charge_regen_seconds = 15.0
