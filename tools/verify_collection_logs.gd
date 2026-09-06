@@ -19,8 +19,19 @@ extends SceneTree
 ##  7. Round-trip: fill a log, assert log_completed fires exactly once, assert a
 ##     SECOND character is unaffected, then serialize/deserialize through real
 ##     JSON and assert the state survives.
-##  8. add_item_to_log is called from the boss loot pipeline and nowhere else,
-##     and that credit still runs after party XP sharing.
+##  8. BOTH writers — add_item_to_log and increment_boss_kill — are called from
+##     the boss loot pipeline and nowhere else, and that credit still runs after
+##     party XP sharing.
+##  9. Both writers guard on _is_authority(), and that guard still tolerates a
+##     null MultiplayerAPI. SOURCE check only: `-s` has no MultiplayerAPI to
+##     point at a fake client, so this catches the guard being deleted, not the
+##     guard being wrong.
+## 10. Every boss VARIANT resolves to its log. A file named for a logged boss,
+##     flagged is_boss, with a loot table, must map to that log's key — the
+##     cinderborn_world case. Encounter ADDS are excluded by shape, not by name.
+##
+## WARN lines are content observations and never fail the run: today, a boss with
+## no log of its own carrying another boss's logged unique.
 
 const LOGS_PATH: String = "res://source/common/gameplay/collection_log/logs/"
 const ITEMS_INDEX: String = "res://source/common/registry/indexes/items_index.tres"
@@ -34,6 +45,8 @@ const REWARD_SERVICE: String = "res://source/common/gameplay/combat/reward_servi
 const MANAGER: String = "res://source/common/gameplay/collection_log/collection_log_manager.gd"
 
 var _failures: Array[String] = []
+## Content observations, not defects — printed but never fail the run.
+var _warnings: Array[String] = []
 var _checks: int = 0
 
 
@@ -47,12 +60,16 @@ func _initialize() -> void:
 	_check_obtainable(logs)
 	_check_runtime(logs)
 	_check_call_sites()
+	_check_variant_coverage(logs)
 	_check_entries_have_a_use()
 	_check_title_grant()
 
 	print("")
+	for line: String in _warnings:
+		print("  WARN: %s" % line)
 	if _failures.is_empty():
-		print("VERIFY_PASS  (%d checks, %d logs)" % [_checks, logs.size()])
+		print("VERIFY_PASS  (%d checks, %d logs, %d warnings)"
+			% [_checks, logs.size(), _warnings.size()])
 	else:
 		for line: String in _failures:
 			printerr("  FAIL: %s" % line)
@@ -445,21 +462,29 @@ func _check_title_grant() -> void:
 ## harmless in review.
 func _check_call_sites() -> void:
 	var allowed: PackedStringArray = [REWARD_SERVICE, MANAGER]
-	var offenders: PackedStringArray = []
-	for path: String in FileUtils.get_all_file_at("res://source/", "*.gd"):
-		if allowed.has(path):
-			continue
-		var f: FileAccess = FileAccess.open(path, FileAccess.READ)
-		if f == null:
-			continue
-		var text: String = f.get_as_text()
-		f.close()
-		if text.contains("add_item_to_log("):
-			offenders.append(path)
-	_checks += 1
-	if not offenders.is_empty():
-		_f("add_item_to_log called outside the boss loot pipeline: %s"
-			% ", ".join(offenders))
+	# BOTH writers, not just the item one. A stray increment_boss_kill is a
+	# quieter bug than a stray add_item_to_log but not a smaller one: kills are
+	# the denominator of the dry streak, so anything that can bump them from
+	# outside the loot pipeline lets a player inflate — or hide — the RNG record
+	# the whole telemetry readout exists to report honestly.
+	for writer: String in ["add_item_to_log(", "increment_boss_kill("]:
+		var offenders: PackedStringArray = []
+		for path: String in FileUtils.get_all_file_at("res://source/", "*.gd"):
+			if allowed.has(path):
+				continue
+			var f: FileAccess = FileAccess.open(path, FileAccess.READ)
+			if f == null:
+				continue
+			var text: String = f.get_as_text()
+			f.close()
+			if text.contains(writer):
+				offenders.append(path)
+		_checks += 1
+		if not offenders.is_empty():
+			_f("%s called outside the boss loot pipeline: %s"
+				% [writer.trim_suffix("("), ", ".join(offenders)])
+
+	_check_authority_guard()
 
 	var rs: FileAccess = FileAccess.open(REWARD_SERVICE, FileAccess.READ)
 	_checks += 2
@@ -476,6 +501,121 @@ func _check_call_sites() -> void:
 	var share_at: int = src.find("_share_party_xp(npc, seen)")
 	if share_at < 0 or credit_at < share_at:
 		_f("collection log credit no longer runs AFTER _share_party_xp")
+
+
+## THE ORPHAN VARIANT CHECK: approached from the DROP TABLES rather than from
+## the logs.
+##
+## _check_obtainable already walks each log and confirms every variant sharing
+## its boss_id resolves to it. That direction cannot see the failure that
+## actually strands a player, because it only ever looks at enemies it has
+## already matched to a log: an enemy that drops a logged unique but whose
+## enemy_type matches NO log is invisible to it.
+##
+## That enemy is a live credit hole. A player kills it, sees the unique land in
+## their bag, and the log does not move — the one symptom this whole subsystem
+## is built to avoid, and the one with no error anywhere to explain it. It is a
+## realistic mistake too: it is what copying a boss to a new variant file and
+## editing its enemy_type produces.
+func _check_variant_coverage(logs: Array[BossCollectionLog]) -> void:
+	var by_id: Dictionary = {}
+	var claimed: Dictionary = {}
+	for boss_log: BossCollectionLog in logs:
+		by_id[boss_log.boss_id] = boss_log
+		for slug: StringName in boss_log.log_items:
+			claimed[slug] = boss_log
+
+	for path: String in FileUtils.get_all_file_at(BOSS_PATH, "*.tres"):
+		var enemy: EnemyTypeResource = ResourceLoader.load(path) as EnemyTypeResource
+		if enemy == null:
+			continue
+		var stem: String = path.get_file().trim_suffix(".tres")
+		var key: StringName = _manager_script().boss_id_for(enemy)
+
+		# 1. THE MIS-KEYED VARIANT — the actual failure this guards.
+		# A file named for a logged boss must resolve to that boss's log.
+		# cinderborn_world.tres is the shipped example and the only variant
+		# carrying the uniques; if its enemy_type were edited to match its file
+		# name, every kill on it would credit nothing, silently, with a full
+		# loot table and a log stuck at zero.
+		# is_boss AND a loot table is what separates a VARIANT from an ADD. The
+		# name alone is not enough: Ossuran's encounter ships seven
+		# `ossuran_*` files — bonepickers, emberlings, three pillars — that share
+		# the prefix and are not the boss. Every one of them is is_boss = false
+		# with an empty loot table, and every real variant (cinderborn_world,
+		# sand_king_world) is is_boss = true with one. An earlier version of this
+		# check keyed on the name alone and failed the build on all seven adds.
+		var variant_shaped: bool = bool(enemy.is_boss) and not enemy.loot.is_empty()
+		for boss_log: BossCollectionLog in logs:
+			var base: String = String(boss_log.boss_id)
+			if stem != base and not stem.begins_with(base + "_"):
+				continue
+			if not variant_shaped:
+				continue
+			_checks += 1
+			if key != boss_log.boss_id:
+				_f("%s is named for %s but resolves to log key '%s' — kills on "
+					% [path.get_file(), boss_log.boss_name, key]
+					+ "this variant would credit "
+					+ ("nothing" if not by_id.has(key) else "the wrong log"))
+
+		# 2. A BOSS carrying someone else's logged unique. Not a failure: credit
+		# is per-boss by design, so this drop simply does not advance any log,
+		# which is the anti-exploit rule working. It is still worth saying out
+		# loud, because it means that log's "unique" has a second source and the
+		# membership rule in boss_collection_log.gd says it should not.
+		#
+		# TRASH sharing a weapon is normal and deliberately not reported — an
+		# earlier version of this check failed the build on three ordinary mobs
+		# and was simply wrong about what a credit hole is.
+		if not bool(enemy.is_boss) or by_id.has(key):
+			continue
+		for drop: LootDrop in enemy.loot:
+			if drop == null or drop.item == null:
+				continue
+			var slug: StringName = StringName(str(drop.item.get_meta(&"slug", &"")))
+			if claimed.has(slug):
+				_warn("%s (a boss with no log) drops '%s', logged to %s"
+					% [path.get_file(), slug,
+					(claimed[slug] as BossCollectionLog).boss_name])
+
+
+## Both writers must refuse to run off the authority.
+##
+## THIS IS A SOURCE CHECK, and only a source check — it reads the manager's text
+## and asserts each writer's guard is present. It does NOT prove the guard
+## rejects a client, and it cannot from here: `Node.multiplayer` is null in a
+## `-s` run, so there is no MultiplayerAPI to point at a fake client peer. What
+## it does catch is the realistic regression — somebody editing these two
+## functions and dropping the guard — which is worth more than nothing and is
+## honestly all this can claim.
+func _check_authority_guard() -> void:
+	var f: FileAccess = FileAccess.open(MANAGER, FileAccess.READ)
+	_checks += 1
+	if f == null:
+		_f("collection_log_manager.gd is unreadable")
+		return
+	var src: String = f.get_as_text()
+	f.close()
+	for writer: String in ["add_item_to_log", "increment_boss_kill"]:
+		var at: int = src.find("func %s(" % writer)
+		_checks += 1
+		if at < 0:
+			_f("%s is gone from the manager" % writer)
+			continue
+		# The guard has to be in the function's opening lines, before anything
+		# has been written. A check further down would still return early but
+		# only after _entry() had already created the row.
+		var head: String = src.substr(at, 400)
+		if not head.contains("_is_authority()"):
+			_f("%s does not check _is_authority() — a client-side call would "
+				% writer + "write collection log progress")
+	# ...and the guard itself must survive a null MultiplayerAPI, or every gate
+	# in tools/ dies on the first write instead of testing anything.
+	_checks += 1
+	if not src.contains("api == null"):
+		_f("_is_authority() no longer tolerates a null MultiplayerAPI — "
+			+ "headless tool runs will error out rather than run")
 
 
 ## The manager SCRIPT, for calling its statics. Autoload identifiers do not
@@ -495,3 +635,8 @@ func _new_manager() -> Node:
 
 func _f(msg: String) -> void:
 	_failures.append(msg)
+
+
+func _warn(msg: String) -> void:
+	if not _warnings.has(msg):
+		_warnings.append(msg)

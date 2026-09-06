@@ -151,7 +151,7 @@ static func _scan() -> void:
 func add_item_to_log(
 	player_res: PlayerResource, boss_id: StringName, item_id: StringName
 ) -> void:
-	if player_res == null:
+	if player_res == null or not _is_authority():
 		return
 	var boss_log: BossCollectionLog = find_log(boss_id)
 	if boss_log == null:
@@ -193,7 +193,7 @@ func add_item_to_log(
 ## drops are credited, so the kill that produced a unique is the kill that ends
 ## the dry streak rather than the one after it.
 func increment_boss_kill(player_res: PlayerResource, boss_id: StringName) -> void:
-	if player_res == null:
+	if player_res == null or not _is_authority():
 		return
 	var entry: Dictionary = _entry(player_res, boss_id)
 	entry[KEY_KILLS] = int(entry[KEY_KILLS]) + 1
@@ -300,7 +300,20 @@ func build_payload(player_res: PlayerResource) -> Dictionary:
 			"dry": dry_streak(player_res, boss_log.boss_id),
 			"unlocked": items.size(),
 			"total": boss_log.total_items(),
-			"completed": has_green_log(player_res, boss_log.boss_id),
+			# TWO different questions, and a content patch is what separates them.
+			#
+			# `title_earned` is the sticky flag: this character green-logged the
+			# boss at some point, so they own the title. It is never revoked —
+			# taking a title back because a later patch added an item to the log
+			# would be indefensible.
+			#
+			# `completed` is the LIVE check against today's log_items. Add an item
+			# to a boss and yesterday's completionist is honestly 9/10 again.
+			#
+			# Reporting only the sticky flag is what would make the UI lie: a gold
+			# frame reading "EARNED TITLE" over a grid with a visibly empty slot.
+			"title_earned": has_green_log(player_res, boss_log.boss_id),
+			"completed": check_green_log_status(player_res, boss_log.boss_id),
 			"title": boss_log.green_log_title_text,
 			# The title's LOOK, so the menu can show what the reward actually
 			# renders as rather than just naming it.
@@ -341,13 +354,20 @@ func serialize_log_data(player_res: PlayerResource) -> Dictionary:
 		var counts: Dictionary = {}
 		for slug: Variant in (entry.get(KEY_COUNTS, {}) as Dictionary):
 			counts[String(slug)] = int((entry[KEY_COUNTS] as Dictionary)[slug])
-		out[String(boss_id)] = {
+		# Carries UNKNOWN keys back out, matching deserialize_log_data. The two
+		# halves have to agree: preserving a newer patch's key on load and then
+		# dropping it on the next save would leave it alive exactly until the
+		# player's first autosave, which is a worse failure than never keeping it
+		# at all — it looks like it works.
+		var row: Dictionary = (entry as Dictionary).duplicate(true)
+		row.merge({
 			KEY_KILLS: int(entry.get(KEY_KILLS, 0)),
 			KEY_ITEMS: items,
 			KEY_COUNTS: counts,
 			KEY_COMPLETED: bool(entry.get(KEY_COMPLETED, false)),
 			KEY_LAST_UNLOCK_KILL: int(entry.get(KEY_LAST_UNLOCK_KILL, 0)),
-		}
+		}, true)
+		out[String(boss_id)] = row
 	return out
 
 
@@ -385,7 +405,22 @@ func deserialize_log_data(player_res: PlayerResource, data: Variant) -> void:
 			if not counts.has(item_id):
 				counts[item_id] = 1
 		var kills: int = int(saved.get(KEY_KILLS, 0))
-		player_res.collection_log[StringName(str(raw_boss_id))] = {
+		# FORWARD compatibility. Start from whatever was on disk and merge the
+		# keys this build understands OVER it, rather than building a fresh row
+		# from known keys only.
+		#
+		# The difference shows up when a player moves between builds. A newer
+		# patch adds a key; they then log into a world still running this build;
+		# a fresh-row read drops the key silently and the next save writes the
+		# loss back permanently. Keeping the unknown keys means an older server
+		# carries them through untouched instead of destroying them.
+		#
+		# The merge is `true` (overwrite) so this build's own parsing always
+		# wins for the keys it does know — items and counts have been normalised
+		# to StringName above, and the raw JSON Strings underneath them must not
+		# survive, or every `has(&"slug")` check against them fails.
+		var row: Dictionary = saved.duplicate(true)
+		row.merge({
 			KEY_KILLS: kills,
 			KEY_ITEMS: items,
 			KEY_COUNTS: counts,
@@ -394,13 +429,35 @@ func deserialize_log_data(player_res: PlayerResource, data: Variant) -> void:
 			# kill count, not 0, so an old save does not report every kill ever
 			# as one enormous dry streak.
 			KEY_LAST_UNLOCK_KILL: mini(int(saved.get(KEY_LAST_UNLOCK_KILL, kills)), kills),
-		}
+		}, true)
+		player_res.collection_log[StringName(str(raw_boss_id))] = row
 
 
 # --- Internals ---------------------------------------------------------------
 
 ## The progress row for one character and boss, created empty on first touch so
 ## every read above can assume the keys exist.
+## Is this process allowed to WRITE collection log progress?
+##
+## Belt and braces over the call-site rule. Nothing on the client can reach these
+## writers today — there is no RPC into them and collection_log.state.gd is
+## read-only — so this exists to make a FUTURE client-side call fail loudly at
+## the door rather than quietly award a log.
+##
+## A null `multiplayer` counts as authority, and that is deliberate rather than
+## lax: in a `-s` headless run — every verifier in tools/ — `Node.multiplayer` is
+## null outright, so `multiplayer.is_server()` does not return false, it errors
+## on a null instance and takes the whole run with it. Treating null as "no
+## networking, therefore no client to spoof from" is what keeps the gates
+## executing instead of silently passing a manager that never writes anything.
+##
+## The real client case is unaffected: a connected client always has a peer, so
+## `is_server()` answers honestly there.
+func _is_authority() -> bool:
+	var api: MultiplayerAPI = multiplayer
+	return api == null or api.multiplayer_peer == null or api.is_server()
+
+
 func _entry(player_res: PlayerResource, boss_id: StringName) -> Dictionary:
 	if not player_res.collection_log.has(boss_id):
 		var items: Array[StringName] = []

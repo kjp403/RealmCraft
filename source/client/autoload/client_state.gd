@@ -301,6 +301,36 @@ func _ready() -> void:
 		if not text.is_empty():
 			Toaster.toast(text, 3.0, PixelUI.INK_GOLD)
 	)
+	# A boss collection log unlocked a new unique. One SELF-REPLACING feed card
+	# per boss, keyed on the boss id: a run that fills three slots updates
+	# "4 / 10" to "6 / 10" in place instead of stacking three cards. The item's
+	# name is resolved here from the slug the server sent, through the same
+	# ContentRegistryHub lookup the log menu and the loot feed use, so all three
+	# agree and the server never ships its locale to the client.
+	Client.subscribe(&"collection_log.item", func(data: Dictionary) -> void:
+		var slug: StringName = StringName(str(data.get("slug", "")))
+		var item: Item = ContentRegistryHub.load_by_slug(&"items", slug) as Item
+		var item_name: String = String(item.item_name) if item != null \
+			else String(slug).replace("_", " ").capitalize()
+		Toaster.toast_feed(
+			"collog:" + str(data.get("boss_id", "")),
+			"Collection log",
+			PackedStringArray([
+				item_name,
+				"%d / %d collected" % [int(data.get("unlocked", 0)),
+					int(data.get("total", 0))],
+			]),
+			4.0)
+	)
+	# ...and the log going green. Its own card, held longer, gold: this is the
+	# rarest thing a boss farmer sees and it should not share a card with the
+	# drop that happened to complete it.
+	Client.subscribe(&"collection_log.green", func(data: Dictionary) -> void:
+		Toaster.toast_group(
+			"%s collection log complete" % str(data.get("boss_name", "Boss")),
+			PackedStringArray(["Title unlocked: « %s »" % str(data.get("title", ""))]),
+			7.0)
+	)
 	Client.subscribe(&"combat.reward", _on_combat_reward)
 	Client.subscribe(&"mining.gather_result", _on_gather_result)
 	# Profession XP from the non-gathering skills. These are request/RESPONSE

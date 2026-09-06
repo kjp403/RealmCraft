@@ -408,6 +408,10 @@ func _ready() -> void:
 	# typed `WorldServer.curr` (the export plugin stubs this static, so naming the
 	# class in common/ stays client-export-safe).
 	curr = self
+	# Collection Log toasts and the green-log announcement. Attached here rather
+	# than per-player: these are world-wide signal subscriptions, and connecting
+	# them on every login would stack one duplicate per connect.
+	CollectionLogNotifier.attach(self)
 
 
 ## If no instance_id is provided, will use all peers connected in the world.
