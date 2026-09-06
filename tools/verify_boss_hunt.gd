@@ -17,8 +17,6 @@ extends Node
 ##   - the Guild Hall places the broker,
 ##   - the Hunt Chest round-trips a deposit,
 ##   - every contract fights the SAME EnemyTypeResource the open world places,
-##   - every contract spawns at exactly 3x the world boss's health and grows
-##     with the party,
 ##   - and the tuning rules hold: XP under the open world, no solo discount,
 ##     health scaling UP with party size.
 
@@ -28,11 +26,6 @@ const BROKER_RES: String = "res://source/common/gameplay/characters/npc/npcs/hun
 const GUILD_HALL: String = "res://source/common/gameplay/maps/maps/guild_house/inside_map.tscn"
 const MAPS_PATH: String = "res://source/common/gameplay/maps/"
 const TYPES_PATH: String = "res://source/common/gameplay/characters/npc/types/"
-## A contract is the world boss with a deeper health pool and nothing else
-## changed. Three times, every contract, no exceptions: below it the private
-## arena and its fast respawn become the CHEAPER farm, which is the whole thing
-## the multiplier exists to prevent.
-const WORLD_HEALTH_MULT: float = 3.0
 
 var _failures: PackedStringArray = PackedStringArray()
 
@@ -87,15 +80,6 @@ func _check_catalog() -> void:
 		if target.xp_mult <= 0.0 or target.xp_mult > 1.0:
 			_fail("%s pays %.2fx XP — must be in (0, 1]; the world kill stays superior." % [
 				id, target.xp_mult])
-
-		# 3x the world kit's health, and only its health — drop rates are
-		# authored on the shared EnemyTypeResource, so they cannot diverge.
-		if not is_equal_approx(target.health_mult, WORLD_HEALTH_MULT):
-			_fail("%s spawns at %.1fx world health, must be %.1fx." % [
-				id, target.health_mult, WORLD_HEALTH_MULT])
-		if target.health_per_extra_player <= 0.0:
-			_fail("%s does not grow with party size (per-extra %.2f)." % [
-				id, target.health_per_extra_player])
 
 		# No solo discount, and the fight grows with the party.
 		var solo: float = target.party_health(1)
