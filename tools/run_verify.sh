@@ -35,6 +35,7 @@ DEFAULT_GATES=(
 	verify_reward_window_layer
 	verify_gather_persistence
 	verify_gather_db_roundtrip
+	verify_gather_tools
 )
 
 GATES=("$@")
