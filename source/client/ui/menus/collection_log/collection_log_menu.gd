@@ -17,9 +17,11 @@ extends MenuShell
 ## server sends slugs rather than names so the payload stays small and the client
 ## keeps using the localised/authored item data it already has.
 
-## Grid columns in the item panel. Six 64px cells fit the right-hand pane at the
-## narrowest supported window without the grid scrolling sideways.
-const GRID_COLUMNS: int = 6
+## Seven 64px cells fit the right pane at the narrowest supported window. Was
+## six, raised when tier materials took the biggest log to 21 items: seven
+## columns lands that at three full rows, where six would have left a fourth row
+## holding three cells and made the common case scroll for almost nothing.
+const GRID_COLUMNS: int = 7
 const CELL_SIZE: Vector2 = Vector2(64, 64)
 ## Headroom for the title itself. The VIP emitter stack is mounted ON the title
 ## label and fitted to its rect, so this is the room those particles get to
@@ -85,11 +87,12 @@ func _build_layout() -> void:
 	PixelUI.panel(right_panel, "frame_stone", 12)
 	hbox.add_child(right_panel)
 
-	# NO ScrollContainer here, deliberately. A ScrollContainer sizes itself to its
-	# CONTENT, so a SIZE_EXPAND_FILL spacer inside one resolves to zero height and
+	# No ScrollContainer around THIS. A ScrollContainer sizes itself to its
+	# CONTENT, so a SIZE_EXPAND_FILL child inside one resolves to zero height and
 	# cannot push anything to the bottom — the reward plaque would float directly
-	# under the grid again. The panel is a fixed height and the largest log is ten
-	# items (two rows), so there is nothing to scroll.
+	# under the grid again. The scrolling in this panel is one level deeper, around
+	# the item grid alone (see _build_detail), where the container it sits in has a
+	# height to constrain it.
 	var pad: MarginContainer = MarginContainer.new()
 	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -99,11 +102,15 @@ func _build_layout() -> void:
 		pad.add_theme_constant_override(StringName("margin_" + side), 8)
 	right_panel.add_child(pad)
 
-	# INVARIANT: exactly one CHILD of this box expands vertically — the spacer in
-	# _build_detail. Everything above it hugs its content and the plaque below it
-	# is SHRINK_BEGIN, which is what pins the plaque to the bottom margin. A
-	# second expanding child anywhere in here splits the leftover space with the
-	# spacer and the plaque drifts back up into the middle of the panel.
+	# INVARIANT: exactly one CHILD of this box expands vertically — the grid's
+	# ScrollContainer in _build_detail. Everything above it hugs its content and
+	# the plaque below it is SHRINK_BEGIN, which is what pins the plaque to the
+	# bottom margin. A second expanding child anywhere in here splits the leftover
+	# space with the scroll and the plaque drifts back up into the middle.
+	#
+	# That one node is doing two jobs: it absorbs the slack under a short grid
+	# (what a bare spacer used to do) AND it is what stops a 21-item log running
+	# off the bottom of the panel.
 	#
 	# The chain ABOVE this node (hbox -> right_panel -> pad -> here) expands on
 	# purpose and must keep doing so: those are ancestors passing the panel's
@@ -275,15 +282,28 @@ func _build_detail() -> void:
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_detail_host.add_child(header)
 	_detail_host.add_child(_make_stats(row))
-	_detail_host.add_child(_make_grid(row))
 
-	# The dynamic spacer, and the whole layout fix: it eats every pixel the grid
-	# does not, so a six-item log and a ten-item log both put the plaque on the
-	# bottom margin instead of leaving a cavern under a short grid.
-	var spacer: Control = Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_detail_host.add_child(spacer)
+	# THE GRID IS ALSO THE SPACER.
+	#
+	# This used to be a bare grid followed by an empty SIZE_EXPAND_FILL Control,
+	# which pinned the plaque to the bottom on the assumption — written into the
+	# old comment — that the largest log was ten items, two rows, always short
+	# enough to fit. Adding tier materials took Ankhemet to 21 and the
+	# Necromancer to 19, so that assumption is gone and a fixed grid now runs off
+	# the bottom of the panel.
+	#
+	# One node solves both: a ScrollContainer holding the grid, expanding to take
+	# every pixel the header and plaque do not. Short logs leave it part empty,
+	# exactly as the spacer did; long ones scroll inside it. The plaque still
+	# sits on the bottom margin either way, and there is still exactly ONE
+	# expanding child in here — see the invariant on _detail_host.
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	scroll.add_child(_make_grid(row))
+	_detail_host.add_child(scroll)
 
 	# BOTTOM: the reward, anchored to the floor of the panel.
 	_detail_host.add_child(_make_title_plaque(row))

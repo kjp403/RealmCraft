@@ -95,6 +95,15 @@ func _go() -> void:
 	await _shot(out_abs, "collection-log-green.png")
 	_assert_layout("green")
 
+	# THE BIGGEST LOG, whichever it currently is. Not a fixed boss: the worst case
+	# moves every time log_items is edited, and the panel's layout assumptions are
+	# exactly what a bigger log breaks — the grid was a bare fixed block until
+	# tier materials took one log to 21 items and ran it off the bottom.
+	_select(_largest_index())
+	await _settle()
+	await _shot(out_abs, "collection-log-largest.png")
+	_assert_layout("largest")
+
 	print("")
 	if _failures.is_empty():
 		print("PREVIEWS_OK -> %s  (layout gate passed)" % out_abs)
@@ -257,6 +266,20 @@ func _select(index: int) -> void:
 	_collect_rows(_menu, rows)
 	if index < rows.size():
 		(rows[index] as Button).emit_signal(&"pressed")
+
+
+## Index of the log with the most items, in the order the list renders them.
+func _largest_index() -> int:
+	var logs: Array = _menu.get(&"_logs")
+	var best: int = 0
+	var most: int = -1
+	for i: int in logs.size():
+		var total: int = int((logs[i] as Dictionary).get("total", 0))
+		if total > most:
+			most = total
+			best = i
+	print("largest log: index %d, %d items" % [best, most])
+	return best
 
 
 func _collect_rows(node: Node, out: Array) -> void:

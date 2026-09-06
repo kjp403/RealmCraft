@@ -22,7 +22,7 @@
 script = ExtResource("1_script")
 boss_id = &"sand_king"
 boss_name = "Ankhemet, the Sand King"
-log_items = Array[StringName]([&"relic_scarabheart", &"sword_sunsteel.item", &"hammer_sunsteel.item", &"sunsteel_bow.item", &"wand_sunsteel.item", &"book_sunsteel.item", &"ankhemet_mask", &"ankhemet_wrappings", &"ankhemet_signet"])
+log_items = Array[StringName]([&"relic_scarabheart", &"sword_sunsteel.item", &"hammer_sunsteel.item", &"sunsteel_bow.item", &"wand_sunsteel.item", &"book_sunsteel.item", &"ankhemet_mask", &"ankhemet_wrappings", &"ankhemet_signet", &"basilisk_ore", &"basilisk_gem", &"basilisk_cloth", &"runewoven_ore", &"runewoven_gem", &"runewoven_cloth", &"fiber_runewoven", &"wraithsilk_gem", &"wraithsilk_cloth", &"fiber_wraithsilk", &"hide_wraithsilk", &"wraithsilk_leather"])
 green_log_title_text = "Dunecrowned"
 green_log_vfx = ExtResource("2_vfx")
 green_log_profile = &"dunecrowned"

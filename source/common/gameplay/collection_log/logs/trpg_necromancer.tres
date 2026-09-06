@@ -13,7 +13,7 @@
 script = ExtResource("1_script")
 boss_id = &"trpg_necromancer"
 boss_name = "Necromancer"
-log_items = Array[StringName]([&"relic_netherglass", &"duskfeather_cloak", &"sword_wyrmguard.item", &"hammer_wyrmguard.item", &"nightglass_bow.item", &"wand_astral.item", &"book_astral.item"])
+log_items = Array[StringName]([&"relic_netherglass", &"duskfeather_cloak", &"sword_wyrmguard.item", &"hammer_wyrmguard.item", &"nightglass_bow.item", &"wand_astral.item", &"book_astral.item", &"wyrmguard_ore", &"wyrmguard_gem", &"wyrmguard_cloth", &"nightglass_gem", &"nightglass_cloth", &"fiber_nightglass", &"hide_nightglass", &"nightglass_leather", &"astral_ore", &"astral_gem", &"astral_cloth", &"fiber_astral"])
 green_log_title_text = "Nethersworn"
 green_log_vfx = ExtResource("2_vfx")
 green_log_profile = &"nethersworn"

@@ -13,7 +13,7 @@
 script = ExtResource("1_script")
 boss_id = &"fungal_heart"
 boss_name = "The Fungal Heart"
-log_items = Array[StringName]([&"relic_sporebloom", &"sword_spore.item", &"hammer_spore.item", &"wand_spore.item", &"book_spore.item", &"spore_bow.item"])
+log_items = Array[StringName]([&"relic_sporebloom", &"sword_spore.item", &"hammer_spore.item", &"wand_spore.item", &"book_spore.item", &"spore_bow.item", &"enchanted_ore", &"enchanted_gem", &"enchanted_cloth", &"phantom_ore", &"phantom_gem", &"phantom_cloth"])
 green_log_title_text = "Sporebound"
 green_log_vfx = ExtResource("2_vfx")
 green_log_profile = &"sporebound"
