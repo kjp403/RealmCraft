@@ -68,7 +68,7 @@ func _init() -> void:
 	for boss_path: String in [
 		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres",
-		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
+		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
 		"res://source/common/gameplay/characters/npc/types/trpg/trpg_necromancer.tres",
 	]:
 		var boss: Resource = load(boss_path)
