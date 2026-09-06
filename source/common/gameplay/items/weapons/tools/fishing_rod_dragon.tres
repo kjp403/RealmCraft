@@ -9,8 +9,8 @@
 [resource]
 script = ExtResource("2_tool")
 tool_type = &"fishing_rod"
-extraction_damage = 6
-swing_cooldown = 0.28
+extraction_damage = 12
+swing_cooldown = 0.56
 required_skill = &"fishing"
 required_skill_level = 65
 bonus_yield_chance = 0.18

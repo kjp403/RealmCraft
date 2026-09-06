@@ -13,8 +13,8 @@ region = Rect2(112, 48, 16, 32)
 [resource]
 script = ExtResource("2_tool")
 tool_type = &"axe"
-extraction_damage = 7
-swing_cooldown = 0.28
+extraction_damage = 14
+swing_cooldown = 0.56
 required_skill = &"woodcutting"
 required_skill_level = 75
 bonus_yield_chance = 0.21
