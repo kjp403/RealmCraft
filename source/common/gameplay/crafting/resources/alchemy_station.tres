@@ -44,6 +44,10 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/aegis_elixir.tres" id="mix_aegis"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/shadowveil_draught.tres" id="mix_shadowveil"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/provocation_brew.tres" id="mix_provocation"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sunscale_flake.tres" id="herb_sunscale_flake"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/hourglass_draught.tres" id="pot_hourglass"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/sovereigns_bloom.tres" id="herb_sovereigns_bloom"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/siltward_draught.tres" id="pot_siltward"]
 [sub_resource type="Resource" id="I_vial"]
 script = ExtResource("3_ingred")
 item = ExtResource("vial_water")
@@ -315,9 +319,33 @@ required_level = 99
 xp_reward = 2600
 reclaim_glass = true
 
+[sub_resource type="Resource" id="I_hourglass"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_sunscale_flake")
+amount = 3
+
+[sub_resource type="Resource" id="R_hourglass"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_hourglass")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_hourglass")])
+required_level = 79
+xp_reward = 690
+
+[sub_resource type="Resource" id="I_siltward"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_sovereigns_bloom")
+amount = 3
+
+[sub_resource type="Resource" id="R_siltward"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_siltward")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_siltward")])
+required_level = 73
+xp_reward = 590
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Alchemy Table"
 profession = &"herblore"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_seep_tonic"), SubResource("R_seep_draught"), SubResource("R_mix_corrosive"), SubResource("R_mix_venom"), SubResource("R_mix_cinder"), SubResource("R_mix_aegis"), SubResource("R_mix_shadowveil"), SubResource("R_mix_provocation")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_seep_tonic"), SubResource("R_seep_draught"), SubResource("R_mix_corrosive"), SubResource("R_mix_venom"), SubResource("R_mix_cinder"), SubResource("R_mix_aegis"), SubResource("R_mix_shadowveil"), SubResource("R_mix_provocation"), SubResource("R_hourglass"), SubResource("R_siltward")])

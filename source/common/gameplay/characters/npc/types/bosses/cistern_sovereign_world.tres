@@ -30,6 +30,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/leather/sirenic_leather.tres" id="sirenic_leather"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/steel_bar.tres" id="steel_bar"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/siltbound_coronet.tres" id="cl_siltbound_coronet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/siltbound_plate.tres" id="cl_siltbound_plate"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/sovereigns_bloom.tres" id="cl_sovereigns_bloom"]
 
 [sub_resource type="Resource" id="Lunge_sov"]
 script = ExtResource("91_lunge")
@@ -172,6 +175,21 @@ min_amount = 1
 max_amount = 1
 chance = 1.0
 
+[sub_resource type="Resource" id="Drop_siltbound_coronet"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_siltbound_coronet")
+chance = 0.035
+
+[sub_resource type="Resource" id="Drop_siltbound_plate"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_siltbound_plate")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_sovereigns_bloom"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_sovereigns_bloom")
+chance = 0.1
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cistern_sovereign"
@@ -200,7 +218,7 @@ wander_pause_max_s = 4.0
 xp_reward = 7200
 respawn_delay = 240.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_relic_rotmire"), SubResource("Drop_dragon_bones")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_bone"), SubResource("Drop_steel_bar"), SubResource("Drop_mithril_bar"), SubResource("Drop_adamant_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_hide_sewer"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_ore"), SubResource("Drop_dragon_gem"), SubResource("Drop_dragon_cloth"), SubResource("Drop_sirenic_leather"), SubResource("Drop_sirenic_gem"), SubResource("Drop_sirenic_cloth"), SubResource("Drop_relic_rotmire"), SubResource("Drop_dragon_bones"), SubResource("Drop_siltbound_coronet"), SubResource("Drop_siltbound_plate"), SubResource("Drop_sovereigns_bloom")])
 combat_skill_xp_override = 22000
 enrage_health_fraction = 0.4
 slam_radius = 130.0

@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/vfx/green_log_title_fx.gd" id="1_fx"]
+
+[node name="GreenLogFxLongRoad" type="Node2D"]
+z_index = 5
+z_as_relative = false
+script = ExtResource("1_fx")
+shape = 2
+primary_tint = Color(0.74, 0.56, 0.36, 1)
+accent_tint = Color(0.90, 0.78, 0.55, 1)
+primary_amount = 12
+accent_amount = 10

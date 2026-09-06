@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_collection_log_previews.gd" id="1_clogprev"]
+
+[node name="CollectionLogPreviewRig" type="Node"]
+script = ExtResource("1_clogprev")

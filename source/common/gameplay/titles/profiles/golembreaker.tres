@@ -1,0 +1,124 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_debris"]
+script = ExtResource("1_layer")
+id = &"debris"
+shape = 7
+shape_px = 6
+span = 2
+span_scale = 1.0
+amount = 10
+lifetime = 1.0
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, 1.0)
+spread = 34.0
+gravity = Vector2(0.0, 190.0)
+velocity_min = 10.0
+velocity_max = 34.0
+damping = 0.0
+angular_velocity = 90.0
+scale_min = 0.25
+scale_max = 0.65
+scale_start = 1.0
+scale_end = 0.5
+color_in = Color(0.61960784, 0.58823529, 0.54901961, 1.00000000)
+color_mid = Color(0.40000000, 0.37647059, 0.35294118, 1.00000000)
+color_out = Color(0.18039216, 0.17254902, 0.16470588, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 1.0
+additive = false
+
+[sub_resource type="Resource" id="Layer_wisps"]
+script = ExtResource("1_layer")
+id = &"wisps"
+shape = 0
+shape_px = 6
+span = 1
+span_scale = 1.0
+amount = 10
+lifetime = 1.35
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 40.0
+gravity = Vector2(0.0, -44.0)
+velocity_min = 6.0
+velocity_max = 20.0
+damping = 16.0
+angular_velocity = 0.0
+scale_min = 0.2
+scale_max = 0.55
+scale_start = 1.0
+scale_end = 0.75
+color_in = Color(0.83921569, 1.00000000, 1.00000000, 1.00000000)
+color_mid = Color(0.37647059, 0.83921569, 0.88627451, 1.00000000)
+color_out = Color(0.11764706, 0.43137255, 0.50980392, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.9
+additive = true
+
+[sub_resource type="Resource" id="Layer_core"]
+script = ExtResource("1_layer")
+id = &"core"
+shape = 2
+shape_px = 9
+span = 3
+span_scale = 1.0
+amount = 6
+lifetime = 0.7
+explosiveness = 0.0
+detail = true
+direction = Vector2(0.0, 0.0)
+spread = 180.0
+gravity = Vector2(0.0, 0.0)
+velocity_min = 0.0
+velocity_max = 4.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.25
+scale_max = 0.6
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(0.92549020, 1.00000000, 1.00000000, 1.00000000)
+color_mid = Color(0.47058824, 0.88627451, 0.94117647, 1.00000000)
+color_out = Color(0.15686275, 0.50980392, 0.58823529, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.8
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"golembreaker"
+display_name = "Golembreaker"
+accent = Color(0.28235294, 0.81568627, 0.89411765, 1.00000000)
+metal_high = Color(0.83921569, 0.98039216, 1.00000000, 1.00000000)
+metal_mid = Color(0.20392157, 0.74509804, 0.83921569, 1.00000000)
+metal_low = Color(0.05490196, 0.13333333, 0.19607843, 1.00000000)
+sheen = Color(0.72941176, 0.98039216, 1.00000000, 1.00000000)
+shadow = Color(0.01568627, 0.07058824, 0.10196078, 0.58000000)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
+sweep_speed = 0.24
+sweep_width = 0.07
+sheen_amount = 0.7
+pulse_amount = 0.2
+pulse_speed = 1.9
+grain = 0.22
+prism = 0.0
+facets = 6.0
+fire = 0.0
+sweep_speed2 = 0.0
+split_color = Color(0.0, 0.0, 0.0, 0.0)
+split_at = 0.5
+split_soft = 0.05
+split_amount = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_debris"), SubResource("Layer_wisps"), SubResource("Layer_core")])

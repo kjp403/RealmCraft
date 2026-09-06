@@ -86,6 +86,16 @@ static var _cache: Dictionary = {}
 @export_range(0.0, 1.0, 0.01) var fire: float = 0.0
 ## A second polish band at this speed, crossing the first. 0 = off.
 @export_range(0.0, 1.5, 0.01) var sweep_speed2: float = 0.0
+
+## HORIZONTAL SPLIT — the metal is tinted toward [member split_color] across a
+## vertical seam, luminance-preserving so both halves stay chiselled. 0 amount =
+## off, which is every profile but Emberfrost.
+@export var split_color: Color = Color(0.0, 0.0, 0.0, 0.0)
+## Where the seam sits across the label, 0 = left edge, 1 = right.
+@export_range(0.0, 1.0, 0.01) var split_at: float = 0.5
+## Seam softness. Small = a hard temperature boundary; large = a blend.
+@export_range(0.002, 0.5, 0.002) var split_soft: float = 0.05
+@export_range(0.0, 1.0, 0.01) var split_amount: float = 0.0
 ## Light-ray fan drawn BEHIND the glyphs, the same seven-triangle burst HIGH
 ## PRIEST uses. Fully transparent = no fan, which is every tier but Diamond; the
 ## alpha here is the fan's peak opacity, so one field both switches it on and

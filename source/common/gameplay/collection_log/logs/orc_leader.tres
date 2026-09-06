@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; Orc Leader — hammer_fire (1/20) is on this table but belongs to Vurthek's log, not here.
+;
+; Built entirely from existing drops: the boss's exclusive relic plus the weapon
+; family off its own table. No new items, so nothing here needs balancing against
+; the endgame ceiling.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_emberbrand.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"orc_leader"
+boss_name = "Orc Leader"
+log_items = Array[StringName]([&"relic_emberbrand", &"sword_fairy.item", &"hammer_fairy.item", &"fairy_bow.item", &"wand_fairy.item", &"book_fairy.item", &"enchanted_ore", &"enchanted_gem", &"enchanted_cloth", &"phantom_ore", &"phantom_gem", &"phantom_cloth"])
+green_log_title_text = "Orcsbane"
+green_log_vfx = ExtResource("2_vfx")
+green_log_profile = &"orcsbane"
+green_log_title_style = 6
+green_log_title_color = Color(0.72941176, 0.76078431, 0.79215686, 1)

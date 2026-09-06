@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; The Fungal Heart — Spore drift. Spore weapons are the most common family in the game at 1/7.
+;
+; Built entirely from existing drops: the boss's exclusive relic plus the weapon
+; family off its own table. No new items, so nothing here needs balancing against
+; the endgame ceiling.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_bloom_struck.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"fungal_heart"
+boss_name = "The Fungal Heart"
+log_items = Array[StringName]([&"relic_sporebloom", &"sword_spore.item", &"hammer_spore.item", &"wand_spore.item", &"book_spore.item", &"spore_bow.item", &"enchanted_ore", &"enchanted_gem", &"enchanted_cloth", &"phantom_ore", &"phantom_gem", &"phantom_cloth"])
+green_log_title_text = "Sporebound"
+green_log_vfx = ExtResource("2_vfx")
+green_log_profile = &"sporebound"
+green_log_title_style = 3
+green_log_title_color = Color(0.37647059, 0.83921569, 0.74509804, 1)

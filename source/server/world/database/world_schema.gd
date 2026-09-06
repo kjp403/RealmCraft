@@ -81,6 +81,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 24:
 		_migration_v24(db)
 		_set_schema_version(db, 24)
+	if version < 25:
+		_migration_v25(db)
+		_set_schema_version(db, 25)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -495,3 +498,14 @@ static func _migration_v23(db: SQLite) -> void:
 static func _migration_v24(db: SQLite) -> void:
 	if not _column_exists(db, "players", "gather_nodes_json"):
 		db.query("ALTER TABLE players ADD COLUMN gather_nodes_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v25: Boss Collection Log — boss_id -> {"kills", "items", "completed",
+## "last_unlock_kill"}. ONE column for the whole roster: adding a boss must be a
+## .tres drop, not a migration, and every extra column is another INSERT
+## placeholder to keep aligned. ADD COLUMN — no DB wipe; existing players migrate
+## to an empty log, which is correct (nothing retroactively credits kills they
+## made before the log existed).
+static func _migration_v25(db: SQLite) -> void:
+	if not _column_exists(db, "players", "collection_log_json"):
+		db.query("ALTER TABLE players ADD COLUMN collection_log_json TEXT NOT NULL DEFAULT '{}';")

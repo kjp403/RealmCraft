@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/sunscale_flake.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Sunscale Flake"
+item_icon = ExtResource("1_tex")
+description = "Gold that peeled off a Sunsteel edge as it came apart. It keeps the desert's hour in it."
+holdable = false
+can_trade = true
+vendor_value = 22
+stack_limit = 10
+tags = PackedStringArray()
+metadata/slug = &"sunscale_flake"
+metadata/id = 699

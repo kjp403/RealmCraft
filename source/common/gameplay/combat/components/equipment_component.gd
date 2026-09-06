@@ -47,6 +47,12 @@ var _special_ability_ids: Array[int] = [0, 0, 0, 0]
 ## LevelSync restored an old snapshot; the ledger makes strip/reapply idempotent.
 var _applied_gear_mods: Array[Dictionary] = []
 
+## Server-side ledger of COMBAT SET bonuses currently applied. Kept separate from
+## _applied_gear_mods on purpose: gear mods are stripped per SLOT, but a set
+## bonus belongs to the whole loadout, so removing one piece has to re-evaluate
+## the set as a unit rather than subtract that slot's share.
+var _applied_set_mods: Dictionary[StringName, float] = {}
+
 
 const EMPTY_HAND_SCENE: PackedScene = preload(
 	"res://source/common/gameplay/items/weapons/empty_hand/empty_hand.tscn"
@@ -62,6 +68,11 @@ func _ready() -> void:
 	# when the resolved id has not changed, so the extra calls from the weapon
 	# special-ability slots cost nothing.
 	equipment_changed.connect(_on_equipment_changed_aura)
+	# Boss-set combat bonuses, hung off the same signal for exactly the reason
+	# above — and more so here, because these move real combat stats. A set
+	# bonus that fails to clear on one of the four exits leaves a player
+	# permanently buffed by armour they are no longer wearing.
+	equipment_changed.connect(_on_equipment_changed_set_bonus)
 	# Players with an empty weapon slot still need a punch so they can fight
 	# before buying/equipping a weapon. Deferred: right_hand_spot must exist.
 	call_deferred(&"_ensure_unarmed_if_empty")
@@ -146,8 +157,23 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 		return
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
 	if not item:
+		# THE SLOT IS ALREADY EMPTY HERE — _clear_slot ran above, stripping the
+		# old item and its gear stats. Returning without emitting leaves every
+		# equipment_changed listener believing the previous item is still worn.
+		# The set-bonus ledger is the one that hurts: it keeps paying a 3-piece
+		# bonus to a character now wearing two, until their next equipment change.
+		#
+		# Reachable whenever a saved slot holds an id a content patch removed.
+		# NOT client-reachable — item.equip.gd resolves and validates the id
+		# before it ever writes the slot — so this is data integrity, not an
+		# exploit, and it fails in the player's favour, which is why nothing
+		# ever reported it.
+		#
+		# Emitting 0 rather than item_id is the honest signal: the slot is empty.
 		if slot == &"weapon":
 			_mount_unarmed()
+		_clamp_vitals_to_max()
+		equipment_changed.emit(slot, 0)
 		return
 
 	equipped_items[slot] = item
@@ -213,6 +239,40 @@ func _on_equipment_changed_aura(_slot: StringName, _item_id: int) -> void:
 		SkillingOutfitManager.refresh_aura(character as Player)
 
 
+## Re-evaluate combat set bonuses after any equipment change. Server-only.
+##
+## Recomputes the WHOLE loadout rather than adjusting for the changed slot: the
+## bonus depends on how many pieces are worn, so swapping one piece can move a
+## set between tiers (or off the table entirely), and a per-slot delta cannot
+## express that.
+func _on_equipment_changed_set_bonus(_slot: StringName, _item_id: int) -> void:
+	refresh_set_bonuses()
+
+
+## Strip the applied set bonuses and re-apply whatever the current loadout earns.
+## Idempotent — the ledger makes a double call a no-op rather than a double buff.
+func refresh_set_bonuses() -> void:
+	if character == null or character.stats_component == null:
+		return
+	if character.multiplayer == null or not character.multiplayer.is_server():
+		_applied_set_mods.clear()
+		return
+	var wanted: Dictionary[StringName, float] = CombatSetBonus.bonuses_for(equipped_items)
+	# Nothing to do in the overwhelmingly common case: no set worn now, none
+	# before. Cheap enough to run on every equipment change of every character.
+	if wanted.is_empty() and _applied_set_mods.is_empty():
+		return
+	for stat: StringName in _applied_set_mods:
+		character.stats_component.modify_stat(stat, -_applied_set_mods[stat])
+	_applied_set_mods.clear()
+	for stat: StringName in wanted:
+		if is_zero_approx(wanted[stat]):
+			continue
+		character.stats_component.modify_stat(stat, wanted[stat])
+		_applied_set_mods[stat] = wanted[stat]
+	_clamp_vitals_to_max()
+
+
 ## Apply GearItem base_modifiers for [param slot], tracking them in the ledger.
 ## Safe to call after item.equip(); no-ops on clients and non-gear.
 func _apply_gear_stats(slot: StringName, item: Item) -> void:
@@ -255,6 +315,10 @@ func reapply_all_gear_stats() -> void:
 	_remove_gear_stats(&"")
 	for slot: StringName in equipped_items:
 		_apply_gear_stats(slot, equipped_items[slot])
+	# This path rewrote live stats without going through slot_changed, so the
+	# set-bonus signal never fired — rebuild it here too or a LevelSync restore
+	# silently drops the bonus until the next equipment swap.
+	refresh_set_bonuses()
 	_clamp_vitals_to_max()
 
 

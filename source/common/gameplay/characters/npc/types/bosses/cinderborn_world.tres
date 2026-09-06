@@ -23,6 +23,9 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/relics/relic_cinderheart.tres" id="relic_cinderheart"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="loot_dragon_bones"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/cindermantle.tres" id="cindermantle"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/metal/slagborn_helm.tres" id="cl_slagborn_helm"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/leather/slagborn_sabatons.tres" id="cl_slagborn_sabatons"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/everburning_coal.tres" id="cl_everburning_coal"]
 
 [sub_resource type="Resource" id="Lunge_cinder"]
 script = ExtResource("91_lunge")
@@ -119,6 +122,21 @@ script = ExtResource("3_loot")
 item = ExtResource("cindermantle")
 chance = 0.02
 
+[sub_resource type="Resource" id="Drop_slagborn_helm"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_slagborn_helm")
+chance = 0.03
+
+[sub_resource type="Resource" id="Drop_slagborn_sabatons"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_slagborn_sabatons")
+chance = 0.035
+
+[sub_resource type="Resource" id="Drop_everburning_coal"]
+script = ExtResource("3_loot")
+item = ExtResource("cl_everburning_coal")
+chance = 0.09
+
 [resource]
 script = ExtResource("4_script")
 enemy_type = &"cinderborn"
@@ -147,7 +165,7 @@ wander_pause_max_s = 4.0
 xp_reward = 28000
 respawn_delay = 300.0
 respawns = true
-loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_bones"), SubResource("Drop_cindermantle")])
+loot = Array[ExtResource("3_loot")]([SubResource("Drop_gold"), SubResource("Drop_mithril_ore"), SubResource("Drop_iron_bar"), SubResource("Drop_coal_ore"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_relic_cinderheart"), SubResource("Drop_fire_sword"), SubResource("Drop_fire_hammer"), SubResource("Drop_fire_bow"), SubResource("Drop_fire_wand"), SubResource("Drop_fire_book"), SubResource("Drop_dragon_bones"), SubResource("Drop_cindermantle"), SubResource("Drop_slagborn_helm"), SubResource("Drop_slagborn_sabatons"), SubResource("Drop_everburning_coal")])
 combat_skill_xp_override = 36000
 enrage_health_fraction = 0.4
 slam_radius = 135.0

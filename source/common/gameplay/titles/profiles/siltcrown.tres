@@ -1,0 +1,124 @@
+[gd_resource type="Resource" script_class="VipTierProfile" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_particle_layer.gd" id="1_layer"]
+[ext_resource type="Script" path="res://source/common/gameplay/titles/vip_tier_profile.gd" id="2_profile"]
+
+[sub_resource type="Resource" id="Layer_bubbles"]
+script = ExtResource("1_layer")
+id = &"bubbles"
+shape = 0
+shape_px = 6
+span = 2
+span_scale = 1.0
+amount = 10
+lifetime = 1.25
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, -1.0)
+spread = 22.0
+gravity = Vector2(0.0, -38.0)
+velocity_min = 4.0
+velocity_max = 14.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.2
+scale_max = 0.55
+scale_start = 0.5
+scale_end = 1.35
+color_in = Color(0.77647059, 0.88627451, 0.58823529, 1.00000000)
+color_mid = Color(0.49411765, 0.66666667, 0.34509804, 1.00000000)
+color_out = Color(0.27450980, 0.37647059, 0.21176471, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.75
+additive = true
+
+[sub_resource type="Resource" id="Layer_mud"]
+script = ExtResource("1_layer")
+id = &"mud"
+shape = 4
+shape_px = 6
+span = 2
+span_scale = 1.0
+amount = 9
+lifetime = 1.35
+explosiveness = 0.0
+detail = false
+direction = Vector2(0.0, 1.0)
+spread = 26.0
+gravity = Vector2(0.0, 62.0)
+velocity_min = 2.0
+velocity_max = 10.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.3
+scale_max = 0.7
+scale_start = 1.0
+scale_end = 0.5
+color_in = Color(0.47058824, 0.43137255, 0.25882353, 1.00000000)
+color_mid = Color(0.30588235, 0.29019608, 0.17254902, 1.00000000)
+color_out = Color(0.14901961, 0.15686275, 0.10980392, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 1.0
+additive = false
+
+[sub_resource type="Resource" id="Layer_tarnish"]
+script = ExtResource("1_layer")
+id = &"tarnish"
+shape = 2
+shape_px = 7
+span = 1
+span_scale = 1.0
+amount = 7
+lifetime = 0.8
+explosiveness = 0.0
+detail = true
+direction = Vector2(0.0, -1.0)
+spread = 60.0
+gravity = Vector2(0.0, -8.0)
+velocity_min = 1.0
+velocity_max = 7.0
+damping = 0.0
+angular_velocity = 0.0
+scale_min = 0.2
+scale_max = 0.5
+scale_start = 1.0
+scale_end = 1.0
+color_in = Color(0.90980392, 0.83921569, 0.54901961, 1.00000000)
+color_mid = Color(0.69019608, 0.57254902, 0.26666667, 1.00000000)
+color_out = Color(0.37647059, 0.31372549, 0.13333333, 1.00000000)
+late_stop = 0.0
+color_late = Color(1.00000000, 1.00000000, 1.00000000, 1.00000000)
+peak_alpha = 0.7
+additive = true
+
+[resource]
+script = ExtResource("2_profile")
+tier = &"siltcrown"
+display_name = "Silt Crown"
+accent = Color(0.49411765, 0.61960784, 0.32156863, 1.00000000)
+metal_high = Color(0.83921569, 0.88627451, 0.65882353, 1.00000000)
+metal_mid = Color(0.37647059, 0.48627451, 0.24313725, 1.00000000)
+metal_low = Color(0.10196078, 0.13333333, 0.10196078, 1.00000000)
+sheen = Color(0.80784314, 0.74509804, 0.46274510, 1.00000000)
+shadow = Color(0.03921569, 0.07843137, 0.04705882, 0.55000000)
+shadow_offset = Vector2i(0, 3)
+outline_override = Color(0.0, 0.0, 0.0, 0.0)
+outline_size = 0
+sweep_speed = 0.1
+sweep_width = 0.16
+sheen_amount = 0.4
+pulse_amount = 0.07
+pulse_speed = 1.1
+grain = 0.34
+prism = 0.0
+facets = 0.0
+fire = 0.0
+sweep_speed2 = 0.0
+split_color = Color(0.0, 0.0, 0.0, 0.0)
+split_at = 0.5
+split_soft = 0.05
+split_amount = 0.0
+ray_color = Color(1.0, 1.0, 1.0, 0.0)
+layers = Array[ExtResource("1_layer")]([SubResource("Layer_bubbles"), SubResource("Layer_mud"), SubResource("Layer_tarnish")])

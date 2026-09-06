@@ -66,6 +66,11 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 		return float(a["dmg"]) > float(b["dmg"])
 	)
 
+	# Collection Log credit is accumulated here and applied AFTER party XP
+	# sharing, so a green log's title toast lands last rather than in the middle
+	# of the payout. One row per participant, including participants whose roll
+	# produced nothing — a dry kill is still a kill and still moves the streak.
+	var log_credits: Array[Dictionary] = []
 	for rank: int in ranked.size():
 		var player_id: int = int(ranked[rank]["player_id"])
 		var player: Player = _resolve_player_by_id(player_id)
@@ -74,10 +79,20 @@ static func distribute(npc: HostileNpc, contributors: Dictionary, killer: Charac
 			# so nearby players can't ninja-loot (top damager included). Ranked
 			# ornate chests (if authored) append on top of the table roll.
 			var reserved_peer: int = int(player.player_resource.current_peer_id)
-			_reward(player, npc, reserved_peer, _roll_ranked_ornate_chests(rank, npc))
+			log_credits.append({
+				"res": player.player_resource,
+				"drops": _reward(
+					player, npc, reserved_peer, _roll_ranked_ornate_chests(rank, npc)
+				),
+			})
 			seen[player_id] = true
 
 	_share_party_xp(npc, seen)
+
+	# Deliberately last, and deliberately NOT inside _share_party_xp's loop: a
+	# party member who only stood nearby gets XP but no loot roll, so crediting
+	# them a kill would hand out a collection log for a boss they never damaged.
+	_credit_collection_logs(npc, log_credits)
 
 
 ## Party members standing near a contributor share character + mastery XP (not
@@ -214,10 +229,10 @@ static func _reward(
 	npc: HostileNpc,
 	reserved_peer: int = 0,
 	bonus_loot: Array = []
-) -> void:
+) -> Array[StringName]:
 	var resource: PlayerResource = player.player_resource
 	if resource == null:
-		return
+		return []
 	var peer_id: int = int(resource.current_peer_id)
 
 	var level_before: int = resource.level
@@ -231,6 +246,10 @@ static func _reward(
 	# to its task's authored fallback rate — see HostileNpc.grants_skill_xp.
 	var skill_xp: int = npc.combat_skill_xp() if npc.grants_skill_xp else 0
 	var loot_gained: Array = _roll_loot(npc, player)
+	# Snapshot the boss's OWN table roll before anything else is merged in. Zone
+	# kill loot and ranked ornate chests are appended below and are NOT the
+	# boss's drops — crediting them would let a zone bonus fill a collection log.
+	var table_slugs: Array[StringName] = _slugs_of(loot_gained)
 	_append_zone_kill_loot(player, loot_gained)
 	for entry: Variant in bonus_loot:
 		if entry is Dictionary:
@@ -243,6 +262,9 @@ static func _reward(
 	if dungeon_instance != null and DungeonService.is_dungeon_instance(dungeon_instance) \
 			and DungeonService.charges_remaining(resource) <= 0:
 		loot_gained.clear()
+		# The drop was rolled but never handed over, so it must not fill a log.
+		# Credit follows RECEIPT, not the roll.
+		table_slugs.clear()
 	# Ordinary drops land on the ground for click-pickup — not auto-bagged. Each
 	# peer's piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
 	# A Boss Hunt boss banks straight into each participant's Hunt Chest instead:
@@ -328,6 +350,7 @@ static func _reward(
 		var inst: Node = WorldServer.curr.instance_manager.find_instance_for_peer(peer_id) if peer_id > 0 else null
 		LevelMilestoneService.on_levels_gained(resource, level_before, resource.level, inst)
 
+	return table_slugs
 
 
 ## Pays [param amount] weapon-mastery XP for a reward that ISN'T a kill — a quest
@@ -381,6 +404,63 @@ static func _best_mastery_category(resource: PlayerResource) -> StringName:
 			best_level = level
 			best = StringName(String(key))
 	return best
+
+
+## Registry slugs for a rolled loot payload. The payload carries content IDs
+## because that is what the client renders from; the Collection Log is authored
+## against slugs, because a .tres written by hand cannot know an id the index
+## allocates. This is the one place the two meet.
+##
+## An id the registry cannot resolve is skipped rather than guessed — it means
+## the index is stale, and a wrong slug would credit the wrong log entry.
+static func _slugs_of(loot: Array) -> Array[StringName]:
+	var out: Array[StringName] = []
+	var registry: ContentRegistry = ContentRegistryHub.registry_of(&"items")
+	if registry == null:
+		return out
+	for entry: Variant in loot:
+		if entry is not Dictionary:
+			continue
+		var slug: StringName = registry.slug_from_id(int((entry as Dictionary).get("id", 0)))
+		if not slug.is_empty() and not out.has(slug):
+			out.append(slug)
+	return out
+
+
+## Boss Collection Log credit for everyone who earned a loot roll on this kill.
+##
+## THIS IS THE ONLY SANCTIONED CALLER of [method CollectionLogManager.add_item_to_log]
+## — see that method's header. It sits here, in the boss loot pipeline, precisely
+## because this is the one place that knows an item came off THIS boss's table
+## rather than out of a bank, a trade, a dungeon chest or a quest reward. Wiring
+## the log to inventory instead would let a player green-log a boss they have
+## never fought; the Fire, Poison and Sunsteel weapon sets are all obtainable
+## elsewhere and would do exactly that.
+##
+## Non-bosses are skipped outright: only bosses have logs, and asking the catalog
+## on every rat kill would scan for nothing thousands of times an hour.
+static func _credit_collection_logs(npc: HostileNpc, credits: Array[Dictionary]) -> void:
+	if npc == null or npc.enemy_data == null or not bool(npc.enemy_data.is_boss):
+		return
+	if npc.enemy_type.is_empty() or credits.is_empty():
+		return
+	# Resolved through the manager so the runtime and the verifier share ONE
+	# definition of the key. It is enemy_type, deliberately NOT the registry slug:
+	# the Boss Hunt variant is a separate file (cinderborn_world.tres) and so
+	# carries the slug &"cinderborn_world", which matches no log — and it is the
+	# only variant that drops the uniques. See CollectionLogManager.boss_id_for.
+	var boss_id: StringName = CollectionLogManager.boss_id_for(npc.enemy_data)
+	if CollectionLogManager.find_log(boss_id) == null:
+		return # boss has no log authored — nothing to track
+	for credit: Dictionary in credits:
+		var resource: PlayerResource = credit.get("res", null) as PlayerResource
+		if resource == null:
+			continue
+		# Kill first, so the drop that ends a dry streak is attributed to the
+		# kill that produced it rather than to the next one.
+		CollectionLogManager.increment_boss_kill(resource, boss_id)
+		for slug: StringName in (credit.get("drops", []) as Array):
+			CollectionLogManager.add_item_to_log(resource, boss_id, slug)
 
 
 ## Rolls each loot entry; returns [{ "id", "amount", "name" }, ...].

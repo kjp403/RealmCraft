@@ -381,6 +381,7 @@ func instantiate_player(peer_id: int) -> Player:
 		# Runs after strip_unreleased_vfx above, so a banner can never advertise a
 		# title that was just taken back off a non-staff account.
 		SkillMasterTitleService.flush_notifications(new_player.player_resource)
+		CollectionLogTitleService.flush_notifications(new_player.player_resource)
 		syn.set_by_path(^":active_guild_id", new_player.player_resource.active_guild_id)
 		syn.set_by_path(^":player_id", int(new_player.player_resource.player_id))
 		syn.set_by_path(

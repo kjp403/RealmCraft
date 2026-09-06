@@ -38,6 +38,14 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_rustic.item.tres" id="w_hammer_rustic"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/rustic_bow.item.tres" id="w_rustic_bow"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_rustic.item.tres" id="w_book_rustic"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/sunscale_flake.tres" id="mat_sunscale_flake"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/sword/sword_sunsteel.item.tres" id="w_sword_sunsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/hammer/hammer_sunsteel.item.tres" id="w_hammer_sunsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/bow/sunsteel_bow.item.tres" id="w_sunsteel_bow"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/wand/wand_sunsteel.item.tres" id="w_wand_sunsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/book/book_sunsteel.item.tres" id="w_book_sunsteel"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/everburning_coal.tres" id="mat_everburning_coal"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/coal_ore.tres" id="mat_coal_ore"]
 
 [sub_resource type="Resource" id="Y_spore"]
 script = ExtResource("3_output")
@@ -278,7 +286,61 @@ outputs = Array[ExtResource("3_output")]([SubResource("Y_rustic")])
 required_level = 1
 xp_reward = 30
 
+[sub_resource type="Resource" id="Y_sunsteel"]
+script = ExtResource("3_output")
+item = ExtResource("mat_sunscale_flake")
+min_amount = 12
+max_amount = 18
+
+[sub_resource type="Resource" id="S_sword_sunsteel"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sword_sunsteel")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_sunsteel")])
+required_level = 27
+xp_reward = 65
+
+[sub_resource type="Resource" id="S_hammer_sunsteel"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_hammer_sunsteel")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_sunsteel")])
+required_level = 27
+xp_reward = 65
+
+[sub_resource type="Resource" id="S_sunsteel_bow"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_sunsteel_bow")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_sunsteel")])
+required_level = 27
+xp_reward = 65
+
+[sub_resource type="Resource" id="S_wand_sunsteel"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_wand_sunsteel")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_sunsteel")])
+required_level = 27
+xp_reward = 65
+
+[sub_resource type="Resource" id="S_book_sunsteel"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("w_book_sunsteel")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_sunsteel")])
+required_level = 27
+xp_reward = 65
+
+[sub_resource type="Resource" id="Y_coal_ore"]
+script = ExtResource("3_output")
+item = ExtResource("mat_coal_ore")
+min_amount = 50
+max_amount = 50
+
+[sub_resource type="Resource" id="S_everburning_coal"]
+script = ExtResource("2_recipe")
+source_item = ExtResource("mat_everburning_coal")
+outputs = Array[ExtResource("3_output")]([SubResource("Y_coal_ore")])
+required_level = 0
+xp_reward = 0
+
 [resource]
 script = ExtResource("1_table")
 profession = &"herblore"
-recipes = Array[ExtResource("2_recipe")]([SubResource("S_sword_spore"), SubResource("S_hammer_spore"), SubResource("S_spore_bow"), SubResource("S_wand_spore"), SubResource("S_book_spore"), SubResource("S_sword_poison"), SubResource("S_hammer_poison"), SubResource("S_poison_bow"), SubResource("S_wand_poison"), SubResource("S_book_poison"), SubResource("S_sword_fairy"), SubResource("S_hammer_fairy"), SubResource("S_fairy_bow"), SubResource("S_wand_fairy"), SubResource("S_book_fairy"), SubResource("S_sword_fire"), SubResource("S_hammer_fire"), SubResource("S_fire_bow"), SubResource("S_fire_wand"), SubResource("S_book_fire"), SubResource("S_sword_bone"), SubResource("S_hammer_bone"), SubResource("S_bone_bow"), SubResource("S_wand_bone"), SubResource("S_book_bone"), SubResource("S_sword_rustic"), SubResource("S_hammer_rustic"), SubResource("S_rustic_bow"), SubResource("S_book_rustic")])
+recipes = Array[ExtResource("2_recipe")]([SubResource("S_sword_spore"), SubResource("S_hammer_spore"), SubResource("S_spore_bow"), SubResource("S_wand_spore"), SubResource("S_book_spore"), SubResource("S_sword_poison"), SubResource("S_hammer_poison"), SubResource("S_poison_bow"), SubResource("S_wand_poison"), SubResource("S_book_poison"), SubResource("S_sword_fairy"), SubResource("S_hammer_fairy"), SubResource("S_fairy_bow"), SubResource("S_wand_fairy"), SubResource("S_book_fairy"), SubResource("S_sword_fire"), SubResource("S_hammer_fire"), SubResource("S_fire_bow"), SubResource("S_fire_wand"), SubResource("S_book_fire"), SubResource("S_sword_bone"), SubResource("S_hammer_bone"), SubResource("S_bone_bow"), SubResource("S_wand_bone"), SubResource("S_book_bone"), SubResource("S_sword_rustic"), SubResource("S_hammer_rustic"), SubResource("S_rustic_bow"), SubResource("S_book_rustic"), SubResource("S_sword_sunsteel"), SubResource("S_hammer_sunsteel"), SubResource("S_sunsteel_bow"), SubResource("S_wand_sunsteel"), SubResource("S_book_sunsteel"), SubResource("S_everburning_coal")])

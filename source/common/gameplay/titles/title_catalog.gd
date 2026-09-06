@@ -219,6 +219,13 @@ static func spec(title: String) -> Dictionary:
 	var from_mastery: Dictionary = SkillMasterTitles.spec(title)
 	if not from_mastery.is_empty():
 		return from_mastery
+	# Green-log titles resolve BEFORE the PREMIUM table below, deliberately: this
+	# is what keeps is_premium_name() false for them, so strip_unreleased_vfx
+	# never takes back a title somebody earned off a 1/1000 relic. Same argument
+	# as the mastery table above it. See CollectionLogTitles.
+	var from_collection_log: Dictionary = CollectionLogTitles.spec(title)
+	if not from_collection_log.is_empty():
+		return from_collection_log
 	var needle: String = title.strip_edges()
 	if needle.is_empty():
 		return {}

@@ -259,6 +259,19 @@ var active_inventory_bag: int = 0
 ## drained vein keeps regenerating while its owner is offline.
 @export var gather_nodes: Dictionary = {}
 
+## --- Boss Collection Log ---
+## boss_id -> {"kills": int, "items": Array[StringName], "completed": bool,
+## "last_unlock_kill": int}. Persisted as collection_log_json.
+##
+## THIS LIVES ON THE PLAYER, NOT ON THE AUTOLOAD, and that is not a style
+## preference. One world process serves many players; a [CollectionLogManager]
+## that cached "the" log would serve whoever killed a boss last, and every read
+## after a second player logged in would belong to someone else — the same rule
+## [DailyQuestManager] states in its header. Read and write it through
+## [CollectionLogManager], never directly: the completion latch and the dry-streak
+## stamp only hold if every mutation goes through one door.
+@export var collection_log: Dictionary = {}
+
 # Profile
 @export var profile_status: String = "Hello I'am new!"
 @export var profile_animation: String = "idle"

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="BossCollectionLog" format=3]
+
+; The Bloated Sovereign — dragged up from the standing water north of the Sewers
+; grate. Enemy display name "Unbound Sovereign", combat level 70 (Boss Hunt
+; contract "cistern_sovereign", recommended level 20).
+;
+; Six entries. relic_rotmire (1/1000) is boss-exclusive; the five Poison weapons
+; are 1/12.5 each and also come off salvage_table and the Hollow Seep quest "The
+; Sovereign Below".
+;
+; Sewer Hide is NOT in the log despite reading as the boss's signature material:
+; eight Sewers trash mobs drop it too, so it would fill from trash clearing.
+
+;
+; Expanded 2026-09-03: the Siltbound set (coronet ~1/29, plate 1/33) and the
+; Sovereign's Bloom (1/10) are new and boss-exclusive. 9 entries.
+
+[ext_resource type="Script" path="res://source/common/gameplay/collection_log/boss_collection_log.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://source/common/gameplay/collection_log/vfx/green_log_fx_standing_water.tscn" id="2_vfx"]
+
+[resource]
+script = ExtResource("1_script")
+boss_id = &"cistern_sovereign"
+boss_name = "The Bloated Sovereign"
+log_items = Array[StringName]([&"relic_rotmire", &"sword_poison.item", &"hammer_poison.item", &"poison_bow.item", &"wand_poison.item", &"book_poison.item", &"siltbound_coronet", &"siltbound_plate", &"sovereigns_bloom"])
+green_log_title_text = "Silt Crown"
+green_log_vfx = ExtResource("2_vfx")
+green_log_profile = &"siltcrown"
+green_log_title_style = 5
+green_log_title_color = Color(0.49411765, 0.61960784, 0.32156863, 1)
