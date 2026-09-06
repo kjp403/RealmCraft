@@ -415,21 +415,32 @@ func deserialize_log_data(player_res: PlayerResource, data: Variant) -> void:
 			continue
 		var saved: Dictionary = raw
 		var items: Array[StringName] = []
-		for raw_item: Variant in saved.get(KEY_ITEMS, []):
+		# TYPE-CHECKED, not merely defaulted. `for x in 7` is legal GDScript and
+		# iterates 0..6, so a corrupt blob whose items field is a NUMBER quietly
+		# unlocked seven items named "0".."6" — measured, not theorised. The green
+		# check compares CONTENTS so it could never false-complete a log, but the
+		# menu happily reported 7/10 collected off nothing.
+		var raw_items: Variant = saved.get(KEY_ITEMS, [])
+		for raw_item: Variant in (raw_items if raw_items is Array else []):
 			var item_id: StringName = StringName(str(raw_item))
 			if not items.has(item_id):
 				items.append(item_id)
 		var counts: Dictionary = {}
-		for raw_slug: Variant in (saved.get(KEY_COUNTS, {}) as Dictionary):
-			counts[StringName(str(raw_slug))] = int(
-				(saved[KEY_COUNTS] as Dictionary)[raw_slug])
+		var raw_counts: Variant = saved.get(KEY_COUNTS, {})
+		for raw_slug: Variant in (raw_counts if raw_counts is Dictionary else {}):
+			counts[StringName(str(raw_slug))] = maxi(
+				0, int((raw_counts as Dictionary)[raw_slug]))
 		# A blob written before quantities existed has no counts at all. Seed
 		# every already-logged item at 1 rather than 0: the player demonstrably
 		# owns one, and 0 would render an owned cell as "x0".
 		for item_id: StringName in items:
 			if not counts.has(item_id):
 				counts[item_id] = 1
-		var kills: int = int(saved.get(KEY_KILLS, 0))
+		# Clamped at zero: a negative kill count is not a state the game can
+		# produce, but it loaded cleanly and rendered as "-999 kills" in the log.
+		# Only a hand-edited or corrupt blob gets here — the column is
+		# server-written — so this is hardening, not a patched exploit.
+		var kills: int = maxi(0, int(saved.get(KEY_KILLS, 0)))
 		# FORWARD compatibility. Start from whatever was on disk and merge the
 		# keys this build understands OVER it, rather than building a fresh row
 		# from known keys only.

@@ -127,6 +127,68 @@ func _run_case(set_slug: StringName, pieces: Array) -> void:
 	else:
 		_fail("%s leaked after unequip: %s" % [set_slug, ", ".join(leaked)])
 
+	# ...and again, three more times. One clean cycle does not prove the ledger
+	# cannot ACCUMULATE: a strip that under-removes by a rounding step, or a
+	# double-apply on re-equip, shows up as drift that only becomes visible once
+	# a player has swapped kit a few times — which is every raid night, and never
+	# the first thirty seconds of a test.
+	for cycle: int in 3:
+		for n: int in pieces.size():
+			_set_slot(pieces[n][0], _id(pieces[n][1]))
+			await get_tree().process_frame
+		for n: int in pieces.size():
+			_set_slot(pieces[n][0], 0)
+			await get_tree().process_frame
+	var drifted: Array[String] = []
+	for stat: StringName in WATCHED:
+		_checks += 1
+		if not is_equal_approx(snappedf(_stat(stat), 0.001), snappedf(float(baseline[stat]), 0.001)):
+			drifted.append("%s %.3f -> %.3f" % [stat, float(baseline[stat]), _stat(stat)])
+	# THE UNRESOLVABLE-ID CASE. A slot can hold an id that no longer loads —
+	# a saved character wearing an item a content patch deleted. _on_slot_changed
+	# clears the slot and then, until this was fixed, RETURNED without emitting
+	# equipment_changed, so the set-bonus ledger never re-evaluated and kept
+	# paying a 3-piece bonus to someone now wearing two.
+	#
+	# Not client-reachable (item.equip.gd validates the id before writing the
+	# slot) and it fails in the player's favour, which is exactly why it would
+	# never have been reported.
+	if pieces.size() >= 3:
+		for n: int in pieces.size():
+			_set_slot(pieces[n][0], _id(pieces[n][1]))
+			await get_tree().process_frame
+		# 999999 resolves to nothing.
+		_set_slot(pieces[0][0], 999999)
+		await get_tree().process_frame
+		var two_piece: Dictionary = CombatSetBonus.tier_row(set_slug, 2)
+		# The gear still ON the character is pieces[1..] — piece 0 is the one
+		# whose slot now holds the unloadable id. Summing "the first two" would
+		# subtract the wrong item's modifiers and make a correct result look
+		# broken, which is exactly what the first draft of this check did.
+		var remaining: Array = pieces.slice(1)
+		var gear_left: Dictionary = _gear_sum(remaining, remaining.size())
+		var bad: Array[String] = []
+		for stat: StringName in WATCHED:
+			var got: float = _stat(stat) - float(baseline[stat]) 				- float(gear_left.get(stat, 0.0))
+			_checks += 1
+			if not is_equal_approx(snappedf(got, 0.001),
+					snappedf(float(two_piece.get(stat, 0.0)), 0.001)):
+				bad.append("%s %.2f (want %.2f)"
+					% [stat, got, float(two_piece.get(stat, 0.0))])
+		if bad.is_empty():
+			print("  unloadable id in a slot -> bonus correctly drops to 2-piece")
+		else:
+			_fail("%s: a slot holding an unloadable id left the ledger stale: %s"
+				% [set_slug, ", ".join(bad)])
+		for n: int in pieces.size():
+			_set_slot(pieces[n][0], 0)
+			await get_tree().process_frame
+
+	if drifted.is_empty():
+		print("  4 full equip/unequip cycles -> still exactly baseline")
+	else:
+		_fail("%s DRIFTED over repeated cycles: %s" % [set_slug, ", ".join(drifted)])
+
 
 ## reapply_all_gear_stats is the LevelSync restore path: it rewrites stats
 ## without going through slot_changed, so the set-bonus signal never fires and

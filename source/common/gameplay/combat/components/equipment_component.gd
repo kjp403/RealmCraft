@@ -157,8 +157,23 @@ func _on_slot_changed(slot: StringName, item_id: int) -> void:
 		return
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id)
 	if not item:
+		# THE SLOT IS ALREADY EMPTY HERE — _clear_slot ran above, stripping the
+		# old item and its gear stats. Returning without emitting leaves every
+		# equipment_changed listener believing the previous item is still worn.
+		# The set-bonus ledger is the one that hurts: it keeps paying a 3-piece
+		# bonus to a character now wearing two, until their next equipment change.
+		#
+		# Reachable whenever a saved slot holds an id a content patch removed.
+		# NOT client-reachable — item.equip.gd resolves and validates the id
+		# before it ever writes the slot — so this is data integrity, not an
+		# exploit, and it fails in the player's favour, which is why nothing
+		# ever reported it.
+		#
+		# Emitting 0 rather than item_id is the honest signal: the slot is empty.
 		if slot == &"weapon":
 			_mount_unarmed()
+		_clamp_vitals_to_max()
+		equipment_changed.emit(slot, 0)
 		return
 
 	equipped_items[slot] = item

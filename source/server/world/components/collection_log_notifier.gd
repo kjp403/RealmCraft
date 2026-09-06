@@ -114,10 +114,22 @@ static func _announce(text: String) -> void:
 		})
 
 
+## The peer to push to, resolved through the LIVE connection map rather than
+## PlayerResource.current_peer_id.
+##
+## current_peer_id lags after a reconnect — give_command.gd hit the same trap and
+## documents it — and ENet REUSES peer ids. Together that means a unique credited
+## during someone's reconnect could push their collection log toast onto whoever
+## now holds that peer id: the wrong player's screen, naming an item and a boss
+## that are not theirs. player_id_to_peer_id is erased on disconnect and rebuilt
+## on connect, so a stale entry resolves to 0 and the push is simply dropped.
 static func _peer_of(player_res: PlayerResource) -> int:
-	if player_res == null:
+	if player_res == null or _server == null or not is_instance_valid(_server):
 		return 0
-	return int(player_res.current_peer_id)
+	var map: Variant = _server.get(&"player_id_to_peer_id")
+	if map is not Dictionary:
+		return 0
+	return int((map as Dictionary).get(int(player_res.player_id), 0))
 
 
 static func _push(peer_id: int, key: StringName, data: Dictionary) -> void:
