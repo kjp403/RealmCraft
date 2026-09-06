@@ -17,7 +17,7 @@ extends CanvasLayer
 ##   ButtonRail       x  10..50   y  10..146   always visible
 ##   SlayerTracker    x   6..     y   6..      only while on a slayer task
 ##   Chat full feed   x   8..268  y 192..532   opens on demand, auto-hides
-##   LootFeed column  x  12..260  y 216..      the pickup pills
+##   LootFeed column  x  58..260  y 216..      the pickup pills (shares MARGIN_LEFT)
 ## That leaves exactly one clear band: right of the button rail, above the chat box
 ## and the loot feed. MARGIN_LEFT clears ButtonRail, MARGIN_TOP clears a visible
 ## SlayerTracker, MARGIN_BOTTOM keeps the stack off the chat box. Move one and the
@@ -57,11 +57,16 @@ const MARGIN_BOTTOM: int = 354 # lane bottom lands at y 186, above the chat box
 ## Card look. Translucent near-black so the world reads through it, hairline border
 ## in the theme's accent hue at low alpha so it separates from bright ground tiles
 ## without looking like a menu panel.
-const CARD_BG: Color = Color(0.102, 0.102, 0.102, 0.8) # #1a1a1acc
-const CARD_BORDER: Color = Color(0.58, 0.82, 0.98, 0.22)
-const CARD_RADIUS: int = 4
-const PAD_X: int = 7
-const PAD_Y: int = 4
+##
+## These values now live in [PixelUI] as the shared HUD-overlay standard — the
+## loot feed, quest tracker and party roster draw from the same constants, so a
+## tweak here reaches all four surfaces instead of leaving three behind. The
+## aliases are kept because the geometry notes above are written in terms of them.
+const CARD_BG: Color = PixelUI.HUD_CARD_BG
+const CARD_BORDER: Color = PixelUI.HUD_CARD_BORDER
+const CARD_RADIUS: int = PixelUI.HUD_CARD_RADIUS
+const PAD_X: int = PixelUI.HUD_CARD_PAD_X
+const PAD_Y: int = PixelUI.HUD_CARD_PAD_Y
 
 const SIZE_TITLE: int = PixelUI.SIZE_CAPTION # 12
 const SIZE_LINE: int = PixelUI.SIZE_TINY     # 10
@@ -271,6 +276,10 @@ func _line_label(text: String, color: Color) -> Label:
 
 ## Left-align (a corner lane reads as a list, not a banner) and pull the theme's
 ## 2px label shadow in to 1px — at 10-12px that shadow is otherwise a fat smear.
+## Identical to the alignment+shadow half of [method PixelUI.hud_label]; kept as a
+## local because the font, size and colour are already applied by PixelUI.text()
+## at the call sites, and re-deriving them here just to hand them back would be
+## indirection for its own sake.
 func _tighten(label: Label) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -278,18 +287,7 @@ func _tighten(label: Label) -> void:
 
 
 func _card_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = CARD_BG
-	style.border_color = CARD_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(CARD_RADIUS)
-	# Padding lives on the stylebox rather than an inner MarginContainer — one node
-	# fewer per card, and it is what makes the panel wrap the text tightly.
-	style.content_margin_left = PAD_X
-	style.content_margin_right = PAD_X
-	style.content_margin_top = PAD_Y
-	style.content_margin_bottom = PAD_Y
-	return style
+	return PixelUI.hud_card(PAD_X, PAD_Y)
 
 
 # --- Lifetime -----------------------------------------------------------------

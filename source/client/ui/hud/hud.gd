@@ -85,6 +85,11 @@ const RIGHT_RAIL_GAP: float = 8.0
 const RIGHT_RAIL_WIDTH: float = 224.0
 const RIGHT_RAIL_MARGIN: float = 8.0
 
+## Padding inside each 40x40 top-left rail button, and the matching fit inset for
+## its glyph. See the note in _ready() on why this is 4 and not "whatever looks
+## roomy".
+const RAIL_ICON_INSET: int = 4
+
 ## Top-left inset for the compact Slayer badge — sits to the right of the chat bubble.
 const SLAYER_BADGE_MARGIN: float = 6.0
 const SLAYER_BESIDE_CHAT_LEFT: float = 58.0
@@ -133,9 +138,17 @@ func _ready() -> void:
 	notification_button.disabled = true
 	# Adopt the buttons' editor-assigned .tscn icons as crisp mounted glyphs (integer-scaled to fit,
 	# whole-pixel centered) — visible in the scene, sharp at runtime.
-	PixelIcon.from_button(menu_button)
-	PixelIcon.from_button(notification_button)
-	PixelIcon.from_button(chat_button)
+	#
+	# RAIL_ICON_INSET IS NOT A TASTE VALUE. The glyphs are 32px art on a 40px
+	# button, so the fit box must land on exactly 32 for the art to draw at 1:1;
+	# any larger inset scales it by a fraction and NEAREST then drops pixel rows
+	# unevenly across a glyph that is mostly straight edges. 4 per side is the
+	# largest inset that still hits 32. If the rail ever wants more air the fix is
+	# 48px buttons (32 + 8 per side, still 1:1) — but note that pushes the rail to
+	# x 10..58 and would collide with the toast lane at Toaster.MARGIN_LEFT.
+	for rail_button: Button in [menu_button, notification_button, chat_button]:
+		PixelUI.hud_icon_button(rail_button, RAIL_ICON_INSET)
+		PixelIcon.from_button(rail_button, float(RAIL_ICON_INSET))
 	chat_button.visible = true
 	chat_button.focus_mode = Control.FOCUS_NONE
 	chat_button.clip_contents = false
@@ -446,6 +459,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	# the screen" guard inside _toggle_compact_panel.
 	if event.is_action_pressed(&"player_inventory"):
 		_toggle_compact_panel($CompactMenuHost)
+		get_viewport().set_input_as_handled()
+		return
+	# HUD edit mode (L): unlock every HudResizer so panels can be dragged, or lock
+	# them back down. Handled HERE rather than in the HudLayout autoload on
+	# purpose — _unhandled_input runs only after the focused Control has had the
+	# key, so a player typing "look out" in chat cannot toggle edit mode. An
+	# _input handler on the autoload would sit AHEAD of the chat box and would
+	# have to re-derive that guard for itself.
+	if event.is_action_pressed(&"hud_lock"):
+		HudLayout.toggle()
+		Toaster.toast(
+			"HUD locked" if HudLayout.locked else "HUD unlocked — drag panel edges to resize"
+		)
 		get_viewport().set_input_as_handled()
 		return
 	# ESC closes every open interface (menus, launcher overlay, trade).
