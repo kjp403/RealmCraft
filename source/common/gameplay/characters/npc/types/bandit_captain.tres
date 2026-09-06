@@ -24,6 +24,7 @@
 [ext_resource type="Resource" uid="uid://cd3f0178c307af" path="res://source/common/gameplay/items/chests/wood_silver_small.tres" id="fx_chest_s"]
 [ext_resource type="Resource" uid="uid://c297e7a295caee" path="res://source/common/gameplay/items/chests/wood_silver_medium.tres" id="fx_chest_m"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="loot_big_bones"]
+[ext_resource type="Resource" uid="uid://c32kds1rn3xt5" path="res://source/common/gameplay/items/gears/relics/relic_bloodbrand.tres" id="relic_bloodbrand"]
 
 [sub_resource type="Resource" id="Lunge_captain"]
 script = ExtResource("91_lunge")
@@ -141,6 +142,11 @@ min_amount = 1
 max_amount = 1
 chance = 0.35
 
+[sub_resource type="Resource" id="Drop_relic_bloodbrand"]
+script = ExtResource("2_loot")
+item = ExtResource("relic_bloodbrand")
+chance = 0.001
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"bandit_captain"
@@ -163,7 +169,7 @@ chase_on_area = true
 xp_reward = 1200
 combat_skill_xp_override = 9000
 respawn_delay = 120.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_cloth"), SubResource("Drop_hide"), SubResource("Drop_coal"), SubResource("Drop_iron"), SubResource("Drop_steel"), SubResource("Drop_willow"), SubResource("Drop_maple"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_book"), SubResource("Drop_bow"), SubResource("Drop_wand"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_relic_bloodbrand")])
 slam_radius = 120.0
 slam_windup_s = 0.85
 slam_damage = 165.0

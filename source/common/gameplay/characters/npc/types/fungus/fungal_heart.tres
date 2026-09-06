@@ -25,6 +25,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/enchanted_ore.tres" id="ench_ore"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/enchanted_gem.tres" id="ench_gem"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/enchanted_cloth.tres" id="ench_cloth"]
+[ext_resource type="Resource" uid="uid://bye53p5l8x8or" path="res://source/common/gameplay/items/gears/relics/relic_sporebloom.tres" id="relic_sporebloom"]
 
 [sub_resource type="Resource" id="Drop_gold"]
 script = ExtResource("2_loot")
@@ -147,6 +148,11 @@ min_amount = 1
 max_amount = 2
 chance = 0.24
 
+[sub_resource type="Resource" id="Drop_relic_sporebloom"]
+script = ExtResource("2_loot")
+item = ExtResource("relic_sporebloom")
+chance = 0.001
+
 [resource]
 script = ExtResource("1_script")
 enemy_type = &"fungal_heart"
@@ -169,7 +175,7 @@ xp_reward = 700
 combat_skill_xp_override = 5500
 respawns = true
 respawn_delay = 90.0
-loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_phantom_ore"), SubResource("Drop_phantom_gem"), SubResource("Drop_phantom_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth")])
+loot = Array[ExtResource("2_loot")]([SubResource("Drop_gold"), SubResource("Drop_hide"), SubResource("Drop_cloth"), SubResource("Drop_bloodcap"), SubResource("Drop_sword"), SubResource("Drop_hammer"), SubResource("Drop_wand"), SubResource("Drop_bow"), SubResource("Drop_book"), SubResource("Drop_dungeon_key"), SubResource("Drop_chest_small"), SubResource("Drop_chest_medium"), SubResource("Drop_bone"), SubResource("Drop_big_bones"), SubResource("Drop_phantom_ore"), SubResource("Drop_phantom_gem"), SubResource("Drop_phantom_cloth"), SubResource("Drop_enchanted_ore"), SubResource("Drop_enchanted_gem"), SubResource("Drop_enchanted_cloth"), SubResource("Drop_relic_sporebloom")])
 slam_radius = 125.0
 slam_windup_s = 0.9
 slam_damage = 120.0
