@@ -371,6 +371,26 @@ func _check_runtime(logs: Array[BossCollectionLog]) -> void:
 		_f("kill count did not survive the round trip")
 	if post_load[0] != 0:
 		_f("deserialize re-emitted log_completed — the title would re-award on login")
+
+	# The completion stamp: set once, and the SAME value after a reload. A stamp
+	# that drifts on load is worse than none — the plaque would quietly report
+	# "earned today" every time the player logged in.
+	_checks += 3
+	var stamped: int = mgr.completed_at(alice, subject.boss_id)
+	if stamped <= 0:
+		_f("completed_at was not stamped when the log went green")
+	if restored.completed_at(reloaded, subject.boss_id) != stamped:
+		_f("completed_at changed across the round trip (%d -> %d)"
+			% [stamped, restored.completed_at(reloaded, subject.boss_id)])
+	# ...and an OLD save, green before the stamp existed, must load as 0 rather
+	# than be back-filled with today.
+	var legacy: PlayerResource = PlayerResource.new()
+	var old_blob: Dictionary = JSON.parse_string(JSON.stringify(blob))
+	for key: Variant in old_blob:
+		(old_blob[key] as Dictionary).erase("completed_at")
+	restored.deserialize_log_data(legacy, old_blob)
+	if restored.completed_at(legacy, subject.boss_id) != 0:
+		_f("a pre-stamp save was back-filled with a completion date it never had")
 	# A pre-v24 row has no collection_log_json at all.
 	var fresh: PlayerResource = PlayerResource.new()
 	restored.deserialize_log_data(fresh, JSON.parse_string("{}"))

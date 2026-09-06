@@ -54,6 +54,11 @@ const KEY_KILLS: String = "kills"
 const KEY_ITEMS: String = "items"
 const KEY_COMPLETED: String = "completed"
 const KEY_LAST_UNLOCK_KILL: String = "last_unlock_kill"
+## Unix seconds, stamped ONCE when the log first goes green. Zero means either
+## "not finished" or "finished before this key existed" — the two are told apart
+## by KEY_COMPLETED, and the UI shows no date rather than inventing one for a
+## character who green-logged before the stamp shipped.
+const KEY_COMPLETED_AT: String = "completed_at"
 ## slug -> how many of that item this boss has ever paid out. Kept ALONGSIDE
 ## KEY_ITEMS rather than replacing it: the array carries first-seen ORDER and is
 ## what the green check walks, the dictionary carries quantity. Collapsing the
@@ -180,6 +185,10 @@ func add_item_to_log(
 	if not check_green_log_status(player_res, boss_id):
 		return
 	entry[KEY_COMPLETED] = true
+	# Stamped here and nowhere else. This is the only moment the transition
+	# happens, and re-stamping on a later read would turn "finished in September"
+	# into "finished just now" every time the menu opened.
+	entry[KEY_COMPLETED_AT] = int(Time.get_unix_time_from_system())
 	log_completed.emit(
 		player_res, boss_id, boss_log.green_log_title_text, boss_log.green_log_vfx
 	)
@@ -252,6 +261,17 @@ func kill_count(player_res: PlayerResource, boss_id: StringName) -> int:
 ## True once the completion reward has fired for this character and boss.
 ## Persisted, so this — not [method check_green_log_status] — is the flag to gate
 ## the title grant on.
+## When this character first filled the log, in unix seconds.
+##
+## 0 means one of two things and the caller must not conflate them: the log is
+## not finished, or it was finished on a build that predates the stamp. Pair it
+## with [method has_green_log] to tell those apart.
+func completed_at(player_res: PlayerResource, boss_id: StringName) -> int:
+	if player_res == null:
+		return 0
+	return int(_entry(player_res, boss_id).get(KEY_COMPLETED_AT, 0))
+
+
 func has_green_log(player_res: PlayerResource, boss_id: StringName) -> bool:
 	if player_res == null:
 		return false
@@ -314,6 +334,10 @@ func build_payload(player_res: PlayerResource) -> Dictionary:
 			# frame reading "EARNED TITLE" over a grid with a visibly empty slot.
 			"title_earned": has_green_log(player_res, boss_log.boss_id),
 			"completed": check_green_log_status(player_res, boss_log.boss_id),
+			# Unix seconds, 0 when unfinished or finished before the stamp
+			# shipped. Sent raw rather than pre-formatted: the client knows the
+			# player's timezone and the server does not.
+			"completed_at": completed_at(player_res, boss_log.boss_id),
 			"title": boss_log.green_log_title_text,
 			# The title's LOOK, so the menu can show what the reward actually
 			# renders as rather than just naming it.
@@ -365,6 +389,7 @@ func serialize_log_data(player_res: PlayerResource) -> Dictionary:
 			KEY_ITEMS: items,
 			KEY_COUNTS: counts,
 			KEY_COMPLETED: bool(entry.get(KEY_COMPLETED, false)),
+			KEY_COMPLETED_AT: int(entry.get(KEY_COMPLETED_AT, 0)),
 			KEY_LAST_UNLOCK_KILL: int(entry.get(KEY_LAST_UNLOCK_KILL, 0)),
 		}, true)
 		out[String(boss_id)] = row
@@ -425,6 +450,11 @@ func deserialize_log_data(player_res: PlayerResource, data: Variant) -> void:
 			KEY_ITEMS: items,
 			KEY_COUNTS: counts,
 			KEY_COMPLETED: bool(saved.get(KEY_COMPLETED, false)),
+			# Deliberately NOT back-filled with "now" for an old completed row.
+			# A character who green-logged before this key shipped has no honest
+			# date, and stamping today's would tell every one of them they
+			# finished on patch day.
+			KEY_COMPLETED_AT: int(saved.get(KEY_COMPLETED_AT, 0)),
 			# Clamped: a blob written before this key existed reads back as the
 			# kill count, not 0, so an old save does not report every kill ever
 			# as one enormous dry streak.
@@ -466,6 +496,7 @@ func _entry(player_res: PlayerResource, boss_id: StringName) -> Dictionary:
 			KEY_ITEMS: items,
 			KEY_COUNTS: {},
 			KEY_COMPLETED: false,
+			KEY_COMPLETED_AT: 0,
 			KEY_LAST_UNLOCK_KILL: 0,
 		}
 	return player_res.collection_log[boss_id]

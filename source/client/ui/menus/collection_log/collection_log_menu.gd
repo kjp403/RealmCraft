@@ -257,10 +257,10 @@ func _add_list_row(row: Dictionary) -> void:
 	# they belong on the ladder row rather than buried in the detail pane.
 	var kills: int = int(row.get("kills", 0))
 	var sub: String = "%d kill%s" % [kills, "" if kills == 1 else "s"]
+	if int(row.get("dry", 0)) > 0:
+		sub += "  ·  %d dry" % int(row.get("dry", 0))
 	if completed:
 		sub += "  ·  %s" % str(row.get("title", ""))
-	elif int(row.get("dry", 0)) > 0:
-		sub += "  ·  %d dry" % int(row.get("dry", 0))
 	vbox.add_child(PixelUI.text(sub, PixelUI.SIZE_TINY, COLOR_MUTED))
 
 
@@ -323,9 +323,12 @@ func _make_stats(row: Dictionary) -> Control:
 			"collected", PixelUI.INK_GOLD],
 		["%d" % kills, "kill" if kills == 1 else "kills", PixelUI.INK],
 	]
-	# Dry streak only while it means something — once green every kill is dry by
-	# definition and the number is noise.
-	if not bool(row.get("completed", false)) and int(row.get("dry", 0)) > 0:
+	# Dry streak stays visible AFTER the log is green. It used to be hidden there
+	# on the grounds that a full log has nothing left to drop, so the number only
+	# climbs — but people keep farming these bosses for the weapons and the
+	# materials long after the log is done, and hiding it took the counter away
+	# from exactly the players with the longest ones.
+	if int(row.get("dry", 0)) > 0:
 		pairs.append(["%d" % int(row.get("dry", 0)), "dry", COLOR_MUTED])
 
 	for i: int in pairs.size():
@@ -406,8 +409,18 @@ func _make_title_plaque(row: Dictionary) -> Control:
 
 	# Left-aligned: this is a field label for the thing under it, not a heading
 	# for the plaque. Centring it made two centred lines that competed.
+	# The completion DATE rides the caption rather than the stat line above: the
+	# stat line is live numbers a player watches move, and a date that will never
+	# change again does not belong among them. It belongs on the trophy.
+	var caption_text: String = "COMPLETION REWARD"
+	if completed:
+		var stamp: int = int(row.get("completed_at", 0))
+		# A character who green-logged before the stamp shipped has no honest
+		# date. Say "EARNED TITLE" for them rather than print a wrong one.
+		caption_text = "EARNED TITLE" if stamp <= 0 \
+			else "EARNED %s" % _local_date(stamp)
 	var caption: Label = PixelUI.text(
-		"EARNED TITLE" if completed else "COMPLETION REWARD",
+		caption_text,
 		PixelUI.SIZE_TINY, PixelUI.INK_GREEN if completed else COLOR_MUTED)
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	caption.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -461,6 +474,23 @@ func _make_title_plaque(row: Dictionary) -> Control:
 			TitleVfx.apply_to_label(label, title)
 	apply.call_deferred()
 	return plaque
+
+
+## "5 SEP 2026" from unix seconds, in the PLAYER's timezone.
+##
+## The server sends the raw stamp precisely so this conversion happens here: it
+## knows when the log was filled, it does not know where the player is, and a
+## UTC date shows the wrong day to anyone far enough east or west of it on the
+## evenings this game is actually played.
+func _local_date(unix_s: int) -> String:
+	const MONTHS: PackedStringArray = [
+		"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+		"JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+	]
+	var bias_s: int = int(Time.get_time_zone_from_system().get("bias", 0)) * 60
+	var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix_s + bias_s)
+	var month: int = clampi(int(d.get("month", 1)), 1, 12)
+	return "%d %s %d" % [int(d.get("day", 1)), MONTHS[month - 1], int(d.get("year", 0))]
 
 
 func _plaque_style(edge: Color) -> StyleBoxFlat:
