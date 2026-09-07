@@ -65,6 +65,11 @@ func _go() -> void:
 	await _shot("trade-full-offer.png")
 	_panel._open_picker()
 	await _shot("trade-picker.png")
+	# The amount dialog: its ceiling is everything the player OWNS of the item —
+	# 90 shrimp spread over nine ten-count bag squares, not one square's 10.
+	_panel._open_qty(_id(&"cooked_shrimp"), false)
+	_panel._qty_spin.value = _panel._qty_spin.max_value
+	await _shot("trade-quantity.png")
 
 	get_tree().quit(0)
 
