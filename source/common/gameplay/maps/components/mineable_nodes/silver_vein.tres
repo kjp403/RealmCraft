@@ -12,10 +12,10 @@ region = Rect2(97.57414, 18.388435, 30.283089, 44.766308)
 script = ExtResource("1_script")
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 16
+&"mining": 40
 })
 required_level = 20
-extraction_hp = 5
+extraction_hp = 76
 min_charges = 10
 max_charges = 50
 charge_regen_seconds = 18.0

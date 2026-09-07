@@ -9,11 +9,11 @@ script = ExtResource("1_script")
 display_name = "Mithril Vein"
 ore = ExtResource("2_ore")
 job_xp = Dictionary[StringName, int]({
-&"mining": 17
+&"mining": 50
 })
 required_level = 35
 required_tool = &"pickaxe"
-extraction_hp = 5
+extraction_hp = 100
 min_charges = 10
 max_charges = 50
 charge_regen_seconds = 18.0
