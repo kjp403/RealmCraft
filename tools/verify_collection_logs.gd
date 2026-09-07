@@ -274,10 +274,11 @@ func _check_obtainable(logs: Array[BossCollectionLog]) -> void:
 ## Check 6 unions every variant sharing the boss_id. That is correct for
 ## crediting and useless for placement: a boss ships as a pair of files and only
 ## one of them stands on a map. When fungus_cave was put back on the base kit
-## (308f3cd8) the Sporebloom Charm stayed behind on fungal_heart_world.tres,
-## which nothing spawns — the relic dropped from nowhere, the log capped at
-## 11/12, and this suite stayed green because the union still saw the item on
-## "a" table. Same for Mossgrown and Bloodbrand.
+## (308f3cd8) the Sporebloom Charm stayed behind on the sibling file, which
+## nothing spawned — the relic dropped from nowhere, the log capped at 11/12,
+## and this suite stayed green because the union still saw the item on "a"
+## table. Same for Mossgrown and Bloodbrand. Those four orphans are deleted now;
+## this check is what stops the next pair from repeating it.
 ##
 ## Reachable means placed by a map scene, or named as a Boss Hunt contract's
 ## target. Anything else is a file players never fight.

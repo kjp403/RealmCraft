@@ -108,9 +108,10 @@ func _check_catalog() -> void:
 ## table. Nothing else reports that: both files carry the same enemy_type, so
 ## every log, quest and slayer task still resolves.
 ##
-## This is how the Bloated Sovereign became the only source of the Siltbound set.
-## Its contract held cistern_sovereign_world.tres while the Sewers pad held
-## cistern_sovereign.tres, and the uniques sat on the contract's copy.
+## This is how the Bloated Sovereign became the only source of the Siltbound set:
+## its contract held a sibling file while the Sewers pad held another, and the
+## uniques sat on the contract's copy. That sibling is deleted, but the shape of
+## the mistake is one ext_resource line away at any time.
 ##
 ## A boss the world does not place at all (a pure contract fight) is exempt —
 ## there is no world table to disagree with.

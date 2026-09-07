@@ -178,15 +178,13 @@ func _init() -> void:
 				quest.quest_name, int(entry["min"]), keys
 			])
 
+	# The four orphaned `_world` siblings (Chief, Captain, Heart, Sovereign) were
+	# deleted, so those bosses appear once. The remaining pairs still ship both.
 	var instance_and_world: Array[String] = [
 		"res://source/common/gameplay/characters/npc/types/goblins/goblin_chief.tres",
-		"res://source/common/gameplay/characters/npc/types/goblins/goblin_chief_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bandit_captain.tres",
-		"res://source/common/gameplay/characters/npc/types/bandit_captain_world.tres",
 		"res://source/common/gameplay/characters/npc/types/fungus/fungal_heart.tres",
-		"res://source/common/gameplay/characters/npc/types/fungus/fungal_heart_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign.tres",
-		"res://source/common/gameplay/characters/npc/types/bosses/cistern_sovereign_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/sand_king.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/sand_king_world.tres",
 		"res://source/common/gameplay/characters/npc/types/bosses/cinderborn.tres",
