@@ -91,33 +91,21 @@ func _act_sell() -> void:
 	})
 	_check(bool(opened.get("ok", false)), "opened stall '%s'" % str(opened.get("store_name", "")))
 
-	# Resolve the bag slot holding the item — market.list takes a slot uid, the
-	# same way the real menu's picker does.
 	var mine: Dictionary = await _request(&"market.mine", {})
 	if not bool(mine.get("ok", false)):
 		_die("market.mine failed")
 		return
-	# Pick the BIGGEST stack of the item, not the first: a character can hold the
-	# same item in several slots (starter kit + a seeded pile), and the first one
-	# found is often the 5-unit leftover.
-	var uid: int = -1
-	var best: int = 0
+	# market.list is addressed by ITEM, the same way the real menu's picker is, and
+	# sells across every bag square holding it — so no slot to resolve, and the
+	# amount is not bounded by one square's stack limit.
 	var inventory: Dictionary = Inventory.normalize(mine.get("inventory", {}))
-	for slot_uid: Variant in inventory:
-		if int(inventory[slot_uid].get("id", 0)) != item_id:
-			continue
-		var held: int = int(inventory[slot_uid].get("a", 0))
-		if held > best:
-			best = held
-			uid = int(slot_uid)
-	if uid < 0:
+	var before: int = Inventory.count(inventory, item_id)
+	if before <= 0:
 		_die("no bag slot holding item %d" % item_id)
 		return
-
-	var before: int = Inventory.count(inventory, item_id)
-	print("[bot] using bag slot %d (%d held there, %d across the bag)" % [uid, best, before])
+	print("[bot] %d of item %d across the bag" % [before, item_id])
 	var listed: Dictionary = await _request(&"market.list", {
-		"uid": uid, "amount": amount, "unit_price": price,
+		"item_id": item_id, "amount": amount, "unit_price": price,
 	})
 	if not _check(bool(listed.get("ok", false)), "listed %dx item %d at %d each" % [amount, item_id, price]):
 		print("[bot]   reason: %s" % str(listed.get("reason", "?")))

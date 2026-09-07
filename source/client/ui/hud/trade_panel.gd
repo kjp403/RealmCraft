@@ -2,7 +2,10 @@ extends MenuShell
 ## Private two-player trade window. The server owns invitations, offers,
 ## confirmations, validation, exchange, and persistence; this is only a view/editor.
 
-const SLOTS: int = 6
+## Mirrors [constant TradeService.MAX_OFFER_ITEMS] — a client that lets you fill
+## a seventh square only to have the server reject the offer is worse than one
+## that greys the button out.
+const SLOTS: int = 12
 const SEAT_COLORS: Array[Color] = [
 	Color(0.96, 0.74, 0.16),
 	Color(0.45, 0.7, 1.0),
@@ -837,7 +840,9 @@ func _column_header(col: VBoxContainer, caption: String) -> Label:
 
 func _make_grid() -> GridContainer:
 	var grid := GridContainer.new()
-	grid.columns = 3
+	# Four wide keeps SLOTS at three tidy rows; three wide made it four tall rows
+	# that pushed the gold row and Confirm button down the panel.
+	grid.columns = 4
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 6)
 	return grid

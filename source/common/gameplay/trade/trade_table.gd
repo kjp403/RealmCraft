@@ -16,8 +16,11 @@ extends Area2D
 @export var join_cost: int = 3
 
 const COUNTDOWN_MS: int = 12000
-## Max distinct items one player can put in an offer (keeps trades simple).
-const MAX_OFFER_ITEMS: int = 6
+## Max distinct items one player can put in an offer. Kept in step with
+## [constant TradeService.MAX_OFFER_ITEMS], which is what the live private-trade
+## path enforces. Quantity per item is not capped here either — an offer holds
+## whatever the trader owns.
+const MAX_OFFER_ITEMS: int = TradeService.MAX_OFFER_ITEMS
 ## Per-seat tint for the in-world offer labels (seat 0 = gold, seat 1 = blue) — the SAME tones the
 ## spar banner uses, so the colour->player association is learned once across features.
 const SEAT_COLORS: PackedStringArray = ["f2bd2a", "73b3ff"]
@@ -208,8 +211,9 @@ func _give(from_inventory: Dictionary, to_inventory: Dictionary, to_resource: Pl
 	for item_id in items:
 		var amount: int = int(items[item_id])
 		Inventory.remove_amount_by_id(from_inventory, int(item_id), amount)
-		for i: int in amount:
-			Inventory.add_item(to_inventory, int(item_id), 1, false, to_resource.active_inventory_bag, to_resource.inventory_bags)
+		# One call, not one per unit — add_item already respects Item.stack_limit,
+		# and a bulk offer would otherwise rescan the bag once per arrow.
+		Inventory.add_item(to_inventory, int(item_id), amount, false, to_resource.active_inventory_bag, to_resource.inventory_bags)
 
 
 func _server_instance() -> Node:
@@ -282,7 +286,8 @@ func _set_hover(on: bool) -> void:
 
 func _build_display() -> void:
 	# Stack the countdown + both seat offers in a VBox so they AUTO-SPACE. Fixed y-offsets let a tall
-	# offer (name + up to 6 items + gold) grow down into the next seat's label and overlap it.
+	# offer (name + up to MAX_OFFER_ITEMS items + gold) grow down into the next seat's label and
+	# overlap it.
 	var box: VBoxContainer = VBoxContainer.new()
 	box.position = Vector2(-72.0, -120.0) # above the table; grows downward — tweak per placement
 	box.add_theme_constant_override(&"separation", 4)

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_trade_previews.gd" id="1_tradeprev"]
+
+[node name="TradePreviewRig" type="Node"]
+script = ExtResource("1_tradeprev")

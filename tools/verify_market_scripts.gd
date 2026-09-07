@@ -43,6 +43,7 @@ func _ready() -> void:
 		else:
 			print("  ok    %s" % path)
 	_check_stall_wiring()
+	_check_lister_groups_by_item()
 	print("VERIFY_PASS" if _fail == 0 else "VERIFY_FAIL")
 	get_tree().quit(0 if _fail == 0 else 1)
 
@@ -74,6 +75,39 @@ func _check_stall_wiring() -> void:
 		names.append(String(state.get_node_name(i)))
 	_ck(names.has("MarketStall"), "the Guild Hall has a Market Stall")
 	_ck(names.has("MailClerk"), "the Guild Hall has a Mail Clerk")
+
+
+## A stall offer is not a bag stack. Cooked shrimp caps at 10 a square, so a
+## player holding 90 of them holds NINE squares — and the lister showed one line
+## per square, which is how five identical "Cooked Shrimp x10" rows ended up on
+## the board. The picker must group by ITEM and offer the full 90.
+##
+## Adding the menu fires its own _ready refresh, which prints one
+## "RPC '_data_request' on yourself is not allowed" — there is no world server in
+## a gate run. Expected, and unrelated to the checks below.
+func _check_lister_groups_by_item() -> void:
+	var menu: Control = (load("res://source/client/ui/menus/market/market_menu.tscn") as PackedScene).instantiate()
+	add_child(menu)
+	var shrimp: int = ContentRegistryHub.id_from_slug(&"items", &"cooked_shrimp")
+	var ore: int = ContentRegistryHub.id_from_slug(&"items", &"iron_ore")
+	var gold: int = Economy.gold_id()
+	var bag: Dictionary = {}
+	for _square: int in 9:
+		bag[Inventory.next_uid(bag)] = {"id": shrimp, "a": 10, "bag": 0}
+	bag[Inventory.next_uid(bag)] = {"id": ore, "a": 7, "bag": 0}
+	bag[Inventory.next_uid(bag)] = {"id": ore, "a": 3, "bag": 1}
+	bag[Inventory.next_uid(bag)] = {"id": gold, "a": 5_000, "bag": 0}
+	menu._inventory = bag
+
+	var listable: Array = menu._listable_stacks()
+	var by_item: Dictionary = {}
+	for entry: Dictionary in listable:
+		by_item[int(entry.get("id", 0))] = int(entry.get("a", 0))
+	_ck(listable.size() == 2, "nine shrimp squares plus two ore squares are TWO listable lines")
+	_ck(int(by_item.get(shrimp, 0)) == 90, "and the shrimp line offers all 90, not one square's 10")
+	_ck(int(by_item.get(ore, 0)) == 10, "squares in different bags count toward the same line")
+	_ck(not by_item.has(gold), "gold is still excluded — it is what buyers pay with")
+	menu.queue_free()
 
 
 func _ck(condition: bool, label: String) -> void:
