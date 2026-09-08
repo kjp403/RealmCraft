@@ -13,7 +13,7 @@ region = Rect2(0, 48, 16, 32)
 [resource]
 script = ExtResource("2_tool")
 tool_type = &"pickaxe"
-extraction_damage = 13
+extraction_damage = 82
 swing_cooldown = 0.26
 required_skill = &"mining"
 required_skill_level = 85
