@@ -61,7 +61,6 @@ var _rows: Dictionary[int, Control] = {}
 ## The chest stack the batch buttons act on. 0 hides them (a pushed reward with
 ## no stack behind it — a boss drop, a daily chest).
 var _target_chest_id: int = 0
-var _remaining: int = 0
 ## True while showing a standing pile (the Boss Hunt stash) rather than the
 ## result of opening something. Drives the wording and hides the reveal chrome.
 var _is_claim_only: bool = false
@@ -220,15 +219,22 @@ func _on_batch_started(chest_name: String, requested: int) -> void:
 	_clear_rows()
 	_title.text = chest_name
 	# requested 0 = nothing was opened. That is the Hunt Chest: a standing pile
-	# to claim from, not a reveal. No "Opening...", no progress bar, and
-	# set_target_chest(0) keeps the Open buttons hidden because there is nothing
-	# to open.
+	# to claim from, not a reveal. No "Opening...", no progress bar, and the
+	# manager reports no target chest for it, so the Open buttons hide below —
+	# there is nothing to open.
 	_is_claim_only = requested == 0
 	if _is_claim_only:
 		_subtitle.text = "Boss Hunt stash"
-		set_target_chest(0, 0)
 	else:
 		_subtitle.text = "Opening..." if requested != 1 else "Opened"
+	# The batch buttons follow the RUN, and the manager is the only thing that
+	# knows what the run is opening. Asking it here is what keeps them honest in
+	# the two cases where waiting to be told did not work: a reward the player did
+	# not open out of their bag (world chest, daily claim, crash recovery) has no
+	# chest behind it and now hides the row instead of staying aimed at whatever
+	# they opened last, and a chest opened from the HOTBAR — which never reached
+	# into this window at all — gets live buttons instead of dead ones.
+	set_target_chest(UniversalChestManager.target_chest())
 	_progress.visible = not _is_claim_only and requested != 1
 	_progress.value = 0.0
 	_set_batch_enabled(false)
@@ -237,7 +243,6 @@ func _on_batch_started(chest_name: String, requested: int) -> void:
 
 
 func _on_batch_progress(opened: int, remaining: int, _ledger: Array) -> void:
-	_remaining = remaining
 	_subtitle.text = "Opened %d · %d left" % [opened, remaining]
 	# Fraction of the run done, computed from counts the SERVER reported.
 	var total: float = float(opened + remaining)
@@ -281,7 +286,6 @@ func _on_rare_granted(entry: Dictionary) -> void:
 func _on_batch_finished(summary: Dictionary) -> void:
 	var opened: int = int(summary.get("opened", 0))
 	_capacity = int(summary.get("capacity", 0))
-	_remaining = int(summary.get("free_slots", 0))
 	_title.text = str(summary.get("chest", "Rewards"))
 	if _is_claim_only:
 		var stacks: int = (summary.get("pending", []) as Array).size()
@@ -338,12 +342,14 @@ func _on_claim_blocked(note: String) -> void:
 # Input
 # ---------------------------------------------------------------------------
 
-## Point the batch buttons at a chest stack. Called by whoever opened the window
-## from an inventory slot; a pushed reward (boss drop, daily chest) leaves it 0
-## and the batch row hides.
-func set_target_chest(item_id: int, held: int) -> void:
+## Point the batch buttons at a chest stack. Driven from _on_batch_started off
+## [method UniversalChestManager.target_chest], so it is re-decided on every run:
+## 0 means the reward has no chest behind it (a boss drop, a daily chest) and the
+## batch row hides. No count is kept — the server reports the authoritative
+## remainder on every batch response, and a stale local one is exactly how the
+## row ends up offering to open chests the player no longer has.
+func set_target_chest(item_id: int) -> void:
 	_target_chest_id = item_id
-	_remaining = held
 	_batch_row.visible = item_id > 0
 
 
@@ -591,9 +597,16 @@ func _show_pile(stacks: Array) -> void:
 		_ledger_box.add_child(row)
 
 
+## remove_child BEFORE queue_free, and that ordering is the whole point: a freed
+## node stays in the tree until the end of the frame, and rows are cleared and
+## rebuilt inside a single call ([method present] emits batch_started and then
+## absorbs the payload synchronously). Left in, the old rows lay out alongside
+## the new ones for a frame — a list that visibly doubles, on a window whose
+## whole job is telling the player how much they got.
 func _clear_rows() -> void:
 	_rows.clear()
 	for child: Node in _ledger_box.get_children():
+		_ledger_box.remove_child(child)
 		child.queue_free()
 
 
