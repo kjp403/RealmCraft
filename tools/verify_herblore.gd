@@ -7,8 +7,8 @@ const VIAL_PRICE: int = 500
 ## No potion may sell to a vendor for more than this.
 const VENDOR_VALUE_CAP: int = 100
 const POTION_VENDOR_VALUES: Dictionary = {
-	"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 4,
-	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 4,
+	"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 5,
+	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 5,
 	"res://source/common/gameplay/items/consumables/health_potion.tres": 50,
 	"res://source/common/gameplay/items/consumables/mana_potion.tres": 50,
 	"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 100,
