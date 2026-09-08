@@ -59,20 +59,6 @@ static func try_damage(
 	if body is not Character:
 		return Result.BLOCKED
 
-	# A CORPSE is not a target — the shot passes through it. take_damage already
-	# no-ops on a dead character, but returning DAMAGED for that no-op made every
-	# caller treat it as a landed hit: a projectile despawned (or burned a pierce)
-	# on the body lying between the shooter and the live mob behind it, a cleave
-	# spent one of its max_targets slots on the dead, and the on-hit hooks at the
-	# bottom of this function (coating, stealth break, ammo procs) all fired for
-	# zero damage. A killed mob keeps its HurtBox on the hurtbox layer for the
-	# whole respawn delay, so this is the difference between "I shot the pack" and
-	# "the first kill walled off the rest of it". is_corpse, not is_dead: clients
-	# never receive is_dead for hostiles, and the client's own projectile copy has
-	# to stop where the server's did.
-	if (body as Character).is_corpse():
-		return Result.IGNORED
-
 	# Only a hostile mob or another player is a valid combatant. Friendly NPCs (shops, quest
 	# givers, trainers) + champion statues + any other Character are non-combatants — the hit
 	# passes through them. Without this a player one-shots a shopkeeper into a "dead but still

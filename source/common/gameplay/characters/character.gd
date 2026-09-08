@@ -359,18 +359,6 @@ func is_in_combat() -> bool:
 	return Time.get_ticks_msec() < combat_until_ms
 
 
-## True while this character is a BODY ON THE GROUND — nothing may target it and
-## nothing may be stopped by it. THE corpse question: ask this, never
-## [member is_dead] directly, anywhere the answer has to be the same on both
-## peers. is_dead is server-only state — clients never receive it for hostiles
-## (death replicates as enemy_state + HEALTH), so a client reading it saw every
-## corpse as a live target and stopped its own projectile visuals on bodies the
-## server's shot flew straight through. HostileNpc overrides with the replicated
-## signals so both peers agree.
-func is_corpse() -> bool:
-	return is_dead
-
-
 ## Sword Deflect: ticks_msec until which incoming PROJECTILES are destroyed instead
 ## of damaging us (a timed parry). Set per-peer by DeflectAbility (so each peer
 ## deflects its own projectile copies; the server's window gates real damage), and
