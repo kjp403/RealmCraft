@@ -9,7 +9,11 @@ const INVITE_TTL_MS: int = 30_000
 const CONFIRM_COUNTDOWN_MS: int = 5_000
 const INVITE_DISTANCE: float = 128.0
 const SESSION_DISTANCE: float = 192.0
-const MAX_OFFER_ITEMS: int = 6
+## Distinct ITEMS one side may put up. Quantity per item is bounded only by what
+## the trader owns, so this counts kinds of thing, not units — twelve is two full
+## rows of the trade window's four-wide grid and covers a gear set plus supplies,
+## where six meant splitting an ordinary swap into two trades.
+const MAX_OFFER_ITEMS: int = 12
 
 static var _next_invite_id: int = 1
 static var _next_session_id: int = 1
@@ -468,8 +472,10 @@ static func _transfer_offer(
 		var item_id: int = int(raw_id)
 		var amount: int = int(items[raw_id])
 		Inventory.remove_amount_by_id(from_inventory, item_id, amount)
-		for _copy: int in amount:
-			Inventory.add_item(to_inventory, item_id, 1, false, to_bag, to_bags)
+		# One call, not one per unit: add_item already fills existing stacks to
+		# Item.stack_limit before opening squares, and a bulk offer of 900 arrows
+		# would otherwise rescan the whole bag 900 times on the world's main loop.
+		Inventory.add_item(to_inventory, item_id, amount, false, to_bag, to_bags)
 
 
 static func _broadcast(instance: ServerInstance, trade_id: int) -> void:

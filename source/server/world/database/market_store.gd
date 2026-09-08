@@ -156,6 +156,64 @@ func create_listing(
 	return int(db.query_result[0].get("id", 0))
 
 
+## The seller's own ACTIVE offer for this item at this exact ask, or 0 when the
+## stall has none. Read-only: the list handler asks BEFORE it touches anything, so
+## it knows whether it is about to open a new board row (which the per-store cap
+## limits) or top an existing one up (which it does not).
+func matching_listing(store_id: int, seller_id: int, item_id: int, unit_price: int) -> int:
+	db.query_with_bindings(
+		"SELECT listing_id FROM market_listings "
+		+ "WHERE store_id = ? AND seller_id = ? AND item_id = ? AND unit_price = ? "
+		+ "AND state = 0 AND amount > 0 ORDER BY listing_id ASC LIMIT 1;",
+		[store_id, seller_id, item_id, unit_price]
+	)
+	if db.query_result.is_empty():
+		return 0
+	return int(db.query_result[0].get("listing_id", 0))
+
+
+## Tops an EXISTING offer up instead of opening a second row for the same goods at
+## the same ask — the thing that turned one bulk seller into five identical
+## "Cooked Shrimp x10" lines on the board. The caller must already have removed
+## the units from the seller's bag (same contract as [method create_listing]).
+##
+## Returns the listing_id that grew, or 0 when there is nothing to merge into (or
+## the merge would breach [constant Market.MAX_LISTING_AMOUNT]) — the caller then
+## falls back to [method create_listing]. Guarded and verified like
+## [method reserve]: the increment is conditioned on the amount we read, so a
+## racing purchase means we merge nothing rather than restocking a stale total.
+func restock(
+	store_id: int,
+	seller_id: int,
+	item_id: int,
+	amount: int,
+	unit_price: int
+) -> int:
+	if amount <= 0:
+		return 0
+	db.query_with_bindings(
+		"SELECT listing_id, amount FROM market_listings "
+		+ "WHERE store_id = ? AND seller_id = ? AND item_id = ? AND unit_price = ? "
+		+ "AND state = 0 AND amount > 0 ORDER BY listing_id ASC LIMIT 1;",
+		[store_id, seller_id, item_id, unit_price]
+	)
+	if db.query_result.is_empty():
+		return 0
+	var listing_id: int = int(db.query_result[0].get("listing_id", 0))
+	var before: int = int(db.query_result[0].get("amount", 0))
+	if listing_id <= 0 or before + amount > Market.MAX_LISTING_AMOUNT:
+		return 0
+	db.query_with_bindings(
+		"UPDATE market_listings SET amount = amount + ? "
+		+ "WHERE listing_id = ? AND state = 0 AND amount = ?;",
+		[amount, listing_id, before]
+	)
+	db.query_with_bindings("SELECT amount FROM market_listings WHERE listing_id = ?;", [listing_id])
+	if db.query_result.is_empty() or int(db.query_result[0].get("amount", -1)) != before + amount:
+		return 0
+	return listing_id
+
+
 ## Takes [param amount] units OUT of an active listing, flipping it to SOLD when it
 ## empties. Returns true only if the full amount was reserved — the caller is then
 ## on the hook to deliver the goods, or to roll its transaction back.

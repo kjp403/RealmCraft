@@ -7,6 +7,10 @@ extends Node
 ## Also covers the delivery ladder (bank -> bag -> ground) used by "send to bank",
 ## as far as it can go without a live map: bank full must fall through to the bag
 ## rather than stop.
+##
+## And BULK (case 7): a bag square's stack limit must never cap a trade offer, but
+## the receiver's free SQUARES still must — those are different limits, and only
+## the second one may refuse a swap.
 ##   godot --path . --mode=client res://tools/check_trade_space.tscn
 
 const FILLER: StringName = &"iron_ore"
@@ -126,5 +130,74 @@ func _go() -> void:
 		1
 	)
 
+	# 7. Bulk. A bag stack limit caps a SQUARE, never a trade offer: 900 cooked
+	# shrimp living in ninety ten-count squares is one offer of 900. This is the
+	# item-loss case this gate exists for, because the transfer stopped adding
+	# received goods one unit at a time — it now hands add_item the whole 900.
+	_check_bulk_offer()
+
 	print("RESULT ", "FAIL" if _failed else "PASS")
 	get_tree().quit(1 if _failed else 0)
+
+
+## A 900-unit offer, end to end through the real transfer.
+##
+## The receiver's PlayerResource is what decides the active bag and how many bags
+## are unlocked — pass it, or _transfer_offer falls back to ONE bag (30 squares =
+## 300 shrimp) and silently drops the rest.
+func _check_bulk_offer() -> void:
+	var shrimp: int = _id(&"cooked_shrimp")
+	if shrimp <= 0:
+		_failed = true
+		print("bulk offer: could not resolve cooked_shrimp — FAIL")
+		return
+	var item: Item = ContentRegistryHub.load_by_id(&"items", shrimp) as Item
+	_expect_int("a bag square holds only 10 shrimp", Inventory.stack_limit_for(item, false), 10)
+
+	# Giver: a full three-bag inventory of shrimp, ninety squares of ten.
+	var giver: Dictionary = {}
+	for i: int in Inventory.MAX_SLOTS * Inventory.MAX_BAGS:
+		giver[Inventory.next_uid(giver)] = {"id": shrimp, "a": 10, "bag": i % Inventory.MAX_BAGS}
+	_expect_int("...but the giver holds 900 of them", Inventory.count(giver, shrimp), 900)
+
+	# What TradeService.set_offer validates: the TOTAL held, not one square.
+	var offer: Dictionary = {"items": {shrimp: 900}, "gold": 0}
+	_expect("an offer of 900 passes set_offer's own check", Inventory.count(giver, shrimp) >= 900, true)
+
+	var receiver: Dictionary = {}
+	_expect(
+		"an empty three-bag receiver can take all 900",
+		InventorySpace.can_receive_all(receiver, offer["items"], {}, 0, Inventory.MAX_BAGS),
+		true
+	)
+	# Room is a real limit and must stay one — it is not the same as a stack cap.
+	_expect(
+		"a one-bag receiver is refused (300 max) — room, not stack size",
+		InventorySpace.can_receive_all(receiver, offer["items"], {}, 0, 1),
+		false
+	)
+
+	var to_pr: PlayerResource = PlayerResource.new()
+	to_pr.inventory_bags = Inventory.MAX_BAGS
+	to_pr.active_inventory_bag = 0
+	TradeService._transfer_offer(giver, receiver, to_pr, offer)
+	_expect_int("the giver's 900 left the bag", Inventory.count(giver, shrimp), 0)
+	_expect_int("the receiver got all 900 — nothing dropped", Inventory.count(receiver, shrimp), 900)
+	_expect_int("and it repacked into 90 squares", receiver.size(), 90)
+	var over_cap: bool = false
+	for uid: Variant in receiver:
+		if int(receiver[uid].get("a", 0)) > 10:
+			over_cap = true
+	_expect("no received square exceeds the bag stack limit", over_cap, false)
+
+	# An item that authors no stack_limit rides in a single square either way.
+	var heads: int = _id(&"bronze_arrowheads")
+	if heads > 0:
+		var a_giver: Dictionary = {}
+		a_giver[Inventory.next_uid(a_giver)] = {"id": heads, "a": 5000, "bag": 0}
+		var a_receiver: Dictionary = {}
+		TradeService._transfer_offer(
+			a_giver, a_receiver, to_pr, {"items": {heads: 5000}, "gold": 0}
+		)
+		_expect_int("5000 arrowheads move whole", Inventory.count(a_receiver, heads), 5000)
+		_expect_int("...in one square", a_receiver.size(), 1)

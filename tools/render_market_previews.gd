@@ -63,6 +63,9 @@ func _go() -> void:
 	_menu._search = ""
 	await _shot(_menu.Tab.STALLS, "market-stalls.png")
 	await _shot(_menu.Tab.MINE, "market-my-stall.png")
+	# The bulk case: 90 cooked shrimp living in nine ten-count bag squares must
+	# offer as ONE listing of 90, not nine of ten.
+	await _shot_lister_for(&"cooked_shrimp", "market-list-bulk.png")
 	# The edit pane only exists while one of your own listings is selected.
 	_menu._editing_listing = 90
 	_menu._side = _menu.SidePanel.EDIT
@@ -146,6 +149,13 @@ func _load_fixture() -> void:
 		var item_id: int = _id(entry[0] as StringName)
 		if item_id > 0:
 			bag[Inventory.next_uid(bag)] = {"id": item_id, "a": int(entry[1]), "bag": 0}
+	# Realistic bulk: cooked shrimp caps at 10 a square, so 90 of them is NINE
+	# squares. The lister must show that as one "Cooked Shrimp (90)" line — the
+	# per-square version is what put five identical rows on the board.
+	var shrimp: int = _id(&"cooked_shrimp")
+	if shrimp > 0:
+		for _square: int in 9:
+			bag[Inventory.next_uid(bag)] = {"id": shrimp, "a": 10, "bag": 0}
 
 	# Sale history: the price signal every panel is annotated with. Prices around
 	# but not equal to the asks, so the "vs. market" deltas render both ways.
@@ -218,11 +228,54 @@ func _load_fixture() -> void:
 	]
 
 
+## Shoot the lister with a specific bag item picked. The item dropdown is built in
+## code inside _build_lister, so the only way to preselect one is to find it in
+## the live tree and fire the same signal a click would.
+func _shot_lister_for(slug: StringName, file_name: String) -> void:
+	_menu._side = _menu.SidePanel.LIST
+	_menu._tab = _menu.Tab.MINE
+	for key: Variant in _menu._tab_buttons:
+		(_menu._tab_buttons[key] as Button).button_pressed = key == _menu.Tab.MINE
+	_menu._rebuild()
+	await get_tree().process_frame
+	var listable: Array = _menu._listable_stacks()
+	var wanted: int = _id(slug)
+	var index: int = -1
+	for i: int in listable.size():
+		if int((listable[i] as Dictionary).get("id", 0)) == wanted:
+			index = i
+			break
+	var picker: OptionButton = _find_option_button(_menu)
+	if index < 0 or picker == null:
+		push_error("lister preview: no %s in the bag fixture" % slug)
+		return
+	picker.select(index)
+	picker.item_selected.emit(index)
+	await _capture(file_name)
+
+
+func _find_option_button(node: Node) -> OptionButton:
+	if node is OptionButton:
+		return node as OptionButton
+	for child: Node in node.get_children():
+		var found: OptionButton = _find_option_button(child)
+		if found != null:
+			return found
+	return null
+
+
 func _shot(tab: int, file_name: String) -> void:
 	_menu._tab = tab
 	for key: Variant in _menu._tab_buttons:
 		(_menu._tab_buttons[key] as Button).button_pressed = key == tab
 	_menu._rebuild()
+	await _capture(file_name)
+
+
+## Screenshot whatever is on screen. Split out of [method _shot] because
+## _rebuild() throws the panel away and rebuilds it, which would discard any
+## selection the caller made in the live tree.
+func _capture(file_name: String) -> void:
 	for _i: int in 10:
 		await get_tree().process_frame
 	var image: Image = _sv.get_texture().get_image()

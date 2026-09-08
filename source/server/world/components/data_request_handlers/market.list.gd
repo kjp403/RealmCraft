@@ -1,10 +1,15 @@
 extends DataRequestHandler
-## Puts one bag stack on the caller's market stall (the ESCROW-IN step).
+## Puts goods on the caller's market stall (the ESCROW-IN step).
 ##
-## The stack leaves the bag, the bag is persisted, and the listing row is written
+## Addressed by ITEM, not by bag square. `Item.stack_limit` caps a bag square, and
+## honouring it here is what made a seller with 900 cooked shrimp post ninety
+## ten-count offers. The sellable amount is [method Inventory.count] across every
+## bag, and the units are taken from as many squares as it takes.
+##
+## The goods leave the bag, the bag is persisted, and the listing row is written
 ## — all inside ONE SQLite transaction, so the item is in exactly one of the two
 ## places at every commit point. A failure anywhere rolls the transaction back and
-## puts the stack straight back into the live PlayerResource, leaving the seller
+## puts the goods straight back into the live PlayerResource, leaving the seller
 ## exactly as they started. See [Market].
 
 
@@ -20,14 +25,18 @@ func data_request_handler(
 		return {"ok": false, "reason": "dead"}
 	var pr: PlayerResource = player.player_resource
 
-	var slot_uid: int = int(args.get("uid", -1))
 	var inventory: Dictionary = pr.inventory
-	if slot_uid < 0 or not inventory.has(slot_uid):
-		return {"ok": false, "reason": "missing"}
+	var item_id: int = int(args.get("item_id", 0))
+	if item_id <= 0:
+		# Slot-addressed callers (an older client) name a bag square; take its
+		# item and then sell from the whole bag like everyone else.
+		var slot_uid: int = int(args.get("uid", -1))
+		if slot_uid < 0 or not inventory.has(slot_uid):
+			return {"ok": false, "reason": "missing"}
+		item_id = int(inventory[slot_uid].get("id", 0))
 
-	var slot: Dictionary = inventory[slot_uid]
-	var item_id: int = int(slot.get("id", 0))
-	var have: int = int(slot.get("a", 0))
+	# Everything the seller owns of this item, however many squares it sits in.
+	var have: int = Inventory.count(inventory, item_id)
 	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
 	if item_id <= 0 or have <= 0 or item == null:
 		return {"ok": false, "reason": "missing"}
@@ -35,7 +44,7 @@ func data_request_handler(
 		return {"ok": false, "reason": "not_listable", "message": Market.listing_block_reason(item)}
 
 	var amount: int = int(args.get("amount", have))
-	if amount <= 0 or amount > have:
+	if amount <= 0 or amount > have or amount > Market.MAX_LISTING_AMOUNT:
 		return {"ok": false, "reason": "bad_amount"}
 
 	var unit_price: int = int(args.get("unit_price", 0))
@@ -55,31 +64,50 @@ func data_request_handler(
 		)
 		if store_id <= 0:
 			return {"ok": false, "reason": "failed"}
-	if market.active_listing_count(store_id) >= Market.MAX_LISTINGS_PER_STORE:
+	# The board cap counts ROWS, so it only applies when this listing opens one.
+	# Topping up an offer the stall already has adds no row and is never blocked.
+	var merge_into: int = market.matching_listing(store_id, pr.player_id, item_id, unit_price)
+	if merge_into <= 0 and market.active_listing_count(store_id) >= Market.MAX_LISTINGS_PER_STORE:
 		return {"ok": false, "reason": "store_full", "max_listings": Market.MAX_LISTINGS_PER_STORE}
 
 	# --- Escrow in. Nothing above this line has mutated anything. ---
 	var db_store: WorldStoreSqlite = instance.world_server.database.store
 	db_store.begin()
 
-	var removed: int = Inventory.remove_from_slot(inventory, slot_uid, amount)
-	if removed != amount:
-		# Partial take — put back exactly what came out and abort untouched.
+	# All-or-nothing across every bag square holding the item: remove_amount_by_id
+	# re-counts first and mutates nothing when the total falls short, so there is
+	# no partial take to unwind here.
+	if not Inventory.remove_amount_by_id(inventory, item_id, amount):
 		db_store.rollback()
-		if removed > 0:
-			Inventory.add_item(inventory, item_id, removed, false, pr.active_inventory_bag, pr.inventory_bags)
 		return {"ok": false, "reason": "missing"}
 
-	# Saved inside the transaction: the bag without the stack and the stall row
-	# holding it commit together, or neither does.
+	# Saved inside the transaction: the bag without the goods and the stall row
+	# holding them commit together, or neither does.
 	instance.world_server.database.save_player(pr)
 
-	var listing_id: int = market.create_listing(
-		store_id, pr.player_id, pr.display_name, item_id, amount, unit_price
-	)
+	# Merge when the stall already asks this price for this item, so re-listing
+	# after a restock grows one row instead of adding a duplicate line.
+	var listing_id: int = 0
+	if merge_into > 0:
+		listing_id = market.restock(store_id, pr.player_id, item_id, amount, unit_price)
+	# A refused merge (the target filled to MAX_LISTING_AMOUNT, or emptied under
+	# us) falls back to a new row — but that IS a new row, so the board cap the
+	# merge let us skip has to be honoured before opening it.
+	var capped: bool = false
+	if listing_id <= 0:
+		if market.active_listing_count(store_id) >= Market.MAX_LISTINGS_PER_STORE:
+			capped = true
+		else:
+			listing_id = market.create_listing(
+				store_id, pr.player_id, pr.display_name, item_id, amount, unit_price
+			)
 	if listing_id <= 0:
 		db_store.rollback()
 		Inventory.add_item(inventory, item_id, amount, false, pr.active_inventory_bag, pr.inventory_bags)
+		if capped:
+			return {
+				"ok": false, "reason": "store_full", "max_listings": Market.MAX_LISTINGS_PER_STORE
+			}
 		ServerLog.error(
 			"Market: listing insert failed for player #%d (%s); %s returned to bag."
 			% [pr.player_id, pr.display_name, MarketService.item_label(item_id, amount)]

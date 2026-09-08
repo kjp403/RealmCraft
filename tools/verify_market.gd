@@ -38,6 +38,7 @@ func _ready() -> void:
 	_check_reserve_is_single_use()
 	_check_partial_buys()
 	_check_reprice_touches_no_stock()
+	_check_bulk_offers_merge()
 	_check_partial_withdraw()
 	_check_pull_is_single_use()
 	_check_sold_out_cannot_be_pulled()
@@ -116,6 +117,51 @@ func _check_reprice_touches_no_stock() -> void:
 	# The stall never had to close for any of that — the row is the same one.
 	_ck(_market.active_listing_count(store) >= 1, "the stall stayed open throughout")
 	_market.pull(listing, SELLER_A)
+
+
+## An offer is not a bag stack. Re-listing the same item at the same ask must GROW
+## the row the stall already has — the behaviour that turned one bulk seller into
+## five identical "Cooked Shrimp x10" lines on the board when it was missing.
+func _check_bulk_offers_merge() -> void:
+	print("bulk offers merge instead of duplicating")
+	var store: int = _market.upsert_store(SELLER_A, "Ash's Emporium", true)
+	var before: int = _market.active_listing_count(store)
+	var listing: int = _list(SELLER_A, store, 900, 8)
+	_ck(
+		int(_market.listing(listing).get("amount", 0)) == 900,
+		"one offer holds 900 units — far past any bag stack limit"
+	)
+	_ck(
+		_market.matching_listing(store, SELLER_A, ITEM, 8) == listing,
+		"the stall's own offer at that ask is found"
+	)
+	_ck(
+		_market.matching_listing(store, SELLER_A, ITEM, 9) == 0,
+		"a different ask is NOT a merge target — that would silently reprice stock"
+	)
+	_ck(
+		_market.matching_listing(store, SELLER_B, ITEM, 8) == 0,
+		"another seller's offer is never a merge target"
+	)
+	_ck(_market.restock(store, SELLER_A, ITEM, 100, 8) == listing, "re-listing tops the same row up")
+	_ck(int(_market.listing(listing).get("amount", 0)) == 1000, "and the units are added, not replaced")
+	_ck(
+		_market.active_listing_count(store) == before + 1,
+		"the board gained ONE row for 1000 units, not one per stack"
+	)
+	_ck(_market.restock(store, SELLER_A, ITEM, 0, 8) == 0, "a zero-unit restock does nothing")
+	_ck(_market.restock(store, SELLER_B, ITEM, 5, 8) == 0, "and nobody can restock someone else's offer")
+	_ck(
+		_market.restock(store, SELLER_A, ITEM, Market.MAX_LISTING_AMOUNT, 8) == 0,
+		"a merge past MAX_LISTING_AMOUNT is refused rather than overflowing the row"
+	)
+	_ck(int(_market.listing(listing).get("amount", 0)) == 1000, "none of those moved stock")
+	# A sold-out row is not a merge target either: it is SOLD, not ACTIVE.
+	_market.reserve(listing, 1000)
+	_ck(
+		_market.matching_listing(store, SELLER_A, ITEM, 8) == 0,
+		"a sold-out offer stops attracting merges"
+	)
 
 
 func _check_partial_withdraw() -> void:

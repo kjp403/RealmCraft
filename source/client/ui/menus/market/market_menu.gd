@@ -86,7 +86,7 @@ var _store_open: bool = false
 var _my_listings: Array = []
 var _inventory: Dictionary = {}
 var _max_listings: int = Market.MAX_LISTINGS_PER_STORE
-var _selected_uid: int = -1
+var _selected_item_id: int = 0
 var _side: SidePanel = SidePanel.LIST
 var _editing_listing: int = 0
 
@@ -210,7 +210,7 @@ func _set_tab(tab: Tab) -> void:
 	for key: Variant in _tab_buttons:
 		(_tab_buttons[key] as Button).button_pressed = key == tab
 	_selected_listing = 0
-	_selected_uid = -1
+	_selected_item_id = 0
 	_side = SidePanel.LIST
 	_refresh()
 
@@ -718,7 +718,7 @@ func _show_listing_detail(listing: Dictionary) -> void:
 	var affordable: int = 0 if unit_price <= 0 else int(_gold / unit_price)
 	column.add_child(_quantity_row(
 		qty,
-		[1, 10, 100],
+		[1, 10, 100, 1000],
 		stock,
 		mini(stock, affordable),
 		"All"
@@ -1168,7 +1168,7 @@ func _build_lister() -> Control:
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var column: VBoxContainer = _panel_body(panel)
 
-	var listable: Array = _listable_slots()
+	var listable: Array = _listable_stacks()
 	if listable.is_empty():
 		column.add_child(_empty_state(
 			"Nothing in your bag can be listed. Quest items stay bound to you, and gold is what buyers pay with."
@@ -1186,8 +1186,10 @@ func _build_lister() -> Control:
 	Style.field(picker)
 	body.add_child(_labelled_row("Item", picker))
 
-	var qty: SpinBox = _spin(1, 1, 1)
-	var qty_row: HBoxContainer = _quantity_row(qty, [1, 10, 100], 1, 0, "All")
+	# Presets run past a bag square on purpose: the cap here is everything the
+	# player owns of the item, so 1000 is a reachable one-tap for a bulk seller.
+	var qty: SpinBox = _spin(1, Market.MAX_LISTING_AMOUNT, 1)
+	var qty_row: HBoxContainer = _quantity_row(qty, [1, 10, 100, 1000], 1, 0, "All")
 	body.add_child(qty_row)
 
 	var price: SpinBox = _spin(1, Market.MAX_UNIT_PRICE, 1)
@@ -1226,7 +1228,7 @@ func _build_lister() -> Control:
 		var item_id: int = int(entry.get("id", 0))
 		var item: Item = _item(item_id)
 		var held: int = int(entry.get("a", 0))
-		_selected_uid = int(entry.get("uid", -1))
+		_selected_item_id = item_id
 		qty.max_value = maxi(1, held)
 		qty.value = mini(int(qty.value), int(qty.max_value))
 		_retarget_quantity_row(qty_row, held, 0, "All")
@@ -1237,13 +1239,13 @@ func _build_lister() -> Control:
 		takeaway.text = "You receive %s gold" % _format(int(price.value) * int(qty.value))
 		_fill_price_chips(price_chips, price, item_id, floor_price)
 		market_note.text = _market_note(item_id, item)
-		submit.disabled = _busy or _selected_uid < 0
+		submit.disabled = _busy or _selected_item_id <= 0
 
 	picker.item_selected.connect(func(_i: int) -> void: sync.call())
 	qty.value_changed.connect(func(_v: float) -> void: sync.call())
 	price.value_changed.connect(func(_v: float) -> void: sync.call())
 	sync.call()
-	submit.pressed.connect(func() -> void: _list_item(_selected_uid, int(qty.value), int(price.value)))
+	submit.pressed.connect(func() -> void: _list_item(_selected_item_id, int(qty.value), int(price.value)))
 	return panel
 
 
@@ -1319,7 +1321,7 @@ func _build_editor() -> Control:
 	actions.add_child(_rule())
 	actions.add_child(_stat_line("Stock on sale", _format(stock), COLOR_TEXT, 13))
 	var qty: SpinBox = _spin(1, maxi(1, stock), 1)
-	actions.add_child(_quantity_row(qty, [1, 10, 100], stock, 0, "All"))
+	actions.add_child(_quantity_row(qty, [1, 10, 100, 1000], stock, 0, "All"))
 
 	var pull: Button = Style.button(Button.new(), Style.Kind.DEFAULT, 32)
 	actions.add_child(pull)
@@ -1399,16 +1401,22 @@ func _market_note(item_id: int, item: Item) -> String:
 	return "  ·  ".join(parts)
 
 
-## Bag slots that can go on a stall. Gold and quest items are excluded by
+## What the bag can put on a stall, one entry PER ITEM rather than per bag
+## square. A stall offer is not a stack — 900 cooked shrimp sitting in ninety
+## ten-count squares is a single "Cooked Shrimp (900)" line here and a single
+## offer on the board. Gold and quest items are excluded by
 ## [method Market.is_listable]; everything else in the game is fair game.
-func _listable_slots() -> Array:
-	var out: Array = []
+func _listable_stacks() -> Array:
+	var totals: Dictionary = {}
 	for uid: Variant in _inventory:
 		var slot: Dictionary = _inventory[uid]
-		var item: Item = _item(int(slot.get("id", 0)))
-		if not Market.is_listable(item):
+		var item_id: int = int(slot.get("id", 0))
+		if not Market.is_listable(_item(item_id)):
 			continue
-		out.append({"uid": int(uid), "id": int(slot.get("id", 0)), "a": int(slot.get("a", 0))})
+		totals[item_id] = int(totals.get(item_id, 0)) + int(slot.get("a", 0))
+	var out: Array = []
+	for item_id: Variant in totals:
+		out.append({"id": int(item_id), "a": int(totals[item_id])})
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return _item_name(int(a.get("id", 0))).nocasecmp_to(_item_name(int(b.get("id", 0)))) < 0)
 	return out
@@ -1447,12 +1455,16 @@ func _set_store(store_name: String, is_open: bool) -> void:
 	await _refresh()
 
 
-func _list_item(uid: int, amount: int, unit_price: int) -> void:
-	if _busy or uid < 0:
+## Addressed by item id, not bag square: the server pulls the units out of as
+## many squares as it takes, so one offer can hold the whole bag's worth.
+func _list_item(item_id: int, amount: int, unit_price: int) -> void:
+	if _busy or item_id <= 0:
 		return
 	_busy = true
 	var result: Array = await Client.request_data_await(
-		&"market.list", {"uid": uid, "amount": amount, "unit_price": unit_price}, _instance_name()
+		&"market.list",
+		{"item_id": item_id, "amount": amount, "unit_price": unit_price},
+		_instance_name()
 	)
 	_busy = false
 	if not is_inside_tree():
@@ -1481,7 +1493,7 @@ func _list_error(data: Dictionary) -> String:
 		"max_price":
 			return "Price is capped at %s gold." % _format(int(data.get("max_price", Market.MAX_UNIT_PRICE)))
 		"bad_amount", "missing":
-			return "That stack moved — check your bag and try again."
+			return "You don't have that many any more — check your bag and try again."
 		"dead":
 			return "Not while you're down."
 		_:
