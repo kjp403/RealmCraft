@@ -1,6 +1,6 @@
 extends SceneTree
 func _initialize() -> void:
-	assert(Distribution.DISCORD_URL == "https://discord.gg/kSs3hxByV")
+	assert(Distribution.DISCORD_URL == "https://discord.gg/kejpgUMPGt")
 	var packed: PackedScene = load("res://source/client/ui/menus/settings/settings_menu.tscn")
 	assert(packed != null)
 	var menu: Node = packed.instantiate()

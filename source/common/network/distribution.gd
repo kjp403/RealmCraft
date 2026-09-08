@@ -27,4 +27,4 @@ const PLAY_WEB_URL: String = "https://play.arkenelle.com/"
 const CLIENT_DOWNLOAD_URL: String = "https://play.arkenelle.com/desktop/Arkenelle-windows.zip"
 const CLIENT_MANIFEST_URL: String = "https://play.arkenelle.com/desktop/latest.json"
 ## Public Discord invite (settings, gateway More menu, help, feedback replies).
-const DISCORD_URL: String = "https://discord.gg/kSs3hxByV"
+const DISCORD_URL: String = "https://discord.gg/kejpgUMPGt"
