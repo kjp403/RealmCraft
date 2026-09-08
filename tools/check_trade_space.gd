@@ -201,3 +201,15 @@ func _check_bulk_offer() -> void:
 		)
 		_expect_int("5000 arrowheads move whole", Inventory.count(a_receiver, heads), 5000)
 		_expect_int("...in one square", a_receiver.size(), 1)
+
+## TradeTable.MAX_OFFER_ITEMS cannot reference TradeService.MAX_OFFER_ITEMS
+## directly: that const-to-const link is a parse-time cycle that took the world
+## down (see the note on TradeTable.MAX_OFFER_ITEMS). Couple them here instead,
+## where a mismatch is a loud failure rather than a silent divergence.
+static func check_offer_limits_agree() -> Array[String]:
+	var fails: Array[String] = []
+	if TradeTable.MAX_OFFER_ITEMS != TradeService.MAX_OFFER_ITEMS:
+		fails.append("TradeTable.MAX_OFFER_ITEMS %d != TradeService.MAX_OFFER_ITEMS %d" % [
+			TradeTable.MAX_OFFER_ITEMS, TradeService.MAX_OFFER_ITEMS
+		])
+	return fails
