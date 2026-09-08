@@ -21,6 +21,7 @@ const PRAYER_PANEL_SCENE: String = "res://source/client/ui/menus/prayer/prayer_m
 ## path rather than by class name so a fresh clone runs it before the editor has
 ## re-registered global classes.
 const ONBOARDING_COACH: GDScript = preload("res://source/client/ui/hud/onboarding_coach.gd")
+const COMBAT_ALERT: GDScript = preload("res://source/client/ui/hud/combat_alert.gd")
 
 const CHAT_ABOVE_MENU_Z: int = 110
 const CHAT_DEFAULT_Z: int = 1
@@ -172,8 +173,7 @@ func _ready() -> void:
 	# and the strip is drawn LAST — so a row of buff icons sat on top of the boss
 	# health bar and its name plate. The strip yields: while a boss bar is up it
 	# docks underneath it, and it takes the top back the moment the bar goes.
-	$BossBar.visibility_changed.connect(_reflow_status_bar)
-	_reflow_status_bar()
+	$BossBar.visibility_changed.connect(_reflow_top_center)
 
 	# Character level / xp bar. The bar chrome starts hidden and only flashes
 	# on gains (see _flash_xp_bar); the level label stays visible throughout.
@@ -193,9 +193,20 @@ func _ready() -> void:
 	Client.subscribe(&"players.list", _on_players_list)
 
 	# Dungeon run HUD (live clock + revive pool) — self-contained; shows itself on dungeon.hud pushes.
-	add_child(DungeonHud.new())
+	_dungeon_hud = DungeonHud.new()
+	add_child(_dungeon_hud)
 	# Boss Hunt HUD (contract countdown + kill tally) — same deal on boss_hunt.hud.
-	add_child(BossHuntHud.new())
+	_boss_hunt_hud = BossHuntHud.new()
+	add_child(_boss_hunt_hud)
+	# Both ride the upper-right rail under the minimap, so the rail re-flows when
+	# a run starts or ends.
+	_dungeon_hud.visibility_changed.connect(_place_right_rail)
+	_boss_hunt_hud.visibility_changed.connect(_place_right_rail)
+	# In-fight callouts (enrage, mechanic warnings) — a thin pill in the reserved
+	# band under the boss bar, instead of an Announcer banner across the fight.
+	_combat_alert = COMBAT_ALERT.new()
+	add_child(_combat_alert)
+	_reflow_top_center()
 	# Onboarding coach — the guided intake lessons and the first-mastery-point
 	# nudge. Inert until an NPC hands out a lesson or a point lands.
 	add_child(ONBOARDING_COACH.new())
@@ -271,22 +282,42 @@ func _maybe_show_web_notice() -> void:
 	add_child(WebNotice.new())
 
 
-## Where the status strip sits with, and without, a boss bar above it. The docked
-## value clears the boss bar's own bottom edge (offset_bottom 82 in boss_bar.tscn)
-## with a few pixels of air.
+## The top-centre column: boss bar, then the in-fight callout band, then the
+## status strip. TOP_DOCKED clears the boss bar's own bottom edge (offset_bottom
+## 82 in boss_bar.tscn) with a few pixels of air.
 const STATUS_BAR_TOP: float = 8.0
 const STATUS_BAR_TOP_DOCKED: float = 90.0
 const STATUS_BAR_HEIGHT: float = 32.0
+## Air between two things in the column.
+const TOP_STACK_GAP: float = 6.0
+
+## The run clocks, kept so the right rail can place them. Both are built in code
+## below; only one is ever visible (a dungeon run and a hunt contract cannot
+## overlap), but the rail does not need to know that.
+var _dungeon_hud: DungeonHud
+var _boss_hunt_hud: BossHuntHud
+## In-fight callout band (enrage, mechanic warnings). Kept for the same reason.
+var _combat_alert: Control
 
 
-## Keep the status strip clear of the boss bar. Driven by the bar's own
-## visibility, so nothing has to know when a boss fight starts or ends.
-func _reflow_status_bar() -> void:
+## Lay out the top-centre column so nothing draws through anything else. Driven
+## by the boss bar's own visibility, so nothing has to know when a fight starts.
+##
+## The callout band takes the slot immediately under the boss bar — the highest
+## spot on the screen a message can hold and still be read at a glance, and out
+## of the play field entirely — and the buff strip sits below it. That slot is
+## RESERVED whether or not a callout is showing: keying it to the band's own
+## visibility would shunt the buff icons down and back up on every mechanic.
+func _reflow_top_center() -> void:
 	var strip: Control = $StatusBar
 	var boss_bar: Control = $BossBar
 	if strip == null or boss_bar == null:
 		return
 	var top: float = STATUS_BAR_TOP_DOCKED if boss_bar.visible else STATUS_BAR_TOP
+	if _combat_alert != null and is_instance_valid(_combat_alert):
+		_combat_alert.offset_top = top
+		_combat_alert.offset_bottom = top + COMBAT_ALERT.BAND_HEIGHT
+		top += COMBAT_ALERT.BAND_HEIGHT + TOP_STACK_GAP
 	strip.offset_top = top
 	strip.offset_bottom = top + STATUS_BAR_HEIGHT
 
@@ -556,10 +587,23 @@ func _place_right_rail() -> void:
 	if quest_tracker == null:
 		return
 	var top: float = RIGHT_RAIL_TOP
-	# The orb heads the rail, and its slot is reserved whenever the player has it
-	# switched ON — not merely while it happens to be visible. It auto-hides four
-	# seconds after every tick, so keying the layout to visibility would shunt the
-	# quest tracker up and down all the way through a gathering session.
+	# The run clock HEADS the rail, above the orb. Not a preference: the rail's
+	# second slot starts at y 184, and the bottom-right compact panels open at
+	# y 162 — anything below the orb is under an open bag. Its slot IS keyed to
+	# visibility (unlike the orb's): it appears once per run, not once every few
+	# seconds, so nothing below it flickers.
+	for chip: Control in [_dungeon_hud, _boss_hunt_hud]:
+		if chip == null or not is_instance_valid(chip) or not chip.visible:
+			continue
+		var chip_height: float = chip.get_combined_minimum_size().y
+		chip.offset_top = top
+		chip.offset_bottom = top + chip_height
+		chip.offset_right = -RIGHT_RAIL_MARGIN
+		top += chip_height + RIGHT_RAIL_GAP
+	# The orb's slot is reserved whenever the player has it switched ON — not
+	# merely while it happens to be visible. It auto-hides four seconds after
+	# every tick, so keying THAT to visibility would shunt the quest tracker up
+	# and down all the way through a gathering session.
 	if _xp_tracker != null and XpTrackerHud.is_enabled():
 		_xp_tracker.offset_top = top
 		_xp_tracker.offset_bottom = top + XpTrackerHud.CASING_DIAMETER

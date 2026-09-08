@@ -255,16 +255,12 @@ func _ready() -> void:
 		Toaster.toast(str(payload.get("message", ""))))
 	Client.subscribe(&"boss_hunt.left", func(_payload: Dictionary) -> void:
 		Toaster.toast("Left the hunt. Your chest keeps what you earned."))
-	# Boss enrage (dungeon phase 2): a red center banner + camera shake so the
-	# escalation reads — see BossController._announce_enrage.
-	Client.subscribe(&"boss.enrage", func(payload: Dictionary) -> void:
-		Announcer.announce("%s enrages!" % str(payload.get("name", "The boss")), "", {"color": PVP_TOAST_COLOR})
+	# Boss enrage (dungeon phase 2): camera shake so the escalation is FELT — see
+	# BossController._announce_enrage. The line itself is CombatAlert's (it
+	# subscribes to the same push); a mid-fight message that repeats every respawn
+	# has no business being an Announcer banner across the middle of the screen.
+	Client.subscribe(&"boss.enrage", func(_payload: Dictionary) -> void:
 		shake_camera(0.6))
-	# Boss mechanic callout — a named warning as the wind-up starts, so a move
-	# with counterplay (Killing Frost's safe circle) can be LEARNED the first
-	# time instead of just killing people. No shake: it must not read as damage.
-	Client.subscribe(&"boss.callout", func(payload: Dictionary) -> void:
-		Announcer.announce(str(payload.get("text", "")), "", {"color": PVP_TOAST_COLOR}))
 	# Boss SPEAKS (Ossuran). Not a mechanic warning — route it into the chat feed
 	# as a System line the whole party sees, and to a bubble over his head. No
 	# banner: his voice and his mechanic callouts must stay visually distinct.
