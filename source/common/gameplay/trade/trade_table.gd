@@ -20,7 +20,18 @@ const COUNTDOWN_MS: int = 12000
 ## [constant TradeService.MAX_OFFER_ITEMS], which is what the live private-trade
 ## path enforces. Quantity per item is not capped here either — an offer holds
 ## whatever the trader owns.
-const MAX_OFFER_ITEMS: int = TradeService.MAX_OFFER_ITEMS
+##
+## DELIBERATELY A LITERAL, not `TradeService.MAX_OFFER_ITEMS`. A const initialised
+## from another class resolves at PARSE time, and trade_service.gd types two of its
+## static funcs against TradeTable, so naming TradeService here makes the two
+## scripts a parse-time cycle. It resolves in the editor off a warm class cache and
+## fails on a cold headless load, which is how it reached live: every map holding a
+## Dictionary[int, TradeTable] then fails the same cascade already documented in
+## trade_service.gd (trade_table -> map -> npc -> hostile_npc -> combat_hit ->
+## melee_arc). The world binds its port, never finishes a map, and no WebSocket
+## handshake ever completes. tools/check_trade_space.gd pins the two values equal
+## at RUNTIME, which is the safe place to couple them.
+const MAX_OFFER_ITEMS: int = 12
 ## Per-seat tint for the in-world offer labels (seat 0 = gold, seat 1 = blue) — the SAME tones the
 ## spar banner uses, so the colour->player association is learned once across features.
 const SEAT_COLORS: PackedStringArray = ["f2bd2a", "73b3ff"]
