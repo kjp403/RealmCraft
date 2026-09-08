@@ -763,6 +763,52 @@ function collectNpcs() {
   return npcs;
 }
 
+// Absolute paths of every enemy resource a map scene actually PLACES.
+//
+// Each world boss ships as a pair of files sharing one enemy_type: the kit
+// standing on the biome pad, and the sibling left behind by the story/farm
+// split. Which half is the live one differs per boss — fungus_cave holds
+// fungal_heart.tres while desert holds sand_king_world.tres — so the file name
+// tells you nothing and placement is the only reliable signal.
+let placedEnemyFiles = null;
+function mapPlacedEnemyFiles() {
+  if (placedEnemyFiles) return placedEnemyFiles;
+  placedEnemyFiles = new Set();
+  const seen = new Set();
+  const dir = path.join(ROOT, "source/common/gameplay/maps");
+  for (const file of walk(dir).filter((f) => f.endsWith(".tscn"))) {
+    for (const res of scanMapScene(file, seen).enemyPaths) {
+      const abs = resToFs(res);
+      if (abs) placedEnemyFiles.add(path.resolve(abs));
+    }
+  }
+  return placedEnemyFiles;
+}
+
+// Keeps only the half of a same-enemy_type pair that a map places.
+//
+// Without this the pair collides in uniqueSlug and the loser is published at
+// "<slug>-2" — and the loser was picked by walk order, not by which boss players
+// can meet, so /creatures/sand-king/ described the unspawned story kit while the
+// pad everyone farms sat at /creatures/sand-king-2/. Groups placement cannot
+// separate (both placed, or neither) are left alone rather than guessed at.
+function keepPlacedVariants(rows) {
+  const placed = mapPlacedEnemyFiles();
+  const byType = new Map();
+  for (const row of rows) {
+    if (!byType.has(row.type)) byType.set(row.type, []);
+    byType.get(row.type).push(row);
+  }
+  const dropped = new Set();
+  for (const group of byType.values()) {
+    if (group.length < 2) continue;
+    const live = group.filter((row) => placed.has(path.resolve(row.file)));
+    if (live.length === 0 || live.length === group.length) continue;
+    for (const row of group) if (!live.includes(row)) dropped.add(row);
+  }
+  return rows.filter((row) => !dropped.has(row));
+}
+
 function collectCreatures() {
   const dir = path.join(ROOT, "source/common/gameplay/characters/npc/types");
   const used = new Set();
@@ -779,7 +825,7 @@ function collectCreatures() {
     if (doc.header.script_class && doc.header.script_class !== "EnemyTypeResource") continue;
     const name = str(doc.resource.display_name) || str(doc.resource.enemy_type) || slug0;
     rows.push({
-      slug: uniqueSlug(str(doc.resource.enemy_type) || slug0, used),
+      slug: "",
       name,
       type: str(doc.resource.enemy_type) || slug0,
       boss: Boolean(doc.resource.is_boss),
@@ -799,8 +845,14 @@ function collectCreatures() {
       file,
     });
   }
-  rows.sort((a, b) => Number(b.boss) - Number(a.boss) || a.name.localeCompare(b.name));
-  return rows;
+  // Slugs are handed out AFTER the variant filter, so the surviving boss takes
+  // the clean URL instead of inheriting a "-2" from a sibling that no longer
+  // ships. Assignment stays in walk order so any future collision numbers the
+  // same way it does today.
+  const kept = keepPlacedVariants(rows);
+  for (const row of kept) row.slug = uniqueSlug(row.type, used);
+  kept.sort((a, b) => Number(b.boss) - Number(a.boss) || a.name.localeCompare(b.name));
+  return kept;
 }
 
 function collectZones() {

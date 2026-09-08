@@ -16,6 +16,7 @@ extends Node
 ##   - the Hunt Broker NPC actually offers both interactions,
 ##   - the Guild Hall places the broker,
 ##   - the Hunt Chest round-trips a deposit,
+##   - every contract fights the SAME EnemyTypeResource the open world places,
 ##   - and the tuning rules hold: XP under the open world, no solo discount,
 ##     health scaling UP with party size.
 
@@ -23,12 +24,15 @@ const ARENA_SCENE: String = "res://source/common/gameplay/maps/maps/boss_hunt/bo
 const ARENA_RES: String = "res://source/common/gameplay/maps/instance/instance_collection/boss_hunt_arena.tres"
 const BROKER_RES: String = "res://source/common/gameplay/characters/npc/npcs/hunt_broker.tres"
 const GUILD_HALL: String = "res://source/common/gameplay/maps/maps/guild_house/inside_map.tscn"
+const MAPS_PATH: String = "res://source/common/gameplay/maps/"
+const TYPES_PATH: String = "res://source/common/gameplay/characters/npc/types/"
 
 var _failures: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
 	_check_catalog()
+	_check_same_boss_as_the_world()
 	_check_arena_scene()
 	_check_arena_resource()
 	_check_broker()
@@ -94,6 +98,69 @@ func _check_catalog() -> void:
 			id, target.cost, target.recommended_level, int(target.respawn_delay_s),
 			roundi(target.xp_mult * 100.0), int(solo), int(full),
 		])
+
+
+## A contract is the SAME boss as the one in the world, only tougher.
+##
+## Drop rates live on the EnemyTypeResource, and a contract scales nothing but
+## health, damage and XP — so the instant a target points at a DIFFERENT file
+## from the one a map places, the instanced fight quietly gets a different loot
+## table. Nothing else reports that: both files carry the same enemy_type, so
+## every log, quest and slayer task still resolves.
+##
+## This is how the Bloated Sovereign became the only source of the Siltbound set:
+## its contract held a sibling file while the Sewers pad held another, and the
+## uniques sat on the contract's copy. That sibling is deleted, but the shape of
+## the mistake is one ext_resource line away at any time.
+##
+## A boss the world does not place at all (a pure contract fight) is exempt —
+## there is no world table to disagree with.
+func _check_same_boss_as_the_world() -> void:
+	var placed: Dictionary = _map_placed_enemies()
+	for target: BossHuntTarget in BossHuntCatalog.all():
+		if target.enemy_type == null:
+			continue # already reported by _check_catalog
+		var id: String = String(target.contract_id())
+		var mine: String = target.enemy_type.resource_path.simplify_path()
+		var world: String = String(placed.get(target.enemy_type.enemy_type, ""))
+		if world.is_empty() or world == mine:
+			continue
+		_fail("%s fights %s but the world places %s — same enemy_type, different loot table."
+			% [id, mine.get_file(), world.get_file()])
+
+
+## enemy_type -> the resource path a map scene actually places for it.
+##
+## Map scenes are read as TEXT: a headless gate has no business instancing every
+## biome to answer "which files does this reference", and the ext_resource header
+## is the whole answer.
+func _map_placed_enemies() -> Dictionary:
+	var out: Dictionary = {}
+	for path: String in FileUtils.get_all_file_at(MAPS_PATH, "*.tscn"):
+		for line: String in FileAccess.get_file_as_string(path).split("
+"):
+			if not line.begins_with("[ext_resource") or not line.contains(TYPES_PATH):
+				continue
+			var res_path: String = _attr(line, "path")
+			if res_path.is_empty():
+				var uid_text: String = _attr(line, "uid")
+				var uid: int = ResourceUID.text_to_id(uid_text) if not uid_text.is_empty() else -1
+				if uid != ResourceUID.INVALID_ID and ResourceUID.has_id(uid):
+					res_path = ResourceUID.get_id_path(uid)
+			if res_path.is_empty():
+				continue
+			var enemy: EnemyTypeResource = ResourceLoader.load(res_path) as EnemyTypeResource
+			if enemy != null and not enemy.enemy_type.is_empty():
+				out[enemy.enemy_type] = res_path.simplify_path()
+	return out
+
+
+## One quoted attribute out of a .tscn header line, or "" if it carries none.
+func _attr(line: String, name: String) -> String:
+	var key: String = ' %s="' % name
+	if not line.contains(key):
+		return ""
+	return line.get_slice(key, 1).get_slice('"', 0)
 
 
 func _check_arena_scene() -> void:

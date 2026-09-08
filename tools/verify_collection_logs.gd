@@ -29,6 +29,10 @@ extends SceneTree
 ## 10. Every boss VARIANT resolves to its log. A file named for a logged boss,
 ##     flagged is_boss, with a loot table, must map to that log's key — the
 ##     cinderborn_world case. Encounter ADDS are excluded by shape, not by name.
+## 11. For a boss that ships as a PAIR, every logged item drops from the half a
+##     player can REACH. Check 6 unions the variants, which is right for
+##     crediting and blind to placement: a drop stranded on the half no map
+##     spawns still passes it.
 ##
 ## WARN lines are content observations and never fail the run: today, a boss with
 ## no log of its own carrying another boss's logged unique.
@@ -41,6 +45,8 @@ const ENEMY_INDEX: String = "res://source/common/registry/indexes/enemy_types_in
 ## orc_leader, mecha_stone_golem and trpg_necromancer are scattered across
 ## types/, types/goblins/, types/fungus/ and types/trpg/.
 const BOSS_PATH: String = "res://source/common/gameplay/characters/npc/types/"
+const MAPS_PATH: String = "res://source/common/gameplay/maps/"
+const HUNT_TARGETS_PATH: String = "res://source/common/gameplay/boss_hunt/targets/"
 const REWARD_SERVICE: String = "res://source/common/gameplay/combat/reward_service.gd"
 const MANAGER: String = "res://source/common/gameplay/collection_log/collection_log_manager.gd"
 
@@ -58,6 +64,7 @@ func _initialize() -> void:
 	_check_shape(logs)
 	_check_vfx(logs)
 	_check_obtainable(logs)
+	_check_reachable(logs)
 	_check_runtime(logs)
 	_check_call_sites()
 	_check_variant_coverage(logs)
@@ -216,8 +223,9 @@ func _check_vfx(logs: Array[BossCollectionLog]) -> void:
 ## and the title is unreachable, with nothing anywhere reporting why.
 ##
 ## Scans every EnemyTypeResource whose enemy_type matches the log's boss_id, so
-## the overworld and _world (Boss Hunt) variants are considered together — the
-## uniques live only on the _world tables by design.
+## every variant of the boss is considered together. That union is deliberate —
+## a kill on ANY variant credits the log — but it says nothing about whether a
+## player can reach the table the item sits on. _check_reachable does that.
 func _check_obtainable(logs: Array[BossCollectionLog]) -> void:
 	for boss_log: BossCollectionLog in logs:
 		var droppable: Dictionary = {}
@@ -259,6 +267,99 @@ func _check_obtainable(logs: Array[BossCollectionLog]) -> void:
 				_f("%s: '%s' is in the log but on none of its %d loot tables — "
 					% [boss_log.boss_name, slug, tables]
 					+ "the log can never reach 100%")
+
+
+## Every logged item must drop from a table a player can actually REACH.
+##
+## Check 6 unions every variant sharing the boss_id. That is correct for
+## crediting and useless for placement: a boss ships as a pair of files and only
+## one of them stands on a map. When fungus_cave was put back on the base kit
+## (308f3cd8) the Sporebloom Charm stayed behind on the sibling file, which
+## nothing spawned — the relic dropped from nowhere, the log capped at 11/12,
+## and this suite stayed green because the union still saw the item on "a"
+## table. Same for Mossgrown and Bloodbrand. Those four orphans are deleted now;
+## this check is what stops the next pair from repeating it.
+##
+## Reachable means placed by a map scene, or named as a Boss Hunt contract's
+## target. Anything else is a file players never fight.
+func _check_reachable(logs: Array[BossCollectionLog]) -> void:
+	var reachable: Dictionary = _reachable_enemy_paths()
+	for boss_log: BossCollectionLog in logs:
+		var variants: PackedStringArray = []
+		for path: String in FileUtils.get_all_file_at(BOSS_PATH, "*.tres"):
+			var res: EnemyTypeResource = ResourceLoader.load(path) as EnemyTypeResource
+			if res != null and res.enemy_type == boss_log.boss_id:
+				variants.append(path)
+		# Only a PAIR can strand a drop on the wrong half. A boss with a single
+		# file has nowhere else for the item to be, and some are spawned purely
+		# from script (Ossuran, off ossuran_arena.gd's boss_slug) so placement
+		# says nothing about them. Check 6 already covers "on no table at all".
+		if variants.size() < 2:
+			continue
+		var droppable: Dictionary = {}
+		var tables: int = 0
+		for path: String in variants:
+			if not reachable.has(path.simplify_path()):
+				continue
+			var enemy: EnemyTypeResource = ResourceLoader.load(path) as EnemyTypeResource
+			if enemy == null:
+				continue
+			tables += 1
+			for drop: LootDrop in enemy.loot:
+				if drop == null or drop.item == null:
+					continue
+				droppable[StringName(str(drop.item.get_meta(&"slug", &"")))] = true
+		_checks += 1
+		if tables == 0:
+			_f("%s: none of the %d files for '%s' is placed on a map or used by "
+				% [boss_log.boss_name, variants.size(), boss_log.boss_id]
+				+ "a Boss Hunt contract — the whole log is unreachable")
+			continue
+		for slug: StringName in boss_log.log_items:
+			_checks += 1
+			if not droppable.has(slug):
+				_f("%s: '%s' drops only from a variant nothing spawns — move it "
+					% [boss_log.boss_name, slug]
+					+ "onto the table players actually fight")
+
+
+## Enemy resource paths a player can meet: placed by a map scene, or set as a
+## BossHuntTarget's enemy_type.
+##
+## Map scenes are read as TEXT rather than instanced — a headless `-s` run has no
+## business building every biome to answer "which files does this reference", and
+## the ext_resource header is the whole answer.
+func _reachable_enemy_paths() -> Dictionary:
+	var out: Dictionary = {}
+	for path: String in FileUtils.get_all_file_at(MAPS_PATH, "*.tscn"):
+		for line: String in FileAccess.get_file_as_string(path).split("
+"):
+			if not line.begins_with("[ext_resource") or not line.contains("/npc/types/"):
+				continue
+			var res_path: String = _attr(line, "path")
+			if res_path.is_empty():
+				var uid_text: String = _attr(line, "uid")
+				var id: int = ResourceUID.text_to_id(uid_text) if not uid_text.is_empty() else -1
+				if id != ResourceUID.INVALID_ID and ResourceUID.has_id(id):
+					res_path = ResourceUID.get_id_path(id)
+			if not res_path.is_empty():
+				out[res_path.simplify_path()] = true
+	for path: String in FileUtils.get_all_file_at(HUNT_TARGETS_PATH, "*.tres"):
+		var target: Resource = ResourceLoader.load(path)
+		if target == null:
+			continue
+		var enemy: EnemyTypeResource = target.get(&"enemy_type") as EnemyTypeResource
+		if enemy != null and not enemy.resource_path.is_empty():
+			out[enemy.resource_path.simplify_path()] = true
+	return out
+
+
+## One quoted attribute out of a .tscn header line, or "" if it carries none.
+func _attr(line: String, name: String) -> String:
+	var key: String = ' %s="' % name
+	if not line.contains(key):
+		return ""
+	return line.get_slice(key, 1).get_slice('"', 0)
 
 
 ## End to end on a live manager instance and real PlayerResources: fill one log,
