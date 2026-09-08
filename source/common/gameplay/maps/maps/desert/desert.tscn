@@ -749,3 +749,12 @@ data = ExtResource("hth_sun_lit_lotus")
 y_sort_enabled = true
 position = Vector2(1960, 1800)
 data = ExtResource("hth_sun_lit_lotus")
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(1560, 2104)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(1960, 1880)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(1880, 2232)

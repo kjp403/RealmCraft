@@ -11,12 +11,17 @@ extends Node
 ##     here as "cells the OLD rule accepted that carry structural paint", broken
 ##     out for the ring around the map edge.
 ##
-##   TOO TIGHT — every square in a map is rejected, so pick_spot falls back to
-##     the home spawn on every cycle. The cart still appears, just always on the
-##     spawn pad, in every biome, forever. Measured here as "cycles that landed
-##     on the anchor". This half is not hypothetical: vetoing Props (a decoration
-##     layer painted over walkable floor in this project) collapsed fungus_cave
-##     and gutterworks to one cell each, and only this number said so.
+##   TOO TIGHT — every square in a map is rejected. This half is not
+##     hypothetical: vetoing Props (a decoration layer painted over walkable
+##     floor in this project) collapsed fungus_cave and gutterworks to one cell
+##     each, and only this number said so.
+##
+## NOTE: placement itself is no longer probed — the cart stands on authored
+## PeddlerSpot markers and tools/verify_peddler_spots.tscn is the gate for those.
+## These rules survive as the CHECK those markers are validated against, which is
+## what this audit now measures. The anchor count below is consequently a report,
+## not a failure: a map reaches its anchor only by carrying no markers at all,
+## and that is the other gate's job to fail on.
 ##
 ## And a third, between them: a square whose CENTRE is on floor but which the
 ## cart's body does not fit on. Measured as "squares the old ring offered that
@@ -172,10 +177,10 @@ func _audit(res_path: String) -> void:
 	])
 	if bad > 0:
 		_fail("%d of %d placements are not on painted floor" % [bad, CYCLES])
-	# deep_shoals has no tile layers at all and is anchor-only BY DESIGN; every
-	# other map has floor, so it must be able to offer a square.
-	if on_anchor == CYCLES and not PeddlerSites.ground_layers(map).is_empty():
-		_fail("every cycle fell back to the anchor — the rules reject this whole map")
+	# Left as a report rather than a failure: with placement authored, landing on
+	# the anchor means the map carries no PeddlerSpot markers, which
+	# tools/verify_peddler_spots.tscn fails on directly and with a better message.
+	# Failing it here too would just be a second, vaguer copy of that gate.
 
 	node.queue_free()
 	await get_tree().process_frame

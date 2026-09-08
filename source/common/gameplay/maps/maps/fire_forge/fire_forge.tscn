@@ -724,3 +724,12 @@ data = ExtResource("hth_rust_spore_cap")
 y_sort_enabled = true
 position = Vector2(856, 1352)
 data = ExtResource("hth_rust_spore_cap")
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(1688, 2360)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(2072, 2200)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(1928, 2504)

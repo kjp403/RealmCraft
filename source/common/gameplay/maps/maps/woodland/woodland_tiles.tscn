@@ -1947,3 +1947,12 @@ shape = SubResource("BeachVoidEast")
 [node name="GapNorthWall" type="CollisionShape2D" parent="BeachVoidBounds"]
 position = Vector2(2820, 1520)
 shape = SubResource("BeachVoidGapNorth")
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(920, 1400)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(872, 520)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(1608, 968)

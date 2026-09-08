@@ -454,3 +454,12 @@ destination_label = "Desert"
 target_instance = ExtResource("e24")
 warper_id = 141
 target_id = 51
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(4440, 5528)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(3800, 5064)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(4264, 5096)

@@ -6,64 +6,45 @@ class_name PeddlerSites
 ## pool is scanned from the biomes folder rather than listed here, so a new biome
 ## joins the rotation by existing.
 ##
-## THE SQUARE is probed live against the map's own collision, because there is no
-## authored "peddler stands here" marker and inventing one for nineteen maps
-## would be nineteen chances to place a cart inside a wall. It is chosen from the
-## squares a player could WALK to from the map's home spawn — a flood fill, not
-## the straight-line ray this used to trust. A ray is one pixel wide: it slips
-## through the diagonal seam where two wall tiles meet at a corner, through gaps
-## no body fits down, and out into the unpainted nothing behind a wall run. Every
-## one of those reads to a player as a cart parked inside the wall — reported in
-## the sewers, measured worst in the_hollow, where a third of all cycles put the
-## cart somewhere no one could reach it (tools/audit_peddler_spots.tscn).
+## THE SQUARE IS AUTHORED. Each map carries [constant SPOT_NODE] markers (Node2D,
+## "PeddlerSpot1".."PeddlerSpot3") and the cycle hash picks one of them. That is
+## the whole placement rule now.
 ##
-## A CLEAR SQUARE IS NOT A FLOOR. The probe's per-cell test used to be "does
-## anything solid overlap this point", and unpainted nothing passes that test
-## perfectly: there is no collider out there to hit. So the walk could leave the
-## painted map entirely and set the cart down in the black — 100px off the island
-## in deep_shoals, and in the unpainted top-left corner of fungus_cave on 62 of
-## 120 cycles (measured, not guessed). Every cell now has to be PAINTED as well
-## as clear (see [method _has_paint]), which is the only test that tells floor
-## from void on a tile map.
+## WHY IT IS AUTHORED, because this used to be inferred and the history is the
+## argument. The square was probed live against the map's own collision, and each
+## rule below was added after players found a cart standing in a wall:
 ##
-## A map with no tile layers at all (deep_shoals is one ground Sprite2D) has
-## nothing to validate against, so it gets no random square: it goes straight to
-## [method failsafe_anchor], and so does any cycle whose walk turns up nothing.
+##   * a straight-line ray -> a flood fill, because a ray is one pixel wide and
+##     slips through the diagonal seam where two wall tiles meet at a corner;
+##   * "nothing solid here" -> "and PAINTED", because unpainted nothing passes a
+##     collider test perfectly — the walk left the map and set the cart down in
+##     the black, 100px off the island in deep_shoals, and in the unpainted corner
+##     of fungus_cave on 62 of 120 cycles;
+##   * "any paint" -> "paint from a layer that paints FLOOR, vetoed by a wall
+##     tile", because a wall is painted too and its tiles routinely overhang its
+##     collider — 1397 such cells in sunken_tombs, 1156 in sunspire_terraces;
+##   * a point sample -> a swept body, because nine sample points have gaps a
+##     wall corner fits between, and the cart's sprite is four times its collider;
+##   * plus elbow room, because a cart wedged in a one-tile nook reads as being in
+##     the wall even when you can prove a player can reach it.
 ##
-## PAINT IS NOT FLOOR EITHER. The paint test above was "does ANY layer have a
-## tile here", and a wall is painted. Wherever a wall's tiles reach further than
-## its collider — an overhanging top row, a decorative run past the end of a
-## block — the square out there is clear (nothing to hit) AND painted (the Walls
-## layer), both halves true and both halves wrong. Measured, the old walk
-## accepted 1397 such cells in sunken_tombs, 1156 in sunspire_terraces, 466 in
-## desert and 260 in Forest. Only a layer that PAINTS FLOOR votes for floor now,
-## and a wall / roof / cliff tile over the same square vetoes it outright — the
-## veto being the half that matters at a boundary, where the ground layer usually
-## runs on underneath the wall ring (see [method _has_paint]).
+## Every one of those was a correct fix, and each found a new way for tile data to
+## disagree with "a player can get here and it looks right". That question is not
+## answerable from tile data, so it is now answered once, by a person, and CHECKED
+## at build time by tools/verify_peddler_spots.tscn instead of re-decided on every
+## 30-minute cycle in nineteen maps. A bad spot is now unshippable rather than
+## unpredictable, which is the actual difference.
 ##
-## AND THE CART IS NOT A POINT. Clearance used to be the centre plus eight
-## samples on a 20px circle, and nine samples is nine samples: a wall corner sits
-## between two of them and the square still reads clear. The cart's centre is
-## then genuinely on floor while its body is inside the wall — and its sprite is
-## four times the size of its 12x8 collision box, so that reads to a player as a
-## cart in the wall just as much as being out of bounds does. The probe now
-## sweeps the real body grown by [constant CLEARANCE] (see
-## [method _is_standable]); that alone drops 191 of the_hollow's 2262 squares,
-## 110 of Forest's and 44 of fungus_cave's.
+## The geometry rules survive as the CHECK ([method is_valid_spot]) rather than
+## the chooser, and [method walkable_cells] survives for the tools that propose
+## spots and audit them.
 ##
-## SOME MAPS ARE NOT SITES AT ALL. A boss arena is one sealed pad built around
-## one fight — nobody passes through it and dying in it ejects you — so it is
-## barred from the pool by name ([constant EXCLUDED_BIOMES]) rather than left to
-## the geometry tests to make unattractive.
+## SOME MAPS ARE NOT SITES AT ALL. A boss arena is one sealed pad built around one
+## fight — nobody passes through it and dying in it ejects you — so it is barred
+## from the pool by name ([constant EXCLUDED_BIOMES]).
 ##
-## Both geometry rules are gated by tools/audit_peddler_ground_rule.tscn, which
-## runs the old rules beside the live ones over every biome and fails EITHER way:
-## a wall-painted cell still in the pool, or a map so over-rejected that every
-## cycle falls back to the anchor.
-##
-## Probing needs the map's live physics space, so the square can only be chosen
-## once the instance is actually loaded. The BIOME choice does not, which is why
-## the two are separate calls.
+## A map with no markers falls back to [method failsafe_anchor] every cycle. The
+## gate exists so that never silently becomes the normal case.
 
 const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_collection/biomes/"
 
@@ -104,9 +85,14 @@ const BLOCKING_LAYERS: PackedStringArray = [
 	"mountain", "tree",
 ]
 
-## How far from the home spawn the cart may set up.
-const MIN_RADIUS: float = 90.0
-const MAX_RADIUS: float = 260.0
+## Name prefix of the authored marker nodes. Any Node2D under the map whose name
+## starts with this is a place the cart may stand.
+const SPOT_NODE: String = "PeddlerSpot"
+## How far [method walkable_cells] may wander from its origin. Only tools use the
+## fill now, and this is the old MAX_RADIUS x FILL_DETOUR product it used to work
+## out to, kept so the audits measure the same area they always did. Callers that
+## want a wider sweep pass their own.
+const FILL_BUDGET: float = 780.0
 ## The cart's own body, from the shared character scene the Peddler is built out
 ## of (character.tscn's CollisionShape2D): a 12x8 box sitting 3px above the node
 ## origin. The probe uses the REAL footprint, because "this pixel is clear" and
@@ -121,11 +107,6 @@ const CLEARANCE: float = 16.0
 ## in every direction and the fill cannot leak through a corner the way a ray
 ## can. Also the lattice the cart ends up standing on.
 const FILL_STEP: float = 16.0
-## How far the fill may wander past [constant MAX_RADIUS] to reach a square, as a
-## multiple of it. Any square the cart may use is at most MAX_RADIUS from the
-## spawn; a walk to one that needs a longer detour than this is not worth the
-## point queries it costs to prove.
-const FILL_DETOUR: float = 3.0
 ## Hard stop on fill size, so a map with an unwalled edge cannot cost a world
 ## server an unbounded loop.
 const FILL_CELL_CAP: int = 20000
@@ -190,24 +171,40 @@ static func rotation_for_cycle(cycle_index: int) -> Array[StringName]:
 ## is worse placement, not a broken window.
 static func pick_spot(map: Map, cycle_index: int) -> Dictionary:
 	var anchor: Vector2 = failsafe_anchor(map)
-	# No FLOOR PAINT means no way to tell floor from void, and a walk with nothing
-	# to stop it is how the cart ended up off the island. That covers a map with
-	# no tile layers at all (deep_shoals is one ground Sprite2D) and, now, one
-	# whose layers are all walls and props — either way there is nothing here to
-	# vouch for a square, so it gets the anchor every cycle.
-	if ground_layers(map).is_empty():
+	var spots: PackedVector2Array = authored_spots(map)
+	if spots.is_empty():
 		return {"peddler": anchor, "vault": _vault_spot(map, {}, anchor)}
-	var home: Vector2 = map.get_spawn_position(0)
-	var walkable: Dictionary = walkable_cells(map, home)
-	var spot: Vector2 = _choose(map, walkable, home, cycle_index, anchor)
-	# Last gate before a cart exists in the world. _choose only offers cells that
-	# already passed, so this catching anything means a rule above it stopped
-	# agreeing with itself — cheap insurance on the one code path whose failures
-	# are visible to every player in the biome.
-	if spot != anchor and not is_valid_spot(map, spot):
-		push_warning("PeddlerSites: rejected an invalid square at %s; using the anchor." % spot)
+	var spot: Vector2 = spots[_cycle_hash(cycle_index) % spots.size()]
+	# Last gate before a cart exists in the world. An authored spot was checked by
+	# tools/verify_peddler_spots.tscn when it shipped, so this catching anything
+	# means the MAP moved under it — a wall extended over a marker, a prop dropped
+	# on one. Cheap insurance on the one code path whose failures every player in
+	# the biome can see.
+	if not is_valid_spot(map, spot):
+		push_warning(
+			"PeddlerSites: authored spot %s is no longer valid; using the anchor." % spot
+		)
 		spot = anchor
-	return {"peddler": spot, "vault": _vault_spot(map, walkable, spot)}
+	return {"peddler": spot, "vault": _vault_spot(map, {}, spot)}
+
+
+## The squares an author marked in [param map], ordered by marker NAME.
+##
+## Ordered because the cycle hash indexes into this array, so two world servers
+## hosting the same biome have to agree on it. Sorted on String, not StringName:
+## comparing StringNames sorts by pointer, which is stable within one process and
+## different in the next — the exact way an "every server agrees" list quietly
+## stops agreeing.
+static func authored_spots(map: Map) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	if map == null:
+		return out
+	var markers: Array[Node] = map.find_children("%s*" % SPOT_NODE, "Node2D", true, false)
+	markers.sort_custom(func(a: Node, b: Node) -> bool:
+		return String(a.name) < String(b.name))
+	for marker: Node in markers:
+		out.append((marker as Node2D).global_position)
+	return out
 
 
 ## Where the cart goes when the probe cannot place it: the map's own
@@ -226,14 +223,27 @@ static func failsafe_anchor(map: Map) -> Vector2:
 	return map.get_spawn_position(0)
 
 
-## Everything a square must be before a cart may stand on it: painted floor, and
-## nothing solid on it or within [constant CLEARANCE] of it. Public so a tool can
-## ask the question in the same words the placement does.
+## Everything a square must be before a cart may stand on it: nothing solid on it
+## or within [constant CLEARANCE] of it, and — on a map that HAS floor paint —
+## painted floor under it. Public so a tool can ask the question in the same
+## words the placement does.
+##
+## The paint half is conditional for the same reason it is in
+## [method walkable_cells]: a map built without tile layers has no paint for any
+## square, so an unconditional test answers false for every point on it and says
+## nothing. deep_shoals is that map, and it is not a hole in the check — its land
+## is bounded by REAL colliders (water, prop footprints and a sealed outer rim,
+## see beach_area_colliders.gd), so "clear" there already means "on the island"
+## in a way it does not on a tile map.
 static func is_valid_spot(map: Map, point: Vector2) -> bool:
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
 		return false
-	return _has_paint(_tile_layers(map), point) and _is_standable(space, point)
+	if not _is_standable(space, point):
+		return false
+	if ground_layers(map).is_empty():
+		return true
+	return _has_paint(_tile_layers(map), point)
 
 
 ## True when [param biome] is barred from the rotation — see
@@ -241,50 +251,6 @@ static func is_valid_spot(map: Map, point: Vector2) -> bool:
 ## tell "this map places the cart badly" from "the cart never goes here".
 static func is_excluded(biome: StringName) -> bool:
 	return EXCLUDED_BIOMES.has(String(biome).to_lower())
-
-
-## Pick this cycle's square out of [param walkable]: far enough from the spawn to
-## be somewhere to go, near enough to be found, with room around it.
-static func _choose(
-	map: Map, walkable: Dictionary, home: Vector2, cycle_index: int, anchor: Vector2
-) -> Vector2:
-	var space: PhysicsDirectSpaceState2D = _space(map)
-	if space == null:
-		return anchor
-	var candidates: Array[Vector2i] = []
-	for cell: Vector2i in walkable:
-		var point: Vector2 = _cell_center(cell)
-		var away: float = home.distance_to(point)
-		if away < MIN_RADIUS or away > MAX_RADIUS:
-			continue
-		if not _is_standable(space, point):
-			continue
-		# Open on all eight sides, in FILL_STEP cells: a 48px box of floor the
-		# player can actually walk around the cart in. Clearance alone still
-		# accepts a one-tile dead-end nook, and a cart wedged in one reads as
-		# being in the wall even though the probe can prove you can reach it.
-		if not _has_elbow_room(walkable, cell):
-			continue
-		candidates.append(cell)
-	if candidates.is_empty():
-		return anchor
-	# BY COORDINATE, not in whatever order the fill happened to reach cells in.
-	# The cycle hash indexes into this array, so two world servers hosting the
-	# same biome have to agree on it — the same promise the biome pool's sort
-	# keeps, and the same way to break it.
-	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return a.x < b.x if a.y == b.y else a.y < b.y
-	)
-	return _cell_center(candidates[_cycle_hash(cycle_index) % candidates.size()])
-
-
-## True when every cell touching [param cell] is walkable too.
-static func _has_elbow_room(walkable: Dictionary, cell: Vector2i) -> bool:
-	for dx: int in [-1, 0, 1]:
-		for dy: int in [-1, 0, 1]:
-			if not walkable.has(cell + Vector2i(dx, dy)):
-				return false
-	return true
 
 
 ## Every square a player could WALK to from [param origin], as a set of cell
@@ -297,7 +263,7 @@ static func _has_elbow_room(walkable: Dictionary, cell: Vector2i) -> bool:
 ## touches an edge, calling the whole lot reachable. And to a detour budget
 ## around the origin. Together they keep the walk to a few thousand point
 ## queries, once per 30-minute window.
-static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
+static func walkable_cells(map: Map, origin: Vector2, budget: float = FILL_BUDGET) -> Dictionary:
 	var cells: Dictionary = {}
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
@@ -314,7 +280,6 @@ static func walkable_cells(map: Map, origin: Vector2) -> Dictionary:
 	# Either way, fall back to the detour budget alone rather than to a fill that
 	# cannot leave its first cell.
 	var bounded: bool = bounds.has_area() and bounds.has_point(origin)
-	var budget: float = MAX_RADIUS * FILL_DETOUR
 	var start: Vector2i = _cell_of(origin)
 	cells[start] = true
 	var queue: Array[Vector2i] = [start]
