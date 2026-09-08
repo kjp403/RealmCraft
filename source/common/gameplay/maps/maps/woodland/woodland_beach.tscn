@@ -157,3 +157,35 @@ data = ExtResource("h2")
 position = Vector2(690, 426)
 data = ExtResource("h3")
 
+[node name="ShrimpHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(66, 298)
+data = ExtResource("h0")
+
+[node name="ShrimpHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(154, 298)
+data = ExtResource("h0")
+
+[node name="HerringHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(238, 286)
+data = ExtResource("h1")
+
+[node name="HerringHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(322, 314)
+data = ExtResource("h1")
+
+[node name="TroutHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(430, 362)
+data = ExtResource("h2")
+
+[node name="TroutHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(498, 426)
+data = ExtResource("h2")
+
+[node name="TunaHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(648, 410)
+data = ExtResource("h3")
+
+[node name="TunaHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(732, 410)
+data = ExtResource("h3")
+
