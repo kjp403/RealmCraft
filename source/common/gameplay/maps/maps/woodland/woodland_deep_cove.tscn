@@ -58,6 +58,38 @@ data = ExtResource("h2")
 position = Vector2(608, 282)
 data = ExtResource("h3")
 
+[node name="LionfishHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(64, 320)
+data = ExtResource("h0")
+
+[node name="LionfishHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(148, 272)
+data = ExtResource("h0")
+
+[node name="CrabHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(230, 173)
+data = ExtResource("h1")
+
+[node name="CrabHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(274, 205)
+data = ExtResource("h1")
+
+[node name="ParrotHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(428, 193)
+data = ExtResource("h2")
+
+[node name="ParrotHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(516, 233)
+data = ExtResource("h2")
+
+[node name="AnglerHole2" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(638, 325)
+data = ExtResource("h3")
+
+[node name="AnglerHole3" parent="MineableNodes" instance=ExtResource("5_node")]
+position = Vector2(682, 353)
+data = ExtResource("h3")
+
 [node name="Scenery" type="Node2D" parent="."]
 y_sort_enabled = true
 
