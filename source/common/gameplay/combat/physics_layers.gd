@@ -4,15 +4,21 @@ class_name PhysicsLayers
 ## names; each BIT below is (1 << (n-1)) for use in collision_layer / collision_mask. CODE
 ## uses these consts; .tscn/.tres files use the raw int (scenes can't reference consts) — keep
 ## them in sync with docs/combat_layers.md. Change a role's layer in ONE place here.
+##
+## Every const below spells out BOTH numbers ("layer N, raw M") because a scene author
+## writing the layer NUMBER where Godot wants the BIT lands one role early and nothing
+## complains: the collectibles shipped `collision_layer = 4` meaning "layer 4, pickup" and
+## sat on layer 3 (hurtbox) instead, which put every dropped item, coin and chest on the
+## layer combat hitboxes target — so arrows and bolts died on the loot they flew over.
 
-const CHARACTER_BODY: int = 1 << 0  ## layer 1 — player/NPC navigation bodies
-const WORLD: int = 1 << 1           ## layer 2 — solid environment (walls, barriers)
-const HURTBOX: int = 1 << 2         ## layer 3 — character damage-receiving areas (attack target)
-const PICKUP: int = 1 << 3          ## layer 4 — coins / collectibles / doors (already in use here)
-const FLAG: int = 1 << 4            ## layer 5 — territory objectives (attack target)
-const HARVESTABLE: int = 1 << 5     ## layer 6 — mineable nodes (pick / sickle target)
-const INTERACTABLE: int = 1 << 6    ## layer 7 — warpers / masters / stations
-## layer 8 — decorative-but-collidable tiles (trees, crates, fences): blocks
+const CHARACTER_BODY: int = 1 << 0  ## layer 1, raw 1 — player/NPC navigation bodies
+const WORLD: int = 1 << 1           ## layer 2, raw 2 — solid environment (walls, barriers)
+const HURTBOX: int = 1 << 2         ## layer 3, raw 4 — character damage-receiving areas (attack target)
+const PICKUP: int = 1 << 3          ## layer 4, raw 8 — coins / ground items / loot chests
+const FLAG: int = 1 << 4            ## layer 5, raw 16 — territory objectives (attack target)
+const HARVESTABLE: int = 1 << 5     ## layer 6, raw 32 — mineable nodes (pick / sickle target)
+const INTERACTABLE: int = 1 << 6    ## layer 7, raw 64 — warpers / masters / stations
+## layer 8, raw 128 — decorative-but-collidable tiles (trees, crates, fences): blocks
 ## movement/spawns/blink same as WORLD, but deliberately excluded from
 ## projectile wall-rays (see arrow.gd) so scenery a shot merely grazes doesn't
 ## eat it the way an actual wall should.
