@@ -1966,6 +1966,15 @@ func die(killer: Character) -> void:
 	died.emit(killer)
 
 
+## Corpse test, answered from state BOTH peers have. is_dead alone is server-only
+## (see Character.is_corpse), and enemy_state is replicated — so a client's own
+## projectile copy stops on exactly the bodies the server's does. REVIVING counts:
+## a mob that is down but not out is damage-immune (is_dead stays latched through
+## ReviveOnceBehavior), so stopping a shot on it would be the same dead end.
+func is_corpse() -> bool:
+	return is_dead or enemy_state == EnemyState.DEAD or enemy_state == EnemyState.REVIVING
+
+
 ## Style wards (world bosses): Physical Ward wants sword/hammer/bow, Arcane Ward
 ## wants wand/book. Wrong category is reduced, not zero.
 func incoming_damage_factor(
