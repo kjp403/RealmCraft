@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gem_cut_emerald.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Emerald"
+item_icon = ExtResource("1_icon")
+description = "A cut emerald, ready to be set into silver or gold jewellery."
+holdable = false
+can_trade = true
+vendor_value = 75
+stack_limit = 10
+tags = PackedStringArray("gem")
+metadata/slug = &"emerald"
+metadata/id = 702

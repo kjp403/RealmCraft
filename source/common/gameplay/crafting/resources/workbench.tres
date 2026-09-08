@@ -85,6 +85,15 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_nightglass.tres" id="130_valf4"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/cloth/fiber_astral.tres" id="131_4qbc1"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="gem_uncut_sapphire"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/sapphire.tres" id="gem_sapphire"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_emerald.tres" id="gem_uncut_emerald"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/emerald.tres" id="gem_emerald"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_ruby.tres" id="gem_uncut_ruby"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/ruby.tres" id="gem_ruby"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_diamond.tres" id="gem_uncut_diamond"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/diamond.tres" id="gem_diamond"]
+
 [sub_resource type="Resource" id="I_cure_f"]
 script = ExtResource("3_ingred")
 item = ExtResource("8_hi_forest")
@@ -939,8 +948,60 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_cqikb")])
 required_level = 45
 xp_reward = 540
 
+[sub_resource type="Resource" id="I_cut_sapphire"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_uncut_sapphire")
+amount = 1
+
+[sub_resource type="Resource" id="R_cut_sapphire"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("gem_sapphire")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_sapphire")])
+required_level = 1
+xp_reward = 18
+
+[sub_resource type="Resource" id="I_cut_emerald"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_uncut_emerald")
+amount = 1
+
+[sub_resource type="Resource" id="R_cut_emerald"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("gem_emerald")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_emerald")])
+required_level = 27
+xp_reward = 30
+
+[sub_resource type="Resource" id="I_cut_ruby"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_uncut_ruby")
+amount = 1
+
+[sub_resource type="Resource" id="R_cut_ruby"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("gem_ruby")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_ruby")])
+required_level = 43
+xp_reward = 46
+
+[sub_resource type="Resource" id="I_cut_diamond"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_uncut_diamond")
+amount = 1
+
+[sub_resource type="Resource" id="R_cut_diamond"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("gem_diamond")
+output_amount = 1
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_diamond")])
+required_level = 60
+xp_reward = 70
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Workbench"
 profession = &"outfitting"
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes"), SubResource("Resource_fa7h2"), SubResource("Resource_81uhs"), SubResource("Resource_435ce"), SubResource("Resource_5m8xc"), SubResource("Resource_sk8h8"), SubResource("Resource_wiyuw"), SubResource("Resource_gm0o0"), SubResource("Resource_dbpv4"), SubResource("Resource_0v0pc"), SubResource("Resource_nseyn"), SubResource("Resource_l767t"), SubResource("Resource_73lkt"), SubResource("Resource_ylwmm"), SubResource("Resource_6uu6h"), SubResource("Resource_t3416"), SubResource("Resource_ydyk0"), SubResource("Resource_t1qkh"), SubResource("Resource_vi1x3")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_cut_sapphire"), SubResource("R_cut_emerald"), SubResource("R_cut_ruby"), SubResource("R_cut_diamond"), SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes"), SubResource("Resource_fa7h2"), SubResource("Resource_81uhs"), SubResource("Resource_435ce"), SubResource("Resource_5m8xc"), SubResource("Resource_sk8h8"), SubResource("Resource_wiyuw"), SubResource("Resource_gm0o0"), SubResource("Resource_dbpv4"), SubResource("Resource_0v0pc"), SubResource("Resource_nseyn"), SubResource("Resource_l767t"), SubResource("Resource_73lkt"), SubResource("Resource_ylwmm"), SubResource("Resource_6uu6h"), SubResource("Resource_t3416"), SubResource("Resource_ydyk0"), SubResource("Resource_t1qkh"), SubResource("Resource_vi1x3")])

@@ -271,11 +271,50 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 
 	var caught: Item = data.ore
 	var xp_table: Dictionary[StringName, int] = data.job_xp
-	if data.secondary_ore != null and data.secondary_chance > 0.0 \
-			and randf() < data.secondary_chance:
-		caught = data.secondary_ore
-		if not data.secondary_job_xp.is_empty():
-			xp_table = data.secondary_job_xp
+	if data.shared_pool:
+		# The meteor pays in gems, and WHICH gem is read off this miner's own
+		# level rather than off the rock — the same vein hands a novice
+		# sapphires and a maxed miner diamonds. A null here (renamed slug)
+		# falls through to data.ore rather than eating the swing.
+		var rolled: Item = MeteorVeinPool.roll_gem(job_level)
+		if rolled != null:
+			caught = rolled
+			amount = data.yield_amount
+	if data.secondary_chance > 0.0 and randf() < data.secondary_chance:
+		# The pool wins over the single item when authored: the chance roll
+		# has already decided that a secondary happens, so this only picks
+		# WHICH one. Weights are relative, not independent probabilities.
+		var picked: Item = null
+		# -1 means "the pool did not set one", which keeps the existing
+		# single-item path on `amount` -- a fishing hole's secondary still
+		# carries the bonus-yield roll it always did. Only a POOL entry, which
+		# authors its own min/max, overrides that.
+		var picked_amount: int = -1
+		if not data.secondary_pool.is_empty():
+			var total: float = 0.0
+			for drop: LootDrop in data.secondary_pool:
+				if drop != null and drop.item != null:
+					total += maxf(drop.chance, 0.0)
+			if total > 0.0:
+				var roll: float = randf() * total
+				for drop: LootDrop in data.secondary_pool:
+					if drop == null or drop.item == null:
+						continue
+					roll -= maxf(drop.chance, 0.0)
+					if roll <= 0.0:
+						picked = drop.item
+						picked_amount = randi_range(
+							maxi(drop.min_amount, 1), maxi(drop.max_amount, 1)
+						)
+						break
+		elif data.secondary_ore != null:
+			picked = data.secondary_ore
+		if picked != null:
+			caught = picked
+			if picked_amount > 0:
+				amount = picked_amount
+			if not data.secondary_job_xp.is_empty():
+				xp_table = data.secondary_job_xp
 
 	# Perk-gated byproduct (trees -> Headless Arrows). Resolved BEFORE the bag
 	# check so both items are validated together — a bag that can take the log
@@ -603,14 +642,23 @@ func _ledger_key(instance: ServerInstance) -> String:
 ## client shows and the ceiling trickle regen tops out at. Regen is applied on
 ## read inside the ledger, so callers never have to sequence it themselves.
 func _pool_for(resource: PlayerResource, key: String) -> int:
+	if data != null and data.shared_pool:
+		return MeteorVeinPool.pool_size()
 	return GatherNodeLedger.pool(resource, key, data)
 
 
 func _charges_for(resource: PlayerResource, key: String) -> int:
+	# A shared-pool node ignores the per-player ledger completely: what is
+	# left is what everyone else has not taken yet.
+	if data != null and data.shared_pool:
+		return MeteorVeinPool.remaining()
 	return GatherNodeLedger.charges(resource, key, data)
 
 
 func _consume_charge(resource: PlayerResource, key: String) -> void:
+	if data != null and data.shared_pool:
+		MeteorVeinPool.take()
+		return
 	GatherNodeLedger.consume(resource, key, data)
 	GatherNodeLedger.trim(resource)
 

@@ -10,6 +10,8 @@
 [ext_resource type="Resource" uid="uid://cmithriloremat1" path="res://source/common/gameplay/items/materials/metals/mithril_ore.tres" id="item_4"]
 [ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="item_5"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="uncut_0"]
+
 [sub_resource type="Resource" id="Drop_0"]
 script = ExtResource("1_loot")
 item = ExtResource("item_0")
@@ -52,6 +54,13 @@ min_amount = 2
 max_amount = 4
 chance = 0.45
 
+[sub_resource type="Resource" id="UncutDrop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("uncut_0")
+min_amount = 1
+max_amount = 1
+chance = 0.1
+
 [resource]
 script = ExtResource("2_chest")
 display_name = "Wood Chest (Silver, Medium)"
@@ -61,4 +70,4 @@ rolls_min = 1
 rolls_max = 2
 gold_min = 1000
 gold_max = 2500
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5")])
+loot = Array[ExtResource("1_loot")]([SubResource("UncutDrop_0"), SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5")])

@@ -15,6 +15,7 @@
 [ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/critter_boar.tres" id="e12"]
 [ext_resource type="PackedScene" uid="uid://dqo57ux3v3lkq" path="res://source/common/gameplay/maps/components/mineable_node.tscn" id="e13"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/wispwood_tree.tres" id="e14"]
+[ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/starfall_meteor.tres" id="e_meteor"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/glimmer_birch_tree.tres" id="e15"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/nebula_palm_tree.tres" id="e16"]
 [ext_resource type="Resource" path="res://source/common/gameplay/maps/components/mineable_nodes/supernova_rosewood_tree.tres" id="e17"]
@@ -251,6 +252,10 @@ node_to_id = {}
 
 [node name="GatherNodes" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="StarfallMeteor" parent="GatherNodes" instance=ExtResource("e13")]
+position = Vector2(584, 536)
+data = ExtResource("e_meteor")
 
 [node name="Wispwood1" parent="GatherNodes" instance=ExtResource("e13")]
 position = Vector2(584.0, 744.0)

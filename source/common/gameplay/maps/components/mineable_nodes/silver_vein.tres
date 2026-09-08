@@ -4,9 +4,35 @@
 [ext_resource type="Resource" uid="uid://ljjy35qnjuxf" path="res://source/common/gameplay/items/materials/metals/silver_ore.tres" id="2_ore"]
 [ext_resource type="Texture2D" uid="uid://bhpljwhf8i5cl" path="res://assets/sprites/environment/props/rocks.png" id="3_tex"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="gem_loot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="gem_0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_emerald.tres" id="gem_1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_ruby.tres" id="gem_2"]
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_silver"]
 atlas = ExtResource("3_tex")
 region = Rect2(97.57414, 18.388435, 30.283089, 44.766308)
+
+[sub_resource type="Resource" id="GemDrop_0"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_0")
+min_amount = 1
+max_amount = 1
+chance = 0.55
+
+[sub_resource type="Resource" id="GemDrop_1"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_1")
+min_amount = 1
+max_amount = 1
+chance = 0.3
+
+[sub_resource type="Resource" id="GemDrop_2"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_2")
+min_amount = 1
+max_amount = 1
+chance = 0.15
 
 [resource]
 script = ExtResource("1_script")
@@ -21,3 +47,9 @@ max_charges = 50
 charge_regen_seconds = 18.0
 depleted_recharge_seconds = 88.0
 texture = SubResource("AtlasTexture_silver")
+secondary_chance = 0.042
+secondary_pool = Array[ExtResource("gem_loot")]([
+	SubResource("GemDrop_0"),
+	SubResource("GemDrop_1"),
+	SubResource("GemDrop_2")
+])

@@ -65,9 +65,9 @@ const POOLS: Dictionary[StringName, Dictionary] = {
 		"support": [&"crab", &"turtle"],
 	},
 	&"outfitting": {
-		"low": [&"cloth_forest", &"leather_forest"],
-		"mid": [&"cloth_cave", &"leather_cave", &"cloth_bandit"],
-		"high": [&"leather_bandit", &"cloth_sewer", &"leather_sewer"],
+		"low": [&"cloth_forest", &"leather_forest", &"uncut_sapphire"],
+		"mid": [&"cloth_cave", &"leather_cave", &"cloth_bandit", &"uncut_emerald"],
+		"high": [&"leather_bandit", &"cloth_sewer", &"leather_sewer", &"uncut_ruby", &"uncut_diamond"],
 		"support": [&"hide_forest", &"hide_cave"],
 	},
 	&"fletching": {

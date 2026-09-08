@@ -4,6 +4,9 @@
 [ext_resource type="Resource" uid="uid://ctinoremat001" path="res://source/common/gameplay/items/materials/metals/tin_ore.tres" id="2_ore"]
 [ext_resource type="Texture2D" uid="uid://bhpljwhf8i5cl" path="res://assets/sprites/environment/props/rocks.png" id="3_tex"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="gem_loot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="gem_0"]
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_tin"]
 atlas = ExtResource("3_tex")
 region = Rect2(96, 32, 32, 32)
@@ -11,6 +14,13 @@ region = Rect2(96, 32, 32, 32)
 [sub_resource type="AtlasTexture" id="AtlasTexture_tin_empty"]
 atlas = ExtResource("3_tex")
 region = Rect2(64, 96, 32, 32)
+
+[sub_resource type="Resource" id="GemDrop_0"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_0")
+min_amount = 1
+max_amount = 1
+chance = 1.0
 
 [resource]
 script = ExtResource("1_script")
@@ -29,3 +39,7 @@ depleted_recharge_seconds = 48.0
 player_cooldown_seconds = 5.0
 texture = SubResource("AtlasTexture_tin")
 depleted_texture = SubResource("AtlasTexture_tin_empty")
+secondary_chance = 0.03
+secondary_pool = Array[ExtResource("gem_loot")]([
+	SubResource("GemDrop_0")
+])

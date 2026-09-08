@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LootChestItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/gem_rough_geode.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/loot_chest_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+chest_slug = &"rough_geode"
+item_name = &"Rough Geode"
+item_icon = ExtResource("1_icon")
+description = "A hollow stone with something rattling inside. Open it for a handful of uncut gems."
+can_trade = true
+holdable = false
+vendor_value = 90
+metadata/slug = &"rough_geode"
+metadata/id = 703
