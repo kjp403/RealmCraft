@@ -99,8 +99,20 @@ func data_request_handler(
 
 	# Pushed as well as returned: the push is what keeps a SECOND open window
 	# (or the loot feed) in step, and it is the same key a single open uses.
+	#
+	# FLAGGED AS AN ECHO, and it must stay flagged. This handler is the only
+	# chest.opened producer that ALSO answers a request, so the requesting client
+	# receives this exact payload twice — once here, once as the response to its
+	# own chest.open_batch. [UniversalChestManager] absorbed both and counted the
+	# whole run double: one chest read as "Opened 2", a single ring showed x2, and
+	# the gold line reported twice what landed in the pouch — while the staging
+	# area (the truth) held one, so Bank All moved one and looked broken.
+	# Consumers that only ever see the push (the loot feed, the toast) ignore the
+	# flag and are unaffected.
 	if peer_id > 0 and WorldServer.curr != null:
-		WorldServer.curr.data_push.rpc_id(peer_id, &"chest.opened", payload)
+		var echo: Dictionary = payload.duplicate()
+		echo["echo"] = true
+		WorldServer.curr.data_push.rpc_id(peer_id, &"chest.opened", echo)
 	return payload
 
 

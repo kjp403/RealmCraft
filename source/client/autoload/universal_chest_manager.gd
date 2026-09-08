@@ -110,6 +110,15 @@ func free_slots() -> int:
 	return _free_slots
 
 
+## The chest item the CURRENT run opens, or 0 when the run has no chest behind it
+## (a world chest, a daily claim, a Hunt Chest, crash recovery). This is what the
+## reward window's Open 1 / 5 / All buttons act on: they follow the run rather
+## than whoever happened to open the window, so a pushed reward can never leave
+## them pointed at the last chest the player opened out of their bag.
+func target_chest() -> int:
+	return _chest_id
+
+
 # --- Opening -----------------------------------------------------------------
 
 ## Open [param count] of chest [param item_id] ([constant ALL] for the whole
@@ -403,7 +412,16 @@ func _apply_claim_payload(payload: Dictionary) -> void:
 # --- internals ---------------------------------------------------------------
 
 ## Server push for an open this client did not drive.
+##
+## An "echo" is the one case where it DID drive it: chest.open_batch pushes its
+## payload as well as answering the request, so the same run would arrive here
+## and at [method _on_batch_response] and be absorbed twice — doubling every
+## count in the window (one chest reading "Opened 2", one ring showing x2) while
+## the server staged the real amount, so Bank All moved half of what was on
+## screen. The request response is the authoritative copy; the echo is dropped.
 func _on_chest_opened(payload: Dictionary) -> void:
+	if bool(payload.get("echo", false)):
+		return
 	present(payload)
 
 

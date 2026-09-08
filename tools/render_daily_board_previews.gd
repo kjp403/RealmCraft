@@ -188,9 +188,12 @@ func _render_reward_window() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	window.set_target_chest(_id(&"outfit_miner_hat"), 43)
-
 	UniversalChestManager.batch_started.emit("Greater Skilling Chest", UniversalChestManager.ALL)
+	# AFTER batch_started, not before: the window re-aims the batch row off the
+	# manager on every run, and no real run is driving this shot, so a target set
+	# ahead of the signal would be cleared to 0 and the Open row would vanish from
+	# the preview.
+	window.set_target_chest(_id(&"outfit_miner_hat"))
 	await get_tree().process_frame
 	UniversalChestManager.batch_progress.emit(31, 12, [])
 
