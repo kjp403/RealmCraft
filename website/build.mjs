@@ -34,7 +34,7 @@ const CSS_V = assetV("styles.css");
 const ITCH = "https://kjp403.itch.io/arkenelle";
 const PLAY_WEB = "https://play.arkenelle.com/";
 const PLAY_DESKTOP = "https://play.arkenelle.com/desktop/Arkenelle-windows.zip";
-const DISCORD = "https://discord.gg/kSs3hxByV";
+const DISCORD = "https://discord.gg/kejpgUMPGt";
 const ITCH_APP = "https://itch.io/app";
 const STRIPE = {
   sapphireVip: "https://buy.stripe.com/28E00k1aF5w81uC8Ho6J207",
