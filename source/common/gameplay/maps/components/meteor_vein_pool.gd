@@ -34,12 +34,16 @@ const PERIOD_S: int = 3 * 60 * 60
 
 ## Yields the whole server shares per window.
 ##
-## Sized so the CURRENT population can actually empty it. A pool nobody can
-## finish is not a community event, it is an uncapped gem faucet — and it also
-## removes the reason to turn up early, which is the thing that makes the vein
-## worth walking to. It self-balances upward: more miners just means a smaller
-## share each, no retune.
-const POOL: int = 150
+## Sized off the actual mining rate, not a guess. At 18 extraction HP and the
+## node's 5s post-yield cooldown a maxed miner pulls ~660 gems an hour, so a
+## 2,000 pool is about one full window of solo work — emptiable, but only just.
+## A group clears it in well under an hour, which is the race that makes
+## turning up early worth something.
+##
+## The first pass at 150 was far too mean: split three ways it was a couple of
+## hundred gems, which is nothing against the ~52,000 a Crafting 99 wants. This
+## has to be a real supply line for skillers, not a garnish.
+const POOL: int = 2000
 
 ## Gem ladder, rarest last. Sapphire is the floor every miner can pull.
 const LADDER: Array[StringName] = [
