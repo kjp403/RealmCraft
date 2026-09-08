@@ -7,6 +7,8 @@
 [ext_resource type="Resource" uid="uid://c4r6h4wum0u0b" path="res://source/common/gameplay/items/weapons/tools/sickle.tres" id="7_qf0tq"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/weapons/tools/sickle_iron.tres" id="7_sickle_iron"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="10_vial"]
+[ext_resource type="Resource" uid="uid://6m10gk0883iw" path="res://source/common/gameplay/items/consumables/minor_health_potion.tres" id="11_potion_hp"]
+[ext_resource type="Resource" uid="uid://ac0936bb83a74" path="res://source/common/gameplay/items/consumables/minor_mana_potion.tres" id="12_potion_mp"]
 
 [sub_resource type="Resource" id="Trade_herb_bundle"]
 script = ExtResource("2_trade")
@@ -32,10 +34,22 @@ item = ExtResource("7_sickle_iron")
 price = 35
 metadata/_custom_type_script = "uid://vvxt3lf10cxb"
 
+[sub_resource type="Resource" id="Entry_minor_health_potion"]
+script = ExtResource("1_entry")
+item = ExtResource("11_potion_hp")
+price = 10
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
+[sub_resource type="Resource" id="Entry_minor_mana_potion"]
+script = ExtResource("1_entry")
+item = ExtResource("12_potion_mp")
+price = 10
+metadata/_custom_type_script = "uid://vvxt3lf10cxb"
+
 [resource]
 script = ExtResource("3_shop")
 shop_name = "Mira's Apothecary"
-entries = Array[ExtResource("1_entry")]([SubResource("Entry_vial"), SubResource("Resource_lmg0x"), SubResource("Entry_sickle_iron")])
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_vial"), SubResource("Resource_lmg0x"), SubResource("Entry_sickle_iron"), SubResource("Entry_minor_health_potion"), SubResource("Entry_minor_mana_potion")])
 accepted_trades = Array[ExtResource("2_trade")]([SubResource("Trade_herb_bundle")])
 metadata/_custom_type_script = "uid://bsed5oxrf1q15"
 metadata/slug = &"miras_apothecary"
