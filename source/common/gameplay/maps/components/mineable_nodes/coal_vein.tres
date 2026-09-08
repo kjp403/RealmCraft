@@ -13,10 +13,11 @@ script = ExtResource("1_script")
 ore = ExtResource("2_ore")
 yield_amount = 2
 job_xp = Dictionary[StringName, int]({
-&"mining": 13
+&"mining": 35
 })
 required_level = 15
 required_tool = &"pickaxe"
+extraction_hp = 48
 min_charges = 10
 max_charges = 50
 charge_regen_seconds = 12.0
