@@ -59,6 +59,7 @@ var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
 var _slayer_tracker_toggle: CheckButton
 var _xp_tracker_toggle: CheckButton
+var _hud_unlock_toggle: CheckButton
 var _combat_toggles: Dictionary[StringName, CheckButton] = {}
 var _music_value: Label
 var _sound_value: Label
@@ -91,6 +92,9 @@ func _ready() -> void:
 	close_button.pressed.connect(_on_close_pressed)
 	visibility_changed.connect(_on_visibility_changed)
 	ClientState.settings.setting_changed.connect(_on_setting_changed)
+	# The lock also changes from the L key and from the reset button, so the
+	# checkbox follows HudLayout rather than only being written by its own click.
+	HudLayout.lock_changed.connect(_on_hud_lock_changed)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -247,6 +251,20 @@ func _build_toggles_view(toggles_box: VBoxContainer) -> void:
 	_xp_tracker_toggle.toggled.connect(_on_xp_tracker_toggled)
 	toggles_box.add_child(_xp_tracker_toggle)
 
+	# Sits with the other two HUD rows rather than with the combat switches: it
+	# is the same kind of setting, "how the HUD behaves", and the L key is
+	# otherwise undiscoverable.
+	_hud_unlock_toggle = CheckButton.new()
+	_hud_unlock_toggle.text = "Unlock HUD (L)"
+	_hud_unlock_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_hud_unlock_toggle.add_theme_font_size_override(&"font_size", 10)
+	_hud_unlock_toggle.tooltip_text = (
+		"Drag the edges of the quest tracker, party list, loot feed and chat box "
+		+ "to resize them. Press L at any time to lock them again."
+	)
+	_hud_unlock_toggle.toggled.connect(_on_hud_unlock_toggled)
+	toggles_box.add_child(_hud_unlock_toggle)
+
 	for entry: Dictionary in COMBAT_TOGGLES:
 		var property: StringName = entry["property"]
 		var toggle := CheckButton.new()
@@ -257,6 +275,22 @@ func _build_toggles_view(toggles_box: VBoxContainer) -> void:
 		toggle.toggled.connect(_on_combat_toggled.bind(property))
 		toggles_box.add_child(toggle)
 		_combat_toggles[property] = toggle
+
+	toggles_box.add_child(HSeparator.new())
+
+	# Kept OUT of the main view's "Reset to defaults", which restores audio, zoom
+	# and weather. A player resetting their volume does not expect the HUD they
+	# spent time arranging to be wiped with it, so the two are separate buttons
+	# with separate blast radii.
+	var reset_hud_button := Button.new()
+	reset_hud_button.text = "Reset HUD layout"
+	reset_hud_button.custom_minimum_size = Vector2(0.0, 26.0)
+	reset_hud_button.add_theme_font_size_override(&"font_size", 9)
+	reset_hud_button.tooltip_text = (
+		"Put every resizable HUD panel back to its default size and lock the HUD."
+	)
+	reset_hud_button.pressed.connect(_on_reset_hud_layout_pressed)
+	toggles_box.add_child(reset_hud_button)
 
 
 func _build_audio_view(audio_box: VBoxContainer) -> void:
@@ -459,6 +493,29 @@ func _on_xp_tracker_toggled(enabled: bool) -> void:
 	XpTrackerHud.set_enabled(enabled)
 
 
+## The lock is global state, not a settings row, so this drives HudLayout and lets
+## the signal come back to update the checkbox — which is also what keeps the box
+## right when the player hits L while this panel is open. HudLayout.set_locked
+## early-returns on an unchanged value, so that round trip cannot loop.
+func _on_hud_unlock_toggled(enabled: bool) -> void:
+	if _syncing:
+		return
+	HudLayout.set_locked(not enabled)
+
+
+func _on_hud_lock_changed(is_locked: bool) -> void:
+	if not is_instance_valid(_hud_unlock_toggle):
+		return
+	_syncing = true
+	_hud_unlock_toggle.button_pressed = not is_locked
+	_syncing = false
+
+
+func _on_reset_hud_layout_pressed() -> void:
+	HudLayout.reset()
+	Toaster.toast("HUD layout reset.")
+
+
 func _on_combat_toggled(enabled: bool, property: StringName) -> void:
 	if _syncing:
 		return
@@ -499,6 +556,7 @@ func _sync_controls() -> void:
 	)
 	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
 	_xp_tracker_toggle.button_pressed = XpTrackerHud.is_enabled()
+	_hud_unlock_toggle.button_pressed = not HudLayout.locked
 	for property: StringName in _combat_toggles:
 		_combat_toggles[property].button_pressed = bool(
 			_section_value(COMBAT_SECTION, property, true)

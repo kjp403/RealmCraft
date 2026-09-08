@@ -4,7 +4,25 @@ extends PanelContainer
 ## active quest) with its objectives + live progress. Hidden when there's nothing to track.
 ## Click-through so it never blocks world interaction.
 
+## Padding inside the card. Rides on the STYLEBOX, not a MarginContainer — same
+## as a toast card, and it is what lets the panel wrap its text tightly.
+const PAD_X: int = 8
+const PAD_Y: int = 6
+
+## The rail slot this panel is pinned into: Hud.RIGHT_RAIL_WIDTH (224) minus
+## Hud.RIGHT_RAIL_MARGIN (8). Hud._ready() sets the anchors that make it true;
+## this copy exists only so WRAP_WIDTH below can be derived rather than guessed.
+const PANEL_WIDTH: float = 216.0
+
+## How narrow / wide the player may drag the tracker. The floor is roughly the
+## width at which a two-word objective still fits on one line; past the ceiling
+## the panel starts eating the centre of the screen, which is the thing the right
+## rail exists to prevent.
+const MIN_WIDTH: float = 160.0
+const MAX_WIDTH: float = 380.0
+
 var _content: VBoxContainer
+var _resizer: HudResizer
 
 
 func _ready() -> void:
@@ -14,18 +32,26 @@ func _ready() -> void:
 	# quest name instead (see _display).
 	add_theme_stylebox_override(&"panel", _make_panel_style())
 
-	var margin: MarginContainer = MarginContainer.new()
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override(&"margin_left", 12)
-	margin.add_theme_constant_override(&"margin_right", 10)
-	for side: String in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 7)
-	add_child(margin)
-
 	_content = VBoxContainer.new()
 	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_content.add_theme_constant_override(&"separation", 3)
-	margin.add_child(_content)
+	_content.add_theme_constant_override(&"separation", 2)
+	add_child(_content)
+
+	# Width only. The tracker is a shrink-to-content PanelContainer whose HEIGHT
+	# is its wrapped text, and Hud._place_right_rail re-derives that height from
+	# get_combined_minimum_size() on every `resized` — a vertical handle here
+	# would be a grip the player could drag that the rail would immediately
+	# undo. Widening is the real control, and it grows LEFTWARD because the panel
+	# is pinned to the screen edge (grow_horizontal = GROW_DIRECTION_BEGIN).
+	_resizer = HudResizer.attach(
+		self,
+		&"quest_tracker",
+		HudResizer.AXIS_X,
+		HudResizer.SizeMode.MODE_MIN_SIZE,
+		Vector2(MIN_WIDTH, 0.0),
+		Vector2(MAX_WIDTH, 0.0)
+	)
+	_resizer.size_changed.connect(_on_resized_by_player)
 
 	hide()
 	ClientState.tracked_quest_changed.connect(func(_id: int): _refresh())
@@ -95,18 +121,16 @@ func _on_received(data: Dictionary) -> void:
 	show()
 
 
-## Transparent dark-neutral card: a soft charcoal fill (palette-agnostic, like the chat overlay)
-## with a faint hairline edge + drop shadow for definition over the world. No accent bar — the
-## palette comes through the quest name instead (see _display). Alpha is the one knob to nudge if
-## text dips on very bright scenes.
+## The shared overlay-card look ([method PixelUI.hud_card]) — the same near-black,
+## hairline accent border and radius a toast uses, so the tracker reads as part of
+## the same notification system rather than as its own panel. No accent bar; the
+## palette comes through the quest name instead (see _display).
+##
+## The old 5px drop shadow is gone deliberately: at this size it doubled the
+## panel's apparent footprint and was the main reason the tracker looked like it
+## was floating over the world rather than sitting in the rail.
 func _make_panel_style() -> StyleBoxFlat:
-	var box: StyleBoxFlat = StyleBoxFlat.new()
-	box.bg_color = Color(0.05, 0.06, 0.08, 0.6)
-	box.set_border_width_all(1)
-	box.border_color = Color(1.0, 1.0, 1.0, 0.07)
-	box.shadow_color = Color(0, 0, 0, 0.35)
-	box.shadow_size = 5
-	return box
+	return PixelUI.hud_card(PAD_X, PAD_Y)
 
 
 func _display(quest: Dictionary) -> void:
@@ -119,14 +143,11 @@ func _display(quest: Dictionary) -> void:
 	# Name leads the panel — no "QUEST" eyebrow, the layout speaks for itself. It follows the active
 	# palette accent while in progress, then flips to bright green with a ✓ prefix once ready: that
 	# color shift is the player's primary "I'm done!" cue.
-	var name_label: Label = Label.new()
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	name_label.add_theme_font_size_override(&"font_size", 14)
 	var prefix: String = "✓ " if complete else ""
-	name_label.text = prefix + str(quest.get("name", "?"))
-	name_label.add_theme_color_override(
-		&"font_color",
-		Color(0.5, 0.95, 0.5) if complete else _accent_color()
+	var name_label: Label = PixelUI.hud_text(
+		prefix + str(quest.get("name", "?")),
+		PixelUI.SIZE_CAPTION,
+		PixelUI.INK_GREEN if complete else _accent_color()
 	)
 	_fit_line(name_label)
 	_content.add_child(name_label)
@@ -147,41 +168,76 @@ func _display(quest: Dictionary) -> void:
 		# In-progress ANY mode: drop an "OR" between alternatives so the
 		# player reads them as a choice rather than a checklist.
 		if any_mode and not complete and any_shown:
-			var or_label: Label = Label.new()
-			or_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			or_label.text = "OR"
+			var or_label: Label = PixelUI.hud_text("OR", PixelUI.SIZE_TINY, PixelUI.INK_DIM)
+			# The one line that is NOT left-aligned: it separates two alternatives
+			# rather than labelling one, so it is centred between them.
 			or_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			or_label.add_theme_color_override(&"font_color", Color(0.65, 0.75, 0.9))
 			_fit_line(or_label)
 			_content.add_child(or_label)
-		var objective_label: Label = Label.new()
-		objective_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var objective_label: Label = PixelUI.hud_text("", PixelUI.SIZE_TINY, PixelUI.INK)
 		# VISIT rows aren't counted — show a ✓ when done, not "(0/1)".
 		if bool(objective.get("countable", true)):
 			objective_label.text = "• %s (%d/%d)" % [str(objective.get("desc", "")), count, required]
 		else:
 			objective_label.text = "• %s%s" % [str(objective.get("desc", "")), "  ✓" if met else ""]
 		if met:
-			objective_label.add_theme_color_override(&"font_color", Color(0.5, 0.9, 0.5))
+			objective_label.add_theme_color_override(&"font_color", PixelUI.INK_GREEN)
 		_fit_line(objective_label)
 		_content.add_child(objective_label)
 		any_shown = true
 
 	# Ready-to-turn-in nudge. Same line every game uses, instantly readable.
 	if complete:
-		var ready_label: Label = Label.new()
-		ready_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ready_label.text = "↩ " + str(quest.get("return_prompt", "Return to the quest giver"))
-		ready_label.add_theme_color_override(&"font_color", Color(0.55, 0.9, 0.55))
+		var ready_label: Label = PixelUI.hud_text(
+			"↩ " + str(quest.get("return_prompt", "Return to the quest giver")),
+			PixelUI.SIZE_TINY,
+			PixelUI.INK_GREEN
+		)
 		_fit_line(ready_label)
 		_content.add_child(ready_label)
 
 
-## HUD rail is 224px; without wrap, "Speak with Forgemaster Helka · Fire Forge,
-## at the entrance" clips to "Speak with Forgemaster" and the location is lost.
+## The player dragged the panel wider or narrower: re-break every line that is
+## already on screen. Without this the labels keep the wrap width they were built
+## with, so widening leaves a ragged column in a roomy panel and narrowing pushes
+## text out under the border.
+## Uses the size the signal CARRIES, never self.size.
+##
+## Control.size does not update at the moment a size is committed — it settles on
+## the next layout pass. Reading it back here made every re-wrap one drag step
+## stale: the labels ended up broken to the width the panel had before the last
+## mouse move, which on a fast drag is visibly wrong text.
+func _on_resized_by_player(new_size: Vector2) -> void:
+	var wrap: float = _wrap_width(new_size.x)
+	for child: Node in _content.get_children():
+		if child is Label:
+			(child as Label).custom_minimum_size.x = wrap
+
+
+## Where every line breaks: the panel interior at its CURRENT width.
+##
+## This is set explicitly on each label rather than left to the container because
+## Hud._place_right_rail sizes the tracker's rail slot from
+## get_combined_minimum_size().y — a Label that has not been told its width
+## reports the height it would have at its longest WORD, and the rail then
+## reserves a slot of the wrong height. Falls back to the authored width before
+## the first layout pass, when size.x is still zero.
+##
+## [param panel_width] overrides the live width for callers that already know the
+## size being committed — see [method _on_resized_by_player].
+func _wrap_width(panel_width: float = -1.0) -> float:
+	var width: float = panel_width
+	if width <= 0.0:
+		width = size.x if size.x > 0.0 else PANEL_WIDTH
+	return maxf(width - float(PAD_X) * 2.0, 40.0)
+
+
+## HUD rail is 224px by default; without wrap, "Speak with Forgemaster Helka ·
+## Fire Forge, at the entrance" clips to "Speak with Forgemaster" and the
+## location is lost.
 func _fit_line(label: Label) -> void:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size.x = 196.0
+	label.custom_minimum_size.x = _wrap_width()
 
 
 ## The active palette's accent (the same hue the gateway + menus focus-tint with), read live from

@@ -270,6 +270,100 @@ static func shimmer_material(shine: Color, base: Color = Color(0.09, 0.10, 0.13)
 	return mat
 
 
+# --- HUD overlay cards -------------------------------------------------------
+
+## THE HUD OVERLAY STANDARD — one look for every transient card that floats over
+## the WORLD rather than sitting inside a menu: toasts, the loot feed, the quest
+## tracker, the party roster.
+##
+## WHY THESE ARE NOT [method frame] OR [method flat_tile]
+## Both of those are chrome for things the player is LOOKING AT. An overlay card
+## is something the player is looking THROUGH — it has to stay legible over a
+## bright grass tile without reading as a menu that stole focus. So it is a third
+## weight: translucent near-black, a hairline accent border at low alpha, and a
+## small radius so it never squares up into a panel.
+##
+## The values are the ones the toast rework landed on and shipped; they live here
+## so the other three surfaces cannot drift a near-black or a padding away from
+## them. Change them HERE, never per-widget.
+const HUD_CARD_BG: Color = Color(0.102, 0.102, 0.102, 0.8) # #1a1a1acc
+const HUD_CARD_BORDER: Color = Color(0.58, 0.82, 0.98, 0.22)
+const HUD_CARD_RADIUS: int = 4
+const HUD_CARD_PAD_X: int = 7
+const HUD_CARD_PAD_Y: int = 4
+
+## The overlay card background. Padding rides on the STYLEBOX, not an inner
+## MarginContainer — one node fewer per card, and it is what makes the panel wrap
+## its content tightly instead of inheriting a container's idea of roomy.
+static func hud_card(pad_x: int = HUD_CARD_PAD_X, pad_y: int = HUD_CARD_PAD_Y) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = HUD_CARD_BG
+	style.border_color = HUD_CARD_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(HUD_CARD_RADIUS)
+	style.content_margin_left = float(pad_x)
+	style.content_margin_right = float(pad_x)
+	style.content_margin_top = float(pad_y)
+	style.content_margin_bottom = float(pad_y)
+	return style
+
+
+## A label for an overlay card: pixel font, left-aligned, click-through, and the
+## theme's 2px drop shadow pulled in to 1px.
+##
+## THE SHADOW IS THE LOAD-BEARING PART. theme_horizon sets
+## Label/constants/shadow_offset_y = 2, which is tuned for 16px menu text. At the
+## 10-12px an overlay card uses, a 2px offset is a fifth of the glyph height — it
+## reads as a grey smear under every letter and is exactly what makes small HUD
+## text look blurry over the world. 1px is one pixel of separation, which is all
+## a pixel font needs.
+static func hud_label(target: Label, size: int = SIZE_CAPTION, color: Color = INK) -> Label:
+	label(target, size, color)
+	target.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	target.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	target.add_theme_constant_override(&"shadow_offset_y", 1)
+	return target
+
+
+## The overlay-card treatment for a bare icon BUTTON — the chat bubble and the
+## kebab on the top-left rail.
+##
+## WHY THIS EXISTS AT ALL
+## theme_horizon styles every Button with the carved frame_iron 9-slice
+## (Button/styles/normal = SBT_btn_normal). On a 40x40 icon button that frame's
+## 8px texture margin plus its 10/6 content margin leaves a 20x28 hole for the
+## glyph — the border IS the button, visually, and three of them stacked read as
+## a row of heavy carved boxes rather than as controls. Overriding the four
+## states here puts the rail in the same visual language as the cards it sits
+## next to: flat dark ground, hairline edge, state carried by VALUE only.
+##
+## [param pad] is the breathing room around the glyph. Pair it with the matching
+## `inset` on [method PixelIcon.from_button] so the art is fitted to the interior
+## rather than to the button's full rect.
+static func hud_icon_button(button: Button, pad: int = 6) -> void:
+	var rest: StyleBoxFlat = hud_card(pad, pad)
+	var hover: StyleBoxFlat = hud_card(pad, pad)
+	hover.bg_color = Color(0.17, 0.19, 0.24, 0.88)
+	hover.border_color = Color(HUD_CARD_BORDER, 0.55)
+	var pressed: StyleBoxFlat = hud_card(pad, pad)
+	pressed.bg_color = Color(0.07, 0.08, 0.10, 0.92)
+	pressed.border_color = Color(HUD_CARD_BORDER, 0.70)
+	button.add_theme_stylebox_override(&"normal", rest)
+	button.add_theme_stylebox_override(&"hover", hover)
+	button.add_theme_stylebox_override(&"pressed", pressed)
+	# Focus and disabled would otherwise fall back to the carved theme frame and
+	# the button would visibly change WEIGHT the moment it is tabbed to.
+	button.add_theme_stylebox_override(&"focus", rest)
+	button.add_theme_stylebox_override(&"disabled", hud_card(pad, pad))
+
+
+## Build an overlay-card label in one call. The HUD counterpart of [method text].
+static func hud_text(value: String, size: int = SIZE_CAPTION, color: Color = INK) -> Label:
+	var l := Label.new()
+	l.text = value
+	return hud_label(l, size, color)
+
+
 # --- Discipline --------------------------------------------------------------
 
 ## Call once on a window's root. texture_filter inherits down the tree, so this

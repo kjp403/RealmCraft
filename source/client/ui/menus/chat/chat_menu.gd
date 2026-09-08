@@ -159,6 +159,21 @@ func _ready() -> void:
 
 	full_feed_message_edit.text_submitted.connect(_on_text_submitted.bind(full_feed_message_edit))
 
+	# The ONLY one of the four HUD surfaces with two real axes: Chatbox is
+	# anchored bottom-left with an explicit 260x340 rect rather than shrinking to
+	# its content, so both width and height are the player's to set and offsets
+	# are what drive them. It grows right and UP (grow_vertical = BEGIN), which
+	# is what keeps the input row pinned above the screen edge as it is resized.
+	# The feed itself is a RichTextLabel, so its text re-wraps on its own.
+	HudResizer.attach(
+		full_feed_content,
+		&"chat_box",
+		HudResizer.AXIS_BOTH,
+		HudResizer.SizeMode.MODE_OFFSETS,
+		Vector2(200.0, 140.0),
+		Vector2(520.0, 460.0)
+	)
+
 	_title_fx = TitleVfx.install_on(full_feed_text_display)
 
 	# Typing indicator: notify the server when the local user starts/stops
