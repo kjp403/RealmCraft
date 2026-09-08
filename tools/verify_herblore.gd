@@ -7,8 +7,8 @@ const VIAL_PRICE: int = 500
 ## No potion may sell to a vendor for more than this.
 const VENDOR_VALUE_CAP: int = 100
 const POTION_VENDOR_VALUES: Dictionary = {
-	"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 25,
-	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 25,
+	"res://source/common/gameplay/items/consumables/minor_health_potion.tres": 4,
+	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres": 4,
 	"res://source/common/gameplay/items/consumables/health_potion.tres": 50,
 	"res://source/common/gameplay/items/consumables/mana_potion.tres": 50,
 	"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 100,
@@ -28,6 +28,20 @@ const DUNGEON_POTION_PRICES: Dictionary = {
 	"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 5000,
 }
 const SHOP_DIR: String = "res://source/common/gameplay/shops/resources"
+## The MINOR pair is the one hole in "potions are dungeon-only". Kyle put them
+## back on the two starter vendors so a new player has something to buy with
+## their first gold; everything from the standard potion up is still Lost Soul
+## only. The buyback MUST stay under this price — vendors pay a flat
+## Item.vendor_value, so a 10g potion worth 25g back is an unbounded gold loop.
+const STARTER_POTIONS: PackedStringArray = PackedStringArray([
+	"res://source/common/gameplay/items/consumables/minor_health_potion.tres",
+	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres",
+])
+const STARTER_POTION_PRICE: int = 10
+const STARTER_POTION_SHOPS: PackedStringArray = PackedStringArray([
+	"res://source/common/gameplay/shops/resources/start_shop.tres",
+	"res://source/common/gameplay/shops/resources/miras_apothecary.tres",
+])
 ## Load-and-shape check for Farming herb ladder + Herblore alchemy station.
 ##
 ## Runs as a SCENE, not `-s`: under `-s` there are no autoloads, so
