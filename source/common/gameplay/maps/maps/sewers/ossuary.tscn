@@ -253,3 +253,12 @@ destination_label = "The Sewers"
 target_instance = ExtResource("e17")
 warper_id = 146
 target_id = 56
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(3160, 4216)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(3624, 4616)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(2792, 4616)

@@ -370,3 +370,12 @@ destination_label = "Starfall Mining Cave"
 target_instance = ExtResource("e21")
 warper_id = 134
 target_id = 34
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(248, 1144)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(728, 1448)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(664, 1016)

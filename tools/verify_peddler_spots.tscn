@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_peddler_spots.gd" id="1_vps"]
+
+[node name="VerifyPeddlerSpots" type="Node"]
+script = ExtResource("1_vps")

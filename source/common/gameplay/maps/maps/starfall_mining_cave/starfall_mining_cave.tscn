@@ -271,3 +271,12 @@ data = ExtResource("hth_iron_spike_thorn")
 y_sort_enabled = true
 position = Vector2(1296, 1456)
 data = ExtResource("hth_iron_spike_thorn")
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(440, 1608)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(520, 1080)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(904, 1384)

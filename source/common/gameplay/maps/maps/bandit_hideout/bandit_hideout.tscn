@@ -363,3 +363,12 @@ destination_label = "Castle Garden"
 target_instance = ExtResource("15_nga3o")
 warper_id = 22
 target_id = 22
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(504, 600)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(936, 664)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(728, 632)

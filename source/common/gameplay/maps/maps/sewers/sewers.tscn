@@ -733,3 +733,12 @@ data = ExtResource("hth_nightshade_bramble")
 y_sort_enabled = true
 position = Vector2(304, 2224)
 data = ExtResource("hth_nightshade_bramble")
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(2248, 2872)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(1720, 3016)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(2696, 3144)

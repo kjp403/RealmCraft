@@ -322,3 +322,12 @@ data = ExtResource("h3")
 
 [node name="PeddlerAnchor" type="Node2D" parent="."]
 position = Vector2(536, 280)
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(600, 584)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(1150, 360)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(168, 264)

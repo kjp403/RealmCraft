@@ -787,3 +787,12 @@ weapon = null
 position = Vector2(1410, 1658)
 enemy_data = ExtResource("we_whelp")
 weapon = null
+
+[node name="PeddlerSpot1" type="Node2D" parent="."]
+position = Vector2(280, 1400)
+
+[node name="PeddlerSpot2" type="Node2D" parent="."]
+position = Vector2(888, 1224)
+
+[node name="PeddlerSpot3" type="Node2D" parent="."]
+position = Vector2(664, 1592)
