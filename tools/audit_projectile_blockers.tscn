@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://tools/audit_projectile_blockers.gd" id="1_audit"]
-
-[node name="ProjectileBlockerAudit" type="Node"]
-script = ExtResource("1_audit")
