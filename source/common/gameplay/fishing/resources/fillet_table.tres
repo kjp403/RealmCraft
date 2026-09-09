@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="FilletTable" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/fishing/fillet_table.gd" id="1_table"]
+
+[resource]
+script = ExtResource("1_table")
+default_yield = 2
+recipes = Array[Resource]([])

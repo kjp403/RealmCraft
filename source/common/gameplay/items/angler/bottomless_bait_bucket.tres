@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BaitBucketItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/empty_vial.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/bait_bucket_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+item_name = &"Bottomless Bait Bucket"
+item_icon = ExtResource("1_icon")
+description = "Holds up to 10,000 bait. Right-click Fill to load every Fish Bait in your bags."
+holdable = false
+stack_limit = 1
+tags = PackedStringArray()
+metadata/slug = &"bottomless_bait_bucket"
+metadata/id = 701
