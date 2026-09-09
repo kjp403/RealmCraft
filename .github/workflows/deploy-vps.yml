@@ -42,7 +42,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Check deploy secrets
         env:
@@ -82,7 +82,10 @@ jobs:
           # Required when the private key was created with a passphrase.
           passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
           port: 22
-          command_timeout: 15m
+          # 20m, not 15m: update.sh now waits up to 8 minutes for the world's
+          # WebSocket handshake, because a startup crash loop can take that long
+          # to settle. Asset import and the port waits sit on top of that.
+          command_timeout: 20m
           request_pty: true
           script: |
             set -euo pipefail
