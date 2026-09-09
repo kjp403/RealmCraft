@@ -85,7 +85,7 @@ func _check_biome(res_path: String) -> void:
 		map.queue_free()
 		return
 
-	var spot: Dictionary = PeddlerSites.pick_spot(map as Map, CYCLE)
+	var spot: Dictionary = PeddlerSites.pick_spot(map as Map)
 	var ok: bool = true
 	var ids: Array[int] = []
 	for pair: Array in [
