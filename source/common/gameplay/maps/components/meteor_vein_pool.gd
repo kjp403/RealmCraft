@@ -34,16 +34,25 @@ const PERIOD_S: int = 3 * 60 * 60
 
 ## Yields the whole server shares per window.
 ##
-## Sized off the actual mining rate, not a guess. At 18 extraction HP and the
-## node's 5s post-yield cooldown a maxed miner pulls ~660 gems an hour, so a
-## 2,000 pool is about one full window of solo work — emptiable, but only just.
-## A group clears it in well under an hour, which is the race that makes
-## turning up early worth something.
+## Sized off the real mining rate, not a guess. At 18 extraction HP and the
+## node's 5s post-yield cooldown a miner pulls ~660 gems an hour before bank
+## trips, so 1,000 is about 90 minutes of solo work — comfortably emptiable,
+## and a group clears it in minutes. That is the race that makes turning up
+## early worth something, and the empty vein is what tells everyone to go do
+## something else.
 ##
-## The first pass at 150 was far too mean: split three ways it was a couple of
-## hundred gems, which is nothing against the ~52,000 a Crafting 99 wants. This
-## has to be a real supply line for skillers, not a garnish.
-const POOL: int = 2000
+## Two corrections got it here. The first pass at 150 was a garnish: 13 minutes
+## of mining, nothing against the ~52,000 gems a Crafting 99 wants. The second
+## overshot at 2,000, which was anchored on "a solo miner can JUST empty one
+## window" — the most generous anchor available. 1,000 is the middle, and still
+## ~7x the original.
+##
+## Worth knowing before retuning: gems are NOT the only gate on Crafting 99.
+## That also costs ~58 hours of crafting clicks at the 2s interval no matter how
+## many gems you hold, so a bigger pool mostly buys "not gem-starved", not a
+## faster 99. Bag space throttles it too — 30 slots per bag, gems stack 10, so a
+## one-bag miner banks every ~300 gems.
+const POOL: int = 1000
 
 ## Gem ladder, rarest last. Sapphire is the floor every miner can pull.
 const LADDER: Array[StringName] = [
