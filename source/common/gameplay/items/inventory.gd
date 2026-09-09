@@ -32,13 +32,15 @@ const BANK_RESOURCE_STACK: int = 50
 ## stack_limit: 0 means "pseudo-infinite", so those sat in single 1.8k piles
 ## beside 50-capped ores and read as a duplication glitch.
 ##
-## Every drinkable is on this list — potions, the Defense Tonic and the weapon
-## coatings. None of them author a stack_limit, so without an entry here they
-## fall to the 50 cap below and a brewer's vault shatters into 50-count rows.
-## Cooked food is the deliberate exception: it is bulk, and _bank_bulk_item
-## keeps it at [constant BANK_RESOURCE_STACK].
+## Drinkables are NOT listed here — [method _bank_unlimited_item] covers every
+## one of them by class, because a hand-kept slug list silently missed each new
+## draught as it shipped and shattered a brewer's vault into 50-count rows. The
+## original potions stay listed anyway: the list is what the verifier reads, and
+## they cost nothing to keep. What genuinely needs a slug is the glassware and
+## the fletching feed — vials and arrowheads are MaterialItem, so no class rule
+## reaches them.
 const UNLIMITED_IN_BANK: Array[StringName] = [
-	&"bone", &"vial_of_water",
+	&"bone", &"vial_of_water", &"empty_vial",
 	&"bronze_arrowheads", &"iron_arrowheads", &"steel_arrowheads",
 	&"mithril_arrowheads", &"adamant_arrowheads", &"runite_arrowheads",
 	&"headless_arrow",
@@ -52,24 +54,42 @@ const UNLIMITED_IN_BANK: Array[StringName] = [
 
 ## Per-slot stack cap for [param item]. 0 = unlimited. Bank materials and cooked
 ## food use [constant BANK_RESOURCE_STACK] when that is higher than the bag cap.
-## [constant UNLIMITED_IN_BANK] slugs are unlimited there (bag stays at
+## [method _bank_unlimited_item] items are unlimited there (bag stays at
 ## [member Item.stack_limit]).
 static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 	var limit: int = 0 if item == null else int(item.stack_limit)
 	if in_bank and item != null:
-		if StringName(item.get_meta(&"slug", &"")) in UNLIMITED_IN_BANK:
+		if _bank_unlimited_item(item):
 			return 0
 		if limit <= 0:
-			# Ammo authors no stack_limit and players hold thousands of arrows.
-			# Capping those at 50 would shatter one pile into forty bank rows.
-			if item is AmmoItem:
-				return 0
 			# Unauthored (0 = pseudo-infinite). Cap it like every other vault
 			# stack rather than letting it grow without bound.
 			return BANK_RESOURCE_STACK
 		if _bank_bulk_item(item):
 			return maxi(limit, BANK_RESOURCE_STACK)
 	return limit
+
+
+## True for items that bank as ONE unbounded pile.
+##
+## Two of the three tests are by class on purpose. The slug list only knows
+## about content that already shipped, so every draught added after it was
+## written inherited the 50 cap by omission — the failure is silent, looks like
+## a duplication guard, and is only ever noticed by a brewer with a full vault.
+## A class test cannot be forgotten by a new .tres.
+static func _bank_unlimited_item(item: Item) -> bool:
+	if StringName(item.get_meta(&"slug", &"")) in UNLIMITED_IN_BANK:
+		return true
+	# Ammo authors no stack_limit and players hold thousands of arrows.
+	# Capping those at 50 would shatter one pile into forty bank rows.
+	if item is AmmoItem:
+		return true
+	# Every drinkable: the potions, the tonics, the weapon coatings and the
+	# combination draughts ([PotionItem] extends [ConsumableItem], so it is
+	# caught here too). Cooked food is the deliberate exception — it is bulk,
+	# and _bank_bulk_item holds it at [constant BANK_RESOURCE_STACK].
+	var drink: ConsumableItem = item as ConsumableItem
+	return drink != null and drink.cooldown_category != &"food"
 
 
 ## True for items that fill to [constant BANK_RESOURCE_STACK] in the vault.
