@@ -61,6 +61,13 @@ const ACCEPT_DB: float = -4.0
 ## A daily task reaching its target.
 const MILESTONE_DB: float = -3.0
 const COIN_DB: float = -6.0
+## Level-up jingle. It used to play untrimmed at 0.0 dB, which made it the loudest
+## thing in the game: measured over its loudest 400 ms window ui_levelup.ogg sits at
+## -20.3 dBFS, so at 0.0 dB it landed ~4 dB above DISCOVERY (-20.5 at RARE_DB) and
+## ~6 dB above QUEST_READY (-23.8 at MILESTONE_DB) — the two cues it should sit
+## beside — and ~15 dB over a button click. It is also by far the longest cue at
+## 7.6 s. -6 puts it level with the rest of the notification set.
+const LEVELUP_DB: float = -6.0
 
 ## Default +/- pitch spread for [method play_varied].
 const PITCH_JITTER: float = 0.05
@@ -125,7 +132,7 @@ static func play(
 
 ## Level-up jingle: cuts itself short if another level-up fires mid-play.
 static func play_levelup() -> void:
-	play(LEVELUP, 1.0, 0.0, true)
+	play(LEVELUP, 1.0, LEVELUP_DB, true)
 
 
 static func click() -> void: play(CLICK, 1.0, CLICK_DB)

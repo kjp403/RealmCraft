@@ -29,6 +29,7 @@ func _ready() -> void:
 
 func _go() -> void:
 	_cue_paths()
+	_bus_routing()
 	_pitch_jitter()
 	_rarity_coverage()
 	print("")
@@ -63,6 +64,61 @@ func _cue_paths() -> void:
 			continue
 		var stream: AudioStream = load(path) as AudioStream
 		_check(stream != null, "%s loads as an AudioStream (%s)" % [name, path.get_file()])
+
+
+## The Sound slider has to actually reach the UI cues.
+##
+## UI cues are mixed by AudioStreamPlaybackPolyphonic.play_stream, whose `bus`
+## parameter DEFAULTS TO &"Master" — not to the bus of the player that owns the
+## playback. Omitting it sent every UI cue straight into Master, past Ui/Sound
+## and past the settings slider, so the slider appeared to do nothing until it
+## hit zero (the mute guard) and the level-up jingle stayed at full volume at the
+## lowest audible setting. Nothing errors when that happens.
+##
+## Ui also SENDS INTO Sound, so the slider gain belongs on Sound alone; applying
+## it to both multiplied it in twice and left UI cues at a quarter volume at 50%.
+func _bus_routing() -> void:
+	print("[bus routing]")
+	var ui_idx: int = AudioServer.get_bus_index(&"Ui")
+	var sound_idx: int = AudioServer.get_bus_index(&"Sound")
+	_check(ui_idx >= 0 and sound_idx >= 0, "Ui and Sound buses both exist")
+	if ui_idx < 0 or sound_idx < 0:
+		return
+	_check(
+		AudioServer.get_bus_send(ui_idx) == &"Sound",
+		"Ui sends into Sound, so Sound alone carries the slider gain"
+	)
+
+	var manager: AudioManager = _audio_manager()
+	if manager == null:
+		print("  ..   no AudioManager in this context - gain split not exercised")
+		return
+
+	manager.set_sfx_volume(0.5)
+	_check(
+		is_equal_approx(snappedf(AudioServer.get_bus_volume_linear(sound_idx), 0.001), 0.5),
+		"Sound carries the slider gain (%.3f at 50%%)"
+			% AudioServer.get_bus_volume_linear(sound_idx)
+	)
+	_check(
+		is_equal_approx(snappedf(AudioServer.get_bus_volume_linear(ui_idx), 0.001), 1.0)
+			and not AudioServer.is_bus_mute(ui_idx),
+		"Ui stays at unity and unmuted (%.3f) - gain is not applied twice"
+			% AudioServer.get_bus_volume_linear(ui_idx)
+	)
+
+	manager.set_sfx_volume(0.0)
+	_check(
+		AudioServer.is_bus_mute(ui_idx) and AudioServer.is_bus_mute(sound_idx),
+		"a zeroed slider mutes both buses"
+	)
+	manager.set_sfx_volume(1.0)
+
+
+func _audio_manager() -> AudioManager:
+	if not is_instance_valid(Client):
+		return null
+	return Client.audio_manager
 
 
 ## The jitter has to actually vary, and has to stay inside a band that reads as

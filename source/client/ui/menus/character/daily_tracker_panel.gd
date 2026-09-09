@@ -251,7 +251,12 @@ func _build_row(entry: Dictionary) -> Control:
 	# The shared recessed item slot — pixel art, so it must not be resampled.
 	slot_tile.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	slot_tile.add_theme_stylebox_override(&"panel", PixelUI.slot_style())
-	var host: CenterContainer = CenterContainer.new()
+	# A PLAIN Control, never a Container — see PixelIcon.mount. A Container re-imposes
+	# size = minimum on its children every layout pass, and a mounted icon reports a
+	# (0,0) minimum, so a CenterContainer here collapsed the skill icon to 0x0.
+	# PixelIcon centres on whole pixels itself.
+	var host: Control = Control.new()
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot_tile.add_child(host)
 	var icon: TextureRect = PixelIcon.mount(host, _skill_icon(str(entry.get("skill", ""))))
 	line.add_child(slot_tile)

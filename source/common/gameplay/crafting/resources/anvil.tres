@@ -114,9 +114,8 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/verdance_gem.tres" id="gem_verdance"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/covenant_gem.tres" id="gem_covenant"]
 
-[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/metals/copper_bar.tres" id="bar_copper"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_low.tres" id="g_guard_low"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_guard_copper.tres" id="r_guard_copper"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_guard_bronze.tres" id="r_guard_bronze"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_medium.tres" id="g_guard_medium"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_guard_iron.tres" id="r_guard_iron"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_high.tres" id="g_guard_high"]
@@ -124,7 +123,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_guard_pristine.tres" id="g_guard_pristine"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_guard_gold.tres" id="r_guard_gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_low.tres" id="g_agile_low"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_agile_copper.tres" id="r_agile_copper"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_agile_bronze.tres" id="r_agile_bronze"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_medium.tres" id="g_agile_medium"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_agile_iron.tres" id="r_agile_iron"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_high.tres" id="g_agile_high"]
@@ -132,7 +131,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_agile_pristine.tres" id="g_agile_pristine"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_agile_gold.tres" id="r_agile_gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_low.tres" id="g_focus_low"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_focus_copper.tres" id="r_focus_copper"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_focus_bronze.tres" id="r_focus_bronze"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_medium.tres" id="g_focus_medium"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_focus_iron.tres" id="r_focus_iron"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_high.tres" id="g_focus_high"]
@@ -140,7 +139,7 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_focus_pristine.tres" id="g_focus_pristine"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_focus_gold.tres" id="r_focus_gold"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_low.tres" id="g_vital_low"]
-[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_vital_copper.tres" id="r_vital_copper"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_vital_bronze.tres" id="r_vital_bronze"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_medium.tres" id="g_vital_medium"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/gears/rings/ring_vital_iron.tres" id="r_vital_iron"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/gem_vital_high.tres" id="g_vital_high"]
@@ -1320,19 +1319,19 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("Resource_ld0t7"), Sub
 required_level = 60
 xp_reward = 143
 
-[sub_resource type="Resource" id="I_guard_copper_bar"]
+[sub_resource type="Resource" id="I_guard_bronze_bar"]
 script = ExtResource("3_ingred")
-item = ExtResource("bar_copper")
+item = ExtResource("10_br_bar")
 amount = 10
 
-[sub_resource type="Resource" id="I_guard_copper_gem"]
+[sub_resource type="Resource" id="I_guard_bronze_gem"]
 script = ExtResource("3_ingred")
 item = ExtResource("g_guard_low")
 
-[sub_resource type="Resource" id="R_ring_guard_copper"]
+[sub_resource type="Resource" id="R_ring_guard_bronze"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("r_guard_copper")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_guard_copper_bar"), SubResource("I_guard_copper_gem")])
+output_item = ExtResource("r_guard_bronze")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_guard_bronze_bar"), SubResource("I_guard_bronze_gem")])
 required_level = 1
 xp_reward = 81
 
@@ -1384,19 +1383,19 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_guard_gold_bar"), S
 required_level = 15
 xp_reward = 650
 
-[sub_resource type="Resource" id="I_agile_copper_bar"]
+[sub_resource type="Resource" id="I_agile_bronze_bar"]
 script = ExtResource("3_ingred")
-item = ExtResource("bar_copper")
+item = ExtResource("10_br_bar")
 amount = 10
 
-[sub_resource type="Resource" id="I_agile_copper_gem"]
+[sub_resource type="Resource" id="I_agile_bronze_gem"]
 script = ExtResource("3_ingred")
 item = ExtResource("g_agile_low")
 
-[sub_resource type="Resource" id="R_ring_agile_copper"]
+[sub_resource type="Resource" id="R_ring_agile_bronze"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("r_agile_copper")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_agile_copper_bar"), SubResource("I_agile_copper_gem")])
+output_item = ExtResource("r_agile_bronze")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_agile_bronze_bar"), SubResource("I_agile_bronze_gem")])
 required_level = 1
 xp_reward = 81
 
@@ -1448,19 +1447,19 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_agile_gold_bar"), S
 required_level = 15
 xp_reward = 650
 
-[sub_resource type="Resource" id="I_focus_copper_bar"]
+[sub_resource type="Resource" id="I_focus_bronze_bar"]
 script = ExtResource("3_ingred")
-item = ExtResource("bar_copper")
+item = ExtResource("10_br_bar")
 amount = 10
 
-[sub_resource type="Resource" id="I_focus_copper_gem"]
+[sub_resource type="Resource" id="I_focus_bronze_gem"]
 script = ExtResource("3_ingred")
 item = ExtResource("g_focus_low")
 
-[sub_resource type="Resource" id="R_ring_focus_copper"]
+[sub_resource type="Resource" id="R_ring_focus_bronze"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("r_focus_copper")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_focus_copper_bar"), SubResource("I_focus_copper_gem")])
+output_item = ExtResource("r_focus_bronze")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_focus_bronze_bar"), SubResource("I_focus_bronze_gem")])
 required_level = 1
 xp_reward = 81
 
@@ -1512,19 +1511,19 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_focus_gold_bar"), S
 required_level = 15
 xp_reward = 650
 
-[sub_resource type="Resource" id="I_vital_copper_bar"]
+[sub_resource type="Resource" id="I_vital_bronze_bar"]
 script = ExtResource("3_ingred")
-item = ExtResource("bar_copper")
+item = ExtResource("10_br_bar")
 amount = 10
 
-[sub_resource type="Resource" id="I_vital_copper_gem"]
+[sub_resource type="Resource" id="I_vital_bronze_gem"]
 script = ExtResource("3_ingred")
 item = ExtResource("g_vital_low")
 
-[sub_resource type="Resource" id="R_ring_vital_copper"]
+[sub_resource type="Resource" id="R_ring_vital_bronze"]
 script = ExtResource("1_recipe")
-output_item = ExtResource("r_vital_copper")
-ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vital_copper_bar"), SubResource("I_vital_copper_gem")])
+output_item = ExtResource("r_vital_bronze")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vital_bronze_bar"), SubResource("I_vital_bronze_gem")])
 required_level = 1
 xp_reward = 81
 
@@ -1795,4 +1794,4 @@ xp_reward = 173
 [resource]
 script = ExtResource("2_station")
 station_name = "Smithing Table"
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_sickle_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_sickle_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_sickle_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_sickle_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_sickle_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru"), SubResource("R_tool_sickle_ru"), SubResource("Resource_1e8l7"), SubResource("Resource_8mlec"), SubResource("Resource_if04n"), SubResource("Resource_7upco"), SubResource("Resource_fvt4r"), SubResource("Resource_2ea3t"), SubResource("R_ring_guard_copper"), SubResource("R_ring_guard_iron"), SubResource("R_ring_guard_silver"), SubResource("R_ring_guard_gold"), SubResource("R_ring_agile_copper"), SubResource("R_ring_agile_iron"), SubResource("R_ring_agile_silver"), SubResource("R_ring_agile_gold"), SubResource("R_ring_focus_copper"), SubResource("R_ring_focus_iron"), SubResource("R_ring_focus_silver"), SubResource("R_ring_focus_gold"), SubResource("R_ring_vital_copper"), SubResource("R_ring_vital_iron"), SubResource("R_ring_vital_silver"), SubResource("R_ring_vital_gold"), SubResource("R_tool_pickaxe_dragon"), SubResource("R_tool_axe_dragon"), SubResource("R_tool_sickle_dragon"), SubResource("R_tool_pickaxe_obsidian"), SubResource("R_tool_axe_obsidian"), SubResource("R_tool_sickle_obsidian"), SubResource("R_tool_pickaxe_celestial"), SubResource("R_tool_axe_celestial"), SubResource("R_tool_sickle_celestial"), SubResource("R_tool_pickaxe_astralite"), SubResource("R_tool_axe_astralite"), SubResource("R_tool_sickle_astralite"), SubResource("R_tool_rod_dragon"), SubResource("R_crucible"), SubResource("R_dragon_head"), SubResource("R_obsidian_head"), SubResource("R_celestial_head"), SubResource("R_astralite_head")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_sm_bronze_bar"), SubResource("R_sm_iron_bar"), SubResource("R_sm_steel_bar"), SubResource("R_sm_silver_bar"), SubResource("R_sm_gold_bar"), SubResource("R_br_helm"), SubResource("R_br_chest"), SubResource("R_br_boots"), SubResource("R_br_arr"), SubResource("R_fe_helm"), SubResource("R_fe_chest"), SubResource("R_fe_boots"), SubResource("R_fe_arr"), SubResource("R_st_helm"), SubResource("R_st_chest"), SubResource("R_st_boots"), SubResource("R_st_arr"), SubResource("R_mi_arr"), SubResource("R_ad_arr"), SubResource("R_ru_arr"), SubResource("R_ag_neck"), SubResource("R_ag_ring"), SubResource("R_ag_amu"), SubResource("R_au_neck"), SubResource("R_au_ring"), SubResource("R_dr_helm"), SubResource("R_dr_chest"), SubResource("R_dr_boots"), SubResource("R_wpn_bronze_sword"), SubResource("R_wpn_bronze_hammer"), SubResource("R_wpn_bronze_wand"), SubResource("R_wpn_bronze_book"), SubResource("R_wpn_bronze_bow"), SubResource("R_wpn_iron_sword"), SubResource("R_wpn_iron_hammer"), SubResource("R_wpn_iron_wand"), SubResource("R_wpn_iron_book"), SubResource("R_wpn_iron_bow"), SubResource("R_wpn_steel_sword"), SubResource("R_wpn_steel_hammer"), SubResource("R_wpn_steel_wand"), SubResource("R_wpn_steel_book"), SubResource("R_wpn_steel_bow"), SubResource("R_wpn_mithril_sword"), SubResource("R_wpn_mithril_hammer"), SubResource("R_wpn_mithril_wand"), SubResource("R_wpn_mithril_book"), SubResource("R_wpn_mithril_bow"), SubResource("R_wpn_adamant_sword"), SubResource("R_wpn_adamant_hammer"), SubResource("R_wpn_adamant_wand"), SubResource("R_wpn_adamant_book"), SubResource("R_wpn_adamant_bow"), SubResource("R_wpn_runite_sword"), SubResource("R_wpn_runite_hammer"), SubResource("R_wpn_runite_wand"), SubResource("R_wpn_runite_book"), SubResource("R_wpn_runite_bow"), SubResource("R_mi_helm"), SubResource("R_mi_chest"), SubResource("R_mi_boots"), SubResource("R_ad_helm"), SubResource("R_ad_chest"), SubResource("R_ad_boots"), SubResource("R_ru_helm"), SubResource("R_ru_chest"), SubResource("R_ru_boots"), SubResource("R_tool_pick_br"), SubResource("R_tool_axe_br"), SubResource("R_tool_sickle_br"), SubResource("R_tool_pick_ir"), SubResource("R_tool_axe_ir"), SubResource("R_tool_sickle_ir"), SubResource("R_tool_pick_st"), SubResource("R_tool_axe_st"), SubResource("R_tool_sickle_st"), SubResource("R_tool_pick_mi"), SubResource("R_tool_axe_mi"), SubResource("R_tool_sickle_mi"), SubResource("R_tool_pick_ad"), SubResource("R_tool_axe_ad"), SubResource("R_tool_sickle_ad"), SubResource("R_tool_pick_ru"), SubResource("R_tool_axe_ru"), SubResource("R_tool_sickle_ru"), SubResource("Resource_1e8l7"), SubResource("Resource_8mlec"), SubResource("Resource_if04n"), SubResource("Resource_7upco"), SubResource("Resource_fvt4r"), SubResource("Resource_2ea3t"), SubResource("R_ring_guard_bronze"), SubResource("R_ring_guard_iron"), SubResource("R_ring_guard_silver"), SubResource("R_ring_guard_gold"), SubResource("R_ring_agile_bronze"), SubResource("R_ring_agile_iron"), SubResource("R_ring_agile_silver"), SubResource("R_ring_agile_gold"), SubResource("R_ring_focus_bronze"), SubResource("R_ring_focus_iron"), SubResource("R_ring_focus_silver"), SubResource("R_ring_focus_gold"), SubResource("R_ring_vital_bronze"), SubResource("R_ring_vital_iron"), SubResource("R_ring_vital_silver"), SubResource("R_ring_vital_gold"), SubResource("R_tool_pickaxe_dragon"), SubResource("R_tool_axe_dragon"), SubResource("R_tool_sickle_dragon"), SubResource("R_tool_pickaxe_obsidian"), SubResource("R_tool_axe_obsidian"), SubResource("R_tool_sickle_obsidian"), SubResource("R_tool_pickaxe_celestial"), SubResource("R_tool_axe_celestial"), SubResource("R_tool_sickle_celestial"), SubResource("R_tool_pickaxe_astralite"), SubResource("R_tool_axe_astralite"), SubResource("R_tool_sickle_astralite"), SubResource("R_tool_rod_dragon"), SubResource("R_crucible"), SubResource("R_dragon_head"), SubResource("R_obsidian_head"), SubResource("R_celestial_head"), SubResource("R_astralite_head")])
