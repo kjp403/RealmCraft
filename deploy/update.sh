@@ -18,6 +18,25 @@ if [[ ! -d "$APP_DIR/.git" ]]; then
 	exit 1
 fi
 
+# Dump the world's own journal when the deploy exits non-zero. Without this the
+# Actions log ends at "handshake failed" and says nothing about WHY, so every
+# investigation costs an SSH session — and the obvious guess (the merge broke it)
+# is usually wrong. The ~50 address frames of a Godot backtrace carry nothing
+# readable here, so strip them and keep the messages, which name the failing
+# script and line. Note Godot reports the real signal itself: systemd will say
+# status=6/ABRT even for a SIGSEGV, because the crash handler aborts after it
+# finishes dumping. Trust the "Program crashed with signal N" line, not systemd.
+dump_world_logs() {
+	echo
+	echo "==> arkenelle-world journal (last 200 lines, backtrace addresses stripped)"
+	journalctl -u arkenelle-world -n 200 --no-pager | grep -vE 'main\+|libc\.so' || true
+	echo
+	echo "==> arkenelle-world unit status"
+	systemctl --no-pager --lines=0 status arkenelle-world || true
+	echo "    NRestarts=$(world_restart_count)"
+}
+trap 'rc=$?; if [[ $rc -ne 0 ]]; then dump_world_logs; fi' EXIT
+
 echo "==> Fetching origin/${BRANCH}"
 sudo -u "$APP_USER" git -C "$APP_DIR" fetch --prune origin "$BRANCH"
 
@@ -80,13 +99,27 @@ wait_port() {
 	return 1
 }
 
+# How many times systemd has had to restart the world. A climbing number during
+# the wait below is the signature of a startup crash loop rather than a slow boot.
+world_restart_count() {
+	systemctl show arkenelle-world -p NRestarts --value 2>/dev/null || echo "?"
+}
+
 # Godot's world peer only speaks WebSocket. A plain HTTP GET through Caddy always
 # surfaces as 502 even when the world is healthy — probe the upgrade handshake.
+#
+# Deadline-based, not iteration-based. The old loop ran `seq 1 $seconds` with a
+# 2s curl timeout inside it, so "45" meant anywhere from 45s to 135s depending on
+# whether the port was refusing (instant) or accepting-then-hanging (2s). During a
+# crash loop it is both, alternating, which made the real budget unknowable.
 wait_world_ws() {
 	local seconds="${1:-30}"
-	local i code
+	local deadline=$(( SECONDS + seconds ))
+	local started=$SECONDS
+	local last_note=$SECONDS
+	local code=""
 	echo "==> Waiting for world WebSocket handshake on 127.0.0.1:8087 (up to ${seconds}s)"
-	for i in $(seq 1 "$seconds"); do
+	while (( SECONDS < deadline )); do
 		code="$(curl --http1.1 -sS -o /dev/null -w '%{http_code}' --max-time 2 \
 			-H 'Connection: Upgrade' \
 			-H 'Upgrade: websocket' \
@@ -94,12 +127,17 @@ wait_world_ws() {
 			-H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
 			"http://127.0.0.1:8087/" 2>/dev/null || true)"
 		if [[ "$code" == "101" ]]; then
-			echo "    world WebSocket OK (101, ${i}s)"
+			echo "    world WebSocket OK (101, $(( SECONDS - started ))s, restarts=$(world_restart_count))"
 			return 0
+		fi
+		# Progress every 30s so a long wait is not silent in the Actions log.
+		if (( SECONDS - last_note >= 30 )); then
+			last_note=$SECONDS
+			echo "    still waiting ($(( SECONDS - started ))s, last=${code:-none}, restarts=$(world_restart_count))"
 		fi
 		sleep 1
 	done
-	echo "    ERROR: world WebSocket did not return 101 within ${seconds}s (last=$code)" >&2
+	echo "    ERROR: world WebSocket did not return 101 within ${seconds}s (last=${code:-none})" >&2
 	return 1
 }
 
@@ -110,11 +148,21 @@ if ! wait_port 8087 "world" 90; then
 	systemctl restart arkenelle-world
 	wait_port 8087 "world" 90
 fi
-if ! wait_world_ws 45; then
-	echo "==> World WS handshake failed — restarting arkenelle-world once and retrying"
-	systemctl restart arkenelle-world
-	wait_port 8087 "world" 90
-	wait_world_ws 45
+# The world can segfault while loading its startup maps and then boot cleanly on
+# a later attempt. On 2026-09-09 that took 47 crash-restarts over ~8 minutes — on
+# a tree byte-identical to a deploy that had passed an hour earlier. The old 45s
+# budget gave up ~6 minutes early, so a healthy merge reported a failed deploy.
+# That invited a revert, and the revert pushed to main, which restarted the world
+# and began the crash loop again: three red deploys in a row, none of them the
+# code's fault. Wait long enough to tell a slow start from a dead one.
+#
+# No manual restart in here on purpose. The unit is Restart=always / RestartSec=3,
+# so systemd is ALREADY retrying every three seconds; a `systemctl restart` on top
+# only kills whichever boot attempt happens to be in flight, which can turn the
+# one attempt that would have survived into another failure.
+if ! wait_world_ws 480; then
+	echo "==> World never completed a WebSocket handshake — journal dump follows" >&2
+	exit 1
 fi
 
 echo "==> Status"
