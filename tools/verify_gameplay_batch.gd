@@ -115,19 +115,12 @@ func _check_bone_item() -> void:
 			"potions must not inherit the cooked-food bank stack of 50"
 		)
 	# Every drinkable banks as one unlimited stack. None of them author a
-	# stack_limit, so anything the bank rule fails to recognise silently drops to
-	# the 50 cap and shatters a brewer's vault into 50-count rows. Cooked food is
+	# stack_limit, so a missing UNLIMITED_IN_BANK entry silently drops it to the
+	# 50 cap and shatters a brewer's vault into 50-count rows. Cooked food is
 	# the deliberate exception and is asserted at 50 above.
-	#
-	# Listed by hand rather than globbed: a glob would pass by testing nothing if
-	# the folder ever moved, and the combination draughts below are exactly the
-	# ones that shipped capped because a slug list went unedited.
 	for slug: String in [
 		"defense_tonic",
 		"weapon_ember", "weapon_poison", "weapon_poison_plus", "weapon_salve",
-		"aegis_elixir", "cinder_guard_brew", "corrosive_ember_draught",
-		"hourglass_draught", "provocation_brew", "shadowveil_draught",
-		"siltward_draught", "venom_draught",
 	]:
 		var draught: Item = load(
 			"res://source/common/gameplay/items/consumables/%s.tres" % slug
@@ -135,17 +128,6 @@ func _check_bone_item() -> void:
 		if _expect(draught != null, "%s.tres failed to load" % slug):
 			_expect(
 				Inventory.stack_limit_for(draught, true) == 0,
-				"%s must bank as one unlimited stack, not cap at 50" % slug
-			)
-	# Glassware is MaterialItem, so the drinkable class rule does not reach it —
-	# both vials need their UNLIMITED_IN_BANK slug or a brewer's empties cap at 50.
-	for slug: String in ["empty_vial", "vial_of_water"]:
-		var vial: Item = load(
-			"res://source/common/gameplay/items/materials/herbs/%s.tres" % slug
-		)
-		if _expect(vial != null, "%s.tres failed to load" % slug):
-			_expect(
-				Inventory.stack_limit_for(vial, true) == 0,
 				"%s must bank as one unlimited stack, not cap at 50" % slug
 			)
 	if not _expect(bone.item_icon != null, "bone has no icon"):

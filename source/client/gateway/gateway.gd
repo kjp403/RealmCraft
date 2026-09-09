@@ -49,17 +49,6 @@ const _SETTING_PALETTE: StringName = &"palette"
 const _SETTING_RANDOMIZE: StringName = &"randomize"
 var current_theme: StringName = ThemePalettes.DEFAULT
 
-# --- "Remember me?" ---------------------------------------------------------
-# The account NAME only, and only in the plain client settings file. The
-# password deliberately does not come with it: session.dat is editor-only for
-# exactly that reason (see save_refresh_token), and a remembered name is not a
-# credential — it saves the typing without turning a shared machine into a
-# standing login. The checkbox is built in code, like the show-password toggle,
-# so the login panel keeps one owner instead of splitting across scene + script.
-const _SETTING_REMEMBER_USER: StringName = &"remember_username"
-const _SETTING_SAVED_USER: StringName = &"saved_username"
-var _remember_me: CheckBox
-
 # Community / support links opened by the global "More" menu. Empty = not provided
 # yet → that button is disabled rather than opening a dead link.
 const LINK_WEBSITE: String = Distribution.WEBSITE_URL
@@ -134,7 +123,6 @@ func _ready() -> void:
 
 	_setup_focus_highlight()
 	_setup_password_fields()
-	_setup_remember_me()
 	_wire_more_menu()
 	_wire_button_sounds()  # static + character-creation buttons exist by now
 	_start_gateway_music()
@@ -584,10 +572,6 @@ func _on_login_login_button_pressed() -> void:
 		return
 
 	session_id = response.get("session_id")
-
-	# Only ever remembered on a login the gateway ACCEPTED, so a typo never comes
-	# back to greet the player on the next launch.
-	_remember_username(username)
 
 	save_refresh_token("%s\n%s" % [username, password], "user://%ssession.dat" % local_id)
 
@@ -1226,55 +1210,6 @@ func _setup_password_fields() -> void:
 	_add_password_toggle(
 		$CreateAccountPanel/VBoxContainer/VBoxContainer/VBoxContainer3,
 		[create_pw, create_pw_confirm]
-	)
-
-
-## Add the "Remember me?" checkbox above the Login button and restore what it
-## saved last time. Runs once at boot: the login panel is built in the scene and
-## only hidden, so a restored name survives every trip back to the main menu.
-func _setup_remember_me() -> void:
-	var form: VBoxContainer = $LoginPanel/VBoxContainer/VBoxContainer
-	var name_edit: LineEdit = $LoginPanel/VBoxContainer/VBoxContainer/VBoxContainer/LineEdit
-
-	_remember_me = CheckBox.new()
-	_remember_me.text = tr("REMEMBER_ME")
-	form.add_child(_remember_me)
-	# Above the Login button — the conventional spot, and it keeps the button the
-	# last thing a keyboard player tabs to.
-	form.move_child(_remember_me, form.get_child_count() - 2)
-
-	var saved: Variant = ClientState.settings.get_value(
-		_SETTINGS_SECTION, _SETTING_SAVED_USER
-	)
-	_remember_me.button_pressed = ClientState.settings.get_value(
-		_SETTINGS_SECTION, _SETTING_REMEMBER_USER
-	) == true
-	if _remember_me.button_pressed and saved is String and not (saved as String).is_empty():
-		name_edit.text = saved as String
-
-	# Forget on the UNTICK, not on the next login: someone clearing the box on a
-	# shared machine means "drop it now", and they may well close the client
-	# instead of signing in again.
-	_remember_me.toggled.connect(
-		func(pressed: bool) -> void:
-			ClientState.settings.set_value(
-				_SETTINGS_SECTION, _SETTING_REMEMBER_USER, pressed
-			)
-			if not pressed:
-				ClientState.settings.set_value(
-					_SETTINGS_SECTION, _SETTING_SAVED_USER, ""
-				)
-	)
-
-
-## Store (or clear) the account name behind the checkbox's current state.
-func _remember_username(username: String) -> void:
-	var remember: bool = _remember_me != null and _remember_me.button_pressed
-	ClientState.settings.set_value(
-		_SETTINGS_SECTION, _SETTING_REMEMBER_USER, remember
-	)
-	ClientState.settings.set_value(
-		_SETTINGS_SECTION, _SETTING_SAVED_USER, username if remember else ""
 	)
 
 
