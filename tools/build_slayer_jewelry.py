@@ -46,7 +46,7 @@ FAMILIES = {
 }
 
 QUALITIES = [
-	("low", "Low Quality", "copper", 30, 1, 125),
+	("low", "Low Quality", "bronze", 30, 1, 125),
 	("medium", "Medium Quality", "iron", 60, 5, 275),
 	("high", "High Quality", "silver", 100, 10, 550),
 	("pristine", "Pristine", "gold", 200, 15, 1000),
@@ -59,8 +59,12 @@ RING_SLUG = {
 	"vital": "ring_vital_{metal}",
 }
 
+# Metal tier -> the bar used at the anvil. The entry tier is BRONZE, not copper:
+# the furnace ladder starts at bronze_bar (copper ore + tin ore) and copper_bar is
+# not a smeltable output, so the original copper_bar cost made these four rings
+# uncraftable. The rings were renamed Copper -> Bronze to match 2026-09-08.
 BAR_SLUG = {
-	"copper": "copper_bar",
+	"bronze": "bronze_bar",
 	"iron": "iron_bar",
 	"silver": "silver_bar",
 	"gold": "gold_bar",
@@ -111,7 +115,7 @@ def build_gems() -> list[Path]:
 			name = f"{qlabel} {stem} Gem"
 			desc = (
 				f"A {qlabel.lower()} gem for forging {stem} rings. "
-				f"Bought with Slayer Points; set into {QUALITIES[i][2].title()} metal at the anvil."
+				f"Bought with Slayer Points; set into {BAR_SLUG[QUALITIES[i][2]].removesuffix('_bar').title()} metal at the anvil."
 			)
 			path = GEM_DIR / f"{slug}.tres"
 			text = f'''[gd_resource type="Resource" script_class="MaterialItem" format=3]
@@ -208,7 +212,7 @@ label_override = "Browse Slayer Shop"
 
 [sub_resource type="Resource" id="Talk_slayer"]
 script = ExtResource("4_diag")
-lines = Array[String](["I take Slayer points, not gold. Finish tasks for Durael — or Turael, if you're just starting — and bring the points here.", "These gems set the Guard, Agile, Focus, and Vital rings. Buy the quality that matches the metal you plan to forge: low for copper, medium for iron, high for silver, pristine for gold.", "Ten bars and one gem at the anvil. No shortcuts, no gold price tags."])
+lines = Array[String](["I take Slayer points, not gold. Finish tasks for Durael — or Turael, if you're just starting — and bring the points here.", "These gems set the Guard, Agile, Focus, and Vital rings. Buy the quality that matches the metal you plan to forge: low for bronze, medium for iron, high for silver, pristine for gold.", "Ten bars and one gem at the anvil. No shortcuts, no gold price tags."])
 label_override = "How does this shop work?"
 
 [resource]
@@ -222,9 +226,9 @@ interactions = Array[ExtResource("2_inter")]([SubResource("Shop_slayer"), SubRes
 
 
 def ensure_anvil_ring_recipes() -> None:
-	"""Append copper/iron/silver/gold Guard/Agile/Focus/Vital recipes if missing."""
+	"""Append bronze/iron/silver/gold Guard/Agile/Focus/Vital recipes if missing."""
 	text = ANVIL.read_text(encoding="utf-8")
-	if "R_ring_guard_copper" in text:
+	if "R_ring_guard_bronze" in text:
 		print("anvil already has entry ring recipes")
 		return
 

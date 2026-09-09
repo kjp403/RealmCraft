@@ -390,8 +390,8 @@ entries = Array[Dictionary]([{
 }, {
 &"hash": "4fb34fc28dc4b122bb76ea835213cbf716b8c1db783ebaf01415e1eee85d9924",
 &"id": 122,
-&"path": "res://source/common/gameplay/items/gears/rings/ring_agile_copper.tres",
-&"slug": &"ring_agile_copper"
+&"path": "res://source/common/gameplay/items/gears/rings/ring_agile_bronze.tres",
+&"slug": &"ring_agile_bronze"
 }, {
 &"hash": "53cd700a0026eeeff243fc3f496dbd3ba35fda5db7ad874491774fddcaa2e20a",
 &"id": 123,
@@ -410,8 +410,8 @@ entries = Array[Dictionary]([{
 }, {
 &"hash": "8c31921a2646149bcf0a1884d3643bddca3437e035d461fc9fc41b9c911a0dc9",
 &"id": 149,
-&"path": "res://source/common/gameplay/items/gears/rings/ring_focus_copper.tres",
-&"slug": &"ring_focus_copper"
+&"path": "res://source/common/gameplay/items/gears/rings/ring_focus_bronze.tres",
+&"slug": &"ring_focus_bronze"
 }, {
 &"hash": "3fc19263ddcd813734ad3b5d5442c8365ec636a1b8a44efcaa07498e84eed568",
 &"id": 125,
@@ -430,8 +430,8 @@ entries = Array[Dictionary]([{
 }, {
 &"hash": "b2904f9416563be9ae01d51a4f0cfcd92ffc05df1482fd1b38ebf263e2d66b98",
 &"id": 127,
-&"path": "res://source/common/gameplay/items/gears/rings/ring_guard_copper.tres",
-&"slug": &"ring_guard_copper"
+&"path": "res://source/common/gameplay/items/gears/rings/ring_guard_bronze.tres",
+&"slug": &"ring_guard_bronze"
 }, {
 &"hash": "ec7f2a1051aa4da5d2a6f662a9e3dd38a965c9f1670fdedc62509e8453146669",
 &"id": 151,
@@ -455,8 +455,8 @@ entries = Array[Dictionary]([{
 }, {
 &"hash": "76bbbf9df78a20fbc7004052e90c7f4ae03b2e2abc79e8b47f297e1d6f30301e",
 &"id": 153,
-&"path": "res://source/common/gameplay/items/gears/rings/ring_vital_copper.tres",
-&"slug": &"ring_vital_copper"
+&"path": "res://source/common/gameplay/items/gears/rings/ring_vital_bronze.tres",
+&"slug": &"ring_vital_bronze"
 }, {
 &"hash": "84662c4eeb215a03891384893ffef1c9a716f068cff12c970c888499a04a0f20",
 &"id": 130,

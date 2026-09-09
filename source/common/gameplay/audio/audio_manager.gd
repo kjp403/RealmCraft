@@ -258,7 +258,17 @@ func play_ui_sound_stream(
 	if not replace_path.is_empty() and replace_path == _replaceable_ui_path and _replaceable_ui_stream_id >= 0:
 		playback.stop_stream(_replaceable_ui_stream_id)
 		_replaceable_ui_stream_id = -1
-	var stream_id: int = playback.play_stream(sound, 0, volume_db, pitch)
+	# THE BUS ARGUMENT IS LOAD-BEARING. AudioStreamPlaybackPolyphonic.play_stream
+	# defaults its `bus` parameter to &"Master" — NOT to the bus of the player that
+	# owns the playback. So every UI cue was mixed straight into Master and bypassed
+	# Ui/Sound, which is where the settings slider applies its gain.
+	# Muting still worked (the _is_silent guard above returns before we reach here),
+	# and that combination is exactly what players reported: the Sound slider appeared
+	# to do nothing at all until it hit zero, and the level-up jingle stayed at full
+	# volume at the lowest audible setting.
+	var stream_id: int = playback.play_stream(
+		sound, 0, volume_db, pitch, AudioServer.PLAYBACK_TYPE_DEFAULT, ui_player.bus
+	)
 	if not replace_path.is_empty():
 		_replaceable_ui_path = replace_path
 		_replaceable_ui_stream_id = stream_id
@@ -271,10 +281,14 @@ func play_ui_sound_stream(
 ## Sets all sound effects volume. UI and spatial sound effects.
 func set_sfx_volume(volume_linear: float) -> void:
 	_sfx_linear = clampf(volume_linear, 0.0, 1.0)
-	# Ui sends through Sound, but mute both: linear 0 → -inf is ignored on some
-	# backends, and UI one-shots (hover, level-up) are the ones that leak.
+	# Ui SENDS INTO Sound (default_bus_layout.tres), so the slider gain belongs on
+	# Sound alone. Setting it on both multiplied it in twice for UI cues — a slider
+	# at 50% left them at 25%, a quarter of the spatial SFX they sit next to.
+	# Ui keeps unity gain; it is still muted independently because linear 0 → -inf
+	# is ignored on some backends (HTML5 Web Audio, a few WASAPI paths) and UI
+	# one-shots are the ones that leak through.
 	_set_bus_gain(&"Sound", _sfx_linear)
-	_set_bus_gain(&"Ui", _sfx_linear)
+	_set_bus_mute(&"Ui", _is_silent(_sfx_linear))
 
 
 ## Load and play a spatial sound from the given path.
@@ -302,6 +316,16 @@ func play_sfx_stream(sound: AudioStream, position: Vector2, override_max_distanc
 
 func _is_silent(volume_linear: float) -> bool:
 	return volume_linear < MUTE_LINEAR
+
+
+## Mute/unmute a bus without touching its gain — for a bus that inherits its level
+## from the bus it sends into (see [method set_sfx_volume]).
+func _set_bus_mute(bus_name: StringName, muted: bool) -> void:
+	var bus_index: int = AudioServer.get_bus_index(bus_name)
+	if bus_index < 0:
+		push_warning("AudioManager: missing bus '%s'" % bus_name)
+		return
+	AudioServer.set_bus_mute(bus_index, muted)
 
 
 func _set_bus_gain(bus_name: StringName, volume_linear: float) -> void:
