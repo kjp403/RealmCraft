@@ -66,24 +66,35 @@ const EFFECT_PROVOCATION: StringName = &"provocation"
 ## Collapsing the second into the first would have made it a bigger version of
 ## the first, which is not a second item.
 ##
-## THE RATE IS SET AGAINST THE PRAYER BOOK, NOT AGAINST THE OTHER POTIONS.
+## THE RATE IS SET AGAINST THE PRAYER BOOK, NOT AGAINST THE OTHER POTIONS,
+## AND IT DELIBERATELY FALLS SHORT OF IT.
+##
 ## The dearest set of combat prayers a player can legally hold at once is Oath
 ## of the Slayer (24/min, and it occupies BOTH the offence and defence groups,
 ## so it locks out everything else in either), one protection prayer (12/min)
-## and Blood Tithe (5/min) — 41/min, which empties a 99 pool in 2m25s. The
-## Renewal is authored at 7 points every 10s, i.e. 42/min, so for its five
-## minutes the whole top-end book costs nothing and a boss fight is not paced by
-## sipping. Under that number it is a slower Prayer Potion; far over it, prayer
-## stops being a resource at all. [method verify_prayer._heaviest_prayer_drain]
-## recomputes the 41 from the book, so a new prayer moves the bar rather than
-## quietly leaving this behind.
+## and Blood Tithe (5/min) — 41/min, which empties a 99 pool in 2m25s.
+##
+## The Renewal pays 5 points every 15s, i.e. 20/min: just under half of that.
+## Net drain on the top-end book falls to 21/min, so the same pool lasts 4m43s
+## instead of 2m25s — the fight gets materially longer, and prayer is still
+## something you spend. FULLY covering the 41 was tried and rejected as overkill
+## (2026-09-10): a draught that zeroes the drain does not extend the resource,
+## it deletes it, and there is then no reason to carry prayer potions at all.
+##
+## Both ends matter, so both are asserted. Under about a third of the heaviest
+## setup this is just a slow Prayer Potion and the Dragon Bones are wasted; at
+## or over 100% prayer stops being a resource.
+## [method verify_prayer._heaviest_prayer_drain] recomputes the 41 from the book,
+## so a new prayer or a retuned drain moves the bar rather than quietly leaving
+## this behind.
 ##
 ## That is what the two Dragon Bones are buying, and they are expensive: burnt
-## at the altar the same two pay 18,000 Prayer xp. Per POINT restored the Super
-## Prayer Potion is more than twice as efficient — the Renewal is priced for
-## uptime (no sip window, no bag slot, no interruption), never for throughput,
-## and it should stay the worse deal for anyone who can afford to stand still
-## and drink.
+## at the altar the same two pay 18,000 Prayer xp. One vial is 105 points over
+## its five minutes — more than a full 99 pool — but the Super Prayer Potion is
+## still far better per bone. That is the intended shape: the Renewal is priced
+## for uptime (no sip window, no bag slot, no interruption), never for
+## throughput, and it should stay the worse deal for anyone who can afford to
+## stand still and drink.
 const EFFECT_PRAYER_RENEWAL: StringName = &"prayer_renewal"
 
 ## Reasons stealth ends, passed to [method break_stealth] purely so the server

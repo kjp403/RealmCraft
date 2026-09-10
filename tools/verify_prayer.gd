@@ -192,17 +192,32 @@ func _check_prayer_draughts() -> void:
 		"the renewal arms the prayer-renewal family"
 	)
 	_check(renewal.aura_pulse_s > 0.0, "the renewal pulses")
-	# The renewal is sized against the PRAYER BOOK: it must cover the heaviest
-	# setup a player can actually run, or it is just a slow Prayer Potion and the
-	# two Dragon Bones (18,000 Prayer xp burnt at the altar) are wasted. See
-	# StatusEffectManager.EFFECT_PRAYER_RENEWAL.
+	# The renewal is sized against the PRAYER BOOK, from BOTH ends. Too slow and
+	# it is a drip-fed Prayer Potion that does not justify two Dragon Bones
+	# (18,000 Prayer xp burnt at the altar); at or over the heaviest setup it
+	# stops extending prayer and starts deleting it. See
+	# StatusEffectManager.EFFECT_PRAYER_RENEWAL for both numbers.
 	var heaviest: float = _heaviest_prayer_drain()
 	var per_minute: float = renewal.aura_potency * (60.0 / renewal.aura_pulse_s)
 	_check(
-		per_minute >= heaviest,
-		"the renewal (%.0f/min) covers the heaviest setup (%.0f/min)" % [
+		per_minute >= heaviest / 3.0,
+		"the renewal (%.0f/min) meaningfully offsets the heaviest setup (%.0f/min)" % [
 			per_minute, heaviest
 		]
+	)
+	_check(
+		per_minute < heaviest,
+		"the renewal (%.0f/min) does NOT fully cover the heaviest setup (%.0f/min)" % [
+			per_minute, heaviest
+		]
+	)
+	# One vial should still be worth more than a full altar recharge, or there is
+	# no reason to brew it over walking back to the church.
+	var pulses: int = int(renewal.aura_duration_s / renewal.aura_pulse_s) + 1
+	var total: float = renewal.aura_potency * pulses
+	_check(
+		total > PrayerService.max_points_for_level(99),
+		"one renewal (%d points) beats a full 99 pool" % int(total)
 	)
 	_check(
 		not renewal.exclusive_buff,
@@ -271,6 +286,25 @@ func _check_prayer_draughts() -> void:
 			said_total = true
 	_check(said_rate, "the renewal tooltip names its rate")
 	_check(said_total, "the renewal tooltip names its total")
+
+	# Distinct art. A draught that wears another draught's icon is a draught the
+	# player grabs by mistake mid-fight, and the generic potion pack makes that
+	# easy to do by accident — the Super Prayer Potion first shipped in the same
+	# green bottle as Weapon Poison ++.
+	var icons: Dictionary = {}
+	for vial: Item in [potion, super_potion, renewal]:
+		var art: String = "" if vial.item_icon == null else vial.item_icon.resource_path
+		_check(not art.is_empty(), "%s has an icon" % vial.item_name)
+		var clash: String = String(icons.get(art, ""))
+		_check(clash.is_empty(), "%s has art of its own%s" % [
+			vial.item_name,
+			"" if clash.is_empty() else " (wears %s's)" % clash,
+		])
+		icons[art] = String(vial.item_name)
+	_check(
+		_icon_users(super_potion) == 1 and _icon_users(renewal) == 1,
+		"the two new draughts' icons are used by nothing else"
+	)
 
 
 func _check_church() -> void:
@@ -421,6 +455,35 @@ func _heaviest_prayer_drain() -> float:
 	if oath != null and float(per_group.get("offence", 0.0)) == oath.drain_per_minute:
 		total -= oath.drain_per_minute
 	return total
+
+
+## How many item resources reference [param item]'s icon. 1 = it owns its art.
+## Grep-shaped on purpose: the icon path is a plain string in every .tres, and
+## walking the whole registry to load every Item would cost far more than
+## reading the files.
+func _icon_users(item: Item) -> int:
+	if item == null or item.item_icon == null:
+		return 0
+	var needle: String = item.item_icon.resource_path
+	var count: int = 0
+	for path: String in _all_item_resources("res://source/common/gameplay/items"):
+		var body: String = FileAccess.get_file_as_string(path)
+		if body.contains(needle):
+			count += 1
+	return count
+
+
+func _all_item_resources(root: String) -> PackedStringArray:
+	var out: PackedStringArray = []
+	var dir: DirAccess = DirAccess.open(root)
+	if dir == null:
+		return out
+	for sub: String in dir.get_directories():
+		out.append_array(_all_item_resources(root.path_join(sub)))
+	for file_name: String in dir.get_files():
+		if file_name.ends_with(".tres"):
+			out.append(root.path_join(file_name))
+	return out
 
 
 func _make_player(prayer_level: int) -> Player:
