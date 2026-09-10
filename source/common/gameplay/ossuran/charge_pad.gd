@@ -35,6 +35,19 @@ signal charged()
 ## drive callouts at milestones without polling.
 signal progress_changed(value: float)
 
+## Progress pushes are rate-limited to this interval.
+##
+## This pad used to push on EVERY physics frame, to EVERY player in the instance,
+## over `data_push` — which is declared reliable and ordered, on the channel
+## combat shares. Two pads and a full group put enough of those in flight that
+## hit acknowledgements queued behind pad-fill spam, and the fight read as lag
+## while the rest of the world felt fine. A fill bar only has to look smooth and
+## the client tweens between pushes, so 10 Hz is ample.
+##
+## Deliberately a wall-clock interval, not a frame count: it must not change if
+## the server tick rate ever does.
+const BROADCAST_INTERVAL_MS: int = 100
+
 ## Floor decal depth. Below characters (z 0) but above the tilemap.
 const PAD_Z_INDEX: int = -2
 
@@ -65,6 +78,9 @@ var active: bool = false
 ## Players we have applied the STORM ward to, so it is always removed from the
 ## same set it was added to — never by re-scanning occupancy, which would miss a
 ## player who died or left the instance while inside.
+## Wall-clock stamp of the last progress push, for [constant BROADCAST_INTERVAL_MS].
+var _last_broadcast_ms: int = 0
+
 var _warded: Array[Player] = []
 ## Cached so the client half can push the number into the shader every frame it
 ## changes without a node lookup.
@@ -113,7 +129,7 @@ func open() -> void:
 	active = true
 	complete = false
 	progress = 0.0
-	_broadcast()
+	_broadcast(true)
 	_apply_visual()
 
 
@@ -123,7 +139,7 @@ func open() -> void:
 func close() -> void:
 	active = false
 	_clear_ward()
-	_broadcast()
+	_broadcast(true)
 	_apply_visual()
 
 
@@ -155,6 +171,7 @@ func _physics_process(delta: float) -> void:
 		complete = true
 		active = false
 		_clear_ward()
+		_broadcast(true)
 		_apply_visual()
 		charged.emit()
 
@@ -197,9 +214,18 @@ func _clear_ward() -> void:
 ## Push the pad's state to every client in the instance. Sent on change only —
 ## _physics_process already rate-limits this to the physics tick, and the
 ## payload is three fields, so this is cheaper than a per-pad synchronizer.
-func _broadcast() -> void:
+## Push this pad's progress to every client in the instance.
+##
+## [param force] sends regardless of the rate limit. Use it for anything a client
+## cannot infer by tweening — opening, closing, completing — so a throttled tick
+## can never be the last word on a state change.
+func _broadcast(force: bool = false) -> void:
 	if not GameMode.is_world_server() or WorldServer.curr == null:
 		return
+	var now: int = Time.get_ticks_msec()
+	if not force and now - _last_broadcast_ms < BROADCAST_INTERVAL_MS:
+		return
+	_last_broadcast_ms = now
 	var instance: Node = _instance()
 	if instance == null:
 		return
