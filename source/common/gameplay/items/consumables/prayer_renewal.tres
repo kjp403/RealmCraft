@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PotionItem" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_purple_flask.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_prayer_renewal.png" id="1_tex"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
 
 [resource]

@@ -3278,12 +3278,12 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/consumables/siltward_draught.tres",
 &"slug": &"siltward_draught"
 }, {
-&"hash": "5b4d801d48983175b91ca0cd3b33ffb783b709b0d9fd53d44cdc97b04dc708ed",
+&"hash": "7d912b891f392ced3527e1a4130088f7451f5362aca25aba791e32aa47d648a0",
 &"id": 701,
 &"path": "res://source/common/gameplay/items/consumables/super_prayer_potion.tres",
 &"slug": &"super_prayer_potion"
 }, {
-&"hash": "200d3740f6913f10b59cfaa86b7dea2bd4a5ab0a3a1d06d22e75c983e9b1d4d9",
+&"hash": "1bcedae51799014e26d665e05bd5e48dfa4a7bb98ebc05575efc9dc452bb7429",
 &"id": 702,
 &"path": "res://source/common/gameplay/items/consumables/prayer_renewal.tres",
 &"slug": &"prayer_renewal"

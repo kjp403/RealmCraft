@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ConsumableItem" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_purple_bottle.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_super_prayer.png" id="1_tex"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/consumable_item.gd" id="1_script"]
 
 [resource]
