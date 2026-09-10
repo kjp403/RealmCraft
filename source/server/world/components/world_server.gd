@@ -236,6 +236,12 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	QuestBossService.on_peer_disconnected(peer_id)
 	PartyService.on_peer_disconnected(peer_id)
 	OssuranGateService.on_peer_disconnected(peer_id)
+	# Fishing combo: drop the streak. It is deliberately session-shaped — nothing
+	# about it is persisted — and this is also what keeps the tracking map from
+	# growing for the life of the process. Keyed by player_id, not peer_id, so it
+	# is cleared HERE rather than in the takeover branch above, where the resource
+	# already belongs to the new session.
+	FishingComboManager.clear(int(player.player_id))
 	# Drop rate-limit counters so a reconnect starts with a clean window.
 	RateLimiter.forget(peer_id)
 

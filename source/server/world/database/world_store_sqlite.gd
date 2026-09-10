@@ -99,15 +99,25 @@ func save_player(player: PlayerResource) -> bool:
 	# anything already back to full — an untouched node and a fully regenerated
 	# one are the same state, so only drained pools reach the row.
 	var gather_nodes_json: String = JSON.stringify(GatherNodeLedger.save_state(player))
+	# Bottomless Bait Bucket charge (schema v26). A JSON blob rather than a bare
+	# int column so the rest of the fishing loop has somewhere to land later
+	# without another migration — every extra column is another INSERT
+	# placeholder to keep aligned, and a mismatched pair makes save_player() fail
+	# silently for every player. stored_bait rides here rather than on the bucket
+	# item or the inventory slot; see the note on PlayerResource.stored_bait for
+	# why both of those lose it without a word.
+	var angler_json: String = JSON.stringify({
+		"bait": player.stored_bait,
+	})
 
 	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, inventory_bags, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
-		+ "peddler_json, gather_nodes_json, collection_log_json, "
+		+ "peddler_json, gather_nodes_json, collection_log_json, angler_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -149,6 +159,7 @@ func save_player(player: PlayerResource) -> bool:
 			peddler_json,
 			gather_nodes_json,
 			collection_log_json,
+			angler_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -682,6 +693,16 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 		player.slayer_tasks_completed = int((slayer_v as Dictionary).get("tasks_completed", 0))
 		var slayer_blocked_v: Variant = (slayer_v as Dictionary).get("blocked", {})
 		player.slayer_blocked_tasks = slayer_blocked_v if slayer_blocked_v is Dictionary else {}
+
+	# Missing column / pre-v26 row reads as "{}" -> an empty bucket, which is
+	# exactly the state those characters are in today.
+	var angler_v: Variant = JSON.parse_string(str(row.get("angler_json", "{}")))
+	if angler_v is Dictionary:
+		# Clamped on read as well as on write: a row saved before the cap existed,
+		# or hand-edited, must not load a bucket over the ceiling.
+		player.stored_bait = clampi(
+			int((angler_v as Dictionary).get("bait", 0)), 0, BaitBucket.MAX_STORED
+		)
 
 	player.active_guild_id = int(row.get("active_guild_id", 0))
 

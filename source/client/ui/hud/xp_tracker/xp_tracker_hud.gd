@@ -96,6 +96,16 @@ const SKILL_TINTS: Dictionary[StringName, Color] = {
 @onready var _drops: XpFloatingTextManager = $Drops
 
 ## The skill the orb is currently showing.
+## Fishing combo, stashed off the gather push so the XP drop that lands in the
+## same frame can be coloured by the streak. ClientState emits gather_succeeded
+## BEFORE the per-grant skill_xp_gained (see its _on_gather_result), which is
+## what makes reading it here an ordering guarantee rather than a race.
+var _combo_streak: int = 0
+var _combo_multiplier: float = 1.0
+## True once the cap has been announced for the CURRENT streak, so the milestone
+## fires once per run rather than on every catch after the twentieth.
+var _combo_capped_announced: bool = false
+
 var _job: StringName = &""
 var _level: int = 1
 var _xp_into_level: int = 0
@@ -139,6 +149,10 @@ func _ready() -> void:
 	# Set here rather than trusted from the scene: the number that decides whether
 	# a drop is visible at all belongs next to the comment explaining it.
 	_drops.position = DROPS_ANCHOR
+	# The combo has no HUD of its own; it rides the number the player is already
+	# watching. Connected here rather than in the combo service because
+	# PlayerResource is server-only — the client only ever sees the gather push.
+	ClientState.gather_succeeded.connect(_on_gather_for_combo)
 
 	_hide_timer = Timer.new()
 	_hide_timer.one_shot = true
@@ -196,6 +210,8 @@ func _on_skill_xp_gained(
 	if not is_enabled():
 		return
 	var tint: Color = tint_for(job)
+	if job == &"fishing" and _combo_streak > 0:
+		tint = _combo_tint(tint)
 	# The number floats whatever the orb does, so a skill that pays out while
 	# the orb is mid-fade still reads.
 	_drops.push(job, amount, tint)
@@ -449,3 +465,44 @@ func _on_setting_changed(section: StringName, property: StringName, new_value: V
 			_fade_tween.kill()
 		modulate.a = 0.0
 		_finish_hide()
+
+
+# --- Fishing combo -----------------------------------------------------------
+
+## Streak below this is not worth a "broken" line. A one- or two-catch streak
+## lapses every time you finish a node and walk to the next, and toasting those
+## would put a notification on the most routine action in the skill.
+const COMBO_TOAST_FLOOR: int = 5
+
+
+## Read the combo off the gather push and speak up only at the two moments that
+## carry information: hitting the cap, and losing a streak that was worth having.
+## Everything in between is carried by the drop colour.
+func _on_gather_for_combo(result: Dictionary) -> void:
+	# combo_streak is 0 on every non-fishing node by construction, so gating on
+	# the job keeps a mining swing from clearing an angler's streak.
+	if str(result.get("job", "")) != "fishing":
+		return
+
+	var streak: int = int(result.get("combo_streak", 0))
+	if _combo_streak >= COMBO_TOAST_FLOOR and streak == 0:
+		Toaster.toast("Fishing combo broken — move back and re-cast to rebuild it.")
+
+	_combo_streak = streak
+	_combo_multiplier = float(result.get("combo_multiplier", 1.0))
+
+	if streak <= 0:
+		_combo_capped_announced = false
+		return
+	if not _combo_capped_announced 			and is_equal_approx(_combo_multiplier, FishingComboManager.MAX_MULTIPLIER):
+		_combo_capped_announced = true
+		Toaster.toast("Fishing combo maxed — +%d%% XP while you stay on this spot."
+			% roundi((FishingComboManager.MAX_MULTIPLIER - 1.0) * 100.0))
+
+
+## Warm the XP drop from sea-blue toward gold as the streak climbs, so the
+## snowball is visible on the number already on screen. Full gold at the cap.
+func _combo_tint(base: Color) -> Color:
+	var span: float = maxf(0.001, FishingComboManager.MAX_MULTIPLIER - 1.0)
+	var t: float = clampf((_combo_multiplier - 1.0) / span, 0.0, 1.0)
+	return base.lerp(PixelUI.INK_GOLD, t)

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MaterialItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_fish_bait.png" id="1_icon"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/material_item.gd" id="2_mat"]
+
+[resource]
+script = ExtResource("2_mat")
+item_name = &"Fish Bait"
+item_icon = ExtResource("1_icon")
+description = "Cut from raw fish with a Fillet Knife. Load it into a Bottomless Bait Bucket to keep a fishing combo alive."
+holdable = false
+can_trade = true
+vendor_value = 1
+tags = PackedStringArray()
+metadata/slug = &"fish_bait"
+metadata/id = 704

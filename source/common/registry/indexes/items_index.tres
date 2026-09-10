@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788493767
-next_id = 701
+version = 1788937594
+next_id = 705
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3277,6 +3277,21 @@ entries = Array[Dictionary]([{
 &"id": 700,
 &"path": "res://source/common/gameplay/items/consumables/siltward_draught.tres",
 &"slug": &"siltward_draught"
+}, {
+&"hash": "405b9b887e9e38547a9824a88bc79c989a3853a427d143cfb758de570bc4a4bf",
+&"id": 701,
+&"path": "res://source/common/gameplay/items/angler/bottomless_bait_bucket.tres",
+&"slug": &"bottomless_bait_bucket"
+}, {
+&"hash": "2a79bf000c8eecdb17765e37651e4cb6f86671798b641855377db68ded4d3f03",
+&"id": 702,
+&"path": "res://source/common/gameplay/items/angler/fillet_knife.tres",
+&"slug": &"fillet_knife"
+}, {
+&"hash": "b3f5ae8b96b80757bb7179e803986f5d5ed79ea2d7ae43d8fbc781555852ed40",
+&"id": 704,
+&"path": "res://source/common/gameplay/items/materials/fish_bait.tres",
+&"slug": &"fish_bait"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

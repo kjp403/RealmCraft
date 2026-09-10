@@ -84,6 +84,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 25:
 		_migration_v25(db)
 		_set_schema_version(db, 25)
+	if version < 26:
+		_migration_v26(db)
+		_set_schema_version(db, 26)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -509,3 +512,15 @@ static func _migration_v24(db: SQLite) -> void:
 static func _migration_v25(db: SQLite) -> void:
 	if not _column_exists(db, "players", "collection_log_json"):
 		db.query("ALTER TABLE players ADD COLUMN collection_log_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v26: the Bottomless Bait Bucket's stored charge. A JSON blob rather than an
+## int column so the rest of the fishing loop can land here later without another
+## migration — for the reason v25 spells out: every extra column is another INSERT
+## placeholder to keep aligned, and a mismatched pair makes save_player() fail
+## silently for EVERY player. Shape is owned by the reader/writer pair in
+## world_store_sqlite.gd. ADD COLUMN — no wipe; existing rows migrate to an empty
+## bucket, which is exactly what those characters have today.
+static func _migration_v26(db: SQLite) -> void:
+	if not _column_exists(db, "players", "angler_json"):
+		db.query("ALTER TABLE players ADD COLUMN angler_json TEXT NOT NULL DEFAULT '{}';")

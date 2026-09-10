@@ -6,6 +6,8 @@
 [ext_resource type="Resource" uid="uid://cfishrodlv1001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv10.tres" id="4_rod10"]
 [ext_resource type="Resource" uid="uid://cfishrodlv2001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv20.tres" id="5_rod20"]
 [ext_resource type="Resource" uid="uid://cfishrodlv3001" path="res://source/common/gameplay/items/weapons/tools/fishing_rod_lv30.tres" id="6_rod30"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/angler/fillet_knife.tres" id="7_knife"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/angler/bottomless_bait_bucket.tres" id="8_bucket"]
 
 [sub_resource type="Resource" id="Entry_rod1"]
 script = ExtResource("1_entry")
@@ -27,8 +29,18 @@ script = ExtResource("1_entry")
 item = ExtResource("6_rod30")
 price = 200
 
+[sub_resource type="Resource" id="Entry_knife"]
+script = ExtResource("1_entry")
+item = ExtResource("7_knife")
+price = 40
+
+[sub_resource type="Resource" id="Entry_bucket"]
+script = ExtResource("1_entry")
+item = ExtResource("8_bucket")
+price = 120
+
 [resource]
 script = ExtResource("2_shop")
 shop_name = "Beach Tackle"
-entries = Array[ExtResource("1_entry")]([SubResource("Entry_rod1"), SubResource("Entry_rod10"), SubResource("Entry_rod20"), SubResource("Entry_rod30")])
+entries = Array[ExtResource("1_entry")]([SubResource("Entry_rod1"), SubResource("Entry_rod10"), SubResource("Entry_rod20"), SubResource("Entry_rod30"), SubResource("Entry_knife"), SubResource("Entry_bucket")])
 metadata/slug = &"beach_angler_shop"
