@@ -39,6 +39,7 @@ DEFAULT_GATES=(
 	verify_gather_db_roundtrip
 	verify_gather_tools
 	verify_peddler_spots
+	verify_angler
 )
 
 GATES=("$@")

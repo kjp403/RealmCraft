@@ -15,4 +15,4 @@ description = "The same bitter green, ground from heavier marrow and cut with st
 vendor_value = 100
 tags = PackedStringArray("vial")
 metadata/slug = &"super_prayer_potion"
-metadata/id = 701
+metadata/id = 705

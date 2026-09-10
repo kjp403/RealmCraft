@@ -18,4 +18,4 @@ description = "Dragon marrow drawn slowly through sun-lit lotus. It does not fil
 vendor_value = 100
 tags = PackedStringArray("vial")
 metadata/slug = &"prayer_renewal"
-metadata/id = 702
+metadata/id = 706

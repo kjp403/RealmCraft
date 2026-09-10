@@ -12,6 +12,6 @@ holdable = false
 can_trade = true
 vendor_value = 13
 stack_limit = 10
-tags = PackedStringArray()
+tags = PackedStringArray("raw_fish")
 metadata/slug = &"halibut"
 metadata/id = 597

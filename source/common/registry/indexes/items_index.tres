@@ -6,7 +6,7 @@
 script = ExtResource("1_gemjq")
 content_name = &"items"
 version = 1789019281
-next_id = 703
+next_id = 707
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3278,13 +3278,28 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/consumables/siltward_draught.tres",
 &"slug": &"siltward_draught"
 }, {
-&"hash": "7d912b891f392ced3527e1a4130088f7451f5362aca25aba791e32aa47d648a0",
+&"hash": "405b9b887e9e38547a9824a88bc79c989a3853a427d143cfb758de570bc4a4bf",
 &"id": 701,
+&"path": "res://source/common/gameplay/items/angler/bottomless_bait_bucket.tres",
+&"slug": &"bottomless_bait_bucket"
+}, {
+&"hash": "2a79bf000c8eecdb17765e37651e4cb6f86671798b641855377db68ded4d3f03",
+&"id": 702,
+&"path": "res://source/common/gameplay/items/angler/fillet_knife.tres",
+&"slug": &"fillet_knife"
+}, {
+&"hash": "b3f5ae8b96b80757bb7179e803986f5d5ed79ea2d7ae43d8fbc781555852ed40",
+&"id": 704,
+&"path": "res://source/common/gameplay/items/materials/fish_bait.tres",
+&"slug": &"fish_bait"
+}, {
+&"hash": "7d912b891f392ced3527e1a4130088f7451f5362aca25aba791e32aa47d648a0",
+&"id": 705,
 &"path": "res://source/common/gameplay/items/consumables/super_prayer_potion.tres",
 &"slug": &"super_prayer_potion"
 }, {
 &"hash": "1bcedae51799014e26d665e05bd5e48dfa4a7bb98ebc05575efc9dc452bb7429",
-&"id": 702,
+&"id": 706,
 &"path": "res://source/common/gameplay/items/consumables/prayer_renewal.tres",
 &"slug": &"prayer_renewal"
 }])

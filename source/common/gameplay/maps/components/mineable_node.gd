@@ -353,6 +353,20 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			Inventory.MAX_SLOTS, false, active_bag, bag_count
 		)
 
+	# Node Combo: consecutive baited catches at the SAME fishing spot multiply
+	# Fishing XP. Registered once per YIELD rather than inside the per-job loop
+	# below — a node that credits two jobs would otherwise spend two bait, and
+	# advance the streak twice, for one fish.
+	#
+	# `key` is the GatherNodeLedger identity, not the node name: a name is unique
+	# only within one live Map, so two instances of the same biome would share it
+	# and a player hopping between them would keep a streak they should have lost.
+	var combo_multiplier: float = 1.0
+	if primary_job == &"fishing":
+		combo_multiplier = FishingComboManager.register_catch(
+			pr, player_id, key, player.global_position
+		)
+
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
 	var prayer_xp: float = 1.0
@@ -368,6 +382,10 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
 			rate *= jp.xp_multiplier(job_perks_dict)
 		rate *= prayer_xp
+		# Combo pays the Fishing line only. A pond that also credited, say,
+		# Harvesting must not have that second skill riding the angler's streak.
+		if job_name == &"fishing":
+			rate *= combo_multiplier
 		if rate != 1.0:
 			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
@@ -427,6 +445,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"charges_left": charges_left,
 		"max_charges": _pool_for(pr, key),
 		"node_path": node_path,
+		# Combo state rides the SAME payload the gather result already pushes
+		# (mining.gather_result -> ClientState.gather_succeeded) rather than a
+		# push of its own: a second push per catch would double the packets on
+		# the hottest loop in the game, and the two could arrive out of order,
+		# which on a streak counter reads as the number jumping backwards.
+		# 0 / 1.0 on every non-fishing node, so a reader needs no special case.
+		"combo_streak": FishingComboManager.streak_of(player_id) if primary_job == &"fishing" else 0,
+		"combo_multiplier": combo_multiplier,
 	}
 
 
