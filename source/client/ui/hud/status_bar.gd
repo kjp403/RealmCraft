@@ -34,6 +34,7 @@ const BUFF_ICONS: Dictionary = {
 	&"cinder_guard": "buff.png",
 	&"shadowveil": "buff.png",
 	&"provocation": "buff.png",
+	&"prayer_renewal": "buff.png",
 	# Anvil Stabilizer. No bespoke art yet, so the generic up-arrow rather than
 	# an unrelated icon.
 	&"anvil_stabilizer": "buff.png",
@@ -81,6 +82,7 @@ const DESCRIPTIONS: Dictionary = {
 	&"cinder_guard": "Cinder-guarded. Melee attackers catch fire.",
 	&"shadowveil": "Veiled. Hostiles cannot see you until you act.",
 	&"provocation": "Provoking. Nearby enemies are locked onto you.",
+	&"prayer_renewal": "Renewed. Your prayer trickles back as it runs.",
 }
 
 ## How long the tap-to-read label lingers on mobile (no hover there).

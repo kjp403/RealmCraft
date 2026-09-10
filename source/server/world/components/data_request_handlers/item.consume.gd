@@ -27,22 +27,35 @@ func data_request_handler(
 	if consumable == null:
 		return {"ok": false, "reason": "not_consumable"}
 
-	# One combat draught at a time — a weapon coating OR a draught-slot tonic,
-	# never both (ConsumableItem.draught_slot_busy). Checked ahead of can_use
-	# (which also refuses, so the hotbar and the held sip agree) purely so the
-	# refusal can be NAMED — "no_effect" would read as "this potion is broken".
+	# One draught at a time PER SLOT — an offensive weapon coating OR a
+	# draught-slot tonic in the combat slot, and the salve in its own
+	# (ConsumableItem.slot_busy). Checked ahead of can_use (which also refuses,
+	# so the hotbar and the held sip agree) purely so the refusal can be NAMED —
+	# "no_effect" would read as "this potion is broken".
 	var wants_slot: bool = consumable.is_coating() or consumable.exclusive_buff
-	if wants_slot and ConsumableItem.draught_slot_busy(player):
-		var coated: bool = CoatingService.is_active(player)
+	if wants_slot and consumable.slot_busy(player):
+		# Name whatever is actually holding the slot this vial wanted. A salve
+		# refused by another salve must not report the ember on the other slot.
+		var sustain: bool = consumable.is_sustain_coating()
+		var coated: bool = (
+			CoatingService.is_sustain_active(player) if sustain
+			else CoatingService.is_active(player)
+		)
 		return {
 			"ok": false,
 			"reason": "coating_active",
 			"active_kind": String(
-				CoatingService.active_kind(player) if coated
+				(
+					CoatingService.sustain_kind(player) if sustain
+					else CoatingService.active_kind(player)
+				) if coated
 				else BuffService.exclusive_stat(player)
 			),
 			"remaining": (
-				CoatingService.remaining_seconds(player) if coated
+				(
+					CoatingService.sustain_remaining_seconds(player) if sustain
+					else CoatingService.remaining_seconds(player)
+				) if coated
 				else BuffService.exclusive_remaining_seconds(player)
 			),
 		}

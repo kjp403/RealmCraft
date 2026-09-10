@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1788937594
-next_id = 705
+version = 1789019281
+next_id = 707
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3292,6 +3292,16 @@ entries = Array[Dictionary]([{
 &"id": 704,
 &"path": "res://source/common/gameplay/items/materials/fish_bait.tres",
 &"slug": &"fish_bait"
+}, {
+&"hash": "7d912b891f392ced3527e1a4130088f7451f5362aca25aba791e32aa47d648a0",
+&"id": 705,
+&"path": "res://source/common/gameplay/items/consumables/super_prayer_potion.tres",
+&"slug": &"super_prayer_potion"
+}, {
+&"hash": "1bcedae51799014e26d665e05bd5e48dfa4a7bb98ebc05575efc9dc452bb7429",
+&"id": 706,
+&"path": "res://source/common/gameplay/items/consumables/prayer_renewal.tres",
+&"slug": &"prayer_renewal"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

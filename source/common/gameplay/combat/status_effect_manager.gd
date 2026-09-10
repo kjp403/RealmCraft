@@ -20,7 +20,7 @@ extends Node
 ## thing that guards arrow-spam from stacking a mob to zero armor into a thing
 ## that sometimes permits stacking, which is how that guard gets lost.
 ##
-## Four families live here, and they share this node because they share the same
+## Six families live here, and they share this node because they share the same
 ## three needs: a per-character ledger of what was actually applied, a 1 Hz
 ## expiry tick, and generic signals the HUD can bind to.
 ##
@@ -32,6 +32,8 @@ extends Node
 ##   - [constant EFFECT_SHADOWVEIL]     — a stealth override read by NPC targeting.
 ##   - [constant EFFECT_PROVOCATION]    — a pulsing aggro lock built on the taunt
 ##                                        that every aggro-steal path already defers to.
+##   - [constant EFFECT_PRAYER_RENEWAL] — a pulsing prayer-point trickle on the
+##                                        drinker.
 ##
 ## SERVER-SIDE ONLY. Every entry point either checks `multiplayer.is_server()` or
 ## is called from a server tick. The client learns about all of it through the
@@ -56,6 +58,44 @@ const EFFECT_CINDER_GUARD: StringName = &"cinder_guard"
 const EFFECT_SHADOWVEIL: StringName = &"shadowveil"
 ## Pulsing aggro lock. Lives on the DRINKER.
 const EFFECT_PROVOCATION: StringName = &"provocation"
+## Prayer points trickled back a few at a time. Lives on the DRINKER.
+##
+## An aura and not a [ConsumableItem.prayer_amount] restore because the two are
+## different items: a Prayer Potion is the panic sip that buys back a chunk NOW,
+## and the Renewal is the thing you drink BEFORE the fight and then forget about.
+## Collapsing the second into the first would have made it a bigger version of
+## the first, which is not a second item.
+##
+## THE RATE IS SET AGAINST THE PRAYER BOOK, NOT AGAINST THE OTHER POTIONS,
+## AND IT DELIBERATELY FALLS SHORT OF IT.
+##
+## The dearest set of combat prayers a player can legally hold at once is Oath
+## of the Slayer (24/min, and it occupies BOTH the offence and defence groups,
+## so it locks out everything else in either), one protection prayer (12/min)
+## and Blood Tithe (5/min) — 41/min, which empties a 99 pool in 2m25s.
+##
+## The Renewal pays 5 points every 15s, i.e. 20/min: just under half of that.
+## Net drain on the top-end book falls to 21/min, so the same pool lasts 4m43s
+## instead of 2m25s — the fight gets materially longer, and prayer is still
+## something you spend. FULLY covering the 41 was tried and rejected as overkill
+## (2026-09-10): a draught that zeroes the drain does not extend the resource,
+## it deletes it, and there is then no reason to carry prayer potions at all.
+##
+## Both ends matter, so both are asserted. Under about a third of the heaviest
+## setup this is just a slow Prayer Potion and the Dragon Bones are wasted; at
+## or over 100% prayer stops being a resource.
+## [method verify_prayer._heaviest_prayer_drain] recomputes the 41 from the book,
+## so a new prayer or a retuned drain moves the bar rather than quietly leaving
+## this behind.
+##
+## That is what the two Dragon Bones are buying, and they are expensive: burnt
+## at the altar the same two pay 18,000 Prayer xp. One vial is 105 points over
+## its five minutes — more than a full 99 pool — but the Super Prayer Potion is
+## still far better per bone. That is the intended shape: the Renewal is priced
+## for uptime (no sip window, no bag slot, no interruption), never for
+## throughput, and it should stay the worse deal for anyone who can afford to
+## stand still and drink.
+const EFFECT_PRAYER_RENEWAL: StringName = &"prayer_renewal"
 
 ## Reasons stealth ends, passed to [method break_stealth] purely so the server
 ## log and the client message can say WHICH action gave the player away.
@@ -460,11 +500,30 @@ func _icd_ready(family: StringName, body: Node, cooldown_ms: int) -> bool:
 # --- Pulsing: Provocation -----------------------------------------------------
 
 func _pulse(family: StringName, aura: Dictionary) -> void:
-	if family != EFFECT_PROVOCATION:
-		return
 	var owner_player: Player = character() as Player
 	if owner_player == null or owner_player.is_dead:
 		return
+	match family:
+		EFFECT_PROVOCATION:
+			_pulse_provocation(owner_player, aura)
+		EFFECT_PRAYER_RENEWAL:
+			_pulse_prayer_renewal(owner_player, aura)
+
+
+## Trickle [code]potency[/code] prayer points back into the pool.
+##
+## [method PrayerService.restore] already caps at the pool and returns what
+## actually went in, so a full pool absorbs nothing and the aura keeps running
+## rather than ending early — which is what a player wants from a draught they
+## drank for the NEXT five minutes, not for this second.
+func _pulse_prayer_renewal(owner_player: Player, aura: Dictionary) -> void:
+	var per_pulse: float = float(aura.get("potency", 0.0))
+	if per_pulse <= 0.0:
+		return
+	PrayerService.restore(owner_player, per_pulse)
+
+
+func _pulse_provocation(owner_player: Player, aura: Dictionary) -> void:
 	var radius: float = float(aura.get("radius", 0.0))
 	if radius <= 0.0:
 		return
@@ -709,6 +768,19 @@ static func describe(potion: PotionItem) -> PackedStringArray:
 			lines.append("Re-provokes every %ss for %s" % [
 				"%.1f" % potion.aura_pulse_s, span,
 			])
+		EFFECT_PRAYER_RENEWAL:
+			# The TOTAL is quoted as well as the rate, because the rate alone
+			# reads far smaller than the draught is — the same reason a coating
+			# quotes its total damage rather than its damage per second.
+			var pulses: int = 0
+			if potion.aura_pulse_s > 0.0:
+				# The first pulse fires the instant it is armed (see arm_aura),
+				# so a 300s aura on a 15s cycle pays 21 times, not 20.
+				pulses = int(potion.aura_duration_s / potion.aura_pulse_s) + 1
+			lines.append("Restores %d prayer every %ss for %s" % [
+				int(potion.aura_potency), "%.0f" % potion.aura_pulse_s, span,
+			])
+			lines.append("%d prayer in total" % int(potion.aura_potency * pulses))
 		_:
 			lines.append("Lasts %s" % span)
 	return lines

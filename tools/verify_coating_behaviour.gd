@@ -21,6 +21,7 @@ func _ready() -> void:
 	_test_poison_on_hit()
 	_test_burn_on_hit()
 	_test_heal_on_hit()
+	_test_salve_stacks()
 	_test_expiry()
 
 	print("")
@@ -174,7 +175,8 @@ func _test_draught_slot() -> void:
 
 func _test_poison_on_hit() -> void:
 	var player: Player = _make_player()
-	_drink(player, _potion(&"weapon_poison"))
+	var poison: ConsumableItem = _potion(&"weapon_poison")
+	_drink(player, poison)
 	var victim: Character = Character.new()
 	add_child(victim)
 	CoatingService.on_hit(player, victim)
@@ -182,7 +184,13 @@ func _test_poison_on_hit() -> void:
 	_check(dot != null, "a poisoned hit attaches a poison DoT")
 	if dot != null:
 		_check(dot.source == player, "the DoT credits the attacker")
-		_check(is_equal_approx(dot.damage_per_tick, 4.0), "the DoT carries the authored dps")
+		# Read the number off the VIAL, never a literal. This assertion was
+		# hard-coded to 4.0 and went red the day the poison was retuned to 18 —
+		# which said nothing about the handoff it exists to test.
+		_check(
+			is_equal_approx(dot.damage_per_tick, poison.coating_potency),
+			"the DoT carries the authored dps (%.1f)" % poison.coating_potency
+		)
 
 
 func _test_burn_on_hit() -> void:
@@ -222,6 +230,90 @@ func _test_heal_on_hit() -> void:
 		player.stats_component.get_stat(Stat.HEALTH) <= 100.0,
 		"heal-on-hit cannot exceed max health"
 	)
+
+
+## The SUSTAIN slot. The salve runs alongside a damage coating and alongside a
+## draught-slot tonic; the only thing it refuses is a second salve. Both halves
+## are tested, because "stacks" that quietly meant "overwrites" would look
+## identical from the outside until a player noticed their ember had gone.
+func _test_salve_stacks() -> void:
+	var player: Player = _make_player()
+	var salve: ConsumableItem = _potion(&"weapon_salve")
+	var ember: ConsumableItem = _potion(&"weapon_ember")
+	var tonic: ConsumableItem = _potion(&"defense_tonic")
+
+	_drink(player, ember)
+	_check(salve.can_use(player), "a salve is drinkable while an ember runs")
+	_drink(player, salve)
+	_check(_held(player, salve) == 0, "the salve vial is consumed")
+	_check(
+		CoatingService.active_kind(player) == CoatingService.KIND_BURN,
+		"the ember still holds the offensive slot"
+	)
+	_check(
+		CoatingService.sustain_kind(player) == CoatingService.KIND_HEAL,
+		"the salve holds the sustain slot"
+	)
+	_check(
+		CoatingService.remaining_seconds(player) > 0
+		and CoatingService.sustain_remaining_seconds(player) > 0,
+		"both slots count down at once"
+	)
+
+	# ONE hit, BOTH payloads. This is the whole point of the split.
+	var victim: Character = Character.new()
+	add_child(victim)
+	player.stats_component.set_stat(Stat.HEALTH, 50.0)
+	CoatingService.on_hit(player, victim)
+	_check(
+		victim.get_node_or_null(^"DoT_burn") != null,
+		"a salved, embered hit still burns the victim"
+	)
+	_check(
+		player.stats_component.get_stat(Stat.HEALTH) > 50.0,
+		"the same hit still heals the attacker"
+	)
+
+	# A second salve is refused, and keeps its vial.
+	_check(not salve.can_use(player), "a second salve is refused")
+	Inventory.add_item(player.player_resource.inventory, int(salve.get_meta(&"id", 0)), 1)
+	salve.on_use(player)
+	_check(_held(player, salve) == 1, "a refused salve does NOT consume the vial")
+
+	# The salve holds no COMBAT DRAUGHT slot, so a tonic pours over it — and a
+	# salve pours over a tonic. Neither direction may refuse.
+	var salved: Player = _make_player()
+	_drink(salved, _potion(&"weapon_salve"))
+	_check(not ConsumableItem.draught_slot_busy(salved), "a salve holds no draught slot")
+	_check(tonic.can_use(salved), "a tonic is drinkable while a salve runs")
+	var armor_before: float = salved.stats_component.get_stat(Stat.ARMOR)
+	_drink(salved, tonic)
+	_check(
+		is_equal_approx(
+			salved.stats_component.get_stat(Stat.ARMOR), armor_before + tonic.buff_amount
+		),
+		"the tonic lands on a salved player"
+	)
+	_check(
+		CoatingService.is_sustain_active(salved),
+		"the tonic did not evict the salve"
+	)
+
+	var tonicked: Player = _make_player()
+	_drink(tonicked, _potion(&"defense_tonic"))
+	_check(salve.can_use(tonicked), "a salve is drinkable while the tonic runs")
+
+	# The tooltip has to say so, or the rule may as well not exist.
+	var said_it: bool = false
+	for line: Dictionary in salve.stat_lines():
+		if str(line.get("text", "")).contains("Stacks with combat draughts"):
+			said_it = true
+	_check(said_it, "the salve tooltip says it stacks")
+	for line: Dictionary in ember.stat_lines():
+		_check(
+			not str(line.get("text", "")).contains("Stacks with combat draughts"),
+			"the ember tooltip still says it does NOT stack"
+		)
 
 
 func _test_expiry() -> void:

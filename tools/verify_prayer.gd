@@ -35,10 +35,17 @@ const EXPECTED_PRAYERS: Dictionary = {
 }
 
 ## bone slug -> prayer xp
+##
+## The jump from Big Bones to Dragon Bones is enormous (326 -> 9,000) and it is
+## DELIBERATE, not a typo — confirmed 2026-09-10. Dragon Bones are the endgame
+## Prayer training item and the reason a dragon bone is worth more burnt than
+## brewed; every recipe that consumes one is priced against that 9,000.
+## This table held 550 / 1,650 / 4,400 long after the altar stopped paying them,
+## and nobody saw it because the script could not be loaded (see the header).
 const EXPECTED_OFFERINGS: Dictionary = {
-	"bone": 550,
-	"big_bones": 1650,
-	"dragon_bones": 4400,
+	"bone": 109,
+	"big_bones": 326,
+	"dragon_bones": 9000,
 }
 
 var _pass: int = 0
@@ -49,6 +56,7 @@ func _ready() -> void:
 	_check_skill()
 	_check_prayers()
 	_check_offerings()
+	_check_prayer_draughts()
 	_check_church()
 	_check_pool()
 	_check_toggling()
@@ -141,6 +149,162 @@ func _check_offerings() -> void:
 	if potion != null:
 		_check(potion.cooldown_category != &"potion",
 			"the prayer potion has its own cooldown")
+
+
+## The three brewed prayer draughts. They are one ladder — Potion, Super Potion,
+## Renewal — so the checks here are mostly about them staying ORDERED and staying
+## different from one another: a Super that restores no more than the Potion, or
+## a Renewal that pays its whole pool at once, is the same item twice.
+func _check_prayer_draughts() -> void:
+	var potion: ConsumableItem = ContentRegistryHub.load_by_slug(
+		&"items", &"prayer_potion"
+	) as ConsumableItem
+	var super_potion: ConsumableItem = ContentRegistryHub.load_by_slug(
+		&"items", &"super_prayer_potion"
+	) as ConsumableItem
+	var renewal: PotionItem = ContentRegistryHub.load_by_slug(
+		&"items", &"prayer_renewal"
+	) as PotionItem
+	_check(super_potion != null, "the super prayer potion is in the item registry")
+	_check(renewal != null, "the prayer renewal is in the item registry")
+	if potion == null or super_potion == null or renewal == null:
+		return
+
+	_check(
+		super_potion.prayer_amount > potion.prayer_amount,
+		"the super potion restores more than the potion (%d > %d)" % [
+			super_potion.prayer_amount, potion.prayer_amount
+		]
+	)
+	# Shared category, so a player cannot chain-chug one then the other. The
+	# whole reason prayer has its own category is that it must not gate a heal.
+	_check(
+		super_potion.cooldown_category == potion.cooldown_category,
+		"the super potion shares the prayer cooldown"
+	)
+
+	# The Renewal is an AURA, not a restore. A prayer_amount on it would make it
+	# a bigger potion, which is the thing it exists not to be.
+	_check(renewal.prayer_amount == 0, "the renewal restores nothing on the sip")
+	_check(renewal.is_aura(), "the renewal arms an aura")
+	_check(
+		renewal.aura_effect == StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		"the renewal arms the prayer-renewal family"
+	)
+	_check(renewal.aura_pulse_s > 0.0, "the renewal pulses")
+	# The renewal is sized against the PRAYER BOOK, from BOTH ends. Too slow and
+	# it is a drip-fed Prayer Potion that does not justify two Dragon Bones
+	# (18,000 Prayer xp burnt at the altar); at or over the heaviest setup it
+	# stops extending prayer and starts deleting it. See
+	# StatusEffectManager.EFFECT_PRAYER_RENEWAL for both numbers.
+	var heaviest: float = _heaviest_prayer_drain()
+	var per_minute: float = renewal.aura_potency * (60.0 / renewal.aura_pulse_s)
+	_check(
+		per_minute >= heaviest / 3.0,
+		"the renewal (%.0f/min) meaningfully offsets the heaviest setup (%.0f/min)" % [
+			per_minute, heaviest
+		]
+	)
+	_check(
+		per_minute < heaviest,
+		"the renewal (%.0f/min) does NOT fully cover the heaviest setup (%.0f/min)" % [
+			per_minute, heaviest
+		]
+	)
+	# One vial should still be worth more than a full altar recharge, or there is
+	# no reason to brew it over walking back to the church.
+	var pulses: int = int(renewal.aura_duration_s / renewal.aura_pulse_s) + 1
+	var total: float = renewal.aura_potency * pulses
+	_check(
+		total > PrayerService.max_points_for_level(99),
+		"one renewal (%d points) beats a full 99 pool" % int(total)
+	)
+	_check(
+		not renewal.exclusive_buff,
+		"the renewal holds no combat-draught slot"
+	)
+
+	# Behaviour: an aura-only draught with no slot claim must be DRINKABLE. The
+	# base class refuses anything with no heal / mana / prayer / buff / coating,
+	# so this is the check that catches it silently becoming un-pourable.
+	var player: Player = _make_player(99)
+	_check(renewal.can_use(player), "the renewal is drinkable")
+	_check(
+		not ConsumableItem.draught_slot_busy(player),
+		"a fresh player holds no draught slot"
+	)
+	Inventory.add_item(player.player_resource.inventory, int(renewal.get_meta(&"id", 0)), 1)
+	renewal.on_use(player)
+	_check(
+		Inventory.count(player.player_resource.inventory, int(renewal.get_meta(&"id", 0))) == 0,
+		"the renewal vial is consumed"
+	)
+	var manager: StatusEffectManager = StatusEffectManager.find(player)
+	_check(manager != null, "the renewal builds a status manager")
+	if manager == null:
+		return
+	_check(
+		manager.has_aura(StatusEffectManager.EFFECT_PRAYER_RENEWAL),
+		"the renewal aura is running"
+	)
+	_check(
+		not ConsumableItem.draught_slot_busy(player),
+		"the running renewal still holds no combat-draught slot"
+	)
+
+	# A pulse pays points back, and cannot overfill the pool.
+	PrayerService.restore(player, -PrayerService.points(player))
+	player.player_resource.prayer_points = 10.0
+	var before: float = PrayerService.points(player)
+	manager._pulse(
+		StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		{"potency": renewal.aura_potency}
+	)
+	_check(
+		is_equal_approx(PrayerService.points(player), before + renewal.aura_potency),
+		"a renewal pulse pays %d points back" % int(renewal.aura_potency)
+	)
+	player.player_resource.prayer_points = PrayerService.max_points(player)
+	manager._pulse(
+		StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		{"potency": renewal.aura_potency}
+	)
+	_check(
+		PrayerService.points(player) <= PrayerService.max_points(player),
+		"a renewal pulse cannot overfill the pool"
+	)
+
+	# The tooltip has to name both the rate and the total, or the draught reads
+	# as far weaker than it is.
+	var said_rate: bool = false
+	var said_total: bool = false
+	for line: Dictionary in renewal.stat_lines():
+		var text: String = str(line.get("text", ""))
+		if text.contains("Restores") and text.contains("prayer every"):
+			said_rate = true
+		if text.contains("prayer in total"):
+			said_total = true
+	_check(said_rate, "the renewal tooltip names its rate")
+	_check(said_total, "the renewal tooltip names its total")
+
+	# Distinct art. A draught that wears another draught's icon is a draught the
+	# player grabs by mistake mid-fight, and the generic potion pack makes that
+	# easy to do by accident — the Super Prayer Potion first shipped in the same
+	# green bottle as Weapon Poison ++.
+	var icons: Dictionary = {}
+	for vial: Item in [potion, super_potion, renewal]:
+		var art: String = "" if vial.item_icon == null else vial.item_icon.resource_path
+		_check(not art.is_empty(), "%s has an icon" % vial.item_name)
+		var clash: String = String(icons.get(art, ""))
+		_check(clash.is_empty(), "%s has art of its own%s" % [
+			vial.item_name,
+			"" if clash.is_empty() else " (wears %s's)" % clash,
+		])
+		icons[art] = String(vial.item_name)
+	_check(
+		_icon_users(super_potion) == 1 and _icon_users(renewal) == 1,
+		"the two new draughts' icons are used by nothing else"
+	)
 
 
 func _check_church() -> void:
@@ -259,6 +423,69 @@ func _check_drain() -> void:
 
 ## A live Player with a real StatsComponent (it is an @onready child node, so a
 ## bare Player.new() has none) and a Prayer level already banked.
+## Points per minute burnt by the most expensive LEGAL set of prayers — the
+## dearest prayer in each conflict group, plus every ungrouped one. Computed
+## from the book rather than hard-coded, so a new prayer or a re-tuned drain
+## moves the bar the Renewal has to clear instead of quietly leaving it behind.
+func _heaviest_prayer_drain() -> float:
+	var per_group: Dictionary = {}
+	var ungrouped: float = 0.0
+	for slug: String in EXPECTED_PRAYERS:
+		var prayer: PrayerResource = PrayerBook.by_slug(StringName(slug))
+		if prayer == null:
+			continue
+		var groups: Array = EXPECTED_PRAYERS[slug][2]
+		if groups.is_empty():
+			ungrouped += prayer.drain_per_minute
+			continue
+		# A prayer claiming two groups (Oath of the Slayer) locks both, so it is
+		# charged once and blocks everything else in either.
+		for group: String in groups:
+			per_group[group] = maxf(
+				float(per_group.get(group, 0.0)), prayer.drain_per_minute
+			)
+	# Combat only. A gathering prayer is never up in the fight this is sized for,
+	# and folding one in would inflate the bar with drain no boss ever sees.
+	var total: float = ungrouped
+	for group: String in ["offence", "defence", "protection", "lifesteal"]:
+		total += float(per_group.get(group, 0.0))
+	# Oath of the Slayer is counted once for offence and once for defence by the
+	# loop above; give one of them back.
+	var oath: PrayerResource = PrayerBook.by_slug(&"oath_slayer")
+	if oath != null and float(per_group.get("offence", 0.0)) == oath.drain_per_minute:
+		total -= oath.drain_per_minute
+	return total
+
+
+## How many item resources reference [param item]'s icon. 1 = it owns its art.
+## Grep-shaped on purpose: the icon path is a plain string in every .tres, and
+## walking the whole registry to load every Item would cost far more than
+## reading the files.
+func _icon_users(item: Item) -> int:
+	if item == null or item.item_icon == null:
+		return 0
+	var needle: String = item.item_icon.resource_path
+	var count: int = 0
+	for path: String in _all_item_resources("res://source/common/gameplay/items"):
+		var body: String = FileAccess.get_file_as_string(path)
+		if body.contains(needle):
+			count += 1
+	return count
+
+
+func _all_item_resources(root: String) -> PackedStringArray:
+	var out: PackedStringArray = []
+	var dir: DirAccess = DirAccess.open(root)
+	if dir == null:
+		return out
+	for sub: String in dir.get_directories():
+		out.append_array(_all_item_resources(root.path_join(sub)))
+	for file_name: String in dir.get_files():
+		if file_name.ends_with(".tres"):
+			out.append(root.path_join(file_name))
+	return out
+
+
 func _make_player(prayer_level: int) -> Player:
 	var player: Player = Player.new()
 	var resource: PlayerResource = PlayerResource.new()
