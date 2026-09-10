@@ -115,6 +115,47 @@ func _go() -> void:
 			"withdraw fit = free bag slots x bag stack limit"
 		)
 
+	print("-- chest stacking --")
+	# Loot chests bank as ONE unbounded pile. They author stack_limit 0, so the
+	# BAG was always one pile and only the vault split them into rows of 50 —
+	# which, on a player who banks a boss night's worth of chests to open in one
+	# sitting, reads as the bank eating chests rather than as a cap.
+	#
+	# Checked by CLASS across every authored chest rather than on one slug: the
+	# rule in Inventory is a class rule for exactly this reason, and a per-slug
+	# check here would pass while a nineteenth chest shipped capped.
+	var chest_dir: String = "res://source/common/gameplay/items/chests"
+	var dir: DirAccess = DirAccess.open(chest_dir)
+	_check(dir != null, "the chest item folder opens")
+	if dir != null:
+		var seen: int = 0
+		var capped: PackedStringArray = PackedStringArray()
+		for file_name: String in dir.get_files():
+			if not file_name.ends_with(".tres"):
+				continue
+			var chest: LootChestItem = load(chest_dir.path_join(file_name)) as LootChestItem
+			if chest == null:
+				continue
+			seen += 1
+			if Inventory.stack_limit_for(chest, true) != 0:
+				capped.append(file_name)
+			if Inventory.stack_limit_for(chest, false) != 0:
+				capped.append(file_name + " (bag)")
+		_check(seen >= 18, "found %d loot chests to check" % seen)
+		_check(
+			capped.is_empty(),
+			"every chest banks and bags unlimited (capped: %s)" % ", ".join(capped)
+		)
+		# And the cap it used to take is still in force for ordinary materials,
+		# so this did not widen into "nothing caps any more".
+		if iron > 0:
+			_check(
+				Inventory.stack_limit_for(
+					ContentRegistryHub.load_by_id(&"items", iron) as Item, true
+				) == Inventory.BANK_RESOURCE_STACK,
+				"ore still caps at %d in the vault" % Inventory.BANK_RESOURCE_STACK
+			)
+
 	print("")
 	print("PASS %d  FAIL %d" % [_pass, _fail])
 	get_tree().quit(1 if _fail > 0 else 0)

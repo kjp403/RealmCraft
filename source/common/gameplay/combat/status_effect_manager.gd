@@ -20,7 +20,7 @@ extends Node
 ## thing that guards arrow-spam from stacking a mob to zero armor into a thing
 ## that sometimes permits stacking, which is how that guard gets lost.
 ##
-## Four families live here, and they share this node because they share the same
+## Six families live here, and they share this node because they share the same
 ## three needs: a per-character ledger of what was actually applied, a 1 Hz
 ## expiry tick, and generic signals the HUD can bind to.
 ##
@@ -32,6 +32,8 @@ extends Node
 ##   - [constant EFFECT_SHADOWVEIL]     — a stealth override read by NPC targeting.
 ##   - [constant EFFECT_PROVOCATION]    — a pulsing aggro lock built on the taunt
 ##                                        that every aggro-steal path already defers to.
+##   - [constant EFFECT_PRAYER_RENEWAL] — a pulsing prayer-point trickle on the
+##                                        drinker.
 ##
 ## SERVER-SIDE ONLY. Every entry point either checks `multiplayer.is_server()` or
 ## is called from a server tick. The client learns about all of it through the
@@ -56,6 +58,14 @@ const EFFECT_CINDER_GUARD: StringName = &"cinder_guard"
 const EFFECT_SHADOWVEIL: StringName = &"shadowveil"
 ## Pulsing aggro lock. Lives on the DRINKER.
 const EFFECT_PROVOCATION: StringName = &"provocation"
+## Prayer points trickled back a few at a time. Lives on the DRINKER.
+##
+## An aura and not a [ConsumableItem.prayer_amount] restore because the two are
+## different items: a Prayer Potion is the panic sip that buys back a chunk NOW,
+## and the Renewal is the thing you drink BEFORE the fight and then forget about.
+## Collapsing the second into the first would have made it a bigger version of
+## the first, which is not a second item.
+const EFFECT_PRAYER_RENEWAL: StringName = &"prayer_renewal"
 
 ## Reasons stealth ends, passed to [method break_stealth] purely so the server
 ## log and the client message can say WHICH action gave the player away.
@@ -460,11 +470,30 @@ func _icd_ready(family: StringName, body: Node, cooldown_ms: int) -> bool:
 # --- Pulsing: Provocation -----------------------------------------------------
 
 func _pulse(family: StringName, aura: Dictionary) -> void:
-	if family != EFFECT_PROVOCATION:
-		return
 	var owner_player: Player = character() as Player
 	if owner_player == null or owner_player.is_dead:
 		return
+	match family:
+		EFFECT_PROVOCATION:
+			_pulse_provocation(owner_player, aura)
+		EFFECT_PRAYER_RENEWAL:
+			_pulse_prayer_renewal(owner_player, aura)
+
+
+## Trickle [code]potency[/code] prayer points back into the pool.
+##
+## [method PrayerService.restore] already caps at the pool and returns what
+## actually went in, so a full pool absorbs nothing and the aura keeps running
+## rather than ending early — which is what a player wants from a draught they
+## drank for the NEXT five minutes, not for this second.
+func _pulse_prayer_renewal(owner_player: Player, aura: Dictionary) -> void:
+	var per_pulse: float = float(aura.get("potency", 0.0))
+	if per_pulse <= 0.0:
+		return
+	PrayerService.restore(owner_player, per_pulse)
+
+
+func _pulse_provocation(owner_player: Player, aura: Dictionary) -> void:
 	var radius: float = float(aura.get("radius", 0.0))
 	if radius <= 0.0:
 		return
@@ -709,6 +738,19 @@ static func describe(potion: PotionItem) -> PackedStringArray:
 			lines.append("Re-provokes every %ss for %s" % [
 				"%.1f" % potion.aura_pulse_s, span,
 			])
+		EFFECT_PRAYER_RENEWAL:
+			# The TOTAL is quoted as well as the rate, because the rate alone
+			# reads far smaller than the draught is — the same reason a coating
+			# quotes its total damage rather than its damage per second.
+			var pulses: int = 0
+			if potion.aura_pulse_s > 0.0:
+				# The first pulse fires the instant it is armed (see arm_aura),
+				# so a 300s aura on a 15s cycle pays 21 times, not 20.
+				pulses = int(potion.aura_duration_s / potion.aura_pulse_s) + 1
+			lines.append("Restores %d prayer every %ss for %s" % [
+				int(potion.aura_potency), "%.0f" % potion.aura_pulse_s, span,
+			])
+			lines.append("%d prayer in total" % int(potion.aura_potency * pulses))
 		_:
 			lines.append("Lasts %s" % span)
 	return lines

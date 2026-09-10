@@ -48,6 +48,10 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/hourglass_draught.tres" id="pot_hourglass"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/sovereigns_bloom.tres" id="herb_sovereigns_bloom"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/siltward_draught.tres" id="pot_siltward"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/big_bones.tres" id="mat_big_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/dragon_bones.tres" id="mat_dragon_bones"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/super_prayer_potion.tres" id="pot_super_prayer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/consumables/prayer_renewal.tres" id="pot_prayer_renewal"]
 [sub_resource type="Resource" id="I_vial"]
 script = ExtResource("3_ingred")
 item = ExtResource("vial_water")
@@ -176,6 +180,34 @@ output_item = ExtResource("pot_prayer")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_prayer_herb"), SubResource("I_prayer_bone")])
 required_level = 42
 xp_reward = 300
+[sub_resource type="Resource" id="I_super_prayer_herb"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_starblossom")
+amount = 2
+[sub_resource type="Resource" id="I_super_prayer_bone"]
+script = ExtResource("3_ingred")
+item = ExtResource("mat_big_bones")
+amount = 5
+[sub_resource type="Resource" id="R_super_prayer"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_super_prayer")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_super_prayer_herb"), SubResource("I_super_prayer_bone")])
+required_level = 66
+xp_reward = 500
+[sub_resource type="Resource" id="I_renewal_herb"]
+script = ExtResource("3_ingred")
+item = ExtResource("herb_sun_lit_lotus")
+amount = 2
+[sub_resource type="Resource" id="I_renewal_bone"]
+script = ExtResource("3_ingred")
+item = ExtResource("mat_dragon_bones")
+amount = 5
+[sub_resource type="Resource" id="R_prayer_renewal"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("pot_prayer_renewal")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_renewal_herb"), SubResource("I_renewal_bone")])
+required_level = 84
+xp_reward = 780
 [sub_resource type="Resource" id="I_seep_cap"]
 script = ExtResource("3_ingred")
 item = ExtResource("quest_cap")
@@ -348,4 +380,4 @@ script = ExtResource("2_station")
 station_name = "Alchemy Table"
 profession = &"herblore"
 craft_fee = 0
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_seep_tonic"), SubResource("R_seep_draught"), SubResource("R_mix_corrosive"), SubResource("R_mix_venom"), SubResource("R_mix_cinder"), SubResource("R_mix_aegis"), SubResource("R_mix_shadowveil"), SubResource("R_mix_provocation"), SubResource("R_hourglass"), SubResource("R_siltward")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_0"), SubResource("R_1"), SubResource("R_2"), SubResource("R_3"), SubResource("R_4"), SubResource("R_5"), SubResource("R_6"), SubResource("R_poison"), SubResource("R_salve"), SubResource("R_ember"), SubResource("R_poison_plus"), SubResource("R_prayer"), SubResource("R_super_prayer"), SubResource("R_prayer_renewal"), SubResource("R_seep_tonic"), SubResource("R_seep_draught"), SubResource("R_mix_corrosive"), SubResource("R_mix_venom"), SubResource("R_mix_cinder"), SubResource("R_mix_aegis"), SubResource("R_mix_shadowveil"), SubResource("R_mix_provocation"), SubResource("R_hourglass"), SubResource("R_siltward")])

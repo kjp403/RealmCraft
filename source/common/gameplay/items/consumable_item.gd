@@ -12,16 +12,22 @@ extends Item
 @export var buff_stat: StringName = &""
 @export var buff_amount: float = 0.0
 @export var buff_duration_s: float = 0.0
-## True when this vial holds the ONE combat-draught slot — the same slot a
-## weapon coating takes. Ember, the poisons and the salve coat your weapon; the
+## True when this vial holds the ONE combat-draught slot — the same slot an
+## OFFENSIVE weapon coating takes. Ember and the poisons coat your weapon; the
 ## Defense Tonic buffs the drinker instead. Both are "the draught you went in
 ## with", so both ask [method draught_slot_busy] before they pour and neither
 ## stacks on the other. Ordinary tonics leave this false and stack freely.
+##
+## The Weapon Salve is the deliberate exception among coatings: it rides
+## [constant CoatingService.SUSTAIN_KINDS], holds a slot of its own, and asks
+## [method sustain_slot_busy] instead. See CoatingService's header.
 @export var exclusive_buff: bool = false
 ## Weapon coating (via CoatingService): while it lasts, every hit the drinker
 ## LANDS does something extra. &"" = this consumable is not a coating. Kept
 ## separate from buff_* because "your hits poison" is not a stat.
-## One of CoatingService.KIND_POISON / KIND_BURN / KIND_HEAL.
+## One of CoatingService.KIND_POISON / KIND_BURN / KIND_HEAL. A KIND_HEAL vial
+## goes in the sustain slot and stacks with the rest; everything else competes
+## for the one offensive slot.
 @export var coating_kind: StringName = &""
 ## Damage per second for poison/ember; health per landed hit for salve.
 @export var coating_potency: float = 0.0
@@ -92,6 +98,33 @@ static func draught_slot_busy(player: Player) -> bool:
 		or BuffService.exclusive_active(player)
 		or StatusEffectManager.exclusive_aura_active(player)
 	)
+
+
+## Is [param player] already running a SUSTAIN coating (the salve)? Its own slot,
+## so the only thing it refuses is a second one of itself — a salve and an ember
+## coexist, and so do a salve and a Defense Tonic.
+##
+## Server-side truth, same as [method draught_slot_busy]: on the client
+## [member Player.player_resource] is null, so this answers false and the sip
+## goes out optimistically with the server as the authority.
+static func sustain_slot_busy(player: Player) -> bool:
+	return CoatingService.is_sustain_active(player)
+
+
+## Does this vial ride the SUSTAIN slot? True only for a coating whose kind is in
+## [constant CoatingService.SUSTAIN_KINDS] — the membership lives there, beside
+## the slot routing it decides, rather than being re-decided per item.
+func is_sustain_coating() -> bool:
+	return is_coating() and CoatingService.is_sustain_kind(coating_kind)
+
+
+## Is the slot this vial needs already taken? The one question the bag button,
+## the hotbar tile and the server handler all ask, so they cannot disagree about
+## which slot a given vial competes for.
+func slot_busy(player: Player) -> bool:
+	if is_sustain_coating():
+		return sustain_slot_busy(player)
+	return draught_slot_busy(player)
 
 
 ## Does this vial coat the drinker's weapon? The fields its kind needs have to
@@ -190,8 +223,15 @@ func stat_lines() -> Array[Dictionary]:
 		})
 		lines.append({"text": _coating_effect_line(), "kind": &"poison"})
 	# One draught at a time (see draught_slot_busy). Saying so on the tooltip is
-	# what keeps the refusal from landing as a surprise at the door of a boss.
-	if is_coating() or exclusive_buff:
+	# what keeps the refusal from landing as a surprise at the door of a boss —
+	# and saying the RIGHT one matters just as much, because a salve labelled
+	# "does not stack" is a salve nobody drinks alongside an ember even though
+	# they now do stack.
+	if is_sustain_coating():
+		lines.append({
+			"text": "Stacks with combat draughts", "kind": &"charges",
+		})
+	elif is_coating() or exclusive_buff:
 		lines.append({
 			"text": "Does not stack with other combat draughts", "kind": &"charges",
 		})
@@ -220,11 +260,11 @@ func can_use(character: Character) -> bool:
 		if not exclusive_buff:
 			return true
 		return character is Player and not draught_slot_busy(character as Player)
-	# A coating is drinkable only on a CLEAN weapon and an EMPTY draught slot —
-	# one at a time, by design (CoatingService.apply). Refusing here is what makes
-	# the bag button, the hotbar and the held sip all agree with the server.
+	# A coating is drinkable only when ITS OWN slot is empty — one at a time per
+	# slot, by design (CoatingService.apply). Refusing here is what makes the bag
+	# button, the hotbar and the held sip all agree with the server.
 	if is_coating():
-		return character is Player and not draught_slot_busy(character as Player)
+		return character is Player and not slot_busy(character as Player)
 	return false
 
 
@@ -253,10 +293,11 @@ func on_use(character: Character) -> void:
 	if is_coating():
 		# A refused coating must NOT eat the vial — bail before the bag removal
 		# below rather than charging the player for nothing. CoatingService only
-		# knows about other COATINGS, so the draught slot is checked here too:
-		# a Defense Tonic holds the same slot and must refuse an Ember as firmly
-		# as another Ember would.
-		if character is not Player or draught_slot_busy(character as Player):
+		# knows about other COATINGS, so the slot is checked here too: a Defense
+		# Tonic holds the offensive slot and must refuse an Ember as firmly as
+		# another Ember would. A salve asks about the sustain slot instead, so
+		# neither of those refuses it.
+		if character is not Player or slot_busy(character as Player):
 			return
 		var coated: bool = CoatingService.apply(
 			character as Player,

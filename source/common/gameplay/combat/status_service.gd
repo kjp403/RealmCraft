@@ -53,11 +53,21 @@ static func sync(player: Player) -> void:
 	# debuff — it rides the buff strip even when its kind names a harmful effect.
 	# The id is prefixed so "coating_poison" on your strip cannot be confused
 	# with "poison" on a victim's.
+	#
+	# BOTH slots get a row. They run at the same time now (CoatingService), so a
+	# strip that only ever drew one of them would show a salved, envenomed player
+	# a single icon and leave them guessing which draught was about to lapse.
 	var coating_left: int = CoatingService.remaining_seconds(player)
 	if coating_left > 0:
 		buffs.append({
 			"id": CoatingService.status_id(CoatingService.active_kind(player)),
 			"remaining": coating_left,
+		})
+	var salve_left: int = CoatingService.sustain_remaining_seconds(player)
+	if salve_left > 0:
+		buffs.append({
+			"id": CoatingService.status_id(CoatingService.sustain_kind(player)),
+			"remaining": salve_left,
 		})
 
 	# The Anvil Stabilizer. A bought, timed buff with no other tell — peddler

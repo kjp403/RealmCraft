@@ -46,7 +46,7 @@ const UNLIMITED_IN_BANK: Array[StringName] = [
 	&"headless_arrow",
 	&"minor_health_potion", &"health_potion", &"greater_health_potion",
 	&"minor_mana_potion", &"mana_potion", &"greater_mana_potion",
-	&"prayer_potion",
+	&"prayer_potion", &"super_prayer_potion", &"prayer_renewal",
 	&"defense_tonic",
 	&"weapon_ember", &"weapon_poison", &"weapon_poison_plus", &"weapon_salve",
 ]
@@ -72,17 +72,26 @@ static func stack_limit_for(item: Item, in_bank: bool = false) -> int:
 
 ## True for items that bank as ONE unbounded pile.
 ##
-## Two of the three tests are by class on purpose. The slug list only knows
+## Three of the four tests are by class on purpose. The slug list only knows
 ## about content that already shipped, so every draught added after it was
 ## written inherited the 50 cap by omission — the failure is silent, looks like
 ## a duplication guard, and is only ever noticed by a brewer with a full vault.
-## A class test cannot be forgotten by a new .tres.
+## A class test cannot be forgotten by a new .tres, which is why the chests are
+## caught by class here too rather than by listing eighteen slugs.
 static func _bank_unlimited_item(item: Item) -> bool:
 	if StringName(item.get_meta(&"slug", &"")) in UNLIMITED_IN_BANK:
 		return true
 	# Ammo authors no stack_limit and players hold thousands of arrows.
 	# Capping those at 50 would shatter one pile into forty bank rows.
 	if item is AmmoItem:
+		return true
+	# Loot chests. A boss hand-out and a dungeon clear both pay them, so a player
+	# who banks unopened chests to open in one sitting passes fifty quickly. They
+	# author stack_limit 0 — so the BAG already held one pile and only the vault
+	# split it, which read as the bank eating chests rather than as a cap. With
+	# no rule of their own they fell into the unauthored branch below and took
+	# [constant BANK_RESOURCE_STACK] by default.
+	if item is LootChestItem:
 		return true
 	# Every drinkable: the potions, the tonics, the weapon coatings and the
 	# combination draughts ([PotionItem] extends [ConsumableItem], so it is

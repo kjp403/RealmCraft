@@ -49,6 +49,7 @@ func _ready() -> void:
 	_check_skill()
 	_check_prayers()
 	_check_offerings()
+	_check_prayer_draughts()
 	_check_church()
 	_check_pool()
 	_check_toggling()
@@ -141,6 +142,116 @@ func _check_offerings() -> void:
 	if potion != null:
 		_check(potion.cooldown_category != &"potion",
 			"the prayer potion has its own cooldown")
+
+
+## The three brewed prayer draughts. They are one ladder — Potion, Super Potion,
+## Renewal — so the checks here are mostly about them staying ORDERED and staying
+## different from one another: a Super that restores no more than the Potion, or
+## a Renewal that pays its whole pool at once, is the same item twice.
+func _check_prayer_draughts() -> void:
+	var potion: ConsumableItem = ContentRegistryHub.load_by_slug(
+		&"items", &"prayer_potion"
+	) as ConsumableItem
+	var super_potion: ConsumableItem = ContentRegistryHub.load_by_slug(
+		&"items", &"super_prayer_potion"
+	) as ConsumableItem
+	var renewal: PotionItem = ContentRegistryHub.load_by_slug(
+		&"items", &"prayer_renewal"
+	) as PotionItem
+	_check(super_potion != null, "the super prayer potion is in the item registry")
+	_check(renewal != null, "the prayer renewal is in the item registry")
+	if potion == null or super_potion == null or renewal == null:
+		return
+
+	_check(
+		super_potion.prayer_amount > potion.prayer_amount,
+		"the super potion restores more than the potion (%d > %d)" % [
+			super_potion.prayer_amount, potion.prayer_amount
+		]
+	)
+	# Shared category, so a player cannot chain-chug one then the other. The
+	# whole reason prayer has its own category is that it must not gate a heal.
+	_check(
+		super_potion.cooldown_category == potion.cooldown_category,
+		"the super potion shares the prayer cooldown"
+	)
+
+	# The Renewal is an AURA, not a restore. A prayer_amount on it would make it
+	# a bigger potion, which is the thing it exists not to be.
+	_check(renewal.prayer_amount == 0, "the renewal restores nothing on the sip")
+	_check(renewal.is_aura(), "the renewal arms an aura")
+	_check(
+		renewal.aura_effect == StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		"the renewal arms the prayer-renewal family"
+	)
+	_check(renewal.aura_pulse_s > 0.0, "the renewal pulses")
+	_check(
+		not renewal.exclusive_buff,
+		"the renewal holds no combat-draught slot"
+	)
+
+	# Behaviour: an aura-only draught with no slot claim must be DRINKABLE. The
+	# base class refuses anything with no heal / mana / prayer / buff / coating,
+	# so this is the check that catches it silently becoming un-pourable.
+	var player: Player = _make_player(99)
+	_check(renewal.can_use(player), "the renewal is drinkable")
+	_check(
+		not ConsumableItem.draught_slot_busy(player),
+		"a fresh player holds no draught slot"
+	)
+	Inventory.add_item(player.player_resource.inventory, int(renewal.get_meta(&"id", 0)), 1)
+	renewal.on_use(player)
+	_check(
+		Inventory.count(player.player_resource.inventory, int(renewal.get_meta(&"id", 0))) == 0,
+		"the renewal vial is consumed"
+	)
+	var manager: StatusEffectManager = StatusEffectManager.find(player)
+	_check(manager != null, "the renewal builds a status manager")
+	if manager == null:
+		return
+	_check(
+		manager.has_aura(StatusEffectManager.EFFECT_PRAYER_RENEWAL),
+		"the renewal aura is running"
+	)
+	_check(
+		not ConsumableItem.draught_slot_busy(player),
+		"the running renewal still holds no combat-draught slot"
+	)
+
+	# A pulse pays points back, and cannot overfill the pool.
+	PrayerService.restore(player, -PrayerService.points(player))
+	player.player_resource.prayer_points = 10.0
+	var before: float = PrayerService.points(player)
+	manager._pulse(
+		StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		{"potency": renewal.aura_potency}
+	)
+	_check(
+		is_equal_approx(PrayerService.points(player), before + renewal.aura_potency),
+		"a renewal pulse pays %d points back" % int(renewal.aura_potency)
+	)
+	player.player_resource.prayer_points = PrayerService.max_points(player)
+	manager._pulse(
+		StatusEffectManager.EFFECT_PRAYER_RENEWAL,
+		{"potency": renewal.aura_potency}
+	)
+	_check(
+		PrayerService.points(player) <= PrayerService.max_points(player),
+		"a renewal pulse cannot overfill the pool"
+	)
+
+	# The tooltip has to name both the rate and the total, or the draught reads
+	# as far weaker than it is.
+	var said_rate: bool = false
+	var said_total: bool = false
+	for line: Dictionary in renewal.stat_lines():
+		var text: String = str(line.get("text", ""))
+		if text.contains("Restores") and text.contains("prayer every"):
+			said_rate = true
+		if text.contains("prayer in total"):
+			said_total = true
+	_check(said_rate, "the renewal tooltip names its rate")
+	_check(said_total, "the renewal tooltip names its total")
 
 
 func _check_church() -> void:
