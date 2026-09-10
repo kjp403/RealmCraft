@@ -47,15 +47,6 @@ const MAX_TRACKED: int = 4096
 ## player_id -> {"node": String, "streak": int, "anchor": Vector2, "last_ms": int}
 static var _state: Dictionary[int, Dictionary] = {}
 
-static var _bus: FishingBus
-
-
-static func bus() -> FishingBus:
-	if _bus == null:
-		_bus = FishingBus.new()
-	return _bus
-
-
 # ---------------------------------------------------------------------------
 # Catch hook
 # ---------------------------------------------------------------------------
@@ -85,7 +76,7 @@ static func register_catch(
 	if not entry.is_empty():
 		var reason: StringName = _break_reason(entry, node_key, position, now)
 		if reason != &"":
-			_reset(resource, player_id, reason)
+			_reset(player_id)
 			entry = {}
 
 	# --- Start a fresh streak --------------------------------------------
@@ -99,7 +90,6 @@ static func register_catch(
 			"anchor": position,
 			"last_ms": now,
 		}
-		bus().combo_streak_updated.emit(resource, 0, 1.0)
 		return 1.0
 
 	# --- Extend, if the bucket can pay ------------------------------------
@@ -109,7 +99,7 @@ static func register_catch(
 	# with no sink to be bottomless for. Flip this branch to `return current
 	# multiplier` if the softer reading is wanted.
 	if not BaitBucket.consume_bait(resource, 1):
-		_reset(resource, player_id, &"out_of_bait")
+		_reset(player_id)
 		return 1.0
 
 	var streak: int = int(entry.get("streak", 0)) + 1
@@ -121,7 +111,6 @@ static func register_catch(
 	_state[player_id] = entry
 
 	var multiplier: float = multiplier_for(streak)
-	bus().combo_streak_updated.emit(resource, streak, multiplier)
 	return multiplier
 
 
@@ -150,16 +139,6 @@ static func _break_reason(
 # Resets
 # ---------------------------------------------------------------------------
 
-## Break the streak for [param player_id]. Safe to call when there is none — it
-## stays quiet rather than emitting a reset for a combo that never existed, so the
-## HUD does not flash on every unbaited catch.
-static func reset(
-	resource: PlayerResource, player_id: int, reason: StringName = &"manual"
-) -> void:
-	if _state.has(player_id):
-		_reset(resource, player_id, reason)
-
-
 ## Drop a player's tracking entirely. Call on disconnect and on instance change —
 ## a streak must not survive either.
 static func clear(player_id: int) -> void:
@@ -171,9 +150,11 @@ static func streak_of(player_id: int) -> int:
 	return int((_state.get(player_id, {}) as Dictionary).get("streak", 0))
 
 
-static func _reset(resource: PlayerResource, player_id: int, reason: StringName) -> void:
+## Break the streak. The WHY stays in [method _break_reason] rather than being
+## threaded through here: nothing consumes it, and a parameter no caller reads is
+## the kind of thing that quietly grows a second implementation later.
+static func _reset(player_id: int) -> void:
 	_state.erase(player_id)
-	bus().combo_reset.emit(resource, reason)
 
 
 ## Drop entries that have already lapsed. Runs only when a new streak starts, so
@@ -184,13 +165,3 @@ static func _prune(now: int) -> void:
 	for player_id: int in _state.keys():
 		if now - int((_state[player_id] as Dictionary).get("last_ms", 0)) > LAPSE_MS:
 			_state.erase(player_id)
-
-
-## What the combo HUD renders.
-static func status_payload(player_id: int) -> Dictionary:
-	var streak: int = streak_of(player_id)
-	return {
-		"streak": streak,
-		"multiplier": multiplier_for(streak),
-		"max_multiplier": MAX_MULTIPLIER,
-	}

@@ -41,15 +41,6 @@ const BAIT_SLUG: StringName = &"fish_bait"
 ## Item slug of the bucket itself, used for the ownership check.
 const BUCKET_SLUG: StringName = &"bottomless_bait_bucket"
 
-static var _bus: FishingBus
-
-
-static func bus() -> FishingBus:
-	if _bus == null:
-		_bus = FishingBus.new()
-	return _bus
-
-
 # ---------------------------------------------------------------------------
 # Registry lookups
 # ---------------------------------------------------------------------------
@@ -158,36 +149,10 @@ static func fill_from_inventory(resource: PlayerResource) -> Dictionary:
 	}
 
 
-## Put bait back into the bags — the refund path for a bonus that could not be
-## applied after the bait was already spent. Returns the amount actually returned,
-## which can be less than asked when the bucket is at [constant MAX_STORED].
-static func refund(resource: PlayerResource, amount: int = 1) -> int:
-	if resource == null or amount <= 0:
-		return 0
-	var before: int = stored(resource)
-	var after: int = mini(MAX_STORED, before + amount)
-	if after == before:
-		return 0
-	_set_stored(resource, after)
-	return after - before
-
-
-## The single write point. Every mutation clamps and announces here, so no path can
-## set an out-of-range count or move bait without the HUD hearing about it.
+## The single write point. Every mutation clamps here, so no path can set an
+## out-of-range count.
 static func _set_stored(resource: PlayerResource, value: int) -> void:
 	var clamped: int = clampi(value, 0, MAX_STORED)
 	if resource.stored_bait == clamped:
 		return
 	resource.stored_bait = clamped
-	bus().bait_count_changed.emit(resource, clamped)
-
-
-## What the bucket tooltip and the fill dialog render.
-static func status_payload(resource: PlayerResource) -> Dictionary:
-	var id: int = bait_id()
-	return {
-		"stored": stored(resource),
-		"max": MAX_STORED,
-		"has_bucket": has_bucket(resource),
-		"loose": Inventory.count(resource.inventory, id) if id > 0 else 0,
-	}

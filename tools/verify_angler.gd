@@ -371,7 +371,6 @@ func _bucket() -> void:
 ## a knife. This is why the gate is scene-mode: under `-s` these scripts name
 ## autoloads that do not exist, and every one would "fail" for the wrong reason.
 const TOUCHED_SCRIPTS: Array[String] = [
-	"res://source/common/gameplay/fishing/fishing_bus.gd",
 	"res://source/common/gameplay/fishing/fishing_combo_manager.gd",
 	"res://source/common/gameplay/fishing/bait_bucket.gd",
 	"res://source/common/gameplay/fishing/fillet_recipe.gd",
