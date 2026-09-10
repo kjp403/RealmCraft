@@ -358,6 +358,8 @@ const ENTER_MAX_RETRIES: int = 8
 ## exists — and the failures that actually strand people are the ones where it
 ## doesn't.
 const ENTER_LOCAL_RETRIES: int = 2
+## One notice per stranding, not one per retry.
+var _told_player: bool = false
 
 
 ## Re-ask the server to spawn us if our arrival never lands.
@@ -398,6 +400,13 @@ func _watch_for_arrival() -> void:
 			]
 		)
 		if escalate:
+			# Tell the player, once. Standing in a loaded map with no character and
+			# no explanation is what turned this into "null spawn, had to relog" —
+			# a name for a symptom nobody could report usefully. Naming it makes the
+			# next report say what actually happened.
+			if not _told_player:
+				_told_player = true
+				Toaster.toast("Arrival didn't land — putting you back in the world…")
 			# Sent with NO instance id: the dispatcher must not try to resolve one,
 			# because an id that no longer resolves is one of the states we are
 			# reporting. The id we are HOLDING rides in the args instead.

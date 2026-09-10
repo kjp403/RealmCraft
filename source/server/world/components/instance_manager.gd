@@ -136,7 +136,7 @@ func place_peer(peer_id: int) -> bool:
 			var jail_inst: ServerInstance = _instance_for_login(jail_res)
 			if jail_inst != null:
 				_rpc_charge(peer_id, jail_res.map_path, jail_inst.name)
-				jail_inst.awaiting_peers[peer_id] = {}
+				jail_inst.queue_arrival(peer_id)
 				return true
 
 	# First-ever login? current_instance can't tell us — it's in-memory only (set on spawn,
@@ -168,7 +168,7 @@ func place_peer(peer_id: int) -> bool:
 						float(player_resource.lb_stats.get("last_y", 0.0))
 					)
 					_rpc_charge(peer_id, saved_res.map_path, saved_inst.name, saved_position)
-					saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
+					saved_inst.queue_arrival(peer_id, {"target_position": saved_position})
 					return true
 
 	var target_name: String = JAIL_INSTANCE_NAME if is_first_login else TAVERN_INSTANCE_NAME
@@ -177,7 +177,7 @@ func place_peer(peer_id: int) -> bool:
 		var target_inst: ServerInstance = _instance_for_login(target_res)
 		if target_inst != null:
 			_rpc_charge(peer_id, target_res.map_path, target_inst.name)
-			target_inst.awaiting_peers[peer_id] = {} # {} = the map's default spawn point (index 0)
+			target_inst.queue_arrival(peer_id) # no target = the map's default spawn point (index 0)
 			return true
 
 	# Fallback: the tavern/jail map is missing or mid-load — land in the default overworld so
@@ -190,7 +190,7 @@ func place_peer(peer_id: int) -> bool:
 		push_error("InstanceManagerServer: could not charge default_instance for peer %d" % peer_id)
 		return false
 	_rpc_charge(peer_id, default_instance.map_path, fallback_inst.name)
-	fallback_inst.awaiting_peers[peer_id] = {}
+	fallback_inst.queue_arrival(peer_id)
 	return true
 
 
@@ -313,10 +313,10 @@ func player_switch_instance(
 		target_instance.name,
 		spawn_pos
 	)
-	target_instance.awaiting_peers[peer_id] = {
+	target_instance.queue_arrival(peer_id, {
 		"player": player,
 		"target_id": warper_target_id
-	}
+	})
 
 
 func charge_instance(instance_resource: InstanceResource) -> ServerInstance:
@@ -362,6 +362,12 @@ func set_instance_collection() -> void:
 		instance_collection.set(instance_resource.instance_name, instance_resource)
 
 
+## How many times the sweeper has declined to reclaim a map purely because
+## somebody was walking into it. Every increment is one null spawn that would
+## have happened on the old code. Grep the world log for "caught (" to read it.
+static var arrivals_protected: int = 0
+
+
 ## Pure eligibility test for the sweeper below, split out from the node walk so
 ## it can be exercised without standing up a real ServerInstance
 ## (tools/verify_arrival_recovery.tscn). An instance is reclaimable only when it
@@ -396,24 +402,62 @@ func unload_unused_instances() -> void:
 			instance.awaiting_peers.size(),
 			pinned
 		):
+			# Was this instance saved ONLY by a pending arrival? Then we just
+			# caught the null-spawn race in the act. Say so out loud.
+			#
+			# After a fix like this, silence is ambiguous — it reads the same as
+			# "deployed wrong" or "wasn't the cause". A count that climbs is the
+			# evidence the window is real and is being held open, and if null
+			# spawns somehow continue anyway, a count that stays at zero says the
+			# cause is somewhere else and points the next search away from here.
+			if is_reapable(
+				instance.instance_resource.load_at_startup,
+				instance.connected_peers.size(),
+				0,
+				pinned
+			):
+				arrivals_protected += 1
+				ServerLog.warn(
+					"Held '%s' open for %d arriving peer(s) — the null-spawn race, caught (%d so far this session)."
+					% [
+						instance.instance_resource.instance_name,
+						instance.awaiting_peers.size(),
+						arrivals_protected,
+					]
+				)
 			continue
 		instance.instance_resource.charged_instances.erase(instance)
 		instance.queue_free()
 
 
-## Forget arrivals whose peer is no longer connected.
+## Forget arrivals that are never going to complete: the peer has disconnected,
+## or the slot has outlived [constant ServerInstance.ARRIVAL_TTL_MS].
+##
+## Both halves matter and they fail in opposite directions. Without the first, a
+## client that quits mid-load holds an empty biome open. Without the second, so
+## does a client that stays connected but never calls back — and THAT is the way
+## this fix could have replaced a map that unloads too eagerly with one that
+## never unloads at all.
 ##
 ## The Player node in an arrival slot was taken out of its old map by
 ## [method ServerInstance.despawn_player] and parented nowhere, so once the slot
 ## is dropped nothing else will ever free it — do it here.
 func _prune_dead_arrivals(instance: ServerInstance) -> void:
+	var expired: PackedInt64Array = instance.expired_arrivals()
 	for peer_id: int in instance.awaiting_peers.keys():
-		if world_server.connected_players.has(peer_id):
+		if world_server.connected_players.has(peer_id) and not expired.has(peer_id):
 			continue
-		var stranded: Node = instance.awaiting_peers[peer_id].get("player", null) as Node
-		if stranded != null and is_instance_valid(stranded) and stranded.get_parent() == null:
-			stranded.queue_free()
-		instance.awaiting_peers.erase(peer_id)
+		_drop_arrival(instance, peer_id)
+
+
+## Erase one arrival slot and free the orphaned Player it was holding.
+func _drop_arrival(instance: ServerInstance, peer_id: int) -> void:
+	if not instance.awaiting_peers.has(peer_id):
+		return
+	var stranded: Node = instance.awaiting_peers[peer_id].get("player", null) as Node
+	if stranded != null and is_instance_valid(stranded) and stranded.get_parent() == null:
+		stranded.queue_free()
+	instance.awaiting_peers.erase(peer_id)
 
 
 func get_instance_server_by_id(id: String) -> ServerInstance:
@@ -449,6 +493,10 @@ func rescue_peer(peer_id: int, client_instance: String) -> String:
 	# 1. Already spawned — the client just never received it. Re-deliver.
 	var live: ServerInstance = find_instance_for_peer(peer_id)
 	if live != null:
+		# They are IN a map, so any arrival slot still naming them is stale, and
+		# a stale slot now keeps its instance alive forever (see is_reapable).
+		# This is the leak the rescue itself would otherwise introduce.
+		_forget_arrivals(peer_id)
 		var player: Player = live.get_player(peer_id)
 		if client_instance == String(live.name) and player != null:
 			live.resend_arrival(peer_id)
@@ -473,12 +521,26 @@ func rescue_peer(peer_id: int, client_instance: String) -> String:
 			spawn = slot["target_position"]
 		elif instance.instance_map != null:
 			spawn = instance.instance_map.get_spawn_position(int(slot.get("target_id", 0)))
+		# Any OTHER instance still holding them is stale for the same reason.
+		_forget_arrivals(peer_id, instance)
 		_rpc_charge(peer_id, instance.instance_resource.map_path, instance.name, spawn)
 		return "recharged_awaiting"
 
 	# 3. Nothing holds them at all — the destination was torn down mid-arrival.
 	#    Re-run the login placement, which is precisely what a relog does.
+	_forget_arrivals(peer_id)
 	return "replaced" if place_peer(peer_id) else "failed"
+
+
+## Drop every arrival slot naming [param peer_id], except one on [param keep].
+## A peer can only ever be walking into one map; more than one slot means an
+## earlier arrival was superseded, and the extras would hold their instances
+## open indefinitely now that the sweeper honours arrivals.
+func _forget_arrivals(peer_id: int, keep: ServerInstance = null) -> void:
+	for instance: ServerInstance in get_children():
+		if instance == keep:
+			continue
+		_drop_arrival(instance, peer_id)
 
 
 ## Boss-arena / authored death eject: if the peer's current instance has
@@ -577,5 +639,5 @@ func teleport_peer_to(peer_id: int, dest_instance: ServerInstance, dest_position
 		dest_instance.name,
 		dest_position
 	)
-	dest_instance.awaiting_peers[peer_id] = {"player": player, "target_position": dest_position}
+	dest_instance.queue_arrival(peer_id, {"player": player, "target_position": dest_position})
 	return true

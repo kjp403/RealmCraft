@@ -32,6 +32,15 @@ var connected_peers: PackedInt64Array = PackedInt64Array()
 ## now; see InstanceManagerServer.is_reapable.
 var awaiting_peers: Dictionary[int, Dictionary] = {}#[int, Player]
 
+## How long an arrival slot may sit unclaimed before the sweeper stops honouring
+## it. The slot exists to stop the map being reclaimed under a loading client, so
+## it MUST outlive the slowest honest map load — but it must also expire, or one
+## client that loads the map and then never calls back pins an empty biome open
+## for the life of the process. Two minutes is far past any real load and far
+## short of a leak that matters.
+const ARRIVAL_TTL_MS: int = 120_000
+
+
 var last_accessed_time: float
 
 var instance_map: Map
@@ -262,6 +271,31 @@ func _warp_after_dwell(player: Player, warper: Warper) -> void:
 	player_entered_warper.emit(player, self, warper)
 
 
+## Register [param peer_id] as walking into this instance. Every arrival slot is
+## created through here so they all carry a timestamp — see ARRIVAL_TTL_MS.
+func queue_arrival(peer_id: int, info: Dictionary = {}) -> void:
+	var slot: Dictionary = info.duplicate()
+	slot["queued_ms"] = Time.get_ticks_msec()
+	awaiting_peers[peer_id] = slot
+
+
+## Arrival slots that have outlived ARRIVAL_TTL_MS. Returned rather than erased
+## so the caller can free the Player node each one is holding.
+func expired_arrivals() -> PackedInt64Array:
+	var stale: PackedInt64Array = PackedInt64Array()
+	var now_ms: int = Time.get_ticks_msec()
+	for peer_id: int in awaiting_peers:
+		var queued_ms: int = int(awaiting_peers[peer_id].get("queued_ms", 0))
+		# A slot with no stamp predates queue_arrival; treat it as fresh once and
+		# let the next pass age it, rather than dropping it on the first sweep.
+		if queued_ms == 0:
+			awaiting_peers[peer_id]["queued_ms"] = now_ms
+			continue
+		if now_ms - queued_ms > ARRIVAL_TTL_MS:
+			stale.append(peer_id)
+	return stale
+
+
 ## Peers whose spawn_player is mid-flight. [method spawn_player] awaits the map
 ## before it registers anything, so players_by_peer_id alone is blind for that
 ## window — and the client now re-asks on a timer. Without this, a re-ask that
@@ -338,7 +372,13 @@ func spawn_player(peer_id: int) -> void:
 
 	if awaiting_peers.has(peer_id):
 		var player_info: Dictionary = awaiting_peers[peer_id]
-		player = player_info["player"] if "player" in player_info else instantiate_player(peer_id)
+		# The node in the slot was removed from its old map and is parented to
+		# nothing, so a teardown elsewhere can have freed it while we awaited the
+		# map. Dereferencing it here killed the spawn mid-coroutine and left the
+		# in-flight mark set — a stranding that then refused its own retry.
+		player = player_info.get("player", null) as Player
+		if player == null or not is_instance_valid(player):
+			player = instantiate_player(peer_id)
 		spawn_index = player_info.get("target_id", 0)
 		spawn_position = player_info["target_position"] if "target_position" in player_info else instance_map.get_spawn_position(spawn_index)
 		awaiting_peers.erase(peer_id)
