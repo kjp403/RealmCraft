@@ -14,17 +14,20 @@ func _ready() -> void:
 	# Valorant (5v5 FPS game) - 128 ticks per second.
 	# I believe it depends of your game and architecture, it's a large topic.
 	#
-	# Raised 10 -> 20 to match the entity send rate. StateSynchronizerManagerServer
-	# already ships entity state at send_rate_hz_entities = 20, so at a 10 Hz
-	# simulation half of every position sent was a byte-for-byte repeat of the one
-	# before it — the bandwidth was already being spent, the tick simply had nothing
-	# new to put in it. Matching the two halves the movement correction window
-	# (100 ms -> 50 ms, which is what rubber-banding keys on) and takes ~50 ms off
-	# worst-case hit latency, for no extra bandwidth.
+	# Raised 10 -> 20 so the simulation matches the entity send rate.
+	# StateSynchronizerManagerServer ships entity state at send_rate_hz_entities =
+	# 20, but the sim only moved things ten times a second, so half of those send
+	# slots found an empty dirty map and sent nothing at all (the early return in
+	# _send_entity_deltas_one_shot). Matching the two halves the movement
+	# correction window — 100 ms -> 50 ms, which is what rubber-banding keys on —
+	# and takes ~50 ms off worst-case hit latency.
 	#
-	# Headroom measured on the live world before the change: 20.6% of one core with
-	# 6 players, i.e. ~20 ms of work inside a 100 ms budget. Doubling the simulation
-	# should land near 35%, comfortably inside the 50 ms a 20 Hz tick allows.
+	# This is NOT free. Those suppressed slots now carry real deltas, so entity
+	# bandwidth for anything moving roughly doubles, and the send path does real
+	# work 20x/s instead of 10x/s on top of the doubled simulation. Affordable at
+	# the population this was measured at — the live world sat at 20.6% of one core
+	# with 6 players, ~20 ms of work inside a 100 ms budget — but it scales with
+	# player count, and max_players is 200. Watch it before a big event.
 	Engine.set_physics_ticks_per_second(20) # 60 by default
 	
 	if DisplayServer.get_name() != "headless":
