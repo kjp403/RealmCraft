@@ -118,6 +118,15 @@ func charge_new_instance(
 	
 	if current_instance:
 		_park_local_player(current_instance.local_player)
+		# queue_free() only takes effect at the END of the frame, so the outgoing
+		# node is still a child of this manager on the add_child below. If the
+		# server hands us an id we are already holding — a warp whose destination
+		# resolves to the instance we are standing in — add_child would find the
+		# name taken and silently RENAME the new node. RPCs are routed by node
+		# path, so an InstanceClient whose name doesn't match the server's
+		# ServerInstance receives nothing at all, spawn_player included, and the
+		# player sits parked forever. Give up the name before we claim it.
+		current_instance.name = "%s_outgoing" % current_instance.name
 		current_instance.queue_free()
 	current_instance = new_instance
 

@@ -18,7 +18,18 @@ var local_role_assignments: Dictionary[int, PackedStringArray]
 var players_by_peer_id: Dictionary[int, Player]
 ## Current connected peers to the instance.
 var connected_peers: PackedInt64Array = PackedInt64Array()
-## Peers coming from another instance.
+## Peers coming from another instance: despawned from the map they left, not yet
+## spawned into this one, and invisible to [member connected_peers] for the whole
+## span of the client's map load.
+##
+## Load-bearing, not bookkeeping. InstanceManagerServer.unload_unused_instances
+## reclaims any instance with nobody in it on a 20-SECOND timer, and it used to
+## count only connected_peers — so a biome charged for an arriving player was
+## routinely freed while that player was still loading it. Their
+## ready_to_enter_instance then addressed a node the server had already deleted,
+## every client-side retry addressed the same dead node, and the avatar never
+## appeared: the recurring "null spawn, had to relog". The sweeper counts these
+## now; see InstanceManagerServer.is_reapable.
 var awaiting_peers: Dictionary[int, Dictionary] = {}#[int, Player]
 
 var last_accessed_time: float
@@ -251,11 +262,18 @@ func _warp_after_dwell(player: Player, warper: Warper) -> void:
 	player_entered_warper.emit(player, self, warper)
 
 
+## Peers whose spawn_player is mid-flight. [method spawn_player] awaits the map
+## before it registers anything, so players_by_peer_id alone is blind for that
+## window — and the client now re-asks on a timer. Without this, a re-ask that
+## lands during the await spawns a second copy of the same character.
+var _spawning_peers: Dictionary[int, bool] = {}
+
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func ready_to_enter_instance() -> void:
 	var peer_id: int = multiplayer.get_remote_sender_id()
 	# Ignore duplicate/spam requests so a client can't spawn ghost copies of itself.
-	if players_by_peer_id.has(peer_id):
+	if players_by_peer_id.has(peer_id) or _spawning_peers.has(peer_id):
 		return
 	spawn_player(peer_id)
 
@@ -300,11 +318,22 @@ func spawn_player(peer_id: int) -> void:
 	var spawn_index: int = 0
 	var spawn_position: Vector2
 
+	_spawning_peers[peer_id] = true
 	if not await await_map_ready():
+		_spawning_peers.erase(peer_id)
 		ServerLog.warn(
 			"Instance '%s': spawn_player(%d) aborted — the instance has no map."
 			% [instance_resource.instance_name, peer_id]
 		)
+		return
+	# The await above spans a map load, and the peer can be gone by the end of it.
+	# instantiate_player indexes connected_players directly, so carrying on here
+	# killed the spawn coroutine on a missing key — and left the in-flight mark
+	# set, which then refused the peer's spawn if they came back to this
+	# instance. Nothing to do for someone who left; the arrival slot is reaped
+	# by InstanceManagerServer._prune_dead_arrivals.
+	if not world_server.connected_players.has(peer_id):
+		_spawning_peers.erase(peer_id)
 		return
 
 	if awaiting_peers.has(peer_id):
@@ -325,6 +354,7 @@ func spawn_player(peer_id: int) -> void:
 	instance_map.add_child(player, true)
 	
 	players_by_peer_id[peer_id] = player
+	_spawning_peers.erase(peer_id)
 	
 	if spawn_position == Vector2.ZERO or not spawn_position.is_finite():
 		spawn_position = instance_map.get_spawn_position(0)
@@ -513,6 +543,26 @@ func get_motd() -> String:
 	return world_server.world_manager.world_info.get("motd", "Default Welcome")
 
 
+## Re-deliver an arrival to ONE peer that is already spawned here but whose
+## client never received it. Everything here is idempotent on the client side:
+## InstanceClient.spawn_player reuses the existing local player node and undoes
+## the park before it re-parents, so a duplicate is a no-op rather than a ghost.
+## Called by InstanceManagerServer.rescue_peer.
+func resend_arrival(peer_id: int) -> void:
+	var player: Player = players_by_peer_id.get(peer_id, null)
+	if player == null:
+		return
+	spawn_player.rpc_id(peer_id, peer_id)
+	for other_id: int in connected_peers:
+		if other_id != peer_id:
+			spawn_player.rpc_id(peer_id, other_id)
+	# Position is client-authoritative, so the re-parent alone would leave the
+	# avatar on the coordinates it carried in from the last map.
+	WorldServer.curr.data_push.rpc_id(
+		peer_id, &"player.teleport", {"position": player.global_position}
+	)
+
+
 ## Spawn the new player on all other client in the current instance
 ## and spawn all other players on the new client.
 func _propagate_spawn(new_player_id: int) -> void:
@@ -527,6 +577,7 @@ func despawn_player(peer_id: int, delete: bool = false) -> void:
 	TradeService.on_peer_left(self, peer_id)
 	connected_peers.remove_at(connected_peers.find(peer_id))
 	
+	_spawning_peers.erase(peer_id)
 	synchronizer_manager.remove_entity(peer_id)
 	synchronizer_manager.unregister_peer(peer_id)
 	

@@ -114,6 +114,17 @@ func _instance_for_login(res: InstanceResource) -> ServerInstance:
 
 ## Deal with player respawn on login. Should replace this with proper map respawn logic later?
 func _on_peer_connected(peer_id: int) -> void:
+	place_peer(peer_id)
+
+
+## Decide where [param peer_id] belongs and charge them into it. This is the login
+## placement, factored out so [code]spawn.rescue[/code] can re-run exactly the same
+## decision for a peer that ended up belonging to no instance at all — that is what
+## a relog does for them, and it used to be the only thing that did.
+## Returns false when no destination could be resolved.
+func place_peer(peer_id: int) -> bool:
+	if not world_server.connected_players.has(peer_id):
+		return false
 	var player_resource: PlayerResource = world_server.connected_players[peer_id]
 
 	# Jailed players go straight to the jail instance, regardless of where they
@@ -126,7 +137,7 @@ func _on_peer_connected(peer_id: int) -> void:
 			if jail_inst != null:
 				_rpc_charge(peer_id, jail_res.map_path, jail_inst.name)
 				jail_inst.awaiting_peers[peer_id] = {}
-				return
+				return true
 
 	# First-ever login? current_instance can't tell us — it's in-memory only (set on spawn,
 	# shown on the dashboard, but never written to the DB). Instead read three values that ARE
@@ -158,7 +169,7 @@ func _on_peer_connected(peer_id: int) -> void:
 					)
 					_rpc_charge(peer_id, saved_res.map_path, saved_inst.name, saved_position)
 					saved_inst.awaiting_peers[peer_id] = {"target_position": saved_position}
-					return
+					return true
 
 	var target_name: String = JAIL_INSTANCE_NAME if is_first_login else TAVERN_INSTANCE_NAME
 	var target_res: InstanceResource = instance_collection.get(target_name, null)
@@ -167,19 +178,20 @@ func _on_peer_connected(peer_id: int) -> void:
 		if target_inst != null:
 			_rpc_charge(peer_id, target_res.map_path, target_inst.name)
 			target_inst.awaiting_peers[peer_id] = {} # {} = the map's default spawn point (index 0)
-			return
+			return true
 
 	# Fallback: the tavern/jail map is missing or mid-load — land in the default overworld so
 	# we never strand the player in a black void.
 	if default_instance == null:
 		push_error("InstanceManagerServer: no default_instance for peer %d" % peer_id)
-		return
+		return false
 	var fallback_inst: ServerInstance = _instance_for_login(default_instance)
 	if fallback_inst == null:
 		push_error("InstanceManagerServer: could not charge default_instance for peer %d" % peer_id)
-		return
+		return false
 	_rpc_charge(peer_id, default_instance.map_path, fallback_inst.name)
 	fallback_inst.awaiting_peers[peer_id] = {}
+	return true
 
 
 func _on_player_entered_warper(player: Player, current_instance: ServerInstance, warper: Warper) -> void:
@@ -350,22 +362,58 @@ func set_instance_collection() -> void:
 		instance_collection.set(instance_resource.instance_name, instance_resource)
 
 
+## Pure eligibility test for the sweeper below, split out from the node walk so
+## it can be exercised without standing up a real ServerInstance
+## (tools/verify_arrival_recovery.tscn). An instance is reclaimable only when it
+## holds NOBODY — neither a player standing in the map nor one still walking in.
+static func is_reapable(
+	load_at_startup: bool,
+	connected_peer_count: int,
+	awaiting_peer_count: int,
+	pinned: bool
+) -> bool:
+	if load_at_startup or pinned:
+		return false
+	return connected_peer_count == 0 and awaiting_peer_count == 0
+
+
 func unload_unused_instances() -> void:
 	print("Checking unload_unused_instances")
 	for instance: ServerInstance in get_children():
-		if instance.instance_resource.load_at_startup:
-			continue
-		if instance.connected_peers:
-			continue
-		if QuestBossService.is_pinned_origin(instance):
-			continue
-		# The Traveling Peddler charges its own biome and holds it for the
-		# 30-minute window. Without this the sweeper would reclaim the empty map
-		# on its next pass and the cart would never get placed in it.
-		if PeddlerManager.holds_instance(instance):
+		# Drop arrival slots whose peer has gone before they are counted, so a
+		# client that quit or crashed mid-load cannot pin an empty map open.
+		_prune_dead_arrivals(instance)
+		var pinned: bool = (
+			QuestBossService.is_pinned_origin(instance)
+			# The Traveling Peddler charges its own biome and holds it for the
+			# 30-minute window. Without this the sweeper would reclaim the empty
+			# map on its next pass and the cart would never get placed in it.
+			or PeddlerManager.holds_instance(instance)
+		)
+		if not is_reapable(
+			instance.instance_resource.load_at_startup,
+			instance.connected_peers.size(),
+			instance.awaiting_peers.size(),
+			pinned
+		):
 			continue
 		instance.instance_resource.charged_instances.erase(instance)
 		instance.queue_free()
+
+
+## Forget arrivals whose peer is no longer connected.
+##
+## The Player node in an arrival slot was taken out of its old map by
+## [method ServerInstance.despawn_player] and parented nowhere, so once the slot
+## is dropped nothing else will ever free it — do it here.
+func _prune_dead_arrivals(instance: ServerInstance) -> void:
+	for peer_id: int in instance.awaiting_peers.keys():
+		if world_server.connected_players.has(peer_id):
+			continue
+		var stranded: Node = instance.awaiting_peers[peer_id].get("player", null) as Node
+		if stranded != null and is_instance_valid(stranded) and stranded.get_parent() == null:
+			stranded.queue_free()
+		instance.awaiting_peers.erase(peer_id)
 
 
 func get_instance_server_by_id(id: String) -> ServerInstance:
@@ -383,6 +431,54 @@ func find_instance_for_peer(peer_id: int) -> ServerInstance:
 			if inst.connected_peers.has(peer_id):
 				return inst
 	return null
+
+
+## Recover a peer whose arrival never completed: the client has a map loaded and
+## is asking to be spawned into it, but nothing answered. Its own re-asks
+## (ready_to_enter_instance) are addressed to the destination ServerInstance, so
+## they are useless in exactly the case that hurts — the instance is gone. This
+## runs off the world server instead, which is always there.
+##
+## [param client_instance] is the instance id the CLIENT is holding, so we can
+## tell "you missed the spawn for the right map" apart from "you are holding a
+## map the server no longer associates you with"; an RPC to an instance node the
+## client does not have would vanish the same way the first one did.
+##
+## Ordered cheapest-first. Returns the action taken, for the log and the reply.
+func rescue_peer(peer_id: int, client_instance: String) -> String:
+	# 1. Already spawned — the client just never received it. Re-deliver.
+	var live: ServerInstance = find_instance_for_peer(peer_id)
+	if live != null:
+		var player: Player = live.get_player(peer_id)
+		if client_instance == String(live.name) and player != null:
+			live.resend_arrival(peer_id)
+			return "resent_spawn"
+		# The client is holding a different map than the one we have them in.
+		_rpc_charge(
+			peer_id,
+			live.instance_resource.map_path,
+			live.name,
+			player.global_position if player != null else Vector2.ZERO
+		)
+		return "recharged_live"
+
+	# 2. Still queued on an instance that is alive — re-send its charge. The
+	#    arrival slot is left untouched, so the spawn lands where it was headed.
+	for instance: ServerInstance in get_children():
+		if not instance.awaiting_peers.has(peer_id):
+			continue
+		var slot: Dictionary = instance.awaiting_peers[peer_id]
+		var spawn: Vector2 = Vector2.ZERO
+		if slot.has("target_position"):
+			spawn = slot["target_position"]
+		elif instance.instance_map != null:
+			spawn = instance.instance_map.get_spawn_position(int(slot.get("target_id", 0)))
+		_rpc_charge(peer_id, instance.instance_resource.map_path, instance.name, spawn)
+		return "recharged_awaiting"
+
+	# 3. Nothing holds them at all — the destination was torn down mid-arrival.
+	#    Re-run the login placement, which is precisely what a relog does.
+	return "replaced" if place_peer(peer_id) else "failed"
 
 
 ## Boss-arena / authored death eject: if the peer's current instance has
