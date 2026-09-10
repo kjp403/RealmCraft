@@ -6,9 +6,12 @@ class_name PeddlerSites
 ## pool is scanned from the biomes folder rather than listed here, so a new biome
 ## joins the rotation by existing.
 ##
-## THE SQUARE IS AUTHORED. Each map carries [constant SPOT_NODE] markers (Node2D,
-## "PeddlerSpot1".."PeddlerSpot3") and the cycle hash picks one of them. That is
-## the whole placement rule now.
+## THE SQUARE IS AUTHORED AND FIXED. Each map carries [constant SPOT_NODE]
+## markers (Node2D, "PeddlerSpot1".."PeddlerSpot3") and the cart always stands on
+## the first one that still checks out. That is the whole placement rule now: one
+## square per zone, the same one every window, so a zone's Peddler spot is
+## something a player learns once. The later markers are fallbacks, not a
+## rotation — see [method pick_spot].
 ##
 ## WHY IT IS AUTHORED, because this used to be inferred and the history is the
 ## argument. The square was probed live against the map's own collision, and each
@@ -50,18 +53,33 @@ const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_
 
 ## Biomes the cart never visits, whatever the cycle hashes to. The pool is
 ## SCANNED rather than listed so a new zone joins the rotation by existing, which
-## is right for a zone and wrong for a boss arena: an arena is a single sealed
-## pad around a single fight, with no through-traffic to find a cart in it and a
-## death return that ejects you out of it. the_hollow is the whole current list:
-## it is the only entry in the biomes folder built as an arena (ArenaWalls, a
-## BossPad and a golem parked on it), and it is where the cart was reported
-## standing on the boundary.
+## is right for a zone and wrong for a map players cannot walk into. Two kinds
+## qualify:
+##
+##   * AN ARENA. the_hollow is the only entry in the biomes folder built as one
+##     (ArenaWalls, a BossPad and a golem parked on it): a single sealed pad
+##     around a single fight, with no through-traffic to find a cart in it and a
+##     death return that ejects you out of it. It is where the cart was reported
+##     standing on the boundary.
+##
+##   * A MAP WITH NO WAY IN. woodland_east is one: the biome resource and its
+##     map exist, but nothing in the project routes to them — no warper, no
+##     quick-travel destination, no death return. The live east expansion is the
+##     east wing INSIDE woodland_tiles (woodland_east_shore + woodland_east_link
+##     are instanced there), and this .tres is what was left behind when it
+##     moved. Only this folder scan still finds it, so the cart was the one
+##     thing that ever went there: roughly one window in nineteen announced
+##     "A Traveling Peddler has set up in Goblin Woodlands East" and then stood
+##     for thirty minutes in a map no player can reach.
 ##
 ## Matched case-insensitively against instance_name, which is not consistently
 ## cased across the pool (Forest, FungusArea1, pirates_cove), and against the
 ## biome file's own stem, so a rename of either one cannot quietly re-admit an
-## arena.
-const EXCLUDED_BIOMES: PackedStringArray = ["the_hollow", "hollow"]
+## excluded map.
+const EXCLUDED_BIOMES: PackedStringArray = [
+	"the_hollow", "hollow",
+	"woodland_east",
+]
 
 ## Layer-name fragments that mean "this layer paints FLOOR". Matched
 ## case-insensitively as substrings, so Ground / Ground2 / GroundDetail /
@@ -108,7 +126,11 @@ const CLEARANCE: float = 16.0
 ## can. Also the lattice the cart ends up standing on.
 const FILL_STEP: float = 16.0
 ## Hard stop on fill size, so a map with an unwalled edge cannot cost a world
-## server an unbounded loop.
+## server an unbounded loop. The DEFAULT, not the limit: a caller may raise it
+## via [method walkable_cells]'s cell_cap, and an offline gate walking a whole
+## map has to — at this cap the fill truncates on the larger maps, and a
+## truncated fill cannot tell "unreachable" from "ran out of room". Nothing on
+## the live server path passes anything but this.
 const FILL_CELL_CAP: int = 20000
 const _NEIGHBOURS: Array[Vector2i] = [
 	Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
@@ -163,29 +185,40 @@ static func rotation_for_cycle(cycle_index: int) -> Array[StringName]:
 	return order
 
 
-## A standable point in [param map] for [param cycle_index], plus the square
-## beside it for the Vault Chest, as {"peddler": Vector2, "vault": Vector2} in
-## GLOBAL coordinates.
+## The square the cart stands on in [param map], plus the square beside it for
+## the Vault Chest, as {"peddler": Vector2, "vault": Vector2} in GLOBAL
+## coordinates.
 ##
-## Falls back to the home spawn when nothing qualifies — a cart on the spawn pad
-## is worse placement, not a broken window.
-static func pick_spot(map: Map, cycle_index: int) -> Dictionary:
-	var anchor: Vector2 = failsafe_anchor(map)
-	var spots: PackedVector2Array = authored_spots(map)
-	if spots.is_empty():
-		return {"peddler": anchor, "vault": _vault_spot(map, {}, anchor)}
-	var spot: Vector2 = spots[_cycle_hash(cycle_index) % spots.size()]
-	# Last gate before a cart exists in the world. An authored spot was checked by
-	# tools/verify_peddler_spots.tscn when it shipped, so this catching anything
-	# means the MAP moved under it — a wall extended over a marker, a prop dropped
-	# on one. Cheap insurance on the one code path whose failures every player in
-	# the biome can see.
-	if not is_valid_spot(map, spot):
+## ONE FIXED SQUARE PER MAP: the first authored marker in name order,
+## PeddlerSpot1. Takes no cycle, because the answer no longer depends on one.
+##
+## It used to. The cart moved between a map's three markers on a cycle hash,
+## which meant "where does the Peddler stand in the desert" had three answers and
+## a player who had found it once still had to sweep the zone the next time. The
+## half-hour window is short enough that searching a map is most of it. A fixed,
+## learnable square per zone is what lets somebody read the announcement, know
+## where they are going, and get there — which is the entire point of the cart
+## being somewhere specific.
+##
+## The other markers are not wasted: they are the FALLBACKS, tried in name order
+## when the one before them does not survive [method is_valid_spot]. That check
+## failing means the MAP moved under the marker — a wall extended over it, a prop
+## dropped on it — because every authored spot was checked by
+## tools/verify_peddler_spots.tscn when it shipped. Falling through to spot 2
+## keeps the cart somewhere a person chose, rather than dumping it on the spawn
+## pad the moment one square goes bad.
+##
+## Falls back to the home spawn only when NO authored spot qualifies — a cart on
+## the spawn pad is worse placement, not a broken window.
+static func pick_spot(map: Map) -> Dictionary:
+	for spot: Vector2 in authored_spots(map):
+		if is_valid_spot(map, spot):
+			return {"peddler": spot, "vault": _vault_spot(map, {}, spot)}
 		push_warning(
-			"PeddlerSites: authored spot %s is no longer valid; using the anchor." % spot
+			"PeddlerSites: authored spot %s is no longer valid; trying the next marker." % spot
 		)
-		spot = anchor
-	return {"peddler": spot, "vault": _vault_spot(map, {}, spot)}
+	var anchor: Vector2 = failsafe_anchor(map)
+	return {"peddler": anchor, "vault": _vault_spot(map, {}, anchor)}
 
 
 ## The squares an author marked in [param map], ordered by marker NAME.
@@ -263,7 +296,10 @@ static func is_excluded(biome: StringName) -> bool:
 ## touches an edge, calling the whole lot reachable. And to a detour budget
 ## around the origin. Together they keep the walk to a few thousand point
 ## queries, once per 30-minute window.
-static func walkable_cells(map: Map, origin: Vector2, budget: float = FILL_BUDGET) -> Dictionary:
+static func walkable_cells(
+	map: Map, origin: Vector2, budget: float = FILL_BUDGET,
+	cell_cap: int = FILL_CELL_CAP
+) -> Dictionary:
 	var cells: Dictionary = {}
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
@@ -286,7 +322,7 @@ static func walkable_cells(map: Map, origin: Vector2, budget: float = FILL_BUDGE
 	# Walked with an index rather than pop_front(): the fill is thousands of cells
 	# and Array.pop_front() is O(n), which would make the walk quadratic.
 	var head: int = 0
-	while head < queue.size() and cells.size() < FILL_CELL_CAP:
+	while head < queue.size() and cells.size() < cell_cap:
 		var cell: Vector2i = queue[head]
 		head += 1
 		for offset: Vector2i in _NEIGHBOURS:
@@ -525,8 +561,10 @@ static func _space(map: Map) -> PhysicsDirectSpaceState2D:
 	return map.get_world_2d().direct_space_state
 
 
-## Non-negative, stable hash of a cycle index. Salted so the biome pick and the
-## in-map probe do not both derive from the raw index and correlate.
+## Non-negative, stable hash of a cycle index. Drives the biome rotation only —
+## the square within a biome is fixed ([method pick_spot]). The salt is kept so
+## the rotation a live world produces does not change under anyone who has
+## learned it.
 static func _cycle_hash(cycle_index: int) -> int:
 	return int(("peddler-site|%d" % cycle_index).hash()) & 0x7FFFFFFF
 

@@ -196,7 +196,7 @@ func _try_place() -> void:
 		_skip_biome("no replicated props container")
 		return
 
-	var spot: Dictionary = PeddlerSites.pick_spot(instance.instance_map, _active_cycle)
+	var spot: Dictionary = PeddlerSites.pick_spot(instance.instance_map)
 	# The node NAME rides the spawn INIT, not a post-spawn assignment. The client
 	# instantiates its own copy from the same packed scene and would otherwise
 	# call it "NPC"; the window sends that name back for the server's range check,
