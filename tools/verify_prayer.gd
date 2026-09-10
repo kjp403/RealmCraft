@@ -35,10 +35,17 @@ const EXPECTED_PRAYERS: Dictionary = {
 }
 
 ## bone slug -> prayer xp
+##
+## The jump from Big Bones to Dragon Bones is enormous (326 -> 9,000) and it is
+## DELIBERATE, not a typo — confirmed 2026-09-10. Dragon Bones are the endgame
+## Prayer training item and the reason a dragon bone is worth more burnt than
+## brewed; every recipe that consumes one is priced against that 9,000.
+## This table held 550 / 1,650 / 4,400 long after the altar stopped paying them,
+## and nobody saw it because the script could not be loaded (see the header).
 const EXPECTED_OFFERINGS: Dictionary = {
-	"bone": 550,
-	"big_bones": 1650,
-	"dragon_bones": 4400,
+	"bone": 109,
+	"big_bones": 326,
+	"dragon_bones": 9000,
 }
 
 var _pass: int = 0
@@ -185,6 +192,18 @@ func _check_prayer_draughts() -> void:
 		"the renewal arms the prayer-renewal family"
 	)
 	_check(renewal.aura_pulse_s > 0.0, "the renewal pulses")
+	# The renewal is sized against the PRAYER BOOK: it must cover the heaviest
+	# setup a player can actually run, or it is just a slow Prayer Potion and the
+	# two Dragon Bones (18,000 Prayer xp burnt at the altar) are wasted. See
+	# StatusEffectManager.EFFECT_PRAYER_RENEWAL.
+	var heaviest: float = _heaviest_prayer_drain()
+	var per_minute: float = renewal.aura_potency * (60.0 / renewal.aura_pulse_s)
+	_check(
+		per_minute >= heaviest,
+		"the renewal (%.0f/min) covers the heaviest setup (%.0f/min)" % [
+			per_minute, heaviest
+		]
+	)
 	_check(
 		not renewal.exclusive_buff,
 		"the renewal holds no combat-draught slot"
@@ -370,6 +389,40 @@ func _check_drain() -> void:
 
 ## A live Player with a real StatsComponent (it is an @onready child node, so a
 ## bare Player.new() has none) and a Prayer level already banked.
+## Points per minute burnt by the most expensive LEGAL set of prayers — the
+## dearest prayer in each conflict group, plus every ungrouped one. Computed
+## from the book rather than hard-coded, so a new prayer or a re-tuned drain
+## moves the bar the Renewal has to clear instead of quietly leaving it behind.
+func _heaviest_prayer_drain() -> float:
+	var per_group: Dictionary = {}
+	var ungrouped: float = 0.0
+	for slug: String in EXPECTED_PRAYERS:
+		var prayer: PrayerResource = PrayerBook.by_slug(StringName(slug))
+		if prayer == null:
+			continue
+		var groups: Array = EXPECTED_PRAYERS[slug][2]
+		if groups.is_empty():
+			ungrouped += prayer.drain_per_minute
+			continue
+		# A prayer claiming two groups (Oath of the Slayer) locks both, so it is
+		# charged once and blocks everything else in either.
+		for group: String in groups:
+			per_group[group] = maxf(
+				float(per_group.get(group, 0.0)), prayer.drain_per_minute
+			)
+	# Combat only. A gathering prayer is never up in the fight this is sized for,
+	# and folding one in would inflate the bar with drain no boss ever sees.
+	var total: float = ungrouped
+	for group: String in ["offence", "defence", "protection", "lifesteal"]:
+		total += float(per_group.get(group, 0.0))
+	# Oath of the Slayer is counted once for offence and once for defence by the
+	# loop above; give one of them back.
+	var oath: PrayerResource = PrayerBook.by_slug(&"oath_slayer")
+	if oath != null and float(per_group.get("offence", 0.0)) == oath.drain_per_minute:
+		total -= oath.drain_per_minute
+	return total
+
+
 func _make_player(prayer_level: int) -> Player:
 	var player: Player = Player.new()
 	var resource: PlayerResource = PlayerResource.new()

@@ -3283,7 +3283,7 @@ entries = Array[Dictionary]([{
 &"path": "res://source/common/gameplay/items/consumables/super_prayer_potion.tres",
 &"slug": &"super_prayer_potion"
 }, {
-&"hash": "077c6493b9b492eab1fd0aebfc62eafd1e7165a18cfc548d3d08a4d05ffc8f36",
+&"hash": "6a05a2dafa3bfed6b1cf8acbe63075732980101c807883cd20afaac6550db1ea",
 &"id": 702,
 &"path": "res://source/common/gameplay/items/consumables/prayer_renewal.tres",
 &"slug": &"prayer_renewal"

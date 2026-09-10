@@ -65,6 +65,25 @@ const EFFECT_PROVOCATION: StringName = &"provocation"
 ## and the Renewal is the thing you drink BEFORE the fight and then forget about.
 ## Collapsing the second into the first would have made it a bigger version of
 ## the first, which is not a second item.
+##
+## THE RATE IS SET AGAINST THE PRAYER BOOK, NOT AGAINST THE OTHER POTIONS.
+## The dearest set of combat prayers a player can legally hold at once is Oath
+## of the Slayer (24/min, and it occupies BOTH the offence and defence groups,
+## so it locks out everything else in either), one protection prayer (12/min)
+## and Blood Tithe (5/min) — 41/min, which empties a 99 pool in 2m25s. The
+## Renewal is authored at 7 points every 10s, i.e. 42/min, so for its five
+## minutes the whole top-end book costs nothing and a boss fight is not paced by
+## sipping. Under that number it is a slower Prayer Potion; far over it, prayer
+## stops being a resource at all. [method verify_prayer._heaviest_prayer_drain]
+## recomputes the 41 from the book, so a new prayer moves the bar rather than
+## quietly leaving this behind.
+##
+## That is what the two Dragon Bones are buying, and they are expensive: burnt
+## at the altar the same two pay 18,000 Prayer xp. Per POINT restored the Super
+## Prayer Potion is more than twice as efficient — the Renewal is priced for
+## uptime (no sip window, no bag slot, no interruption), never for throughput,
+## and it should stay the worse deal for anyone who can afford to stand still
+## and drink.
 const EFFECT_PRAYER_RENEWAL: StringName = &"prayer_renewal"
 
 ## Reasons stealth ends, passed to [method break_stealth] purely so the server

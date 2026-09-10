@@ -187,13 +187,13 @@ amount = 2
 [sub_resource type="Resource" id="I_super_prayer_bone"]
 script = ExtResource("3_ingred")
 item = ExtResource("mat_big_bones")
-amount = 5
+amount = 3
 [sub_resource type="Resource" id="R_super_prayer"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_super_prayer")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_super_prayer_herb"), SubResource("I_super_prayer_bone")])
-required_level = 66
-xp_reward = 500
+required_level = 78
+xp_reward = 670
 [sub_resource type="Resource" id="I_renewal_herb"]
 script = ExtResource("3_ingred")
 item = ExtResource("herb_sun_lit_lotus")
@@ -201,13 +201,13 @@ amount = 2
 [sub_resource type="Resource" id="I_renewal_bone"]
 script = ExtResource("3_ingred")
 item = ExtResource("mat_dragon_bones")
-amount = 5
+amount = 2
 [sub_resource type="Resource" id="R_prayer_renewal"]
 script = ExtResource("1_recipe")
 output_item = ExtResource("pot_prayer_renewal")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_vial"), SubResource("I_renewal_herb"), SubResource("I_renewal_bone")])
-required_level = 84
-xp_reward = 780
+required_level = 92
+xp_reward = 1050
 [sub_resource type="Resource" id="I_seep_cap"]
 script = ExtResource("3_ingred")
 item = ExtResource("quest_cap")

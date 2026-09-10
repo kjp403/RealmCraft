@@ -53,5 +53,5 @@ perks = Array[Dictionary]([{
 "per_rank": 0.04
 }])
 recipe_items = Array[ExtResource("1_item")]([ExtResource("p0"), ExtResource("p1"), ExtResource("p2"), ExtResource("p3"), ExtResource("p4"), ExtResource("p5"), ExtResource("p6"), ExtResource("p7"), ExtResource("p8"), ExtResource("p9"), ExtResource("p10"), ExtResource("p11"), ExtResource("p18"), ExtResource("p19"), ExtResource("p_seep_tonic"), ExtResource("p_seep_draught"), ExtResource("p12"), ExtResource("p13"), ExtResource("p14"), ExtResource("p15"), ExtResource("p16"), ExtResource("p17"), ExtResource("p20"), ExtResource("p21")])
-recipe_levels = Array[int]([1, 6, 14, 24, 34, 50, 58, 70, 76, 82, 88, 42, 66, 84, 1, 1, 90, 91, 93, 95, 97, 99, 79, 73])
+recipe_levels = Array[int]([1, 6, 14, 24, 34, 50, 58, 70, 76, 82, 88, 42, 78, 92, 1, 1, 90, 91, 93, 95, 97, 99, 79, 73])
 describe_lines = Array[String](["Herblore XP +{xp}%", "Material refund: {refund}%", "Extra dose: {extra_item}%"])
