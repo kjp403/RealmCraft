@@ -126,7 +126,11 @@ const CLEARANCE: float = 16.0
 ## can. Also the lattice the cart ends up standing on.
 const FILL_STEP: float = 16.0
 ## Hard stop on fill size, so a map with an unwalled edge cannot cost a world
-## server an unbounded loop.
+## server an unbounded loop. The DEFAULT, not the limit: a caller may raise it
+## via [method walkable_cells]'s cell_cap, and an offline gate walking a whole
+## map has to — at this cap the fill truncates on the larger maps, and a
+## truncated fill cannot tell "unreachable" from "ran out of room". Nothing on
+## the live server path passes anything but this.
 const FILL_CELL_CAP: int = 20000
 const _NEIGHBOURS: Array[Vector2i] = [
 	Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
@@ -292,7 +296,10 @@ static func is_excluded(biome: StringName) -> bool:
 ## touches an edge, calling the whole lot reachable. And to a detour budget
 ## around the origin. Together they keep the walk to a few thousand point
 ## queries, once per 30-minute window.
-static func walkable_cells(map: Map, origin: Vector2, budget: float = FILL_BUDGET) -> Dictionary:
+static func walkable_cells(
+	map: Map, origin: Vector2, budget: float = FILL_BUDGET,
+	cell_cap: int = FILL_CELL_CAP
+) -> Dictionary:
 	var cells: Dictionary = {}
 	var space: PhysicsDirectSpaceState2D = _space(map)
 	if space == null:
@@ -315,7 +322,7 @@ static func walkable_cells(map: Map, origin: Vector2, budget: float = FILL_BUDGE
 	# Walked with an index rather than pop_front(): the fill is thousands of cells
 	# and Array.pop_front() is O(n), which would make the walk quadratic.
 	var head: int = 0
-	while head < queue.size() and cells.size() < FILL_CELL_CAP:
+	while head < queue.size() and cells.size() < cell_cap:
 		var cell: Vector2i = queue[head]
 		head += 1
 		for offset: Vector2i in _NEIGHBOURS:
