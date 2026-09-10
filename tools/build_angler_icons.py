@@ -33,6 +33,9 @@ STEEL = [(28, 32, 42), (72, 82, 98), (126, 138, 156), (186, 198, 214), (238, 246
 WOOD = [(38, 24, 14), (74, 48, 26), (110, 74, 40), (146, 104, 60), (178, 134, 84)]
 IRON = [(26, 26, 30), (58, 58, 66), (92, 94, 104), (132, 136, 148), (176, 182, 196)]
 BAIT = [(74, 16, 12), (128, 32, 20), (184, 58, 32), (222, 96, 52), (250, 152, 96)]
+# Cut fish flesh: salmon pink with a pale fatty edge, deliberately NOT the red of
+# a whole shrimp so a chunk never reads as a small animal.
+FLESH = [(96, 38, 40), (150, 66, 62), (198, 104, 92), (232, 150, 132), (252, 206, 188)]
 OUTLINE = (14, 12, 18)
 
 
@@ -129,7 +132,7 @@ def build_bucket():
 
     im = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     im.alpha_composite(shade(handle, IRON))
-    im.alpha_composite(shade(bait, BAIT))
+    im.alpha_composite(shade(bait, FLESH))  # the bucket shows the bait it holds
     im.alpha_composite(shade(body, WOOD))
     im.alpha_composite(shade(rim, IRON))
     im.alpha_composite(shade(foot, IRON))
@@ -144,10 +147,33 @@ def build_bucket():
     return im
 
 
+def build_bait():
+    """Chunks of cut fish, not a whole one.
+
+    This shipped as a copy of the Raw Shrimp icon, which put the SAME sprite on
+    two different rows of the Fillet panel — the row you cut from and the row you
+    get. Bait is what filleting produces, so it is drawn as offcuts: four
+    irregular pieces at different sizes and angles, each with a pale edge where
+    the knife went through.
+    """
+    pieces = [
+        [(6, 17), (13, 14), (16, 19), (9, 23)],
+        [(15, 12), (22, 10), (25, 15), (18, 18)],
+        [(17, 19), (24, 18), (25, 24), (18, 25)],
+        [(9, 24), (15, 22), (16, 27), (10, 28)],
+    ]
+    im = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    for poly in pieces:
+        cells = _mask(lambda d, q=poly: d.polygon(q, fill=1))
+        im.alpha_composite(shade(cells, FLESH))
+    return im
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     for name, fn in (("tool_fillet_knife", build_knife),
-                     ("tool_bait_bucket", build_bucket)):
+                     ("tool_bait_bucket", build_bucket),
+                     ("mat_fish_bait", build_bait)):
         path = os.path.join(OUT_DIR, name + ".png")
         fn().save(path)
         print("wrote", os.path.relpath(path, ROOT))
