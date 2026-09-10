@@ -41,12 +41,22 @@ signal progress_changed(value: float)
 ## over `data_push` — which is declared reliable and ordered, on the channel
 ## combat shares. Two pads and a full group put enough of those in flight that
 ## hit acknowledgements queued behind pad-fill spam, and the fight read as lag
-## while the rest of the world felt fine. A fill bar only has to look smooth and
-## the client tweens between pushes, so 10 Hz is ample.
+## while the rest of the world felt fine.
 ##
-## Deliberately a wall-clock interval, not a frame count: it must not change if
-## the server tick rate ever does.
-const BROADCAST_INTERVAL_MS: int = 100
+## MUST stay comfortably longer than the physics tick or this does nothing at
+## all. The server ticks at 10 Hz (world_main.gd), i.e. one frame per 100 ms, so
+## a 100 ms interval lets every frame through unchanged — which is exactly the
+## bug this constant was added to fix. At 250 ms each pad pushes 4x/s instead of
+## 10x/s.
+##
+## Not lower than this without giving the client a tween: _on_pad_push assigns
+## progress and repaints, with no smoothing, so the push rate IS the visual
+## frame rate of the fill bar. Over a 14 s channel 4 Hz moves the bar in ~1.7%
+## steps, which reads as continuous; 2 Hz starts to look stepped.
+##
+## Deliberately wall-clock, not a frame count, so it cannot drift if the tick
+## rate ever changes.
+const BROADCAST_INTERVAL_MS: int = 250
 
 ## Floor decal depth. Below characters (z 0) but above the tilemap.
 const PAD_Z_INDEX: int = -2
