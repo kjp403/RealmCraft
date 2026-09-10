@@ -16,6 +16,9 @@ extends Control
 ## the icon / name / count / yield columns line up as a table.
 const COLUMNS: int = 1
 
+## Horizontal padding between a row's contents and its frame, per side.
+const ROW_INSET_PX: float = 8.0
+
 var _rows: Array = []
 var _busy: bool = false
 
@@ -139,14 +142,19 @@ func _render() -> void:
 		child.queue_free()
 
 	var total_bait: int = 0
+	var total_fish: int = 0
 	for row: Dictionary in _rows:
 		total_bait += int(row.get("bait", 0))
+		# Fish, not ROWS. _rows.size() is the number of species, so a bag of 24
+		# tuna and 11 lobster read as "2 fish" — which is both wrong and the
+		# opposite of reassuring right before you press Fillet All.
+		total_fish += int(row.get("held", 0))
 
 	if _rows.is_empty():
 		_summary.text = "No raw fish in your bags."
 		_all_button.disabled = true
 	else:
-		_summary.text = "%d fish → %d bait" % [_rows.size(), total_bait]
+		_summary.text = "%d fish → %d bait" % [total_fish, total_bait]
 		_all_button.disabled = _busy
 
 	for row: Dictionary in _rows:
@@ -164,6 +172,11 @@ func _build_row(row: Dictionary) -> Control:
 
 	var line := HBoxContainer.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Inset from the frame. PRESET_FULL_RECT zeroes the offsets, and the button's
+	# own content margins do not apply to an anchored child — so without this the
+	# bait figure on the widest row is drawn under the border and clipped.
+	line.offset_left = ROW_INSET_PX
+	line.offset_right = -ROW_INSET_PX
 	line.add_theme_constant_override(&"separation", 8)
 	# IGNORE so the layout never eats the click meant for the button under it.
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE

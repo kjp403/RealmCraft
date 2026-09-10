@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="FilletKnifeItem" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/mat_bronze_arrowheads.png" id="1_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/tool_fillet_knife.png" id="1_icon"]
 [ext_resource type="Script" path="res://source/common/gameplay/items/fillet_knife_item.gd" id="2_script"]
 
 [resource]

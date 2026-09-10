@@ -383,6 +383,7 @@ const TOUCHED_SCRIPTS: Array[String] = [
 	"res://source/common/gameplay/maps/components/mineable_node.gd",
 	"res://source/client/ui/menus/fillet/fillet_menu.gd",
 	"res://source/client/ui/compact_menus/compact_menu_host.gd",
+	"res://source/client/ui/hud/xp_tracker/xp_tracker_hud.gd",
 	"res://source/server/world/components/world_server.gd",
 	"res://source/server/world/database/world_schema.gd",
 	"res://source/server/world/database/world_store_sqlite.gd",
