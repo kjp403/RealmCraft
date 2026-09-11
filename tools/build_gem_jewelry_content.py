@@ -20,12 +20,12 @@ WHAT THIS MAKES
 
 XP (Kyle, 2026-09-10)
 ---------------------
-Setting pays 60 / 105 / 165 / 270 and unlocks five levels after the cut;
-cutting pays 27 / 45 / 69 / 105. Cut + set is two actions per gem at the 2s
-craft interval, 375 xp per diamond at the top, which puts 99 at ~39.7h and
-~35,750 gems. That is 1.5x the first pass (Kyle, 2026-09-10), chosen because
-53,600 gems to 99 was a lot. XP is per GEM, not per piece: a ruby ring
-and a ruby amulet are the same action.
+Setting pays 60 / 105 / 165 / 270 into silver and 90 / 158 / 248 / 405 into
+gold -- gold pays 1.5x, the ratio Smithing already uses for its gold pieces --
+and unlocks five levels after the cut; cutting pays 27 / 45 / 69 / 105. Cut +
+set is two actions per gem at the 2s craft interval, so 99 setting into gold
+is ~29.2h and ~26,300 gems. Ring, necklace and amulet pay the same; the metal
+is what changes the XP.
 
 The Gold Amulet's 184 xp is the anvil's own silver amulet:necklace ratio
 (117:91) applied to the gold necklace's 143. There is no generator behind the
@@ -71,12 +71,13 @@ SLOT = {
     "amulet": f"{RES}/items/item_slot/slots/amulet.tres",
 }
 
-# (cut gem slug, cut level -- shipped in #439, set level, set xp)
+# (cut gem slug, cut level -- shipped in #439, set level, silver set xp,
+#  gold set xp -- gold pays 1.5x silver, the ratio Smithing already uses)
 GEMS = [
-    ("sapphire", 1, 5, 60),
-    ("emerald", 27, 32, 105),
-    ("ruby", 43, 48, 165),
-    ("diamond", 60, 65, 270),
+    ("sapphire", 1, 5, 60, 90),
+    ("emerald", 27, 32, 105, 158),
+    ("ruby", 43, 48, 165, 248),
+    ("diamond", 60, 65, 270, 405),
 ]
 METALS = ("silver", "gold")
 PIECES = ("ring", "necklace", "amulet")
@@ -215,7 +216,7 @@ def write_items(dry: bool) -> int:
         "jewelry_gold_amulet.png", SLOT["amulet"], BASE_STATS["gold_amulet"],
         OLD_BASE_VENDOR["gold_amulet"] // 2))]
 
-    for gem, _cut_lvl, _set_lvl, _xp in GEMS:
+    for gem, _cut_lvl, _set_lvl, _silver_xp, _gold_xp in GEMS:
         for metal in METALS:
             for piece in PIECES:
                 slug = slug_for(gem, metal, piece)
@@ -348,7 +349,7 @@ def wire_setting_recipes(dry: bool) -> int:
             _require_free_ids(body, [eid], "workbench")
             ext.append(f'[ext_resource type="Resource" '
                        f'path="{JEWELRY_RES}/{metal}_{piece}.tres" id="{eid}"]')
-    for gem, _cut_lvl, set_lvl, xp in GEMS:
+    for gem, _cut_lvl, set_lvl, silver_xp, gold_xp in GEMS:
         if f'id="gem_{gem}"' not in body:
             sys.exit(f"  ! workbench: cut gem ext_resource gem_{gem} not found")
         for metal in METALS:
@@ -373,7 +374,7 @@ def wire_setting_recipes(dry: bool) -> int:
                     f'[SubResource("I_set_{slug}_base"), '
                     f'SubResource("I_set_{slug}_gem")])\n'
                     f'required_level = {set_lvl}\n'
-                    f'xp_reward = {xp}\n')
+                    f'xp_reward = {gold_xp if metal == "gold" else silver_xp}\n')
                 refs.append(f'SubResource("R_set_{slug}")')
 
     body = insert_blocks(body, ext, subs)
@@ -457,7 +458,7 @@ def main() -> int:
          "r_16"),                         # r_16 is the Gold Ring
     ], dry)
     outfitting_entries: list[tuple[str, str, int, str | None]] = []
-    for gem, cut_lvl, set_lvl, _xp in GEMS:
+    for gem, cut_lvl, set_lvl, _silver_xp, _gold_xp in GEMS:
         outfitting_entries.append(
             (f"cut_{gem}", f"{GEM_RES}/{gem}.tres", cut_lvl, None))
         for metal in METALS:

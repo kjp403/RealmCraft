@@ -57,8 +57,9 @@ const PERIOD_S: int = 3 * 60 * 60
 ##     gems and ~101 hours.
 ##
 ## The setting half (tools/build_gem_jewelry_content.py) and a 1.5x raise to
-## both halves (Kyle, 2026-09-10: cut 27/45/69/105, set 60/105/165/270) put the
-## best-gem-per-level ladder at ~35,750 gems and ~39.7h to 99. The meteor-mix figure above has NOT been re-measured with setting in, so
+## both halves (Kyle, 2026-09-10: cut 27/45/69/105, set 60/105/165/270), then a
+## 1.5x gold premium on setting (90/158/248/405), put the best-gem-per-level
+## ladder, setting into gold, at ~26,300 gems and ~29.2h to 99. The meteor-mix figure above has NOT been re-measured with setting in, so
 ## re-run it before resizing POOL — the pool was never the binding constraint.
 ##
 ## Bag space throttles it too — 30 slots per bag, gems stack 10, so a one-bag

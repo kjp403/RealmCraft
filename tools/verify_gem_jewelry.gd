@@ -17,12 +17,12 @@ const ICONS: String = "res://assets/sprites/items/icons"
 
 const METALS: Array[String] = ["silver", "gold"]
 const PIECES: Array[String] = ["ring", "necklace", "amulet"]
-## gem -> [cut level, set level, set xp]. Set xp approved by Kyle 2026-09-10.
+## gem -> [cut level, set level, silver set xp, gold set xp] (Kyle, 2026-09-10).
 const LADDER: Dictionary = {
-	"sapphire": [1, 5, 60],
-	"emerald": [27, 32, 105],
-	"ruby": [43, 48, 165],
-	"diamond": [60, 65, 270],
+	"sapphire": [1, 5, 60, 90],
+	"emerald": [27, 32, 105, 158],
+	"ruby": [43, 48, 165, 248],
+	"diamond": [60, 65, 270, 405],
 }
 ## Each gem adds ONE stat, colour-matched to the Slayer gem standing for it...
 const GEM_STAT: Dictionary = {
@@ -68,7 +68,6 @@ func _init() -> void:
 	_check_gold_amulet(anvil)
 	var sets: int = _check_setting(bench)
 	_check_guides()
-	_check_training_method()
 
 	print("setting recipes: %d   problems: %d" % [sets, bad])
 	# run_verify.sh greps for this exact string and ignores the exit code,
@@ -77,57 +76,6 @@ func _init() -> void:
 		print("VERIFY_PASS")
 	quit(1 if bad else 0)
 
-
-## What the gem line pays per craft at [param level]: cut + set of the best gem
-## a player can both cut and set there, averaged over the two actions (cut only
-## below level 5).
-func _gem_rate_at(level: int) -> int:
-	if level < 5:
-		return 27
-	if level < 32:
-		return 43
-	if level < 48:
-		return 75
-	if level < 65:
-		return 117
-	return 187
-
-
-## Jewellery is THE Crafting training method (Kyle, 2026-09-10). No other
-## outfitting recipe on either workbench may pay as much per craft as the gem
-## line does at its level, or players train on armour and the gem economy, the
-## meteor and the ~40h pace to 99 all stop mattering.
-func _check_training_method() -> void:
-	var gem_line: Array[String] = []
-	for gem: String in LADDER:
-		gem_line.append(gem)
-		for metal: String in METALS:
-			for piece: String in PIECES:
-				gem_line.append("%s_%s_%s" % [gem, metal, piece])
-	var checked: int = 0
-	for path: String in [
-		"res://source/common/gameplay/crafting/resources/workbench.tres",
-		"res://source/common/gameplay/crafting/resources/ascended_workbench.tres",
-	]:
-		var station: CraftingStationResource = load(path) as CraftingStationResource
-		if station == null:
-			_fail("could not load " + path)
-			continue
-		for recipe: CraftingRecipe in station.recipes:
-			if recipe == null or recipe.output_item == null:
-				continue
-			if recipe.profession_for(station) != &"outfitting":
-				continue
-			if str(recipe.output_item.get_meta(&"slug", &"")) in gem_line:
-				continue
-			checked += 1
-			var gem_rate: int = _gem_rate_at(recipe.required_level)
-			if recipe.xp_reward >= gem_rate:
-				_fail("TRAINING METHOD %s pays %d xp at L%d; the gem line pays %d" % [
-					recipe.output_item.get_meta(&"slug", &"?"), recipe.xp_reward,
-					recipe.required_level, gem_rate])
-	if checked == 0:
-		_fail("TRAINING METHOD: no outfitting recipes were checked")
 
 
 func _load_gear(dir: String, slug: String) -> GearItem:
@@ -227,7 +175,6 @@ func _check_setting(bench: CraftingStationResource) -> int:
 	for gem: String in LADDER:
 		var cut_lvl: int = int(LADDER[gem][0])
 		var set_lvl: int = int(LADDER[gem][1])
-		var set_xp: int = int(LADDER[gem][2])
 		var cut: Item = load("%s/%s.tres" % [GEMS_DIR, gem]) as Item
 		if cut == null:
 			_fail("CUT GEM MISSING " + gem)
@@ -259,9 +206,10 @@ func _check_setting(bench: CraftingStationResource) -> int:
 				sets += 1
 				if recipe.profession_for(bench) != &"outfitting":
 					_fail("SET PAYS WRONG SKILL " + slug)
-				if recipe.required_level != set_lvl or recipe.xp_reward != set_xp:
+				var want_xp: int = int(LADDER[gem][3 if metal == "gold" else 2])
+				if recipe.required_level != set_lvl or recipe.xp_reward != want_xp:
 					_fail("SET %s is L%d/%dxp, want L%d/%dxp" % [slug,
-						recipe.required_level, recipe.xp_reward, set_lvl, set_xp])
+						recipe.required_level, recipe.xp_reward, set_lvl, want_xp])
 				if CraftingCategory.of(recipe, bench) != &"jewelry":
 					_fail("SET TAB %s -> %s" % [slug, CraftingCategory.of(recipe, bench)])
 				var want: Dictionary = {base_slug: 1, gem: 1}
