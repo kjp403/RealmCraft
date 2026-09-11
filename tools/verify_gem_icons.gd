@@ -52,4 +52,8 @@ func _init() -> void:
 			else:
 				seen[key] = f
 	print("items loaded: %d   unique icons: %d   problems: %d" % [n, seen.size(), bad])
+	# run_verify.sh greps for this exact string and ignores the exit
+	# code, because a gate that dies before its first check also exits 0.
+	if bad == 0:
+		print("VERIFY_PASS")
 	quit(1 if bad else 0)

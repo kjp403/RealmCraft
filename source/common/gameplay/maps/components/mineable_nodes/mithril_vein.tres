@@ -53,7 +53,7 @@ max_charges = 50
 charge_regen_seconds = 18.0
 depleted_recharge_seconds = 88.0
 texture = ExtResource("3_tex")
-secondary_chance = 0.05
+gem_chance = 0.05
 secondary_pool = Array[ExtResource("gem_loot")]([
 	SubResource("GemDrop_0"),
 	SubResource("GemDrop_1"),

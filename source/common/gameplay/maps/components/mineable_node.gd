@@ -280,43 +280,50 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		# falls through to data.ore rather than eating the swing.
 		var rolled: Item = MeteorVeinPool.roll_gem(job_level)
 		if rolled != null:
+			# Only WHICH item changes here. `amount` is deliberately left alone:
+			# it already carries data.yield_amount plus the bonus-yield roll, and
+			# reassigning it here silently threw away the Mining perk tree, the
+			# pickaxe tier bonus, the Prayer GATHER_YIELD stat and the whole
+			# Prospector outfit -- at the one node built to reward skillers.
 			caught = rolled
-			amount = data.yield_amount
-	if data.secondary_chance > 0.0 and randf() < data.secondary_chance:
-		# The pool wins over the single item when authored: the chance roll
-		# has already decided that a secondary happens, so this only picks
-		# WHICH one. Weights are relative, not independent probabilities.
-		var picked: Item = null
-		# -1 means "the pool did not set one", which keeps the existing
-		# single-item path on `amount` -- a fishing hole's secondary still
-		# carries the bonus-yield roll it always did. Only a POOL entry, which
-		# authors its own min/max, overrides that.
-		var picked_amount: int = -1
-		if not data.secondary_pool.is_empty():
-			var total: float = 0.0
+	# The node's own secondary (dragon scale, obsidian flux, ...) and the gem
+	# table are ONE mutually-exclusive draw rather than two independent rolls,
+	# so each keeps its exact authored rate instead of one eating into the
+	# other. A single `randf()` is sliced: [0, ore) is the secondary ore,
+	# [ore, ore + gem) is a gem, the rest is plain ore.
+	#
+	# These MUST stay separate chances. Folding gems into secondary_chance and
+	# letting the pool win is what silently removed all four high-tier
+	# secondaries from the game -- the furnace recipes that eat them have no
+	# other source.
+	var ore_p: float = (
+		data.secondary_chance if data.secondary_ore != null else 0.0
+	)
+	var gem_p: float = (
+		data.gem_chance if not data.secondary_pool.is_empty() else 0.0
+	)
+	var sec_roll: float = randf()
+	if ore_p > 0.0 and sec_roll < ore_p:
+		caught = data.secondary_ore
+		if not data.secondary_job_xp.is_empty():
+			xp_table = data.secondary_job_xp
+	elif gem_p > 0.0 and sec_roll < ore_p + gem_p:
+		var total: float = 0.0
+		for drop: LootDrop in data.secondary_pool:
+			if drop != null and drop.item != null:
+				total += maxf(drop.chance, 0.0)
+		if total > 0.0:
+			var pick: float = randf() * total
 			for drop: LootDrop in data.secondary_pool:
-				if drop != null and drop.item != null:
-					total += maxf(drop.chance, 0.0)
-			if total > 0.0:
-				var roll: float = randf() * total
-				for drop: LootDrop in data.secondary_pool:
-					if drop == null or drop.item == null:
-						continue
-					roll -= maxf(drop.chance, 0.0)
-					if roll <= 0.0:
-						picked = drop.item
-						picked_amount = randi_range(
-							maxi(drop.min_amount, 1), maxi(drop.max_amount, 1)
-						)
-						break
-		elif data.secondary_ore != null:
-			picked = data.secondary_ore
-		if picked != null:
-			caught = picked
-			if picked_amount > 0:
-				amount = picked_amount
-			if not data.secondary_job_xp.is_empty():
-				xp_table = data.secondary_job_xp
+				if drop == null or drop.item == null:
+					continue
+				pick -= maxf(drop.chance, 0.0)
+				if pick <= 0.0:
+					caught = drop.item
+					amount = randi_range(
+						maxi(drop.min_amount, 1), maxi(drop.max_amount, 1)
+					)
+					break
 
 	# Perk-gated byproduct (trees -> Headless Arrows). Resolved BEFORE the bag
 	# check so both items are validated together — a bag that can take the log

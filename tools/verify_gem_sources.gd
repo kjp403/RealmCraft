@@ -1,8 +1,9 @@
 @tool
 extends SceneTree
 ## Gate on where uncut gems come from: every mining vein must carry a gem
-## table, every entry must resolve, and the cumulative tier rule must hold —
-## a vein may only offer gems at or below its own tier.
+## table, every entry must resolve, the cumulative tier rule must hold —
+## a vein may only offer gems at or below its own tier — and adding gems
+## must not have cost a vein the secondary it already dropped.
 ##
 ##   godot --headless --path . -s tools/verify_gem_sources.gd
 
@@ -45,8 +46,23 @@ func _init() -> void:
 			printerr("VEIN MISSING  ", vein); bad += 1; continue
 		if res.secondary_pool.is_empty():
 			printerr("VEIN NO POOL  ", vein); bad += 1; continue
-		if res.secondary_chance <= 0.0:
-			printerr("VEIN 0 CHANCE ", vein); bad += 1
+		if res.gem_chance <= 0.0:
+			printerr("VEIN 0 GEM CHANCE ", vein); bad += 1
+		# A vein that already dropped something of its own must STILL drop it.
+		# The gem table was originally written over secondary_chance, which on
+		# four of these veins was a DUPLICATE key: Godot took the later line,
+		# the rate fell ~6x, and the pool then shadowed the drop out entirely.
+		# Dragon scale, obsidian flux, celestial dust and astralite mote are
+		# furnace inputs with no other source, so that was a silent content
+		# block. Gems are additive -- never a replacement.
+		if res.secondary_ore != null and res.secondary_chance <= 0.0:
+			printerr("VEIN LOST ITS OWN SECONDARY ", vein, " (",
+				res.secondary_ore.get_meta(&"slug", &"?"), ")"); bad += 1
+		# The two share one sliced draw, so past 1.0 the gem tail is
+		# unreachable.
+		if res.secondary_chance + res.gem_chance > 1.0:
+			printerr("VEIN CHANCE OVERFLOW ", vein, " ",
+				res.secondary_chance + res.gem_chance); bad += 1
 		wired += 1
 		var cap: int = int(VEIN_CAP[vein])
 		var total: float = 0.0
@@ -90,4 +106,8 @@ func _init() -> void:
 		printerr("CUT RECIPES: expected 4, found ", cuts); bad += 1
 
 	print("veins wired: %d   cut recipes: %d   problems: %d" % [wired, cuts, bad])
+	# run_verify.sh greps for this exact string and ignores the exit
+	# code, because a gate that dies before its first check also exits 0.
+	if bad == 0:
+		print("VERIFY_PASS")
 	quit(1 if bad else 0)

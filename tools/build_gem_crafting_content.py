@@ -185,10 +185,17 @@ def _splice(body: str, ext_lines: list[str], sub_blocks: list[str],
 
 
 def wire_veins(dry: bool) -> int:
-    """Write secondary_pool + secondary_chance onto each vein resource.
+    """Write secondary_pool + gem_chance onto each vein resource.
 
     Text edit rather than ResourceSaver: a headless save strips uid= off every
     ext_resource it rewrites, which would break the vein's own ore reference.
+
+    gem_chance, NOT secondary_chance. Four of these veins already carry a
+    secondary_chance of their own for dragon scale / obsidian flux / celestial
+    dust / astralite mote, so writing that key again appended a DUPLICATE that
+    Godot silently resolved to the later line -- nerfing those drops ~6x, and
+    then the pool shadowed them out of the game completely. Gems are an extra
+    roll on a vein, never a replacement for what it already drops.
     """
     touched = 0
     for vein, (table, chance) in sorted(VEINS.items()):
@@ -221,7 +228,7 @@ def wire_veins(dry: bool) -> int:
             refs.append(f'SubResource("GemDrop_{i}")')
 
         props = (
-            f"secondary_chance = {chance}\n"
+            f"gem_chance = {chance}\n"
             'secondary_pool = Array[ExtResource("gem_loot")]([\n'
             + ",\n".join("\t" + r for r in refs)
             + "\n])")

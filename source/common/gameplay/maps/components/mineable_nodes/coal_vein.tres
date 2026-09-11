@@ -41,7 +41,7 @@ max_charges = 50
 charge_regen_seconds = 12.0
 depleted_recharge_seconds = 60.0
 texture = SubResource("AtlasTexture_0dw3s")
-secondary_chance = 0.035
+gem_chance = 0.035
 secondary_pool = Array[ExtResource("gem_loot")]([
 	SubResource("GemDrop_0"),
 	SubResource("GemDrop_1")

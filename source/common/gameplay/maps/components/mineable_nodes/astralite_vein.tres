@@ -80,7 +80,7 @@ hit_flash_strength = 0.45
 hit_flash_color = Color(0.925, 0.894, 1, 1)
 hit_flash_seconds = 0.12
 hit_recoil_pixels = 4.0
-secondary_chance = 0.065
+gem_chance = 0.065
 secondary_pool = Array[ExtResource("gem_loot")]([
 	SubResource("GemDrop_0"),
 	SubResource("GemDrop_1"),

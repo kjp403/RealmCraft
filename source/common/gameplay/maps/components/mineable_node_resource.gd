@@ -40,9 +40,8 @@ var _shimmer_material: ShaderMaterial = null
 @export_range(0.0, 1.0, 0.01) var secondary_chance: float = 0.0
 ## Job XP granted when the secondary catch wins. Empty → reuse [member job_xp].
 @export var secondary_job_xp: Dictionary[StringName, int] = {}
-## Weighted table used INSTEAD of [member secondary_ore] when it is non-empty:
-## the [member secondary_chance] roll decides whether a secondary happens at
-## all, then one entry is drawn from here by [member LootDrop.chance] as a
+## Weighted gem table, drawn on [member gem_chance] and entirely SEPARATE from
+## [member secondary_ore]: one entry is picked by [member LootDrop.chance] as a
 ## relative weight.
 ##
 ## Exists for the ore-vein gem tables, which are cumulative rather than flat —
@@ -52,6 +51,18 @@ var _shimmer_material: ShaderMaterial = null
 ## [member LootDrop.min_amount] / [member LootDrop.max_amount] are honoured, so
 ## a table entry can also hand over a small stack.
 @export var secondary_pool: Array[LootDrop] = []
+## Chance this node hands over a gem from [member secondary_pool].
+##
+## Deliberately NOT [member secondary_chance]. The first cut of this reused that
+## field and let the pool win whenever it was authored, which silently deleted
+## dragon scale, obsidian flux, celestial dust and astralite mote from the game:
+## those four veins already had a secondary, and the furnace recipes that eat
+## them have no other source. A gem is an EXTRA thing a vein can give, never a
+## replacement for what it already gave.
+##
+## The two share one mutually-exclusive draw, so each keeps its exact absolute
+## rate as long as they sum to <= 1.0.
+@export_range(0.0, 1.0, 0.005) var gem_chance: float = 0.0
 
 @export_group("Shared pool")
 ## When true this node abandons per-player charges entirely and draws from one

@@ -72,4 +72,8 @@ func _init() -> void:
 		root.queue_free()
 
 	print("meteor checks — problems: %d" % bad)
+	# run_verify.sh greps for this exact string and ignores the exit
+	# code, because a gate that dies before its first check also exits 0.
+	if bad == 0:
+		print("VERIFY_PASS")
 	quit(1 if bad else 0)

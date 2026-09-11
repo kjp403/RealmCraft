@@ -39,7 +39,7 @@ depleted_recharge_seconds = 48.0
 player_cooldown_seconds = 5.0
 texture = SubResource("AtlasTexture_tin")
 depleted_texture = SubResource("AtlasTexture_tin_empty")
-secondary_chance = 0.03
+gem_chance = 0.03
 secondary_pool = Array[ExtResource("gem_loot")]([
 	SubResource("GemDrop_0")
 ])
