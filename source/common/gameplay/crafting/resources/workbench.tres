@@ -94,6 +94,37 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_diamond.tres" id="gem_uncut_diamond"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/diamond.tres" id="gem_diamond"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_ring.tres" id="base_silver_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_necklace.tres" id="base_silver_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/silver_amulet.tres" id="base_silver_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/gold_ring.tres" id="base_gold_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/gold_necklace.tres" id="base_gold_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/gold_amulet.tres" id="base_gold_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_silver_ring.tres" id="set_sapphire_silver_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_silver_necklace.tres" id="set_sapphire_silver_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_silver_amulet.tres" id="set_sapphire_silver_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_gold_ring.tres" id="set_sapphire_gold_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_gold_necklace.tres" id="set_sapphire_gold_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/sapphire_gold_amulet.tres" id="set_sapphire_gold_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_silver_ring.tres" id="set_emerald_silver_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_silver_necklace.tres" id="set_emerald_silver_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_silver_amulet.tres" id="set_emerald_silver_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_gold_ring.tres" id="set_emerald_gold_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_gold_necklace.tres" id="set_emerald_gold_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/emerald_gold_amulet.tres" id="set_emerald_gold_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_silver_ring.tres" id="set_ruby_silver_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_silver_necklace.tres" id="set_ruby_silver_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_silver_amulet.tres" id="set_ruby_silver_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_gold_ring.tres" id="set_ruby_gold_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_gold_necklace.tres" id="set_ruby_gold_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/ruby_gold_amulet.tres" id="set_ruby_gold_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_silver_ring.tres" id="set_diamond_silver_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_silver_necklace.tres" id="set_diamond_silver_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_silver_amulet.tres" id="set_diamond_silver_amulet"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_gold_ring.tres" id="set_diamond_gold_ring"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_gold_necklace.tres" id="set_diamond_gold_necklace"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/gears/jewelry/diamond_gold_amulet.tres" id="set_diamond_gold_amulet"]
+
 [sub_resource type="Resource" id="I_cure_f"]
 script = ExtResource("3_ingred")
 item = ExtResource("8_hi_forest")
@@ -1000,8 +1031,368 @@ ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_diamond")])
 required_level = 60
 xp_reward = 70
 
+[sub_resource type="Resource" id="I_set_sapphire_silver_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_ring")
+
+[sub_resource type="Resource" id="I_set_sapphire_silver_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_silver_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_silver_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_ring_base"), SubResource("I_set_sapphire_silver_ring_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_sapphire_silver_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_necklace")
+
+[sub_resource type="Resource" id="I_set_sapphire_silver_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_silver_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_silver_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_necklace_base"), SubResource("I_set_sapphire_silver_necklace_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_sapphire_silver_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_amulet")
+
+[sub_resource type="Resource" id="I_set_sapphire_silver_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_silver_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_silver_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_amulet_base"), SubResource("I_set_sapphire_silver_amulet_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_ring")
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_gold_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_gold_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_ring_base"), SubResource("I_set_sapphire_gold_ring_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_necklace")
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_gold_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_gold_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_necklace_base"), SubResource("I_set_sapphire_gold_necklace_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_amulet")
+
+[sub_resource type="Resource" id="I_set_sapphire_gold_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_sapphire")
+
+[sub_resource type="Resource" id="R_set_sapphire_gold_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_sapphire_gold_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_amulet_base"), SubResource("I_set_sapphire_gold_amulet_gem")])
+required_level = 5
+xp_reward = 40
+
+[sub_resource type="Resource" id="I_set_emerald_silver_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_ring")
+
+[sub_resource type="Resource" id="I_set_emerald_silver_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_silver_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_silver_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_ring_base"), SubResource("I_set_emerald_silver_ring_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_emerald_silver_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_necklace")
+
+[sub_resource type="Resource" id="I_set_emerald_silver_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_silver_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_silver_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_necklace_base"), SubResource("I_set_emerald_silver_necklace_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_emerald_silver_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_amulet")
+
+[sub_resource type="Resource" id="I_set_emerald_silver_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_silver_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_silver_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_amulet_base"), SubResource("I_set_emerald_silver_amulet_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_emerald_gold_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_ring")
+
+[sub_resource type="Resource" id="I_set_emerald_gold_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_gold_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_gold_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_ring_base"), SubResource("I_set_emerald_gold_ring_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_emerald_gold_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_necklace")
+
+[sub_resource type="Resource" id="I_set_emerald_gold_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_gold_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_gold_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_necklace_base"), SubResource("I_set_emerald_gold_necklace_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_emerald_gold_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_amulet")
+
+[sub_resource type="Resource" id="I_set_emerald_gold_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_emerald")
+
+[sub_resource type="Resource" id="R_set_emerald_gold_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_emerald_gold_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_amulet_base"), SubResource("I_set_emerald_gold_amulet_gem")])
+required_level = 32
+xp_reward = 70
+
+[sub_resource type="Resource" id="I_set_ruby_silver_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_ring")
+
+[sub_resource type="Resource" id="I_set_ruby_silver_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_silver_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_silver_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_ring_base"), SubResource("I_set_ruby_silver_ring_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_ruby_silver_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_necklace")
+
+[sub_resource type="Resource" id="I_set_ruby_silver_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_silver_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_silver_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_necklace_base"), SubResource("I_set_ruby_silver_necklace_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_ruby_silver_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_amulet")
+
+[sub_resource type="Resource" id="I_set_ruby_silver_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_silver_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_silver_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_amulet_base"), SubResource("I_set_ruby_silver_amulet_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_ruby_gold_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_ring")
+
+[sub_resource type="Resource" id="I_set_ruby_gold_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_gold_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_gold_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_ring_base"), SubResource("I_set_ruby_gold_ring_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_ruby_gold_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_necklace")
+
+[sub_resource type="Resource" id="I_set_ruby_gold_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_gold_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_gold_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_necklace_base"), SubResource("I_set_ruby_gold_necklace_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_ruby_gold_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_amulet")
+
+[sub_resource type="Resource" id="I_set_ruby_gold_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_ruby")
+
+[sub_resource type="Resource" id="R_set_ruby_gold_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_ruby_gold_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_amulet_base"), SubResource("I_set_ruby_gold_amulet_gem")])
+required_level = 48
+xp_reward = 110
+
+[sub_resource type="Resource" id="I_set_diamond_silver_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_ring")
+
+[sub_resource type="Resource" id="I_set_diamond_silver_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_silver_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_silver_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_ring_base"), SubResource("I_set_diamond_silver_ring_gem")])
+required_level = 65
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_set_diamond_silver_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_necklace")
+
+[sub_resource type="Resource" id="I_set_diamond_silver_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_silver_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_silver_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_necklace_base"), SubResource("I_set_diamond_silver_necklace_gem")])
+required_level = 65
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_set_diamond_silver_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_silver_amulet")
+
+[sub_resource type="Resource" id="I_set_diamond_silver_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_silver_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_silver_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_amulet_base"), SubResource("I_set_diamond_silver_amulet_gem")])
+required_level = 65
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_set_diamond_gold_ring_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_ring")
+
+[sub_resource type="Resource" id="I_set_diamond_gold_ring_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_gold_ring"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_gold_ring")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_ring_base"), SubResource("I_set_diamond_gold_ring_gem")])
+required_level = 65
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_set_diamond_gold_necklace_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_necklace")
+
+[sub_resource type="Resource" id="I_set_diamond_gold_necklace_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_gold_necklace"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_gold_necklace")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_necklace_base"), SubResource("I_set_diamond_gold_necklace_gem")])
+required_level = 65
+xp_reward = 180
+
+[sub_resource type="Resource" id="I_set_diamond_gold_amulet_base"]
+script = ExtResource("3_ingred")
+item = ExtResource("base_gold_amulet")
+
+[sub_resource type="Resource" id="I_set_diamond_gold_amulet_gem"]
+script = ExtResource("3_ingred")
+item = ExtResource("gem_diamond")
+
+[sub_resource type="Resource" id="R_set_diamond_gold_amulet"]
+script = ExtResource("1_recipe")
+output_item = ExtResource("set_diamond_gold_amulet")
+ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_amulet_base"), SubResource("I_set_diamond_gold_amulet_gem")])
+required_level = 65
+xp_reward = 180
+
 [resource]
 script = ExtResource("2_station")
 station_name = "Workbench"
 profession = &"outfitting"
-recipes = Array[ExtResource("1_recipe")]([SubResource("R_cut_sapphire"), SubResource("R_cut_emerald"), SubResource("R_cut_ruby"), SubResource("R_cut_diamond"), SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes"), SubResource("Resource_fa7h2"), SubResource("Resource_81uhs"), SubResource("Resource_435ce"), SubResource("Resource_5m8xc"), SubResource("Resource_sk8h8"), SubResource("Resource_wiyuw"), SubResource("Resource_gm0o0"), SubResource("Resource_dbpv4"), SubResource("Resource_0v0pc"), SubResource("Resource_nseyn"), SubResource("Resource_l767t"), SubResource("Resource_73lkt"), SubResource("Resource_ylwmm"), SubResource("Resource_6uu6h"), SubResource("Resource_t3416"), SubResource("Resource_ydyk0"), SubResource("Resource_t1qkh"), SubResource("Resource_vi1x3")])
+recipes = Array[ExtResource("1_recipe")]([SubResource("R_cut_sapphire"), SubResource("R_cut_emerald"), SubResource("R_cut_ruby"), SubResource("R_cut_diamond"), SubResource("R_set_sapphire_silver_ring"), SubResource("R_set_sapphire_silver_necklace"), SubResource("R_set_sapphire_silver_amulet"), SubResource("R_set_sapphire_gold_ring"), SubResource("R_set_sapphire_gold_necklace"), SubResource("R_set_sapphire_gold_amulet"), SubResource("R_set_emerald_silver_ring"), SubResource("R_set_emerald_silver_necklace"), SubResource("R_set_emerald_silver_amulet"), SubResource("R_set_emerald_gold_ring"), SubResource("R_set_emerald_gold_necklace"), SubResource("R_set_emerald_gold_amulet"), SubResource("R_set_ruby_silver_ring"), SubResource("R_set_ruby_silver_necklace"), SubResource("R_set_ruby_silver_amulet"), SubResource("R_set_ruby_gold_ring"), SubResource("R_set_ruby_gold_necklace"), SubResource("R_set_ruby_gold_amulet"), SubResource("R_set_diamond_silver_ring"), SubResource("R_set_diamond_silver_necklace"), SubResource("R_set_diamond_silver_amulet"), SubResource("R_set_diamond_gold_ring"), SubResource("R_set_diamond_gold_necklace"), SubResource("R_set_diamond_gold_amulet"), SubResource("R_leather_forest"), SubResource("R_leather_cave"), SubResource("R_leather_bandit"), SubResource("R_leather_sewer"), SubResource("R_cloth_hood"), SubResource("R_cloth_vest"), SubResource("R_cloth_shoes"), SubResource("R_ap_hood"), SubResource("R_appr_robe"), SubResource("R_ap_shoes"), SubResource("R_sch_hood"), SubResource("R_sch_robe"), SubResource("R_sch_boots"), SubResource("R_ench_hood"), SubResource("R_ench_robe"), SubResource("R_ench_shoes"), SubResource("R_lea_cap"), SubResource("R_lea_jacket"), SubResource("R_lea_boots"), SubResource("R_st_cap"), SubResource("R_studded"), SubResource("R_st_boots"), SubResource("R_sh_hood"), SubResource("R_sh_vest"), SubResource("R_sh_boots"), SubResource("R_ph_hood"), SubResource("R_ph_vest"), SubResource("R_ph_sandals"), SubResource("R_si_hood"), SubResource("R_si_vest"), SubResource("R_si_sandals"), SubResource("R_an_hood"), SubResource("R_an_robe"), SubResource("R_an_shoes"), SubResource("Resource_fa7h2"), SubResource("Resource_81uhs"), SubResource("Resource_435ce"), SubResource("Resource_5m8xc"), SubResource("Resource_sk8h8"), SubResource("Resource_wiyuw"), SubResource("Resource_gm0o0"), SubResource("Resource_dbpv4"), SubResource("Resource_0v0pc"), SubResource("Resource_nseyn"), SubResource("Resource_l767t"), SubResource("Resource_73lkt"), SubResource("Resource_ylwmm"), SubResource("Resource_6uu6h"), SubResource("Resource_t3416"), SubResource("Resource_ydyk0"), SubResource("Resource_t1qkh"), SubResource("Resource_vi1x3")])
