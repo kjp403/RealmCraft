@@ -119,10 +119,12 @@ PIECE_SCALE = {"ring": 0.5, "necklace": 0.75, "amulet": 1.0}
 # ---------------------------------------------------------------------------
 # VENDOR (Kyle, 2026-09-10)
 # ---------------------------------------------------------------------------
-# Base jewellery was a faucet -- a plain Gold Necklace sold for 600 -- so every
-# base is halved, and a gem piece sells for the OLD base price plus half the
-# cut stone. Chosen knowing that setting then pays at the vendor: -45g to
-# +430g against selling the base and the stone separately.
+# Every base is halved, and a gem piece sells for the OLD base price plus half
+# the cut stone. The old base price was exactly the bars in it (item.gd:
+# silver bar 150, gold bar 300), so a gem piece always sells for HALF THE STONE
+# LESS than the bars and stone sold raw -- setting can never mint vendor gold.
+# Halving the base does not remove a faucet either: the bars still sell at
+# full rate. It only makes a plain Smithing piece worth less than its bars.
 OLD_BASE_VENDOR = {"silver_ring": 150, "silver_necklace": 300,
                    "silver_amulet": 450, "gold_ring": 300,
                    "gold_necklace": 600,
