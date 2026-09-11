@@ -349,7 +349,17 @@ func ready_to_enter_instance() -> void:
 ## Seconds between re-asks, and how many times we ask, when the server never
 ## answers our first "I'm loaded, spawn me".
 const ENTER_RETRY_S: float = 2.0
-const ENTER_MAX_RETRIES: int = 5
+## Long enough to cover two escalations at the server's 5s rescue rate limit, so
+## a rescue that itself races something still gets a second swing before we stop
+## watching.
+const ENTER_MAX_RETRIES: int = 8
+## Re-asks addressed to our own instance before we escalate to the world server.
+## Two, because re-asking is only worth anything while that instance still
+## exists — and the failures that actually strand people are the ones where it
+## doesn't.
+const ENTER_LOCAL_RETRIES: int = 2
+## One notice per stranding, not one per retry.
+var _told_player: bool = false
 
 
 ## Re-ask the server to spawn us if our arrival never lands.
@@ -365,18 +375,44 @@ const ENTER_MAX_RETRIES: int = 5
 ## The server side is idempotent (ServerInstance.ready_to_enter_instance returns
 ## early once the peer has a Player), so a re-ask can never produce a ghost copy —
 ## it either lands on a server that genuinely never spawned us, or it no-ops.
+##
+## Re-asking alone was not enough, because it is addressed to the destination
+## ServerInstance. When THAT is the thing that went wrong — the instance was
+## swept while we were loading, or our node ended up under a name the server
+## can't resolve — the re-ask lands nowhere, every retry lands nowhere, and only
+## a relog cleared it. So after two local tries we escalate to `spawn.rescue`,
+## which is handled by the world server and therefore needs nothing about this
+## instance to still be true. It re-runs the same placement a relog would.
 func _watch_for_arrival() -> void:
-	for _attempt: int in ENTER_MAX_RETRIES:
+	for attempt: int in ENTER_MAX_RETRIES:
 		await get_tree().create_timer(ENTER_RETRY_S).timeout
 		if not is_instance_valid(self) or InstanceClient.current != self:
 			return  # charged into a different instance meanwhile — not our problem
 		if _local_player_arrived():
 			return
+		var escalate: bool = attempt >= ENTER_LOCAL_RETRIES
 		push_warning(
-			"InstanceClient '%s': no spawn %ds after map load — re-asking the server."
-			% [name, int(ENTER_RETRY_S * (_attempt + 1))]
+			"InstanceClient '%s': no spawn %ds after map load — %s."
+			% [
+				name,
+				int(ENTER_RETRY_S * (attempt + 1)),
+				"asking the world server to re-place us" if escalate else "re-asking the instance",
+			]
 		)
-		ready_to_enter_instance.rpc_id(1)
+		if escalate:
+			# Tell the player, once. Standing in a loaded map with no character and
+			# no explanation is what turned this into "null spawn, had to relog" —
+			# a name for a symptom nobody could report usefully. Naming it makes the
+			# next report say what actually happened.
+			if not _told_player:
+				_told_player = true
+				Toaster.toast("Arrival didn't land — putting you back in the world…")
+			# Sent with NO instance id: the dispatcher must not try to resolve one,
+			# because an id that no longer resolves is one of the states we are
+			# reporting. The id we are HOLDING rides in the args instead.
+			Client.request_data(&"spawn.rescue", Callable(), {"instance": String(name)})
+		else:
+			ready_to_enter_instance.rpc_id(1)
 
 
 ## True once OUR avatar is actually parented into this instance's map — the one
