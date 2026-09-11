@@ -42,16 +42,27 @@ const PERIOD_S: int = 3 * 60 * 60
 ## something else.
 ##
 ## Two corrections got it here. The first pass at 150 was a garnish: 13 minutes
-## of mining, nothing against the ~52,000 gems a Crafting 99 wants. The second
-## overshot at 2,000, which was anchored on "a solo miner can JUST empty one
-## window" — the most generous anchor available. 1,000 is the middle, and still
-## ~7x the original.
+## of mining. The second overshot at 2,000, anchored on "a solo miner can JUST
+## empty one window" — the most generous anchor available. 1,000 is the middle,
+## and still ~7x the original.
 ##
-## Worth knowing before retuning: gems are NOT the only gate on Crafting 99.
-## That also costs ~58 hours of crafting clicks at the 2s interval no matter how
-## many gems you hold, so a bigger pool mostly buys "not gem-starved", not a
-## faster 99. Bag space throttles it too — 30 slots per bag, gems stack 10, so a
-## one-bag miner banks every ~300 gems.
+## READ THIS BEFORE RETUNING. The ~52,000-gem figure this was originally sized
+## against was for the WHOLE line — cut the stone, then set it into jewellery,
+## two Crafting actions per gem at a combined ~125 xp. Only the CUT shipped, and
+## a cut alone tops out at 70 xp, so the real numbers today are:
+##
+##   * 60→99 on the meteor's own level-weighted mix (~39.6 xp/gem at 99 Mining)
+##     wants ~322,000 gems and ~179 hours of cutting;
+##   * all-diamond, which means buying them rather than mining them, is ~182,000
+##     gems and ~101 hours.
+##
+## So the pool is NOT the binding constraint and making it bigger will not fix
+## the pace — the missing setting recipes are roughly half the intended xp per
+## gem. Size those first, then revisit this number, or the line stays about 2x
+## Smithing's 248h.
+##
+## Bag space throttles it too — 30 slots per bag, gems stack 10, so a one-bag
+## miner banks every ~300 gems.
 const POOL: int = 1000
 
 ## Gem ladder, rarest last. Sapphire is the floor every miner can pull.
