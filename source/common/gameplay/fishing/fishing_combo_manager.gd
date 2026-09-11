@@ -114,6 +114,19 @@ static func register_catch(
 	return multiplier
 
 
+## Consecutive catches it takes to reach [constant MAX_MULTIPLIER] — the length
+## of the ramp, and therefore the length of the meter that draws it
+## ([FishingComboHud] puts one pip on each).
+##
+## ROUNDED, NOT TRUNCATED. 0.40 / 0.02 is 19.999999 in binary floating point, so
+## `int()` on it answers 19: a meter one pip short, reading FULL at +38% and
+## never showing the last catch that actually caps. The verifier asserts that
+## [method multiplier_for] of this number IS the cap, which is the check that
+## caught it.
+static func steps_to_cap() -> int:
+	return maxi(1, roundi((MAX_MULTIPLIER - 1.0) / STEP))
+
+
 ## The XP multiplier a [param streak] of consecutive catches earns.
 static func multiplier_for(streak: int) -> float:
 	if streak <= 0:

@@ -122,6 +122,22 @@ signal skill_xp_gained(
 ## read as level 1, matching PlayerResource.mastery_level_of.
 signal mastery_levels_changed
 var mastery_levels: Dictionary = {}
+## Bottomless Bait Bucket mirror — the charge lives on PlayerResource, which is
+## server-only, so the bag tooltip and the fishing combo chip read THIS. Fed by
+## the bait.set push on every instance join, the bait.fill reply, and the bait
+## block the gather push carries on every baited catch; see [BaitBucket].
+##
+## `bait_capacity` is mirrored rather than read from BaitBucket.MAX_STORED so the
+## tooltip reports the number the SERVER is clamping to. The two are the same
+## constant today, but a server that ships a raised cap before the client does
+## would otherwise have the bag confidently print the old one. It starts at 0 —
+## meaning "nothing has told us yet" — rather than seeding from the constant,
+## which would make this autoload's PARSE depend on BaitBucket and, through it,
+## PlayerResource. Readers fall back to the constant themselves.
+signal stored_bait_changed
+var stored_bait: int = 0
+var bait_capacity: int = 0
+var has_bait_bucket: bool = false
 ## True while a blocking menu is open (NPC dialogue, shop, quest log, inventory).
 ## While set, the local player's movement and actions are suppressed, so you can't
 ## walk or fight with a menu up, and can't keep one open to act from afar. Only the
@@ -275,6 +291,12 @@ func _ready() -> void:
 		apply_skills_payload(payload.get("skills", {})))
 	Client.subscribe(&"skills.levels", func(payload: Dictionary):
 		apply_skill_levels(payload.get("levels", {})))
+	# Bait bucket: the login/instance-join push and the Fill reply land in the
+	# same mirror. bait.fill is a REQUEST type, not a push — Client._data_response
+	# fans every response back through data_push, so subscribing here keeps the
+	# mirror current without the inventory dock having to report it.
+	Client.subscribe(&"bait.set", apply_bait_payload)
+	Client.subscribe(&"bait.fill", apply_bait_payload)
 	# The campaign's heartbeat moment — bigger than a level-up (docs/wardstones.md).
 	Client.subscribe(&"wardstone.granted", func(payload: Dictionary):
 		var stone: String = str(payload.get("stone", ""))
@@ -690,6 +712,13 @@ func _on_gather_result(data: Dictionary) -> void:
 		# from the swing animation + (future) chip-sound, not a toast.
 		return
 
+	# Before gather_succeeded, so anything listening to the gather push (the
+	# fishing combo chip) reads a bucket count that already matches the catch it
+	# is being told about.
+	var bait_block: Variant = data.get("bait", {})
+	if bait_block is Dictionary and not (bait_block as Dictionary).is_empty():
+		apply_bait_payload(bait_block)
+
 	gather_succeeded.emit(data)
 
 	# Keep the client skill mirror current even without a level-up (gates read it).
@@ -843,6 +872,30 @@ func apply_skill_levels(levels: Variant) -> void:
 			changed = true
 	if changed:
 		skill_levels_changed.emit()
+
+
+## Merge a [method BaitBucket.status_payload]-shaped dict into the bucket mirror.
+##
+## Silently ignores a payload with no `stored` key: the bait.fill refusals that
+## never reached a PlayerResource ("no_player") carry none, and treating a
+## missing key as zero would empty the player's bucket on screen every time a
+## Fill bounced.
+func apply_bait_payload(payload: Dictionary) -> void:
+	if not payload.has("stored"):
+		return
+	var next_stored: int = maxi(0, int(payload.get("stored", 0)))
+	var next_max: int = maxi(0, int(payload.get("max", bait_capacity)))
+	var next_owned: bool = bool(payload.get("has_bucket", has_bait_bucket))
+	if (
+		next_stored == stored_bait
+		and next_max == bait_capacity
+		and next_owned == has_bait_bucket
+	):
+		return
+	stored_bait = next_stored
+	bait_capacity = next_max
+	has_bait_bucket = next_owned
+	stored_bait_changed.emit()
 
 
 ## Local weapon-mastery level for client-side gates. Missing categories read as 1

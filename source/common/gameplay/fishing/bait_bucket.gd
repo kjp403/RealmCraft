@@ -89,6 +89,25 @@ static func has_bait(resource: PlayerResource) -> bool:
 	return has_bucket(resource) and stored(resource) > 0
 
 
+## Everything a client needs to draw the bucket, in ONE shape.
+##
+## Three surfaces read this — the bag tooltip, the fishing combo chip and the
+## Fill reply — and they used to be three different dictionaries. One shape means
+## the hover card and the HUD cannot disagree about how much bait is left, which
+## is the only thing either of them is for.
+##
+## `has_bucket` is carried rather than inferred from `stored > 0`: the charge
+## survives dropping the bucket, so a player with 400 bait and no bucket is a
+## real state, and it is exactly the one where the tooltip must not promise a
+## combo the next cast cannot pay for.
+static func status_payload(resource: PlayerResource) -> Dictionary:
+	return {
+		"stored": stored(resource),
+		"max": MAX_STORED,
+		"has_bucket": has_bucket(resource),
+	}
+
+
 # ---------------------------------------------------------------------------
 # Writes
 # ---------------------------------------------------------------------------

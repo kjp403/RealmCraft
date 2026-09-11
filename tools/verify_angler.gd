@@ -39,6 +39,7 @@ func _go() -> void:
 	_combo_math()
 	_combo_streak()
 	_bucket()
+	_readout()
 	_scripts_compile()
 	print("")
 	if _failures.is_empty():
@@ -364,6 +365,67 @@ func _bucket() -> void:
 		"%d bait vs %d needed" % [funded, POOL_MAX - 1])
 
 
+# --- The readout ------------------------------------------------------------
+
+## The three surfaces that TELL the player any of this is happening — the bag
+## hover card, the fishing combo chip and the Fill reply — all read one shape and
+## one ramp. The mechanic shipped without any of them and was invisible, so what
+## is gated here is not the maths (above) but the promise that what gets drawn
+## still describes it.
+func _readout() -> void:
+	print("\n[readout] status payload + meter contract")
+
+	var pr: PlayerResource = PlayerResource.new()
+	pr.player_id = 99002
+	pr.inventory = {}
+	pr.inventory_bags = 1
+	pr.stored_bait = 137
+
+	var bucket_id: int = BaitBucket.bucket_id()
+	var without: Dictionary = BaitBucket.status_payload(pr)
+	_check("payload carries stored / max / has_bucket",
+		without.has("stored") and without.has("max") and without.has("has_bucket"))
+	_check("stored survives having no bucket", int(without.get("stored", -1)) == 137)
+	# The charge outliving the item is the whole reason has_bucket is carried
+	# rather than inferred from stored > 0 — bank the bucket, keep the bait.
+	_check("has_bucket false with the bucket banked",
+		not bool(without.get("has_bucket", true)))
+
+	Inventory.try_add_item(pr.inventory, bucket_id, 1, Inventory.MAX_SLOTS, false, 0, 1)
+	var with_bucket: Dictionary = BaitBucket.status_payload(pr)
+	_check("has_bucket true once carried", bool(with_bucket.get("has_bucket", false)))
+	_check("max is the server cap", int(with_bucket.get("max", 0)) == BaitBucket.MAX_STORED)
+
+	# The combo meter is a row of pips, one per catch of headroom, and a FULL
+	# meter has to mean "capped". Retune either constant and it must still land
+	# exactly on the cap — not one pip short, which is what int() truncation did
+	# on the first cut of FishingComboHud.
+	var pips: int = FishingComboManager.steps_to_cap()
+	_check("meter is a whole number of pips", pips > 0, "%d pips" % pips)
+	_check("a full meter is exactly the cap",
+		is_equal_approx(FishingComboManager.multiplier_for(pips),
+			FishingComboManager.MAX_MULTIPLIER))
+	_check("one pip short is below the cap",
+		FishingComboManager.multiplier_for(pips - 1) < FishingComboManager.MAX_MULTIPLIER)
+
+	# The bag hover card is built from stat_lines(). On a SERVER parse there is no
+	# ClientState to read, and the line that would need it must simply not appear
+	# rather than printing a confident zero.
+	var bucket_item: BaitBucketItem = ContentRegistryHub.load_by_id(
+		&"items", bucket_id
+	) as BaitBucketItem
+	_check("bucket item resolves", bucket_item != null)
+	if bucket_item == null:
+		return
+	var text: String = ""
+	for entry: Dictionary in bucket_item.stat_lines():
+		text += str(entry.get("text", "")) + "\n"
+	_check("hover explains what bait buys", text.contains("Fishing XP"))
+	_check("hover names the real cap",
+		text.contains("+%d%%" % roundi((FishingComboManager.MAX_MULTIPLIER - 1.0) * 100.0)))
+	_check("no stored count without a client mirror", not text.contains("Bait stored"))
+
+
 # --- Compile check ----------------------------------------------------------
 
 ## Every script and scene this work added or touched, loaded so a parse error in a
@@ -384,6 +446,11 @@ const TOUCHED_SCRIPTS: Array[String] = [
 	"res://source/client/ui/menus/fillet/fillet_menu.gd",
 	"res://source/client/ui/compact_menus/compact_menu_host.gd",
 	"res://source/client/ui/hud/xp_tracker/xp_tracker_hud.gd",
+	"res://source/client/ui/hud/fishing_combo_hud.gd",
+	"res://source/client/ui/hud/run_clock_chip.gd",
+	"res://source/client/ui/hud/hud.gd",
+	"res://source/client/autoload/client_state.gd",
+	"res://source/server/world/components/instance_server.gd",
 	"res://source/server/world/components/world_server.gd",
 	"res://source/server/world/database/world_schema.gd",
 	"res://source/server/world/database/world_store_sqlite.gd",

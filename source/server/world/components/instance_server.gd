@@ -505,6 +505,14 @@ func instantiate_player(peer_id: int) -> Player:
 			WorldServer.curr.data_push.rpc_id(
 				peer_id, &"wardstones.set", {"wardstones": new_player.player_resource.wardstones}
 			)
+			# Bait bucket mirror, same deal and for the same reason: the bag
+			# tooltip and the fishing combo chip both read
+			# ClientState.stored_bait, and PlayerResource is server-only, so
+			# without this push a fresh client shows an owned bucket as empty
+			# until the first Fill or the first baited catch.
+			WorldServer.curr.data_push.rpc_id(
+				peer_id, &"bait.set", BaitBucket.status_payload(new_player.player_resource)
+			)
 	new_player.ready.connect(setup_new_player,CONNECT_ONE_SHOT)
 	return new_player
 

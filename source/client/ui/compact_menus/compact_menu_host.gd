@@ -676,6 +676,17 @@ func _on_angler_tool_result(tool_item: AnglerToolItem, result: Array) -> void:
 			Toaster.toast("Stored %d bait. (%d/%d)" % [
 				moved, int(payload.get("stored", 0)), int(payload.get("max", 0)),
 			])
+			# Fill empties Fish Bait stacks out of the bags SERVER-SIDE, and
+			# nothing on that path pushes an inventory change — so the emptied
+			# stack kept its icon and its count until the dock was closed and
+			# reopened, which reads as a Fill that did nothing. Re-read the bag
+			# here. Quiet, because the bait did not leave the player's
+			# possession and a LootFeed pill would announce it as a loss.
+			#
+			# Deliberately a LOCAL emit rather than a server push riding the
+			# reply: pushing AND answering the same request delivers the event
+			# to the requester twice, and this dock refreshes on both.
+			ClientState.inventory_changed.emit({"quiet": true})
 		if bool(payload.get("capped", false)):
 			Toaster.toast("Your bucket is full — the rest stayed in your bag.")
 		return

@@ -42,6 +42,17 @@ static func dress(chip: PanelContainer) -> HBoxContainer:
 	chip.anchor_bottom = 0.0
 	chip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	chip.grow_vertical = Control.GROW_DIRECTION_END
+	return style_only(chip)
+
+
+## The pill's LOOK, with no opinion about where it goes. Split out of
+## [method dress] for [FishingComboHud], which wears the same chrome but lives
+## bottom-centre above the ability bar rather than in the upper-right rail —
+## the rail has exactly one slot clear of the minimap and the open bag, and the
+## XP orb is already in it.
+##
+## The two run clocks keep calling [method dress] and are untouched.
+static func style_only(chip: PanelContainer) -> HBoxContainer:
 	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
