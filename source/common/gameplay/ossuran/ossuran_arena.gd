@@ -179,7 +179,8 @@ func _ready() -> void:
 		# EnvironmentTransitionManager: the controllers below are server-only, so
 		# anything the players must SEE has to be pushed and replayed here or the
 		# server snuffs a fire nobody is looking at.
-		Client.subscribe(BRAZIER_CHANNEL, _on_braziers_push)
+		# By node path, never by name: see the note on _client_bus().
+		_client_bus().call(&"subscribe", BRAZIER_CHANNEL, _on_braziers_push)
 		return
 	_build_controllers()
 	# Self-arming: the encounter starts when someone walks in and stands itself
@@ -193,8 +194,9 @@ func _exit_tree() -> void:
 	# Client-side subscriptions outlive the node they were made from unless they
 	# are dropped here — a map unloaded between fights would leave a callable
 	# bound to a freed arena on the Client's channel list.
-	if not GameMode.is_world_server() and is_instance_valid(Client):
-		Client.unsubscribe(BRAZIER_CHANNEL, _on_braziers_push)
+	var bus: Node = null if GameMode.is_world_server() else _client_bus()
+	if bus != null:
+		bus.call(&"unsubscribe", BRAZIER_CHANNEL, _on_braziers_push)
 
 
 ## Fill any unset @export from a conventional child name.
@@ -955,3 +957,17 @@ func _instance() -> Node:
 ## makes all of them no-op instead, which is the correct behaviour off-server.
 static func _is_server_instance(node: Node) -> bool:
 	return node != null and node.get(&"players_by_peer_id") is Dictionary
+
+
+## The Client autoload, looked up by NODE PATH on a client.
+##
+## Never write `Client` as an identifier in this file, charge_pad.gd or
+## environment_transition_manager.gd. The world server compiles these three the
+## first time anyone clicks Enter on the Ossuran gate (nothing at startup or in
+## fire_forge loads them), and naming the autoload makes that compile pull in
+## client.gd and the whole client class graph. Godot 4.7.1 segfaults inside that
+## load often enough that it dropped the entire world on Enter — the same crash
+## the Guild Hall champion statue caused at boot (#458). Gate:
+## tools/verify_ossuran_server_safe.tscn.
+func _client_bus() -> Node:
+	return get_node_or_null(^"/root/Client")

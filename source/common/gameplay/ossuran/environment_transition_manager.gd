@@ -77,7 +77,8 @@ func _ready() -> void:
 	# Clients listen for the server's announcement; the server does not, or it
 	# would answer its own push and restart the tween it is already running.
 	if not GameMode.is_world_server():
-		Client.subscribe(PUSH_CHANNEL, _on_environment_push)
+		# By node path, never by name — same reason as OssuranArena._client_bus().
+		get_node(^"/root/Client").call(&"subscribe", PUSH_CHANNEL, _on_environment_push)
 		_subscribed = true
 
 
@@ -87,8 +88,9 @@ func _exit_tree() -> void:
 	# table, and the next group to load a map overlapping that rect would slide
 	# around on a floor with no ice on it.
 	SurfaceQuery.unregister_volume(VOLUME_ID)
-	if _subscribed and is_instance_valid(Client):
-		Client.unsubscribe(PUSH_CHANNEL, _on_environment_push)
+	var bus: Node = get_node_or_null(^"/root/Client") if _subscribed else null
+	if bus != null:
+		bus.call(&"unsubscribe", PUSH_CHANNEL, _on_environment_push)
 
 
 ## Fill any unset @export from a conventional sibling name.

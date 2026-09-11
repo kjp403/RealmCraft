@@ -105,7 +105,8 @@ func _ready() -> void:
 	set_physics_process(GameMode.is_world_server())
 	_apply_visual()
 	if not GameMode.is_world_server():
-		Client.subscribe(&"ossuran.pad", _on_pad_push)
+		# By node path, never by name — same reason as OssuranArena._client_bus().
+		get_node(^"/root/Client").call(&"subscribe", &"ossuran.pad", _on_pad_push)
 
 
 ## Open the pad for charging. Resets progress so a re-run of the phase starts clean.
