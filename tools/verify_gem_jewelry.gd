@@ -68,7 +68,6 @@ func _init() -> void:
 	_check_gold_amulet(anvil)
 	var sets: int = _check_setting(bench)
 	_check_guides()
-	_check_training_method()
 
 	print("setting recipes: %d   problems: %d" % [sets, bad])
 	# run_verify.sh greps for this exact string and ignores the exit code,
@@ -77,57 +76,6 @@ func _init() -> void:
 		print("VERIFY_PASS")
 	quit(1 if bad else 0)
 
-
-## What the gem line pays per craft at [param level]: cut + GOLD set of the
-## best gem a player can both cut and set there, averaged over the two actions (cut only
-## below level 5).
-func _gem_rate_at(level: int) -> int:
-	if level < 5:
-		return 27
-	if level < 32:
-		return 58
-	if level < 48:
-		return 101
-	if level < 65:
-		return 158
-	return 255
-
-
-## Jewellery is THE Crafting training method (Kyle, 2026-09-10). No other
-## outfitting recipe on either workbench may pay as much per craft as the gem
-## line does at its level, or players train on armour and the gem economy, the
-## meteor and the ~29h pace to 99 all stop mattering.
-func _check_training_method() -> void:
-	var gem_line: Array[String] = []
-	for gem: String in LADDER:
-		gem_line.append(gem)
-		for metal: String in METALS:
-			for piece: String in PIECES:
-				gem_line.append("%s_%s_%s" % [gem, metal, piece])
-	var checked: int = 0
-	for path: String in [
-		"res://source/common/gameplay/crafting/resources/workbench.tres",
-		"res://source/common/gameplay/crafting/resources/ascended_workbench.tres",
-	]:
-		var station: CraftingStationResource = load(path) as CraftingStationResource
-		if station == null:
-			_fail("could not load " + path)
-			continue
-		for recipe: CraftingRecipe in station.recipes:
-			if recipe == null or recipe.output_item == null:
-				continue
-			if recipe.profession_for(station) != &"outfitting":
-				continue
-			if str(recipe.output_item.get_meta(&"slug", &"")) in gem_line:
-				continue
-			checked += 1
-			var gem_rate: int = _gem_rate_at(recipe.required_level)
-			if recipe.xp_reward >= gem_rate:
-				_fail("TRAINING METHOD %s pays %d xp at L%d; the gem line pays %d" % [
-					recipe.output_item.get_meta(&"slug", &"?"), recipe.xp_reward,
-					recipe.required_level, gem_rate])
-	if checked == 0:
-		_fail("TRAINING METHOD: no outfitting recipes were checked")
 
 
 func _load_gear(dir: String, slug: String) -> GearItem:

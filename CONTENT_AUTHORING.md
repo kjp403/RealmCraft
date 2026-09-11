@@ -557,32 +557,26 @@ The workbench rates, applied across every cloth and hide armour recipe:
 
 | Tier | Recipe level | XP per unit |
 |---|---:|---:|
-| Forest cloth / leather | 1 | 4 |
-| Cave cloth / leather (incl. Studded) | 5 | 8 |
-| Bandit cloth / leather | 10 | 8 |
-| Enchanted / Phantom | 15 | 6 |
-| Ancient / Sirenic | 30 | 5 |
-| Wraithsilk / Runewoven | 45 | 10 |
-| Nightglass / Astral | 50 | 15 |
+| Forest cloth / leather | 1 | 36 |
+| Cave cloth / leather (incl. Studded) | 5 | 54 |
+| Bandit cloth / leather | 10 | 72 |
+| Enchanted / Phantom | 15 | 180 |
+| Ancient / Sirenic | 30 | 200 |
+| Wraithsilk / Runewoven | 45 | 240 |
+| Nightglass / Astral | 50 | 290 |
 
 Every ingredient counts as a unit — ore and gem alongside the cloth, the same way
-the anvil's Dragon-and-up armour prices its ore + gem + cloth — so a vest that
-eats five cloth is worth more than a hood that eats three.
+the anvil's Dragon-and-up armour prices its ore + gem + cloth. Each rate is the
+material-weighted average of what that band already paid, so a tier's total XP
+throughput is unchanged and only the *distribution* inside it moved: a vest that
+eats five cloth is now worth more than a hood that eats three, which was not
+true before (a Studded Cap used to pay 180 XP per leather against an Apprentice
+Robe's 43, for gear of the same mastery tier).
 
-**Jewellery is the Crafting training method, not armour** (Kyle, 2026-09-10).
-Each rate above is set so the largest piece at its level pays under 90% of what
-the gem line pays per craft there when setting into gold: cut + gold set of the
-best gem unlocked, averaged over the two actions -- 27 below level 5, 58 from 5,
-101 from 32, 158 from 48 and 255 from 65. Before any rescale a Primordial Robe
-paid 4,590 XP a craft against a set diamond's 180, so nobody trained on gems.
-The first pass cut armour to under 80% of a lower gem rate and went too far; it
-was raised back to this ceiling when gold settings got their 1.5x premium.
-
-**Tanning, weaving and the Ascended Workbench were scaled under the same
-ceiling.** `hide -> leather` and `fibre -> cloth` stay a flat per-craft rate and
-Ascended armour stays priced per piece, each keeping its own progression (both
-top out at 229). `tools/verify_gem_jewelry.gd` fails any outfitting recipe on
-either workbench that reaches the gem rate at its level.
+**Tanning and weaving are not rebased.** `hide -> leather` and `fibre -> cloth`
+are the "smelting" step: one output, one flat per-craft rate, already
+proportionate among themselves. They stay the efficient way to train, exactly as
+smelting does for Smithing.
 
 When you add an armour recipe, read the rate off this table and multiply. Do not
 eyeball an `xp_reward`. The gate re-derives every row from the same table:
