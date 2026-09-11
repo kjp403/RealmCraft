@@ -42,6 +42,7 @@ DEFAULT_GATES=(
 	verify_gem_sources
 	verify_gem_jewelry
 	verify_outfitting_xp
+	verify_champion_statue_split
 	verify_meteor_vein
 	verify_peddler_spots
 	verify_angler
