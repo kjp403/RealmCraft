@@ -17,12 +17,12 @@ const ICONS: String = "res://assets/sprites/items/icons"
 
 const METALS: Array[String] = ["silver", "gold"]
 const PIECES: Array[String] = ["ring", "necklace", "amulet"]
-## gem -> [cut level, set level, set xp]. Set xp approved by Kyle 2026-09-10.
+## gem -> [cut level, set level, silver set xp, gold set xp] (Kyle, 2026-09-10).
 const LADDER: Dictionary = {
-	"sapphire": [1, 5, 60],
-	"emerald": [27, 32, 105],
-	"ruby": [43, 48, 165],
-	"diamond": [60, 65, 270],
+	"sapphire": [1, 5, 60, 90],
+	"emerald": [27, 32, 105, 158],
+	"ruby": [43, 48, 165, 248],
+	"diamond": [60, 65, 270, 405],
 }
 ## Each gem adds ONE stat, colour-matched to the Slayer gem standing for it...
 const GEM_STAT: Dictionary = {
@@ -78,25 +78,25 @@ func _init() -> void:
 	quit(1 if bad else 0)
 
 
-## What the gem line pays per craft at [param level]: cut + set of the best gem
-## a player can both cut and set there, averaged over the two actions (cut only
+## What the gem line pays per craft at [param level]: cut + GOLD set of the
+## best gem a player can both cut and set there, averaged over the two actions (cut only
 ## below level 5).
 func _gem_rate_at(level: int) -> int:
 	if level < 5:
 		return 27
 	if level < 32:
-		return 43
+		return 58
 	if level < 48:
-		return 75
+		return 101
 	if level < 65:
-		return 117
-	return 187
+		return 158
+	return 255
 
 
 ## Jewellery is THE Crafting training method (Kyle, 2026-09-10). No other
 ## outfitting recipe on either workbench may pay as much per craft as the gem
 ## line does at its level, or players train on armour and the gem economy, the
-## meteor and the ~40h pace to 99 all stop mattering.
+## meteor and the ~29h pace to 99 all stop mattering.
 func _check_training_method() -> void:
 	var gem_line: Array[String] = []
 	for gem: String in LADDER:
@@ -227,7 +227,6 @@ func _check_setting(bench: CraftingStationResource) -> int:
 	for gem: String in LADDER:
 		var cut_lvl: int = int(LADDER[gem][0])
 		var set_lvl: int = int(LADDER[gem][1])
-		var set_xp: int = int(LADDER[gem][2])
 		var cut: Item = load("%s/%s.tres" % [GEMS_DIR, gem]) as Item
 		if cut == null:
 			_fail("CUT GEM MISSING " + gem)
@@ -259,9 +258,10 @@ func _check_setting(bench: CraftingStationResource) -> int:
 				sets += 1
 				if recipe.profession_for(bench) != &"outfitting":
 					_fail("SET PAYS WRONG SKILL " + slug)
-				if recipe.required_level != set_lvl or recipe.xp_reward != set_xp:
+				var want_xp: int = int(LADDER[gem][3 if metal == "gold" else 2])
+				if recipe.required_level != set_lvl or recipe.xp_reward != want_xp:
 					_fail("SET %s is L%d/%dxp, want L%d/%dxp" % [slug,
-						recipe.required_level, recipe.xp_reward, set_lvl, set_xp])
+						recipe.required_level, recipe.xp_reward, set_lvl, want_xp])
 				if CraftingCategory.of(recipe, bench) != &"jewelry":
 					_fail("SET TAB %s -> %s" % [slug, CraftingCategory.of(recipe, bench)])
 				var want: Dictionary = {base_slug: 1, gem: 1}

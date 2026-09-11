@@ -343,8 +343,8 @@ def wire_cutting_recipes(dry: bool) -> int:
 
     XP is priced on the method, not on the top recipe (see the Smithing
     rescale): two Crafting actions per finished piece at the 2s craft interval,
-    aiming for ~187 XP/action at the top of the ladder (1.5x the first pass,
-    Kyle 2026-09-10), which puts a full 99 at ~40h. The CUT is the smaller half; setting the stone into
+    aiming for ~255 XP/action at the top of the ladder when setting into gold
+    (Kyle 2026-09-10), which puts a full 99 at ~29h. The CUT is the smaller half; setting the stone into
     jewellery is the other, and is a later pass.
     """
     path = os.path.join(ROOT, "source", "common", "gameplay", "crafting",

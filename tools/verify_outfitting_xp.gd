@@ -19,20 +19,19 @@ const STATION_PATH: String = "res://source/common/gameplay/crafting/resources/wo
 
 ## Recipe level -> xp per unit of material. Jewellery is the Crafting training
 ## method (Kyle, 2026-09-10), so each rate is set so the LARGEST piece at that
-## level pays under 80% of what the gem line pays per craft there (cut + set of
-## the best gem unlocked, 18 / 29 / 50 / 78 / 125 when set; gem XP was raised
-## 1.5x after, so armour now sits further below). Armour is gear you make, not
-## how you train. tools/verify_gem_jewelry.gd enforces that ceiling across both
+## level pays under 90% of what the gem line pays per craft there, setting into
+## gold (27 / 58 / 101 / 158 / 255). Armour is gear you make, not the fastest way
+## to train. tools/verify_gem_jewelry.gd enforces that ceiling across both
 ## workbenches; this gate keeps the per-unit shape. Documented in
 ## CONTENT_AUTHORING.md under "Crafting XP is priced per unit of material".
 const RATE_BY_LEVEL: Dictionary = {
-	1: 2,     # Forest cloth / leather
-	5: 3,     # Cave cloth / leather, including Studded
-	10: 3,    # Bandit cloth / leather
-	15: 2,    # Enchanted / Phantom
-	30: 2,    # Ancient / Sirenic
-	45: 4,    # Wraithsilk / Runewoven
-	50: 6,    # Nightglass / Astral
+	1: 4, # Forest cloth / leather
+	5: 8, # Cave cloth / leather, including Studded
+	10: 8, # Bandit cloth / leather
+	15: 6, # Enchanted / Phantom
+	30: 5, # Ancient / Sirenic
+	45: 10, # Wraithsilk / Runewoven
+	50: 15, # Nightglass / Astral
 }
 
 ## Tanning and weaving (hide -> leather, fibre -> cloth) are the "smelting" step:
