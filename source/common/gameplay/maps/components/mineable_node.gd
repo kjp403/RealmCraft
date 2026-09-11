@@ -377,6 +377,21 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"node_path": node_path,
 		}
 
+	# Shared pool: charges are only checked when an extraction round starts, so
+	# another miner can take the last unit while this one is mid-swing. Re-check
+	# before paying, or everyone mid-extraction at empty is paid past the
+	# window's cap. Nothing has been granted yet, so rejecting here is clean.
+	if data.shared_pool and MeteorVeinPool.remaining() <= 0:
+		_progress_hp_by_player.erase(player_id)
+		return {
+			"ok": false,
+			"extracted": false,
+			"reason": "depleted",
+			"charges_left": 0,
+			"max_charges": _pool_for(pr, key),
+			"node_path": node_path,
+		}
+
 	# Consume one of THIS player's charges now that the bag can take the yield.
 	# The Prospector set can preserve the node instead: the yield is still paid,
 	# the charge is not spent. Capped well under 1.0 in SkillingOutfitManager.CAPS
@@ -570,6 +585,13 @@ func _arm_regen_prediction() -> void:
 	# Random pools don't trickle, so a partially mined vein has nothing to
 	# predict — only the post-depletion respawn is worth counting down to.
 	if _disp_charges > 0 and _has_random_pool():
+		_set_regen_armed(false)
+		return
+	# The Starfall meteor's pool is SHARED and refills on a wall-clock window,
+	# so nothing about it can be predicted from this node's own timings. With
+	# charge_regen_seconds at 0 the +1 tick fired every frame and painted a full
+	# meteor after every swing. Only the server's charges_left is true here.
+	if data.shared_pool:
 		_set_regen_armed(false)
 		return
 	var interval_s: float = data.depleted_recharge_seconds if _disp_charges <= 0 else data.charge_regen_seconds
