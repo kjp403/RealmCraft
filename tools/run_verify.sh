@@ -40,6 +40,8 @@ DEFAULT_GATES=(
 	verify_gather_tools
 	verify_gem_icons
 	verify_gem_sources
+	verify_gem_jewelry
+	verify_outfitting_xp
 	verify_meteor_vein
 	verify_peddler_spots
 	verify_angler

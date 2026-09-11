@@ -48,18 +48,18 @@ const PERIOD_S: int = 3 * 60 * 60
 ##
 ## READ THIS BEFORE RETUNING. The ~52,000-gem figure this was originally sized
 ## against was for the WHOLE line — cut the stone, then set it into jewellery,
-## two Crafting actions per gem at a combined ~125 xp. Only the CUT shipped, and
-## a cut alone tops out at 70 xp, so the real numbers today are:
+## two Crafting actions per gem at ~125 xp EACH (~250 per diamond). The cut
+## shipped first and tops out at 70 xp; cut alone, the numbers were:
 ##
 ##   * 60→99 on the meteor's own level-weighted mix (~39.6 xp/gem at 99 Mining)
 ##     wants ~322,000 gems and ~179 hours of cutting;
 ##   * all-diamond, which means buying them rather than mining them, is ~182,000
 ##     gems and ~101 hours.
 ##
-## So the pool is NOT the binding constraint and making it bigger will not fix
-## the pace — the missing setting recipes are roughly half the intended xp per
-## gem. Size those first, then revisit this number, or the line stays about 2x
-## Smithing's 248h.
+## The setting half (tools/build_gem_jewelry_content.py) adds 40/70/110/180 per
+## gem, which puts the best-gem-per-level ladder at ~53,600 gems and ~59.6h to
+## 99. The meteor-mix figure above has NOT been re-measured with setting in, so
+## re-run it before resizing POOL — the pool was never the binding constraint.
 ##
 ## Bag space throttles it too — 30 slots per bag, gems stack 10, so a one-bag
 ## miner banks every ~300 gems.
