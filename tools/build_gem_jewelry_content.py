@@ -20,11 +20,11 @@ WHAT THIS MAKES
 
 XP (Kyle, 2026-09-10)
 ---------------------
-Setting pays 40 / 70 / 110 / 180 and unlocks five levels after the cut.
-Cut + set is two actions per gem at the 2s craft interval, 250 xp per diamond
-at the top, which puts 99 at ~59.6h and ~53,600 gems -- beside Smithing's 59h
-after PR #393. The ~52,000-gem figure the meteor pool was sized against is
-this same line, so the two agree. XP is per GEM, not per piece: a ruby ring
+Setting pays 60 / 105 / 165 / 270 and unlocks five levels after the cut;
+cutting pays 27 / 45 / 69 / 105. Cut + set is two actions per gem at the 2s
+craft interval, 375 xp per diamond at the top, which puts 99 at ~39.7h and
+~35,750 gems. That is 1.5x the first pass (Kyle, 2026-09-10), chosen because
+53,600 gems to 99 was a lot. XP is per GEM, not per piece: a ruby ring
 and a ruby amulet are the same action.
 
 The Gold Amulet's 184 xp is the anvil's own silver amulet:necklace ratio
@@ -73,10 +73,10 @@ SLOT = {
 
 # (cut gem slug, cut level -- shipped in #439, set level, set xp)
 GEMS = [
-    ("sapphire", 1, 5, 40),
-    ("emerald", 27, 32, 70),
-    ("ruby", 43, 48, 110),
-    ("diamond", 60, 65, 180),
+    ("sapphire", 1, 5, 60),
+    ("emerald", 27, 32, 105),
+    ("ruby", 43, 48, 165),
+    ("diamond", 60, 65, 270),
 ]
 METALS = ("silver", "gold")
 PIECES = ("ring", "necklace", "amulet")

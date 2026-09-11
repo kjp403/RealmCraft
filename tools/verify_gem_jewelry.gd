@@ -19,10 +19,10 @@ const METALS: Array[String] = ["silver", "gold"]
 const PIECES: Array[String] = ["ring", "necklace", "amulet"]
 ## gem -> [cut level, set level, set xp]. Set xp approved by Kyle 2026-09-10.
 const LADDER: Dictionary = {
-	"sapphire": [1, 5, 40],
-	"emerald": [27, 32, 70],
-	"ruby": [43, 48, 110],
-	"diamond": [60, 65, 180],
+	"sapphire": [1, 5, 60],
+	"emerald": [27, 32, 105],
+	"ruby": [43, 48, 165],
+	"diamond": [60, 65, 270],
 }
 ## Each gem adds ONE stat, colour-matched to the Slayer gem standing for it...
 const GEM_STAT: Dictionary = {
@@ -83,20 +83,20 @@ func _init() -> void:
 ## below level 5).
 func _gem_rate_at(level: int) -> int:
 	if level < 5:
-		return 18
+		return 27
 	if level < 32:
-		return 29
+		return 43
 	if level < 48:
-		return 50
+		return 75
 	if level < 65:
-		return 78
-	return 125
+		return 117
+	return 187
 
 
 ## Jewellery is THE Crafting training method (Kyle, 2026-09-10). No other
 ## outfitting recipe on either workbench may pay as much per craft as the gem
 ## line does at its level, or players train on armour and the gem economy, the
-## meteor and the ~60h pace to 99 all stop mattering.
+## meteor and the ~40h pace to 99 all stop mattering.
 func _check_training_method() -> void:
 	var gem_line: Array[String] = []
 	for gem: String in LADDER:
