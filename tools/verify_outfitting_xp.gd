@@ -17,24 +17,27 @@ extends Node
 
 const STATION_PATH: String = "res://source/common/gameplay/crafting/resources/workbench.tres"
 
-## Recipe level -> xp per unit of material. Each rate is the material-weighted
-## average of what that band already paid, so the tier's total throughput is
-## unchanged and only the distribution inside it moved. Documented in
+## Recipe level -> xp per unit of material. Jewellery is the Crafting training
+## method (Kyle, 2026-09-10), so each rate is set so the LARGEST piece at that
+## level pays under 80% of what the gem line pays per craft there (cut + set of
+## the best gem unlocked: 18 / 29 / 50 / 78 / 125). Armour is gear you make, not
+## how you train. tools/verify_gem_jewelry.gd enforces that ceiling across both
+## workbenches; this gate keeps the per-unit shape. Documented in
 ## CONTENT_AUTHORING.md under "Crafting XP is priced per unit of material".
 const RATE_BY_LEVEL: Dictionary = {
-	1: 36,    # Forest cloth / leather
-	5: 54,    # Cave cloth / leather, including Studded
-	10: 72,   # Bandit cloth / leather
-	15: 180,  # Enchanted / Phantom
-	30: 200,  # Ancient / Sirenic
-	45: 240,  # Wraithsilk / Runewoven
-	50: 290,  # Nightglass / Astral
+	1: 2,     # Forest cloth / leather
+	5: 3,     # Cave cloth / leather, including Studded
+	10: 3,    # Bandit cloth / leather
+	15: 2,    # Enchanted / Phantom
+	30: 2,    # Ancient / Sirenic
+	45: 4,    # Wraithsilk / Runewoven
+	50: 6,    # Nightglass / Astral
 }
 
 ## Tanning and weaving (hide -> leather, fibre -> cloth) are the "smelting" step:
-## one output, one flat per-craft rate, already proportionate among themselves.
-## They are deliberately NOT rebased, so they are skipped here — an output that
-## lives under items/materials/ is one of them.
+## one output, one flat per-craft rate. They were scaled down with the same gem
+## ceiling but keep their own progression, so they are not per-unit and are
+## skipped here -- an output that lives under items/materials/ is one of them.
 const MATERIAL_MARKER: String = "/items/materials/"
 
 var _fails: Array[String] = []
@@ -55,7 +58,9 @@ func _ready() -> void:
 			_fails.append("a workbench recipe has no output item")
 			continue
 		var out_path: String = recipe.output_item.resource_path
-		if out_path.contains(MATERIAL_MARKER):
+		# Gem jewellery is priced per GEM (cut + set ladder), not per unit of
+		# material, and tools/verify_gem_jewelry.gd pins every one of those.
+		if out_path.contains(MATERIAL_MARKER) or out_path.contains("/gears/jewelry/"):
 			continue
 		if not RATE_BY_LEVEL.has(recipe.required_level):
 			_fails.append("%s sits at level %d, which has no authored xp rate" % [
