@@ -44,8 +44,8 @@ var _shimmer_material: ShaderMaterial = null
 @export var market_minimum_price: int = 0
 ## Gold paid per unit when sold to a vendor with [member ShopResource.buys_vendor_priced].
 ## 0 = not junk-sellable (specialty [ShopTrade]s can still buy it). Used for gatherables.
-## Smithable bar products: set vendor_value = bars_required × bar_vendor_value (Bronze 5, Iron 8, Steel 16, Silver 150, Gold 300, Mithril 30, Adamant 50, Runite 100).
-## EXCEPT silver/gold jewellery: plain pieces sell for HALF their bars, and a gem piece for its bars + half the cut gem (tools/build_gem_jewelry_content.py).
+## Smithable bar products: set vendor_value = bars_required × bar_vendor_value (Bronze 5, Iron 8, Steel 16, Silver 16, Gold 24, Mithril 30, Adamant 50, Runite 100).
+## EXCEPT silver/gold jewellery, priced well above its bars so jewellery is what sells (tools/build_gem_jewelry_content.py owns those prices).
 @export var vendor_value: int = 0
 
 

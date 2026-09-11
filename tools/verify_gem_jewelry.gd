@@ -114,12 +114,40 @@ func _find_recipe(station: CraftingStationResource, slug: String) -> Array[Craft
 	return out
 
 
+## Silver and gold bars repriced to 2x their ore (Kyle, 2026-09-10), so that
+## jewellery -- not the bar -- is what a smith sells.
+const BAR_VENDOR: Dictionary = {"silver_bar": 16, "gold_bar": 24}
+
+
 func _check_bases() -> void:
+	var anvil: CraftingStationResource = load(
+		"res://source/common/gameplay/crafting/resources/anvil.tres"
+	) as CraftingStationResource
+	for bar_slug: String in BAR_VENDOR:
+		var bar: Item = load(
+			"res://source/common/gameplay/items/materials/metals/%s.tres" % bar_slug) as Item
+		if bar == null:
+			_fail("BAR MISSING " + bar_slug)
+		elif bar.vendor_value != int(BAR_VENDOR[bar_slug]):
+			_fail("BAR VENDOR %s is %d, want %d" % [bar_slug, bar.vendor_value,
+				BAR_VENDOR[bar_slug]])
 	for slug: String in BASE_VENDOR:
 		var gear: GearItem = _load_gear(JEWELRY, slug)
-		if gear != null and gear.vendor_value != int(BASE_VENDOR[slug]):
+		if gear == null:
+			continue
+		if gear.vendor_value != int(BASE_VENDOR[slug]):
 			_fail("BASE VENDOR %s is %d, want %d" % [slug, gear.vendor_value,
 				BASE_VENDOR[slug]])
+		# The selling point: a piece must sell for more than the bars it was
+		# smithed from, or a smith vendors the bars and skips the jewellery.
+		for recipe: CraftingRecipe in _find_recipe(anvil, slug):
+			var inputs: int = 0
+			for ing: CraftIngredient in recipe.ingredients:
+				if ing != null and ing.item != null:
+					inputs += ing.item.vendor_value * ing.amount
+			if gear.vendor_value <= inputs:
+				_fail("BASE %s sells for %d, not above its bars (%d)" % [slug,
+					gear.vendor_value, inputs])
 
 
 ## Silver had an amulet and gold did not, so four gem pieces had no base.

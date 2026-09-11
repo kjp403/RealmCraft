@@ -119,18 +119,24 @@ PIECE_SCALE = {"ring": 0.5, "necklace": 0.75, "amulet": 1.0}
 # ---------------------------------------------------------------------------
 # VENDOR (Kyle, 2026-09-10)
 # ---------------------------------------------------------------------------
-# Every base is halved, and a gem piece sells for the OLD base price plus half
-# the cut stone. The old base price was exactly the bars in it (item.gd:
-# silver bar 150, gold bar 300), so a gem piece always sells for HALF THE STONE
-# LESS than the bars and stone sold raw -- setting can never mint vendor gold.
-# Halving the base does not remove a faucet either: the bars still sell at
-# full rate. It only makes a plain Smithing piece worth less than its bars.
+# Jewellery is the selling point, not the bar. Silver and gold bars sold for
+# 150 / 300 -- 19x and 25x their single ore, above runite's 100 -- so they are
+# repriced to 16 / 24, the 2x-ore markup iron and adamant already use. Plain
+# pieces sell at half their old bar-derived price, and a gem piece at that OLD
+# price plus half the cut stone, so every piece is worth well over its bars
+# and setting a stone adds value on top.
 OLD_BASE_VENDOR = {"silver_ring": 150, "silver_necklace": 300,
                    "silver_amulet": 450, "gold_ring": 300,
                    "gold_necklace": 600,
                    # never shipped at this price; 2x silver, like ring and necklace
                    "gold_amulet": 900}
 CUT_VENDOR = {"sapphire": 40, "emerald": 75, "ruby": 135, "diamond": 240}
+# bar slug -> (old vendor, new vendor). Keyed on the old value so a re-run can
+# never reprice twice. This also lowers what the 12 gold chests and the
+# Necromancer's bar drops are worth at a vendor -- intended.
+BAR_VENDOR = {"silver_bar": (150, 16), "gold_bar": (300, 24)}
+BAR_DIR = os.path.join(ROOT, "source", "common", "gameplay", "items",
+                       "materials", "metals")
 
 
 def slug_for(gem: str, metal: str, piece: str) -> str:
@@ -230,26 +236,36 @@ def write_items(dry: bool) -> int:
     return made
 
 
-def halve_base_vendor(dry: bool) -> int:
-    """One-line text edit per base, keyed on the OLD value so a re-run can
-    never halve twice: a file already at half is skipped, and anything else
+def _reprice(path: str, slug: str, old: int, new: int, dry: bool) -> bool:
+    """One-line vendor_value edit, keyed on the OLD value so a re-run can never
+    apply twice: a file already at the new price is skipped, and anything else
     stops the run rather than guessing."""
+    body = open(path, encoding="utf-8").read()
+    if re.search(rf"^vendor_value = {new}$", body, re.M):
+        return False
+    body, n = re.subn(rf"^vendor_value = {old}$", f"vendor_value = {new}",
+                      body, flags=re.M)
+    if n != 1:
+        sys.exit(f"  ! {slug}: vendor_value is neither {old} nor {new}")
+    if not dry:
+        open(path, "w", encoding="utf-8", newline="\n").write(body)
+    return True
+
+
+def halve_base_vendor(dry: bool) -> int:
+    """Halve the plain jewellery bases, and reprice silver/gold bars to 2x ore."""
     touched = 0
     for slug, old in OLD_BASE_VENDOR.items():
         if slug == "gold_amulet":
             continue                      # written at half by write_items
-        path = os.path.join(JEWELRY_DIR, f"{slug}.tres")
-        body = open(path, encoding="utf-8").read()
-        new = old // 2
-        if re.search(rf"^vendor_value = {new}$", body, re.M):
-            continue
-        body, n = re.subn(rf"^vendor_value = {old}$", f"vendor_value = {new}",
-                          body, flags=re.M)
-        if n != 1:
-            sys.exit(f"  ! {slug}: vendor_value is neither {old} nor {new}")
-        if not dry:
-            open(path, "w", encoding="utf-8", newline="\n").write(body)
-        touched += 1
+        if _reprice(os.path.join(JEWELRY_DIR, f"{slug}.tres"), slug,
+                    old, old // 2, dry):
+            touched += 1
+    bars = 0
+    for slug, (old, new) in BAR_VENDOR.items():
+        if _reprice(os.path.join(BAR_DIR, f"{slug}.tres"), slug, old, new, dry):
+            bars += 1
+    print(f"bars repriced        {bars}")
     return touched
 
 
