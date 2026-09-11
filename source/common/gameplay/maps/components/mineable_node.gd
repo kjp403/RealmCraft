@@ -320,9 +320,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 				pick -= maxf(drop.chance, 0.0)
 				if pick <= 0.0:
 					caught = drop.item
+					# The drop's own stack size, PLUS whatever the bonus-yield roll
+					# already added. Replacing `amount` outright threw away the perk
+					# tree, pickaxe tier, Prayer GATHER_YIELD and Prospector bonus on
+					# every vein gem -- the bug the meteor branch above was fixed for.
+					var bonus_units: int = maxi(0, amount - data.yield_amount)
 					amount = randi_range(
 						maxi(drop.min_amount, 1), maxi(drop.max_amount, 1)
-					)
+					) + bonus_units
 					break
 
 	# Perk-gated byproduct (trees -> Headless Arrows). Resolved BEFORE the bag
