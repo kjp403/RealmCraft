@@ -40,6 +40,42 @@ var _shimmer_material: ShaderMaterial = null
 @export_range(0.0, 1.0, 0.01) var secondary_chance: float = 0.0
 ## Job XP granted when the secondary catch wins. Empty → reuse [member job_xp].
 @export var secondary_job_xp: Dictionary[StringName, int] = {}
+## Weighted gem table, drawn on [member gem_chance] and entirely SEPARATE from
+## [member secondary_ore]: one entry is picked by [member LootDrop.chance] as a
+## relative weight.
+##
+## Exists for the ore-vein gem tables, which are cumulative rather than flat —
+## a mithril vein can roll any of the four gems with diamond rarest, while a
+## copper vein only ever yields sapphire. One item per node could not say that,
+## and four near-identical node resources per vein would have been worse.
+## [member LootDrop.min_amount] / [member LootDrop.max_amount] are honoured, so
+## a table entry can also hand over a small stack.
+@export var secondary_pool: Array[LootDrop] = []
+## Chance this node hands over a gem from [member secondary_pool].
+##
+## Deliberately NOT [member secondary_chance]. The first cut of this reused that
+## field and let the pool win whenever it was authored, which silently deleted
+## dragon scale, obsidian flux, celestial dust and astralite mote from the game:
+## those four veins already had a secondary, and the furnace recipes that eat
+## them have no other source. A gem is an EXTRA thing a vein can give, never a
+## replacement for what it already gave.
+##
+## The two share one mutually-exclusive draw, so each keeps its exact absolute
+## rate as long as they sum to <= 1.0.
+@export_range(0.0, 1.0, 0.005) var gem_chance: float = 0.0
+
+@export_group("Shared pool")
+## When true this node abandons per-player charges entirely and draws from one
+## server-wide pool ([MeteorVeinPool]) that every miner shares, refilling on a
+## wall-clock window rather than per player.
+##
+## Exactly one node uses this — the Starfall meteor vein — and it is meant to
+## stay that way: the per-player pool is what stops one miner emptying a vein
+## for everybody, and it should only be given up where being emptiable together
+## IS the content. The yield is also rolled from the miner's own Mining level
+## rather than from the node's tier, so the same rock pays a novice sapphires
+## and a maxed miner diamonds.
+@export var shared_pool: bool = false
 
 @export_group("Byproduct")
 ## Optional SECOND item granted alongside [member ore] on a successful yield

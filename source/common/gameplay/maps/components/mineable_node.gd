@@ -273,11 +273,62 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 
 	var caught: Item = data.ore
 	var xp_table: Dictionary[StringName, int] = data.job_xp
-	if data.secondary_ore != null and data.secondary_chance > 0.0 \
-			and randf() < data.secondary_chance:
+	if data.shared_pool:
+		# The meteor pays in gems, and WHICH gem is read off this miner's own
+		# level rather than off the rock — the same vein hands a novice
+		# sapphires and a maxed miner diamonds. A null here (renamed slug)
+		# falls through to data.ore rather than eating the swing.
+		var rolled: Item = MeteorVeinPool.roll_gem(job_level)
+		if rolled != null:
+			# Only WHICH item changes here. `amount` is deliberately left alone:
+			# it already carries data.yield_amount plus the bonus-yield roll, and
+			# reassigning it here silently threw away the Mining perk tree, the
+			# pickaxe tier bonus, the Prayer GATHER_YIELD stat and the whole
+			# Prospector outfit -- at the one node built to reward skillers.
+			caught = rolled
+	# The node's own secondary (dragon scale, obsidian flux, ...) and the gem
+	# table are ONE mutually-exclusive draw rather than two independent rolls,
+	# so each keeps its exact authored rate instead of one eating into the
+	# other. A single `randf()` is sliced: [0, ore) is the secondary ore,
+	# [ore, ore + gem) is a gem, the rest is plain ore.
+	#
+	# These MUST stay separate chances. Folding gems into secondary_chance and
+	# letting the pool win is what silently removed all four high-tier
+	# secondaries from the game -- the furnace recipes that eat them have no
+	# other source.
+	var ore_p: float = (
+		data.secondary_chance if data.secondary_ore != null else 0.0
+	)
+	var gem_p: float = (
+		data.gem_chance if not data.secondary_pool.is_empty() else 0.0
+	)
+	var sec_roll: float = randf()
+	if ore_p > 0.0 and sec_roll < ore_p:
 		caught = data.secondary_ore
 		if not data.secondary_job_xp.is_empty():
 			xp_table = data.secondary_job_xp
+	elif gem_p > 0.0 and sec_roll < ore_p + gem_p:
+		var total: float = 0.0
+		for drop: LootDrop in data.secondary_pool:
+			if drop != null and drop.item != null:
+				total += maxf(drop.chance, 0.0)
+		if total > 0.0:
+			var pick: float = randf() * total
+			for drop: LootDrop in data.secondary_pool:
+				if drop == null or drop.item == null:
+					continue
+				pick -= maxf(drop.chance, 0.0)
+				if pick <= 0.0:
+					caught = drop.item
+					# The drop's own stack size, PLUS whatever the bonus-yield roll
+					# already added. Replacing `amount` outright threw away the perk
+					# tree, pickaxe tier, Prayer GATHER_YIELD and Prospector bonus on
+					# every vein gem -- the bug the meteor branch above was fixed for.
+					var bonus_units: int = maxi(0, amount - data.yield_amount)
+					amount = randi_range(
+						maxi(drop.min_amount, 1), maxi(drop.max_amount, 1)
+					) + bonus_units
+					break
 
 	# Perk-gated byproduct (trees -> Headless Arrows). Resolved BEFORE the bag
 	# check so both items are validated together — a bag that can take the log
@@ -327,6 +378,21 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			"progress_hp": 1,
 			"extraction_hp": data.extraction_hp,
 			"charges_left": charges_left,
+			"max_charges": _pool_for(pr, key),
+			"node_path": node_path,
+		}
+
+	# Shared pool: charges are only checked when an extraction round starts, so
+	# another miner can take the last unit while this one is mid-swing. Re-check
+	# before paying, or everyone mid-extraction at empty is paid past the
+	# window's cap. Nothing has been granted yet, so rejecting here is clean.
+	if data.shared_pool and MeteorVeinPool.remaining() <= 0:
+		_progress_hp_by_player.erase(player_id)
+		return {
+			"ok": false,
+			"extracted": false,
+			"reason": "depleted",
+			"charges_left": 0,
 			"max_charges": _pool_for(pr, key),
 			"node_path": node_path,
 		}
@@ -526,6 +592,13 @@ func _arm_regen_prediction() -> void:
 	if _disp_charges > 0 and _has_random_pool():
 		_set_regen_armed(false)
 		return
+	# The Starfall meteor's pool is SHARED and refills on a wall-clock window,
+	# so nothing about it can be predicted from this node's own timings. With
+	# charge_regen_seconds at 0 the +1 tick fired every frame and painted a full
+	# meteor after every swing. Only the server's charges_left is true here.
+	if data.shared_pool:
+		_set_regen_armed(false)
+		return
 	var interval_s: float = data.depleted_recharge_seconds if _disp_charges <= 0 else data.charge_regen_seconds
 	_next_regen_ms = Time.get_ticks_msec() + int(interval_s * 1000.0)
 	_set_regen_armed(true)
@@ -631,14 +704,23 @@ func _ledger_key(instance: ServerInstance) -> String:
 ## client shows and the ceiling trickle regen tops out at. Regen is applied on
 ## read inside the ledger, so callers never have to sequence it themselves.
 func _pool_for(resource: PlayerResource, key: String) -> int:
+	if data != null and data.shared_pool:
+		return MeteorVeinPool.pool_size()
 	return GatherNodeLedger.pool(resource, key, data)
 
 
 func _charges_for(resource: PlayerResource, key: String) -> int:
+	# A shared-pool node ignores the per-player ledger completely: what is
+	# left is what everyone else has not taken yet.
+	if data != null and data.shared_pool:
+		return MeteorVeinPool.remaining()
 	return GatherNodeLedger.charges(resource, key, data)
 
 
 func _consume_charge(resource: PlayerResource, key: String) -> void:
+	if data != null and data.shared_pool:
+		MeteorVeinPool.take()
+		return
 	GatherNodeLedger.consume(resource, key, data)
 	GatherNodeLedger.trim(resource)
 

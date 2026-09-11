@@ -20,6 +20,10 @@
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/primordial_gem.tres" id="item_16"]
 [ext_resource type="Resource" path="res://source/common/gameplay/items/materials/herbs/vial_of_water.tres" id="fish_vial_of_water"]
 
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_emerald.tres" id="uncut_0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_ruby.tres" id="uncut_1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_diamond.tres" id="uncut_2"]
+
 [sub_resource type="Resource" id="Drop_2"]
 script = ExtResource("1_loot")
 item = ExtResource("item_2")
@@ -132,6 +136,27 @@ min_amount = 5
 max_amount = 15
 chance = 1.0
 
+[sub_resource type="Resource" id="UncutDrop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("uncut_0")
+min_amount = 1
+max_amount = 2
+chance = 0.07
+
+[sub_resource type="Resource" id="UncutDrop_1"]
+script = ExtResource("1_loot")
+item = ExtResource("uncut_1")
+min_amount = 1
+max_amount = 2
+chance = 0.07
+
+[sub_resource type="Resource" id="UncutDrop_2"]
+script = ExtResource("1_loot")
+item = ExtResource("uncut_2")
+min_amount = 1
+max_amount = 2
+chance = 0.07
+
 [resource]
 script = ExtResource("2_chest")
 display_name = "Masterwork Steel Chest"
@@ -141,4 +166,4 @@ rolls_min = 3
 rolls_max = 4
 gold_min = 18000
 gold_max = 30000
-loot = Array[ExtResource("1_loot")]([SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16"), SubResource("Drop_fish_vial_of_water")])
+loot = Array[ExtResource("1_loot")]([SubResource("UncutDrop_0"), SubResource("UncutDrop_1"), SubResource("UncutDrop_2"), SubResource("Drop_2"), SubResource("Drop_3"), SubResource("Drop_4"), SubResource("Drop_5"), SubResource("Drop_6"), SubResource("Drop_7"), SubResource("Drop_8"), SubResource("Drop_9"), SubResource("Drop_10"), SubResource("Drop_11"), SubResource("Drop_12"), SubResource("Drop_13"), SubResource("Drop_14"), SubResource("Drop_15"), SubResource("Drop_16"), SubResource("Drop_fish_vial_of_water")])

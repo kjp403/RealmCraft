@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MineableNodeResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/maps/components/mineable_node_resource.gd" id="1_script"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="2_ore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_starfall_meteor.png" id="3_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_starfall_meteor_f1.png" id="5_f1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_starfall_meteor_f2.png" id="6_f2"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Starfall Meteor"
+ore = ExtResource("2_ore")
+job_xp = Dictionary[StringName, int]({
+&"mining": 13
+})
+required_level = 0
+required_tool = &"pickaxe"
+extraction_hp = 18
+min_charges = 1000
+max_charges = 1000
+charge_regen_seconds = 0.0
+depleted_recharge_seconds = 10800.0
+shared_pool = true
+texture = ExtResource("3_tex")
+visual_scale = 1.3
+shimmer_strength = 0.9
+shimmer_tint = Color(0.78, 0.88, 1, 1)
+shimmer_speed = 0.8
+idle_frames = Array[Texture2D]([ExtResource("5_f1"), ExtResource("6_f2")])
+idle_frame_seconds = 0.55

@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="ChestResource" format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="1_loot"]
+[ext_resource type="Script" path="res://source/common/gameplay/combat/chest_resource.gd" id="2_chest"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="gem_0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_emerald.tres" id="gem_1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_ruby.tres" id="gem_2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_diamond.tres" id="gem_3"]
+
+[sub_resource type="Resource" id="Drop_0"]
+script = ExtResource("1_loot")
+item = ExtResource("gem_0")
+min_amount = 1
+max_amount = 2
+chance = 0.4
+
+[sub_resource type="Resource" id="Drop_1"]
+script = ExtResource("1_loot")
+item = ExtResource("gem_1")
+min_amount = 1
+max_amount = 2
+chance = 0.3
+
+[sub_resource type="Resource" id="Drop_2"]
+script = ExtResource("1_loot")
+item = ExtResource("gem_2")
+min_amount = 1
+max_amount = 2
+chance = 0.2
+
+[sub_resource type="Resource" id="Drop_3"]
+script = ExtResource("1_loot")
+item = ExtResource("gem_3")
+min_amount = 1
+max_amount = 2
+chance = 0.1
+
+[resource]
+script = ExtResource("2_chest")
+display_name = "Rough Geode"
+tier = 2
+rolls_min = 2
+rolls_max = 4
+gold_min = 0
+gold_max = 0
+loot = Array[ExtResource("1_loot")]([SubResource("Drop_0"), SubResource("Drop_1"), SubResource("Drop_2"), SubResource("Drop_3")])

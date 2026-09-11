@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_gemjq")
 content_name = &"items"
-version = 1789019281
-next_id = 707
+version = 1789091955
+next_id = 716
 entries = Array[Dictionary]([{
 &"hash": "96d1278efab805e01101eefb294f5e95fe7a663aad15dcb96affdd04f343bf4a",
 &"id": 74,
@@ -3302,6 +3302,51 @@ entries = Array[Dictionary]([{
 &"id": 706,
 &"path": "res://source/common/gameplay/items/consumables/prayer_renewal.tres",
 &"slug": &"prayer_renewal"
+}, {
+&"hash": "132e46d8fe86f6d3fe44235f6df1e1aa32e131303744e4b29a1cd84313a05a49",
+&"id": 707,
+&"path": "res://source/common/gameplay/items/materials/gems/diamond.tres",
+&"slug": &"diamond"
+}, {
+&"hash": "cc3fbfa23667f898a222b3af1f5873a827cd2f816b315a06f358a5f58d4a6f29",
+&"id": 708,
+&"path": "res://source/common/gameplay/items/materials/gems/emerald.tres",
+&"slug": &"emerald"
+}, {
+&"hash": "c6ec01826bece277e6b3e08b5931c4f50cf910168be0cba135c9ee557cfd49a8",
+&"id": 709,
+&"path": "res://source/common/gameplay/items/materials/gems/rough_geode.tres",
+&"slug": &"rough_geode"
+}, {
+&"hash": "ba38f9f0d7347216626e776d798f37b4d0f775cdd43f028a4124958a60f9b0fc",
+&"id": 710,
+&"path": "res://source/common/gameplay/items/materials/gems/ruby.tres",
+&"slug": &"ruby"
+}, {
+&"hash": "e47f364fb02decfbec9b478d57202f1b17be2588c165097540f854e53d07ea9e",
+&"id": 711,
+&"path": "res://source/common/gameplay/items/materials/gems/sapphire.tres",
+&"slug": &"sapphire"
+}, {
+&"hash": "f47105d5cba8c15c467d17235b38670770a4d1c971ecfc79dc95ba2c03a03780",
+&"id": 712,
+&"path": "res://source/common/gameplay/items/materials/gems/uncut_diamond.tres",
+&"slug": &"uncut_diamond"
+}, {
+&"hash": "024acaed1e268bfedf5e23c1a09cb9872b5be9ac01b583c050aedba7484ab85a",
+&"id": 713,
+&"path": "res://source/common/gameplay/items/materials/gems/uncut_emerald.tres",
+&"slug": &"uncut_emerald"
+}, {
+&"hash": "718d3c9999539996e38fc2acdb0053b5bc86d9bf03264036bd9d52d2fb80243e",
+&"id": 714,
+&"path": "res://source/common/gameplay/items/materials/gems/uncut_ruby.tres",
+&"slug": &"uncut_ruby"
+}, {
+&"hash": "0570cae5957fa016680cb15cc1eb53108cc9e5bd65f2d7d33a4fb44ea9281b02",
+&"id": 715,
+&"path": "res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres",
+&"slug": &"uncut_sapphire"
 }])
 scan_path = "res://source/common/gameplay/items"
 filters = PackedStringArray("*.tres", "*.tscn")

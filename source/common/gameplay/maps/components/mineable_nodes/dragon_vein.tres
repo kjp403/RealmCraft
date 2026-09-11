@@ -7,6 +7,48 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_dragon_f1.png" id="5_f1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/props/vein_dragon_f2.png" id="6_f2"]
 
+[ext_resource type="Script" path="res://source/common/gameplay/combat/loot_drop.gd" id="gem_loot"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_sapphire.tres" id="gem_0"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_emerald.tres" id="gem_1"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_ruby.tres" id="gem_2"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/uncut_diamond.tres" id="gem_3"]
+[ext_resource type="Resource" path="res://source/common/gameplay/items/materials/gems/rough_geode.tres" id="gem_4"]
+
+[sub_resource type="Resource" id="GemDrop_0"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_0")
+min_amount = 1
+max_amount = 1
+chance = 0.4
+
+[sub_resource type="Resource" id="GemDrop_1"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_1")
+min_amount = 1
+max_amount = 1
+chance = 0.3
+
+[sub_resource type="Resource" id="GemDrop_2"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_2")
+min_amount = 1
+max_amount = 1
+chance = 0.2
+
+[sub_resource type="Resource" id="GemDrop_3"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_3")
+min_amount = 1
+max_amount = 1
+chance = 0.1
+
+[sub_resource type="Resource" id="GemDrop_4"]
+script = ExtResource("gem_loot")
+item = ExtResource("gem_4")
+min_amount = 1
+max_amount = 1
+chance = 0.04
+
 [resource]
 script = ExtResource("1_script")
 display_name = "Dragon Vein"
@@ -37,3 +79,11 @@ hit_flash_strength = 0.5
 hit_flash_color = Color(1, 0.878, 0.784, 1)
 hit_flash_seconds = 0.12
 hit_recoil_pixels = 3.0
+gem_chance = 0.055
+secondary_pool = Array[ExtResource("gem_loot")]([
+	SubResource("GemDrop_0"),
+	SubResource("GemDrop_1"),
+	SubResource("GemDrop_2"),
+	SubResource("GemDrop_3"),
+	SubResource("GemDrop_4")
+])
