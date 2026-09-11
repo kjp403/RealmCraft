@@ -15,5 +15,10 @@ func data_request_handler(peer_id: int, instance: ServerInstance, _args: Diction
 		return {"ok": false, "reason": "no_player"}
 
 	var result: Dictionary = BaitBucket.fill_from_inventory(player.player_resource)
-	result["max"] = BaitBucket.MAX_STORED
+	# Every branch answers with the SAME status block, refusals included. The
+	# client mirrors the bucket off this reply (ClientState.apply_bait_payload),
+	# and the refusal paths used to omit `stored` — so a Fill that bounced off a
+	# full bucket left the hover card showing whatever it last saw, which on a
+	# first-session player was zero.
+	result.merge(BaitBucket.status_payload(player.player_resource), true)
 	return result

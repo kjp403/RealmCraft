@@ -519,6 +519,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		# 0 / 1.0 on every non-fishing node, so a reader needs no special case.
 		"combo_streak": FishingComboManager.streak_of(player_id) if primary_job == &"fishing" else 0,
 		"combo_multiplier": combo_multiplier,
+		# Bucket state rides along too, read AFTER the catch so it is the count
+		# the next cast will actually have. The combo chip needs it to say why a
+		# streak stopped climbing ("out of bait" and "you walked off" look
+		# identical from a streak counter alone), and it keeps the bag's hover
+		# card honest through a session without a single extra request.
+		"bait": (
+			BaitBucket.status_payload(pr) if primary_job == &"fishing" else {}
+		),
 	}
 
 

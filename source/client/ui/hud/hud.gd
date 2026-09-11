@@ -211,6 +211,11 @@ func _ready() -> void:
 	# Boss Hunt HUD (contract countdown + kill tally) — same deal on boss_hunt.hud.
 	_boss_hunt_hud = BossHuntHud.new()
 	add_child(_boss_hunt_hud)
+	# Fishing combo meter — same pill as the run clocks, but bottom-centre above
+	# the ability bar, NOT in the rail: the rail's one clear slot is the orb's
+	# and pushing the orb down puts it under an open bag. It anchors itself.
+	_fishing_combo_hud = FishingComboHud.new()
+	add_child(_fishing_combo_hud)
 	# Both ride the upper-right rail under the minimap, so the rail re-flows when
 	# a run starts or ends.
 	_dungeon_hud.visibility_changed.connect(_place_right_rail)
@@ -309,6 +314,7 @@ const TOP_STACK_GAP: float = 6.0
 ## overlap), but the rail does not need to know that.
 var _dungeon_hud: DungeonHud
 var _boss_hunt_hud: BossHuntHud
+var _fishing_combo_hud: FishingComboHud
 ## In-fight callout band (enrage, mechanic warnings). Kept for the same reason.
 var _combat_alert: Control
 
@@ -613,11 +619,12 @@ func _place_right_rail() -> void:
 	if quest_tracker == null:
 		return
 	var top: float = RIGHT_RAIL_TOP
-	# The run clock HEADS the rail, above the orb. Not a preference: the rail's
+	# The run clocks HEAD the rail, above the orb. Not a preference: the rail's
 	# second slot starts at y 184, and the bottom-right compact panels open at
-	# y 162 — anything below the orb is under an open bag. Its slot IS keyed to
-	# visibility (unlike the orb's): it appears once per run, not once every few
-	# seconds, so nothing below it flickers.
+	# y 162 — anything below the orb is under an open bag. Their slots ARE keyed
+	# to visibility (unlike the orb's): they appear once per run, not once every
+	# few seconds, so nothing below them flickers. That budget is why the fishing
+	# combo meter is NOT here — see FishingComboHud's class docs.
 	for chip: Control in [_dungeon_hud, _boss_hunt_hud]:
 		if chip == null or not is_instance_valid(chip) or not chip.visible:
 			continue
