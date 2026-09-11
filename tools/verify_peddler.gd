@@ -956,14 +956,14 @@ func _check_placement() -> void:
 		# there — a map bug worth someone's attention.
 		print("  !!  %s has no ReplicatedPropsContainer — the rotation skips it," % biome)
 		print("      and ground loot / chests / spawns are broken in that map too.")
-	var spot: Dictionary = PeddlerSites.pick_spot(map, PeddlerSchedule.cycle_index())
+	var spot: Dictionary = PeddlerSites.pick_spot(map)
 	var peddler_at: Vector2 = spot["peddler"]
 	var vault_at: Vector2 = spot["vault"]
 	if peddler_at.distance_to(vault_at) > 96.0:
 		# The vault has to be within the player's own click walk-up of the cart.
 		_fail("the vault landed %.0fpx from the Peddler" % peddler_at.distance_to(vault_at))
-	if PeddlerSites.pick_spot(map, PeddlerSchedule.cycle_index())["peddler"] != peddler_at:
-		_fail("the spot probe is not deterministic for one cycle")
+	if PeddlerSites.pick_spot(map)["peddler"] != peddler_at:
+		_fail("the spot probe is not deterministic")
 	_ok("spot in %s" % biome, "(%.0f, %.0f)" % [peddler_at.x, peddler_at.y])
 
 	# THE EMPTY-BIOME CASE, which is now the ordinary one: the window charges its
@@ -983,20 +983,41 @@ func _check_placement() -> void:
 		if placed == null:
 			_fail("the cart could not be spawned into %s" % biome)
 		else:
+			var local_at: Vector2 = container.to_local(peddler_at)
 			var carried: bool = false
+			var placed_at: bool = false
 			for entry: Variant in (container.capture_bootstrap_block()["spawns"] as Array):
 				var row: Array = entry as Array
 				if int(row[1]) != ReplicatedPropsContainer.SCENE_NPC:
 					continue
+				var init: Dictionary = row[2] as Dictionary
 				# The NAME has to ride the bootstrap too, not just the scene: the
 				# shop window sends it back for the server's range check, and a
 				# late joiner whose copy is called "NPC" is answered "closed".
-				if str((row[2] as Dictionary).get("name", "")) == PeddlerNames.NODE_NAME:
+				if str(init.get("name", "")) == PeddlerNames.NODE_NAME:
 					carried = true
-			if carried:
-				_ok("late joiner", "an empty biome's cart rides the bootstrap, named")
-			else:
+				# And so does WHERE IT STANDS. The spawn init is the only thing
+				# that crosses the wire, so a cart missing a position here is one
+				# every client draws at the container's origin while the server
+				# range-checks the real square across the map — the window then
+				# answers "too_far" ("Step up to the cart to see the wares") no
+				# matter where the player is standing. That shipped, because this
+				# gate checked the name and nothing else.
+				# Type-checked rather than handed to SyncUtils.roughly_equal,
+				# which asserts on mismatched types — a MISSING position is the
+				# exact case this is here to report, and it must fail loudly,
+				# not crash the gate.
+				var at: Variant = init.get("position", null)
+				if at is Vector2 and (at as Vector2).is_equal_approx(local_at):
+					placed_at = true
+			if carried and placed_at:
+				_ok("late joiner", "an empty biome's cart rides the bootstrap, named and placed")
+			elif not carried:
 				_fail("a cart placed with nobody watching is missing from the bootstrap")
+			else:
+				_fail("the cart's bootstrap carries no position — every client draws it at the container origin")
+			if not (placed as Node2D).position.is_equal_approx(local_at):
+				_fail("the server's own cart node is not at the square it was placed on")
 
 	var npc_scene: PackedScene = load(
 		ReplicatedPropsContainer.DYNAMIC_SCENE_PATHS[ReplicatedPropsContainer.SCENE_NPC]

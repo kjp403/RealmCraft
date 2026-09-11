@@ -65,6 +65,7 @@ ERR_RATE_LIMITED,Too many attempts. Please wait a moment and try again.,Muitas t
 ERR_BANNED,You are banned from this world.,Você está banido deste mundo.,Estás baneado de este mundo.
 BANNED_TITLE,Banned,Banido,Baneado
 SHOW_PASSWORD,Show password,Mostrar senha,Mostrar contraseña
+REMEMBER_ME,Remember me?,Lembrar de mim?,¿Recordarme?
 CONNECTED_AS,Connected · %s,Conectado · %s,Conectado · %s
 NAME_LEVEL,%s\nLevel %d,%s\nNível %d,%s\nNivel %d
 CHECKING_UPDATE,Checking for updates…,Procurando atualizações…,Buscando actualizaciones…

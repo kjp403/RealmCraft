@@ -14,6 +14,8 @@ const POTION_VENDOR_VALUES: Dictionary = {
 	"res://source/common/gameplay/items/consumables/greater_health_potion.tres": 100,
 	"res://source/common/gameplay/items/consumables/greater_mana_potion.tres": 100,
 	"res://source/common/gameplay/items/consumables/prayer_potion.tres": 100,
+	"res://source/common/gameplay/items/consumables/super_prayer_potion.tres": 100,
+	"res://source/common/gameplay/items/consumables/prayer_renewal.tres": 100,
 }
 ## The ONE shop still allowed to stock potions: the Lost Soul, who stands in all
 ## three dungeons. Every other vendor was cleared out so players buy from players.
@@ -31,17 +33,17 @@ const SHOP_DIR: String = "res://source/common/gameplay/shops/resources"
 ## The MINOR pair is the one hole in "potions are dungeon-only". Kyle put them
 ## back on the two starter vendors so a new player has something to buy with
 ## their first gold; everything from the standard potion up is still Lost Soul
-## only. The buyback MUST stay under this price � vendors pay a flat
+## only. The buyback MUST stay under this price — vendors pay a flat
 ## Item.vendor_value, so a 10g potion worth 25g back is an unbounded gold loop.
-const STARTER_POTIONS: PackedStringArray = PackedStringArray([
+const STARTER_POTIONS: Array[String] = [
 	"res://source/common/gameplay/items/consumables/minor_health_potion.tres",
 	"res://source/common/gameplay/items/consumables/minor_mana_potion.tres",
-])
+]
 const STARTER_POTION_PRICE: int = 10
-const STARTER_POTION_SHOPS: PackedStringArray = PackedStringArray([
+const STARTER_POTION_SHOPS: Array[String] = [
 	"res://source/common/gameplay/shops/resources/start_shop.tres",
 	"res://source/common/gameplay/shops/resources/miras_apothecary.tres",
-])
+]
 ## Load-and-shape check for Farming herb ladder + Herblore alchemy station.
 ##
 ## Runs as a SCENE, not `-s`: under `-s` there are no autoloads, so
@@ -67,10 +69,13 @@ func _ready() -> void:
 		fails.append("JobRegistry missing herblore")
 	else:
 		print("herblore=", herb.display_name, " recipes=", herb.recipe_items.size())
-		# 7 potion ladder + 4 weapon coatings + prayer potion + 2 Hollow Seep brews
-		# + 6 high-tier combination draughts.
-		if herb.recipe_items.size() != 20:
-			fails.append("Herblore recipe_items expected 20, got %d" % herb.recipe_items.size())
+		# 7 potion ladder + 4 weapon coatings + 3 prayer draughts (potion, super,
+		# renewal) + Hourglass + Siltward + 2 Hollow Seep brews + 6 high-tier
+		# combination draughts. MUST equal the station count below: the guide is
+		# what a player reads to plan the skill, and the two lists drifted apart
+		# unnoticed for as long as this script could not be loaded.
+		if herb.recipe_items.size() != 24:
+			fails.append("Herblore recipe_items expected 24, got %d" % herb.recipe_items.size())
 
 	if not JobRegistry.JOBS.has(&"herblore"):
 		fails.append("JOBS dict missing herblore")
@@ -85,8 +90,8 @@ func _ready() -> void:
 			" recipes=", station.recipes.size())
 		if station.profession != &"herblore":
 			fails.append("alchemy station profession should be herblore")
-		if station.recipes.size() != 20:
-			fails.append("expected 20 brew recipes, got %d" % station.recipes.size())
+		if station.recipes.size() != 24:
+			fails.append("expected 24 brew recipes, got %d" % station.recipes.size())
 		for r: CraftingRecipe in station.recipes:
 			if r == null or r.output_item == null:
 				fails.append("null brew recipe")
@@ -268,11 +273,25 @@ func _check_no_potions_outside_dungeon() -> Array[String]:
 		var shop: ShopResource = load(path) as ShopResource
 		if shop == null or shop.entries == null:
 			continue
+		var starter_shop: bool = STARTER_POTION_SHOPS.has(path)
 		for entry: ShopEntry in shop.entries:
 			if entry == null or entry.item == null:
 				continue
-			if POTION_VENDOR_VALUES.has(entry.item.resource_path):
-				fails.append("%s still stocks %s — potions are dungeon-only" % [
-					file_name, entry.item.item_name
-				])
+			if not POTION_VENDOR_VALUES.has(entry.item.resource_path):
+				continue
+			# The one documented hole: the MINOR pair on the two starter vendors,
+			# so a new player has something to buy with their first gold. It is an
+			# exemption and not an oversight, so it is checked rather than waved
+			# through — the wrong potion on a starter shelf, or the right one at
+			# the wrong price, still fails.
+			if starter_shop and STARTER_POTIONS.has(entry.item.resource_path):
+				if entry.price != STARTER_POTION_PRICE:
+					fails.append("%s sells %s for %d, want %d" % [
+						file_name, entry.item.item_name,
+						entry.price, STARTER_POTION_PRICE,
+					])
+				continue
+			fails.append("%s still stocks %s — potions are dungeon-only" % [
+				file_name, entry.item.item_name
+			])
 	return fails

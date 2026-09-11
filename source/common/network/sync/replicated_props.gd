@@ -329,6 +329,9 @@ func alloc_dynamic_id() -> int:
 ## the caller can configure it before/after it enters the tree. NB: node_to_id +
 ## position are set BEFORE add_child so the child's _ready can resolve its
 ## prop_id and spawn origin.
+##
+## [param at_position] is CONTAINER-LOCAL and is replicated — see
+## [method _init_with_position]. Callers pass container.to_local(global_pos).
 func spawn_dynamic(scene_id: int, at_position: Vector2 = Vector2.ZERO, init: Dictionary = {}) -> Node:
 	var packed_scene: PackedScene = _dynamic_scene(scene_id)
 	if packed_scene == null:
@@ -336,19 +339,54 @@ func spawn_dynamic(scene_id: int, at_position: Vector2 = Vector2.ZERO, init: Dic
 		return null
 	var child_id: int = alloc_dynamic_id()
 	var instance: Node = packed_scene.instantiate()
+	var spawn_init: Dictionary = _init_with_position(instance, at_position, init)
 	# Same init the client applies (rides the spawn op + bootstrap), set before
 	# add_child so this server-side _ready is configured identically.
-	_apply_spawn_init(instance, init)
+	_apply_spawn_init(instance, spawn_init)
 	instance.set_meta(&"rp_container", self)
 	instance.set_meta(&"scene_id", scene_id) # capture_bootstrap_block reads this
-	instance.set_meta(&"spawn_init", init)   # late-joiner bootstrap re-applies it
+	instance.set_meta(&"spawn_init", spawn_init) # late-joiner bootstrap re-applies it
 	dynamic_nodes[child_id] = instance
 	node_to_id[instance] = child_id
-	if instance is Node2D and at_position != Vector2.ZERO:
-		(instance as Node2D).position = at_position
 	add_child(instance)
-	queue_spawn(child_id, scene_id, init)
+	queue_spawn(child_id, scene_id, spawn_init)
 	return instance
+
+
+## [param init] with the spawn position folded in, so WHERE a prop stands reaches
+## the client.
+##
+## The init dictionary is the ONLY thing that crosses the wire with a spawn — it
+## rides queue_spawn to the clients that are here, and the spawn_init meta that
+## capture_bootstrap_block replays to the ones that arrive later. Setting
+## at_position on the local node alone therefore placed the prop on the SERVER
+## and nowhere else, and every cold prop was drawn at this container's origin on
+## every client.
+##
+## That went unnoticed because the props whose position visibly mattered are hot:
+## HostileNpc marks :position every tick (it moves), so it corrects itself on the
+## frame after it spawns. A prop that never moves has nothing to correct it.
+## [PeddlerManager]'s cart was the case that showed: players walked to the cart
+## drawn at the origin, and PeddlerDesk.resolve range-checked against the real
+## one across the map, so the window answered "too_far" — "Step up to the cart to
+## see the wares" — no matter where the player stood.
+##
+## Folded in here rather than left to each caller because two call sites already
+## passed "position" by hand (LootChest.spawn_at, ItemDelivery) and four did not
+## (both Peddler props, MysterySeedBloom, PortableDepositBox) — a rule every
+## caller has to remember is the same bug waiting on the next prop. An explicit
+## "position" in [param init] still wins, so those two are unchanged.
+##
+## Position goes in LAST so it is applied last, matching the order the two-step
+## it replaces used (init keys, then position) on both ends.
+static func _init_with_position(
+	instance: Node, at_position: Vector2, init: Dictionary
+) -> Dictionary:
+	if not (instance is Node2D) or init.has("position"):
+		return init
+	var out: Dictionary = init.duplicate()
+	out["position"] = at_position
+	return out
 
 
 ## Server: despawn a dynamic prop everywhere and free the local node.

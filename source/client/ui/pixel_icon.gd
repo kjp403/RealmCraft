@@ -11,6 +11,19 @@ extends RefCounted
 ## timing (an immediate fit caught freshly-built grids at 0-size, drawing tiny in the corner). Returns the
 ## TextureRect so callers that change the art later can pass it to [method set_art].
 static func mount(host: Control, texture: Texture2D = null, inset: float = 0.0) -> TextureRect:
+	# THE HOST MUST NOT BE A Container. _fit drives icon.size directly, and a Container
+	# re-imposes size = combined minimum on its children on every sort — which for an
+	# EXPAND_IGNORE_SIZE TextureRect is (0,0). The icon is then silently collapsed to
+	# 0x0 and the slot renders EMPTY, with no error anywhere. This is what emptied the
+	# skilling board, the daily tracker and the chest reward ledger: each wrapped the
+	# mount in a CenterContainer, which is redundant anyway since _fit centres on whole
+	# pixels. Use a plain Control (mouse_filter IGNORE) sized by its own parent instead.
+	if host is Container:
+		push_warning(
+			"PixelIcon.mount: host '%s' is a %s. A Container resizes its children to "
+			% [host.name, host.get_class()]
+			+ "their (0,0) minimum, collapsing the icon. Use a plain Control host."
+		)
 	var icon: TextureRect = TextureRect.new()
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	icon.stretch_mode = TextureRect.STRETCH_SCALE

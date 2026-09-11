@@ -14,4 +14,4 @@ vendor_value = 135
 stack_limit = 10
 tags = PackedStringArray("gem")
 metadata/slug = &"ruby"
-metadata/id = 704
+metadata/id = 710

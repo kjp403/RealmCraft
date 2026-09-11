@@ -11,6 +11,24 @@ extends Resource
 ## Tier label for tooling (1 = silver wood, 2 = gold wood, 3 = ornate).
 @export_range(1, 3, 1) var tier: int = 1
 ## Gold paid on open, rolled uniformly in [gold_min, gold_max]. 0 = no gold.
+##
+## THE T3 GOLD LADDER. The three gold-banded rows are Ornate < Grand <
+## Masterwork, and their bands must not overlap, because the ROW is what says
+## how hard the chest was to get:
+##
+##   Ornate      6,000-14,000     Grand  9,000-28,000    Masterwork  18,000-40,000
+##
+## Ornate sits at the bottom on volume. It is the only T3 chest handed out
+## GUARANTEED — one per Normal dungeon clear, two per Hard, one to two to a
+## world boss's top damage plus a 40% consolation roll to everyone else, and
+## Ossuran pays 2-5 in a single drop. Grand and Masterwork are weighted table
+## entries at a tenth of that rate. Ornate Blue / Gold / Red shipped at
+## 10,000-25,000, which put the most common T3 chest in the game ABOVE Grand
+## Steel and level with Grand Crimson, and made its gold — not its Sirenic /
+## Dragon / Ancient mats — the reason to open it. A dungeon clear paid 3,000-
+## 8,000 for the clear itself and then handed over a chest worth three times
+## that. They are 7,000-14,000 now: a step above Ornate Steel (6,000-12,000),
+## which is the row's anchor and was always priced correctly, and under Grand.
 @export var gold_min: int = 0
 @export var gold_max: int = 0
 ## Loot table. An open draws [member rolls_min]..[member rolls_max] distinct

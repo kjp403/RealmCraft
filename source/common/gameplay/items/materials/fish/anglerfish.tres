@@ -8,6 +8,7 @@ script = ExtResource("2_mat")
 item_name = &"Raw Anglerfish"
 item_icon = ExtResource("1_icon")
 description = "Deep-lure nightmare. Culinary prize."
+tags = PackedStringArray("raw_fish")
 vendor_value = 10
 stack_limit = 10
 metadata/slug = &"anglerfish"

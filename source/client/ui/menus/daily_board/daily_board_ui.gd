@@ -193,7 +193,12 @@ func _build_header(entry: Dictionary, claimed: bool) -> Control:
 	tile.custom_minimum_size = Vector2(44, 44)
 	tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	tile.add_theme_stylebox_override(&"panel", PixelUI.slot_style())
-	var host: CenterContainer = CenterContainer.new()
+	# A PLAIN Control, never a Container — see PixelIcon.mount. A Container re-imposes
+	# size = minimum on its children every layout pass, and a mounted icon reports a
+	# (0,0) minimum, so a CenterContainer here collapsed the skill icon to 0x0 and the
+	# slot rendered empty. PixelIcon centres on whole pixels itself.
+	var host: Control = Control.new()
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tile.add_child(host)
 	var perks: JobPerks = JobRegistry.perks_for(StringName(str(entry.get("skill", ""))))
 	if perks != null and perks.icon != null:

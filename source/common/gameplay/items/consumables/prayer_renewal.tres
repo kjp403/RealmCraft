@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PotionItem" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/items/icons/potion_prayer_renewal.png" id="1_tex"]
+[ext_resource type="Script" path="res://source/common/gameplay/items/potion_item.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+aura_effect = &"prayer_renewal"
+aura_duration_s = 300.0
+aura_pulse_s = 15.0
+aura_potency = 5.0
+shared_cooldown_ms = 0
+cooldown_category = &"prayer_renewal"
+use_freeze_ms = 0
+item_name = &"Prayer Renewal"
+item_icon = ExtResource("1_tex")
+description = "Dragon marrow drawn slowly through sun-lit lotus. It does not fill you back up — it just stops you running out."
+vendor_value = 100
+tags = PackedStringArray("vial")
+metadata/slug = &"prayer_renewal"
+metadata/id = 706

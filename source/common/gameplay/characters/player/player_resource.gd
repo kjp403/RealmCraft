@@ -209,6 +209,16 @@ var active_inventory_bag: int = 0
 ## assigned). Reserved for the Slayer Shop; empty until that ships.
 @export var slayer_blocked_tasks: Dictionary = {}
 
+## Bait held in the Bottomless Bait Bucket, 0..BaitBucket.MAX_STORED.
+##
+## This is on the CHARACTER, not on the bucket item, and that is load-bearing:
+## item .tres resources are shared process-wide by ContentRegistryHub, so an
+## @export on the item would be one shared bucket for every player on the server;
+## and Inventory.normalize() rebuilds each slot as {id, a, bag, p}, so a per-slot
+## count would be silently erased on the next load. Both failures are quiet.
+## Always write it through BaitBucket, which clamps and emits.
+@export var stored_bait: int = 0
+
 ## Soft dungeon charge state lives in dungeon_lockouts under "_daily_charges":
 ## {day, used, bonus}. Successful clears spend a charge; failed runs do not.
 ## Bonus comes from Dungeon Keys. Older per-dungeon unix timestamps may still
@@ -314,10 +324,17 @@ var stats: Dictionary
 ## only on purpose: survives instance changes within a session, gone on logout.
 var active_buffs: Array[Dictionary] = []
 
-## Live weapon coating ({kind, potency, hit_duration_s, expires_ms} — see
-## CoatingService), empty when the weapon is clean. Not a stat buff, so it
-## cannot live in active_buffs; runtime only for the same reason those are.
+## Live OFFENSIVE weapon coating ({kind, potency, hit_duration_s, expires_ms} —
+## see CoatingService), empty when the weapon carries none. Not a stat buff, so
+## it cannot live in active_buffs; runtime only for the same reason those are.
 var weapon_coating: Dictionary = {}
+
+## Live SUSTAIN coating (the Weapon Salve), same shape and same lifetime as
+## weapon_coating. A second field rather than a second entry in the first,
+## because every reader of weapon_coating asks "what one thing is on my weapon"
+## and would have had to learn to ask "which of the two" — see CoatingService's
+## header for why the salve stopped sharing the offensive slot.
+var weapon_salve: Dictionary = {}
 
 ## Live StatusEffectManager auras on this player ({family: aura dict} — see
 ## StatusEffectManager.arm_aura), empty when none are running. Runtime only for

@@ -46,7 +46,9 @@ const GATHER_XP_RATE: Dictionary[StringName, float] = {
 
 # --- Cached refs ------------------------------------------------------------
 @onready var _sprite: Sprite2D = $Sprite2D
-@onready var _name_label: Label = $NameLabel
+@onready var _hover_card: PanelContainer = $HoverCard
+@onready var _name_label: Label = $HoverCard/VBoxContainer/NameLabel
+@onready var _req_label: Label = $HoverCard/VBoxContainer/ReqLabel
 @onready var _bar: ProgressBar = $VisualState/ProgressBar
 @onready var _charge_label: Label = $VisualState/ChargeLabel
 @onready var _visual_state: Control = $VisualState
@@ -390,6 +392,20 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			Inventory.MAX_SLOTS, false, active_bag, bag_count
 		)
 
+	# Node Combo: consecutive baited catches at the SAME fishing spot multiply
+	# Fishing XP. Registered once per YIELD rather than inside the per-job loop
+	# below — a node that credits two jobs would otherwise spend two bait, and
+	# advance the streak twice, for one fish.
+	#
+	# `key` is the GatherNodeLedger identity, not the node name: a name is unique
+	# only within one live Map, so two instances of the same biome would share it
+	# and a player hopping between them would keep a streak they should have lost.
+	var combo_multiplier: float = 1.0
+	if primary_job == &"fishing":
+		combo_multiplier = FishingComboManager.register_catch(
+			pr, player_id, key, player.global_position
+		)
+
 	# Job XP — iterate the dict so a node can credit multiple jobs at once.
 	var grants: Array = []
 	var prayer_xp: float = 1.0
@@ -405,6 +421,10 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 			var job_perks_dict: Dictionary = skill_entry.get("perks", {})
 			rate *= jp.xp_multiplier(job_perks_dict)
 		rate *= prayer_xp
+		# Combo pays the Fishing line only. A pond that also credited, say,
+		# Harvesting must not have that second skill riding the angler's streak.
+		if job_name == &"fishing":
+			rate *= combo_multiplier
 		if rate != 1.0:
 			xp_gain = maxi(0, roundi(float(raw) * rate))
 		var prog: Dictionary = player.player_resource.add_skill_xp(job_name, xp_gain)
@@ -464,6 +484,14 @@ func register_gather_hit(player: Player, damage: int, instance: ServerInstance, 
 		"charges_left": charges_left,
 		"max_charges": _pool_for(pr, key),
 		"node_path": node_path,
+		# Combo state rides the SAME payload the gather result already pushes
+		# (mining.gather_result -> ClientState.gather_succeeded) rather than a
+		# push of its own: a second push per catch would double the packets on
+		# the hottest loop in the game, and the two could arrive out of order,
+		# which on a streak counter reads as the number jumping backwards.
+		# 0 / 1.0 on every non-fishing node, so a reader needs no special case.
+		"combo_streak": FishingComboManager.streak_of(player_id) if primary_job == &"fishing" else 0,
+		"combo_multiplier": combo_multiplier,
 	}
 
 
@@ -704,10 +732,7 @@ func _layout_from_texture() -> void:
 			rect.size = Vector2(32, 32)
 			collision.position = Vector2(0.0, -8.0)
 
-	if _name_label != null:
-		var top_y: float = _sprite.position.y - tex_size.y * 0.5
-		_name_label.position = Vector2(-56.0, top_y - 18.0)
-		_name_label.size = Vector2(112.0, 20.0)
+	_position_hover_card()
 
 	if _visual_state != null:
 		var bar_y: float = _sprite.position.y - tex_size.y * 0.5 - 28.0
@@ -904,18 +929,83 @@ static func _fx_texture(shape: StringName) -> Texture2D:
 	return tex
 
 
+## Vertical gap between the top of the sprite and the bottom of the hover card.
+## Must clear the VisualState band (parked 28px above the sprite, 26px tall) —
+## the gather bar and the hover card are both up when you work a node you are
+## already hovering, and an overlap there reads as a broken tooltip.
+const HOVER_CARD_GAP: float = 32.0
+## Requirement line colours: you can work this node / you cannot / it has no
+## gate at all (then the line is just "which skill does this train").
+const REQ_MET_COLOR: Color = Color(0.62, 0.87, 0.53)
+const REQ_UNMET_COLOR: Color = Color(0.94, 0.42, 0.38)
+const REQ_NONE_COLOR: Color = Color(0.72, 0.68, 0.58)
+
+
+## Fill the hover card's two lines. Text only — it is authored once here and the
+## card's SIZE is settled from it, so the hover path can stay a visibility flip
+## plus a recolour and never re-measure.
 func _apply_name_label() -> void:
-	if _name_label == null:
+	if _hover_card == null:
 		return
 	if data == null or data.ore == null:
-		_name_label.visible = false
+		_hover_card.visible = false
 		return
 	if not data.display_name.is_empty():
 		_name_label.text = data.display_name
 	else:
 		_name_label.text = String(data.ore.item_name)
-	# Names only appear while the cursor is over the node (see hover).
-	_name_label.visible = GameMode.is_client() and _interactable_hovered
+
+	# Second line: the job this node trains, plus its level gate when it has one.
+	# A gate of 0 or 1 is no gate at all (see MineableNodeResource.required_level)
+	# and printing "Lv 1" there would read as a requirement the node doesn't have.
+	var job: StringName = _primary_job()
+	if job == &"":
+		_req_label.visible = false
+	else:
+		_req_label.visible = true
+		if data.required_level > 1:
+			_req_label.text = "%s Lv %d" % [
+				JobRegistry.display_name(job), data.required_level
+			]
+		else:
+			_req_label.text = JobRegistry.display_name(job)
+
+	_refresh_requirement_tint()
+	_position_hover_card()
+	# Cards only appear while the cursor is over the node (see hover).
+	_hover_card.visible = GameMode.is_client() and _interactable_hovered
+
+
+## Centre the card above the sprite. Called after the text is set, because a
+## PanelContainer outside a container parent only knows its width once its
+## labels do — and the card is centred by halving that width.
+func _position_hover_card() -> void:
+	if _hover_card == null or _sprite == null or data == null or data.texture == null:
+		return
+	var s: float = maxf(0.1, data.visual_scale)
+	var top_y: float = _sprite.position.y - data.texture.get_size().y * s * 0.5
+	_hover_card.reset_size()
+	_hover_card.position = Vector2(
+		-_hover_card.size.x * 0.5,
+		top_y - HOVER_CARD_GAP - _hover_card.size.y
+	)
+
+
+## Green / red the requirement line against THIS client's job level. Re-run on
+## every hover rather than once at spawn: the node outlives the level-up that
+## unlocks it, and a vein that stays red after you earn it is worse than no
+## line at all. Client-only — the server has no local skill levels to read.
+func _refresh_requirement_tint() -> void:
+	if _req_label == null or data == null or not _req_label.visible:
+		return
+	var job: StringName = _primary_job()
+	if data.required_level <= 1 or job == &"" or not GameMode.is_client():
+		_req_label.add_theme_color_override(&"font_color", REQ_NONE_COLOR)
+		return
+	var met: bool = ClientState.skill_level(job) >= data.required_level
+	_req_label.add_theme_color_override(
+		&"font_color", REQ_MET_COLOR if met else REQ_UNMET_COLOR
+	)
 
 
 ## Client charge count used by [HarvestController] while waiting on regen.
@@ -970,8 +1060,14 @@ func _set_interactable_hover(on: bool) -> void:
 	# block left-click movement / Attack the way fishing holes do.
 	if not harvests_on_right_click():
 		ClientState.world_interactables_hovered += 1 if on else -1
-	if _name_label != null and data != null and data.ore != null:
-		_name_label.visible = on
+	if _hover_card != null and data != null and data.ore != null:
+		if on:
+			# Re-centre as well as recolour: the card is measured at _ready, and
+			# a node whose art or font resolved a frame late would have banked a
+			# zero width there and be pinned to the player's side of the rock.
+			_refresh_requirement_tint()
+			_position_hover_card()
+		_hover_card.visible = on
 
 
 func _on_clicked() -> void:

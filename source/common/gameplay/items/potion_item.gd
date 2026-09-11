@@ -219,15 +219,22 @@ func coating_extras() -> Dictionary:
 	return {}
 
 
-## Drinkable? An aura draught follows the same one-draught-at-a-time rule as a
-## coating or an exclusive tonic — checked HERE as well as in [method on_use] so
-## the bag button, the hotbar tile and the server refuse together instead of the
-## click succeeding and the sip silently failing.
+## Drinkable? An EXCLUSIVE aura draught follows the same one-draught-at-a-time
+## rule as a coating or an exclusive tonic — checked HERE as well as in
+## [method on_use] so the bag button, the hotbar tile and the server refuse
+## together instead of the click succeeding and the sip silently failing.
+##
+## A NON-exclusive aura holds no slot, so nothing can be holding it and it is
+## always drinkable. It has to be answered here rather than falling through to
+## the base class: an aura-only vial has no heal, no mana, no stat buff and no
+## coating, so every branch there misses it and the shared `return false` at the
+## bottom made it a potion the bag would not pour. Re-drinking refreshes the
+## aura, which is the same thing every other draught does.
 func can_use(character: Character) -> bool:
-	if is_aura() and exclusive_buff:
+	if is_aura():
 		if character is not Player:
 			return false
-		return not draught_slot_busy(character as Player)
+		return not (exclusive_buff and draught_slot_busy(character as Player))
 	return super(character)
 
 

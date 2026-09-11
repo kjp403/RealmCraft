@@ -12,6 +12,6 @@ holdable = false
 can_trade = true
 vendor_value = 26
 stack_limit = 10
-tags = PackedStringArray()
+tags = PackedStringArray("raw_fish")
 metadata/slug = &"blue_lobster"
 metadata/id = 596

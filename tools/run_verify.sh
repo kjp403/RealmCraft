@@ -33,10 +33,13 @@ DEFAULT_GATES=(
 	verify_reward_audio
 	verify_pixel_chrome
 	verify_reward_window_layer
+	verify_pixel_icon_hosts
+	audit_content_icons
 	verify_gather_persistence
 	verify_gather_db_roundtrip
 	verify_gather_tools
 	verify_peddler_spots
+	verify_angler
 )
 
 GATES=("$@")

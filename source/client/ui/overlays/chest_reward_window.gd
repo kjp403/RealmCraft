@@ -426,7 +426,12 @@ func _build_row(entry: Dictionary) -> Control:
 	slot.add_child(shine)
 	frame.set_meta(&"shine", shine)
 
-	var icon_host: CenterContainer = CenterContainer.new()
+	# A PLAIN Control, never a Container — see PixelIcon.mount. A Container re-imposes
+	# size = minimum on its children every layout pass, and a mounted icon reports a
+	# (0,0) minimum, so a CenterContainer here collapsed every reward icon to 0x0 and
+	# the ledger rows showed empty slots. PixelIcon centres on whole pixels itself.
+	var icon_host: Control = Control.new()
+	icon_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot.add_child(icon_host)
 	var item: Item = ContentRegistryHub.load_by_id(&"items", int(entry.get("id", 0))) as Item
 	if item != null and item.item_icon != null:

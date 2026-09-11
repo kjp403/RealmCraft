@@ -319,7 +319,9 @@ func _build_inventory_grid() -> Control:
 		var item: Item = ContentRegistryHub.load_by_slug(&"items", slug) as Item
 		if item == null or item.item_icon == null:
 			continue
-		var host: CenterContainer = CenterContainer.new()
+		# A PLAIN Control, never a Container — see PixelIcon.mount.
+		var host: Control = Control.new()
+		host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(host)
 		PixelIcon.mount(host, item.item_icon)
 		# Quantity, bottom-right, over the icon — the standard inventory read.

@@ -14,4 +14,4 @@ vendor_value = 75
 stack_limit = 10
 tags = PackedStringArray("gem")
 metadata/slug = &"emerald"
-metadata/id = 702
+metadata/id = 708

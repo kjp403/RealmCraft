@@ -33,7 +33,6 @@ extends Node
 ##   godot --headless --path . --mode=client res://tools/audit_peddler_ground_rule.tscn
 
 const BIOMES_DIR: String = "res://source/common/gameplay/maps/instance/instance_collection/biomes/"
-const CYCLES: int = 200
 ## The lattice PeddlerSites walks on, so a cell here is a cell there.
 const STEP: float = 16.0
 const FILL_CELL_CAP: int = 60000
@@ -157,28 +156,21 @@ func _audit(res_path: String) -> void:
 			tight += 1
 	print("  fit: %d squares the old ring offered are too tight for the cart's body" % tight)
 
-	# And the placements themselves. An anchor on every cycle means the rules got
-	# tight enough to reject the whole map — the cart still spawns, always on the
-	# spawn pad, which no error would ever tell us about.
+	# And the placement itself. One square per map now, so there is one to check
+	# rather than a sample of cycles: landing on the anchor means the rules got
+	# tight enough to reject every authored marker — the cart still spawns, always
+	# on the spawn pad, which no error would ever tell us about.
 	var anchor: Vector2 = PeddlerSites.failsafe_anchor(map)
-	var on_anchor: int = 0
-	var bad: int = 0
-	for c: int in CYCLES:
-		var spot: Vector2 = PeddlerSites.pick_spot(map, c)["peddler"]
-		if spot == anchor:
-			on_anchor += 1
-			continue
-		if not PeddlerSites.is_valid_spot(map, spot) or _painted_by_wall(layers, spot):
-			bad += 1
-			if bad < 4:
-				print("    cycle %d placed at (%d,%d), not on painted floor" % [c, spot.x, spot.y])
-	print("  placements: %d/%d real squares, %d on the anchor" % [
-		CYCLES - on_anchor, CYCLES, on_anchor
-	])
-	if bad > 0:
-		_fail("%d of %d placements are not on painted floor" % [bad, CYCLES])
-	# Left as a report rather than a failure: with placement authored, landing on
-	# the anchor means the map carries no PeddlerSpot markers, which
+	var spot: Vector2 = PeddlerSites.pick_spot(map)["peddler"]
+	if spot == anchor:
+		print("  placement: on the anchor — no authored marker survived the rules")
+	elif not PeddlerSites.is_valid_spot(map, spot) or _painted_by_wall(layers, spot):
+		print("    placed at (%d,%d), not on painted floor" % [spot.x, spot.y])
+		_fail("the placement is not on painted floor")
+	else:
+		print("  placement: (%d,%d) on painted floor" % [spot.x, spot.y])
+	# The anchor case is left as a report rather than a failure: with placement
+	# authored, landing on it means the map carries no PeddlerSpot markers, which
 	# tools/verify_peddler_spots.tscn fails on directly and with a better message.
 	# Failing it here too would just be a second, vaguer copy of that gate.
 

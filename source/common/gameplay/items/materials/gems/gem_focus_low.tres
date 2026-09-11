@@ -7,7 +7,7 @@
 script = ExtResource("2_script")
 item_name = &"Low Quality Focus Gem"
 item_icon = ExtResource("1_icon")
-description = "A low quality gem for forging Focus rings. Bought with Slayer Points; set into Copper metal at the anvil."
+description = "A low quality gem for forging Focus rings. Bought with Slayer Points; set into Bronze metal at the anvil."
 holdable = false
 can_trade = true
 vendor_value = 0

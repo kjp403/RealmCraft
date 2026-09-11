@@ -655,16 +655,55 @@ func _on_slot_gui_input(
 		# Materials / non-holdables have no primary action — ignore double-click
 		# so players don't get a misleading "could not be used" toast.
 		var item: Item = entry["item"]
-		if (
-			item is ConsumableItem
-			or item is LootChestItem
-			or item is DungeonKeyItem
-			or item is GearItem
-			or _is_usable_peddler_good(item)
-			or item.holdable
-		):
+		if _has_primary_action(item):
 			slot.accept_event()
 			_perform_primary_action(entry)
+
+
+## Report the outcome of an Angler tool's request. Split out of
+## _perform_primary_action so the panel-opening branch above stays a plain early
+## return, and so every refusal gets a NAMED message — a silent no-op on a bag
+## action reads as a broken item, which is what made the guild-house shop bug
+## undiagnosable (see shop_menu._buy).
+func _on_angler_tool_result(tool_item: AnglerToolItem, result: Array) -> void:
+	if result.size() < 2 or result[1] != OK:
+		Toaster.toast("%s could not be used." % tool_item.item_name)
+		return
+	var payload: Dictionary = result[0] if result[0] is Dictionary else {}
+	if bool(payload.get("ok", false)):
+		var moved: int = int(payload.get("moved", 0))
+		if moved > 0:
+			Toaster.toast("Stored %d bait. (%d/%d)" % [
+				moved, int(payload.get("stored", 0)), int(payload.get("max", 0)),
+			])
+		if bool(payload.get("capped", false)):
+			Toaster.toast("Your bucket is full — the rest stayed in your bag.")
+		return
+	Toaster.toast({
+		"no_bucket": "You aren't carrying that bucket.",
+		"no_bait": "You have no Fish Bait to store.",
+		"bucket_full": "Your bucket is already full.",
+		"no_bait_item": "Bait is unavailable. Try again after a server update.",
+		"no_player": "That can't be used right now.",
+	}.get(str(payload.get("reason", "")), "Nothing happened."))
+
+
+## True when this item has a right-click / double-click action at all. THE one
+## place that question is answered — the context row, the double-click filter and
+## the primary-action guard all call it, so they cannot drift into a state where
+## the dock offers "Use" on something that then refuses, or silently makes a usable
+## item Drop-only. Adding a usable item type means editing this list and nothing
+## else.
+func _has_primary_action(item: Item) -> bool:
+	return (
+		item is ConsumableItem
+		or item is LootChestItem
+		or item is DungeonKeyItem
+		or item is GearItem
+		or item is AnglerToolItem
+		or _is_usable_peddler_good(item)
+		or item.holdable
+	)
 
 
 func _open_context_menu(entry: Dictionary) -> void:
@@ -680,6 +719,10 @@ func _open_context_menu(entry: Dictionary) -> void:
 		# offering "Use" and then being refused by name reads as a broken item.
 		if (item as PeddlerGoodItem).usable:
 			context_menu.add_item("Use", ACTION_PRIMARY)
+	elif item is AnglerToolItem:
+		# The tool names its own row ("Use" for the knife, "Fill" for the bucket),
+		# so a third Angler tool needs no change here.
+		context_menu.add_item((item as AnglerToolItem).action_label(), ACTION_PRIMARY)
 	elif item is ConsumableItem or item is DungeonKeyItem:
 		context_menu.add_item("Use", ACTION_PRIMARY)
 	elif item is GearItem:
@@ -687,14 +730,7 @@ func _open_context_menu(entry: Dictionary) -> void:
 	elif item.holdable:
 		context_menu.add_item("Hold", ACTION_PRIMARY)
 
-	if (
-		item is ConsumableItem
-		or item is LootChestItem
-		or item is DungeonKeyItem
-		or item is GearItem
-		or _is_usable_peddler_good(item)
-		or item.holdable
-	):
+	if _has_primary_action(item):
 		context_menu.add_item("Bind to 1-5", ACTION_HOTKEY)
 
 	# Break down is the only route to salvage from the dock. Items the salvage
@@ -944,14 +980,7 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		return
 
 	# Materials and other non-holdables are Drop-only — never send item.equip.
-	if not (
-		item is ConsumableItem
-		or item is LootChestItem
-		or item is DungeonKeyItem
-		or item is GearItem
-		or _is_usable_peddler_good(item)
-		or item.holdable
-	):
+	if not _has_primary_action(item):
 		return
 
 	# Chests take the UniversalChestManager route and return here — it owns the
@@ -965,6 +994,25 @@ func _perform_primary_action(entry: Dictionary) -> void:
 		# opens that came from HERE, which left the hotbar's opens with dead
 		# buttons and a pushed reward showing this stack's.
 		UniversalChestManager.open(item_id, 1)
+		return
+
+	# Angler tools either open a panel or fire one request; they never equip.
+	# Handled before the request_name ladder because the panel case sends nothing.
+	if item is AnglerToolItem:
+		var tool_item: AnglerToolItem = item as AnglerToolItem
+		var menu: StringName = tool_item.client_menu()
+		if menu != &"":
+			ClientState.open_menu_requested.emit(menu, item_id)
+			return
+		var tool_request: StringName = tool_item.server_request()
+		if tool_request == &"":
+			return
+		primary_action_in_progress = true
+		var tool_result: Array = await Client.request_data_await(
+			tool_request, {"id": item_id}, InstanceClient.current.name
+		)
+		primary_action_in_progress = false
+		_on_angler_tool_result(tool_item, tool_result)
 		return
 
 	var request_name: StringName = &"item.equip"

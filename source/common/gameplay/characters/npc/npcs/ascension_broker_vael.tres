@@ -14,7 +14,7 @@ label_override = "Browse Slayer Shop"
 
 [sub_resource type="Resource" id="Talk_slayer"]
 script = ExtResource("4_diag")
-lines = Array[String](["I take Slayer points, not gold. Finish tasks for Durael — or Turael, if you're just starting — and bring the points here.", "These gems set the Guard, Agile, Focus, and Vital rings. Buy the quality that matches the metal you plan to forge: low for copper, medium for iron, high for silver, pristine for gold.", "Ten bars and one gem at the anvil. No shortcuts, no gold price tags."])
+lines = Array[String](["I take Slayer points, not gold. Finish tasks for Durael — or Turael, if you're just starting — and bring the points here.", "These gems set the Guard, Agile, Focus, and Vital rings. Buy the quality that matches the metal you plan to forge: low for bronze, medium for iron, high for silver, pristine for gold.", "Ten bars and one gem at the anvil. No shortcuts, no gold price tags."])
 label_override = "How does this shop work?"
 
 [resource]

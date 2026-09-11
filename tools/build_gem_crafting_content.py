@@ -417,7 +417,18 @@ def wire_geode_opener(dry: bool) -> bool:
     if not os.path.exists(item_path):
         print("  ! rough_geode.tres missing — run write_items first")
         return False
-    if "LootChestItem" in open(item_path, encoding="utf-8").read():
+    prior = open(item_path, encoding="utf-8").read()
+    if "LootChestItem" in prior:
+        return False
+    # The rewrite below replaces the file wholesale, so the id the index
+    # has already stamped has to be carried across by hand. A literal here
+    # is what collided with main's own new items once already: ids come
+    # from a shared high-water mark, so this file cannot know its number
+    # ahead of time -- it can only preserve the one it was given.
+    stamped = re.search(r"^metadata/id = (\d+)$", prior, re.M)
+    if stamped is None:
+        print("  ! rough_geode.tres has no metadata/id - run "
+              "update_items_index.gd first")
         return False
 
     # 2-4 DISTINCT entries per open (ChestResource draws without replacement),
@@ -471,7 +482,7 @@ def wire_geode_opener(dry: bool) -> bool:
         'holdable = false\n'
         'vendor_value = 90\n'
         'metadata/slug = &"rough_geode"\n'
-        'metadata/id = 703\n'
+        f'metadata/id = {stamped.group(1)}\n'
     )
     if not dry:
         open(table_path, "w", encoding="utf-8", newline="\n").write(table)
