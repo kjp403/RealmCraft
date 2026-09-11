@@ -56,9 +56,9 @@ const PERIOD_S: int = 3 * 60 * 60
 ##   * all-diamond, which means buying them rather than mining them, is ~182,000
 ##     gems and ~101 hours.
 ##
-## The setting half (tools/build_gem_jewelry_content.py) adds 40/70/110/180 per
-## gem, which puts the best-gem-per-level ladder at ~53,600 gems and ~59.6h to
-## 99. The meteor-mix figure above has NOT been re-measured with setting in, so
+## The setting half (tools/build_gem_jewelry_content.py) and a 1.5x raise to
+## both halves (Kyle, 2026-09-10: cut 27/45/69/105, set 60/105/165/270) put the
+## best-gem-per-level ladder at ~35,750 gems and ~39.7h to 99. The meteor-mix figure above has NOT been re-measured with setting in, so
 ## re-run it before resizing POOL — the pool was never the binding constraint.
 ##
 ## Bag space throttles it too — 30 slots per bag, gems stack 10, so a one-bag

@@ -572,9 +572,10 @@ eats five cloth is worth more than a hood that eats three.
 **Jewellery is the Crafting training method, not armour** (Kyle, 2026-09-10).
 Each rate above is set so the largest piece at its level pays under 80% of what
 the gem line pays per craft there: cut + set of the best gem unlocked, averaged
-over the two actions — 18 below level 5, 29 from 5, 50 from 32, 78 from 48 and
-125 from 65. Before this, a Primordial Robe paid 4,590 XP a craft against a set
-diamond's 180, so nobody would ever have trained on gems.
+over the two actions — 27 below level 5, 43 from 5, 75 from 32, 117 from 48 and
+187 from 65 (gem XP was raised 1.5x after armour was set, so armour now sits
+well under 80%). Before this, a Primordial Robe paid 4,590 XP a craft against a set
+diamond's 180 (now 270), so nobody would ever have trained on gems.
 
 **Tanning, weaving and the Ascended Workbench were scaled under the same
 ceiling.** `hide -> leather` and `fibre -> cloth` stay a flat per-craft rate and

@@ -990,7 +990,7 @@ output_item = ExtResource("gem_sapphire")
 output_amount = 1
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_sapphire")])
 required_level = 1
-xp_reward = 18
+xp_reward = 27
 
 [sub_resource type="Resource" id="I_cut_emerald"]
 script = ExtResource("3_ingred")
@@ -1003,7 +1003,7 @@ output_item = ExtResource("gem_emerald")
 output_amount = 1
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_emerald")])
 required_level = 27
-xp_reward = 30
+xp_reward = 45
 
 [sub_resource type="Resource" id="I_cut_ruby"]
 script = ExtResource("3_ingred")
@@ -1016,7 +1016,7 @@ output_item = ExtResource("gem_ruby")
 output_amount = 1
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_ruby")])
 required_level = 43
-xp_reward = 46
+xp_reward = 69
 
 [sub_resource type="Resource" id="I_cut_diamond"]
 script = ExtResource("3_ingred")
@@ -1029,7 +1029,7 @@ output_item = ExtResource("gem_diamond")
 output_amount = 1
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_cut_diamond")])
 required_level = 60
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_sapphire_silver_ring_base"]
 script = ExtResource("3_ingred")
@@ -1044,7 +1044,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_silver_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_ring_base"), SubResource("I_set_sapphire_silver_ring_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_sapphire_silver_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1059,7 +1059,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_silver_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_necklace_base"), SubResource("I_set_sapphire_silver_necklace_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_sapphire_silver_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1074,7 +1074,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_silver_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_silver_amulet_base"), SubResource("I_set_sapphire_silver_amulet_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_sapphire_gold_ring_base"]
 script = ExtResource("3_ingred")
@@ -1089,7 +1089,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_gold_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_ring_base"), SubResource("I_set_sapphire_gold_ring_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_sapphire_gold_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1104,7 +1104,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_gold_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_necklace_base"), SubResource("I_set_sapphire_gold_necklace_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_sapphire_gold_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1119,7 +1119,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_sapphire_gold_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_sapphire_gold_amulet_base"), SubResource("I_set_sapphire_gold_amulet_gem")])
 required_level = 5
-xp_reward = 40
+xp_reward = 60
 
 [sub_resource type="Resource" id="I_set_emerald_silver_ring_base"]
 script = ExtResource("3_ingred")
@@ -1134,7 +1134,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_silver_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_ring_base"), SubResource("I_set_emerald_silver_ring_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_emerald_silver_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1149,7 +1149,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_silver_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_necklace_base"), SubResource("I_set_emerald_silver_necklace_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_emerald_silver_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1164,7 +1164,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_silver_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_silver_amulet_base"), SubResource("I_set_emerald_silver_amulet_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_emerald_gold_ring_base"]
 script = ExtResource("3_ingred")
@@ -1179,7 +1179,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_gold_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_ring_base"), SubResource("I_set_emerald_gold_ring_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_emerald_gold_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1194,7 +1194,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_gold_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_necklace_base"), SubResource("I_set_emerald_gold_necklace_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_emerald_gold_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1209,7 +1209,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_emerald_gold_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_emerald_gold_amulet_base"), SubResource("I_set_emerald_gold_amulet_gem")])
 required_level = 32
-xp_reward = 70
+xp_reward = 105
 
 [sub_resource type="Resource" id="I_set_ruby_silver_ring_base"]
 script = ExtResource("3_ingred")
@@ -1224,7 +1224,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_silver_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_ring_base"), SubResource("I_set_ruby_silver_ring_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_ruby_silver_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1239,7 +1239,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_silver_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_necklace_base"), SubResource("I_set_ruby_silver_necklace_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_ruby_silver_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1254,7 +1254,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_silver_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_silver_amulet_base"), SubResource("I_set_ruby_silver_amulet_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_ruby_gold_ring_base"]
 script = ExtResource("3_ingred")
@@ -1269,7 +1269,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_gold_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_ring_base"), SubResource("I_set_ruby_gold_ring_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_ruby_gold_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1284,7 +1284,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_gold_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_necklace_base"), SubResource("I_set_ruby_gold_necklace_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_ruby_gold_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1299,7 +1299,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_ruby_gold_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_ruby_gold_amulet_base"), SubResource("I_set_ruby_gold_amulet_gem")])
 required_level = 48
-xp_reward = 110
+xp_reward = 165
 
 [sub_resource type="Resource" id="I_set_diamond_silver_ring_base"]
 script = ExtResource("3_ingred")
@@ -1314,7 +1314,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_silver_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_ring_base"), SubResource("I_set_diamond_silver_ring_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [sub_resource type="Resource" id="I_set_diamond_silver_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1329,7 +1329,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_silver_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_necklace_base"), SubResource("I_set_diamond_silver_necklace_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [sub_resource type="Resource" id="I_set_diamond_silver_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1344,7 +1344,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_silver_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_silver_amulet_base"), SubResource("I_set_diamond_silver_amulet_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [sub_resource type="Resource" id="I_set_diamond_gold_ring_base"]
 script = ExtResource("3_ingred")
@@ -1359,7 +1359,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_gold_ring")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_ring_base"), SubResource("I_set_diamond_gold_ring_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [sub_resource type="Resource" id="I_set_diamond_gold_necklace_base"]
 script = ExtResource("3_ingred")
@@ -1374,7 +1374,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_gold_necklace")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_necklace_base"), SubResource("I_set_diamond_gold_necklace_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [sub_resource type="Resource" id="I_set_diamond_gold_amulet_base"]
 script = ExtResource("3_ingred")
@@ -1389,7 +1389,7 @@ script = ExtResource("1_recipe")
 output_item = ExtResource("set_diamond_gold_amulet")
 ingredients = Array[ExtResource("3_ingred")]([SubResource("I_set_diamond_gold_amulet_base"), SubResource("I_set_diamond_gold_amulet_gem")])
 required_level = 65
-xp_reward = 180
+xp_reward = 270
 
 [resource]
 script = ExtResource("2_station")

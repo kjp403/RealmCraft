@@ -20,7 +20,8 @@ const STATION_PATH: String = "res://source/common/gameplay/crafting/resources/wo
 ## Recipe level -> xp per unit of material. Jewellery is the Crafting training
 ## method (Kyle, 2026-09-10), so each rate is set so the LARGEST piece at that
 ## level pays under 80% of what the gem line pays per craft there (cut + set of
-## the best gem unlocked: 18 / 29 / 50 / 78 / 125). Armour is gear you make, not
+## the best gem unlocked, 18 / 29 / 50 / 78 / 125 when set; gem XP was raised
+## 1.5x after, so armour now sits further below). Armour is gear you make, not
 ## how you train. tools/verify_gem_jewelry.gd enforces that ceiling across both
 ## workbenches; this gate keeps the per-unit shape. Documented in
 ## CONTENT_AUTHORING.md under "Crafting XP is priced per unit of material".
