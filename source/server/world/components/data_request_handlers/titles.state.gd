@@ -1,15 +1,24 @@
 extends DataRequestHandler
 ## Roster for the Vault Titles shelf.
 ##
-## Staff see the whole shelf. Everyone else sees what is for sale plus whatever
-## they already hold, which is what keeps the two kinds of title that are NOT for
-## sale off a shopper's list while still letting the people who have them wear
-## them: the donation ladder (bought with money, through a different door) and
-## the mastery titles (earned at 99, and never premium). PremiumCatalog.resolve
-## refuses both, so neither needs naming here.
+## THE SHELF LISTS STOCK. Only what PremiumCatalog.resolve will actually sell -
+## so not the donation ladder, which is bought with real money through a
+## different door, and not the mastery titles, which are earned at 99. Neither is
+## named here; resolve refuses both, so the shelf and the till cannot disagree
+## about what is on offer.
 ##
-## `allowed` means "may wear anything" - staff. A player's right to one title
-## comes from `owned`. titles.equip re-checks independently.
+## AND NOT EVEN THE ONES YOU OWN, unlike the cosmetics shelf. The asymmetry is
+## deliberate: every title a character holds - donated, earned or bought - lands
+## in titles_unlocked, and the PROFILE title dropdown reads exactly that. An
+## unlisted title is still wearable, from the screen that exists for wearing
+## titles. A cosmetic has no such second home.
+##
+## STAFF SEE EVERYTHING, BUT ONLY IN THE VFX VAULT. That room is for testing the
+## whole set; in the town shop staff see the shop, so what staff look at is what
+## players get.
+##
+## `allowed` means "may wear anything" - a staff power, anywhere. A player's right
+## to one title comes from `owned`. titles.equip re-checks independently.
 
 
 func data_request_handler(
@@ -23,6 +32,7 @@ func data_request_handler(
 	var pr: PlayerResource = player.player_resource
 	var staff: bool = CommandPermissions.effective_priority(pr, instance) \
 			>= CommandPermissions.STAFF_PROTECT_PRIORITY
+	var testing: bool = staff and VaultRooms.is_staff_vault(instance)
 
 	var visible: Array = []
 	var owned: Array = []
@@ -31,10 +41,9 @@ func data_request_handler(
 		var title: String = str(row.get("name", row.get("title", "")))
 		if title.is_empty():
 			continue
-		var is_owned: bool = VaultGrants.has_title(pr, title)
-		if is_owned:
+		if VaultGrants.has_title(pr, title):
 			owned.append(title)
-		if staff or is_owned \
+		if testing \
 				or not PremiumCatalog.resolve(VaultGrants.title_token(title)).is_empty():
 			visible.append(row)
 

@@ -3,11 +3,15 @@ extends DataRequestHandler
 ## and what they have equipped.
 ##
 ## WHO SEES WHAT. Staff see every cosmetic, including the ones with no gameplay
-## trigger, because testing those is the entire point of the VFX Vault. Everyone
-## else sees what is actually FOR SALE, plus anything they already own. The
-## second half matters more than it looks: a slot can be pulled from sale after
-## somebody bought from it, and dropping it from their roster would hide a
-## cosmetic they paid for.
+## trigger - but only while standing in the VFX Vault, the room that exists for
+## testing them. In the town shop staff see the shop, so what staff look at is
+## what players get. Everyone else, everywhere, sees what is actually FOR SALE
+## plus anything they already own.
+##
+## That last clause matters more than it looks, and it is why this shelf differs
+## from the titles one: a slot can be pulled from sale after somebody has bought
+## from it, and a cosmetic has no home outside this menu - no profile dropdown,
+## no chat command - so dropping it would stop them wearing what they paid for.
 ##
 ## PremiumCatalog.resolve is the filter rather than a list kept here, so "can be
 ## seen in the shop" and "can be bought" are the same question asked once. The
@@ -31,6 +35,7 @@ func data_request_handler(
 
 	var staff: bool = CommandPermissions.effective_priority(pr, instance) \
 		>= CommandPermissions.STAFF_PROTECT_PRIORITY
+	var testing: bool = staff and VaultRooms.is_staff_vault(instance)
 
 	var visible: Array[int] = []
 	var owned: Array[int] = []
@@ -38,7 +43,7 @@ func data_request_handler(
 		var is_owned: bool = VaultGrants.has_cosmetic(pr, cosmetic_id)
 		if is_owned:
 			owned.append(cosmetic_id)
-		if staff or is_owned \
+		if testing or is_owned \
 				or not PremiumCatalog.resolve(VaultGrants.cosmetic_token(cosmetic_id)).is_empty():
 			visible.append(cosmetic_id)
 
