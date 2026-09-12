@@ -41,9 +41,17 @@ const DASHBOARD_BIND_DEFAULT: String = "127.0.0.1" # "*" = all interfaces (confi
 
 const USER_CONFIG_PATH: String = "user://dashboard.cfg"
 const RES_CONFIG_PATH: String = "res://data/config/dashboard.cfg"
+## Preferred source for the token, and the ONLY one that is safe by
+## construction. res://data/config/dashboard.cfg is tracked in git, so a real
+## token written there is one `git add -A` away from being public forever;
+## user://dashboard.cfg is safe but is a second secret in a second place. This
+## puts the token in /etc/arkenelle/peddler.env beside every other server
+## secret, loaded by systemd, owned by root, mode 0640.
+const TOKEN_ENV: String = "ARKENELLE_DASHBOARD_TOKEN"
 
 @onready var world_manager: WorldManagerServer = $"../WorldManagerServer"
 @onready var authentication_manager: AuthenticationManager = $"../AuthenticationManager"
+@onready var premium_database: PremiumDatabase = $"../PremiumDatabase"
 
 var _started_at_unix: int = 0
 var _auth_token: String = ""
@@ -76,6 +84,8 @@ func _ready() -> void:
 	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/players/revoke",    _handle_player_revoke)
 	router.register_route(HTTPClient.Method.METHOD_GET,  &"/v1/accounts",                _handle_accounts)
 	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/accounts/reset_password", _handle_account_reset_password)
+	router.register_route(HTTPClient.Method.METHOD_GET,  &"/v1/premium",               _handle_premium_get)
+	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/premium/grant",         _handle_premium_grant)
 
 	server.listen(PORT, _bind_address)
 	ServerLog.info("Dashboard listening on %s:%d" % [_bind_address, PORT])
@@ -400,9 +410,29 @@ func _check_auth(payload: Dictionary) -> bool:
 	# Token disabled → everyone gets in. Useful only for localhost-bound dev.
 	if _auth_token.is_empty():
 		return true
-	# We don't currently parse headers in the addon, so the static UI sends
-	# the token as a payload field on every request.
-	return str(payload.get("token", "")) == _auth_token
+	# The static UI sends the token as a payload field; the addon also stamps the
+	# Authorization header, so a curl caller can use the standard channel.
+	var offered: String = str(payload.get("token", ""))
+	if offered.is_empty():
+		var header: String = str(payload.get("__auth__", ""))
+		const PREFIX: String = "Bearer "
+		if header.begins_with(PREFIX):
+			offered = header.substr(PREFIX.length())
+	return _token_equals(offered)
+
+
+## Length-checked, full-pass comparison - the same shape the gateway uses for
+## its server-to-server secret. `==` short-circuits on the first differing
+## byte, which leaks the token a character at a time to anything that can time
+## the response. That mattered less when this only read stats; it guards a
+## currency grant now.
+func _token_equals(offered: String) -> bool:
+	if offered.length() != _auth_token.length():
+		return false
+	var diff: int = 0
+	for i: int in _auth_token.length():
+		diff |= offered.unicode_at(i) ^ _auth_token.unicode_at(i)
+	return diff == 0
 
 
 func _unauthorized() -> Dictionary:
@@ -410,12 +440,105 @@ func _unauthorized() -> Dictionary:
 
 
 func _load_config() -> void:
+	# Environment wins over both files. A deployment that sets it never has to
+	# touch a config file, and cannot accidentally commit the token.
+	_auth_token = OS.get_environment(TOKEN_ENV).strip_edges()
+
 	var config: ConfigFile = ConfigFile.new()
 	var path: String = USER_CONFIG_PATH if FileAccess.file_exists(USER_CONFIG_PATH) else RES_CONFIG_PATH
-	if config.load(path) != OK:
-		ServerLog.warn("Dashboard: no config found, running with auth DISABLED. Create %s or %s with [auth] token=\"...\"" % [USER_CONFIG_PATH, RES_CONFIG_PATH])
-		return
-	_auth_token = str(config.get_value("auth", "token", ""))
+	if config.load(path) == OK:
+		if _auth_token.is_empty():
+			_auth_token = str(config.get_value("auth", "token", "")).strip_edges()
+		_bind_address = str(config.get_value("server", "bind", DASHBOARD_BIND_DEFAULT))
+	elif _auth_token.is_empty():
+		ServerLog.warn(
+			"Dashboard: no config and no %s, running with auth DISABLED." % TOKEN_ENV
+		)
+
 	if _auth_token.is_empty():
-		ServerLog.warn("Dashboard: token is empty in config, running with auth DISABLED.")
-	_bind_address = str(config.get_value("server", "bind", DASHBOARD_BIND_DEFAULT))
+		# Named louder than it used to be. When this only served stats, an open
+		# loopback dashboard was untidy; it now carries /v1/premium/grant, so
+		# anyone with ANY shell on the box can mint currency for themselves.
+		# Parenthesised: `%` binds tighter than `+`, so without these brackets the
+		# format applies to the last fragment alone and the line errors instead of
+		# printing the warning it exists to print.
+		ServerLog.warn(
+			(
+				"Dashboard: auth DISABLED - /v1/premium/grant can mint currency for "
+				+ "anyone with a shell on this host. Set %s (preferred) or [auth] "
+				+ "token in %s."
+			)
+			% [TOKEN_ENV, USER_CONFIG_PATH]
+		)
+
+
+#region Premium currency (admin)
+## Balance + recent ledger for one account. The support answer to "where did my
+## currency go" — every movement is a row, so the question is answerable.
+func _handle_premium_get(payload: Dictionary) -> Dictionary:
+	if not _check_auth(payload):
+		return _unauthorized()
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "error": "unavailable"}
+	var username: String = str(payload.get("username", "")).strip_edges().to_lower()
+	if username.is_empty():
+		return {"ok": false, "error": "bad_args"}
+	return {
+		"ok": true,
+		"username": username,
+		"balance": premium_database.store.balance_of(username),
+		"history": premium_database.store.history(username, 50),
+	}
+
+
+## Manual top-up. THE ONLY WAY CURRENCY ENTERS THE SYSTEM right now — donations
+## are processed by hand (Stripe's dashboard, then /supporter), and this is the
+## same shape: a human decides, then grants.
+##
+## Idempotent on transaction_id. Omit it and one is minted from the arguments and
+## the current minute, so a double-submitted form inside the same minute pays out
+## once — pass an explicit id from any automated caller (a payment webhook) rather
+## than relying on that window.
+func _handle_premium_grant(payload: Dictionary) -> Dictionary:
+	if not _check_auth(payload):
+		return _unauthorized()
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "error": "unavailable"}
+
+	var username: String = str(payload.get("username", "")).strip_edges().to_lower()
+	var amount: int = int(payload.get("amount", 0))
+	if username.is_empty() or amount <= 0:
+		return {"ok": false, "error": "bad_args"}
+	# Refuse to fund an account that does not exist. A typo'd username would
+	# otherwise mint a wallet nobody can ever log into and the currency would
+	# look spent from the operator's side.
+	if not authentication_manager.username_exists(username):
+		return {"ok": false, "error": "unknown_account"}
+
+	var transaction_id: String = str(payload.get("transaction_id", "")).strip_edges()
+	if transaction_id.is_empty():
+		transaction_id = "grant-%s-%d-%d" % [
+			username, amount, int(Time.get_unix_time_from_system() / 60.0)
+		]
+	var reason: String = str(payload.get("reason", "grant")).strip_edges()
+	if reason.is_empty():
+		reason = "grant"
+
+	var result: Dictionary = premium_database.store.credit(
+		username, amount, transaction_id, reason
+	)
+	if not bool(result.get("ok", false)):
+		return {"ok": false, "error": str(result.get("reason", "failed"))}
+	if bool(result.get("duplicate", false)):
+		return {
+			"ok": true,
+			"duplicate": true,
+			"balance": int(result.get("balance", 0)),
+			"msg": "Already applied — nothing added.",
+		}
+	ServerLog.info(
+		"Premium: granted %d to %s (%s, tx %s); balance now %d."
+			% [amount, username, reason, transaction_id, int(result.get("balance", 0))]
+	)
+	return {"ok": true, "duplicate": false, "balance": int(result.get("balance", 0))}
+#endregion

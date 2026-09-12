@@ -16,12 +16,16 @@ func data_request_handler(
 	var title: String = str(args.get("title", "")).strip_edges()
 
 	if not title.is_empty():
-		if CommandPermissions.effective_priority(pr, instance) \
-				< CommandPermissions.STAFF_PROTECT_PRIORITY:
-			return {"ok": false, "reason": "not_allowed"}
 		if not TitleCatalog.has_vfx(title):
 			return {"ok": false, "reason": "unknown_title"}
+		# Canonicalised BEFORE the gate: grant tokens are stored canonical, so
+		# checking a raw client string against them would miss every real grant.
 		title = TitleCatalog.canonical_name(title)
+		# Staff OR bought. Without the second half a paying player owns a title
+		# they can never wear.
+		var staff: bool = CommandPermissions.effective_priority(pr, instance) >= CommandPermissions.STAFF_PROTECT_PRIORITY
+		if not staff and not VaultGrants.has_title(pr, title):
+			return {"ok": false, "reason": "not_allowed"}
 		var unlocked: PackedStringArray = pr.titles_unlocked.duplicate()
 		if not unlocked.has(title):
 			unlocked.append(title)

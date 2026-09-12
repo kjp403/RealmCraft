@@ -242,6 +242,7 @@ func _update_preview() -> void:
 		_dye_label.text = "—"
 		_blurb_label.text = ""
 		_status_label.text = "No wardrobe skins in the registry."
+		_announce_selection("")
 		_action_button.disabled = true
 		_clear_button.visible = false
 		return
@@ -268,6 +269,7 @@ func _update_preview() -> void:
 	if not hex.is_empty():
 		_dye_swatch.color = Color(hex)
 	_blurb_label.text = str(dye.get("blurb", ""))
+	_announce_selection(VaultGrants.skin_token(vault_id))
 	if vault_id == _equipped and vault_id > 0:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
@@ -308,3 +310,14 @@ func _on_equipped(data: Dictionary, vault_id: int) -> void:
 	if lp != null and is_instance_valid(lp):
 		lp.vault_skin_id = _equipped
 	_update_preview()
+
+
+## Tell the Vault shell what is highlighted, so its Buy button can price it.
+## Walks up rather than assuming a parent: this menu also runs standalone
+## (embedded == false), where there is no shell to talk to and this no-ops.
+func _announce_selection(item_id: String) -> void:
+	var host: Node = get_parent()
+	while host != null and not host.has_method("set_selection"):
+		host = host.get_parent()
+	if host != null:
+		host.set_selection(item_id)

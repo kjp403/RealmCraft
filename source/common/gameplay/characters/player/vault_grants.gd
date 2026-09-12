@@ -30,6 +30,10 @@ class_name VaultGrants
 ## they are constants rather than inline literals.
 const TITLE_PREFIX: String = "title:"
 const SKIN_PREFIX: String = "skin:"
+## Added when cosmetics became purchasable. Before this, strip_unreleased_vfx
+## wiped cosmetic_id and weapon_cosmetic_id unconditionally for non-staff, so a
+## bought cosmetic lasted exactly until the buyer's next zone change.
+const COSMETIC_PREFIX: String = "cosmetic:"
 
 
 static func title_token(title: String) -> String:
@@ -41,6 +45,10 @@ static func title_token(title: String) -> String:
 
 static func skin_token(vault_id: int) -> String:
 	return SKIN_PREFIX + str(vault_id)
+
+
+static func cosmetic_token(cosmetic_id: int) -> String:
+	return COSMETIC_PREFIX + str(cosmetic_id)
 
 
 static func has_title(player: PlayerResource, title: String) -> bool:
@@ -55,6 +63,12 @@ static func has_skin(player: PlayerResource, vault_id: int) -> bool:
 	return player.granted_vfx.has(skin_token(vault_id))
 
 
+static func has_cosmetic(player: PlayerResource, cosmetic_id: int) -> bool:
+	if player == null or cosmetic_id == 0:
+		return false
+	return player.granted_vfx.has(cosmetic_token(cosmetic_id))
+
+
 ## True when this actually added something, so a caller can tell a fresh grant
 ## from a re-grant without checking first.
 static func grant_title(player: PlayerResource, title: String) -> bool:
@@ -65,12 +79,20 @@ static func grant_skin(player: PlayerResource, vault_id: int) -> bool:
 	return _add(player, skin_token(vault_id))
 
 
+static func grant_cosmetic(player: PlayerResource, cosmetic_id: int) -> bool:
+	return _add(player, cosmetic_token(cosmetic_id))
+
+
 static func revoke_title(player: PlayerResource, title: String) -> bool:
 	return _remove(player, title_token(title))
 
 
 static func revoke_skin(player: PlayerResource, vault_id: int) -> bool:
 	return _remove(player, skin_token(vault_id))
+
+
+static func revoke_cosmetic(player: PlayerResource, cosmetic_id: int) -> bool:
+	return _remove(player, cosmetic_token(cosmetic_id))
 
 
 ## Every granted title, as the tokens were stored (lower case). For /vaultgrants
@@ -92,6 +114,16 @@ static func granted_skins(player: PlayerResource) -> PackedInt64Array:
 	for token: String in player.granted_vfx:
 		if token.begins_with(SKIN_PREFIX):
 			out.append(int(token.substr(SKIN_PREFIX.length())))
+	return out
+
+
+static func granted_cosmetics(player: PlayerResource) -> PackedInt64Array:
+	var out: PackedInt64Array = PackedInt64Array()
+	if player == null:
+		return out
+	for token: String in player.granted_vfx:
+		if token.begins_with(COSMETIC_PREFIX):
+			out.append(int(token.substr(COSMETIC_PREFIX.length())))
 	return out
 
 

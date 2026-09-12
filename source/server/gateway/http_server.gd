@@ -24,6 +24,10 @@ var _peddler_cache: Dictionary = {}
 var _peddler_cache_ms: int = 0
 ## Env var holding the shared server-to-server secret. Never in the repo.
 const PEDDLER_KEY_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_KEY"
+## Shared server-to-server secret for the premium currency routes. The WORLD
+## sends it as `Authorization: Bearer`, this gateway compares. Same file, same
+## single-source-of-truth shape as the peddler key above.
+const PREMIUM_KEY_ENV: String = "ARKENELLE_PREMIUM_API_KEY"
 ## A snapshot older than this is served with stale=true so the page can say the
 ## world has gone quiet instead of counting down a cart that is long gone.
 const PEDDLER_STALE_MS: int = 15 * 60 * 1000
@@ -90,6 +94,18 @@ func _ready() -> void:
 		HTTPClient.Method.METHOD_GET,
 		&"/v1/peddler",
 		handle_peddler
+	)
+	# Premium currency. Both are server-to-server (the WORLD calls them over
+	# loopback) and both are blocked at Caddy as well as bearer-checked here.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/premium/balance",
+		handle_premium_balance
+	)
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/premium/purchase",
+		handle_premium_purchase
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -293,6 +309,150 @@ func handle_peddler(payload: Dictionary) -> Dictionary:
 	out["age_seconds"] = int((Time.get_ticks_msec() - _peddler_cache_ms) / 1000.0)
 	out["stale"] = Time.get_ticks_msec() - _peddler_cache_ms > PEDDLER_STALE_MS
 	return out
+
+
+#region Premium currency
+## Server-to-server. The world server asks what an account's balance is.
+##
+## Answers with a REAL HTTP status code, not 200-with-an-error-body: the caller
+## (PremiumApi) branches on the status first, and a 200 carrying {"ok": false}
+## would be read as a successful call. That needs the router's __raw__ escape
+## hatch, because the normal return path hard-codes 200 for every handler.
+func handle_premium_balance(payload: Dictionary) -> Dictionary:
+	var auth: Dictionary = _premium_auth(payload)
+	if not auth.is_empty():
+		return auth
+	if not _rate_ok(payload, &"premium_balance", 120, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var user_id: String = str(payload.get("user_id", "")).strip_edges()
+	if user_id.is_empty():
+		return _json_status(400, {"ok": false, "reason": "bad_args"})
+
+	var result: Dictionary = await send_request("premium_balance", {"user_id": user_id}, 4.0)
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		return _json_status(503, {"ok": false, "reason": "backend_error"})
+	if not bool(result.get("ok", false)):
+		return _json_status(503, {"ok": false, "reason": str(result.get("reason", "backend_error"))})
+	return _json_status(200, {"ok": true, "data": {"balance": int(result.get("balance", 0))}})
+
+
+## Server-to-server. Settles one Vault purchase.
+##
+## The master does the money - price re-derivation, the balance check and the
+## atomic deduct all live there, next to the database. This function is the HTTP
+## skin: authenticate, pull the idempotency key out of wherever it arrived, and
+## map the master's reason onto the status code the caller expects.
+func handle_premium_purchase(payload: Dictionary) -> Dictionary:
+	var auth: Dictionary = _premium_auth(payload)
+	if not auth.is_empty():
+		return auth
+	if not _rate_ok(payload, &"premium_purchase", 60, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var user_id: String = str(payload.get("user_id", "")).strip_edges()
+	var item_id: String = str(payload.get("item_id", "")).strip_edges()
+	var cost: int = int(payload.get("cost", 0))
+	# Header first, body second. The header is the HTTP-standard channel and the
+	# one a proxy or a retrying client will preserve; the body is what the world
+	# actually sends today. Accepting either means neither side has to change to
+	# add the other.
+	var transaction_id: String = str(payload.get("__idempotency_key__", "")).strip_edges()
+	if transaction_id.is_empty():
+		transaction_id = str(payload.get("transaction_id", "")).strip_edges()
+
+	if user_id.is_empty() or item_id.is_empty() or transaction_id.is_empty() or cost <= 0:
+		return _json_status(400, {"ok": false, "reason": "bad_args"})
+
+	var result: Dictionary = await send_request("premium_purchase", {
+		"user_id": user_id,
+		"item_id": item_id,
+		"cost": cost,
+		"transaction_id": transaction_id,
+	}, 6.0)
+
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		# Nothing was charged - send_request timed out before the master answered,
+		# OR the master answered too late. The world treats this as "check the
+		# balance before retrying", which is the honest instruction: the same
+		# transaction_id replayed is safe, a new one is not.
+		return _json_status(503, {"ok": false, "reason": "timeout"})
+
+	if bool(result.get("ok", false)):
+		var balance: int = int(result.get("balance", 0))
+		if bool(result.get("duplicate", false)):
+			# Already settled. 409 with the ORIGINAL balance - the caller learns
+			# nothing new was charged without having to ask again.
+			return _json_status(409, {
+				"ok": false,
+				"reason": "duplicate",
+				"data": {"balance": balance},
+			})
+		return _json_status(200, {"ok": true, "data": {"balance": balance}})
+
+	var reason: String = str(result.get("reason", "rejected"))
+	var body: Dictionary = {"ok": false, "reason": reason}
+	if result.has("balance"):
+		body["data"] = {"balance": int(result.get("balance", 0))}
+	if reason == "price_mismatch" and result.has("cost"):
+		body["cost"] = int(result.get("cost", 0))
+	return _json_status(_premium_status_for(reason), body)
+
+
+## Reason -> HTTP status. One table so the two handlers cannot drift, and so the
+## mapping is reviewable in one place rather than inline at six return sites.
+func _premium_status_for(reason: String) -> int:
+	match reason:
+		"insufficient_funds":
+			return 402
+		"duplicate":
+			return 409
+		"price_mismatch":
+			return 409
+		"unknown_item", "unknown_account":
+			return 404
+		"bad_args":
+			return 400
+		"unavailable", "write_failed", "backend_error", "timeout":
+			return 503
+	return 400
+
+
+## Bearer check for the premium routes. Returns {} when the caller is allowed,
+## or the ready-made error response when it is not.
+##
+## FAILS CLOSED. With no secret configured the routes reject everything - an
+## unconfigured money endpoint that accepted requests would let anyone who found
+## the URL spend other people's balances, and an operator who sets the key on the
+## world but forgets the gateway gets a clean 401 in the world's log instead of a
+## silently ignored POST.
+func _premium_auth(payload: Dictionary) -> Dictionary:
+	var expected: String = OS.get_environment(PREMIUM_KEY_ENV)
+	if expected.is_empty():
+		return _json_status(503, {"ok": false, "reason": "not_configured"})
+	var offered: String = str(payload.get("__auth__", ""))
+	const PREFIX: String = "Bearer "
+	if not offered.begins_with(PREFIX):
+		return _json_status(401, {"ok": false, "reason": "unauthorized"})
+	if not _secret_equals(offered.substr(PREFIX.length()), expected):
+		return _json_status(401, {"ok": false, "reason": "unauthorized"})
+	return {}
+
+
+## JSON body with a chosen status code.
+##
+## The router sends a plain Dictionary return as 200 unconditionally, so every
+## non-200 answer on these routes has to go out through __raw__. utf8, not ascii:
+## the shared http_send uses to_ascii_buffer and would mangle any non-ASCII that
+## ever reached a reason string.
+func _json_status(code: int, body: Dictionary) -> Dictionary:
+	return {
+		"__raw__": true,
+		"code": code,
+		"content_type": "application/json; charset=utf-8",
+		"body": JSON.stringify(body).to_utf8_buffer(),
+	}
+#endregion
 
 
 ## Length-checked, full-pass comparison. Returns early ONLY on a length

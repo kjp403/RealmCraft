@@ -7,6 +7,12 @@ Wants=network-online.target
 Type=simple
 User=arkenelle
 WorkingDirectory=/opt/arkenelle
+# OPTIONAL (the dash), same file the gateway and world load. Carries
+# ARKENELLE_DASHBOARD_TOKEN, which gates the admin routes - including
+# /v1/premium/grant, which mints currency. A missing file leaves the
+# dashboard loopback-bound and unauthenticated rather than refusing to
+# start the master, which would take the whole game down with it.
+EnvironmentFile=-/etc/arkenelle/peddler.env
 # --env=live is REQUIRED: the VPS uses the Godot editor binary, so without this
 # flag OS.has_feature("editor") is true and data/admin gates take the unsafe path.
 ExecStart=/usr/local/bin/godot --headless --path /opt/arkenelle --mode=master-server --env=live

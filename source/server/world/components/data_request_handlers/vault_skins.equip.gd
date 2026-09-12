@@ -15,8 +15,10 @@ func data_request_handler(
 	var vault_id: int = int(args.get("vault_skin_id", args.get("skin_id", 0)))
 
 	if vault_id != 0:
-		if CommandPermissions.effective_priority(pr, instance) \
-				< CommandPermissions.STAFF_PROTECT_PRIORITY:
+		# Staff OR bought. Without the second half a paying player owns a skin
+		# they can never wear.
+		var staff: bool = CommandPermissions.effective_priority(pr, instance) >= CommandPermissions.STAFF_PROTECT_PRIORITY
+		if not staff and not VaultGrants.has_skin(pr, vault_id):
 			return {"ok": false, "reason": "not_allowed"}
 		if not VaultSkins.is_valid(vault_id):
 			return {"ok": false, "reason": "unknown_skin"}
