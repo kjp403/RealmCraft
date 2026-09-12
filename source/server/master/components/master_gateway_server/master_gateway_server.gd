@@ -110,6 +110,12 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request_id,
 				premium_credit_request(request)
 			)
+		"account_exists":
+			gateway_response.rpc_id(
+				gateway_id,
+				request_id,
+				account_exists_request(str(request.get("user_id", "")))
+			)
 
 
 @rpc("authority", "call_remote")
@@ -245,6 +251,23 @@ func request_enter_world(
 
 
 #region Premium currency
+## Does this account name exist? Asked by the PUBLIC /v1/account/check route,
+## which the storefront uses to refuse a payment aimed at a name nobody can log
+## into - the mistake that strands money and needs a human to unpick.
+##
+## Deliberately narrower than [method AuthenticationManager.username_exists] is
+## capable of: a bool and nothing else. No character list, no balance, no
+## "exists but banned" - the caller is an anonymous web page, and every extra
+## field would be a fact about somebody else's account given away for free.
+func account_exists_request(user_id: String) -> Dictionary:
+	if authentication_manager == null:
+		return {"ok": false, "reason": "unavailable"}
+	var account: String = user_id.strip_edges().to_lower()
+	if account.is_empty():
+		return {"ok": false, "reason": "bad_args"}
+	return {"ok": true, "exists": authentication_manager.username_exists(account)}
+
+
 ## Balance for an account. Unknown account is NOT an error - a name that has
 ## never bought anything and a name that does not exist both have nothing, and
 ## telling the caller which is which would turn this into an account oracle.

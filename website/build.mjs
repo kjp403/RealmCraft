@@ -2490,10 +2490,9 @@ function build() {
         <form class="store-form" data-store-form>
           <label for="store-name">Your Arkenelle account name</label>
           <input id="store-name" data-store-name type="text" autocomplete="username" spellcheck="false" placeholder="account name" required>
-          <label for="store-confirm">Type it again to confirm</label>
-          <input id="store-confirm" data-store-confirm type="text" autocomplete="off" spellcheck="false" placeholder="account name" required>
           <p class="store-status" data-store-status></p>
-          <p class="muted small">This is your <strong>account</strong> name — the one you log in with, not your character name. Coins are added to the account, so every character you own shares them.</p>
+          <p class="muted small">This is your <strong>account</strong> name — the one you log in with, not your character name. They are often different. Coins are added to the account, so every character you own shares them.</p>
+          <p class="muted small">We check the name against the live server before the buy buttons turn on, so a payment cannot go out under a name that does not exist.</p>
         </form>
 
         <section class="pkgs">
@@ -2505,7 +2504,7 @@ function build() {
           <ul>
             <li>Payment is handled by Stripe. We never see your card details.</li>
             <li>Coins normally land within a minute. If they have not arrived after ten, contact us on <a href="${DISCORD}">Discord</a> with your receipt.</li>
-            <li>Coins are credited to the account name you typed above. If you mistype it the payment cannot be credited automatically — we will need your receipt to sort it out, so check it twice.</li>
+            <li>Coins are credited to the account name you typed above, and the buy buttons only work once we have confirmed that account exists.</li>
             <li>Coins have no cash value and cannot be transferred between accounts or refunded for currency.</li>
           </ul>
           <p class="muted">See the <a href="/terms/">terms</a> before buying.</p>

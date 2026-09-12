@@ -102,8 +102,8 @@ func _ready() -> void:
 		&"/v1/peddler",
 		handle_peddler
 	)
-	# Premium currency. Both are server-to-server (the WORLD calls them over
-	# loopback) and both are blocked at Caddy as well as bearer-checked here.
+	# Premium currency. These are server-to-server (the WORLD calls them over
+	# loopback) and all are blocked at Caddy as well as bearer-checked here.
 	router.register_route(
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/premium/balance",
@@ -114,12 +114,26 @@ func _ready() -> void:
 		&"/v1/premium/purchase",
 		handle_premium_purchase
 	)
-	# PUBLIC, unlike the two above - Stripe has to reach it from the internet.
+	# Also server-to-server: the world's /arkcoins command credits through here.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/premium/grant",
+		handle_premium_grant
+	)
+	# PUBLIC, unlike the three above - Stripe has to reach it from the internet.
 	# Its security is the signature check, not the network.
 	router.register_route(
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/premium/stripe-webhook",
 		handle_stripe_webhook
+	)
+	# PUBLIC. The storefront asks this before it will build a checkout link, so a
+	# character name typed where an account name belongs is refused at the form
+	# instead of becoming a payment nobody can credit.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/account/check",
+		handle_account_check
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -413,6 +427,61 @@ func handle_premium_purchase(payload: Dictionary) -> Dictionary:
 	return _json_status(_premium_status_for(reason), body)
 
 
+## Server-to-server. Adds coins to an account on a human's say-so.
+##
+## THE REFUND AND SUPPORT PATH, and the reason it exists: the Stripe webhook is
+## the only OTHER way coins enter the system, and it refuses any payment whose
+## account name does not exist. Those payments are real money that landed
+## nowhere, and before this route the only way to settle one was a shell on the
+## VPS and the master's loopback dashboard. Now /arkcoins in game does it.
+##
+## Same master call the webhook makes - `premium_credit`, same ledger, same
+## idempotency on transaction_id - so a grant and a purchase are indistinguishable
+## to the balance and both show up in the account's history.
+func handle_premium_grant(payload: Dictionary) -> Dictionary:
+	var auth: Dictionary = _premium_auth(payload)
+	if not auth.is_empty():
+		return auth
+	if not _rate_ok(payload, &"premium_grant", 30, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var user_id: String = str(payload.get("user_id", "")).strip_edges()
+	var amount: int = int(payload.get("amount", 0))
+	var reason: String = str(payload.get("reason", "grant")).strip_edges()
+	# Header first, body second - same rule as the purchase route.
+	var transaction_id: String = str(payload.get("__idempotency_key__", "")).strip_edges()
+	if transaction_id.is_empty():
+		transaction_id = str(payload.get("transaction_id", "")).strip_edges()
+
+	if user_id.is_empty() or transaction_id.is_empty() or amount <= 0:
+		return _json_status(400, {"ok": false, "reason": "bad_args"})
+
+	var result: Dictionary = await send_request("premium_credit", {
+		"user_id": user_id,
+		"amount": amount,
+		"transaction_id": transaction_id,
+		"reason": reason,
+	}, 6.0)
+
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		return _json_status(503, {"ok": false, "reason": "timeout"})
+
+	if bool(result.get("ok", false)):
+		var balance: int = int(result.get("balance", 0))
+		if bool(result.get("duplicate", false)):
+			# The SAME transaction id twice. 409 rather than 200 so the caller
+			# says "already applied" instead of claiming a second grant landed.
+			return _json_status(409, {
+				"ok": false,
+				"reason": "duplicate",
+				"data": {"balance": balance},
+			})
+		return _json_status(200, {"ok": true, "data": {"balance": balance}})
+
+	var failure: String = str(result.get("reason", "rejected"))
+	return _json_status(_premium_status_for(failure), {"ok": false, "reason": failure})
+
+
 ## Reason -> HTTP status. One table so the two handlers cannot drift, and so the
 ## mapping is reviewable in one place rather than inline at six return sites.
 func _premium_status_for(reason: String) -> int:
@@ -466,6 +535,41 @@ func _json_status(code: int, body: Dictionary) -> Dictionary:
 		"content_type": "application/json; charset=utf-8",
 		"body": JSON.stringify(body).to_utf8_buffer(),
 	}
+#endregion
+
+
+#region Account check
+## PUBLIC, and deliberately an existence oracle: it answers whether an account
+## name can be logged into. That is the whole point - the storefront has no
+## session, so the only thing standing between a buyer and a payment credited to
+## nobody is this question, asked before Stripe is ever opened. A player typing
+## their CHARACTER name here is the bug this closes; it looks exactly like a
+## valid account name and the site could not tell.
+##
+## The cost is that it confirms which account names exist, which is a small help
+## to someone guessing passwords. Bounded on purpose: the answer is one bool with
+## no hint about characters, tiers or spend, and the per-IP limit is far below
+## what enumeration needs. The alternative - a session or a link code - buys a
+## login the site does not have.
+##
+## A MALFORMED NAME NEVER REACHES THE MASTER. It cannot be an account (the same
+## CredentialsUtils rule created every account), so it is answered here.
+func handle_account_check(payload: Dictionary) -> Dictionary:
+	if not _rate_ok(payload, &"account_check", 20, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var name: String = str(payload.get("name", "")).strip_edges().to_lower()
+	var shape: Dictionary = CredentialsUtils.validate_username(name)
+	if int(shape.get("code", 0)) != CredentialsUtils.UsernameError.OK:
+		return _json_status(200, {"ok": true, "data": {"exists": false}})
+
+	var result: Dictionary = await send_request("account_exists", {"user_id": name}, 4.0)
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT or not bool(result.get("ok", false)):
+		# NOT "does not exist". The caller has to be able to tell "no such
+		# account" from "we could not ask", because it gates a payment on the
+		# answer and a false negative there costs a sale.
+		return _json_status(503, {"ok": false, "reason": "backend_error"})
+	return _json_status(200, {"ok": true, "data": {"exists": bool(result.get("exists", false))}})
 #endregion
 
 

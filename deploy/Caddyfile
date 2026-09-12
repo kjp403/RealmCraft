@@ -20,9 +20,9 @@ api.arkenelle.com {
 	@peddler_write path /v1/peddler/update
 	respond @peddler_write 404
 
-	# Same reasoning, and it matters more here because these two move money. The
+	# Same reasoning, and it matters more here because these move money. The
 	# world server calls them over loopback; nothing on the internet has any
-	# business reaching a balance read or a debit. Bearer-checked in the gateway
+	# business reaching a balance read, a debit or a grant. Bearer-checked in the gateway
 	# as well — that check is the guarantee, this removes the attack surface.
 	#
 	# LISTED EXPLICITLY, NOT /v1/premium/* — the Stripe webhook lives under that
@@ -30,8 +30,18 @@ api.arkenelle.com {
 	# their servers. A wildcard here silently 404s every payment notification and
 	# the symptom is players paying and never being credited. Adding a premium
 	# route means deciding, here, whether it is internal or public.
-	@premium_internal path /v1/premium/balance /v1/premium/purchase
+	# /v1/premium/grant is on this list for the same reason: it ADDS currency on
+	# staff authority (the /arkcoins command), so it is the single most valuable
+	# route on the box to anyone who finds it.
+	@premium_internal path /v1/premium/balance /v1/premium/purchase /v1/premium/grant
 	respond @premium_internal 404
+
+	# PUBLIC on purpose, unlike the three above: the storefront on
+	# arkenelle.com asks whether an account name exists before it will build
+	# a Stripe link, which is what stops a character name typed in that box from
+	# becoming a payment nobody can credit. It answers one bool and is rate
+	# limited in the gateway. Blocking it here silently returns the site to
+	# accepting any name at all.
 
 	# The gateway rate-limiter reads the real client IP from this header
 	# (see source/server/gateway/http_server.gd).
