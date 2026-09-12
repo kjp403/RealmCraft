@@ -62,7 +62,17 @@ var _equipped: Dictionary = {}
 var _allowed: bool = false
 var _owned: Dictionary[int, bool] = {}
 
-var _preview: CosmeticVfx
+## slot -> the CosmeticVfx drawing that slot in the preview. One node per slot,
+## all mounted on the same pivot, so the box shows a COMBINATION rather than the
+## one effect being browsed.
+var _preview_vfx: Dictionary = {}
+## slot -> the id being tried on. Seeded from what the player actually wears and
+## then changed by browsing - THIS MENU ONLY. Nothing here is sent anywhere: the
+## point is to see how a halo sits over an aura before spending on either.
+var _try_on: Dictionary = {}
+## Says so, in the corner of the stage, whenever the mannequin is wearing
+## something the player is not.
+var _try_on_label: Label
 ## The buyer's OWN character, drawn under the effect. Not decoration: an aura is
 ## sized and positioned against a body, and a trail is drawn from where one has
 ## been, so an effect floating in an empty box is not the thing being sold.
@@ -74,8 +84,9 @@ var _body: AnimatedSprite2D
 ## NOT _title_label: MenuShell already owns that name for the window's own
 ## heading, and shadowing it is a parse error that takes the whole menu down.
 var _wearer_title: Label
-## Carries [member _preview] around the walk circle. Separate from the preview node
-## so the walk can be switched off per slot without touching the effect.
+## Carries the whole preview - body, title and every slot's effect - around the
+## walk circle. Separate from the effect nodes so the walk can be switched off
+## per tab without touching what is being worn.
 var _preview_pivot: Node2D
 var _walking: bool = false
 var _walk_elapsed: float = 0.0
@@ -152,13 +163,18 @@ func _build_layout() -> void:
 	_preview_pivot.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
 	preview_box.add_child(_preview_pivot)
 
-	_preview = CosmeticVfx.new()
-	# The world mounts this under a Character, which puts it behind the body at
-	# z_index -1. A NEGATIVE z here would sink the effect behind the panel it sits
-	# on, so the same order is built the other way up: effect at 0, body above it.
-	_preview.z_index = 0
-	_preview.preview_mode = true
-	_preview_pivot.add_child(_preview)
+	# One node per slot, built up front and left hidden until something is put in
+	# it. The world mounts these under a Character, which puts them behind the
+	# body at z_index -1; a NEGATIVE z here would sink the effect behind the
+	# panel it sits on, so the same order is built the other way up: effects at
+	# 0, body above them.
+	for slot: StringName in Cosmetics.SLOTS:
+		var vfx: CosmeticVfx = CosmeticVfx.new()
+		vfx.z_index = 0
+		vfx.preview_mode = true
+		vfx.visible = false
+		_preview_pivot.add_child(vfx)
+		_preview_vfx[slot] = vfx
 
 	# Rides the pivot, so a trail preset is drawn from a body that is actually
 	# moving rather than trailing off empty space.
@@ -185,6 +201,19 @@ func _build_layout() -> void:
 	_wearer_title = Label.new()
 	_wearer_title.add_theme_font_size_override(&"font_size", 13)
 	title_center.add_child(_wearer_title)
+
+	# Bottom-left of the stage, so it costs the column ZERO height - this tab has
+	# none to give. Only ever visible when the mannequin and the player disagree.
+	_try_on_label = Label.new()
+	_try_on_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_try_on_label.offset_left = 6
+	_try_on_label.offset_top = -20
+	_try_on_label.add_theme_font_size_override(&"font_size", 11)
+	_try_on_label.modulate = Color(1, 1, 1, 0.55)
+	_try_on_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_try_on_label.z_index = 2
+	_try_on_label.visible = false
+	preview_box.add_child(_try_on_label)
 
 	set_process(true)
 
@@ -272,6 +301,9 @@ func _on_state(data: Dictionary) -> void:
 		var worn: int = int((data.get("slots", {}) as Dictionary)[slot_key])
 		if worn > 0:
 			_equipped[StringName(str(slot_key))] = worn
+	# The state fetch runs on every open, so this is also the reset: the
+	# mannequin starts each visit dressed as the player is.
+	_reset_try_on()
 
 	_by_slot.clear()
 	_slots.clear()
@@ -359,11 +391,17 @@ func _cycle(delta: int) -> void:
 	_update_preview()
 
 
-## Where the preview sits when it is not walking. Slightly below centre: a preset
-## draws from the FEET, so centring it puts most of the effect in the lower half
-## of the box and the head-height layers off the top.
+## Where the preview sits when it is not walking. Below centre: a preset draws
+## from the FEET, so centring it puts most of the effect in the lower half of the
+## box and the head-height layers off the top.
+##
+## Dropped from 0.55 once halos joined the picture. A halo draws at head height
+## and the worn title is pinned to the top of the box, so at 0.55 the two
+## overlapped - the one pairing a buyer is most likely to be checking looked like
+## a rendering fault. The feet still clear the bottom with an aura's radius to
+## spare.
 func _preview_home() -> Vector2:
-	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.55)
+	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
 
 
 ## Walk the preview so trail presets have movement to sample. A circle rather than
@@ -384,15 +422,15 @@ func _update_preview() -> void:
 	var id: int = _current_id()
 	if id == 0:
 		return
-	if _preview != null:
-		# Lend the preview the player's own character, refreshed every browse
-		# because it may not have existed when this menu was built. Chrono Echo
-		# stamps the wearer's live sprite frame, so with nothing to read it
-		# previews as an empty box — and borrowing the local player means the
-		# wardrobe shows the effect on the skin the buyer is actually wearing.
-		_preview.preview_wearer = ClientState.local_player
-		_preview.apply(id)
-	_walking = Cosmetics.slot_of(id) == &"trail"
+	# Browsing a slot tries that item ON. The other slots keep whatever is in
+	# them, which is what turns arrowing through halos into "how does this sit
+	# over the aura I already have".
+	_try_on[_slot] = id
+	_render_outfit()
+	# The walk exists to give a TRAIL something to sample, so it follows the tab
+	# you are on rather than the outfit: standing still on the Auras tab while a
+	# tried-on trail drags the mannequin round in circles reads as a bug.
+	_walking = _slot == &"trail"
 	if not _walking and _preview_pivot != null:
 		_preview_pivot.position = _preview_home()
 	# Re-read every browse for the same reason the wearer is: the player can
@@ -405,6 +443,63 @@ func _update_preview() -> void:
 		ids.size(),
 	]
 	_update_action()
+
+
+## Draw every slot of the tried-on outfit at once.
+##
+## THE WHOLE POINT OF TRYING THINGS ON. A halo, an aura and a trail are worn
+## together in the world, and the only question a buyer has once they like an
+## effect is whether it goes with the rest of what they own. Showing one at a
+## time answers a question nobody asked.
+##
+## THE TWO EVENT SLOTS ONLY RENDER ON THEIR OWN TAB. A flourish and a departure
+## are one-shots that the preview node replays on a loop; left in the outfit they
+## would fire over and over behind whatever else was being browsed, which reads
+## as the aura being broken rather than as a flourish being worn.
+##
+## NOTHING HERE LEAVES THE MENU. No request, no equip, no push - the mannequin is
+## the only thing that changes.
+func _render_outfit() -> void:
+	for slot: StringName in _preview_vfx:
+		var vfx: CosmeticVfx = _preview_vfx[slot]
+		var event_slot: bool = not Cosmetics.LOOPING_SLOTS.has(slot)
+		var wanted: int = int(_try_on.get(slot, 0))
+		if event_slot and slot != _slot:
+			wanted = 0
+		if wanted == 0:
+			vfx.visible = false
+			vfx.apply(0)
+			continue
+		# Lend each one the player's own character: Chrono Echo stamps the
+		# wearer's live sprite frame, and with nothing to read it previews as an
+		# empty box.
+		vfx.preview_wearer = ClientState.local_player
+		vfx.apply(wanted)
+	_update_try_on_label()
+
+
+## Say when the mannequin is wearing something the player is not, so nobody
+## reads the preview as their character and wonders why the world disagrees.
+func _update_try_on_label() -> void:
+	if _try_on_label == null:
+		return
+	var extra: int = 0
+	for slot: StringName in _try_on:
+		if int(_try_on[slot]) != _equipped_for(slot):
+			extra += 1
+	_try_on_label.visible = extra > 0
+	if extra > 0:
+		_try_on_label.text = "Trying on %d — not worn. Reopen the Vault to reset." % extra
+
+
+## Start every visit from what the player actually wears. A try-on that survived
+## a close and reopen would be indistinguishable from the real thing the next
+## time they looked.
+func _reset_try_on() -> void:
+	_try_on.clear()
+	for slot: StringName in _equipped:
+		_try_on[slot] = int(_equipped[slot])
+	_render_outfit()
 
 
 ## Put the buyer's own character under the effect, and their title over it.
@@ -578,6 +673,10 @@ func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 				lp.halo_cosmetic_id = id
 			&"trail":
 				lp.trail_cosmetic_id = id
+	# Bought or equipped for real, so the mannequin and the player agree about
+	# this slot again - and the "trying on" count drops by one.
+	_try_on[slot] = id
+	_render_outfit()
 	_update_action()
 	_refresh_wearer()
 

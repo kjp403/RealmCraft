@@ -91,6 +91,15 @@ func _go() -> void:
 		await RenderingServer.frame_post_draw
 		_shoot("vault_flourish")
 
+	# And the try-on stack: an aura and a halo already worn, a trail being
+	# browsed over the top.
+	if cosmetics_panel != null:
+		cosmetics_panel.call(&"_select_slot", &"trail")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		_shoot("vault_combo")
+
 	print("done -> ", _out_abs)
 	get_tree().quit()
 
@@ -141,12 +150,19 @@ func _feed_panels() -> void:
 
 	var cosmetics: Control = panels.get(&"cosmetics")
 	if cosmetics != null:
+		# Dressed in an aura and a halo already, so the Trails tab shows what the
+		# wardrobe is actually for now: a COMBINATION, with the browsed trail on
+		# top of what is already worn.
 		cosmetics.call(&"_on_state", {
 			"ok": true,
 			"allowed": true,
 			"cosmetics": Cosmetics.ids(),
 			"equipped": 0,
 			"equipped_weapon": 0,
+			"slots": {
+				"aura": _first_in_slot(&"aura"),
+				"halo": _first_in_slot(&"halo"),
+			},
 		})
 
 
@@ -171,3 +187,12 @@ func _shoot(name: String) -> void:
 	var path: String = "%s/%s.png" % [_out_abs, name]
 	img.save_png(path)
 	print("  wrote ", path)
+
+
+## The lowest id in [param slot], for dressing the stand-in. Lowest rather than
+## random so two runs of this tool produce comparable pictures.
+func _first_in_slot(slot: StringName) -> int:
+	for id: int in Cosmetics.ids():
+		if Cosmetics.slot_of(id) == slot:
+			return id
+	return 0
