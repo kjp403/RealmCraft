@@ -385,3 +385,10 @@ func _announce_selection(item_id: String) -> void:
 		host = host.get_parent()
 	if host != null:
 		host.set_selection(item_id)
+
+
+## Re-emit the current selection. Called by the Vault shell when this tab
+## becomes visible, so the Buy button is priced on the frame the tab opens
+## instead of after a server round trip.
+func announce_selection_now() -> void:
+	_update_action()

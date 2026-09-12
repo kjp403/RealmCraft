@@ -39,16 +39,23 @@ const COST_TRAIL: int = 350
 ## titles. Left where it was rather than guessed at.
 const COST_TITLE: int = 500
 
-## AURAS ARE 450-750 BY TIER, AND THIS TABLE IS THE TIER. [Cosmetics] has slots,
-## not tiers - there is no rarity field anywhere on a cosmetic - so the band has
-## to be spent somewhere explicit, and a lookup by slug is the one place an
-## editor can see every aura and its price side by side. Nothing derives from
-## this; change a number and that is the whole change.
+## EVERY COSMETIC, PRICED BY SLUG. [Cosmetics] has slots, not tiers - there is no
+## rarity field anywhere on one - so the band has to be spent somewhere explicit,
+## and one table is the only place an editor can see all 26 side by side and
+## judge them against each other. Nothing derives from this; change a number and
+## that is the whole change.
 ##
-## The grouping is by how much is going on visually: single-hue at the floor,
-## multi-hue in the middle, and the two named set-pieces at the ceiling.
-const AURA_COSTS: Dictionary = {
-	# Single hue, one idea.
+## THE SHAPE OF IT:
+##   450  one persistent effect, one hue
+##   600  one persistent effect, multi-hue or animated palette
+##   750  a named set-piece, or something already gated behind endgame content
+##   350  a one-shot - a trail, a flourish, a departure
+##
+## Persistent effects cost more than one-shots because they are what other
+## players actually see: an aura is on screen the whole time you are, a departure
+## is on screen for half a second when you leave.
+const COSMETIC_COSTS: Dictionary = {
+	# --- Auras. Single hue, one idea.
 	&"aura_gold": 450,
 	&"aura_verdant": 450,
 	&"aura_toxic": 450,
@@ -60,18 +67,48 @@ const AURA_COSTS: Dictionary = {
 	# The set-pieces.
 	&"aura_solar_eclipse": 750,
 	&"aura_runebound_titan": 750,
+
+	# --- Trails. Flat, as briefed: a trail only renders while you are moving, so
+	# the elaborate ones are not on screen appreciably more than the plain ones.
+	&"trail_blood": 350,
+	&"trail_chromatic": 350,
+	&"trail_chrono_echo": 350,
+	&"trail_galaxy": 350,
+	&"trail_gold": 350,
+	&"trail_infernal_chasm": 350,
+	&"trail_rainbow": 350,
+	&"trail_storm": 350,
+	&"trail_toxic": 350,
+
+	# --- Halos. Persistent and always in frame above the head, so they price like
+	# auras rather than like one-shots - and they rhyme with their aura namesakes,
+	# which is the point of having a gold and a galaxy of each.
+	&"halo_gold": 450,
+	&"halo_galaxy": 600,
+	&"halo_rainbow": 600,
+
+	# --- Flourishes. A one-shot on an action. Priced with trails: seen often, but
+	# only for a moment at a time.
+	&"flourish_rainbow": 350,
+	&"flourish_void": 350,
+
+	# --- Departures. A one-shot when you go. The rarest MOMENT of any of these -
+	# nobody sees it twice in a row - so it prices with the other one-shots rather
+	# than with the persistent effects, however good it looks.
+	&"departure_galaxy": 350,
+	&"departure_gold": 350,
+
+	# --- Weapon. The only one, and it renders on nothing but an Ascended weapon -
+	# so it is already gated behind endgame content and is worth the ceiling to
+	# the players who can actually show it off.
+	&"weapon_ascended_radiance": 750,
 }
 
-## SLOTS THE BRIEF DID NOT PRICE. Auras and trails are 18 of the 26 cosmetics;
-## these eight had no number, and shipping them unpriced would either mean they
-## silently vanish from the shop or resolve to a made-up default with nothing
-## saying so. Priced here, in one visible place, explicitly marked as needing a
-## decision rather than pretending to be settled:
-##   halo      - a ring, simpler than an aura, so at the aura floor.
-##   flourish  - a one-shot, priced with trails.
-##   departure - a one-shot, priced with trails.
-##   weapon    - one item, and it only shows on an Ascended weapon, so ceiling.
+## Fallback by slot, for a cosmetic added later that nobody has priced. Every
+## cosmetic that exists TODAY is named above; this only catches new content.
 const SLOT_COSTS: Dictionary = {
+	&"aura": 450,
+	&"trail": 350,
 	&"halo": 450,
 	&"flourish": 350,
 	&"departure": 350,
@@ -259,9 +296,7 @@ static func _cosmetic_entry(cosmetic_id: int) -> Dictionary:
 ## id would silently re-price every aura the next time a cosmetic is inserted.
 static func _cosmetic_base_cost(cosmetic_id: int) -> int:
 	var slug: StringName = Cosmetics.slug(cosmetic_id)
-	if AURA_COSTS.has(slug):
-		return int(AURA_COSTS[slug])
+	if COSMETIC_COSTS.has(slug):
+		return int(COSMETIC_COSTS[slug])
 	var slot: StringName = Cosmetics.slot_of(cosmetic_id)
-	if slot == &"trail":
-		return COST_TRAIL
 	return int(SLOT_COSTS.get(slot, COST_COSMETIC_FALLBACK))

@@ -187,11 +187,20 @@ func _check_prices() -> int:
 		auras, trails, PremiumCatalog.COST_TRAIL
 	])
 
-	# Every aura in the table must actually exist, or a rename silently drops one
-	# back to the fallback price with nothing to notice it.
-	for slug: StringName in PremiumCatalog.AURA_COSTS:
+	# Every entry in the table must exist, or a rename silently drops that
+	# cosmetic back to the fallback price with nothing to notice it.
+	for slug: StringName in PremiumCatalog.COSMETIC_COSTS:
 		if ContentRegistryHub.id_from_slug(&"cosmetics", slug) <= 0:
-			push_error("AURA_COSTS names a cosmetic that does not exist: %s" % slug)
+			push_error("COSMETIC_COSTS names a cosmetic that does not exist: %s" % slug)
+			failures += 1
+
+	# And the reverse: every cosmetic in the game must be NAMED, not silently
+	# inheriting a slot fallback. The fallback exists for content added later; a
+	# gap today means something shipped at a price nobody actually chose.
+	for cosmetic_id: int in Cosmetics.ids():
+		var cosmetic_slug: StringName = Cosmetics.slug(cosmetic_id)
+		if not PremiumCatalog.COSMETIC_COSTS.has(cosmetic_slug):
+			push_error("cosmetic has no explicit price: %s" % cosmetic_slug)
 			failures += 1
 
 	# Dyes are per (body, dye) pair. Buying one must not imply another - this is
