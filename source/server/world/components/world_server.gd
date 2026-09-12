@@ -481,6 +481,27 @@ func _data_request(
 ) -> void:
 	const DATA_REQUEST_HANDLERS_PATH: String = "res://source/server/world/components/data_request_handlers/"
 	var peer_id: int = multiplayer.get_remote_sender_id()
+
+	# BOTH of these strings arrive from the client and BOTH used to be pasted
+	# straight into a lookup that resolves paths — so they are checked here, at
+	# the one door every request comes through, rather than in 179 handlers.
+	#
+	# `type` is concatenated into a res:// path below. "../" in it resolves:
+	# "bank.get" finds the handler, but "../world_server" finds world_server.gd
+	# and "../../../master/components/password_hasher" finds that. load() then
+	# hands back a real script and script.new() RUNS ITS _init() before the
+	# `as DataRequestHandler` cast can reject it.
+	#
+	# `instance_id` is passed to Node.get_node(), which accepts "../" and
+	# absolute "/root/..." paths — so it could address any node in the server
+	# tree, not just an instance.
+	if not _is_safe_request_type(type):
+		_data_response.rpc_id(peer_id, request_id, type, {"ok": false, "reason": "unknown_request"})
+		return
+	if not _is_safe_instance_id(instance_id):
+		_data_response.rpc_id(peer_id, request_id, type, {"ok": false, "reason": "unknown_request"})
+		return
+
 	var instance: ServerInstance = instance_manager.get_instance_server_by_id(instance_id)
 
 	if not instance:
@@ -520,3 +541,49 @@ func _data_response(request_id: int, type: String, data: Dictionary) -> void:
 func data_push(type: StringName, data: Dictionary) -> void:
 	# Client only
 	pass
+
+
+## Every handler in data_request_handlers/ is a FILE NAME made of [a-z0-9._] and
+## nothing else, so anything outside that set cannot name a real handler and has
+## no business being concatenated into a res:// path.
+##
+## Both this and [method _is_safe_instance_id] refuse with the same
+## "unknown_request" a genuine typo gets, and neither logs: a prober learns
+## nothing from the reply about what exists versus what was rejected, and cannot
+## fill the disk by spamming rejections.
+const _REQUEST_TYPE_CHARS: String = "abcdefghijklmnopqrstuvwxyz0123456789._"
+const _REQUEST_TYPE_MAX_LENGTH: int = 64
+
+
+static func _is_safe_request_type(type: StringName) -> bool:
+	var handler_name: String = String(type)
+	if handler_name.is_empty() or handler_name.length() > _REQUEST_TYPE_MAX_LENGTH:
+		return false
+	# ".." is the traversal itself; a leading or trailing dot names no handler.
+	if handler_name.begins_with(".") or handler_name.ends_with("."):
+		return false
+	if handler_name.contains(".."):
+		return false
+	for character: String in handler_name:
+		if not _REQUEST_TYPE_CHARS.contains(character):
+			return false
+	return true
+
+
+## InstanceManager names every instance `str(instance.get_instance_id())` — a
+## plain integer — and the client echoes `InstanceClient.current.name` straight
+## back, so a legitimate value is either empty ("whichever instance I am in")
+## or all digits. Anything else is not an instance name, and get_node() would
+## happily walk "../" or "/root/..." out of the manager if it got there.
+const _INSTANCE_ID_MAX_LENGTH: int = 24
+
+
+static func _is_safe_instance_id(instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return true
+	if instance_id.length() > _INSTANCE_ID_MAX_LENGTH:
+		return false
+	for character: String in instance_id:
+		if not ("0123456789".contains(character)):
+			return false
+	return true
