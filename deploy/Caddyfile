@@ -20,6 +20,13 @@ api.arkenelle.com {
 	@peddler_write path /v1/peddler/update
 	respond @peddler_write 404
 
+	# Same reasoning, and it matters more here because these two move money. The
+	# world server calls them over loopback; nothing on the internet has any
+	# business reaching a balance read or a debit. Bearer-checked in the gateway
+	# as well — that check is the guarantee, this removes the attack surface.
+	@premium path /v1/premium/*
+	respond @premium 404
+
 	# The gateway rate-limiter reads the real client IP from this header
 	# (see source/server/gateway/http_server.gd).
 	reverse_proxy 127.0.0.1:8088 {

@@ -128,6 +128,10 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	# under a reserved key so a client cannot forge it through the body or the
 	# query string — those are merged above, this is written after.
 	payload["__auth__"] = _header_value(headers, "authorization", "")
+	# Idempotency-Key, stamped the same way and under the same kind of reserved
+	# key, for routes that must settle a retried request exactly once. Written
+	# after the body/query merge so a client cannot forge it through either.
+	payload["__idempotency_key__"] = _header_value(headers, "idempotency-key", "")
 
 	# Try a registered route first. Static fallback only fires when no route
 	# matched, so API paths can use any prefix without colliding with the

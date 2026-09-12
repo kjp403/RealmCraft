@@ -172,15 +172,28 @@ static func _interpret(
 	var data: Dictionary = parsed as Dictionary
 
 	if code >= 200 and code < 300:
-		return _result(true, code, "", data)
+		return _result(true, code, "", _unwrap(data))
 
 	# The backend's own reason wins when it gives one - it knows "insufficient
 	# funds" from "already settled" and we do not. Status is the fallback.
+	# Read BEFORE unwrapping: `reason` lives on the envelope, not in its payload.
 	var server_reason: String = str(data.get("reason", "")).strip_edges()
 	if server_reason.is_empty():
 		server_reason = _reason_for_status(code)
 	ServerLog.warn("%s rejected (HTTP %d, %s)." % [label, code, server_reason])
-	return _result(false, code, server_reason, data)
+	return _result(false, code, server_reason, _unwrap(data))
+
+
+## Strip the API's `{"ok":…, "data":{…}}` envelope so callers read the payload
+## directly. Without this `result["data"]` is the whole envelope and a caller
+## asking it for "balance" silently gets 0 - which reads as a broke player rather
+## than as a bug, and is exactly the kind of wrong that ships.
+##
+## A body with no "data" key is returned as-is, so an error shape or a future
+## endpoint that answers flat still reaches the caller intact.
+static func _unwrap(body: Dictionary) -> Dictionary:
+	var inner: Variant = body.get("data", null)
+	return inner if inner is Dictionary else body
 
 
 static func _reason_for_status(code: int) -> String:

@@ -44,6 +44,7 @@ const RES_CONFIG_PATH: String = "res://data/config/dashboard.cfg"
 
 @onready var world_manager: WorldManagerServer = $"../WorldManagerServer"
 @onready var authentication_manager: AuthenticationManager = $"../AuthenticationManager"
+@onready var premium_database: PremiumDatabase = $"../PremiumDatabase"
 
 var _started_at_unix: int = 0
 var _auth_token: String = ""
@@ -76,6 +77,8 @@ func _ready() -> void:
 	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/players/revoke",    _handle_player_revoke)
 	router.register_route(HTTPClient.Method.METHOD_GET,  &"/v1/accounts",                _handle_accounts)
 	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/accounts/reset_password", _handle_account_reset_password)
+	router.register_route(HTTPClient.Method.METHOD_GET,  &"/v1/premium",               _handle_premium_get)
+	router.register_route(HTTPClient.Method.METHOD_POST, &"/v1/premium/grant",         _handle_premium_grant)
 
 	server.listen(PORT, _bind_address)
 	ServerLog.info("Dashboard listening on %s:%d" % [_bind_address, PORT])
@@ -419,3 +422,75 @@ func _load_config() -> void:
 	if _auth_token.is_empty():
 		ServerLog.warn("Dashboard: token is empty in config, running with auth DISABLED.")
 	_bind_address = str(config.get_value("server", "bind", DASHBOARD_BIND_DEFAULT))
+
+
+#region Premium currency (admin)
+## Balance + recent ledger for one account. The support answer to "where did my
+## currency go" — every movement is a row, so the question is answerable.
+func _handle_premium_get(payload: Dictionary) -> Dictionary:
+	if not _check_auth(payload):
+		return _unauthorized()
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "error": "unavailable"}
+	var username: String = str(payload.get("username", "")).strip_edges().to_lower()
+	if username.is_empty():
+		return {"ok": false, "error": "bad_args"}
+	return {
+		"ok": true,
+		"username": username,
+		"balance": premium_database.store.balance_of(username),
+		"history": premium_database.store.history(username, 50),
+	}
+
+
+## Manual top-up. THE ONLY WAY CURRENCY ENTERS THE SYSTEM right now — donations
+## are processed by hand (Stripe's dashboard, then /supporter), and this is the
+## same shape: a human decides, then grants.
+##
+## Idempotent on transaction_id. Omit it and one is minted from the arguments and
+## the current minute, so a double-submitted form inside the same minute pays out
+## once — pass an explicit id from any automated caller (a payment webhook) rather
+## than relying on that window.
+func _handle_premium_grant(payload: Dictionary) -> Dictionary:
+	if not _check_auth(payload):
+		return _unauthorized()
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "error": "unavailable"}
+
+	var username: String = str(payload.get("username", "")).strip_edges().to_lower()
+	var amount: int = int(payload.get("amount", 0))
+	if username.is_empty() or amount <= 0:
+		return {"ok": false, "error": "bad_args"}
+	# Refuse to fund an account that does not exist. A typo'd username would
+	# otherwise mint a wallet nobody can ever log into and the currency would
+	# look spent from the operator's side.
+	if not authentication_manager.username_exists(username):
+		return {"ok": false, "error": "unknown_account"}
+
+	var transaction_id: String = str(payload.get("transaction_id", "")).strip_edges()
+	if transaction_id.is_empty():
+		transaction_id = "grant-%s-%d-%d" % [
+			username, amount, int(Time.get_unix_time_from_system() / 60.0)
+		]
+	var reason: String = str(payload.get("reason", "grant")).strip_edges()
+	if reason.is_empty():
+		reason = "grant"
+
+	var result: Dictionary = premium_database.store.credit(
+		username, amount, transaction_id, reason
+	)
+	if not bool(result.get("ok", false)):
+		return {"ok": false, "error": str(result.get("reason", "failed"))}
+	if bool(result.get("duplicate", false)):
+		return {
+			"ok": true,
+			"duplicate": true,
+			"balance": int(result.get("balance", 0)),
+			"msg": "Already applied — nothing added.",
+		}
+	ServerLog.info(
+		"Premium: granted %d to %s (%s, tx %s); balance now %d."
+			% [amount, username, reason, transaction_id, int(result.get("balance", 0))]
+	)
+	return {"ok": true, "duplicate": false, "balance": int(result.get("balance", 0))}
+#endregion

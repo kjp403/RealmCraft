@@ -4,6 +4,10 @@ extends BaseMultiplayerEndpoint
 
 @export var world_manager: WorldManagerServer
 @export var authentication_manager: AuthenticationManager
+## Premium currency wallet + ledger. Same scene, so this resolves - an
+## exported node path that pointed outside this scene would silently be null
+## on instance and every purchase would answer "unavailable".
+@export var premium_database: PremiumDatabase
 
 
 func _ready() -> void:
@@ -87,6 +91,18 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				gateway_id,
 				request_id,
 				world_manager.public_leaderboards()
+			)
+		"premium_balance":
+			gateway_response.rpc_id(
+				gateway_id,
+				request_id,
+				premium_balance_request(str(request.get("user_id", "")))
+			)
+		"premium_purchase":
+			gateway_response.rpc_id(
+				gateway_id,
+				request_id,
+				premium_purchase_request(request)
 			)
 
 
@@ -220,3 +236,82 @@ func request_enter_world(
 		character_id,
 		client_ip
 	)
+
+
+#region Premium currency
+## Balance for an account. Unknown account is NOT an error - a name that has
+## never bought anything and a name that does not exist both have nothing, and
+## telling the caller which is which would turn this into an account oracle.
+func premium_balance_request(user_id: String) -> Dictionary:
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "reason": "unavailable"}
+	var account: String = user_id.strip_edges().to_lower()
+	if account.is_empty():
+		return {"ok": false, "reason": "bad_args"}
+	return {"ok": true, "balance": premium_database.store.balance_of(account)}
+
+
+## Settle a purchase. THE PRICE IS RE-DERIVED HERE, NOT TRUSTED.
+##
+## The world sends what it believes the item costs, and this re-resolves the same
+## token through [PremiumCatalog] and compares. A world running an older build,
+## or a compromised one, therefore cannot set its own prices - the worst it can
+## do is be refused. That check is the entire reason this endpoint takes a `cost`
+## at all rather than silently charging whatever the catalog says: a mismatch is
+## a real disagreement worth surfacing, not something to paper over.
+func premium_purchase_request(request: Dictionary) -> Dictionary:
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "reason": "unavailable"}
+
+	var account: String = str(request.get("user_id", "")).strip_edges().to_lower()
+	var item_id: String = str(request.get("item_id", "")).strip_edges()
+	var transaction_id: String = str(request.get("transaction_id", "")).strip_edges()
+	var claimed_cost: int = int(request.get("cost", 0))
+	if account.is_empty() or item_id.is_empty() or transaction_id.is_empty():
+		return {"ok": false, "reason": "bad_args"}
+
+	# The account must exist. Unlike the balance read, a purchase against an
+	# unknown name is a real fault - it means the world handed us something that
+	# is not one of our accounts - and silently minting a wallet for it would
+	# hide that.
+	if authentication_manager == null or not authentication_manager.username_exists(account):
+		return {"ok": false, "reason": "unknown_account"}
+
+	var entry: Dictionary = PremiumCatalog.resolve(item_id)
+	if entry.is_empty():
+		return {"ok": false, "reason": "unknown_item"}
+	var true_cost: int = int(entry.get("cost", 0))
+	if true_cost <= 0:
+		return {"ok": false, "reason": "unknown_item"}
+	if claimed_cost != true_cost:
+		ServerLog.warn(
+			"Premium purchase %s for '%s' claimed cost %d, catalog says %d - refusing."
+				% [transaction_id, item_id, claimed_cost, true_cost]
+		)
+		return {"ok": false, "reason": "price_mismatch", "cost": true_cost}
+
+	var result: Dictionary = premium_database.store.debit(
+		account, item_id, true_cost, transaction_id
+	)
+	if not bool(result.get("ok", false)):
+		return {
+			"ok": false,
+			"reason": str(result.get("reason", "rejected")),
+			"balance": int(result.get("balance", 0)),
+		}
+	if bool(result.get("duplicate", false)):
+		# Already settled. Reported up so the HTTP layer can answer 409 while
+		# still handing back the real balance - a replay must not look like a
+		# second charge OR like a fresh success.
+		return {
+			"ok": true,
+			"duplicate": true,
+			"balance": int(result.get("balance", 0)),
+		}
+
+	ServerLog.info(
+		"Premium: %s spent %d on '%s' (tx %s), balance now %d."
+			% [account, true_cost, item_id, transaction_id, int(result.get("balance", 0))]
+	)
+	return {"ok": true, "duplicate": false, "balance": int(result.get("balance", 0))}
+#endregion
