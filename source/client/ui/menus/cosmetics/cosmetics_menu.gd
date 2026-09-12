@@ -320,10 +320,32 @@ func _update_action() -> void:
 	else:
 		_action_button.text = "Equip"
 		_action_button.disabled = not _allowed
-		_status_label.text = (
-			"Lights up any Ascended weapon you hold." if _slot == &"weapon"
-			else "Unreleased — staff testing only."
-		)
+		_status_label.text = _slot_blurb(_slot)
+
+
+## What this slot actually does in the world, in the player's words.
+##
+## Replaces a flat "Unreleased — staff testing only." that was true when nothing
+## was for sale and is now both wrong and off-putting on a thing with a price on
+## it. Per slot rather than one line, because "it glows around you" and "it
+## trails behind you" are the difference a buyer is choosing between.
+func _slot_blurb(slot: StringName) -> String:
+	match slot:
+		&"aura":
+			return "Glows around you wherever you go."
+		&"trail":
+			return "Leaves a wake behind you as you move."
+		&"halo":
+			return "Sits above your head, everywhere you go."
+		&"weapon":
+			return "Lights up any Ascended weapon you hold."
+		&"flourish", &"departure":
+			# Deliberately blunt. Nothing in the game plays these yet, and this
+			# menu is the only place they render — so it says so rather than
+			# implying they show up in the world. They are held out of the shop
+			# for the same reason (PremiumCatalog.SLOTS_WITHOUT_A_TRIGGER).
+			return "Preview only for now — nothing in the world plays this yet."
+	return "Worn effect."
 
 
 func _on_action_pressed() -> void:

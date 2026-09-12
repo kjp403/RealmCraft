@@ -104,6 +104,22 @@ const COSMETIC_COSTS: Dictionary = {
 	&"weapon_ascended_radiance": 750,
 }
 
+## SLOTS WITH NO TRIGGER, AND THEREFORE NOTHING TO SELL.
+##
+## Flourishes and death effects are authored as one-shots, and NOTHING IN THE
+## GAME FIRES EITHER OF THEM. Search the tree: the only thing that plays a
+## flourish or a departure is [CosmeticVfx]'s replay timer, whose own comment
+## says it exists "so staff can actually watch them in the vault". There is no
+## ability hook, no death hook, no logout hook.
+##
+## So a player who bought one would pay real money for something that renders in
+## the wardrobe preview and nowhere else, ever. They stay priced above - the
+## numbers are right and the moment these get a trigger they should go on sale -
+## but they are held out of the roster until something can actually play them.
+##
+## Remove a slot from here the same day it gets a trigger, not before.
+const SLOTS_WITHOUT_A_TRIGGER: Array[StringName] = [&"flourish", &"departure"]
+
 ## Fallback by slot, for a cosmetic added later that nobody has priced. Every
 ## cosmetic that exists TODAY is named above; this only catches new content.
 const SLOT_COSTS: Dictionary = {
@@ -277,6 +293,10 @@ static func _cosmetic_entry(cosmetic_id: int) -> Dictionary:
 	# without this guard "cosmetic:0" resolves to a priced row that nobody can
 	# ever own (has_cosmetic short-circuits on 0), so it bills on every click.
 	if cosmetic_id <= 0 or not Cosmetics.is_valid(cosmetic_id):
+		return {}
+	# Checked in resolve() as well as roster(), so a crafted token cannot buy one
+	# either - being absent from the shop list is not the same as being refused.
+	if SLOTS_WITHOUT_A_TRIGGER.has(Cosmetics.slot_of(cosmetic_id)):
 		return {}
 	var token: String = VaultGrants.cosmetic_token(cosmetic_id)
 	return {

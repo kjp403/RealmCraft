@@ -169,7 +169,7 @@ func _update_preview() -> void:
 	else:
 		_action_button.text = "Wear"
 		_action_button.disabled = not _allowed
-		_status_label.text = "Staff testing — persists when you leave the Vault."
+		_status_label.text = "Worn on your profile and in chat, anywhere in the world."
 
 
 func _on_action_pressed() -> void:

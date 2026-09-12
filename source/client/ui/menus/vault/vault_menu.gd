@@ -1,6 +1,6 @@
 extends MenuShell
-## Staff VFX Vault - Titles, Skins, and Cosmetics each get a tab. Opened from
-## the Curator. Individual Curator buttons jump to the matching tab via open(arg).
+## The Vault - Titles, Skins and Cosmetics, bought with Ark Coins. Opened from
+## the Curator; individual Curator buttons jump to a tab via open(arg).
 ##
 ## PREMIUM PURCHASING lives here rather than in the three tabs, because all three
 ## sell the same way and the lockout has to be one state, not three. A tab says

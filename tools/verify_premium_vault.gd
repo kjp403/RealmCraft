@@ -203,6 +203,15 @@ func _check_prices() -> int:
 			push_error("cosmetic has no explicit price: %s" % cosmetic_slug)
 			failures += 1
 
+	# Nothing from a slot with no trigger may be buyable - by token OR by roster.
+	# Selling an effect the game never plays is taking money for nothing.
+	for cosmetic_id: int in Cosmetics.ids():
+		if not PremiumCatalog.SLOTS_WITHOUT_A_TRIGGER.has(Cosmetics.slot_of(cosmetic_id)):
+			continue
+		if not PremiumCatalog.resolve(VaultGrants.cosmetic_token(cosmetic_id)).is_empty():
+			push_error("untriggerable cosmetic is buyable: %s" % Cosmetics.slug(cosmetic_id))
+			failures += 1
+
 	# Dyes are per (body, dye) pair. Buying one must not imply another - this is
 	# the property that makes 250 a fair price rather than a 16-body bundle.
 	var probe: PlayerResource = PlayerResource.new()
