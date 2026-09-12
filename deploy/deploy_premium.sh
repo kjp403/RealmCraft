@@ -318,10 +318,25 @@ echo
 # This step verifies the in-process one is actually producing files.
 echo "==> 5/5 Checks"
 
-BACKUP_DIR="/home/$APP_USER/.local/share/godot/app_userdata/Arkenelle/db_backups"
-[[ -d "$BACKUP_DIR" ]] || BACKUP_DIR="$(sudo -u "$APP_USER" find /home/"$APP_USER" -type d -name db_backups 2>/dev/null | head -n1)"
+# Godot's user:// sits under the SERVICE's home, which on this box is the
+# checkout directory - /home/arkenelle need not exist at all. Both are checked
+# before falling back to a search.
+BACKUP_DIR=""
+for candidate in 	"$APP_DIR/.local/share/godot/app_userdata/Arkenelle/db_backups" 	"/home/$APP_USER/.local/share/godot/app_userdata/Arkenelle/db_backups"; do
+	if [[ -d "$candidate" ]]; then
+		BACKUP_DIR="$candidate"
+		break
+	fi
+done
+# `|| true` is load-bearing. find exits non-zero on any unreadable directory,
+# pipefail promotes that to the pipeline's status, and the failed assignment
+# then trips set -e - so a POST-CHECK took down a run whose every real step had
+# already succeeded. A check may report a problem; it may never BE one.
+if [[ -z "$BACKUP_DIR" ]]; then
+	BACKUP_DIR="$({ find "$APP_DIR" /home -maxdepth 8 -type d -name db_backups 2>/dev/null || true; } | head -n1)"
+fi
 if [[ -n "$BACKUP_DIR" && -d "$BACKUP_DIR" ]]; then
-	count="$(find "$BACKUP_DIR" -name 'premium_*.db' 2>/dev/null | wc -l)"
+	count="$({ find "$BACKUP_DIR" -name 'premium_*.db' 2>/dev/null || true; } | wc -l)"
 	echo "    premium.db snapshots on disk: $count  ($BACKUP_DIR)"
 	if [[ "$count" -eq 0 ]]; then
 		echo "    none yet — the master takes one on boot, so check again in a minute."
@@ -353,11 +368,12 @@ code="$(curl -s -o /dev/null -w '%{http_code}' -X POST \
 echo
 echo "Done."
 echo
-echo "Remaining, in the Stripe dashboard — this script cannot do these for you:"
-echo "  1. Create four Payment Links: \$2.49 / \$4.99 / \$9.99 / \$24.99 (USD)."
-echo "  2. Point the webhook endpoint at"
+echo "In the Stripe dashboard — this script cannot do these for you:"
+echo "  1. Four Payment Links: \$2.49 / \$4.99 / \$9.99 / \$24.99, FIXED price, USD."
+echo "     Any other amount credits zero coins, by design."
+echo "  2. A webhook endpoint at"
 echo "     https://api.arkenelle.com/v1/premium/stripe-webhook"
-echo "     subscribed to checkout.session.completed."
-echo "  3. Put the four link URLs in the website build environment as"
-echo "     ARKENELLE_STRIPE_LINK_249 / _499 / _999 / _2499, then redeploy the site."
-echo "     Until then /store/ shows every package as 'Coming soon'."
+echo "     subscribed to checkout.session.completed, snapshot payload."
+echo "  Both were done on 2026-09-12. The live link URLs are committed in"
+echo "  website/build.mjs; ARKENELLE_STRIPE_LINK_249/_499/_999/_2499 still"
+echo "  override them if the site ever needs pointing at test mode."
