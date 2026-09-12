@@ -110,14 +110,25 @@ func save_player(player: PlayerResource) -> bool:
 		"bait": player.stored_bait,
 	})
 
+	# Slot -> id, string keys because JSON has no StringName. Zeroes are dropped
+	# rather than stored: an unequipped slot and a slot that has never been used
+	# must read identically, or "take it off" leaves a 0 behind that later code
+	# has to keep special-casing.
+	var cosmetics_out: Dictionary = {}
+	for slot_key: Variant in player.cosmetic_slots:
+		var worn: int = int(player.cosmetic_slots[slot_key])
+		if worn > 0:
+			cosmetics_out[str(slot_key)] = worn
+	var cosmetics_json: String = JSON.stringify(cosmetics_out)
+
 	return db.query_with_bindings(
 		"INSERT OR REPLACE INTO players("
 		+ "player_id, account_name, display_name, skin_id, cosmetic_id, weapon_cosmetic_id, vault_skin_id, level, experience, available_attributes_points, "
 		+ "profile_status, profile_animation, "
 		+ "attributes_json, inventory_json, inventory_bags, bank_json, bank_slots, equipment_json, skills_json, mastery_json, quests_json, friends_json, blocked_ids_json, owned_skins_json, server_roles_json, stats_json, titles_json, dailies_json, dungeon_lockouts_json, redeemed_codes_json, wardstones_json, slayer_json, pending_chest_loot_json, hunt_chest_json, character_flags_json, "
-		+ "peddler_json, gather_nodes_json, collection_log_json, angler_json, "
+		+ "peddler_json, gather_nodes_json, collection_log_json, angler_json, cosmetics_json, "
 		+ "active_guild_id, joined_guild_ids_json, led_guild_id"
-		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		+ ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		[
 			player.player_id,
 			player.account_name,
@@ -160,6 +171,7 @@ func save_player(player: PlayerResource) -> bool:
 			gather_nodes_json,
 			collection_log_json,
 			angler_json,
+			cosmetics_json,
 
 			player.active_guild_id,
 			joined_guild_ids_json,
@@ -494,6 +506,42 @@ func get_player_row_by_display_name(display_name: String) -> Dictionary:
 	return db.query_result[0]
 
 
+## Fill [member PlayerResource.cosmetic_slots] from the row.
+##
+## MIGRATION LIVES HERE, not in a schema step. Before per-slot storage there was
+## one body slot (players.cosmetic_id) holding whatever the player equipped last
+## - which for plenty of characters is a trail or a halo, not an aura. Routing
+## that id through Cosmetics.slot_of() puts it in the slot it actually belongs
+## to, so nobody logs in undressed and no backfill query has to run.
+##
+## The blob wins where both exist: once a player equips anything after the
+## upgrade, cosmetics_json is the truth and the legacy column is only a mirror.
+func _read_cosmetic_slots(player: PlayerResource, row: Dictionary) -> void:
+	var slots: Dictionary = {}
+	var parsed: Variant = JSON.parse_string(str(row.get("cosmetics_json", "{}")))
+	if parsed is Dictionary:
+		for slot_key: Variant in (parsed as Dictionary):
+			var worn: int = int((parsed as Dictionary)[slot_key])
+			if worn > 0:
+				slots[StringName(str(slot_key))] = worn
+
+	var legacy: int = int(row.get("cosmetic_id", 0))
+	if legacy > 0:
+		var slot: StringName = Cosmetics.slot_of(legacy)
+		if slot != &"" and not slots.has(slot):
+			slots[slot] = legacy
+
+	var weapon: int = int(row.get("weapon_cosmetic_id", 0))
+	if weapon > 0 and not slots.has(&"weapon"):
+		slots[&"weapon"] = weapon
+
+	player.cosmetic_slots = slots
+	# cosmetic_id is the AURA mirror from here on. The profile row and the
+	# :cosmetic_id sync path both read it, and leaving a trail id in there would
+	# make a profile show an aura the player is not wearing.
+	player.cosmetic_id = int(slots.get(&"aura", 0))
+
+
 func get_player_profile_row(player_id: int) -> Dictionary:
 	db.query_with_bindings(
 		"SELECT player_id, account_name, display_name, skin_id, cosmetic_id, vault_skin_id, level, "
@@ -531,6 +579,7 @@ func _row_to_player(row: Dictionary) -> PlayerResource:
 	player.skin_id = int(row.get("skin_id", 1))
 	player.cosmetic_id = int(row.get("cosmetic_id", 0))
 	player.weapon_cosmetic_id = int(row.get("weapon_cosmetic_id", 0))
+	_read_cosmetic_slots(player, row)
 	player.vault_skin_id = int(row.get("vault_skin_id", 0))
 
 	player.level = int(row.get("level", 1))

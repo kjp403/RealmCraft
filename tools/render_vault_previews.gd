@@ -78,6 +78,19 @@ func _go() -> void:
 		await RenderingServer.frame_post_draw
 		_shoot(str(tab[1]))
 
+	# One more, on the FLOURISH tab. The two event slots are the ones a buyer
+	# cannot judge from the art - a flourish and a departure look identical in a
+	# wardrobe, and differ entirely in when they fire - so the line that says
+	# when it plays is the thing worth having a picture of.
+	var cosmetics_panel: Control = (_menu.get(&"_panels") as Dictionary).get(&"cosmetics")
+	if cosmetics_panel != null:
+		_menu.call(&"_select_tab", &"cosmetics")
+		cosmetics_panel.call(&"_select_slot", &"flourish")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		_shoot("vault_flourish")
+
 	print("done -> ", _out_abs)
 	get_tree().quit()
 

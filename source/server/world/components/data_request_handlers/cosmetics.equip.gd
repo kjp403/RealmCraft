@@ -36,18 +36,36 @@ func data_request_handler(
 		if not Cosmetics.is_valid(cosmetic_id):
 			return {"ok": false, "reason": "unknown_cosmetic"}
 
-	# Route by SLOT so the two cosmetic slots stay independent — equipping a weapon
-	# glow must not silently clear an aura. Clearing (id 0) needs the caller to say
-	# WHICH slot, since 0 has no slot of its own.
+	# EVERY SLOT IS INDEPENDENT. An aura, a halo and a trail render together, and
+	# the two event slots are not worn at all - so equipping any one of them must
+	# never evict another. Clearing (id 0) needs the caller to say WHICH slot,
+	# since 0 has no slot of its own.
 	var slot: StringName = Cosmetics.slot_of(cosmetic_id)
 	if cosmetic_id == 0:
 		slot = StringName(str(args.get("slot", "")))
-	if slot == &"weapon":
-		pr.weapon_cosmetic_id = cosmetic_id
-		player.state_synchronizer.set_by_path(^":weapon_cosmetic_id", cosmetic_id)
+	if not Cosmetics.SLOTS.has(slot):
+		return {"ok": false, "reason": "unknown_slot"}
+
+	if cosmetic_id == 0:
+		pr.cosmetic_slots.erase(slot)
 	else:
-		pr.cosmetic_id = cosmetic_id
-		player.state_synchronizer.set_by_path(^":cosmetic_id", cosmetic_id)
+		pr.cosmetic_slots[slot] = cosmetic_id
+
+	# The three worn channels are mirrored onto synced properties so every client
+	# in the zone renders them. Flourish and departure have no channel: nothing
+	# wears them, they are looked up at the moment they fire.
+	match slot:
+		&"weapon":
+			pr.weapon_cosmetic_id = cosmetic_id
+			player.state_synchronizer.set_by_path(^":weapon_cosmetic_id", cosmetic_id)
+		&"aura":
+			# Still a real column, because the profile row reads it.
+			pr.cosmetic_id = cosmetic_id
+			player.state_synchronizer.set_by_path(^":cosmetic_id", cosmetic_id)
+		&"halo":
+			player.state_synchronizer.set_by_path(^":halo_cosmetic_id", cosmetic_id)
+		&"trail":
+			player.state_synchronizer.set_by_path(^":trail_cosmetic_id", cosmetic_id)
 	# Persisted now that cosmetics can be BOUGHT. While the only path in was
 	# an admin command this could stay transient; a purchase that does not
 	# survive logout is a refund request.

@@ -280,6 +280,28 @@ static func _on_level_up(payload: Dictionary) -> void:
 	# Skill / combat label optional — character levels default to "Combat".
 	var skill: String = str(payload.get("skill", "Combat"))
 	LevelUpFx.celebrate(player, skill, level)
+	# Their FLOURISH, if they own one and have it equipped. The id travels with
+	# the broadcast rather than being synced, because a flourish is not worn -
+	# see CosmeticVfx.play_once.
+	CosmeticVfx.play_once(player, int(payload.get("flourish", 0)))
+
+
+## A player in this instance died wearing a DEPARTURE cosmetic — play it on their
+## body, for everyone.
+##
+## Deliberately not folded into the player.died push: that one is addressed to
+## the dying player alone and carries respawn instructions, and the audience for
+## a death effect is everybody EXCEPT the person looking at a death screen.
+##
+## Mounted on the character rather than at a world position, so it dies with them
+## if the body is despawned before the effect finishes.
+static func _on_player_departure(payload: Dictionary) -> void:
+	if current == null:
+		return
+	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	if player == null:
+		return
+	CosmeticVfx.play_once(player, int(payload.get("cosmetic", 0)))
 
 
 ## A level-99 mastery title was granted (SkillMasterTitleService). Centre-screen
@@ -328,6 +350,7 @@ func _ready() -> void:
 		Client.subscribe(&"dungeon.room", _on_dungeon_room)
 		Client.subscribe(&"dungeon.left", _on_dungeon_left)
 		Client.subscribe(&"level.up", _on_level_up)
+		Client.subscribe(&"player.departure", _on_player_departure)
 		Client.subscribe(&"title.unlocked", _on_title_unlocked)
 		_subscribed = true
 

@@ -53,8 +53,10 @@ var _idx_by_slot: Dictionary = {}
 var _slots: Array[StringName] = []
 var _slot: StringName = &""
 
-var _equipped_body: int = 0
-var _equipped_weapon: int = 0
+## slot -> equipped id, straight from cosmetics.state. Replaces the two scalars
+## this used to keep: every slot is independent now, and a halo, an aura and a
+## trail are worn at the same time.
+var _equipped: Dictionary = {}
 ## Staff: may equip ANYTHING, owned or not. Ordinary players get their rights
 ## one cosmetic at a time, from _owned.
 var _allowed: bool = false
@@ -265,8 +267,11 @@ func _on_state(data: Dictionary) -> void:
 	_owned.clear()
 	for owned_v: Variant in data.get("owned", []):
 		_owned[int(owned_v)] = true
-	_equipped_body = int(data.get("equipped", 0))
-	_equipped_weapon = int(data.get("equipped_weapon", 0))
+	_equipped.clear()
+	for slot_key: Variant in (data.get("slots", {}) as Dictionary):
+		var worn: int = int((data.get("slots", {}) as Dictionary)[slot_key])
+		if worn > 0:
+			_equipped[StringName(str(slot_key))] = worn
 
 	_by_slot.clear()
 	_slots.clear()
@@ -291,11 +296,10 @@ func _on_state(data: Dictionary) -> void:
 		_clear_button.visible = false
 		return
 	_clear_button.visible = true
-	# Open on the tab holding whatever is already equipped, else the first tab.
+	# Open on the first tab that has something equipped in it, else the first tab.
 	var want: StringName = _slots[0]
 	for slot: StringName in _slots:
-		var ids: Array = _by_slot[slot]
-		if ids.has(_equipped_body) or ids.has(_equipped_weapon):
+		if _equipped_for(slot) > 0:
 			want = slot
 			break
 	_select_slot(want)
@@ -329,9 +333,10 @@ func _select_slot(slot: StringName) -> void:
 	_update_preview()
 
 
-## Which equipped id this tab drives — the weapon tab has its own slot.
+## Which equipped id this tab drives. Every slot has its own now, so this is a
+## lookup rather than the weapon/everything-else split it used to be.
 func _equipped_for(slot: StringName) -> int:
-	return _equipped_weapon if slot == &"weapon" else _equipped_body
+	return int(_equipped.get(slot, 0))
 
 
 # --- Browsing ---
@@ -496,28 +501,31 @@ func _can_wear(id: int) -> bool:
 	return _allowed or _owned.has(id)
 
 
-## What this slot actually does in the world, in the player's words.
+## What this slot actually does, and WHEN IT SHOWS, in the player's words.
 ##
-## Replaces a flat "Unreleased — staff testing only." that was true when nothing
-## was for sale and is now both wrong and off-putting on a thing with a price on
-## it. Per slot rather than one line, because "it glows around you" and "it
-## trails behind you" are the difference a buyer is choosing between.
+## Every line names the moment the effect appears, because the two event slots
+## cannot be judged from the preview alone: a flourish and a departure look
+## identical in the wardrobe - both replay on a loop there - and are completely
+## different purchases. One fires every time you level, the other only when you
+## die. A buyer who learns that after paying has been sold a surprise.
+##
+## "Everyone nearby sees it" is on the event lines on purpose. Both are
+## broadcast to the whole instance, and being seen is the entire point of
+## buying one.
 func _slot_blurb(slot: StringName) -> String:
 	match slot:
 		&"aura":
-			return "Glows around you wherever you go."
+			return "Worn: glows around you wherever you go."
 		&"trail":
-			return "Leaves a wake behind you as you move."
+			return "Worn: leaves a wake behind you as you move."
 		&"halo":
-			return "Sits above your head, everywhere you go."
+			return "Worn: sits above your head, everywhere you go."
 		&"weapon":
-			return "Lights up any Ascended weapon you hold."
-		&"flourish", &"departure":
-			# Deliberately blunt. Nothing in the game plays these yet, and this
-			# menu is the only place they render — so it says so rather than
-			# implying they show up in the world. They are held out of the shop
-			# for the same reason (PremiumCatalog.SLOTS_WITHOUT_A_TRIGGER).
-			return "Preview only for now — nothing in the world plays this yet."
+			return "Worn: lights up any Ascended weapon you hold."
+		&"flourish":
+			return "Plays once each time you gain a level. Everyone nearby sees it."
+		&"departure":
+			return "Plays once where you fall when you die. Everyone nearby sees it."
 	return "Worn effect."
 
 
@@ -550,16 +558,28 @@ func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 		_status_label.text = _equip_error(str(data.get("reason", "")))
 		_update_action()
 		return
-	var lp: Node = ClientState.local_player
-	if slot == &"weapon":
-		_equipped_weapon = id
-		if lp != null and is_instance_valid(lp):
-			lp.weapon_cosmetic_id = id
+	if id > 0:
+		_equipped[slot] = id
 	else:
-		_equipped_body = id
-		if lp != null and is_instance_valid(lp):
-			lp.cosmetic_id = id
+		_equipped.erase(slot)
+
+	# Instant local swap so the preview and the character behind the menu react
+	# now rather than on the next state fetch. Only the three WORN slots have a
+	# channel to write; a flourish or a departure has nothing to show until it
+	# fires, which is the whole difference between the two kinds of slot.
+	var lp: Node = ClientState.local_player
+	if lp != null and is_instance_valid(lp):
+		match slot:
+			&"weapon":
+				lp.weapon_cosmetic_id = id
+			&"aura":
+				lp.cosmetic_id = id
+			&"halo":
+				lp.halo_cosmetic_id = id
+			&"trail":
+				lp.trail_cosmetic_id = id
 	_update_action()
+	_refresh_wearer()
 
 
 func _equip_error(reason: String) -> String:

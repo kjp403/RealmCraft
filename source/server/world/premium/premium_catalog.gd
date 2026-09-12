@@ -138,19 +138,17 @@ const COSMETIC_COSTS: Dictionary = {
 
 ## SLOTS WITH NO TRIGGER, AND THEREFORE NOTHING TO SELL.
 ##
-## Flourishes and death effects are authored as one-shots, and NOTHING IN THE
-## GAME FIRES EITHER OF THEM. Search the tree: the only thing that plays a
-## flourish or a departure is [CosmeticVfx]'s replay timer, whose own comment
-## says it exists "so staff can actually watch them in the vault". There is no
-## ability hook, no death hook, no logout hook.
+## EMPTY SINCE FLOURISHES AND DEPARTURES GOT THEIR TRIGGERS. A flourish now fires
+## on a character level-up (LevelMilestoneService.on_levels_gained broadcasts it
+## to the whole instance) and a departure on death (Player.die does the same), so
+## both are things a buyer sees in the world rather than only in the wardrobe.
 ##
-## So a player who bought one would pay real money for something that renders in
-## the wardrobe preview and nowhere else, ever. They stay priced above - the
-## numbers are right and the moment these get a trigger they should go on sale -
-## but they are held out of the roster until something can actually play them.
-##
-## Remove a slot from here the same day it gets a trigger, not before.
-const SLOTS_WITHOUT_A_TRIGGER: Array[StringName] = [&"flourish", &"departure"]
+## KEPT, NOT DELETED. This is the rule the roster and resolve() both check, and
+## the next slot authored with no hook to play it needs exactly this guard -
+## without it, the first sign that nothing fires a new slot is a refund request.
+## Add a slot here the day its art lands and remove it the day it gets a trigger,
+## not the other way round.
+const SLOTS_WITHOUT_A_TRIGGER: Array[StringName] = []
 
 ## Fallback by slot, for a cosmetic added later that nobody has priced. Every
 ## cosmetic that exists TODAY is named above; this only catches new content.

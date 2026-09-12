@@ -54,6 +54,21 @@ func data_request_handler(
 		"allowed": staff,
 		"owned": owned,
 		"cosmetics": visible,
+		# Kept for a client that has not been updated yet; `slots` is the truth.
 		"equipped": pr.cosmetic_id,
 		"equipped_weapon": pr.weapon_cosmetic_id,
+		# slot -> id for every slot the player has something in, including the
+		# two event slots, which are equipped but never worn.
+		"slots": _slots_as_strings(pr),
 	}
+
+
+## String keys, because the client reads this out of a Dictionary that came over
+## the wire - StringName does not survive the trip as a key.
+func _slots_as_strings(pr: PlayerResource) -> Dictionary:
+	var out: Dictionary = {}
+	for slot_key: Variant in pr.cosmetic_slots:
+		var worn: int = int(pr.cosmetic_slots[slot_key])
+		if worn > 0:
+			out[str(slot_key)] = worn
+	return out

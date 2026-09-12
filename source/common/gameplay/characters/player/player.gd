@@ -216,6 +216,22 @@ func die(killer: Character) -> void:
 			"killed_by": killed_by,
 			"return_home": return_home,
 		})
+		# The DEPARTURE cosmetic, to everyone who can see the body - not just the
+		# player who owns it. A death effect the dying player is the only witness
+		# to is the one thing it must not be; they are looking at a death screen.
+		#
+		# Broadcast separately from player.died because that push is addressed to
+		# one peer and carries respawn instructions nobody else should act on.
+		var departure: int = int(player_resource.cosmetic_slots.get(&"departure", 0)) 			if player_resource != null else 0
+		var death_instance: ServerInstance = WorldServer.curr.instance_manager 			.find_instance_for_peer(peer_id)
+		if departure > 0 and death_instance != null:
+			WorldServer.curr.propagate_rpc(
+				WorldServer.curr.data_push.bind(&"player.departure", {
+					"p": peer_id,
+					"cosmetic": departure,
+				}),
+				death_instance.name
+			)
 
 	await get_tree().create_timer(RESPAWN_DELAY).timeout
 	if not is_instance_valid(self):

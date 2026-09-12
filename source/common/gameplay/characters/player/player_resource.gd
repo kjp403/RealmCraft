@@ -56,6 +56,18 @@ const HEALTH_PER_LEVEL: float = 0.76
 ## so an aura and a weapon glow can be worn together. Persisted as
 ## players.weapon_cosmetic_id; ownership is likewise not stored.
 @export var weapon_cosmetic_id: int = 0
+## Every equipped cosmetic, keyed by slot: {&"aura": 12, &"halo": 5, ...}.
+## Persisted as players.cosmetics_json.
+##
+## THE AUTHORITY for what is worn. [member cosmetic_id] and
+## [member weapon_cosmetic_id] are kept in step with the aura and weapon entries
+## because the profile row and the sync paths read them, but a slot that has no
+## column of its own - halo, trail, flourish, departure - exists only here.
+##
+## Slots are independent on purpose: an aura, a halo and a trail render together
+## (Character mounts one CosmeticVfx per channel), and the two event slots are
+## not worn at all - they fire on level-up and on death.
+@export var cosmetic_slots: Dictionary = {}
 ## Prestige vault skin packed id (`style * 10000 + skin_id`). 0 = none.
 ## Not owned, not sold — staff equip only, stripped on spawn if rank drops.
 @export var vault_skin_id: int = 0
