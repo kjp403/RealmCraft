@@ -41,6 +41,13 @@ const DASHBOARD_BIND_DEFAULT: String = "127.0.0.1" # "*" = all interfaces (confi
 
 const USER_CONFIG_PATH: String = "user://dashboard.cfg"
 const RES_CONFIG_PATH: String = "res://data/config/dashboard.cfg"
+## Preferred source for the token, and the ONLY one that is safe by
+## construction. res://data/config/dashboard.cfg is tracked in git, so a real
+## token written there is one `git add -A` away from being public forever;
+## user://dashboard.cfg is safe but is a second secret in a second place. This
+## puts the token in /etc/arkenelle/peddler.env beside every other server
+## secret, loaded by systemd, owned by root, mode 0640.
+const TOKEN_ENV: String = "ARKENELLE_DASHBOARD_TOKEN"
 
 @onready var world_manager: WorldManagerServer = $"../WorldManagerServer"
 @onready var authentication_manager: AuthenticationManager = $"../AuthenticationManager"
@@ -403,9 +410,29 @@ func _check_auth(payload: Dictionary) -> bool:
 	# Token disabled → everyone gets in. Useful only for localhost-bound dev.
 	if _auth_token.is_empty():
 		return true
-	# We don't currently parse headers in the addon, so the static UI sends
-	# the token as a payload field on every request.
-	return str(payload.get("token", "")) == _auth_token
+	# The static UI sends the token as a payload field; the addon also stamps the
+	# Authorization header, so a curl caller can use the standard channel.
+	var offered: String = str(payload.get("token", ""))
+	if offered.is_empty():
+		var header: String = str(payload.get("__auth__", ""))
+		const PREFIX: String = "Bearer "
+		if header.begins_with(PREFIX):
+			offered = header.substr(PREFIX.length())
+	return _token_equals(offered)
+
+
+## Length-checked, full-pass comparison - the same shape the gateway uses for
+## its server-to-server secret. `==` short-circuits on the first differing
+## byte, which leaks the token a character at a time to anything that can time
+## the response. That mattered less when this only read stats; it guards a
+## currency grant now.
+func _token_equals(offered: String) -> bool:
+	if offered.length() != _auth_token.length():
+		return false
+	var diff: int = 0
+	for i: int in _auth_token.length():
+		diff |= offered.unicode_at(i) ^ _auth_token.unicode_at(i)
+	return diff == 0
 
 
 func _unauthorized() -> Dictionary:
@@ -413,15 +440,36 @@ func _unauthorized() -> Dictionary:
 
 
 func _load_config() -> void:
+	# Environment wins over both files. A deployment that sets it never has to
+	# touch a config file, and cannot accidentally commit the token.
+	_auth_token = OS.get_environment(TOKEN_ENV).strip_edges()
+
 	var config: ConfigFile = ConfigFile.new()
 	var path: String = USER_CONFIG_PATH if FileAccess.file_exists(USER_CONFIG_PATH) else RES_CONFIG_PATH
-	if config.load(path) != OK:
-		ServerLog.warn("Dashboard: no config found, running with auth DISABLED. Create %s or %s with [auth] token=\"...\"" % [USER_CONFIG_PATH, RES_CONFIG_PATH])
-		return
-	_auth_token = str(config.get_value("auth", "token", ""))
+	if config.load(path) == OK:
+		if _auth_token.is_empty():
+			_auth_token = str(config.get_value("auth", "token", "")).strip_edges()
+		_bind_address = str(config.get_value("server", "bind", DASHBOARD_BIND_DEFAULT))
+	elif _auth_token.is_empty():
+		ServerLog.warn(
+			"Dashboard: no config and no %s, running with auth DISABLED." % TOKEN_ENV
+		)
+
 	if _auth_token.is_empty():
-		ServerLog.warn("Dashboard: token is empty in config, running with auth DISABLED.")
-	_bind_address = str(config.get_value("server", "bind", DASHBOARD_BIND_DEFAULT))
+		# Named louder than it used to be. When this only served stats, an open
+		# loopback dashboard was untidy; it now carries /v1/premium/grant, so
+		# anyone with ANY shell on the box can mint currency for themselves.
+		# Parenthesised: `%` binds tighter than `+`, so without these brackets the
+		# format applies to the last fragment alone and the line errors instead of
+		# printing the warning it exists to print.
+		ServerLog.warn(
+			(
+				"Dashboard: auth DISABLED - /v1/premium/grant can mint currency for "
+				+ "anyone with a shell on this host. Set %s (preferred) or [auth] "
+				+ "token in %s."
+			)
+			% [TOKEN_ENV, USER_CONFIG_PATH]
+		)
 
 
 #region Premium currency (admin)
