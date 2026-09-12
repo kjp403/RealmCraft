@@ -7,13 +7,16 @@
 // why this site can stay a static build with no login.
 //
 // THE NAME IS CHECKED AGAINST THE LIVE SERVER BEFORE A BUY LINK EXISTS.
-// /v1/account/check answers whether that account can be logged into, and the
-// buttons stay dead until it says yes. This is not politeness: the webhook will
-// not create a wallet for an account that does not exist, so a name that fails
-// this check is a payment that reaches nobody and has to be refunded or granted
-// by hand. Typing it twice — what this page used to ask for — cannot catch the
-// mistake that actually happens, which is a player carefully typing their
-// CHARACTER name twice.
+// /v1/account/check answers whether the name is an account, a character, or
+// nothing at all, and the buttons stay dead until it is one of the first two.
+// This is not politeness: a name that is neither is a payment that reaches
+// nobody and has to be granted by hand. Typing it twice — what this page used
+// to ask for — cannot catch the mistake that actually happens, which is a
+// player carefully typing the same wrong name twice.
+//
+// A CHARACTER NAME IS FINE AND IS SENT AS-IS. The webhook resolves it to the
+// account that owns it at credit time, so this page never has to be told whose
+// account a character belongs to — and never leaks it.
 //
 // A CHECK THAT CANNOT BE MADE BLOCKS THE SALE. If the API is unreachable the
 // buttons stay dead and the page says so. Letting them through on a network
@@ -39,8 +42,9 @@
   var MAX_LEN = 20;
   var DEBOUNCE_MS = 450;
 
-  // Every answer the server has given us this session, so re-typing a name we
-  // already checked is instant and costs the rate limiter nothing.
+  // Every answer the server has given us this session — "account", "character"
+  // or "" for nothing — so re-typing a name we already checked is instant and
+  // costs the rate limiter nothing.
   var known = Object.create(null);
   var timer = 0;
   var inFlight = null;
@@ -118,10 +122,14 @@
         if (!body || body.ok !== true || typeof data.exists !== "boolean") {
           throw new Error("bad body");
         }
-        known[name] = data.exists;
+        // "account" or "character" — both spendable, and the difference is only
+        // ever used to word the message. The server never tells this page which
+        // account owns a character, and it does not need to: whatever is typed
+        // goes to Stripe as-is and the webhook resolves it at credit time.
+        known[name] = data.exists ? (data.kind || "account") : "";
         // Only speak for the name still in the box — a slow answer for an
         // abandoned name must not overwrite a newer verdict.
-        if (normalise(nameInput.value) === name) render(data.exists, name);
+        if (normalise(nameInput.value) === name) render(known[name], name);
       })
       .catch(function (error) {
         if (error && error.name === "AbortError") return;
@@ -134,16 +142,27 @@
       });
   }
 
-  function render(exists, name) {
-    if (exists) {
+  function render(kind, name) {
+    if (kind === "account") {
       setVerified(name);
       say("Account found — coins will be added to " + name + " within a minute of payment.", "good");
       return;
     }
+    if (kind === "character") {
+      // Not an error. Say whose coins these are anyway, because the buyer may
+      // have several characters and will look for the coins on this one.
+      setVerified(name);
+      say(
+        name + " is a character — coins will go to the account it belongs to, " +
+          "and every character on that account can spend them.",
+        "good"
+      );
+      return;
+    }
     setVerified("");
     say(
-      "No account called " + name + ". This is the name you LOG IN with, " +
-        "not your character's name — they are often different.",
+      "Nothing here is called " + name + " — no account and no character. " +
+        "Check the spelling of the name you log in with.",
       "bad"
     );
   }
@@ -163,7 +182,7 @@
       return;
     }
     setVerified("");
-    say("Checking that account exists…", "");
+    say("Checking that name…", "");
     timer = window.setTimeout(function () {
       check(name);
     }, DEBOUNCE_MS);

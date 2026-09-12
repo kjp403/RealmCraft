@@ -1051,6 +1051,31 @@ body.location-scene article.page {
    spends on money. A premium currency in a new colour would be the only
    gold-adjacent thing here that is not those two. */
 
+/* The one instruction on this page that a buyer cannot afford to skim: coins
+   are credited to an ACCOUNT, and the name people know best is their
+   character's. Loud on purpose — a mistake here used to be a payment that
+   reached nobody. */
+.store-callout {
+  max-width: 30rem;
+  margin: 1.5rem 0 0.75rem;
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--cat-donate) 10%, var(--panel));
+  border: 1px solid var(--cat-donate);
+  border-left-width: 4px;
+  border-radius: 10px;
+}
+.store-callout p {
+  margin: 0.45rem 0 0;
+  font-size: 0.92rem;
+}
+.store-callout p:first-child { margin-top: 0; }
+.store-callout-head {
+  font-family: var(--ui);
+  font-size: 1rem !important;
+  color: var(--cat-donate);
+}
+.store-callout-soft { color: var(--muted); font-size: 0.85rem !important; }
+
 .store-form {
   display: grid;
   gap: 0.5rem;

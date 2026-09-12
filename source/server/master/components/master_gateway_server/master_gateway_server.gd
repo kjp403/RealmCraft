@@ -116,6 +116,13 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request_id,
 				account_exists_request(str(request.get("user_id", "")))
 			)
+		"resolve_character":
+			# Answers on the world's reply, not here - see the function.
+			resolve_character_request(
+				gateway_id,
+				request_id,
+				str(request.get("name", ""))
+			)
 
 
 @rpc("authority", "call_remote")
@@ -251,6 +258,33 @@ func request_enter_world(
 
 
 #region Premium currency
+## Which account owns the character called [param name]?
+##
+## ANSWERS LATER, NOT HERE. Characters live in the world's database, not this
+## one, so this forwards to a world and the world replies straight back through
+## [MasterWorldServer.receive_account_for_character] using the same request_id.
+## The only reply this function sends itself is the failure one, for when there
+## is no world to ask.
+##
+## ANY connected world will do. Character names are unique inside a world
+## database and there is one world; if that ever stops being true this picks the
+## first, and the fix is to ask the world the buyer plays on rather than to make
+## this smarter.
+func resolve_character_request(gateway_id: int, request_id: int, name: String) -> void:
+	var display_name: String = name.strip_edges()
+	if display_name.is_empty():
+		gateway_response.rpc_id(gateway_id, request_id, {"ok": false, "reason": "bad_args"})
+		return
+	for world_id: int in world_manager.connected_worlds:
+		world_manager.request_account_for_character.rpc_id(
+			world_id, gateway_id, request_id, display_name
+		)
+		return
+	# No world is up. NOT "no such character" - the caller gates a payment on
+	# this and must be able to tell the two apart.
+	gateway_response.rpc_id(gateway_id, request_id, {"ok": false, "reason": "no_world"})
+
+
 ## Does this account name exist? Asked by the PUBLIC /v1/account/check route,
 ## which the storefront uses to refuse a payment aimed at a name nobody can log
 ## into - the mistake that strands money and needs a human to unpick.

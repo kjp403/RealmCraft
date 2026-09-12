@@ -411,6 +411,33 @@ func receive_player_characters(_gateway_id: int, _peer_id: int, _player_characte
 	pass
 
 
+## Which ACCOUNT owns the character called [param display_name]?
+##
+## Only the world knows. Accounts live in the master's database and characters
+## live in this one, and nothing but the players table connects them - which is
+## why a buyer typing their character name into the storefront could not be
+## credited: the master looked the name up among accounts, found nothing, and
+## the payment stopped there.
+##
+## Display names are UNIQUE (world_schema puts a unique index on the column), so
+## this is an exact answer, not a best guess. Case-insensitive to match how the
+## name is typed everywhere else.
+@rpc("authority")
+func request_account_for_character(gateway_id: int, peer_id: int, display_name: String) -> void:
+	var row: Dictionary = database.store.get_player_row_by_display_name(display_name.strip_edges())
+	receive_account_for_character.rpc_id(
+		1,
+		gateway_id,
+		peer_id,
+		str(row.get("account_name", "")).to_lower()
+	)
+
+
+@rpc("any_peer")
+func receive_account_for_character(_gateway_id: int, _peer_id: int, _account_name: String) -> void:
+	pass
+
+
 @rpc("authority")
 func request_login(
 	gateway_id: int,
