@@ -1,6 +1,7 @@
 extends MenuShell
-## Cosmetics wardrobe — browse and equip VFX cosmetics. Opened from the Curator in
-## the VFX Vault (CosmeticsInteraction → open_menu_requested(&"cosmetics")).
+## Cosmetics wardrobe — browse, buy and equip VFX cosmetics. Opened from the Vault
+## Keeper in the Guild House, or from the Curator in the staff VFX Vault
+## (CosmeticsInteraction → open_menu_requested(&"cosmetics")).
 ##
 ## TABBED BY SLOT. One flat cycler through 20+ effects was unusable, so the roster
 ## is split into Auras / Trails / Halos / Flourishes / Departures / Weapon Skins
@@ -10,9 +11,10 @@ extends MenuShell
 ## an Ascended weapon glow can be worn together. The Weapon Skins tab drives the
 ## second one; every other tab drives the first.
 ##
-## STAFF ONLY, and the client does not enforce it: cosmetics.state returns an empty
-## roster to non-staff and cosmetics.equip refuses them, so a forced-open menu shows
-## nothing and changes nothing.
+## THE CLIENT ENFORCES NOTHING. cosmetics.state decides what this caller may see -
+## staff get the whole roster, everyone else gets what is for sale plus what they
+## own - and cosmetics.equip refuses anything unowned. A forced-open menu with a
+## hand-edited roster still changes nothing.
 ##
 ## The preview is a real [CosmeticVfx], the same node the world mounts, so a
 ## cosmetic upgraded to a scripted [CosmeticPreset] previews as what it actually
@@ -53,7 +55,10 @@ var _slot: StringName = &""
 
 var _equipped_body: int = 0
 var _equipped_weapon: int = 0
+## Staff: may equip ANYTHING, owned or not. Ordinary players get their rights
+## one cosmetic at a time, from _owned.
 var _allowed: bool = false
+var _owned: Dictionary[int, bool] = {}
 
 var _preview: CosmeticVfx
 ## Carries [member _preview] around the walk circle. Separate from the preview node
@@ -182,6 +187,9 @@ func _on_shown() -> void:
 
 func _on_state(data: Dictionary) -> void:
 	_allowed = bool(data.get("allowed", false))
+	_owned.clear()
+	for owned_v: Variant in data.get("owned", []):
+		_owned[int(owned_v)] = true
 	_equipped_body = int(data.get("equipped", 0))
 	_equipped_weapon = int(data.get("equipped_weapon", 0))
 
@@ -327,8 +335,15 @@ func _update_action() -> void:
 		_status_label.text = "Currently worn."
 	else:
 		_action_button.text = "Equip"
-		_action_button.disabled = not _allowed
+		_action_button.disabled = not _can_wear(id)
 		_status_label.text = _slot_blurb(_slot)
+
+
+## Whether THIS cosmetic may be equipped. Staff may wear the whole roster for
+## testing; everyone else may wear what they bought. The server re-checks exactly
+## this in cosmetics.equip - a disabled button is a courtesy, not a lock.
+func _can_wear(id: int) -> bool:
+	return _allowed or _owned.has(id)
 
 
 ## What this slot actually does in the world, in the player's words.
