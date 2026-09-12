@@ -2426,23 +2426,45 @@ function build() {
   // two ever disagree, the server wins and the buyer gets the server's number —
   // so keep them in step, but nothing here can mint coins by being wrong.
   //
-  // Payment Link URLs come from the environment at BUILD time. They are not
-  // secrets (they are public checkout pages) but they differ per Stripe account
-  // and per test/live mode, so hard-coding them would bake one environment into
-  // the repo. A package with no link renders as "coming soon" rather than a
-  // dead button.
+  // The live Payment Links, committed rather than configured. They are PUBLIC
+  // checkout pages, not secrets - the whole point of one is to be handed out -
+  // and keeping them here means the storefront cannot silently lose its buy
+  // buttons because a build environment was rebuilt without its variables. The
+  // env var still wins where it is set, which is how you point the site at test
+  // mode without touching the repo. A package with neither renders as "coming
+  // soon" rather than a dead button.
+  //
+  // Each link is FIXED PRICE at exactly the amount below, in USD. That is not
+  // cosmetic: StripePackages maps 249/499/999/2499 to coins and treats anything
+  // else as zero, so a link edited to a different amount stops crediting rather
+  // than credits the wrong thing. Adaptive Pricing is fine and cannot be turned
+  // off for Payment Links anyway - Stripe keeps the session in the integration
+  // currency and puts the buyer's local figure in presentment_details.
+  //
   // NO THOUSANDS SEPARATOR. --display is Jersey 10, whose comma renders as a
   // stray block at this size - "1,000" read as a broken character rather than as
   // a number. Four digits need no separator to be readable anyway.
   const COIN_PACKAGES = [
-    { coins: 250, price: "$2.49", env: "ARKENELLE_STRIPE_LINK_249" },
-    { coins: 500, price: "$4.99", env: "ARKENELLE_STRIPE_LINK_499" },
-    { coins: 1000, price: "$9.99", env: "ARKENELLE_STRIPE_LINK_999", best: true },
-    { coins: 2500, price: "$24.99", env: "ARKENELLE_STRIPE_LINK_2499" },
+    {
+      coins: 250, price: "$2.49", env: "ARKENELLE_STRIPE_LINK_249",
+      link: "https://buy.stripe.com/7sY6oI2eJ5w8a183n46J209",
+    },
+    {
+      coins: 500, price: "$4.99", env: "ARKENELLE_STRIPE_LINK_499",
+      link: "https://buy.stripe.com/28E8wQ6uZ1fS2yG7Dk6J20a",
+    },
+    {
+      coins: 1000, price: "$9.99", env: "ARKENELLE_STRIPE_LINK_999", best: true,
+      link: "https://buy.stripe.com/bJe3cwbPjbUwddke1I6J20b",
+    },
+    {
+      coins: 2500, price: "$24.99", env: "ARKENELLE_STRIPE_LINK_2499",
+      link: "https://buy.stripe.com/cNieVe5qVf6I2yGg9Q6J20c",
+    },
   ];
 
   const storeCards = COIN_PACKAGES.map((pkg) => {
-    const link = (process.env[pkg.env] || "").trim();
+    const link = (process.env[pkg.env] || pkg.link || "").trim();
     const unavailable = link ? "" : `<p class="muted pkg-soon">Coming soon</p>`;
     return `<article class="pkg${pkg.best ? " pkg-best" : ""}" data-pkg="${pkg.coins}">
             ${pkg.best ? `<span class="pkg-flag">Most popular</span>` : ""}
