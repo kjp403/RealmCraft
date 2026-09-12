@@ -127,6 +127,7 @@ func _on_state(data: Dictionary) -> void:
 		_name_label.text = "—"
 		_blurb_label.text = ""
 		_status_label.text = "Nothing to show."
+		_announce_selection("")
 		_action_button.disabled = true
 		_clear_button.visible = false
 		return
@@ -160,6 +161,7 @@ func _update_preview() -> void:
 	TitleVfx.apply_to_label(_preview, name)
 	_name_label.text = "%s  (%d/%d)" % [name, _idx + 1, _roster.size()]
 	_blurb_label.text = str(entry.get("blurb", ""))
+	_announce_selection(VaultGrants.title_token(name))
 	if name == _equipped:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
@@ -197,3 +199,14 @@ func _on_equipped(data: Dictionary, title: String) -> void:
 		return
 	_equipped = str(data.get("title", title))
 	_update_preview()
+
+
+## Tell the Vault shell what is highlighted, so its Buy button can price it.
+## Walks up rather than assuming a parent: this menu also runs standalone
+## (embedded == false), where there is no shell to talk to and this no-ops.
+func _announce_selection(item_id: String) -> void:
+	var host: Node = get_parent()
+	while host != null and not host.has_method("set_selection"):
+		host = host.get_parent()
+	if host != null:
+		host.set_selection(item_id)

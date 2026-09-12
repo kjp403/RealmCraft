@@ -310,6 +310,7 @@ func _update_preview() -> void:
 
 func _update_action() -> void:
 	var id: int = _current_id()
+	_announce_selection(VaultGrants.cosmetic_token(id) if id != 0 else "")
 	if id == 0:
 		return
 	if id == _equipped_for(_slot):
@@ -373,3 +374,14 @@ func _equip_error(reason: String) -> String:
 		"unknown_cosmetic":
 			return "That cosmetic no longer exists."
 	return "Couldn't equip that."
+
+
+## Tell the Vault shell what is highlighted, so its Buy button can price it.
+## Walks up rather than assuming a parent: this menu also runs standalone
+## (embedded == false), where there is no shell to talk to and this no-ops.
+func _announce_selection(item_id: String) -> void:
+	var host: Node = get_parent()
+	while host != null and not host.has_method("set_selection"):
+		host = host.get_parent()
+	if host != null:
+		host.set_selection(item_id)

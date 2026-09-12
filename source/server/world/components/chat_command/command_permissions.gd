@@ -282,10 +282,12 @@ static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstanc
 	if player.vault_skin_id != 0 and not VaultGrants.has_skin(player, player.vault_skin_id):
 		player.vault_skin_id = 0
 		changed = true
-	if player.cosmetic_id != 0:
+	if player.cosmetic_id != 0 and not VaultGrants.has_cosmetic(player, player.cosmetic_id):
 		player.cosmetic_id = 0
 		changed = true
-	if player.weapon_cosmetic_id != 0:
+	# Split for line length; same shape as the vault_skin_id check above.
+	var weapon_granted: bool = VaultGrants.has_cosmetic(player, player.weapon_cosmetic_id)
+	if player.weapon_cosmetic_id != 0 and not weapon_granted:
 		player.weapon_cosmetic_id = 0
 		changed = true
 	if TitleCatalog.is_premium_name(player.display_title) \

@@ -28,8 +28,10 @@ func data_request_handler(
 	# Unequipping is always permitted — a demoted admin must be able to take theirs off,
 	# and it can never grant anything.
 	if cosmetic_id != 0:
-		if CommandPermissions.effective_priority(pr, instance) \
-				< CommandPermissions.STAFF_PROTECT_PRIORITY:
+		# Staff OR bought. Without the second half a paying player owns a
+		# cosmetic they can never wear.
+		var staff: bool = CommandPermissions.effective_priority(pr, instance) >= CommandPermissions.STAFF_PROTECT_PRIORITY
+		if not staff and not VaultGrants.has_cosmetic(pr, cosmetic_id):
 			return {"ok": false, "reason": "not_allowed"}
 		if not Cosmetics.is_valid(cosmetic_id):
 			return {"ok": false, "reason": "unknown_cosmetic"}
@@ -46,4 +48,8 @@ func data_request_handler(
 	else:
 		pr.cosmetic_id = cosmetic_id
 		player.state_synchronizer.set_by_path(^":cosmetic_id", cosmetic_id)
+	# Persisted now that cosmetics can be BOUGHT. While the only path in was
+	# an admin command this could stay transient; a purchase that does not
+	# survive logout is a refund request.
+	instance.world_server.database.save_player(pr)
 	return {"ok": true, "cosmetic_id": cosmetic_id, "slot": slot}
