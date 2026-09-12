@@ -104,6 +104,12 @@ func gateway_request(request_id: int, request: Dictionary) -> void:
 				request_id,
 				premium_purchase_request(request)
 			)
+		"premium_credit":
+			gateway_response.rpc_id(
+				gateway_id,
+				request_id,
+				premium_credit_request(request)
+			)
 
 
 @rpc("authority", "call_remote")
@@ -314,4 +320,43 @@ func premium_purchase_request(request: Dictionary) -> Dictionary:
 			% [account, true_cost, item_id, transaction_id, int(result.get("balance", 0))]
 	)
 	return {"ok": true, "duplicate": false, "balance": int(result.get("balance", 0))}
+
+## Add coins to an account. The caller is the gateway, having already verified a
+## Stripe signature - this does not re-check that, because it cannot: the raw
+## body does not survive the RPC hop and re-signing it here would prove nothing.
+## What it DOES enforce is that the account exists and that the credit is
+## idempotent on transaction_id (the Stripe event id), so a re-delivered webhook
+## adds nothing the second time.
+func premium_credit_request(request: Dictionary) -> Dictionary:
+	if premium_database == null or premium_database.store == null:
+		return {"ok": false, "reason": "unavailable"}
+
+	var account: String = str(request.get("user_id", "")).strip_edges().to_lower()
+	var amount: int = int(request.get("amount", 0))
+	var transaction_id: String = str(request.get("transaction_id", "")).strip_edges()
+	var reason: String = str(request.get("reason", "stripe")).strip_edges()
+	if account.is_empty() or transaction_id.is_empty() or amount <= 0:
+		return {"ok": false, "reason": "bad_args"}
+
+	# A payment naming an account that does not exist is a typo in a checkout
+	# field. Minting a wallet for it would hide the problem and strand the money
+	# somewhere nobody can log in to.
+	if authentication_manager == null or not authentication_manager.username_exists(account):
+		return {"ok": false, "reason": "unknown_account"}
+
+	var result: Dictionary = premium_database.store.credit(
+		account, amount, transaction_id, reason
+	)
+	if not bool(result.get("ok", false)):
+		return {"ok": false, "reason": str(result.get("reason", "failed"))}
+	if not bool(result.get("duplicate", false)):
+		ServerLog.info(
+			"Premium: credited %d to %s (%s, tx %s); balance now %d."
+				% [amount, account, reason, transaction_id, int(result.get("balance", 0))]
+		)
+	return {
+		"ok": true,
+		"duplicate": bool(result.get("duplicate", false)),
+		"balance": int(result.get("balance", 0)),
+	}
 #endregion

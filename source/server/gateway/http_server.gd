@@ -28,6 +28,13 @@ const PEDDLER_KEY_ENV: String = "ARKENELLE_PEDDLER_WEBHOOK_KEY"
 ## sends it as `Authorization: Bearer`, this gateway compares. Same file, same
 ## single-source-of-truth shape as the peddler key above.
 const PREMIUM_KEY_ENV: String = "ARKENELLE_PREMIUM_API_KEY"
+## Stripe endpoint signing secret (whsec_...). Different from the API key:
+## this one only proves a webhook came from Stripe, and is the only thing
+## protecting a PUBLIC route that adds currency to an account.
+const STRIPE_WEBHOOK_SECRET_ENV: String = "ARKENELLE_STRIPE_WEBHOOK_SECRET"
+## The one event the storefront cares about. Subscribe the endpoint to this
+## in the Stripe dashboard; anything else is acknowledged and dropped.
+const STRIPE_EVENT_PAID: String = "checkout.session.completed"
 ## A snapshot older than this is served with stale=true so the page can say the
 ## world has gone quiet instead of counting down a cart that is long gone.
 const PEDDLER_STALE_MS: int = 15 * 60 * 1000
@@ -106,6 +113,13 @@ func _ready() -> void:
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/premium/purchase",
 		handle_premium_purchase
+	)
+	# PUBLIC, unlike the two above - Stripe has to reach it from the internet.
+	# Its security is the signature check, not the network.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/premium/stripe-webhook",
+		handle_stripe_webhook
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -452,6 +466,157 @@ func _json_status(code: int, body: Dictionary) -> Dictionary:
 		"content_type": "application/json; charset=utf-8",
 		"body": JSON.stringify(body).to_utf8_buffer(),
 	}
+#endregion
+
+
+#region Stripe webhook
+## Stripe calls this when a Checkout Session is paid. PUBLIC by necessity - it is
+## an internet callback - which is why the signature check below is the whole
+## security model and is written to fail closed.
+##
+## WHY THIS LIVES ON THE GATEWAY AND NOT THE MASTER. The master's HTTP server is
+## the admin dashboard, bound to 127.0.0.1, with no route in from outside; Caddy
+## only fronts the gateway. So the public edge is here, and the credit itself is
+## forwarded to the master over the internal RPC link - the same path
+## /v1/premium/purchase already takes.
+##
+## STATUS CODES ARE A RETRY PROTOCOL HERE, not decoration. Stripe re-delivers any
+## non-2xx for up to three days, so anything a retry could fix (master down,
+## secret not yet configured) must answer 5xx, and anything a retry can never fix
+## (bad signature, an event we do not handle) must answer 2xx or 4xx so Stripe
+## stops.
+func handle_stripe_webhook(payload: Dictionary) -> Dictionary:
+	var secret: String = OS.get_environment(STRIPE_WEBHOOK_SECRET_ENV)
+	if secret.strip_edges().is_empty():
+		# Retryable on purpose: once the secret is installed, Stripe's own retries
+		# deliver the backlog and nobody has to reconcile by hand.
+		ServerLog.error("Stripe webhook arrived but %s is not set." % STRIPE_WEBHOOK_SECRET_ENV)
+		return _json_status(503, {"ok": false, "reason": "not_configured"})
+
+	var raw_body: String = str(payload.get("__raw_body__", ""))
+	var signature: String = header_of(payload, "stripe-signature")
+	var bad: Dictionary = StripeSignature.verify(raw_body, signature, secret)
+	if not bad.is_empty():
+		# 400, not 5xx: a signature that does not verify will not verify on a
+		# retry either, and this is also what an attacker probing gets.
+		ServerLog.warn("Stripe webhook refused (%s)." % str(bad.get("reason", "?")))
+		return _json_status(400, {"ok": false, "reason": str(bad.get("reason", "invalid"))})
+
+	var parsed: Variant = JSON.parse_string(raw_body)
+	if not (parsed is Dictionary):
+		return _json_status(400, {"ok": false, "reason": "bad_json"})
+	var event: Dictionary = parsed as Dictionary
+
+	var event_type: String = str(event.get("type", ""))
+	if event_type != STRIPE_EVENT_PAID:
+		# Acknowledged and ignored. Stripe sends whatever the endpoint is
+		# subscribed to; anything else is not an error and must not be retried.
+		return _json_status(200, {"ok": true, "ignored": event_type})
+
+	# The event id is the idempotency key. Stripe re-delivers the SAME id on a
+	# retry, so this is what stops a slow response from paying out twice.
+	var event_id: String = str(event.get("id", "")).strip_edges()
+	var session: Dictionary = (event.get("data", {}) as Dictionary).get("object", {}) as Dictionary
+	if event_id.is_empty() or session.is_empty():
+		return _json_status(400, {"ok": false, "reason": "malformed_event"})
+
+	if str(session.get("payment_status", "")) != "paid":
+		# Completed but unpaid (an async method still clearing). Nothing to credit
+		# yet; the paid event follows.
+		return _json_status(200, {"ok": true, "ignored": "unpaid"})
+
+	var currency: String = str(session.get("currency", ""))
+	if not StripePackages.currency_ok(currency):
+		ServerLog.error(
+			"Stripe session %s paid in '%s', expected '%s' - NOT credited."
+				% [str(session.get("id", "")), currency, StripePackages.CURRENCY]
+		)
+		return _json_status(200, {"ok": false, "reason": "currency_mismatch"})
+
+	# Coins come from what Stripe says was CAPTURED, never from metadata a URL
+	# could have set. An unrecognised amount is worth nothing, loudly.
+	var coins: int = StripePackages.coins_for_cents(int(session.get("amount_total", 0)))
+	var account: String = _stripe_account_name(session)
+	if coins <= 0 or account.is_empty():
+		ServerLog.error(
+			"Stripe session %s: amount %s -> %d coins, account '%s'. NOT credited - "
+				% [
+					str(session.get("id", "")),
+					str(session.get("amount_total", "")),
+					coins,
+					account,
+				]
+			+ "grant by hand after checking the payment."
+		)
+		# 200: retrying cannot fix a bad amount or a missing name. A human must.
+		return _json_status(200, {"ok": false, "reason": "unmapped_payment"})
+
+	var result: Dictionary = await send_request("premium_credit", {
+		"user_id": account,
+		"amount": coins,
+		"transaction_id": event_id,
+		"reason": "stripe:" + str(session.get("id", "")),
+	}, 8.0)
+
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		# The master did not answer. Retryable, and MUST be retried - the player
+		# has paid. The event id keeps the eventual retry from double-crediting.
+		ServerLog.error("Stripe credit for %s timed out against the master." % account)
+		return _json_status(503, {"ok": false, "reason": "timeout"})
+
+	if not bool(result.get("ok", false)):
+		var reason: String = str(result.get("reason", "rejected"))
+		ServerLog.error(
+			"Stripe credit for '%s' (%d coins, %s) refused: %s"
+				% [account, coins, event_id, reason]
+		)
+		# unknown_account is the typo case: the payment is real, the name is not.
+		# 200 so Stripe stops retrying something only a human can resolve.
+		if reason == "unknown_account":
+			return _json_status(200, {"ok": false, "reason": reason})
+		return _json_status(503, {"ok": false, "reason": reason})
+
+	ServerLog.info(
+		"Stripe credited %d coins to '%s' (%s)%s."
+			% [
+				coins,
+				account,
+				event_id,
+				" [replay]" if bool(result.get("duplicate", false)) else "",
+			]
+	)
+	return _json_status(200, {"ok": true, "credited": coins})
+
+
+## The Arkenelle account this payment is for.
+##
+## client_reference_id first - it is what a Payment Link carries in its URL and
+## the field Stripe is designed for exactly this. Falls back to scanning the
+## Checkout custom fields for anything that looks like an account prompt, so a
+## link built in the dashboard with a text field also works without code changes.
+func _stripe_account_name(session: Dictionary) -> String:
+	var reference: String = str(session.get("client_reference_id", "")).strip_edges()
+	if not reference.is_empty():
+		return reference.to_lower()
+	for field: Variant in session.get("custom_fields", []):
+		var entry: Dictionary = field as Dictionary
+		var key: String = str(entry.get("key", "")).to_lower()
+		if not (key.contains("account") or key.contains("user") or key.contains("name")):
+			continue
+		var text: Dictionary = entry.get("text", {}) as Dictionary
+		var value: String = str(text.get("value", "")).strip_edges()
+		if not value.is_empty():
+			return value.to_lower()
+	return ""
+
+
+## Read one header out of the raw block the addon stamps. Lower-case name.
+static func header_of(payload: Dictionary, lower_name: String) -> String:
+	for line: String in str(payload.get("__headers__", "")).split("\r\n"):
+		var colon: int = line.find(":")
+		if colon != -1 and line.substr(0, colon).strip_edges().to_lower() == lower_name:
+			return line.substr(colon + 1).strip_edges()
+	return ""
 #endregion
 
 

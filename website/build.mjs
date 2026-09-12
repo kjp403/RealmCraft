@@ -639,6 +639,7 @@ function shell({ title, active, body, scripts = [], theme = "", extraClass = "" 
       <a href="/leaderboards/" class="${active === "boards" ? "active" : ""}">Leaderboards</a>
       <a href="${PLAY_WEB}" class="${active === "play" ? "active" : ""}">Play</a>
       <a href="${PLAY_DESKTOP}">Download</a>
+      <a href="/store/" class="${active === "store" ? "active" : ""}">Ark Coins</a>
       <a href="/donate/" class="${active === "donate" ? "active" : ""}">Donate</a>
       <a href="${DISCORD}">Discord</a>
       <a href="/terms/" class="${active === "terms" ? "active" : ""}">Terms</a>
@@ -2181,7 +2182,7 @@ function build() {
   // the previous build. That already bit once: a live fix to peddler.js looked
   // like it had never deployed, because the browser was still holding the old
   // script from before the merge.
-  const SCRIPTS = ["search.js", "leaderboards.js", "peddler.js"];
+  const SCRIPTS = ["search.js", "leaderboards.js", "peddler.js", "store.js"];
   for (const name of SCRIPTS) {
     fs.copyFileSync(path.join(SRC, name), path.join(DIST, name));
   }
@@ -2408,6 +2409,78 @@ function build() {
         <div class="pd-stock" data-pd-stock></div>
         <p class="muted pd-note" data-pd-note></p>
         <p class="muted pd-foot">Times are read from the live world and counted down in your browser. The cart's schedule is UTC, so it appears at the same hours everywhere.</p>
+      </main>`,
+    })
+  );
+
+
+  // ---- Ark Coin store -----------------------------------------------------
+  //
+  // PRICES MIRROR StripePackages.BY_AMOUNT_CENTS ON THE SERVER, which is the
+  // authority: the webhook decides how many coins a payment is worth from the
+  // amount Stripe says was captured, never from anything this page says. If the
+  // two ever disagree, the server wins and the buyer gets the server's number —
+  // so keep them in step, but nothing here can mint coins by being wrong.
+  //
+  // Payment Link URLs come from the environment at BUILD time. They are not
+  // secrets (they are public checkout pages) but they differ per Stripe account
+  // and per test/live mode, so hard-coding them would bake one environment into
+  // the repo. A package with no link renders as "coming soon" rather than a
+  // dead button.
+  const COIN_PACKAGES = [
+    { coins: 250, price: "$2.49", env: "ARKENELLE_STRIPE_LINK_249" },
+    { coins: 500, price: "$4.99", env: "ARKENELLE_STRIPE_LINK_499" },
+    { coins: 1000, price: "$9.99", env: "ARKENELLE_STRIPE_LINK_999", best: true },
+    { coins: 2500, price: "$24.99", env: "ARKENELLE_STRIPE_LINK_2499" },
+  ];
+
+  const storeCards = COIN_PACKAGES.map((pkg) => {
+    const link = (process.env[pkg.env] || "").trim();
+    const unavailable = link ? "" : `<p class="muted pkg-soon">Coming soon</p>`;
+    return `<article class="pkg${pkg.best ? " pkg-best" : ""}">
+            ${pkg.best ? `<span class="pkg-flag">Most popular</span>` : ""}
+            <h2>${pkg.coins.toLocaleString("en-GB")}</h2>
+            <p class="pkg-unit">Ark Coins</p>
+            <p class="pkg-price">${pkg.price}</p>
+            <a class="btn" data-buy data-href="${link}" aria-disabled="true" rel="noopener">Buy</a>
+            ${unavailable}
+          </article>`;
+  }).join("\n          ");
+
+  write(
+    "store/index.html",
+    shell({
+      title: "Ark Coins — Arkenelle",
+      active: "store",
+      theme: "donate",
+      scripts: ["/store.js"],
+      body: `<main class="wrap">
+        ${pageHeading("donate", "Ark Coins")}
+        <p class="muted">Ark Coins buy cosmetics in the Vault — dyes, auras and trails. They do not buy power: nothing sold for coins changes a stat, a drop rate or a fight.</p>
+
+        <form class="store-form" data-store-form>
+          <label for="store-name">Your Arkenelle account name</label>
+          <input id="store-name" data-store-name type="text" autocomplete="username" spellcheck="false" placeholder="account name" required>
+          <label for="store-confirm">Type it again to confirm</label>
+          <input id="store-confirm" data-store-confirm type="text" autocomplete="off" spellcheck="false" placeholder="account name" required>
+          <p class="store-status" data-store-status></p>
+          <p class="muted small">This is your <strong>account</strong> name — the one you log in with, not your character name. Coins are added to the account, so every character you own shares them.</p>
+        </form>
+
+        <section class="pkgs">
+          ${storeCards}
+        </section>
+
+        <section class="store-notes">
+          <h2>What to expect</h2>
+          <ul>
+            <li>Payment is handled by Stripe. We never see your card details.</li>
+            <li>Coins normally land within a minute. If they have not arrived after ten, contact us on <a href="${DISCORD}">Discord</a> with your receipt.</li>
+            <li>Coins are credited to the account name you typed above. If you mistype it the payment cannot be credited automatically — we will need your receipt to sort it out, so check it twice.</li>
+            <li>Coins have no cash value and cannot be transferred between accounts or refunded for currency.</li>
+          </ul>
+          <p class="muted">See the <a href="/terms/">terms</a> before buying.</p>
+        </section>
       </main>`,
     })
   );
@@ -2899,6 +2972,7 @@ function build() {
     { title: "Gear path", kind: "Guide", href: "/wiki/getting-started/gear/", haystack: "gear path weapon armor armour progression tier mastery unique bone spore sunsteel basilisk bronze iron steel mithril adamant runite how to get" },
     { title: "Guilds", kind: "Guide", href: "/wiki/guilds/", haystack: "guilds territory glory banner" },
     { title: "Leaderboards", kind: "Live", href: "/leaderboards/", haystack: "leaderboards pvp pve glory gold arena dungeon ranks" },
+    { title: "Ark Coins", kind: "Store", href: "/store/", haystack: "ark coins store premium currency buy cosmetics dye aura trail vault stripe" },
     { title: "Traveling Peddler", kind: "Live", href: "/peddler/", haystack: "traveling peddler cart merchant daily stock rotation shop vault key chest tracker where is the peddler" },
     { title: "Slayer", kind: "Guide", href: "/wiki/slayer/", haystack: "slayer turael durael tasks" },
   ];

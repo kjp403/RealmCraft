@@ -14,20 +14,79 @@ class_name PremiumCatalog
 ##   - SkillMasterTitles. Earned at 99. TitleCatalog's own comment says these must
 ##     never read as premium; they are not in PREMIUM and so never resolve here.
 ##
-## PRICES ARE PLACEHOLDERS. The numbers below are structure, not economy - they
-## need real values before this ships. The backend is expected to re-validate the
-## cost it is sent and reject a mismatch rather than trust us.
+## The master re-derives every price from this same file before it charges, so a
+## world running an older build cannot set its own prices - it can only be
+## refused. That makes this the single source of truth for what anything costs.
 
 const KIND_TITLE: StringName = &"title"
 const KIND_SKIN: StringName = &"skin"
 const KIND_COSMETIC: StringName = &"cosmetic"
 
-const COST_TITLE: int = 500
-const COST_SKIN: int = 750
-const COST_COSMETIC: int = 1000
+## PRICES ARE IN ARK COINS. The storefront sells 250 for $2.49 and 1000 for
+## $9.99, so a coin is worth roughly a penny and every number below is also a
+## price in pence - a 250 dye is about GBP 2.49, a 750 aura about GBP 7.49. Keep
+## that in mind when editing: these are real-money prices wearing a coin costume.
 
-## Per-token overrides for anything that should not sit at its kind's default.
-## Keyed by the same token grammar as everything else.
+## One recolour of one body. NOT a dye you own everywhere - see the note on
+## [method _skin_entry]; "Obsidian" bought for Scholar Researcher unlocks exactly
+## that pairing and nothing else, which is what makes 250 the right number rather
+## than a 16-body bundle price.
+const COST_DYE: int = 250
+
+const COST_TRAIL: int = 350
+
+## Unchanged - the brief priced dyes, auras and trails, and said nothing about
+## titles. Left where it was rather than guessed at.
+const COST_TITLE: int = 500
+
+## AURAS ARE 450-750 BY TIER, AND THIS TABLE IS THE TIER. [Cosmetics] has slots,
+## not tiers - there is no rarity field anywhere on a cosmetic - so the band has
+## to be spent somewhere explicit, and a lookup by slug is the one place an
+## editor can see every aura and its price side by side. Nothing derives from
+## this; change a number and that is the whole change.
+##
+## The grouping is by how much is going on visually: single-hue at the floor,
+## multi-hue in the middle, and the two named set-pieces at the ceiling.
+const AURA_COSTS: Dictionary = {
+	# Single hue, one idea.
+	&"aura_gold": 450,
+	&"aura_verdant": 450,
+	&"aura_toxic": 450,
+	&"aura_blood": 450,
+	# Multi-hue / animated palette.
+	&"aura_galaxy": 600,
+	&"aura_emberfrost": 600,
+	&"aura_rainbow": 600,
+	# The set-pieces.
+	&"aura_solar_eclipse": 750,
+	&"aura_runebound_titan": 750,
+}
+
+## SLOTS THE BRIEF DID NOT PRICE. Auras and trails are 18 of the 26 cosmetics;
+## these eight had no number, and shipping them unpriced would either mean they
+## silently vanish from the shop or resolve to a made-up default with nothing
+## saying so. Priced here, in one visible place, explicitly marked as needing a
+## decision rather than pretending to be settled:
+##   halo      - a ring, simpler than an aura, so at the aura floor.
+##   flourish  - a one-shot, priced with trails.
+##   departure - a one-shot, priced with trails.
+##   weapon    - one item, and it only shows on an Ascended weapon, so ceiling.
+const SLOT_COSTS: Dictionary = {
+	&"halo": 450,
+	&"flourish": 350,
+	&"departure": 350,
+	&"weapon": 750,
+}
+
+## Last-resort price for a cosmetic in a slot nobody has priced - a new slot
+## added later, say. Deliberately at the ceiling: a new cosmetic appearing in the
+## shop too expensive is a complaint, appearing too cheap is lost revenue nobody
+## notices.
+const COST_COSMETIC_FALLBACK: int = 750
+
+## Per-token overrides, for a single item that should not sit at its group's
+## price. Keyed by the same token grammar as everything else, so an entry here
+## reads as "skin:140001 costs X" and beats every rule above.
 const COST_OVERRIDES: Dictionary = {}
 
 
@@ -153,6 +212,14 @@ static func _build_title_entry(raw_name: String, blurb: String) -> Dictionary:
 	}
 
 
+## ONE ROW PER (BODY, DYE) PAIR, AND THAT IS THE PRODUCT.
+##
+## vault_id is `style * VaultSkins.STRIDE + skin_id`, so "Obsidian Scholar
+## Researcher" and "Obsidian Goblin" are different ids, different tokens,
+## different grants and different purchases. Buying one cannot unlock the other:
+## VaultGrants.has_skin() tests the exact packed id, and vault_skins.equip
+## re-checks it per equip. That is what keeps 250 a sane price - it buys one
+## look, not a dye applied across all 36 bodies.
 static func _skin_entry(vault_id: int) -> Dictionary:
 	if not VaultSkins.is_valid(vault_id):
 		return {}
@@ -163,7 +230,7 @@ static func _skin_entry(vault_id: int) -> Dictionary:
 		"vault_id": vault_id,
 		"label": VaultSkins.display_name(vault_id),
 		"blurb": VaultSkins.blurb(vault_id),
-		"cost": _cost(token, COST_SKIN),
+		"cost": _cost(token, COST_DYE),
 	}
 
 
@@ -179,7 +246,22 @@ static func _cosmetic_entry(cosmetic_id: int) -> Dictionary:
 		"item_id": token,
 		"kind": KIND_COSMETIC,
 		"cosmetic_id": cosmetic_id,
+		"slot": String(Cosmetics.slot_of(cosmetic_id)),
 		"label": Cosmetics.display_name(cosmetic_id),
 		"blurb": "",
-		"cost": _cost(token, COST_COSMETIC),
+		"cost": _cost(token, _cosmetic_base_cost(cosmetic_id)),
 	}
+
+
+## Price before any per-token override: the aura table first (it is per-item),
+## then the slot table. Looked up by SLUG rather than by id, because ids come
+## from the content registry and shift when content is added - a table keyed by
+## id would silently re-price every aura the next time a cosmetic is inserted.
+static func _cosmetic_base_cost(cosmetic_id: int) -> int:
+	var slug: StringName = Cosmetics.slug(cosmetic_id)
+	if AURA_COSTS.has(slug):
+		return int(AURA_COSTS[slug])
+	var slot: StringName = Cosmetics.slot_of(cosmetic_id)
+	if slot == &"trail":
+		return COST_TRAIL
+	return int(SLOT_COSTS.get(slot, COST_COSMETIC_FALLBACK))
