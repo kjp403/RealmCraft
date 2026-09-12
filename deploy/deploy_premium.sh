@@ -3,6 +3,11 @@
 #
 #   sudo bash /opt/arkenelle/deploy/deploy_premium.sh
 #
+# Or, without a terminal, from the "Premium secrets" GitHub Actions workflow,
+# which runs this same script with --from-env and feeds it repository secrets.
+# Same script on purpose: two ways to ship with different behaviour is how a box
+# ends up configured in a way nobody can reproduce.
+#
 # WHAT THIS IS FOR. Everything else about premium currency deploys itself:
 # update.sh already installs the Caddyfile and the systemd units on every push to
 # main. The only things it cannot do are the ones that need a SECRET, because a
@@ -41,11 +46,24 @@ if [[ ! -d "$APP_DIR/.git" ]]; then
 	exit 1
 fi
 
-# Interactive by definition: it prompts for secrets. Refuse to run headless
-# rather than silently write blank keys and leave the store quietly broken.
-if [[ ! -t 0 ]]; then
+# --from-env takes each secret from the environment variable of the same name
+# instead of prompting, so CI can run this over SSH. Anything not supplied that
+# has a generator is generated; anything already set is kept.
+FROM_ENV=0
+for arg in "$@"; do
+	case "$arg" in
+		--from-env) FROM_ENV=1 ;;
+		*) echo "Unknown argument: $arg" >&2; exit 2 ;;
+	esac
+done
+
+# Interactive by default: it prompts for secrets. Refuse to run headless rather
+# than silently write blank keys and leave the store quietly broken - a store
+# that takes money and credits nothing is worse than one that is visibly off.
+if [[ $FROM_ENV -eq 0 && ! -t 0 ]]; then
 	echo "This script prompts for secrets and needs a terminal." >&2
-	echo "Run it from an interactive shell, not from a pipe or a CI job." >&2
+	echo "Run it from an interactive shell, or pass --from-env and set the" >&2
+	echo "secrets as environment variables (see the Premium secrets workflow)." >&2
 	exit 1
 fi
 
@@ -62,6 +80,16 @@ echo
 # running. If this refuses, something has edited files on the server and that is
 # worth looking at before deploying over it.
 echo "==> 1/5 Updating $APP_DIR from origin/main"
+# NOT in --from-env mode. The Deploy VPS workflow already syncs the checkout on
+# every push, so there is nothing to do - and doing it anyway would rewrite THIS
+# FILE while bash is still reading it. Bash reads a script incrementally from a
+# byte offset, so a running script that edits itself resumes at whatever now sits
+# at that offset. Harmless while the file is unchanged, which is why it has never
+# bitten; not worth leaving armed.
+if [[ $FROM_ENV -eq 1 ]]; then
+	echo "    skipped (--from-env; the deploy workflow owns the checkout)"
+	echo "    at $(git -C "$APP_DIR" rev-parse --short HEAD)"
+else
 CURRENT_BRANCH="$(git -C "$APP_DIR" rev-parse --abbrev-ref HEAD)"
 if [[ "$CURRENT_BRANCH" != "main" ]]; then
 	echo "    checkout is on '$CURRENT_BRANCH', not main — leaving it alone." >&2
@@ -76,12 +104,14 @@ else
 		echo "    Resolve by hand; nothing else here depends on it." >&2
 	fi
 fi
+fi
 echo
 
 # --------------------------------------------------------------------------
 # 2. Secrets
 # --------------------------------------------------------------------------
 echo "==> 2/5 Secrets"
+MISSING_SECRETS=0
 install -d -m 0750 -o root -g "$APP_USER" "$ENV_DIR"
 if [[ ! -f "$ENV_FILE" ]]; then
 	install -m 0640 -o root -g "$APP_USER" \
@@ -129,6 +159,28 @@ ask_secret() {
 	local existing entered
 	existing="$(current_value "$key")"
 
+	if [[ $FROM_ENV -eq 1 ]]; then
+		# The variable of the same name, then the existing value, then a
+		# generated one. Never a blank: a key that silently ends up empty is the
+		# failure this whole script exists to avoid.
+		entered="${!key:-}"
+		if [[ -n "$entered" ]]; then
+			set_value "$key" "$entered"
+			echo "    $key set from the environment (${#entered} chars)."
+		elif [[ -n "$existing" ]]; then
+			echo "    $key already set (${#existing} chars) - kept."
+		elif [[ -n "$generator" ]]; then
+			entered="$(eval "$generator")"
+			set_value "$key" "$entered"
+			echo "    $key generated (${#entered} chars)."
+		else
+			echo "    $key is NOT set and cannot be generated. $description" >&2
+			echo "    Add it as a repository secret and re-run." >&2
+			MISSING_SECRETS=1
+		fi
+		return
+	fi
+
 	if [[ -n "$existing" ]]; then
 		echo "    $key is already set (${#existing} chars). Enter to keep it."
 	else
@@ -175,6 +227,15 @@ echo "    The endpoint URL is https://api.arkenelle.com/v1/premium/stripe-webhoo
 echo "    and it must be subscribed to checkout.session.completed."
 ask_secret ARKENELLE_STRIPE_WEBHOOK_SECRET \
 	"Endpoint signing secret, starts whsec_. NOT your API key."
+
+if [[ $MISSING_SECRETS -ne 0 ]]; then
+	# Stop BEFORE restarting anything. Half-configured is a store that takes
+	# money and credits nothing, which is the one outcome worth failing loudly
+	# for; leaving the services on their old environment is the safe state.
+	echo >&2
+	echo "    Refusing to continue with a secret missing." >&2
+	exit 1
+fi
 
 chown root:"$APP_USER" "$ENV_FILE"
 chmod 0640 "$ENV_FILE"
@@ -227,7 +288,15 @@ for unit in arkenelle-master arkenelle-gateway; do
 done
 echo
 
-read -r -p "    Restart the WORLD too? This disconnects everyone online. [y/N] " restart_world
+# Never implicit. Restarting the world drops every player, so in --from-env mode
+# it happens only when RESTART_WORLD is explicitly "y" - the workflow makes that
+# a checkbox rather than a side effect of setting a key.
+if [[ $FROM_ENV -eq 1 ]]; then
+	restart_world="${RESTART_WORLD:-n}"
+	echo "    Restart the WORLD? ${restart_world}  (from RESTART_WORLD)"
+else
+	read -r -p "    Restart the WORLD too? This disconnects everyone online. [y/N] " restart_world
+fi
 if [[ "${restart_world,,}" == "y" ]]; then
 	systemctl restart arkenelle-world
 	sleep 3
