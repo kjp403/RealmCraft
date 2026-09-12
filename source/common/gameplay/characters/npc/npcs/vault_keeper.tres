@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="NPCResource" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/npc_interaction.gd" id="1_interaction"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/cosmetics_interaction.gd" id="2_cosmetics"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/dialogue_interaction.gd" id="3_dialogue"]
+[ext_resource type="SpriteFrames" path="res://source/common/gameplay/characters/sprite_frames/wizard.tres" id="4_skin"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/npc_resource.gd" id="5_npc"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/titles_interaction.gd" id="6_titles"]
+[ext_resource type="Script" path="res://source/common/gameplay/characters/npc/interactions/skins_interaction.gd" id="7_skins"]
+
+[sub_resource type="Resource" id="TitlesInteraction_shop"]
+script = ExtResource("6_titles")
+label_override = "Titles"
+
+[sub_resource type="Resource" id="SkinsInteraction_shop"]
+script = ExtResource("7_skins")
+label_override = "Dyes"
+
+[sub_resource type="Resource" id="CosmeticsInteraction_shop"]
+script = ExtResource("2_cosmetics")
+label_override = "Cosmetics"
+
+[sub_resource type="Resource" id="Dialogue_vaultkeeper"]
+script = ExtResource("3_dialogue")
+lines = Array[String](["Ark Coins, and nothing else. No gold I could name would buy what is on these shelves, and no amount of it makes you hit harder — everything here is something to be seen wearing.", "Coins come from the website. What you do with them is your business; I only keep the shelves."])
+label_override = "What do these cost?"
+
+[resource]
+script = ExtResource("5_npc")
+npc_name = "The Vault Keeper"
+skin = ExtResource("4_skin")
+greeting = "Titles, dyes and cosmetics — each on its own shelf. Ark Coins only."
+interactions = Array[ExtResource("1_interaction")]([SubResource("CosmeticsInteraction_shop"), SubResource("SkinsInteraction_shop"), SubResource("TitlesInteraction_shop"), SubResource("Dialogue_vaultkeeper")])

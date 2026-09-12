@@ -11,7 +11,12 @@ var _dyes: Array = []
 var _base_idx: int = 0
 var _dye_idx: int = 0
 var _equipped: int = 0
+## Staff: may wear any pairing for testing. Everyone else wears what they bought,
+## and a dye is bought FOR ONE BODY - "Obsidian" on the Scholar is not the same
+## entitlement as "Obsidian" on the Knight, which is why _owned is keyed by the
+## packed id rather than by dye.
 var _allowed: bool = false
+var _owned: Dictionary[int, bool] = {}
 var _anim: StringName = &"idle"
 
 var _preview: AnimatedSprite2D
@@ -148,6 +153,9 @@ func _on_shown() -> void:
 
 func _on_state(data: Dictionary) -> void:
 	_allowed = bool(data.get("allowed", false))
+	_owned.clear()
+	for owned_v: Variant in data.get("owned", []):
+		_owned[int(owned_v)] = true
 	_equipped = int(data.get("equipped", 0))
 	if _bases.is_empty() or _dyes.is_empty():
 		_load_local_catalog()
@@ -248,7 +256,13 @@ func _update_preview() -> void:
 		_action_button.disabled = true
 	else:
 		_action_button.text = "Wear"
-		_action_button.disabled = not _allowed
+		_action_button.disabled = not _can_wear(vault_id)
+
+
+## Whether THIS pairing may be worn. vault_skins.equip re-checks it server-side;
+## a disabled button is a courtesy, not a lock.
+func _can_wear(vault_id: int) -> bool:
+	return _allowed or _owned.has(vault_id)
 
 
 func _on_action_pressed() -> void:

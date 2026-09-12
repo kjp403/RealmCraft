@@ -29,6 +29,7 @@
 [ext_resource type="Resource" uid="uid://cmarketstall001" path="res://source/common/gameplay/characters/npc/npcs/market_steward.tres" id="27_market"]
 [ext_resource type="Resource" uid="uid://cmailclerk00001" path="res://source/common/gameplay/characters/npc/npcs/mail_clerk.tres" id="28_mailclerk"]
 [ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/wayfarer.tres" id="29_wayfarer"]
+[ext_resource type="Resource" path="res://source/common/gameplay/characters/npc/npcs/vault_keeper.tres" id="30_vaultkeeper"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5v2ol"]
 size = Vector2(80, 50)
@@ -178,3 +179,8 @@ npc_resource = ExtResource("28_mailclerk")
 position = Vector2(-6, -320)
 collision_mask = 6
 npc_resource = ExtResource("29_wayfarer")
+
+[node name="VaultKeeper" parent="." instance=ExtResource("10_subvk")]
+position = Vector2(56, -536)
+collision_mask = 6
+npc_resource = ExtResource("30_vaultkeeper")

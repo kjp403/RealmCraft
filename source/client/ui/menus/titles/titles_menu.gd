@@ -7,7 +7,10 @@ extends MenuShell
 var _roster: Array = []
 var _idx: int = 0
 var _equipped: String = ""
+## Staff: may wear ANY title on the shelf. Everyone else wears what they hold,
+## which is _owned - bought here, or granted from the donation ladder.
 var _allowed: bool = false
+var _owned: Dictionary[String, bool] = {}
 
 var _preview: Label
 var _name_label: Label
@@ -122,6 +125,11 @@ func _on_shown() -> void:
 
 func _on_state(data: Dictionary) -> void:
 	_allowed = bool(data.get("allowed", false))
+	_owned.clear()
+	for owned_v: Variant in data.get("owned", []):
+		# Lower-cased to match VaultGrants.title_token, which does the same on the
+		# way into the entitlement list - "Gilded" and "gilded" are one title.
+		_owned[str(owned_v).strip_edges().to_lower()] = true
 	_equipped = str(data.get("equipped", ""))
 	_roster = data.get("titles", [])
 	if _roster.is_empty():
@@ -171,8 +179,14 @@ func _update_preview() -> void:
 		_status_label.text = "Shown on your profile and in chat."
 	else:
 		_action_button.text = "Wear"
-		_action_button.disabled = not _allowed
+		_action_button.disabled = not _can_wear(name)
 		_status_label.text = "Worn on your profile and in chat, anywhere in the world."
+
+
+## Whether THIS title may be worn. titles.equip re-checks it server-side; a
+## disabled button is a courtesy, not a lock.
+func _can_wear(title: String) -> bool:
+	return _allowed or _owned.has(title.strip_edges().to_lower())
 
 
 func _on_action_pressed() -> void:
