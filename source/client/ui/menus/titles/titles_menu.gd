@@ -134,7 +134,7 @@ func _on_state(data: Dictionary) -> void:
 	_roster = data.get("titles", [])
 	if _roster.is_empty():
 		_preview.text = "—"
-		TitleVfx.apply_to_label(_preview, "")
+		TitleVfx.apply_to_label(_preview, "", true)
 		_name_label.text = "—"
 		_blurb_label.text = ""
 		_status_label.text = "Nothing to show."
@@ -169,7 +169,11 @@ func _update_preview() -> void:
 	var entry: Dictionary = _current()
 	var name: String = str(entry.get("name", ""))
 	_preview.text = "— %s —" % name
-	TitleVfx.apply_to_label(_preview, name)
+	# preview: this label is in a menu, nowhere near the camera and never
+	# walking anywhere, so the emitter stacks must not cull themselves against
+	# either - see TitleVfx.apply_to_label. Without it the shelf shows a
+	# stripped-down version of the effect it is selling.
+	TitleVfx.apply_to_label(_preview, name, true)
 	_name_label.text = "%s  (%d/%d)" % [name, _idx + 1, _roster.size()]
 	_blurb_label.text = str(entry.get("blurb", ""))
 	_announce_selection(VaultGrants.title_token(name))

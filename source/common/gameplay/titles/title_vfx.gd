@@ -3,13 +3,15 @@ class_name TitleVfx
 ## Looks up [TitleCatalog] (supporter + earned mastery + premium). Never equips
 ## auras.
 ##
-## THREE FAMILIES, ONE PIPELINE. A supporter or premium title is one colour that
+## FOUR FAMILIES, ONE PIPELINE. A supporter or premium title is one colour that
 ## this script animates; a level-99 [SkillMasterTitles] title paints its own
 ## gradient in skill_master_title.gdshader and carries a particle layer; a VIP
 ## donation-ladder title is cast metal from vip_title.gdshader with a
-## [VipTitleEffect] emitter stack loaded from its [VipTierProfile]. The whole
-## branch between the three is which key the catalog spec carries: `fx` for
-## mastery, `vip_tier` for the ladder, neither for everything else.
+## [VipTitleEffect] emitter stack loaded from its [VipTierProfile]; a
+## colour-matched shop title is theme_title.gdshader tinted from
+## [CosmeticThemes], with an emitter stack from [TitleThemeFx]. The whole branch
+## between the four is which key the catalog spec carries: `fx` for mastery,
+## `vip_tier` for the ladder, `theme` for the shop set, none for everything else.
 ##
 ## Every title, all three families, gets the same near-black outline - see
 ## [constant OUTLINE_COLOR].
@@ -17,6 +19,7 @@ class_name TitleVfx
 const SHADER: Shader = preload("res://source/common/gameplay/titles/title_vfx.gdshader")
 const MASTERY_SHADER: Shader = preload("res://source/common/gameplay/titles/skill_master_title.gdshader")
 const VIP_SHADER: Shader = preload("res://source/common/gameplay/titles/vip_title.gdshader")
+const THEME_SHADER: Shader = preload("res://source/common/gameplay/titles/theme_title.gdshader")
 const PULSE_SCRIPT: GDScript = preload("res://source/common/gameplay/titles/title_vfx_pulse.gd")
 const PARTICLES_SCRIPT: GDScript = preload("res://source/common/gameplay/titles/title_particles.gd")
 const VIP_EFFECT_SCRIPT: GDScript = preload("res://source/common/gameplay/titles/vip_title_effect.gd")
@@ -24,6 +27,7 @@ const FALLBACK_CHAT_COLOR: String = "#c8b977"
 const PULSE_NODE := "TitleVfxPulse"
 const PARTICLES_NODE := "TitleParticles"
 const VIP_NODE := "VipTitleFx"
+const THEME_NODE := "TitleThemeFx"
 
 ## The dark backing every title outline uses.
 ##
@@ -52,10 +56,15 @@ const OUTLINE_SIZE_VIP: int = 12
 const OUTLINE_TOLERANCE: float = 0.22
 
 
-static func apply_to_label(label: Label, title: String) -> void:
+## [param preview] marks a MENU mount - the vault shelf, a shop row - rather than
+## a nameplate. It reaches the emitter stacks, which otherwise cull themselves
+## against a camera the label is nowhere near and against a wearer who never
+## walks; see [member VipTitleEffect.preview]. Default false, so a nameplate
+## keeps the culling that makes a crowded bank affordable.
+static func apply_to_label(label: Label, title: String, preview: bool = false) -> void:
 	if label == null:
 		return
-	_apply_to_canvas(label, title)
+	_apply_to_canvas(label, title, preview)
 
 
 static func apply_to_button(button: Button, title: String) -> void:
@@ -64,7 +73,7 @@ static func apply_to_button(button: Button, title: String) -> void:
 	_apply_to_canvas(button, title)
 
 
-static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
+static func _apply_to_canvas(host: CanvasItem, title: String, preview: bool = false) -> void:
 	var entry: Dictionary = TitleCatalog.spec(title)
 	var existing: Node = host.get_node_or_null(PULSE_NODE)
 	if entry.is_empty():
@@ -72,6 +81,7 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 			_drop_layer(existing)
 		_apply_particles(host, -1)
 		_apply_vip_effect(host, &"")
+		_apply_theme_effect(host, &"", false)
 		_clear_canvas(host)
 		return
 	var hex: String = str(entry.get("color", ""))
@@ -90,6 +100,13 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 	var profile: VipTierProfile = VipTierProfile.for_tier(tier)
 	if profile == null:
 		tier = &""
+	# ...and a shop set title carries a `theme`. Resolved the same defensive way
+	# the tier is: a theme key with no entry in [CosmeticThemes] degrades to the
+	# plain premium look rather than rendering a colourless one, and
+	# tools/verify_cosmetic_themes.gd is what makes that disagreement loud.
+	var theme: StringName = TitleCatalog.theme(title)
+	if not CosmeticThemes.has(theme):
+		theme = &""
 	# Optional per-title outline. Slayer Master sets one in the catalog and a VIP
 	# tier may set one in its profile; everything else falls back to the shared
 	# near-black. Whatever it resolves to has to reach BOTH the theme override and
@@ -107,7 +124,9 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 		# Both shader families paint their own colour per fragment, so the label
 		# under them is left white - tinting it would multiply a chosen palette
 		# toward one colour.
-		label.self_modulate = tint if (mastery_fx < 0 and profile == null) else Color.WHITE
+		label.self_modulate = (
+			tint if (mastery_fx < 0 and profile == null and theme == &"") else Color.WHITE
+		)
 		label.add_theme_color_override(&"font_color", Color.WHITE)
 		label.add_theme_color_override(&"font_outline_color", outline_col)
 		label.add_theme_constant_override(&"outline_size", outline_px)
@@ -122,6 +141,12 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 			mat.shader = VIP_SHADER
 			_apply_vip_uniforms(mat, profile, outline_col)
 			_apply_vip_shadow(label, profile)
+		elif theme != &"":
+			# The shop set paints its own colour per fragment from the dye table,
+			# so the label is left white above exactly like the other two shader
+			# families and the palette arrives unmultiplied.
+			mat.shader = THEME_SHADER
+			_apply_theme_uniforms(mat, theme, outline_col)
 		elif mastery_fx >= 0:
 			# Mastery looks paint their own gradient, so the label is left white
 			# above and the shader multiplies its palette in from `base`.
@@ -167,10 +192,11 @@ static func _apply_to_canvas(host: CanvasItem, title: String) -> void:
 		# blank white with nothing animating it. Falling through to the legacy path
 		# instead gives the chip the tier's accent colour, which is the right
 		# degradation for a control that cannot carry the full look.
-		var clock_driven: bool = profile != null and host is Label
+		var clock_driven: bool = (profile != null or theme != &"") and host is Label
 		existing.configure(tint, vip, style, mastery_fx, outline_col, clock_driven, outline_px)
 	_apply_particles(host, mastery_fx)
 	_apply_vip_effect(host, tier)
+	_apply_theme_effect(host, theme, preview)
 
 
 ## Every uniform vip_title.gdshader takes, fed from the tier's profile. One
@@ -202,6 +228,24 @@ static func _apply_vip_uniforms(
 	mat.set_shader_parameter(&"split_amount", profile.split_amount)
 
 
+## Every uniform theme_title.gdshader takes, fed from [CosmeticThemes].
+##
+## Same one-caller rule as [method _apply_vip_uniforms], and the same reason: a
+## uniform added to the shader and forgotten here renders at its GLSL default,
+## which for every colour in that file is flat white - and a themed title that
+## renders white is a title that lost the one thing it was bought for.
+static func _apply_theme_uniforms(
+	mat: ShaderMaterial, theme: StringName, outline_col: Color
+) -> void:
+	mat.set_shader_parameter(&"fx", CosmeticThemes.fx(theme))
+	mat.set_shader_parameter(&"core", CosmeticThemes.core(theme))
+	mat.set_shader_parameter(&"accent", CosmeticThemes.accent(theme))
+	mat.set_shader_parameter(&"pale", CosmeticThemes.pale(theme))
+	mat.set_shader_parameter(&"deep", CosmeticThemes.deep(theme))
+	mat.set_shader_parameter(&"outline", outline_col)
+	mat.set_shader_parameter(&"outline_tolerance", OUTLINE_TOLERANCE)
+
+
 ## Drop shadow under a ladder title. A theme override rather than part of the
 ## shader, because Godot draws the shadow as its own pass BEHIND both the glyph
 ## and the outline - a shader cannot put anything back there, and faking one by
@@ -231,7 +275,7 @@ static func _clear_vip_shadow(label: Label) -> void:
 ## and shrinking them with the text keeps the effect in proportion at any zoom.
 static func _apply_particles(host: CanvasItem, mastery_fx: int) -> void:
 	var existing: Node = host.get_node_or_null(PARTICLES_NODE)
-	if mastery_fx < 0:
+	if mastery_fx < 0 or not particles_enabled():
 		if existing != null:
 			_drop_layer(existing)
 		return
@@ -265,7 +309,7 @@ static func _apply_particles(host: CanvasItem, mastery_fx: int) -> void:
 ## the rest of the session.
 static func _apply_vip_effect(host: CanvasItem, tier: StringName) -> void:
 	var existing: Node = host.get_node_or_null(VIP_NODE)
-	if tier == &"":
+	if tier == &"" or not particles_enabled():
 		if existing != null:
 			_drop_layer(existing)
 		return
@@ -282,6 +326,61 @@ static func _apply_vip_effect(host: CanvasItem, tier: StringName) -> void:
 		control.add_child(layer)
 		existing = layer
 	_place_layer(control, existing)
+
+
+## Mount, re-point or tear down the emitter stack for a colour-matched title.
+##
+## A THIRD NODE beside the mastery and ladder layers, for the same reason those
+## two are separate from each other: the three are built from different data and
+## rebuild on different keys, and a player can only wear one title, so a single
+## node would have to remember which family built it in order to know whether it
+## needs replacing. Three nodes and three teardowns is the version with no state
+## to get wrong.
+##
+## The teardown is the half that matters. Switching from Iridescent Aspect to a
+## quest title must leave nothing running over the wearer's head - which is also
+## what keeps the swap from leaking a node per browse in the vault, where a
+## shopper cycles through the whole shelf in a few seconds.
+static func _apply_theme_effect(host: CanvasItem, theme: StringName, preview: bool) -> void:
+	var existing: Node = host.get_node_or_null(THEME_NODE)
+	if theme == &"" or not particles_enabled():
+		if existing != null:
+			_drop_layer(existing)
+		return
+	var control: Control = host as Control
+	if control == null:
+		return
+	var built: VipTierProfile = TitleThemeFx.profile(theme)
+	if built == null:
+		if existing != null:
+			_drop_layer(existing)
+		return
+	if existing != null and StringName(existing.get(&"tier")) != theme:
+		_drop_layer(existing)
+		existing = null
+	if existing == null:
+		var layer: Node2D = VIP_EFFECT_SCRIPT.new()
+		layer.name = THEME_NODE
+		# All three set BEFORE the node enters the tree: build() runs from _ready
+		# and reads every one of them exactly once.
+		layer.set(&"tier", theme)
+		layer.set(&"profile", built)
+		layer.set(&"preview", preview)
+		control.add_child(layer)
+		existing = layer
+	_place_layer(control, existing)
+
+
+## Whether title particle layers may run at all - the player's own switch, in
+## [TitleVfxSettings]. Checked here at MOUNT time and again on [VipTitleEffect]'s
+## LOD tick, so flipping it quiets the titles already on screen rather than only
+## the next ones.
+##
+## THE SHADERS STAY ON EITHER WAY. A player who paid for Iridescent Aspect must
+## not lose the thing they paid for by ticking a performance box; what they lose
+## is fifty OTHER people's emitters, which is where the frames actually went.
+static func particles_enabled() -> bool:
+	return TitleVfxSettings.enabled()
 
 
 ## Centre a particle layer on its label and match its laid-out size.

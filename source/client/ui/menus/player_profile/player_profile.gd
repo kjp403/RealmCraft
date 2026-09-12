@@ -394,7 +394,10 @@ func apply_profile(profile: Dictionary) -> void:
 	var title: String = str(profile.get("title", ""))
 	title_label.text = "— %s —" % title if not title.is_empty() else ""
 	title_label.visible = not title.is_empty()
-	TitleVfx.apply_to_label(title_label, title)
+	# preview: this is a MENU, so the emitter stack must not cull itself against a
+	# camera the label is nowhere near - see TitleVfx.apply_to_label. The profile
+	# is where a player looks at the title they just bought.
+	TitleVfx.apply_to_label(title_label, title, true)
 
 	# Account handle stays as the dim line under the title — it's secondary
 	# identity info ("oh, that's their main account").

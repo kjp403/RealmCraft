@@ -116,6 +116,83 @@ const PREMIUM: Dictionary = {
 		"vip": true,
 		"blurb": "Deep crimson. Not the Ruby donor pink — older, meaner.",
 	},
+	# THE COLOUR-MATCHED SET. Eight titles that each pair with an aura and a body
+	# dye of the SAME colour - see [CosmeticThemes], which owns every hex below.
+	#
+	# A `theme` key switches the render path the way `vip_tier` does: these get
+	# theme_title.gdshader plus a [TitleThemeFx] emitter stack tinted from the
+	# theme, instead of the `style` branch in title_vfx.gdshader. The `color` here
+	# is the theme's dye tint spelled out, because chat BBCode and the vault row
+	# both need a plain hex and neither can call a function; tools/
+	# verify_cosmetic_themes.gd fails the moment one of them drifts from its dye.
+	#
+	# `style` is still set, and is NOT dead: it is what a chat bracket falls back
+	# to, and what a Button host (the trophy chips on the player profile) renders
+	# with, since the theme shader is mounted on Labels only.
+	"crimson-warlord": {
+		"name": "Crimson Warlord",
+		"color": "#e03040",
+		"style": 2,
+		"vip": false,
+		"theme": &"crimson",
+		"blurb": "Banner-red, pulsing like a forge. Embers come off the letters and ash off your heels.",
+	},
+	"arcane-magus": {
+		"name": "Arcane Magus",
+		"color": "#9a78ff",
+		"style": 3,
+		"vip": false,
+		"theme": &"arcane",
+		"blurb": "Deep violet, lit from inside. Gold sigils turn slowly around the name.",
+	},
+	"glacial-sovereign": {
+		"name": "Glacial Sovereign",
+		"color": "#d8f4ff",
+		"style": 5,
+		"vip": false,
+		"theme": &"glacial",
+		"blurb": "Ice-cut letters under a halo of falling snow. Cold enough to read as weather.",
+	},
+	"verdant-warden": {
+		"name": "Verdant Warden",
+		"color": "#3cb86a",
+		"style": 6,
+		"vip": false,
+		"theme": &"verdant",
+		"blurb": "Quiet emerald shine. Leaves lift off it when you walk, and settle when you stop.",
+	},
+	"aether-storm": {
+		"name": "Aether Storm",
+		"color": "#3a78ff",
+		"style": 0,
+		"vip": false,
+		"theme": &"storm",
+		"blurb": "Blue static across the glyphs, cut by cyan bindrune arcs that never fire twice the same way.",
+	},
+	"lotus-weaver": {
+		"name": "Lotus Weaver",
+		"color": "#ff7ab0",
+		"style": 0,
+		"vip": false,
+		"theme": &"lotus",
+		"blurb": "Soft magenta bloom with blossom drifting down past the letters.",
+	},
+	"alchemical-exarch": {
+		"name": "Alchemical Exarch",
+		"color": "#f0c84a",
+		"style": 1,
+		"vip": false,
+		"theme": &"solar",
+		"blurb": "Struck gold with a sunburst standing behind it. The loudest of the set, and it knows.",
+	},
+	"iridescent-aspect": {
+		"name": "Iridescent Aspect",
+		"color": "#5ce8f0",
+		"style": 0,
+		"vip": false,
+		"theme": &"prism",
+		"blurb": "White light through a prism: the letters scroll every dye in the vault and throw sparks of each.",
+	},
 	# THE DONATION LADDER, low rung to high. Read against each other rather than
 	# on their own - a donor stepping up has to SEE the step - so these four are
 	# meant to be tuned as a set, in source/common/gameplay/titles/profiles/.
@@ -167,6 +244,14 @@ const ORDER: PackedStringArray = [
 	"voidtouched",
 	"eclipse",
 	"wyrmblood",
+	"crimson-warlord",
+	"arcane-magus",
+	"glacial-sovereign",
+	"verdant-warden",
+	"aether-storm",
+	"lotus-weaver",
+	"alchemical-exarch",
+	"iridescent-aspect",
 	"silver-contributor",
 	"golden-contributor",
 	"platinum-contributor",
@@ -253,6 +338,28 @@ static func is_vip(title: String) -> bool:
 ## from.
 static func vip_tier(title: String) -> StringName:
 	return StringName(str(spec(title).get("vip_tier", "")))
+
+
+## The [CosmeticThemes] key for a title, or &"" when it is not one of the
+## colour-matched set. The single call the VFX pipeline branches on - see
+## [TitleVfx] - so nothing downstream has to know how a themed title is spelled.
+##
+## Deliberately NOT vip_tier. The two look alike and mean opposite things: a
+## vip_tier is a donation rung and [PremiumCatalog] refuses to sell it, a theme is
+## a shop title and the whole point is that it sells. Keying one off the other
+## would either put the ladder on the shelf or take the set off it.
+static func theme(title: String) -> StringName:
+	return StringName(str(spec(title).get("theme", "")))
+
+
+## The eight themed slugs, in [constant ORDER]. Derived rather than typed a
+## second time, so the set cannot end up listed in two places that disagree.
+static func theme_slugs() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for slug: String in ORDER:
+		if not str((PREMIUM[slug] as Dictionary).get("theme", "")).is_empty():
+			out.append(slug)
+	return out
 
 
 ## The four ladder slugs, low rung to high, in [constant ORDER]. Derived rather

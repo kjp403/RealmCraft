@@ -275,6 +275,12 @@ setting_section = &"general"
 setting_property = &"weather_effects"
 hide_on_web = true
 
+[node name="TitleParticles" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
+layout_mode = 2
+setting_section = &"general"
+setting_property = &"title_particles"
+label_override = "Title particles"
+
 [node name="SlayerTracker" parent="MainContainer/Root/HBoxContainer/GraphicsSettings/ScrollContainer/VBoxContainer" instance=ExtResource("10_toggle")]
 layout_mode = 2
 setting_section = &"general"

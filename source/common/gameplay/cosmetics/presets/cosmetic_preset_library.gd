@@ -30,6 +30,14 @@ const _AURA_SOLAR_ECLIPSE: GDScript = preload("res://source/common/gameplay/cosm
 const _AURA_RUNEBOUND_TITAN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_runebound_titan_preset.gd")
 const _TRAIL_CHRONO_ECHO: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_chrono_echo_preset.gd")
 const _TRAIL_INFERNAL_CHASM: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_infernal_chasm_preset.gd")
+const _AURA_CRIMSON_EMBERS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_crimson_embers_preset.gd")
+const _AURA_ARCANE_SIGILS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_arcane_sigils_preset.gd")
+const _AURA_GLACIAL_VEIL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_glacial_veil_preset.gd")
+const _AURA_VERDANT_BLOOM: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_verdant_bloom_preset.gd")
+const _AURA_AETHER_ARCS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_aether_arcs_preset.gd")
+const _AURA_LOTUS_PETALS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_lotus_petals_preset.gd")
+const _AURA_ALCHEMICAL_SUN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_alchemical_sun_preset.gd")
+const _AURA_PRISMATIC_SHIMMER: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_prismatic_shimmer_preset.gd")
 
 ## Adding a line here upgrades one cosmetic from its strip to a node tree.
 const PRESETS: Dictionary = {
@@ -51,6 +59,18 @@ const PRESETS: Dictionary = {
 	&"aura_runebound_titan": _AURA_RUNEBOUND_TITAN,
 	&"trail_chrono_echo": _TRAIL_CHRONO_ECHO,
 	&"trail_infernal_chasm": _TRAIL_INFERNAL_CHASM,
+	# THE COLOUR-MATCHED SET. Authored as presets from the start, like the mythic
+	# tier above - their generated strips exist only to hold a registry entry. Each
+	# takes its colours from [CosmeticThemes], so the aura, the matching title and
+	# the matching body dye are the same hex and cannot drift apart.
+	&"aura_crimson_embers": _AURA_CRIMSON_EMBERS,
+	&"aura_arcane_sigils": _AURA_ARCANE_SIGILS,
+	&"aura_glacial_veil": _AURA_GLACIAL_VEIL,
+	&"aura_verdant_bloom": _AURA_VERDANT_BLOOM,
+	&"aura_aether_arcs": _AURA_AETHER_ARCS,
+	&"aura_lotus_petals": _AURA_LOTUS_PETALS,
+	&"aura_alchemical_sun": _AURA_ALCHEMICAL_SUN,
+	&"aura_prismatic_shimmer": _AURA_PRISMATIC_SHIMMER,
 }
 
 

@@ -1,8 +1,16 @@
 class_name VipTitleEffect
 extends Node2D
-## The particle layer for a VIP donation title, parented to the title Label and
-## sized to it. One node per wearer; the look comes entirely from the wearer's
-## [VipTierProfile].
+## The particle layer for a BOUGHT title, parented to the title Label and sized to
+## it. One node per wearer; the look comes entirely from a [VipTierProfile].
+##
+## TWO FAMILIES FEED IT, and they differ only in where the profile comes from.
+## The four donation rungs name a [member tier] and their profile is loaded off
+## disk; the eight colour-matched shop titles hand one in through [member profile]
+## built from [CosmeticThemes] - see [TitleThemeFx], and see that file for why a
+## themed profile cannot be a .tres. Everything below this line - the budget, the
+## span clamp, the LOD, the teardown - is the same for both, because the thing
+## that made it necessary is the same for both: these are the titles players PAY
+## for, so they are worn constantly and they crowd.
 ##
 ## SAME CONTRACT AS [TitleParticles], deliberately. Same absolute z, same
 ## build()/fit_to() pair, same CPU-only emitters, same clamp-don't-trust approach
@@ -88,6 +96,16 @@ const CROWD_RICH_LIMIT: int = 6
 ## per wearer so a bank full of them does not recompute on the same frame.
 const LOD_INTERVAL: float = 0.25
 
+## ...and the faster tick used when a title has a [member VipParticleLayer.on_move]
+## layer, because that tick is also what starts and stops its TRAIL.
+##
+## At a quarter second the trail visibly lagged the wearer - it began a stride
+## after they set off and hung on a stride after they stopped, which reads as the
+## effect being broken rather than as follow-through. A tenth is under one frame
+## of player reaction and still nowhere near per-frame cost: the tick is a
+## distance compare and one loop over at most three emitters.
+const MOVE_INTERVAL: float = 0.1
+
 ## Grow the cull rect past the label by this factor, so particles that travel
 ## outside the text are not clipped away a frame before the label is.
 const CULL_MARGIN: float = 1.6
@@ -109,16 +127,58 @@ static var _additive: CanvasItemMaterial = null
 ## Maintained by the notifier signals, so it costs nothing per frame.
 static var _on_screen: int = 0
 
+## World distance the node must travel between LOD ticks to count as moving, for
+## the layers flagged [member VipParticleLayer.on_move].
+##
+## Low, because the two cases are far apart: a nameplate drifts a fraction of a
+## pixel while its owner stands still, and a walking player covers several times
+## this in one [constant MOVE_INTERVAL] tick. Anything in between - a knockback, a
+## slow drift - starting the trail is the harmless side of the error.
+const MOVE_EPSILON: float = 1.5
+
 ## The tier key, matching [member VipTierProfile.tier]. Set BEFORE the node
 ## enters the tree; [method build] reads it once and the emitter set is not
 ## designed to be mutated afterwards.
+##
+## For a themed shop title this carries the [CosmeticThemes] key instead, and
+## [member profile] is set alongside it. It is not looked up in that case - it is
+## only the identity [TitleVfx] compares to decide whether a swap needs a rebuild,
+## and one field serving both families is what keeps that comparison single.
 var tier: StringName = &""
+
+## Profile injected directly, INSTEAD of loading [member tier] off disk. Set it
+## before the node enters the tree, exactly like [member tier].
+##
+## The themed titles need this because their colours are derived from the dye
+## table at runtime - a .tres would have to hold a second copy of every hex, which
+## is the drift the whole theme system exists to prevent. See [TitleThemeFx].
+var profile: VipTierProfile = null
+
+## Mounted in a MENU rather than on a nameplate. Set before the node enters the
+## tree, like the two above.
+##
+## A preview lives in UI space, where global_position is a screen coordinate and
+## the distance to the camera's world centre is meaningless - and usually
+## enormous, so [method _near_camera] culls the detail layers and the shop shows a
+## stripped-down version of the thing it is trying to sell. Exactly the trap
+## [CosmeticPreset] documents for the aura wardrobe; the answer is the same one.
+##
+## It also keeps the [member VipParticleLayer.on_move] layers running: a preview
+## label does not walk anywhere, and a Warden's leaves must not be missing from
+## the only place a buyer can look at them before paying.
+var preview: bool = false
 
 var _profile: VipTierProfile = null
 var _extent: Vector2 = REF_EXTENT
 var _built: bool = false
 ## Emitters flagged [member VipParticleLayer.detail], in build order.
 var _detail: Array[CPUParticles2D] = []
+## Emitters flagged [member VipParticleLayer.on_move].
+var _on_move: Array[CPUParticles2D] = []
+## Where this node was on the previous LOD tick, for the movement test. Only
+## sampled when a layer actually asked for it.
+var _last_pos: Vector2 = Vector2.ZERO
+var _moving: bool = true
 var _all: Array[CPUParticles2D] = []
 ## Widest span_scale any layer asked for, so the cull rect can cover the whole
 ## drifting field rather than just the text it hangs off.
@@ -156,7 +216,10 @@ func build() -> void:
 	_built = true
 	z_as_relative = false
 	z_index = NAMEPLATE_Z
-	_profile = VipTierProfile.for_tier(tier)
+	# Injected first, tier lookup second. A caller that hands one in has already
+	# resolved it and must not be second-guessed; a caller that does not is a
+	# donation rung and gets the on-disk profile as before.
+	_profile = profile if profile != null else VipTierProfile.for_tier(tier)
 	if _profile == null:
 		return
 	var layers: Array[VipParticleLayer] = _profile.layers
@@ -197,6 +260,10 @@ func _apply_world_scale() -> void:
 		return
 	var s: float = maxf(global_scale.x, 0.01)
 	for p: CPUParticles2D in _all:
+		# A local-space layer is already inside this node's transform. Scaling it
+		# here as well would square the nameplate's 0.2 and leave it invisible.
+		if bool(p.get_meta(&"local", false)):
+			continue
 		var sc: Vector2 = p.get_meta(&"base_scale", Vector2(0.3, 0.8))
 		var vel: Vector2 = p.get_meta(&"base_vel", Vector2(0.0, 20.0))
 		p.scale_amount_min = sc.x * s
@@ -264,7 +331,16 @@ func _emitter(layer: VipParticleLayer) -> CPUParticles2D:
 	# big. Setting local_coords = true fixed the size and killed the trail. The
 	# answer is to keep global space and pre-multiply the values that are now in
 	# WORLD units by that same scale; see _apply_world_scale().
-	p.local_coords = false
+	#
+	# ...unless the layer asked to stay in formation around the text. See
+	# VipParticleLayer.local_space, and note that _apply_world_scale skips these:
+	# in local space the node's transform applies to the particles already, so
+	# pre-multiplying by it would scale everything twice.
+	p.local_coords = layer.local_space or not is_zero_approx(layer.orbit)
+	if not is_zero_approx(layer.orbit):
+		p.orbit_velocity_min = layer.orbit
+		p.orbit_velocity_max = layer.orbit
+	p.set_meta(&"local", p.local_coords)
 	p.set_meta(&"base_scale", Vector2(layer.scale_min, layer.scale_max))
 	p.set_meta(&"base_vel", Vector2(layer.velocity_min, layer.velocity_max))
 	p.set_meta(&"base_grav", layer.gravity)
@@ -278,6 +354,12 @@ func _emitter(layer: VipParticleLayer) -> CPUParticles2D:
 	_all.append(p)
 	if layer.detail:
 		_detail.append(p)
+	if layer.on_move:
+		_on_move.append(p)
+		# Starts stopped: a title that puffs out a batch of leaves the instant it
+		# is put on, while its wearer stands still, reads as a glitch. The first
+		# LOD tick turns it on if they are actually walking.
+		p.emitting = preview
 	return p
 
 
@@ -402,7 +484,10 @@ func _build_lod() -> void:
 
 	_lod_timer = Timer.new()
 	_lod_timer.name = "Lod"
-	_lod_timer.wait_time = LOD_INTERVAL
+	# A title with a trail ticks faster, because this timer is what starts and
+	# stops that trail as well as what thins the layer set. Everything else stays
+	# on the lazy quarter second.
+	_lod_timer.wait_time = MOVE_INTERVAL if not _on_move.is_empty() else LOD_INTERVAL
 	_lod_timer.timeout.connect(_tick_lod)
 	add_child(_lod_timer)
 
@@ -416,7 +501,10 @@ func _build_lod() -> void:
 func _start_lod() -> void:
 	if _lod_timer == null or not is_inside_tree():
 		return
-	_lod_timer.start(randf_range(LOD_INTERVAL * 0.25, LOD_INTERVAL))
+	# Staggered against this timer's OWN interval, not the shared constant: a
+	# trailing title ticks at MOVE_INTERVAL, and seeding it with up to a quarter
+	# second of delay would hold its trail off for the first two ticks.
+	_lod_timer.start(randf_range(_lod_timer.wait_time * 0.25, _lod_timer.wait_time))
 
 
 func _exit_tree() -> void:
@@ -428,7 +516,9 @@ func _exit_tree() -> void:
 
 func _on_screen_entered() -> void:
 	_visible = true
-	if not _counted:
+	# A menu preview is not one of the titles crowding a bank, and counting it
+	# would spend a slot of the crowd budget on a label nobody else can see.
+	if not _counted and not preview:
 		_counted = true
 		_on_screen += 1
 	_start_lod()
@@ -458,18 +548,38 @@ func _release_count() -> void:
 func _tick_lod() -> void:
 	if not _visible:
 		return
+	# The player's own switch, re-read here rather than only at mount time: a
+	# title already over someone's head must go quiet when it is turned off, not
+	# at their next zone change. [TitleVfx] drops the NODES on the next apply;
+	# this is what stops the emitting in the meantime.
+	var allowed: bool = TitleVfxSettings.enabled()
 	var rich: bool = _on_screen <= CROWD_RICH_LIMIT and _near_camera()
-	# Restart anything the cull stopped. Guarded rather than assigned blind:
-	# writing `emitting` is not free on CPUParticles2D and this runs four times a
-	# second per wearer.
+	_moving = _sample_movement()
+	# One pass over every emitter, deciding what it should be doing from all three
+	# gates at once. Assigned only on a CHANGE: writing `emitting` is not free on
+	# CPUParticles2D and this runs four times a second per wearer.
 	for p: CPUParticles2D in _all:
-		if not p.emitting and (rich or not _detail.has(p)):
-			p.emitting = true
-	if rich == _rich:
-		return
+		var want: bool = allowed \
+			and (rich or not _detail.has(p)) \
+			and (_moving or not _on_move.has(p))
+		if p.emitting != want:
+			p.emitting = want
 	_rich = rich
-	for p: CPUParticles2D in _detail:
-		p.emitting = rich
+
+
+## Has this title moved since the last tick? Only asked when a layer cares - the
+## whole point of the flag is that a tier without one pays nothing for it.
+##
+## Previews always count as moving; see [member preview].
+func _sample_movement() -> bool:
+	if _on_move.is_empty():
+		return true
+	if preview or not is_inside_tree():
+		return true
+	var now: Vector2 = global_position
+	var moved: bool = now.distance_to(_last_pos) > MOVE_EPSILON
+	_last_pos = now
+	return moved
 
 
 ## True when the camera is close enough for the ambient layers to be worth
@@ -478,6 +588,10 @@ func _tick_lod() -> void:
 ## quietly showing a stripped-down version there would make every proof capture
 ## and every screenshot lie about what ships.
 func _near_camera() -> bool:
+	# A menu mount is not anywhere near the camera and never will be - see
+	# [member preview]. Asking would cull the shop's own preview.
+	if preview:
+		return true
 	if not is_inside_tree():
 		return true
 	var view: Viewport = get_viewport()

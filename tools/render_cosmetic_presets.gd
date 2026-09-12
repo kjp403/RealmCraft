@@ -16,6 +16,11 @@ extends Node
 
 const OUT_AURAS: String = "res://previews/cosmetic-auras.png"
 const OUT_TRAILS: String = "res://previews/cosmetic-trails.png"
+## The colour-matched set gets its own sheet rather than being appended to the
+## aura one: these eight are meant to be judged AGAINST EACH OTHER - they share a
+## floor ring by design, and the question a reviewer is asking is whether eight
+## variations on it still read as eight different things.
+const OUT_THEMES: String = "res://previews/cosmetic-theme-auras.png"
 const ZOOM: int = 3
 const VIEW: Vector2i = Vector2i(400, 150)
 
@@ -23,6 +28,8 @@ const AURAS: Array[String] = [
 	"aura_toxic", "aura_verdant", "aura_blood", "aura_emberfrost",
 	"aura_galaxy", "aura_gold", "aura_solar_eclipse", "aura_runebound_titan",
 ]
+## Built from CosmeticThemes rather than typed out, so a theme added later
+## appears in the proof automatically instead of being silently left out of it.
 const TRAILS: Array[String] = [
 	"trail_toxic", "trail_blood", "trail_galaxy", "trail_gold", "trail_storm",
 	"trail_chrono_echo", "trail_infernal_chasm",
@@ -55,8 +62,16 @@ func _canvas() -> Vector2:
 
 func _go() -> void:
 	await _pass(AURAS, OUT_AURAS, false)
+	await _pass(_theme_auras(), OUT_THEMES, false)
 	await _pass(TRAILS, OUT_TRAILS, true)
 	get_tree().quit()
+
+
+func _theme_auras() -> Array[String]:
+	var out: Array[String] = []
+	for slug: StringName in CosmeticThemes.aura_slugs():
+		out.append(String(slug))
+	return out
 
 
 func _pass(slugs: Array[String], out: String, walking: bool) -> void:

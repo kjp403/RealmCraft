@@ -56,6 +56,19 @@ enum Span { BOX, TOP, BOTTOM, ENDS }
 ## the ambient dust, the second smoke bank - never its signature layer.
 @export var detail: bool = false
 
+## ONLY EMITS WHILE THE WEARER IS MOVING. Leaves lifting off a Warden's title as
+## he walks and settling when he stops; nothing on the donation ladder uses it.
+##
+## Sampled from the node's own world position on the LOD tick, not from the
+## player - the label is carried by the nameplate, so its position IS the wearer's
+## and there is no character to find. The tick is four times a second, so a layer
+## flagged here keeps emitting for up to a quarter second after the wearer stops,
+## which is shorter than any of these particles live and reads as follow-through.
+##
+## Never flag a signature layer with this: a title that renders nothing while its
+## owner stands in a bank is a title nobody can see them wearing.
+@export var on_move: bool = false
+
 @export_group("Motion")
 @export var direction: Vector2 = Vector2(0.0, -1.0)
 @export_range(0.0, 180.0, 1.0) var spread: float = 30.0
@@ -66,6 +79,24 @@ enum Span { BOX, TOP, BOTTOM, ENDS }
 ## Degrees per second, applied as a symmetric +/- range so a layer of leaves or
 ## shards does not all spin the same way.
 @export_range(0.0, 360.0, 1.0) var angular_velocity: float = 0.0
+
+## Full turns per second around the emitter. Non-zero makes the layer CIRCLE the
+## title instead of drifting off it - the Magus's sigils, and nothing else so far.
+##
+## Implies [member local_space]: orbital velocity is measured from the emission
+## origin, and in world space that origin is wherever the wearer happened to be
+## standing when each particle was born, so a walking player leaves a trail of
+## little circles behind them instead of carrying a ring of sigils.
+@export_range(-1.5, 1.5, 0.01) var orbit: float = 0.0
+
+## Bolt this layer to the label instead of leaving its particles in world space.
+##
+## The default (world space) is what makes a layer TRAIL behind a walking
+## nameplate, and it is right for almost everything here. Turn it on only for a
+## layer that has to stay in formation around the text - see [member orbit].
+## [VipTitleEffect] skips its world-scale pre-multiply for these, because in local
+## space the node's own transform already applies.
+@export var local_space: bool = false
 
 @export_group("Size")
 @export var scale_min: float = 0.3

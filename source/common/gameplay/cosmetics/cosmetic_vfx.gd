@@ -117,9 +117,17 @@ func _stop_replay() -> void:
 
 ## Tear down a mounted preset. queue_free rather than free: a preset may be
 ## mid-frame in its own _process when a player swaps cosmetics from the vault.
+##
+## UNPARENTED FIRST, THEN QUEUED. queue_free() alone leaves the node a child until
+## the end of the frame, so the replacement mounted a line later joins a parent
+## that still holds the old one - both draw for that frame, and the new one is
+## silently renamed (Godot will not allow two children called "Preset"), which
+## means anything addressing it by name for the rest of the frame finds the dying
+## one instead. Same fix, same reason, as [method TitleVfx._drop_layer].
 func _clear_preset() -> void:
 	if _preset == null:
 		return
+	remove_child(_preset)
 	_preset.queue_free()
 	_preset = null
 

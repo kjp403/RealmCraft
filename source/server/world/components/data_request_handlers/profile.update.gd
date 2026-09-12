@@ -28,9 +28,21 @@ func data_request_handler(
 		var requested_title: String = str(args["display_title"])
 		if not requested_title.is_empty() and not player.titles_unlocked.has(requested_title):
 			return {"ok": false, "reason": "title_locked"}
+		# STAFF OR BOUGHT, and the second half is not optional any more. A premium
+		# name used to mean "unreleased, staff testing only", so staff rank was the
+		# whole gate. They are SOLD now, and titles.state's own docs say the
+		# profile dropdown is where a bought title is worn from - so without this
+		# a paying customer could buy a title, see it in their own dropdown, and be
+		# refused with "title_locked" every time they picked it.
+		#
+		# The same pair titles.equip checks, and the same one
+		# CommandPermissions.strip_unreleased_vfx treats as a gift rather than a
+		# leak: titles_unlocked above proves the character has it, granted_vfx
+		# proves they were entitled to it.
 		if not requested_title.is_empty() and TitleCatalog.is_premium_name(requested_title):
-			if CommandPermissions.effective_priority(player, instance) \
-					< CommandPermissions.STAFF_PROTECT_PRIORITY:
+			var staff: bool = CommandPermissions.effective_priority(player, instance) \
+					>= CommandPermissions.STAFF_PROTECT_PRIORITY
+			if not staff and not VaultGrants.has_title(player, requested_title):
 				return {"ok": false, "reason": "title_locked"}
 		new_title = requested_title
 

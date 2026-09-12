@@ -42,6 +42,19 @@ func _initialize() -> void:
 			_check(int(entry.get("cost", 0)) > 0,
 				"master prices %s" % token, "cost=%d" % int(entry.get("cost", 0)))
 
+	# THE COLOUR-MATCHED SET, both halves. The title needs no registry and the aura
+	# needs two - the cosmetics index AND the price table - so a set whose aura is
+	# refused here sells its title on the master and nothing else, which is the
+	# same half-a-product failure this tool was written for.
+	for key: StringName in CosmeticThemes.keys():
+		var slug: String = CosmeticThemes.title_slug(key)
+		var title: String = str(TitleCatalog.premium_entry(slug).get("name", ""))
+		_check(not PremiumCatalog.resolve(VaultGrants.title_token(title)).is_empty(),
+			"master resolves the %s title" % key)
+		var aura: int = ContentRegistryHub.id_from_slug(&"cosmetics", CosmeticThemes.aura_slug(key))
+		_check(aura > 0 and not PremiumCatalog.resolve(VaultGrants.cosmetic_token(aura)).is_empty(),
+			"master resolves the %s aura" % key)
+
 	# Junk must still be refused - the fix must not turn resolve into a rubber stamp.
 	for junk: String in ["skin:0", "skin:999999", "cosmetic:0", "title:nope", ""]:
 		_check(PremiumCatalog.resolve(junk).is_empty(), "master refuses '%s'" % junk)
