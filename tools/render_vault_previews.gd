@@ -60,6 +60,7 @@ func _go() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
+	_fake_wearer()
 	_feed_panels()
 	_feed_shell()
 
@@ -79,6 +80,32 @@ func _go() -> void:
 
 	print("done -> ", _out_abs)
 	get_tree().quit()
+
+
+## A stand-in local player, so the Cosmetics tab draws a body under the effect
+## and a title over it.
+##
+## The wardrobe reads the wearer off [member ClientState.local_player] - that is
+## the whole point of the preview, an aura shown on the skin and dye the buyer is
+## actually wearing - and there is no world here to spawn one. Without this the
+## panel falls back to the starter body with no title, which is a true picture of
+## the fallback and a poor one of the feature.
+##
+## DELIBERATELY LEFT OUT OF THE TREE, and it logs one error for it: skin_id's
+## setter refreshes the body visual, which asks `multiplayer` whether this is the
+## server, and that is null outside a tree - so the run prints "Cannot call
+## method 'is_server' on a null value" and carries on. The assignment itself
+## lands before the refresh, which is all the wardrobe reads.
+##
+## PARENTING IT IS WORSE, not better: a LocalPlayer in a tree starts running its
+## real _process against a camera, a state machine and a stat block that do not
+## exist here, and the run fills with a dozen null errors instead of one.
+func _fake_wearer() -> void:
+	var wearer: LocalPlayer = LocalPlayer.new()
+	wearer.skin_id = PlayerSkins.starter_skin_id()
+	wearer.vault_skin_id = 0
+	wearer.display_title = "Emberwake"
+	ClientState.local_player = wearer
 
 
 ## Hand each panel the state a live server would have sent. Called directly

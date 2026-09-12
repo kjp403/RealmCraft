@@ -45,22 +45,32 @@ Files: `source/server/gateway/http_server.gd`,
 
 ## Still to do
 
-**In-game preview of cosmetics before purchase.** Kyle asked for this last; it
-is NOT started. What exists today, so nobody rebuilds it:
+Nothing known. The cosmetic preview below was the last item; re-read the PR
+before assuming otherwise.
 
-| Vault tab | Preview today | Gap |
-|---|---|---|
-| Cosmetics (`cosmetics_menu.gd`) | Real `CosmeticVfx`, walks a circle so trails render | **No character body under the effect** |
-| Skins (`skins_menu.gd`) | `AnimatedSprite2D` body × dye | No VFX on it |
-| Titles (`titles_menu.gd`) | A styled `Label` | Text only |
+### Done: preview a cosmetic on your own character (commit after `10408789`)
 
-All three already show items the player does **not** own (the server sends
-for-sale + owned; staff get everything), so "can I see it before I buy" is
-really "can I see it **on a character**, and all together".
+The Cosmetics tab drew the effect in an empty box. It now draws the buyer's own
+body under it — their skin and their prestige dye, read off
+`ClientState.local_player` — and their worn title over it, so one box shows the
+whole look. The body sits at the character scene's own `offset = Vector2(0, -30)`
+so its feet land where every preset is anchored; it plays `run` while a trail
+preset walks the circle, `idle` otherwise.
 
-Ask Kyle which he meant before building — the options put to him were: a body in
-the menu preview, a real try-on in the world, or leaving it as three separate
-previews. If his answer is not in the transcript, ask again rather than guess.
+The other two tabs were already adequate and were not touched: Skins previews
+the body and dye it sells, Titles previews the title it sells. If Kyle wants the
+worn aura shown behind the Skins preview too, that is the obvious follow-up.
+
+Screenshot it with:
+
+```
+<godot> --path . --mode=client res://tools/render_vault_previews.tscn
+```
+
+which writes `previews/vault_{titles,skins,cosmetics}.png`. It needs no server —
+it injects the state a live one would send, and `_fake_wearer()` stands in for
+the local player. **It prints exactly one `is_server` script error by design**;
+see the comment on that function before trying to "fix" it.
 
 ## How to run and verify locally (Windows)
 
