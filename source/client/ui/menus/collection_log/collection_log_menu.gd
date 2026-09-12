@@ -471,7 +471,9 @@ func _make_title_plaque(row: Dictionary) -> Control:
 	var apply: Callable = func() -> void:
 		await get_tree().process_frame
 		if is_instance_valid(label):
-			TitleVfx.apply_to_label(label, title)
+			# preview: a menu mount, so the emitters are not culled against the
+			# world camera - see TitleVfx.apply_to_label.
+			TitleVfx.apply_to_label(label, title, true)
 	apply.call_deferred()
 	return plaque
 

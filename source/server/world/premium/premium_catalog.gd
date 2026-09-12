@@ -37,7 +37,23 @@ const COST_TRAIL: int = 350
 
 ## Unchanged - the brief priced dyes, auras and trails, and said nothing about
 ## titles. Left where it was rather than guessed at.
+##
+## IT IS ALSO THE CEILING. No title may cost more than this; the colour-matched
+## set below sits under it and tools/verify_cosmetic_themes.gd fails the build if
+## anything creeps past.
 const COST_TITLE: int = 500
+
+## The eight colour-matched titles ([CosmeticThemes]). Under the plain premium
+## price on purpose: those are one-off names, these come in a SET, and the set is
+## meant to be bought twice - a title and its matching aura - so the title half
+## has to leave room in the wallet for the aura half.
+const COST_TITLE_THEMED: int = 350
+
+## ...except the multi-colour one, which is at the ceiling because it is the only
+## title in the game that carries every dye at once and is obviously the one
+## people will want. Named by THEME rather than by token: a token is a lower-cased
+## display name, so renaming the title would silently take the price with it.
+const THEMED_TITLE_AT_CEILING: StringName = &"prism"
 
 ## EVERY COSMETIC, PRICED BY SLUG. [Cosmetics] has slots, not tiers - there is no
 ## rarity field anywhere on one - so the band has to be spent somewhere explicit,
@@ -67,6 +83,22 @@ const COSMETIC_COSTS: Dictionary = {
 	# The set-pieces.
 	&"aura_solar_eclipse": 750,
 	&"aura_runebound_titan": 750,
+
+	# --- THE COLOUR-MATCHED SET ([CosmeticThemes]). One per theme, each pairing
+	# with a title and a body dye of the same colour.
+	#
+	# Priced by VISUAL INTENSITY inside the aura band, exactly like the rows
+	# above: how much of the screen it occupies, how many layers are running, and
+	# whether it is one hue or several. A buyer standing next to two of these
+	# should be able to see which one cost more.
+	&"aura_verdant_bloom": 500,      # two quiet layers, one hue
+	&"aura_lotus_petals": 500,       # falling petals, one hue
+	&"aura_glacial_veil": 550,       # ground mist plus drifting snow
+	&"aura_crimson_embers": 600,     # embers and a lit floor ring
+	&"aura_aether_arcs": 600,        # arcs firing, two hues
+	&"aura_arcane_sigils": 650,      # a turning sigil circle, gold on violet
+	&"aura_alchemical_sun": 650,     # a standing sunburst
+	&"aura_prismatic_shimmer": 750,  # every dye at once - the set-piece of the set
 
 	# --- Trails. Flat, as briefed: a trail only renders while you are moving, so
 	# the elaborate ones are not on screen appreciably more than the plain ones.
@@ -255,14 +287,38 @@ static func _build_title_entry(raw_name: String, blurb: String) -> Dictionary:
 	if not String(TitleCatalog.vip_tier(title)).is_empty():
 		return {} # donation ladder - not sold, see the class docs
 	var token: String = VaultGrants.title_token(title)
-	return {
+	var entry: Dictionary = {
 		"item_id": token,
 		"kind": KIND_TITLE,
 		"title": title,
 		"label": title,
 		"blurb": blurb,
-		"cost": _cost(token, COST_TITLE),
+		"cost": _cost(token, _title_base_cost(title)),
 	}
+	# The theme, so the Vault row can pair a title with its matching aura instead
+	# of making a shopper work the pairing out from the names. Added only when
+	# there IS one: roster() is ~630 rows on one message and an empty string on
+	# every title is payload nobody reads.
+	var theme: StringName = TitleCatalog.theme(title)
+	if theme != &"":
+		entry["theme"] = String(theme)
+	return entry
+
+
+## Price before any per-token override. A colour-matched title is cheaper than a
+## plain premium one - see [constant COST_TITLE_THEMED] - and the multi-colour one
+## is back at the ceiling.
+##
+## Keyed off the THEME rather than off a table of tokens, for the same reason the
+## cosmetic prices are keyed off slugs: a token is a lower-cased display name, so
+## a table of them silently re-prices a title the day somebody renames it.
+static func _title_base_cost(title: String) -> int:
+	var theme: StringName = TitleCatalog.theme(title)
+	if theme == &"":
+		return COST_TITLE
+	if theme == THEMED_TITLE_AT_CEILING:
+		return COST_TITLE
+	return COST_TITLE_THEMED
 
 
 ## ONE ROW PER (BODY, DYE) PAIR, AND THAT IS THE PRODUCT.

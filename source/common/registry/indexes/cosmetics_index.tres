@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1788121281
-next_id = 27
+version = 1789206331
+next_id = 35
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -137,4 +137,44 @@ entries = Array[Dictionary]([{
 &"id": 26,
 &"path": "res://source/common/gameplay/cosmetics/frames/trail_infernal_chasm.tres",
 &"slug": &"trail_infernal_chasm"
+}, {
+&"hash": "8bc58180240e0802fcdd4fa355e79512ea90fb4ae5865ad6d07178cf0c0a1f5a",
+&"id": 27,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_aether_arcs.tres",
+&"slug": &"aura_aether_arcs"
+}, {
+&"hash": "43891ccc252fd06e742c80e1a58097ca041b184f8770fc6eaec305a07a3b42b6",
+&"id": 28,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_alchemical_sun.tres",
+&"slug": &"aura_alchemical_sun"
+}, {
+&"hash": "cca71d0c749b6cd8d4475a2ea6f8b96edd4b0e3aca5e5b8ff2e55000f4b0f4e6",
+&"id": 29,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_arcane_sigils.tres",
+&"slug": &"aura_arcane_sigils"
+}, {
+&"hash": "0ab6b3a4312036bfc51d2c3b07b5acf416aa911b1115fdea38b03ddc50ecfc12",
+&"id": 30,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_crimson_embers.tres",
+&"slug": &"aura_crimson_embers"
+}, {
+&"hash": "b19f4824d091cd03cdca13746e0ef45dadaa9938e1e7c022f34dce125dcefdfa",
+&"id": 31,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_glacial_veil.tres",
+&"slug": &"aura_glacial_veil"
+}, {
+&"hash": "ed1df95fd32216a9dd677eba59912503e36f9f2812df785f098546cea309a35d",
+&"id": 32,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_lotus_petals.tres",
+&"slug": &"aura_lotus_petals"
+}, {
+&"hash": "8afa50caa85d7ad9dd1bd720b21acf5f0f09923de1c709350efce785ac54e4da",
+&"id": 33,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_prismatic_shimmer.tres",
+&"slug": &"aura_prismatic_shimmer"
+}, {
+&"hash": "658c5d218598e1fdca4bf608d14cb7501a18e4d8a3fb2aec7d92f4581a770ea5",
+&"id": 34,
+&"path": "res://source/common/gameplay/cosmetics/frames/aura_verdant_bloom.tres",
+&"slug": &"aura_verdant_bloom"
 }])

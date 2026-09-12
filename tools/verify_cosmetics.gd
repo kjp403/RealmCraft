@@ -34,7 +34,10 @@ func _extends_preset(script: GDScript) -> bool:
 func _initialize() -> void:
 	print("-- registry --")
 	var ids: Array[int] = Cosmetics.ids()
-	_check(ids.size() == 26, "26 cosmetics registered (got %d)" % ids.size())
+	# 26 + the eight colour-matched auras (CosmeticThemes). This number is a
+	# tripwire for content VANISHING, so it is bumped deliberately when content is
+	# added and never loosened into a >= .
+	_check(ids.size() == 34, "34 cosmetics registered (got %d)" % ids.size())
 
 	var slots: Dictionary = {}
 	var bad_frames: PackedStringArray = []
@@ -102,7 +105,8 @@ func _initialize() -> void:
 			bad_scripts.append(String(slug))
 	_check(unknown_slugs.is_empty(), "every preset slug is a real cosmetic %s" % str(unknown_slugs))
 	_check(bad_scripts.is_empty(), "every preset extends CosmeticPreset %s" % str(bad_scripts))
-	_check(CosmeticPresetLibrary.PRESETS.size() == 15, "15 presets registered (got %d)"
+	# 15 + one per colour-matched aura.
+	_check(CosmeticPresetLibrary.PRESETS.size() == 23, "23 presets registered (got %d)"
 		% CosmeticPresetLibrary.PRESETS.size())
 
 	# The two render paths must stay mutually exclusive and correctly routed.
@@ -209,14 +213,14 @@ func _initialize() -> void:
 	)
 
 	print("-- titles --")
-	# premium_slugs() is 17: the 13 shop titles PLUS the four donation rungs,
-	# which share the PREMIUM dict and are told apart by vip_tier. The 13 is
+	# premium_slugs() is 25: the 21 shop titles PLUS the four donation rungs,
+	# which share the PREMIUM dict and are told apart by vip_tier. The 21 is
 	# what is actually for sale, so subtract the ladder rather than loosening
 	# the number - this failed for months reading as "someone deleted four
 	# titles" when nothing had been deleted at all.
 	_check(
-		TitleCatalog.premium_slugs().size() - TitleCatalog.vip_tier_slugs().size() == 13,
-		"13 buyable premium titles in the vault roster"
+		TitleCatalog.premium_slugs().size() - TitleCatalog.vip_tier_slugs().size() == 21,
+		"21 buyable premium titles in the vault roster"
 	)
 	_check(TitleCatalog.has_vfx("Sovereign"), "Sovereign has title-text VFX")
 	_check(TitleCatalog.has_vfx("Sapphire Supporter"), "donator titles still resolve")

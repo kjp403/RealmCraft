@@ -118,6 +118,52 @@ STATIC = {
 }
 
 
+# --- The dye palette --------------------------------------------------------
+#
+# THESE HEXES ARE COPIES, and the copy is deliberate: this file is plain Python
+# and cannot read CosmeticThemes / VaultSkins.STYLE_META, which is where they
+# live. tools/verify_cosmetic_themes.gd parses the dict below out of this file
+# and fails if any entry has drifted from the dye it names, so the duplication
+# is checked rather than trusted.
+#
+# Everything else about a theme strip is DERIVED from these two, the same way
+# CosmeticThemes.pale()/deep() derive from the dye: pale = lightened(0.55),
+# deep = darkened(0.58). Do not hand-pick a third colour here.
+DYE_HEX = {
+    "crimson": ("#e03040", "#ff6a28"),
+    "arcane": ("#9a78ff", "#ffb040"),
+    "glacial": ("#d8f4ff", "#5ce8f0"),
+    "verdant": ("#3cb86a", "#6cff6a"),
+    "storm": ("#3a78ff", "#5ce8f0"),
+    "lotus": ("#ff7ab0", "#d8f4ff"),
+    "solar": ("#f0c84a", "#ffb040"),
+    "prism": ("#5ce8f0", "#ff7ab0"),
+}
+
+# CosmeticThemes.CORE_LIGHTEN / CORE_DARKEN. Godot's Color.lightened(a) is
+# c + (1 - c) * a and darkened(a) is c * (1 - a); these reproduce both exactly.
+LIGHTEN = 0.55
+DARKEN = 0.58
+
+
+def _rgb(hex_code):
+    h = hex_code.lstrip("#")
+    return tuple(float(int(h[i:i + 2], 16)) for i in (0, 2, 4))
+
+
+def theme(name):
+    """Static palette for one CosmeticThemes key: pale core, the dye, its shadow.
+
+    The strip is a FALLBACK -- every theme aura is rendered in game by a preset
+    (see the note at the top of this file) -- so what matters is that it reads as
+    the right colour in a roster listing, not that it previews the effect.
+    """
+    core = _rgb(DYE_HEX[name][0])
+    pale = tuple(c + (255.0 - c) * LIGHTEN for c in core)
+    deep = tuple(c * (1.0 - DARKEN) for c in core)
+    return lambda k, t: (pale, core, deep)
+
+
 def _hsv(h, s, v):
     r, g, b = colorsys.hsv_to_rgb(h % 1.0, s, v)
     return (r * 255, g * 255, b * 255)
@@ -455,6 +501,16 @@ ROSTER = [
     ("aura_emberfrost",     fx_aura,            duotone("ember", "frost")),
     ("aura_solar_eclipse",  fx_aura,            const("eclipse")),
     ("aura_runebound_titan", fx_aura,           const("rune")),
+    # The colour-matched set. One aura per CosmeticThemes key, each pairing with
+    # a title and a body dye of the same hex -- see theme() above.
+    ("aura_crimson_embers", fx_aura,            theme("crimson")),
+    ("aura_arcane_sigils",  fx_aura,            theme("arcane")),
+    ("aura_glacial_veil",   fx_aura,            theme("glacial")),
+    ("aura_verdant_bloom",  fx_aura,            theme("verdant")),
+    ("aura_aether_arcs",    fx_aura,            theme("storm")),
+    ("aura_lotus_petals",   fx_aura,            theme("lotus")),
+    ("aura_alchemical_sun", fx_aura,            theme("solar")),
+    ("aura_prismatic_shimmer", fx_aura,         rainbow(spread=1.0, speed=0.5)),
     # Trails
     ("trail_rainbow",       fx_ribbon_trail,    rainbow(spread=1.1, speed=0.9)),
     ("trail_galaxy",        fx_galaxy_trail,    galaxy()),

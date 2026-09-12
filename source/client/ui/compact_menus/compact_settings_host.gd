@@ -57,6 +57,7 @@ var _music_slider: HSlider
 var _sound_slider: HSlider
 var _zoom_slider: HSlider
 var _weather_toggle: CheckButton
+var _title_particles_toggle: CheckButton
 var _slayer_tracker_toggle: CheckButton
 var _xp_tracker_toggle: CheckButton
 var _hud_unlock_toggle: CheckButton
@@ -230,6 +231,16 @@ func _build_toggles_view(toggles_box: VBoxContainer) -> void:
 	_weather_toggle.add_theme_font_size_override(&"font_size", 10)
 	_weather_toggle.toggled.connect(_on_weather_toggled)
 	toggles_box.add_child(_weather_toggle)
+
+	# The emitter stacks over other players' heads, not this player's own title -
+	# see TitleVfxSettings. It sits next to Weather because it is the same kind of
+	# row: a whole VFX family, off for frame rate, on by default.
+	_title_particles_toggle = CheckButton.new()
+	_title_particles_toggle.text = "Title particles"
+	_title_particles_toggle.custom_minimum_size = Vector2(0.0, 26.0)
+	_title_particles_toggle.add_theme_font_size_override(&"font_size", 10)
+	_title_particles_toggle.toggled.connect(_on_title_particles_toggled)
+	toggles_box.add_child(_title_particles_toggle)
 
 	_slayer_tracker_toggle = CheckButton.new()
 	_slayer_tracker_toggle.text = "Slayer tracker"
@@ -481,6 +492,16 @@ func _on_weather_toggled(enabled: bool) -> void:
 	)
 
 
+func _on_title_particles_toggled(enabled: bool) -> void:
+	if _syncing:
+		return
+	ClientState.settings.set_value(
+		SECTION,
+		TitleVfxSettings.PROPERTY,
+		enabled
+	)
+
+
 func _on_slayer_tracker_toggled(enabled: bool) -> void:
 	if _syncing:
 		return
@@ -538,6 +559,7 @@ func _on_setting_changed(
 		&"sound_volume",
 		&"camera_zoom",
 		&"weather_effects",
+		TitleVfxSettings.PROPERTY,
 		SlayerTracker.SETTING_PROPERTY,
 	]:
 		_sync_controls()
@@ -553,6 +575,9 @@ func _sync_controls() -> void:
 	_zoom_slider.value = float(_setting_value(&"camera_zoom", 2.0))
 	_weather_toggle.button_pressed = bool(
 		_setting_value(&"weather_effects", true)
+	)
+	_title_particles_toggle.button_pressed = bool(
+		_setting_value(TitleVfxSettings.PROPERTY, true)
 	)
 	_slayer_tracker_toggle.button_pressed = SlayerTracker.is_enabled()
 	_xp_tracker_toggle.button_pressed = XpTrackerHud.is_enabled()
@@ -616,6 +641,7 @@ func _on_reset_pressed() -> void:
 		&"sound_volume",
 		&"camera_zoom",
 		&"weather_effects",
+		TitleVfxSettings.PROPERTY,
 		SlayerTracker.SETTING_PROPERTY,
 	]:
 		var default_value: Variant = (
