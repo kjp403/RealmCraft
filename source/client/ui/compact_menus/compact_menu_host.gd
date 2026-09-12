@@ -33,6 +33,11 @@ const ACTION_DROP := 1
 const ACTION_HOTKEY := 2
 const ACTION_SALVAGE := 3
 
+## How stale an Ark Coin balance may get before the header asks again.
+## vault.balance allows ten calls a minute per player, and the Vault menu
+## spends from the same budget, so this leaves room for both.
+const ARK_REFRESH_MS: int = 45_000
+
 @onready var header: HBoxContainer = $MarginContainer/MainColumn/Header
 @onready var close_button: Button = $MarginContainer/MainColumn/Header/CloseButton
 @onready var content_margin: MarginContainer = $MarginContainer/MainColumn/Content
@@ -41,6 +46,14 @@ const ACTION_SALVAGE := 3
 var gold_label: Label
 ## Hoverable parent of [member gold_label] — holds the exact-balance tooltip.
 var gold_pouch: Control
+## Ark Coins, the premium currency. Hidden until a real balance arrives: it is
+## fetched from the web backend rather than counted out of the inventory, so
+## "not answered yet" and "you have none" are different states and a placeholder
+## zero would be a guess about someone's money.
+var ark_label: Label
+var ark_pouch: Control
+var _ark_balance: int = -1
+var _ark_fetched_ms: int = 0
 ## Current active inventory bag (0-2) and unlocked count (1-3), mirrored from
 ## the server by inventory.bags. The grid below shows ONE bag at a time.
 var active_bag: int = 0
@@ -86,6 +99,12 @@ func _ready() -> void:
 	# so ore counts climb without close→reopen (fullscreen inventory already does this).
 	ClientState.gather_succeeded.connect(_on_gather_succeeded)
 	ClientState.inventory_changed.connect(_on_inventory_changed)
+	# Both settle pushes for the premium balance. Subscribed for the life of the
+	# panel rather than while it is open: the purchase push is the only thing
+	# that tells the header a Vault purchase happened, and it fires while the
+	# Vault is covering this panel.
+	Client.subscribe(&"vault.balance.result", _on_ark_balance)
+	Client.subscribe(&"vault.purchase.result", _on_ark_purchased)
 
 	var hud := get_parent() as Control
 	if hud != null:
@@ -94,6 +113,11 @@ func _ready() -> void:
 	call_deferred(&"_place_panel")
 	_connect_equipment_signal()
 	hide()
+
+
+func _exit_tree() -> void:
+	Client.unsubscribe(&"vault.balance.result", _on_ark_balance)
+	Client.unsubscribe(&"vault.purchase.result", _on_ark_purchased)
 
 
 func _place_panel() -> void:
@@ -149,6 +173,48 @@ func _build_currency_pouch() -> void:
 
 	# Move the pouch immediately before the X button.
 	header.move_child(pouch, close_button.get_index())
+
+	_build_ark_pouch()
+
+
+## The Ark Coin badge, immediately left of the gold pouch so the two currencies
+## read as one purse rather than as a purse and an advert.
+##
+## NOT COUNTED FROM THE INVENTORY. Gold is an item and this is not - the balance
+## lives with the web backend, reaches the client through vault.balance, and is
+## deliberately never cached on the character (see vault.balance.gd). So this
+## badge is fed by a request and by the purchase push, never by _refresh_inventory.
+func _build_ark_pouch() -> void:
+	var pouch := HBoxContainer.new()
+	pouch.add_theme_constant_override(&"separation", 2)
+	pouch.visible = false
+
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(16.0, 16.0)
+	icon.custom_maximum_size = Vector2(16.0, 16.0)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.texture = load("res://assets/sprites/ui/ark_coin.png")
+
+	ark_label = Label.new()
+	ark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ark_label.add_theme_font_size_override(&"font_size", 11)
+	# The Aether teal the coin's stone is drawn in, so the number belongs to the
+	# icon beside it and never reads as a second gold figure.
+	ark_label.add_theme_color_override(&"font_color", Color("#5ce8f0"))
+	ark_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ark_label.clip_text = false
+	ark_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+
+	pouch.add_child(icon)
+	pouch.add_child(ark_label)
+	ark_pouch = pouch
+
+	header.add_child(pouch)
+	header.move_child(pouch, gold_pouch.get_index())
 
 
 ## Paints the header purse. The raw total is only ever READ here — it is the
@@ -315,6 +381,52 @@ func _on_visibility_changed() -> void:
 	if visible:
 		_connect_equipment_signal()
 		_refresh_inventory()
+		_maybe_fetch_ark_balance()
+
+
+## Ask for the Ark Coin balance, at most once every REFRESH window.
+##
+## DELIBERATELY NOT IN _refresh_inventory. That runs on every gather, every loot
+## and every equip while the bag is open, and vault.balance is rate limited to
+## ten calls a minute per player - it would trip the limiter during ordinary
+## play, and then the badge would be blank for the people using the game hardest.
+## The window below is well inside that budget even with the Vault menu also
+## polling, and a purchase updates the number immediately through its own push
+## rather than waiting for the next one.
+func _maybe_fetch_ark_balance() -> void:
+	if InstanceClient.current == null:
+		return
+	var now: int = Time.get_ticks_msec()
+	if _ark_balance >= 0 and now - _ark_fetched_ms < ARK_REFRESH_MS:
+		return
+	_ark_fetched_ms = now
+	Client.request_data(&"vault.balance", Callable(), {}, String(InstanceClient.current.name))
+
+
+## The settle push for a balance request. A failure leaves the badge alone: an
+## offline store is not a zero balance, and blanking a number someone just saw
+## is worse than showing one a few seconds stale.
+func _on_ark_balance(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		return
+	_set_ark_display(int(data.get("balance", 0)))
+
+
+## A Vault purchase settling. It carries the new balance, so the header follows
+## a purchase without waiting for the refresh window.
+func _on_ark_purchased(data: Dictionary) -> void:
+	if bool(data.get("ok", false)) and data.has("balance"):
+		_set_ark_display(int(data.get("balance", 0)))
+
+
+func _set_ark_display(balance: int) -> void:
+	_ark_balance = maxi(0, balance)
+	if ark_label == null or ark_pouch == null:
+		return
+	var purse: Dictionary = NumberFormat.format_stack_size(_ark_balance)
+	ark_label.text = str(purse["text"])
+	ark_pouch.tooltip_text = "%s Ark Coins" % str(purse["exact_text"])
+	ark_pouch.visible = true
 
 
 func _on_gather_succeeded(_result: Dictionary) -> void:
