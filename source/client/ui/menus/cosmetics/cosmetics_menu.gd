@@ -123,9 +123,23 @@ func _build_layout() -> void:
 	_tab_bar.add_theme_constant_override(&"separation", 4)
 	col.add_child(_tab_bar)
 
+	# A STAGE, NOT A TRANSPARENT GAP. The Vault is a fullscreen MenuShell, which
+	# drops the card frame on purpose and leaves only a half-alpha dim - so
+	# before this, a 1.6x pixel character and a particle effect were drawn over
+	# the lit Guild House, its NPCs and the leaderboard text. The preview was
+	# there and simply could not be seen, worst of all when the buyer's own
+	# character happened to be standing behind it.
+	#
+	# Clipped, so a wide trail cannot paint over the Buy button underneath.
+	var stage: PanelContainer = PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.clip_contents = true
+	stage.add_theme_stylebox_override(&"panel", _stage_style())
+	col.add_child(stage)
+
 	var preview_center: CenterContainer = CenterContainer.new()
 	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(preview_center)
+	stage.add_child(preview_center)
 
 	var preview_box: Control = Control.new()
 	preview_box.custom_minimum_size = Vector2(PREVIEW_BOX, PREVIEW_BOX)
@@ -214,6 +228,24 @@ func _build_layout() -> void:
 	_clear_button.custom_minimum_size = Vector2(0, 34)
 	_clear_button.pressed.connect(_on_clear_pressed)
 	col.add_child(_clear_button)
+
+
+## Near-opaque, because the point is to take the world out from behind the
+## effect. Not fully opaque: a sliver of the room still shows through, which
+## keeps the menu feeling like it is over the Guild House rather than a separate
+## screen - the same call the fullscreen shell makes with its dim.
+func _stage_style() -> StyleBoxFlat:
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = Color(0.035, 0.042, 0.06, 0.94)
+	box.border_color = Color(0.38, 0.34, 0.28, 0.9)
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(4)
+	# ZERO margins. This tab has no vertical slack - six slot tabs, a Buy button,
+	# Equip and Take off inside 540px - and 4px of padding top and bottom was
+	# enough to push Take off off the bottom edge. The stage already expands to
+	# fill whatever the column has spare.
+	box.set_content_margin_all(0)
+	return box
 
 
 # --- Data ---
