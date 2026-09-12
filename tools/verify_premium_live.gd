@@ -95,6 +95,47 @@ func _run() -> void:
 	_ok("status is 404", int(junk.get("status")) == 404, str(junk))
 
 	print("")
+	print("grant (the /arkcoins refund path)")
+	var before_grant: int = int((await _balance()).get("data", {}).get("balance", -1))
+	var grant_tx: String = "verify-grant-%d" % int(Time.get_unix_time_from_system())
+	var granted: Dictionary = await _grant(_account, 7, grant_tx, "verify")
+	_ok("grant settles", bool(granted.get("ok")), str(granted))
+	_ok(
+		"balance rose by 7",
+		int((granted.get("data", {}) as Dictionary).get("balance", -1)) == before_grant + 7,
+		"before=%d %s" % [before_grant, str(granted)]
+	)
+	# The same key twice is the double-press case, and it must NOT pay out again.
+	var grant_replay: Dictionary = await _grant(_account, 7, grant_tx, "verify")
+	_ok("replayed grant refused", not bool(grant_replay.get("ok")), str(grant_replay))
+	_ok("replay reason is duplicate", str(grant_replay.get("reason")) == "duplicate", str(grant_replay))
+	var after_grant: int = int((await _balance()).get("data", {}).get("balance", -1))
+	_ok("replay added nothing", after_grant == before_grant + 7, "got=%d" % after_grant)
+	# A typo'd account must be refused rather than minting a wallet nobody owns.
+	var ghost_grant: Dictionary = await _grant(
+		"nosuchaccount", 7, "verify-ghost-%d" % int(Time.get_unix_time_from_system()), "verify"
+	)
+	_ok("grant to unknown account refused", not bool(ghost_grant.get("ok")), str(ghost_grant))
+	_ok("status is 404", int(ghost_grant.get("status")) == 404, str(ghost_grant))
+
+	print("")
+	print("public account check (what the storefront asks before checkout)")
+	var real: Dictionary = await _account_check(_account)
+	_ok("answers 200", int(real.get("status")) == 200, str(real))
+	_ok("known account exists", bool((real.get("json", {}) as Dictionary)
+		.get("data", {}).get("exists", false)), str(real))
+	var unknown: Dictionary = await _account_check("nosuchaccount")
+	_ok("unknown account does not exist", not bool((unknown.get("json", {}) as Dictionary)
+		.get("data", {}).get("exists", true)), str(unknown))
+	# The whole bug: a character name is a perfectly well-formed account name.
+	# The only thing that can tell them apart is this lookup.
+	var malformed: Dictionary = await _account_check("!!")
+	_ok("malformed name answered without a backend hop",
+		int(malformed.get("status")) == 200
+		and not bool((malformed.get("json", {}) as Dictionary)
+			.get("data", {}).get("exists", true)), str(malformed))
+
+	print("")
 	if _failures == 0:
 		print("verify_premium_live: PASS")
 	else:
@@ -115,6 +156,47 @@ func _purchase(item_id: String, cost: int, transaction_id: String) -> Dictionary
 		func(r: Dictionary) -> void: out.append(r)
 	)
 	return await _await_one(out)
+
+
+func _grant(account: String, amount: int, transaction_id: String, reason: String) -> Dictionary:
+	var out: Array = []
+	PremiumApi.grant_premium_coins(
+		_host, account, amount, transaction_id, reason,
+		func(r: Dictionary) -> void: out.append(r)
+	)
+	return await _await_one(out)
+
+
+## The account check is PUBLIC and carries no bearer, so it cannot go through
+## [PremiumApi] - this posts it the way the website does, with no credentials at
+## all. A 401 here would mean the route had been moved behind the premium auth
+## and the storefront had silently stopped checking anything.
+func _account_check(name: String) -> Dictionary:
+	var base: String = OS.get_environment("ARKENELLE_PREMIUM_API_URL").strip_edges().rstrip("/")
+	var request: HTTPRequest = HTTPRequest.new()
+	request.timeout = 15.0
+	_host.add_child(request)
+	var sink: Array = []
+	request.request_completed.connect(
+		func(_r: int, code: int, _h: PackedStringArray, raw: PackedByteArray) -> void:
+			var parsed: Variant = JSON.parse_string(raw.get_string_from_utf8())
+			sink.append({"status": code, "json": parsed if parsed is Dictionary else {}})
+	)
+	var error: Error = request.request(
+		base + "/v1/account/check",
+		PackedStringArray(["Content-Type: application/json"]),
+		HTTPClient.METHOD_POST,
+		JSON.stringify({"name": name})
+	)
+	if error != OK:
+		request.queue_free()
+		return {"status": 0, "json": {}}
+	var waited: float = 0.0
+	while sink.is_empty() and waited < 15.0:
+		await process_frame
+		waited += 0.016
+	request.queue_free()
+	return sink[0] if not sink.is_empty() else {"status": 0, "json": {}}
 
 
 ## PremiumApi answers on a callback, not a signal, so poll the sink. Bounded so a

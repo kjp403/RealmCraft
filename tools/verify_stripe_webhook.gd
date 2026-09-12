@@ -18,11 +18,18 @@ var _failures: int = 0
 var _secret: String = ""
 var _account: String = "stripeuser"
 var _token: String = ""
+## Optional. A CHARACTER name, and the account that owns it, both live in the
+## world database this gateway is pointed at. Set both to exercise the path a
+## buyer actually takes when they type the name they see over their own head.
+var _character: String = ""
+var _character_account: String = ""
 
 
 func _init() -> void:
 	_secret = OS.get_environment("ARKENELLE_STRIPE_WEBHOOK_SECRET").strip_edges()
 	_token = OS.get_environment("ARKENELLE_DASHBOARD_TOKEN").strip_edges()
+	_character = OS.get_environment("ARKENELLE_VERIFY_CHARACTER").strip_edges().to_lower()
+	_character_account = OS.get_environment("ARKENELLE_VERIFY_CHARACTER_ACCOUNT").strip_edges().to_lower()
 	if _secret.is_empty():
 		print("ARKENELLE_STRIPE_WEBHOOK_SECRET is not set.")
 		quit(1)
@@ -114,6 +121,25 @@ func _run() -> void:
 	_ok("replay credited nothing", after_replay == after, "after=%d replay=%d" % [after, after_replay])
 
 	print("")
+	print("character name instead of the account name")
+	if _character.is_empty() or _character_account.is_empty():
+		print("  skipped - set ARKENELLE_VERIFY_CHARACTER and ARKENELLE_VERIFY_CHARACTER_ACCOUNT")
+	else:
+		# The mistake that started all of this: the buyer types the name they see
+		# over their own head. Display names are unique, so the webhook can
+		# resolve one to its owner rather than stranding the payment.
+		var owner_before: int = await _balance_of(_character_account)
+		var as_character: Dictionary = await _post_event(
+			_event("evt_char_%d" % Time.get_ticks_msec(), "cs_char", 999, "usd", _character), true)
+		_ok("accepted", int(as_character.get("status")) == 200, str(as_character))
+		_ok("reports credited 1000",
+			int((as_character.get("json", {}) as Dictionary).get("credited", 0)) == 1000,
+			str(as_character))
+		var owner_after: int = await _balance_of(_character_account)
+		_ok("the OWNING ACCOUNT was credited", owner_after == owner_before + 1000,
+			"before=%d after=%d" % [owner_before, owner_after])
+
+	print("")
 	print("hostile / malformed")
 	var unsigned: Dictionary = await _post_event(_event("evt_x", "cs_x", 999, "usd", _account), false)
 	_ok("unsigned rejected 400", int(unsigned.get("status")) == 400, str(unsigned))
@@ -186,8 +212,12 @@ func _post_event(event: Dictionary, sign: bool) -> Dictionary:
 
 
 func _balance() -> int:
+	return await _balance_of(_account)
+
+
+func _balance_of(username: String) -> int:
 	var out: Dictionary = await _request(
-		"%s/v1/premium?username=%s&token=%s" % [DASHBOARD, _account, _token],
+		"%s/v1/premium?username=%s&token=%s" % [DASHBOARD, username, _token],
 		PackedStringArray(), ""
 	)
 	return int((out.get("json", {}) as Dictionary).get("balance", -1))

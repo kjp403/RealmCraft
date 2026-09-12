@@ -61,6 +61,17 @@ var _allowed: bool = false
 var _owned: Dictionary[int, bool] = {}
 
 var _preview: CosmeticVfx
+## The buyer's OWN character, drawn under the effect. Not decoration: an aura is
+## sized and positioned against a body, and a trail is drawn from where one has
+## been, so an effect floating in an empty box is not the thing being sold.
+var _body: AnimatedSprite2D
+## The buyer's worn title, floating over the preview the way it floats over their
+## head in the world. Inside the preview box on purpose - this tab carries the
+## six slot tabs and has no vertical budget for another row (see PREVIEW_BOX).
+##
+## NOT _title_label: MenuShell already owns that name for the window's own
+## heading, and shadowing it is a parse error that takes the whole menu down.
+var _wearer_title: Label
 ## Carries [member _preview] around the walk circle. Separate from the preview node
 ## so the walk can be switched off per slot without touching the effect.
 var _preview_pivot: Node2D
@@ -126,11 +137,39 @@ func _build_layout() -> void:
 	preview_box.add_child(_preview_pivot)
 
 	_preview = CosmeticVfx.new()
-	# The world mounts this under a Character, which puts it behind the body. There
-	# is no body here, so the preview must not sink behind the panel it sits on.
+	# The world mounts this under a Character, which puts it behind the body at
+	# z_index -1. A NEGATIVE z here would sink the effect behind the panel it sits
+	# on, so the same order is built the other way up: effect at 0, body above it.
 	_preview.z_index = 0
 	_preview.preview_mode = true
 	_preview_pivot.add_child(_preview)
+
+	# Rides the pivot, so a trail preset is drawn from a body that is actually
+	# moving rather than trailing off empty space.
+	_body = AnimatedSprite2D.new()
+	_body.z_index = 1
+	_body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# The SAME offset the character scene uses (see render_cosmetic_presets's
+	# stand-in): it puts the body's FEET on the node origin. Every preset is
+	# anchored to the feet, so without this the body hangs half a torso low and
+	# an aura meant to ring the knees rings the head.
+	_body.offset = Vector2(0, -30)
+	_preview_pivot.add_child(_body)
+
+	# Above the box, not above the column: a row here would push Equip off the
+	# bottom of a 540px client, which is the same 70px trap documented in
+	# vault_menu._build_purchase_bar. z_index clears the body, which sits at 1.
+	var title_center: CenterContainer = CenterContainer.new()
+	title_center.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title_center.custom_minimum_size = Vector2(PREVIEW_BOX, 20)
+	title_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_center.z_index = 2
+	preview_box.add_child(title_center)
+
+	_wearer_title = Label.new()
+	_wearer_title.add_theme_font_size_override(&"font_size", 13)
+	title_center.add_child(_wearer_title)
+
 	set_process(true)
 
 	var nav: HBoxContainer = HBoxContainer.new()
@@ -180,6 +219,10 @@ func _build_layout() -> void:
 # --- Data ---
 
 func _on_shown() -> void:
+	# Before the request, not after: the body and title come from the local
+	# player and need no server round trip, so the preview is never empty while
+	# the roster is in flight.
+	_refresh_wearer()
 	if InstanceClient.current == null:
 		return
 	Client.request_data(&"cosmetics.state", _on_state, {}, String(InstanceClient.current.name))
@@ -315,6 +358,9 @@ func _update_preview() -> void:
 	_walking = Cosmetics.slot_of(id) == &"trail"
 	if not _walking and _preview_pivot != null:
 		_preview_pivot.position = _preview_home()
+	# Re-read every browse for the same reason the wearer is: the player can
+	# change skin in another menu while this one is open.
+	_refresh_wearer()
 	var ids: Array = _current_ids()
 	_name_label.text = "%s  (%d/%d)" % [
 		Cosmetics.display_name(id),
@@ -322,6 +368,78 @@ func _update_preview() -> void:
 		ids.size(),
 	]
 	_update_action()
+
+
+## Put the buyer's own character under the effect, and their title over it.
+##
+## THE POINT OF THE WHOLE PREVIEW. A player is choosing between auras they will
+## see on THEIR body in THEIR dye, and the same effect reads differently over a
+## dark Knight than over a pale Scholar. Reading it off the local player rather
+## than off a stock mannequin also means a wardrobe change elsewhere shows up
+## here without this menu knowing anything about wardrobes.
+##
+## FALLS BACK TO THE STARTER BODY rather than to nothing. With no local player -
+## a render tool, or a menu opened before the world finished spawning - an empty
+## box reads as a broken preview, while a stand-in body still shows how the
+## effect sits on a character. In the game there is always a local player and
+## this never fires.
+func _refresh_wearer() -> void:
+	if _body == null:
+		return
+	var wearer: Player = ClientState.local_player as Player
+	var live: bool = wearer != null and is_instance_valid(wearer)
+
+	_body.visible = true
+	var skin_id: int = wearer.skin_id if live else PlayerSkins.starter_skin_id()
+	var frames: SpriteFrames = ContentRegistryHub.load_by_id(
+		&"sprites", skin_id
+	) as SpriteFrames
+	if frames != null and _body.sprite_frames != frames:
+		_body.sprite_frames = frames
+	# The prestige recolour is a shader on the sprite, exactly as the world
+	# applies it - so an aura is judged against the dye it will actually sit on.
+	VaultSkinVfx.apply_to_sprite(_body, wearer.vault_skin_id if live else 0)
+	# "run", not "walk": player SpriteFrames are authored ["death", "idle",
+	# "run"] and there is no walk clip to fall back from.
+	_play_body(&"run" if _walking else &"idle")
+
+	if _wearer_title == null:
+		return
+	var title: String = wearer.display_title.strip_edges() if live else ""
+	_wearer_title.visible = not title.is_empty()
+	if title.is_empty():
+		return
+	_wearer_title.text = "— %s —" % title
+	# preview:true for the same reason the Titles shelf passes it - this label is
+	# nowhere near the camera and never walks anywhere, so the emitter stacks
+	# must not cull themselves against either.
+	TitleVfx.apply_to_label(_wearer_title, title, true)
+
+
+## Play [param wanted], falling back the way the skin wardrobe does: not every
+## sprite sheet carries every clip, and a missing one must not leave the body
+## frozen on frame zero.
+##
+## NEVER falls back to names[0] blindly - that is "death" on player frames, and a
+## corpse lying across the aura is not the sale.
+func _play_body(wanted: StringName) -> void:
+	if _body == null or _body.sprite_frames == null:
+		return
+	var frames: SpriteFrames = _body.sprite_frames
+	var anim: StringName = wanted
+	if not frames.has_animation(anim):
+		anim = &""
+		for candidate: StringName in [&"idle", &"run"]:
+			if frames.has_animation(candidate):
+				anim = candidate
+				break
+		if anim.is_empty():
+			var names: PackedStringArray = frames.get_animation_names()
+			if names.is_empty():
+				return
+			anim = StringName(names[0])
+	if _body.animation != anim or not _body.is_playing():
+		_body.play(anim)
 
 
 func _update_action() -> void:

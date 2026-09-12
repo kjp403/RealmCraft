@@ -102,8 +102,8 @@ func _ready() -> void:
 		&"/v1/peddler",
 		handle_peddler
 	)
-	# Premium currency. Both are server-to-server (the WORLD calls them over
-	# loopback) and both are blocked at Caddy as well as bearer-checked here.
+	# Premium currency. These are server-to-server (the WORLD calls them over
+	# loopback) and all are blocked at Caddy as well as bearer-checked here.
 	router.register_route(
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/premium/balance",
@@ -114,12 +114,26 @@ func _ready() -> void:
 		&"/v1/premium/purchase",
 		handle_premium_purchase
 	)
-	# PUBLIC, unlike the two above - Stripe has to reach it from the internet.
+	# Also server-to-server: the world's /arkcoins command credits through here.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/premium/grant",
+		handle_premium_grant
+	)
+	# PUBLIC, unlike the three above - Stripe has to reach it from the internet.
 	# Its security is the signature check, not the network.
 	router.register_route(
 		HTTPClient.Method.METHOD_POST,
 		&"/v1/premium/stripe-webhook",
 		handle_stripe_webhook
+	)
+	# PUBLIC. The storefront asks this before it will build a checkout link, so a
+	# character name typed where an account name belongs is refused at the form
+	# instead of becoming a payment nobody can credit.
+	router.register_route(
+		HTTPClient.Method.METHOD_POST,
+		&"/v1/account/check",
+		handle_account_check
 	)
 	# The manager connection remains loopback-only in its own section, while the
 	# public HTTP listener can be bound to a private VPN address for closed tests.
@@ -413,6 +427,61 @@ func handle_premium_purchase(payload: Dictionary) -> Dictionary:
 	return _json_status(_premium_status_for(reason), body)
 
 
+## Server-to-server. Adds coins to an account on a human's say-so.
+##
+## THE REFUND AND SUPPORT PATH, and the reason it exists: the Stripe webhook is
+## the only OTHER way coins enter the system, and it refuses any payment whose
+## account name does not exist. Those payments are real money that landed
+## nowhere, and before this route the only way to settle one was a shell on the
+## VPS and the master's loopback dashboard. Now /arkcoins in game does it.
+##
+## Same master call the webhook makes - `premium_credit`, same ledger, same
+## idempotency on transaction_id - so a grant and a purchase are indistinguishable
+## to the balance and both show up in the account's history.
+func handle_premium_grant(payload: Dictionary) -> Dictionary:
+	var auth: Dictionary = _premium_auth(payload)
+	if not auth.is_empty():
+		return auth
+	if not _rate_ok(payload, &"premium_grant", 30, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var user_id: String = str(payload.get("user_id", "")).strip_edges()
+	var amount: int = int(payload.get("amount", 0))
+	var reason: String = str(payload.get("reason", "grant")).strip_edges()
+	# Header first, body second - same rule as the purchase route.
+	var transaction_id: String = str(payload.get("__idempotency_key__", "")).strip_edges()
+	if transaction_id.is_empty():
+		transaction_id = str(payload.get("transaction_id", "")).strip_edges()
+
+	if user_id.is_empty() or transaction_id.is_empty() or amount <= 0:
+		return _json_status(400, {"ok": false, "reason": "bad_args"})
+
+	var result: Dictionary = await send_request("premium_credit", {
+		"user_id": user_id,
+		"amount": amount,
+		"transaction_id": transaction_id,
+		"reason": reason,
+	}, 6.0)
+
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
+		return _json_status(503, {"ok": false, "reason": "timeout"})
+
+	if bool(result.get("ok", false)):
+		var balance: int = int(result.get("balance", 0))
+		if bool(result.get("duplicate", false)):
+			# The SAME transaction id twice. 409 rather than 200 so the caller
+			# says "already applied" instead of claiming a second grant landed.
+			return _json_status(409, {
+				"ok": false,
+				"reason": "duplicate",
+				"data": {"balance": balance},
+			})
+		return _json_status(200, {"ok": true, "data": {"balance": balance}})
+
+	var failure: String = str(result.get("reason", "rejected"))
+	return _json_status(_premium_status_for(failure), {"ok": false, "reason": failure})
+
+
 ## Reason -> HTTP status. One table so the two handlers cannot drift, and so the
 ## mapping is reviewable in one place rather than inline at six return sites.
 func _premium_status_for(reason: String) -> int:
@@ -466,6 +535,60 @@ func _json_status(code: int, body: Dictionary) -> Dictionary:
 		"content_type": "application/json; charset=utf-8",
 		"body": JSON.stringify(body).to_utf8_buffer(),
 	}
+#endregion
+
+
+#region Account check
+## PUBLIC. Is this name one we can credit a payment to - and is it an account or
+## a character? The storefront asks before it will build a Stripe link, because
+## it has no session and this is the only thing standing between a buyer and a
+## payment credited to nobody.
+##
+## BOTH KINDS OF NAME ARE GOOD. An account name is what we ask for; a character
+## name is what people type, and it is answerable because display names are
+## unique per world. Resolving one is the WEBHOOK's job, not this route's - see
+## [method _credit_account] - so the browser is never told which account owns a
+## character. It only learns that the name it was given is spendable, which is
+## what it needs to know.
+##
+## ACCOUNT FIRST, CHARACTER SECOND. If a name is both - somebody's login and
+## somebody else's character - the account wins, here and at credit time, so the
+## two can never disagree about where the money went.
+##
+## The cost is that it confirms which names exist. Bounded on purpose: no hint
+## about who owns what, character names are already public on the leaderboards,
+## and the per-IP limit is far below what enumeration needs. The alternative - a
+## session, or a link code - buys a login the site does not have.
+##
+## A MALFORMED NAME NEVER REACHES THE MASTER. It cannot be an account (the same
+## CredentialsUtils rule created every account), so it is answered here.
+func handle_account_check(payload: Dictionary) -> Dictionary:
+	if not _rate_ok(payload, &"account_check", 20, 60000):
+		return _json_status(429, {"ok": false, "reason": "rate_limited"})
+
+	var name: String = str(payload.get("name", "")).strip_edges().to_lower()
+	var shape: Dictionary = CredentialsUtils.validate_username(name)
+	if int(shape.get("code", 0)) != CredentialsUtils.UsernameError.OK:
+		return _json_status(200, {"ok": true, "data": {"exists": false, "kind": ""}})
+
+	var result: Dictionary = await send_request("account_exists", {"user_id": name}, 4.0)
+	if int(result.get("error", 0)) == Error.ERR_TIMEOUT or not bool(result.get("ok", false)):
+		# NOT "does not exist". The caller has to be able to tell "no such
+		# account" from "we could not ask", because it gates a payment on the
+		# answer and a false negative there costs a sale.
+		return _json_status(503, {"ok": false, "reason": "backend_error"})
+	if bool(result.get("exists", false)):
+		return _json_status(200, {"ok": true, "data": {"exists": true, "kind": "account"}})
+
+	var owner: Dictionary = await send_request("resolve_character", {"name": name}, 4.0)
+	if int(owner.get("error", 0)) == Error.ERR_TIMEOUT or not bool(owner.get("ok", false)):
+		# The world is down or restarting. Same rule as above: unknown, not no.
+		return _json_status(503, {"ok": false, "reason": "backend_error"})
+	var account: String = str(owner.get("account", "")).strip_edges()
+	return _json_status(200, {
+		"ok": true,
+		"data": {"exists": not account.is_empty(), "kind": "character" if not account.is_empty() else ""},
+	})
 #endregion
 
 
@@ -551,12 +674,9 @@ func handle_stripe_webhook(payload: Dictionary) -> Dictionary:
 		# 200: retrying cannot fix a bad amount or a missing name. A human must.
 		return _json_status(200, {"ok": false, "reason": "unmapped_payment"})
 
-	var result: Dictionary = await send_request("premium_credit", {
-		"user_id": account,
-		"amount": coins,
-		"transaction_id": event_id,
-		"reason": "stripe:" + str(session.get("id", "")),
-	}, 8.0)
+	var result: Dictionary = await _credit_account_or_character(
+		account, coins, event_id, str(session.get("id", ""))
+	)
 
 	if int(result.get("error", 0)) == Error.ERR_TIMEOUT:
 		# The master did not answer. Retryable, and MUST be retried - the player
@@ -570,22 +690,77 @@ func handle_stripe_webhook(payload: Dictionary) -> Dictionary:
 			"Stripe credit for '%s' (%d coins, %s) refused: %s"
 				% [account, coins, event_id, reason]
 		)
-		# unknown_account is the typo case: the payment is real, the name is not.
-		# 200 so Stripe stops retrying something only a human can resolve.
+		# unknown_account here means the name is neither an account NOR a
+		# character: the payment is real, the name is not. 200 so Stripe stops
+		# retrying something only a human can resolve - with /arkcoins.
 		if reason == "unknown_account":
 			return _json_status(200, {"ok": false, "reason": reason})
 		return _json_status(503, {"ok": false, "reason": reason})
 
 	ServerLog.info(
-		"Stripe credited %d coins to '%s' (%s)%s."
+		"Stripe credited %d coins to '%s' (%s)%s%s."
 			% [
 				coins,
-				account,
+				str(result.get("credited_as", account)),
 				event_id,
+				" [via character %s]" % account if result.has("credited_as") else "",
 				" [replay]" if bool(result.get("duplicate", false)) else "",
 			]
 	)
 	return _json_status(200, {"ok": true, "credited": coins})
+
+
+## Credit [param name], which may be an ACCOUNT name or a CHARACTER name.
+##
+## Buyers type their character name - it is the name they see all day, it is
+## unique, and until this existed it was a payment that reached nobody. The
+## storefront now steers them to the account name and accepts either, but a
+## Payment Link opened directly, or a name typed into Stripe's own field, still
+## arrives here raw. So the fallback lives at the point the money moves rather
+## than on the page, and every route in is covered by it.
+##
+## ACCOUNT FIRST. A name that is a login is credited as one without the world
+## ever being asked, so a character that happens to share someone else's login
+## name cannot divert a payment.
+##
+## THE SAME transaction_id IS REUSED on the retry, deliberately: it is the Stripe
+## event id, and a re-delivery of that event must settle once no matter which of
+## the two attempts credited it.
+func _credit_account_or_character(
+	name: String,
+	coins: int,
+	event_id: String,
+	session_id: String
+) -> Dictionary:
+	var body: Dictionary = {
+		"user_id": name,
+		"amount": coins,
+		"transaction_id": event_id,
+		"reason": "stripe:" + session_id,
+	}
+	var first: Dictionary = await send_request("premium_credit", body, 8.0)
+	if int(first.get("error", 0)) == Error.ERR_TIMEOUT:
+		return first
+	if bool(first.get("ok", false)) or str(first.get("reason", "")) != "unknown_account":
+		return first
+
+	var owner: Dictionary = await send_request("resolve_character", {"name": name}, 4.0)
+	var account: String = str(owner.get("account", "")).strip_edges().to_lower()
+	if not bool(owner.get("ok", false)) or account.is_empty():
+		# Not a character either. Hand back the ORIGINAL refusal so the caller
+		# logs "unknown_account" and answers 200, rather than reporting whatever
+		# went wrong with a lookup that was only ever a long shot.
+		return first
+
+	ServerLog.info(
+		"Stripe session %s named character '%s'; crediting its account '%s'."
+			% [session_id, name, account]
+	)
+	body["user_id"] = account
+	var second: Dictionary = await send_request("premium_credit", body, 8.0)
+	if bool(second.get("ok", false)):
+		second["credited_as"] = account
+	return second
 
 
 ## The Arkenelle account this payment is for.

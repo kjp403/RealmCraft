@@ -25,6 +25,7 @@ const TIMEOUT_S: float = 8.0
 
 const BALANCE_PATH: String = "/v1/premium/balance"
 const PURCHASE_PATH: String = "/v1/premium/purchase"
+const GRANT_PATH: String = "/v1/premium/grant"
 
 
 ## True when both halves of the config are present. False is the normal state on
@@ -79,6 +80,38 @@ static func execute_vault_purchase(
 		},
 		transaction_id,
 		"Premium purchase",
+		on_done
+	)
+
+
+## Credit [param amount] coins to [param user_id] on staff authority - /arkcoins.
+##
+## THE ONLY WAY TO PUT COINS BACK. A Stripe payment naming an account that does
+## not exist is refused by the webhook and logged, and a refund, a goodwill grant
+## or a support fix has no other route in. The backend re-checks the account
+## exists, so this cannot mint a wallet for a typo either.
+##
+## [param transaction_id] is the idempotency key, same as a purchase: the same id
+## twice settles once and reports duplicate rather than paying out again.
+static func grant_premium_coins(
+	host: Node,
+	user_id: String,
+	amount: int,
+	transaction_id: String,
+	reason: String,
+	on_done: Callable
+) -> bool:
+	return _post(
+		host,
+		GRANT_PATH,
+		{
+			"user_id": user_id,
+			"amount": amount,
+			"transaction_id": transaction_id,
+			"reason": reason,
+		},
+		transaction_id,
+		"Premium grant",
 		on_done
 	)
 

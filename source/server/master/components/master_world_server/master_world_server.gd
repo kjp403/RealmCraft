@@ -309,6 +309,24 @@ func request_player_characters(_gateway_id: int, _peer_id: int, _username: Strin
 
 
 @rpc("any_peer")
+func request_account_for_character(_gateway_id: int, _peer_id: int, _display_name: String) -> void:
+	pass
+
+
+## The world's answer to "who owns this character name", forwarded to whichever
+## gateway asked. An empty account is a real answer - no such character - and is
+## passed through as one rather than dropped, so the caller settles instead of
+## waiting out its timeout.
+@rpc("any_peer")
+func receive_account_for_character(gateway_id: int, peer_id: int, account_name: String) -> void:
+	gateway_manager.gateway_response.rpc_id(
+		gateway_id,
+		peer_id,
+		{"ok": true, "account": account_name}
+	)
+
+
+@rpc("any_peer")
 func request_login(_gateway_id: int, _peer_id: int, _username: String, _character_id: int, _client_ip: String = "") -> void:
 	pass
 
