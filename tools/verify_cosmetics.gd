@@ -209,7 +209,15 @@ func _initialize() -> void:
 	)
 
 	print("-- titles --")
-	_check(TitleCatalog.premium_slugs().size() == 13, "13 premium titles in the vault roster")
+	# premium_slugs() is 17: the 13 shop titles PLUS the four donation rungs,
+	# which share the PREMIUM dict and are told apart by vip_tier. The 13 is
+	# what is actually for sale, so subtract the ladder rather than loosening
+	# the number - this failed for months reading as "someone deleted four
+	# titles" when nothing had been deleted at all.
+	_check(
+		TitleCatalog.premium_slugs().size() - TitleCatalog.vip_tier_slugs().size() == 13,
+		"13 buyable premium titles in the vault roster"
+	)
 	_check(TitleCatalog.has_vfx("Sovereign"), "Sovereign has title-text VFX")
 	_check(TitleCatalog.has_vfx("Sapphire Supporter"), "donator titles still resolve")
 	_check(TitleCatalog.has_vfx("Sapphire VIP"), "VIP donator titles still resolve")
