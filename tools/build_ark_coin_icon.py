@@ -20,7 +20,7 @@ It has to survive three sizes that are very far apart:
     every other pixel, so nothing thinner than ~3px at 64 is real)
   * 256px+ on the storefront
 
-So: ONE silhouette, ONE glyph, no fine detail. A face-on disc reads as coinage at
+So: ONE silhouette, ONE mark, no fine detail. A face-on disc reads as coinage at
 any size, and face-on (not the three-quarter ellipse that looks better large)
 keeps a clean circular edge when the pixels get thrown away.
 
@@ -29,13 +29,21 @@ are both #e8c56a, which is what the Donate page and every price uses. A premium
 currency in a NEW colour would be the only gold-adjacent thing on the site that
 is not those, and would read as a different kind of value.
 
-The glyph is an angular "A": two legs and a crossbar, 4px thick at 64 so it
-survives the halving. Deliberately not the project icon — that is a detailed
-mark that turns to mush below 32px.
+A SET GEM, NOT A LETTER, and that is the whole reason this version works. A
+glyph identifies by SHAPE, and shape is exactly what a NEAREST halving to 16px
+destroys — every letter-mark tried here collapsed into a dark smear at the size
+the coin is smallest. The gem identifies by COLOUR: teal against gold is a
+two-tone contrast that survives any downscale, because it does not depend on any
+particular pixel surviving.
 
-Stamped, not printed: the glyph is cut INTO the coin as a darker inset with a
-light top edge, so it reads as struck metal rather than a sticker. That is what
-keeps it looking like currency instead of a logo in a circle.
+It also earns its place in the world. Gems are already a generated icon family
+here (tools/build_gem_icons.py), where cut carries tier and hue carries role, so
+a gem set into gold reads as "valuable thing from this game" rather than as a
+logo someone put in a circle.
+
+Teal is #5CE8F0 — the Aether vault dye, the one palette in the game that is
+unmistakably arcane rather than elemental, and far enough from every gold on the
+site that the two can never blur together.
 
 Usage:  python tools/build_ark_coin_icon.py [--check]
         --check renders and reports legibility at 16/32/64 without writing.
@@ -71,6 +79,13 @@ GOLD_MID = (0xC9, 0xA1, 0x45)
 GOLD_DEEP = (0x8E, 0x6C, 0x22)
 OUTLINE = (0x2A, 0x1E, 0x08)
 
+# The set stone. Matches VaultSkins.STYLE_AETHER (#5ce8f0); the deep tone is the
+# same hue dropped in value, so the girdle reads as one stone in shadow rather
+# than as two colours side by side.
+GEM = (0x5C, 0xE8, 0xF0)
+GEM_DEEP = (0x1E, 0x6E, 0x86)
+GEM_LIGHT = (0xC4, 0xF7, 0xFB)
+
 # ~2px of rim at 64, so ~1px survives the drop to 32.
 OUTLINE_W = 2.0 * SS
 
@@ -79,23 +94,33 @@ def _disc(draw: ImageDraw.ImageDraw, cx: float, cy: float, r: float, fill) -> No
     draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=fill)
 
 
-def _glyph_a(draw: ImageDraw.ImageDraw, cx: float, cy: float, h: float, w: float, fill) -> None:
-    """An angular A: two splayed legs and a crossbar. No counter (the triangular
-    hole) — at 32px it fills in anyway, and leaving it out means the shape is the
-    same at every size instead of degrading into a blob."""
-    half = w * 0.5
-    top = cy - h * 0.5
-    bottom = cy + h * 0.5
-    stroke = w * 0.30
+def _gem(draw: ImageDraw.ImageDraw, cx: float, cy: float, r: float) -> None:
+    """A set stone: girdle, body, and one bright table facet.
 
-    draw.line([(cx, top), (cx - half, bottom)], fill=fill, width=int(stroke), joint="curve")
-    draw.line([(cx, top), (cx + half, bottom)], fill=fill, width=int(stroke), joint="curve")
-    # Crossbar low enough to leave the apex readable when the legs thicken.
-    bar_y = cy + h * 0.16
-    bar_half = half * 0.52
-    draw.line([(cx - bar_half, bar_y), (cx + bar_half, bar_y)], fill=fill, width=int(stroke * 0.9))
-    # Round the apex so the two legs read as one joined stroke at small sizes.
-    _disc(draw, cx, top, stroke * 0.5, fill)
+    A rhombus rather than a rounded stone because four straight edges and two
+    points stay recognisable when the pixel grid gets coarse - a circle inside a
+    circle just reads as a blob. Narrower than it is tall so it cannot be
+    mistaken for a square turned 45 degrees."""
+    draw.polygon(
+        [(cx, cy - r), (cx + r * 0.78, cy), (cx, cy + r), (cx - r * 0.78, cy)],
+        fill=GEM_DEEP,
+    )
+    draw.polygon(
+        [(cx, cy - r * 0.72), (cx + r * 0.56, cy), (cx, cy + r * 0.72), (cx - r * 0.56, cy)],
+        fill=GEM,
+    )
+    # Table facet, up and left with the coin's own light. Small on purpose: at
+    # 16px it merges into the body and the stone just reads a shade lighter,
+    # which is the right way for it to fail.
+    draw.polygon(
+        [
+            (cx, cy - r * 0.52),
+            (cx + r * 0.26, cy - r * 0.10),
+            (cx, cy + r * 0.06),
+            (cx - r * 0.26, cy - r * 0.10),
+        ],
+        fill=GEM_LIGHT,
+    )
 
 
 def render() -> Image.Image:
@@ -124,13 +149,10 @@ def render() -> Image.Image:
     _disc(d, cx - r_face * 0.10, cy - r_face * 0.10, r_face * 0.86, GOLD_LIGHT)
     _disc(d, cx, cy, r_face * 0.80, GOLD)
 
-    # The glyph, struck in: dark body with a light top edge one step up, which is
-    # what sells "pressed into metal" rather than "drawn on top of".
-    gh = r_face * 1.02
-    gw = r_face * 0.92
-    _glyph_a(d, cx, cy + C * 0.012, gh, gw, GOLD_DEEP)
-    _glyph_a(d, cx, cy - C * 0.004, gh, gw, GOLD_LIGHT)
-    _glyph_a(d, cx, cy + C * 0.004, gh, gw, GOLD_MID)
+    # A one-step shadow under the stone so it sits IN the coin rather than
+    # floating on the face.
+    _disc(d, cx, cy + C * 0.008, r_face * 0.76, GOLD_DEEP)
+    _gem(d, cx, cy, r_face * 0.72)
 
     # Two diagonal streaks, same highlight language as the gem pack.
     gloss = Image.new("RGBA", (C, C), (0, 0, 0, 0))

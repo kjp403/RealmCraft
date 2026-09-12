@@ -2431,6 +2431,9 @@ function build() {
   // and per test/live mode, so hard-coding them would bake one environment into
   // the repo. A package with no link renders as "coming soon" rather than a
   // dead button.
+  // NO THOUSANDS SEPARATOR. --display is Jersey 10, whose comma renders as a
+  // stray block at this size - "1,000" read as a broken character rather than as
+  // a number. Four digits need no separator to be readable anyway.
   const COIN_PACKAGES = [
     { coins: 250, price: "$2.49", env: "ARKENELLE_STRIPE_LINK_249" },
     { coins: 500, price: "$4.99", env: "ARKENELLE_STRIPE_LINK_499" },
@@ -2443,7 +2446,7 @@ function build() {
     const unavailable = link ? "" : `<p class="muted pkg-soon">Coming soon</p>`;
     return `<article class="pkg${pkg.best ? " pkg-best" : ""}" data-pkg="${pkg.coins}">
             ${pkg.best ? `<span class="pkg-flag">Most popular</span>` : ""}
-            <h2>${pkg.coins.toLocaleString("en-GB")}</h2>
+            <h2>${pkg.coins}</h2>
             <p class="pkg-unit">Ark Coins</p>
             <p class="pkg-price">${pkg.price}</p>
             <a class="btn" data-buy data-href="${link}" aria-disabled="true" rel="noopener">Buy</a>

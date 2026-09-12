@@ -20,7 +20,12 @@ extends MenuShell
 ## for those eleven, and the wardrobe would be advertising art the game no longer
 ## renders.
 
-const PREVIEW_BOX: float = 200.0
+## Shrunk from 200 to make room for the Buy button that now sits above Equip.
+## This tab carries a whole extra row the others do not - the six slot tabs -
+## so it is the one with no slack, and at 200 the Equip button fell off the
+## bottom of a 540px client. The preview still clears the walk radius by a
+## wide margin (WALK_RADIUS is 26).
+const PREVIEW_BOX: float = 140.0
 const PREVIEW_SCALE: float = 1.6
 
 ## A trail preset renders from real movement and shows NOTHING standing still, so
@@ -62,6 +67,8 @@ var _name_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
+## The panel's own column, so the shell can drop its Buy button into it.
+var _col: VBoxContainer
 
 
 func _ready() -> void:
@@ -84,9 +91,10 @@ func _host() -> Control:
 
 func _build_layout() -> void:
 	var col: VBoxContainer = VBoxContainer.new()
+	_col = col
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override(&"separation", 8)
+	col.add_theme_constant_override(&"separation", 6)
 	if content == null:
 		col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_host().add_child(col)
@@ -414,3 +422,14 @@ func _announce_selection(item_id: String) -> void:
 ## instead of after a server round trip.
 func announce_selection_now() -> void:
 	_update_action()
+
+
+## Host the Vault shell's Buy button directly above this panel's own action
+## button, so price and purchase sit with the thing they act on.
+func mount_purchase_button(button: Button) -> void:
+	if _col == null or button == null or _action_button == null:
+		return
+	if button.get_parent() != null:
+		button.get_parent().remove_child(button)
+	_col.add_child(button)
+	_col.move_child(button, _action_button.get_index())

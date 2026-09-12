@@ -15,6 +15,8 @@ var _blurb_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
+## The panel's own column, so the shell can drop its Buy button into it.
+var _col: VBoxContainer
 
 
 func _ready() -> void:
@@ -34,6 +36,7 @@ func _host() -> Control:
 
 func _build_layout() -> void:
 	var col: VBoxContainer = VBoxContainer.new()
+	_col = col
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_theme_constant_override(&"separation", 10)
@@ -217,3 +220,14 @@ func _announce_selection(item_id: String) -> void:
 ## instead of after a server round trip.
 func announce_selection_now() -> void:
 	_update_preview()
+
+
+## Host the Vault shell's Buy button directly above this panel's own action
+## button, so price and purchase sit with the thing they act on.
+func mount_purchase_button(button: Button) -> void:
+	if _col == null or button == null or _action_button == null:
+		return
+	if button.get_parent() != null:
+		button.get_parent().remove_child(button)
+	_col.add_child(button)
+	_col.move_child(button, _action_button.get_index())

@@ -97,7 +97,13 @@ func open(arg: Variant = null) -> void:
 ## token built client-side by the tab - it is only ever echoed back to the server,
 ## which re-resolves it, so a forged one resolves to nothing.
 func set_selection(item_id: String) -> void:
-	_selected = item_id.strip_edges()
+	var next: String = item_id.strip_edges()
+	# Only on a real change, and never mid-purchase: every failure path sets a
+	# message and then calls _update_buy, so clearing on any refresh would erase
+	# the reason before anyone could read it.
+	if next != _selected and not _processing:
+		_say("")
+	_selected = next
 	_update_buy()
 
 
@@ -157,7 +163,8 @@ func _build_layout() -> void:
 	# embedded panels are full-height layouts and have no vertical budget to give.
 
 
-## Price, Buy and the result line live in the HEADER, beside the balance.
+## The result line lives in the header beside the balance; the Buy button does
+## not - it is mounted into the visible tab by _select_tab.
 ##
 ## THEY USED TO BE A FULL-WIDTH BAR AT THE BOTTOM OF THE COLUMN, AND THAT WAS
 ## BROKEN. The three embedded panels (titles, skins, cosmetics) are each a
@@ -184,14 +191,22 @@ func _build_purchase_bar(row: HBoxContainer) -> void:
 	_status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_status_label.custom_minimum_size = Vector2(210, 0)
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# Hidden until it has something to say. An HBoxContainer skips invisible
+	# children entirely, so an empty status stops reserving 210px and Close sits
+	# where it belongs instead of being shoved into the middle of the header.
+	_status_label.visible = false
 	row.add_child(_status_label)
 
+	# NOT added to the header. It is mounted into whichever tab is showing, just
+	# above that tab's own Wear / Equip button - see _select_tab. Full width and
+	# 18pt because a price is the number a buyer is actually reading; the 14pt
+	# corner version was too small to check before clicking.
 	_buy_button = Button.new()
-	_buy_button.custom_minimum_size = Vector2(132, 30)
-	_buy_button.add_theme_font_size_override(&"font_size", 14)
+	_buy_button.custom_minimum_size = Vector2(0, 44)
+	_buy_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_buy_button.add_theme_font_size_override(&"font_size", 18)
 	_buy_button.disabled = true
 	_buy_button.pressed.connect(_on_buy_pressed)
-	row.add_child(_buy_button)
 
 
 func _add_tab_button(row: HBoxContainer, id: StringName, label: String) -> void:
@@ -229,8 +244,14 @@ func _select_tab(id: StringName) -> void:
 	# single time a tab was clicked.
 	_selected = ""
 	var shown: Control = _panels.get(id)
-	if shown != null and shown.has_method("announce_selection_now"):
-		shown.call("announce_selection_now")
+	if shown != null:
+		# Re-home the Buy button into the tab now showing. One button moved
+		# rather than three buttons kept in sync, so "Processing..." and the
+		# in-flight lock can only ever exist in one place.
+		if shown.has_method("mount_purchase_button"):
+			shown.call("mount_purchase_button", _buy_button)
+		if shown.has_method("announce_selection_now"):
+			shown.call("announce_selection_now")
 	_update_buy()
 
 
@@ -333,7 +354,7 @@ func _update_buy() -> void:
 		_buy_button.disabled = true
 		return
 	var cost: int = int(entry.get("cost", 0))
-	_buy_button.text = "Buy - %d" % cost
+	_buy_button.text = "Buy  %d Ark Coins" % cost
 	# Unknown balance (-1) still allows the click: the server is the authority on
 	# affordability, and greying the button out on a failed fetch would look like
 	# the item is unavailable.
@@ -351,3 +372,4 @@ func _say(message: String) -> void:
 		return
 	_status_label.text = message
 	_status_label.tooltip_text = message
+	_status_label.visible = not message.is_empty()
