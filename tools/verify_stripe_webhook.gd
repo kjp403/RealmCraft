@@ -86,6 +86,27 @@ func _run() -> void:
 	_ok("balance +1000", after == before + 1000, "before=%d after=%d" % [before, after])
 
 	print("")
+	print("adaptive pricing (buyer pays in their own currency)")
+	# Adaptive Pricing is ALWAYS on for Payment Links and cannot be switched off,
+	# so this is the ordinary case for anyone outside the US, not an edge case.
+	# Stripe keeps the session in the integration currency and quarantines the
+	# local figure in presentment_details, so a Canadian paying CA$14.42 must
+	# still arrive as usd/999 and credit 1000. Pinned because the dashboard shows
+	# CAD, and reading the currency guard next to that invites a "fix" that swaps
+	# amount_total for the presentment amount and silently stops crediting
+	# everyone abroad.
+	var adaptive_id: String = "evt_adaptive_%d" % Time.get_ticks_msec()
+	var adaptive_event: Dictionary = _event(adaptive_id, "cs_adaptive", 999, "usd", _account)
+	((adaptive_event["data"] as Dictionary)["object"] as Dictionary)["presentment_details"] = {
+		"presentment_amount": 1442,
+		"presentment_currency": "cad",
+	}
+	var adaptive: Dictionary = await _post_event(adaptive_event, true)
+	_ok("local-currency purchase credits 1000",
+		int((adaptive.get("json", {}) as Dictionary).get("credited", 0)) == 1000, str(adaptive))
+	after = await _balance()
+
+	print("")
 	print("replay of the same event id")
 	var replay: Dictionary = await _post_event(_event(event_id, "cs_test_1", 999, "usd", _account), true)
 	_ok("replay accepted (200, so Stripe stops)", int(replay.get("status")) == 200, str(replay))
