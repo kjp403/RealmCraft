@@ -6,11 +6,22 @@ static var _versions: Dictionary[StringName, int]
 
 
 static func _static_init() -> void:
-	# Master + gateway are data-only servers — they don't render anything, so
-	# loading the sprite/skin registries is pure waste. GameMode reads the
-	# --mode= cmdline arg first so this works in a unified server binary too.
-	if GameMode.is_master_server() or GameMode.is_gateway_server():
-		return
+	# EVERY MODE LOADS THE INDEXES, master and gateway included.
+	#
+	# They used to be skipped there as "pure waste" for a data-only server that
+	# renders nothing, and that was true right up until the master became the
+	# PRICE AUTHORITY for the premium shop. It re-derives every cost through
+	# PremiumCatalog.resolve before it charges, and resolve asks PlayerSkins and
+	# Cosmetics whether the thing is real - both of which read a registry. With no
+	# registry the honest answer came back "no such thing", so the master refused
+	# every dye and every cosmetic in the shop with "That is not for sale" while
+	# titles, which are const tables, sold perfectly. Nothing logged a fault
+	# because nothing had one: each layer did exactly what it was told.
+	#
+	# These are INDEXES - id/slug/path lookup tables, 221 KB for all six - and not
+	# the content they point at, which still loads lazily through load_by_id. The
+	# waste being avoided was never the expensive part, and the cost of guessing
+	# wrong is a shop that takes money and delivers nothing.
 	const INDEXES_DIR: String = "res://source/common/registry/indexes/"
 	for index_path: String in ResourceLoader.list_directory(INDEXES_DIR):
 		# Load UNTYPED and check. A typed assignment here throws on anything in
