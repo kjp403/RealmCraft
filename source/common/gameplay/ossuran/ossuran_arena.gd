@@ -265,7 +265,6 @@ func _build_controllers() -> void:
 	add_child(cold)
 
 	state_machine.state_changed.connect(_on_state_changed)
-	state_machine.phase_changed.connect(_on_phase_changed)
 	state_machine.threshold_reached.connect(_on_threshold)
 
 	if ember_pad != null:
@@ -454,6 +453,13 @@ func _seal_boss(sealed: bool) -> void:
 
 
 func _on_state_changed(_from: BossStateMachine.State, to: BossStateMachine.State) -> void:
+	# Push on EVERY stage, not just when the 1/2/3 phase number moves: pad, waves
+	# and melee trial all share phase 1, so a phase-only push left the boss bar
+	# reading "Kindle the Ember Pad" through the whole gauntlet. reset() also
+	# re-seeds the machine at phase 1, so a re-armed run never pushed phase 1 at
+	# all. DEFEATED is stood down by _on_defeated instead.
+	if to != BossStateMachine.State.DEFEATED:
+		_push_phase(int(BossStateMachine.STATES[to]["phase"]))
 	match to:
 		BossStateMachine.State.EMBER_PAD:
 			_say("Kindle it, then. Let me see you try.")
@@ -494,10 +500,6 @@ func _on_state_changed(_from: BossStateMachine.State, to: BossStateMachine.State
 			_on_defeated()
 		_:
 			pass
-
-
-func _on_phase_changed(phase: int) -> void:
-	_push_phase(phase)
 
 
 func _on_threshold(fraction: float) -> void:
