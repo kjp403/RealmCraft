@@ -1045,3 +1045,128 @@ body.location-scene article.page {
 .footer-links { margin-top: 0.4rem; }
 .footer-links a { color: var(--muted); }
 .footer-links a:hover { color: var(--text); }
+
+/* ---- Ark Coin store ------------------------------------------------------
+   Gold throughout, because --accent-2 / --cat-donate is already what this site
+   spends on money. A premium currency in a new colour would be the only
+   gold-adjacent thing here that is not those two. */
+
+.store-form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 30rem;
+  margin: 1.5rem 0 2rem;
+  padding: 1rem 1.1rem 1.2rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.store-form label {
+  font-family: var(--ui);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.store-form input {
+  padding: 0.6rem 0.7rem;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1rem;
+}
+.store-form input:focus {
+  outline: none;
+  border-color: var(--cat-donate);
+}
+.store-status {
+  margin: 0.2rem 0 0;
+  min-height: 1.2rem;           /* reserved, so the cards never jump on typing */
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.store-status.good { color: var(--ok); }
+.store-status.bad { color: var(--danger); }
+.store-form .small { font-size: 0.85rem; margin: 0.4rem 0 0; }
+
+.pkgs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.9rem;
+  margin: 0 0 2rem;
+}
+.pkg {
+  position: relative;
+  padding: 1.3rem 1rem 1.1rem;
+  text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.pkg-best {
+  border-color: var(--cat-donate);
+  box-shadow: 0 0 0 1px rgba(232, 197, 106, 0.25);
+}
+.pkg-flag {
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.1rem 0.55rem;
+  background: var(--cat-donate);
+  color: #0b1018;
+  border-radius: 999px;
+  font-family: var(--ui);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+.pkg h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--cat-donate);
+}
+/* The coin sits with the number, not in a corner: the mark and the amount are
+   one unit, which is how it reads everywhere else (HUD, shop rows). */
+.pkg h2::before {
+  content: "";
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.35rem;
+  vertical-align: -0.22em;
+  background: url("/ark-coin.png") center/contain no-repeat;
+  image-rendering: pixelated;
+}
+.pkg-unit {
+  margin: 0.15rem 0 0.6rem;
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.pkg-price {
+  margin: 0 0 0.9rem;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  color: var(--text);
+}
+.pkg .btn { width: 100%; }
+/* Disabled until the name is confirmed, or until a Payment Link exists. Greyed
+   rather than hidden so the package is still visible as something on sale. */
+.pkg .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: default;
+}
+.pkg-soon {
+  margin: 0.5rem 0 0;
+  font-family: var(--ui);
+  font-size: 0.72rem;
+}
+
+.store-notes { max-width: 46rem; }
+.store-notes h2 { font-family: var(--display); color: var(--cat-donate); }
+.store-notes ul { padding-left: 1.1rem; }
+.store-notes li { margin: 0.35rem 0; }

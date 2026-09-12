@@ -39,6 +39,7 @@ func _init() -> void:
 	print("")
 	failures += _check_tokens()
 	failures += _check_catalog()
+	failures += _check_prices()
 
 	print("")
 	if failures == 0:
@@ -136,5 +137,91 @@ func _check_catalog() -> int:
 
 	if roster.is_empty():
 		push_error("roster is empty - nothing is for sale")
+		failures += 1
+	return failures
+
+
+## Phase 1 pricing. Asserted rather than eyeballed because these are real-money
+## prices: a dye that silently costs 750 is a GBP 5 overcharge on every sale.
+func _check_prices() -> int:
+	var failures: int = 0
+	var by_kind: Dictionary = {}
+	for entry: Dictionary in PremiumCatalog.roster():
+		var kind: String = str(entry.get("kind", ""))
+		if not by_kind.has(kind):
+			by_kind[kind] = []
+		(by_kind[kind] as Array).append(entry)
+
+	# Every dye is 250, and there are no exceptions hiding in the 576.
+	for entry: Dictionary in by_kind.get("skin", []):
+		if int(entry.get("cost", 0)) != PremiumCatalog.COST_DYE:
+			push_error("dye not %d: %s = %d" % [
+				PremiumCatalog.COST_DYE, entry.get("item_id"), entry.get("cost")
+			])
+			failures += 1
+			break
+
+	var auras: int = 0
+	var trails: int = 0
+	for entry: Dictionary in by_kind.get("cosmetic", []):
+		var slot: String = str(entry.get("slot", ""))
+		var cost: int = int(entry.get("cost", 0))
+		if slot == "aura":
+			auras += 1
+			if cost < 450 or cost > 750:
+				push_error("aura outside 450-750: %s = %d" % [entry.get("label"), cost])
+				failures += 1
+		elif slot == "trail":
+			trails += 1
+			if cost != PremiumCatalog.COST_TRAIL:
+				push_error("trail not %d: %s = %d" % [
+					PremiumCatalog.COST_TRAIL, entry.get("label"), cost
+				])
+				failures += 1
+		if cost <= 0:
+			push_error("cosmetic has no price: %s" % entry.get("item_id"))
+			failures += 1
+
+	print("prices: %d dyes @ %d, %d auras 450-750, %d trails @ %d" % [
+		(by_kind.get("skin", []) as Array).size(), PremiumCatalog.COST_DYE,
+		auras, trails, PremiumCatalog.COST_TRAIL
+	])
+
+	# Every entry in the table must exist, or a rename silently drops that
+	# cosmetic back to the fallback price with nothing to notice it.
+	for slug: StringName in PremiumCatalog.COSMETIC_COSTS:
+		if ContentRegistryHub.id_from_slug(&"cosmetics", slug) <= 0:
+			push_error("COSMETIC_COSTS names a cosmetic that does not exist: %s" % slug)
+			failures += 1
+
+	# And the reverse: every cosmetic in the game must be NAMED, not silently
+	# inheriting a slot fallback. The fallback exists for content added later; a
+	# gap today means something shipped at a price nobody actually chose.
+	for cosmetic_id: int in Cosmetics.ids():
+		var cosmetic_slug: StringName = Cosmetics.slug(cosmetic_id)
+		if not PremiumCatalog.COSMETIC_COSTS.has(cosmetic_slug):
+			push_error("cosmetic has no explicit price: %s" % cosmetic_slug)
+			failures += 1
+
+	# Nothing from a slot with no trigger may be buyable - by token OR by roster.
+	# Selling an effect the game never plays is taking money for nothing.
+	for cosmetic_id: int in Cosmetics.ids():
+		if not PremiumCatalog.SLOTS_WITHOUT_A_TRIGGER.has(Cosmetics.slot_of(cosmetic_id)):
+			continue
+		if not PremiumCatalog.resolve(VaultGrants.cosmetic_token(cosmetic_id)).is_empty():
+			push_error("untriggerable cosmetic is buyable: %s" % Cosmetics.slug(cosmetic_id))
+			failures += 1
+
+	# Dyes are per (body, dye) pair. Buying one must not imply another - this is
+	# the property that makes 250 a fair price rather than a 16-body bundle.
+	var probe: PlayerResource = PlayerResource.new()
+	var a: int = VaultSkins.pack(VaultSkins.base_skin_id(10001), VaultSkins.STYLE_OBSIDIAN)
+	var b: int = VaultSkins.pack(VaultSkins.base_skin_id(10001), VaultSkins.STYLE_GOLD)
+	VaultGrants.grant_skin(probe, a)
+	if not VaultGrants.has_skin(probe, a):
+		push_error("granted dye not held")
+		failures += 1
+	if VaultGrants.has_skin(probe, b):
+		push_error("buying one dye unlocked another - dyes are NOT skin-specific")
 		failures += 1
 	return failures

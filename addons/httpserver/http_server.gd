@@ -12,6 +12,21 @@ var router: HttpRouter
 
 var current_connections: Array[StreamPeerTCP]
 
+## Partial requests, keyed by connection instance id.
+##
+## WHY THIS EXISTS. A poll tick reads whatever bytes have arrived, and TCP
+## makes no promise that a request is one of them. The old code took that one
+## read, and if it did not already contain a complete request it returned -
+## having ALREADY CONSUMED the bytes. The next tick then saw the remainder
+## with no request line, and the body was gone for good. Small requests from
+## Godot's own HTTPRequest happened to arrive whole, which is why this was
+## never noticed; anything larger, or any client that writes headers and body
+## separately, silently lost its body and read as an empty payload.
+##
+## That is survivable for a peddler snapshot. It is not survivable for a
+## payment webhook, where a dropped body means a player paid and got nothing.
+var _buffers: Dictionary[int, PackedByteArray] = {}
+
 
 func _ready() -> void:
 	server = TCPServer.new()
@@ -31,6 +46,7 @@ func listen(port: int, bind_address: String = "*") -> void:
 
 
 func close_connection(connection: StreamPeerTCP) -> void:
+	_buffers.erase(connection.get_instance_id())
 	connection.disconnect_from_host()
 	current_connections.erase(connection)
 
@@ -41,27 +57,50 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	# Get and Check status
 	var status: StreamPeerTCP.Status = connection.get_status()
 	if status == StreamPeerTCP.Status.STATUS_NONE or status == StreamPeerTCP.Status.STATUS_ERROR:
+		_buffers.erase(connection.get_instance_id())
 		current_connections.erase(connection)
 		return
 	if status == StreamPeerTCP.Status.STATUS_CONNECTING:
 		return
 
+	# Append whatever arrived to this connection's buffer, then decide whether a
+	# COMPLETE request is in hand. Bytes are never dropped on an incomplete read.
+	var key: int = connection.get_instance_id()
 	var available_bytes: int = connection.get_available_bytes()
-	if not available_bytes:
-		return
+	if available_bytes > 0:
+		var chunk: Array = connection.get_data(available_bytes)
+		if int(chunk[0]) == OK:
+			var buffered: PackedByteArray = _buffers.get(key, PackedByteArray())
+			buffered.append_array(chunk[1] as PackedByteArray)
+			_buffers[key] = buffered
 
-	if available_bytes > MAX_REQUEST_BYTES:
+	var raw: PackedByteArray = _buffers.get(key, PackedByteArray())
+	if raw.is_empty():
+		return
+	if raw.size() > MAX_REQUEST_BYTES:
 		close_connection(connection)
 		return
 
-	var as_string: String = connection.get_string(available_bytes)
-	if not as_string.contains("\r\n\r\n"):
-		# Not full headers yet.
-		return
+	# Split on the header terminator in BYTES, not in a decoded string: a body cut
+	# mid-UTF-8 decodes to something that is not the bytes that were sent, and a
+	# webhook signature is computed over the bytes.
+	var split_at: int = _find_header_end(raw)
+	if split_at == -1:
+		return # headers still arriving
 
-	var headers: String = as_string.get_slice("\r\n\r\n", 0)
-	if headers.is_empty() or headers == as_string:
+	var headers: String = raw.slice(0, split_at).get_string_from_utf8()
+	if headers.is_empty():
+		close_connection(connection)
 		return
+	var body_bytes: PackedByteArray = raw.slice(split_at + 4)
+	var expected_body: int = _content_length(headers)
+	if body_bytes.size() < expected_body:
+		return # body still arriving - wait for the rest rather than eating it
+
+	# Complete. The buffer is no longer needed and must go before any early return
+	# below, or a malformed request pins its bytes for the life of the process.
+	_buffers.erase(key)
+	var as_string: String = headers
 
 	var header: PackedStringArray = headers.get_slice("\r\n", 0).split(" ")
 
@@ -98,7 +137,7 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	var payload: Dictionary = {}
 
 	# Body (JSON) first — typical for POST/PUT.
-	var body: String = as_string.get_slice("\r\n\r\n", 1)
+	var body: String = body_bytes.get_string_from_utf8()
 	if body.strip_edges() != "":
 		var parsed: Variant = JSON.parse_string(body)
 		if typeof(parsed) == TYPE_DICTIONARY:
@@ -132,6 +171,16 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	# key, for routes that must settle a retried request exactly once. Written
 	# after the body/query merge so a client cannot forge it through either.
 	payload["__idempotency_key__"] = _header_value(headers, "idempotency-key", "")
+	# The body EXACTLY as it arrived. A webhook signature is an HMAC over these
+	# bytes, so re-serialising the parsed Dictionary would not reproduce it -
+	# key order, spacing and number formatting would all differ. Only routes
+	# that verify a signature should read this.
+	payload["__raw_body__"] = body
+	# The whole header block, for routes that need a header this server does not
+	# stamp individually (a webhook signature, say). Handlers read it with
+	# header_of(); parsing it here for every request would cost every route for
+	# the benefit of one.
+	payload["__headers__"] = headers
 
 	# Try a registered route first. Static fallback only fires when no route
 	# matched, so API paths can use any prefix without colliding with the
@@ -157,6 +206,26 @@ func handle_connection(connection: StreamPeerTCP) -> void:
 	# Nothing matched.
 	http_send(connection, {"ok": false, "error": "not_found"}, HTTPClient.ResponseCode.RESPONSE_NOT_FOUND)
 	close_connection(connection)
+
+
+## Byte offset of the CRLFCRLF that ends the header block, or -1 while it is
+## still arriving.
+func _find_header_end(raw: PackedByteArray) -> int:
+	for i: int in range(0, maxi(0, raw.size() - 3)):
+		if raw[i] == 13 and raw[i + 1] == 10 and raw[i + 2] == 13 and raw[i + 3] == 10:
+			return i
+	return -1
+
+
+## Declared body length, or 0 when the header is absent or unparseable. A
+## request with no Content-Length is treated as having no body, which is
+## correct for the GETs this serves; chunked encoding is not supported and
+## nothing that talks to this server uses it.
+func _content_length(header_block: String) -> int:
+	var raw_value: String = _header_value(header_block, "content-length", "")
+	if not raw_value.is_valid_int():
+		return 0
+	return maxi(0, raw_value.to_int())
 
 
 ## Case-insensitive lookup of a request header value in the raw header block (the

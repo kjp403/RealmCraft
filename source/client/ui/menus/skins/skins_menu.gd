@@ -5,7 +5,6 @@ extends MenuShell
 
 const PREVIEW_BOX: float = 160.0
 const PREVIEW_SCALE: float = 2.6
-const ANIMS: Array[StringName] = [&"idle", &"run", &"death"]
 
 var _bases: Array = []
 var _dyes: Array = []
@@ -19,11 +18,13 @@ var _preview: AnimatedSprite2D
 var _skin_label: Label
 var _dye_label: Label
 var _dye_swatch: ColorRect
-var _blurb_label: Label
+## Kept, but SILENT unless something went wrong. The standing "Wear writes this
+## dye onto your character" line was describing the button directly beneath it;
+## what this is actually needed for is telling someone a Wear failed.
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
-var _anim_buttons: Dictionary = {}
+var _col: VBoxContainer
 
 
 func _ready() -> void:
@@ -50,6 +51,7 @@ func _load_local_catalog() -> void:
 
 func _build_layout() -> void:
 	var col: VBoxContainer = VBoxContainer.new()
+	_col = col
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_theme_constant_override(&"separation", 6)
@@ -96,31 +98,10 @@ func _build_layout() -> void:
 	_dye_swatch.color = Color(0.94, 0.78, 0.29)
 	dye_row.add_child(_dye_swatch)
 
-	var anim_row: HBoxContainer = HBoxContainer.new()
-	anim_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	anim_row.add_theme_constant_override(&"separation", 6)
-	col.add_child(anim_row)
-	for anim: StringName in ANIMS:
-		var btn: Button = Button.new()
-		btn.text = String(anim).capitalize()
-		btn.toggle_mode = true
-		btn.button_pressed = (anim == _anim)
-		btn.custom_minimum_size = Vector2(0, 28)
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.pressed.connect(_set_anim.bind(anim))
-		anim_row.add_child(btn)
-		_anim_buttons[anim] = btn
-
-	_blurb_label = Label.new()
-	_blurb_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_blurb_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_blurb_label.add_theme_font_size_override(&"font_size", 13)
-	_blurb_label.modulate = Color(1, 1, 1, 0.8)
-	col.add_child(_blurb_label)
-
 	_status_label = Label.new()
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.modulate = Color(1, 1, 1, 0.7)
+	_status_label.visible = false
 	col.add_child(_status_label)
 
 	_action_button = Button.new()
@@ -211,13 +192,6 @@ func _cycle_dye(delta: int) -> void:
 	_update_preview()
 
 
-func _set_anim(anim: StringName) -> void:
-	_anim = anim
-	for key: StringName in _anim_buttons:
-		(_anim_buttons[key] as Button).button_pressed = (key == anim)
-	_play_anim()
-
-
 func _play_anim() -> void:
 	if _preview == null or _preview.sprite_frames == null:
 		return
@@ -240,8 +214,7 @@ func _update_preview() -> void:
 			VaultSkinVfx.apply_to_sprite(_preview, 0)
 		_skin_label.text = "—"
 		_dye_label.text = "—"
-		_blurb_label.text = ""
-		_status_label.text = "No wardrobe skins in the registry."
+		_say("No wardrobe skins in the registry.")
 		_announce_selection("")
 		_action_button.disabled = true
 		_clear_button.visible = false
@@ -268,16 +241,14 @@ func _update_preview() -> void:
 	var hex: String = str(dye.get("tint", ""))
 	if not hex.is_empty():
 		_dye_swatch.color = Color(hex)
-	_blurb_label.text = str(dye.get("blurb", ""))
 	_announce_selection(VaultGrants.skin_token(vault_id))
+	_say("")
 	if vault_id == _equipped and vault_id > 0:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
-		_status_label.text = "On your sprite in the live world. Leave the Vault — it stays."
 	else:
 		_action_button.text = "Wear"
 		_action_button.disabled = not _allowed
-		_status_label.text = "Wear writes this dye onto your character."
 
 
 func _on_action_pressed() -> void:
@@ -302,7 +273,7 @@ func _equip(vault_id: int) -> void:
 
 func _on_equipped(data: Dictionary, vault_id: int) -> void:
 	if not data.get("ok", false):
-		_status_label.text = "Couldn't wear that (%s)." % str(data.get("reason", "error"))
+		_say("Couldn't wear that (%s)." % str(data.get("reason", "error")))
 		_update_preview()
 		return
 	_equipped = int(data.get("vault_skin_id", data.get("skin_id", vault_id)))
@@ -321,3 +292,31 @@ func _announce_selection(item_id: String) -> void:
 		host = host.get_parent()
 	if host != null:
 		host.set_selection(item_id)
+
+
+## Re-emit the current selection. Called by the Vault shell when this tab
+## becomes visible, so the Buy button is priced on the frame the tab opens
+## instead of after a server round trip.
+func announce_selection_now() -> void:
+	_update_preview()
+
+
+## Status text, hidden entirely when there is nothing to say - an always-present
+## line that restates the button under it is just noise between the art and the
+## thing you came to click.
+func _say(message: String) -> void:
+	if _status_label == null:
+		return
+	_status_label.text = message
+	_status_label.visible = not message.is_empty()
+
+
+## Host the Vault shell's Buy button directly above this panel's own action
+## button, so price and purchase sit with Wear rather than in a far corner.
+func mount_purchase_button(button: Button) -> void:
+	if _col == null or button == null or _action_button == null:
+		return
+	if button.get_parent() != null:
+		button.get_parent().remove_child(button)
+	_col.add_child(button)
+	_col.move_child(button, _action_button.get_index())

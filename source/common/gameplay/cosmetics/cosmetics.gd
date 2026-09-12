@@ -6,11 +6,14 @@ class_name Cosmetics
 ## with tools/build_cosmetic_frames.py, and it is offered everywhere at once with NO
 ## hardcoded list. The slug prefix carries the slot (&"aura_rainbow" -> &"aura").
 ##
-## OBTAINABILITY (2026-08-12): nothing here is for sale yet. The only way to equip a
-## cosmetic is the admin-gated cosmetics.equip handler, which requires admin+ priority
-## on EVERY call — see CommandPermissions.STAFF_PROTECT_PRIORITY. There is deliberately
-## no price table and no purchase path; when the shop ships, add them here rather than
-## loosening the handler gate.
+## OBTAINABILITY (updated 2026-09-12): these are SOLD for Ark Coins. The price table
+## is [PremiumCatalog.COSMETIC_COSTS] and the purchase path is the vault.purchase
+## handler; cosmetics.equip now admits staff OR a holder of the matching
+## [VaultGrants] cosmetic token, so a buyer can wear what they bought.
+##
+## Two carve-outs live in PremiumCatalog rather than here: id 0 is never sellable
+## (it is how a cosmetic is CLEARED), and the flourish / departure slots are held
+## back because nothing in the game fires them — see SLOTS_WITHOUT_A_TRIGGER.
 
 
 ## Slot order is display order in the curator menu, and doubles as the valid-slot set.
