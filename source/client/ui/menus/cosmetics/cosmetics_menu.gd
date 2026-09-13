@@ -542,9 +542,13 @@ func _update_preview() -> void:
 func _render_outfit() -> void:
 	for slot: StringName in _preview_vfx:
 		var vfx: CosmeticVfx = _preview_vfx[slot]
-		var event_slot: bool = not Cosmetics.LOOPING_SLOTS.has(slot)
+		# THE WEAPON SLOT ONLY RENDERS ON ITS OWN TAB TOO. In the world it re-skins
+		# the Ascended weapon in hand and never draws on the body; the mannequin
+		# holds no weapon, so worn here it drew the raw strip as a giant sword over
+		# every aura and pet.
+		var own_tab_only: bool = slot == &"weapon" or not Cosmetics.LOOPING_SLOTS.has(slot)
 		var wanted: int = int(_try_on.get(slot, 0))
-		if event_slot and slot != _real_slot(_slot):
+		if own_tab_only and slot != _real_slot(_slot):
 			wanted = 0
 		if wanted == 0:
 			vfx.visible = false
