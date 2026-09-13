@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1789206331
-next_id = 35
+version = 1789264378
+next_id = 37
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -177,4 +177,14 @@ entries = Array[Dictionary]([{
 &"id": 34,
 &"path": "res://source/common/gameplay/cosmetics/frames/aura_verdant_bloom.tres",
 &"slug": &"aura_verdant_bloom"
+}, {
+&"hash": "c6c9d72eef8af506c85d042fa6d6308f0af6cdfcf309fb9b0c5c74b1681997bc",
+&"id": 35,
+&"path": "res://source/common/gameplay/cosmetics/frames/halo_thunderhead_crown.tres",
+&"slug": &"halo_thunderhead_crown"
+}, {
+&"hash": "dd73135900a5317b11e5252e97e99f3f726aa39386564266ca5f9e6a71fc4cb4",
+&"id": 36,
+&"path": "res://source/common/gameplay/cosmetics/frames/trail_static_wake.tres",
+&"slug": &"trail_static_wake"
 }])

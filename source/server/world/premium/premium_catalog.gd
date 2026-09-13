@@ -111,6 +111,7 @@ const COSMETIC_COSTS: Dictionary = {
 	&"trail_rainbow": 350,
 	&"trail_storm": 350,
 	&"trail_toxic": 350,
+	&"trail_static_wake": 350,
 
 	# --- Halos. Persistent and always in frame above the head, so they price like
 	# auras rather than like one-shots - and they rhyme with their aura namesakes,
@@ -118,6 +119,8 @@ const COSMETIC_COSTS: Dictionary = {
 	&"halo_gold": 450,
 	&"halo_galaxy": 600,
 	&"halo_rainbow": 600,
+	# Two layers of depth and lightning in the cloud - priced with the multi-hue halos.
+	&"halo_thunderhead_crown": 600,
 
 	# --- Flourishes. A one-shot on an action. Priced with trails: seen often, but
 	# only for a moment at a time.

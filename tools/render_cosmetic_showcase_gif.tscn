@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/render_cosmetic_showcase_gif.gd" id="1_gif"]
+
+[node name="RenderCosmeticShowcaseGif" type="Node"]
+script = ExtResource("1_gif")

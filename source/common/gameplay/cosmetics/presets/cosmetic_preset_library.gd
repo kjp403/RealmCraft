@@ -38,6 +38,8 @@ const _AURA_AETHER_ARCS: GDScript = preload("res://source/common/gameplay/cosmet
 const _AURA_LOTUS_PETALS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_lotus_petals_preset.gd")
 const _AURA_ALCHEMICAL_SUN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_alchemical_sun_preset.gd")
 const _AURA_PRISMATIC_SHIMMER: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_prismatic_shimmer_preset.gd")
+const _TRAIL_STATIC_WAKE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_static_wake_preset.gd")
+const _HALO_THUNDERHEAD_CROWN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/halo_thunderhead_crown_preset.gd")
 
 ## Adding a line here upgrades one cosmetic from its strip to a node tree.
 const PRESETS: Dictionary = {
@@ -71,6 +73,9 @@ const PRESETS: Dictionary = {
 	&"aura_lotus_petals": _AURA_LOTUS_PETALS,
 	&"aura_alchemical_sun": _AURA_ALCHEMICAL_SUN,
 	&"aura_prismatic_shimmer": _AURA_PRISMATIC_SHIMMER,
+	# The rest of each theme set: a trail and a halo in the same colours.
+	&"trail_static_wake": _TRAIL_STATIC_WAKE,
+	&"halo_thunderhead_crown": _HALO_THUNDERHEAD_CROWN,
 }
 
 

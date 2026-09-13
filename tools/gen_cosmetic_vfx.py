@@ -521,10 +521,12 @@ ROSTER = [
     ("trail_gold",          fx_trail,           const("gold")),
     ("trail_chrono_echo",   fx_ribbon_trail,    const("chrono")),
     ("trail_infernal_chasm", fx_trail,          const("infernal")),
+    ("trail_static_wake",   fx_trail,           theme("storm")),
     # Halos
     ("halo_rainbow",        fx_halo,            rainbow(spread=1.0, speed=0.8)),
     ("halo_galaxy",         fx_halo,            galaxy()),
     ("halo_gold",           fx_halo,            const("gold")),
+    ("halo_thunderhead_crown", fx_halo,         theme("storm")),
     # Flourishes / departures
     ("flourish_rainbow",    fx_flourish,        rainbow(spread=0.9, speed=0.7)),
     ("flourish_void",       fx_flourish,        const("void")),
