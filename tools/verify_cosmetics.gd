@@ -37,7 +37,7 @@ func _initialize() -> void:
 	# 26 + the eight colour-matched auras (CosmeticThemes). This number is a
 	# tripwire for content VANISHING, so it is bumped deliberately when content is
 	# added and never loosened into a >= .
-	_check(ids.size() == 67, "67 cosmetics registered (got %d)" % ids.size())
+	_check(ids.size() == 72, "72 cosmetics registered (got %d)" % ids.size())
 
 	var slots: Dictionary = {}
 	var bad_frames: PackedStringArray = []
@@ -106,7 +106,7 @@ func _initialize() -> void:
 	_check(unknown_slugs.is_empty(), "every preset slug is a real cosmetic %s" % str(unknown_slugs))
 	_check(bad_scripts.is_empty(), "every preset extends CosmeticPreset %s" % str(bad_scripts))
 	# 15 + one per colour-matched aura.
-	_check(CosmeticPresetLibrary.PRESETS.size() == 56, "56 presets registered (got %d)"
+	_check(CosmeticPresetLibrary.PRESETS.size() == 61, "61 presets registered (got %d)"
 		% CosmeticPresetLibrary.PRESETS.size())
 
 	# The two render paths must stay mutually exclusive and correctly routed.

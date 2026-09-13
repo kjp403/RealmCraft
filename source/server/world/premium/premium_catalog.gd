@@ -176,6 +176,12 @@ const COSMETIC_COSTS: Dictionary = {
 	&"pet_ember_imp": 600,
 	&"pet_corgi": 600,
 	&"pet_red_panda": 600,
+	# Second detailed batch, priced with the Corgi and the Red Panda.
+	&"pet_baby_griffin": 600,
+	&"pet_bunny": 600,
+	&"pet_pixie": 600,
+	&"pet_starry_cat": 600,
+	&"pet_treasure_goblin": 600,
 
 	&"pet_phoenix_chick": 750,
 	&"pet_clockwork_owl": 750,

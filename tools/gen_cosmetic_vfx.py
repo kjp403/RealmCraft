@@ -561,6 +561,11 @@ ROSTER = [
     ("pet_snail",            fx_halo,            const("gold")),
     ("pet_spellbook",        fx_halo,            const("gold")),
     ("pet_star_sprite",      fx_halo,            const("gold")),
+    ("pet_baby_griffin",     fx_halo,            const("gold")),
+    ("pet_bunny",            fx_halo,            const("gold")),
+    ("pet_pixie",            fx_halo,            const("gold")),
+    ("pet_starry_cat",       fx_halo,            const("gold")),
+    ("pet_treasure_goblin",  fx_halo,            const("gold")),
     ("pet_wisp",             fx_halo,            const("gold")),
     # Flourishes / departures
     ("flourish_rainbow",    fx_flourish,        rainbow(spread=0.9, speed=0.7)),

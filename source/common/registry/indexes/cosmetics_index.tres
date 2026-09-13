@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1789270210
-next_id = 68
+version = 1789273278
+next_id = 73
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -342,4 +342,29 @@ entries = Array[Dictionary]([{
 &"id": 67,
 &"path": "res://source/common/gameplay/cosmetics/frames/pet_wisp.tres",
 &"slug": &"pet_wisp"
+}, {
+&"hash": "c1be30f61f0bfc28bdc2b013c7b8c162f0e97106ebe45a619a0e9dafb2919f96",
+&"id": 68,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_baby_griffin.tres",
+&"slug": &"pet_baby_griffin"
+}, {
+&"hash": "9fd4e9b231c90f769955cb5b32ca600b14850bd2925ac6bad609b45bb295ac51",
+&"id": 69,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_bunny.tres",
+&"slug": &"pet_bunny"
+}, {
+&"hash": "f8610d48ccc6530775c0e787136d1d2899b7c3673ad58c648a9b0802f9baf87c",
+&"id": 70,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_pixie.tres",
+&"slug": &"pet_pixie"
+}, {
+&"hash": "866439ae49e33473c37c72832db4c16165f4d0a516b22558af68da5ecf80ccad",
+&"id": 71,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_starry_cat.tres",
+&"slug": &"pet_starry_cat"
+}, {
+&"hash": "bf946e9b0471a9d4f06c1fc645b514d5865a6e6e7d2a2a7fa96028937b275703",
+&"id": 72,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_treasure_goblin.tres",
+&"slug": &"pet_treasure_goblin"
 }])
