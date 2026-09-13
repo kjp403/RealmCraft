@@ -17,11 +17,14 @@ class_name Cosmetics
 
 
 ## Slot order is display order in the curator menu, and doubles as the valid-slot set.
-const SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"flourish", &"departure", &"weapon"]
+##
+## PET is a worn slot like aura/halo/trail - a companion that follows you - and is
+## sold on its own Vault tab (see vault_menu.gd), not mixed in with the effects.
+const SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"flourish", &"departure", &"weapon", &"pet"]
 
 ## Slots that play continuously while equipped. The rest are event effects — the
 ## preview node replays them on a cycle so they can still be inspected.
-const LOOPING_SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"weapon"]
+const LOOPING_SLOTS: Array[StringName] = [&"aura", &"trail", &"halo", &"weapon", &"pet"]
 
 
 ## All cosmetic ids, sorted ascending. Empty when the registry is missing (dedicated

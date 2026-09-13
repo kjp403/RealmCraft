@@ -32,7 +32,7 @@ CELL = 128
 
 # Slot is derived from the slug prefix. Looping slots play forever while equipped;
 # one-shot slots fire on an event and stop.
-LOOPING = {"aura", "trail", "halo"}
+LOOPING = {"aura", "trail", "halo", "pet"}
 SPEED = {"aura": 12.0, "trail": 14.0, "halo": 14.0, "flourish": 16.0, "departure": 14.0}
 
 

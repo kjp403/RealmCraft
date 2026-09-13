@@ -44,7 +44,29 @@ const SLOT_LABELS: Dictionary = {
 	&"flourish": "Flourishes",
 	&"departure": "Departures",
 	&"weapon": "Weapon Skins",
+	&"pet": "Pets",
+	&"pet_reactive": "Reactive Pets",
 }
+
+## A SECTION is a tab that is not a slot of its own. The Pets tab splits the one
+## "pet" slot into two shelves - pets with themed reactions to what their owner
+## is doing, and the rest - so the ones that do the most get a shelf of their
+## own. Every section maps back to the real slot it equips into; see _real_slot.
+const SECTION_REACTIVE_PETS: StringName = &"pet_reactive"
+
+## SLOT FILTER, set by whoever embeds this menu (before it enters the tree) as the
+## "slots" meta: an Array of slot names to show, or unset for every slot EXCEPT the
+## ones listed in "exclude_slots". The Vault embeds two copies - Cosmetics without
+## pets, and Pets with only pets - so pets get a shelf of their own instead of
+## being a seventh tab crammed into a row with no room for it.
+var _only_slots: Array = []
+var _exclude_slots: Array = []
+
+## Pets preview WALK, THEN STOP, on a loop: a pet's whole appeal is that it
+## follows you AND does something when you stand still, and a preview that only
+## walks (or only stands) sells half of it.
+const PET_WALK_S: float = 2.6
+const PET_STAND_S: float = 3.4
 
 ## slot -> Array[int] of cosmetic ids in that tab.
 var _by_slot: Dictionary = {}
@@ -53,14 +75,26 @@ var _idx_by_slot: Dictionary = {}
 var _slots: Array[StringName] = []
 var _slot: StringName = &""
 
-var _equipped_body: int = 0
-var _equipped_weapon: int = 0
+## slot -> equipped id, straight from cosmetics.state. Replaces the two scalars
+## this used to keep: every slot is independent now, and a halo, an aura and a
+## trail are worn at the same time.
+var _equipped: Dictionary = {}
 ## Staff: may equip ANYTHING, owned or not. Ordinary players get their rights
 ## one cosmetic at a time, from _owned.
 var _allowed: bool = false
 var _owned: Dictionary[int, bool] = {}
 
-var _preview: CosmeticVfx
+## slot -> the CosmeticVfx drawing that slot in the preview. One node per slot,
+## all mounted on the same pivot, so the box shows a COMBINATION rather than the
+## one effect being browsed.
+var _preview_vfx: Dictionary = {}
+## slot -> the id being tried on. Seeded from what the player actually wears and
+## then changed by browsing - THIS MENU ONLY. Nothing here is sent anywhere: the
+## point is to see how a halo sits over an aura before spending on either.
+var _try_on: Dictionary = {}
+## Says so, in the corner of the stage, whenever the mannequin is wearing
+## something the player is not.
+var _try_on_label: Label
 ## The buyer's OWN character, drawn under the effect. Not decoration: an aura is
 ## sized and positioned against a body, and a trail is drawn from where one has
 ## been, so an effect floating in an empty box is not the thing being sold.
@@ -72,8 +106,9 @@ var _body: AnimatedSprite2D
 ## NOT _title_label: MenuShell already owns that name for the window's own
 ## heading, and shadowing it is a parse error that takes the whole menu down.
 var _wearer_title: Label
-## Carries [member _preview] around the walk circle. Separate from the preview node
-## so the walk can be switched off per slot without touching the effect.
+## Carries the whole preview - body, title and every slot's effect - around the
+## walk circle. Separate from the effect nodes so the walk can be switched off
+## per tab without touching what is being worn.
 var _preview_pivot: Node2D
 var _walking: bool = false
 var _walk_elapsed: float = 0.0
@@ -88,6 +123,8 @@ var _col: VBoxContainer
 
 
 func _ready() -> void:
+	_only_slots = get_meta(&"slots", [])
+	_exclude_slots = get_meta(&"exclude_slots", [])
 	var embedded: bool = bool(get_meta(&"embedded", false))
 	if not embedded:
 		build_shell("Cosmetics", null, true)
@@ -123,9 +160,23 @@ func _build_layout() -> void:
 	_tab_bar.add_theme_constant_override(&"separation", 4)
 	col.add_child(_tab_bar)
 
+	# A STAGE, NOT A TRANSPARENT GAP. The Vault is a fullscreen MenuShell, which
+	# drops the card frame on purpose and leaves only a half-alpha dim - so
+	# before this, a 1.6x pixel character and a particle effect were drawn over
+	# the lit Guild House, its NPCs and the leaderboard text. The preview was
+	# there and simply could not be seen, worst of all when the buyer's own
+	# character happened to be standing behind it.
+	#
+	# Clipped, so a wide trail cannot paint over the Buy button underneath.
+	var stage: PanelContainer = PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.clip_contents = true
+	stage.add_theme_stylebox_override(&"panel", _stage_style())
+	col.add_child(stage)
+
 	var preview_center: CenterContainer = CenterContainer.new()
 	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(preview_center)
+	stage.add_child(preview_center)
 
 	var preview_box: Control = Control.new()
 	preview_box.custom_minimum_size = Vector2(PREVIEW_BOX, PREVIEW_BOX)
@@ -136,13 +187,18 @@ func _build_layout() -> void:
 	_preview_pivot.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
 	preview_box.add_child(_preview_pivot)
 
-	_preview = CosmeticVfx.new()
-	# The world mounts this under a Character, which puts it behind the body at
-	# z_index -1. A NEGATIVE z here would sink the effect behind the panel it sits
-	# on, so the same order is built the other way up: effect at 0, body above it.
-	_preview.z_index = 0
-	_preview.preview_mode = true
-	_preview_pivot.add_child(_preview)
+	# One node per slot, built up front and left hidden until something is put in
+	# it. The world mounts these under a Character, which puts them behind the
+	# body at z_index -1; a NEGATIVE z here would sink the effect behind the
+	# panel it sits on, so the same order is built the other way up: effects at
+	# 0, body above them.
+	for slot: StringName in Cosmetics.SLOTS:
+		var vfx: CosmeticVfx = CosmeticVfx.new()
+		vfx.z_index = 0
+		vfx.preview_mode = true
+		vfx.visible = false
+		_preview_pivot.add_child(vfx)
+		_preview_vfx[slot] = vfx
 
 	# Rides the pivot, so a trail preset is drawn from a body that is actually
 	# moving rather than trailing off empty space.
@@ -169,6 +225,19 @@ func _build_layout() -> void:
 	_wearer_title = Label.new()
 	_wearer_title.add_theme_font_size_override(&"font_size", 13)
 	title_center.add_child(_wearer_title)
+
+	# Bottom-left of the stage, so it costs the column ZERO height - this tab has
+	# none to give. Only ever visible when the mannequin and the player disagree.
+	_try_on_label = Label.new()
+	_try_on_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_try_on_label.offset_left = 6
+	_try_on_label.offset_top = -20
+	_try_on_label.add_theme_font_size_override(&"font_size", 11)
+	_try_on_label.modulate = Color(1, 1, 1, 0.55)
+	_try_on_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_try_on_label.z_index = 2
+	_try_on_label.visible = false
+	preview_box.add_child(_try_on_label)
 
 	set_process(true)
 
@@ -216,6 +285,24 @@ func _build_layout() -> void:
 	col.add_child(_clear_button)
 
 
+## Near-opaque, because the point is to take the world out from behind the
+## effect. Not fully opaque: a sliver of the room still shows through, which
+## keeps the menu feeling like it is over the Guild House rather than a separate
+## screen - the same call the fullscreen shell makes with its dim.
+func _stage_style() -> StyleBoxFlat:
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = Color(0.035, 0.042, 0.06, 0.94)
+	box.border_color = Color(0.38, 0.34, 0.28, 0.9)
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(4)
+	# ZERO margins. This tab has no vertical slack - six slot tabs, a Buy button,
+	# Equip and Take off inside 540px - and 4px of padding top and bottom was
+	# enough to push Take off off the bottom edge. The stage already expands to
+	# fill whatever the column has spare.
+	box.set_content_margin_all(0)
+	return box
+
+
 # --- Data ---
 
 func _on_shown() -> void:
@@ -233,20 +320,34 @@ func _on_state(data: Dictionary) -> void:
 	_owned.clear()
 	for owned_v: Variant in data.get("owned", []):
 		_owned[int(owned_v)] = true
-	_equipped_body = int(data.get("equipped", 0))
-	_equipped_weapon = int(data.get("equipped_weapon", 0))
+	_equipped.clear()
+	for slot_key: Variant in (data.get("slots", {}) as Dictionary):
+		var worn: int = int((data.get("slots", {}) as Dictionary)[slot_key])
+		if worn > 0:
+			_equipped[StringName(str(slot_key))] = worn
+	# The state fetch runs on every open, so this is also the reset: the
+	# mannequin starts each visit dressed as the player is.
+	_reset_try_on()
 
 	_by_slot.clear()
 	_slots.clear()
 	for id_v: Variant in data.get("cosmetics", []):
 		var id: int = int(id_v)
 		var slot: StringName = Cosmetics.slot_of(id)
-		if not _by_slot.has(slot):
-			_by_slot[slot] = []
-		(_by_slot[slot] as Array).append(id)
+		if not _shows_slot(slot):
+			continue
+		var key: StringName = slot
+		if slot == &"pet" and _has_themed_reactions(id):
+			key = SECTION_REACTIVE_PETS
+		if not _by_slot.has(key):
+			_by_slot[key] = []
+		(_by_slot[key] as Array).append(id)
 
 	# Keep Cosmetics.SLOTS order, skipping slots with no content.
 	for slot: StringName in Cosmetics.SLOTS:
+		# Reactive pets shelve first: they are the flagship of the Pets tab.
+		if slot == &"pet" and _by_slot.has(SECTION_REACTIVE_PETS):
+			_slots.append(SECTION_REACTIVE_PETS)
 		if _by_slot.has(slot):
 			_slots.append(slot)
 
@@ -259,20 +360,43 @@ func _on_state(data: Dictionary) -> void:
 		_clear_button.visible = false
 		return
 	_clear_button.visible = true
-	# Open on the tab holding whatever is already equipped, else the first tab.
+	# Open on the first tab that has something equipped in it, else the first tab.
 	var want: StringName = _slots[0]
 	for slot: StringName in _slots:
-		var ids: Array = _by_slot[slot]
-		if ids.has(_equipped_body) or ids.has(_equipped_weapon):
+		if _equipped_for(slot) > 0:
 			want = slot
 			break
 	_select_slot(want)
+
+
+## The slot a tab EQUIPS into: a section maps back to its real slot, and every
+## other tab is its own slot. Anything that equips, tries on or reads what is
+## worn must go through this - the section key is only a shelf.
+func _real_slot(key: StringName) -> StringName:
+	return &"pet" if key == SECTION_REACTIVE_PETS else key
+
+
+## True for a pet whose preset declares THEMED_REACTIONS - read straight off the
+## script, so marking a pet reactive is one line in its own file.
+func _has_themed_reactions(cosmetic_id: int) -> bool:
+	var script: GDScript = CosmeticPresetLibrary.script_for(cosmetic_id)
+	return script != null and script.get_script_constant_map().has(&"THEMED_REACTIONS")
+
+
+## Whether this copy of the menu shows [param slot] at all (see _only_slots).
+func _shows_slot(slot: StringName) -> bool:
+	if not _only_slots.is_empty():
+		return _only_slots.has(slot)
+	return not _exclude_slots.has(slot)
 
 
 func _rebuild_tabs() -> void:
 	for child: Node in _tab_bar.get_children():
 		child.queue_free()
 	_tab_buttons.clear()
+	# A one-slot shelf (Pets) needs no tab strip: a single tab is just a label
+	# costing a row this layout does not have.
+	_tab_bar.visible = _slots.size() > 1
 	for slot: StringName in _slots:
 		var b: Button = Button.new()
 		b.text = String(SLOT_LABELS.get(slot, String(slot).capitalize()))
@@ -297,9 +421,10 @@ func _select_slot(slot: StringName) -> void:
 	_update_preview()
 
 
-## Which equipped id this tab drives — the weapon tab has its own slot.
+## Which equipped id this tab drives. Every slot has its own now, so this is a
+## lookup rather than the weapon/everything-else split it used to be.
 func _equipped_for(slot: StringName) -> int:
-	return _equipped_weapon if slot == &"weapon" else _equipped_body
+	return int(_equipped.get(_real_slot(slot), 0))
 
 
 # --- Browsing ---
@@ -322,18 +447,34 @@ func _cycle(delta: int) -> void:
 	_update_preview()
 
 
-## Where the preview sits when it is not walking. Slightly below centre: a preset
-## draws from the FEET, so centring it puts most of the effect in the lower half
-## of the box and the head-height layers off the top.
+## Where the preview sits when it is not walking. Below centre: a preset draws
+## from the FEET, so centring it puts most of the effect in the lower half of the
+## box and the head-height layers off the top.
+##
+## Dropped from 0.55 once halos joined the picture. A halo draws at head height
+## and the worn title is pinned to the top of the box, so at 0.55 the two
+## overlapped - the one pairing a buyer is most likely to be checking looked like
+## a rendering fault. The feet still clear the bottom with an aura's radius to
+## spare.
+##
+## PETS SIT LOWER STILL. A flying pet hovers a head above its owner, and at 0.62
+## it flew straight through the worn title pinned to the top of the box.
 func _preview_home() -> Vector2:
-	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.55)
+	if _real_slot(_slot) == &"pet":
+		return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
+	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
 
 
 ## Walk the preview so trail presets have movement to sample. A circle rather than
 ## the back-and-forth the render tool uses: a wardrobe preview has no room to run,
 ## and a circle keeps the whole trail inside the box at every moment.
 func _process(delta: float) -> void:
-	if not _walking or _preview_pivot == null:
+	if _preview_pivot == null:
+		return
+	if _real_slot(_slot) == &"pet":
+		_pet_walk_cycle(delta)
+		return
+	if not _walking:
 		return
 	_walk_elapsed += delta
 	var angle: float = _walk_elapsed * TAU / WALK_PERIOD_S
@@ -343,19 +484,33 @@ func _process(delta: float) -> void:
 	_preview_pivot.position = _preview_home() + orbit
 
 
+## Walk for PET_WALK_S, stand for PET_STAND_S, repeat - so the pet is seen both
+## following and doing its idle trick. The body switches run/idle with it.
+func _pet_walk_cycle(delta: float) -> void:
+	_walk_elapsed += delta
+	var t: float = fposmod(_walk_elapsed, PET_WALK_S + PET_STAND_S)
+	var moving: bool = t < PET_WALK_S
+	if moving:
+		var angle: float = t * TAU / WALK_PERIOD_S
+		_preview_pivot.position = _preview_home() + Vector2(cos(angle), sin(angle) * 0.5) * WALK_RADIUS
+	if moving != _walking:
+		_walking = moving
+		_play_body(&"run" if moving else &"idle")
+
+
 func _update_preview() -> void:
 	var id: int = _current_id()
 	if id == 0:
 		return
-	if _preview != null:
-		# Lend the preview the player's own character, refreshed every browse
-		# because it may not have existed when this menu was built. Chrono Echo
-		# stamps the wearer's live sprite frame, so with nothing to read it
-		# previews as an empty box — and borrowing the local player means the
-		# wardrobe shows the effect on the skin the buyer is actually wearing.
-		_preview.preview_wearer = ClientState.local_player
-		_preview.apply(id)
-	_walking = Cosmetics.slot_of(id) == &"trail"
+	# Browsing a slot tries that item ON. The other slots keep whatever is in
+	# them, which is what turns arrowing through halos into "how does this sit
+	# over the aura I already have".
+	_try_on[_real_slot(_slot)] = id
+	_render_outfit()
+	# The walk exists to give a TRAIL something to sample, so it follows the tab
+	# you are on rather than the outfit: standing still on the Auras tab while a
+	# tried-on trail drags the mannequin round in circles reads as a bug.
+	_walking = _slot == &"trail"
 	if not _walking and _preview_pivot != null:
 		_preview_pivot.position = _preview_home()
 	# Re-read every browse for the same reason the wearer is: the player can
@@ -368,6 +523,63 @@ func _update_preview() -> void:
 		ids.size(),
 	]
 	_update_action()
+
+
+## Draw every slot of the tried-on outfit at once.
+##
+## THE WHOLE POINT OF TRYING THINGS ON. A halo, an aura and a trail are worn
+## together in the world, and the only question a buyer has once they like an
+## effect is whether it goes with the rest of what they own. Showing one at a
+## time answers a question nobody asked.
+##
+## THE TWO EVENT SLOTS ONLY RENDER ON THEIR OWN TAB. A flourish and a departure
+## are one-shots that the preview node replays on a loop; left in the outfit they
+## would fire over and over behind whatever else was being browsed, which reads
+## as the aura being broken rather than as a flourish being worn.
+##
+## NOTHING HERE LEAVES THE MENU. No request, no equip, no push - the mannequin is
+## the only thing that changes.
+func _render_outfit() -> void:
+	for slot: StringName in _preview_vfx:
+		var vfx: CosmeticVfx = _preview_vfx[slot]
+		var event_slot: bool = not Cosmetics.LOOPING_SLOTS.has(slot)
+		var wanted: int = int(_try_on.get(slot, 0))
+		if event_slot and slot != _real_slot(_slot):
+			wanted = 0
+		if wanted == 0:
+			vfx.visible = false
+			vfx.apply(0)
+			continue
+		# Lend each one the player's own character: Chrono Echo stamps the
+		# wearer's live sprite frame, and with nothing to read it previews as an
+		# empty box.
+		vfx.preview_wearer = ClientState.local_player
+		vfx.apply(wanted)
+	_update_try_on_label()
+
+
+## Say when the mannequin is wearing something the player is not, so nobody
+## reads the preview as their character and wonders why the world disagrees.
+func _update_try_on_label() -> void:
+	if _try_on_label == null:
+		return
+	var extra: int = 0
+	for slot: StringName in _try_on:
+		if int(_try_on[slot]) != _equipped_for(slot):
+			extra += 1
+	_try_on_label.visible = extra > 0
+	if extra > 0:
+		_try_on_label.text = "Trying on %d — not worn. Reopen the Vault to reset." % extra
+
+
+## Start every visit from what the player actually wears. A try-on that survived
+## a close and reopen would be indistinguishable from the real thing the next
+## time they looked.
+func _reset_try_on() -> void:
+	_try_on.clear()
+	for slot: StringName in _equipped:
+		_try_on[slot] = int(_equipped[slot])
+	_render_outfit()
 
 
 ## Put the buyer's own character under the effect, and their title over it.
@@ -406,6 +618,10 @@ func _refresh_wearer() -> void:
 	if _wearer_title == null:
 		return
 	var title: String = wearer.display_title.strip_edges() if live else ""
+	# Not on the Pets tab: perching pets (the owls, the moth) sit on the head,
+	# and in this small box that is exactly where the title is pinned.
+	if _real_slot(_slot) == &"pet":
+		title = ""
 	_wearer_title.visible = not title.is_empty()
 	if title.is_empty():
 		return
@@ -447,7 +663,7 @@ func _update_action() -> void:
 	_announce_selection(VaultGrants.cosmetic_token(id) if id != 0 else "")
 	if id == 0:
 		return
-	if id == _equipped_for(_slot):
+	if id == _equipped_for(_real_slot(_slot)):
 		_action_button.text = "Equipped"
 		_action_button.disabled = true
 		_status_label.text = "Currently worn."
@@ -464,41 +680,48 @@ func _can_wear(id: int) -> bool:
 	return _allowed or _owned.has(id)
 
 
-## What this slot actually does in the world, in the player's words.
+## What this slot actually does, and WHEN IT SHOWS, in the player's words.
 ##
-## Replaces a flat "Unreleased — staff testing only." that was true when nothing
-## was for sale and is now both wrong and off-putting on a thing with a price on
-## it. Per slot rather than one line, because "it glows around you" and "it
-## trails behind you" are the difference a buyer is choosing between.
+## Every line names the moment the effect appears, because the two event slots
+## cannot be judged from the preview alone: a flourish and a departure look
+## identical in the wardrobe - both replay on a loop there - and are completely
+## different purchases. One fires every time you level, the other only when you
+## die. A buyer who learns that after paying has been sold a surprise.
+##
+## "Everyone nearby sees it" is on the event lines on purpose. Both are
+## broadcast to the whole instance, and being seen is the entire point of
+## buying one.
 func _slot_blurb(slot: StringName) -> String:
 	match slot:
 		&"aura":
-			return "Glows around you wherever you go."
+			return "Worn: glows around you wherever you go."
 		&"trail":
-			return "Leaves a wake behind you as you move."
+			return "Worn: leaves a wake behind you as you move."
 		&"halo":
-			return "Sits above your head, everywhere you go."
+			return "Worn: sits above your head, everywhere you go."
 		&"weapon":
-			return "Lights up any Ascended weapon you hold."
-		&"flourish", &"departure":
-			# Deliberately blunt. Nothing in the game plays these yet, and this
-			# menu is the only place they render — so it says so rather than
-			# implying they show up in the world. They are held out of the shop
-			# for the same reason (PremiumCatalog.SLOTS_WITHOUT_A_TRIGGER).
-			return "Preview only for now — nothing in the world plays this yet."
+			return "Worn: lights up any Ascended weapon you hold."
+		&"flourish":
+			return "Plays once each time you gain a level. Everyone nearby sees it."
+		&"departure":
+			return "Plays once where you fall when you die. Everyone nearby sees it."
+		&"pet":
+			return "Worn: follows you everywhere, and does something when you stop."
+		&"pet_reactive":
+			return "Worn: follows you, and joins in with whatever you're doing."
 	return "Worn effect."
 
 
 func _on_action_pressed() -> void:
 	var id: int = _current_id()
 	if id != 0:
-		_equip(id, _slot)
+		_equip(id, _real_slot(_slot))
 
 
 ## Clearing sends the slot explicitly — id 0 has no slot of its own, so the server
 ## cannot infer which one to clear.
 func _on_clear_pressed() -> void:
-	_equip(0, _slot)
+	_equip(0, _real_slot(_slot))
 
 
 func _equip(id: int, slot: StringName) -> void:
@@ -518,16 +741,34 @@ func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 		_status_label.text = _equip_error(str(data.get("reason", "")))
 		_update_action()
 		return
-	var lp: Node = ClientState.local_player
-	if slot == &"weapon":
-		_equipped_weapon = id
-		if lp != null and is_instance_valid(lp):
-			lp.weapon_cosmetic_id = id
+	if id > 0:
+		_equipped[slot] = id
 	else:
-		_equipped_body = id
-		if lp != null and is_instance_valid(lp):
-			lp.cosmetic_id = id
+		_equipped.erase(slot)
+
+	# Instant local swap so the preview and the character behind the menu react
+	# now rather than on the next state fetch. Only the three WORN slots have a
+	# channel to write; a flourish or a departure has nothing to show until it
+	# fires, which is the whole difference between the two kinds of slot.
+	var lp: Node = ClientState.local_player
+	if lp != null and is_instance_valid(lp):
+		match slot:
+			&"weapon":
+				lp.weapon_cosmetic_id = id
+			&"aura":
+				lp.cosmetic_id = id
+			&"halo":
+				lp.halo_cosmetic_id = id
+			&"trail":
+				lp.trail_cosmetic_id = id
+			&"pet":
+				lp.pet_cosmetic_id = id
+	# Bought or equipped for real, so the mannequin and the player agree about
+	# this slot again - and the "trying on" count drops by one.
+	_try_on[slot] = id
+	_render_outfit()
 	_update_action()
+	_refresh_wearer()
 
 
 func _equip_error(reason: String) -> String:

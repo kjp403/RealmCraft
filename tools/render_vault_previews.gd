@@ -68,6 +68,7 @@ func _go() -> void:
 		[&"titles", "vault_titles"],
 		[&"skins", "vault_skins"],
 		[&"cosmetics", "vault_cosmetics"],
+		[&"pets", "vault_pets"],
 	]:
 		_menu.call(&"_select_tab", tab[0])
 		# The tab re-announces its selection on show, which is what re-prices the
@@ -75,8 +76,42 @@ func _go() -> void:
 		# to react to the selection it emitted.
 		await get_tree().process_frame
 		await get_tree().process_frame
+		if tab[0] == &"pets":
+			# A companion springs in from where it spawned; give it time to arrive.
+			await get_tree().create_timer(1.5).timeout
 		await RenderingServer.frame_post_draw
 		_shoot(str(tab[1]))
+
+	# One more, on the FLOURISH tab. The two event slots are the ones a buyer
+	# cannot judge from the art - a flourish and a departure look identical in a
+	# wardrobe, and differ entirely in when they fire - so the line that says
+	# when it plays is the thing worth having a picture of.
+	var cosmetics_panel: Control = (_menu.get(&"_panels") as Dictionary).get(&"cosmetics")
+	if cosmetics_panel != null:
+		_menu.call(&"_select_tab", &"cosmetics")
+		cosmetics_panel.call(&"_select_slot", &"flourish")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		_shoot("vault_flourish")
+
+	# And the try-on stack: an aura and a halo already worn, a trail being
+	# browsed over the top.
+	if cosmetics_panel != null:
+		cosmetics_panel.call(&"_select_slot", &"trail")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		_shoot("vault_combo")
+
+	# The Pets tab's two shelves: the flagship Reactive Pets, then the rest.
+	var pets_panel: Control = (_menu.get(&"_panels") as Dictionary).get(&"pets")
+	if pets_panel != null:
+		_menu.call(&"_select_tab", &"pets")
+		pets_panel.call(&"_select_slot", &"pet")
+		await get_tree().create_timer(1.0).timeout
+		await RenderingServer.frame_post_draw
+		_shoot("vault_pets_plain")
 
 	print("done -> ", _out_abs)
 	get_tree().quit()
@@ -126,14 +161,33 @@ func _feed_panels() -> void:
 	if skins != null:
 		skins.call(&"_on_state", {"ok": true, "allowed": true, "equipped": 0})
 
+	# Pets: the same wardrobe filtered to the pet slot. Settled for a couple of
+	# seconds before its shot (see _go) so the companion has flown in beside the
+	# body rather than being caught at its spawn point.
+	var pets: Control = panels.get(&"pets")
+	if pets != null:
+		pets.call(&"_on_state", {
+			"ok": true,
+			"allowed": true,
+			"cosmetics": Cosmetics.ids(),
+			"slots": {"aura": _first_in_slot(&"aura")},
+		})
+
 	var cosmetics: Control = panels.get(&"cosmetics")
 	if cosmetics != null:
+		# Dressed in an aura and a halo already, so the Trails tab shows what the
+		# wardrobe is actually for now: a COMBINATION, with the browsed trail on
+		# top of what is already worn.
 		cosmetics.call(&"_on_state", {
 			"ok": true,
 			"allowed": true,
 			"cosmetics": Cosmetics.ids(),
 			"equipped": 0,
 			"equipped_weapon": 0,
+			"slots": {
+				"aura": _first_in_slot(&"aura"),
+				"halo": _first_in_slot(&"halo"),
+			},
 		})
 
 
@@ -158,3 +212,12 @@ func _shoot(name: String) -> void:
 	var path: String = "%s/%s.png" % [_out_abs, name]
 	img.save_png(path)
 	print("  wrote ", path)
+
+
+## The lowest id in [param slot], for dressing the stand-in. Lowest rather than
+## random so two runs of this tool produce comparable pictures.
+func _first_in_slot(slot: StringName) -> int:
+	for id: int in Cosmetics.ids():
+		if Cosmetics.slot_of(id) == slot:
+			return id
+	return 0

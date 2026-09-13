@@ -87,6 +87,9 @@ static func ensure_schema(db: SQLite) -> void:
 	if version < 26:
 		_migration_v26(db)
 		_set_schema_version(db, 26)
+	if version < 27:
+		_migration_v27(db)
+		_set_schema_version(db, 27)
 
 
 static func _migration_v1(db: SQLite) -> void:
@@ -524,3 +527,20 @@ static func _migration_v25(db: SQLite) -> void:
 static func _migration_v26(db: SQLite) -> void:
 	if not _column_exists(db, "players", "angler_json"):
 		db.query("ALTER TABLE players ADD COLUMN angler_json TEXT NOT NULL DEFAULT '{}';")
+
+
+## v27: one equipped cosmetic PER SLOT, as a JSON map of slot -> id, so an aura,
+## a halo and a trail can be worn at once and a flourish or a departure can be
+## equipped without evicting the aura you paid for.
+##
+## A BLOB, NOT FIVE COLUMNS, for the reason v25 and v26 both spell out: every
+## extra column is another INSERT placeholder to keep aligned, and a mismatched
+## pair makes save_player() fail silently for EVERY player.
+##
+## NOTHING TO BACKFILL. Existing characters migrate to an empty map, and the
+## reader routes their old players.cosmetic_id into whichever slot it belongs to
+## (world_store_sqlite._read_cosmetic_slots) - so a player wearing a trail today
+## is still wearing it after this, in the trail slot. ADD COLUMN - no wipe.
+static func _migration_v27(db: SQLite) -> void:
+	if not _column_exists(db, "players", "cosmetics_json"):
+		db.query("ALTER TABLE players ADD COLUMN cosmetics_json TEXT NOT NULL DEFAULT '{}';")

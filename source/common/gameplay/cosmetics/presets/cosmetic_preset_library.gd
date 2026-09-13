@@ -38,6 +38,49 @@ const _AURA_AETHER_ARCS: GDScript = preload("res://source/common/gameplay/cosmet
 const _AURA_LOTUS_PETALS: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_lotus_petals_preset.gd")
 const _AURA_ALCHEMICAL_SUN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_alchemical_sun_preset.gd")
 const _AURA_PRISMATIC_SHIMMER: GDScript = preload("res://source/common/gameplay/cosmetics/presets/aura_prismatic_shimmer_preset.gd")
+const _TRAIL_STATIC_WAKE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/trail_static_wake_preset.gd")
+const _HALO_THUNDERHEAD_CROWN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/halo_thunderhead_crown_preset.gd")
+const _PET_AXOLOTL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_axolotl_preset.gd")
+const _PET_BABY_DRAGON: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_baby_dragon_preset.gd")
+const _PET_BUMBLEBEE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_bumblebee_preset.gd")
+const _PET_CLOCKWORK_OWL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_clockwork_owl_preset.gd")
+const _PET_CLOUD_PUP: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_cloud_pup_preset.gd")
+const _PET_CORGI: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_corgi_preset.gd")
+const _PET_CRAB: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_crab_preset.gd")
+const _PET_CRYSTAL_GOLEM: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_crystal_golem_preset.gd")
+const _PET_DUCKLING: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_duckling_preset.gd")
+const _PET_EMBER_IMP: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_ember_imp_preset.gd")
+const _PET_FIREFLIES: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_fireflies_preset.gd")
+const _PET_FROG: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_frog_preset.gd")
+const _PET_GHOST: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_ghost_preset.gd")
+const _PET_HAMSTER_BALL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_hamster_ball_preset.gd")
+const _PET_JELLYFISH: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_jellyfish_preset.gd")
+const _PET_KITSUNE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_kitsune_preset.gd")
+const _PET_MIMIC: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_mimic_preset.gd")
+const _PET_MOTH: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_moth_preset.gd")
+const _PET_MUSHROOM_SPROUT: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_mushroom_sprout_preset.gd")
+const _PET_OWL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_owl_preset.gd")
+const _PET_PENGUIN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_penguin_preset.gd")
+const _PET_PET_ROCK: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_pet_rock_preset.gd")
+const _PET_PHOENIX_CHICK: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_phoenix_chick_preset.gd")
+const _PET_POCKET_MOON: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_pocket_moon_preset.gd")
+const _PET_PUMPKIN_LANTERN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_pumpkin_lantern_preset.gd")
+const _PET_RED_PANDA: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_red_panda_preset.gd")
+const _PET_SLIME: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_slime_preset.gd")
+const _PET_SNAIL: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_snail_preset.gd")
+const _PET_SPELLBOOK: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_spellbook_preset.gd")
+const _PET_STAR_SPRITE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_star_sprite_preset.gd")
+const _PET_BABY_GRIFFIN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_baby_griffin_preset.gd")
+const _PET_BUNNY: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_bunny_preset.gd")
+const _PET_PIXIE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_pixie_preset.gd")
+const _PET_STARRY_CAT: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_starry_cat_preset.gd")
+const _PET_TREASURE_GOBLIN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_treasure_goblin_preset.gd")
+const _PET_HEDGEHOG: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_hedgehog_preset.gd")
+const _PET_HONEY_BEAR: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_honey_bear_preset.gd")
+const _PET_SKY_WHALE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_sky_whale_preset.gd")
+const _PET_SPIRIT_FAWN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_spirit_fawn_preset.gd")
+const _PET_SQUIRE_KNIGHT: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_squire_knight_preset.gd")
+const _PET_WISP: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_wisp_preset.gd")
 
 ## Adding a line here upgrades one cosmetic from its strip to a node tree.
 const PRESETS: Dictionary = {
@@ -71,6 +114,52 @@ const PRESETS: Dictionary = {
 	&"aura_lotus_petals": _AURA_LOTUS_PETALS,
 	&"aura_alchemical_sun": _AURA_ALCHEMICAL_SUN,
 	&"aura_prismatic_shimmer": _AURA_PRISMATIC_SHIMMER,
+	# The rest of each theme set: a trail and a halo in the same colours.
+	&"trail_static_wake": _TRAIL_STATIC_WAKE,
+	&"halo_thunderhead_crown": _HALO_THUNDERHEAD_CROWN,
+	# PETS. Every pet is a scripted companion (CompanionPreset) - there is no
+	# strip version of one, and its registry strip is only a placeholder.
+	&"pet_axolotl": _PET_AXOLOTL,
+	&"pet_baby_dragon": _PET_BABY_DRAGON,
+	&"pet_bumblebee": _PET_BUMBLEBEE,
+	&"pet_clockwork_owl": _PET_CLOCKWORK_OWL,
+	&"pet_cloud_pup": _PET_CLOUD_PUP,
+	&"pet_corgi": _PET_CORGI,
+	&"pet_crab": _PET_CRAB,
+	&"pet_crystal_golem": _PET_CRYSTAL_GOLEM,
+	&"pet_duckling": _PET_DUCKLING,
+	&"pet_ember_imp": _PET_EMBER_IMP,
+	&"pet_fireflies": _PET_FIREFLIES,
+	&"pet_frog": _PET_FROG,
+	&"pet_ghost": _PET_GHOST,
+	&"pet_hamster_ball": _PET_HAMSTER_BALL,
+	&"pet_jellyfish": _PET_JELLYFISH,
+	&"pet_kitsune": _PET_KITSUNE,
+	&"pet_mimic": _PET_MIMIC,
+	&"pet_moth": _PET_MOTH,
+	&"pet_mushroom_sprout": _PET_MUSHROOM_SPROUT,
+	&"pet_owl": _PET_OWL,
+	&"pet_penguin": _PET_PENGUIN,
+	&"pet_pet_rock": _PET_PET_ROCK,
+	&"pet_phoenix_chick": _PET_PHOENIX_CHICK,
+	&"pet_pocket_moon": _PET_POCKET_MOON,
+	&"pet_pumpkin_lantern": _PET_PUMPKIN_LANTERN,
+	&"pet_red_panda": _PET_RED_PANDA,
+	&"pet_slime": _PET_SLIME,
+	&"pet_snail": _PET_SNAIL,
+	&"pet_spellbook": _PET_SPELLBOOK,
+	&"pet_star_sprite": _PET_STAR_SPRITE,
+	&"pet_wisp": _PET_WISP,
+	&"pet_hedgehog": _PET_HEDGEHOG,
+	&"pet_honey_bear": _PET_HONEY_BEAR,
+	&"pet_sky_whale": _PET_SKY_WHALE,
+	&"pet_spirit_fawn": _PET_SPIRIT_FAWN,
+	&"pet_squire_knight": _PET_SQUIRE_KNIGHT,
+	&"pet_baby_griffin": _PET_BABY_GRIFFIN,
+	&"pet_bunny": _PET_BUNNY,
+	&"pet_pixie": _PET_PIXIE,
+	&"pet_starry_cat": _PET_STARRY_CAT,
+	&"pet_treasure_goblin": _PET_TREASURE_GOBLIN,
 }
 
 

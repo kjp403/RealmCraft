@@ -36,6 +36,33 @@ static func _on_action_performed(payload: Dictionary) -> void:
 			bool(payload.get("r", false)),
 			payload.get("t", null)
 		)
+	# Their pet sees the swing too: a tool names the skill, anything else is a fight.
+	var pet: CompanionPreset = _pet_of(player)
+	if pet != null:
+		var item: Item = player.equipment_component.equipped_items.get(&"weapon", null)
+		pet.owner_swung((item as ToolItem).tool_type if item is ToolItem else &"")
+
+
+## The companion [param player] is wearing, or null. Pets are client-only visuals,
+## so this is null on the server and for anyone without a pet equipped.
+static func _pet_of(player: Character) -> CompanionPreset:
+	if player == null or not is_instance_valid(player) or player.pet_vfx == null:
+		return null
+	return player.pet_vfx.companion()
+
+
+## A player took a hit: their pet reacts. victim_peer carries the victim's
+## PLAYER id (not their peer id), so this matches on Player.player_id - the synced
+## copy - never on player_resource, which is server-only and null here.
+func _tell_pet_of_victim(victim_player_id: int) -> void:
+	if victim_player_id < 0:
+		return
+	for victim: Player in players_by_peer_id.values():
+		if is_instance_valid(victim) and victim.player_id == victim_player_id:
+			var pet: CompanionPreset = _pet_of(victim)
+			if pet != null:
+				pet.owner_hit()
+			return
 
 
 static func _on_combat_hit_static(payload: Dictionary) -> void:
@@ -280,6 +307,31 @@ static func _on_level_up(payload: Dictionary) -> void:
 	# Skill / combat label optional — character levels default to "Combat".
 	var skill: String = str(payload.get("skill", "Combat"))
 	LevelUpFx.celebrate(player, skill, level)
+	var pet: CompanionPreset = _pet_of(player)
+	if pet != null:
+		pet.owner_leveled_up()
+	# Their FLOURISH, if they own one and have it equipped. The id travels with
+	# the broadcast rather than being synced, because a flourish is not worn -
+	# see CosmeticVfx.play_once.
+	CosmeticVfx.play_once(player, int(payload.get("flourish", 0)))
+
+
+## A player in this instance died wearing a DEPARTURE cosmetic — play it on their
+## body, for everyone.
+##
+## Deliberately not folded into the player.died push: that one is addressed to
+## the dying player alone and carries respawn instructions, and the audience for
+## a death effect is everybody EXCEPT the person looking at a death screen.
+##
+## Mounted on the character rather than at a world position, so it dies with them
+## if the body is despawned before the effect finishes.
+static func _on_player_departure(payload: Dictionary) -> void:
+	if current == null:
+		return
+	var player: Player = current.players_by_peer_id.get(int(payload.get("p", 0)), null)
+	if player == null:
+		return
+	CosmeticVfx.play_once(player, int(payload.get("cosmetic", 0)))
 
 
 ## A level-99 mastery title was granted (SkillMasterTitleService). Centre-screen
@@ -328,6 +380,7 @@ func _ready() -> void:
 		Client.subscribe(&"dungeon.room", _on_dungeon_room)
 		Client.subscribe(&"dungeon.left", _on_dungeon_left)
 		Client.subscribe(&"level.up", _on_level_up)
+		Client.subscribe(&"player.departure", _on_player_departure)
 		Client.subscribe(&"title.unlocked", _on_title_unlocked)
 		_subscribed = true
 
@@ -546,6 +599,7 @@ func _on_combat_hit(payload: Dictionary) -> void:
 	# that path early-returns on player_resource, which is server-only and null here.
 	if not bool(payload.get("heal", false)):
 		HitFeedback.play(instance_map, pos, local_player)
+		_tell_pet_of_victim(int(payload.get("victim_peer", -1)))
 	# Auto-retaliate when WE were the victim of a hostile hit.
 	if local_player == null or local_player.player_resource == null:
 		return

@@ -33,7 +33,18 @@ static func on_levels_gained(player_res: PlayerResource, old_level: int, new_lev
 	# the level-up (clients flare a VFX on the character — InstanceClient._on_level_up).
 	var peer_id: int = int(player_res.current_peer_id)
 	if peer_id > 0 and instance != null:
-		ws.propagate_rpc(ws.data_push.bind(&"level.up", {"p": peer_id, "level": new_level}), instance.name)
+		# The equipped FLOURISH rides along. It is not a worn channel - nothing
+		# syncs it - so the id has to travel with the event that plays it, and
+		# sending it here means every client in the zone can render it without
+		# ever holding another player's wardrobe.
+		ws.propagate_rpc(
+			ws.data_push.bind(&"level.up", {
+				"p": peer_id,
+				"level": new_level,
+				"flourish": int(player_res.cosmetic_slots.get(&"flourish", 0)),
+			}),
+			instance.name
+		)
 	for level: int in range(old_level + 1, new_level + 1):
 		for quest: QuestResource in _by_min_level.get(level, []):
 			if quest == null or quest.unlock_message.is_empty():

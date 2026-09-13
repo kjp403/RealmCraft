@@ -290,6 +290,15 @@ static func strip_unreleased_vfx(player: PlayerResource, instance: ServerInstanc
 	if player.weapon_cosmetic_id != 0 and not weapon_granted:
 		player.weapon_cosmetic_id = 0
 		changed = true
+	# EVERY SLOT, not just the two with columns. cosmetic_slots is where a halo,
+	# a trail, a flourish and a departure live, and a slot missed here is an
+	# ungranted cosmetic that keeps rendering (or keeps firing, for the two event
+	# slots) on a demoted account forever.
+	for slot_key: Variant in player.cosmetic_slots.keys():
+		var worn: int = int(player.cosmetic_slots[slot_key])
+		if worn != 0 and not VaultGrants.has_cosmetic(player, worn):
+			player.cosmetic_slots.erase(slot_key)
+			changed = true
 	if TitleCatalog.is_premium_name(player.display_title) \
 			and not VaultGrants.has_title(player, player.display_title):
 		player.display_title = ""

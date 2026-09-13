@@ -57,6 +57,50 @@ func _init() -> void:
 	centered = true
 
 
+## Play an EVENT cosmetic once on [param host], then clean up after itself.
+##
+## Flourishes and departures are authored as one-shots and are not worn: nothing
+## syncs them and no channel holds them, so the id arrives with the event that
+## fires them (a level-up broadcast, a death broadcast) and this mounts a
+## throwaway node to play it.
+##
+## NO REPLAY TIMER. [method apply] starts one for any non-looping cosmetic, which
+## is right in the wardrobe - staff need to watch it more than once - and wrong
+## here, where it would leave a flourish pulsing on a character forever.
+##
+## Freed on the animation, not on a fixed delay: strips differ in length, and a
+## timer picked to fit the longest would leave the short ones lingering as an
+## invisible node on every character that ever died.
+static func play_once(host: Node2D, cosmetic_id: int) -> CosmeticVfx:
+	if host == null or not is_instance_valid(host) or cosmetic_id <= 0:
+		return null
+	var vfx: CosmeticVfx = CosmeticVfx.new()
+	host.add_child(vfx)
+	vfx.apply(cosmetic_id)
+	vfx._stop_replay()
+	# A scripted preset runs on its own clock and has no animation to finish, so
+	# it gets a bounded lifetime instead of one that may never arrive.
+	if vfx.sprite_frames == null:
+		vfx.get_tree().create_timer(PRESET_ONE_SHOT_S).timeout.connect(
+			func() -> void:
+				if is_instance_valid(vfx):
+					vfx.queue_free()
+		)
+		return vfx
+	vfx.animation_finished.connect(
+		func() -> void:
+			if is_instance_valid(vfx):
+				vfx.queue_free()
+	)
+	return vfx
+
+
+## How long a scripted preset gets when it is played as a one-shot. Presets have
+## no animation_finished to wait on; this is the wardrobe replay cadence rounded
+## up, so nothing is cut off mid-sweep.
+const PRESET_ONE_SHOT_S: float = 2.0
+
+
 ## Swap to a new cosmetic. 0 hides the node (kept alive: equipping is cheap to toggle
 ## and staff flip through the roster fast).
 func apply(cosmetic_id: int) -> void:
@@ -130,6 +174,12 @@ func _clear_preset() -> void:
 	remove_child(_preset)
 	_preset.queue_free()
 	_preset = null
+
+
+## The mounted companion, if this channel is wearing a pet - so the network layer
+## can tell it what its owner is doing (see [CompanionPreset.owner_swung]).
+func companion() -> CompanionPreset:
+	return _preset as CompanionPreset
 
 
 ## Trails are drawn streaming to the LEFT (wearer running right), so they mirror with

@@ -39,6 +39,30 @@ var prismatic_dye_id: int:
 ## actually have a cosmetic equipped.
 var cosmetic_vfx: CosmeticVfx
 
+## Equipped HALO cosmetic id (0 = none). Its own channel, like the weapon glow and
+## the skilling aura, so a halo and an aura are worn together rather than one
+## replacing the other. Synced; the visual is client-only.
+var halo_cosmetic_id: int:
+	set = _set_halo_cosmetic_id
+
+## Lazily built by [method _set_halo_cosmetic_id].
+var halo_vfx: CosmeticVfx
+
+## Equipped TRAIL cosmetic id (0 = none). Same arrangement as the halo.
+var trail_cosmetic_id: int:
+	set = _set_trail_cosmetic_id
+
+## Lazily built by [method _set_trail_cosmetic_id].
+var trail_vfx: CosmeticVfx
+
+## Equipped PET cosmetic id (0 = none). Same arrangement as the halo: its own
+## channel, so a pet is worn alongside an aura, a halo and a trail.
+var pet_cosmetic_id: int:
+	set = _set_pet_cosmetic_id
+
+## Lazily built by [method _set_pet_cosmetic_id].
+var pet_vfx: CosmeticVfx
+
 ## Aura granted by a complete Skilling Outfit ([SkillingOutfitManager]). 0 = none.
 ##
 ## A SEPARATE channel from [member cosmetic_id] on purpose, exactly like
@@ -785,6 +809,47 @@ func _set_cosmetic_id(id: int) -> void:
 	cosmetic_vfx.set_facing(flipped)
 
 
+func _set_halo_cosmetic_id(id: int) -> void:
+	halo_cosmetic_id = id
+	# Server holds the value for persistence/sync but renders nothing, same as
+	# _set_cosmetic_id.
+	if multiplayer.is_server():
+		return
+	if halo_vfx == null:
+		if id == 0:
+			return # never build the node for the common "no halo" case
+		halo_vfx = CosmeticVfx.new()
+		add_child(halo_vfx)
+	halo_vfx.apply(id)
+	halo_vfx.set_facing(flipped)
+
+
+func _set_trail_cosmetic_id(id: int) -> void:
+	trail_cosmetic_id = id
+	if multiplayer.is_server():
+		return
+	if trail_vfx == null:
+		if id == 0:
+			return
+		trail_vfx = CosmeticVfx.new()
+		add_child(trail_vfx)
+	trail_vfx.apply(id)
+	trail_vfx.set_facing(flipped)
+
+
+func _set_pet_cosmetic_id(id: int) -> void:
+	pet_cosmetic_id = id
+	if multiplayer.is_server():
+		return
+	if pet_vfx == null:
+		if id == 0:
+			return
+		pet_vfx = CosmeticVfx.new()
+		add_child(pet_vfx)
+	pet_vfx.apply(id)
+	pet_vfx.set_facing(flipped)
+
+
 func _set_skilling_aura_id(id: int) -> void:
 	skilling_aura_id = id
 	# Server holds the value for sync but renders nothing, same as _set_cosmetic_id.
@@ -835,8 +900,17 @@ func _set_flip(new_flip: bool) -> void:
 	hand_offset.scale.x = -1 if new_flip else 1
 	flipped = new_flip
 	# Directional cosmetics (trails) mirror with the body; radial ones must not.
+	# EVERY channel, not just the first two - the trail channel is the one this
+	# matters most for, and a halo left out here would drift out of step with the
+	# body the moment its wearer turned around.
 	if cosmetic_vfx != null:
 		cosmetic_vfx.set_facing(new_flip)
+	if halo_vfx != null:
+		halo_vfx.set_facing(new_flip)
+	if trail_vfx != null:
+		trail_vfx.set_facing(new_flip)
+	if pet_vfx != null:
+		pet_vfx.set_facing(new_flip)
 	if skilling_aura_vfx != null:
 		skilling_aura_vfx.set_facing(new_flip)
 

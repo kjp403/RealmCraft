@@ -111,6 +111,7 @@ const COSMETIC_COSTS: Dictionary = {
 	&"trail_rainbow": 350,
 	&"trail_storm": 350,
 	&"trail_toxic": 350,
+	&"trail_static_wake": 350,
 
 	# --- Halos. Persistent and always in frame above the head, so they price like
 	# auras rather than like one-shots - and they rhyme with their aura namesakes,
@@ -118,6 +119,8 @@ const COSMETIC_COSTS: Dictionary = {
 	&"halo_gold": 450,
 	&"halo_galaxy": 600,
 	&"halo_rainbow": 600,
+	# Two layers of depth and lightning in the cloud - priced with the multi-hue halos.
+	&"halo_thunderhead_crown": 600,
 
 	# --- Flourishes. A one-shot on an action. Priced with trails: seen often, but
 	# only for a moment at a time.
@@ -134,23 +137,75 @@ const COSMETIC_COSTS: Dictionary = {
 	# so it is already gated behind endgame content and is worth the ceiling to
 	# the players who can actually show it off.
 	&"weapon_ascended_radiance": 750,
+
+	# --- PETS. Companions that follow you - on screen the whole time you are,
+	# next to your character, so they price in the AURA band (450 / 600 / 750),
+	# never the one-shot band. Tiered by how much there is to watch:
+	#
+	#   450  simple: one idea, one motion (a wisp, a moth, a slime)
+	#   600  a character with an idle gag (the ghost's peek-a-boo, the frog
+	#        catching a fly, the corgi's happy hop)
+	#   750  the detailed set-pieces: hand-shaded pixel art with live effects on
+	#        top (the phoenix's rebirth, the clockwork owl, the crystal golem)
+	&"pet_wisp": 450,
+	&"pet_moth": 450,
+	&"pet_fireflies": 450,
+	&"pet_slime": 450,
+	&"pet_snail": 450,
+	&"pet_pet_rock": 450,
+	&"pet_duckling": 450,
+	&"pet_frog": 450,
+	&"pet_crab": 450,
+	&"pet_bumblebee": 450,
+	&"pet_mushroom_sprout": 450,
+
+	&"pet_ghost": 600,
+	&"pet_mimic": 600,
+	&"pet_jellyfish": 600,
+	&"pet_spellbook": 600,
+	&"pet_baby_dragon": 600,
+	&"pet_star_sprite": 600,
+	&"pet_pumpkin_lantern": 600,
+	&"pet_axolotl": 600,
+	&"pet_cloud_pup": 600,
+	&"pet_hamster_ball": 600,
+	&"pet_owl": 600,
+	&"pet_penguin": 600,
+	&"pet_kitsune": 600,
+	&"pet_pocket_moon": 600,
+	&"pet_ember_imp": 600,
+	&"pet_corgi": 600,
+	&"pet_red_panda": 600,
+	# Second and third detailed batches, priced with the Corgi and the Red Panda.
+	&"pet_hedgehog": 600,
+	&"pet_honey_bear": 600,
+	&"pet_sky_whale": 600,
+	&"pet_spirit_fawn": 600,
+	&"pet_squire_knight": 600,
+	&"pet_baby_griffin": 600,
+	&"pet_bunny": 600,
+	&"pet_pixie": 600,
+	&"pet_starry_cat": 600,
+	&"pet_treasure_goblin": 600,
+
+	&"pet_phoenix_chick": 750,
+	&"pet_clockwork_owl": 750,
+	&"pet_crystal_golem": 750,
 }
 
 ## SLOTS WITH NO TRIGGER, AND THEREFORE NOTHING TO SELL.
 ##
-## Flourishes and death effects are authored as one-shots, and NOTHING IN THE
-## GAME FIRES EITHER OF THEM. Search the tree: the only thing that plays a
-## flourish or a departure is [CosmeticVfx]'s replay timer, whose own comment
-## says it exists "so staff can actually watch them in the vault". There is no
-## ability hook, no death hook, no logout hook.
+## EMPTY SINCE FLOURISHES AND DEPARTURES GOT THEIR TRIGGERS. A flourish now fires
+## on a character level-up (LevelMilestoneService.on_levels_gained broadcasts it
+## to the whole instance) and a departure on death (Player.die does the same), so
+## both are things a buyer sees in the world rather than only in the wardrobe.
 ##
-## So a player who bought one would pay real money for something that renders in
-## the wardrobe preview and nowhere else, ever. They stay priced above - the
-## numbers are right and the moment these get a trigger they should go on sale -
-## but they are held out of the roster until something can actually play them.
-##
-## Remove a slot from here the same day it gets a trigger, not before.
-const SLOTS_WITHOUT_A_TRIGGER: Array[StringName] = [&"flourish", &"departure"]
+## KEPT, NOT DELETED. This is the rule the roster and resolve() both check, and
+## the next slot authored with no hook to play it needs exactly this guard -
+## without it, the first sign that nothing fires a new slot is a refund request.
+## Add a slot here the day its art lands and remove it the day it gets a trigger,
+## not the other way round.
+const SLOTS_WITHOUT_A_TRIGGER: Array[StringName] = []
 
 ## Fallback by slot, for a cosmetic added later that nobody has priced. Every
 ## cosmetic that exists TODAY is named above; this only catches new content.
@@ -161,6 +216,7 @@ const SLOT_COSTS: Dictionary = {
 	&"flourish": 350,
 	&"departure": 350,
 	&"weapon": 750,
+	&"pet": 600,
 }
 
 ## Last-resort price for a cosmetic in a slot nobody has priced - a new slot
