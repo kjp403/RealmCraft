@@ -45,9 +45,66 @@ func _ready() -> void:
 	_check_closed_stalls_leave_the_board()
 	_check_trade_history()
 	_check_everything_is_listable()
+	_check_claim_to_bank()
 	print("%d passed, %d failed" % [_pass, _fail])
 	print("VERIFY_PASS" if _fail == 0 else "VERIFY_FAIL")
 	get_tree().quit(0 if _fail == 0 else 1)
+
+
+## Mail "Send to bank": a 900-unit market buy that no bag can hold must land in
+## the vault, overflow must spill to the bag, and a bundle that fits nowhere must
+## move NOTHING - a mail is claimed whole.
+func _check_claim_to_bank() -> void:
+	print("mail claims can go to the bank")
+	var picks: Array[int] = []
+	var registry: ContentRegistry = ContentRegistryHub.registry_of(&"items")
+	for item_id: int in (registry.all_ids() if registry != null else []):
+		var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+		if item == null or item.is_currency or item.inventory_tab() != Item.InventoryTab.MATERIAL:
+			continue
+		if item.stack_limit < 2 or item.stack_limit > 10:
+			continue
+		if Inventory.stack_limit_for(item, true) != Inventory.BANK_RESOURCE_STACK:
+			continue
+		picks.append(item_id)
+		if picks.size() == 2:
+			break
+	if picks.size() < 2:
+		_ck(false, "found two 10-stack materials to test with")
+		return
+	var ore: int = picks[0]
+	var filler: int = picks[1]
+
+	# 900 into an empty one-bag character: the bag refuses, the bank takes it all.
+	var pr: PlayerResource = PlayerResource.new()
+	pr.inventory = {}
+	pr.bank = {}
+	var big: Array = [{"type": "item", "id": ore, "amount": 900}]
+	_ck(not RedeemCodes.grants_fit(pr, big), "900 does not fit the bag")
+	_ck(RedeemCodes.grants_fit_bank(pr, big), "900 fits bank-first")
+	var placed: Dictionary = RedeemCodes.apply_grants_bank(pr, big)
+	_ck(Inventory.count(pr.bank, ore) == 900 and int(placed["banked"]) == 900, "all 900 landed in the bank")
+	_ck(Inventory.count(pr.inventory, ore) == 0, "none went to the bag")
+
+	# Full vault: a small claim spills into the bag, with gold still in the pouch.
+	pr = PlayerResource.new()
+	pr.inventory = {}
+	pr.bank = {}
+	Inventory.add_item(pr.bank, filler, BankInteraction.STARTING_SLOTS * Inventory.BANK_RESOURCE_STACK, true)
+	var small: Array = [{"type": "item", "id": ore, "amount": 200}, {"type": "currency", "amount": 500}]
+	_ck(RedeemCodes.grants_fit_bank(pr, small), "200 fits a full bank by spilling to the bag")
+	placed = RedeemCodes.apply_grants_bank(pr, small)
+	_ck(int(placed["banked"]) == 0 and int(placed["bagged"]) == 200, "200 went to the bag")
+	_ck(Inventory.count(pr.inventory, Economy.gold_id()) == 500, "gold went to the pouch")
+	_ck((placed["rewards"] as Array).size() == 2, "both rewards reported")
+
+	# Nowhere to put it: refused, and the probe touched nothing real.
+	_ck(not RedeemCodes.grants_fit_bank(pr, big), "900 into a full bank and bag is refused")
+	_ck(Inventory.count(pr.inventory, ore) == 200, "refusal left the bag untouched")
+	_ck(
+		Inventory.count(pr.bank, filler) == BankInteraction.STARTING_SLOTS * Inventory.BANK_RESOURCE_STACK,
+		"refusal left the bank untouched"
+	)
 
 
 func _open() -> void:

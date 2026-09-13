@@ -166,6 +166,76 @@ static func apply_grants(pr: PlayerResource, grants: Array) -> Array:
 	return rewards
 
 
+## Bank-first twin of [method grants_fit], for claiming mail straight into the
+## vault: each item grant fills the bank, then spills into the bag. The bag alone
+## tops out at ~90 slots of 10-stacks, so a 900-unit market buy could never be
+## claimed at all.
+##
+## ALL OR NOTHING. A mail is claimed whole, so a bundle that leaves anything over
+## is refused rather than stranding the remainder or dropping it at a mailbox.
+static func grants_fit_bank(pr: PlayerResource, grants: Array) -> bool:
+	var bank_probe: Dictionary = pr.bank.duplicate(true)
+	var bag_probe: Dictionary = pr.inventory.duplicate(true)
+	for g: Variant in grants:
+		if not (g is Dictionary):
+			continue
+		var grant: Dictionary = g
+		if str(grant.get("type", "")) != "item":
+			continue
+		var placed: Dictionary = _place_bank_first(
+			pr, bank_probe, bag_probe, int(grant.get("id", 0)), int(grant.get("amount", 0))
+		)
+		if int(placed["left"]) > 0:
+			return false
+	return true
+
+
+## Applies a bundle gated by [method grants_fit_bank]. Items take the same
+## bank-then-bag placement the check simulated; every other grant goes through
+## [method apply_grants] unchanged. Returns {"rewards", "banked", "bagged"}.
+static func apply_grants_bank(pr: PlayerResource, grants: Array) -> Dictionary:
+	var rewards: Array = []
+	var banked: int = 0
+	var bagged: int = 0
+	for g: Variant in grants:
+		var grant: Dictionary = g
+		if str(grant.get("type", "")) != "item":
+			rewards.append_array(apply_grants(pr, [grant]))
+			continue
+		var placed: Dictionary = _place_bank_first(
+			pr, pr.bank, pr.inventory, int(grant.get("id", 0)), int(grant.get("amount", 0))
+		)
+		banked += int(placed["bank"])
+		bagged += int(placed["bag"])
+		rewards.append(_grant_descriptor(grant))
+	return {"rewards": rewards, "banked": banked, "bagged": bagged}
+
+
+## Put [param amount] into [param bank] up to its capacity, the rest into
+## [param bag]. Mutates both. Currency never banks (bank.deposit refuses it), so
+## it goes to the pouch whole. Returns {"bank", "bag", "left"} unit counts.
+static func _place_bank_first(
+	pr: PlayerResource, bank: Dictionary, bag: Dictionary, item_id: int, amount: int
+) -> Dictionary:
+	var item: Item = ContentRegistryHub.load_by_id(&"items", item_id) as Item
+	if item != null and item.is_currency:
+		Inventory.add_item(bag, item_id, amount, false, pr.active_inventory_bag, pr.inventory_bags)
+		return {"bank": 0, "bag": amount, "left": 0}
+	var capacity: int = maxi(BankInteraction.STARTING_SLOTS, pr.bank_slots)
+	var to_bank: int = mini(amount, Inventory.max_fit(bank, item_id, capacity, true))
+	if to_bank > 0:
+		Inventory.add_item(bank, item_id, to_bank, true)
+	var rest: int = amount - to_bank
+	var to_bag: int = 0
+	if rest > 0:
+		to_bag = mini(rest, Inventory.max_fit(
+			bag, item_id, Inventory.MAX_SLOTS, false, pr.active_inventory_bag, pr.inventory_bags
+		))
+		if to_bag > 0:
+			Inventory.add_item(bag, item_id, to_bag, false, pr.active_inventory_bag, pr.inventory_bags)
+	return {"bank": to_bank, "bag": to_bag, "left": rest - to_bag}
+
+
 ## Resolves a bundle to display descriptors WITHOUT granting — lets mail preview
 ## its attachments before they're claimed. Same shape apply_grants returns.
 static func describe_grants(grants: Array) -> Array:
