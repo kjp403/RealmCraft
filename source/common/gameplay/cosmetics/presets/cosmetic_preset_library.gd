@@ -75,6 +75,11 @@ const _PET_BUNNY: GDScript = preload("res://source/common/gameplay/cosmetics/pre
 const _PET_PIXIE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_pixie_preset.gd")
 const _PET_STARRY_CAT: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_starry_cat_preset.gd")
 const _PET_TREASURE_GOBLIN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_treasure_goblin_preset.gd")
+const _PET_HEDGEHOG: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_hedgehog_preset.gd")
+const _PET_HONEY_BEAR: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_honey_bear_preset.gd")
+const _PET_SKY_WHALE: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_sky_whale_preset.gd")
+const _PET_SPIRIT_FAWN: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_spirit_fawn_preset.gd")
+const _PET_SQUIRE_KNIGHT: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_squire_knight_preset.gd")
 const _PET_WISP: GDScript = preload("res://source/common/gameplay/cosmetics/presets/pet_wisp_preset.gd")
 
 ## Adding a line here upgrades one cosmetic from its strip to a node tree.
@@ -145,6 +150,11 @@ const PRESETS: Dictionary = {
 	&"pet_spellbook": _PET_SPELLBOOK,
 	&"pet_star_sprite": _PET_STAR_SPRITE,
 	&"pet_wisp": _PET_WISP,
+	&"pet_hedgehog": _PET_HEDGEHOG,
+	&"pet_honey_bear": _PET_HONEY_BEAR,
+	&"pet_sky_whale": _PET_SKY_WHALE,
+	&"pet_spirit_fawn": _PET_SPIRIT_FAWN,
+	&"pet_squire_knight": _PET_SQUIRE_KNIGHT,
 	&"pet_baby_griffin": _PET_BABY_GRIFFIN,
 	&"pet_bunny": _PET_BUNNY,
 	&"pet_pixie": _PET_PIXIE,

@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_ci")
 content_name = &"cosmetics"
-version = 1789273278
-next_id = 73
+version = 1789273973
+next_id = 78
 entries = Array[Dictionary]([{
 &"hash": "27c2a031c634930c2e8baa94e6b52e444b404622b86d1ea978c3a0c26c571c44",
 &"id": 1,
@@ -367,4 +367,29 @@ entries = Array[Dictionary]([{
 &"id": 72,
 &"path": "res://source/common/gameplay/cosmetics/frames/pet_treasure_goblin.tres",
 &"slug": &"pet_treasure_goblin"
+}, {
+&"hash": "0306a433bb50fec43e15b72271a7d3e5159c3d9761ae4aa589bdbc66aa3e4755",
+&"id": 73,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_hedgehog.tres",
+&"slug": &"pet_hedgehog"
+}, {
+&"hash": "1612f99962ff0e27a7c88d32c84555d5e6d5ba59bad4da3a579664a0fad5e2c2",
+&"id": 74,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_honey_bear.tres",
+&"slug": &"pet_honey_bear"
+}, {
+&"hash": "19c47a567484c8d9271e1da2337d91dfc6ae8b451cff7d7d2b3cf1e1cba84484",
+&"id": 75,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_sky_whale.tres",
+&"slug": &"pet_sky_whale"
+}, {
+&"hash": "46ebe4d417eda099825be15d837bd1562e793113655a07456774cbdab607d15b",
+&"id": 76,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_spirit_fawn.tres",
+&"slug": &"pet_spirit_fawn"
+}, {
+&"hash": "e44b02abab42656408d0e4a806aed4a2214d8ca262da7afbf08678027d0237aa",
+&"id": 77,
+&"path": "res://source/common/gameplay/cosmetics/frames/pet_squire_knight.tres",
+&"slug": &"pet_squire_knight"
 }])
