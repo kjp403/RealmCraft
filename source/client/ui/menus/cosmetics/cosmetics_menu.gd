@@ -29,6 +29,7 @@ extends MenuShell
 ## wide margin (WALK_RADIUS is 26).
 const PREVIEW_BOX: float = 140.0
 const PREVIEW_SCALE: float = 1.6
+const STAGE_BG: Color = Color(0.035, 0.042, 0.06, 0.94)
 
 ## A trail preset renders from real movement and shows NOTHING standing still, so
 ## the preview walks in a small circle. Radial effects are left alone - orbiting an
@@ -110,6 +111,12 @@ var _wearer_title: Label
 ## walk circle. Separate from the effect nodes so the walk can be switched off
 ## per tab without touching what is being worn.
 var _preview_pivot: Node2D
+## The preview draws in its own viewport, shown on the stage through this rect -
+## see _build_layout for why it cannot draw on the panel directly.
+var _preview_view: TextureRect
+var _preview_viewport: SubViewport
+var _preview_center: CenterContainer
+var _preview_box: Control
 var _walking: bool = false
 var _walk_elapsed: float = 0.0
 var _tab_bar: HBoxContainer
@@ -174,18 +181,65 @@ func _build_layout() -> void:
 	stage.add_theme_stylebox_override(&"panel", _stage_style())
 	col.add_child(stage)
 
-	var preview_center: CenterContainer = CenterContainer.new()
-	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	stage.add_child(preview_center)
+	# THE PREVIEW RENDERS IN ITS OWN VIEWPORT. The HUD hosts every menu at
+	# z_index 100 (hud.gd), and a pet's body - like several trail layers - is
+	# top_level, which drops that inherited z. Drawn straight onto this panel the
+	# pet sat at z 2, UNDER the stage, and showed only as a shadow through it. A
+	# top_level node cannot leave its viewport's canvas, so inside one the host's
+	# z stops mattering.
+	#
+	# OPAQUE, with the stage colour painted in: an additive glow blended onto a
+	# transparent target keeps alpha 0 and vanishes once composited.
+	_preview_view = TextureRect.new()
+	_preview_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_preview_view.stretch_mode = TextureRect.STRETCH_SCALE
+	_preview_view.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_preview_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_preview_view)
+
+	_preview_viewport = SubViewport.new()
+	_preview_viewport.transparent_bg = false
+	_preview_viewport.gui_disable_input = true
+	_preview_viewport.size_2d_override_stretch = true
+	_preview_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_preview_view.add_child(_preview_viewport)
+	_preview_view.texture = _preview_viewport.get_texture()
+
+	# At the lowest z there is, so a companion passing BEHIND its owner (z -7)
+	# still draws in front of the backdrop.
+	var backdrop: ColorRect = ColorRect.new()
+	backdrop.color = Color(STAGE_BG, 1.0)
+	backdrop.size = Vector2(4096, 4096)
+	backdrop.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview_viewport.add_child(backdrop)
+
+	# Still laid out on the stage: it holds the title and try-on labels, and its
+	# position is where the preview is centred (see _preview_box_origin).
+	_preview_center = CenterContainer.new()
+	_preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_preview_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_preview_center)
 
 	var preview_box: Control = Control.new()
 	preview_box.custom_minimum_size = Vector2(PREVIEW_BOX, PREVIEW_BOX)
-	preview_center.add_child(preview_box)
+	preview_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview_center.add_child(preview_box)
+	_preview_box = preview_box
+
+	# The viewport covers the stage's 1px border; redraw it on top. A bare Panel
+	# has no minimum size, so it costs this tab none of its height.
+	var border: Panel = Panel.new()
+	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var frame: StyleBoxFlat = _stage_style()
+	frame.draw_center = false
+	border.add_theme_stylebox_override(&"panel", frame)
+	stage.add_child(border)
 
 	_preview_pivot = Node2D.new()
 	_preview_pivot.position = _preview_home()
 	_preview_pivot.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
-	preview_box.add_child(_preview_pivot)
+	_preview_viewport.add_child(_preview_pivot)
 
 	# One node per slot, built up front and left hidden until something is put in
 	# it. The world mounts these under a Character, which puts them behind the
@@ -291,7 +345,7 @@ func _build_layout() -> void:
 ## screen - the same call the fullscreen shell makes with its dim.
 func _stage_style() -> StyleBoxFlat:
 	var box: StyleBoxFlat = StyleBoxFlat.new()
-	box.bg_color = Color(0.035, 0.042, 0.06, 0.94)
+	box.bg_color = STAGE_BG
 	box.border_color = Color(0.38, 0.34, 0.28, 0.9)
 	box.set_border_width_all(1)
 	box.set_corner_radius_all(0)
@@ -460,9 +514,40 @@ func _cycle(delta: int) -> void:
 ## PETS SIT LOWER STILL. A flying pet hovers a head above its owner, and at 0.62
 ## it flew straight through the worn title pinned to the top of the box.
 func _preview_home() -> Vector2:
+	var origin: Vector2 = _preview_box_origin()
 	if _real_slot(_slot) == &"pet":
-		return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
-	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
+		return origin + Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
+	return origin + Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
+
+
+## Where the centred preview box sits inside the preview viewport, which spans
+## the whole stage. The homes above are authored against the box. Local
+## positions, not global rects, so a scaled menu host cannot skew it.
+func _preview_box_origin() -> Vector2:
+	if _preview_box == null or _preview_center == null or _preview_view == null:
+		return Vector2.ZERO
+	return _preview_center.position + _preview_box.position - _preview_view.position
+
+
+## Match the preview viewport to the stage: its 2D space in UI units, so the box
+## maps 1:1, and its pixels at the window's real scale, so a glow is not rendered
+## at the 960x540 base size and blown up.
+func _fit_preview_viewport() -> void:
+	if _preview_view == null or _preview_viewport == null:
+		return
+	var ui_size: Vector2i = Vector2i(_preview_view.size.round())
+	if ui_size.x <= 0 or ui_size.y <= 0:
+		return
+	var pixel_scale: float = 1.0
+	var root: Window = get_tree().root
+	var base: Vector2 = Vector2(root.content_scale_size)
+	if base.x > 0.0 and base.y > 0.0:
+		pixel_scale = maxf(1.0, minf(root.size.x / base.x, root.size.y / base.y))
+	var pixels: Vector2i = Vector2i((Vector2(ui_size) * pixel_scale).round())
+	if _preview_viewport.size_2d_override != ui_size:
+		_preview_viewport.size_2d_override = ui_size
+	if _preview_viewport.size != pixels:
+		_preview_viewport.size = pixels
 
 
 ## Walk the preview so trail presets have movement to sample. A circle rather than
@@ -471,10 +556,14 @@ func _preview_home() -> Vector2:
 func _process(delta: float) -> void:
 	if _preview_pivot == null:
 		return
+	_fit_preview_viewport()
 	if _real_slot(_slot) == &"pet":
 		_pet_walk_cycle(delta)
 		return
 	if not _walking:
+		# Every frame, not once: the box's place in the viewport follows the
+		# stage's layout, which settles a frame or two after the tab opens.
+		_preview_pivot.position = _preview_home()
 		return
 	_walk_elapsed += delta
 	var angle: float = _walk_elapsed * TAU / WALK_PERIOD_S
