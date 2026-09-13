@@ -68,6 +68,7 @@ func _go() -> void:
 		[&"titles", "vault_titles"],
 		[&"skins", "vault_skins"],
 		[&"cosmetics", "vault_cosmetics"],
+		[&"pets", "vault_pets"],
 	]:
 		_menu.call(&"_select_tab", tab[0])
 		# The tab re-announces its selection on show, which is what re-prices the
@@ -75,6 +76,9 @@ func _go() -> void:
 		# to react to the selection it emitted.
 		await get_tree().process_frame
 		await get_tree().process_frame
+		if tab[0] == &"pets":
+			# A companion springs in from where it spawned; give it time to arrive.
+			await get_tree().create_timer(1.5).timeout
 		await RenderingServer.frame_post_draw
 		_shoot(str(tab[1]))
 
@@ -147,6 +151,18 @@ func _feed_panels() -> void:
 	var skins: Control = panels.get(&"skins")
 	if skins != null:
 		skins.call(&"_on_state", {"ok": true, "allowed": true, "equipped": 0})
+
+	# Pets: the same wardrobe filtered to the pet slot. Settled for a couple of
+	# seconds before its shot (see _go) so the companion has flown in beside the
+	# body rather than being caught at its spawn point.
+	var pets: Control = panels.get(&"pets")
+	if pets != null:
+		pets.call(&"_on_state", {
+			"ok": true,
+			"allowed": true,
+			"cosmetics": Cosmetics.ids(),
+			"slots": {"aura": _first_in_slot(&"aura")},
+		})
 
 	var cosmetics: Control = panels.get(&"cosmetics")
 	if cosmetics != null:

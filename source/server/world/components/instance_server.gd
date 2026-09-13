@@ -437,13 +437,14 @@ func instantiate_player(peer_id: int) -> Player:
 		syn.set_by_path(^":skin_id", new_player.player_resource.skin_id)
 		syn.set_by_path(^":cosmetic_id", new_player.player_resource.cosmetic_id)
 		syn.set_by_path(^":weapon_cosmetic_id", new_player.player_resource.weapon_cosmetic_id)
-		# The two channels with no column of their own. Sent here as well as on
+		# The channels with no column of their own. Sent here as well as on
 		# equip, or a player who logs in wearing a halo is the only one who can
 		# see it - the equip push reached the clients that were present at the
 		# time, and this is the only thing that tells everyone else.
 		var worn: Dictionary = new_player.player_resource.cosmetic_slots
 		syn.set_by_path(^":halo_cosmetic_id", int(worn.get(&"halo", 0)))
 		syn.set_by_path(^":trail_cosmetic_id", int(worn.get(&"trail", 0)))
+		syn.set_by_path(^":pet_cosmetic_id", int(worn.get(&"pet", 0)))
 		syn.set_by_path(^":vault_skin_id", new_player.player_resource.vault_skin_id)
 		# Expiry-checked at the source: a lapsed dye is broadcast as 0, so no
 		# client ever has to hold another player's timer to know when to stop

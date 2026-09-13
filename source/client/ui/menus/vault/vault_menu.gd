@@ -1,5 +1,5 @@
 extends MenuShell
-## The Vault - Titles, Skins and Cosmetics, bought with Ark Coins. Opened from
+## The Vault - Titles, Skins, Cosmetics and Pets, bought with Ark Coins. Opened from
 ## the Curator; individual Curator buttons jump to a tab via open(arg).
 ##
 ## PREMIUM PURCHASING lives here rather than in the three tabs, because all three
@@ -26,6 +26,9 @@ const COIN_PX: int = 16
 const TAB_TITLES := &"titles"
 const TAB_SKINS := &"skins"
 const TAB_COSMETICS := &"cosmetics"
+## Pets are cosmetics too (the "pet" slot), served by a second copy of the
+## cosmetics wardrobe filtered to that one slot - see _embed_cosmetics.
+const TAB_PETS := &"pets"
 
 ## Failure reasons the server and the web backend can return, in player words.
 ## Anything not listed falls back to a generic line rather than printing a slug.
@@ -89,6 +92,8 @@ func open(arg: Variant = null) -> void:
 			_select_tab(TAB_SKINS)
 		"cosmetics":
 			_select_tab(TAB_COSMETICS)
+		"pets":
+			_select_tab(TAB_PETS)
 		_:
 			_select_tab(TAB_TITLES)
 
@@ -149,6 +154,7 @@ func _build_layout() -> void:
 	_add_tab_button(tabs, TAB_TITLES, "Titles")
 	_add_tab_button(tabs, TAB_SKINS, "Skins")
 	_add_tab_button(tabs, TAB_COSMETICS, "Cosmetics")
+	_add_tab_button(tabs, TAB_PETS, "Pets")
 
 	var body: Control = Control.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -157,7 +163,8 @@ func _build_layout() -> void:
 
 	_embed(body, TAB_TITLES, TITLES_SCENE)
 	_embed(body, TAB_SKINS, SKINS_SCENE)
-	_embed(body, TAB_COSMETICS, COSMETICS_SCENE)
+	_embed(body, TAB_COSMETICS, COSMETICS_SCENE, {&"exclude_slots": [&"pet"]})
+	_embed(body, TAB_PETS, COSMETICS_SCENE, {&"slots": [&"pet"]})
 
 	# NOTHING ELSE GOES IN THIS COLUMN. See _build_purchase_bar - the three
 	# embedded panels are full-height layouts and have no vertical budget to give.
@@ -221,9 +228,13 @@ func _add_tab_button(row: HBoxContainer, id: StringName, label: String) -> void:
 	_tab_buttons[id] = b
 
 
-func _embed(body: Control, id: StringName, scene: PackedScene) -> void:
+## [param meta] is set on the panel BEFORE it enters the tree, so its _ready sees
+## it - that is how the two wardrobe copies learn which slots they show.
+func _embed(body: Control, id: StringName, scene: PackedScene, meta: Dictionary = {}) -> void:
 	var panel: Control = scene.instantiate()
 	panel.set_meta(&"embedded", true)
+	for key: StringName in meta:
+		panel.set_meta(key, meta[key])
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL

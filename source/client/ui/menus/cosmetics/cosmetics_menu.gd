@@ -44,7 +44,22 @@ const SLOT_LABELS: Dictionary = {
 	&"flourish": "Flourishes",
 	&"departure": "Departures",
 	&"weapon": "Weapon Skins",
+	&"pet": "Pets",
 }
+
+## SLOT FILTER, set by whoever embeds this menu (before it enters the tree) as the
+## "slots" meta: an Array of slot names to show, or unset for every slot EXCEPT the
+## ones listed in "exclude_slots". The Vault embeds two copies - Cosmetics without
+## pets, and Pets with only pets - so pets get a shelf of their own instead of
+## being a seventh tab crammed into a row with no room for it.
+var _only_slots: Array = []
+var _exclude_slots: Array = []
+
+## Pets preview WALK, THEN STOP, on a loop: a pet's whole appeal is that it
+## follows you AND does something when you stand still, and a preview that only
+## walks (or only stands) sells half of it.
+const PET_WALK_S: float = 2.6
+const PET_STAND_S: float = 3.4
 
 ## slot -> Array[int] of cosmetic ids in that tab.
 var _by_slot: Dictionary = {}
@@ -101,6 +116,8 @@ var _col: VBoxContainer
 
 
 func _ready() -> void:
+	_only_slots = get_meta(&"slots", [])
+	_exclude_slots = get_meta(&"exclude_slots", [])
 	var embedded: bool = bool(get_meta(&"embedded", false))
 	if not embedded:
 		build_shell("Cosmetics", null, true)
@@ -310,6 +327,8 @@ func _on_state(data: Dictionary) -> void:
 	for id_v: Variant in data.get("cosmetics", []):
 		var id: int = int(id_v)
 		var slot: StringName = Cosmetics.slot_of(id)
+		if not _shows_slot(slot):
+			continue
 		if not _by_slot.has(slot):
 			_by_slot[slot] = []
 		(_by_slot[slot] as Array).append(id)
@@ -337,10 +356,20 @@ func _on_state(data: Dictionary) -> void:
 	_select_slot(want)
 
 
+## Whether this copy of the menu shows [param slot] at all (see _only_slots).
+func _shows_slot(slot: StringName) -> bool:
+	if not _only_slots.is_empty():
+		return _only_slots.has(slot)
+	return not _exclude_slots.has(slot)
+
+
 func _rebuild_tabs() -> void:
 	for child: Node in _tab_bar.get_children():
 		child.queue_free()
 	_tab_buttons.clear()
+	# A one-slot shelf (Pets) needs no tab strip: a single tab is just a label
+	# costing a row this layout does not have.
+	_tab_bar.visible = _slots.size() > 1
 	for slot: StringName in _slots:
 		var b: Button = Button.new()
 		b.text = String(SLOT_LABELS.get(slot, String(slot).capitalize()))
@@ -400,7 +429,12 @@ func _cycle(delta: int) -> void:
 ## overlapped - the one pairing a buyer is most likely to be checking looked like
 ## a rendering fault. The feet still clear the bottom with an aura's radius to
 ## spare.
+##
+## PETS SIT LOWER STILL. A flying pet hovers a head above its owner, and at 0.62
+## it flew straight through the worn title pinned to the top of the box.
 func _preview_home() -> Vector2:
+	if _slot == &"pet":
+		return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
 	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
 
 
@@ -408,7 +442,12 @@ func _preview_home() -> Vector2:
 ## the back-and-forth the render tool uses: a wardrobe preview has no room to run,
 ## and a circle keeps the whole trail inside the box at every moment.
 func _process(delta: float) -> void:
-	if not _walking or _preview_pivot == null:
+	if _preview_pivot == null:
+		return
+	if _slot == &"pet":
+		_pet_walk_cycle(delta)
+		return
+	if not _walking:
 		return
 	_walk_elapsed += delta
 	var angle: float = _walk_elapsed * TAU / WALK_PERIOD_S
@@ -416,6 +455,20 @@ func _process(delta: float) -> void:
 	# than as the effect being swung around on a string.
 	var orbit: Vector2 = Vector2(cos(angle), sin(angle) * 0.5) * WALK_RADIUS
 	_preview_pivot.position = _preview_home() + orbit
+
+
+## Walk for PET_WALK_S, stand for PET_STAND_S, repeat - so the pet is seen both
+## following and doing its idle trick. The body switches run/idle with it.
+func _pet_walk_cycle(delta: float) -> void:
+	_walk_elapsed += delta
+	var t: float = fposmod(_walk_elapsed, PET_WALK_S + PET_STAND_S)
+	var moving: bool = t < PET_WALK_S
+	if moving:
+		var angle: float = t * TAU / WALK_PERIOD_S
+		_preview_pivot.position = _preview_home() + Vector2(cos(angle), sin(angle) * 0.5) * WALK_RADIUS
+	if moving != _walking:
+		_walking = moving
+		_play_body(&"run" if moving else &"idle")
 
 
 func _update_preview() -> void:
@@ -621,6 +674,8 @@ func _slot_blurb(slot: StringName) -> String:
 			return "Plays once each time you gain a level. Everyone nearby sees it."
 		&"departure":
 			return "Plays once where you fall when you die. Everyone nearby sees it."
+		&"pet":
+			return "Worn: follows you everywhere, and does something when you stop."
 	return "Worn effect."
 
 
@@ -673,6 +728,8 @@ func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 				lp.halo_cosmetic_id = id
 			&"trail":
 				lp.trail_cosmetic_id = id
+			&"pet":
+				lp.pet_cosmetic_id = id
 	# Bought or equipped for real, so the mannequin and the player agree about
 	# this slot again - and the "trying on" count drops by one.
 	_try_on[slot] = id

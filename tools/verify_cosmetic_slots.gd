@@ -57,6 +57,7 @@ func _run() -> void:
 		&"flourish": 1004,
 		&"departure": 1005,
 		&"weapon": 1006,
+		&"pet": 1007,
 	}
 	res.cosmetic_id = 1001
 	res.weapon_cosmetic_id = 1006
@@ -74,7 +75,7 @@ func _run() -> void:
 	if back == null:
 		_finish()
 		return
-	for slot: StringName in [&"aura", &"halo", &"trail", &"flourish", &"departure", &"weapon"]:
+	for slot: StringName in [&"aura", &"halo", &"trail", &"flourish", &"departure", &"weapon", &"pet"]:
 		_ok(
 			"%s survived" % slot,
 			int(back.cosmetic_slots.get(slot, 0)) == int(res.cosmetic_slots[slot]),

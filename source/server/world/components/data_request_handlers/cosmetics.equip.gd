@@ -51,7 +51,7 @@ func data_request_handler(
 	else:
 		pr.cosmetic_slots[slot] = cosmetic_id
 
-	# The three worn channels are mirrored onto synced properties so every client
+	# The worn channels are mirrored onto synced properties so every client
 	# in the zone renders them. Flourish and departure have no channel: nothing
 	# wears them, they are looked up at the moment they fire.
 	match slot:
@@ -66,6 +66,8 @@ func data_request_handler(
 			player.state_synchronizer.set_by_path(^":halo_cosmetic_id", cosmetic_id)
 		&"trail":
 			player.state_synchronizer.set_by_path(^":trail_cosmetic_id", cosmetic_id)
+		&"pet":
+			player.state_synchronizer.set_by_path(^":pet_cosmetic_id", cosmetic_id)
 	# Persisted now that cosmetics can be BOUGHT. While the only path in was
 	# an admin command this could stay transient; a purchase that does not
 	# survive logout is a refund request.

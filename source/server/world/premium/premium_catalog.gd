@@ -137,6 +137,49 @@ const COSMETIC_COSTS: Dictionary = {
 	# so it is already gated behind endgame content and is worth the ceiling to
 	# the players who can actually show it off.
 	&"weapon_ascended_radiance": 750,
+
+	# --- PETS. Companions that follow you - on screen the whole time you are,
+	# next to your character, so they price in the AURA band (450 / 600 / 750),
+	# never the one-shot band. Tiered by how much there is to watch:
+	#
+	#   450  simple: one idea, one motion (a wisp, a moth, a slime)
+	#   600  a character with an idle gag (the ghost's peek-a-boo, the frog
+	#        catching a fly, the corgi's happy hop)
+	#   750  the detailed set-pieces: hand-shaded pixel art with live effects on
+	#        top (the phoenix's rebirth, the clockwork owl, the crystal golem)
+	&"pet_wisp": 450,
+	&"pet_moth": 450,
+	&"pet_fireflies": 450,
+	&"pet_slime": 450,
+	&"pet_snail": 450,
+	&"pet_pet_rock": 450,
+	&"pet_duckling": 450,
+	&"pet_frog": 450,
+	&"pet_crab": 450,
+	&"pet_bumblebee": 450,
+	&"pet_mushroom_sprout": 450,
+
+	&"pet_ghost": 600,
+	&"pet_mimic": 600,
+	&"pet_jellyfish": 600,
+	&"pet_spellbook": 600,
+	&"pet_baby_dragon": 600,
+	&"pet_star_sprite": 600,
+	&"pet_pumpkin_lantern": 600,
+	&"pet_axolotl": 600,
+	&"pet_cloud_pup": 600,
+	&"pet_hamster_ball": 600,
+	&"pet_owl": 600,
+	&"pet_penguin": 600,
+	&"pet_kitsune": 600,
+	&"pet_pocket_moon": 600,
+	&"pet_ember_imp": 600,
+	&"pet_corgi": 600,
+	&"pet_red_panda": 600,
+
+	&"pet_phoenix_chick": 750,
+	&"pet_clockwork_owl": 750,
+	&"pet_crystal_golem": 750,
 }
 
 ## SLOTS WITH NO TRIGGER, AND THEREFORE NOTHING TO SELL.
@@ -162,6 +205,7 @@ const SLOT_COSTS: Dictionary = {
 	&"flourish": 350,
 	&"departure": 350,
 	&"weapon": 750,
+	&"pet": 600,
 }
 
 ## Last-resort price for a cosmetic in a slot nobody has priced - a new slot

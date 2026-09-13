@@ -55,6 +55,14 @@ var trail_cosmetic_id: int:
 ## Lazily built by [method _set_trail_cosmetic_id].
 var trail_vfx: CosmeticVfx
 
+## Equipped PET cosmetic id (0 = none). Same arrangement as the halo: its own
+## channel, so a pet is worn alongside an aura, a halo and a trail.
+var pet_cosmetic_id: int:
+	set = _set_pet_cosmetic_id
+
+## Lazily built by [method _set_pet_cosmetic_id].
+var pet_vfx: CosmeticVfx
+
 ## Aura granted by a complete Skilling Outfit ([SkillingOutfitManager]). 0 = none.
 ##
 ## A SEPARATE channel from [member cosmetic_id] on purpose, exactly like
@@ -829,6 +837,19 @@ func _set_trail_cosmetic_id(id: int) -> void:
 	trail_vfx.set_facing(flipped)
 
 
+func _set_pet_cosmetic_id(id: int) -> void:
+	pet_cosmetic_id = id
+	if multiplayer.is_server():
+		return
+	if pet_vfx == null:
+		if id == 0:
+			return
+		pet_vfx = CosmeticVfx.new()
+		add_child(pet_vfx)
+	pet_vfx.apply(id)
+	pet_vfx.set_facing(flipped)
+
+
 func _set_skilling_aura_id(id: int) -> void:
 	skilling_aura_id = id
 	# Server holds the value for sync but renders nothing, same as _set_cosmetic_id.
@@ -888,6 +909,8 @@ func _set_flip(new_flip: bool) -> void:
 		halo_vfx.set_facing(new_flip)
 	if trail_vfx != null:
 		trail_vfx.set_facing(new_flip)
+	if pet_vfx != null:
+		pet_vfx.set_facing(new_flip)
 	if skilling_aura_vfx != null:
 		skilling_aura_vfx.set_facing(new_flip)
 
