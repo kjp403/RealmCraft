@@ -294,7 +294,7 @@ func _stage_style() -> StyleBoxFlat:
 	box.bg_color = Color(0.035, 0.042, 0.06, 0.94)
 	box.border_color = Color(0.38, 0.34, 0.28, 0.9)
 	box.set_border_width_all(1)
-	box.set_corner_radius_all(4)
+	box.set_corner_radius_all(0)
 	# ZERO margins. This tab has no vertical slack - six slot tabs, a Buy button,
 	# Equip and Take off inside 540px - and 4px of padding top and bottom was
 	# enough to push Take off off the bottom edge. The stage already expands to
