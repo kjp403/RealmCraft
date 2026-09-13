@@ -6,6 +6,8 @@ var player_resource: PlayerResource
 
 signal staff_role_changed(role: String)
 signal display_title_changed(title: String)
+## Server: fired at the start of [method die], before the respawn delay.
+signal died(killer: Character)
 
 ## Synced guild tag — drives the blue ally health-bar tint guildmates see on each
 ## other. Synced like display_name (set_by_path → baseline + live dirty).
@@ -131,6 +133,7 @@ func incoming_damage_factor(
 ## targets) instead of trailing the corpse.
 func die(killer: Character) -> void:
 	_died_at_ms = Time.get_ticks_msec()
+	died.emit(killer)
 	# RESPAWN_DELAY (3s) is shorter than ShotOverrideAbility.EXPIRY_S (6s), so an
 	# armed shot from THIS life could otherwise still be "fresh" when the next
 	# life starts and silently lock its Q/E slots for no visible reason.

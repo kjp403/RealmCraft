@@ -162,6 +162,11 @@ var _empty_since_ms: int = 0
 ## after the kill, and spawns the boss again on top of the group while they are
 ## still looting him.
 var _cleared: bool = false
+## player_id -> true for everyone who died during THIS run. Stamped by reference
+## onto every encounter body under [constant RewardService.LOOT_BARRED_META], so a
+## player who falls gets no loot when the survivors finish a kill. Replaced (never
+## cleared) on [method begin], so a body from an old run keeps its old list.
+var _fallen: Dictionary = {}
 ## Latches the environment shift so a re-entry into phase 3 cannot re-run it.
 var _frozen: bool = false
 ## Bumped on every phase-3 brazier loop start; only the newest owns the fires.
@@ -286,6 +291,8 @@ func _process(_delta: float) -> void:
 	_poll_at_ms = now + int(ARM_POLL_S * 1000.0)
 
 	var populated: bool = not _live_players().is_empty()
+	if _running:
+		_watch_deaths()
 	if not _running:
 		# A cleared room re-arms only after everyone has left, so the victors get
 		# to loot and walk out instead of being handed a fresh boss.
@@ -315,12 +322,15 @@ func begin() -> void:
 		return
 	_running = true
 	_frozen = false
+	_fallen = {}
+	_watch_deaths()
 	# Snapshot the group NOW and hold it for the whole run — every scaled body
 	# (boss, waves, pillars) reads _party_hp_factor() off this.
 	var instance: Node = _instance()
 	_party_size = maxi(1, instance.players_by_peer_id.size()) if instance != null else 1
 	if wave_manager != null:
 		wave_manager.minion_health_mult = WAVE_HP_BASE * _party_hp_factor()
+		wave_manager.loot_barred = _fallen
 	_spawn_boss()
 	if boss == null:
 		_running = false
@@ -387,6 +397,7 @@ func _spawn_boss() -> void:
 		return
 	npc.respawns = false
 	npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+	npc.set_meta(RewardService.LOOT_BARRED_META, _fallen)
 	# NO OUT-OF-COMBAT HEAL for the whole run. Phase 3 spreads the group onto the
 	# braziers, and every brazier in this room sits 280-370px from the boss
 	# spawn — outside his authored 260px detection radius. Lose the current
@@ -548,6 +559,7 @@ func _spawn_pillars() -> void:
 			continue
 		npc.respawns = false
 		npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+		npc.set_meta(RewardService.LOOT_BARRED_META, _fallen)
 		# Same reason as the boss: the pillar run is a dodging phase, and a group
 		# spending ten seconds clearing telegraphs before it can swing again must
 		# not find the pillar back at full.
@@ -844,6 +856,35 @@ func _arena_point() -> Vector2:
 	if boss_spawn != null and is_instance_valid(boss_spawn):
 		return boss_spawn.global_position + Vector2(0.0, 120.0)
 	return global_position
+
+
+# --- Deaths ------------------------------------------------------------------
+
+
+## Hook every player in the room. Called on begin and from the one-second poll,
+## so a player who arrives mid-run is covered before they can take a hit.
+func _watch_deaths() -> void:
+	var instance: Node = _instance()
+	if instance == null:
+		return
+	for peer_id: int in instance.players_by_peer_id:
+		var player: Player = instance.players_by_peer_id[peer_id]
+		if player == null or not is_instance_valid(player):
+			continue
+		if not player.died.is_connected(_on_player_died):
+			player.died.connect(_on_player_died.bind(player))
+
+
+## A death costs the loot for the rest of the run. Checked against THIS room's
+## roster: the connection outlives a player walking out, and a death in the forge
+## afterwards must not land on whatever group runs here next.
+func _on_player_died(_killer: Character, player: Player) -> void:
+	if not _running or not is_instance_valid(player) or player.player_resource == null:
+		return
+	var instance: Node = _instance()
+	if instance == null or not instance.players_by_peer_id.values().has(player):
+		return
+	_fallen[int(player.player_resource.player_id)] = true
 
 
 # --- Finish ------------------------------------------------------------------

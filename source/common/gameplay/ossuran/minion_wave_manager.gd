@@ -63,6 +63,9 @@ var spawn_markers: Array[Marker2D] = []
 ## can be tuned per difficulty without editing five EnemyTypeResources.
 var minion_health_mult: float = 1.0
 var minion_damage_mult: float = 1.0
+## The arena's fallen-player list, stamped onto every body so a player who died
+## during the run gets no loot from the waves either. See RewardService.LOOT_BARRED_META.
+var loot_barred: Dictionary = {}
 
 ## Live bodies for the CURRENT wave. The teleport gate the brief asks for is
 ## exactly `active_minions.size() == 0` — see [method _on_minion_exited].
@@ -154,6 +157,7 @@ func _spawn_wave(spec: Array) -> void:
 			# tree_exited) when it dies.
 			npc.respawns = false
 			npc.max_distance_from_spawn = HostileNpc.NO_LEASH_DISTANCE
+			npc.set_meta(RewardService.LOOT_BARRED_META, loot_barred)
 			_scale_body(npc)
 			npc.replicate_visual(&"rp_spawn_effect", [])
 			active_minions.append(npc)
@@ -198,7 +202,9 @@ func _on_minion_exited(npc: HostileNpc) -> void:
 	active_minions.erase(npc)
 	# Teardown, a wipe, or a reset already stood the gauntlet down: the bodies
 	# leaving are cleanup, not progress.
-	if not _running or _finished:
+	# Out of the tree means the instance is unloading (the group left mid-wave):
+	# the bodies are going with it, and get_tree() is null for the timer below.
+	if not _running or _finished or not is_inside_tree():
 		return
 	if active_minions.size() > 0:
 		return
@@ -211,7 +217,7 @@ func _on_minion_exited(npc: HostileNpc) -> void:
 	# is what stops a group that left during the gap from spawning a wave into
 	# an empty room.
 	await get_tree().create_timer(WAVE_GAP_S).timeout
-	if not _running:
+	if not _running or not is_inside_tree():
 		return
 	_advance()
 
@@ -220,8 +226,10 @@ func _finish() -> void:
 	if _finished:
 		return
 	_finished = true
+	if not is_inside_tree():
+		return
 	await get_tree().create_timer(RETURN_DELAY_S).timeout
-	if not _running:
+	if not _running or not is_inside_tree():
 		return
 	_running = false
 	all_waves_cleared.emit()

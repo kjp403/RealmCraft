@@ -18,6 +18,11 @@ const LOOT_EXCLUSIVE_MS: int = 60_000
 ## Fallback ornate chest id (pink / 249) when a boss leaves ornate_chest_item empty.
 ## Ranked grants use the boss's authored color item when set.
 const ORNATE_CHEST_IDS: Array[int] = [249]
+## Metadata on a body: a Dictionary of player_id -> true barred from its LOOT.
+## Scripted encounters (Ossuran) stamp it so anyone who died during the run gets no
+## drop when the survivors finish the kill. XP, mastery, Slayer and quest credit
+## are untouched. Held by reference, so deaths after the spawn still count.
+const LOOT_BARRED_META: StringName = &"loot_barred_player_ids"
 
 
 ## [param contributors] = player_id -> total damage dealt this life (HostileNpc
@@ -264,6 +269,12 @@ static func _reward(
 		loot_gained.clear()
 		# The drop was rolled but never handed over, so it must not fill a log.
 		# Credit follows RECEIPT, not the roll.
+		table_slugs.clear()
+	# Died during a scripted encounter: same rule as the dungeon charge above —
+	# rolled, never handed over, so no drop and no collection-log item.
+	var barred: Variant = npc.get_meta(LOOT_BARRED_META, null)
+	if barred is Dictionary and (barred as Dictionary).has(int(resource.player_id)):
+		loot_gained.clear()
 		table_slugs.clear()
 	# Ordinary drops land on the ground for click-pickup — not auto-bagged. Each
 	# peer's piles are reserved to THEM (instanced loot — goblin chief / mecha golem).
