@@ -22,13 +22,21 @@ extends MenuShell
 ## for those eleven, and the wardrobe would be advertising art the game no longer
 ## renders.
 
-## Shrunk from 200 to make room for the Buy button that now sits above Equip.
-## This tab carries a whole extra row the others do not - the six slot tabs -
-## so it is the one with no slack, and at 200 the Equip button fell off the
-## bottom of a 540px client. The preview still clears the walk radius by a
-## wide margin (WALK_RADIUS is 26).
-const PREVIEW_BOX: float = 140.0
-const PREVIEW_SCALE: float = 1.6
+const VaultStyle := preload("res://source/client/ui/menus/vault/vault_style.gd")
+const VaultShelf := preload("res://source/client/ui/menus/vault/vault_shelf.gd")
+
+## The preview box's minimum size - it is the stage's minimum height. This tab
+## carries a row the others do not (the slot tabs), and the Buy and Equip rows sit
+## under the stage inside a 540px client, so it stays modest; the stage itself
+## expands to whatever the column has spare. Clears WALK_RADIUS (26) with room.
+const PREVIEW_BOX: float = 150.0
+const PREVIEW_SCALE: float = 1.8
+
+## What the Weapon Skins tab shows its glow on. A weapon cosmetic has no art of its
+## own on a body - in the world it lights the Ascended weapon in hand - so it is
+## previewed on a real one, through the same WeaponVfx node and the same
+## Cosmetics.weapon_fx_for lookup the world uses.
+const SHOWCASE_WEAPON_ICON: Texture2D = preload("res://assets/sprites/items/weapons/ascension/sword_dawnbreaker.png")
 
 ## A trail preset renders from real movement and shows NOTHING standing still, so
 ## the preview walks in a small circle. Radial effects are left alone - orbiting an
@@ -92,13 +100,18 @@ var _preview_vfx: Dictionary = {}
 ## then changed by browsing - THIS MENU ONLY. Nothing here is sent anywhere: the
 ## point is to see how a halo sits over an aura before spending on either.
 var _try_on: Dictionary = {}
-## Says so, in the corner of the stage, whenever the mannequin is wearing
-## something the player is not.
+## Bottom of the stage: names what OTHER tabs have put on the mannequin that the
+## player does not wear, with a Reset that takes it back off.
+var _try_on_bar: HBoxContainer
 var _try_on_label: Label
+var _try_on_reset: Button
 ## The buyer's OWN character, drawn under the effect. Not decoration: an aura is
 ## sized and positioned against a body, and a trail is drawn from where one has
 ## been, so an effect floating in an empty box is not the thing being sold.
 var _body: AnimatedSprite2D
+## The showcase Ascended weapon and its glow, shown on the Weapon Skins tab only.
+var _weapon_preview: Sprite2D
+var _weapon_glow: WeaponVfx
 ## The buyer's worn title, floating over the preview the way it floats over their
 ## head in the world. Inside the preview box on purpose - this tab carries the
 ## six slot tabs and has no vertical budget for another row (see PREVIEW_BOX).
@@ -110,16 +123,28 @@ var _wearer_title: Label
 ## walk circle. Separate from the effect nodes so the walk can be switched off
 ## per tab without touching what is being worn.
 var _preview_pivot: Node2D
+## The preview draws in its own viewport, shown on the stage through this rect -
+## see _build_layout for why it cannot draw on the panel directly.
+var _preview_view: TextureRect
+var _preview_viewport: SubViewport
+var _preview_center: CenterContainer
+var _preview_box: Control
 var _walking: bool = false
 var _walk_elapsed: float = 0.0
 var _tab_bar: HBoxContainer
 var _tab_buttons: Dictionary = {}
+var _shelf: VaultShelf
 var _name_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
-## The panel's own column, so the shell can drop its Buy button into it.
 var _col: VBoxContainer
+## The right-hand column, so the shell can drop its Buy button into it.
+var _detail: VBoxContainer
+var _action_row: HBoxContainer
+## Set by a refresh after a purchase: re-read ownership but stay on the slot and
+## item the player just bought, still wearing whatever they were trying on.
+var _keep_selection: bool = false
 
 
 func _ready() -> void:
@@ -152,7 +177,7 @@ func _build_layout() -> void:
 		col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_host().add_child(col)
 
-	# Tab strip. Populated in _rebuild_tabs once the roster arrives — building it
+	# Slot tabs. Populated in _rebuild_tabs once the roster arrives - building it
 	# from the response rather than a hardcoded list means an empty slot (or a new
 	# one) needs no change here.
 	_tab_bar = HBoxContainer.new()
@@ -160,38 +185,96 @@ func _build_layout() -> void:
 	_tab_bar.add_theme_constant_override(&"separation", 4)
 	col.add_child(_tab_bar)
 
-	# A STAGE, NOT A TRANSPARENT GAP. The Vault is a fullscreen MenuShell, which
-	# drops the card frame on purpose and leaves only a half-alpha dim - so
-	# before this, a 1.6x pixel character and a particle effect were drawn over
-	# the lit Guild House, its NPCs and the leaderboard text. The preview was
-	# there and simply could not be seen, worst of all when the buyer's own
-	# character happened to be standing behind it.
-	#
-	# Clipped, so a wide trail cannot paint over the Buy button underneath.
+	# The layout every Vault tab shares: the whole slot listed on the left with
+	# prices, the selected item previewed large on the right, buttons under it.
+	var body: HBoxContainer = HBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override(&"separation", 10)
+	col.add_child(body)
+
+	_shelf = VaultShelf.new()
+	_shelf.picked.connect(_on_picked)
+	body.add_child(_shelf)
+
+	_detail = VBoxContainer.new()
+	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail.add_theme_constant_override(&"separation", 6)
+	body.add_child(_detail)
+
+	# An opaque stage, so a pixel character and a particle effect are never read
+	# against the room behind the menu. Clipped, so a wide trail cannot paint over
+	# the Buy button underneath.
 	var stage: PanelContainer = PanelContainer.new()
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	stage.clip_contents = true
-	stage.add_theme_stylebox_override(&"panel", _stage_style())
-	col.add_child(stage)
+	stage.add_theme_stylebox_override(&"panel", VaultStyle.stage_box())
+	_detail.add_child(stage)
 
-	var preview_center: CenterContainer = CenterContainer.new()
-	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	stage.add_child(preview_center)
+	# THE PREVIEW RENDERS IN ITS OWN VIEWPORT. The HUD hosts every menu at
+	# z_index 100 (hud.gd), and a pet's body - like several trail layers - is
+	# top_level, which drops that inherited z. Drawn straight onto this panel the
+	# pet sat at z 2, UNDER the stage, and showed only as a shadow through it. A
+	# top_level node cannot leave its viewport's canvas, so inside one the host's
+	# z stops mattering.
+	#
+	# OPAQUE, with the stage colour painted in: an additive glow blended onto a
+	# transparent target keeps alpha 0 and vanishes once composited.
+	_preview_view = TextureRect.new()
+	_preview_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_preview_view.stretch_mode = TextureRect.STRETCH_SCALE
+	_preview_view.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_preview_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_preview_view)
+
+	_preview_viewport = SubViewport.new()
+	_preview_viewport.transparent_bg = false
+	_preview_viewport.gui_disable_input = true
+	_preview_viewport.size_2d_override_stretch = true
+	_preview_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_preview_view.add_child(_preview_viewport)
+	_preview_view.texture = _preview_viewport.get_texture()
+
+	# At the lowest z there is, so a companion passing BEHIND its owner (z -7)
+	# still draws in front of the backdrop.
+	var backdrop: ColorRect = ColorRect.new()
+	backdrop.color = VaultStyle.BG
+	backdrop.size = Vector2(4096, 4096)
+	backdrop.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview_viewport.add_child(backdrop)
+
+	# Still laid out on the stage: it holds the title and try-on labels, and its
+	# position is where the preview is centred (see _preview_box_origin).
+	_preview_center = CenterContainer.new()
+	_preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_preview_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(_preview_center)
 
 	var preview_box: Control = Control.new()
 	preview_box.custom_minimum_size = Vector2(PREVIEW_BOX, PREVIEW_BOX)
-	preview_center.add_child(preview_box)
+	preview_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview_center.add_child(preview_box)
+	_preview_box = preview_box
+
+	# The viewport covers the stage's 1px border; redraw it on top. A bare Panel
+	# has no minimum size, so it costs this tab none of its height.
+	var border: Panel = Panel.new()
+	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var frame: StyleBoxFlat = VaultStyle.stage_box()
+	frame.draw_center = false
+	border.add_theme_stylebox_override(&"panel", frame)
+	stage.add_child(border)
 
 	_preview_pivot = Node2D.new()
 	_preview_pivot.position = _preview_home()
 	_preview_pivot.scale = Vector2(PREVIEW_SCALE, PREVIEW_SCALE)
-	preview_box.add_child(_preview_pivot)
+	_preview_viewport.add_child(_preview_pivot)
 
 	# One node per slot, built up front and left hidden until something is put in
-	# it. The world mounts these under a Character, which puts them behind the
-	# body at z_index -1; a NEGATIVE z here would sink the effect behind the
-	# panel it sits on, so the same order is built the other way up: effects at
-	# 0, body above them.
+	# it. The world mounts these under a Character, behind the body at z_index -1;
+	# here the same order is built the other way up: effects at 0, body above.
 	for slot: StringName in Cosmetics.SLOTS:
 		var vfx: CosmeticVfx = CosmeticVfx.new()
 		vfx.z_index = 0
@@ -212,9 +295,20 @@ func _build_layout() -> void:
 	_body.offset = Vector2(0, -30)
 	_preview_pivot.add_child(_body)
 
-	# Above the box, not above the column: a row here would push Equip off the
-	# bottom of a 540px client, which is the same 70px trap documented in
-	# vault_menu._build_purchase_bar. z_index clears the body, which sits at 1.
+	# Held out beside the body at hand height, in front of it (body is z 1). The
+	# glow is a child, exactly as Weapon.apply_cosmetic_fx mounts it.
+	_weapon_preview = Sprite2D.new()
+	_weapon_preview.texture = SHOWCASE_WEAPON_ICON
+	_weapon_preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_weapon_preview.position = Vector2(18, -18)
+	_weapon_preview.z_index = 2
+	_weapon_preview.visible = false
+	_preview_pivot.add_child(_weapon_preview)
+	_weapon_glow = WeaponVfx.new()
+	_weapon_preview.add_child(_weapon_glow)
+
+	# Inside the box, not a row of its own: this tab has no height to spare.
+	# z_index clears the body, which sits at 1.
 	var title_center: CenterContainer = CenterContainer.new()
 	title_center.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title_center.custom_minimum_size = Vector2(PREVIEW_BOX, 20)
@@ -226,81 +320,60 @@ func _build_layout() -> void:
 	_wearer_title.add_theme_font_size_override(&"font_size", 13)
 	title_center.add_child(_wearer_title)
 
-	# Bottom-left of the stage, so it costs the column ZERO height - this tab has
-	# none to give. Only ever visible when the mannequin and the player disagree.
+	# Along the bottom of the stage, so it costs the column ZERO height. Shown only
+	# while another tab's try-on is on the mannequin: the item being browsed is
+	# obvious, a trail tried on three tabs ago is not - so say which, and offer
+	# the one click back. It replaces "Reopen the Vault to reset".
+	var try_on_layer: Control = Control.new()
+	try_on_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(try_on_layer)
+
+	_try_on_bar = HBoxContainer.new()
+	_try_on_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_try_on_bar.offset_left = 8
+	_try_on_bar.offset_right = -8
+	_try_on_bar.offset_top = -34
+	_try_on_bar.offset_bottom = -6
+	_try_on_bar.add_theme_constant_override(&"separation", 8)
+	_try_on_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_try_on_bar.visible = false
+	try_on_layer.add_child(_try_on_bar)
+
 	_try_on_label = Label.new()
-	_try_on_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_try_on_label.offset_left = 6
-	_try_on_label.offset_top = -20
-	_try_on_label.add_theme_font_size_override(&"font_size", 11)
-	_try_on_label.modulate = Color(1, 1, 1, 0.55)
+	_try_on_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_try_on_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_try_on_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_try_on_label.add_theme_font_size_override(&"font_size", 12)
+	_try_on_label.add_theme_color_override(&"font_color", VaultStyle.INK_DIM)
 	_try_on_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_try_on_label.z_index = 2
-	_try_on_label.visible = false
-	preview_box.add_child(_try_on_label)
+	_try_on_bar.add_child(_try_on_label)
+
+	_try_on_reset = Button.new()
+	_try_on_reset.text = "Reset"
+	_try_on_reset.custom_minimum_size = Vector2(72, 26)
+	VaultStyle.style_secondary(_try_on_reset)
+	_try_on_reset.add_theme_font_size_override(&"font_size", 12)
+	_try_on_reset.pressed.connect(_reset_other_try_ons)
+	_try_on_bar.add_child(_try_on_reset)
 
 	set_process(true)
 
-	var nav: HBoxContainer = HBoxContainer.new()
-	nav.alignment = BoxContainer.ALIGNMENT_CENTER
-	nav.add_theme_constant_override(&"separation", 10)
-	col.add_child(nav)
+	_name_label = VaultStyle.name_label()
+	_detail.add_child(_name_label)
 
-	var prev: Button = Button.new()
-	prev.text = "<"
-	prev.custom_minimum_size = Vector2(44, 44)
-	prev.add_theme_font_size_override(&"font_size", 22)
-	prev.pressed.connect(_cycle.bind(-1))
-	nav.add_child(prev)
+	_status_label = VaultStyle.note_label()
+	_detail.add_child(_status_label)
 
-	_name_label = Label.new()
-	_name_label.custom_minimum_size = Vector2(190, 44)
-	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_name_label.add_theme_font_size_override(&"font_size", 18)
-	nav.add_child(_name_label)
+	_action_row = VaultStyle.action_row()
+	_detail.add_child(_action_row)
 
-	var next: Button = Button.new()
-	next.text = ">"
-	next.custom_minimum_size = Vector2(44, 44)
-	next.add_theme_font_size_override(&"font_size", 22)
-	next.pressed.connect(_cycle.bind(1))
-	nav.add_child(next)
-
-	_status_label = Label.new()
-	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.modulate = Color(1, 1, 1, 0.7)
-	col.add_child(_status_label)
-
-	_action_button = Button.new()
-	_action_button.custom_minimum_size = Vector2(0, 44)
-	_action_button.add_theme_font_size_override(&"font_size", 18)
+	_action_button = VaultStyle.action_button("Equip")
 	_action_button.pressed.connect(_on_action_pressed)
-	col.add_child(_action_button)
+	_action_row.add_child(_action_button)
 
-	_clear_button = Button.new()
-	_clear_button.text = "Take off"
-	_clear_button.custom_minimum_size = Vector2(0, 34)
+	_clear_button = VaultStyle.action_button("Take off")
 	_clear_button.pressed.connect(_on_clear_pressed)
-	col.add_child(_clear_button)
-
-
-## Near-opaque, because the point is to take the world out from behind the
-## effect. Not fully opaque: a sliver of the room still shows through, which
-## keeps the menu feeling like it is over the Guild House rather than a separate
-## screen - the same call the fullscreen shell makes with its dim.
-func _stage_style() -> StyleBoxFlat:
-	var box: StyleBoxFlat = StyleBoxFlat.new()
-	box.bg_color = Color(0.035, 0.042, 0.06, 0.94)
-	box.border_color = Color(0.38, 0.34, 0.28, 0.9)
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(0)
-	# ZERO margins. This tab has no vertical slack - six slot tabs, a Buy button,
-	# Equip and Take off inside 540px - and 4px of padding top and bottom was
-	# enough to push Take off off the bottom edge. The stage already expands to
-	# fill whatever the column has spare.
-	box.set_content_margin_all(0)
-	return box
+	_action_row.add_child(_clear_button)
 
 
 # --- Data ---
@@ -326,8 +399,12 @@ func _on_state(data: Dictionary) -> void:
 		if worn > 0:
 			_equipped[StringName(str(slot_key))] = worn
 	# The state fetch runs on every open, so this is also the reset: the
-	# mannequin starts each visit dressed as the player is.
-	_reset_try_on()
+	# mannequin starts each visit dressed as the player is. Not after a purchase -
+	# the buyer is mid-browse and still trying things on.
+	if _keep_selection:
+		_render_outfit()
+	else:
+		_reset_try_on()
 
 	_by_slot.clear()
 	_slots.clear()
@@ -353,6 +430,8 @@ func _on_state(data: Dictionary) -> void:
 
 	_rebuild_tabs()
 	if _slots.is_empty():
+		_keep_selection = false
+		_shelf.set_rows([])
 		_name_label.text = "—"
 		_status_label.text = "Nothing to show."
 		_action_button.text = "Unavailable"
@@ -361,11 +440,16 @@ func _on_state(data: Dictionary) -> void:
 		return
 	_clear_button.visible = true
 	# Open on the first tab that has something equipped in it, else the first tab.
+	# After a purchase, stay on the tab the buyer is in.
 	var want: StringName = _slots[0]
-	for slot: StringName in _slots:
-		if _equipped_for(slot) > 0:
-			want = slot
-			break
+	if _keep_selection and _slots.has(_slot):
+		want = _slot
+	else:
+		for slot: StringName in _slots:
+			if _equipped_for(slot) > 0:
+				want = slot
+				break
+	_keep_selection = false
 	_select_slot(want)
 
 
@@ -403,6 +487,8 @@ func _rebuild_tabs() -> void:
 		b.toggle_mode = true
 		b.custom_minimum_size = Vector2(0, 30)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.add_theme_font_size_override(&"font_size", 14)
+		VaultStyle.style_tab(b)
 		b.pressed.connect(_select_slot.bind(slot))
 		_tab_bar.add_child(b)
 		_tab_buttons[slot] = b
@@ -418,6 +504,7 @@ func _select_slot(slot: StringName) -> void:
 		var equipped: int = _equipped_for(slot)
 		var found: int = ids.find(equipped)
 		_idx_by_slot[slot] = found if found >= 0 else 0
+	_rebuild_shelf()
 	_update_preview()
 
 
@@ -439,12 +526,38 @@ func _current_id() -> int:
 	return int(ids[i]) if i >= 0 and i < ids.size() else 0
 
 
-func _cycle(delta: int) -> void:
-	var ids: Array = _current_ids()
-	if ids.is_empty():
-		return
-	_idx_by_slot[_slot] = wrapi(int(_idx_by_slot.get(_slot, 0)) + delta, 0, ids.size())
+func _on_picked(index: int) -> void:
+	_idx_by_slot[_slot] = index
 	_update_preview()
+
+
+func _rebuild_shelf() -> void:
+	var rows: Array = []
+	for id_v: Variant in _current_ids():
+		rows.append({"name": Cosmetics.display_name(int(id_v)), "tag": _tag_for(int(id_v))})
+	_shelf.set_rows(rows)
+
+
+func _tag_for(id: int) -> Dictionary:
+	return VaultStyle.row_tag(
+		self, VaultGrants.cosmetic_token(id), id == _equipped_for(_slot), _owned.has(id)
+	)
+
+
+## Re-read every row's price / Owned / Equipped tag. Called by the Vault shell
+## when its catalog arrives, and here after an equip.
+func refresh_shelf() -> void:
+	var tags: Array = []
+	for id_v: Variant in _current_ids():
+		tags.append(_tag_for(int(id_v)))
+	_shelf.set_tags(tags)
+
+
+## A purchase just settled: fetch ownership again so Equip unlocks without
+## reopening the Vault, and keep the buyer where they are.
+func refresh_after_purchase() -> void:
+	_keep_selection = true
+	_on_shown()
 
 
 ## Where the preview sits when it is not walking. Below centre: a preset draws
@@ -460,9 +573,40 @@ func _cycle(delta: int) -> void:
 ## PETS SIT LOWER STILL. A flying pet hovers a head above its owner, and at 0.62
 ## it flew straight through the worn title pinned to the top of the box.
 func _preview_home() -> Vector2:
+	var origin: Vector2 = _preview_box_origin()
 	if _real_slot(_slot) == &"pet":
-		return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
-	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
+		return origin + Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
+	return origin + Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
+
+
+## Where the centred preview box sits inside the preview viewport, which spans
+## the whole stage. The homes above are authored against the box. Local
+## positions, not global rects, so a scaled menu host cannot skew it.
+func _preview_box_origin() -> Vector2:
+	if _preview_box == null or _preview_center == null or _preview_view == null:
+		return Vector2.ZERO
+	return _preview_center.position + _preview_box.position - _preview_view.position
+
+
+## Match the preview viewport to the stage: its 2D space in UI units, so the box
+## maps 1:1, and its pixels at the window's real scale, so a glow is not rendered
+## at the 960x540 base size and blown up.
+func _fit_preview_viewport() -> void:
+	if _preview_view == null or _preview_viewport == null:
+		return
+	var ui_size: Vector2i = Vector2i(_preview_view.size.round())
+	if ui_size.x <= 0 or ui_size.y <= 0:
+		return
+	var pixel_scale: float = 1.0
+	var root: Window = get_tree().root
+	var base: Vector2 = Vector2(root.content_scale_size)
+	if base.x > 0.0 and base.y > 0.0:
+		pixel_scale = maxf(1.0, minf(root.size.x / base.x, root.size.y / base.y))
+	var pixels: Vector2i = Vector2i((Vector2(ui_size) * pixel_scale).round())
+	if _preview_viewport.size_2d_override != ui_size:
+		_preview_viewport.size_2d_override = ui_size
+	if _preview_viewport.size != pixels:
+		_preview_viewport.size = pixels
 
 
 ## Walk the preview so trail presets have movement to sample. A circle rather than
@@ -471,10 +615,14 @@ func _preview_home() -> Vector2:
 func _process(delta: float) -> void:
 	if _preview_pivot == null:
 		return
+	_fit_preview_viewport()
 	if _real_slot(_slot) == &"pet":
 		_pet_walk_cycle(delta)
 		return
 	if not _walking:
+		# Every frame, not once: the box's place in the viewport follows the
+		# stage's layout, which settles a frame or two after the tab opens.
+		_preview_pivot.position = _preview_home()
 		return
 	_walk_elapsed += delta
 	var angle: float = _walk_elapsed * TAU / WALK_PERIOD_S
@@ -516,12 +664,8 @@ func _update_preview() -> void:
 	# Re-read every browse for the same reason the wearer is: the player can
 	# change skin in another menu while this one is open.
 	_refresh_wearer()
-	var ids: Array = _current_ids()
-	_name_label.text = "%s  (%d/%d)" % [
-		Cosmetics.display_name(id),
-		int(_idx_by_slot.get(_slot, 0)) + 1,
-		ids.size(),
-	]
+	_shelf.select(int(_idx_by_slot.get(_slot, 0)))
+	_name_label.text = Cosmetics.display_name(id)
 	_update_action()
 
 
@@ -550,6 +694,12 @@ func _render_outfit() -> void:
 		var wanted: int = int(_try_on.get(slot, 0))
 		if own_tab_only and slot != _real_slot(_slot):
 			wanted = 0
+		# Never the raw strip on the body - see SHOWCASE_WEAPON_ICON.
+		if slot == &"weapon":
+			vfx.visible = false
+			vfx.apply(0)
+			_show_weapon_preview(slot == _real_slot(_slot), wanted)
+			continue
 		if wanted == 0:
 			vfx.visible = false
 			vfx.apply(0)
@@ -562,18 +712,57 @@ func _render_outfit() -> void:
 	_update_try_on_label()
 
 
-## Say when the mannequin is wearing something the player is not, so nobody
-## reads the preview as their character and wonders why the world disagrees.
-func _update_try_on_label() -> void:
-	if _try_on_label == null:
+## The showcase weapon, on its own tab only, glowing with [param cosmetic_id] when
+## one is on. A weapon the world has no authored glow for shows none here either.
+func _show_weapon_preview(on_tab: bool, cosmetic_id: int) -> void:
+	if _weapon_preview == null:
 		return
-	var extra: int = 0
+	_weapon_preview.visible = on_tab
+	if on_tab and Cosmetics.is_weapon_slot(cosmetic_id):
+		_weapon_glow.apply(Cosmetics.weapon_fx_for(SHOWCASE_WEAPON_ICON))
+	else:
+		_weapon_glow.apply(null)
+
+
+## Say when the mannequin is wearing something from ANOTHER tab that the player
+## does not wear, so nobody reads the preview as their character and wonders why
+## the world disagrees. The item being browsed is left out - it is the one on
+## screen, and flagging it on every unowned row was noise.
+func _update_try_on_label() -> void:
+	if _try_on_bar == null:
+		return
+	var names: PackedStringArray = PackedStringArray()
+	for slot: StringName in _other_try_ons():
+		# With the slot: "Blood" is an aura AND a trail.
+		var tried: int = int(_try_on[slot])
+		names.append(
+			"%s %s" % [Cosmetics.display_name(tried), String(slot)] if tried > 0 else "no %s" % String(slot)
+		)
+	_try_on_bar.visible = not names.is_empty()
+	if not names.is_empty():
+		_try_on_label.text = "Also trying on: %s" % ", ".join(names)
+
+
+## Worn-slot try-ons from other tabs that differ from what is really worn. Only
+## slots that draw on THIS tab count: a weapon skin or a flourish tried on
+## elsewhere is not on the mannequin here (see _render_outfit).
+func _other_try_ons() -> Array[StringName]:
+	var out: Array[StringName] = []
+	var here: StringName = _real_slot(_slot)
 	for slot: StringName in _try_on:
+		if slot == here or slot == &"weapon" or not Cosmetics.LOOPING_SLOTS.has(slot):
+			continue
 		if int(_try_on[slot]) != _equipped_for(slot):
-			extra += 1
-	_try_on_label.visible = extra > 0
-	if extra > 0:
-		_try_on_label.text = "Trying on %d — not worn. Reopen the Vault to reset." % extra
+			out.append(slot)
+	return out
+
+
+## Put every other tab's slot back to what is really worn, keeping the item being
+## browsed on: "take the rest off", not "start over".
+func _reset_other_try_ons() -> void:
+	for slot: StringName in _other_try_ons():
+		_try_on[slot] = _equipped_for(slot)
+	_render_outfit()
 
 
 ## Start every visit from what the player actually wears. A try-on that survived
@@ -665,6 +854,8 @@ func _play_body(wanted: StringName) -> void:
 func _update_action() -> void:
 	var id: int = _current_id()
 	_announce_selection(VaultGrants.cosmetic_token(id) if id != 0 else "")
+	# Nothing to take off when nothing is worn in this slot.
+	_clear_button.disabled = _equipped_for(_slot) == 0
 	if id == 0:
 		return
 	if id == _equipped_for(_real_slot(_slot)):
@@ -704,7 +895,7 @@ func _slot_blurb(slot: StringName) -> String:
 		&"halo":
 			return "Worn: sits above your head, everywhere you go."
 		&"weapon":
-			return "Worn: lights up any Ascended weapon you hold."
+			return "Worn: lights up any Ascended weapon you hold. Shown here on the Dawnbreaker."
 		&"flourish":
 			return "Plays once each time you gain a level. Everyone nearby sees it."
 		&"departure":
@@ -773,6 +964,7 @@ func _on_equipped(data: Dictionary, id: int, slot: StringName) -> void:
 	_render_outfit()
 	_update_action()
 	_refresh_wearer()
+	refresh_shelf()
 
 
 func _equip_error(reason: String) -> String:
@@ -788,11 +980,21 @@ func _equip_error(reason: String) -> String:
 ## Walks up rather than assuming a parent: this menu also runs standalone
 ## (embedded == false), where there is no shell to talk to and this no-ops.
 func _announce_selection(item_id: String) -> void:
+	# Only the tab on screen may point Buy at something. Every tab fetches its
+	# state when the Vault opens and again after each purchase; a hidden one
+	# announcing on arrival re-targeted Buy at an item the buyer was not looking at.
+	if not is_visible_in_tree():
+		return
 	var host: Node = get_parent()
 	while host != null and not host.has_method("set_selection"):
 		host = host.get_parent()
 	if host != null:
 		host.set_selection(item_id)
+
+
+## Whether the highlighted cosmetic is already held. The Vault shell hides Buy on it.
+func selection_owned() -> bool:
+	return _owned.has(_current_id())
 
 
 ## Re-emit the current selection. Called by the Vault shell when this tab
@@ -802,12 +1004,12 @@ func announce_selection_now() -> void:
 	_update_action()
 
 
-## Host the Vault shell's Buy button directly above this panel's own action
-## button, so price and purchase sit with the thing they act on.
+## Host the Vault shell's Buy button directly above Equip / Take off, so price and
+## purchase sit with the thing they act on.
 func mount_purchase_button(button: Button) -> void:
-	if _col == null or button == null or _action_button == null:
+	if _detail == null or button == null or _action_row == null:
 		return
 	if button.get_parent() != null:
 		button.get_parent().remove_child(button)
-	_col.add_child(button)
-	_col.move_child(button, _action_button.get_index())
+	_detail.add_child(button)
+	_detail.move_child(button, _action_row.get_index())

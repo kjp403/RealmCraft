@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/verify_vault_store.gd" id="1_vstore"]
+
+[node name="VerifyVaultStore" type="Node"]
+script = ExtResource("1_vstore")

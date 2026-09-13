@@ -1,8 +1,13 @@
 extends MenuShell
-## Staff Titles shelf — browse premium title VFX and wear one. Opened from the
-## Curator in the VFX Vault (TitlesInteraction). Existing cosmetics wardrobe
-## is a separate menu and is not changed here.
+## Titles shelf - browse premium title VFX, buy one and wear it. The Vault's first
+## tab, and also opened standalone from the Curator in the VFX Vault
+## (TitlesInteraction).
+##
+## Laid out like every Vault tab: the whole shelf listed on the left with prices,
+## the selected title shown large on the right with Buy and Wear under it.
 
+const VaultStyle := preload("res://source/client/ui/menus/vault/vault_style.gd")
+const VaultShelf := preload("res://source/client/ui/menus/vault/vault_shelf.gd")
 
 var _roster: Array = []
 var _idx: int = 0
@@ -11,15 +16,20 @@ var _equipped: String = ""
 ## which is _owned - bought here, or granted from the donation ladder.
 var _allowed: bool = false
 var _owned: Dictionary[String, bool] = {}
+## Set by a refresh after a purchase: re-read ownership but stay on the title the
+## player just bought, so Wear is right under their cursor.
+var _keep_selection: bool = false
 
+var _shelf: VaultShelf
 var _preview: Label
 var _name_label: Label
 var _blurb_label: Label
 var _status_label: Label
 var _action_button: Button
 var _clear_button: Button
-## The panel's own column, so the shell can drop its Buy button into it.
-var _col: VBoxContainer
+## The right-hand column, so the shell can drop its Buy button into it.
+var _detail: VBoxContainer
+var _action_row: HBoxContainer
 
 
 func _ready() -> void:
@@ -38,83 +48,59 @@ func _host() -> Control:
 
 
 func _build_layout() -> void:
-	var col: VBoxContainer = VBoxContainer.new()
-	_col = col
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override(&"separation", 10)
+	var body: HBoxContainer = HBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override(&"separation", 10)
 	if content == null:
-		col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_host().add_child(col)
+		body.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_host().add_child(body)
 
-	var hint: Label = Label.new()
-	hint.text = "Text VFX only. Wear one, leave the Vault, walk the live world."
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.modulate = Color(1, 1, 1, 0.65)
-	hint.add_theme_font_size_override(&"font_size", 12)
-	col.add_child(hint)
+	_shelf = VaultShelf.new()
+	_shelf.picked.connect(_on_picked)
+	body.add_child(_shelf)
+
+	_detail = VBoxContainer.new()
+	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail.add_theme_constant_override(&"separation", 6)
+	body.add_child(_detail)
+
+	var stage: PanelContainer = PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.clip_contents = true
+	stage.add_theme_stylebox_override(&"panel", VaultStyle.stage_box())
+	_detail.add_child(stage)
 
 	var preview_center: CenterContainer = CenterContainer.new()
-	preview_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(preview_center)
+	stage.add_child(preview_center)
 
 	_preview = Label.new()
 	_preview.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_preview.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_preview.add_theme_font_size_override(&"font_size", 22)
-	_preview.custom_minimum_size = Vector2(280, 48)
+	_preview.add_theme_font_size_override(&"font_size", 26)
+	_preview.custom_minimum_size = Vector2(280, 56)
 	preview_center.add_child(_preview)
 
-	var nav: HBoxContainer = HBoxContainer.new()
-	nav.alignment = BoxContainer.ALIGNMENT_CENTER
-	nav.add_theme_constant_override(&"separation", 10)
-	col.add_child(nav)
+	_name_label = VaultStyle.name_label()
+	_detail.add_child(_name_label)
 
-	var prev: Button = Button.new()
-	prev.text = "<"
-	prev.custom_minimum_size = Vector2(44, 44)
-	prev.add_theme_font_size_override(&"font_size", 22)
-	prev.pressed.connect(_cycle.bind(-1))
-	nav.add_child(prev)
+	_blurb_label = VaultStyle.note_label()
+	_detail.add_child(_blurb_label)
 
-	_name_label = Label.new()
-	_name_label.custom_minimum_size = Vector2(190, 44)
-	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_name_label.add_theme_font_size_override(&"font_size", 16)
-	nav.add_child(_name_label)
+	_status_label = VaultStyle.note_label()
+	_detail.add_child(_status_label)
 
-	var next: Button = Button.new()
-	next.text = ">"
-	next.custom_minimum_size = Vector2(44, 44)
-	next.add_theme_font_size_override(&"font_size", 22)
-	next.pressed.connect(_cycle.bind(1))
-	nav.add_child(next)
+	_action_row = VaultStyle.action_row()
+	_detail.add_child(_action_row)
 
-	_blurb_label = Label.new()
-	_blurb_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_blurb_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_blurb_label.add_theme_font_size_override(&"font_size", 13)
-	_blurb_label.modulate = Color(1, 1, 1, 0.8)
-	col.add_child(_blurb_label)
-
-	_status_label = Label.new()
-	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.modulate = Color(1, 1, 1, 0.7)
-	col.add_child(_status_label)
-
-	_action_button = Button.new()
-	_action_button.custom_minimum_size = Vector2(0, 44)
-	_action_button.add_theme_font_size_override(&"font_size", 18)
+	_action_button = VaultStyle.action_button("Wear")
 	_action_button.pressed.connect(_on_action_pressed)
-	col.add_child(_action_button)
+	_action_row.add_child(_action_button)
 
-	_clear_button = Button.new()
-	_clear_button.text = "Take off"
-	_clear_button.custom_minimum_size = Vector2(0, 34)
+	_clear_button = VaultStyle.action_button("Take off")
 	_clear_button.pressed.connect(_on_clear_pressed)
-	col.add_child(_clear_button)
+	_action_row.add_child(_clear_button)
 
 
 func _on_shown() -> void:
@@ -124,6 +110,7 @@ func _on_shown() -> void:
 
 
 func _on_state(data: Dictionary) -> void:
+	var was_showing: String = str(_current().get("name", ""))
 	_allowed = bool(data.get("allowed", false))
 	_owned.clear()
 	for owned_v: Variant in data.get("owned", []):
@@ -133,6 +120,8 @@ func _on_state(data: Dictionary) -> void:
 	_equipped = str(data.get("equipped", ""))
 	_roster = data.get("titles", [])
 	if _roster.is_empty():
+		_keep_selection = false
+		_shelf.set_rows([])
 		_preview.text = "—"
 		TitleVfx.apply_to_label(_preview, "", true)
 		_name_label.text = "—"
@@ -143,12 +132,19 @@ func _on_state(data: Dictionary) -> void:
 		_clear_button.visible = false
 		return
 	_clear_button.visible = true
+	# After a purchase, stay put; on a fresh open, land on what is worn.
+	var want: String = was_showing if _keep_selection else _equipped
+	_keep_selection = false
 	var found: int = -1
 	for i: int in _roster.size():
-		if str((_roster[i] as Dictionary).get("name", "")) == _equipped:
+		if str((_roster[i] as Dictionary).get("name", "")) == want:
 			found = i
 			break
 	_idx = found if found >= 0 else 0
+	var rows: Array = []
+	for i: int in _roster.size():
+		rows.append({"name": str((_roster[i] as Dictionary).get("name", "")), "tag": _tag_for(i)})
+	_shelf.set_rows(rows)
 	_update_preview()
 
 
@@ -158,33 +154,58 @@ func _current() -> Dictionary:
 	return _roster[_idx]
 
 
-func _cycle(delta: int) -> void:
-	if _roster.is_empty():
-		return
-	_idx = wrapi(_idx + delta, 0, _roster.size())
+func _on_picked(index: int) -> void:
+	_idx = index
 	_update_preview()
 
 
 func _update_preview() -> void:
 	var entry: Dictionary = _current()
-	var name: String = str(entry.get("name", ""))
-	_preview.text = "— %s —" % name
+	var title: String = str(entry.get("name", ""))
+	_shelf.select(_idx)
+	_preview.text = "— %s —" % title
 	# preview: this label is in a menu, nowhere near the camera and never
 	# walking anywhere, so the emitter stacks must not cull themselves against
 	# either - see TitleVfx.apply_to_label. Without it the shelf shows a
 	# stripped-down version of the effect it is selling.
-	TitleVfx.apply_to_label(_preview, name, true)
-	_name_label.text = "%s  (%d/%d)" % [name, _idx + 1, _roster.size()]
+	TitleVfx.apply_to_label(_preview, title, true)
+	_name_label.text = title
 	_blurb_label.text = str(entry.get("blurb", ""))
-	_announce_selection(VaultGrants.title_token(name))
-	if name == _equipped:
+	_announce_selection(VaultGrants.title_token(title))
+	# Nothing to take off when nothing is worn.
+	_clear_button.disabled = _equipped.is_empty()
+	if title == _equipped:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
 		_status_label.text = "Shown on your profile and in chat."
 	else:
 		_action_button.text = "Wear"
-		_action_button.disabled = not _can_wear(name)
+		_action_button.disabled = not _can_wear(title)
 		_status_label.text = "Worn on your profile and in chat, anywhere in the world."
+
+
+func _tag_for(index: int) -> Dictionary:
+	var title: String = str((_roster[index] as Dictionary).get("name", ""))
+	return VaultStyle.row_tag(
+		self, VaultGrants.title_token(title), title == _equipped,
+		_owned.has(title.strip_edges().to_lower())
+	)
+
+
+## Re-read every row's price / Owned / Equipped tag. Called by the Vault shell
+## when its catalog arrives, and here after a Wear.
+func refresh_shelf() -> void:
+	var tags: Array = []
+	for i: int in _roster.size():
+		tags.append(_tag_for(i))
+	_shelf.set_tags(tags)
+
+
+## A purchase just settled: fetch ownership again so Wear unlocks without
+## reopening the Vault, and keep the bought title selected.
+func refresh_after_purchase() -> void:
+	_keep_selection = true
+	_on_shown()
 
 
 ## Whether THIS title may be worn. titles.equip re-checks it server-side; a
@@ -220,12 +241,18 @@ func _on_equipped(data: Dictionary, title: String) -> void:
 		return
 	_equipped = str(data.get("title", title))
 	_update_preview()
+	refresh_shelf()
 
 
 ## Tell the Vault shell what is highlighted, so its Buy button can price it.
 ## Walks up rather than assuming a parent: this menu also runs standalone
 ## (embedded == false), where there is no shell to talk to and this no-ops.
 func _announce_selection(item_id: String) -> void:
+	# Only the tab on screen may point Buy at something. Every tab fetches its
+	# state when the Vault opens and again after each purchase; a hidden one
+	# announcing on arrival re-targeted Buy at an item the buyer was not looking at.
+	if not is_visible_in_tree():
+		return
 	var host: Node = get_parent()
 	while host != null and not host.has_method("set_selection"):
 		host = host.get_parent()
@@ -233,19 +260,25 @@ func _announce_selection(item_id: String) -> void:
 		host.set_selection(item_id)
 
 
+## Whether the highlighted title is already held. The Vault shell hides Buy on it.
+func selection_owned() -> bool:
+	return _owned.has(str(_current().get("name", "")).strip_edges().to_lower())
+
+
 ## Re-emit the current selection. Called by the Vault shell when this tab
 ## becomes visible, so the Buy button is priced on the frame the tab opens
 ## instead of after a server round trip.
 func announce_selection_now() -> void:
-	_update_preview()
+	if not _roster.is_empty():
+		_update_preview()
 
 
-## Host the Vault shell's Buy button directly above this panel's own action
-## button, so price and purchase sit with the thing they act on.
+## Host the Vault shell's Buy button directly above Wear / Take off, so price and
+## purchase sit with the thing they act on.
 func mount_purchase_button(button: Button) -> void:
-	if _col == null or button == null or _action_button == null:
+	if _detail == null or button == null or _action_row == null:
 		return
 	if button.get_parent() != null:
 		button.get_parent().remove_child(button)
-	_col.add_child(button)
-	_col.move_child(button, _action_button.get_index())
+	_detail.add_child(button)
+	_detail.move_child(button, _action_row.get_index())
