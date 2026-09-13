@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Arkenelle"
-config/version="0.28.217"
+config/version="0.28.218"
 ; Oldest published Windows zip still allowed to log in. The usual rule is to
 ; keep this at the last play.arkenelle.com/desktop userversion until Release
 ; clients has caught up — exact-match alone soft-locks everyone when Deploy VPS
@@ -55,6 +55,8 @@ PeddlerManager="*res://source/common/gameplay/peddler/peddler_manager.gd"
 CollectionLogManager="*res://source/common/gameplay/collection_log/collection_log_manager.gd"
 
 [debug]
+
+settings/gdscript/always_track_call_stacks=true
 
 gdscript/warnings/unused_variable=0
 gdscript/warnings/unused_private_class_variable=0
