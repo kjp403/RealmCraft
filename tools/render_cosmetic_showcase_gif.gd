@@ -41,6 +41,7 @@ const PRESET_DIR: String = "res://source/common/gameplay/cosmetics/presets/%s_pr
 var _walkers: Array[Node2D] = []
 var _walker_bodies: Array[AnimatedSprite2D] = []
 var _walker_home: Array[float] = []
+var _expected_size: Vector2i = Vector2i.ZERO
 ## [host, event] for every standing row that has a reaction scripted.
 var _reactors: Array = []
 var _next_react: Array[float] = []
@@ -58,7 +59,8 @@ func _ready() -> void:
 		push_error("pass at least one --outfit=slug+slug")
 		get_tree().quit(1)
 		return
-	get_window().size = Vector2i(int(WIDTH), int(ROW_H * outfits.size())) * ZOOM
+	_expected_size = Vector2i(int(WIDTH), int(ROW_H * outfits.size())) * ZOOM
+	get_window().size = _expected_size
 	call_deferred(&"_go", outfits, set_name)
 
 
@@ -117,7 +119,14 @@ func _go(outfits: Array[PackedStringArray], set_name: String) -> void:
 			clock += get_process_delta_time()
 			_drive(clock)
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png(out.path_join("f%03d.png" % i))
+		var image: Image = get_viewport().get_texture().get_image()
+		# A tall window can be resized by the OS mid-capture (seen: three frames
+		# at 1920x1111 in a 900x1656 run). The encoder sizes the GIF from the
+		# first frame, so one stray frame ruins the whole file - wait it out.
+		while image.get_size() != _expected_size:
+			await RenderingServer.frame_post_draw
+			image = get_viewport().get_texture().get_image()
+		image.save_png(out.path_join("f%03d.png" % i))
 	print("GIF_FRAMES ", out)
 	get_tree().quit()
 
