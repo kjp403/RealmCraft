@@ -172,6 +172,8 @@ func _update_preview() -> void:
 	_name_label.text = title
 	_blurb_label.text = str(entry.get("blurb", ""))
 	_announce_selection(VaultGrants.title_token(title))
+	# Nothing to take off when nothing is worn.
+	_clear_button.disabled = _equipped.is_empty()
 	if title == _equipped:
 		_action_button.text = "Wearing"
 		_action_button.disabled = true
@@ -246,6 +248,11 @@ func _on_equipped(data: Dictionary, title: String) -> void:
 ## Walks up rather than assuming a parent: this menu also runs standalone
 ## (embedded == false), where there is no shell to talk to and this no-ops.
 func _announce_selection(item_id: String) -> void:
+	# Only the tab on screen may point Buy at something. Every tab fetches its
+	# state when the Vault opens and again after each purchase; a hidden one
+	# announcing on arrival re-targeted Buy at an item the buyer was not looking at.
+	if not is_visible_in_tree():
+		return
 	var host: Node = get_parent()
 	while host != null and not host.has_method("set_selection"):
 		host = host.get_parent()

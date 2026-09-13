@@ -32,6 +32,12 @@ const VaultShelf := preload("res://source/client/ui/menus/vault/vault_shelf.gd")
 const PREVIEW_BOX: float = 150.0
 const PREVIEW_SCALE: float = 1.8
 
+## What the Weapon Skins tab shows its glow on. A weapon cosmetic has no art of its
+## own on a body - in the world it lights the Ascended weapon in hand - so it is
+## previewed on a real one, through the same WeaponVfx node and the same
+## Cosmetics.weapon_fx_for lookup the world uses.
+const SHOWCASE_WEAPON_ICON: Texture2D = preload("res://assets/sprites/items/weapons/ascension/sword_dawnbreaker.png")
+
 ## A trail preset renders from real movement and shows NOTHING standing still, so
 ## the preview walks in a small circle. Radial effects are left alone - orbiting an
 ## aura would just make the wardrobe look like it is drifting.
@@ -94,13 +100,18 @@ var _preview_vfx: Dictionary = {}
 ## then changed by browsing - THIS MENU ONLY. Nothing here is sent anywhere: the
 ## point is to see how a halo sits over an aura before spending on either.
 var _try_on: Dictionary = {}
-## Says so, in the corner of the stage, whenever the mannequin is wearing
-## something the player is not.
+## Bottom of the stage: names what OTHER tabs have put on the mannequin that the
+## player does not wear, with a Reset that takes it back off.
+var _try_on_bar: HBoxContainer
 var _try_on_label: Label
+var _try_on_reset: Button
 ## The buyer's OWN character, drawn under the effect. Not decoration: an aura is
 ## sized and positioned against a body, and a trail is drawn from where one has
 ## been, so an effect floating in an empty box is not the thing being sold.
 var _body: AnimatedSprite2D
+## The showcase Ascended weapon and its glow, shown on the Weapon Skins tab only.
+var _weapon_preview: Sprite2D
+var _weapon_glow: WeaponVfx
 ## The buyer's worn title, floating over the preview the way it floats over their
 ## head in the world. Inside the preview box on purpose - this tab carries the
 ## six slot tabs and has no vertical budget for another row (see PREVIEW_BOX).
@@ -284,6 +295,18 @@ func _build_layout() -> void:
 	_body.offset = Vector2(0, -30)
 	_preview_pivot.add_child(_body)
 
+	# Held out beside the body at hand height, in front of it (body is z 1). The
+	# glow is a child, exactly as Weapon.apply_cosmetic_fx mounts it.
+	_weapon_preview = Sprite2D.new()
+	_weapon_preview.texture = SHOWCASE_WEAPON_ICON
+	_weapon_preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_weapon_preview.position = Vector2(18, -18)
+	_weapon_preview.z_index = 2
+	_weapon_preview.visible = false
+	_preview_pivot.add_child(_weapon_preview)
+	_weapon_glow = WeaponVfx.new()
+	_weapon_preview.add_child(_weapon_glow)
+
 	# Inside the box, not a row of its own: this tab has no height to spare.
 	# z_index clears the body, which sits at 1.
 	var title_center: CenterContainer = CenterContainer.new()
@@ -297,18 +320,41 @@ func _build_layout() -> void:
 	_wearer_title.add_theme_font_size_override(&"font_size", 13)
 	title_center.add_child(_wearer_title)
 
-	# Bottom-left of the box, so it costs the column ZERO height. Only ever
-	# visible when the mannequin and the player disagree.
+	# Along the bottom of the stage, so it costs the column ZERO height. Shown only
+	# while another tab's try-on is on the mannequin: the item being browsed is
+	# obvious, a trail tried on three tabs ago is not - so say which, and offer
+	# the one click back. It replaces "Reopen the Vault to reset".
+	var try_on_layer: Control = Control.new()
+	try_on_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(try_on_layer)
+
+	_try_on_bar = HBoxContainer.new()
+	_try_on_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_try_on_bar.offset_left = 8
+	_try_on_bar.offset_right = -8
+	_try_on_bar.offset_top = -34
+	_try_on_bar.offset_bottom = -6
+	_try_on_bar.add_theme_constant_override(&"separation", 8)
+	_try_on_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_try_on_bar.visible = false
+	try_on_layer.add_child(_try_on_bar)
+
 	_try_on_label = Label.new()
-	_try_on_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_try_on_label.offset_left = 6
-	_try_on_label.offset_top = -20
-	_try_on_label.add_theme_font_size_override(&"font_size", 11)
-	_try_on_label.modulate = Color(1, 1, 1, 0.55)
+	_try_on_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_try_on_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_try_on_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_try_on_label.add_theme_font_size_override(&"font_size", 12)
+	_try_on_label.add_theme_color_override(&"font_color", VaultStyle.INK_DIM)
 	_try_on_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_try_on_label.z_index = 2
-	_try_on_label.visible = false
-	preview_box.add_child(_try_on_label)
+	_try_on_bar.add_child(_try_on_label)
+
+	_try_on_reset = Button.new()
+	_try_on_reset.text = "Reset"
+	_try_on_reset.custom_minimum_size = Vector2(72, 26)
+	VaultStyle.style_secondary(_try_on_reset)
+	_try_on_reset.add_theme_font_size_override(&"font_size", 12)
+	_try_on_reset.pressed.connect(_reset_other_try_ons)
+	_try_on_bar.add_child(_try_on_reset)
 
 	set_process(true)
 
@@ -648,6 +694,12 @@ func _render_outfit() -> void:
 		var wanted: int = int(_try_on.get(slot, 0))
 		if own_tab_only and slot != _real_slot(_slot):
 			wanted = 0
+		# Never the raw strip on the body - see SHOWCASE_WEAPON_ICON.
+		if slot == &"weapon":
+			vfx.visible = false
+			vfx.apply(0)
+			_show_weapon_preview(slot == _real_slot(_slot), wanted)
+			continue
 		if wanted == 0:
 			vfx.visible = false
 			vfx.apply(0)
@@ -660,18 +712,57 @@ func _render_outfit() -> void:
 	_update_try_on_label()
 
 
-## Say when the mannequin is wearing something the player is not, so nobody
-## reads the preview as their character and wonders why the world disagrees.
-func _update_try_on_label() -> void:
-	if _try_on_label == null:
+## The showcase weapon, on its own tab only, glowing with [param cosmetic_id] when
+## one is on. A weapon the world has no authored glow for shows none here either.
+func _show_weapon_preview(on_tab: bool, cosmetic_id: int) -> void:
+	if _weapon_preview == null:
 		return
-	var extra: int = 0
+	_weapon_preview.visible = on_tab
+	if on_tab and Cosmetics.is_weapon_slot(cosmetic_id):
+		_weapon_glow.apply(Cosmetics.weapon_fx_for(SHOWCASE_WEAPON_ICON))
+	else:
+		_weapon_glow.apply(null)
+
+
+## Say when the mannequin is wearing something from ANOTHER tab that the player
+## does not wear, so nobody reads the preview as their character and wonders why
+## the world disagrees. The item being browsed is left out - it is the one on
+## screen, and flagging it on every unowned row was noise.
+func _update_try_on_label() -> void:
+	if _try_on_bar == null:
+		return
+	var names: PackedStringArray = PackedStringArray()
+	for slot: StringName in _other_try_ons():
+		# With the slot: "Blood" is an aura AND a trail.
+		var tried: int = int(_try_on[slot])
+		names.append(
+			"%s %s" % [Cosmetics.display_name(tried), String(slot)] if tried > 0 else "no %s" % String(slot)
+		)
+	_try_on_bar.visible = not names.is_empty()
+	if not names.is_empty():
+		_try_on_label.text = "Also trying on: %s" % ", ".join(names)
+
+
+## Worn-slot try-ons from other tabs that differ from what is really worn. Only
+## slots that draw on THIS tab count: a weapon skin or a flourish tried on
+## elsewhere is not on the mannequin here (see _render_outfit).
+func _other_try_ons() -> Array[StringName]:
+	var out: Array[StringName] = []
+	var here: StringName = _real_slot(_slot)
 	for slot: StringName in _try_on:
+		if slot == here or slot == &"weapon" or not Cosmetics.LOOPING_SLOTS.has(slot):
+			continue
 		if int(_try_on[slot]) != _equipped_for(slot):
-			extra += 1
-	_try_on_label.visible = extra > 0
-	if extra > 0:
-		_try_on_label.text = "Trying on %d — not worn. Reopen the Vault to reset." % extra
+			out.append(slot)
+	return out
+
+
+## Put every other tab's slot back to what is really worn, keeping the item being
+## browsed on: "take the rest off", not "start over".
+func _reset_other_try_ons() -> void:
+	for slot: StringName in _other_try_ons():
+		_try_on[slot] = _equipped_for(slot)
+	_render_outfit()
 
 
 ## Start every visit from what the player actually wears. A try-on that survived
@@ -763,6 +854,8 @@ func _play_body(wanted: StringName) -> void:
 func _update_action() -> void:
 	var id: int = _current_id()
 	_announce_selection(VaultGrants.cosmetic_token(id) if id != 0 else "")
+	# Nothing to take off when nothing is worn in this slot.
+	_clear_button.disabled = _equipped_for(_slot) == 0
 	if id == 0:
 		return
 	if id == _equipped_for(_real_slot(_slot)):
@@ -802,7 +895,7 @@ func _slot_blurb(slot: StringName) -> String:
 		&"halo":
 			return "Worn: sits above your head, everywhere you go."
 		&"weapon":
-			return "Worn: lights up any Ascended weapon you hold."
+			return "Worn: lights up any Ascended weapon you hold. Shown here on the Dawnbreaker."
 		&"flourish":
 			return "Plays once each time you gain a level. Everyone nearby sees it."
 		&"departure":
@@ -887,6 +980,11 @@ func _equip_error(reason: String) -> String:
 ## Walks up rather than assuming a parent: this menu also runs standalone
 ## (embedded == false), where there is no shell to talk to and this no-ops.
 func _announce_selection(item_id: String) -> void:
+	# Only the tab on screen may point Buy at something. Every tab fetches its
+	# state when the Vault opens and again after each purchase; a hidden one
+	# announcing on arrival re-targeted Buy at an item the buyer was not looking at.
+	if not is_visible_in_tree():
+		return
 	var host: Node = get_parent()
 	while host != null and not host.has_method("set_selection"):
 		host = host.get_parent()
