@@ -21,6 +21,10 @@ extends GroundCompanionPreset
 ##   fight over             a victory hop with hearts
 ##   level-up               spins round in the air with confetti
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const FUR: Color = Color(0.93, 0.56, 0.24)
 const FUR_DEEP: Color = Color(0.78, 0.40, 0.14)
 const WHITE: Color = Color(1.0, 0.97, 0.92)

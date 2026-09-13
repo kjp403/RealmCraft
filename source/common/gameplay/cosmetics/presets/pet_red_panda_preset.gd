@@ -11,6 +11,14 @@ extends GroundCompanionPreset
 ## tear-stripes, rounded white-tipped ears, a shiny eye, and a thick tail with
 ## dark rings. Motion on top is procedural: the bound, the landing squash, the
 ## sit/surprise timing.
+##
+## REACTS: in a fight it rears up into its "surprise" pose, arms thrown wide,
+## from behind its owner - which is exactly what a startled red panda does. While
+## its owner chops wood or harvests it sits and munches a stalk of bamboo.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FUR: Color = Color(0.80, 0.34, 0.16)
 const FUR_LIGHT: Color = Color(0.94, 0.52, 0.26)
@@ -20,6 +28,8 @@ const RING: Color = Color(0.56, 0.22, 0.10)
 const NOSE: Color = Color(0.10, 0.06, 0.06)
 const BLUSH: Color = Color(1.0, 0.55, 0.60)
 const SIT_AFTER_S: float = 0.7
+const BAMBOO: Color = Color(0.46, 0.76, 0.34)
+const BAMBOO_NODE: Color = Color(0.30, 0.54, 0.22)
 const SURPRISE_EVERY_S: float = 5.0
 const SURPRISE_S: float = 1.0
 
@@ -103,10 +113,34 @@ static func _frame(pose: String) -> ImageTexture:
 	)
 
 
+## A stalk of bamboo held in the paws, nibbled from the top.
+func _paint_bamboo(layer: VfxDrawLayer, f: float) -> void:
+	# Paws in the sit pose: canvas (13, 14) -> local (1, -8).
+	var base: Vector2 = Vector2(2.0 * f, -7.0)
+	var chew: float = roundf(absf(sin(_elapsed * 10.0)))
+	var length: int = 9
+	for i: int in length:
+		var at: Vector2 = (base + Vector2(float(i) * 0.25 * f, -float(i) - chew)).round()
+		layer.draw_rect(Rect2(at, Vector2(2, 1)), BAMBOO_NODE if i % 3 == 2 else BAMBOO)
+	var top: Vector2 = (base + Vector2(2.25 * f, -float(length) - chew)).round()
+	layer.draw_rect(Rect2(top + Vector2(1.0 * f, -1.0), Vector2(3, 1)), BAMBOO)
+	layer.draw_rect(Rect2(top + Vector2(-1.0 * f, 0.0), Vector2(2, 1)), BAMBOO)
+
+
 func _paint_panda(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 9.0)
 	var pose: String
 	var f: float = facing
+	var act: StringName = activity()
+	if act == &"combat":
+		layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		PixelCanvas.draw_sprite(layer, _frame("surprise"), Vector2.ZERO, 1.0)
+		return
+	if act == &"axe" or act == &"sickle":
+		layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		PixelCanvas.draw_sprite(layer, _frame("sit"), Vector2.ZERO, f)
+		_paint_bamboo(layer, f)
+		return
 	if still_for >= SIT_AFTER_S:
 		var t: float = fposmod(still_for - SIT_AFTER_S, SURPRISE_EVERY_S)
 		pose = "surprise" if t > SURPRISE_EVERY_S - SURPRISE_S else "sit"

@@ -12,6 +12,10 @@ extends GroundCompanionPreset
 ## REACTS: while its owner fishes, it fishes too - every couple of seconds a fish
 ## leaps out of the water in front of it, it swipes a paw, and catches it.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const FUR: Color = Color(0.62, 0.42, 0.26)
 const FUR_LIGHT: Color = Color(0.84, 0.66, 0.46)
 const EAR_IN: Color = Color(0.86, 0.62, 0.52)

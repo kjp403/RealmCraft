@@ -8,6 +8,14 @@ extends GroundCompanionPreset
 ## three tones, long ears with pink insides, a cotton tail, big hind feet and a
 ## shiny eye. Live on top: the carrot (drawn so it can shrink bite by bite), the
 ## chewing wiggle, the sparkle, and the leap itself.
+##
+## REACTS: in a fight it freezes flat in a crouch behind its owner, trembling.
+## While its owner harvests it gets overexcited and demolishes carrots three
+## times as fast, thumping a hind foot.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FUR: Color = Color(0.97, 0.93, 0.86)
 const FUR_SHADE: Color = Color(0.84, 0.76, 0.70)
@@ -24,10 +32,19 @@ const W: int = 20
 const H: int = 20
 
 
+var _carrot_clock: float = 0.0
+
+
 func _build() -> void:
 	hop_peak = 7.0
 	hop_rate = 2.4
 	add_body_layer(_paint_bunny, false, 0)
+
+
+func _tick(delta: float) -> void:
+	super(delta)
+	if still_for >= SIT_AFTER_S:
+		_carrot_clock += delta * (3.0 if activity() == &"sickle" else 1.0)
 
 
 static func _frame(pose: String) -> ImageTexture:
@@ -82,6 +99,9 @@ static func _frame(pose: String) -> ImageTexture:
 func _paint_bunny(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 8.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if activity() == &"combat":
+		PixelCanvas.draw_sprite(layer, _frame("crouch"), Vector2.ZERO, facing)
+		return
 	var sitting: bool = still_for >= SIT_AFTER_S
 	var pose: String = "sit" if sitting else ("leap" if hop_height > 2.0 else "crouch")
 	var feet: Vector2 = Vector2(0.0, -hop_height)
@@ -92,7 +112,12 @@ func _paint_bunny(layer: VfxDrawLayer) -> void:
 	if not sitting:
 		return
 	# The carrot: held in the paws, eaten from the top down.
-	var t: float = fposmod(still_for - SIT_AFTER_S, CARROT_S)
+	var t: float = fposmod(_carrot_clock, CARROT_S)
+	if activity() == &"sickle" and fposmod(_elapsed * 3.0, 1.0) < 0.2:
+		# The happy thump: a little dust puff at the hind foot.
+		var foot: Vector2 = feet + Vector2(-4.0 * facing, 0.0)
+		layer.draw_rect(Rect2(foot.round() + Vector2(-2, -1), Vector2(1, 1)), Color(0.85, 0.80, 0.70, 0.8))
+		layer.draw_rect(Rect2(foot.round() + Vector2(1, -2), Vector2(1, 1)), Color(0.85, 0.80, 0.70, 0.8))
 	var left: float = 1.0 - clampf(t / (CARROT_S * 0.85), 0.0, 1.0)
 	var f: float = facing
 	# Paws at canvas (12..13, 11..12) -> sprite-local (2, -9).

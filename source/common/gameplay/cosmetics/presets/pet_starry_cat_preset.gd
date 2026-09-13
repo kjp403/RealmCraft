@@ -14,6 +14,10 @@ extends GroundCompanionPreset
 ## flaring at once - while it hides behind its owner. While its owner fishes a
 ## little thought bubble with a fish in it floats over its head.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const FUR: Color = Color(0.20, 0.18, 0.32)
 const FUR_LIGHT: Color = Color(0.34, 0.31, 0.50)
 const EAR_IN: Color = Color(0.86, 0.52, 0.66)

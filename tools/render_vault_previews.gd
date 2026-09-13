@@ -104,6 +104,15 @@ func _go() -> void:
 		await RenderingServer.frame_post_draw
 		_shoot("vault_combo")
 
+	# The Pets tab's two shelves: the flagship Reactive Pets, then the rest.
+	var pets_panel: Control = (_menu.get(&"_panels") as Dictionary).get(&"pets")
+	if pets_panel != null:
+		_menu.call(&"_select_tab", &"pets")
+		pets_panel.call(&"_select_slot", &"pet")
+		await get_tree().create_timer(1.0).timeout
+		await RenderingServer.frame_post_draw
+		_shoot("vault_pets_plain")
+
 	print("done -> ", _out_abs)
 	get_tree().quit()
 

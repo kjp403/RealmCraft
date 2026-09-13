@@ -45,7 +45,14 @@ const SLOT_LABELS: Dictionary = {
 	&"departure": "Departures",
 	&"weapon": "Weapon Skins",
 	&"pet": "Pets",
+	&"pet_reactive": "Reactive Pets",
 }
+
+## A SECTION is a tab that is not a slot of its own. The Pets tab splits the one
+## "pet" slot into two shelves - pets with themed reactions to what their owner
+## is doing, and the rest - so the ones that do the most get a shelf of their
+## own. Every section maps back to the real slot it equips into; see _real_slot.
+const SECTION_REACTIVE_PETS: StringName = &"pet_reactive"
 
 ## SLOT FILTER, set by whoever embeds this menu (before it enters the tree) as the
 ## "slots" meta: an Array of slot names to show, or unset for every slot EXCEPT the
@@ -329,12 +336,18 @@ func _on_state(data: Dictionary) -> void:
 		var slot: StringName = Cosmetics.slot_of(id)
 		if not _shows_slot(slot):
 			continue
-		if not _by_slot.has(slot):
-			_by_slot[slot] = []
-		(_by_slot[slot] as Array).append(id)
+		var key: StringName = slot
+		if slot == &"pet" and _has_themed_reactions(id):
+			key = SECTION_REACTIVE_PETS
+		if not _by_slot.has(key):
+			_by_slot[key] = []
+		(_by_slot[key] as Array).append(id)
 
 	# Keep Cosmetics.SLOTS order, skipping slots with no content.
 	for slot: StringName in Cosmetics.SLOTS:
+		# Reactive pets shelve first: they are the flagship of the Pets tab.
+		if slot == &"pet" and _by_slot.has(SECTION_REACTIVE_PETS):
+			_slots.append(SECTION_REACTIVE_PETS)
 		if _by_slot.has(slot):
 			_slots.append(slot)
 
@@ -354,6 +367,20 @@ func _on_state(data: Dictionary) -> void:
 			want = slot
 			break
 	_select_slot(want)
+
+
+## The slot a tab EQUIPS into: a section maps back to its real slot, and every
+## other tab is its own slot. Anything that equips, tries on or reads what is
+## worn must go through this - the section key is only a shelf.
+func _real_slot(key: StringName) -> StringName:
+	return &"pet" if key == SECTION_REACTIVE_PETS else key
+
+
+## True for a pet whose preset declares THEMED_REACTIONS - read straight off the
+## script, so marking a pet reactive is one line in its own file.
+func _has_themed_reactions(cosmetic_id: int) -> bool:
+	var script: GDScript = CosmeticPresetLibrary.script_for(cosmetic_id)
+	return script != null and script.get_script_constant_map().has(&"THEMED_REACTIONS")
 
 
 ## Whether this copy of the menu shows [param slot] at all (see _only_slots).
@@ -397,7 +424,7 @@ func _select_slot(slot: StringName) -> void:
 ## Which equipped id this tab drives. Every slot has its own now, so this is a
 ## lookup rather than the weapon/everything-else split it used to be.
 func _equipped_for(slot: StringName) -> int:
-	return int(_equipped.get(slot, 0))
+	return int(_equipped.get(_real_slot(slot), 0))
 
 
 # --- Browsing ---
@@ -433,7 +460,7 @@ func _cycle(delta: int) -> void:
 ## PETS SIT LOWER STILL. A flying pet hovers a head above its owner, and at 0.62
 ## it flew straight through the worn title pinned to the top of the box.
 func _preview_home() -> Vector2:
-	if _slot == &"pet":
+	if _real_slot(_slot) == &"pet":
 		return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.8)
 	return Vector2(PREVIEW_BOX * 0.5, PREVIEW_BOX * 0.62)
 
@@ -444,7 +471,7 @@ func _preview_home() -> Vector2:
 func _process(delta: float) -> void:
 	if _preview_pivot == null:
 		return
-	if _slot == &"pet":
+	if _real_slot(_slot) == &"pet":
 		_pet_walk_cycle(delta)
 		return
 	if not _walking:
@@ -478,7 +505,7 @@ func _update_preview() -> void:
 	# Browsing a slot tries that item ON. The other slots keep whatever is in
 	# them, which is what turns arrowing through halos into "how does this sit
 	# over the aura I already have".
-	_try_on[_slot] = id
+	_try_on[_real_slot(_slot)] = id
 	_render_outfit()
 	# The walk exists to give a TRAIL something to sample, so it follows the tab
 	# you are on rather than the outfit: standing still on the Auras tab while a
@@ -517,7 +544,7 @@ func _render_outfit() -> void:
 		var vfx: CosmeticVfx = _preview_vfx[slot]
 		var event_slot: bool = not Cosmetics.LOOPING_SLOTS.has(slot)
 		var wanted: int = int(_try_on.get(slot, 0))
-		if event_slot and slot != _slot:
+		if event_slot and slot != _real_slot(_slot):
 			wanted = 0
 		if wanted == 0:
 			vfx.visible = false
@@ -591,6 +618,10 @@ func _refresh_wearer() -> void:
 	if _wearer_title == null:
 		return
 	var title: String = wearer.display_title.strip_edges() if live else ""
+	# Not on the Pets tab: perching pets (the owls, the moth) sit on the head,
+	# and in this small box that is exactly where the title is pinned.
+	if _real_slot(_slot) == &"pet":
+		title = ""
 	_wearer_title.visible = not title.is_empty()
 	if title.is_empty():
 		return
@@ -632,7 +663,7 @@ func _update_action() -> void:
 	_announce_selection(VaultGrants.cosmetic_token(id) if id != 0 else "")
 	if id == 0:
 		return
-	if id == _equipped_for(_slot):
+	if id == _equipped_for(_real_slot(_slot)):
 		_action_button.text = "Equipped"
 		_action_button.disabled = true
 		_status_label.text = "Currently worn."
@@ -676,19 +707,21 @@ func _slot_blurb(slot: StringName) -> String:
 			return "Plays once where you fall when you die. Everyone nearby sees it."
 		&"pet":
 			return "Worn: follows you everywhere, and does something when you stop."
+		&"pet_reactive":
+			return "Worn: follows you, and joins in with whatever you're doing."
 	return "Worn effect."
 
 
 func _on_action_pressed() -> void:
 	var id: int = _current_id()
 	if id != 0:
-		_equip(id, _slot)
+		_equip(id, _real_slot(_slot))
 
 
 ## Clearing sends the slot explicitly — id 0 has no slot of its own, so the server
 ## cannot infer which one to clear.
 func _on_clear_pressed() -> void:
-	_equip(0, _slot)
+	_equip(0, _real_slot(_slot))
 
 
 func _equip(id: int, slot: StringName) -> void:

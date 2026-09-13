@@ -8,6 +8,13 @@ extends CompanionPreset
 ## back with pale spots, a pale grooved belly, a pectoral fin, tail flukes, a
 ## shiny eye and a smile. Live on top: the swim bob, the spout column and its
 ## falling droplets.
+##
+## REACTS: while its owner fishes it gets excited - swims lower and spouts again
+## and again. A level-up gets its biggest spout, with a rainbow arcing through it.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FOLLOW: Vector2 = Vector2(0, -40)
 const FOLLOW_PX: float = 18.0
@@ -28,10 +35,16 @@ var _facing: float = 1.0
 
 
 func _build() -> void:
+	custom_level_up = true
 	stiffness = 35.0
 	damping = 7.0
 	add_body_layer(_paint_whale, false, 0)
 	add_body_layer(_paint_spout, false, 1)
+	add_body_layer(_paint_rainbow, true, 2)
+
+
+func _spout_every() -> float:
+	return 1.1 if activity() == &"fishing_rod" else SPOUT_EVERY_S
 
 
 func target_local(_delta: float) -> Vector2:
@@ -41,6 +54,8 @@ func target_local(_delta: float) -> Vector2:
 	var bob: float = sin(_elapsed * 1.6) * 2.0
 	if still_for < IDLE_AFTER_S:
 		return FOLLOW - _heading * FOLLOW_PX + Vector2(0, bob)
+	if activity() == &"fishing_rod":
+		return Vector2(-20.0 * _facing, -30.0 + bob * 1.5)
 	return Vector2(-20.0 * _facing, -42.0 + bob)
 
 
@@ -81,10 +96,27 @@ func _paint_whale(layer: VfxDrawLayer) -> void:
 	PixelCanvas.draw_sprite(layer, _frame("up" if up else "down"), Vector2.ZERO, _facing)
 
 
-func _paint_spout(layer: VfxDrawLayer) -> void:
-	if still_for < IDLE_AFTER_S + 0.8:
+## Level-up: a rainbow arcing up through the spout.
+func _paint_rainbow(layer: VfxDrawLayer) -> void:
+	if not celebrating():
 		return
-	var t: float = fposmod(still_for - IDLE_AFTER_S - 0.8, SPOUT_EVERY_S)
+	var k: float = celebration_t()
+	var sweep: float = PI * clampf(k * 2.0, 0.0, 1.0)
+	var fade: float = 1.0 - maxf(0.0, k - 0.7) / 0.3
+	var colors: Array[Color] = [Color(1.0, 0.4, 0.4), Color(1.0, 0.75, 0.3), Color(1.0, 0.95, 0.4), Color(0.5, 0.9, 0.5), Color(0.45, 0.7, 1.0), Color(0.75, 0.55, 1.0)]
+	var hole: Vector2 = Vector2(5.0 * _facing, -14.0)
+	for i: int in colors.size():
+		layer.draw_arc(hole + Vector2(0, 2), 16.0 - float(i), PI, PI + sweep, 20, Color(colors[i], 0.5 * fade), 1.0)
+
+
+func _paint_spout(layer: VfxDrawLayer) -> void:
+	var t: float
+	if celebrating():
+		t = celebration_t() * SPOUT_S
+	else:
+		if still_for < IDLE_AFTER_S + 0.8:
+			return
+		t = fposmod(still_for - IDLE_AFTER_S - 0.8, _spout_every())
 	if t > SPOUT_S:
 		return
 	var k: float = t / SPOUT_S

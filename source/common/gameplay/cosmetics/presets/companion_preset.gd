@@ -38,8 +38,11 @@ var _placed: bool = false
 ## A pet with reactions of its own turns the generic ones off:
 ##   hides_in_combat = false     it has somewhere better to be (the Squire charges in)
 ##   custom_celebration = true   it draws its own cheer and level-up (the Corgi)
+##   custom_level_up = true      it keeps the shared cheer but has its own
+##                               level-up (the Phoenix's rebirth)
 var hides_in_combat: bool = true
 var custom_celebration: bool = false
+var custom_level_up: bool = false
 
 
 func _ready() -> void:
@@ -332,6 +335,19 @@ func hide_spot() -> Vector2:
 	return Vector2(5.0 * _away_side(), -28.0)
 
 
+## The owner's FEET in the pet body's local space (unscaled). A themed reaction
+## that has to reach the owner - a sparkle stream to their hands, a shard wall in
+## front of them - measures from here.
+func owner_local() -> Vector2:
+	var s: float = maxf(0.001, global_scale.x)
+	return (global_position - body.global_position) / s
+
+
+## -1 or +1: the side the owner is facing.
+func owner_front() -> float:
+	return signf(_heading.x) if absf(_heading.x) > 0.1 else 1.0
+
+
 ## -1 or +1: the side of the owner they are NOT facing.
 func _away_side() -> float:
 	return -signf(_heading.x) if absf(_heading.x) > 0.1 else -1.0
@@ -345,7 +361,7 @@ func _reaction_offset(hiding: bool) -> Vector2:
 		off.x = 0.5 if fposmod(_elapsed * 28.0, 1.0) < 0.5 else -0.5
 	if custom_celebration:
 		return off
-	if celebrating():
+	if celebrating() and not custom_level_up:
 		off.y -= absf(sin(celebration_t() * PI * 3.0)) * 7.0
 	elif cheering():
 		off.y -= absf(sin(celebration_t() * PI * 2.0)) * 5.0
@@ -354,7 +370,7 @@ func _reaction_offset(hiding: bool) -> Vector2:
 
 ## -1 flips the pet for the spin frames of a level-up, else 1.
 func _reaction_flip() -> float:
-	if custom_celebration or not celebrating():
+	if custom_celebration or custom_level_up or not celebrating():
 		return 1.0
 	return -1.0 if int(celebration_t() * 14.0) % 2 == 1 else 1.0
 
@@ -365,6 +381,8 @@ const _HEART: Color = Color(1.0, 0.40, 0.58)
 
 ## The generic celebration art: a heart after a fight, confetti on a level-up.
 func _paint_reaction_fx(layer: VfxDrawLayer) -> void:
+	if celebrating() and custom_level_up:
+		return
 	if celebrating():
 		var t: float = celebration_t()
 		for i: int in 14:

@@ -11,6 +11,14 @@ extends CompanionPreset
 ## drawn in pixel art. The shards are separate sprites so they can orbit in 3D
 ## (far ones drawn behind the body, near ones in front). A glint sweep runs
 ## across the facets and additive glow breathes underneath.
+##
+## REACTS: in a fight its three shards fly out and line up as a glowing wall in
+## front of its owner. While its owner mines it resonates with the ore - shards
+## whirling fast and bright gem glints popping out of the rock.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FOLLOW: Vector2 = Vector2(0, -38)
 const FOLLOW_PX: float = 15.0
@@ -28,6 +36,7 @@ const H: int = 22
 
 
 func _build() -> void:
+	hides_in_combat = false
 	stiffness = 55.0
 	damping = 9.0
 	add_body_layer(_paint_glow, true, 0)
@@ -90,7 +99,15 @@ static func _shard(i: int) -> ImageTexture:
 
 ## Orbit position and depth (sin > 0 is near) of shard [param i].
 func _shard_at(i: int) -> Array:
+	if activity() == &"combat":
+		# A shield wall: stacked in a column in front of the owner, humming.
+		var wall: Vector2 = owner_local() + Vector2(13.0 * owner_front(), -26.0 + float(i) * 8.0)
+		wall.x += sin(_elapsed * 6.0 + float(i)) * 0.6
+		return [wall, 1.0]
 	var idle: bool = still_for >= IDLE_AFTER_S
+	if activity() == &"pickaxe":
+		var fast: float = _elapsed * 7.0 + float(i) * TAU / 3.0
+		return [Vector2(cos(fast) * 12.0, -11.0 + sin(fast) * 4.0), sin(fast)]
 	var a: float = _elapsed * (0.9 if idle else 2.2) + float(i) * TAU / 3.0
 	var r: float = 15.0 if idle else 11.0
 	var at: Vector2 = Vector2(cos(a) * r, -11.0 + sin(a) * r * 0.32 + sin(_elapsed * 2.0 + float(i)) * 1.5)
@@ -115,6 +132,19 @@ func _paint_shards(layer: VfxDrawLayer, near: bool) -> void:
 		PixelCanvas.draw_sprite(layer, _shard(i), (s[0] as Vector2).round() + Vector2(0, 5), 1.0, Color(shade, shade, shade))
 
 
+## Gem glints popping out of the rock in front of the owner, in shard colours.
+func _paint_ore_glints(layer: VfxDrawLayer) -> void:
+	var rock: Vector2 = owner_local() + Vector2(12.0 * owner_front(), -6.0)
+	for i: int in 3:
+		var k: float = fposmod(_elapsed * 0.9 + float(i) / 3.0, 1.0)
+		var at: Vector2 = rock + Vector2((float(i) - 1.0) * 4.0, -k * 12.0)
+		var col: Color = Color(SHARD_COLORS[i], 1.0 - k)
+		layer.draw_rect(Rect2(at.round(), Vector2.ONE), col)
+		if k < 0.4:
+			layer.draw_rect(Rect2(at.round() + Vector2(-1, 0), Vector2(3, 1)), Color(col, (1.0 - k) * 0.5))
+			layer.draw_rect(Rect2(at.round() + Vector2(0, -1), Vector2(1, 3)), Color(col, (1.0 - k) * 0.5))
+
+
 func _paint_core(layer: VfxDrawLayer) -> void:
 	PixelCanvas.draw_sprite(layer, _core(), Vector2.ZERO)
 	# Glowing eyes, live so they can blink.
@@ -134,6 +164,12 @@ func _paint_glow(layer: VfxDrawLayer) -> void:
 ## A band of light sweeping down across the facets every couple of seconds,
 ## kept inside the body's middle section so it never spills past the crystal.
 func _paint_glint(layer: VfxDrawLayer) -> void:
+	if activity() == &"pickaxe":
+		_paint_ore_glints(layer)
+	if activity() == &"combat":
+		# A faint bar of light joining the wall of shards.
+		var top: Vector2 = owner_local() + Vector2(13.0 * owner_front(), -26.0)
+		layer.draw_line(top, top + Vector2(0.0, 16.0), Color(GLOW, 0.35 + 0.15 * sin(_elapsed * 8.0)), 3.0)
 	var t: float = fposmod(_elapsed, 2.4)
 	if t > 0.6:
 		return

@@ -9,6 +9,14 @@ extends CompanionPreset
 ## shiny eye and a blush. Live on top, because they need to move every frame:
 ## gossamer wings (additive, beating), the wand and its star, glitter, and the
 ## flower ring.
+##
+## REACTS: whenever her owner works a skill - mining, chopping, fishing,
+## harvesting - she points her wand at their hands and a stream of sparkles
+## flows from the tip onto the work, as if helping it along.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FOLLOW: Vector2 = Vector2(0, -38)
 const FOLLOW_PX: float = 15.0
@@ -114,9 +122,26 @@ func _paint_fairy(layer: VfxDrawLayer) -> void:
 	layer.draw_line(hand, tip, WAND, 1.0)
 
 
+## Sparkles travelling from the wand tip down to where the owner is working.
+func _paint_helping_stream(layer: VfxDrawLayer, tip: Vector2) -> void:
+	var work: Vector2 = owner_local() + Vector2(8.0 * owner_front(), -12.0)
+	for i: int in 7:
+		var k: float = fposmod(_elapsed * 1.4 + float(i) / 7.0, 1.0)
+		var at: Vector2 = tip.lerp(work, k) + Vector2(0.0, -sin(k * PI) * 5.0)
+		var col: Color = Color(PETAL[i % PETAL.size()], 1.0 - k * 0.6)
+		layer.draw_rect(Rect2(at.round(), Vector2.ONE), col)
+	# A little burst where the stream lands.
+	var tw: float = 0.5 + 0.5 * sin(_elapsed * 12.0)
+	layer.draw_rect(Rect2(work.round() + Vector2(-1, 0), Vector2(3, 1)), Color(STAR, tw))
+	layer.draw_rect(Rect2(work.round() + Vector2(0, -1), Vector2(1, 3)), Color(STAR, tw))
+
+
 func _paint_magic(layer: VfxDrawLayer) -> void:
 	var f: float = _facing
 	var tip: Vector2 = Vector2(7.0 * f, -14.0)
+	var act: StringName = activity()
+	if act != &"" and act != &"combat":
+		_paint_helping_stream(layer, tip)
 	var tw: float = 0.6 + 0.4 * sin(_elapsed * 9.0)
 	layer.draw_circle(tip, 2.5, Color(STAR, 0.25 * tw))
 	layer.draw_rect(Rect2(tip.round() - Vector2(1, 0), Vector2(3, 1)), Color(STAR, tw))

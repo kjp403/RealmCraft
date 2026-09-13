@@ -16,6 +16,10 @@ extends CompanionPreset
 ## scanning beam across the ground from its lenses, gear whirring. In a fight its
 ## lenses switch to red and its gear spins up.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const FOLLOW: Vector2 = Vector2(-2, -38)
 const FOLLOW_PX: float = 15.0
 const PERCH_AFTER_S: float = 1.0

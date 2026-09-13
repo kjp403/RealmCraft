@@ -13,6 +13,10 @@ extends GroundCompanionPreset
 ## REACTS: in a fight it curls up into its ball behind its owner and bristles,
 ## spikes flicking between the two rotations.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const SPINE: Color = Color(0.46, 0.33, 0.24)
 const SPINE_TIP: Color = Color(0.86, 0.78, 0.66)
 const FACE: Color = Color(0.96, 0.84, 0.68)

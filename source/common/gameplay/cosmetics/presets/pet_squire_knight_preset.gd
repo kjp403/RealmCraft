@@ -13,6 +13,10 @@ extends GroundCompanionPreset
 ## of its owner, facing the way they face, and swings its sword in quick chops
 ## with a slash arc - a squire defending its knight.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const STEEL: Color = Color(0.74, 0.78, 0.86)
 const STEEL_DARK: Color = Color(0.46, 0.50, 0.60)
 const PLUME: Color = Color(0.90, 0.24, 0.26)

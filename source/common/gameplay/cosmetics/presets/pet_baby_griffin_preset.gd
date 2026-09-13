@@ -9,12 +9,22 @@ extends CompanionPreset
 ## wings spread): tawny lion body with a paler belly, white head and neck ruff,
 ## a hooked gold beak, gold talons, layered wing feathers and a tail tuft.
 ## Live on top: the flap timing and a feather-drift particle burst.
+##
+## REACTS: it does not hide - in a fight it flies out in front of its owner and
+## holds its wings spread wide, feathers flying, as fierce as a chick can be.
+## While its owner fishes it dives: down to the water, and back up with a fish.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FOLLOW: Vector2 = Vector2(0, -36)
 const FOLLOW_PX: float = 16.0
 const IDLE_AFTER_S: float = 0.8
 const DISPLAY_EVERY_S: float = 4.0
 const DISPLAY_S: float = 0.9
+const DIVE_EVERY_S: float = 2.8
+const FISH: Color = Color(0.70, 0.84, 0.96)
 
 const TAWNY: Color = Color(0.86, 0.66, 0.38)
 const BELLY: Color = Color(0.98, 0.86, 0.62)
@@ -32,6 +42,7 @@ var _feathers: CPUParticles2D
 
 
 func _build() -> void:
+	_build_reactions()
 	stiffness = 65.0
 	damping = 10.0
 	add_body_layer(_paint_griffin, false, 0)
@@ -61,10 +72,25 @@ func _build() -> void:
 	_feathers = p
 
 
+func _build_reactions() -> void:
+	hides_in_combat = false
+
+
+## 0..1 through a fishing dive: down to the water by 0.4, back up by 1.
+func _dive_t() -> float:
+	return fposmod(_elapsed, DIVE_EVERY_S) / DIVE_EVERY_S
+
+
 func target_local(_delta: float) -> Vector2:
 	set_in_front(true)
 	if absf(_heading.x) > 0.2:
 		_facing = signf(_heading.x)
+	if activity() == &"combat":
+		return Vector2(16.0 * owner_front(), -30.0 + sin(_elapsed * 9.0) * 1.0)
+	if activity() == &"fishing_rod":
+		var k: float = _dive_t()
+		var depth: float = sin(clampf(k / 0.8, 0.0, 1.0) * PI)
+		return Vector2(-18.0 * _facing + 10.0 * _facing * depth, -34.0 + depth * 30.0)
 	if still_for < IDLE_AFTER_S:
 		return FOLLOW - _heading * FOLLOW_PX + Vector2(0, sin(_elapsed * 7.0) * 1.5)
 	return Vector2(-18.0 * _facing, -34.0 + sin(_elapsed * 2.2) * 1.5)
@@ -142,7 +168,9 @@ static func _frame(pose: String) -> ImageTexture:
 
 func _paint_griffin(layer: VfxDrawLayer) -> void:
 	var pose: String
-	var display: bool = _displaying()
+	var display: bool = _displaying() or activity() == &"combat"
+	if activity() == &"combat":
+		_facing = owner_front()
 	if display:
 		pose = "spread"
 	elif still_for >= IDLE_AFTER_S:
@@ -151,3 +179,10 @@ func _paint_griffin(layer: VfxDrawLayer) -> void:
 		pose = "up" if fposmod(_elapsed * 2.0, 1.0) < 0.5 else "down"
 	_feathers.emitting = display
 	PixelCanvas.draw_sprite(layer, _frame(pose), Vector2(0.0, -2.0 if display else 0.0), _facing)
+	# The catch, carried up in its beak after the dive.
+	if activity() == &"fishing_rod":
+		var k: float = _dive_t()
+		if k > 0.4 and k < 0.95:
+			var beak: Vector2 = Vector2(13.0 * _facing, -12.0).round()
+			layer.draw_rect(Rect2(beak, Vector2(3, 2)), FISH)
+			layer.draw_rect(Rect2(beak + Vector2(3.0 if _facing > 0.0 else -1.0, 1.0), Vector2(1, 1)), FISH.darkened(0.3))

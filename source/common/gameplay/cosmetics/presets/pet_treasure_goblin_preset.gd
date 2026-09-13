@@ -14,6 +14,10 @@ extends GroundCompanionPreset
 ## peeking out of the neck, trembling). While its owner mines, gold coins arc
 ## out of the rock face and drop into its sack.
 
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
+
 const SKIN: Color = Color(0.52, 0.76, 0.34)
 const SKIN_DARK: Color = Color(0.36, 0.56, 0.22)
 const TUNIC: Color = Color(0.54, 0.36, 0.22)

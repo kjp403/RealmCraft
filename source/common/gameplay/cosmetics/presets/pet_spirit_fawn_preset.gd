@@ -9,6 +9,14 @@ extends GroundCompanionPreset
 ## with dark hooves, big ears with pink insides, a white tail tuft and a shiny
 ## eye. Live on top: the spots and antlers glowing and pulsing (additive), the
 ## hoof motes, and the flowers.
+##
+## REACTS: while its owner harvests, glowing flowers bloom in a ring round the
+## OWNER's feet, not just its own. In a fight it stands tall behind them and its
+## spots and antler buds blaze.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 ## A faint blue cast, not pure white: pure white with thick legs read as a goat.
 const COAT: Color = Color(0.84, 0.92, 1.0)
@@ -98,6 +106,8 @@ func _head(pose: String) -> Vector2:
 
 
 func _pose() -> String:
+	if activity() == &"combat":
+		return "stand"
 	if still_for >= GRAZE_AFTER_S:
 		return "graze" if fposmod(still_for, 5.0) < 3.4 else "stand"
 	if not is_hopping():
@@ -117,6 +127,8 @@ func _paint_glow(layer: VfxDrawLayer) -> void:
 	# Luminous spots, pulsing one after another along the back.
 	for i: int in SPOTS.size():
 		var pulse: float = 0.55 + 0.45 * sin(_elapsed * 2.5 - float(i) * 0.9)
+		if activity() == &"combat":
+			pulse = 1.0
 		var p: Vector2 = feet + Vector2((SPOTS[i].x - 13.0) * facing, SPOTS[i].y - 24.0)
 		if facing < 0.0:
 			p.x -= 1.0
@@ -126,13 +138,31 @@ func _paint_glow(layer: VfxDrawLayer) -> void:
 	var hd: Vector2 = feet + Vector2(_head(pose).x * facing, _head(pose).y)
 	var bud: Vector2 = hd + Vector2(-1.5 * facing, -4.0)
 	var shine: float = 0.7 + 0.3 * sin(_elapsed * 3.3)
+	if activity() == &"combat":
+		shine = 1.0
+		layer.draw_circle(feet + Vector2(0, -12), 9.0, Color(GLOW, 0.05 + 0.03 * sin(_elapsed * 7.0)))
 	layer.draw_rect(Rect2(bud.round(), Vector2(1, 2)), Color(GLOW, shine))
 	layer.draw_rect(Rect2((bud + Vector2(1.5 * facing, -0.5)).round(), Vector2(1, 2)), Color(GLOW, shine))
 	layer.draw_circle(bud + Vector2(0.5, 0.0), 3.0, Color(GLOW, 0.14 * shine))
 
 
+## A ring of glowing flowers opening round the owner's feet while they harvest.
+func _paint_owner_bloom(layer: VfxDrawLayer) -> void:
+	var centre: Vector2 = owner_local()
+	for i: int in 8:
+		var a: float = float(i) * TAU / 8.0 + 0.3
+		var k: float = clampf(0.6 + 0.4 * sin(_elapsed * 2.0 + float(i)), 0.0, 1.0)
+		var at: Vector2 = (centre + Vector2(cos(a) * 16.0, sin(a) * 7.0)).round()
+		var col: Color = Color(FLOWER[i % FLOWER.size()], k)
+		layer.draw_rect(Rect2(at + Vector2(-1, 0), Vector2(3, 1)), Color(col, k * 0.7))
+		layer.draw_rect(Rect2(at + Vector2(0, -1), Vector2(1, 3)), Color(col, k * 0.7))
+		layer.draw_rect(Rect2(at, Vector2.ONE), Color(1.0, 1.0, 0.9, k))
+
+
 ## Flowers opening in the grass while it grazes, drawn on the floor under it.
 func _paint_ground_glow(layer: VfxDrawLayer) -> void:
+	if activity() == &"sickle":
+		_paint_owner_bloom(layer)
 	if still_for < GRAZE_AFTER_S:
 		return
 	var grow: float = clampf((still_for - GRAZE_AFTER_S) / 1.5, 0.0, 1.0)

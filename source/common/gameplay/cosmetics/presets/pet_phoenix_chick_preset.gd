@@ -12,6 +12,15 @@ extends CompanionPreset
 ## FIRE is live on top: additive flame tongues for the crest and tail that
 ## flicker every frame, a heat glow, and ember particles - the part a baked
 ## sprite could never animate.
+##
+## REACTS: it does not hide - in a fight it BLAZES, crest and tail flames doubling
+## and the heat glow flaring. While its owner mines, sparks fly off the rock with
+## every strike. A level-up is a rebirth: it bursts into its egg of fire and
+## hatches out in a ring of sparks.
+
+## Has reactions of its own beyond the shared hide / cheer / level-up. The Vault
+## reads this to shelve the pet under "Reactive Pets" (see cosmetics_menu.gd).
+const THEMED_REACTIONS: bool = true
 
 const FOLLOW: Vector2 = Vector2(0, -36)
 const FOLLOW_PX: float = 16.0
@@ -36,6 +45,8 @@ var _embers: CPUParticles2D
 
 
 func _build() -> void:
+	hides_in_combat = false
+	custom_level_up = true
 	stiffness = 70.0
 	damping = 10.0
 	add_body_layer(_paint_glow, true, 0)
@@ -59,6 +70,11 @@ func target_local(_delta: float) -> Vector2:
 
 ## 0 normal; during a rebirth, 0 -> 1 -> 0 as it curls into fire and back out.
 func _rebirth() -> float:
+	if celebrating():
+		return sin(celebration_t() * PI)
+	# No idle rebirth mid-fight: curled in an egg is the opposite of blazing.
+	if activity() == &"combat":
+		return 0.0
 	if still_for < IDLE_AFTER_S + 1.0:
 		return 0.0
 	var t: float = fposmod(still_for - IDLE_AFTER_S - 1.0, REBIRTH_EVERY_S)
@@ -109,11 +125,30 @@ static func _frame(wings_up: bool) -> ImageTexture:
 	)
 
 
+## 1 normally; bigger in a fight.
+func _blaze() -> float:
+	return 1.7 if activity() == &"combat" else 1.0
+
+
 func _paint_glow(layer: VfxDrawLayer) -> void:
-	var flick: float = 0.85 + 0.15 * sin(_elapsed * 13.0) * sin(_elapsed * 5.0)
+	var flick: float = (0.85 + 0.15 * sin(_elapsed * 13.0) * sin(_elapsed * 5.0)) * _blaze()
 	var r: float = _rebirth()
 	layer.draw_circle(Vector2(0, -9), 15.0 + r * 6.0, Color(FIRE, (0.07 + r * 0.12) * flick))
 	layer.draw_circle(Vector2(0, -9), 9.0 + r * 4.0, Color(FIRE, (0.12 + r * 0.18) * flick))
+
+
+## Sparks thrown off the rock face in front of the owner on every strike.
+func _paint_mining_sparks(layer: VfxDrawLayer) -> void:
+	var strike: float = fposmod(_elapsed * 1.8, 1.0)
+	if strike > 0.35:
+		return
+	var k: float = strike / 0.35
+	var hit: Vector2 = owner_local() + Vector2(12.0 * owner_front(), -8.0)
+	for i: int in 6:
+		var a: float = -PI * 0.5 + (float(i) - 2.5) * 0.45
+		var d: Vector2 = Vector2(cos(a) * owner_front() * -1.0, sin(a))
+		var at: Vector2 = hit + d * (2.0 + k * 9.0) + Vector2(0.0, k * k * 6.0)
+		layer.draw_rect(Rect2(at.round(), Vector2.ONE), Color(FIRE_HOT, 1.0 - k))
 
 
 ## A flame tongue from [param root] along [param dir].
@@ -138,8 +173,8 @@ func _paint_tail_fire(layer: VfxDrawLayer) -> void:
 		dir.x *= f
 		var root: Vector2 = Vector2((-5.0 + float(i)) * f, -4.0 + float(i) * 0.5)
 		var flick: float = 1.0 + 0.2 * sin(_elapsed * 17.0 + float(i))
-		_tongue(layer, root, dir, 2.2, (7.0 + r * 5.0) * flick, Color(FIRE, 0.7))
-		_tongue(layer, root, dir, 1.1, (4.5 + r * 3.0) * flick, Color(FIRE_HOT, 0.8))
+		_tongue(layer, root, dir, 2.2 * _blaze(), (7.0 + r * 5.0) * flick * _blaze(), Color(FIRE, 0.7))
+		_tongue(layer, root, dir, 1.1 * _blaze(), (4.5 + r * 3.0) * flick * _blaze(), Color(FIRE_HOT, 0.8))
 
 
 func _paint_bird(layer: VfxDrawLayer) -> void:
@@ -176,8 +211,19 @@ func _paint_crest(layer: VfxDrawLayer) -> void:
 			var dir: Vector2 = Vector2.from_angle(-PI * 0.5 - 0.35 * f + (float(i) - 1.0) * 0.35 * f + sway)
 			var root: Vector2 = Vector2((3.0 + float(i) * 1.2) * f, -16.0 + absf(float(i) - 1.0))
 			var flick: float = 1.0 + 0.25 * sin(_elapsed * 19.0 + float(i) * 3.0)
-			_tongue(layer, root, dir, 1.6, 6.0 * flick, Color(FIRE, 0.85))
-			_tongue(layer, root, dir, 0.8, 3.5 * flick, Color(FIRE_CORE, 0.9))
+			_tongue(layer, root, dir, 1.6 * _blaze(), 6.0 * flick * _blaze(), Color(FIRE, 0.85))
+			_tongue(layer, root, dir, 0.8 * _blaze(), 3.5 * flick * _blaze(), Color(FIRE_CORE, 0.9))
+	if activity() == &"pickaxe":
+		_paint_mining_sparks(layer)
+	# The level-up hatch.
+	if celebrating():
+		var burst_l: float = (celebration_t() - 0.55) / 0.45
+		if burst_l > 0.0 and burst_l < 1.0:
+			for i: int in 14:
+				var a: float = float(i) * TAU / 14.0
+				var at: Vector2 = Vector2(0, -10) + Vector2(cos(a), sin(a)) * (6.0 + burst_l * 18.0)
+				layer.draw_rect(Rect2(at.round(), Vector2(1, 1)), Color(FIRE_CORE, 1.0 - burst_l))
+		return
 	# The hatch: a ring of sparks thrown out as the egg bursts.
 	if still_for >= IDLE_AFTER_S + 1.0:
 		var t: float = fposmod(still_for - IDLE_AFTER_S - 1.0, REBIRTH_EVERY_S)
