@@ -9,6 +9,12 @@ extends Node
 ##   python tools/encode_vip_gif.py <GIF_FRAMES dir> previews/cosmetic-storm.gif
 ##
 ## One row per --outfit (repeatable). Slugs joined with "+" are worn together.
+##
+## PET REACTIONS: suffix an outfit with @event to feed the STANDING copy's pets
+## what their owner is doing, on a loop (see CompanionPreset.owner_swung):
+##   @pickaxe / @axe / @fishing_rod / @sickle   a swing of that tool every 0.5 s
+##   @combat      weapon swings for 3 s, then nothing (so the fight-over cheer plays)
+##   @levelup     a level-up every 3 s
 ## Trails are only mounted on the walker - standing still they draw nothing, by
 ## design - and every other slot is worn by both.
 ##
@@ -35,6 +41,9 @@ const PRESET_DIR: String = "res://source/common/gameplay/cosmetics/presets/%s_pr
 var _walkers: Array[Node2D] = []
 var _walker_bodies: Array[AnimatedSprite2D] = []
 var _walker_home: Array[float] = []
+## [host, event] for every standing row that has a reaction scripted.
+var _reactors: Array = []
+var _next_react: Array[float] = []
 
 
 func _ready() -> void:
@@ -75,7 +84,18 @@ func _go(outfits: Array[PackedStringArray], set_name: String) -> void:
 	var row_h: float = canvas.y / float(outfits.size())
 	for r: int in outfits.size():
 		var feet_y: float = row_h * (float(r) + 0.72)
-		_wear(root, outfits[r], Vector2(44.0, feet_y), false)
+		var slugs: PackedStringArray = PackedStringArray()
+		var event: String = ""
+		for entry: String in outfits[r]:
+			var bits: PackedStringArray = entry.split("@")
+			slugs.append(bits[0])
+			if bits.size() > 1:
+				event = bits[1]
+		outfits[r] = slugs
+		var stander: Node2D = _wear(root, slugs, Vector2(44.0, feet_y), false)
+		if not event.is_empty():
+			_reactors.append([stander, event])
+			_next_react.append(0.0)
 		var home: float = canvas.x * 0.62
 		_walker_home.append(home)
 		_walkers.append(_wear(root, outfits[r], Vector2(home, feet_y), true))
@@ -110,6 +130,7 @@ const WALK_SHARE: float = 0.3
 
 
 func _drive(clock: float) -> void:
+	_react(clock)
 	var window: float = float(FRAMES) / float(FPS)
 	var phase: float = fposmod(clock / window, 1.0)
 	var x: float
@@ -131,6 +152,26 @@ func _drive(clock: float) -> void:
 		if _walker_bodies[i] != null:
 			_walker_bodies[i].animation = &"run" if x > -1.0 and x < 1.0 else &"idle"
 			_walker_bodies[i].flip_h = heading_left
+
+
+func _react(clock: float) -> void:
+	for i: int in _reactors.size():
+		if clock < _next_react[i]:
+			continue
+		var host: Node2D = _reactors[i][0]
+		var event: String = _reactors[i][1]
+		for child: Node in host.get_children():
+			if not child.has_method(&"owner_swung"):
+				continue
+			match event:
+				"levelup":
+					child.call(&"owner_leveled_up")
+				"combat":
+					if fposmod(clock, 7.0) < 3.0:
+						child.call(&"owner_swung", &"")
+				_:
+					child.call(&"owner_swung", StringName(event))
+		_next_react[i] = clock + (3.0 if event == "levelup" else 0.5)
 
 
 func _wear(root: Node2D, slugs: PackedStringArray, at: Vector2, walking: bool) -> Node2D:

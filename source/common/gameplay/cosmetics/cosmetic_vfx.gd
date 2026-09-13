@@ -176,6 +176,12 @@ func _clear_preset() -> void:
 	_preset = null
 
 
+## The mounted companion, if this channel is wearing a pet - so the network layer
+## can tell it what its owner is doing (see [CompanionPreset.owner_swung]).
+func companion() -> CompanionPreset:
+	return _preset as CompanionPreset
+
+
 ## Trails are drawn streaming to the LEFT (wearer running right), so they mirror with
 ## the body. Radial effects must never mirror — flipping a ring just jitters it.
 func set_facing(flipped: bool) -> void:

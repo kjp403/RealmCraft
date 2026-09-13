@@ -201,8 +201,95 @@ func body_velocity() -> Vector2:
 	return _vel
 
 
+# --- Reacting to the owner -----------------------------------------------------
+#
+# A pet knows what its owner is DOING, not just where they are. The client sees
+# three things for every player nearby, and InstanceClient forwards each one to
+# that player's pet:
+#
+#   owner_swung(tool_type)  every tool or weapon swing (the action.perform echo).
+#                           A ToolItem's tool_type - &"pickaxe", &"axe",
+#                           &"fishing_rod", &"sickle" - names the skill; any other
+#                           weapon is a fight.
+#   owner_hit()             the owner took damage (combat.hit, victim_peer).
+#   owner_leveled_up()      a level-up broadcast (level.up).
+#
+# Swings arrive one at a time, so an activity LINGERS for a moment after each
+# one; stop swinging and it lapses. A fight that lapses turns into a short cheer.
+# Subclasses read [method activity], [method cheering] and [method celebrating].
+
+## How long an activity holds after its last swing - longer than the slowest
+## tool's swing cadence, so a steady miner never flickers out of "mining".
+const ACTIVITY_LINGER_S: float = 1.8
+const COMBAT_LINGER_S: float = 2.5
+const CHEER_S: float = 1.6
+const LEVEL_UP_S: float = 2.2
+
+var _activity: StringName = &""
+var _activity_until: float = -1.0
+var _combat_until: float = -1.0
+var _cheer_until: float = -1.0
+var _level_up_until: float = -1.0
+
+
+func owner_swung(tool_type: StringName) -> void:
+	if tool_type.is_empty():
+		_combat_until = _elapsed + COMBAT_LINGER_S
+		return
+	_activity = tool_type
+	_activity_until = _elapsed + ACTIVITY_LINGER_S
+
+
+func owner_hit() -> void:
+	_combat_until = _elapsed + COMBAT_LINGER_S
+
+
+func owner_leveled_up() -> void:
+	_level_up_until = _elapsed + LEVEL_UP_S
+
+
+## &"combat", a tool type (&"pickaxe", &"axe", &"fishing_rod", &"sickle"), or &"".
+## A fight outranks a skill: nobody fishes calmly while being hit.
+func activity() -> StringName:
+	if _elapsed < _combat_until:
+		return &"combat"
+	if _elapsed < _activity_until:
+		return _activity
+	return &""
+
+
+## True for a moment after a fight ends.
+func cheering() -> bool:
+	return _elapsed < _cheer_until
+
+
+## True for a moment after the owner levels up.
+func celebrating() -> bool:
+	return _elapsed < _level_up_until
+
+
+## 0..1 progress through the current cheer or level-up celebration.
+func celebration_t() -> float:
+	if celebrating():
+		return 1.0 - (_level_up_until - _elapsed) / LEVEL_UP_S
+	if cheering():
+		return 1.0 - (_cheer_until - _elapsed) / CHEER_S
+	return 0.0
+
+
+var _was_fighting: bool = false
+
+
+func _update_reactions() -> void:
+	var fighting: bool = _elapsed < _combat_until
+	if _was_fighting and not fighting:
+		_cheer_until = _elapsed + CHEER_S
+	_was_fighting = fighting
+
+
 func _tick(delta: float) -> void:
 	super(delta)
+	_update_reactions()
 	still_for = 0.0 if is_moving() else still_for + delta
 	var s: Vector2 = global_scale
 	var target: Vector2 = global_position + target_local(delta) * s
