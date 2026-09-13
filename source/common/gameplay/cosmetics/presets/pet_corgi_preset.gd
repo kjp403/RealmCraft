@@ -52,6 +52,8 @@ var _dirt: CPUParticles2D
 
 
 func _build() -> void:
+	# Draws its own cheer and level-up; hiding in a fight uses the shared spot.
+	custom_celebration = true
 	hop_peak = 2.0
 	hop_rate = 4.2
 	add_body_layer(_paint_corgi, false, 0)
@@ -97,14 +99,6 @@ func _tick(delta: float) -> void:
 	_dirt.position = Vector2(4.0 * facing, -3.0)
 	_dirt.direction = Vector2(-facing, -1.4)
 
-
-## Fighting: tuck in right behind the owner, on the far side from where they
-## face, and slightly further from the camera so their body hides it.
-func target_local(delta: float) -> Vector2:
-	if activity() == &"combat":
-		var away: float = -signf(_heading.x) if absf(_heading.x) > 0.1 else -1.0
-		return Vector2(7.0 * away, -3.0)
-	return super(delta)
 
 
 ## One frame of the corgi, facing right, feet on the bottom row.

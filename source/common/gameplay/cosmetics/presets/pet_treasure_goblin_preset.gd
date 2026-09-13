@@ -9,6 +9,10 @@ extends GroundCompanionPreset
 ## and gold glinting out of the neck, a toothy grin and a shiny eye. Live on
 ## top: coins jostled out of the sack while it runs (world particles) and the
 ## coin flip when it sits.
+##
+## REACTS: in a fight it dives into its own sack (hidden behind its owner, eyes
+## peeking out of the neck, trembling). While its owner mines, gold coins arc
+## out of the rock face and drop into its sack.
 
 const SKIN: Color = Color(0.52, 0.76, 0.34)
 const SKIN_DARK: Color = Color(0.36, 0.56, 0.22)
@@ -52,13 +56,26 @@ func _build() -> void:
 
 func _tick(delta: float) -> void:
 	super(delta)
-	_coins.emitting = is_hopping()
+	_coins.emitting = is_hopping() and activity() != &"combat"
 	# Out of the sack's neck, which is behind the goblin whichever way it faces.
 	_coins.position = Vector2(-5.0 * facing, -17.0)
 
 
 static func _frame(pose: String) -> ImageTexture:
 	return PixelCanvas.cached("goblin_" + pose, W, H, func(c: PixelCanvas) -> void:
+		if pose == "hide":
+			# Only the sack, with ear tips poking out of the neck.
+			c.tri(Vector2(9.0, 9.0), Vector2(11.0, 8.5), Vector2(5.0, 4.0), SKIN_DARK)
+			c.tri(Vector2(13.0, 8.5), Vector2(15.0, 9.0), Vector2(19.0, 4.0), SKIN)
+			c.ball(12.0, 15.5, 7.0, 6.2, SACK)
+			c.ball(12.0, 9.5, 3.0, 1.6, SACK)
+			c.finish(0.18, 0.24, 0.58)
+			c.rect(9.0, 10.5, 6.0, 1.0, ROPE)
+			c.rect(10.0, 9.0, 4.0, 1.0, BOOT)              # dark gap in the neck
+			c.px(10.0, 9.0, GOLD)                          # eyes peeking out
+			c.px(13.0, 9.0, GOLD)
+			c.rect(7.0, 14.0, 2.0, 2.0, SACK.darkened(0.2))
+			return
 		var hd: Vector2
 		if pose == "sit":
 			# The sack on the ground, the goblin perched on top of it.
@@ -111,12 +128,36 @@ static func _frame(pose: String) -> ImageTexture:
 func _paint_goblin(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 8.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if activity() == &"combat":
+		PixelCanvas.draw_sprite(layer, _frame("hide"), Vector2.ZERO, facing)
+		return
 	var sitting: bool = still_for >= SIT_AFTER_S
 	var pose: String = "sit" if sitting else ("run_a" if hop_phase < 0.5 else "run_b")
 	var feet: Vector2 = Vector2(0.0, -hop_height)
 	PixelCanvas.draw_sprite(layer, _frame(pose), feet, facing)
 	if not sitting:
 		return
+	if activity() == &"pickaxe":
+		_paint_mining_coins(layer, feet)
+		return
+	_paint_coin_flip(layer, feet)
+
+
+## Coins arcing from the owner's side into the sack's neck, three at a time.
+func _paint_mining_coins(layer: VfxDrawLayer, feet: Vector2) -> void:
+	var s: float = maxf(0.001, global_scale.x)
+	var owner_x: float = (global_position.x - body.global_position.x) / s
+	# Sack neck in the sit pose: canvas (9, 11) -> local (-3, -11), mirrored.
+	var sack: Vector2 = feet + Vector2(-3.0 * facing, -11.0)
+	var from: Vector2 = Vector2(owner_x, -14.0)
+	for i: int in 3:
+		var k: float = fposmod(_elapsed * 1.2 + float(i) / 3.0, 1.0)
+		var at: Vector2 = from.lerp(sack, k) + Vector2(0.0, -sin(k * PI) * 10.0)
+		var w: float = 1.0 + roundf(absf(cos(k * TAU * 1.5)) * 1.0)
+		layer.draw_rect(Rect2(roundf(at.x), roundf(at.y), w, 2.0), GOLD)
+
+
+func _paint_coin_flip(layer: VfxDrawLayer, feet: Vector2) -> void:
 	# The coin flip: up from its hand, spinning, and caught again.
 	var t: float = fposmod(still_for, FLIP_S) / FLIP_S
 	var hand: Vector2 = feet + Vector2(5.0 * facing, -10.0)

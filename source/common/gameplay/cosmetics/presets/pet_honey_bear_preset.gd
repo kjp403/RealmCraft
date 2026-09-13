@@ -8,6 +8,9 @@ extends GroundCompanionPreset
 ## paw up): brown fur in three tones, a lighter tummy and muzzle, round ears
 ## with inner patches, a shiny eye, a clay honey pot with a dark rim and gold
 ## honey. Live on top: honey dripping off the pot, and the two bees.
+##
+## REACTS: while its owner fishes, it fishes too - every couple of seconds a fish
+## leaps out of the water in front of it, it swipes a paw, and catches it.
 
 const FUR: Color = Color(0.62, 0.42, 0.26)
 const FUR_LIGHT: Color = Color(0.84, 0.66, 0.46)
@@ -17,6 +20,8 @@ const POT: Color = Color(0.82, 0.52, 0.24)
 const HONEY: Color = Color(1.0, 0.78, 0.22)
 const BEE: Color = Color(1.0, 0.86, 0.20)
 const SIT_AFTER_S: float = 0.7
+const FISH: Color = Color(0.70, 0.84, 0.96)
+const CATCH_EVERY_S: float = 2.2
 
 const W: int = 24
 const H: int = 21
@@ -72,12 +77,39 @@ static func _frame(pose: String) -> ImageTexture:
 	)
 
 
+## A fish leaping from the water in front of the bear into its raised paw, then
+## gone (eaten) with a sparkle.
+func _paint_fish_catch(layer: VfxDrawLayer, feet: Vector2, f: float, t: float) -> void:
+	if t > 0.5:
+		if t < 0.62:
+			var sp: Vector2 = feet + Vector2(3.0 * f, -14.0)
+			layer.draw_rect(Rect2(sp.round() + Vector2(-2, 0), Vector2(1, 1)), Color(1, 1, 0.8, 0.9))
+			layer.draw_rect(Rect2(sp.round() + Vector2(2, -1), Vector2(1, 1)), Color(1, 1, 0.8, 0.9))
+		return
+	var k: float = t / 0.5
+	# Paw up at canvas (15, 10) -> local (3, -11).
+	var from: Vector2 = feet + Vector2(11.0 * f, 1.0)
+	var to: Vector2 = feet + Vector2(3.0 * f, -12.0)
+	var at: Vector2 = (from.lerp(to, k) + Vector2(0.0, -sin(k * PI) * 6.0)).round()
+	layer.draw_rect(Rect2(at, Vector2(3, 2)), FISH)
+	layer.draw_rect(Rect2(at + Vector2(3.0 if f > 0.0 else -1.0, 0.0), Vector2(1, 2)), FISH.darkened(0.3))
+	layer.draw_rect(Rect2(at + Vector2(0.0 if f > 0.0 else 2.0, 0.0), Vector2(1, 1)), FACE_DARK)
+	# A splash ring where it jumped from.
+	if k < 0.3:
+		layer.draw_rect(Rect2((from + Vector2(-2, 1)).round(), Vector2(5, 1)), Color(FISH, 0.8 * (1.0 - k / 0.3)))
+
+
 func _paint_bear(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 9.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var sitting: bool = still_for >= SIT_AFTER_S
 	var pose: String
-	if sitting:
+	var fishing: bool = activity() == &"fishing_rod"
+	var catch_t: float = fposmod(_elapsed, CATCH_EVERY_S) / CATCH_EVERY_S
+	if sitting and fishing:
+		# Paw up just as the fish reaches it.
+		pose = "sit_lick" if catch_t > 0.25 and catch_t < 0.55 else "sit"
+	elif sitting:
 		pose = "sit_lick" if fposmod(still_for, 1.6) < 0.7 else "sit"
 	else:
 		pose = "waddle_a" if hop_phase < 0.5 else "waddle_b"
@@ -86,6 +118,8 @@ func _paint_bear(layer: VfxDrawLayer) -> void:
 	if not sitting:
 		return
 	var f: float = facing
+	if fishing:
+		_paint_fish_catch(layer, feet, f, catch_t)
 	# Pot at canvas (15.5, 18) -> sprite-local (3.5, -3).
 	var pot: Vector2 = feet + Vector2(3.5 * f, -3.0)
 	# A drip of honey sliding down the side of the pot.

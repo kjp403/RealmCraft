@@ -9,6 +9,10 @@ extends GroundCompanionPreset
 ## insides, whisker pixels, a gold moon charm and a coloured outline. Live on
 ## top: stars twinkling in the fur at fixed spots, eyes that glow and slow-blink,
 ## and a faint starlight glow.
+##
+## REACTS: in a fight it puffs up - standing, back arched, every star in its fur
+## flaring at once - while it hides behind its owner. While its owner fishes a
+## little thought bubble with a fish in it floats over its head.
 
 const FUR: Color = Color(0.20, 0.18, 0.32)
 const FUR_LIGHT: Color = Color(0.34, 0.31, 0.50)
@@ -34,6 +38,9 @@ func _build() -> void:
 	add_body_layer(_paint_glow, true, 0)
 	add_body_layer(_paint_cat, false, 1)
 	add_body_layer(_paint_stars, true, 2)
+	# The thought bubble is paint, not light: additive white over the owner's
+	# helmet read as a grey smear.
+	add_body_layer(_paint_thoughts, false, 3)
 
 
 static func _frame(pose: String) -> ImageTexture:
@@ -88,9 +95,12 @@ func _head(loaf: bool) -> Vector2:
 func _paint_cat(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 8.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var loaf: bool = still_for >= LOAF_AFTER_S
+	var puffed: bool = activity() == &"combat"
+	var loaf: bool = still_for >= LOAF_AFTER_S and not puffed
 	var pose: String
-	if loaf:
+	if puffed:
+		pose = "walk_a"
+	elif loaf:
 		pose = "loaf_flick" if fposmod(still_for, 2.6) < 0.35 else "loaf"
 	else:
 		pose = "walk_a" if hop_phase < 0.5 else "walk_b"
@@ -109,11 +119,14 @@ func _paint_cat(layer: VfxDrawLayer) -> void:
 
 
 func _paint_stars(layer: VfxDrawLayer) -> void:
-	var loaf: bool = still_for >= LOAF_AFTER_S
+	var puffed: bool = activity() == &"combat"
+	var loaf: bool = still_for >= LOAF_AFTER_S and not puffed
 	var spots: Array[Vector2] = STARS_LOAF if loaf else STARS_WALK
 	var feet: Vector2 = Vector2(0.0, -hop_height)
 	for i: int in spots.size():
 		var tw: float = pow(maxf(0.0, sin(_elapsed * 2.3 + float(i) * 1.9)), 4.0)
+		if puffed:
+			tw = 1.0
 		if tw < 0.05:
 			continue
 		var p: Vector2 = feet + Vector2((spots[i].x - 12.0 + 0.5) * facing - 0.5, spots[i].y - 17.0)
@@ -125,6 +138,31 @@ func _paint_stars(layer: VfxDrawLayer) -> void:
 	if loaf:
 		var hd: Vector2 = _head(true)
 		layer.draw_circle(feet + Vector2((hd.x + 0.5) * facing, hd.y), 3.0, Color(EYE, 0.12))
+
+
+func _paint_thoughts(layer: VfxDrawLayer) -> void:
+	if activity() == &"fishing_rod":
+		_paint_fish_dream(layer, Vector2(0.0, -hop_height))
+
+
+## A thought bubble over its head with a fish in it - drifting up and AWAY from
+## the owner (behind the cat), so it never sits over the owner's head.
+func _paint_fish_dream(layer: VfxDrawLayer, feet: Vector2) -> void:
+	var hd: Vector2 = _head(still_for >= LOAF_AFTER_S)
+	var base: Vector2 = feet + Vector2(hd.x * facing, hd.y - 5.0)
+	var bob: float = roundf(sin(_elapsed * 2.0))
+	var back: float = -facing
+	var puff: Color = Color(0.96, 0.96, 1.0, 0.9)
+	var rim: Color = Color(0.45, 0.45, 0.60, 0.9)
+	layer.draw_rect(Rect2((base + Vector2(1.0 * back, 0.0)).round(), Vector2.ONE), puff)
+	layer.draw_rect(Rect2((base + Vector2(3.0 * back, -3.0)).round(), Vector2(2, 2)), puff)
+	var bubble: Vector2 = (base + Vector2(8.0 * back, -9.0 + bob)).round()
+	layer.draw_circle(bubble, 5.0, rim)
+	layer.draw_circle(bubble, 4.0, puff)
+	var fish: Vector2 = bubble + Vector2(-2.0, -1.0)
+	layer.draw_rect(Rect2(fish, Vector2(3, 2)), Color(0.60, 0.80, 1.0))
+	layer.draw_rect(Rect2(fish + Vector2(3, 0), Vector2(1, 2)), Color(0.45, 0.62, 0.90))
+	layer.draw_rect(Rect2(fish, Vector2(1, 1)), FACE_DARK)
 
 
 func _paint_glow(layer: VfxDrawLayer) -> void:

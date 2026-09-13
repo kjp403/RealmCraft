@@ -11,6 +11,10 @@ extends CompanionPreset
 ## rivets, iron eye sockets and a coloured outline. Live on top: the chest gear
 ## drawn turning, lens glow pulsing additively, the head's stepped click-turn,
 ## and steam. The perch uses the measured head height, so it sits on every skin.
+##
+## REACTS: it does not hide - it is a machine. While its owner mines it sweeps a
+## scanning beam across the ground from its lenses, gear whirring. In a fight its
+## lenses switch to red and its gear spins up.
 
 const FOLLOW: Vector2 = Vector2(-2, -38)
 const FOLLOW_PX: float = 15.0
@@ -31,9 +35,14 @@ var _perched: bool = false
 var _steam: CPUParticles2D
 
 
+const LENS_ALERT: Color = Color(1.0, 0.30, 0.25)
+
+
 func _build() -> void:
+	hides_in_combat = false
 	stiffness = 70.0
 	damping = 11.0
+	add_body_layer(_paint_scan_beam, true, 0)
 	add_body_layer(_paint_owl, false, 0)
 	add_body_layer(_paint_gear_and_face, false, 1)
 	add_body_layer(_paint_lens_glow, true, 2)
@@ -130,7 +139,8 @@ func _paint_gear_and_face(layer: VfxDrawLayer) -> void:
 	var top: float = -float(H) - 1.0
 	var chest: Vector2 = Vector2(0.0, top + 17.5)
 	# The gear: a hub, a rim and six teeth, turning.
-	var spin: float = _elapsed * (2.0 if _perched else 6.0)
+	var busy: bool = activity() == &"combat" or activity() == &"pickaxe"
+	var spin: float = _elapsed * (14.0 if busy else (2.0 if _perched else 6.0))
 	layer.draw_arc(chest, 2.0, 0.0, TAU, 12, BRASS_DEEP.darkened(0.3), 1.0)
 	for i: int in 6:
 		var a: float = spin + float(i) * TAU / 6.0
@@ -139,9 +149,10 @@ func _paint_gear_and_face(layer: VfxDrawLayer) -> void:
 	layer.draw_rect(Rect2(chest.round() - Vector2(0.5, 0.5), Vector2(1, 1)), IRON)
 	# Lenses: offset by the head turn so the eyes look about.
 	var turn: float = _head_turn()
+	var lens: Color = LENS_ALERT if activity() == &"combat" else LENS
 	for s: float in [-1.0, 1.0]:
 		var e: Vector2 = (Vector2(s * 2.6 + turn, top + 7.5)).round()
-		layer.draw_rect(Rect2(e.x - 1.0, e.y - 1.0, 2.0, 2.0), LENS)
+		layer.draw_rect(Rect2(e.x - 1.0, e.y - 1.0, 2.0, 2.0), lens)
 		layer.draw_rect(Rect2(e.x - 1.0, e.y - 1.0, 1.0, 1.0), Color.WHITE)
 
 
@@ -151,5 +162,29 @@ func _paint_lens_glow(layer: VfxDrawLayer) -> void:
 	var turn: float = _head_turn()
 	for s: float in [-1.0, 1.0]:
 		var e: Vector2 = Vector2(s * 2.6 + turn, top + 7.5)
-		layer.draw_circle(e, 3.5, Color(LENS, 0.18 * pulse))
-		layer.draw_circle(e, 2.0, Color(LENS, 0.25 * pulse))
+		var glow: Color = LENS_ALERT if activity() == &"combat" else LENS
+		layer.draw_circle(e, 3.5, Color(glow, 0.18 * pulse))
+		layer.draw_circle(e, 2.0, Color(glow, 0.25 * pulse))
+
+
+## Mining: a cone of light from the lenses sweeping back and forth over the
+## ground in front of its owner, like a prospector's detector.
+func _paint_scan_beam(layer: VfxDrawLayer) -> void:
+	if activity() != &"pickaxe":
+		return
+	var top: float = -float(H) - 1.0
+	var eyes: Vector2 = Vector2(0.0, top + 7.5)
+	# The ground is the owner's feet: the owl's own origin sits on their head.
+	var s: float = maxf(0.001, global_scale.x)
+	var ground_y: float = (global_position.y - body.global_position.y) / s
+	var sweep: float = sin(_elapsed * 2.2) * 16.0
+	var hit: Vector2 = Vector2(sweep, ground_y)
+	var near: Color = Color(LENS, 0.22)
+	var far: Color = Color(LENS, 0.0)
+	layer.draw_polygon(
+		PackedVector2Array([eyes + Vector2(-1.5, 0.0), eyes + Vector2(1.5, 0.0), hit + Vector2(5.0, 0.0), hit + Vector2(-5.0, 0.0)]),
+		PackedColorArray([near, near, far, far])
+	)
+	layer.draw_set_transform(hit, 0.0, Vector2(1.0, 0.4))
+	layer.draw_arc(Vector2.ZERO, 5.0, 0.0, TAU, 16, Color(LENS, 0.5), 1.0)
+	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

@@ -30,6 +30,17 @@ var _pos: Vector2 = Vector2.ZERO
 var _vel: Vector2 = Vector2.ZERO
 var _placed: bool = false
 
+## EVERY PET REACTS, EVEN THE ONES THAT NEVER ASKED TO. With these left at their
+## defaults a pet hides behind its owner during a fight, hops with a heart when
+## the fight ends, and spins with confetti on a level-up - all done here by
+## moving and flipping [member body], so it works for any pet's art.
+##
+## A pet with reactions of its own turns the generic ones off:
+##   hides_in_combat = false     it has somewhere better to be (the Squire charges in)
+##   custom_celebration = true   it draws its own cheer and level-up (the Corgi)
+var hides_in_combat: bool = true
+var custom_celebration: bool = false
+
 
 func _ready() -> void:
 	body = Node2D.new()
@@ -37,6 +48,9 @@ func _ready() -> void:
 	body.top_level = true
 	add_child(body)
 	super()
+	# After super(): _build (inside it) is where a pet opts out.
+	if not custom_celebration:
+		add_body_layer(_paint_reaction_fx, false, LAYER_Z_SPAN - 1)
 
 
 ## Override: where the companion wants to be, in the wearer's local space
@@ -83,9 +97,10 @@ func add_motes(tint: Color, amount: int = 10, texture: Texture2D = null, offset:
 	return p
 
 
-## Deepest z a companion's own layers reach above [member body] (glow 0, art
-## 1, highlights 2). "Behind" has to put ALL of them below the wearer.
-const LAYER_Z_SPAN: int = 3
+## Deepest z a companion's own layers reach above [member body]. "Behind" has to
+## put ALL of them below the wearer; the Crystal Golem's near shards sit at 4 and
+## the generic reaction layer one above that, so this has headroom for both.
+const LAYER_Z_SPAN: int = 6
 
 
 ## In front of the wearer's body, or behind it.
@@ -292,12 +307,81 @@ func _tick(delta: float) -> void:
 	_update_reactions()
 	still_for = 0.0 if is_moving() else still_for + delta
 	var s: Vector2 = global_scale
-	var target: Vector2 = global_position + target_local(delta) * s
+	var local_target: Vector2 = target_local(delta)
+	var hiding: bool = hides_in_combat and activity() == &"combat"
+	if hiding:
+		local_target = hide_spot()
+	var target: Vector2 = global_position + local_target * s
 	if not _placed:
 		_pos = target
 		_placed = true
 	var accel: Vector2 = (target - _pos) * stiffness - _vel * damping
 	_vel += accel * delta
 	_pos += _vel * delta
-	body.global_position = _pos
-	body.scale = s
+	body.global_position = _pos + _reaction_offset(hiding) * s
+	body.scale = Vector2(s.x * _reaction_flip(), s.y)
+	if hiding:
+		set_in_front(false)
+
+
+## Where to shelter during a fight, in the owner's local space: tucked behind
+## them on the side away from where they face. Flyers hide behind the head -
+## close in, so the head actually covers them and only a glow or an edge peeks
+## out; [GroundCompanionPreset] overrides this to hide behind the legs.
+func hide_spot() -> Vector2:
+	return Vector2(5.0 * _away_side(), -28.0)
+
+
+## -1 or +1: the side of the owner they are NOT facing.
+func _away_side() -> float:
+	return -signf(_heading.x) if absf(_heading.x) > 0.1 else -1.0
+
+
+## Generic reaction motion: a tremble while hiding, hops while cheering and
+## celebrating. Skipped for a pet that draws its own celebration.
+func _reaction_offset(hiding: bool) -> Vector2:
+	var off: Vector2 = Vector2.ZERO
+	if hiding:
+		off.x = 0.5 if fposmod(_elapsed * 28.0, 1.0) < 0.5 else -0.5
+	if custom_celebration:
+		return off
+	if celebrating():
+		off.y -= absf(sin(celebration_t() * PI * 3.0)) * 7.0
+	elif cheering():
+		off.y -= absf(sin(celebration_t() * PI * 2.0)) * 5.0
+	return off
+
+
+## -1 flips the pet for the spin frames of a level-up, else 1.
+func _reaction_flip() -> float:
+	if custom_celebration or not celebrating():
+		return 1.0
+	return -1.0 if int(celebration_t() * 14.0) % 2 == 1 else 1.0
+
+
+const _CONFETTI: Array[Color] = [Color(1.0, 0.45, 0.55), Color(1.0, 0.86, 0.35), Color(0.45, 0.85, 1.0), Color(0.60, 0.95, 0.55)]
+const _HEART: Color = Color(1.0, 0.40, 0.58)
+
+
+## The generic celebration art: a heart after a fight, confetti on a level-up.
+func _paint_reaction_fx(layer: VfxDrawLayer) -> void:
+	if celebrating():
+		var t: float = celebration_t()
+		for i: int in 14:
+			var a: float = float(i) * 2.399
+			var spread: float = 6.0 + fposmod(float(i) * 7.1, 9.0)
+			var up: float = sin(minf(t * 2.0, 1.0) * PI * 0.5) * (18.0 + fposmod(float(i) * 3.7, 8.0))
+			var fall: float = maxf(0.0, t - 0.4) * 22.0
+			var at: Vector2 = Vector2(cos(a) * spread, -12.0 - up + fall).round()
+			var wide: bool = fposmod(_elapsed * 10.0 + float(i), 1.0) < 0.5
+			var fade: float = 1.0 - maxf(0.0, t - 0.7) / 0.3
+			layer.draw_rect(Rect2(at, Vector2(2.0 if wide else 1.0, 1.0)), Color(_CONFETTI[i % _CONFETTI.size()], fade))
+	elif cheering():
+		var t: float = celebration_t()
+		var at: Vector2 = Vector2(0.0, -24.0 - t * 8.0).round()
+		var col: Color = Color(_HEART, 1.0 - t)
+		layer.draw_rect(Rect2(at.x - 2.0, at.y, 2.0, 1.0), col)
+		layer.draw_rect(Rect2(at.x + 1.0, at.y, 2.0, 1.0), col)
+		layer.draw_rect(Rect2(at.x - 2.0, at.y + 1.0, 5.0, 1.0), col)
+		layer.draw_rect(Rect2(at.x - 1.0, at.y + 2.0, 3.0, 1.0), col)
+		layer.draw_rect(Rect2(at.x, at.y + 3.0, 1.0, 1.0), col)

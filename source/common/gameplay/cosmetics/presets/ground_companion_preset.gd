@@ -49,6 +49,12 @@ func _ready() -> void:
 	super()
 
 
+## Hide behind the owner's legs, on the side they are not facing, a touch further
+## from the camera so their body covers the pet.
+func hide_spot() -> Vector2:
+	return Vector2(7.0 * _away_side(), -3.0)
+
+
 func target_local(_delta: float) -> Vector2:
 	if is_moving():
 		if absf(_heading.x) > 0.2:

@@ -8,6 +8,10 @@ extends GroundCompanionPreset
 ## a steel helmet in three tones with a visor slit and glinting eyes, a plume,
 ## a red tabard with a gold stripe, a blue shield with a gold boss, and a sword
 ## with a gold hilt. Live on top: the plume bouncing and the salute timing.
+##
+## REACTS: the one pet that does not hide in a fight. It plants itself IN FRONT
+## of its owner, facing the way they face, and swings its sword in quick chops
+## with a slash arc - a squire defending its knight.
 
 const STEEL: Color = Color(0.74, 0.78, 0.86)
 const STEEL_DARK: Color = Color(0.46, 0.50, 0.60)
@@ -25,6 +29,7 @@ const H: int = 23
 
 
 func _build() -> void:
+	hides_in_combat = false
 	hop_peak = 1.5
 	hop_rate = 4.0
 	add_body_layer(_paint_knight, false, 0)
@@ -69,7 +74,28 @@ static func _frame(pose: String) -> ImageTexture:
 	)
 
 
+## In a fight: stand guard just ahead of the owner, where the enemy is.
+func target_local(delta: float) -> Vector2:
+	if activity() == &"combat":
+		return Vector2(14.0 * _front_side(), 3.0)
+	return super(delta)
+
+
+func _front_side() -> float:
+	return signf(_heading.x) if absf(_heading.x) > 0.1 else 1.0
+
+
 func _paint_knight(layer: VfxDrawLayer) -> void:
+	if activity() == &"combat":
+		apply_hop(layer, 7.0)
+		layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		var f: float = _front_side()
+		var chop: bool = fposmod(_elapsed * 5.0, 1.0) < 0.5
+		PixelCanvas.draw_sprite(layer, _frame("salute" if chop else "stand"), Vector2.ZERO, f)
+		if not chop and fposmod(_elapsed * 5.0, 1.0) < 0.75:
+			# The slash: a quick white arc where the blade came down.
+			layer.draw_arc(Vector2(7.0 * f, -12.0), 6.0, -PI * 0.5 if f > 0.0 else PI * 0.5, PI * 0.2 if f > 0.0 else PI * 0.8, 6, Color(1, 1, 1, 0.8), 1.0)
+		return
 	apply_hop(layer, 7.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var pose: String

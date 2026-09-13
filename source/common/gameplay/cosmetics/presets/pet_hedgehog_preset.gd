@@ -9,6 +9,9 @@ extends GroundCompanionPreset
 ## tan face, a twitchy nose and a shiny eye, an apple speared on its back). The
 ## roll itself is real: the ball frame advances with distance travelled, so it
 ## turns at the speed it moves.
+##
+## REACTS: in a fight it curls up into its ball behind its owner and bristles,
+## spikes flicking between the two rotations.
 
 const SPINE: Color = Color(0.46, 0.33, 0.24)
 const SPINE_TIP: Color = Color(0.86, 0.78, 0.66)
@@ -92,6 +95,9 @@ static func _stand_frame(sniff: bool) -> ImageTexture:
 func _paint_hedgehog(layer: VfxDrawLayer) -> void:
 	apply_hop(layer, 7.0)
 	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if activity() == &"combat":
+		PixelCanvas.draw_sprite(layer, _ball_frame(int(_elapsed * 18.0) % 2), Vector2.ZERO, facing)
+		return
 	if still_for < UNCURL_AFTER_S:
 		# Two spike rotations, alternated by distance rolled, drawn with a slight
 		# bounce as the ball goes over its corners.
