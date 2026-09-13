@@ -185,8 +185,19 @@ func _show_detail(mail: Dictionary) -> void:
 		if has_unclaimed: # accent the live reward action so it pops vs. neutral Delete
 			claim.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.45))
 			claim.add_theme_color_override(&"font_hover_color", Color(1.0, 0.92, 0.62))
-		claim.pressed.connect(_on_claim.bind(int(mail.get("mail_id", 0))))
+		claim.pressed.connect(_on_claim.bind(int(mail.get("mail_id", 0)), false))
 		buttons.add_child(claim)
+
+	# A market buy of hundreds of units cannot fit a bag at 10 per slot, so an item
+	# reward can go straight to the vault instead. Server fills the bank first and
+	# only spills into the bag; if the whole mail doesn't fit, nothing moves.
+	if has_unclaimed and _has_item_reward(rewards):
+		var to_bank: Button = Button.new()
+		to_bank.text = "Send to bank"
+		to_bank.custom_minimum_size = Vector2(140, 38)
+		to_bank.pressed.connect(_on_claim.bind(int(mail.get("mail_id", 0)), true))
+		buttons.add_child(to_bank)
+		buttons.move_child(to_bank, 0)
 
 	var del: Button = Button.new()
 	del.text = "Delete"
@@ -195,8 +206,17 @@ func _show_detail(mail: Dictionary) -> void:
 	buttons.add_child(del)
 
 
-func _on_claim(mail_id: int) -> void:
-	var result: Array = await Client.request_data_await(&"mail.claim", {"mail_id": mail_id}, String(InstanceClient.current.name))
+func _has_item_reward(rewards: Array) -> bool:
+	for r: Variant in rewards:
+		if r is Dictionary and str((r as Dictionary).get("type", "")) == "item":
+			return true
+	return false
+
+
+func _on_claim(mail_id: int, to_bank: bool) -> void:
+	var result: Array = await Client.request_data_await(
+		&"mail.claim", {"mail_id": mail_id, "to_bank": to_bank}, String(InstanceClient.current.name)
+	)
 	if not is_inside_tree():
 		return
 	var data: Dictionary = result[0] if result[1] == OK else {}
@@ -204,7 +224,10 @@ func _on_claim(mail_id: int) -> void:
 		var lines: PackedStringArray = PackedStringArray()
 		for r: Variant in (data.get("rewards", []) as Array):
 			lines.append(RewardFormat.describe(r as Dictionary))
-		Toaster.toast_group("Claimed!", lines, 3.0)
+		var bagged: int = int(data.get("bagged", 0))
+		if to_bank and bagged > 0:
+			lines.append("%d went to your bag (bank full)" % bagged)
+		Toaster.toast_group("Sent to bank!" if to_bank else "Claimed!", lines, 3.0)
 		# Gold / items landed in the bag — refresh the pouch + bag dock behind the menu.
 		ClientState.inventory_changed.emit({"quiet": true})
 		var mail: Dictionary = _find(mail_id)
@@ -223,7 +246,9 @@ func _on_claim(mail_id: int) -> void:
 func _claim_error(reason: String) -> String:
 	match reason:
 		"inventory_full":
-			return "Bag full — free a slot, then claim."
+			return "Bag full — try Send to bank, or free some slots."
+		"bank_full":
+			return "Not enough room in your bank and bag for all of it."
 		"claimed":
 			return "Already claimed."
 		"empty":
